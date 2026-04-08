@@ -23,17 +23,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS",
-      "moduleResolution": "node"
-    }
-  },
-  "include": [
-    "src/eventHandlers/**/*.ts",
-    "src/lib/**/*.ts",
-    "src/env.ts",
-    "generated/**/*.ts"
-  ],
+  "include": ["./**/*.ts"],
   "exclude": ["node_modules", "test"]
 }

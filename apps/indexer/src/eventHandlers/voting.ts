@@ -1,14 +1,32 @@
-import type { handlerContext } from "../../generated/index.js";
-import type { EventType_t } from "../../generated/src/db/Enums.gen.ts";
-import type { Address, Hex } from "viem";
-import { getAddress } from "viem";
+import { Context } from "ponder:registry";
+import {
+  accountPower,
+  feedEvent,
+  proposalsOnchain,
+  votesOnchain,
+} from "ponder:schema";
+import { Address, getAddress, Hex } from "viem";
 
-import { ProposalStatus } from "../lib/constants.ts";
+import { ProposalStatus } from "@/lib/constants";
 
-import { ensureAccountExists } from "./shared.ts";
+import { ensureAccountExists } from "./shared";
 
+/**
+ * ### Creates:
+ * - New `Account` record (for voter if it doesn't exist)
+ * - New `AccountPower` record (if voter doesn't have one for this DAO)
+ * - New `votesOnchain` record with vote details (transaction hash, support, voting power, reason)
+ *
+ * ### Updates:
+ * - `AccountPower`: Increments voter's total vote count by 1
+ * - `AccountPower`: Sets last vote timestamp to current vote timestamp
+ * - `AccountPower`: Sets first vote timestamp (only if voter has never voted before)
+ * - `proposalsOnchain`: Increments `againstVotes` if support is 0 (against)
+ * - `proposalsOnchain`: Increments `forVotes` if support is 1 (for)
+ * - `proposalsOnchain`: Increments `abstainVotes` if support is 2 (abstain)
+ */
 export const voteCast = async (
-  context: handlerContext,
+  context: Context,
   daoId: string,
   args: {
     proposalId: string;
@@ -34,26 +52,26 @@ export const voteCast = async (
 
   await ensureAccountExists(context, voter);
 
-  const normalizedVoter = getAddress(voter);
-  const powerId = normalizedVoter;
-  const existingPower = await context.AccountPower.get(powerId);
-  context.AccountPower.set({
-    id: powerId,
-    accountId: normalizedVoter,
-    daoId,
-    votingPower: existingPower?.votingPower ?? 0n,
-    votesCount: (existingPower?.votesCount ?? 0) + 1,
-    proposalsCount: existingPower?.proposalsCount ?? 0,
-    delegationsCount: existingPower?.delegationsCount ?? 0,
-    lastVoteTimestamp: timestamp,
-  });
+  // Update account power with vote statistics
+  await context.db
+    .insert(accountPower)
+    .values({
+      accountId: getAddress(voter),
+      daoId,
+      votesCount: 1,
+      lastVoteTimestamp: timestamp,
+    })
+    .onConflictDoUpdate((current) => ({
+      votesCount: current.votesCount + 1,
+      lastVoteTimestamp: timestamp,
+    }));
 
-  context.VoteOnchain.set({
-    id: `${normalizedVoter}-${proposalId}`,
-    txHash,
+  // Create vote record
+  await context.db.insert(votesOnchain).values({
+    txHash: txHash,
     daoId,
     proposalId,
-    voterAccountId: normalizedVoter,
+    voterAccountId: getAddress(voter),
     support: support.toString(),
     votingPower,
     reason,
@@ -61,49 +79,61 @@ export const voteCast = async (
   });
 
   // Update proposal vote totals
-  const proposal = await context.ProposalOnchain.get(proposalId);
-  if (proposal) {
-    context.ProposalOnchain.set({
-      ...proposal,
-      againstVotes: proposal.againstVotes + (support === 0 ? votingPower : 0n),
-      forVotes: proposal.forVotes + (support === 1 ? votingPower : 0n),
-      abstainVotes: proposal.abstainVotes + (support === 2 ? votingPower : 0n),
-    });
-  }
+  await context.db
+    .update(proposalsOnchain, { id: proposalId })
+    .set((current) => ({
+      againstVotes: current.againstVotes + (support === 0 ? votingPower : 0n),
+      forVotes: current.forVotes + (support === 1 ? votingPower : 0n),
+      abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
+    }));
 
-  context.FeedEvent.set({
-    id: `${txHash}-${logIndex}`,
+  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
+
+  await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
-    eventType: "VOTE" as EventType_t,
+    type: "VOTE",
     value: votingPower,
     timestamp,
     metadata: {
-      voter: normalizedVoter,
+      voter: getAddress(voter),
       reason,
       support,
-      votingPower: votingPower.toString(),
+      votingPower,
       proposalId,
-      title: proposal?.title ?? null,
+      title: proposal?.title ?? undefined,
     },
   });
 };
 
 const MAX_TITLE_LENGTH = 200;
 
+/**
+ * Extracts a proposal title from a markdown description.
+ *
+ * Strategy:
+ * 1. Normalize literal `\n` sequences to real newlines (some proposers
+ *    submit descriptions with escaped newlines).
+ * 2. If the first non-empty line is an H1 (`# Title`), use it.
+ * 3. Otherwise, use the first non-empty line that is not a section header
+ *    (H2+), truncated to MAX_TITLE_LENGTH characters.
+ */
 function parseProposalTitle(description: string): string {
+  // Normalize literal "\n" (two chars) into real newlines
   const normalized = description.replace(/\\n/g, "\n");
   const lines = normalized.split("\n");
 
+  // Pass 1: look for an H1 among leading lines (before any content)
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     if (/^# /.test(trimmed)) {
       return trimmed.replace(/^# +/, "");
     }
-    break;
+    break; // stop at first non-empty, non-H1 line
   }
 
+  // Pass 2: no H1 found — use first non-empty, non-header line
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || /^#{1,6}\s/.test(trimmed)) continue;
@@ -115,8 +145,21 @@ function parseProposalTitle(description: string): string {
   return "";
 }
 
+/**
+ * ### Creates:
+ * - New `Account` record (for proposer if it doesn't exist)
+ * - New `proposalsOnchain` record with proposal details (targets, values, signatures, calldatas, blocks, description, status)
+ * - New `AccountPower` record (if proposer doesn't have one for this DAO)
+ *
+ * ### Updates:
+ * - `AccountPower`: Increments proposer's total proposals count by 1
+ *
+ * ### Calculates:
+ * - Proposal end timestamp based on block delta and average block time
+ * - Sets initial proposal status to PENDING
+ */
 export const proposalCreated = async (
-  context: handlerContext,
+  context: Context,
   daoId: string,
   blockTime: number,
   args: {
@@ -156,14 +199,13 @@ export const proposalCreated = async (
 
   const title = parseProposalTitle(description);
   const blockDelta = parseInt(endBlock) - Number(blockNumber);
-
-  context.ProposalOnchain.set({
+  await context.db.insert(proposalsOnchain).values({
     id: proposalId,
     txHash,
     daoId,
     proposerAccountId: getAddress(proposer),
     targets: targets.map((a) => getAddress(a)),
-    values: values.map((v) => v.toString()),
+    values,
     signatures,
     calldatas,
     startBlock: parseInt(startBlock),
@@ -175,54 +217,56 @@ export const proposalCreated = async (
     status: ProposalStatus.PENDING,
     endTimestamp: timestamp + BigInt(blockDelta * blockTime),
     proposalType: args.proposalType,
-    forVotes: 0n,
-    againstVotes: 0n,
-    abstainVotes: 0n,
   });
 
-  const powerId = getAddress(proposer);
-  const existingPower = await context.AccountPower.get(powerId);
-  const proposerVotingPower = existingPower?.votingPower ?? 0n;
-  context.AccountPower.set({
-    id: powerId,
-    accountId: powerId,
-    daoId,
-    votingPower: proposerVotingPower,
-    votesCount: existingPower?.votesCount ?? 0,
-    proposalsCount: (existingPower?.proposalsCount ?? 0) + 1,
-    delegationsCount: existingPower?.delegationsCount ?? 0,
-    lastVoteTimestamp: existingPower?.lastVoteTimestamp ?? 0n,
-  });
+  // Update proposer's proposal count
+  const { votingPower: proposerVotingPower } = await context.db
+    .insert(accountPower)
+    .values({
+      accountId: getAddress(proposer),
+      daoId,
+      proposalsCount: 1,
+    })
+    .onConflictDoUpdate((current) => ({
+      proposalsCount: current.proposalsCount + 1,
+    }));
 
-  context.FeedEvent.set({
-    id: `${txHash}-${logIndex}`,
+  // Insert feed event for activity feed
+  // Proposals are always high relevance as they are significant governance actions
+  await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
-    eventType: "PROPOSAL" as EventType_t,
-    value: 0n,
+    type: "PROPOSAL",
     timestamp,
     metadata: {
       id: proposalId,
       proposer: getAddress(proposer),
-      votingPower: proposerVotingPower.toString(),
+      votingPower: proposerVotingPower,
       title,
     },
   });
 };
 
+/**
+ * ### Updates:
+ * - `proposalsOnchain`: Sets the proposal status to the provided status value
+ */
 export const updateProposalStatus = async (
-  context: handlerContext,
+  context: Context,
   proposalId: string,
   status: string,
 ) => {
-  const proposal = await context.ProposalOnchain.get(proposalId);
-  if (proposal) {
-    context.ProposalOnchain.set({ ...proposal, status });
-  }
+  await context.db.update(proposalsOnchain, { id: proposalId }).set({
+    status,
+  });
 };
 
+/**
+ * ### Updates:
+ * - `proposalsOnchain`: Sets the new deadline (endBlock) and endTimestamp
+ */
 export const proposalExtended = async (
-  context: handlerContext,
+  context: Context,
   proposalId: string,
   blockTime: number,
   extendedDeadline: bigint,
@@ -230,32 +274,32 @@ export const proposalExtended = async (
   logIndex: number,
   timestamp: bigint,
 ) => {
-  const proposal = await context.ProposalOnchain.get(proposalId);
-  if (!proposal) return;
+  let endTimestamp: bigint | undefined;
 
-  const endTimestamp =
-    proposal.endTimestamp +
-    BigInt((Number(extendedDeadline) - proposal.endBlock) * blockTime);
-
-  context.ProposalOnchain.set({
-    ...proposal,
-    endBlock: Number(extendedDeadline),
-    endTimestamp,
+  await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => {
+    endTimestamp =
+      row.endTimestamp +
+      BigInt((Number(extendedDeadline) - row.endBlock) * blockTime);
+    return {
+      row,
+      endBlock: Number(extendedDeadline),
+      endTimestamp,
+    };
   });
 
-  context.FeedEvent.set({
-    id: `${txHash}-${logIndex}`,
+  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
+
+  await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
-    eventType: "PROPOSAL_EXTENDED" as EventType_t,
-    value: 0n,
+    type: "PROPOSAL_EXTENDED",
     timestamp,
     metadata: {
       id: proposalId,
-      title: proposal.title,
+      title: proposal?.title ?? undefined,
       endBlock: Number(extendedDeadline),
-      endTimestamp: endTimestamp.toString(),
-      proposer: getAddress(proposal.proposerAccountId),
+      endTimestamp,
+      proposer: getAddress(proposal!.proposerAccountId),
     },
   });
 };

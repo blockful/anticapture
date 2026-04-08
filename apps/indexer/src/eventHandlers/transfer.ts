@@ -1,18 +1,37 @@
-import type { handlerContext } from "../../generated/index.js";
-import type { EventType_t } from "../../generated/src/db/Enums.gen.ts";
-import type { Address, Hex } from "viem";
-import { getAddress, zeroAddress } from "viem";
-
-import { DaoIdEnum } from "../lib/enums.ts";
-
+import { Context } from "ponder:registry";
 import {
-  AddressCollection,
-  ensureAccountsExist,
-  toAddressSet,
-} from "./shared.ts";
+  accountBalance,
+  balanceHistory,
+  feedEvent,
+  transfer,
+} from "ponder:schema";
+import { Address, getAddress, Hex, zeroAddress } from "viem";
 
+import { DaoIdEnum } from "@/lib/enums";
+
+import { AddressCollection, ensureAccountsExist, toAddressSet } from "./shared";
+
+/**
+ * ### Creates:
+ * - New `Account` records (for sender and receiver if they don't exist)
+ * - New `accountBalance` record (for receiver if it doesn't exist)
+ * - New `accountBalance` record (for sender if it doesn't exist and not minting)
+ * - New `transfer` record with transaction details and classification flags
+ * - New daily metric records for supply tracking (via `updateSupplyMetric` calls)
+ *
+ * ### Updates:
+ * - `accountBalance`: Increments receiver's token balance by transfer value
+ * - `accountBalance`: Decrements sender's token balance by transfer value (if not minting from zero address)
+ * - `Token`: Adjusts lending supply based on transfers involving lending addresses
+ * - `Token`: Adjusts CEX supply based on transfers involving centralized exchange addresses
+ * - `Token`: Adjusts DEX supply based on transfers involving decentralized exchange addresses
+ * - `Token`: Adjusts treasury balance based on transfers involving treasury addresses
+ * - `Token`: Adjusts total supply based on transfers involving burning addresses
+ * - `Token`: Recalculates circulating supply after all supply changes
+ * - Daily bucket metrics for all supply types (lending, CEX, DEX, treasury, total, circulating)
+ */
 export const tokenTransfer = async (
-  context: handlerContext,
+  context: Context,
   daoId: DaoIdEnum,
   args: {
     from: Address;
@@ -51,59 +70,58 @@ export const tokenTransfer = async (
 
   await ensureAccountsExist(context, [from, to]);
 
-  // Upsert receiver balance and track current balance for history
-  const receiverBalanceId = `${normalizedTo}-${normalizedTokenId}`;
-  const existingReceiverBalance =
-    await context.AccountBalance.get(receiverBalanceId);
-  const currentReceiverBalance = existingReceiverBalance
-    ? existingReceiverBalance.balance + value
-    : value;
-  context.AccountBalance.set({
-    id: receiverBalanceId,
-    accountId: normalizedTo,
-    tokenId: normalizedTokenId,
-    balance: currentReceiverBalance,
-    delegate: existingReceiverBalance?.delegate ?? zeroAddress,
-  });
-
-  context.BalanceHistory.set({
-    id: `${transactionHash}-${normalizedTo}-${logIndex}`,
-    daoId,
-    transactionHash,
-    accountId: normalizedTo,
-    balance: currentReceiverBalance,
-    delta: value,
-    deltaMod: value > 0n ? value : -value,
-    timestamp,
-    logIndex,
-  });
-
-  if (from !== zeroAddress) {
-    const senderBalanceId = `${normalizedFrom}-${normalizedTokenId}`;
-    const existingSenderBalance =
-      await context.AccountBalance.get(senderBalanceId);
-    const currentSenderBalance = existingSenderBalance
-      ? existingSenderBalance.balance - value
-      : -value;
-    context.AccountBalance.set({
-      id: senderBalanceId,
-      accountId: normalizedFrom,
+  const { balance: currentReceiverBalance } = await context.db
+    .insert(accountBalance)
+    .values({
+      accountId: normalizedTo,
       tokenId: normalizedTokenId,
-      balance: currentSenderBalance,
-      delegate: existingSenderBalance?.delegate ?? zeroAddress,
-    });
+      balance: value,
+      delegate: zeroAddress,
+    })
+    .onConflictDoUpdate((current) => ({
+      balance: current.balance + value,
+    }));
 
-    context.BalanceHistory.set({
-      id: `${transactionHash}-${normalizedFrom}-${logIndex}`,
+  await context.db
+    .insert(balanceHistory)
+    .values({
       daoId,
-      transactionHash,
-      accountId: normalizedFrom,
-      balance: currentSenderBalance,
-      delta: -value,
+      transactionHash: transactionHash,
+      accountId: normalizedTo,
+      balance: currentReceiverBalance,
+      delta: value,
       deltaMod: value > 0n ? value : -value,
       timestamp,
       logIndex,
-    });
+    })
+    .onConflictDoNothing();
+
+  if (from !== zeroAddress) {
+    const { balance: currentSenderBalance } = await context.db
+      .insert(accountBalance)
+      .values({
+        accountId: normalizedFrom,
+        tokenId: normalizedTokenId,
+        balance: -value,
+        delegate: zeroAddress,
+      })
+      .onConflictDoUpdate((current) => ({
+        balance: current.balance - value,
+      }));
+
+    await context.db
+      .insert(balanceHistory)
+      .values({
+        daoId,
+        transactionHash: transactionHash,
+        accountId: normalizedFrom,
+        balance: currentSenderBalance,
+        delta: -value,
+        deltaMod: value > 0n ? value : -value,
+        timestamp,
+        logIndex,
+      })
+      .onConflictDoNothing();
   }
 
   const normalizedCex = toAddressSet(cex);
@@ -111,39 +129,43 @@ export const tokenTransfer = async (
   const normalizedLending = toAddressSet(lending);
   const normalizedBurning = toAddressSet(burning);
 
-  const transferId = `${transactionHash}-${normalizedFrom}-${normalizedTo}`;
-  const existingTransfer = await context.Transfer.get(transferId);
-  context.Transfer.set({
-    id: transferId,
-    transactionHash,
-    daoId,
-    tokenId: normalizedTokenId,
-    amount: (existingTransfer?.amount ?? 0n) + value,
-    fromAccountId: normalizedFrom,
-    toAccountId: normalizedTo,
-    timestamp,
-    logIndex,
-    isCex: normalizedCex.has(normalizedFrom) || normalizedCex.has(normalizedTo),
-    isDex: normalizedDex.has(normalizedFrom) || normalizedDex.has(normalizedTo),
-    isLending:
-      normalizedLending.has(normalizedFrom) ||
-      normalizedLending.has(normalizedTo),
-    isTotal:
-      normalizedBurning.has(normalizedFrom) ||
-      normalizedBurning.has(normalizedTo),
-  });
+  await context.db
+    .insert(transfer)
+    .values({
+      transactionHash,
+      daoId,
+      tokenId: normalizedTokenId,
+      amount: value,
+      fromAccountId: normalizedFrom,
+      toAccountId: normalizedTo,
+      timestamp,
+      logIndex,
+      isCex:
+        normalizedCex.has(normalizedFrom) || normalizedCex.has(normalizedTo),
+      isDex:
+        normalizedDex.has(normalizedFrom) || normalizedDex.has(normalizedTo),
+      isLending:
+        normalizedLending.has(normalizedFrom) ||
+        normalizedLending.has(normalizedTo),
+      isTotal:
+        normalizedBurning.has(normalizedFrom) ||
+        normalizedBurning.has(normalizedTo),
+    })
+    .onConflictDoUpdate((current) => ({
+      amount: current.amount + value,
+    }));
 
-  context.FeedEvent.set({
-    id: `${transactionHash}-${logIndex}`,
+  // Insert feed event for activity feed
+  await context.db.insert(feedEvent).values({
     txHash: transactionHash,
     logIndex,
-    eventType: "TRANSFER" as EventType_t,
+    type: "TRANSFER",
     value,
     timestamp,
     metadata: {
       from: normalizedFrom,
       to: normalizedTo,
-      amount: value.toString(),
+      amount: value,
     },
   });
 };

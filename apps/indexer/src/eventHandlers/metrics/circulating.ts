@@ -1,27 +1,32 @@
-import type { Address } from "viem";
-import { getAddress } from "viem";
-import type { handlerContext } from "../../../generated/index.js";
+import { Address, getAddress } from "viem";
+import { token } from "ponder:schema";
+import { Context } from "ponder:registry";
 
-import { storeDailyBucket } from "../shared.ts";
-import { MetricTypesEnum } from "../../lib/constants.ts";
+import { storeDailyBucket } from "../shared";
+import { MetricTypesEnum } from "@/lib/constants";
 
 export const updateCirculatingSupply = async (
-  context: handlerContext,
+  context: Context,
   daoId: string,
   tokenAddress: Address,
   timestamp: bigint,
 ) => {
-  const tokenId = getAddress(tokenAddress);
-  const token = await context.Token.get(tokenId);
-  if (!token) return false;
+  let currentCirculatingSupply = 0n;
+  let newCirculatingSupply = 0n;
+  await context.db
+    .update(token, { id: getAddress(tokenAddress) })
+    .set((current) => {
+      currentCirculatingSupply = current.circulatingSupply;
+      newCirculatingSupply =
+        current.totalSupply - current.treasury - current.nonCirculatingSupply;
+      return {
+        circulatingSupply: newCirculatingSupply,
+      };
+    });
 
-  const currentCirculatingSupply = token.circulatingSupply;
-  const newCirculatingSupply =
-    token.totalSupply - token.treasury - token.nonCirculatingSupply;
-
-  if (currentCirculatingSupply === newCirculatingSupply) return false;
-
-  context.Token.set({ ...token, circulatingSupply: newCirculatingSupply });
+  if (currentCirculatingSupply === newCirculatingSupply) {
+    return false;
+  }
 
   await storeDailyBucket(
     context,

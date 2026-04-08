@@ -1,17 +1,17 @@
-import type { Address } from "viem";
-import { getAddress } from "viem";
-import type { handlerContext } from "../../../generated/index.js";
+import { Address, getAddress } from "viem";
+import { token } from "ponder:schema";
+import { Context } from "ponder:registry";
 
-import { DaoIdEnum } from "../../lib/enums.ts";
-import { MetricTypesEnum } from "../../lib/constants.ts";
+import { DaoIdEnum } from "@/lib/enums";
+import { MetricTypesEnum } from "@/lib/constants";
 import {
   AddressCollection,
   storeDailyBucket,
   toAddressSet,
-} from "../shared.ts";
+} from "@/eventHandlers/shared";
 
 export const updateTotalSupply = async (
-  context: handlerContext,
+  context: Context,
   addressList: AddressCollection,
   metricType: MetricTypesEnum,
   from: Address,
@@ -30,16 +30,19 @@ export const updateTotalSupply = async (
 
   if (isTotalSupplyTransaction) {
     const isBurningTokens = normalizedAddressList.has(getAddress(to));
-    const tokenId = getAddress(tokenAddress);
-    const token = await context.Token.get(tokenId);
-    if (!token) return false;
-
-    const currentTotalSupply = token.totalSupply;
-    const newTotalSupply = isBurningTokens
-      ? currentTotalSupply - value
-      : currentTotalSupply + value;
-
-    context.Token.set({ ...token, totalSupply: newTotalSupply });
+    let currentTotalSupply = 0n;
+    const newTotalSupply = (
+      await context.db
+        .update(token, { id: getAddress(tokenAddress) })
+        .set((row) => {
+          currentTotalSupply = row.totalSupply;
+          return {
+            totalSupply: isBurningTokens
+              ? row.totalSupply - value
+              : row.totalSupply + value,
+          };
+        })
+    ).totalSupply;
 
     await storeDailyBucket(
       context,

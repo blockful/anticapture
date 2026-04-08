@@ -4,8 +4,8 @@
  * Forward-fill: Use the last known value for any missing data points.
  */
 
-import { SECONDS_IN_DAY } from "./enums.ts";
-import { truncateTimestampToMidnight } from "./date-helpers.ts";
+import { SECONDS_IN_DAY } from "./enums";
+import { truncateTimestampToMidnight } from "./date-helpers";
 
 /**
  * Forward-fill sparse data across a master timeline.

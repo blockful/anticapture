@@ -1,0 +1,908 @@
+import type { Address } from "viem";
+import { zeroAddress } from "viem";
+
+import { DaoIdEnum } from "./enums.ts";
+
+export const CONTRACT_ADDRESSES = {
+  [DaoIdEnum.UNI]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984
+    token: {
+      address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      decimals: 18,
+      startBlock: 10861674,
+    },
+    // https://etherscan.io/address/0x408ED6354d4973f66138C91495F2f2FCbd8724C3
+    governor: {
+      address: "0x408ED6354d4973f66138C91495F2f2FCbd8724C3",
+      startBlock: 13059157,
+    },
+  },
+  [DaoIdEnum.ENS]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72
+    token: {
+      address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+      decimals: 18,
+      startBlock: 9380410,
+    },
+    // https://etherscan.io/address/0x323a76393544d5ecca80cd6ef2a560c6a395b7e3
+    governor: {
+      address: "0x323a76393544d5ecca80cd6ef2a560c6a395b7e3",
+      startBlock: 13533772,
+    },
+  },
+  [DaoIdEnum.ARB]: {
+    blockTime: 0.25,
+    // https://arbiscan.io/address/0x912CE59144191C1204E64559FE8253a0e49E6548
+    token: {
+      address: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+      decimals: 18,
+      startBlock: 70398200,
+    },
+  },
+  [DaoIdEnum.OP]: {
+    blockTime: 2,
+    optimisticProposalType: 2,
+    // https://optimistic.etherscan.io/token/0x4200000000000000000000000000000000000042
+    token: {
+      address: "0x4200000000000000000000000000000000000042",
+      decimals: 18,
+      startBlock: 6490467,
+    },
+    // https://optimistic.etherscan.io/address/0xcDF27F107725988f2261Ce2256bDfCdE8B382B10
+    governor: {
+      address: "0xcDF27F107725988f2261Ce2256bDfCdE8B382B10",
+      startBlock: 71801427,
+    },
+  },
+  [DaoIdEnum.TEST]: {
+    blockTime: 12,
+    token: {
+      address: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+      decimals: 18,
+      startBlock: 22635098,
+    },
+    governor: {
+      address: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+      startBlock: 22635098,
+    },
+  },
+  [DaoIdEnum.GTC]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F
+    token: {
+      address: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
+      decimals: 18,
+      startBlock: 12422079,
+    },
+    // https://etherscan.io/address/0x9D4C63565D5618310271bF3F3c01b2954C1D1639
+    governor: {
+      address: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
+      startBlock: 17813942,
+    },
+    // https://etherscan.io/address/0xDbD27635A534A3d3169Ef0498beB56Fb9c937489
+    governorAlpha: {
+      address: "0xDbD27635A534A3d3169Ef0498beB56Fb9c937489",
+      startBlock: 12497481,
+    },
+  },
+  [DaoIdEnum.NOUNS]: {
+    blockTime: 12,
+    token: {
+      // https://etherscan.io/token/0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03
+      address: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+      decimals: 0,
+      startBlock: 12985438,
+    },
+    governor: {
+      // https://etherscan.io/address/0x6f3e6272a167e8accb32072d08e0957f9c79223d
+      address: "0x6f3e6272a167e8accb32072d08e0957f9c79223d",
+      startBlock: 12985453,
+    },
+    auction: {
+      // https://etherscan.io/address/0x830BD73E4184ceF73443C15111a1DF14e495C706
+      address: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
+      startBlock: 12985451,
+    },
+  },
+  [DaoIdEnum.SCR]: {
+    blockTime: 1.5,
+    // https://scrollscan.com/address/0xd29687c813D741E2F938F4aC377128810E217b1b
+    token: {
+      address: "0xd29687c813D741E2F938F4aC377128810E217b1b",
+      decimals: 18,
+      startBlock: 8949006,
+    },
+    // https://scrollscan.com/address/0x2f3f2054776bd3c2fc30d750734a8f539bb214f0
+    governor: {
+      address: "0x2f3f2054776bd3c2fc30d750734a8f539bb214f0",
+      startBlock: 8963441,
+    },
+  },
+  [DaoIdEnum.COMP]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0xc00e94Cb662C3520282E6f5717214004A7f26888
+    token: {
+      address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+      decimals: 18,
+      startBlock: 9601359,
+    },
+    // https://etherscan.io/address/0x309a862bbC1A00e45506cB8A802D1ff10004c8C0
+    governor: {
+      address: "0x309a862bbC1A00e45506cB8A802D1ff10004c8C0",
+      startBlock: 21688680,
+    },
+  },
+  [DaoIdEnum.OBOL]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x0B010000b7624eb9B3DfBC279673C76E9D29D5F7
+    // Token created: Sep-19-2022 11:12:47 PM UTC
+    token: {
+      address: "0x0B010000b7624eb9B3DfBC279673C76E9D29D5F7",
+      decimals: 18,
+      startBlock: 15570746,
+    },
+    // https://etherscan.io/address/0xcB1622185A0c62A80494bEde05Ba95ef29Fbf85c
+    // Governor created: Feb-19-2025 10:34:47 PM UTC
+    governor: {
+      address: "0xcB1622185A0c62A80494bEde05Ba95ef29Fbf85c",
+      startBlock: 21883431,
+    },
+  },
+  [DaoIdEnum.ZK]: {
+    blockTime: 1,
+    // https://explorer.zksync.io/address/0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E
+    token: {
+      address: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
+      decimals: 18,
+      startBlock: 34572100,
+    },
+    // https://explorer.zksync.io/address/0xb83FF6501214ddF40C91C9565d095400f3F45746
+    governor: {
+      address: "0xb83FF6501214ddF40C91C9565d095400f3F45746",
+      startBlock: 55519658,
+    },
+  },
+  [DaoIdEnum.SHU]: {
+    blockTime: 12,
+    tokenType: "ERC20",
+    // https://etherscan.io/address/0xe485E2f1bab389C08721B291f6b59780feC83Fd7
+    token: {
+      address: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
+      decimals: 18,
+      startBlock: 19021394,
+    },
+    // https://etherscan.io/address/0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e
+    azorius: {
+      address: "0xAA6BfA174d2f803b517026E93DBBEc1eBa26258e",
+      startBlock: 19021698,
+    },
+    // https://etherscan.io/address/0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F
+    linearVotingStrategy: {
+      address: "0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F",
+      startBlock: 19021698,
+    },
+  },
+  [DaoIdEnum.FLUID]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb
+    token: {
+      address: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+      decimals: 18,
+      startBlock: 12183236,
+    },
+    // https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B
+    governor: {
+      address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B",
+      startBlock: 12183245,
+    },
+  },
+  [DaoIdEnum.LIL_NOUNS]: {
+    blockTime: 12,
+    token: {
+      // https://etherscan.io/address/0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B
+      address: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
+      decimals: 0,
+      startBlock: 14736710,
+    },
+    governor: {
+      // https://etherscan.io/address/0x5d2C31ce16924C2a71D317e5BbFd5ce387854039
+      address: "0x5d2C31ce16924C2a71D317e5BbFd5ce387854039",
+      startBlock: 14736719,
+    },
+  },
+  [DaoIdEnum.AAVE]: {
+    blockTime: 1,
+    token: {
+      decimals: 18,
+      address: zeroAddress,
+    },
+    aave: {
+      decimals: 18,
+      address: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+    },
+    stkAAVE: {
+      decimals: 18,
+      address: "0x4da27a545c0c5B758a6BA100e3a049001de870f5",
+    },
+    aAAVE: {
+      decimals: 18,
+      address: "0xA700b4eB416Be35b2911fd5Dee80678ff64fF6C9",
+    },
+  },
+} as const;
+
+export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
+  [DaoIdEnum.UNI]: {
+    timelock: "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
+    treasuryVester1: "0x4750c43867EF5F89869132ecCF19B9b6C4286E1a",
+    treasuryVester2: "0xe3953D9d317B834592aB58AB2c7A6aD22b54075D",
+    treasuryVester3: "0x4b4e140D1f131fdaD6fb59C13AF796fD194e4135",
+    treasuryVester4: "0x3D30B1aB88D487B0F3061F40De76845Bec3F1e94",
+  },
+  [DaoIdEnum.ENS]: {
+    timelock: "0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7",
+    endaoment: "0x4F2083f5fBede34C2714aFfb3105539775f7FE64",
+    oldEthRegistrarController: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
+    ethRegistrarController: "0x253553366Da8546fC250F225fe3d25d0C782303b",
+  },
+  [DaoIdEnum.ARB]: {
+    // https://docs.arbitrum.foundation/deployment-addresses
+    "DAO Treasury": "0xF3FC178157fb3c87548bAA86F9d24BA38E649B58",
+    "L2 Treasury Timelock": "0xbFc1FECa8B09A5c5D3EFfE7429eBE24b9c09EF58",
+    "L2 Core Timelock": "0x34d45e99f7D8c45ed05B5cA72D54bbD1fb3F98f0",
+    "Foundation Vesting Wallet": "0x15533b77981cDa0F85c4F9a485237DF4285D6844",
+  },
+  [DaoIdEnum.AAVE]: {
+    // https://github.com/bgd-labs/aave-address-book
+    Collector: "0x464C71f6c2F760DdA6093dCB91C24c39e5d6e18c",
+    "Ecosystem Reserve": "0x25F2226B597E8F9514B3F68F00f494cF4f286491",
+  },
+  [DaoIdEnum.OP]: {
+    // https://gov.optimism.io/t/where-are-the-optimisms-main-treasury-addresses/8880
+    "Unallocated Treasury": "0x2A82Ae142b2e62Cb7D10b55E323ACB1Cab663a26",
+    "Foundation Budget": "0x2501c477D0A35545a387Aa4A3EEe4292A9a8B3F0",
+    "Foundation Grants": "0x19793c7824Be70ec58BB673CA42D2779d12581BE",
+    "Foundation Locked Grants": "0xE4553b743E74dA3424Ac51f8C1E586fd43aE226F",
+  },
+  [DaoIdEnum.NOUNS]: {
+    timelock: "0xb1a32fc9f9d8b2cf86c068cae13108809547ef71",
+    auction: "0x830BD73E4184ceF73443C15111a1DF14e495C706",
+  },
+  [DaoIdEnum.LIL_NOUNS]: {
+    timelock: "0xd5f279ff9EB21c6D40C8f345a66f2751C4eeA1fB",
+  },
+  [DaoIdEnum.TEST]: {},
+  [DaoIdEnum.GTC]: {
+    "Gitcoin Timelock": "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
+    "Gitcoin CSDO": "0x931896A8A9313F622a2AFCA76d1471B97955e551",
+    "Gitcoin Fraud Detection & Defense":
+      "0xD4567069C5a1c1fc8261d8Ff5C0B1d98f069Cf47",
+    "Gitcoin Grants Matching Pool":
+      "0xde21F729137C5Af1b01d73aF1dC21eFfa2B8a0d6",
+    "Gitcoin Merch, Memes and Marketing":
+      "0xC23DA3Ca9300571B9CF43298228353cbb3E1b4c0",
+    "Gitcoin Timelock Transfer 1": "0x6EEdE31a2A15340342B4BCb3039447d457aC7C4b",
+    "Gitcoin Timelock Transfer 2": "0xeD95D629c4Db80060C59432e81254D256AEc97E2",
+    "Vesting Address GTC 1": "0x2AA5d15Eb36E5960d056e8FeA6E7BB3e2a06A351",
+    "Staking contract GTC": "0x0E3efD5BE54CC0f4C64e0D186b0af4b7F2A0e95F",
+    "OKX Ventures": "0xe527BbDE3654E9ba824f9B72DFF495eEe60fD366",
+    "Protocol Labs 1": "0x154855f5522f6B04ce654175368F428852DCd55D",
+    "Matt Solomon": "0x7aD3d9819B06E800F8A65f3440D599A23D6A0BDf",
+    "Arbitrum Bridge": "0xa3A7B6F88361F48403514059F1F16C8E78d60EeC",
+    "Optimism Bridge": "0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1",
+    "Radicle Timelock": "0x8dA8f82d2BbDd896822de723F55D6EdF416130ba",
+    "Vesting Address GTC 3": "0x2CDE9919e81b20B4B33DD562a48a84b54C48F00C",
+    "deltajuliet.eth 1": "0x5b1ddBEC956Ed39e1aC92AE3c3D99295ddD59865",
+    "deltajuliet.eth 2": "0x407466C56B8488c4d99558633Ff1AC5D84400B46",
+    "deltajuliet.eth 3": "0x14b9F70C3d4B367D496F3771EdA7EFA65282e55D",
+    "deltajuliet.eth 4": "0x0dcFc9323539A6eC47f9BC0A96882070540bf950",
+    "deltajuliet.eth 5": "0x08f3FB287AEc4E06EFF8de37410eaF52B05c7f56",
+    "Gitcoin Timelock Transfer 5": "0x9E75c3BFb82cf701AC0A74d6C1607461Ec65EfF9",
+    "Old Address, Large GTC Transfers 1":
+      "0xF5A7bA226CB94D87C29aDD2b59aC960904a163F3",
+    "Old Address, Large GTC Transfers 2":
+      "0xeD865C87c3509e3A908655777B13f7313b2fc196",
+    "Old Address, Large GTC Transfers 3":
+      "0xDD6a165B9e05549640149dF108AC0aF8579B7005",
+    "Old Address, Large GTC Transfers 4":
+      "0xaD467E6039F0Ca383b5FFd60F1C7a890acaB4bE3",
+    "Old Address, Large GTC Transfers 5":
+      "0x44d4d830788cc6D4d72C78203F5918a3E2761691",
+    "Old Address, Large GTC Transfers 6":
+      "0x38661187CfD779bEa00e14Bc5b986CF0C717A39B",
+    "Old Address, Large GTC Transfers 7":
+      "0x34237F91D2Ce322f3572376b82472C7FA56D7595",
+    "Old Address, Large GTC Transfers 8":
+      "0x2083e7B107347AE4F5Cb6Ff35EC5DAcf03391c57",
+    "Old Address, Large GTC Transfers 9":
+      "0x183a1CaF6750CF88E45812FCE0110D59d71833e4",
+    "Old Address, Large GTC Transfers 10":
+      "0x11e06eF6e42306dc40D2754Ef2629fB011d80aE9",
+  },
+  [DaoIdEnum.SCR]: {
+    "DAO Treasury": "0x4cb06982dD097633426cf32038D9f1182a9aDA0c",
+    "Foundation Treasury": "0xfF120e015777E9AA9F1417a4009a65d2EdA78C13",
+    "Ecosystem Treasury": "0xeE198F4a91E5b05022dc90535729B2545D3b03DF",
+  },
+  [DaoIdEnum.COMP]: {
+    Timelock: "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
+    Comptroller: "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B",
+    /// v2 markets
+    v2WBTC: "0xccF4429DB6322D5C611ee964527D42E5d685DD6a",
+    v2USDC: "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+    v2DAI: "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
+    v2USDT: "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9",
+    v2ETH: "0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5",
+    v2UNI: "0x35A18000230DA775CAc24873d00Ff85BccdeD550",
+    v2BAT: "0x6C8c6b02E7b2BE14d4fA6022Dfd6d75921D90E4E",
+    v2LINK: "0xFAce851a4921ce59e912d19329929CE6da6EB0c7",
+    v2TUSD: "0x12392F67bdf24faE0AF363c24aC620a2f67DAd86",
+    v2AAVE: "0xe65cdB6479BaC1e22340E4E755fAE7E509EcD06c",
+    v2COMP: "0x70e36f6BF80a52b3B46b3aF8e106CC0ed743E8e4",
+    ///v3 markets
+    //Ethereum markets
+    mainnetETH: "0xA17581A9E3356d9A858b789D68B4d866e593aE94",
+    mainnetstETH: "0x3D0bb1ccaB520A66e607822fC55BC921738fAFE3",
+    mainnetUSDT: "0x3Afdc9BCA9213A35503b077a6072F3D0d5AB0840",
+    mainnetUSDS: "0x5D409e56D886231aDAf00c8775665AD0f9897b56",
+    mainnetUSDC: "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+    mainnetWBTC: "0xe85Dc543813B8c2CFEaAc371517b925a166a9293",
+    // Optimism markets
+    opETH: "0xE36A30D249f7761327fd973001A32010b521b6Fd",
+    opUSDT: "0x995E394b8B2437aC8Ce61Ee0bC610D617962B214",
+    opUSDC: "0x2e44e174f7D53F0212823acC11C01A11d58c5bCB",
+    // Unichain markets
+    uniUSDC: "0x2c7118c4C88B9841FCF839074c26Ae8f035f2921",
+    uniETH: "0x6C987dDE50dB1dcDd32Cd4175778C2a291978E2a",
+    // Polygon markets
+    polyUSDT0: "0xaeB318360f27748Acb200CE616E389A6C9409a07",
+    polyUSDC: "0xF25212E676D1F7F89Cd72fFEe66158f541246445",
+    // Ronin markets
+    ronWETH: "0x4006ed4097ee51c09a04c3b0951d28ccf19e6dfe",
+    ronRON: "0xc0Afdbd1cEB621Ef576BA969ce9D4ceF78Dbc0c0",
+    // Mantle markets
+    manUSDe: "0x606174f62cd968d8e684c645080fa694c1D7786E",
+    // Base markets
+    manUSDbC: "0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf",
+    manUSDC: "0xb125E6687d4313864e53df431d5425969c15Eb2F",
+    manAERO: "0x784efeB622244d2348d4F2522f8860B96fbEcE89",
+    manUSDS: "0x2c776041CCFe903071AF44aa147368a9c8EEA518",
+    manETH: "0x46e6b214b524310239732D51387075E0e70970bf",
+    // Arbitrum marketsVOTE
+    arbUSDT0: "0xd98Be00b5D27fc98112BdE293e487f8D4cA57d07",
+    arbUSDC: "0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf",
+    "arbUSDC.e": "0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA",
+    arbETH: "0x6f7D514bbD4aFf3BcD1140B7344b32f063dEe486",
+    // Linea markets
+    linUSDC: "0x8D38A3d6B3c3B7d96D6536DA7Eef94A9d7dbC991",
+    linETH: "0x60F2058379716A64a7A5d29219397e79bC552194",
+    // Scroll markets
+    scrUSDC: "0xB2f97c1Bd3bf02f5e74d13f02E3e26F93D77CE44",
+  },
+  [DaoIdEnum.OBOL]: {
+    timelock: "0xCdBf527842Ab04Da548d33EB09d03DB831381Fb0",
+    "Ecosystem Treasury 1": "0x42D201CC4d9C1e31c032397F54caCE2f48C1FA72",
+    "Ecosystem Treasury 2": "0x54076088bE86943e27B99120c5905AAD8A1bD166",
+    "Staking Rewards Reserve": "0x33f3D61415784A5899b733976b0c1F9176051569",
+    "OBOL Incentives Reserve": "0xdc8A309111aB0574CA51cA9C7Dd0152738e4c374",
+    "Protocol Revenue": "0xDe5aE4De36c966747Ea7DF13BD9589642e2B1D0d",
+    "Grant Program": "0xa59f60A7684A69E63c07bEC087cEC3D0607cd5cE",
+    "DV Labs Treasury 2": "0x6BeFB6484AA10187947Dda81fC01e495f7168dB4",
+  },
+  [DaoIdEnum.ZK]: {
+    timelock: "0xe5d21A9179CA2E1F0F327d598D464CcF60d89c3d",
+  },
+  [DaoIdEnum.SHU]: {
+    timelock: "0x36bD3044ab68f600f6d3e081056F34f2a58432c4",
+  },
+  [DaoIdEnum.FLUID]: {
+    "InstaDApp Treasury": "0x28849D2b63fA8D361e5fc15cB8aBB13019884d09",
+    "Fluid Liquidity": "0x52Aa899454998Be5b000Ad077a46Bbe360F4e497",
+    "Chainlink CCIP LockReleaseTokenPool":
+      "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
+    InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
+  },
+};
+
+export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
+  [DaoIdEnum.UNI]: {
+    BinanceHotWallet: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    BinanceHotWallet2: "0x28C6c06298d514Db089934071355E5743bf21d60",
+    BinanceHotWallet3: "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3",
+    BinanceHotWallet4: "0x43684D03D81d3a4C70da68feBDd61029d426F042",
+    BinanceHotWallet5: "0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549",
+    BinanceHotWallet6: "0xDFd5293D8e347dFe59E90eFd55b2956a1343963d",
+    BinanceUSHotWallet: "0x21d45650db732cE5dF77685d6021d7D5d1da807f",
+    BinanceColdWallet: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    BinancePegTokenFunds: "0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503",
+    Robinhood: "0x73AF3bcf944a6559933396c1577B257e2054D935",
+    AnchorageDigital1: "0x985DE23260743c2c2f09BFdeC50b048C7a18c461",
+    AnchorageDigital2: "0xfad67fBdb7d4D8569671b8aa4A09F6a90d692Ed7",
+    BybitColdWallet1: "0x88a1493366D48225fc3cEFbdae9eBb23E323Ade3",
+    UpbitDeposit: "0xacCFeA7d9e618f60CE1347C52AE206262412AA4a",
+    UpbitColdWallet: "0x245445940B317E509002eb682E03f4429184059d",
+    KrakenColdWallet: "0xDA9dfA130Df4dE4673b89022EE50ff26f6EA73Cf",
+    KrakenHotWallet: "0x4C6007e38Ce164Ed80FF8Ff94192225FcdAC68CD",
+    KrakenHotWallet2: "0x0A332d03367366dd5fD3a554EF8f8B47ED36e591",
+    Robinhood2: "0x2eFB50e952580f4ff32D8d2122853432bbF2E204",
+    GeminiColdWallet: "0xAFCD96e580138CFa2332C632E66308eACD45C5dA",
+    KrakenColdWallet2: "0xC06f25517E906b7F9B4deC3C7889503Bb00b3370",
+    CoinbaseColdWallet: "0x6cc8FfF60A60AB0373fB3072f0B846450a8FA443",
+    NobitexIrHotWallet: "0xF639d88a89384A4D97f2bA9159567Ddb3890Ea07",
+    MEXCHotWallet: "0x4982085C9e2F89F2eCb8131Eca71aFAD896e89CB",
+    MEXCHotWallet2: "0x2e8F79aD740de90dC5F5A9F0D8D9661a60725e64",
+    OKXHotWallet: "0x6cC5F688a315f3dC28A7781717a9A798a59fDA7b",
+    StakeComHotWallet: "0xFa500178de024BF43CFA69B7e636A28AB68F2741",
+    BinanceWithdrawalHotWallet: "0xe2fc31F816A9b94326492132018C3aEcC4a93aE1",
+    NobitexIrHotWallet2: "0xd582C78a04E7379DfC9EE991A25f549576962eE1",
+  },
+  [DaoIdEnum.ENS]: {
+    BinanceHotWallet: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    BinanceHotWallet2: "0x28C6c06298d514Db089934071355E5743bf21d60",
+    BinanceHotWallet3: "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3",
+    BinanceHotWallet4: "0x43684D03D81d3a4C70da68feBDd61029d426F042",
+    BinanceHotWallet5: "0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549",
+    BinanceHotWallet6: "0xDFd5293D8e347dFe59E90eFd55b2956a1343963d",
+    BinanceUSHotWallet: "0x21d45650db732cE5dF77685d6021d7D5d1da807f",
+    BitThumbHotWallet: "0x498697892fd0e5e3a16bd40D7bF2644F33CBbBd4",
+    BybitColdWallet1: "0x88a1493366D48225fc3cEFbdae9eBb23E323Ade3",
+    ByBitHotWallet: "0xf89d7b9c864f589bbF53a82105107622B35EaA40",
+    BtcTurkColdWallet: "0x76eC5A0D3632b2133d9f1980903305B62678Fbd3",
+    BitGetHotWallet: "0x5bdf85216ec1e38D6458C870992A69e38e03F7Ef",
+    CryptoComHotWallet: "0xA023f08c70A23aBc7EdFc5B6b5E171d78dFc947e",
+    CryptoComHotWallet2: "0xCFFAd3200574698b78f32232aa9D63eABD290703",
+    BitThumbHotWallet2: "0x10522336d85Cb52628C84e06CB05f79011FEf585",
+    ParibuColdWallet: "0xa23cbCdFAfd09De2ce793D0A08f51865885Be3f5",
+    CoinOneHotWallet: "0x167A9333BF582556f35Bd4d16A7E80E191aa6476",
+    BitvavoColdWallet: "0xc419733Ba8F13d8605141Cac8f681F5A0aBC0122",
+    KuCoinHotWallet: "0xD6216fC19DB775Df9774a6E33526131dA7D19a2c",
+    BitvavoColdWallet2: "0xedC6BacdC1e29D7c5FA6f6ECA6FDD447B9C487c9",
+    CoinbaseHotWallet: "0xA9D1e08C7793af67e9d92fe308d5697FB81d3E43",
+    MEXCHotWallet3: "0x3CC936b795A188F0e246cBB2D74C5Bd190aeCF18",
+    KuCoinColdWallet: "0x2933782B5A8d72f2754103D1489614F29bfA4625",
+    UpbitColdWallet: "0x245445940B317E509002eb682E03f4429184059d",
+  },
+  [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.AAVE]: {},
+  [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
+  [DaoIdEnum.OP]: {
+    "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    "Binance 2": "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    OKX: "0x611f7bF868a6212f871e89F7e44684045DdFB09d",
+    Bybit: "0xf89d7b9c864f589bbF53a82105107622B35EaA40",
+    "Bybit 2": "0x88a1493366D48225fc3cEFbdae9eBb23E323Ade3",
+    Bithumb: "0xB18fe4B95b7d633c83689B5Ed3ac4ad0a857A2a7",
+    MEXC: "0xDF90C9B995a3b10A5b8570a47101e6c6a29eb945",
+    Gate: "0xC882b111A75C0c657fC507C04FbFcD2cC984F071",
+    "Kraken 1": "0x2a62C4aCcA1A166Ee582877112682cAe8Cc0ffe7",
+    "Kraken 2": "0xC06f25517E906b7F9B4deC3C7889503Bb00b3370",
+    "Bitkub 1": "0xda4231EF1768176536EEE3ec187315E60572BBD4",
+    "Bitkub 2": "0x7A1CF8CE543F4838c964FB14D403Cc6ED0bDbaCC",
+    Bitget: "0x5bdf85216ec1e38D6458C870992A69e38e03F7Ef",
+    "Kucoin 1": "0x2933782B5A8d72f2754103D1489614F29bfA4625",
+    "Kucoin 2": "0xC1274c580C5653cDF8246695c2E0112492a99D6F",
+    "Kucoin 3": "0xa3f45e619cE3AAe2Fa5f8244439a66B203b78bCc",
+    "Coinbase 1": "0xC8373EDFaD6d5C5f600b6b2507F78431C5271fF5",
+    "Coinbase 2": "0xD839C179a4606F46abD7A757f7Bb77D7593aE249",
+    "Crypto.com 1": "0x8a161a996617f130d0F37478483AfC8c1914DB6d",
+    "Crypto.com 2": "0x92BD687953Da50855AeE2Df0Cff282cC2d5F226b",
+    "Btcturk 1": "0xdE2fACa4BBC0aca08fF04D387c39B6f6325bf82A",
+    "Btcturk 2": "0xB5A46bC8b76FD2825AEB43db9C9e89e89158ECdE",
+    "Bitpanda 1": "0xb1A63489469868dD1d0004922C36D5079d6331c6",
+    "Bitpanda 2": "0x5E8c4499fDD78A5EFe998b3ABF78658E02BB7702",
+    "Bitpanda 3": "0x0529ea5885702715e83923c59746ae8734c553B7",
+    "BingX 1": "0xC3dcd744db3f114f0edF03682b807b78A227Bf74",
+    "Bingx 2": "0x0b07f64ABc342B68AEc57c0936E4B6fD4452967E",
+    "HTX 1": "0xe0B7A39Fef902c21bAd124b144c62E7F85f5f5fA",
+    "HTX 2": "0xd3Cc0C7d40366A061397274Eae7C387D840e6ff8",
+    Bitbank: "0x3727cfCBD85390Bb11B3fF421878123AdB866be8",
+    Revolut: "0x9b0c45d46D386cEdD98873168C36efd0DcBa8d46",
+    "Paribu 1": "0xc80Afd311c9626528De66D86814770361Fe92416",
+    Coinspot: "0xf35A6bD6E0459A4B53A27862c51A2A7292b383d1",
+    "Bitvavo 1": "0x48EcA43dB3a3Ca192a5fB9b20F4fc4d96017AF0F",
+    SwissBorg: "0x28cC933fecf280E720299b1258e8680355D8841F",
+    "Coinbase Prime": "0xDfD76BbFEB9Eb8322F3696d3567e03f894C40d6c",
+    "Binance US": "0x43c5b1C2bE8EF194a509cF93Eb1Ab3Dbd07B97eD",
+    "Bitstamp 1": "0x7C43E0270c868D0341c636a38C07e5Ae93908a04",
+    "Bitstamp 2": "0x4c2eEb203DDC70291e33796527dE4272Ac9fafc1",
+    "Coinhako 1": "0xE66BAa0B612003AF308D78f066Bbdb9a5e00fF6c",
+    "Coinhako 2": "0xE66BAa0B612003AF308D78f066Bbdb9a5e00fF6c",
+    Bitfinex: "0x77134cbC06cB00b66F4c7e623D5fdBF6777635EC",
+    "Woo Network": "0x63DFE4e34A3bFC00eB0220786238a7C6cEF8Ffc4",
+    Koribit: "0xf0bc8FdDB1F358cEf470D63F96aE65B1D7914953",
+    "Indodax 1": "0x3C02290922a3618A4646E3BbCa65853eA45FE7C6",
+    "Indodax 2": "0x91Dca37856240E5e1906222ec79278b16420Dc92",
+  },
+  [DaoIdEnum.TEST]: {
+    // Major centralized exchanges (CEX) - Alice and Bob for comprehensive coverage
+    Alice_CEX: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", // Alice as CEX
+    Bob_CEX: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", // Bob as CEX
+    // ENS contract addresses for completeness
+    ENSToken: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+    ENSGovernor: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+    ENSTimelock: "0xa7E99C1df635d13d61F7c81eCe571cc952E64526",
+  },
+  [DaoIdEnum.GTC]: {
+    "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    "Binance 2": "0x28C6c06298d514Db089934071355E5743bf21d60",
+    "Binance 3": "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    "Binance 4": "0xDFd5293D8e347dFe59E90eFd55b2956a1343963d",
+    "Binance 5": "0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549",
+    Bithumb: "0x74be0CF1c9972C00ed4EF290e0E5BCFd18873f13",
+    Upbit: "0x74be0CF1c9972C00ed4EF290e0E5BCFd18873f13",
+    "Upbit 2": "0xeDAe8A6cBA6867a0B7e565C21eaBAEe3D550fd9d",
+    "Coinbase 1": "0x237eF9564D74A1056c1A276B03C66055Fa61A700",
+    "Coinbase 2": "0x31Bc777E72A0A7F90cC7b1ec52eACeC806B27563",
+    "Coinbase 3": "0x11aC4fE470Cf8B5b3de59B31261030BD8514892d",
+    "Coinbase 4": "0x271Ac4A385F689f00D01716877e827702231447e",
+    "Coinbase 5": "0x4a630c042B2b07a0641d487b0Ccf5af36800415e",
+    "Coinbase 6": "0xA9D1e08C7793af67e9d92fe308d5697FB81d3E43",
+    Kraken: "0x310E035d176ccB589511eD16af7aE7BAc4fc7f83",
+    "Kraken 2": "0xC06f25517E906b7F9B4deC3C7889503Bb00b3370",
+    "Kraken 3": "0x22af984f13DFB5C80145E3F9eE1050Ae5a5FB651",
+    "Crypto.com": "0xCFFAd3200574698b78f32232aa9D63eABD290703",
+    "Crypto.com 2": "0xA023f08c70A23aBc7EdFc5B6b5E171d78dFc947e",
+    "Crypto.com 3": "0x46340b20830761efd32832A74d7169B29FEB9758",
+    Kucoin: "0x58edF78281334335EfFa23101bBe3371b6a36A51",
+    "Kucoin 2": "0xD6216fC19DB775Df9774a6E33526131dA7D19a2c",
+    Bittavo: "0xaB782bc7D4a2b306825de5a7730034F8F63ee1bC",
+    MEXC: "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
+    "MEXC 2": "0x75e89d5979E4f6Fba9F97c104c2F0AFB3F1dcB88",
+    Gate: "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    BingX: "0xC3dcd744db3f114f0edF03682b807b78A227Bf74",
+    Bitget: "0x5bdf85216ec1e38D6458C870992A69e38e03F7Ef",
+    CoinEx: "0x38f6d5fb32f970Fe60924B282704899411126336",
+    Bitpanda: "0x0529ea5885702715e83923c59746ae8734c553B7",
+  },
+  [DaoIdEnum.SCR]: {
+    "Binance 2": "0x98ADeF6F2ac8572ec48965509d69A8Dd5E8BbA9D",
+    "Binance 3": "0x687B50A70D33D71f9a82dD330b8C091e4D772508",
+    "Gate 2": "0xC882b111A75C0c657fC507C04FbFcD2cC984F071",
+    "OKX 2": "0xB0A27099582833c0Cb8C7A0565759fF145113d64",
+    Binance: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    BingX: "0x2b3bf74B29f59fb8dDA41Cf3d6A8DA28CF8e7921",
+    Bitget: "0x1AB4973a48dc892Cd9971ECE8e01DcC7688f8F23",
+    Bitpanda: "0x0529ea5885702715e83923c59746ae8734c553B7",
+    Bybit: "0xf89d7b9c864f589bbF53a82105107622B35EaA40",
+    Gate: "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    Kucoin: "0x2933782B5A8d72f2754103D1489614F29bfA4625",
+    OKX: "0x611f7bF868a6212f871e89F7e44684045DdFB09d",
+  },
+  [DaoIdEnum.COMP]: {
+    Robinhood: "0x73AF3bcf944a6559933396c1577B257e2054D935",
+    "Robinhood 2": "0x841ed663F2636863D40be4EE76243377dff13a34",
+    "Binance 1": "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    "Binance 2": "0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503",
+    "Binance 3": "0x28C6c06298d514Db089934071355E5743bf21d60",
+    "Binance 4": "0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549",
+    "Binance 5": "0xDFd5293D8e347dFe59E90eFd55b2956a1343963d",
+    ByBit: "0x6522B7F9d481eCEB96557F44753a4b893F837E90",
+    OKX: "0x073F564419b625A45D8aEa3bb0dE4d5647113AD7",
+    Upbit: "0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503",
+    BtcTurk: "0x76eC5A0D3632b2133d9f1980903305B62678Fbd3",
+    Bithumb: "0x75252a69676C2472EdF9974476e9c636ca7a8AF1",
+    Kraken: "0x7DAFbA1d69F6C01AE7567Ffd7b046Ca03B706f83",
+    "Kraken 2": "0xd2DD7b597Fd2435b6dB61ddf48544fd931e6869F",
+    "Kucoin 1": "0x2933782B5A8d72f2754103D1489614F29bfA4625",
+    "Kucoin 2": "0x58edF78281334335EfFa23101bBe3371b6a36A51",
+  },
+  [DaoIdEnum.OBOL]: {
+    "Bybit Hot Wallet": "0xA31231E727Ca53Ff95f0D00a06C645110c4aB647",
+    "Binance Wallet": "0x93dEb693b170d56BdDe1B0a5222B14c0F885d976",
+    "Gate Cold Wallet": "0xC882b111A75C0c657fC507C04FbFcD2cC984F071",
+    "Gate Hot Wallet": "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    "MEXC Hot Wallet": "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
+    "Binance Wallet Proxy": "0x73D8bD54F7Cf5FAb43fE4Ef40A62D390644946Db",
+  },
+  [DaoIdEnum.ZK]: {
+    "Binance 1": "0xf977814e90da44bfa03b6295a0616a897441acec",
+    "Binance 2": "0x7aed074ca56f5050d5a2e512ecc5bf7103937d76",
+    "Binance 3": "0xa84fd90d8640fa63d194601e0b2d1c9094297083",
+    "Binance 4": "0x43684d03d81d3a4c70da68febdd61029d426f042",
+    "Binance 5": "0x98adef6f2ac8572ec48965509d69a8dd5e8bba9d",
+    Bybit: "0xacf9a5610cb9e6ec9c84ca7429815e95b6607e9f",
+    OKX1: "0x611f7bf868a6212f871e89f7e44684045ddfb09d",
+    BtcTurk: "0x7aed074ca56f5050d5a2e512ecc5bf7103937d76",
+    MEXC: "0xfe4931fb4deabc515f1a48b94b6b17653eeaa34f",
+    Bitget: "0x97b9d2102a9a65a26e1ee82d59e42d1b73b68689",
+    Kraken: "0xd2dd7b597fd2435b6db61ddf48544fd931e6869f",
+    Kucoin: "0xd6216fc19db775df9774a6e33526131da7d19a2c",
+    "Kucoin 2": "0x2933782b5a8d72f2754103d1489614f29bfa4625",
+    Gate: "0x0d0707963952f2fba59dd06f2b425ace40b492fe",
+    "Gate 2": "0xc882b111a75c0c657fc507c04fbfcd2cc984f071",
+    "Crypto.com": "0x2a584c02de672425729af2f174fb19fe734dde5d",
+    OKX2: "0xf9b52be2426f06ab6d560f64a7b15e820f33cbdb",
+    OKX3: "0xecf17c7f6a6090f1edd21e0beb2268197270fb44",
+  },
+  [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.FLUID]: {
+    MEXC: "0x9642b23Ed1E01Df1092B92641051881a322F5D4E",
+    Gate: "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
+    Bitvavo: "0xaB782bc7D4a2b306825de5a7730034F8F63ee1bC",
+  },
+};
+
+export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
+  [DaoIdEnum.UNI]: {
+    // ArbitrumL1ERC20Gateway: "0xa3a7b6f88361f48403514059f1f16c8e78d60eec",
+    Uniswap_UNI_ETH_V3_03: "0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801",
+    Uniswap_UNI_ETH_V3_1: "0x360b9726186C0F62cc719450685ce70280774Dc8",
+    Uniswap_UNI_ETH_V2_03: "0xd3d2E2692501A5c9Ca623199D38826e513033a17",
+    Uniswap_UNI_USDT_V3_03: "0x3470447f3CecfFAc709D3e783A307790b0208d60",
+    Uniswap_UNI_AAVE_V3_03: "0x59c38b6775Ded821f010DbD30eCabdCF84E04756",
+    Uniswap_UNI_USDC_V3_03: "0xD0fC8bA7E267f2bc56044A7715A489d851dC6D78",
+    Uniswap_UNI_WBTC_V3_03: "0x8F0CB37cdFF37E004E0088f563E5fe39E05CCC5B",
+    Uniswap_UNI_LINK_V3_1: "0xA6B9a13B34db2A00284299c47DACF49FB62C1755",
+    Uniswap_UNI_1INCH_V3_1: "0x0619062B988576FE2d39b33fF23Fb1a0330c0ac7",
+    Uniswap_UNI_ETH_V3_005: "0xfaA318479b7755b2dBfDD34dC306cb28B420Ad12",
+    Sushi_UNI_ETH_V2_03: "0xDafd66636E2561b0284EDdE37e42d192F2844D40",
+    BalancerCow_UNI_ETH: "0xa81b22966f1841e383e69393175e2cc65f0a8854",
+  },
+  [DaoIdEnum.ENS]: {
+    Uniswap_ENS_5: "0x92560C178cE069CC014138eD3C2F5221Ba71f58a",
+    SushiSwapEthENSV2: "0xa1181481beb2dc5de0daf2c85392d81c704bf75d",
+  },
+  [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.AAVE]: {},
+  [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
+  [DaoIdEnum.OP]: {
+    "Velodrome Finance": "0x47029bc8f5CBe3b464004E87eF9c9419a48018cd",
+    "Uniswap 1": "0x9a13F98Cb987694C9F086b1F5eB990EeA8264Ec3",
+    "Uniswap 2": "0xFC1f3296458F9b2a27a0B91dd7681C4020E09D05",
+    "Uniswap 3": "0xA39fe8F7A00CE28B572617d3a0bC1c2B44110e79",
+    "WooFi 1": "0x5520385bFcf07Ec87C4c53A7d8d65595Dff69FA4",
+    Curve: "0xd8dD9a8b2AcA88E68c46aF9008259d0EC04b7751",
+    Balancer: "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
+    Mux: "0xc6BD76FA1E9e789345e003B361e4A0037DFb7260",
+  },
+  [DaoIdEnum.TEST]: {
+    // DEX pools - Charlie and David for comprehensive coverage
+    Charlie_DEX_Pool: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", // Charlie as DEX
+    David_DEX_Pool: "0x90F79bf6EB2c4f870365E785982E1f101E93b906", // David as DEX
+    // ENS contract addresses involved in DEX-like operations
+    ENSToken: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+    ENSTimelock: "0xa7E99C1df635d13d61F7c81eCe571cc952E64526",
+  },
+  [DaoIdEnum.GTC]: {
+    Uniswap: "0xD017617f6F0fD22796E137a8240cc38F52a147B2",
+  },
+  [DaoIdEnum.SCR]: {
+    Honeypop: "0x7761786afAB6E496e6Bf3EBe56fc2ea71cd02d7D",
+    DEX: "0x7761786afAB6E496e6Bf3EBe56fc2ea71cd02d7D",
+    "Ambient Finance": "0xaaaaAAAACB71BF2C8CaE522EA5fa455571A74106",
+    SyncSwap: "0x7160570BB153Edd0Ea1775EC2b2Ac9b65F1aB61B",
+    Nuri: "0x76c662b1e25CB67D7365191B55813D8CD3Fdac02",
+  },
+  [DaoIdEnum.COMP]: {
+    Uniswap: "0x5598931BfBb43EEC686fa4b5b92B5152ebADC2f6",
+    "Uniswap 2": "0xea4Ba4CE14fdd287f380b55419B1C5b6c3f22ab6",
+    "Pancake Swap": "0x0392957571F28037607C14832D16f8B653eDd472",
+  },
+  [DaoIdEnum.OBOL]: {
+    "Uniswap V3 Pool": "0x57F52C9faa6D40c5163D76b8D7dD81ddB7c95434",
+    "Uniswap PoolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+  },
+  [DaoIdEnum.ZK]: {
+    "Pancake Swap": "0xf92b0178bc932a59d45c1c4aac81712aac6a5b61",
+    Uniswap: "0x3d7264539E6e3f596bb485E3091f3Ae02Ad01ef8",
+  },
+  [DaoIdEnum.SHU]: {
+    "Uniswap V3": "0x7A922aea89288d8c91777BeECc68DF4A17151df1",
+  },
+  [DaoIdEnum.FLUID]: {
+    "Uniswap V3 INST/WETH": "0xc1cd3D0913f4633b43FcdDBCd7342bC9b71C676f",
+  },
+};
+
+export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
+  [DaoIdEnum.UNI]: {
+    AaveEthUni: "0xF6D2224916DDFbbab6e6bd0D1B7034f4Ae0CaB18",
+    MorphoBlue: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+    CompoundCUNI: "0x35A18000230DA775CAc24873d00Ff85BccdeD550",
+  },
+  [DaoIdEnum.ENS]: {
+    //After research using intel.arkm and defi llama token-usage page, I only found this lending address so far
+    AaveEthENS: "0x545bD6c032eFdde65A377A6719DEF2796C8E0f2e",
+  },
+  [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.AAVE]: {},
+  [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
+  [DaoIdEnum.OP]: {
+    Aave: "0x513c7E3a9c69cA3e22550eF58AC1C0088e918FFf",
+    Superfluid: "0x1828Bff08BD244F7990edDCd9B19cc654b33cDB4",
+    Moonwell: "0x9fc345a20541Bf8773988515c5950eD69aF01847",
+    "Silo Finance": "0x8ED1609D796345661d36291B411992e85DE7B224",
+    "Compound 1": "0x2e44e174f7D53F0212823acC11C01A11d58c5bCB",
+    "Compound 2": "0x995E394b8B2437aC8Ce61Ee0bC610D617962B214",
+    "Exactly Protocol": "0xa430A427bd00210506589906a71B54d6C256CEdb",
+    Morpho: "0xF057afeEc22E220f47AD4220871364e9E828b2e9",
+    dForce: "0x7702dC73e8f8D9aE95CF50933aDbEE68e9F1D725",
+  },
+  [DaoIdEnum.TEST]: {
+    // Lending protocols - different addresses for comprehensive flag coverage
+    Alice_Lending_Protocol: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", // Alice as lending
+    Charlie_Lending_Pool: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", // Charlie as lending
+    // ENS contract addresses involved in lending-like operations
+    ENSGovernor: "0x7c28FC9709650D49c8d0aED2f6ece6b191F192a9",
+    ENSTimelock: "0xa7E99C1df635d13d61F7c81eCe571cc952E64526",
+  },
+  [DaoIdEnum.GTC]: {},
+  [DaoIdEnum.SCR]: {
+    Aave: "0x25718130C2a8eb94e2e1FAFB5f1cDd4b459aCf64",
+  },
+  [DaoIdEnum.COMP]: {
+    Compound: "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+    "Compound 2": "0x3Afdc9BCA9213A35503b077a6072F3D0d5AB0840",
+  },
+  [DaoIdEnum.OBOL]: {},
+  [DaoIdEnum.ZK]: {
+    Aave: "0xd6cd2c0fc55936498726cacc497832052a9b2d1b",
+    Venus: "0x697a70779c1a03ba2bd28b7627a902bff831b616",
+  },
+  [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.FLUID]: {},
+};
+
+export const BurningAddresses: Record<
+  DaoIdEnum,
+  {
+    ZeroAddress: Address;
+    Dead: Address;
+    TokenContract: Address;
+    Airdrop?: Address;
+  }
+> = {
+  [DaoIdEnum.UNI]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+    Airdrop: "0x090D4613473dEE047c3f2706764f49E0821D256e",
+  },
+  [DaoIdEnum.ENS]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+  },
+  [DaoIdEnum.ARB]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1",
+  },
+  [DaoIdEnum.AAVE]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x000000000000000000000000000000000000dEaD",
+  },
+  [DaoIdEnum.OP]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x4200000000000000000000000000000000000042",
+  },
+  [DaoIdEnum.TEST]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x244dE6b06E7087110b94Cde88A42d9aBA17efa52",
+  },
+  [DaoIdEnum.GTC]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
+  },
+  [DaoIdEnum.NOUNS]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03",
+  },
+  [DaoIdEnum.LIL_NOUNS]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x0000000000000000000000000000000000000000",
+    TokenContract: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
+  },
+  [DaoIdEnum.SCR]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xd29687c813D741E2F938F4aC377128810E217b1b",
+  },
+  [DaoIdEnum.COMP]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+  },
+  [DaoIdEnum.OBOL]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x0B010000b7624eb9B3DfBC279673C76E9D29D5F7",
+  },
+  [DaoIdEnum.ZK]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
+  },
+  [DaoIdEnum.SHU]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0xe485E2f1bab389C08721B291f6b59780feC83Fd7",
+  },
+  [DaoIdEnum.FLUID]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
+  },
+};
+
+export const NonCirculatingAddresses: Record<
+  DaoIdEnum,
+  Record<string, Address>
+> = {
+  [DaoIdEnum.UNI]: {},
+  [DaoIdEnum.ENS]: {
+    // https://etherscan.io/address/0xd7a029db2585553978190db5e85ec724aa4df23f
+    // Linear vesting for contributors, unlock end Dec 2025
+    "Token Timelock": "0xd7a029db2585553978190db5e85ec724aa4df23f",
+  },
+  [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.AAVE]: {
+    // https://etherscan.io/address/0x317625234562B1526Ea2FaC4030Ea499C5291de4
+    // Permanently locked - LEND migration discontinued
+    "LEND to AAVE Migrator": "0x317625234562B1526Ea2FaC4030Ea499C5291de4",
+  },
+  [DaoIdEnum.OP]: {},
+  [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.TEST]: {},
+  [DaoIdEnum.GTC]: {},
+  [DaoIdEnum.SCR]: {},
+  [DaoIdEnum.FLUID]: {},
+  [DaoIdEnum.COMP]: {},
+  [DaoIdEnum.OBOL]: {},
+  [DaoIdEnum.ZK]: {
+    // https://docs.zknation.io/zk-nation/zksync-governance-contract-addresses
+    "Initial Merkle Distributor": "0x66fd4fc8fa52c9bec2aba368047a0b27e24ecfe4",
+    "Second ZK Distributor": "0xb294F411cB52c7C6B6c0B0b61DBDf398a8b0725d",
+    "Third ZK Distributor": "0xf29d698e74ef1904bcfdb20ed38f9f3ef0a89e5b",
+    "Matter Labs Allocation": "0xa97fbc75ccbc7d4353c4d2676ed18cd0c5aaf7e6",
+    "Foundation Allocation": "0xd78dc27d4db8f428c67f542216a2b23663838405",
+    "Guardians Allocation": "0x21b27952f8621f54f3cb652630e122ec81dd2dc1",
+    "Security Council Allocation": "0x0ad50686c159040e57ddce137db0b63c67473450",
+    "ZKsync Association Allocation":
+      "0x0681e3808a0aa12004fb815ebb4515dc823cfbb4",
+  },
+  [DaoIdEnum.LIL_NOUNS]: {},
+  [DaoIdEnum.SHU]: {},
+};
+
+export const ProposalStatus = {
+  PENDING: "PENDING",
+  ACTIVE: "ACTIVE",
+  CANCELED: "CANCELED",
+  DEFEATED: "DEFEATED",
+  SUCCEEDED: "SUCCEEDED",
+  QUEUED: "QUEUED",
+  EXPIRED: "EXPIRED",
+  EXECUTED: "EXECUTED",
+  VETOED: "VETOED",
+  NO_QUORUM: "NO_QUORUM",
+} as const;
+
+export type ProposalStatus =
+  (typeof ProposalStatus)[keyof typeof ProposalStatus];
+
+export const MetricTypesEnum = {
+  TOTAL_SUPPLY: "TOTAL_SUPPLY",
+  DELEGATED_SUPPLY: "DELEGATED_SUPPLY",
+  CEX_SUPPLY: "CEX_SUPPLY",
+  DEX_SUPPLY: "DEX_SUPPLY",
+  LENDING_SUPPLY: "LENDING_SUPPLY",
+  CIRCULATING_SUPPLY: "CIRCULATING_SUPPLY",
+  TREASURY: "TREASURY",
+  NON_CIRCULATING_SUPPLY: "NON_CIRCULATING_SUPPLY",
+} as const;
+
+export type MetricTypesEnum =
+  (typeof MetricTypesEnum)[keyof typeof MetricTypesEnum];
+
+export const metricTypeArray = Object.values(MetricTypesEnum);

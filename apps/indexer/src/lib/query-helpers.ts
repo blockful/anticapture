@@ -2,7 +2,7 @@
  * Query helpers for pagination and data filtering in time-series APIs.
  */
 
-import { truncateTimestampToMidnight } from "./date-helpers.ts";
+import { truncateTimestampToMidnight } from "./date-helpers";
 
 /**
  * Filter data by cutoff date with fallback to last value before cutoff.
