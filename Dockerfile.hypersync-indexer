@@ -16,6 +16,7 @@ COPY --from=builder /app/out/full/ .
 COPY --from=builder /app/turbo.json turbo.json
 WORKDIR /app/apps/hypersync-indexer
 RUN pnpm envio codegen
+RUN npm install --prefix generated
 
 FROM base AS runner
 ENV NODE_ENV=production
