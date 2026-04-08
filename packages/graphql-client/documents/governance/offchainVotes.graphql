@@ -20,7 +20,10 @@ query GetOffchainVotesByProposalId(
   ) {
     totalCount
     items {
-      choice
+      choice {
+        Int
+        JSON
+      }
       created
       proposalId
       proposalTitle

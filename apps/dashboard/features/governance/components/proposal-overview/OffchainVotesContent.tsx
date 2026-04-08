@@ -160,7 +160,7 @@ export const OffchainVotesContent = ({
       if (vote.reason && vote.reason.trim() !== "") {
         rows.push({
           voter: `__DESCRIPTION_${vote.voter}__`,
-          choice: "",
+          choice: { Int: null, JSON: null },
           vp: null,
           reason: vote.reason,
           created: 0,
@@ -172,7 +172,7 @@ export const OffchainVotesContent = ({
     if (hasNextPage || (loading && votes.length > 0)) {
       rows.push({
         voter: LOADING_ROW,
-        choice: "",
+        choice: { Int: null, JSON: null },
         vp: null,
         reason: "",
         created: 0,
