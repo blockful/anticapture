@@ -37,9 +37,12 @@
       "outputs": ["dist/**", ".next/**"]
     },
     "storybook": {
-      "outputs": ["dist/**"]
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "persistent": true,
+      "cache": false
     },
     "build-storybook": {
+      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
@@ -93,6 +96,17 @@
     "@anticapture/api#dev": {
       "dependsOn": ["@anticapture/observability#build"],
       "passThroughEnv": ["*"]
+    },
+    "@anticapture/indexer": {
+      "env": ["DAO_ID"]
+    },
+    "@anticapture/api": {
+      "env": [
+        "DAO_ID",
+        "CHAIN_ID",
+        "TREASURY_DATA_PROVIDER_API_URL",
+        "TREASURY_DATA_PROVIDER_ID"
+      ]
     },
     "dev": {
       "persistent": true,
