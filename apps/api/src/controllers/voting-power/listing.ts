@@ -86,7 +86,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         toDate,
       );
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         VotingPowersResponseSchema.parse({
           ...response,
@@ -135,7 +135,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         fromDate,
         toDate,
       );
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         VotingPowerResponseSchema.parse({
           ...result,

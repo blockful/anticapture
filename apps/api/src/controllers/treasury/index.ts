@@ -41,7 +41,7 @@ export function treasury(
         days / (24 * 60 * 60),
         orderDirection,
       );
-      context.header("Cache-Control", "public, max-age=300");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(result, 200);
     },
   );
@@ -76,7 +76,7 @@ export function treasury(
         orderDirection,
         decimals,
       );
-      context.header("Cache-Control", "public, max-age=300");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(result, 200);
     },
   );
@@ -111,7 +111,7 @@ export function treasury(
         orderDirection,
         decimals,
       );
-      context.header("Cache-Control", "public, max-age=300");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(result, 200);
     },
   );

@@ -43,7 +43,7 @@ export function delegators(app: Hono, service: DelegatorsService) {
         orderDirection,
       });
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(DelegatorsResponseSchema.parse(result), 200);
     },
   );

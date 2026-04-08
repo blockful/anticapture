@@ -79,7 +79,7 @@ export function token(
         );
       }
 
-      context.header("Cache-Control", "public, max-age=300");
+      context.header("Cache-Control", "public, max-age=3600");
       return context.json(TokenMapper.toApi(tokenProps, priceData), 200);
     },
   );

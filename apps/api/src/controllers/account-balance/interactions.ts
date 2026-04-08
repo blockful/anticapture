@@ -77,7 +77,7 @@ Positive amounts signify net token transfers FROM <address>, whilst negative amo
         },
       );
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         AccountInteractionsMapper(result, fromDate, toDate),
         200,

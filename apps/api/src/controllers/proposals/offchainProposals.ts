@@ -48,7 +48,7 @@ export function offchainProposals(
         endDate,
       });
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(OffchainProposalsResponseSchema.parse(response), 200);
     },
   );
@@ -95,7 +95,7 @@ export function offchainProposals(
         );
       }
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(OffchainProposalResponseSchema.parse(proposal), 200);
     },
   );

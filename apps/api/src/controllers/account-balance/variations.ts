@@ -51,7 +51,7 @@ export function accountBalanceVariations(
         addresses,
       );
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         AccountBalanceVariationsResponseMapper(result, fromDate, toDate),
         200,
@@ -92,7 +92,7 @@ export function accountBalanceVariations(
         toDate,
       );
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         AccountBalanceVariationsByAccountIdResponseMapper(
           result,

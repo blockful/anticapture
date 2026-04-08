@@ -70,7 +70,7 @@ export function votingPowerVariations(
         addresses,
       );
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         VotingPowerVariationsResponseMapper(result, fromDate, toDate),
         200,
@@ -113,7 +113,7 @@ export function votingPowerVariations(
         toDate,
       );
 
-      context.header("Cache-Control", "public, max-age=120");
+      context.header("Cache-Control", "public, max-age=60");
       return context.json(
         VotingPowerVariationsByAccountIdResponseMapper(
           result,

@@ -33,7 +33,7 @@ export function delegationPercentage(
     async (ctx) => {
       const query = ctx.req.valid("query");
       const serviceResult = await service.delegationPercentageByDay(query);
-      ctx.header("Cache-Control", "public, max-age=300");
+      ctx.header("Cache-Control", "public, max-age=3600");
       return ctx.json(toApi(serviceResult), 200);
     },
   );
