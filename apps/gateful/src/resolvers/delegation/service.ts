@@ -11,6 +11,10 @@ export type DelegationPercentageResponse = {
   };
 };
 
+export type DelegationResult = DelegationPercentageResponse & {
+  cacheControl: string | null;
+};
+
 export class DelegationService {
   constructor(private readonly daoApis: Map<string, string>) {}
 
@@ -21,7 +25,7 @@ export class DelegationService {
     before?: string;
     orderDirection?: string;
     limit?: number;
-  }) {
+  }): Promise<DelegationResult> {
     const params = new URLSearchParams();
     params.set("startDate", args.startDate);
     if (args.endDate) params.set("endDate", args.endDate);
@@ -30,11 +34,12 @@ export class DelegationService {
     if (args.orderDirection) params.set("orderDirection", args.orderDirection);
     if (args.limit) params.set("limit", String(args.limit));
 
-    const daoResponses = await fanOutGet<DelegationPercentageResponse>(
-      this.daoApis,
-      "/delegation-percentage",
-      params.toString(),
-    );
+    const { data: daoResponses, cacheControl } =
+      await fanOutGet<DelegationPercentageResponse>(
+        this.daoApis,
+        "/delegation-percentage",
+        params.toString(),
+      );
 
     const hasNextPage = Array.from(daoResponses.values()).some(
       (response) => response?.pageInfo?.hasNextPage ?? false,
@@ -50,7 +55,12 @@ export class DelegationService {
         ? []
         : this.aggregateMeanPercentage(alignedResponses);
 
-    return this.buildPaginatedResponse(aggregated, args, hasNextPage);
+    const paginatedResponse = this.buildPaginatedResponse(
+      aggregated,
+      args,
+      hasNextPage,
+    );
+    return { ...paginatedResponse, cacheControl };
   }
 
   private getFirstDate(

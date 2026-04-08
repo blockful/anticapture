@@ -36,7 +36,8 @@ const route = createRoute({
 
 export function daos(app: OpenAPIHono, service: DaosService) {
   app.openapi(route, async (c) => {
-    const result = await service.getAllDaos();
-    return c.json(result);
+    const { cacheControl, ...body } = await service.getAllDaos();
+    if (cacheControl) c.header("Cache-Control", cacheControl);
+    return c.json(body, 200);
   });
 }
