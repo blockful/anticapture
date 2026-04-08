@@ -26,8 +26,8 @@ contracts:
 
 networks:
   - id: 1
-    rpc_config:
-      url: ${RPC_URL}
+    hypersync_config:
+      url: https://eth.hypersync.xyz
     start_block: 9380410
     contracts:
       - name: ENSToken
