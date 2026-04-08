@@ -8,6 +8,8 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
 import { config } from "./config.js";
+import { createRedisClient } from "./cache/redis.js";
+import { cacheMiddleware } from "./middlewares/cache.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
 import { addressEnrichment } from "./resolvers/address-enrichment/route.js";
@@ -28,6 +30,8 @@ app.use("*", logger());
 if (config.blockfulApiToken) {
   app.use("*", bearerAuth({ token: config.blockfulApiToken }));
 }
+const redis = config.redisUrl ? createRedisClient(config.redisUrl) : undefined;
+app.use("*", cacheMiddleware(redis));
 
 console.log(
   `Discovered ${config.daoApis.size} DAO APIs: [${Array.from(config.daoApis.keys()).join(", ")}]`,
