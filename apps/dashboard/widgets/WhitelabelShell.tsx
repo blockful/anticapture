@@ -1,6 +1,13 @@
 "use client";
 
-import { Bell, Briefcase, Landmark, Newspaper, Users } from "lucide-react";
+import {
+  Bell,
+  Briefcase,
+  Landmark,
+  Newspaper,
+  Settings,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -45,6 +52,12 @@ const NAV_ITEMS = [
     label: "Notifications",
     page: WHITELABEL_ROUTES.notifications,
     icon: Bell,
+    enabled: () => true,
+  },
+  {
+    label: "Governance Settings",
+    page: WHITELABEL_ROUTES.governanceSettings,
+    icon: Settings,
     enabled: () => true,
   },
 ] as const;

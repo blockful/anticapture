@@ -7,6 +7,7 @@ import {
   ChevronsRight,
   Landmark,
   Newspaper,
+  Settings,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -49,6 +50,12 @@ const NAV_ITEMS = [
     label: "Notifications",
     page: WHITELABEL_ROUTES.notifications,
     icon: Bell,
+    enabled: () => true,
+  },
+  {
+    label: "Governance Settings",
+    page: WHITELABEL_ROUTES.governanceSettings,
+    icon: Settings,
     enabled: () => true,
   },
 ] as const;

@@ -339,7 +339,17 @@ export const ProposalItem = ({
           {supportValue !== undefined ? (
             <>
               <BulletDivider />
-              <span className="text-link font-medium">You voted</span>
+              <span className="flex items-center gap-1 font-medium">
+                <CheckCircle2 className="text-success size-3.5" />
+                <span className="text-link">
+                  You voted{" "}
+                  {supportValue === 1
+                    ? "For"
+                    : supportValue === 0
+                      ? "Against"
+                      : "Abstain"}
+                </span>
+              </span>
             </>
           ) : null}
           <BulletDivider />

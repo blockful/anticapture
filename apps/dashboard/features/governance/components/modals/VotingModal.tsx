@@ -7,9 +7,9 @@ import { formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
+import { VoteSuccessContent } from "@/features/governance/components/modals/VoteSuccessContent";
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
 import type { ProposalDetails } from "@/features/governance/types";
-import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import { BadgeStatus, Button } from "@/shared/components";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -38,6 +38,7 @@ export const VotingModal = ({
   const [comment, setComment] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactionhash, setTransactionhash] = useState<string>("");
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
   // Parse user's voting power to BigInt for calculations
   const userVotingPowerBigInt = BigInt(rawVotingPower || "0");
@@ -100,6 +101,7 @@ export const VotingModal = ({
       setComment("");
       setIsLoading(false);
       setTransactionhash("");
+      setIsSuccess(false);
     }
   }, [isOpen]);
 
@@ -174,7 +176,14 @@ export const VotingModal = ({
         </div>
 
         {/* Content */}
-        {isLoading ? (
+        {isSuccess ? (
+          <VoteSuccessContent
+            onClose={() => {
+              onClose();
+              window.location.reload();
+            }}
+          />
+        ) : isLoading ? (
           <LoadingComponent
             transactionhash={transactionhash}
             proposalId={proposal?.id as string}
@@ -257,49 +266,48 @@ export const VotingModal = ({
           </>
         )}
 
-        <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            data-ph-event="vote_submit"
-            data-ph-source="gov_fe"
-            data-umami-event="vote_submit"
-            disabled={
-              !address ||
-              !chain ||
-              !vote ||
-              !walletClient ||
-              isLoading ||
-              !rawVotingPower ||
-              rawVotingPower === "0"
-            }
-            loading={isLoading}
-            onClick={async () => {
-              if (!address || !chain || !walletClient) return;
-              setIsLoading(true);
-              const hash = await voteOnProposal(
-                vote as "for" | "against" | "abstain",
-                proposal?.id as string,
-                address as unknown as Account,
-                chain,
-                daoId,
-                walletClient,
-                setTransactionhash,
-                comment,
-              );
-              setIsLoading(false);
-              if (hash) {
-                onClose();
-                // Reload the page to fetch fresh data
-                window.location.reload();
-                showCustomToast("Vote submitted successfully!", "success");
+        {!isSuccess && (
+          <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              data-ph-event="vote_submit"
+              data-ph-source="gov_fe"
+              data-umami-event="vote_submit"
+              disabled={
+                !address ||
+                !chain ||
+                !vote ||
+                !walletClient ||
+                isLoading ||
+                !rawVotingPower ||
+                rawVotingPower === "0"
               }
-            }}
-          >
-            Submit
-          </Button>
-        </div>
+              loading={isLoading}
+              onClick={async () => {
+                if (!address || !chain || !walletClient) return;
+                setIsLoading(true);
+                const hash = await voteOnProposal(
+                  vote as "for" | "against" | "abstain",
+                  proposal?.id as string,
+                  address as unknown as Account,
+                  chain,
+                  daoId,
+                  walletClient,
+                  setTransactionhash,
+                  comment,
+                );
+                setIsLoading(false);
+                if (hash) {
+                  setIsSuccess(true);
+                }
+              }}
+            >
+              Submit
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

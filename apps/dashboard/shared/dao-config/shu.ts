@@ -18,11 +18,22 @@ export const SHU: DaoConfiguration = {
   ogIcon: ShutterOgIcon,
   decimals: 18,
   color: {
-    svgColor: "#0080bc",
+    svgColor: "#1e1e1e",
     svgBgColor: "#fff",
   },
   forumLink: "https://shutternetwork.discourse.group/c/shutter-dao/14",
   icon: ShutterIcon,
+  whitelabel: {
+    theme: "light",
+    requestFeatureUrl: "https://blockful.io/contact",
+    customDomain: "governance.ens.domains", // change later
+    forumBaseUrl: "https://discuss.ens.domains/", // change later
+    branding: {
+      appName: "Shutter Governance",
+      logo: ShutterIcon,
+    },
+    hostnames: ["governance.ens.domains"], // change later
+  },
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
