@@ -1,10 +1,10 @@
 import { and, asc, desc, eq, gte, inArray, SQL } from "drizzle-orm";
 
-import { OffchainDrizzle, offchainProposals } from "@/database";
+import { UnifiedDrizzle, offchainProposals } from "@/database";
 import { DBOffchainProposal } from "@/mappers";
 
 export class OffchainProposalRepository {
-  constructor(private readonly db: OffchainDrizzle) {}
+  constructor(private readonly db: UnifiedDrizzle) {}
 
   async getProposals(
     skip: number,
