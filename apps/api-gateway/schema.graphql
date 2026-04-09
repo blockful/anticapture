@@ -1971,17 +1971,13 @@ type OffchainVotesResponse {
 type OffchainVote {
   voter: String!
   proposalId: String!
-  choice: SnapshotVoteChoice!
+  choice: [String]!
   vp: Float
   reason: String!
   created: Int!
   proposalTitle: String
 }
 
-type SnapshotVoteChoice {
-  Int: Int
-  JSON: JSON
-}
 
 """Sort votes by timestamp or voting power."""
 enum queryInput_votesOffchain_orderBy {
