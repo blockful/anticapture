@@ -12,6 +12,14 @@ type CachedEntry = {
   contentType: string;
 };
 
+function safeParse<T>(raw: string): T | null {
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Cache-aside middleware using Redis.
  *
@@ -37,7 +45,8 @@ export function cacheMiddleware(redis?: CacheStore) {
     // Fail open: if Redis is unavailable, .catch returns null and we proceed normally.
     const raw = await redis.get(key).catch(() => null);
     if (raw) {
-      const entry = JSON.parse(raw) as CachedEntry;
+      const entry = safeParse<CachedEntry>(raw);
+      if (!entry) return next();
       return new Response(entry.body, {
         status: entry.status,
         headers: {
