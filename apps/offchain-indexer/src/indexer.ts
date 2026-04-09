@@ -17,7 +17,11 @@ export class Indexer {
 
   async start(forceBackfill: boolean): Promise<void> {
     if (forceBackfill) {
-      logger.info("force backfill enabled — resetting cursors");
+      logger.info(
+        "force backfill enabled — clearing data and resetting cursors",
+      );
+      await this.repository.clearVotes();
+      await this.repository.clearProposals();
       await this.repository.resetCursor("proposals");
       await this.repository.resetCursor("votes");
     }

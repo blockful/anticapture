@@ -7,8 +7,8 @@ import { ProposalsRepository, ProposalsService } from "./onchainProposals";
 const DEFAULT_REQ: ProposalsRequest = {
   skip: 0,
   limit: 10,
-  includeOptimisticProposals: true,
   status: undefined,
+  includeOptimisticProposals: true,
 };
 
 const createMockProposal = (

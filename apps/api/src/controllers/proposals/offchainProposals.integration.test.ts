@@ -3,7 +3,8 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
-import type { OffchainDrizzle } from "@/database";
+import type { UnifiedDrizzle } from "@/database";
+import * as schema from "@/database/schema";
 import * as offchainSchema from "@/database/offchain-schema";
 import { offchainProposals } from "@/database/offchain-schema";
 import { OffchainProposalRepository } from "@/repositories/proposals/offchainProposals";
@@ -11,7 +12,7 @@ import { OffchainProposalsService } from "@/services/proposals/offchainProposals
 import { offchainProposals as offchainProposalsController } from "./offchainProposals";
 
 let client: PGlite;
-let db: OffchainDrizzle;
+let db: UnifiedDrizzle;
 let app: Hono;
 
 type OffchainProposalInsert = typeof offchainProposals.$inferInsert;
@@ -62,9 +63,10 @@ const BASE_PROPOSAL_ITEM = {
 
 beforeAll(async () => {
   client = new PGlite();
-  db = drizzle(client, { schema: offchainSchema });
+  const unifiedSchema = { ...schema, ...offchainSchema };
+  db = drizzle(client, { schema: unifiedSchema });
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  const { apply } = await pushSchema(offchainSchema, db as any);
+  const { apply } = await pushSchema(unifiedSchema, db as any);
   await apply();
 });
 

@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const contactFormSchema = z.object({
   nameOrAlias: z.string().min(2),
   whichDao: z.string().min(2),
@@ -24,6 +22,7 @@ const contactFormSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const body = await request.json();
 

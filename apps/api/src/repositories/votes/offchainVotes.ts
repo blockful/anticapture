@@ -1,10 +1,10 @@
 import { and, asc, desc, eq, gte, lte, inArray, SQL } from "drizzle-orm";
 
-import { OffchainDrizzle, offchainProposals, offchainVotes } from "@/database";
+import { UnifiedDrizzle, offchainProposals, offchainVotes } from "@/database";
 import { DBOffchainVote } from "@/mappers";
 
 export class OffchainVoteRepository {
-  constructor(private readonly db: OffchainDrizzle) {}
+  constructor(private readonly db: UnifiedDrizzle) {}
 
   async getVotes(
     skip: number,
