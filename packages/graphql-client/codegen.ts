@@ -25,6 +25,7 @@ const config: CodegenConfig = {
           NonNegativeInt: "number",
           PositiveInt: "number",
           ObjMap: "Record<string, unknown>",
+          NonEmptyString: "string",
         },
       },
     },

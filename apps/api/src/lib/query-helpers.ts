@@ -5,6 +5,14 @@
 import { truncateTimestampToMidnight } from "./date-helpers";
 
 /**
+ * Escapes special characters in a string for use in a SQL LIKE/ILIKE pattern.
+ * Escapes backslash, percent, and underscore characters.
+ */
+export function escapeLikePattern(query: string): string {
+  return query.replace(/[\\%_]/g, "\\$&");
+}
+
+/**
  * Filter data by cutoff date with fallback to last value before cutoff.
  *
  * Returns items with date >= cutoffDate. If no items match, returns the last
