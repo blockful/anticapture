@@ -88,7 +88,7 @@ export const WhitelabelShell = ({
   );
 
   return (
-    <div className="bg-surface-background text-primary flex min-h-screen">
+    <div className="bg-surface-background text-primary flex h-screen overflow-hidden">
       <WhitelabelSidebar
         daoId={daoId}
         isCollapsed={isSidebarCollapsed}
@@ -143,7 +143,10 @@ export const WhitelabelShell = ({
             className="mt-4 w-full justify-center"
           >
             <a
-              href={daoConfig.whitelabel?.requestFeatureUrl}
+              href={
+                daoConfig.whitelabel?.requestFeatureUrl ??
+                "https://forms.clickup.com/90132341641/f/2ky4wrw9-30353/Z1Y0VQ9TC6SQ3AMUMX"
+              }
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -152,7 +155,9 @@ export const WhitelabelShell = ({
           </Button>
         </div>
 
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+          {children}
+        </main>
       </div>
     </div>
   );

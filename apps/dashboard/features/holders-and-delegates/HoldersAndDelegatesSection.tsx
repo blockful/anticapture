@@ -14,7 +14,11 @@ import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMo
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
+import {
+  getWhitelabelBasePath,
+  isWhitelabelDao,
+} from "@/shared/utils/whitelabel";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 type TabId = "tokenHolders" | "delegates";
 
@@ -30,7 +34,10 @@ const WHITELABEL_TABS = [
 
 export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const pathname = usePathname();
-  const isWhitelabel = Boolean(getWhitelabelBasePath({ daoId, pathname }));
+  const basePath = getWhitelabelBasePath({ daoId, pathname });
+  const isWhitelabel =
+    basePath.startsWith("/whitelabel/") ||
+    (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoId]));
 
   const defaultDays = TimeInterval.NINETY_DAYS;
   const [days, setDays] = useQueryState(
@@ -61,12 +68,19 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   };
 
   // Map from tab ID to tab component
+  const tabs = isWhitelabel ? WHITELABEL_TABS : NORMAL_TABS;
+  const defaultTab = isWhitelabel ? "delegates" : "tokenHolders";
+
   const tabComponentMap: Record<TabId, ReactElement> = {
     tokenHolders: <TokenHolders days={days || defaultDays} daoId={daoId} />,
-    delegates: <Delegates daoId={daoId} timePeriod={days || defaultDays} />,
+    delegates: (
+      <Delegates
+        daoId={daoId}
+        timePeriod={days || defaultDays}
+        isWhitelabel={isWhitelabel}
+      />
+    ),
   };
-
-  const TABS = isWhitelabel ? WHITELABEL_TABS : NORMAL_TABS;
 
   return (
     <div>
@@ -79,8 +93,8 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         <SubSectionsContainer>
           <div className="flex w-full items-center justify-between">
             <PillTabGroup
-              tabs={TABS}
-              activeTab={activeTab ?? "tokenHolders"}
+              tabs={tabs}
+              activeTab={activeTab ?? defaultTab}
               onTabChange={(value) => handleTabChange(value as TabId)}
             />
             <SwitcherDateMobile

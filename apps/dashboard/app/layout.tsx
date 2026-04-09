@@ -58,11 +58,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(location.pathname.startsWith('/whitelabel/'))document.documentElement.classList.remove('dark')`,
+          }}
         />
       </head>
       <body

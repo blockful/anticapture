@@ -15,6 +15,7 @@ import {
   X,
   MessageCircle,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { BadgeIcon } from "@/shared/components/design-system/badges";
@@ -82,7 +83,10 @@ const LinkButton = ({ link }: { link: HelpLink }) => {
 };
 
 export const HelpPopover = ({ className }: HelpPopoverProps) => {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+
+  if (pathname?.startsWith("/whitelabel/")) return null;
 
   return (
     <div className={cn("fixed bottom-4 right-4 z-10", className)}>
