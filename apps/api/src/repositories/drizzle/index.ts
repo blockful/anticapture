@@ -18,10 +18,20 @@ import {
 } from "@/controllers";
 import { Drizzle, proposalsOnchain } from "@/database";
 import { DaysEnum } from "@/lib/enums";
+import { escapeLikePattern } from "@/lib/query-helpers";
 import { DBProposal } from "@/mappers";
 
 export class DrizzleRepository {
   constructor(private readonly db: Drizzle) {}
+
+  private buildProposalSearchWhere(query: string): SQL<unknown> {
+    const searchPattern = `%${escapeLikePattern(query)}%`;
+
+    return sql`(
+      ${proposalsOnchain.id} ILIKE ${searchPattern} ESCAPE '\\'
+      OR ${proposalsOnchain.title} ILIKE ${searchPattern} ESCAPE '\\'
+    )`;
+  }
 
   async getSupplyComparison(metricType: string, days: DaysEnum) {
     const query = sql`
@@ -170,8 +180,29 @@ export class DrizzleRepository {
     });
   }
 
+  async searchProposals(
+    query: string,
+    skip: number,
+    limit: number,
+  ): Promise<DBProposal[]> {
+    return await this.db
+      .select()
+      .from(proposalsOnchain)
+      .where(this.buildProposalSearchWhere(query))
+      .orderBy(desc(proposalsOnchain.timestamp))
+      .limit(limit)
+      .offset(skip);
+  }
+
   async getProposalsCount(): Promise<number> {
     return this.db.$count(proposalsOnchain);
+  }
+
+  async getSearchProposalsCount(query: string): Promise<number> {
+    return this.db.$count(
+      proposalsOnchain,
+      this.buildProposalSearchWhere(query),
+    );
   }
 
   now() {

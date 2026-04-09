@@ -17,14 +17,18 @@ export class Client<
   protected abi: typeof GovernorAbi;
   protected address: Address;
 
-  constructor(client: vClient<TTransport, TChain, TAccount>, address: Address) {
+  constructor(
+    client: vClient<TTransport, TChain, TAccount>,
+    address: Address,
+    private readonly daoId: string,
+  ) {
     super(client, 5); // 5 minutes of cache for quorum
     this.address = address;
     this.abi = GovernorAbi;
   }
 
   getDaoId(): string {
-    return "NOUNS";
+    return this.daoId;
   }
 
   async getQuorum(): Promise<bigint> {

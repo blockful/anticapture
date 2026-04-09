@@ -144,3 +144,23 @@ export const OffchainProposalsRequestSchema = z
     ),
   })
   .openapi("OffchainProposalsRequest");
+
+export const OffchainProposalSearchRequestSchema = z
+  .object({
+    query: z
+      .string()
+      .trim()
+      .min(1)
+      .openapi({
+        param: {
+          name: "query",
+          in: "query",
+        },
+        description:
+          "Partial Snapshot proposal identifier or title to search for.",
+        example: "test",
+      }),
+    skip: paginationSkipQueryParam(),
+    limit: paginationLimitQueryParam(),
+  })
+  .openapi("OffchainProposalSearchRequest");

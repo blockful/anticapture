@@ -11,7 +11,7 @@ const SPACE_ID = "ens.eth";
 function makeProposal(overrides?: Record<string, unknown>) {
   return {
     id: "proposal-1",
-    author: "0xabc",
+    author: "0x1111111111111111111111111111111111111111",
     title: "Test Proposal",
     body: "Some body",
     discussion: "https://discuss.ens.domains/t/1",
@@ -30,7 +30,7 @@ function makeProposal(overrides?: Record<string, unknown>) {
 function makeVote(overrides?: Record<string, unknown>) {
   return {
     id: "vote-1",
-    voter: "0xdef",
+    voter: "0x2222222222222222222222222222222222222222",
     proposal: { id: "proposal-1" },
     choice: 1,
     vp: 100.5,
@@ -65,7 +65,7 @@ describe("SnapshotProvider", () => {
         {
           id: "proposal-1",
           spaceId: SPACE_ID,
-          author: "0xabc",
+          author: "0x1111111111111111111111111111111111111111",
           title: "Test Proposal",
           body: "Some body",
           discussion: "https://discuss.ens.domains/t/1",
@@ -117,7 +117,7 @@ describe("SnapshotProvider", () => {
       const result = await provider.fetchProposals(null);
 
       expect(result.data[0]).toStrictEqual({
-        author: "0xabc",
+        author: "0x1111111111111111111111111111111111111111",
         body: "",
         choices: [],
         created: 1700000000,
@@ -151,7 +151,7 @@ describe("SnapshotProvider", () => {
         {
           id: "vote-1",
           spaceId: SPACE_ID,
-          voter: "0xdef",
+          voter: "0x2222222222222222222222222222222222222222",
           proposalId: "proposal-1",
           choice: 1,
           vp: "100.5",

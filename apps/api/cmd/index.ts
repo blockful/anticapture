@@ -38,6 +38,7 @@ import {
   votes,
   offchainProposals,
   offchainVotes,
+  offchainNonVoters,
   eventRelevance,
   feed,
   health,
@@ -76,6 +77,7 @@ import {
   AccountBalanceQueryFragments,
   OffchainProposalRepository,
   OffchainVoteRepository,
+  OffchainNonVotersRepositoryImpl,
 } from "@/repositories";
 import {
   AccountBalanceService,
@@ -100,6 +102,7 @@ import {
   FeedService,
   OffchainProposalsService,
   OffchainVotesService,
+  OffchainNonVotersService,
   EventRelevanceService,
 } from "@/services";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
@@ -172,10 +175,6 @@ if (!daoClient) {
 }
 
 const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
-const pgOffchainClient = drizzle(env.DATABASE_URL, {
-  schema: offchainSchema,
-  casing: "snake_case",
-});
 
 health(app, pgClient);
 
@@ -349,20 +348,32 @@ dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
 
-const offchainProposalsRepo = wrapWithTracing(
-  new OffchainProposalRepository(pgOffchainClient),
-);
-const offchainVotesRepo = wrapWithTracing(
-  new OffchainVoteRepository(pgOffchainClient),
-);
-offchainProposals(
-  app,
-  wrapWithTracing(new OffchainProposalsService(offchainProposalsRepo)),
-);
-offchainVotes(
-  app,
-  wrapWithTracing(new OffchainVotesService(offchainVotesRepo)),
-);
+if (daoClient.supportOffchainData()) {
+  const pgUnifiedClient = drizzle(env.DATABASE_URL, {
+    schema: { ...schema, ...offchainSchema },
+    casing: "snake_case",
+  });
+
+  const offchainProposalsRepo = wrapWithTracing(
+    new OffchainProposalRepository(pgUnifiedClient),
+  );
+  const offchainVotesRepo = wrapWithTracing(
+    new OffchainVoteRepository(pgUnifiedClient),
+  );
+  offchainProposals(
+    app,
+    wrapWithTracing(new OffchainProposalsService(offchainProposalsRepo)),
+  );
+  offchainVotes(
+    app,
+    wrapWithTracing(new OffchainVotesService(offchainVotesRepo)),
+  );
+
+  const offchainNonVotersRepo = new OffchainNonVotersRepositoryImpl(
+    pgUnifiedClient,
+  );
+  offchainNonVoters(app, new OffchainNonVotersService(offchainNonVotersRepo));
+}
 
 serve(
   {
