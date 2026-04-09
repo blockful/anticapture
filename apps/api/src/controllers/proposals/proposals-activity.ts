@@ -7,6 +7,7 @@ import {
   ProposalActivityRequestSchema,
   ProposalActivityResponseSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { DrizzleProposalsActivityRepository } from "@/repositories/";
 import { ProposalsActivityService } from "@/services";
 
@@ -66,7 +67,7 @@ export function proposalsActivity(
         userVoteFilter,
       });
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(ProposalActivityResponseSchema.parse(result), 200);
     },
   );

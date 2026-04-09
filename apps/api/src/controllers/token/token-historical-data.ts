@@ -4,6 +4,7 @@ import {
   TokenHistoricalPriceRequest,
   TokenHistoricalPriceResponse,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 
 export interface TokenHistoricalDataClient {
   getHistoricalTokenData(
@@ -41,7 +42,7 @@ export function tokenHistoricalData(
     async (context) => {
       const { skip, limit } = context.req.valid("query");
       const data = await client.getHistoricalTokenData(limit, skip);
-      context.header("Cache-Control", "public, max-age=3600");
+      setCacheControl(context, 3600);
       return context.json(data, 200);
     },
   );

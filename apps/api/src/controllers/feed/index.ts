@@ -1,6 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { FeedRequestSchema, FeedResponseSchema } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { FeedService } from "@/services";
 
 export function feed(app: Hono, service: FeedService) {
@@ -28,7 +29,7 @@ export function feed(app: Hono, service: FeedService) {
     async (context) => {
       const req = context.req.valid("query");
       const response = await service.getFeedEvents(req);
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(FeedResponseSchema.parse(response), 200);
     },
   );

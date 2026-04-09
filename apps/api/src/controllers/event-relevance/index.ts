@@ -6,6 +6,7 @@ import {
   EventRelevanceThresholdQuerySchema,
   EventRelevanceThresholdResponseSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { EventRelevanceService } from "@/services";
 
 export function eventRelevance(app: Hono, service: EventRelevanceService) {
@@ -36,7 +37,7 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
         type as FeedEventType,
         relevance as FeedRelevance,
       );
-      context.header("Cache-Control", "public, max-age=3600");
+      setCacheControl(context, 3600);
       return context.json({ threshold }, 200);
     },
   );

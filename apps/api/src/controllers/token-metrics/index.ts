@@ -6,6 +6,7 @@ import {
   toTokenMetricsApi,
 } from "@/mappers/token-metrics";
 import {} from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 
 import { TokenMetricsService } from "@/services/token-metrics";
 
@@ -37,7 +38,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
         orderDirection: query.orderDirection ?? "asc",
       });
       const httpResponse = toTokenMetricsApi(serviceResult);
-      ctx.header("Cache-Control", "public, max-age=3600");
+      setCacheControl(ctx, 3600);
       return ctx.json(httpResponse, 200);
     },
   );

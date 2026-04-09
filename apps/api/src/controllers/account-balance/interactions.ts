@@ -1,6 +1,8 @@
 import { Address } from "viem";
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
+import { setCacheControl } from "@/middlewares";
+
 import {
   AccountInteractions,
   AccountInteractionsMapper,
@@ -77,7 +79,7 @@ Positive amounts signify net token transfers FROM <address>, whilst negative amo
         },
       );
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(
         AccountInteractionsMapper(result, fromDate, toDate),
         200,

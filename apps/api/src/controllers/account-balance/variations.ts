@@ -9,6 +9,7 @@ import {
   AccountBalanceVariationsByAccountIdResponseMapper,
   AccountBalanceVariationsByAccountIdResponseSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { BalanceVariationsService } from "@/services";
 
 export function accountBalanceVariations(
@@ -51,7 +52,7 @@ export function accountBalanceVariations(
         addresses,
       );
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(
         AccountBalanceVariationsResponseMapper(result, fromDate, toDate),
         200,
@@ -92,7 +93,7 @@ export function accountBalanceVariations(
         toDate,
       );
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(
         AccountBalanceVariationsByAccountIdResponseMapper(
           result,

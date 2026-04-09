@@ -6,6 +6,7 @@ import {
   DelegatorsRequestQuerySchema,
 } from "@/mappers/delegations/delegators";
 import {} from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { DelegatorsService } from "@/services/delegations/delegators";
 
 export function delegators(app: Hono, service: DelegatorsService) {
@@ -43,7 +44,7 @@ export function delegators(app: Hono, service: DelegatorsService) {
         orderDirection,
       });
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(DelegatorsResponseSchema.parse(result), 200);
     },
   );

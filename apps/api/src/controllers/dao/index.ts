@@ -1,6 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { DaoResponseSchema } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { DaoService } from "@/services";
 
 export function dao(app: Hono, service: DaoService) {
@@ -25,7 +26,7 @@ export function dao(app: Hono, service: DaoService) {
     }),
     async (context) => {
       const daoData = await service.getDaoParameters();
-      context.header("Cache-Control", "public, max-age=3600");
+      setCacheControl(context, 3600);
       return context.json(daoData, 200);
     },
   );

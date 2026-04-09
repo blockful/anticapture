@@ -5,6 +5,7 @@ import {
   TransfersRequestQuerySchema,
   TransfersResponseSchema,
 } from "@/mappers/";
+import { setCacheControl } from "@/middlewares";
 import { TransfersService } from "@/services";
 
 export function transfers(app: Hono, service: TransfersService) {
@@ -59,7 +60,7 @@ export function transfers(app: Hono, service: TransfersService) {
         toDate,
       });
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(result, 200);
     },
   );

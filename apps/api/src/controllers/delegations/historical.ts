@@ -6,6 +6,7 @@ import {
   DelegationsResponseSchema,
 } from "@/mappers/delegations";
 import {} from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 
 import { HistoricalDelegationsService } from "@/services/delegations";
 
@@ -60,7 +61,7 @@ export function historicalDelegations(
         limit,
       );
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(DelegationsResponseSchema.parse(result), 200);
     },
   );

@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { Drizzle } from "@/database";
 import { LastUpdateQuerySchema, LastUpdateResponseSchema } from "@/mappers/";
+import { setCacheControl } from "@/middlewares";
 import { LastUpdateRepositoryImpl } from "@/repositories";
 import { LastUpdateService } from "@/services";
 
@@ -32,7 +33,7 @@ export function lastUpdate(app: Hono, db: Drizzle) {
     async (context) => {
       const { chart } = context.req.valid("query");
       const lastUpdate = await service.getLastUpdate(chart);
-      context.header("Cache-Control", "public, max-age=30");
+      setCacheControl(context, 30);
       return context.json({ lastUpdate }, 200);
     },
   );

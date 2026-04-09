@@ -7,6 +7,7 @@ import {
   TokenPropertiesResponseSchema,
   TokenMapper,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { TokenService } from "@/services";
 
 export interface TokenPriceClient {
@@ -79,7 +80,7 @@ export function token(
         );
       }
 
-      context.header("Cache-Control", "public, max-age=3600");
+      setCacheControl(context, 3600);
       return context.json(TokenMapper.toApi(tokenProps, priceData), 200);
     },
   );

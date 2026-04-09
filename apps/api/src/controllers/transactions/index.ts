@@ -4,6 +4,7 @@ import {
   TransactionsRequestSchema,
   TransactionsResponseSchema,
 } from "@/mappers/";
+import { setCacheControl } from "@/middlewares";
 import { TransactionsService } from "@/services";
 
 export function transactions(app: Hono, service: TransactionsService) {
@@ -60,7 +61,7 @@ export function transactions(app: Hono, service: TransactionsService) {
         includes,
       });
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(result, 200);
     },
   );

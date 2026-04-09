@@ -6,6 +6,7 @@ import {
   HistoricalBalanceRequestQuerySchema,
   HistoricalBalancesResponseSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { HistoricalBalancesService } from "@/services";
 
 export function historicalBalances(
@@ -61,7 +62,7 @@ export function historicalBalances(
         toDate,
       );
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(
         HistoricalBalancesResponseMapper(items, totalCount),
         200,

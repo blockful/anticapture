@@ -3,6 +3,7 @@ import { formatUnits, parseEther } from "viem";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { DaysEnum, SECONDS_IN_DAY } from "@/lib/enums";
+import { setCacheControl } from "@/middlewares";
 import {
   SupplyComparisonResponseSchema,
   TokenDistributionComparisonQuerySchema,
@@ -59,7 +60,7 @@ export function tokenDistribution(
 
         const result = await repository.getSupplyComparison(metric, days);
 
-        ctx.header("Cache-Control", "public, max-age=60");
+        setCacheControl(ctx, 60);
         if (!result) {
           return ctx.json(
             { previousValue: "0", currentValue: "0", changeRate: 0 },

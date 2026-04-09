@@ -5,6 +5,7 @@ import {
   OffchainVotesRequestSchema,
   OffchainVotesResponseSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { OffchainVotesService } from "@/services";
 
 export function offchainVotes(app: Hono, service: OffchainVotesService) {
@@ -51,7 +52,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );
@@ -102,7 +103,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );

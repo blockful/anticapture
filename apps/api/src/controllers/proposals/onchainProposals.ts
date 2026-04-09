@@ -9,6 +9,7 @@ import {
   ProposalResponseSchema,
   ProposalMapper,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { ProposalsService } from "@/services";
 
 export function proposals(
@@ -65,7 +66,7 @@ export function proposals(
         client.getVotingDelay(),
       ]);
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(
         {
           items: result.map((p, index) =>
@@ -125,7 +126,7 @@ export function proposals(
         client.getVotingDelay(),
       ]);
 
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(
         ProposalMapper.toApi(proposal, quorum, blockTime),
         200,

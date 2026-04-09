@@ -8,6 +8,7 @@ import {
   HistoricalVotingPowerGlobalQuerySchema,
   DBHistoricalVotingPowerWithRelations,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { Address } from "viem";
 
 export interface HistoricalVotingPowerService {
@@ -79,7 +80,7 @@ export function historicalVotingPower(
         fromDate,
         toDate,
       );
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
         200,
@@ -133,7 +134,7 @@ export function historicalVotingPower(
         fromDate,
         toDate,
       );
-      context.header("Cache-Control", "public, max-age=60");
+      setCacheControl(context, 60);
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
         200,
