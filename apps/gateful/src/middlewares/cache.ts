@@ -25,20 +25,16 @@ function safeParse<T>(raw: string): T | null {
  * Cache-aside middleware using Redis.
  *
  * - Skips non-GET requests.
- * - Skips when Redis is not configured.
  * - On cache hit: returns the stored response with `X-Cache: HIT`.
  * - On cache miss: passes through, then stores the response when:
  *     - The status is 2xx.
  *     - The upstream set a `Cache-Control: max-age=<n>` header with n > 0.
  * - All Redis errors are swallowed (fail open) to preserve availability.
  */
-export function cacheMiddleware(redis?: CacheStore) {
+export function cacheMiddleware(redis: CacheStore) {
   return async (c: Context, next: Next) => {
     // Only cache GET requests.
     if (c.req.method !== "GET") return next();
-
-    // Skip entirely if Redis is not configured.
-    if (!redis) return next();
 
     const key = c.req.url;
 
@@ -86,7 +82,7 @@ export function cacheMiddleware(redis?: CacheStore) {
           contentType,
           cacheControl: cacheControl!,
         };
-        return redis!.set(key, JSON.stringify(entry), { EX: ttl });
+        return redis.set(key, JSON.stringify(entry), { EX: ttl });
       })
       .catch(() => null);
   };

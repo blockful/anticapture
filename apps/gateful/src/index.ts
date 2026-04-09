@@ -30,8 +30,10 @@ app.use("*", logger());
 if (config.blockfulApiToken) {
   app.use("*", bearerAuth({ token: config.blockfulApiToken }));
 }
-const redis = config.redisUrl ? createRedisClient(config.redisUrl) : undefined;
-app.use("*", cacheMiddleware(redis));
+if (config.redisUrl) {
+  const redis = createRedisClient(config.redisUrl);
+  app.use("*", cacheMiddleware(redis));
+}
 
 console.log(
   `Discovered ${config.daoApis.size} DAO APIs: [${Array.from(config.daoApis.keys()).join(", ")}]`,
