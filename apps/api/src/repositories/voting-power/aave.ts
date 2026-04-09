@@ -126,8 +126,7 @@ export class AAVEVotingPowerRepository {
     return result.map((row) => ({
       ...row.VotingPowerHistory,
       delegations:
-        row.Transfer &&
-        row.Transfer?.logIndex > (row.Delegation?.logIndex || 0)
+        row.Transfer && row.Transfer?.logIndex > (row.Delegation?.logIndex || 0)
           ? null
           : row.Delegation,
       transfers:

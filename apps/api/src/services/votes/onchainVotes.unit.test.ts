@@ -17,6 +17,7 @@ type VoteWithTitle = DBVote & {
 const createMockDBVote = (
   overrides: Partial<VoteWithTitle> = {},
 ): VoteWithTitle => ({
+  id: "test-id",
   voterAccountId: VOTER_A,
   txHash: TX_HASH,
   transactionHash: TX_HASH,

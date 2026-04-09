@@ -11,6 +11,7 @@ function createStubRepo(items: DBTransfer[] = [], count = 0) {
 }
 
 const makeDBTransfer = (overrides = {}): DBTransfer => ({
+  id: "test-id",
   transactionHash: "0xdeadbeef",
   daoId: "UNI",
   tokenId: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",

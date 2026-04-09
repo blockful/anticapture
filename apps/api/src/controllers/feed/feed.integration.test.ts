@@ -19,6 +19,7 @@ const nounsThresholds = getDaoRelevanceThreshold(DaoIdEnum.NOUNS);
 const createEvent = (
   overrides: Partial<FeedEventInsert> = {},
 ): FeedEventInsert => ({
+  id: "test-id",
   txHash: "0xabc123def456abc1",
   logIndex: 0,
   type: "VOTE" as const,

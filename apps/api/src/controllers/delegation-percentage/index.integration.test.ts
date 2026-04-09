@@ -15,6 +15,7 @@ type MetricInsert = typeof daoMetricsDayBucket.$inferInsert;
 const TEST_DATE = 1699920000n;
 
 const createMetric = (overrides: Partial<MetricInsert> = {}): MetricInsert => ({
+  id: "test-id",
   date: TEST_DATE,
   daoId: "UNI",
   tokenId: "uni",

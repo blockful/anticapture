@@ -1,11 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  pgTable,
-  index,
-  bigint,
-  pgEnum,
-  primaryKey,
-} from "drizzle-orm/pg-core";
+import { pgTable, index, bigint, pgEnum } from "drizzle-orm/pg-core";
 import { Address, zeroAddress } from "viem";
 
 import { MetricTypesArray } from "@/lib/constants";
@@ -67,35 +61,29 @@ export const accountPower = pgTable(
   (table) => [index().on(table.lastVoteTimestamp)],
 );
 
-export const votingPowerHistory = pgTable(
-  "VotingPowerHistory",
-  (drizzle) => ({
-    id: drizzle.text().primaryKey(),
-    transactionHash: drizzle.text("transactionHash").notNull(),
-    daoId: drizzle.text("daoId").notNull(),
-    accountId: drizzle.text("accountId").$type<Address>().notNull(),
-    votingPower: bigint("votingPower", { mode: "bigint" }).notNull(),
-    delta: bigint({ mode: "bigint" }).notNull(),
-    deltaMod: bigint("deltaMod", { mode: "bigint" }).notNull(),
-    timestamp: bigint({ mode: "bigint" }).notNull(),
-    logIndex: drizzle.integer("logIndex").notNull(),
-  }),
-);
+export const votingPowerHistory = pgTable("VotingPowerHistory", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  transactionHash: drizzle.text("transactionHash").notNull(),
+  daoId: drizzle.text("daoId").notNull(),
+  accountId: drizzle.text("accountId").$type<Address>().notNull(),
+  votingPower: bigint("votingPower", { mode: "bigint" }).notNull(),
+  delta: bigint({ mode: "bigint" }).notNull(),
+  deltaMod: bigint("deltaMod", { mode: "bigint" }).notNull(),
+  timestamp: bigint({ mode: "bigint" }).notNull(),
+  logIndex: drizzle.integer("logIndex").notNull(),
+}));
 
-export const balanceHistory = pgTable(
-  "BalanceHistory",
-  (drizzle) => ({
-    id: drizzle.text().primaryKey(),
-    transactionHash: drizzle.text("transactionHash").notNull(),
-    daoId: drizzle.text("daoId").notNull(),
-    accountId: drizzle.text("accountId").$type<Address>().notNull(),
-    balance: bigint({ mode: "bigint" }).notNull(),
-    delta: bigint({ mode: "bigint" }).notNull(),
-    deltaMod: bigint("deltaMod", { mode: "bigint" }).notNull(),
-    timestamp: bigint({ mode: "bigint" }).notNull(),
-    logIndex: drizzle.integer("logIndex").notNull(),
-  }),
-);
+export const balanceHistory = pgTable("BalanceHistory", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  transactionHash: drizzle.text("transactionHash").notNull(),
+  daoId: drizzle.text("daoId").notNull(),
+  accountId: drizzle.text("accountId").$type<Address>().notNull(),
+  balance: bigint({ mode: "bigint" }).notNull(),
+  delta: bigint({ mode: "bigint" }).notNull(),
+  deltaMod: bigint("deltaMod", { mode: "bigint" }).notNull(),
+  timestamp: bigint({ mode: "bigint" }).notNull(),
+  logIndex: drizzle.integer("logIndex").notNull(),
+}));
 
 export const delegation = pgTable(
   "Delegation",
@@ -157,20 +145,17 @@ export const transfer = pgTable(
   ],
 );
 
-export const votesOnchain = pgTable(
-  "VoteOnchain",
-  (drizzle) => ({
-    id: drizzle.text().primaryKey(),
-    txHash: drizzle.text("txHash").notNull(),
-    daoId: drizzle.text("daoId").notNull(),
-    voterAccountId: drizzle.text("voterAccountId").$type<Address>().notNull(),
-    proposalId: drizzle.text("proposalId").notNull(),
-    support: drizzle.text().notNull(),
-    votingPower: bigint("votingPower", { mode: "bigint" }).notNull(),
-    reason: drizzle.text(),
-    timestamp: bigint({ mode: "bigint" }).notNull(),
-  }),
-);
+export const votesOnchain = pgTable("VoteOnchain", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  txHash: drizzle.text("txHash").notNull(),
+  daoId: drizzle.text("daoId").notNull(),
+  voterAccountId: drizzle.text("voterAccountId").$type<Address>().notNull(),
+  proposalId: drizzle.text("proposalId").notNull(),
+  support: drizzle.text().notNull(),
+  votingPower: bigint("votingPower", { mode: "bigint" }).notNull(),
+  reason: drizzle.text(),
+  timestamp: bigint({ mode: "bigint" }).notNull(),
+}));
 
 export const proposalsOnchain = pgTable(
   "ProposalOnchain",

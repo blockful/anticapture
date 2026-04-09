@@ -33,6 +33,7 @@ let txCounter = 0;
 const createAccountPowerRow = (
   overrides: Partial<AccountPowerInsert> = {},
 ): AccountPowerInsert => ({
+  id: "test-id",
   accountId: TEST_ACCOUNT_1,
   daoId: TEST_DAO,
   votingPower: 1000n,
@@ -45,21 +46,26 @@ const createAccountPowerRow = (
 
 const createHistoryRow = (
   overrides: Partial<VotingPowerHistoryInsert> = {},
-): VotingPowerHistoryInsert => ({
-  transactionHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  daoId: TEST_DAO,
-  accountId: TEST_ACCOUNT_1,
-  votingPower: 1000n,
-  delta: 200n,
-  deltaMod: 200n,
-  timestamp: 1700000000n,
-  logIndex: 10,
-  ...overrides,
-});
+): VotingPowerHistoryInsert => {
+  const n = txCounter++;
+  return {
+    id: `h-${n}`,
+    transactionHash: `0x${n.toString(16).padStart(64, "0")}`,
+    daoId: TEST_DAO,
+    accountId: TEST_ACCOUNT_1,
+    votingPower: 1000n,
+    delta: 200n,
+    deltaMod: 200n,
+    timestamp: 1700000000n,
+    logIndex: 10,
+    ...overrides,
+  };
+};
 
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: `d-${txCounter}`,
   transactionHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
   daoId: TEST_DAO,
   delegateAccountId: TEST_ACCOUNT_1,
@@ -72,12 +78,16 @@ const createDelegation = (
 
 const createAccountBalance = (
   overrides: Partial<AccountBalanceInsert> = {},
-): AccountBalanceInsert => ({
-  accountId: TEST_ACCOUNT_1,
-  tokenId: `token-${txCounter++}`,
-  balance: 500n,
-  ...overrides,
-});
+): AccountBalanceInsert => {
+  const n = txCounter++;
+  return {
+    id: `ab-${n}`,
+    accountId: TEST_ACCOUNT_1,
+    tokenId: `token-${n}`,
+    balance: 500n,
+    ...overrides,
+  };
+};
 
 describe("AAVEVotingPowerRepository", () => {
   let client: PGlite;

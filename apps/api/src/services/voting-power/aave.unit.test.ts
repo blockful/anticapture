@@ -12,6 +12,7 @@ const MOCK_ADDRESS = getAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 const createMockHistoricalVP = (
   overrides: Partial<DBHistoricalVotingPowerWithRelations> = {},
 ): DBHistoricalVotingPowerWithRelations => ({
+  id: "test-id",
   transactionHash: "0xabc",
   daoId: "AAVE",
   accountId: MOCK_ADDRESS,
@@ -28,6 +29,7 @@ const createMockHistoricalVP = (
 const createMockAccountPower = (
   overrides: Partial<DBAccountPowerWithVariation> = {},
 ): DBAccountPowerWithVariation => ({
+  id: "test-id",
   accountId: MOCK_ADDRESS,
   daoId: "AAVE",
   votingPower: 1000n,

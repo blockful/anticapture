@@ -29,6 +29,7 @@ const DAO_ID = "ENS";
 const createHistoryRow = (
   overrides: Partial<VotingPowerHistoryInsert> = {},
 ): VotingPowerHistoryInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: DAO_ID,
   accountId: VALID_ADDRESS,
@@ -43,6 +44,7 @@ const createHistoryRow = (
 const createDelegationRow = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: DAO_ID,
   delegateAccountId: VALID_ADDRESS,

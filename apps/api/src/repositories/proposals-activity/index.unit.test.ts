@@ -14,17 +14,21 @@ const OTHER_VOTER = getAddress("0x2222222222222222222222222222222222222222");
 type VoteInsert = typeof votesOnchain.$inferInsert;
 type ProposalInsert = typeof proposalsOnchain.$inferInsert;
 
-const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => ({
-  txHash: "0xvote1",
-  daoId: "UNI",
-  voterAccountId: VOTER,
-  proposalId: "proposal-1",
-  support: "1",
-  votingPower: 1000n,
-  reason: "",
-  timestamp: 1700000000n,
-  ...overrides,
-});
+const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => {
+  const txHash = overrides.txHash ?? "0xvote1";
+  return {
+    id: txHash,
+    txHash,
+    daoId: "UNI",
+    voterAccountId: VOTER,
+    proposalId: "proposal-1",
+    support: "1",
+    votingPower: 1000n,
+    reason: "",
+    timestamp: 1700000000n,
+    ...overrides,
+  };
+};
 
 const createProposal = (
   overrides: Partial<ProposalInsert> = {},

@@ -30,6 +30,7 @@ const TEST_DAO = "test-dao";
 const createAccountPowerRow = (
   overrides: Partial<AccountPowerInsert> = {},
 ): AccountPowerInsert => ({
+  id: "test-id",
   accountId: TEST_ACCOUNT_1,
   daoId: TEST_DAO,
   votingPower: 1000n,
@@ -43,6 +44,7 @@ const createAccountPowerRow = (
 const createHistoryRow = (
   overrides: Partial<VotingPowerHistoryInsert> = {},
 ): VotingPowerHistoryInsert => ({
+  id: "test-id",
   transactionHash: "0xtx1",
   daoId: TEST_DAO,
   accountId: TEST_ACCOUNT_1,
@@ -58,20 +60,25 @@ let vpTxCounter = 0;
 
 const createDelegationRow = (
   overrides: Partial<DelegationInsert> = {},
-): DelegationInsert => ({
-  transactionHash: `0x${(vpTxCounter++).toString(16).padStart(64, "0")}`,
-  daoId: TEST_DAO,
-  delegateAccountId: TEST_ACCOUNT_1,
-  delegatorAccountId: TEST_ACCOUNT_2,
-  delegatedValue: 0n,
-  timestamp: 1700000000n,
-  logIndex: 5,
-  ...overrides,
-});
+): DelegationInsert => {
+  const n = vpTxCounter++;
+  return {
+    id: `d-${n}`,
+    transactionHash: `0x${n.toString(16).padStart(64, "0")}`,
+    daoId: TEST_DAO,
+    delegateAccountId: TEST_ACCOUNT_1,
+    delegatorAccountId: TEST_ACCOUNT_2,
+    delegatedValue: 0n,
+    timestamp: 1700000000n,
+    logIndex: 5,
+    ...overrides,
+  };
+};
 
 const createTransferRow = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: `tf-${vpTxCounter}`,
   transactionHash: `0x${vpTxCounter.toString(16).padStart(64, "0")}`,
   daoId: TEST_DAO,
   tokenId: "token-1",

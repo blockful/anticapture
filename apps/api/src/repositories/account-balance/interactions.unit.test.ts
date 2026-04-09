@@ -23,26 +23,34 @@ let txCounter = 0;
 
 const createAccountBalance = (
   overrides: Partial<AccountBalanceInsert> = {},
-): AccountBalanceInsert => ({
-  accountId: ACCOUNT_A,
-  tokenId: `token-${txCounter++}`,
-  balance: 1000n,
-  ...overrides,
-});
+): AccountBalanceInsert => {
+  const n = txCounter++;
+  return {
+    id: `ab-${n}`,
+    accountId: ACCOUNT_A,
+    tokenId: `token-${n}`,
+    balance: 1000n,
+    ...overrides,
+  };
+};
 
 const createTransfer = (
   overrides: Partial<TransferInsert> = {},
-): TransferInsert => ({
-  transactionHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  daoId: "test-dao",
-  tokenId: "token-1",
-  amount: 100n,
-  fromAccountId: ACCOUNT_A,
-  toAccountId: ACCOUNT_B,
-  timestamp: 1700000000n,
-  logIndex: 0,
-  ...overrides,
-});
+): TransferInsert => {
+  const n = txCounter++;
+  return {
+    id: `tx-${n}`,
+    transactionHash: `0x${n.toString(16).padStart(64, "0")}`,
+    daoId: "test-dao",
+    tokenId: "token-1",
+    amount: 100n,
+    fromAccountId: ACCOUNT_A,
+    toAccountId: ACCOUNT_B,
+    timestamp: 1700000000n,
+    logIndex: 0,
+    ...overrides,
+  };
+};
 
 describe("AccountInteractionsRepository", () => {
   let client: PGlite;

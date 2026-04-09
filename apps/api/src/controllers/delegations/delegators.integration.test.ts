@@ -29,6 +29,7 @@ const DAO_ID = "uni";
 const createDelegationRow = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: "test-id",
   transactionHash:
     "0xaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
   daoId: DAO_ID,
@@ -48,6 +49,7 @@ const createDelegationRow = (
 const createAccountBalanceRow = (
   overrides: Partial<AccountBalanceInsert> = {},
 ): AccountBalanceInsert => ({
+  id: "test-id",
   accountId: DELEGATOR_1,
   tokenId: "uni",
   balance: 1000000000000000000n,

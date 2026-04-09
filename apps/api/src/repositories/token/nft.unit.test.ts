@@ -14,11 +14,15 @@ let counter = 0;
 
 const createTokenPrice = (
   overrides: Partial<TokenPriceInsert> = {},
-): TokenPriceInsert => ({
-  price: 1000000000000000000n,
-  timestamp: BigInt(1700000000 + counter++),
-  ...overrides,
-});
+): TokenPriceInsert => {
+  const n = counter++;
+  return {
+    id: `price-${n}`,
+    price: 1000000000000000000n,
+    timestamp: BigInt(1700000000 + n),
+    ...overrides,
+  };
+};
 
 describe("NFTPriceRepository", () => {
   let client: PGlite;

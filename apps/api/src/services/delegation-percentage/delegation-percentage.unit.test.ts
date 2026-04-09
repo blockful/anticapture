@@ -18,6 +18,7 @@ import {
 const createMockRow = (
   overrides: Partial<DBTokenMetric> = {},
 ): DBTokenMetric => ({
+  id: "test-id",
   date: 0n,
   daoId: "uniswap",
   tokenId: "uni",

@@ -19,21 +19,26 @@ let txCounter = 0;
 
 const createBalanceHistory = (
   overrides: Partial<BalanceHistoryInsert> = {},
-): BalanceHistoryInsert => ({
-  transactionHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  daoId: "test-dao",
-  accountId: ACCOUNT_A,
-  balance: 1000n,
-  delta: 200n,
-  deltaMod: 200n,
-  timestamp: 1700000000n,
-  logIndex: 0,
-  ...overrides,
-});
+): BalanceHistoryInsert => {
+  const n = txCounter++;
+  return {
+    id: `bh-${n}`,
+    transactionHash: `0x${n.toString(16).padStart(64, "0")}`,
+    daoId: "test-dao",
+    accountId: ACCOUNT_A,
+    balance: 1000n,
+    delta: 200n,
+    deltaMod: 200n,
+    timestamp: 1700000000n,
+    logIndex: 0,
+    ...overrides,
+  };
+};
 
 const createTransfer = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: `tx-${txCounter}`,
   transactionHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
   daoId: "test-dao",
   tokenId: "token-1",

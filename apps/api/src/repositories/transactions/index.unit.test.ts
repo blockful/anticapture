@@ -22,17 +22,22 @@ let txCounter = 0;
 
 const createTransaction = (
   overrides: Partial<TransactionInsert> = {},
-): TransactionInsert => ({
-  transactionHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  fromAddress: ACCOUNT_A,
-  toAddress: ACCOUNT_B,
-  timestamp: 1700000000n,
-  ...overrides,
-});
+): TransactionInsert => {
+  const n = txCounter++;
+  return {
+    id: `tx-${n}`,
+    transactionHash: `0x${n.toString(16).padStart(64, "0")}`,
+    fromAddress: ACCOUNT_A,
+    toAddress: ACCOUNT_B,
+    timestamp: 1700000000n,
+    ...overrides,
+  };
+};
 
 const createTransfer = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: `tf-${txCounter}`,
   transactionHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
   daoId: TEST_DAO,
   tokenId: "token-1",
@@ -47,6 +52,7 @@ const createTransfer = (
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: `d-${txCounter}`,
   transactionHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
   daoId: TEST_DAO,
   delegateAccountId: ACCOUNT_B,

@@ -11,6 +11,7 @@ import { FeedService } from ".";
 const createFeedEvent = (
   overrides: Partial<DBFeedEvent> = {},
 ): DBFeedEvent => ({
+  id: "test-id",
   txHash: "0xabc123",
   logIndex: 0,
   type: "VOTE",

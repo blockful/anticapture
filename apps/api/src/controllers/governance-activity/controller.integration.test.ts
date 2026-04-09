@@ -100,6 +100,7 @@ describe("GovernanceActivity Controller", () => {
 
     it("should return 200 with activeSupply when recent voters exist", async () => {
       await db.insert(accountPower).values({
+        id: "test-id-1",
         accountId: "0x1111111111111111111111111111111111111111",
         daoId: "TEST",
         votingPower: 1000000000000000000n,
@@ -121,6 +122,7 @@ describe("GovernanceActivity Controller", () => {
 
     it("should use default days=90d when not provided", async () => {
       await db.insert(accountPower).values({
+        id: "test-id-2",
         accountId: "0x1111111111111111111111111111111111111111",
         daoId: "TEST",
         votingPower: 500n,
@@ -203,6 +205,7 @@ describe("GovernanceActivity Controller", () => {
     it("should return 200 with data and calculated changeRate", async () => {
       await db.insert(votesOnchain).values([
         {
+          id: "vote-1",
           txHash: "0xv1",
           daoId: "TEST",
           voterAccountId: "0x1111111111111111111111111111111111111111",
@@ -212,6 +215,7 @@ describe("GovernanceActivity Controller", () => {
           timestamp: RECENT_TS,
         },
         {
+          id: "vote-2",
           txHash: "0xv2",
           daoId: "TEST",
           voterAccountId: "0x2222222222222222222222222222222222222222",
@@ -221,6 +225,7 @@ describe("GovernanceActivity Controller", () => {
           timestamp: RECENT_TS,
         },
         {
+          id: "vote-3",
           txHash: "0xv3",
           daoId: "TEST",
           voterAccountId: "0x3333333333333333333333333333333333333333",

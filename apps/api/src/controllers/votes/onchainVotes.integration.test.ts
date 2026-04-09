@@ -49,6 +49,7 @@ const createProposal = (
 });
 
 const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => ({
+  id: "test-id",
   txHash: "0xabc123",
   daoId: "ENS",
   voterAccountId: VOTER_ADDRESS,
@@ -63,6 +64,7 @@ const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => ({
 const createAccountPower = (
   overrides: Partial<AccountPowerInsert> = {},
 ): AccountPowerInsert => ({
+  id: "test-id",
   accountId: VOTER_ADDRESS,
   daoId: "ENS",
   votingPower: 1000000000000000000n,

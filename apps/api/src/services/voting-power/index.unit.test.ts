@@ -38,6 +38,7 @@ function createStubVotingPowersRepo(
 const makeDBHistoricalVotingPower = (
   overrides = {},
 ): DBHistoricalVotingPowerWithRelations => ({
+  id: "test-id",
   transactionHash: "0xabc",
   daoId: "UNI",
   accountId: "0x1111111111111111111111111111111111111111" as Address,
@@ -252,6 +253,7 @@ describe("VotingPowerService (index)", () => {
   describe("getVotingPowersByAccountId", () => {
     it("returns the voting power for the given account", async () => {
       const repoResult: DBAccountPowerWithVariation = {
+        id: "test-id",
         accountId: addr1,
         daoId: "UNI",
         votingPower: 1000n,

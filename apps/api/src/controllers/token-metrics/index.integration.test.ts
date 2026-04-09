@@ -15,6 +15,7 @@ import { tokenMetrics } from "./index";
 type MetricInsert = typeof daoMetricsDayBucket.$inferInsert;
 
 const createMetric = (overrides: Partial<MetricInsert> = {}): MetricInsert => ({
+  id: "test-id",
   date: 1700000000n,
   daoId: "UNI",
   tokenId: "uni",

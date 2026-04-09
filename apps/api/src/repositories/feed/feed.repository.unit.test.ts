@@ -38,6 +38,7 @@ const defaultThresholds = (
 const createFeedEvent = (
   overrides: Partial<FeedEventInsert> = {},
 ): FeedEventInsert => ({
+  id: "test-id",
   txHash: "0xabc123",
   logIndex: 0,
   type: "VOTE",

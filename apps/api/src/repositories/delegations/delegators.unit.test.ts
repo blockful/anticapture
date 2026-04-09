@@ -23,26 +23,34 @@ let txCounter = 0;
 
 const createAccountBalance = (
   overrides: Partial<AccountBalanceInsert> = {},
-): AccountBalanceInsert => ({
-  accountId: DELEGATOR_A,
-  tokenId: `token-${txCounter++}`,
-  balance: 1000000000000000000n,
-  delegate: DELEGATE,
-  ...overrides,
-});
+): AccountBalanceInsert => {
+  const n = txCounter++;
+  return {
+    id: `ab-${n}`,
+    accountId: DELEGATOR_A,
+    tokenId: `token-${n}`,
+    balance: 1000000000000000000n,
+    delegate: DELEGATE,
+    ...overrides,
+  };
+};
 
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
-): DelegationInsert => ({
-  transactionHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  daoId: "uni",
-  delegateAccountId: DELEGATE,
-  delegatorAccountId: DELEGATOR_A,
-  delegatedValue: 0n,
-  timestamp: 1700000000n,
-  logIndex: 0,
-  ...overrides,
-});
+): DelegationInsert => {
+  const n = txCounter++;
+  return {
+    id: `d-${n}`,
+    transactionHash: `0x${n.toString(16).padStart(64, "0")}`,
+    daoId: "uni",
+    delegateAccountId: DELEGATE,
+    delegatorAccountId: DELEGATOR_A,
+    delegatedValue: 0n,
+    timestamp: 1700000000n,
+    logIndex: 0,
+    ...overrides,
+  };
+};
 
 const defaultSort = (
   overrides: Partial<DelegatorsSortOptions> = {},

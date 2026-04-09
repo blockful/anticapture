@@ -25,6 +25,7 @@ const DAO_ID = "test-dao";
 const createAccountPowerRow = (
   overrides: Partial<AccountPowerInsert> = {},
 ): AccountPowerInsert => ({
+  id: "test-id",
   accountId: TEST_ACCOUNT_1,
   daoId: DAO_ID,
   votingPower: 1000n,
@@ -38,6 +39,7 @@ const createAccountPowerRow = (
 const createHistoryRow = (
   overrides: Partial<VotingPowerHistoryInsert> = {},
 ): VotingPowerHistoryInsert => ({
+  id: "test-id",
   transactionHash:
     "0xabc1230000000000000000000000000000000000000000000000000000000000",
   daoId: DAO_ID,

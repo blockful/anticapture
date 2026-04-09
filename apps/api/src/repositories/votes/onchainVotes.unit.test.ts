@@ -50,21 +50,26 @@ const createProposal = (
 
 const createVote = (
   overrides: Partial<VotesOnchainInsert> = {},
-): VotesOnchainInsert => ({
-  txHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  daoId: TEST_DAO,
-  voterAccountId: VOTER_A,
-  proposalId: "proposal-1",
-  support: "1",
-  votingPower: 1000n,
-  reason: null,
-  timestamp: 1700000000n,
-  ...overrides,
-});
+): VotesOnchainInsert => {
+  const n = txCounter++;
+  return {
+    id: `vote-${n}`,
+    txHash: `0x${n.toString(16).padStart(64, "0")}`,
+    daoId: TEST_DAO,
+    voterAccountId: VOTER_A,
+    proposalId: "proposal-1",
+    support: "1",
+    votingPower: 1000n,
+    reason: null,
+    timestamp: 1700000000n,
+    ...overrides,
+  };
+};
 
 const createAccountPowerRow = (
   overrides: Partial<AccountPowerInsert> = {},
 ): AccountPowerInsert => ({
+  id: "test-id",
   accountId: VOTER_A,
   daoId: TEST_DAO,
   votingPower: 1000n,
@@ -77,17 +82,21 @@ const createAccountPowerRow = (
 
 const createHistoryRow = (
   overrides: Partial<VotingPowerHistoryInsert> = {},
-): VotingPowerHistoryInsert => ({
-  transactionHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  daoId: TEST_DAO,
-  accountId: VOTER_A,
-  votingPower: 1000n,
-  delta: 200n,
-  deltaMod: 200n,
-  timestamp: 1700000000n,
-  logIndex: 0,
-  ...overrides,
-});
+): VotingPowerHistoryInsert => {
+  const n = txCounter++;
+  return {
+    id: `h-${n}`,
+    transactionHash: `0x${n.toString(16).padStart(64, "0")}`,
+    daoId: TEST_DAO,
+    accountId: VOTER_A,
+    votingPower: 1000n,
+    delta: 200n,
+    deltaMod: 200n,
+    timestamp: 1700000000n,
+    logIndex: 0,
+    ...overrides,
+  };
+};
 
 describe("VotesRepository", () => {
   let client: PGlite;

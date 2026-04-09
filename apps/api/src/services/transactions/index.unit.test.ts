@@ -16,6 +16,7 @@ function createStubRepo(items: DBTransaction[] = [], count = 0) {
 }
 
 const makeDBTransaction = (overrides = {}): DBTransaction => ({
+  id: "test-id",
   transactionHash: "0xabc123",
   fromAddress: "0x1234567890123456789012345678901234567890",
   toAddress: "0x0987654321098765432109876543210987654321",

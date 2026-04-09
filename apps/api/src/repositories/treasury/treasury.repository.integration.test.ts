@@ -14,6 +14,7 @@ type DaoMetricInsert = typeof daoMetricsDayBucket.$inferInsert;
 const createMetricRow = (
   overrides: Partial<DaoMetricInsert> = {},
 ): DaoMetricInsert => ({
+  id: "test-id",
   date: 1600041600n,
   daoId: "ENS",
   tokenId: "ENS-token",

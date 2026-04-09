@@ -25,6 +25,7 @@ const DAO_ID = "ENS";
 const createAccountBalanceRow = (
   overrides: Partial<AccountBalanceInsert> = {},
 ): AccountBalanceInsert => ({
+  id: "test-id",
   accountId: COUNTERPART,
   tokenId: TOKEN_ID,
   balance: 200000000000000000n,
@@ -35,6 +36,7 @@ const createAccountBalanceRow = (
 const createTransferRow = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: DAO_ID,
   tokenId: TOKEN_ID,

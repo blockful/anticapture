@@ -19,6 +19,7 @@ type DelegationInsert = typeof delegation.$inferInsert;
 const createTransaction = (
   overrides: Partial<TransactionInsert> = {},
 ): TransactionInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   fromAddress: getAddress("0x1111111111111111111111111111111111111111"),
   toAddress: getAddress("0x2222222222222222222222222222222222222222"),
@@ -33,6 +34,7 @@ const createTransaction = (
 const createTransfer = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: "UNI",
   tokenId: "uni",
@@ -51,6 +53,7 @@ const createTransfer = (
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: "UNI",
   delegateAccountId: getAddress("0x3333333333333333333333333333333333333333"),
