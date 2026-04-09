@@ -10,6 +10,14 @@ directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITI
 
 directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
 
+directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+
+directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+
+directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
+
 type Query {
   """
   Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
@@ -736,6 +744,21 @@ type Query {
     """Latest vote timestamp, in Unix seconds."""
     toDate: Int
   ): OffchainVotesResponse
+
+  """
+  Returns the active delegates that did not vote on a given offchain proposal
+  """
+  offchainProposalNonVoters(
+    id: String!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    orderDirection: OrderDirection = desc
+    addresses: [String]
+  ): offchainProposalNonVoters_response
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -1986,6 +2009,7 @@ type OffchainVote {
   proposalTitle: String
 }
 
+
 """Sort votes by timestamp or voting power."""
 enum queryInput_votesOffchain_orderBy {
   timestamp
@@ -1996,6 +2020,18 @@ enum queryInput_votesOffchain_orderBy {
 enum queryInput_votesOffchainByProposalId_orderBy {
   timestamp
   votingPower
+}
+
+union offchainProposalNonVoters_response = OffchainVotersResponse | ErrorResponse
+
+type OffchainVotersResponse {
+  items: [OffchainNonVoter]!
+  totalCount: Int!
+}
+
+type OffchainNonVoter {
+  voter: String!
+  votingPower: String!
 }
 
 type AverageDelegationPercentageItem {

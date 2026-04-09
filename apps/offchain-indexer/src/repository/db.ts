@@ -13,6 +13,14 @@ export class DrizzleRepository implements Repository {
       .where(eq(schema.syncStatus.entity, entity));
   }
 
+  async clearProposals(): Promise<void> {
+    await this.db.delete(schema.proposals);
+  }
+
+  async clearVotes(): Promise<void> {
+    await this.db.delete(schema.votes);
+  }
+
   async getLastCursor(entity: string): Promise<string | null> {
     const [row] = await this.db
       .select({ lastCursor: schema.syncStatus.lastCursor })
