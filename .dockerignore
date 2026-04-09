@@ -3,4 +3,5 @@ dist
 .next
 .turbo
 .env
-.env.local
+.env.*
+.git
