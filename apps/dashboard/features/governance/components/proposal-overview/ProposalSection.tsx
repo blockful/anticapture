@@ -39,10 +39,12 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface ProposalSectionProps {
   isOffchain?: boolean;
+  isWhitelabel?: boolean;
 }
 
 export const ProposalSection = ({
   isOffchain = false,
+  isWhitelabel = false,
 }: ProposalSectionProps) => {
   const { proposalId: rawProposalId, daoId } = useParams<{
     proposalId: string;
@@ -178,10 +180,9 @@ export const ProposalSection = ({
           address={address}
           proposalStatus={proposal.status}
           snapshotLink={snapshotLink}
+          isWhitelabel={isWhitelabel}
         />
         <div className="mx-auto w-full">
-          <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
-
           <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
             <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
               <TitleSection

@@ -146,7 +146,7 @@ export const WhitelabelSidebar = ({
   return (
     <aside
       className={cn(
-        "bg-surface-background border-border-default sticky top-0 z-20 hidden h-screen shrink-0 flex-col overflow-visible border-r transition-all duration-300 lg:flex",
+        "bg-surface-background border-border-default sticky top-0 z-30 hidden h-screen shrink-0 flex-col overflow-visible border-r transition-all duration-300 lg:flex",
         isCollapsed ? "w-[68px]" : "w-[224px]",
       )}
     >

@@ -30,5 +30,7 @@ export async function generateMetadata({
 export default async function WhitelabelProposalPage({ searchParams }: Props) {
   const { proposalType } = await searchParams;
 
-  return <ProposalSection isOffchain={proposalType === "offchain"} />;
+  return (
+    <ProposalSection isOffchain={proposalType === "offchain"} isWhitelabel />
+  );
 }

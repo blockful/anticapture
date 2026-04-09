@@ -9,10 +9,7 @@ import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import {
-  getDaoGovernanceListPath,
-  getWhitelabelBasePath,
-} from "@/shared/utils/whitelabel";
+import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -22,6 +19,7 @@ interface ProposalHeaderProps {
   address: string | undefined;
   proposalStatus: string;
   snapshotLink?: string | null;
+  isWhitelabel?: boolean;
 }
 
 const ProposalHeaderAction = ({
@@ -82,17 +80,13 @@ export const ProposalHeader = ({
   address,
   proposalStatus,
   snapshotLink,
+  isWhitelabel = false,
 }: ProposalHeaderProps) => {
   const pathname = usePathname();
   const supportValue =
     votes?.items[0]?.support != null
       ? Number(votes.items[0].support)
       : undefined;
-  const basePath = getWhitelabelBasePath({
-    daoId: daoId.toUpperCase() as DaoIdEnum,
-    pathname,
-  });
-  const isWhitelabelRoute = Boolean(basePath);
   const proposalListHref = getDaoGovernanceListPath({
     daoId: daoId.toUpperCase() as DaoIdEnum,
     pathname,
@@ -100,25 +94,59 @@ export const ProposalHeader = ({
   });
 
   return (
-    <div className="text-primary bg-surface-background border-border-default sticky -top-[57px] z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0">
+    <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 flex h-[60px] w-full shrink-0 items-center justify-between gap-6 border-b py-2">
       <div className="mx-auto flex w-full flex-1 items-center justify-between px-5">
         <div className="flex items-center gap-2">
-          <Link
-            href={proposalListHref}
-            className="text-secondary hover:text-primary inline-flex items-center gap-2 text-[14px] font-normal leading-[20px] transition-colors"
-          >
-            <span>Proposals</span>
-            <ChevronRight className="size-4" />
-          </Link>
-          <p className="text-primary text-[14px] font-medium leading-[20px]">
-            {snapshotLink !== undefined
-              ? "Offchain proposal"
-              : "Proposal details"}
-          </p>
+          {isWhitelabel ? (
+            <nav className="text-body-md flex items-center gap-1.5">
+              <Link
+                href={proposalListHref}
+                className="text-link font-medium hover:underline"
+              >
+                Proposals
+              </Link>
+              <span className="text-dimmed">/</span>
+              <span className="text-secondary">
+                {snapshotLink !== undefined
+                  ? "Offchain proposal"
+                  : "Proposal details"}
+              </span>
+            </nav>
+          ) : (
+            <Link
+              href={proposalListHref}
+              className="text-secondary hover:text-primary inline-flex items-center gap-2 text-[14px] font-normal leading-[20px] transition-colors"
+            >
+              <span>Proposals</span>
+              <ChevronRight className="size-4" />
+            </Link>
+          )}
+          {!isWhitelabel && (
+            <p className="text-primary text-[14px] font-medium leading-[20px]">
+              {snapshotLink !== undefined
+                ? "Offchain proposal"
+                : "Proposal details"}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
-          {snapshotLink ? (
+          {isWhitelabel ? (
+            <>
+              <div className="hidden lg:flex">
+                <WhitelabelConnectWallet />
+              </div>
+              <ProposalHeaderAction
+                address={address}
+                supportValue={
+                  snapshotLink ? undefined : (supportValue ?? undefined)
+                }
+                proposalStatus={proposalStatus}
+                setIsVotingModalOpen={setIsVotingModalOpen}
+                isWhitelabel={isWhitelabel}
+              />
+            </>
+          ) : snapshotLink ? (
             <>
               {address && (
                 <div className="hidden flex-col items-end lg:flex">
@@ -135,7 +163,7 @@ export const ProposalHeader = ({
                 supportValue={undefined}
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
-                isWhitelabel={isWhitelabelRoute}
+                isWhitelabel={isWhitelabel}
               />
             </>
           ) : (
@@ -160,7 +188,7 @@ export const ProposalHeader = ({
                 supportValue={supportValue ?? undefined}
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
-                isWhitelabel={isWhitelabelRoute}
+                isWhitelabel={isWhitelabel}
               />
             </>
           )}
