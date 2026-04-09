@@ -1,17 +1,14 @@
 import { and, asc, desc, eq, gte, inArray, sql, SQL } from "drizzle-orm";
 
 import { OffchainDrizzle, offchainProposals } from "@/database";
+import { escapeLikePattern } from "@/lib/query-helpers";
 import { DBOffchainProposal } from "@/mappers";
 
 export class OffchainProposalRepository {
   constructor(private readonly db: OffchainDrizzle) {}
 
-  private escapeLikePattern(query: string): string {
-    return query.replace(/[\\%_]/g, "\\$&");
-  }
-
   private buildProposalSearchWhere(query: string): SQL<unknown> {
-    const searchPattern = `%${this.escapeLikePattern(query)}%`;
+    const searchPattern = `%${escapeLikePattern(query)}%`;
 
     return sql`(
       ${offchainProposals.id} ILIKE ${searchPattern} ESCAPE '\\'

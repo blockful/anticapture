@@ -18,17 +18,14 @@ import {
 } from "@/controllers";
 import { Drizzle, proposalsOnchain } from "@/database";
 import { DaysEnum } from "@/lib/enums";
+import { escapeLikePattern } from "@/lib/query-helpers";
 import { DBProposal } from "@/mappers";
 
 export class DrizzleRepository {
   constructor(private readonly db: Drizzle) {}
 
-  private escapeLikePattern(query: string): string {
-    return query.replace(/[\\%_]/g, "\\$&");
-  }
-
   private buildProposalSearchWhere(query: string): SQL<unknown> {
-    const searchPattern = `%${this.escapeLikePattern(query)}%`;
+    const searchPattern = `%${escapeLikePattern(query)}%`;
 
     return sql`(
       ${proposalsOnchain.id} ILIKE ${searchPattern} ESCAPE '\\'
