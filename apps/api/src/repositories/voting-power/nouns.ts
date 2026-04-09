@@ -100,17 +100,17 @@ export class NounsVotingPowerRepository {
       .offset(skip);
 
     return result.map((row) => ({
-      ...row.voting_power_history,
+      ...row.VotingPowerHistory,
       delegations:
-        row.transfers &&
-        row.transfers?.logIndex < (row.delegations?.logIndex || 0)
+        row.Transfer &&
+        row.Transfer?.logIndex < (row.Delegation?.logIndex || 0)
           ? null
-          : row.delegations,
+          : row.Delegation,
       transfers:
-        row.delegations &&
-        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
+        row.Delegation &&
+        row.Delegation?.logIndex > (row.Transfer?.logIndex || 0)
           ? null
-          : row.transfers,
+          : row.Transfer,
     }));
   }
 }

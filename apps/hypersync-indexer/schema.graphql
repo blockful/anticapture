@@ -161,8 +161,8 @@ type DaoMetricsDayBucket {
   daoId: String!
   tokenId: String! @index
   metricType: MetricType!
-  openValue: BigInt!
-  closeValue: BigInt!
+  open: BigInt!
+  close: BigInt!
   low: BigInt!
   high: BigInt!
   average: BigInt!
@@ -195,7 +195,7 @@ type FeedEvent {
   id: ID!
   txHash: String! @index
   logIndex: Int!
-  eventType: EventType!
+  type: EventType!
   value: BigInt! @index
   timestamp: BigInt! @index
   metadata: Json
