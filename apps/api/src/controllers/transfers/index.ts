@@ -17,6 +17,7 @@ export function transfers(app: Hono, service: TransfersService) {
       summary: "Get transfers",
       description: "Get transfers of a given address",
       tags: ["transfers"],
+      middleware: [setCacheControl(60)],
       request: {
         params: TransfersRequestRouteSchema,
         query: TransfersRequestQuerySchema,
@@ -60,7 +61,6 @@ export function transfers(app: Hono, service: TransfersService) {
         toDate,
       });
 
-      setCacheControl(context, 60);
       return context.json(result, 200);
     },
   );

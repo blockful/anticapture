@@ -25,6 +25,7 @@ export function tokenHistoricalData(
       summary: "Get historical token data",
       description: "Get historical market data for a specific token",
       tags: ["tokens"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: TokenHistoricalPriceRequest,
       },
@@ -42,7 +43,6 @@ export function tokenHistoricalData(
     async (context) => {
       const { skip, limit } = context.req.valid("query");
       const data = await client.getHistoricalTokenData(limit, skip);
-      setCacheControl(context, 3600);
       return context.json(data, 200);
     },
   );

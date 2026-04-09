@@ -18,6 +18,7 @@ export function delegations(app: Hono, service: DelegationsService) {
       summary: "Get delegations",
       description: "Get current delegations for an account",
       tags: ["delegations"],
+      middleware: [setCacheControl(60)],
       request: {
         params: DelegationsRequestParamsSchema,
       },
@@ -38,7 +39,6 @@ export function delegations(app: Hono, service: DelegationsService) {
 
       const result = await service.getDelegations(address);
 
-      setCacheControl(context, 60);
       return context.json(DelegationsResponseSchema.parse(result), 200);
     },
   );

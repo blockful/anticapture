@@ -35,6 +35,7 @@ export function accountInteractions(app: Hono, service: InteractionsService) {
       description: `Returns a mapping of the largest interactions between accounts. 
 Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>`,
       tags: ["account-balances"],
+      middleware: [setCacheControl(60)],
       request: {
         params: AccountInteractionsParamsSchema,
         query: AccountInteractionsQuerySchema,
@@ -79,7 +80,6 @@ Positive amounts signify net token transfers FROM <address>, whilst negative amo
         },
       );
 
-      setCacheControl(context, 60);
       return context.json(
         AccountInteractionsMapper(result, fromDate, toDate),
         200,

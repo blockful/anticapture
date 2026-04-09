@@ -44,6 +44,7 @@ export function votingPowerVariations(
       description:
         "Returns a mapping of the voting power changes within a time frame for the given addresses",
       tags: ["voting-power"],
+      middleware: [setCacheControl(60)],
       request: {
         query: VotingPowerVariationsRequestQuerySchema,
       },
@@ -71,7 +72,6 @@ export function votingPowerVariations(
         addresses,
       );
 
-      setCacheControl(context, 60);
       return context.json(
         VotingPowerVariationsResponseMapper(result, fromDate, toDate),
         200,
@@ -89,6 +89,7 @@ export function votingPowerVariations(
       description:
         "Returns a the changes to voting power by period and accountId",
       tags: ["voting-power"],
+      middleware: [setCacheControl(60)],
       request: {
         params: VotingPowerVariationsByAccountIdRequestParamsSchema,
         query: VotingPowerVariationsByAccountIdRequestQuerySchema,
@@ -114,7 +115,6 @@ export function votingPowerVariations(
         toDate,
       );
 
-      setCacheControl(context, 60);
       return context.json(
         VotingPowerVariationsByAccountIdResponseMapper(
           result,

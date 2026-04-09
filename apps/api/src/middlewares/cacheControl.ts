@@ -1,11 +1,8 @@
-import type { Context } from "hono";
+import { createMiddleware } from "hono/factory";
 
-/**
- * Sets a `Cache-Control: public, max-age=<seconds>` header on the response.
- *
- * Use this instead of raw `context.header("Cache-Control", ...)` to avoid
- * typos in the header value.
- */
-export function setCacheControl(c: Context, seconds: number) {
-  c.header("Cache-Control", `public, max-age=${seconds}`);
+export function setCacheControl(seconds: number) {
+  return createMiddleware(async (c, next) => {
+    await next();
+    c.header("Cache-Control", `public, max-age=${seconds}`);
+  });
 }

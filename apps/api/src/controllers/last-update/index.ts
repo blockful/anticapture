@@ -16,6 +16,7 @@ export function lastUpdate(app: Hono, db: Drizzle) {
       path: "/last-update",
       summary: "Get the last update time",
       tags: ["metrics"],
+      middleware: [setCacheControl(30)],
       request: {
         query: LastUpdateQuerySchema,
       },
@@ -33,7 +34,6 @@ export function lastUpdate(app: Hono, db: Drizzle) {
     async (context) => {
       const { chart } = context.req.valid("query");
       const lastUpdate = await service.getLastUpdate(chart);
-      setCacheControl(context, 30);
       return context.json({ lastUpdate }, 200);
     },
   );

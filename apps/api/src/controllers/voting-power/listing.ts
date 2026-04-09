@@ -46,6 +46,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       summary: "Get voting powers",
       description: "Returns sorted and paginated account voting power records",
       tags: ["voting-power"],
+      middleware: [setCacheControl(60)],
       request: {
         query: VotingPowersRequestSchema,
       },
@@ -87,7 +88,6 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         toDate,
       );
 
-      setCacheControl(context, 60);
       return context.json(
         VotingPowersResponseSchema.parse({
           ...response,
@@ -113,6 +113,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       description:
         "Returns voting power information for a specific address (account)",
       tags: ["voting-power"],
+      middleware: [setCacheControl(60)],
       request: {
         params: VotingPowerByAccountIdRequestParamsSchema,
         query: VotingPowerByAccountIdRequestQuerySchema,
@@ -136,7 +137,6 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
         fromDate,
         toDate,
       );
-      setCacheControl(context, 60);
       return context.json(
         VotingPowerResponseSchema.parse({
           ...result,

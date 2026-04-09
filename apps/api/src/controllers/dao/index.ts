@@ -13,6 +13,7 @@ export function dao(app: Hono, service: DaoService) {
       summary: "Get DAO governance parameters",
       description: "Returns current governance parameters for this DAO",
       tags: ["governance"],
+      middleware: [setCacheControl(3600)],
       responses: {
         200: {
           description: "DAO governance parameters",
@@ -26,7 +27,6 @@ export function dao(app: Hono, service: DaoService) {
     }),
     async (context) => {
       const daoData = await service.getDaoParameters();
-      setCacheControl(context, 3600);
       return context.json(daoData, 200);
     },
   );

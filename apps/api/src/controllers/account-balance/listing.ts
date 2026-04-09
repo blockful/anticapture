@@ -26,6 +26,7 @@ export function accountBalances(
       summary: "Get account balance records",
       description: "Returns sorted and paginated account balance records",
       tags: ["account-balances"],
+      middleware: [setCacheControl(60)],
       request: {
         query: AccountBalancesRequestSchema,
       },
@@ -75,7 +76,6 @@ export function accountBalances(
         excludeDaoAddresses,
       );
 
-      setCacheControl(context, 60);
       return context.json(
         AccountBalancesWithVariationResponseMapper(
           result.items,
@@ -96,6 +96,7 @@ export function accountBalances(
       summary: "Get account balance",
       description: "Returns account balance information for a specific address",
       tags: ["account-balances"],
+      middleware: [setCacheControl(60)],
       request: {
         params: AccountBalanceRequestParamSchema,
         query: AccountBalanceRequestQuerySchema,
@@ -124,7 +125,6 @@ export function accountBalances(
         toTimestamp,
       );
 
-      setCacheControl(context, 60);
       return context.json(
         AccountBalanceWithVariationResponseMapper(
           result,

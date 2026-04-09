@@ -28,6 +28,7 @@ export function proposalsActivity(
       description:
         "Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         query: ProposalActivityRequestSchema,
       },
@@ -67,7 +68,6 @@ export function proposalsActivity(
         userVoteFilter,
       });
 
-      setCacheControl(context, 60);
       return context.json(ProposalActivityResponseSchema.parse(result), 200);
     },
   );

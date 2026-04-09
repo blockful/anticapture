@@ -40,6 +40,7 @@ export function token(
       summary: "Get token properties",
       description: "Get property data for a specific token",
       tags: ["tokens"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: TokenPropertiesQuerySchema,
       },
@@ -80,7 +81,6 @@ export function token(
         );
       }
 
-      setCacheControl(context, 3600);
       return context.json(TokenMapper.toApi(tokenProps, priceData), 200);
     },
   );

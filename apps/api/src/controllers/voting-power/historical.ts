@@ -41,6 +41,7 @@ export function historicalVotingPower(
       description:
         "Returns a list of voting power changes for a specific account",
       tags: ["voting-power"],
+      middleware: [setCacheControl(60)],
       request: {
         params: HistoricalVotingPowerRequestParamsSchema,
         query: HistoricalVotingPowerRequestQuerySchema,
@@ -80,7 +81,6 @@ export function historicalVotingPower(
         fromDate,
         toDate,
       );
-      setCacheControl(context, 60);
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
         200,
@@ -96,6 +96,7 @@ export function historicalVotingPower(
       summary: "Get voting power changes",
       description: "Returns a list of voting power changes.",
       tags: ["voting-power"],
+      middleware: [setCacheControl(60)],
       request: {
         query: HistoricalVotingPowerGlobalQuerySchema,
       },
@@ -134,7 +135,6 @@ export function historicalVotingPower(
         fromDate,
         toDate,
       );
-      setCacheControl(context, 60);
       return context.json(
         HistoricalVotingPowersResponseMapper(items, totalCount),
         200,

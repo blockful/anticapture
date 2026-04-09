@@ -19,6 +19,7 @@ export function delegationPercentage(
       path: "/delegation-percentage",
       summary: "Get delegation percentage day buckets with forward-fill",
       tags: ["metrics"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: DelegationPercentageRequestSchema,
       },
@@ -34,7 +35,6 @@ export function delegationPercentage(
     async (ctx) => {
       const query = ctx.req.valid("query");
       const serviceResult = await service.delegationPercentageByDay(query);
-      setCacheControl(ctx, 3600);
       return ctx.json(toApi(serviceResult), 200);
     },
   );

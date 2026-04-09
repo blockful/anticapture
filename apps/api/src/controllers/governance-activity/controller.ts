@@ -41,6 +41,7 @@ export function governanceActivity(
       path: "/active-supply/compare",
       summary: "Get active token supply for DAO",
       tags: ["governance"],
+      middleware: [setCacheControl(60)],
       request: {
         query: GovernanceActivityDaysQuerySchema,
       },
@@ -58,7 +59,6 @@ export function governanceActivity(
     async (context) => {
       const { days } = context.req.valid("query");
       const data = await repository.getActiveSupply(days);
-      setCacheControl(context, 60);
       return context.json({ activeSupply: data?.activeSupply || "0" }, 200);
     },
   );
@@ -70,6 +70,7 @@ export function governanceActivity(
       path: "/proposals/compare",
       summary: "Compare number of proposals between time periods",
       tags: ["governance"],
+      middleware: [setCacheControl(60)],
       request: {
         query: GovernanceActivityDaysQuerySchema,
       },
@@ -88,7 +89,6 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getProposalsCompare(days);
-      setCacheControl(context, 60);
       if (!data) {
         return context.json(
           {
@@ -120,6 +120,7 @@ export function governanceActivity(
       path: "/votes/compare",
       summary: "Compare number of votes between time periods",
       tags: ["governance"],
+      middleware: [setCacheControl(60)],
       request: {
         query: GovernanceActivityDaysQuerySchema,
       },
@@ -138,7 +139,6 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getVotesCompare(days);
-      setCacheControl(context, 60);
       if (!data) {
         return context.json(
           {
@@ -169,6 +169,7 @@ export function governanceActivity(
       path: "/average-turnout/compare",
       summary: "Compare average turnout between time periods",
       tags: ["governance"],
+      middleware: [setCacheControl(60)],
       request: {
         query: GovernanceActivityDaysQuerySchema,
       },
@@ -187,7 +188,6 @@ export function governanceActivity(
       const { days } = context.req.valid("query");
 
       const data = await repository.getAverageTurnoutCompare(days);
-      setCacheControl(context, 60);
       if (!data) {
         return context.json(
           {

@@ -17,6 +17,7 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
       path: "/event-relevance/threshold",
       summary: "Get event relevance threshold",
       tags: ["feed"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: EventRelevanceThresholdQuerySchema,
       },
@@ -37,7 +38,6 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
         type as FeedEventType,
         relevance as FeedRelevance,
       );
-      setCacheControl(context, 3600);
       return context.json({ threshold }, 200);
     },
   );

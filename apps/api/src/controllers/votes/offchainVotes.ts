@@ -17,6 +17,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
       summary: "Get offchain votes",
       description: "Returns a list of offchain (Snapshot) votes",
       tags: ["offchain"],
+      middleware: [setCacheControl(60)],
       request: {
         query: OffchainVotesRequestSchema,
       },
@@ -52,7 +53,6 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      setCacheControl(context, 60);
       return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );
@@ -66,6 +66,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
       description:
         "Returns a paginated list of offchain (Snapshot) votes for a specific proposal",
       tags: ["offchain"],
+      middleware: [setCacheControl(60)],
       request: {
         params: OffchainProposalRequestSchema,
         query: OffchainVotesRequestSchema,
@@ -103,7 +104,6 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      setCacheControl(context, 60);
       return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );

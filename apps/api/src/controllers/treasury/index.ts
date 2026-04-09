@@ -22,6 +22,7 @@ export function treasury(
       description:
         "Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)",
       tags: ["treasury"],
+      middleware: [setCacheControl(60)],
       request: {
         query: TreasuryQuerySchema,
       },
@@ -42,7 +43,6 @@ export function treasury(
         days / (24 * 60 * 60),
         orderDirection,
       );
-      setCacheControl(context, 60);
       return context.json(result, 200);
     },
   );
@@ -56,6 +56,7 @@ export function treasury(
       description:
         "Get historical DAO Token Treasury value (governance token quantity × token price)",
       tags: ["treasury"],
+      middleware: [setCacheControl(60)],
       request: {
         query: TreasuryQuerySchema,
       },
@@ -77,7 +78,6 @@ export function treasury(
         orderDirection,
         decimals,
       );
-      setCacheControl(context, 60);
       return context.json(result, 200);
     },
   );
@@ -91,6 +91,7 @@ export function treasury(
       description:
         "Get historical Total Treasury (liquid treasury + DAO token treasury)",
       tags: ["treasury"],
+      middleware: [setCacheControl(60)],
       request: {
         query: TreasuryQuerySchema,
       },
@@ -112,7 +113,6 @@ export function treasury(
         orderDirection,
         decimals,
       );
-      setCacheControl(context, 60);
       return context.json(result, 200);
     },
   );

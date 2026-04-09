@@ -18,6 +18,7 @@ export function delegators(app: Hono, service: DelegatorsService) {
       summary: "Get delegators",
       description: "Get current delegators of an account with voting power",
       tags: ["delegations"],
+      middleware: [setCacheControl(60)],
       request: {
         params: DelegatorsRequestParamsSchema,
         query: DelegatorsRequestQuerySchema,
@@ -44,7 +45,6 @@ export function delegators(app: Hono, service: DelegatorsService) {
         orderDirection,
       });
 
-      setCacheControl(context, 60);
       return context.json(DelegatorsResponseSchema.parse(result), 200);
     },
   );

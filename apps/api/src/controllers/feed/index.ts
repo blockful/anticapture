@@ -12,6 +12,7 @@ export function feed(app: Hono, service: FeedService) {
       path: "/feed/events",
       summary: "Get feed events",
       tags: ["feed"],
+      middleware: [setCacheControl(60)],
       request: {
         query: FeedRequestSchema,
       },
@@ -29,7 +30,6 @@ export function feed(app: Hono, service: FeedService) {
     async (context) => {
       const req = context.req.valid("query");
       const response = await service.getFeedEvents(req);
-      setCacheControl(context, 60);
       return context.json(FeedResponseSchema.parse(response), 200);
     },
   );

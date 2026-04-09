@@ -23,6 +23,7 @@ export function historicalDelegations(
       description:
         "Get historical delegations for an account, with optional filtering and sorting",
       tags: ["delegations"],
+      middleware: [setCacheControl(60)],
       request: {
         params: HistoricalDelegationsRequestParamsSchema,
         query: HistoricalDelegationsRequestQuerySchema,
@@ -61,7 +62,6 @@ export function historicalDelegations(
         limit,
       );
 
-      setCacheControl(context, 60);
       return context.json(DelegationsResponseSchema.parse(result), 200);
     },
   );

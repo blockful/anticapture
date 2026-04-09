@@ -17,6 +17,7 @@ export function transactions(app: Hono, service: TransactionsService) {
       description:
         "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
       tags: ["transactions"],
+      middleware: [setCacheControl(60)],
       request: {
         query: TransactionsRequestSchema,
       },
@@ -61,7 +62,6 @@ export function transactions(app: Hono, service: TransactionsService) {
         includes,
       });
 
-      setCacheControl(context, 60);
       return context.json(result, 200);
     },
   );

@@ -26,6 +26,7 @@ export function proposals(
       summary: "Get proposals",
       description: "Returns a list of proposal",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         query: ProposalsRequestSchema,
       },
@@ -66,7 +67,6 @@ export function proposals(
         client.getVotingDelay(),
       ]);
 
-      setCacheControl(context, 60);
       return context.json(
         {
           items: result.map((p, index) =>
@@ -87,6 +87,7 @@ export function proposals(
       summary: "Get a proposal by ID",
       description: "Returns a single proposal by its ID",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         params: ProposalRequestSchema,
       },
@@ -126,7 +127,6 @@ export function proposals(
         client.getVotingDelay(),
       ]);
 
-      setCacheControl(context, 60);
       return context.json(
         ProposalMapper.toApi(proposal, quorum, blockTime),
         200,

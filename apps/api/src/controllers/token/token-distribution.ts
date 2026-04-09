@@ -43,6 +43,7 @@ export function tokenDistribution(
         path: `/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
         tags: ["tokens"],
+        middleware: [setCacheControl(60)],
         request: {
           query: TokenDistributionComparisonQuerySchema,
         },
@@ -60,7 +61,6 @@ export function tokenDistribution(
 
         const result = await repository.getSupplyComparison(metric, days);
 
-        setCacheControl(ctx, 60);
         if (!result) {
           return ctx.json(
             { previousValue: "0", currentValue: "0", changeRate: 0 },

@@ -20,6 +20,7 @@ export function votes(app: Hono, service: VotesService) {
       description:
         "Returns a paginated list of votes cast on a specific proposal",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         params: ProposalRequestSchema,
         query: VotesRequestSchema,
@@ -60,7 +61,6 @@ export function votes(app: Hono, service: VotesService) {
         toDate,
       );
 
-      setCacheControl(context, 60);
       return context.json({ totalCount, items }, 200);
     },
   );
@@ -73,6 +73,7 @@ export function votes(app: Hono, service: VotesService) {
       summary: "Get all votes",
       description: "Get all votes ordered by timestamp or voting power",
       tags: ["votes"],
+      middleware: [setCacheControl(60)],
       request: {
         query: VotesRequestSchema,
       },
@@ -108,7 +109,6 @@ export function votes(app: Hono, service: VotesService) {
         support,
       });
 
-      setCacheControl(context, 60);
       return context.json(result);
     },
   );
@@ -122,6 +122,7 @@ export function votes(app: Hono, service: VotesService) {
       description:
         "Returns the active delegates that did not vote on a given proposal",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         params: ProposalRequestSchema,
         query: VotersRequestSchema,
@@ -149,7 +150,6 @@ export function votes(app: Hono, service: VotesService) {
         orderDirection,
         addresses,
       );
-      setCacheControl(context, 60);
       return context.json({ totalCount, items }, 200);
     },
   );

@@ -19,6 +19,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
       summary: "Get token related metrics",
       description: `Returns token related metrics for a single metric type.`,
       tags: ["metrics"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: TokenMetricsRequestSchema,
       },
@@ -38,7 +39,6 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
         orderDirection: query.orderDirection ?? "asc",
       });
       const httpResponse = toTokenMetricsApi(serviceResult);
-      setCacheControl(ctx, 3600);
       return ctx.json(httpResponse, 200);
     },
   );
