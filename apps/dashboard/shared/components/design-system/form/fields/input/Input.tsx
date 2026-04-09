@@ -13,7 +13,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
 
     const containerClasses = cn(
-      "border-border-contrast bg-surface-default flex h-9 w-full items-center gap-2.5 border px-2.5 py-2 transition-all duration-200",
+      "border-border-contrast bg-surface-default flex h-9 w-full items-center gap-2.5 rounded-base border px-2.5 py-2 transition-all duration-200",
       //enabled
       "has-[:enabled]:hover:bg-surface-contrast",
       //focused
@@ -38,7 +38,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          "border-border-contrast bg-surface-default text-primary placeholder:text-dimmed flex h-9 w-full border px-2.5 py-2 text-sm transition-all duration-200",
+          "border-border-contrast bg-surface-default text-primary placeholder:text-dimmed rounded-base flex h-9 w-full border px-2.5 py-2 text-sm transition-all duration-200",
           //enabled
           "enabled:hover:bg-surface-contrast",
           //focused

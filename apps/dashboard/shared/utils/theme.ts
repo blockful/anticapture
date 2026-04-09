@@ -38,6 +38,7 @@ const LIGHT_THEME_VARIABLES = {
   "--base-error-opacity": "#dc26261f",
   "--base-destructive-hover": "#f87171",
   "--base-dimmed": "#a1a1aa",
+  "--radius-base": "8px",
 } satisfies Record<string, string>;
 
 const withBrandColor = ({

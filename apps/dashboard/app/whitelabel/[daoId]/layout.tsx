@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoApolloProvider } from "@/shared/providers/DaoApolloProvider";
+import { WhitelabelThemeInjector } from "@/shared/components/WhitelabelThemeInjector";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { ALL_DAOS } from "@/shared/types/daos";
 import { getThemeCSSVariables } from "@/shared/utils/theme";
@@ -52,9 +53,12 @@ export default async function WhitelabelLayout({
     notFound();
   }
 
+  const themeVariables = getThemeCSSVariables(daoIdEnum);
+
   return (
     <DaoApolloProvider daoId={daoIdEnum}>
-      <div style={getThemeCSSVariables(daoIdEnum) as CSSProperties}>
+      <WhitelabelThemeInjector variables={themeVariables} />
+      <div style={themeVariables as CSSProperties}>
         <WhitelabelShell daoId={daoIdEnum}>{children}</WhitelabelShell>
       </div>
     </DaoApolloProvider>

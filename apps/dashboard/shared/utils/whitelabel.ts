@@ -91,11 +91,72 @@ export const getDaoProposalPath = ({
   isOffchain?: boolean;
 }) => {
   const basePath = getWhitelabelBasePath({ daoId, pathname });
-  const proposalRoute = `${WHITELABEL_ROUTES.proposals}/${proposalId}`;
 
+  // Internal whitelabel path: /whitelabel/[daoId]/...
+  if (basePath.startsWith("/whitelabel/")) {
+    const proposalRoute = `${WHITELABEL_ROUTES.proposals}/${proposalId}`;
+    return isOffchain
+      ? `${basePath}/${proposalRoute}?proposalType=offchain`
+      : `${basePath}/${proposalRoute}`;
+  }
+
+  // External whitelabel domain: middleware rewrites the path, so pathname
+  // doesn't include the daoId prefix (basePath is "")
+  if (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoId])) {
+    const proposalRoute = `${WHITELABEL_ROUTES.proposals}/${proposalId}`;
+    return isOffchain
+      ? `/${proposalRoute}?proposalType=offchain`
+      : `/${proposalRoute}`;
+  }
+
+  // Normal dashboard: /[daoId]/governance/proposal/[proposalId]
+  const daoSlug = daoId.toLowerCase();
   return isOffchain
-    ? `${basePath}/${proposalRoute}?proposalType=offchain`
-    : `${basePath}/${proposalRoute}`;
+    ? `/${daoSlug}/governance/offchain-proposal/${proposalId}`
+    : `/${daoSlug}/governance/proposal/${proposalId}`;
+};
+
+export const getDaoGovernanceListPath = ({
+  daoId,
+  pathname,
+  isOffchain = false,
+}: {
+  daoId: DaoIdEnum;
+  pathname: string;
+  isOffchain?: boolean;
+}) => {
+  const basePath = getWhitelabelBasePath({ daoId, pathname });
+  const tab = isOffchain ? "?tab=offchain" : "";
+
+  if (basePath.startsWith("/whitelabel/")) {
+    return `${basePath}/${WHITELABEL_ROUTES.proposals}${tab}`;
+  }
+
+  if (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoId])) {
+    return `/${WHITELABEL_ROUTES.proposals}${tab}`;
+  }
+
+  return `/${daoId.toLowerCase()}/governance${tab}`;
+};
+
+export const getDaoNotificationsPath = ({
+  daoId,
+  pathname,
+}: {
+  daoId: DaoIdEnum;
+  pathname: string;
+}) => {
+  const basePath = getWhitelabelBasePath({ daoId, pathname });
+
+  if (basePath.startsWith("/whitelabel/")) {
+    return `${basePath}/${WHITELABEL_ROUTES.notifications}`;
+  }
+
+  if (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoId])) {
+    return `/${WHITELABEL_ROUTES.notifications}`;
+  }
+
+  return `/whitelabel/${daoId.toLowerCase()}/${WHITELABEL_ROUTES.notifications}`;
 };
 
 export const getWhitelabelForumProposalUrl = ({

@@ -4,7 +4,10 @@ import { useParams, usePathname } from "next/navigation";
 
 import { Button } from "@/shared/components";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getDaoPagePath, WHITELABEL_ROUTES } from "@/shared/utils/whitelabel";
+import {
+  getDaoGovernanceListPath,
+  getDaoNotificationsPath,
+} from "@/shared/utils/whitelabel";
 
 interface VoteSuccessContentProps {
   onClose: () => void;
@@ -15,17 +18,9 @@ export const VoteSuccessContent = ({ onClose }: VoteSuccessContentProps) => {
   const daoId = daoIdParam.toUpperCase() as DaoIdEnum;
   const pathname = usePathname();
 
-  const proposalsPath = getDaoPagePath({
-    daoId,
-    pathname,
-    page: WHITELABEL_ROUTES.proposals,
-  });
+  const proposalsPath = getDaoGovernanceListPath({ daoId, pathname });
 
-  const notificationsPath = getDaoPagePath({
-    daoId,
-    pathname,
-    page: WHITELABEL_ROUTES.notifications,
-  });
+  const notificationsPath = getDaoNotificationsPath({ daoId, pathname });
 
   return (
     <div className="flex flex-col items-center gap-3 px-4 py-8">

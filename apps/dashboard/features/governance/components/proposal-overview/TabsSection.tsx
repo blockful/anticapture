@@ -6,12 +6,12 @@ import { ActionsTabContent } from "@/features/governance/components/proposal-ove
 import { DescriptionTabContent } from "@/features/governance/components/proposal-overview/DescriptionTabContent";
 import { OffchainVotesContent } from "@/features/governance/components/proposal-overview/OffchainVotesContent";
 import { VotesTabContent } from "@/features/governance/components/proposal-overview/VotesTabContent";
+import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
 import type {
   ProposalDetails,
   ProposalViewData,
 } from "@/features/governance/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { cn } from "@/shared/utils/cn";
 
 type TabId = "description" | "votes" | "actions";
 
@@ -75,53 +75,24 @@ export const TabsSection = ({
     }
   };
 
+  const tabs = [
+    { label: "Description", value: "description" },
+    { label: "Votes", value: "votes" },
+    ...(!isOffchain ? [{ label: "Actions", value: "actions" }] : []),
+  ];
+
   return (
     <div className="lg:bg-surface-default flex flex-1 flex-col lg:min-w-0">
-      {/* Tabs Section */}
-      <div className="border-border-default lg:bg-surface-default sticky left-0 top-[7px] z-10 flex w-full shrink-0 gap-2 border-b lg:top-[85px] lg:px-4">
-        <Tab
-          isActive={activeTab === "description"}
-          onClick={() => setActiveTab("description")}
-        >
-          Description
-        </Tab>
-        <Tab
-          isActive={activeTab === "votes"}
-          onClick={() => setActiveTab("votes")}
-        >
-          Votes
-        </Tab>
-        {!isOffchain && (
-          <Tab
-            isActive={activeTab === "actions"}
-            onClick={() => setActiveTab("actions")}
-          >
-            Actions
-          </Tab>
-        )}
+      <div className="lg:bg-surface-default sticky left-0 top-[7px] z-10 w-full shrink-0 lg:top-[85px] lg:px-4">
+        <TabGroup
+          size="md"
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(value) => setActiveTab(value as TabId)}
+        />
       </div>
 
       <div className="flex-1">{renderTabContent()}</div>
     </div>
-  );
-};
-
-interface TabProps {
-  children: React.ReactNode;
-  isActive?: boolean;
-  onClick?: () => void;
-}
-
-export const Tab = ({ children, isActive = false, onClick }: TabProps) => {
-  return (
-    <button
-      className={cn(
-        "text-secondary font-inter flex cursor-pointer items-center justify-center px-3 py-3 text-[14px] font-medium not-italic leading-[20px]",
-        isActive && "text-link border-b-link border-b",
-      )}
-      onClick={onClick}
-    >
-      {children}
-    </button>
   );
 };

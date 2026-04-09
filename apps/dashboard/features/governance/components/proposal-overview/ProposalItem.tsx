@@ -232,7 +232,7 @@ export const ProposalItem = ({
           isOffchain: true,
         })}
         className={cn(
-          "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
+          "text-primary bg-surface-default hover:bg-surface-contrast rounded-base relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
           className,
         )}
         prefetch={true}
@@ -317,7 +317,7 @@ export const ProposalItem = ({
         proposalId: proposal!.id,
       })}
       className={cn(
-        "text-primary bg-surface-default hover:bg-surface-contrast relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
+        "text-primary bg-surface-default hover:bg-surface-contrast rounded-base relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
         className,
       )}
       prefetch={true}

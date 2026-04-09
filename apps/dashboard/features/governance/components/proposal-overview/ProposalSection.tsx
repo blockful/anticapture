@@ -30,6 +30,7 @@ import {
   normalizeScores,
 } from "@/features/governance/utils/offchainProposal";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+import { ProposalHeaderProvider } from "@/features/governance/context/ProposalHeaderContext";
 import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { TelegramBotMessage } from "@/shared/components/messages";
@@ -158,96 +159,107 @@ export const ProposalSection = ({
       : undefined;
 
   return (
-    <div className="w-full pb-20 lg:pb-0">
-      <ProposalHeader
-        daoId={daoId as string}
-        setIsVotingModalOpen={setIsVotingModalOpen}
-        votingPower={votingPower}
-        votes={votes}
-        address={address}
-        proposalStatus={proposal.status}
-        snapshotLink={snapshotLink}
-      />
-      <div className="mx-auto w-full">
-        <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
+    <ProposalHeaderProvider
+      value={{
+        votingPower,
+        address,
+        proposalStatus: proposal.status,
+        supportValue,
+        snapshotLink,
+        setIsVotingModalOpen,
+      }}
+    >
+      <div className="w-full pb-20 lg:pb-0">
+        <ProposalHeader
+          daoId={daoId as string}
+          setIsVotingModalOpen={setIsVotingModalOpen}
+          votingPower={votingPower}
+          votes={votes}
+          address={address}
+          proposalStatus={proposal.status}
+          snapshotLink={snapshotLink}
+        />
+        <div className="mx-auto w-full">
+          <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
 
-        <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
-          <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
-            <TitleSection
+          <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
+            <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
+              <TitleSection
+                proposal={proposal}
+                onAddressClick={handleAddressClick}
+              />
+              <ProposalInfoSection
+                proposal={proposal}
+                decimals={isOffchain ? 0 : decimals}
+                offchainChoices={isOffchain ? offchainChoices : undefined}
+                offchainScores={isOffchain ? offchainScores : undefined}
+              />
+              {!isOffchain && <ProposalParametersSection daoId={daoEnum} />}
+              <ProposalStatusSection
+                proposal={proposal}
+                isOffchain={isOffchain}
+              />
+              {!isOffchain && supportValue !== undefined ? (
+                <div className="border-border-default bg-surface-default border px-4 py-3">
+                  <TelegramBotMessage />
+                </div>
+              ) : null}
+            </div>
+
+            <TabsSection
               proposal={proposal}
               onAddressClick={handleAddressClick}
-            />
-            <ProposalInfoSection
-              proposal={proposal}
-              decimals={isOffchain ? 0 : decimals}
-              offchainChoices={isOffchain ? offchainChoices : undefined}
-              offchainScores={isOffchain ? offchainScores : undefined}
-            />
-            {!isOffchain && <ProposalParametersSection daoId={daoEnum} />}
-            <ProposalStatusSection
-              proposal={proposal}
               isOffchain={isOffchain}
+              offchainProposalId={offchainProposalId}
+              offchainChoices={offchainChoices}
+              offchainScores={isOffchain ? offchainScores : undefined}
+              daoId={daoEnum}
             />
-            {!isOffchain && supportValue !== undefined ? (
-              <div className="border-border-default bg-surface-default border px-4 py-3">
-                <TelegramBotMessage />
-              </div>
-            ) : null}
           </div>
 
-          <TabsSection
-            proposal={proposal}
-            onAddressClick={handleAddressClick}
-            isOffchain={isOffchain}
-            offchainProposalId={offchainProposalId}
-            offchainChoices={offchainChoices}
-            offchainScores={isOffchain ? offchainScores : undefined}
-            daoId={daoEnum}
-          />
-        </div>
+          {!isOffchain && (
+            <>
+              <VotingModal
+                isOpen={isVotingModalOpen}
+                onClose={() => setIsVotingModalOpen(false)}
+                proposal={onchainProposal as ProposalDetails}
+                votingPower={votingPower}
+                rawVotingPower={rawVotingPower}
+                decimals={decimals}
+                daoId={daoEnum}
+              />
 
-        {!isOffchain && (
-          <>
-            <VotingModal
+              <HoldersAndDelegatesDrawer
+                isOpen={!!drawerAddress}
+                onClose={handleCloseDrawer}
+                entityType="delegate"
+                address={drawerAddress || ""}
+                daoId={daoEnum}
+              />
+            </>
+          )}
+
+          {isOffchain && rawOffchainProposal && (
+            <OffchainVotingModal
               isOpen={isVotingModalOpen}
               onClose={() => setIsVotingModalOpen(false)}
-              proposal={onchainProposal as ProposalDetails}
-              votingPower={votingPower}
-              rawVotingPower={rawVotingPower}
-              decimals={decimals}
-              daoId={daoEnum}
+              proposal={rawOffchainProposal}
             />
+          )}
+        </div>
 
-            <HoldersAndDelegatesDrawer
-              isOpen={!!drawerAddress}
-              onClose={handleCloseDrawer}
-              entityType="delegate"
-              address={drawerAddress || ""}
-              daoId={daoEnum}
-            />
-          </>
-        )}
-
-        {isOffchain && rawOffchainProposal && (
-          <OffchainVotingModal
-            isOpen={isVotingModalOpen}
-            onClose={() => setIsVotingModalOpen(false)}
-            proposal={rawOffchainProposal}
+        {/* Fixed bottom bar for mobile */}
+        <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
+          <MobileBottomBar
+            isOffchain={isOffchain}
+            address={address}
+            supportValue={supportValue}
+            proposalStatus={proposal.status}
+            onVoteClick={() => setIsVotingModalOpen(true)}
           />
-        )}
+        </div>
       </div>
-
-      {/* Fixed bottom bar for mobile */}
-      <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
-        <MobileBottomBar
-          isOffchain={isOffchain}
-          address={address}
-          supportValue={supportValue}
-          proposalStatus={proposal.status}
-          onVoteClick={() => setIsVotingModalOpen(true)}
-        />
-      </div>
-    </div>
+    </ProposalHeaderProvider>
   );
 };
 

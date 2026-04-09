@@ -71,10 +71,7 @@ export const WhitelabelConnectWallet = ({
                 onClick={openAccountModal}
                 type="button"
                 variant="outline"
-                className={cn(
-                  "max-w-full gap-2 rounded-full px-3 py-2",
-                  className,
-                )}
+                className={cn("max-w-full gap-2 px-3 py-2", className)}
               >
                 {account.ensAvatar ? (
                   <div className="relative size-6 overflow-hidden rounded-full">

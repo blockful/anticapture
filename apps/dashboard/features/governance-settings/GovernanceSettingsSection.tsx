@@ -19,7 +19,7 @@ export const GovernanceSettingsSection = () => {
     "https://etherscan.io";
 
   return (
-    <div className="mx-auto flex w-full max-w-[1096px] flex-col gap-6 px-5 py-6">
+    <div className="flex w-full max-w-[1096px] flex-col gap-6 px-5 py-6">
       {/* Header */}
       <div className="flex flex-col gap-1">
         <h1 className="text-primary text-2xl font-medium">

@@ -24,7 +24,7 @@ export const PillTab = ({
         // Surfaces
         "bg-transparent",
         // Border — all sides, 1px
-        "border",
+        "rounded-base border",
         // Transitions
         "transition-colors duration-150",
         // Default state

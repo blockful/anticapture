@@ -186,6 +186,7 @@
 
   /* root colors  */
   --radius: 0.625rem;
+  --radius-base: 0px;
   --base-background: #ffffff;
   --base-foreground: #09090b;
   --base-muted: #f4f4f5;
