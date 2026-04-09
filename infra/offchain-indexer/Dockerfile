@@ -6,21 +6,23 @@ COPY . .
 RUN npx turbo@2.3.1 prune @anticapture/offchain-indexer --docker
 
 FROM base AS installer
-RUN apt-get update && apt-get install -y curl && npm install -g pnpm
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g pnpm@10.10.0
 WORKDIR /app
 COPY package.json package.json
 COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY --from=builder /app/out/json/ .
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 COPY --from=builder /app/turbo.json turbo.json
-RUN pnpm --filter @anticapture/observability build
-RUN pnpm run offchain-indexer build
+RUN pnpm --filter @anticapture/offchain-indexer... build
 
 FROM base AS runner
 ENV NODE_ENV=production
+RUN addgroup --system app && adduser --system --ingroup app --home /home/app app
 WORKDIR /app
-COPY --from=installer /app .
+COPY --from=installer --chown=app:app /app .
+USER app
 WORKDIR /app/apps/offchain-indexer
-
 ENTRYPOINT ["node", "dist/index.js"]

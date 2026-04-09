@@ -2,9 +2,21 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
+directive @enum(subgraph: String, value: String) on ENUM_VALUE
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+
+directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+
 directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
 
-directive @enum(subgraph: String, value: String) on ENUM_VALUE
+directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
+
+directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
+
+directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+
+directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
 
 type Query {
   """
@@ -24,6 +36,9 @@ type Query {
     """
     addresses: [String]!
   ): getAddresses_200_response
+
+  """Check API and database health"""
+  health: health_response
 
   """
   Get historical delegations for an account, with optional filtering and sorting
@@ -703,6 +718,21 @@ type Query {
   ): OffchainVotesResponse
 
   """
+  Returns the active delegates that did not vote on a given offchain proposal
+  """
+  offchainProposalNonVoters(
+    id: String!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    orderDirection: OrderDirection = desc
+    addresses: [String]
+  ): offchainProposalNonVoters_response
+
+  """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
   Only includes dates where ALL DAOs have data available.
@@ -859,6 +889,27 @@ enum HTTPMethod {
 }
 
 scalar ObjMap
+
+union health_response = health_200_response | health_503_response
+
+type health_200_response {
+  status: ok_const!
+  database: ok_const!
+}
+
+enum ok_const {
+  ok
+}
+
+type health_503_response {
+  status: error_const!
+  database: error_const!
+  message: String!
+}
+
+enum error_const {
+  error
+}
 
 """Paginated historical delegations response."""
 type DelegationsResponse {
@@ -1920,12 +1971,13 @@ type OffchainVotesResponse {
 type OffchainVote {
   voter: String!
   proposalId: String!
-  choice: JSON!
+  choice: [String]!
   vp: Float
   reason: String!
   created: Int!
   proposalTitle: String
 }
+
 
 """Sort votes by timestamp or voting power."""
 enum queryInput_votesOffchain_orderBy {
@@ -1937,6 +1989,18 @@ enum queryInput_votesOffchain_orderBy {
 enum queryInput_votesOffchainByProposalId_orderBy {
   timestamp
   votingPower
+}
+
+union offchainProposalNonVoters_response = OffchainVotersResponse | ErrorResponse
+
+type OffchainVotersResponse {
+  items: [OffchainNonVoter]!
+  totalCount: Int!
+}
+
+type OffchainNonVoter {
+  voter: String!
+  votingPower: String!
 }
 
 type AverageDelegationPercentageItem {
@@ -1956,10 +2020,6 @@ type AverageDelegationPercentagePage {
 }
 
 type DAOList {
-  items: [dao_200_response!]!
+  items: [DaoResponse!]!
   totalCount: Int!
-}
-
-type dao_200_response {
-  _fake: String
 }

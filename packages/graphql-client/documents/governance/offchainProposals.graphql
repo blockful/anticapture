@@ -58,19 +58,3 @@ query GetOffchainProposal($id: String!) {
   }
 }
 
-query GetOffchainVotesByProposalId(
-  $id: String!
-  $skip: Int
-  $limit: Int = 10
-) {
-  votesOffchainByProposalId(id: $id, skip: $skip, limit: $limit) {
-    items {
-      voter
-      choice
-      vp
-      reason
-      created
-    }
-    totalCount
-  }
-}

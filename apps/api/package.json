@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest run --coverage",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
-    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
     "start": "node --import ./dist/instrumentation.js dist/index.js",

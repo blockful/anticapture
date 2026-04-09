@@ -1,30 +1,26 @@
 "use client";
 
-import type { GetOffchainVotesByProposalIdQuery } from "@anticapture/graphql-client";
-import { useGetOffchainVotesByProposalIdQuery } from "@anticapture/graphql-client/hooks";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { OffchainVote } from "@anticapture/graphql-client";
 import {
-  CheckCircle2,
-  CircleMinus,
-  Inbox,
-  ThumbsDown,
-  XCircle,
-} from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+  OrderDirection,
+  QueryInput_VotesOffchainByProposalId_OrderBy,
+  useGetOffchainVotesByProposalIdQuery,
+} from "@anticapture/graphql-client/hooks";
+import type { ColumnDef } from "@tanstack/react-table";
+import { CheckCircle2, CircleMinus, Inbox, XCircle } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
-import { BlankSlate, SkeletonRow } from "@/shared/components";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getAuthHeaders } from "@/shared/utils/server-utils";
-
-type OffchainVoteItem = NonNullable<
-  NonNullable<
-    GetOffchainVotesByProposalIdQuery["votesOffchainByProposalId"]
-  >["items"][number]
->;
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 const LOADING_ROW = "__LOADING_ROW__";
 
@@ -39,37 +35,23 @@ const getLabelDisplay = (label: string) => {
   return { label, icon: null as React.ReactNode };
 };
 
-const getChoiceInfo = (choice: unknown, choices: string[]) => {
-  if (choice === null || choice === undefined)
-    return { label: "—", icon: null as React.ReactNode };
+const getChoiceInfo = (choice: string[], choices: string[]) => {
+  if (choice.length === 0) return { label: "—", icon: null as React.ReactNode };
 
-  if (typeof choice === "number" || typeof choice === "string") {
-    const choiceKey = Number(choice) - 1;
-    const label = choices[choiceKey] ?? `Choice ${Number(choice)}`;
+  if (choice.length === 1 && choice[0] != null) {
+    const idx = Number(choice[0]);
+    const label = choices[idx - 1] ?? `Choice ${choice[0]}`;
     return getLabelDisplay(label);
   }
 
-  if (Array.isArray(choice)) {
-    const label = (choice as number[])
-      .map((choice) => choices[choice - 1] ?? `Choice ${choice}`)
-      .join(", ");
-    return { label, icon: null as React.ReactNode };
-  }
-
-  if (typeof choice === "object") {
-    const label = Object.entries(choice as Record<string, number>)
-      .map(
-        ([choiceKey, percent]) =>
-          `${choices[Number(choiceKey) - 1] ?? `Choice ${choiceKey}`} (${percent}%)`,
-      )
-      .join(", ");
-    return { label, icon: null as React.ReactNode };
-  }
-
-  return {
-    label: "Unknown",
-    icon: <ThumbsDown className="text-secondary size-4" />,
-  };
+  const label = choice
+    .filter((c): c is string => c != null)
+    .map((c) => {
+      const idx = Number(c);
+      return choices[idx - 1] ?? `Choice ${c}`;
+    })
+    .join(", ");
+  return { label, icon: null as React.ReactNode };
 };
 
 interface OffchainVotesContentProps {
@@ -87,9 +69,42 @@ export const OffchainVotesContent = ({
 }: OffchainVotesContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
 
+  const [orderBy, setOrderBy] =
+    useState<QueryInput_VotesOffchainByProposalId_OrderBy>(
+      QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp,
+    );
+  const [orderDirection, setOrderDirection] = useState<OrderDirection>(
+    OrderDirection.Desc,
+  );
+
+  const handleSort = useCallback(
+    (field: QueryInput_VotesOffchainByProposalId_OrderBy) => {
+      if (orderBy === field) {
+        setOrderDirection((prev) =>
+          prev === OrderDirection.Asc
+            ? OrderDirection.Desc
+            : OrderDirection.Asc,
+        );
+      } else {
+        setOrderBy(field);
+        setOrderDirection(OrderDirection.Desc);
+      }
+    },
+    [orderBy],
+  );
+
   const { data, loading, error, fetchMore } =
     useGetOffchainVotesByProposalIdQuery({
-      variables: { id: proposalId, limit: 10, skip: 0 },
+      variables: {
+        id: proposalId,
+        limit: 10,
+        skip: 0,
+        fromDate: null,
+        toDate: null,
+        voterAddresses: null,
+        orderBy,
+        orderDirection,
+      },
       context: {
         headers: {
           "anticapture-dao-id": daoId,
@@ -102,7 +117,7 @@ export const OffchainVotesContent = ({
   const votes = useMemo(
     () =>
       (data?.votesOffchainByProposalId?.items ?? []).filter(
-        (vote): vote is OffchainVoteItem => vote !== null,
+        (vote): vote is OffchainVote => vote !== null,
       ),
     [data],
   );
@@ -140,14 +155,16 @@ export const OffchainVotesContent = ({
   }, [hasNextPage, loading, loadMore]);
 
   const tableData = useMemo(() => {
-    const rows: (OffchainVoteItem & { isSubRow?: boolean })[] = [];
+    const rows: (Omit<OffchainVote, "proposalId" | "proposalTitle"> & {
+      isSubRow?: boolean;
+    })[] = [];
 
     votes.forEach((vote) => {
       rows.push(vote);
       if (vote.reason && vote.reason.trim() !== "") {
         rows.push({
           voter: `__DESCRIPTION_${vote.voter}__`,
-          choice: "",
+          choice: [],
           vp: null,
           reason: vote.reason,
           created: 0,
@@ -159,17 +176,17 @@ export const OffchainVotesContent = ({
     if (hasNextPage || (loading && votes.length > 0)) {
       rows.push({
         voter: LOADING_ROW,
-        choice: "",
+        choice: [],
         vp: null,
         reason: "",
         created: 0,
       });
     }
 
-    return rows as OffchainVoteItem[];
+    return rows as OffchainVote[];
   }, [votes, hasNextPage, loading]);
 
-  const columns: ColumnDef<OffchainVoteItem>[] = useMemo(
+  const columns: ColumnDef<OffchainVote>[] = useMemo(
     () => [
       {
         accessorKey: "voter",
@@ -223,6 +240,11 @@ export const OffchainVotesContent = ({
                 variant="rounded"
                 showName={true}
                 isDashed={true}
+              />{" "}
+              <CopyAndPasteButton
+                textToCopy={voter}
+                className="text-secondary hover:text-primary ml-2 inline-flex p-1 align-middle transition-colors"
+                iconSize="md"
               />
             </div>
           );
@@ -248,7 +270,7 @@ export const OffchainVotesContent = ({
               </div>
             );
           }
-          const choice = row.getValue("choice");
+          const choice = row.getValue("choice") as string[];
           const { icon, label } = getChoiceInfo(choice, choices);
           return (
             <div className="flex items-center gap-2 p-2">
@@ -262,9 +284,27 @@ export const OffchainVotesContent = ({
         accessorKey: "created",
         size: 120,
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-            <p>Date</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-secondary w-full justify-start"
+            onClick={() =>
+              handleSort(QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp)
+            }
+          >
+            <h4 className="text-table-header whitespace-nowrap">Date</h4>
+            <ArrowUpDown
+              props={{ className: "size-4 ml-1" }}
+              activeState={
+                orderBy ===
+                QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp
+                  ? orderDirection === OrderDirection.Asc
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
+                  : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         ),
         cell: ({ row }) => {
           const voter = row.getValue("voter") as string;
@@ -308,9 +348,31 @@ export const OffchainVotesContent = ({
         accessorKey: "vp",
         size: 160,
         header: () => (
-          <div className="text-table-header flex h-8 w-full items-center justify-start px-2">
-            <p>Voting Power</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-secondary w-full justify-start"
+            onClick={() =>
+              handleSort(
+                QueryInput_VotesOffchainByProposalId_OrderBy.VotingPower,
+              )
+            }
+          >
+            <h4 className="text-table-header whitespace-nowrap">
+              Voting Power
+            </h4>
+            <ArrowUpDown
+              props={{ className: "size-4 ml-1" }}
+              activeState={
+                orderBy ===
+                QueryInput_VotesOffchainByProposalId_OrderBy.VotingPower
+                  ? orderDirection === OrderDirection.Asc
+                    ? ArrowState.UP
+                    : ArrowState.DOWN
+                  : ArrowState.DEFAULT
+              }
+            />
+          </Button>
         ),
         cell: ({ row }) => {
           const voter = row.getValue("voter") as string;
@@ -340,7 +402,7 @@ export const OffchainVotesContent = ({
         },
       },
     ],
-    [totalVotingPower, choices],
+    [totalVotingPower, choices, orderBy, orderDirection, handleSort],
   );
 
   if (error) return <div>Error: {error.message}</div>;
@@ -350,7 +412,7 @@ export const OffchainVotesContent = ({
       <div className="w-full lg:p-4">
         <VotesTable
           columns={columns}
-          data={Array.from({ length: 7 }, () => ({}) as OffchainVoteItem)}
+          data={Array.from({ length: 7 }, () => ({}) as OffchainVote)}
         />
       </div>
     );

@@ -24,7 +24,7 @@ export const ProviderNameCell = ({
     .toUpperCase();
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-0 items-center gap-3 overflow-hidden">
       <div className="bg-surface-contrast border-border-contrast flex size-6 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold text-white">
         {avatarUrl ? (
           <Image
@@ -43,7 +43,7 @@ export const ProviderNameCell = ({
         <span className="text-primary truncate text-sm font-medium">
           {name}
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="hidden items-center gap-1.5 sm:flex">
           {websiteUrl && (
             <DefaultLink size="sm" openInNewTab href={websiteUrl}>
               WEBSITE

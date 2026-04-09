@@ -2,7 +2,7 @@
 
 import type { GetOffchainProposalQuery } from "@anticapture/graphql-client/hooks";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { ApprovalVoteOptions } from "@/features/governance/components/modals/vote-options/ApprovalVoteOptions";
@@ -41,7 +41,18 @@ export const OffchainVotingModal = ({
 
   const { address } = useAccount();
   const { vote, isPending: isVoting } = useVoteOnOffchainProposal();
-
+  const strategies = useMemo(
+    () =>
+      proposal.strategies
+        ?.filter((s): s is NonNullable<typeof s> => s !== null)
+        .map((s) => ({
+          name: s.name,
+          network: s.network,
+          params:
+            typeof s.params === "string" ? JSON.parse(s.params) : s.params,
+        })),
+    [proposal.strategies],
+  );
   const {
     votingPower,
     isLoading: isVpLoading,
@@ -51,13 +62,7 @@ export const OffchainVotingModal = ({
     spaceId: proposal.spaceId,
     proposalId: proposal.id,
     snapshot: proposal.snapshot,
-    strategies: proposal.strategies
-      ?.filter((s): s is NonNullable<typeof s> => s !== null)
-      .map((s) => ({
-        name: s.name,
-        network: s.network,
-        params: typeof s.params === "string" ? JSON.parse(s.params) : s.params,
-      })),
+    strategies,
     network: proposal.network,
   });
 

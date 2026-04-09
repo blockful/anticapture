@@ -41,7 +41,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       } = context.req.valid("query");
 
-      const { items, totalCount } = await service.getVotes({
+      const response = await service.getVotes({
         skip,
         limit,
         orderBy,
@@ -51,10 +51,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      return context.json(
-        OffchainVotesResponseSchema.parse({ items, totalCount }),
-        200,
-      );
+      return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );
 
@@ -94,7 +91,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       } = context.req.valid("query");
 
-      const { items, totalCount } = await service.getVotesByProposalId(id, {
+      const response = await service.getVotesByProposalId(id, {
         skip,
         limit,
         orderBy,
@@ -104,10 +101,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
         toDate,
       });
 
-      return context.json(
-        OffchainVotesResponseSchema.parse({ items, totalCount }),
-        200,
-      );
+      return context.json(OffchainVotesResponseSchema.parse(response), 200);
     },
   );
 }
