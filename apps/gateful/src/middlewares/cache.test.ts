@@ -49,6 +49,7 @@ async function readResponse(res: Response) {
   return {
     status: res.status,
     xCache: res.headers.get("X-Cache"),
+    cacheControl: res.headers.get("Cache-Control"),
     body: await res.text(),
   };
 }
@@ -81,6 +82,7 @@ describe("cacheMiddleware", () => {
     expect(await readResponse(res)).toEqual({
       status: 200,
       xCache: "HIT",
+      cacheControl: "public, max-age=60",
       body: '{"ok":true}',
     });
     // Handler was only invoked for the first (MISS) request.
@@ -103,6 +105,7 @@ describe("cacheMiddleware", () => {
     expect(await readResponse(res)).toEqual({
       status: 200,
       xCache: null,
+      cacheControl: "public, max-age=60",
       body: '{"ok":true}',
     });
   });
@@ -121,6 +124,7 @@ describe("cacheMiddleware", () => {
     expect(await readResponse(res)).toEqual({
       status: 200,
       xCache: null,
+      cacheControl: "public, max-age=60",
       body: '{"ok":true}',
     });
   });

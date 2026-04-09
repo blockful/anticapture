@@ -10,6 +10,7 @@ type CachedEntry = {
   body: string;
   status: number;
   contentType: string;
+  cacheControl: string;
 };
 
 function safeParse<T>(raw: string): T | null {
@@ -51,6 +52,7 @@ export function cacheMiddleware(redis?: CacheStore) {
         status: entry.status,
         headers: {
           "Content-Type": entry.contentType,
+          "Cache-Control": entry.cacheControl,
           "X-Cache": "HIT",
         },
       });
@@ -78,7 +80,12 @@ export function cacheMiddleware(redis?: CacheStore) {
       .then((body) => {
         const contentType =
           c.res.headers.get("Content-Type") ?? "application/json";
-        const entry: CachedEntry = { body, status: c.res.status, contentType };
+        const entry: CachedEntry = {
+          body,
+          status: c.res.status,
+          contentType,
+          cacheControl: cacheControl!,
+        };
         return redis!.set(key, JSON.stringify(entry), { EX: ttl });
       })
       .catch(() => null);
