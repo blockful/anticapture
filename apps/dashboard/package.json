@@ -11,11 +11,12 @@
     "test": "jest",
     "format": "prettier --write .",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "pnpm --filter @anticapture/graphql-client codegen && storybook build",
+    "build-storybook": "pnpm --filter @anticapture/graphql-client codegen && pnpm --filter @anticapture/client codegen && storybook build",
     "clean": "rm -rf node_modules .next out build coverage storybook-static *.tsbuildinfo *storybook.log",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anticapture/client": "workspace:*",
     "@anticapture/graphql-client": "workspace:*",
     "@apollo/client": "^3.13.8",
     "@ethersproject/providers": "^5.8.0",

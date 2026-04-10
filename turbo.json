@@ -13,14 +13,17 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "@anticapture/observability#build": {
-      "outputs": ["dist/**"]
-    },
     "@anticapture/graphql-client#build": {
       "outputs": ["generated/**"]
     },
+    "@anticapture/client#codegen": {
+      "outputs": ["generated/**"]
+    },
     "@anticapture/dashboard#dev": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "dependsOn": [
+        "@anticapture/graphql-client#codegen",
+        "@anticapture/client#codegen"
+      ],
       "persistent": true,
       "cache": false
     },
@@ -28,21 +31,26 @@
       "persistent": true
     },
     "@anticapture/dashboard#build": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["dist/**", ".next/**"],
       "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "dependsOn": ["^build", "^codegen"],
+      "outputs": ["dist/**"]
     },
     "storybook": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "dependsOn": [
+        "@anticapture/graphql-client#codegen",
+        "@anticapture/client#codegen"
+      ],
       "persistent": true,
       "cache": false
     },
     "build-storybook": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "dependsOn": [
+        "@anticapture/graphql-client#codegen",
+        "@anticapture/client#codegen"
+      ],
       "outputs": ["storybook-static/**"]
     },
     "start": {

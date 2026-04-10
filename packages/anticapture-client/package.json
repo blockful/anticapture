@@ -1,0 +1,46 @@
+{
+  "name": "@anticapture/client",
+  "version": "1.0.0",
+  "scripts": {
+    "codegen": "kubb --config kubb.config.ts",
+    "build": "pnpm codegen",
+    "clean": "rm -rf node_modules dist generated *.tsbuildinfo",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./hooks": {
+      "types": "./src/hooks.ts",
+      "default": "./src/hooks.ts"
+    }
+  },
+  "files": [
+    "client.ts",
+    "generated",
+    "hooks.ts",
+    "index.ts",
+    "openapi/gateful.json"
+  ],
+  "devDependencies": {
+    "@kubb/cli": "^4.37.2",
+    "@kubb/core": "^4.37.2",
+    "@kubb/plugin-client": "^4.37.2",
+    "@kubb/plugin-oas": "^4.37.2",
+    "@kubb/plugin-react-query": "^4.37.2",
+    "@kubb/plugin-ts": "^4.37.2",
+    "@tanstack/react-query": "^5.90.21",
+    "@types/node": "^20.16.5",
+    "react": "19.2.3",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^19.0.0"
+  }
+}
