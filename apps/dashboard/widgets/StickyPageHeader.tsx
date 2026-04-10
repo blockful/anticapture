@@ -92,7 +92,7 @@ export const StickyPageHeader = ({
       <header
         className={cn(
           "bg-surface-background fixed left-0 right-0 top-0 w-full shadow-md transition-transform duration-300",
-          isDropdownOpen ? "z-[60]" : "z-30",
+          isDropdownOpen ? "z-[60]" : "z-40",
         )}
       >
         <HeaderDAOSidebarDropdown onOpenChange={setIsDropdownOpen} />
