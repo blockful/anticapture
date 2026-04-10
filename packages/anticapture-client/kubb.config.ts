@@ -47,6 +47,7 @@ export default defineConfig({
         name: (name, type) =>
           name === "dao" && type === "function" ? "getDao" : name, // rename "dao" operation ID to getDao
       },
+      suspense: {},
     }),
   ],
 });
