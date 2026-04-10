@@ -4,6 +4,24 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import ensGovernorAbi from "@/abis/ens-governor.json";
 
+// GovernorBravo-style governors (UNI, NOUNS) use queue/execute(uint256 proposalId)
+const GovernorBravoAbi = [
+  {
+    name: "queue",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    name: "execute",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [],
+  },
+] as const;
+
 const AzoriusExecuteAbi = [
   {
     name: "executeProposal",
@@ -58,6 +76,20 @@ const submitAction = async (
   let hash: `0x${string}`;
 
   switch (daoId) {
+    case DaoIdEnum.UNISWAP:
+    case DaoIdEnum.NOUNS: {
+      // GovernorBravo: queue/execute take only the proposal ID
+      const { request } = await client.simulateContract({
+        abi: GovernorBravoAbi,
+        address,
+        functionName: action === "queue" ? "queue" : "execute",
+        args: [BigInt(args.proposalId)],
+        account: args.account,
+        chain,
+      });
+      hash = await client.writeContract(request);
+      break;
+    }
     case DaoIdEnum.SHU: {
       if (action === "queue") {
         throw new Error("Queue is not supported for Azorius governance (SHU)");

@@ -89,9 +89,14 @@ export const GovernanceActionModal = ({
   }, [address, walletClient, step, action, proposal, daoId, onClose, chain]);
 
   useEffect(() => {
-    if (!isOpen || !walletClient || step !== "waiting-signature") return;
+    if (!isOpen || step !== "waiting-signature") return;
+    if (!walletClient) {
+      setError(`Please switch your wallet to the ${chain.name} network.`);
+      setStep("error");
+      return;
+    }
     handleAction();
-  }, [isOpen, walletClient, handleAction, step]);
+  }, [isOpen, walletClient, handleAction, step, chain.name]);
 
   const handleClose = () => {
     setStep("waiting-signature");
