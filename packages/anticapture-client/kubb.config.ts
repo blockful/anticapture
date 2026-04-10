@@ -34,7 +34,7 @@ export default defineConfig({
         path: "hooks.ts",
       },
       client: {
-        importPath: "../client",
+        importPath: "../src/client",
       },
       exclude: [
         {
