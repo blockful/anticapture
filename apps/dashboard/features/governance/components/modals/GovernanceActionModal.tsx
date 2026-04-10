@@ -2,6 +2,7 @@
 
 import { Check, Hourglass, PenLine } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import type { Address } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
 import type { ProposalViewData } from "@/features/governance/types";
@@ -58,9 +59,9 @@ export const GovernanceActionModal = ({
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
       await handler(
-        proposal.targets.filter((t) => t !== null),
-        proposal.values.filter((v) => v !== null),
-        (proposal.calldatas ?? []).filter((c) => c !== null),
+        proposal.targets.filter((t): t is Address => t !== null),
+        proposal.values.filter((v): v is string => v !== null),
+        (proposal.calldatas ?? []).filter((c): c is Address => c !== null),
         proposal.description,
         address,
         daoId,

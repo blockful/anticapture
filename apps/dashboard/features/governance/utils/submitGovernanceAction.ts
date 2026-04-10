@@ -115,17 +115,17 @@ const submitAction = async (
 };
 
 const toActionArgs = (
-  proposalTargets: string[],
+  proposalTargets: Address[],
   proposalValues: string[],
-  proposalCalldatas: string[],
+  proposalCalldatas: Address[],
   description: string,
   account: Address,
   proposalId: string,
 ): ActionArgs => {
   return {
-    targets: proposalTargets as `0x${string}`[],
+    targets: proposalTargets,
     values: proposalValues.map((v) => BigInt(v)),
-    calldatas: proposalCalldatas as `0x${string}`[],
+    calldatas: proposalCalldatas,
     descriptionHash: keccak256(toHex(description)),
     account,
     proposalId,
@@ -133,9 +133,9 @@ const toActionArgs = (
 };
 
 export const queueProposal = (
-  proposalTargets: string[],
+  proposalTargets: Address[],
   proposalValues: string[],
-  proposalCalldatas: string[],
+  proposalCalldatas: Address[],
   description: string,
   account: Address,
   daoId: DaoIdEnum,
@@ -159,9 +159,9 @@ export const queueProposal = (
   );
 
 export const executeProposal = (
-  proposalTargets: string[],
+  proposalTargets: Address[],
   proposalValues: string[],
-  proposalCalldatas: string[],
+  proposalCalldatas: Address[],
   description: string,
   account: Address,
   daoId: DaoIdEnum,
