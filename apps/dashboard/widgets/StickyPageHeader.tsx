@@ -88,7 +88,7 @@ export const StickyPageHeader = ({
   }, [lastScrollY]);
 
   return (
-    <div className={cn(showMobileMenu ? "h-[124px]" : "h-[64px]")}>
+    <div className={cn(showMobileMenu ? "h-[110px]" : "h-13.75")}>
       <header
         className={cn(
           "bg-surface-background fixed left-0 right-0 top-0 w-full shadow-md transition-transform duration-300",

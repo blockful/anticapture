@@ -31,7 +31,7 @@ export const HeaderNavMobile = () => {
     },
     {
       page: "governance",
-      title: "Governance",
+      title: "Proposals",
       enabled: !!daoConfig.governancePage,
     },
     {
