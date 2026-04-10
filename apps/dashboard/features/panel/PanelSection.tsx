@@ -21,7 +21,6 @@ export const PanelSection = () => {
       title={PAGES_CONSTANTS.panel.title}
       icon={<BarChart4 className="section-layout-icon" />}
       description={PAGES_CONSTANTS.panel.description}
-      className="mt-14 lg:mt-0"
     >
       <div className="flex flex-col gap-8 lg:gap-2">
         <div className="lg:hidden">

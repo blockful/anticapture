@@ -33,7 +33,7 @@ import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import daoConfig from "@/shared/dao-config";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface ProposalSectionProps {
   isOffchain?: boolean;
@@ -256,7 +256,10 @@ export const ProposalSection = ({
           address={address}
           supportValue={supportValue}
           proposalStatus={proposal.status}
+          daoId={daoEnum}
           onVoteClick={() => setIsVotingModalOpen(true)}
+          onQueueClick={() => setIsQueueModalOpen(true)}
+          onExecuteClick={() => setIsExecuteModalOpen(true)}
         />
       </div>
     </div>
@@ -268,13 +271,19 @@ const MobileBottomBar = ({
   address,
   supportValue,
   proposalStatus,
+  daoId,
   onVoteClick,
+  onQueueClick,
+  onExecuteClick,
 }: {
   isOffchain: boolean;
   address: string | undefined;
   supportValue: number | undefined;
   proposalStatus: string;
+  daoId: DaoIdEnum;
   onVoteClick: () => void;
+  onQueueClick: () => void;
+  onExecuteClick: () => void;
 }) => {
   if (isOffchain) {
     const isOngoing = proposalStatus.toLowerCase() === "ongoing";
@@ -290,6 +299,29 @@ const MobileBottomBar = ({
   }
 
   if (address) {
+    if (
+      proposalStatus === "succeeded" &&
+      daoId.toUpperCase() !== DaoIdEnum.SHU
+    ) {
+      return (
+        <Button className="flex w-full" onClick={onQueueClick}>
+          Queue Proposal
+        </Button>
+      );
+    }
+
+    if (
+      proposalStatus === "pending_execution" ||
+      proposalStatus === "queued" ||
+      (proposalStatus === "succeeded" && daoId.toUpperCase() === DaoIdEnum.SHU)
+    ) {
+      return (
+        <Button className="flex w-full" onClick={onExecuteClick}>
+          Execute Proposal
+        </Button>
+      );
+    }
+
     if (supportValue === undefined) {
       return (
         <Button className="flex w-full" onClick={onVoteClick}>

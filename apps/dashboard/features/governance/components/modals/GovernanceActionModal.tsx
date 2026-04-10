@@ -135,7 +135,7 @@ export const GovernanceActionModal = ({
         <StepRow
           done={step === "success" || step === "pending-tx"}
           active={step === "waiting-signature"}
-          icon={<PenLine className="size-3.5 text-black" />}
+          icon={<PenLine className="text-primary size-3.5" />}
           label={confirmLabel}
           error={step === "error" ? error : undefined}
         />
@@ -145,7 +145,7 @@ export const GovernanceActionModal = ({
         <StepRow
           done={step === "success"}
           active={step === "pending-tx"}
-          icon={<Hourglass className="size-3.5 text-black" />}
+          icon={<Hourglass className="text-primary size-3.5" />}
           label="Wait for transaction to complete"
         />
       </div>
@@ -173,7 +173,7 @@ const StepRow = ({ done, active, icon, label, error }: StepRowProps) => {
       <div className="flex w-full items-center gap-2">
         <div className="relative flex size-8 shrink-0 items-center justify-center">
           {active && (
-            <SpinIcon className="absolute inset-0 size-8 animate-spin text-orange-500" />
+            <SpinIcon className="text-warning absolute inset-0 size-8 animate-spin" />
           )}
           <div
             className={cn(
@@ -181,7 +181,7 @@ const StepRow = ({ done, active, icon, label, error }: StepRowProps) => {
               getBackgroundColor(),
             )}
           >
-            <div className="border-border-default flex items-center justify-center rounded-full border p-2">
+            <div className="border-border-default flex items-center justify-center rounded-full border p-1">
               {done ? <Check className="text-success size-3.5" /> : icon}
             </div>
           </div>

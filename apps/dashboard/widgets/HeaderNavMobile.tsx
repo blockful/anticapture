@@ -66,15 +66,15 @@ export const HeaderNavMobile = () => {
     },
   ];
 
-  const items = options
-    .filter((o) => o.enabled)
-    .map((o) => ({ value: o.page, label: o.title }));
+  const enabledOptions = options.filter((o) => o.enabled);
+  const items = enabledOptions.map((o) => ({ value: o.page, label: o.title }));
 
   const isDaoOverviewPage =
     pathname === `/${daoId}` || pathname === `/${daoId}/`;
   const currentPage = isDaoOverviewPage
     ? "/"
-    : (pathname?.split("/").filter(Boolean).pop() ?? "/");
+    : (enabledOptions.find((o) => pathname?.includes(`/${o.page}`))?.page ??
+      "/");
 
   const handleChange = (value: string) => {
     if (value === "/") {
