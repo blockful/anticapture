@@ -27,10 +27,10 @@ const AzoriusExecuteAbi = [
 export type GovernanceAction = "queue" | "execute";
 
 type ActionArgs = {
-  targets: `0x${string}`[];
+  targets: Address[];
   values: bigint[];
-  calldatas: `0x${string}`[];
-  descriptionHash: `0x${string}`;
+  calldatas: Address[];
+  descriptionHash: Address;
   account: Address;
   proposalId: string;
 };
