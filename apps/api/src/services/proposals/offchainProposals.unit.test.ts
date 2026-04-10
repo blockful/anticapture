@@ -33,6 +33,8 @@ describe("OffchainProposalsService", () => {
   let stubRepository: {
     getProposals: ReturnType<typeof vi.fn>;
     getProposalsCount: ReturnType<typeof vi.fn>;
+    searchProposals: ReturnType<typeof vi.fn>;
+    getSearchProposalsCount: ReturnType<typeof vi.fn>;
     getProposalById: ReturnType<typeof vi.fn>;
   };
   let service: OffchainProposalsService;
@@ -41,6 +43,8 @@ describe("OffchainProposalsService", () => {
     stubRepository = {
       getProposals: vi.fn().mockResolvedValue([]),
       getProposalsCount: vi.fn().mockResolvedValue(0),
+      searchProposals: vi.fn().mockResolvedValue([]),
+      getSearchProposalsCount: vi.fn().mockResolvedValue(0),
       getProposalById: vi.fn().mockResolvedValue(undefined),
     };
     service = new OffchainProposalsService(stubRepository);
@@ -78,6 +82,20 @@ describe("OffchainProposalsService", () => {
       const result = await service.getProposalById("nonexistent");
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe("searchProposals", () => {
+    it("should return matched items and totalCount", async () => {
+      const proposal = createMockProposal({ id: "snapshot-42" });
+      stubRepository.searchProposals.mockResolvedValue([proposal]);
+      stubRepository.getSearchProposalsCount.mockResolvedValue(1);
+
+      const result = await service.searchProposals({ query: "42" });
+
+      expect(result).toEqual({ items: [proposal], totalCount: 1 });
+      expect(stubRepository.searchProposals).toHaveBeenCalledWith("42", 0, 10);
+      expect(stubRepository.getSearchProposalsCount).toHaveBeenCalledWith("42");
     });
   });
 });

@@ -4,6 +4,7 @@ import {
   ErrorResponseSchema,
   OffchainProposalResponseSchema,
   OffchainProposalRequestSchema,
+  OffchainProposalSearchRequestSchema,
   OffchainProposalsResponseSchema,
   OffchainProposalsRequestSchema,
 } from "@/mappers";
@@ -46,6 +47,42 @@ export function offchainProposals(
         status,
         fromDate,
         endDate,
+      });
+
+      return context.json(OffchainProposalsResponseSchema.parse(response), 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "offchainSearchProposals",
+      path: "/offchain/proposals/search",
+      summary: "Search offchain proposals",
+      description:
+        "Returns offchain proposals whose title or identifier partially matches the query.",
+      tags: ["offchain"],
+      request: {
+        query: OffchainProposalSearchRequestSchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved matching offchain proposals",
+          content: {
+            "application/json": {
+              schema: OffchainProposalsResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { query, skip, limit } = context.req.valid("query");
+
+      const response = await service.searchProposals({
+        query,
+        skip,
+        limit,
       });
 
       return context.json(OffchainProposalsResponseSchema.parse(response), 200);

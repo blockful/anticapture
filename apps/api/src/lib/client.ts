@@ -46,11 +46,11 @@ export function getClient<
     }
     case DaoIdEnum.LIL_NOUNS: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
-      return new NounsClient(client, governor.address);
+      return new NounsClient(client, governor.address, daoId);
     }
     case DaoIdEnum.NOUNS: {
       const { governor } = CONTRACT_ADDRESSES[daoId];
-      return new NounsClient(client, governor.address);
+      return new NounsClient(client, governor.address, daoId);
     }
     case DaoIdEnum.SCR: {
       const { governor } = CONTRACT_ADDRESSES[daoId];

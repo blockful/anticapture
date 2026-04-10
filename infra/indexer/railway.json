@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "infra/indexer/Dockerfile",
+    "watchPatterns": ["apps/indexer/**", "infra/indexer/**"]
+  },
+  "deploy": {
+    "healthcheckPath": "/ready",
+    "restartPolicyType": "NEVER",
+    "healthcheckTimeout": 172800,
+    "preDeployCommand": "npm run db:prune"
+  }
+}
