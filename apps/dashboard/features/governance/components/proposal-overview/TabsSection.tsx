@@ -78,7 +78,7 @@ export const TabsSection = ({
   return (
     <div className="lg:bg-surface-default flex flex-1 flex-col lg:min-w-0">
       {/* Tabs Section */}
-      <div className="border-border-default bg-surface-background lg:bg-surface-default sticky left-0 top-[120px] z-10 flex w-full shrink-0 gap-2 border-b lg:top-[85px] lg:px-4">
+      <div className="border-border-default bg-surface-background lg:bg-surface-default sticky left-0 top-[118px] z-10 flex w-full shrink-0 gap-2 border-b lg:top-[85px] lg:px-4">
         <Tab
           isActive={activeTab === "description"}
           onClick={() => setActiveTab("description")}
