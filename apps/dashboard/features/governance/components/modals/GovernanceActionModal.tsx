@@ -58,9 +58,9 @@ export const GovernanceActionModal = ({
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
       await handler(
-        proposal.targets,
-        proposal.values,
-        proposal.calldatas ?? [],
+        proposal.targets.filter((t) => t !== null),
+        proposal.values.filter((v) => v !== null),
+        (proposal.calldatas ?? []).filter((c) => c !== null),
         proposal.description,
         address,
         daoId,
@@ -78,19 +78,11 @@ export const GovernanceActionModal = ({
       onClose();
       setTimeout(() => window.location.reload(), 2000);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Action failed.";
-      console.error("[GovernanceActionModal]", err);
-      let shortMessage: string;
-      if (message.includes("rejected") || message.includes("denied")) {
-        shortMessage = "Transaction rejected by user.";
-      } else if (message.includes("reverted")) {
-        shortMessage =
-          "Contract call reverted. The proposal may not be in the correct state.";
-      } else {
-        shortMessage =
-          message.split("\n")[0]?.slice(0, 100) ?? "Action failed.";
-      }
-      setError(shortMessage);
+      const message =
+        err instanceof Error
+          ? (err.message.split("\n")[0]?.slice(0, 120) ?? "Action failed.")
+          : "Action failed.";
+      setError(message);
       setStep("error");
     }
   }, [address, walletClient, step, action, proposal, daoId, onClose, chain]);

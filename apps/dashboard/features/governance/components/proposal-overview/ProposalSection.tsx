@@ -136,7 +136,7 @@ export const ProposalSection = ({
 
   const proposal: ProposalViewData | null = isOffchain
     ? adaptedOffchainProposal
-    : (onchainProposal as ProposalViewData | null);
+    : onchainProposal;
   const snapshotLink = isOffchain
     ? (rawOffchainProposal?.link ?? null)
     : undefined;

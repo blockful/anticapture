@@ -2,36 +2,7 @@ import { keccak256, publicActions, toHex } from "viem";
 import type { Address, Chain, WalletClient } from "viem";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
-
-const GovernorQueueAbi = [
-  {
-    name: "queue",
-    type: "function",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "targets", type: "address[]" },
-      { name: "values", type: "uint256[]" },
-      { name: "calldatas", type: "bytes[]" },
-      { name: "descriptionHash", type: "bytes32" },
-    ],
-    outputs: [],
-  },
-] as const;
-
-const GovernorExecuteAbi = [
-  {
-    name: "execute",
-    type: "function",
-    stateMutability: "payable",
-    inputs: [
-      { name: "targets", type: "address[]" },
-      { name: "values", type: "uint256[]" },
-      { name: "calldatas", type: "bytes[]" },
-      { name: "descriptionHash", type: "bytes32" },
-    ],
-    outputs: [],
-  },
-] as const;
+import ensGovernorAbi from "@/abis/ens-governor.json";
 
 const AzoriusExecuteAbi = [
   {
@@ -69,7 +40,7 @@ const submitAction = async (
   daoId: DaoIdEnum,
   walletClient: WalletClient,
   args: ActionArgs,
-  onTxHash: (hash: `0x${string}`) => void,
+  onTxSubmitted: () => void,
 ) => {
   const client = walletClient.extend(publicActions);
   const daoOverview = daoConfigByDaoId[daoId].daoOverview;
@@ -114,7 +85,7 @@ const submitAction = async (
     default: {
       if (action === "queue") {
         const { request } = await client.simulateContract({
-          abi: GovernorQueueAbi,
+          abi: ensGovernorAbi,
           address,
           functionName: "queue",
           args: ozContractArgs,
@@ -124,7 +95,7 @@ const submitAction = async (
         hash = await client.writeContract(request);
       } else {
         const { request } = await client.simulateContract({
-          abi: GovernorExecuteAbi,
+          abi: ensGovernorAbi,
           address,
           functionName: "execute",
           args: ozContractArgs,
@@ -138,23 +109,23 @@ const submitAction = async (
     }
   }
 
-  onTxHash(hash);
+  onTxSubmitted();
   const receipt = await client.waitForTransactionReceipt({ hash });
   return receipt;
 };
 
 const toActionArgs = (
-  proposalTargets: (string | null)[],
-  proposalValues: (string | null)[],
-  proposalCalldatas: (string | null)[],
+  proposalTargets: string[],
+  proposalValues: string[],
+  proposalCalldatas: string[],
   description: string,
   account: Address,
   proposalId: string,
 ): ActionArgs => {
   return {
-    targets: proposalTargets.map((t) => (t ?? "0x") as `0x${string}`),
-    values: proposalValues.map((v) => BigInt(v ?? "0")),
-    calldatas: proposalCalldatas.map((c) => (c ?? "0x") as `0x${string}`),
+    targets: proposalTargets as `0x${string}`[],
+    values: proposalValues.map((v) => BigInt(v)),
+    calldatas: proposalCalldatas as `0x${string}`[],
     descriptionHash: keccak256(toHex(description)),
     account,
     proposalId,
@@ -162,14 +133,14 @@ const toActionArgs = (
 };
 
 export const queueProposal = (
-  proposalTargets: (string | null)[],
-  proposalValues: (string | null)[],
-  proposalCalldatas: (string | null)[],
+  proposalTargets: string[],
+  proposalValues: string[],
+  proposalCalldatas: string[],
   description: string,
   account: Address,
   daoId: DaoIdEnum,
   walletClient: WalletClient,
-  onTxHash: (hash: `0x${string}`) => void,
+  onTxSubmitted: () => void,
   proposalId: string,
 ) =>
   submitAction(
@@ -184,18 +155,18 @@ export const queueProposal = (
       account,
       proposalId,
     ),
-    onTxHash,
+    onTxSubmitted,
   );
 
 export const executeProposal = (
-  proposalTargets: (string | null)[],
-  proposalValues: (string | null)[],
-  proposalCalldatas: (string | null)[],
+  proposalTargets: string[],
+  proposalValues: string[],
+  proposalCalldatas: string[],
   description: string,
   account: Address,
   daoId: DaoIdEnum,
   walletClient: WalletClient,
-  onTxHash: (hash: `0x${string}`) => void,
+  onTxSubmitted: () => void,
   proposalId: string,
 ) =>
   submitAction(
@@ -210,5 +181,5 @@ export const executeProposal = (
       account,
       proposalId,
     ),
-    onTxHash,
+    onTxSubmitted,
   );
