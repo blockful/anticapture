@@ -36,17 +36,18 @@ const defaultThresholds = (
 });
 
 const createFeedEvent = (
-  overrides: Partial<FeedEventInsert> = {},
-): FeedEventInsert => ({
-  id: "test-id",
-  txHash: "0xabc123",
-  logIndex: 0,
-  type: "VOTE",
-  value: 1000n,
-  timestamp: 1700000000,
-  metadata: null,
-  ...overrides,
-});
+  overrides: Partial<Omit<FeedEventInsert, "type"> & { type: string }> = {},
+): FeedEventInsert =>
+  ({
+    id: "test-id",
+    txHash: "0xabc123",
+    logIndex: 0,
+    type: "VOTE",
+    value: 1000n,
+    timestamp: 1700000000,
+    metadata: null,
+    ...overrides,
+  }) as FeedEventInsert;
 
 describe("FeedRepository", () => {
   let client: PGlite;

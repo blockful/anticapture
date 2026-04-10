@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
-import { pgTable, index, bigint, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, index, bigint } from "drizzle-orm/pg-core";
 import { Address, zeroAddress } from "viem";
 
-import { MetricTypesArray } from "@/lib/constants";
+import { FeedEventType } from "@/lib/constants";
 
 export const token = pgTable("Token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
@@ -197,8 +197,6 @@ export const votesOnchainRelations = relations(votesOnchain, ({ one }) => ({
   }),
 }));
 
-export const metricType = pgEnum("metricType", MetricTypesArray);
-
 export const daoMetricsDayBucket = pgTable(
   "DaoMetricsDayBucket",
   (drizzle) => ({
@@ -206,7 +204,7 @@ export const daoMetricsDayBucket = pgTable(
     date: bigint({ mode: "bigint" }).notNull(),
     daoId: drizzle.text("daoId").notNull(),
     tokenId: drizzle.text("tokenId").notNull(),
-    metricType: metricType("metricType").notNull(),
+    metricType: drizzle.text("metricType").notNull(),
     open: bigint({ mode: "bigint" }).notNull(),
     close: bigint({ mode: "bigint" }).notNull(),
     low: bigint({ mode: "bigint" }).notNull(),
@@ -236,22 +234,13 @@ export const tokenPrice = pgTable("TokenPrice", (_drizzle) => ({
   timestamp: bigint({ mode: "bigint" }).notNull(),
 }));
 
-export const evenTypeEnum = pgEnum("event_type", [
-  "VOTE",
-  "PROPOSAL",
-  "DELEGATION",
-  "TRANSFER",
-  "DELEGATION_VOTES_CHANGED",
-  "PROPOSAL_EXTENDED",
-]);
-
 export const feedEvent = pgTable(
   "FeedEvent",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
     txHash: drizzle.text("txHash").notNull(),
     logIndex: drizzle.integer("logIndex").notNull(),
-    type: evenTypeEnum("type").notNull(),
+    type: drizzle.text("type").$type<FeedEventType>().notNull(),
     value: bigint({ mode: "bigint" }).notNull().default(0n),
     timestamp: bigint({ mode: "number" }).notNull(),
     metadata: drizzle.json().$type<Record<string, unknown>>(),

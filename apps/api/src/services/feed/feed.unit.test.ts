@@ -9,17 +9,18 @@ import { DBFeedEvent, FeedRequest } from "@/mappers";
 import { FeedService } from ".";
 
 const createFeedEvent = (
-  overrides: Partial<DBFeedEvent> = {},
-): DBFeedEvent => ({
-  id: "test-id",
-  txHash: "0xabc123",
-  logIndex: 0,
-  type: "VOTE",
-  value: parseEther("100000"),
-  timestamp: 1700000000,
-  metadata: null,
-  ...overrides,
-});
+  overrides: Partial<Omit<DBFeedEvent, "type"> & { type: string }> = {},
+): DBFeedEvent =>
+  ({
+    id: "test-id",
+    txHash: "0xabc123",
+    logIndex: 0,
+    type: "VOTE",
+    value: parseEther("100000"),
+    timestamp: 1700000000,
+    metadata: null,
+    ...overrides,
+  }) as DBFeedEvent;
 
 const createRequest = (overrides: Partial<FeedRequest> = {}): FeedRequest => ({
   skip: 0,
@@ -38,7 +39,7 @@ class SimpleFeedRepository {
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ) {
     const filtered = this.items.filter((e) => {
-      if (e.type === "DELEGATION_VOTES_CHANGED") return false;
+      if ((e.type as string) === "DELEGATION_VOTES_CHANGED") return false;
       const threshold = valueThresholds[e.type];
       return threshold === undefined || e.value >= threshold;
     });
