@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, CircleMinus, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useMemo } from "react";
@@ -340,8 +340,22 @@ export const ProposalItem = ({
             <>
               <BulletDivider />
               <span className="flex items-center gap-1 font-medium">
-                <CheckCircle2 className="text-success size-3.5" />
-                <span className="text-link">
+                {supportValue === 1 && (
+                  <CheckCircle2 className="text-success size-3.5" />
+                )}
+                {supportValue === 0 && (
+                  <XCircle className="text-error size-3.5" />
+                )}
+                {supportValue === 2 && (
+                  <CircleMinus className="text-secondary size-3.5" />
+                )}
+                <span
+                  className={cn(
+                    supportValue === 1 && "text-success",
+                    supportValue === 0 && "text-error",
+                    supportValue === 2 && "text-secondary",
+                  )}
+                >
                   You voted{" "}
                   {supportValue === 1
                     ? "For"

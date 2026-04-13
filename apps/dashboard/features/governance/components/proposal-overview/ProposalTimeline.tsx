@@ -98,24 +98,24 @@ export const ProposalTimeline = ({
     );
 
     if (index < lastCompletedIndex) {
-      // Past completed items - white
-      return "bg-surface-action";
+      // Past completed items
+      return "bg-dimmed";
     } else if (index === lastCompletedIndex) {
-      // Current state (last completed item) - orange/brand
+      // Current state (last completed item) - brand color
       return "bg-link";
     } else {
-      // Future pending items - gray
+      // Future pending items
       return "bg-surface-hover";
     }
   };
 
   const getTimelineLineBgColor = (index: number) => {
     // The line at index i connects item[i] to item[i+1]
-    // If the next item is completed, the line should be white (surface-action)
-    // If the next item is pending (future), the line should be gray (surface-hover)
+    // If the next item is completed, the line is dimmed (past)
+    // If the next item is pending (future), the line is surface-hover
     const nextItem = timelineItems[index + 1];
     if (nextItem && nextItem.status === "completed") {
-      return "bg-surface-action";
+      return "bg-dimmed";
     }
     return "bg-surface-hover";
   };

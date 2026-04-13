@@ -73,8 +73,8 @@
 
   /* Surface Colors */
   --color-surface-background: var(--base-background);
-  --color-surface-default: var(--base-muted);
-  --color-surface-contrast: var(--base-border);
+  --color-surface-default: var(--base-primary-foreground);
+  --color-surface-contrast: var(--base-muted);
   --color-surface-hover: var(--base-border);
   --color-surface-action: var(--base-brand);
   --color-surface-action-hover: color-mix(
@@ -104,7 +104,7 @@
   --color-surface-solid-brand: var(--base-brand);
 
   /* Border Colors */
-  --color-border-default: var(--base-border);
+  --color-border-default: var(--base-secondary);
   --color-border-contrast: var(--base-border);
   --color-border-primary: var(--base-primary-foreground);
   --color-border-error: var(--base-error);
@@ -194,7 +194,7 @@
   --base-background: #ffffff;
   --base-foreground: #09090b;
   --base-muted: #f4f4f5;
-  --base-muted-foreground: #52525b;
+  --base-muted-foreground: #71717a;
   --base-card: #ffffff;
   --base-card-foreground: #09090b;
   --base-border: #e4e4e7;
@@ -227,15 +227,15 @@
   --base-chart-7: #fbbf24;
 
   /* Custom Colors */
-  --base-primary-opacity: #18181b1f;
+  --base-primary-opacity: #fafafa1f;
   --base-primary-opacity-darker: #fafafab2;
   --base-brand: #ec762e;
   --base-brand-lighter: #fb8f4d;
   --base-brand-opacity: #fb8f4d1f;
-  --base-success: #15803d;
-  --base-success-opacity: #15803d1f;
-  --base-warning: #ca8a04;
-  --base-warning-opacity: #ca8a041f;
+  --base-success: #4ade80;
+  --base-success-opacity: #4ade801f;
+  --base-warning: #facc15;
+  --base-warning-opacity: #facc151f;
   --base-error: #f87171;
   --base-error-opacity: #f871711f;
   --base-destructive-hover: #f87171;
