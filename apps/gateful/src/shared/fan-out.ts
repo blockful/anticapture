@@ -1,3 +1,6 @@
+import { CircuitOpenError } from "./circuit-breaker.js";
+import type { CircuitBreakerRegistry } from "./circuit-breaker-registry.js";
+
 /**
  * Fetches a path from all configured DAO APIs in parallel.
  * Returns both the parsed response data and the Cache-Control header from
@@ -5,6 +8,7 @@
  */
 export async function fanOutGet<T = unknown>(
   daoApis: Map<string, string>,
+  registry: CircuitBreakerRegistry,
   path: string,
   queryString?: string,
 ): Promise<{ data: Map<string, T>; cacheControl: string | null }> {
@@ -12,17 +16,19 @@ export async function fanOutGet<T = unknown>(
 
   const results = await Promise.allSettled(
     entries.map(async ([dao, baseUrl]) => {
-      const url = new URL(path, baseUrl);
-      if (queryString) url.search = queryString;
+      return registry.get(dao).execute(async () => {
+        const url = new URL(path, baseUrl);
+        if (queryString) url.search = queryString;
 
-      const res = await fetch(url.toString(), {
-        signal: AbortSignal.timeout(5000),
+        const res = await fetch(url.toString(), {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!res.ok) throw new Error(`${dao}: ${res.status}`);
+        const cacheControl = res.headers?.get("cache-control") ?? null;
+
+        const data = (await res.json()) as T;
+        return { dao, data, cacheControl };
       });
-      if (!res.ok) throw new Error(`${dao}: ${res.status}`);
-      const cacheControl = res.headers?.get("cache-control") ?? null;
-
-      const data = (await res.json()) as T;
-      return { dao, data, cacheControl };
     }),
   );
 
@@ -36,7 +42,11 @@ export async function fanOutGet<T = unknown>(
         cacheControl = result.value.cacheControl;
       }
     } else {
-      console.error(`[fan-out] `, result.reason);
+      if (result.reason instanceof CircuitOpenError) {
+        console.warn(`[fan-out] `, result.reason);
+      } else {
+        console.error(`[fan-out] `, result.reason);
+      }
     }
   }
 

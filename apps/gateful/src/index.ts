@@ -8,6 +8,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
 import { config } from "./config.js";
+import { CircuitOpenError } from "./shared/circuit-breaker.js";
 import { createRedisClient } from "./cache/redis.js";
 import { cacheMiddleware } from "./middlewares/cache.js";
 import { health } from "./health/route.js";
@@ -17,6 +18,7 @@ import { daos } from "./resolvers/daos/route.js";
 import { DaosService } from "./resolvers/daos/service.js";
 import { averageDelegation } from "./resolvers/delegation/route.js";
 import { DelegationService } from "./resolvers/delegation/service.js";
+import { CircuitBreakerRegistry } from "./shared/circuit-breaker-registry.js";
 import { mergeUpstreamDocs } from "./upstream-docs.js";
 
 // "verbatim" preserves the DNS response order so AAAA records
@@ -24,6 +26,12 @@ import { mergeUpstreamDocs } from "./upstream-docs.js";
 dns.setDefaultResultOrder("verbatim");
 
 const app = new OpenAPIHono();
+
+app.onError((err, c) => {
+  if (err instanceof CircuitOpenError)
+    return c.json({ error: "DAO service temporarily unavailable" }, 503);
+  throw err;
+});
 
 app.use("*", cors({ origin: "*" }));
 app.use("*", logger());
@@ -39,13 +47,15 @@ console.log(
   `Discovered ${config.daoApis.size} DAO APIs: [${Array.from(config.daoApis.keys()).join(", ")}]`,
 );
 
+const registry = new CircuitBreakerRegistry(config.circuitBreaker);
+
 // OpenAPI routes
-health(app);
+health(app, registry);
 addressEnrichment(app, config.addressEnrichmentUrl);
 
 // Aggregation routes
-const daosService = new DaosService(config.daoApis);
-const delegationService = new DelegationService(config.daoApis);
+const daosService = new DaosService(config.daoApis, registry);
+const delegationService = new DelegationService(config.daoApis, registry);
 
 daos(app, daosService);
 averageDelegation(app, delegationService);
@@ -63,7 +73,7 @@ app.get("/docs/json", async (c) => {
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
 // Proxy catch-all (must be last)
-proxy(app, config.daoApis);
+proxy(app, config.daoApis, registry);
 
 console.log(`🚀 REST Gateway running`);
 
