@@ -42,8 +42,7 @@ export default function GlossaryPage() {
 
       <main className="flex-1 overflow-auto">
         <div className="lg:hidden">
-          <div className="h-[57px] w-full lg:hidden" />
-          <HeaderMobile overlayClassName="top-[57px]" />
+          <HeaderMobile className="fixed! top-0" />
         </div>
 
         <div className="flex min-h-screen w-full flex-col items-center">
@@ -52,9 +51,9 @@ export default function GlossaryPage() {
               title={PAGES_CONSTANTS.glossary.title}
               icon={<BookOpen className="section-layout-icon" />}
               description={PAGES_CONSTANTS.glossary.description}
-              className="bg-surface-background! lg:mt-0! gap-4! lg:gap-6!"
+              className="bg-surface-background! lg:mt-0! gap-4! lg:gap-6! mt-14"
             >
-              <div className="border-light-dark flex flex-col gap-2 border-t border-dashed py-5 lg:flex-row lg:gap-10 lg:border-none">
+              <div className="flex flex-col gap-2 py-5 lg:flex-row lg:gap-10 lg:border-none">
                 {/* Sticky Sidebar - Left Side */}
                 <div className="flex-shrink-0">
                   <div className="sticky top-4 lg:space-y-6">

@@ -9,6 +9,8 @@ import { logger } from "hono/logger";
 
 import { config } from "./config.js";
 import { CircuitOpenError } from "./shared/circuit-breaker.js";
+import { createRedisClient } from "./cache/redis.js";
+import { cacheMiddleware } from "./middlewares/cache.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
 import { addressEnrichment } from "./resolvers/address-enrichment/route.js";
@@ -35,6 +37,10 @@ app.use("*", cors({ origin: "*" }));
 app.use("*", logger());
 if (config.blockfulApiToken) {
   app.use("*", bearerAuth({ token: config.blockfulApiToken }));
+}
+if (config.redisUrl) {
+  const redis = createRedisClient(config.redisUrl);
+  app.use("*", cacheMiddleware(redis));
 }
 
 console.log(

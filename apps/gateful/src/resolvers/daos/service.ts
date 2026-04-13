@@ -1,7 +1,8 @@
 import type { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry.js";
 import { fanOutGet } from "../../shared/fan-out.js";
-
 import { DaoResponse, DaosResponse } from "./route.js";
+
+export type DaosResult = DaosResponse & { cacheControl: string | null };
 
 export class DaosService {
   constructor(
@@ -9,17 +10,19 @@ export class DaosService {
     private readonly registry: CircuitBreakerRegistry,
   ) {}
 
-  async getAllDaos(): Promise<DaosResponse> {
-    const responses = await fanOutGet<DaoResponse>(
+  async getAllDaos(): Promise<DaosResult> {
+    const { data, cacheControl } = await fanOutGet<DaoResponse>(
       this.daoApis,
       this.registry,
       "/dao",
     );
-    const items = Array.from(responses.values());
+
+    const items = Array.from(data.values());
 
     return {
       items,
       totalCount: items.length,
+      cacheControl,
     };
   }
 }

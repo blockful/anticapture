@@ -21,6 +21,7 @@ interface TheSectionLayoutProps {
   headerAction?: ReactNode;
   subsectionTitle?: string;
   subsectionDescription?: string;
+  hideDivider?: boolean;
 }
 
 export const TheSectionLayout = ({
@@ -34,6 +35,7 @@ export const TheSectionLayout = ({
   headerAction,
   subsectionTitle,
   subsectionDescription,
+  hideDivider = false,
 }: TheSectionLayoutProps) => {
   return (
     <div
@@ -56,7 +58,9 @@ export const TheSectionLayout = ({
         />
         {headerAction}
       </div>
-      <div className="border-border-default w-full border-b border-dashed lg:hidden" />
+      {!hideDivider && (
+        <div className="border-border-default w-full border-b border-dashed lg:hidden" />
+      )}
       {subsectionTitle ? (
         <SubSection
           subsectionTitle={subsectionTitle}

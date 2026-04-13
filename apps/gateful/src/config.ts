@@ -10,6 +10,7 @@ const envSchema = z.object({
   CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
   CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
   CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
+  REDIS_URL: z.string().optional(),
 });
 
 function loadDaoApis(
@@ -38,6 +39,7 @@ export const config = {
   port: env.PORT,
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
   blockfulApiToken: env.BLOCKFUL_API_TOKEN,
+  redisUrl: env.REDIS_URL,
   daoApis: loadDaoApis(),
   circuitBreaker: {
     failureThreshold: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD,

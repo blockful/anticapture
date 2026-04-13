@@ -153,7 +153,7 @@ export const ServiceProvidersTable = ({
         return <StatusCell status={status} reportUrl={reportUrl} />;
       },
       meta: {
-        columnClassName: cn(hasYear2 && "w-[140px]", "px-2 relative"),
+        columnClassName: "w-[140px] px-2 relative",
       },
     };
   };

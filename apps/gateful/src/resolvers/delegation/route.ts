@@ -69,6 +69,8 @@ export function averageDelegation(
       limit,
     });
 
-    return c.json(result);
+    const { cacheControl, ...body } = result;
+    if (cacheControl) c.header("Cache-Control", cacheControl);
+    return c.json(body, 200);
   });
 }

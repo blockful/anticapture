@@ -10,14 +10,6 @@ directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITI
 
 directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
 
-directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
-
-directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
-
-directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
-
-directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
-
 type Query {
   """
   Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
@@ -195,6 +187,20 @@ type Query {
 
     """Whether optimistic proposals should be included."""
     includeOptimisticProposals: Boolean = true
+  ): OnchainProposalsResponse
+
+  """
+  Returns proposals whose title or identifier partially matches the query.
+  """
+  searchProposals(
+    """Partial proposal identifier or title to search for."""
+    query: NonEmptyString!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
   ): OnchainProposalsResponse
 
   """Returns a single proposal by its ID"""
@@ -660,6 +666,20 @@ type Query {
 
     """Latest proposal creation timestamp, in Unix seconds."""
     endDate: Int
+  ): OffchainProposalsResponse
+
+  """
+  Returns offchain proposals whose title or identifier partially matches the query.
+  """
+  offchainSearchProposals(
+    """Partial Snapshot proposal identifier or title to search for."""
+    query: NonEmptyString!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
   ): OffchainProposalsResponse
 
   """Returns a single offchain (Snapshot) proposal by its ID"""
@@ -1336,6 +1356,9 @@ enum queryInput_proposals_status_items {
   NO_QUORUM
 }
 
+"""A string that cannot be passed as an empty value"""
+scalar NonEmptyString
+
 union proposal_response = OnchainProposal | ErrorResponse
 
 """Paginated historical balance records for one account."""
@@ -1971,13 +1994,12 @@ type OffchainVotesResponse {
 type OffchainVote {
   voter: String!
   proposalId: String!
-  choice: [String]!
+  choice: [String]
   vp: Float
   reason: String!
   created: Int!
   proposalTitle: String
 }
-
 
 """Sort votes by timestamp or voting power."""
 enum queryInput_votesOffchain_orderBy {
