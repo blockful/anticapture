@@ -38,7 +38,7 @@ export const HeaderSidebar = () => {
         <Link
           prefetch={true}
           href="/"
-          className="border-b-light-dark flex h-[65px] w-full shrink-0 items-center justify-center border-b"
+          className="border-b-light-dark flex h-16 w-full shrink-0 items-center justify-center border-b"
         >
           <AnticaptureIcon className="size-9" />
         </Link>

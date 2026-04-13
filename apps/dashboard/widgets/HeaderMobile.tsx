@@ -11,7 +11,6 @@ import {
   Mail,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { useState, useEffect, useMemo } from "react";
 
@@ -22,16 +21,12 @@ import { cn } from "@/shared/utils/";
 export const HeaderMobile = ({
   className,
   overlayClassName,
-  withMobileMenu = true,
 }: {
   overlayClassName?: string;
   className?: string;
-  withMobileMenu?: boolean;
 }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-
-  const pathname = usePathname();
 
   const menuItems = useMemo(
     () => [
@@ -143,8 +138,7 @@ export const HeaderMobile = ({
       >
         <div
           className={cn(
-            `fixed left-0 right-0 z-50 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
-            pathname === "/" || !withMobileMenu ? "top-[57px]" : "top-[124px]",
+            `fixed left-0 right-0 top-[57px] z-50 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
             isMenuOpen
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",
