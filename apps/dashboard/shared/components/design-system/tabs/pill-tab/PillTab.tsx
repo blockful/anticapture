@@ -16,7 +16,7 @@ export const PillTab = ({
       onClick={onClick}
       className={cn(
         // Base/layout
-        "flex flex-col items-center gap-1",
+        "flex flex-col items-center gap-1 lg:flex-row",
         // Sizing — fixed padding from Figma (px-3 py-2 = 12px/8px)
         "px-3 py-2",
         // Typography — Roboto Mono, uppercase, tracked

@@ -128,6 +128,7 @@ export const VotesTabContent = ({
     <div className="text-primary flex w-full flex-col gap-3 py-4 lg:p-4">
       <div role="tablist" className="flex items-center gap-2">
         <PillTab
+          className="w-full"
           label="Voted"
           isActive={activeTab === "voted"}
           onClick={() => setActiveTab("voted")}
@@ -142,6 +143,7 @@ export const VotesTabContent = ({
           }
         />
         <PillTab
+          className="w-full"
           label="Didn't vote"
           isActive={activeTab === "didntVote"}
           onClick={() => setActiveTab("didntVote")}

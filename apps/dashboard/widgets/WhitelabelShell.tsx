@@ -144,7 +144,6 @@ export const WhitelabelShell = ({
           >
             <a
               href={
-                daoConfig.whitelabel?.requestFeatureUrl ??
                 "https://forms.clickup.com/90132341641/f/2ky4wrw9-30353/Z1Y0VQ9TC6SQ3AMUMX"
               }
               target="_blank"
