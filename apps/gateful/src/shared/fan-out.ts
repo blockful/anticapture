@@ -20,14 +20,15 @@ export async function fanOutGet<T = unknown>(
         const url = new URL(path, baseUrl);
         if (queryString) url.search = queryString;
 
-      const res = await fetch(url.toString(), {
-        signal: AbortSignal.timeout(5000),
-      });
-      if (!res.ok) throw new Error(`${dao}: ${res.status}`);
-      const cacheControl = res.headers?.get("cache-control") ?? null;
+        const res = await fetch(url.toString(), {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!res.ok) throw new Error(`${dao}: ${res.status}`);
+        const cacheControl = res.headers?.get("cache-control") ?? null;
 
-      const data = (await res.json()) as T;
-      return { dao, data, cacheControl };
+        const data = (await res.json()) as T;
+        return { dao, data, cacheControl };
+      });
     }),
   );
 
