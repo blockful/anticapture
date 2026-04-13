@@ -3,6 +3,7 @@ import { formatUnits, parseEther } from "viem";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { DaysEnum, SECONDS_IN_DAY } from "@/lib/enums";
+import { setCacheControl } from "@/middlewares";
 import {
   SupplyComparisonResponseSchema,
   TokenDistributionComparisonQuerySchema,
@@ -42,6 +43,7 @@ export function tokenDistribution(
         path: `/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
         tags: ["tokens"],
+        middleware: [setCacheControl(60)],
         request: {
           query: TokenDistributionComparisonQuerySchema,
         },

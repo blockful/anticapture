@@ -2,13 +2,7 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "infra/gateful/Dockerfile",
-    "watchPatterns": [
-      "apps/gateful/**",
-      "infra/gateful/**",
-      "apps/api/**/*.ts",
-      "apps/address-enrichment/**/*.ts"
-    ]
+    "dockerfilePath": "infra/gateful/Dockerfile"
   },
   "deploy": {
     "healthcheckPath": "/health",

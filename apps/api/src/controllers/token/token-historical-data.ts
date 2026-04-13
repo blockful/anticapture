@@ -4,6 +4,7 @@ import {
   TokenHistoricalPriceRequest,
   TokenHistoricalPriceResponse,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 
 export interface TokenHistoricalDataClient {
   getHistoricalTokenData(
@@ -24,6 +25,7 @@ export function tokenHistoricalData(
       summary: "Get historical token data",
       description: "Get historical market data for a specific token",
       tags: ["tokens"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: TokenHistoricalPriceRequest,
       },
