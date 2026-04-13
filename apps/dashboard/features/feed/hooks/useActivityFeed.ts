@@ -1,13 +1,20 @@
-import type { FeedItem, FeedEventsQueryParams } from "@anticapture/client";
+import {
+  type FeedItem,
+  type FeedEventsQueryParams,
+  type FeedEventsPathParams,
+  getNextPageParam,
+} from "@anticapture/client";
 import { useFeedEventsSuspenseInfinite } from "@anticapture/client/hooks";
+import { useParams } from "next/navigation";
 
 export const useActivityFeed = ({
-  // daoId,
   filters,
 }: {
-  daoId: string;
   filters: FeedEventsQueryParams;
 }) => {
+  const { daoId } = useParams<{ daoId: string }>();
+  const dao = daoId.toLowerCase() as FeedEventsPathParams["dao"];
+
   const {
     data,
     isLoading,
@@ -18,7 +25,7 @@ export const useActivityFeed = ({
     refetch,
     isFetching,
   } = useFeedEventsSuspenseInfinite(
-    "ens",
+    dao,
     {
       limit: filters.limit,
       orderBy: filters.orderBy,
@@ -30,18 +37,7 @@ export const useActivityFeed = ({
     },
     {
       query: {
-        getNextPageParam: (lastPage, allPages) => {
-          const loadedCount = allPages.reduce(
-            (sum, page) => sum + page.items.length,
-            0,
-          );
-
-          if (loadedCount >= lastPage.totalCount) {
-            return undefined;
-          }
-
-          return loadedCount;
-        },
+        getNextPageParam,
       },
     },
   );
