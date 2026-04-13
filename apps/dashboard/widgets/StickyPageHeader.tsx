@@ -25,9 +25,7 @@ export const StickyPageHeader = ({
   const router = useRouter();
   const pathname = usePathname();
 
-  const isProposalPage = !!pathname?.match(
-    /\/governance\/(offchain-)?proposal\//,
-  );
+  const isProposalPage = !!pathname?.match(/\/proposals\/[^/]+/);
   const showMobileMenu = withMobileMenu && !isProposalPage;
 
   const menuItems = useMemo(

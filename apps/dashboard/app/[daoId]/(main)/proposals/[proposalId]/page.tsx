@@ -5,13 +5,18 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
   params: Promise<{ daoId: string; proposalId: string }>;
+  searchParams: Promise<{ proposalType?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
+  const { proposalType } = await props.searchParams;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
+  const isOffchain = proposalType === "offchain";
 
-  const canonicalPath = `/${params.daoId}/governance/proposal/${params.proposalId}`;
+  const canonicalPath = isOffchain
+    ? `/${params.daoId}/proposals/${params.proposalId}?proposalType=offchain`
+    : `/${params.daoId}/proposals/${params.proposalId}`;
 
   return {
     title: `${daoId} DAO Governance Proposal | Security Analysis — Anticapture`,
@@ -30,10 +35,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default function ProposalPage() {
+export default async function ProposalPage({ searchParams }: Props) {
+  const { proposalType } = await searchParams;
+
   return (
     <div>
-      <ProposalSection />
+      <ProposalSection isOffchain={proposalType === "offchain"} />
     </div>
   );
 }

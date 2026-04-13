@@ -109,11 +109,11 @@ export const getDaoProposalPath = ({
       : `/${proposalRoute}`;
   }
 
-  // Normal dashboard: /[daoId]/governance/proposal/[proposalId]
+  // Normal dashboard: /[daoId]/proposals/[proposalId]
   const daoSlug = daoId.toLowerCase();
   return isOffchain
-    ? `/${daoSlug}/governance/offchain-proposal/${proposalId}`
-    : `/${daoSlug}/governance/proposal/${proposalId}`;
+    ? `/${daoSlug}/proposals/${proposalId}?proposalType=offchain`
+    : `/${daoSlug}/proposals/${proposalId}`;
 };
 
 export const getDaoGovernanceListPath = ({
@@ -136,7 +136,7 @@ export const getDaoGovernanceListPath = ({
     return `/${WHITELABEL_ROUTES.proposals}${tab}`;
   }
 
-  return `/${daoId.toLowerCase()}/governance${tab}`;
+  return `/${daoId.toLowerCase()}/proposals${tab}`;
 };
 
 export const getDaoNotificationsPath = ({
