@@ -1,3 +1,5 @@
+/** Marker error thrown when the circuit is OPEN — lets consumers (error handler, fan-out)
+ *  distinguish "circuit rejected the call" from "upstream actually failed" via instanceof. */
 export class CircuitOpenError extends Error {
   constructor(name: string) {
     super(`Circuit breaker "${name}" is OPEN`);
@@ -7,6 +9,10 @@ export class CircuitOpenError extends Error {
 
 type State = "CLOSED" | "OPEN" | "HALF_OPEN";
 
+/** Wraps async calls with failure tracking and automatic recovery.
+ *  After consecutive failures hit the threshold, the circuit OPENS and rejects calls instantly.
+ *  After a cooldown (with exponential backoff), it transitions to HALF_OPEN and lets one probe
+ *  through — if it succeeds the circuit CLOSES, otherwise it re-opens with a longer cooldown. */
 export class CircuitBreaker {
   private _state: State = "CLOSED";
   private failureCount = 0;
