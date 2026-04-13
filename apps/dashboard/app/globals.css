@@ -77,7 +77,11 @@
   --color-surface-contrast: var(--base-border);
   --color-surface-hover: var(--base-border);
   --color-surface-action: var(--base-brand);
-  --color-surface-action-hover: color-mix(in srgb, var(--base-brand) 80%, black);
+  --color-surface-action-hover: color-mix(
+    in srgb,
+    var(--base-brand) 80%,
+    black
+  );
   --color-surface-destructive: var(--base-destructive);
   --color-surface-destructive-hover: var(--base-destructive-hover);
   --color-surface-disabled: var(--base-muted);

@@ -75,7 +75,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       >
         <div
           data-vaul-drawer-wrapper=""
-          className="border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
+          className="border-border-default mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
         >
           <GlobalProviders>
             <ShutterAttackBanner />

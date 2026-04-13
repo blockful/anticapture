@@ -12,7 +12,6 @@ import {
   ProposalHeader,
 } from "@/features/governance/components/proposal-overview/ProposalHeader";
 import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
-import { ProposalParametersSection } from "@/features/governance/components/proposal-overview/ProposalParametersSection";
 import { ProposalSectionSkeleton } from "@/features/governance/components/proposal-overview/ProposalSectionSkeleton";
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
 import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
@@ -195,7 +194,6 @@ export const ProposalSection = ({
                 offchainChoices={isOffchain ? offchainChoices : undefined}
                 offchainScores={isOffchain ? offchainScores : undefined}
               />
-              {!isOffchain && <ProposalParametersSection daoId={daoEnum} />}
               <ProposalStatusSection
                 proposal={proposal}
                 isOffchain={isOffchain}
@@ -211,6 +209,7 @@ export const ProposalSection = ({
               proposal={proposal}
               onAddressClick={handleAddressClick}
               isOffchain={isOffchain}
+              isWhitelabel={isWhitelabel}
               offchainProposalId={offchainProposalId}
               offchainChoices={offchainChoices}
               offchainScores={isOffchain ? offchainScores : undefined}

@@ -19,6 +19,7 @@ interface TabsSectionProps {
   proposal: ProposalViewData;
   onAddressClick?: (address: string) => void;
   isOffchain?: boolean;
+  isWhitelabel?: boolean;
   offchainProposalId?: string;
   offchainChoices?: string[];
   offchainScores?: number[];
@@ -29,6 +30,7 @@ export const TabsSection = ({
   proposal,
   onAddressClick,
   isOffchain = false,
+  isWhitelabel = false,
   offchainProposalId,
   offchainChoices = [],
   offchainScores,
@@ -83,7 +85,9 @@ export const TabsSection = ({
 
   return (
     <div className="lg:bg-surface-default flex flex-1 flex-col lg:min-w-0">
-      <div className="lg:bg-surface-default sticky left-0 top-[7px] z-10 w-full shrink-0 lg:top-[85px] lg:px-4">
+      <div
+        className={`lg:bg-surface-default sticky left-0 z-10 w-full shrink-0 lg:px-4 ${!isWhitelabel ? "top-[7px] lg:top-[85px]" : "top-0"}`}
+      >
         <TabGroup
           size="md"
           tabs={tabs}
