@@ -12,7 +12,6 @@ import { DefaultLink } from "@/shared/components/design-system/links/default-lin
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getWhitelabelForumProposalUrl } from "@/shared/utils/whitelabel";
 
 const XLogo = ({ className }: { className?: string }) => (
   <svg
@@ -54,11 +53,7 @@ export const TitleSection = ({
   const daoIdKey = proposal.daoId.toUpperCase() as DaoIdEnum;
   const daoConfig = daoConfigByDaoId[daoIdKey];
   const twitterHandle = DAO_TWITTER_HANDLES[proposal.daoId.toUpperCase()] ?? "";
-  const proposalLink = `${process.env.NEXT_PUBLIC_SITE_URL}/${proposal.daoId.toLowerCase()}/governance/proposal/${proposal.id}`;
-  const forumProposalUrl = getWhitelabelForumProposalUrl({
-    daoId: daoIdKey,
-    proposalTitle: proposal.title,
-  });
+  const proposalLink = `${process.env.NEXT_PUBLIC_SITE_URL}/${proposal.daoId.toLowerCase()}/proposals/${proposal.id}`;
   const twitterText = `🗳️ [${daoConfig?.name ?? proposal.daoId.toUpperCase()} DAO] PROPOSAL DETECTED — STATUS: [${proposal.status.toUpperCase()}] // This transmission needs a response. ${twitterHandle} ${proposalLink}`;
 
   return (
@@ -90,14 +85,6 @@ export const TitleSection = ({
       </div>
 
       <div className="flex w-full items-center justify-start gap-2">
-        {forumProposalUrl ? (
-          <>
-            <DefaultLink href={forumProposalUrl} openInNewTab>
-              Forum discussion
-            </DefaultLink>
-            <BulletDivider className="bg-border-contrast" />
-          </>
-        ) : null}
         <DefaultLink
           href={`https://x.com/intent/tweet?text=${encodeURIComponent(twitterText)}`}
           openInNewTab

@@ -98,10 +98,8 @@ export const ProposalHeader = ({
   });
 
   return (
-    <div
-      className={`text-primary bg-surface-background border-border-default sticky z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0 ${isWhitelabel ? "px-0" : "px-5"}`}
-    >
-      <div className="mx-auto flex w-full flex-1 items-center justify-between px-5">
+    <div className="text-primary bg-surface-background border-border-default sticky z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:top-0">
+      <div className="mx-auto flex w-full flex-1 items-center justify-between">
         <div className="flex items-center gap-2">
           {isWhitelabel ? (
             <nav className="text-body-md flex items-center gap-1.5">

@@ -12,6 +12,7 @@ import type {
   ProposalViewData,
 } from "@/features/governance/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { usePathname } from "next/navigation";
 
 type TabId = "description" | "votes" | "actions";
 
@@ -35,6 +36,9 @@ export const TabsSection = ({
   offchainScores,
   daoId,
 }: TabsSectionProps) => {
+  const pathname = usePathname();
+  const isWhitelabel = pathname.includes("/whitelabel/");
+
   const allowedTabs: TabId[] = isOffchain
     ? ["description", "votes"]
     : ["description", "votes", "actions"];
@@ -84,7 +88,9 @@ export const TabsSection = ({
 
   return (
     <div className="lg:bg-surface-default flex flex-1 flex-col lg:min-w-0">
-      <div className="border-border-default bg-surface-background lg:bg-surface-default sticky left-0 top-[118px] z-10 w-full shrink-0 border-b lg:top-[85px] lg:px-4">
+      <div
+        className={`border-border-default bg-surface-background lg:bg-surface-default sticky left-0 z-10 w-full shrink-0 border-b lg:top-[85px] lg:px-4 ${isWhitelabel ? "top-0" : "top-29.5"}`}
+      >
         <TabGroup
           size="md"
           tabs={tabs}

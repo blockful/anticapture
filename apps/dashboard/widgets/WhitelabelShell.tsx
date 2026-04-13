@@ -107,7 +107,7 @@ export const WhitelabelShell = ({
 
           <div
             className={cn(
-              "border-border-default bg-surface-background top-15.25 fixed inset-x-0 z-40 border-b px-4 py-4 transition-opacity duration-200",
+              "border-border-default bg-surface-background top-13 fixed inset-x-0 z-40 border-b px-4 py-4 transition-opacity duration-200",
               isMobileMenuOpen
                 ? "pointer-events-auto opacity-100"
                 : "pointer-events-none opacity-0",

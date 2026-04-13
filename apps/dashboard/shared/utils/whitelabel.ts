@@ -159,26 +159,6 @@ export const getDaoNotificationsPath = ({
   return `/whitelabel/${daoId.toLowerCase()}/${WHITELABEL_ROUTES.notifications}`;
 };
 
-export const getWhitelabelForumProposalUrl = ({
-  daoId,
-  proposalTitle,
-}: {
-  daoId: DaoIdEnum;
-  proposalTitle: string;
-}) => {
-  const forumBaseUrl = daoConfigByDaoId[daoId]?.forumLink;
-
-  if (!forumBaseUrl) {
-    return null;
-  }
-
-  const normalizedBaseUrl = forumBaseUrl.endsWith("/")
-    ? forumBaseUrl
-    : `${forumBaseUrl}/`;
-
-  return `${normalizedBaseUrl}search?q=${encodeURIComponent(proposalTitle)}`;
-};
-
 export const isWhitelabelProposalDetailPath = (pathname: string) =>
   /\/proposals\/[^/]+$/.test(pathname);
 

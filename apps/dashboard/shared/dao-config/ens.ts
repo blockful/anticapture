@@ -47,7 +47,7 @@ export const ENS: DaoConfiguration = {
     },
     govPlatform: {
       name: "Anticapture",
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}/ens/governance/proposal/`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/ens/proposals/`,
     },
     securityCouncil: {
       isActive: true,
