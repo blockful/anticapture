@@ -1,78 +1,71 @@
-"use client";
+import { useCallback } from "react";
+import { useQueryState, parseAsStringEnum, parseAsInteger } from "nuqs";
 
-import { useQueryState, parseAsStringEnum, parseAsString } from "nuqs";
-import { useCallback, useMemo } from "react";
-
-import type {
-  ActivityFeedFilterState,
-  FeedEventRelevance,
-} from "@/features/feed/types";
 import {
-  FeedEventRelevance as FeedRelevance,
-  FeedEventType,
-} from "@/features/feed/types";
+  type FeedRelevance,
+  type FeedEventType,
+  feedRelevanceEnum,
+  feedEventTypeEnum,
+  orderDirectionEnum,
+} from "@anticapture/client";
+import type {
+  FeedEventsQueryParams,
+  OrderDirectionEnumKey,
+} from "@anticapture/client";
 
-export interface UseActivityFeedParamsReturn {
-  filters: ActivityFeedFilterState;
-  setFilters: (filters: ActivityFeedFilterState) => void;
-  clearFilters: () => void;
-}
-
-export function useActivityFeedParams(): UseActivityFeedParamsReturn {
-  const [sortOrder, setSortOrder] = useQueryState(
+export function useActivityFeedParams() {
+  const [orderDirection, setOrderDirection] = useQueryState(
     "sort",
-    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+    parseAsStringEnum<OrderDirectionEnumKey>(
+      Object.values(orderDirectionEnum),
+    ).withDefault("desc"),
   );
   const [relevance, setRelevance] = useQueryState(
     "relevance",
-    parseAsStringEnum([
-      FeedRelevance.Low,
-      FeedRelevance.Medium,
-      FeedRelevance.High,
-    ]).withDefault(FeedRelevance.Medium),
+    parseAsStringEnum<FeedRelevance>(
+      Object.values(feedRelevanceEnum),
+    ).withDefault("MEDIUM"),
   );
-  const [fromDate, setFromDate] = useQueryState("from", parseAsString);
-  const [toDate, setToDate] = useQueryState("to", parseAsString);
+  const [fromDate, setFromDate] = useQueryState("from", parseAsInteger);
+  const [toDate, setToDate] = useQueryState("to", parseAsInteger);
   const [eventType, setEventType] = useQueryState(
     "type",
-    parseAsStringEnum([
-      FeedEventType.Vote,
-      FeedEventType.Proposal,
-      FeedEventType.ProposalExtended,
-      FeedEventType.Transfer,
-      FeedEventType.Delegation,
-    ]),
+    parseAsStringEnum<FeedEventType>(Object.values(feedEventTypeEnum)),
   );
 
-  const filters: ActivityFeedFilterState = useMemo(
-    () => ({
-      sortOrder: sortOrder as "asc" | "desc",
-      relevance: relevance as FeedEventRelevance,
-      fromDate: fromDate ?? "",
-      toDate: toDate ?? "",
-      type: (eventType as FeedEventType) ?? undefined,
-    }),
-    [sortOrder, relevance, fromDate, toDate, eventType],
-  );
+  const filters: FeedEventsQueryParams = {
+    orderDirection,
+    relevance,
+    fromDate: fromDate ?? undefined,
+    toDate: toDate ?? undefined,
+    type: eventType ?? undefined,
+  };
 
   const setFilters = useCallback(
-    (newFilters: ActivityFeedFilterState) => {
-      setSortOrder(newFilters.sortOrder);
+    (newFilters: FeedEventsQueryParams) => {
+      setOrderDirection(newFilters.orderDirection ?? "desc");
       setRelevance(newFilters.relevance ?? null);
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
       setEventType(newFilters.type ?? null);
     },
-    [setSortOrder, setRelevance, setFromDate, setToDate, setEventType],
+    [setOrderDirection, setRelevance, setFromDate, setToDate, setEventType],
   );
 
   const clearFilters = useCallback(() => {
-    setSortOrder("desc");
-    setRelevance(FeedRelevance.Medium);
+    setOrderDirection(null);
+    setRelevance(null);
     setFromDate(null);
     setToDate(null);
     setEventType(null);
-  }, [setSortOrder, setRelevance, setFromDate, setToDate, setEventType]);
+  }, [setOrderDirection, setRelevance, setFromDate, setToDate, setEventType]);
 
-  return { filters, setFilters, clearFilters };
+  const activeFiltersCount =
+    (filters.fromDate ? 1 : 0) +
+    (filters.toDate ? 1 : 0) +
+    (filters.orderDirection !== "desc" ? 1 : 0) +
+    (filters.relevance !== feedRelevanceEnum.MEDIUM ? 1 : 0) +
+    (filters.type ? 1 : 0);
+
+  return { filters, setFilters, clearFilters, activeFiltersCount };
 }

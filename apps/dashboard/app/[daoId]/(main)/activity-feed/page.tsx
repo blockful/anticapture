@@ -27,7 +27,5 @@ export default async function ActivityFeedPage({
 }: {
   params: Promise<{ daoId: string }>;
 }) {
-  await params;
-
-  return <ActivityFeedSection />;
+  return <ActivityFeedSection daoId={(await params).daoId} />;
 }
