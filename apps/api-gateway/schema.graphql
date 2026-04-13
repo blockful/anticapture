@@ -189,6 +189,20 @@ type Query {
     includeOptimisticProposals: Boolean = true
   ): OnchainProposalsResponse
 
+  """
+  Returns proposals whose title or identifier partially matches the query.
+  """
+  searchProposals(
+    """Partial proposal identifier or title to search for."""
+    query: NonEmptyString!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+  ): OnchainProposalsResponse
+
   """Returns a single proposal by its ID"""
   proposal(
     """Onchain proposal identifier."""
@@ -654,6 +668,20 @@ type Query {
     endDate: Int
   ): OffchainProposalsResponse
 
+  """
+  Returns offchain proposals whose title or identifier partially matches the query.
+  """
+  offchainSearchProposals(
+    """Partial Snapshot proposal identifier or title to search for."""
+    query: NonEmptyString!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+  ): OffchainProposalsResponse
+
   """Returns a single offchain (Snapshot) proposal by its ID"""
   offchainProposalById(
     """Snapshot proposal identifier."""
@@ -708,6 +736,21 @@ type Query {
     """Latest vote timestamp, in Unix seconds."""
     toDate: Int
   ): OffchainVotesResponse
+
+  """
+  Returns the active delegates that did not vote on a given offchain proposal
+  """
+  offchainProposalNonVoters(
+    id: String!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    orderDirection: OrderDirection = desc
+    addresses: [String]
+  ): offchainProposalNonVoters_response
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -1312,6 +1355,9 @@ enum queryInput_proposals_status_items {
   VETOED
   NO_QUORUM
 }
+
+"""A string that cannot be passed as an empty value"""
+scalar NonEmptyString
 
 union proposal_response = OnchainProposal | ErrorResponse
 
@@ -1948,7 +1994,7 @@ type OffchainVotesResponse {
 type OffchainVote {
   voter: String!
   proposalId: String!
-  choice: [String]!
+  choice: [String]
   vp: Float
   reason: String!
   created: Int!
@@ -1965,6 +2011,18 @@ enum queryInput_votesOffchain_orderBy {
 enum queryInput_votesOffchainByProposalId_orderBy {
   timestamp
   votingPower
+}
+
+union offchainProposalNonVoters_response = OffchainVotersResponse | ErrorResponse
+
+type OffchainVotersResponse {
+  items: [OffchainNonVoter]!
+  totalCount: Int!
+}
+
+type OffchainNonVoter {
+  voter: String!
+  votingPower: String!
 }
 
 type AverageDelegationPercentageItem {

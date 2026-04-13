@@ -1,6 +1,6 @@
 import { DAOClient } from "@/clients";
 import { ProposalStatus } from "@/lib/constants";
-import { DBProposal, ProposalsRequest } from "@/mappers";
+import { DBProposal, ProposalSearchRequest, ProposalsRequest } from "@/mappers";
 
 export interface ProposalsRepository {
   getProposals(
@@ -13,6 +13,12 @@ export interface ProposalsRepository {
     proposalTypeExclude?: number[],
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
+  searchProposals(
+    query: string,
+    skip: number,
+    limit: number,
+  ): Promise<DBProposal[]>;
+  getSearchProposalsCount(query: string): Promise<number>;
   getProposalById(proposalId: string): Promise<DBProposal | undefined>;
 }
 
@@ -25,6 +31,10 @@ export class ProposalsService {
 
   async getProposalsCount(): Promise<number> {
     return this.proposalsRepo.getProposalsCount();
+  }
+
+  async getSearchProposalsCount(query: string): Promise<number> {
+    return this.proposalsRepo.getSearchProposalsCount(query);
   }
 
   /**
@@ -73,6 +83,23 @@ export class ProposalsService {
     );
   }
 
+  private async hydrateProposalsStatus(
+    proposals: DBProposal[],
+  ): Promise<DBProposal[]> {
+    const currentBlock = await this.daoClient.getCurrentBlockNumber();
+    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+
+    for (const proposal of proposals) {
+      proposal.status = await this.daoClient.getProposalStatus(
+        proposal,
+        currentBlock,
+        currentTimestamp!,
+      );
+    }
+
+    return proposals;
+  }
+
   async getProposals({
     skip = 0,
     limit = 10,
@@ -104,20 +131,25 @@ export class ProposalsService {
       proposalTypeExclude,
     );
 
-    const currentBlock = await this.daoClient.getCurrentBlockNumber();
-    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
-
     // 4. Update each proposal with its real on-chain status
-    for (const proposal of proposals) {
-      proposal.status = await this.daoClient.getProposalStatus(
-        proposal,
-        currentBlock,
-        currentTimestamp!,
-      );
-    }
+    await this.hydrateProposalsStatus(proposals);
 
     // 5. Filter by originally requested statuses (handles on-chain determined statuses)
     return status ? this.filterProposalsByStatus(proposals, status) : proposals;
+  }
+
+  async searchProposals({
+    query,
+    skip = 0,
+    limit = 10,
+  }: ProposalSearchRequest): Promise<DBProposal[]> {
+    const proposals = await this.proposalsRepo.searchProposals(
+      query,
+      skip,
+      limit,
+    );
+
+    return this.hydrateProposalsStatus(proposals);
   }
 
   async getProposalById(proposalId: string): Promise<DBProposal | undefined> {

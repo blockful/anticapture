@@ -34,5 +34,13 @@ export type OffchainDrizzle =
   | NodePgDatabase<typeof offchainSchema>
   | PgliteDatabase<typeof offchainSchema>;
 
+/**
+ * Unified Drizzle type that can query both public and snapshot schemas.
+ * Used for cross-schema queries (e.g., offchain non-voters).
+ */
+export type UnifiedDrizzle =
+  | NodePgDatabase<typeof schema & typeof offchainSchema>
+  | PgliteDatabase<typeof schema & typeof offchainSchema>;
+
 export * from "./schema";
 export * from "./offchain-schema";

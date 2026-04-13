@@ -97,6 +97,17 @@
       "dependsOn": ["@anticapture/observability#build"],
       "passThroughEnv": ["*"]
     },
+    "@anticapture/indexer": {
+      "env": ["DAO_ID"]
+    },
+    "@anticapture/api": {
+      "env": [
+        "DAO_ID",
+        "CHAIN_ID",
+        "TREASURY_DATA_PROVIDER_API_URL",
+        "TREASURY_DATA_PROVIDER_ID"
+      ]
+    },
     "dev": {
       "persistent": true,
       "cache": false,

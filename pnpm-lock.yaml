@@ -613,6 +613,9 @@ importers:
       pg:
         specifier: ^8.17.2
         version: 8.20.0
+      viem:
+        specifier: ^2.47.2
+        version: 2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       zod:
         specifier: ^3.25.3
         version: 3.25.76
@@ -689,7 +692,7 @@ importers:
         version: 4.9.6
       forge-std:
         specifier: github:foundry-rs/forge-std
-        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/4540e4aadda88eeb19a54d2b5ad2117c2c7632ec
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/50fbb2ca69a24b8991771787dfa023c0429584e5
 
   packages/observability:
     dependencies:
@@ -12660,10 +12663,10 @@ packages:
       }
     engines: { node: ">=14" }
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/4540e4aadda88eeb19a54d2b5ad2117c2c7632ec:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/50fbb2ca69a24b8991771787dfa023c0429584e5:
     resolution:
       {
-        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/4540e4aadda88eeb19a54d2b5ad2117c2c7632ec,
+        tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/50fbb2ca69a24b8991771787dfa023c0429584e5,
       }
     version: 1.15.0
 
@@ -30330,7 +30333,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/4540e4aadda88eeb19a54d2b5ad2117c2c7632ec:
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/50fbb2ca69a24b8991771787dfa023c0429584e5:
     {}
 
   fork-ts-checker-webpack-plugin@9.1.0(typescript@5.9.3)(webpack@5.105.4):
