@@ -25,7 +25,7 @@ function safeParse<T>(raw: string): T | null {
  * Cache-aside middleware using Redis.
  *
  * - Skips non-GET requests.
- * - On cache hit: returns the stored response with `X-Cache: HIT`.
+ * - On cache hit: returns the stored response with `Cache-Status: Redis; hit`.
  * - On cache miss: passes through, then stores the response when:
  *     - The status is 2xx.
  *     - The upstream set a `Cache-Control: max-age=<n>` header with n > 0.
@@ -49,7 +49,7 @@ export function cacheMiddleware(redis: CacheStore) {
         headers: {
           "Content-Type": entry.contentType,
           "Cache-Control": entry.cacheControl,
-          "X-Cache": "HIT",
+          "Cache-Status": "Redis; hit",
         },
       });
     }

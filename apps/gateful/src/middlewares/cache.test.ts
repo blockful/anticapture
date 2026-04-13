@@ -48,7 +48,7 @@ function buildApp(
 async function readResponse(res: Response) {
   return {
     status: res.status,
-    xCache: res.headers.get("X-Cache"),
+    cacheStatus: res.headers.get("Cache-Status"),
     cacheControl: res.headers.get("Cache-Control"),
     body: await res.text(),
   };
@@ -69,7 +69,7 @@ describe("cacheMiddleware", () => {
   // Cache HIT
   // -------------------------------------------------------------------------
 
-  it("returns cached response with X-Cache: HIT header on cache hit", async () => {
+  it("returns cached response with Cache-Status: Redis; hit on cache hit", async () => {
     const handler = vi.fn((c: import("hono").Context) => {
       c.header("Cache-Control", "public, max-age=60");
       return c.json({ ok: true }, 200);
@@ -81,7 +81,7 @@ describe("cacheMiddleware", () => {
 
     expect(await readResponse(res)).toEqual({
       status: 200,
-      xCache: "HIT",
+      cacheStatus: "Redis; hit",
       cacheControl: "public, max-age=60",
       body: '{"ok":true}',
     });
@@ -104,7 +104,7 @@ describe("cacheMiddleware", () => {
 
     expect(await readResponse(res)).toEqual({
       status: 200,
-      xCache: null,
+      cacheStatus: null,
       cacheControl: "public, max-age=60",
       body: '{"ok":true}',
     });
@@ -123,7 +123,7 @@ describe("cacheMiddleware", () => {
 
     expect(await readResponse(res)).toEqual({
       status: 200,
-      xCache: null,
+      cacheStatus: null,
       cacheControl: "public, max-age=60",
       body: '{"ok":true}',
     });
