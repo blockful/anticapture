@@ -241,6 +241,7 @@ run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
 # 7. Dashboard
 export NEXT_PUBLIC_BASE_URL="http://localhost:${PORT_GATEWAY}/graphql"
+export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 

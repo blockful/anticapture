@@ -25,7 +25,8 @@
         "@anticapture/client#codegen"
       ],
       "persistent": true,
-      "cache": false
+      "cache": false,
+      "passThroughEnv": ["*"]
     },
     "@anticapture/graphql-client#dev": {
       "persistent": true
@@ -39,18 +40,11 @@
       "outputs": ["dist/**"]
     },
     "storybook": {
-      "dependsOn": [
-        "@anticapture/graphql-client#codegen",
-        "@anticapture/client#codegen"
-      ],
       "persistent": true,
       "cache": false
     },
     "build-storybook": {
-      "dependsOn": [
-        "@anticapture/graphql-client#codegen",
-        "@anticapture/client#codegen"
-      ],
+      "dependsOn": ["^codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
@@ -119,12 +113,8 @@
     "dev": {
       "persistent": true,
       "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "dev:rw": {
-      "persistent": true,
-      "cache": false,
-      "passThroughEnv": ["*"]
+      "passThroughEnv": ["*"],
+      "dependsOn": ["^codegen"]
     }
   }
 }

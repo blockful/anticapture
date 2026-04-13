@@ -20,7 +20,7 @@ export default defineConfig({
       },
     }),
     pluginClient({
-      client: "fetch",
+      importPath: "../src/client",
       output: {
         path: "sdk.ts",
       },

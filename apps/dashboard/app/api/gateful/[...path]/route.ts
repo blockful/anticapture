@@ -9,7 +9,7 @@ type RouteContext = {
 const buildUpstreamUrl = (request: NextRequest, path: string[]) => {
   const upstreamUrl = new URL(
     path.join("/"),
-    `${process.env.NEXT_PUBLIC_BASE_URL}/`,
+    `${process.env.NEXT_PUBLIC_GATEFUL_URL}/`,
   );
   upstreamUrl.search = new URL(request.url).search;
   return upstreamUrl;
