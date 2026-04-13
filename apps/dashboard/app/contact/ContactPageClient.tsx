@@ -77,17 +77,15 @@ export default function ContactPage() {
       <HeaderSidebar />
       <main className="flex-1 overflow-auto">
         <div className="lg:hidden">
-          <div className="h-[57px] w-full lg:hidden" />
-          <HeaderMobile overlayClassName="top-[57px]" />
+          <HeaderMobile className="fixed! top-0" />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <TheSectionLayout
             title={PAGES_CONSTANTS.contact.title}
             icon={<Mail className="section-layout-icon" />}
             description={PAGES_CONSTANTS.contact.description}
-            className="border-b-0!"
+            className="border-b-0! mt-14 lg:mt-0"
           >
-            <div className="border-border-default flex border-t border-dashed lg:hidden" />
             <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
               <div className="bg-surface-default hidden flex-col space-y-6 p-5 lg:flex">
                 <div>
