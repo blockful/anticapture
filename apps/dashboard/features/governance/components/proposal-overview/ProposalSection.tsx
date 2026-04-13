@@ -250,18 +250,16 @@ export const ProposalSection = ({
       </div>
 
       {/* Fixed bottom bar for mobile */}
-      <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
-        <MobileBottomBar
-          isOffchain={isOffchain}
-          address={address}
-          supportValue={supportValue}
-          proposalStatus={proposal.status}
-          daoId={daoEnum}
-          onVoteClick={() => setIsVotingModalOpen(true)}
-          onQueueClick={() => setIsQueueModalOpen(true)}
-          onExecuteClick={() => setIsExecuteModalOpen(true)}
-        />
-      </div>
+      <MobileBottomBar
+        isOffchain={isOffchain}
+        address={address}
+        supportValue={supportValue}
+        proposalStatus={proposal.status}
+        daoId={daoEnum}
+        onVoteClick={() => setIsVotingModalOpen(true)}
+        onQueueClick={() => setIsQueueModalOpen(true)}
+        onExecuteClick={() => setIsExecuteModalOpen(true)}
+      />
     </div>
   );
 };
@@ -285,55 +283,60 @@ const MobileBottomBar = ({
   onQueueClick: () => void;
   onExecuteClick: () => void;
 }) => {
+  const isOngoing = proposalStatus.toLowerCase() === "ongoing";
+
+  let content: React.ReactNode = null;
+
   if (isOffchain) {
-    const isOngoing = proposalStatus.toLowerCase() === "ongoing";
     if (address && isOngoing) {
-      return (
+      content = (
         <Button className="flex w-full" onClick={onVoteClick}>
           Cast your vote
           <ArrowRight className="size-3.5" />
         </Button>
       );
     }
-    return null;
-  }
-
-  if (address) {
+  } else if (address) {
     if (
       proposalStatus === "succeeded" &&
       daoId.toUpperCase() !== DaoIdEnum.SHU
     ) {
-      return (
+      content = (
         <Button className="flex w-full" onClick={onQueueClick}>
           Queue Proposal
         </Button>
       );
-    }
-
-    if (
+    } else if (
       proposalStatus === "pending_execution" ||
       proposalStatus === "queued" ||
       (proposalStatus === "succeeded" && daoId.toUpperCase() === DaoIdEnum.SHU)
     ) {
-      return (
+      content = (
         <Button className="flex w-full" onClick={onExecuteClick}>
           Execute Proposal
         </Button>
       );
-    }
-
-    if (supportValue === undefined) {
-      return (
+    } else if (supportValue === undefined) {
+      content = (
         <Button className="flex w-full" onClick={onVoteClick}>
           Cast your vote
           <ArrowRight className="size-3.5" />
         </Button>
       );
+    } else {
+      content = <MobileVotedBadge vote={Number(supportValue)} />;
     }
-    return <MobileVotedBadge vote={Number(supportValue)} />;
+  } else {
+    content = <ConnectWalletCustom className="w-full" />;
   }
 
-  return <ConnectWalletCustom className="w-full" />;
+  if (!content) return null;
+
+  return (
+    <div className="bg-surface-background border-border-default fixed bottom-0 left-0 right-0 z-50 border-t p-4 lg:hidden">
+      {content}
+    </div>
+  );
 };
 
 const MobileVotedBadge = ({ vote }: { vote: number }) => {
