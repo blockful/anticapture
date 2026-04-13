@@ -75,43 +75,55 @@ export class CircuitBreaker {
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
-    if (this._state === "OPEN") {
-      const elapsed = Date.now() - this.lastFailureTime;
-      if (elapsed >= this.currentCooldown()) {
-        // Cooldown expired — transition to HALF_OPEN and let this request probe
-        this._state = "HALF_OPEN";
-        console.warn(
-          `[circuit-breaker] ${this._name}: OPEN -> HALF_OPEN (cooldown expired, probing)`,
-        );
-      } else {
-        throw new CircuitOpenError(this._name);
-      }
+    switch (this._state) {
+      case "OPEN":
+        this.tryTransitionToHalfOpen();
+        return this.handleHalfOpen(fn);
+      case "HALF_OPEN":
+        return this.handleHalfOpen(fn);
+      case "CLOSED":
+        return this.handleClosed(fn);
     }
+  }
 
-    if (this._state === "HALF_OPEN") {
-      if (this.probeInFlight) {
-        throw new CircuitOpenError(this._name);
-      }
-      this.probeInFlight = true;
-      try {
-        const result = await fn();
-        console.warn(
-          `[circuit-breaker] ${this._name}: HALF_OPEN -> CLOSED (probe succeeded)`,
-        );
-        this.closeTheCircuit();
-        return result;
-      } catch (err) {
-        this.backoffMultiplier *= 2;
-        this.openTheCircuit();
-        this.probeInFlight = false;
-        console.warn(
-          `[circuit-breaker] ${this._name}: HALF_OPEN -> OPEN (probe failed, next retry in ${this.currentCooldown()}ms)`,
-        );
-        throw err;
-      }
+  /** If cooldown has expired, transition to HALF_OPEN; otherwise reject. */
+  private tryTransitionToHalfOpen(): void {
+    const elapsed = Date.now() - this.lastFailureTime;
+    if (elapsed < this.currentCooldown()) {
+      throw new CircuitOpenError(this._name);
     }
+    this._state = "HALF_OPEN";
+    console.warn(
+      `[circuit-breaker] ${this._name}: OPEN -> HALF_OPEN (cooldown expired, probing)`,
+    );
+  }
 
-    // CLOSED — run normally
+  /** Allow a single probe request through. Close on success, re-open on failure. */
+  private async handleHalfOpen<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.probeInFlight) {
+      throw new CircuitOpenError(this._name);
+    }
+    this.probeInFlight = true;
+    try {
+      const result = await fn();
+      console.warn(
+        `[circuit-breaker] ${this._name}: HALF_OPEN -> CLOSED (probe succeeded)`,
+      );
+      this.closeTheCircuit();
+      return result;
+    } catch (err) {
+      this.backoffMultiplier *= 2;
+      this.openTheCircuit();
+      this.probeInFlight = false;
+      console.warn(
+        `[circuit-breaker] ${this._name}: HALF_OPEN -> OPEN (probe failed, next retry in ${this.currentCooldown()}ms)`,
+      );
+      throw err;
+    }
+  }
+
+  /** Normal execution — track consecutive failures and open if threshold is reached. */
+  private async handleClosed<T>(fn: () => Promise<T>): Promise<T> {
     try {
       const result = await fn();
       this.failureCount = 0;
