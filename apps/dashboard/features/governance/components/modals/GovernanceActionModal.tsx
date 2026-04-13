@@ -58,10 +58,21 @@ export const GovernanceActionModal = ({
 
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
+      const calldatas = proposal.calldatas ?? [];
+      const validIndices = proposal.targets.reduce<number[]>((acc, t, i) => {
+        if (
+          t !== null &&
+          proposal.values[i] !== null &&
+          (calldatas[i] ?? null) !== null
+        ) {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
       await handler(
-        proposal.targets.filter((t): t is Address => t !== null),
-        proposal.values.filter((v): v is string => v !== null),
-        (proposal.calldatas ?? []).filter((c): c is Address => c !== null),
+        validIndices.map((i) => proposal.targets[i] as Address),
+        validIndices.map((i) => proposal.values[i] as string),
+        validIndices.map((i) => calldatas[i] as Address),
         proposal.description,
         address,
         daoId,

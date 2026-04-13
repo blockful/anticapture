@@ -77,7 +77,8 @@ const submitAction = async (
 
   switch (daoId) {
     case DaoIdEnum.UNISWAP:
-    case DaoIdEnum.NOUNS: {
+    case DaoIdEnum.NOUNS:
+    case DaoIdEnum.LIL_NOUNS: {
       // GovernorBravo: queue/execute take only the proposal ID
       const { request } = await client.simulateContract({
         abi: GovernorBravoAbi,
