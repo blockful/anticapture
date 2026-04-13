@@ -7,6 +7,8 @@ import { ParameterCard } from "@/features/governance-settings/components/Paramet
 import { useGovernanceSettingsData } from "@/features/governance-settings/hooks/useGovernanceSettingsData";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { TheSectionLayout } from "@/shared/components";
+import { Settings } from "lucide-react";
 
 export const GovernanceSettingsSection = () => {
   const daoIdParam = useParams().daoId as string;
@@ -19,19 +21,15 @@ export const GovernanceSettingsSection = () => {
     "https://etherscan.io";
 
   return (
-    <div className="flex w-full max-w-[1096px] flex-col gap-6 px-5 py-6">
-      {/* Header */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-primary text-2xl font-medium">
-          Governance Settings
-        </h1>
-        <p className="text-secondary text-sm">
-          View the contracts and parameters that govern how this DAO operates.
-        </p>
-      </div>
-
+    <TheSectionLayout
+      title={"Governance Settings"}
+      icon={<Settings className="section-layout-icon" />}
+      description={
+        "View the contracts and parameters that govern how this DAO operates."
+      }
+    >
       {/* Parameters */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 pb-3">
         <h2 className="text-secondary text-xs font-medium">Parameters</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {parameters.map((param) => (
@@ -50,7 +48,7 @@ export const GovernanceSettingsSection = () => {
       {contracts.length > 0 && (
         <div className="flex flex-col gap-3">
           <h2 className="text-secondary text-xs font-medium">Contracts</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {contracts.map((contract) => (
               <ContractCard
                 key={contract.label}
@@ -62,6 +60,6 @@ export const GovernanceSettingsSection = () => {
           </div>
         </div>
       )}
-    </div>
+    </TheSectionLayout>
   );
 };
