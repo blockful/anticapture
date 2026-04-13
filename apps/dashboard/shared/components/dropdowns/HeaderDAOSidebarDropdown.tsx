@@ -108,7 +108,7 @@ export const HeaderDAOSidebarDropdown = ({
   return (
     <div
       ref={ref}
-      className="border-light-dark relative z-50 inline-block h-14 w-full shrink-0 border-b lg:h-16"
+      className="border-light-dark lg:h-16.25 relative z-50 inline-block h-14 w-full shrink-0 border-b"
       onMouseLeave={() => isOpen && close()}
     >
       <div className="flex h-full items-center">
