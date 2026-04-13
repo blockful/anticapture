@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 
 import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
@@ -19,7 +20,8 @@ import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 
-export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
+export const ActivityFeedSection = () => {
+  const { daoId } = useParams<{ daoId: string }>();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [drawerState, setDrawerState] = useState<{
     address: string;
@@ -36,7 +38,6 @@ export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
     fetchNextPage,
     refetch,
   } = useActivityFeed({
-    daoId: daoId.toUpperCase() as DaoIdEnum,
     filters: {
       limit: 20,
       orderBy: filters.orderBy,
