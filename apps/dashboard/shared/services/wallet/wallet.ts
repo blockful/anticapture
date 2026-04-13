@@ -8,13 +8,11 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 import { createWalletClient } from "viem";
 import { createConfig, http } from "wagmi";
-import { mainnet, optimism, scroll } from "wagmi/chains";
+import { mainnet } from "wagmi/chains";
 
 const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
 
 export const rpcHttpUrl = `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-const rpcOptimismUrl = `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-const rpcScrollUrl = `https://scroll-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
 
 export const walletClient = createWalletClient({
   chain: mainnet,
@@ -48,11 +46,9 @@ const connectors = connectorsForWallets(
 
 const wagmiConfig = createConfig({
   connectors,
-  chains: [mainnet, optimism, scroll],
+  chains: [mainnet],
   transports: {
     [mainnet.id]: http(rpcHttpUrl),
-    [optimism.id]: http(rpcOptimismUrl),
-    [scroll.id]: http(rpcScrollUrl),
   },
 });
 

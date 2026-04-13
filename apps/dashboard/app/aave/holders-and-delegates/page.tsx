@@ -10,7 +10,7 @@ import { Footer } from "@/shared/components/design-system/footer";
 import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
-import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
+import { HeaderDAOSidebar, HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 import { DelegationTable } from "@/app/aave/holders-and-delegates/DelegationTable";
@@ -64,51 +64,46 @@ function AavePageContent() {
           <HeaderDAOSidebar />
         </div>
       </div>
-      <main className="h-screen flex-1 overflow-auto">
+      <main className="flex h-screen flex-1 flex-col overflow-hidden">
         <div className="lg:hidden">
-          <HeaderMobile />
-          <StickyPageHeader withMobileMenu={false} />
+          <HeaderMobile overlayClassName="top-[57px]" />
         </div>
-        <div className="flex w-full flex-col items-center lg:h-screen">
-          <div className="w-full flex-1">
-            <TheSectionLayout
-              title={PAGES_CONSTANTS.holdersAndDelegates.title}
-              subtitle={"Holders & Delegates"}
-              icon={<UserCheck className="section-layout-icon" />}
-              description={PAGES_CONSTANTS.holdersAndDelegates.description}
-            >
-              <SubSectionsContainer>
-                <div className="flex w-full items-center justify-between">
-                  <div className="flex gap-2">
-                    {TABS.map((tab) => (
-                      <TabButton
-                        key={tab.id}
-                        id={tab.id}
-                        label={tab.label}
-                        activeTab={activeTab as TabId}
-                        setActiveTab={handleTabChange}
-                      />
-                    ))}
-                  </div>
-                  <SwitcherDateMobile
-                    defaultValue={days || defaultDays}
-                    setTimeInterval={setDays}
+        <TheSectionLayout
+          title={PAGES_CONSTANTS.holdersAndDelegates.title}
+          subtitle={"Holders & Delegates"}
+          icon={<UserCheck className="section-layout-icon" />}
+          description={PAGES_CONSTANTS.holdersAndDelegates.description}
+        >
+          <SubSectionsContainer>
+            <div className="flex w-full items-center justify-between">
+              <div className="flex gap-2">
+                {TABS.map((tab) => (
+                  <TabButton
+                    key={tab.id}
+                    id={tab.id}
+                    label={tab.label}
+                    activeTab={activeTab as TabId}
+                    setActiveTab={handleTabChange}
                   />
-                </div>
-                {activeTab === "delegates" ? (
-                  <DelegationTable days={days || defaultDays} />
-                ) : (
-                  <TokenHolders
-                    days={days || defaultDays}
-                    daoId={DaoIdEnum.AAVE}
-                    showTokenName={false}
-                  />
-                )}
-              </SubSectionsContainer>
-            </TheSectionLayout>
-          </div>
-          <Footer />
-        </div>
+                ))}
+              </div>
+              <SwitcherDateMobile
+                defaultValue={days || defaultDays}
+                setTimeInterval={setDays}
+              />
+            </div>
+            {activeTab === "delegates" ? (
+              <DelegationTable days={days || defaultDays} />
+            ) : (
+              <TokenHolders
+                days={days || defaultDays}
+                daoId={DaoIdEnum.AAVE}
+                showTokenName={false}
+              />
+            )}
+          </SubSectionsContainer>
+        </TheSectionLayout>
+        <Footer />
       </main>
     </div>
   );

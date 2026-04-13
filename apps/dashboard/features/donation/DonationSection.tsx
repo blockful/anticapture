@@ -16,9 +16,12 @@ export const DonationSection = () => {
       title={PAGES_CONSTANTS.donate.title}
       icon={<Heart className="section-layout-icon" />}
       description={PAGES_CONSTANTS.donate.description}
-      className="bg-surface-background! lg:mt-0! mt-14"
+      className="bg-surface-background! mt-[56px]! lg:mt-0!"
     >
       <div className="flex flex-col gap-2">
+        {/* Dashed line separator - Mobile only */}
+        <div className="border-light-dark -mx-4 border-t border-dashed lg:hidden" />
+
         {/* Main donation card with integrated benefits */}
         <DonationCard
           title={donation.title}

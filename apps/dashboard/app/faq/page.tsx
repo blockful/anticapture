@@ -28,7 +28,8 @@ export default function FAQPage() {
       <HeaderSidebar />
       <main className="flex-1 overflow-auto">
         <div className="lg:hidden">
-          <HeaderMobile className="fixed! top-0" />
+          <div className="h-[57px] w-full lg:hidden" />
+          <HeaderMobile overlayClassName="top-[57px]" />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
           <div className="w-full flex-1">

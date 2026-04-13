@@ -34,9 +34,7 @@ export const Footer = ({ variant, className }: FooterProps) => {
     release?.html_url || "https://github.com/blockful/anticapture/releases";
 
   return (
-    <footer
-      className={cn(footerVariant({ variant }), className, "pb-20 lg:pb-0")}
-    >
+    <footer className={cn(footerVariant({ variant }), className)}>
       <div className="flex flex-col items-center justify-center gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2">
           <DefaultLink

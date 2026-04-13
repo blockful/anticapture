@@ -11,15 +11,9 @@ import { VoteOption } from "@/features/governance/components/proposal-overview/V
 import type { ProposalDetails } from "@/features/governance/types";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
-import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import {
-  DrawerContent,
-  DrawerRoot,
-} from "@/shared/components/design-system/drawer";
-import { useScreenSize } from "@/shared/hooks";
+import { BadgeStatus, Button } from "@/shared/components";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { formatNumberUserReadable } from "@/shared/utils";
 
 interface VotingModalProps {
   isOpen: boolean;
@@ -44,8 +38,6 @@ export const VotingModal = ({
   const [comment, setComment] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactionhash, setTransactionhash] = useState<string>("");
-
-  const { isMobile } = useScreenSize();
 
   // Parse user's voting power to BigInt for calculations
   const userVotingPowerBigInt = BigInt(rawVotingPower || "0");
@@ -111,199 +103,36 @@ export const VotingModal = ({
     }
   }, [isOpen]);
 
-  // Prevent body scroll when desktop modal is open
+  // Prevent body scroll when modal is open
   useEffect(() => {
-    if (!isMobile) {
-      if (isOpen) {
-        document.body.classList.add("no-scroll");
-      } else {
-        document.body.classList.remove("no-scroll");
-      }
-      return () => {
-        document.body.classList.remove("no-scroll");
-      };
+    if (isOpen) {
+      document.body.classList.add("no-scroll");
+    } else {
+      document.body.classList.remove("no-scroll");
     }
-  }, [isOpen, isMobile]);
 
-  // Handle escape key for desktop modal
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove("no-scroll");
+    };
+  }, [isOpen]);
+
+  // Handle escape key
   useEffect(() => {
-    if (isMobile) return;
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
       }
     };
+
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
     }
+
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen, onClose, isMobile]);
-
-  const handleSubmit = async () => {
-    if (!address || !chain || !walletClient) return;
-    setIsLoading(true);
-    const hash = await voteOnProposal(
-      vote as "for" | "against" | "abstain",
-      proposal?.id as string,
-      address as unknown as Account,
-      chain,
-      daoId,
-      walletClient,
-      setTransactionhash,
-      comment,
-    );
-    setIsLoading(false);
-    if (hash) {
-      onClose();
-      window.location.reload();
-      showCustomToast("Vote submitted successfully!", "success");
-    }
-  };
-
-  const submitDisabled =
-    !address ||
-    !chain ||
-    !vote ||
-    !walletClient ||
-    isLoading ||
-    !rawVotingPower ||
-    rawVotingPower === "0";
-
-  const content = (
-    <div className="flex h-full flex-col overflow-y-auto">
-      {/* Header */}
-      <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
-        <div className="flex flex-col items-start">
-          <h2 className="text-primary font-inter text-[16px] font-medium not-italic leading-6">
-            Cast Your Vote
-          </h2>
-          <p className="text-secondary font-inter text-[14px] font-normal not-italic leading-5">
-            Once you submit your vote, you cannot change it.
-          </p>
-        </div>
-
-        <button
-          onClick={onClose}
-          className="text-secondary hover:text-primary cursor-pointer rounded-sm p-1 transition-colors"
-          aria-label="Close"
-        >
-          <X className="size-5" />
-        </button>
-      </div>
-
-      {/* Content */}
-      {isLoading ? (
-        <LoadingComponent
-          transactionhash={transactionhash}
-          proposalId={proposal?.id as string}
-          proposalTitle={proposal?.title as string}
-          votingPower={votingPower}
-          vote={vote as "for" | "against" | "abstain"}
-        />
-      ) : (
-        <>
-          {/* your vote  */}
-          <div className="flex flex-col gap-[6px] p-4">
-            <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-              Your vote
-            </p>
-
-            {/* For vote  */}
-            <VoteOption
-              vote="for"
-              optionPercentage={forPercentage}
-              votingPower={simulatedForVotes.toString()}
-              onChange={setVote}
-              checked={vote === "for"}
-              decimals={decimals}
-            />
-
-            {/* Against vote  */}
-            <VoteOption
-              vote="against"
-              optionPercentage={againstPercentage}
-              votingPower={simulatedAgainstVotes.toString()}
-              onChange={setVote}
-              checked={vote === "against"}
-              decimals={decimals}
-            />
-
-            {/* Abstain vote  */}
-            <VoteOption
-              vote="abstain"
-              optionPercentage={abstainPercentage}
-              votingPower={simulatedAbstainVotes.toString()}
-              onChange={setVote}
-              checked={vote === "abstain"}
-              decimals={decimals}
-            />
-
-            <div className="border-border-default bg-surface-contrast flex items-center justify-start gap-2 border px-[10px] py-2">
-              <User2Icon className="text-secondary size-3.5" />
-              <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
-                Quorum
-              </p>
-              <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
-                {userReadableQuorumVotes} / {userReadableQuorum}
-              </p>
-              {isQuorumReached ? (
-                <BadgeStatus
-                  variant="success"
-                  iconClassName="text-success!"
-                  icon={Check}
-                >
-                  Reached
-                </BadgeStatus>
-              ) : (
-                <BadgeStatus variant="dimmed">Not Reached</BadgeStatus>
-              )}
-            </div>
-          </div>
-
-          {/* Comment  */}
-          <div className="flex flex-col gap-[6px] p-4">
-            <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-              Comment <span className="text-secondary">(optional)</span>
-            </p>
-            <textarea
-              className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
-              placeholder="Enter your comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
-        </>
-      )}
-
-      <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
-        <Button variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          data-ph-event="vote_submit"
-          data-ph-source="gov_fe"
-          data-umami-event="vote_submit"
-          disabled={submitDisabled}
-          loading={isLoading}
-          onClick={handleSubmit}
-        >
-          Submit
-        </Button>
-      </div>
-    </div>
-  );
-
-  if (isMobile) {
-    return (
-      <DrawerRoot open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DrawerContent className="data-[vaul-drawer-direction=bottom]:h-auto data-[vaul-drawer-direction=bottom]:max-h-[90svh]">
-          {content}
-        </DrawerContent>
-      </DrawerRoot>
-    );
-  }
+  }, [isOpen, onClose]);
 
   return (
     <div
@@ -324,7 +153,153 @@ export const VotingModal = ({
           isOpen ? "translate-y-0 scale-100" : "translate-y-4 scale-95"
         }`}
       >
-        {content}
+        {/* Header */}
+        <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
+          <div className="flex flex-col items-start">
+            <h2 className="text-primary font-inter text-[16px] font-medium not-italic leading-6">
+              Cast Your Vote
+            </h2>
+            <p className="text-secondary font-inter text-[14px] font-normal not-italic leading-5">
+              Once you submit your vote, you cannot change it.
+            </p>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="text-secondary hover:text-primary cursor-pointer rounded-sm p-1 transition-colors"
+            aria-label="Close modal"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        {isLoading ? (
+          <LoadingComponent
+            transactionhash={transactionhash}
+            proposalId={proposal?.id as string}
+            proposalTitle={proposal?.title as string}
+            votingPower={votingPower}
+            vote={vote as "for" | "against" | "abstain"}
+          />
+        ) : (
+          <>
+            {/* your vote  */}
+            <div className="flex flex-col gap-[6px] p-4">
+              <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
+                Your vote
+              </p>
+
+              {/* For vote  */}
+              <VoteOption
+                vote="for"
+                optionPercentage={forPercentage}
+                votingPower={simulatedForVotes.toString()}
+                onChange={setVote}
+                checked={vote === "for"}
+                decimals={decimals}
+              />
+
+              {/* Against vote  */}
+              <VoteOption
+                vote="against"
+                optionPercentage={againstPercentage}
+                votingPower={simulatedAgainstVotes.toString()}
+                onChange={setVote}
+                checked={vote === "against"}
+                decimals={decimals}
+              />
+
+              {/* Abstain vote  */}
+              <VoteOption
+                vote="abstain"
+                optionPercentage={abstainPercentage}
+                votingPower={simulatedAbstainVotes.toString()}
+                onChange={setVote}
+                checked={vote === "abstain"}
+                decimals={decimals}
+              />
+
+              <div className="border-border-default bg-surface-contrast flex items-center justify-start gap-2 border px-[10px] py-2">
+                <User2Icon className="text-secondary size-3.5" />
+                <p className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
+                  Quorum
+                </p>
+                <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
+                  {userReadableQuorumVotes} / {userReadableQuorum}
+                </p>
+                {isQuorumReached ? (
+                  <BadgeStatus
+                    variant="success"
+                    iconClassName="text-success!"
+                    icon={Check}
+                  >
+                    Reached
+                  </BadgeStatus>
+                ) : (
+                  <BadgeStatus variant="dimmed">Not Reached</BadgeStatus>
+                )}
+              </div>
+            </div>
+
+            {/* Comment  */}
+            <div className="flex flex-col gap-[6px] p-4">
+              <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
+                Comment <span className="text-secondary">(optional)</span>
+              </p>
+              <textarea
+                className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
+                placeholder="Enter your comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+          </>
+        )}
+
+        <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            data-ph-event="vote_submit"
+            data-ph-source="gov_fe"
+            data-umami-event="vote_submit"
+            disabled={
+              !address ||
+              !chain ||
+              !vote ||
+              !walletClient ||
+              isLoading ||
+              !rawVotingPower ||
+              rawVotingPower === "0"
+            }
+            loading={isLoading}
+            onClick={async () => {
+              if (!address || !chain || !walletClient) return;
+              setIsLoading(true);
+              const hash = await voteOnProposal(
+                vote as "for" | "against" | "abstain",
+                proposal?.id as string,
+                address as unknown as Account,
+                chain,
+                daoId,
+                walletClient,
+                setTransactionhash,
+                comment,
+              );
+              setIsLoading(false);
+              if (hash) {
+                onClose();
+                // Reload the page to fetch fresh data
+                window.location.reload();
+                showCustomToast("Vote submitted successfully!", "success");
+              }
+            }}
+          >
+            Submit
+          </Button>
+        </div>
       </div>
     </div>
   );

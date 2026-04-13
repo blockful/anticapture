@@ -73,7 +73,7 @@ export const ButtonHeaderSidebar = ({
     "flex h-[33px] w-full cursor-pointer items-center gap-2 px-2 py-2 text-sm font-medium transition-all",
     {
       "bg-primary text-inverted": isActive,
-      "lg:bg-surface-background text-secondary hover:bg-surface-contrast":
+      "bg-surface-background text-secondary hover:bg-surface-contrast":
         !isActive,
       "justify-center": isCollapsed,
     },
