@@ -2,6 +2,7 @@
 
 import { Check, Hourglass, PenLine } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import type { Address } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
 import type { ProposalViewData } from "@/features/governance/types";
@@ -57,10 +58,21 @@ export const GovernanceActionModal = ({
 
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
+      const calldatas = proposal.calldatas ?? [];
+      const validIndices = proposal.targets.reduce<number[]>((acc, t, i) => {
+        if (
+          t !== null &&
+          proposal.values[i] !== null &&
+          (calldatas[i] ?? null) !== null
+        ) {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
       await handler(
-        proposal.targets,
-        proposal.values,
-        proposal.calldatas ?? [],
+        validIndices.map((i) => proposal.targets[i] as Address),
+        validIndices.map((i) => proposal.values[i] as string),
+        validIndices.map((i) => calldatas[i] as Address),
         proposal.description,
         address,
         daoId,
@@ -78,27 +90,24 @@ export const GovernanceActionModal = ({
       onClose();
       setTimeout(() => window.location.reload(), 2000);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Action failed.";
-      console.error("[GovernanceActionModal]", err);
-      let shortMessage: string;
-      if (message.includes("rejected") || message.includes("denied")) {
-        shortMessage = "Transaction rejected by user.";
-      } else if (message.includes("reverted")) {
-        shortMessage =
-          "Contract call reverted. The proposal may not be in the correct state.";
-      } else {
-        shortMessage =
-          message.split("\n")[0]?.slice(0, 100) ?? "Action failed.";
-      }
-      setError(shortMessage);
+      const message =
+        err instanceof Error
+          ? (err.message.split("\n")[0]?.slice(0, 120) ?? "Action failed.")
+          : "Action failed.";
+      setError(message);
       setStep("error");
     }
   }, [address, walletClient, step, action, proposal, daoId, onClose, chain]);
 
   useEffect(() => {
-    if (!isOpen || !walletClient || step !== "waiting-signature") return;
+    if (!isOpen || step !== "waiting-signature") return;
+    if (!walletClient) {
+      setError(`Please switch your wallet to the ${chain.name} network.`);
+      setStep("error");
+      return;
+    }
     handleAction();
-  }, [isOpen, walletClient, handleAction, step]);
+  }, [isOpen, walletClient, handleAction, step, chain.name]);
 
   const handleClose = () => {
     setStep("waiting-signature");
