@@ -89,6 +89,7 @@ export function proposals(
       description:
         "Returns proposals whose title or identifier partially matches the query.",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         query: ProposalSearchRequestSchema,
       },
