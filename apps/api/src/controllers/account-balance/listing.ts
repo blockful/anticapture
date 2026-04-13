@@ -24,7 +24,7 @@ export function accountBalances(
       path: "/balances",
       summary: "Get account balance records",
       description: "Returns sorted and paginated account balance records",
-      tags: ["account-balances"],
+      tags: ["account-balances", "skip-pagination"],
       request: {
         query: AccountBalancesRequestSchema,
       },

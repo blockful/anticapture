@@ -20,7 +20,7 @@ export function historicalBalances(
       summary: "Get historical token balances",
       description:
         "Returns historical balance deltas for one account, enriched with the transfer that caused each change.",
-      tags: ["account-balances"],
+      tags: ["account-balances", "skip-pagination"],
       request: {
         params: HistoricalBalanceRequestParamsSchema,
         query: HistoricalBalanceRequestQuerySchema,

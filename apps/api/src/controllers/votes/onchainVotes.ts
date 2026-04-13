@@ -18,7 +18,7 @@ export function votes(app: Hono, service: VotesService) {
       summary: "List of votes for a given proposal",
       description:
         "Returns a paginated list of votes cast on a specific proposal",
-      tags: ["proposals"],
+      tags: ["proposals", "skip-pagination"],
       request: {
         params: ProposalRequestSchema,
         query: VotesRequestSchema,
@@ -70,7 +70,7 @@ export function votes(app: Hono, service: VotesService) {
       path: "/votes",
       summary: "Get all votes",
       description: "Get all votes ordered by timestamp or voting power",
-      tags: ["votes"],
+      tags: ["votes", "skip-pagination"],
       request: {
         query: VotesRequestSchema,
       },
@@ -118,7 +118,7 @@ export function votes(app: Hono, service: VotesService) {
       summary: "Get a proposal non-voters",
       description:
         "Returns the active delegates that did not vote on a given proposal",
-      tags: ["proposals"],
+      tags: ["proposals", "skip-pagination"],
       request: {
         params: ProposalRequestSchema,
         query: VotersRequestSchema,

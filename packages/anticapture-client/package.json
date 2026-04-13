@@ -2,6 +2,7 @@
   "name": "@anticapture/client",
   "version": "1.0.0",
   "scripts": {
+    "dev": "kubb generate --config kubb.config.ts --watch",
     "codegen": "kubb --config kubb.config.ts",
     "build": "pnpm codegen",
     "clean": "rm -rf node_modules dist generated *.tsbuildinfo",

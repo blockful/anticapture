@@ -215,8 +215,9 @@ if [ "$RUN_API" = true ]; then
       sleep 3
       if lsof -i ":$PORT_API" -sTCP:LISTEN >/dev/null 2>&1; then
         if [ "$api_was_up" = false ]; then
-          log "API recovered — reloading Gateway..."
+          log "API recovered — reloading Gateway and Gateful..."
           touch "$(dirname "$0")/../apps/api-gateway/src/_dev-reload.ts"
+          touch "$(dirname "$0")/../apps/gateful/src/_dev-reload.ts"
           api_was_up=true
         fi
       else

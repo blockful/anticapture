@@ -42,7 +42,7 @@ export function votingPowerVariations(
         "Get voting power changes within a time frame for the given addresses",
       description:
         "Returns a mapping of the voting power changes within a time frame for the given addresses",
-      tags: ["voting-power"],
+      tags: ["voting-power", "skip-pagination"],
       request: {
         query: VotingPowerVariationsRequestQuerySchema,
       },

@@ -6,7 +6,7 @@ import { pluginTs } from "@kubb/plugin-ts";
 
 export default defineConfig({
   input: {
-    path: "https://gateful.up.railway.app/docs/json",
+    path: "http://localhost:4001/docs/json",
   },
   output: {
     path: "./generated",
@@ -48,6 +48,18 @@ export default defineConfig({
           name === "dao" && type === "function" ? "getDao" : name, // rename "dao" operation ID to getDao
       },
       suspense: {},
+      override: [
+        {
+          type: "tag",
+          pattern: /skip-pagination/,
+          options: {
+            infinite: {
+              initialPageParam: 0,
+              queryParam: "skip",
+            },
+          },
+        },
+      ],
     }),
   ],
 });

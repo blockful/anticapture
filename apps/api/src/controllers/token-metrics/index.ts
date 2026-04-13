@@ -17,7 +17,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
       path: "/token-metrics",
       summary: "Get token related metrics",
       description: `Returns token related metrics for a single metric type.`,
-      tags: ["metrics"],
+      tags: ["metrics", "skip-pagination"],
       request: {
         query: TokenMetricsRequestSchema,
       },

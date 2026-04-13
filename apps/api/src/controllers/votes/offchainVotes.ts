@@ -15,7 +15,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
       path: "/offchain/votes",
       summary: "Get offchain votes",
       description: "Returns a list of offchain (Snapshot) votes",
-      tags: ["offchain"],
+      tags: ["offchain", "skip-pagination"],
       request: {
         query: OffchainVotesRequestSchema,
       },
@@ -63,7 +63,7 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
       summary: "Get offchain votes for a proposal",
       description:
         "Returns a paginated list of offchain (Snapshot) votes for a specific proposal",
-      tags: ["offchain"],
+      tags: ["offchain", "skip-pagination"],
       request: {
         params: OffchainProposalRequestSchema,
         query: OffchainVotesRequestSchema,

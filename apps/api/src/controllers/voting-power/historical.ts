@@ -39,7 +39,7 @@ export function historicalVotingPower(
       summary: "Get voting power changes by account",
       description:
         "Returns a list of voting power changes for a specific account",
-      tags: ["voting-power"],
+      tags: ["voting-power", "skip-pagination"],
       request: {
         params: HistoricalVotingPowerRequestParamsSchema,
         query: HistoricalVotingPowerRequestQuerySchema,
@@ -93,7 +93,7 @@ export function historicalVotingPower(
       path: "/voting-powers/historical",
       summary: "Get voting power changes",
       description: "Returns a list of voting power changes.",
-      tags: ["voting-power"],
+      tags: ["voting-power", "skip-pagination"],
       request: {
         query: HistoricalVotingPowerGlobalQuerySchema,
       },

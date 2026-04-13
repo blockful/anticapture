@@ -1,11 +1,18 @@
 const DEFAULT_BASE_URL = "/api/gateful";
 
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+type HttpMethod =
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "PATCH"
+  | "DELETE"
+  | "OPTIONS"
+  | "HEAD";
 
 export type RequestConfig<TData = unknown> = {
-  url: string;
-  method: HttpMethod;
-  params?: Record<string, unknown>;
+  url?: string;
+  method?: HttpMethod;
+  params?: unknown;
   data?: TData | FormData;
   responseType?:
     | "arraybuffer"
@@ -15,7 +22,7 @@ export type RequestConfig<TData = unknown> = {
     | "text"
     | "stream";
   signal?: AbortSignal;
-  headers?: HeadersInit;
+  headers?: [string, string][] | Record<string, string>;
   baseURL?: string;
 };
 
@@ -23,6 +30,7 @@ export type ResponseConfig<TData = unknown> = {
   data: TData;
   headers: Headers;
   status: number;
+  statusText: string;
 };
 
 export type ResponseErrorConfig<TError = unknown> = Error & {
@@ -54,7 +62,7 @@ const appendSearchParams = (
 
 const resolveUrl = (
   url: string,
-  params?: Record<string, unknown>,
+  params?: unknown,
   baseURL = DEFAULT_BASE_URL,
 ) => {
   const isAbsolute = /^https?:\/\//.test(url);
@@ -66,8 +74,8 @@ const resolveUrl = (
     "http://localhost",
   );
 
-  if (params) {
-    appendSearchParams(target.searchParams, params);
+  if (params && typeof params === "object") {
+    appendSearchParams(target.searchParams, params as Record<string, unknown>);
   }
 
   return isAbsolute ? target.toString() : `${target.pathname}${target.search}`;
@@ -88,7 +96,10 @@ const getBody = (data: unknown) => {
   return JSON.stringify(data);
 };
 
-const getHeaders = (headers?: HeadersInit, data?: unknown) => {
+const getHeaders = (
+  headers?: [string, string][] | Record<string, string>,
+  data?: unknown,
+) => {
   const resolvedHeaders = new Headers(headers);
 
   if (data !== undefined && data !== null && !isFormData(data)) {
@@ -128,8 +139,8 @@ const getResponseData = async <TData>(
 };
 
 const client = async <TData = unknown, TError = unknown, TVariables = unknown>({
-  url,
-  method,
+  url = "/",
+  method = "GET",
   params,
   data,
   responseType,
@@ -149,6 +160,7 @@ const client = async <TData = unknown, TError = unknown, TVariables = unknown>({
     data: responseData,
     headers: response.headers,
     status: response.status,
+    statusText: response.statusText,
   };
 
   if (!response.ok) {
@@ -159,6 +171,7 @@ const client = async <TData = unknown, TError = unknown, TVariables = unknown>({
       data: responseData as TError,
       headers: response.headers,
       status: response.status,
+      statusText: response.statusText,
     };
     error.status = response.status;
     throw error;

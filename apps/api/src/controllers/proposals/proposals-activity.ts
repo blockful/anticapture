@@ -26,7 +26,7 @@ export function proposalsActivity(
       summary: "Get proposals activity for delegate",
       description:
         "Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window",
-      tags: ["proposals"],
+      tags: ["proposals", "skip-pagination"],
       request: {
         query: ProposalActivityRequestSchema,
       },

@@ -15,7 +15,7 @@ export function transactions(app: Hono, service: TransactionsService) {
       summary: "Get transactions with transfers and delegations",
       description:
         "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
-      tags: ["transactions"],
+      tags: ["transactions", "skip-pagination"],
       request: {
         query: TransactionsRequestSchema,
       },

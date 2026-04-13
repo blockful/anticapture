@@ -9,6 +9,7 @@
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "dist",
+    "noEmit": true,
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*.ts", "generated/**/*.ts"],

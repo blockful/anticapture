@@ -16,7 +16,7 @@ export function delegators(app: Hono, service: DelegatorsService) {
       path: "/accounts/{address}/delegators",
       summary: "Get delegators",
       description: "Get current delegators of an account with voting power",
-      tags: ["delegations"],
+      tags: ["delegations", "skip-pagination"],
       request: {
         params: DelegatorsRequestParamsSchema,
         query: DelegatorsRequestQuerySchema,

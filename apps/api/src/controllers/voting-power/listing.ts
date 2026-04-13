@@ -44,7 +44,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       path: "/voting-powers",
       summary: "Get voting powers",
       description: "Returns sorted and paginated account voting power records",
-      tags: ["voting-power"],
+      tags: ["voting-power", "skip-pagination"],
       request: {
         query: VotingPowersRequestSchema,
       },

@@ -25,7 +25,7 @@ export function proposals(
       path: "/proposals",
       summary: "Get proposals",
       description: "Returns a list of proposal",
-      tags: ["proposals"],
+      tags: ["proposals", "skip-pagination"],
       request: {
         query: ProposalsRequestSchema,
       },
@@ -86,7 +86,7 @@ export function proposals(
       summary: "Search proposals",
       description:
         "Returns proposals whose title or identifier partially matches the query.",
-      tags: ["proposals"],
+      tags: ["proposals", "skip-pagination"],
       request: {
         query: ProposalSearchRequestSchema,
       },

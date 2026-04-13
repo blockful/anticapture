@@ -21,7 +21,7 @@ export function historicalDelegations(
       summary: "Get historical delegations",
       description:
         "Get historical delegations for an account, with optional filtering and sorting",
-      tags: ["delegations"],
+      tags: ["delegations", "skip-pagination"],
       request: {
         params: HistoricalDelegationsRequestParamsSchema,
         query: HistoricalDelegationsRequestQuerySchema,
