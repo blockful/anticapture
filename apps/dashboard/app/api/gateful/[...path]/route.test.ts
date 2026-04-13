@@ -2,9 +2,16 @@ import { NextRequest } from "next/server";
 
 import { GET } from "./route";
 
+const MOCK_GATEFUL_URL = "https://gateful.mock.local";
+
 describe("Gateful proxy route", () => {
   beforeEach(() => {
+    process.env.NEXT_PUBLIC_GATEFUL_URL = MOCK_GATEFUL_URL;
     global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_GATEFUL_URL;
   });
 
   it("forwards path segments and query params", async () => {
@@ -28,9 +35,7 @@ describe("Gateful proxy route", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      new URL(
-        "https://gateful.up.railway.app/comp/feed/events?limit=5&relevance=HIGH",
-      ),
+      new URL(`${MOCK_GATEFUL_URL}/comp/feed/events?limit=5&relevance=HIGH`),
       expect.objectContaining({
         method: "GET",
       }),
