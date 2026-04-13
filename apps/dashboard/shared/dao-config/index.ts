@@ -14,8 +14,6 @@ import { AAVE } from "@/shared/dao-config/aave";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { GovernanceImplementationEnum } from "@/shared/types/enums";
 
-const DEFAULT_REQUEST_FEATURE_URL = "https://blockful.io/contact";
-
 const createDerivedGovernanceParameters = (config: DaoConfiguration) => {
   const rules = config.daoOverview.rules;
   const governanceFields = config.governanceImplementation?.fields;
@@ -60,22 +58,9 @@ const withDerivedWhitelabelConfig = (
   whitelabel: config.whitelabel
     ? {
         ...config.whitelabel,
-        theme: config.whitelabel.theme ?? "dark",
-        requestFeatureUrl:
-          config.whitelabel.requestFeatureUrl ?? DEFAULT_REQUEST_FEATURE_URL,
-        customDomain:
-          config.whitelabel.customDomain ?? config.whitelabel.hostnames[0],
-        forumBaseUrl:
-          config.whitelabel.forumBaseUrl ?? config.forumLink ?? undefined,
-        branding: {
-          appName:
-            config.whitelabel.branding?.appName ?? `${config.name} Governance`,
-          logo: config.whitelabel.branding?.logo ?? config.icon,
-        },
         governanceParameters:
           config.whitelabel.governanceParameters ??
           createDerivedGovernanceParameters(config),
-        hostnames: config.whitelabel.hostnames ?? [],
       }
     : undefined,
 });

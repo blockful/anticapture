@@ -23,17 +23,9 @@ export const SHU: DaoConfiguration = {
   },
   forumLink: "https://shutternetwork.discourse.group/c/shutter-dao/14",
   icon: ShutterIcon,
-  whitelabel: {
-    theme: "light",
-    requestFeatureUrl: "https://blockful.io/contact",
-    customDomain: "governance.ens.domains", // change later
-    forumBaseUrl: "https://discuss.ens.domains/", // change later
-    branding: {
-      appName: "Shutter Governance",
-      logo: ShutterIcon,
-    },
-    hostnames: ["governance.ens.domains"], // change later
-  },
+  customDomain: "governance.ens.domains", // TODO: update when domain is ready
+  hostnames: ["governance.ens.domains"], // TODO: update when domain is ready
+  whitelabel: {},
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },

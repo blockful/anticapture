@@ -24,17 +24,9 @@ export const ENS: DaoConfiguration = {
   forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
   ogIcon: EnsOgIcon,
-  whitelabel: {
-    theme: "light",
-    requestFeatureUrl: "https://blockful.io/contact",
-    customDomain: "governance.ens.domains",
-    forumBaseUrl: "https://discuss.ens.domains/",
-    branding: {
-      appName: "ENS Governance",
-      logo: EnsIcon,
-    },
-    hostnames: ["governance.ens.domains"],
-  },
+  customDomain: "governance.ens.domains",
+  hostnames: ["governance.ens.domains"],
+  whitelabel: {},
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },

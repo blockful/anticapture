@@ -122,20 +122,11 @@ export interface AttackProfitabilityConfig {
 export type GovernanceImplementationConfig = GovernanceImplementation;
 
 export interface WhitelabelConfig {
-  theme: "light" | "dark";
-  requestFeatureUrl?: string;
-  customDomain?: string;
-  forumBaseUrl?: string;
-  branding?: {
-    appName?: string;
-    logo?: (props: DaoIconProps) => ReactNode;
-  };
   governanceParameters?: Array<{
     label: string;
     value: string;
     description?: string;
   }>;
-  hostnames: string[];
 }
 
 export type DefenseAreaDescription = {
@@ -161,6 +152,8 @@ export type DaoFeaturePageSlug =
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
   whitelabel?: WhitelabelConfig;
+  customDomain?: string;
+  hostnames?: string[];
   activityFeed?: boolean;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;

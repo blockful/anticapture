@@ -158,8 +158,8 @@ export const WhitelabelSidebar = ({
             isCollapsed && "justify-center",
           )}
         >
-          {daoConfig.whitelabel?.branding?.logo ? (
-            <daoConfig.whitelabel.branding.logo className="size-8 shrink-0 rounded-full" />
+          {daoConfig.icon ? (
+            <daoConfig.icon className="size-8 shrink-0 rounded-full" />
           ) : (
             <DaoAvatarIcon
               daoId={daoId}

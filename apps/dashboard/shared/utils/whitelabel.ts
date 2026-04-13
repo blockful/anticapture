@@ -18,7 +18,7 @@ export type WhitelabelRouteSlug =
 
 const NORMALIZED_HOSTNAME_TO_DAO_ID = Object.entries(daoConfigByDaoId).reduce(
   (acc, [daoId, daoConfig]) => {
-    daoConfig.whitelabel?.hostnames.forEach((hostname) => {
+    daoConfig.hostnames?.forEach((hostname) => {
       acc[hostname.toLowerCase()] = daoId as DaoIdEnum;
     });
 
@@ -166,7 +166,7 @@ export const getWhitelabelForumProposalUrl = ({
   daoId: DaoIdEnum;
   proposalTitle: string;
 }) => {
-  const forumBaseUrl = getWhitelabelConfig(daoId)?.forumBaseUrl;
+  const forumBaseUrl = daoConfigByDaoId[daoId]?.forumLink;
 
   if (!forumBaseUrl) {
     return null;
