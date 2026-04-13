@@ -21,11 +21,13 @@ type DropdownItem = {
 export interface HeaderDAOSidebarDropdownProps {
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 export const HeaderDAOSidebarDropdown = ({
   isCollapsed = false,
   onToggleCollapse,
+  onOpenChange,
 }: HeaderDAOSidebarDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -40,17 +42,19 @@ export const HeaderDAOSidebarDropdown = ({
     if (!isOpen) return;
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setIsClosing(true);
+    onOpenChange?.(false);
     closeTimerRef.current = setTimeout(() => {
       setIsOpen(false);
       setIsClosing(false);
     }, ANIMATION_DURATION);
-  }, [isOpen]);
+  }, [isOpen, onOpenChange]);
 
   const open = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setIsClosing(false);
     setIsOpen(true);
-  }, []);
+    onOpenChange?.(true);
+  }, [onOpenChange]);
 
   const toggle = useCallback(() => {
     if (isOpen && !isClosing) {
@@ -104,7 +108,7 @@ export const HeaderDAOSidebarDropdown = ({
   return (
     <div
       ref={ref}
-      className="border-light-dark relative z-50 inline-block h-16 w-full shrink-0 border-b"
+      className="border-light-dark lg:h-16.25 relative z-50 inline-block h-14 w-full shrink-0 border-b"
       onMouseLeave={() => isOpen && close()}
     >
       <div className="flex h-full items-center">

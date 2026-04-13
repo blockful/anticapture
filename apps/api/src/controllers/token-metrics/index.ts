@@ -6,6 +6,7 @@ import {
   toTokenMetricsApi,
 } from "@/mappers/token-metrics";
 import {} from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 
 import { TokenMetricsService } from "@/services/token-metrics";
 
@@ -18,6 +19,7 @@ export function tokenMetrics(app: Hono, service: TokenMetricsService) {
       summary: "Get token related metrics",
       description: `Returns token related metrics for a single metric type.`,
       tags: ["metrics"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: TokenMetricsRequestSchema,
       },

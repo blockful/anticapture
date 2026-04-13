@@ -8,12 +8,14 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
 
 interface ProposalHeaderProps {
   daoId: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
+  setIsQueueModalOpen: (isOpen: boolean) => void;
+  setIsExecuteModalOpen: (isOpen: boolean) => void;
   votingPower: string;
   votes: GetAccountPowerQuery["votesByProposalId"] | null;
   address: string | undefined;
@@ -77,6 +79,8 @@ export const ProposalHeader = ({
   votingPower,
   votes,
   setIsVotingModalOpen,
+  setIsQueueModalOpen,
+  setIsExecuteModalOpen,
   address,
   proposalStatus,
   snapshotLink,
@@ -94,7 +98,7 @@ export const ProposalHeader = ({
   });
 
   return (
-    <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 flex h-[60px] w-full shrink-0 items-center justify-between gap-6 border-b py-2">
+    <div className="text-primary bg-surface-background border-border-default top-13.75 sticky z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0">
       <div className="mx-auto flex w-full flex-1 items-center justify-between px-5">
         <div className="flex items-center gap-2">
           {isWhitelabel ? (
@@ -190,6 +194,28 @@ export const ProposalHeader = ({
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
               />
+              {address &&
+                proposalStatus === "succeeded" &&
+                daoId.toUpperCase() !== DaoIdEnum.SHU && (
+                  <Button
+                    className="hidden lg:flex"
+                    onClick={() => setIsQueueModalOpen(true)}
+                  >
+                    Queue Proposal
+                  </Button>
+                )}
+              {address &&
+                (proposalStatus === "pending_execution" ||
+                  proposalStatus === "queued" ||
+                  (proposalStatus === "succeeded" &&
+                    daoId.toUpperCase() === DaoIdEnum.SHU)) && (
+                  <Button
+                    className="hidden lg:flex"
+                    onClick={() => setIsExecuteModalOpen(true)}
+                  >
+                    Execute Proposal
+                  </Button>
+                )}
             </>
           )}
         </div>

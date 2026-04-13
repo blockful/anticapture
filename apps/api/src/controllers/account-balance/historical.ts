@@ -6,6 +6,7 @@ import {
   HistoricalBalanceRequestQuerySchema,
   HistoricalBalancesResponseSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { HistoricalBalancesService } from "@/services";
 
 export function historicalBalances(
@@ -21,6 +22,7 @@ export function historicalBalances(
       description:
         "Returns historical balance deltas for one account, enriched with the transfer that caused each change.",
       tags: ["account-balances"],
+      middleware: [setCacheControl(60)],
       request: {
         params: HistoricalBalanceRequestParamsSchema,
         query: HistoricalBalanceRequestQuerySchema,

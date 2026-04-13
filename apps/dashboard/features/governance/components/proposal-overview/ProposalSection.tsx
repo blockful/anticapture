@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useState, useCallback, useMemo } from "react";
 import { useAccount } from "wagmi";
 
+import { GovernanceActionModal } from "@/features/governance/components/modals/GovernanceActionModal";
 import { OffchainVotingModal } from "@/features/governance/components/modals/OffchainVotingModal";
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import {
@@ -34,7 +35,7 @@ import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { TelegramBotMessage } from "@/shared/components/messages";
 import daoConfig from "@/shared/dao-config";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 interface ProposalSectionProps {
   isOffchain?: boolean;
@@ -55,6 +56,8 @@ export const ProposalSection = ({
 
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
+  const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
   const daoEnum = (daoId as string).toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
@@ -137,7 +140,7 @@ export const ProposalSection = ({
 
   const proposal: ProposalViewData | null = isOffchain
     ? adaptedOffchainProposal
-    : (onchainProposal ?? null);
+    : (onchainProposal as ProposalViewData | null);
   const snapshotLink = isOffchain
     ? (rawOffchainProposal?.link ?? null)
     : undefined;
@@ -174,6 +177,8 @@ export const ProposalSection = ({
         <ProposalHeader
           daoId={daoId as string}
           setIsVotingModalOpen={setIsVotingModalOpen}
+          setIsQueueModalOpen={setIsQueueModalOpen}
+          setIsExecuteModalOpen={setIsExecuteModalOpen}
           votingPower={votingPower}
           votes={votes}
           address={address}
@@ -182,6 +187,7 @@ export const ProposalSection = ({
           isWhitelabel={isWhitelabel}
         />
         <div className="mx-auto w-full">
+          <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
           <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
             <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
               <TitleSection
@@ -229,6 +235,22 @@ export const ProposalSection = ({
                 daoId={daoEnum}
               />
 
+              <GovernanceActionModal
+                isOpen={isQueueModalOpen}
+                onClose={() => setIsQueueModalOpen(false)}
+                action="queue"
+                proposal={proposal}
+                daoId={daoEnum}
+              />
+
+              <GovernanceActionModal
+                isOpen={isExecuteModalOpen}
+                onClose={() => setIsExecuteModalOpen(false)}
+                action="execute"
+                proposal={proposal}
+                daoId={daoEnum}
+              />
+
               <HoldersAndDelegatesDrawer
                 isOpen={!!drawerAddress}
                 onClose={handleCloseDrawer}
@@ -248,16 +270,16 @@ export const ProposalSection = ({
           )}
         </div>
 
-        {/* Fixed bottom bar for mobile */}
-        <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
-          <MobileBottomBar
-            isOffchain={isOffchain}
-            address={address}
-            supportValue={supportValue}
-            proposalStatus={proposal.status}
-            onVoteClick={() => setIsVotingModalOpen(true)}
-          />
-        </div>
+        <MobileBottomBar
+          isOffchain={isOffchain}
+          address={address}
+          supportValue={supportValue}
+          proposalStatus={proposal.status}
+          daoId={daoEnum}
+          onVoteClick={() => setIsVotingModalOpen(true)}
+          onQueueClick={() => setIsQueueModalOpen(true)}
+          onExecuteClick={() => setIsExecuteModalOpen(true)}
+        />
       </div>
     </ProposalHeaderProvider>
   );
@@ -268,40 +290,74 @@ const MobileBottomBar = ({
   address,
   supportValue,
   proposalStatus,
+  daoId,
   onVoteClick,
+  onQueueClick,
+  onExecuteClick,
 }: {
   isOffchain: boolean;
   address: string | undefined;
   supportValue: number | undefined;
   proposalStatus: string;
+  daoId: DaoIdEnum;
   onVoteClick: () => void;
+  onQueueClick: () => void;
+  onExecuteClick: () => void;
 }) => {
+  const isOngoing = proposalStatus.toLowerCase() === "ongoing";
+
+  let content: React.ReactNode = null;
+
   if (isOffchain) {
-    const isOngoing = proposalStatus.toLowerCase() === "ongoing";
     if (address && isOngoing) {
-      return (
+      content = (
         <Button className="flex w-full" onClick={onVoteClick}>
           Cast your vote
           <ArrowRight className="size-3.5" />
         </Button>
       );
     }
-    return null;
-  }
-
-  if (address) {
-    if (supportValue === undefined) {
-      return (
+  } else if (address) {
+    if (
+      proposalStatus === "succeeded" &&
+      daoId.toUpperCase() !== DaoIdEnum.SHU
+    ) {
+      content = (
+        <Button className="flex w-full" onClick={onQueueClick}>
+          Queue Proposal
+        </Button>
+      );
+    } else if (
+      proposalStatus === "pending_execution" ||
+      proposalStatus === "queued" ||
+      (proposalStatus === "succeeded" && daoId.toUpperCase() === DaoIdEnum.SHU)
+    ) {
+      content = (
+        <Button className="flex w-full" onClick={onExecuteClick}>
+          Execute Proposal
+        </Button>
+      );
+    } else if (supportValue === undefined) {
+      content = (
         <Button className="flex w-full" onClick={onVoteClick}>
           Cast your vote
           <ArrowRight className="size-3.5" />
         </Button>
       );
+    } else {
+      content = <MobileVotedBadge vote={Number(supportValue)} />;
     }
-    return <MobileVotedBadge vote={Number(supportValue)} />;
+  } else {
+    content = <ConnectWalletCustom className="w-full" />;
   }
 
-  return <ConnectWalletCustom className="w-full" />;
+  if (!content) return null;
+
+  return (
+    <div className="bg-surface-background border-border-default fixed bottom-0 left-0 right-0 z-50 border-t p-4 lg:hidden">
+      {content}
+    </div>
+  );
 };
 
 const MobileVotedBadge = ({ vote }: { vote: number }) => {

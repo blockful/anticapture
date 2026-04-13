@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { formatEther } from "viem";
 
 import { DaysEnum } from "@/lib/enums";
+import { setCacheControl } from "@/middlewares";
 import {
   ActiveSupplyResponseSchema,
   AverageTurnoutComparisonResponseSchema,
@@ -40,6 +41,7 @@ export function governanceActivity(
       path: "/active-supply/compare",
       summary: "Get active token supply for DAO",
       tags: ["governance"],
+      middleware: [setCacheControl(60)],
       request: {
         query: GovernanceActivityDaysQuerySchema,
       },
@@ -68,6 +70,7 @@ export function governanceActivity(
       path: "/proposals/compare",
       summary: "Compare number of proposals between time periods",
       tags: ["governance"],
+      middleware: [setCacheControl(60)],
       request: {
         query: GovernanceActivityDaysQuerySchema,
       },
@@ -117,6 +120,7 @@ export function governanceActivity(
       path: "/votes/compare",
       summary: "Compare number of votes between time periods",
       tags: ["governance"],
+      middleware: [setCacheControl(60)],
       request: {
         query: GovernanceActivityDaysQuerySchema,
       },
@@ -165,6 +169,7 @@ export function governanceActivity(
       path: "/average-turnout/compare",
       summary: "Compare average turnout between time periods",
       tags: ["governance"],
+      middleware: [setCacheControl(60)],
       request: {
         query: GovernanceActivityDaysQuerySchema,
       },

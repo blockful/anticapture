@@ -84,11 +84,7 @@ export const TabsSection = ({
 
   return (
     <div className="lg:bg-surface-default flex flex-1 flex-col lg:min-w-0">
-      <div
-        className={
-          "lg:bg-surface-default sticky left-0 top-[7px] z-10 w-full shrink-0 lg:top-[85px] lg:px-4"
-        }
-      >
+      <div className="border-border-default bg-surface-background lg:bg-surface-default sticky left-0 top-[118px] z-10 w-full shrink-0 border-b lg:top-[85px] lg:px-4">
         <TabGroup
           size="md"
           tabs={tabs}

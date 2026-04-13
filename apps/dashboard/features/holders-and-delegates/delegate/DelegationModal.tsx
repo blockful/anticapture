@@ -2,7 +2,7 @@
 
 import { Check, Hourglass, PenLine } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import type { Account, Address } from "viem";
+import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useReadContract, useWalletClient } from "wagmi";
 
@@ -45,7 +45,6 @@ export const DelegationModal = ({
   onSuccess,
 }: DelegationModalProps) => {
   const { address: userAddress } = useAccount();
-  const { data: walletClient } = useWalletClient();
   const [step, setStep] = useState<DelegationStep>("waiting-signature");
   const [error, setError] = useState<string | null>(null);
 
@@ -53,6 +52,8 @@ export const DelegationModal = ({
   const tokenAddress = daoConfig?.daoOverview?.contracts?.token as
     | Address
     | undefined;
+  const chain = daoConfig?.daoOverview?.chain;
+  const { data: walletClient } = useWalletClient({ chainId: chain?.id });
   const decimals = daoConfig?.decimals ?? 18;
 
   const { data: votingPowerRaw } = useReadContract({
@@ -79,9 +80,10 @@ export const DelegationModal = ({
       await delegateTo(
         tokenAddress,
         delegateAddress,
-        userAddress as unknown as Account,
+        userAddress,
         walletClient,
         () => setStep("pending-tx"),
+        chain,
       );
       setStep("success");
       showCustomToast("Delegation successful!", "success");
