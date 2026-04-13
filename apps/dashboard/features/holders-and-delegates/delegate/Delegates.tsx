@@ -217,7 +217,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="group flex w-full items-center">
+          <div className="group flex w-40 items-center lg:w-full">
             <div className="min-w-0 flex-1">
               <EnsAvatar
                 address={address as Address}

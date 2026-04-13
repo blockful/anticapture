@@ -97,61 +97,66 @@ export const WhitelabelShell = ({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <WhitelabelHeader />
-        <WhitelabelHeaderMobile
-          daoId={daoId}
-          isMenuOpen={isMobileMenuOpen}
-          onToggleMenu={() => setIsMobileMenuOpen((current) => !current)}
-        />
 
-        <div
-          className={cn(
-            "bg-surface-background border-border-default lg:hidden",
-            isMobileMenuOpen ? "block border-b px-4 py-4" : "hidden",
-          )}
-        >
-          <div className="mb-4 sm:hidden">
-            <WhitelabelConnectWallet className="w-full justify-center" />
-          </div>
+        <div className="lg:hidden">
+          <WhitelabelHeaderMobile
+            daoId={daoId}
+            isMenuOpen={isMobileMenuOpen}
+            onToggleMenu={() => setIsMobileMenuOpen((current) => !current)}
+          />
 
-          <nav className="flex flex-col gap-2">
-            {navItems.map(({ page, label, href, icon: Icon }) => {
-              const isActive =
-                pathname === href || pathname.startsWith(`${href}/`);
-
-              return (
-                <Link
-                  key={page}
-                  href={href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-surface-opacity-brand text-link"
-                      : "text-secondary hover:bg-surface-contrast hover:text-primary",
-                  )}
-                >
-                  <Icon className="size-5 shrink-0" />
-                  <span>{label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <Button
-            variant="outline"
-            asChild
-            className="mt-4 w-full justify-center"
+          <div
+            className={cn(
+              "border-border-default bg-surface-background top-15.25 fixed inset-x-0 z-40 border-b px-4 py-4 transition-opacity duration-200",
+              isMobileMenuOpen
+                ? "pointer-events-auto opacity-100"
+                : "pointer-events-none opacity-0",
+            )}
           >
-            <a
-              href={
-                "https://forms.clickup.com/90132341641/f/2ky4wrw9-30353/Z1Y0VQ9TC6SQ3AMUMX"
-              }
-              target="_blank"
-              rel="noopener noreferrer"
+            <div className="mb-4 sm:hidden">
+              <WhitelabelConnectWallet className="w-full justify-center" />
+            </div>
+
+            <nav className="flex flex-col gap-2">
+              {navItems.map(({ page, label, href, icon: Icon }) => {
+                const isActive =
+                  pathname === href || pathname.startsWith(`${href}/`);
+
+                return (
+                  <Link
+                    key={page}
+                    href={href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-surface-opacity-brand text-link"
+                        : "text-secondary hover:bg-surface-contrast hover:text-primary",
+                    )}
+                  >
+                    <Icon className="size-5 shrink-0" />
+                    <span>{label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <Button
+              variant="outline"
+              asChild
+              className="mt-4 w-full justify-center"
             >
-              Request feature
-            </a>
-          </Button>
+              <a
+                href={
+                  "https://forms.clickup.com/90132341641/f/2ky4wrw9-30353/Z1Y0VQ9TC6SQ3AMUMX"
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Request feature
+              </a>
+            </Button>
+          </div>
         </div>
 
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">

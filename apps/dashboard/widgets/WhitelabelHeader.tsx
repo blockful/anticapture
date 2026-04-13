@@ -24,7 +24,7 @@ export const WhitelabelHeader = () => {
   if (onProposalDetail) return null;
 
   return (
-    <header className="border-border-default bg-surface-background sticky top-0 z-10 hidden h-[60px] items-center justify-between gap-6 border-b px-6 lg:flex">
+    <header className="border-border-default bg-surface-background sticky top-0 z-10 hidden h-[65px] items-center justify-between gap-6 border-b px-6 lg:flex">
       <div className="flex min-w-0 flex-1 items-center gap-4">
         {showSearch && (
           <div className="max-w-xl flex-1">

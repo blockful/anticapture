@@ -23,47 +23,48 @@ export const WhitelabelHeaderMobile = ({
   const pathname = usePathname();
 
   return (
-    <div className="border-border-default bg-surface-background sticky top-0 z-30 border-b px-4 py-3 lg:hidden">
-      <div className="flex items-center justify-between gap-3">
-        <Link
-          href={getDaoPagePath({
-            daoId,
-            pathname,
-            page: WHITELABEL_ROUTES.proposals,
-          })}
-          className="flex min-w-0 items-center gap-3"
-        >
-          {daoConfig.icon ? (
-            <daoConfig.icon className="size-9 shrink-0 rounded-full" />
-          ) : (
-            <DaoAvatarIcon
-              daoId={daoId}
-              className="size-9"
-              isRounded
-              showBackground={false}
-            />
-          )}
-          <span className="text-primary truncate text-base font-semibold">
-            {daoConfig.name}
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:block">
-            <WhitelabelConnectWallet className="max-w-[240px]" />
-          </div>
-          <button
-            type="button"
-            onClick={onToggleMenu}
-            aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
-            className="text-primary rounded-lg border border-transparent p-2"
+    <div className="relative left-0 top-0 z-50 w-full lg:hidden">
+      <div className="border-border-default bg-surface-background z-50 border-b px-4 py-1.5">
+        <div className="flex items-center justify-between">
+          <Link
+            href={getDaoPagePath({
+              daoId,
+              pathname,
+              page: WHITELABEL_ROUTES.proposals,
+            })}
+            className="flex min-w-0 items-center gap-3"
           >
-            {isMenuOpen ? (
-              <X className="size-5" />
+            {daoConfig.icon ? (
+              <daoConfig.icon className="size-9 shrink-0 rounded-full" />
             ) : (
-              <Menu className="size-5" />
+              <DaoAvatarIcon
+                daoId={daoId}
+                className="size-9"
+                isRounded
+                showBackground={false}
+              />
             )}
-          </button>
+            <span className="text-primary truncate text-base font-semibold">
+              {daoConfig.name}
+            </span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="flex h-full w-full">
+              <WhitelabelConnectWallet className="max-w-[240px]" />
+            </div>
+            <button
+              type="button"
+              onClick={onToggleMenu}
+              aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
+              className="text-primary rounded-lg border border-transparent p-2"
+            >
+              {isMenuOpen ? (
+                <X className="size-6" />
+              ) : (
+                <Menu className="size-6" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

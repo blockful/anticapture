@@ -151,7 +151,7 @@ export const WhitelabelSidebar = ({
       )}
     >
       {/* Header */}
-      <div className="border-border-default relative flex h-[60px] shrink-0 items-center border-b px-2.5 py-2">
+      <div className="border-border-default relative flex h-[65px] shrink-0 items-center border-b px-2.5 py-2">
         <div
           className={cn(
             "flex flex-1 items-center gap-2 p-1",
