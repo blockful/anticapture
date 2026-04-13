@@ -7,6 +7,9 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(4001),
   ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
   BLOCKFUL_API_TOKEN: z.string().optional(),
+  CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
+  CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
+  CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
 });
 
 function loadDaoApis(
@@ -36,4 +39,9 @@ export const config = {
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
   blockfulApiToken: env.BLOCKFUL_API_TOKEN,
   daoApis: loadDaoApis(),
+  circuitBreaker: {
+    failureThreshold: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+    cooldownMs: env.CIRCUIT_BREAKER_COOLDOWN_MS,
+    maxCooldownMs: env.CIRCUIT_BREAKER_MAX_COOLDOWN_MS,
+  },
 };

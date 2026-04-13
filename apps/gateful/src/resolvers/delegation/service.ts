@@ -1,3 +1,4 @@
+import type { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry.js";
 import { fanOutGet } from "../../shared/fan-out.js";
 
 export type DelegationPercentageResponse = {
@@ -12,7 +13,10 @@ export type DelegationPercentageResponse = {
 };
 
 export class DelegationService {
-  constructor(private readonly daoApis: Map<string, string>) {}
+  constructor(
+    private readonly daoApis: Map<string, string>,
+    private readonly registry: CircuitBreakerRegistry,
+  ) {}
 
   async getAverageDelegationPercentage(args: {
     startDate: string;
@@ -32,6 +36,7 @@ export class DelegationService {
 
     const daoResponses = await fanOutGet<DelegationPercentageResponse>(
       this.daoApis,
+      this.registry,
       "/delegation-percentage",
       params.toString(),
     );
