@@ -5,6 +5,7 @@ import {
   DelegationsResponseSchema,
 } from "@/mappers/delegations";
 import {} from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 
 import { DelegationsService } from "@/services/delegations/current";
 
@@ -17,6 +18,7 @@ export function delegations(app: Hono, service: DelegationsService) {
       summary: "Get delegations",
       description: "Get current delegations for an account",
       tags: ["delegations"],
+      middleware: [setCacheControl(60)],
       request: {
         params: DelegationsRequestParamsSchema,
       },

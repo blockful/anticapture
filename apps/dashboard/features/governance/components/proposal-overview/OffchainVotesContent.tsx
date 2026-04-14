@@ -35,17 +35,21 @@ const getLabelDisplay = (label: string) => {
   return { label, icon: null as React.ReactNode };
 };
 
-const getChoiceInfo = (choice: Array<number | null>, choices: string[]) => {
+const getChoiceInfo = (choice: string[], choices: string[]) => {
   if (choice.length === 0) return { label: "—", icon: null as React.ReactNode };
 
   if (choice.length === 1 && choice[0] != null) {
-    const label = choices[choice[0] - 1] ?? `Choice ${choice[0]}`;
+    const idx = Number(choice[0]);
+    const label = choices[idx - 1] ?? `Choice ${choice[0]}`;
     return getLabelDisplay(label);
   }
 
   const label = choice
-    .filter((c): c is number => c != null)
-    .map((c) => choices[c - 1] ?? `Choice ${c}`)
+    .filter((c): c is string => c != null)
+    .map((c) => {
+      const idx = Number(c);
+      return choices[idx - 1] ?? `Choice ${c}`;
+    })
     .join(", ");
   return { label, icon: null as React.ReactNode };
 };
@@ -266,7 +270,7 @@ export const OffchainVotesContent = ({
               </div>
             );
           }
-          const choice = row.getValue("choice") as Array<number | null>;
+          const choice = row.getValue("choice") as string[];
           const { icon, label } = getChoiceInfo(choice, choices);
           return (
             <div className="flex items-center gap-2 p-2">

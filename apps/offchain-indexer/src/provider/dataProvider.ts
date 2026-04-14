@@ -1,4 +1,5 @@
 import { type AxiosInstance } from "axios";
+import { z } from "zod";
 
 import { rawProposalSchema, offchainProposalSchema } from "@/mappers/proposal";
 import { toOffchainVote, rawVoteSchema } from "@/mappers/vote";
@@ -83,7 +84,7 @@ export class SnapshotProvider implements DataProvider {
     const cursorInt = cursor ? parseInt(cursor, 10) : 0;
 
     const response = await this.query<{
-      proposals: (typeof rawProposalSchema)[];
+      proposals: z.input<typeof rawProposalSchema>[];
     }>(PROPOSALS_QUERY, {
       spaceId: this.spaceId,
       cursor: cursorInt,
@@ -107,10 +108,13 @@ export class SnapshotProvider implements DataProvider {
   ): Promise<{ data: OffchainVote[]; nextCursor: string | null }> {
     const cursorInt = cursor ? parseInt(cursor, 10) : 0;
 
-    const response = await this.query<{ votes: (typeof rawVoteSchema)[] }>(
-      VOTES_QUERY,
-      { spaceId: this.spaceId, cursor: cursorInt, pageSize: PAGE_SIZE },
-    );
+    const response = await this.query<{
+      votes: z.input<typeof rawVoteSchema>[];
+    }>(VOTES_QUERY, {
+      spaceId: this.spaceId,
+      cursor: cursorInt,
+      pageSize: PAGE_SIZE,
+    });
 
     const votes: OffchainVote[] = response.votes.map((v) =>
       toOffchainVote(this.spaceId).parse(v),

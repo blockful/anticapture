@@ -56,6 +56,12 @@ function createSimpleRepository(): Repository & {
     resetCursor: vi.fn(async (entity: string) => {
       cursors.delete(entity);
     }),
+    clearProposals: vi.fn(async () => {
+      savedProposals.length = 0;
+    }),
+    clearVotes: vi.fn(async () => {
+      savedVotes.length = 0;
+    }),
     saveProposals: vi.fn(
       async (proposals: OffchainProposal[], cursor: string) => {
         savedProposals.push(...proposals);
@@ -132,6 +138,8 @@ describe("Indexer", () => {
     const promise = indexer.start(true);
     await vi.advanceTimersByTimeAsync(0);
 
+    expect(repo.clearVotes).toHaveBeenCalled();
+    expect(repo.clearProposals).toHaveBeenCalled();
     expect(repo.resetCursor).toHaveBeenCalledWith("proposals");
     expect(repo.resetCursor).toHaveBeenCalledWith("votes");
     expect(provider.fetchProposals).toHaveBeenCalledWith(null);

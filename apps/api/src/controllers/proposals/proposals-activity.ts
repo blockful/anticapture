@@ -7,6 +7,7 @@ import {
   ProposalActivityRequestSchema,
   ProposalActivityResponseSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { DrizzleProposalsActivityRepository } from "@/repositories/";
 import { ProposalsActivityService } from "@/services";
 
@@ -27,6 +28,7 @@ export function proposalsActivity(
       description:
         "Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         query: ProposalActivityRequestSchema,
       },
