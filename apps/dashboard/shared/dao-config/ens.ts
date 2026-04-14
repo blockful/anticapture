@@ -24,8 +24,8 @@ export const ENS: DaoConfiguration = {
   forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
   ogIcon: EnsOgIcon,
-  customDomain: "governance.ens.domains",
-  hostnames: ["governance.ens.domains"],
+  customDomain: "staging.anticapture.com",
+  hostnames: ["staging.anticapture.com"],
   whitelabel: {},
   daoOverview: {
     token: "ERC20",
