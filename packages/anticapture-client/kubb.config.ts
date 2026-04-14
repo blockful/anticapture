@@ -1,12 +1,18 @@
+import { fileURLToPath } from "node:url";
+
 import { defineConfig } from "@kubb/core";
 import { pluginClient } from "@kubb/plugin-client";
 import { pluginOas } from "@kubb/plugin-oas";
 import { pluginReactQuery } from "@kubb/plugin-react-query";
 import { pluginTs } from "@kubb/plugin-ts";
 
+const gatefulOpenApiSpecPath = fileURLToPath(
+  new URL("../../apps/gateful/openapi/gateful.json", import.meta.url),
+);
+
 export default defineConfig({
   input: {
-    path: "http://localhost:4001/docs/json",
+    path: gatefulOpenApiSpecPath,
   },
   output: {
     path: "./generated",

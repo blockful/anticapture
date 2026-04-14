@@ -7,6 +7,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(4001),
   ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
   BLOCKFUL_API_TOKEN: z.string().optional(),
+  REDIS_URL: z.string().optional(),
 });
 
 function loadDaoApis(
@@ -35,5 +36,6 @@ export const config = {
   port: env.PORT,
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
   blockfulApiToken: env.BLOCKFUL_API_TOKEN,
+  redisUrl: env.REDIS_URL,
   daoApis: loadDaoApis(),
 };

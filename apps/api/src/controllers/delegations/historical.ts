@@ -6,6 +6,7 @@ import {
   DelegationsResponseSchema,
 } from "@/mappers/delegations";
 import {} from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 
 import { HistoricalDelegationsService } from "@/services/delegations";
 
@@ -22,6 +23,7 @@ export function historicalDelegations(
       description:
         "Get historical delegations for an account, with optional filtering and sorting",
       tags: ["delegations", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         params: HistoricalDelegationsRequestParamsSchema,
         query: HistoricalDelegationsRequestQuerySchema,

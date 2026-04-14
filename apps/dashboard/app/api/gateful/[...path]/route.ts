@@ -7,8 +7,9 @@ type RouteContext = {
 };
 
 const buildUpstreamUrl = (request: NextRequest, path: string[]) => {
+  const pathname = path.map(encodeURIComponent).join("/");
   const upstreamUrl = new URL(
-    path.join("/"),
+    pathname ? `./${pathname}` : "./",
     `${process.env.NEXT_PUBLIC_GATEFUL_URL}/`,
   );
   upstreamUrl.search = new URL(request.url).search;

@@ -8,6 +8,8 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
 import { config } from "./config.js";
+import { createRedisClient } from "./cache/redis.js";
+import { cacheMiddleware } from "./middlewares/cache.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
 import { addressEnrichment } from "./resolvers/address-enrichment/route.js";
@@ -15,7 +17,7 @@ import { daos } from "./resolvers/daos/route.js";
 import { DaosService } from "./resolvers/daos/service.js";
 import { averageDelegation } from "./resolvers/delegation/route.js";
 import { DelegationService } from "./resolvers/delegation/service.js";
-import { mergeUpstreamDocs } from "./upstream-docs.js";
+import { storeOpenApiSpec } from "./upstream-docs.js";
 
 // "verbatim" preserves the DNS response order so AAAA records
 // are used directly, allowing fetch() to resolve *.railway.internal correctly.
@@ -27,6 +29,10 @@ app.use("*", cors({ origin: "*" }));
 app.use("*", logger());
 if (config.blockfulApiToken) {
   app.use("*", bearerAuth({ token: config.blockfulApiToken }));
+}
+if (config.redisUrl) {
+  const redis = createRedisClient(config.redisUrl);
+  app.use("*", cacheMiddleware(redis));
 }
 
 console.log(
@@ -45,14 +51,16 @@ daos(app, daosService);
 averageDelegation(app, delegationService);
 
 // OpenAPI docs
-app.get("/docs/json", async (c) => {
-  const ownSpec = app.getOpenAPI31Document({
+const getOpenApiSpec = storeOpenApiSpec(
+  app.getOpenAPI31Document({
     openapi: "3.1.0",
     info: { title: "Anticapture REST Gateway", version: "1.0.0" },
-  });
+  }),
+  config.daoApis,
+);
 
-  const merged = await mergeUpstreamDocs(ownSpec, config.daoApis);
-  return c.json(merged);
+app.get("/docs/json", async (c) => {
+  return c.json(await getOpenApiSpec());
 });
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 

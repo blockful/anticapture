@@ -5,6 +5,7 @@ import {
   TreasuryQuerySchema,
 } from "@/mappers/treasury";
 import {} from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { TreasuryService } from "@/services/treasury";
 
 export function treasury(
@@ -21,6 +22,7 @@ export function treasury(
       description:
         "Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)",
       tags: ["treasury"],
+      middleware: [setCacheControl(60)],
       request: {
         query: TreasuryQuerySchema,
       },
@@ -54,6 +56,7 @@ export function treasury(
       description:
         "Get historical DAO Token Treasury value (governance token quantity × token price)",
       tags: ["treasury"],
+      middleware: [setCacheControl(60)],
       request: {
         query: TreasuryQuerySchema,
       },
@@ -88,6 +91,7 @@ export function treasury(
       description:
         "Get historical Total Treasury (liquid treasury + DAO token treasury)",
       tags: ["treasury"],
+      middleware: [setCacheControl(60)],
       request: {
         query: TreasuryQuerySchema,
       },

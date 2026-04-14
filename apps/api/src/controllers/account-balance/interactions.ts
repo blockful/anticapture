@@ -1,6 +1,8 @@
 import { Address } from "viem";
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
+import { setCacheControl } from "@/middlewares";
+
 import {
   AccountInteractions,
   AccountInteractionsMapper,
@@ -33,6 +35,7 @@ export function accountInteractions(app: Hono, service: InteractionsService) {
       description: `Returns a mapping of the largest interactions between accounts. 
 Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>`,
       tags: ["account-balances", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         params: AccountInteractionsParamsSchema,
         query: AccountInteractionsQuerySchema,

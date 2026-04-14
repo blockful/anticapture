@@ -5,6 +5,7 @@ import {
   TransfersRequestQuerySchema,
   TransfersResponseSchema,
 } from "@/mappers/";
+import { setCacheControl } from "@/middlewares";
 import { TransfersService } from "@/services";
 
 export function transfers(app: Hono, service: TransfersService) {
@@ -16,6 +17,7 @@ export function transfers(app: Hono, service: TransfersService) {
       summary: "Get transfers",
       description: "Get transfers of a given address",
       tags: ["transfers", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         params: TransfersRequestRouteSchema,
         query: TransfersRequestQuerySchema,
