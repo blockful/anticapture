@@ -137,9 +137,11 @@ export const ProposalHeader = ({
         <div className="flex items-center gap-4">
           {isWhitelabel ? (
             <>
-              <div className="hidden lg:flex">
-                <WhitelabelConnectWallet />
-              </div>
+              {address && (
+                <div className="hidden lg:flex">
+                  <WhitelabelConnectWallet />
+                </div>
+              )}
               <ProposalHeaderAction
                 address={address}
                 supportValue={

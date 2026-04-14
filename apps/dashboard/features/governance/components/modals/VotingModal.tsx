@@ -185,7 +185,10 @@ export const VotingModal = ({
         </div>
 
         <button
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+            if (isSuccess) window.location.reload();
+          }}
           className="text-secondary hover:text-primary cursor-pointer rounded-sm p-1 transition-colors"
           aria-label="Close"
         >
@@ -195,12 +198,7 @@ export const VotingModal = ({
 
       {/* Content */}
       {isSuccess ? (
-        <VoteSuccessContent
-          onClose={() => {
-            onClose();
-            window.location.reload();
-          }}
-        />
+        <VoteSuccessContent onClose={onClose} />
       ) : isLoading ? (
         <LoadingComponent
           transactionhash={transactionhash}
@@ -323,7 +321,10 @@ export const VotingModal = ({
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={() => {
+          onClose();
+          if (isSuccess) window.location.reload();
+        }}
         aria-hidden="true"
       />
 

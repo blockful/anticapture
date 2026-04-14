@@ -97,7 +97,7 @@ export default async function RootLayout({
           <GlobalProviders>
             {children}
             <CookieConsent isWhitelabel={isWhitelabel} />
-            <HelpPopover />
+            <HelpPopover isWhitelabel={isWhitelabel} />
           </GlobalProviders>
           <Toaster position="bottom-left" reverseOrder={false} />
           <ConditionalPostHog />

@@ -156,7 +156,7 @@ export const getDaoNotificationsPath = ({
     return `/${WHITELABEL_ROUTES.notifications}`;
   }
 
-  return `/whitelabel/${daoId.toLowerCase()}/${WHITELABEL_ROUTES.notifications}`;
+  return "/alerts";
 };
 
 export const isWhitelabelProposalDetailPath = (pathname: string) =>

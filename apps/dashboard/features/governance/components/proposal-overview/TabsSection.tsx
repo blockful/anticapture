@@ -12,8 +12,6 @@ import type {
   ProposalViewData,
 } from "@/features/governance/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { usePathname } from "next/navigation";
-
 type TabId = "description" | "votes" | "actions";
 
 interface TabsSectionProps {
@@ -31,14 +29,12 @@ export const TabsSection = ({
   proposal,
   onAddressClick,
   isOffchain = false,
+  isWhitelabel = false,
   offchainProposalId,
   offchainChoices = [],
   offchainScores,
   daoId,
 }: TabsSectionProps) => {
-  const pathname = usePathname();
-  const isWhitelabel = pathname.includes("/whitelabel/");
-
   const allowedTabs: TabId[] = isOffchain
     ? ["description", "votes"]
     : ["description", "votes", "actions"];
