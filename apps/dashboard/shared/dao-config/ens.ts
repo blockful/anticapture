@@ -24,7 +24,6 @@ export const ENS: DaoConfiguration = {
   forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
   ogIcon: EnsOgIcon,
-  customDomain: "staging.anticapture.com",
   hostnames: ["staging.anticapture.com"],
   whitelabel: {},
   daoOverview: {
