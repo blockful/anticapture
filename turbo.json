@@ -13,23 +13,9 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "@anticapture/graphql-client#build": {
-      "outputs": ["generated/**"]
-    },
-    "@anticapture/client#codegen": {
-      "outputs": ["generated/**"]
-    },
-    "@anticapture/dashboard#dev": {
-      "dependsOn": [
-        "@anticapture/graphql-client#codegen",
-        "@anticapture/client#codegen"
-      ],
-      "persistent": true,
-      "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "@anticapture/graphql-client#dev": {
-      "persistent": true
+    "@anticapture/graphql-client#codegen": {
+      "inputs": ["documents/**/*", "codegen.ts"],
+      "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^build", "^codegen"],
@@ -89,7 +75,6 @@
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {
-      "inputs": ["documents/**/*", "codegen.ts"],
       "outputs": ["generated/**"]
     },
     "db:generate": {
