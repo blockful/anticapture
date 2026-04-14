@@ -21,6 +21,7 @@ jobs:
               - "apps/api-gateway/**/*.ts"
               - "packages/graphql-client/**"
             rest:
+              - "apps/gateful/openapi/gateful.json"
               - "apps/gateful/**/*.ts"
               - "packages/anticapture-client/**"
 

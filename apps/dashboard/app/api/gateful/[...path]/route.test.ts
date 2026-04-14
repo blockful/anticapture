@@ -42,8 +42,8 @@ describe("Gateful proxy route", () => {
     );
   });
 
-  it("injects the server-side GATEFUL_API_TOKEN as authorization header", async () => {
-    process.env.GATEFUL_API_TOKEN = "server-secret";
+  it("injects the server-side BLOCKFUL_API_TOKEN as authorization header", async () => {
+    process.env.BLOCKFUL_API_TOKEN = "server-secret";
 
     (global.fetch as jest.Mock).mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), {
@@ -69,11 +69,11 @@ describe("Gateful proxy route", () => {
 
     expect(headers.get("authorization")).toBe("Bearer server-secret");
 
-    delete process.env.GATEFUL_API_TOKEN;
+    delete process.env.BLOCKFUL_API_TOKEN;
   });
 
-  it("sends no authorization header when GATEFUL_API_TOKEN is not set", async () => {
-    delete process.env.GATEFUL_API_TOKEN;
+  it("sends no authorization header when BLOCKFUL_API_TOKEN is not set", async () => {
+    delete process.env.BLOCKFUL_API_TOKEN;
 
     (global.fetch as jest.Mock).mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), {
