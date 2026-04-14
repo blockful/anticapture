@@ -15,7 +15,7 @@ import { daos } from "./resolvers/daos/route.js";
 import { DaosService } from "./resolvers/daos/service.js";
 import { averageDelegation } from "./resolvers/delegation/route.js";
 import { DelegationService } from "./resolvers/delegation/service.js";
-import { mergeUpstreamDocs } from "./upstream-docs.js";
+import { storeOpenApiSpec } from "./upstream-docs.js";
 
 // "verbatim" preserves the DNS response order so AAAA records
 // are used directly, allowing fetch() to resolve *.railway.internal correctly.
@@ -45,14 +45,16 @@ daos(app, daosService);
 averageDelegation(app, delegationService);
 
 // OpenAPI docs
-app.get("/docs/json", async (c) => {
-  const ownSpec = app.getOpenAPI31Document({
+const getOpenApiSpec = storeOpenApiSpec(
+  app.getOpenAPI31Document({
     openapi: "3.1.0",
     info: { title: "Anticapture REST Gateway", version: "1.0.0" },
-  });
+  }),
+  config.daoApis,
+);
 
-  const merged = await mergeUpstreamDocs(ownSpec, config.daoApis);
-  return c.json(merged);
+app.get("/docs/json", async (c) => {
+  return c.json(await getOpenApiSpec());
 });
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 

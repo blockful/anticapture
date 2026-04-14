@@ -1,3 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+
 import type {
   ComponentsObject,
   OpenAPIObject,
@@ -105,4 +108,26 @@ export async function mergeUpstreamDocs(
       },
     },
   };
+}
+
+/**
+ * Stores the merged OpenAPI spec locally so upstream docs are fetched once.
+ */
+export function storeOpenApiSpec(
+  ownSpec: OpenAPIObject,
+  daoApis: Map<string, string>,
+  outputPath = join(process.cwd(), "openapi", "gateful.json"),
+): () => Promise<OpenAPIObject> {
+  const openApiSpec = mergeUpstreamDocs(ownSpec, daoApis).then(async (spec) => {
+    try {
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, `${JSON.stringify(spec, null, 2)}\n`);
+    } catch (err) {
+      console.warn("[upstream-docs] Failed to store OpenAPI spec:", err);
+    }
+
+    return spec;
+  });
+
+  return () => openApiSpec;
 }
