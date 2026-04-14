@@ -97,6 +97,9 @@
       "dependsOn": ["@anticapture/observability#build"],
       "passThroughEnv": ["*"]
     },
+    "@anticapture/relayer#dev": {
+      "passThroughEnv": ["*"]
+    },
     "@anticapture/indexer": {
       "env": ["DAO_ID"]
     },

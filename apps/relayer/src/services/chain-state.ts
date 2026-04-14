@@ -1,0 +1,74 @@
+import { Address, PublicClient } from "viem";
+
+import { governorAbi, ProposalState } from "@/abi/governor";
+import { erc20VotesAbi } from "@/abi/token";
+
+export class ChainStateService {
+  constructor(
+    private client: PublicClient,
+    private governorAddress: Address,
+    private tokenAddress: Address,
+  ) {}
+
+  async getVotingPower(address: Address): Promise<bigint> {
+    return this.client.readContract({
+      address: this.tokenAddress,
+      abi: erc20VotesAbi,
+      functionName: "getVotes",
+      args: [address],
+    });
+  }
+
+  async getProposalState(proposalId: bigint): Promise<ProposalState> {
+    const state = await this.client.readContract({
+      address: this.governorAddress,
+      abi: governorAbi,
+      functionName: "state",
+      args: [proposalId],
+    });
+    return state as ProposalState;
+  }
+
+  async hasVoted(proposalId: bigint, voter: Address): Promise<boolean> {
+    return this.client.readContract({
+      address: this.governorAddress,
+      abi: governorAbi,
+      functionName: "hasVoted",
+      args: [proposalId, voter],
+    });
+  }
+
+  async getDelegationNonce(address: Address): Promise<bigint> {
+    return this.client.readContract({
+      address: this.tokenAddress,
+      abi: erc20VotesAbi,
+      functionName: "nonces",
+      args: [address],
+    });
+  }
+
+  async getCurrentDelegate(address: Address): Promise<Address> {
+    return this.client.readContract({
+      address: this.tokenAddress,
+      abi: erc20VotesAbi,
+      functionName: "delegates",
+      args: [address],
+    });
+  }
+
+  async getGovernorName(): Promise<string> {
+    return this.client.readContract({
+      address: this.governorAddress,
+      abi: governorAbi,
+      functionName: "name",
+    });
+  }
+
+  async getTokenName(): Promise<string> {
+    return this.client.readContract({
+      address: this.tokenAddress,
+      abi: erc20VotesAbi,
+      functionName: "name",
+    });
+  }
+}
