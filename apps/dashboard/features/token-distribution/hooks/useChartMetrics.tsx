@@ -209,14 +209,23 @@ export const useChartMetrics = ({
         if (!proposal || !proposal.id) return;
 
         const timestamp = normalizeTimestamp(proposal.timestamp);
+        const existing = result[timestamp];
+        const existingCount =
+          typeof existing?.PROPOSALS_GOVERNANCE === "number"
+            ? existing.PROPOSALS_GOVERNANCE
+            : 0;
+        const existingText =
+          typeof existing?.PROPOSALS_GOVERNANCE_TEXT === "string" &&
+          existing.PROPOSALS_GOVERNANCE_TEXT.length > 0
+            ? existing.PROPOSALS_GOVERNANCE_TEXT + ", "
+            : "";
 
-        result[normalizeTimestamp(timestamp)] = {
-          ...result[normalizeTimestamp(timestamp)],
-          date: normalizeTimestamp(timestamp),
-          PROPOSALS_GOVERNANCE: 1,
-          PROPOSALS_GOVERNANCE_TEXT: proposal.title || "",
+        result[timestamp] = {
+          ...existing,
+          date: timestamp,
+          PROPOSALS_GOVERNANCE: existingCount + 1,
+          PROPOSALS_GOVERNANCE_TEXT: existingText + (proposal.title || ""),
         };
-        // }
       });
     }
 
