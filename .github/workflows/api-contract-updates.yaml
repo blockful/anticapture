@@ -41,6 +41,8 @@ jobs:
 
           for file in "${changed_files[@]}"; do
             case "$file" in
+              *.test.ts | *.spec.ts | *.integration.test.ts)
+                ;;
               apps/api/src/controllers/* | apps/api/src/mappers/*)
                 api_implementation_changed=true
                 ;;
