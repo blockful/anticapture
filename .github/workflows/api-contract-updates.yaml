@@ -3,15 +3,14 @@ name: API Contract Updates
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - "apps/api/src/controllers/**"
-      - "apps/api/src/mappers/**"
-      - "apps/api-gateway/schema.graphql"
-      - "apps/gateful/openapi/gateful.json"
 
 jobs:
-  require-contract-updates:
+  detect-contract-updates:
+    name: Detect API contract updates
     runs-on: ubuntu-latest
+    outputs:
+      needs_manual_approval: ${{ steps.detect.outputs.needs_manual_approval }}
+      missing_files: ${{ steps.detect.outputs.missing_files }}
 
     steps:
       - name: Checkout repository
@@ -19,10 +18,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Require generated contract updates
+      - name: Detect generated contract updates
+        id: detect
         shell: bash
         run: |
           set -euo pipefail
+
+          {
+            echo "needs_manual_approval=false"
+            echo "missing_files="
+          } >> "$GITHUB_OUTPUT"
 
           mapfile -t changed_files < <(
             git diff --name-only \
@@ -62,10 +67,33 @@ jobs:
           fi
 
           if (( ${#missing[@]} > 0 )); then
-            echo "API controllers or mappers changed, so generated contracts must be updated in the same PR."
+            {
+              echo "needs_manual_approval=true"
+              echo "missing_files=${missing[*]}"
+            } >> "$GITHUB_OUTPUT"
+
+            echo "API controllers or mappers changed without corresponding generated contract updates."
             echo "Missing required changed file(s):"
             printf ' - %s\n' "${missing[@]}"
-            exit 1
+            echo "Manual approval is required before this PR can merge."
+            exit 0
           fi
 
           echo "API contract updates are present."
+
+  approve-contract-exception:
+    name: API contract exception approval
+    needs: detect-contract-updates
+    if: needs.detect-contract-updates.outputs.needs_manual_approval == 'true'
+    runs-on: ubuntu-latest
+    environment: api-contract-exception
+
+    steps:
+      - name: Confirm manual approval
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "API contract exception manually approved."
+          echo "Missing generated contract update(s):"
+          printf '%s\n' "${{ needs.detect-contract-updates.outputs.missing_files }}"
