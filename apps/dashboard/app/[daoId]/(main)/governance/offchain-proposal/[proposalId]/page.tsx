@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
+import { getOffchainProposalSeoData } from "@/shared/seo/graphql";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
@@ -10,22 +11,33 @@ type Props = {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
+  const decodedProposalId = decodeURIComponent(params.proposalId);
+  const proposal = await getOffchainProposalSeoData(
+    daoId,
+    decodedProposalId,
+  ).catch(() => null);
 
   const canonicalPath = `/${params.daoId}/governance/offchain-proposal/${params.proposalId}`;
+  const proposalTitle =
+    proposal?.title ?? `${daoId} DAO Offchain Governance Proposal`;
+  const description =
+    proposal?.description ||
+    `Analyze the governance security implications of "${proposalTitle}" in ${daoId} DAO, including delegate participation, offchain voting dynamics, and governance capture signals.`;
+  const fullTitle = `${proposalTitle} | ${daoId} DAO Governance Security Analysis | Anticapture`;
 
   return {
-    title: `Anticapture - ${daoId} DAO`,
-    description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+    title: fullTitle,
+    description,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: fullTitle,
+      description,
     },
     twitter: {
       card: "summary_large_image",
-      title: `Anticapture - ${daoId} DAO`,
-      description: `Explore and mitigate governance risks in ${daoId} DAO.`,
+      title: fullTitle,
+      description,
     },
   };
 }
