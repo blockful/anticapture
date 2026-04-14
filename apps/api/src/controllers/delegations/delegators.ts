@@ -6,6 +6,7 @@ import {
   DelegatorsRequestQuerySchema,
 } from "@/mappers/delegations/delegators";
 import {} from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { DelegatorsService } from "@/services/delegations/delegators";
 
 export function delegators(app: Hono, service: DelegatorsService) {
@@ -17,6 +18,7 @@ export function delegators(app: Hono, service: DelegatorsService) {
       summary: "Get delegators",
       description: "Get current delegators of an account with voting power",
       tags: ["delegations"],
+      middleware: [setCacheControl(60)],
       request: {
         params: DelegatorsRequestParamsSchema,
         query: DelegatorsRequestQuerySchema,

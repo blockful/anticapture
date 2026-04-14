@@ -14,6 +14,12 @@ interface OffchainProposalsRepository {
     fromDate?: number | undefined,
     endDate?: number | undefined,
   ): Promise<number>;
+  searchProposals(
+    query: string,
+    skip: number,
+    limit: number,
+  ): Promise<DBOffchainProposal[]>;
+  getSearchProposalsCount(query: string): Promise<number>;
   getProposalById(proposalId: string): Promise<DBOffchainProposal | undefined>;
 }
 
@@ -24,6 +30,12 @@ export interface OffchainProposalsRequest {
   status?: string[];
   fromDate?: number;
   endDate?: number;
+}
+
+export interface OffchainProposalSearchRequest {
+  query: string;
+  skip?: number;
+  limit?: number;
 }
 
 export class OffchainProposalsService {
@@ -56,5 +68,16 @@ export class OffchainProposalsService {
 
   async getProposalById(proposalId: string) {
     return this.repo.getProposalById(proposalId);
+  }
+
+  async searchProposals(params: OffchainProposalSearchRequest) {
+    const { query, skip = 0, limit = 10 } = params;
+
+    const [items, totalCount] = await Promise.all([
+      this.repo.searchProposals(query, skip, limit),
+      this.repo.getSearchProposalsCount(query),
+    ]);
+
+    return { items, totalCount };
   }
 }

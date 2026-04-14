@@ -65,6 +65,27 @@ export const ProposalsRequestSchema = z
 
 export type ProposalsRequest = z.infer<typeof ProposalsRequestSchema>;
 
+export const ProposalSearchRequestSchema = z
+  .object({
+    query: z
+      .string()
+      .trim()
+      .min(1)
+      .openapi({
+        param: {
+          name: "query",
+          in: "query",
+        },
+        description: "Partial proposal identifier or title to search for.",
+        example: "test",
+      }),
+    skip: paginationSkipQueryParam(),
+    limit: paginationLimitQueryParam(),
+  })
+  .openapi("OnchainProposalSearchRequest");
+
+export type ProposalSearchRequest = z.infer<typeof ProposalSearchRequestSchema>;
+
 export const ProposalResponseSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),

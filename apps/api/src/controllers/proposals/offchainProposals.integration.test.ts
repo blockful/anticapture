@@ -121,6 +121,112 @@ describe("Offchain Proposals Controller", () => {
 
       expect(res.status).toBe(400);
     });
+
+    it("should return partial matches for title or id", async () => {
+      await db.insert(offchainProposals).values([
+        createProposal({
+          id: "snapshot-upgrade-1",
+          title: "Treasury Upgrade",
+          created: 1700000000,
+          updated: 1700000000,
+        }),
+        createProposal({
+          id: "prop-special-42",
+          title: "Operations Budget",
+          created: 1700001000,
+          updated: 1700001000,
+        }),
+        createProposal({
+          id: "community-sync",
+          title: "Community Call",
+          created: 1700002000,
+          updated: 1700002000,
+        }),
+      ]);
+
+      const byTitleRes = await app.request(
+        "/offchain/proposals/search?query=grade",
+      );
+
+      expect(byTitleRes.status).toBe(200);
+      expect(await byTitleRes.json()).toEqual({
+        items: [
+          {
+            ...BASE_PROPOSAL_ITEM,
+            id: "snapshot-upgrade-1",
+            title: "Treasury Upgrade",
+          },
+        ],
+        totalCount: 1,
+      });
+
+      const byIdRes = await app.request(
+        "/offchain/proposals/search?query=special",
+      );
+
+      expect(byIdRes.status).toBe(200);
+      expect(await byIdRes.json()).toEqual({
+        items: [
+          {
+            ...BASE_PROPOSAL_ITEM,
+            id: "prop-special-42",
+            title: "Operations Budget",
+            created: 1700001000,
+            updated: 1700001000,
+          },
+        ],
+        totalCount: 1,
+      });
+    });
+
+    it("should treat % and _ as literal characters in search queries", async () => {
+      await db.insert(offchainProposals).values([
+        createProposal({
+          id: "snapshot_100",
+          title: "Budget 100% Plan",
+          created: 1700000000,
+          updated: 1700000000,
+        }),
+        createProposal({
+          id: "snapshot-plain",
+          title: "Ordinary Proposal",
+          created: 1700001000,
+          updated: 1700001000,
+        }),
+      ]);
+
+      const percentRes = await app.request(
+        "/offchain/proposals/search?query=%25",
+      );
+
+      expect(percentRes.status).toBe(200);
+      expect(await percentRes.json()).toEqual({
+        items: [
+          {
+            ...BASE_PROPOSAL_ITEM,
+            id: "snapshot_100",
+            title: "Budget 100% Plan",
+          },
+        ],
+        totalCount: 1,
+      });
+
+      const underscoreRes = await app.request(
+        "/offchain/proposals/search?query=_",
+      );
+
+      expect(underscoreRes.status).toBe(200);
+      expect(await underscoreRes.json()).toEqual({
+        items: [
+          {
+            ...BASE_PROPOSAL_ITEM,
+            id: "snapshot_100",
+            title: "Budget 100% Plan",
+          },
+        ],
+        totalCount: 1,
+      });
+    });
   });
 
   describe("GET /offchain/proposals/{id}", () => {

@@ -3,12 +3,14 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { DAOClient } from "@/clients";
 import {
   ErrorResponseSchema,
+  ProposalSearchRequestSchema,
   ProposalsResponseSchema,
   ProposalsRequestSchema,
   ProposalRequestSchema,
   ProposalResponseSchema,
   ProposalMapper,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { ProposalsService } from "@/services";
 
 export function proposals(
@@ -25,6 +27,7 @@ export function proposals(
       summary: "Get proposals",
       description: "Returns a list of proposal",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         query: ProposalsRequestSchema,
       },
@@ -80,11 +83,60 @@ export function proposals(
   app.openapi(
     createRoute({
       method: "get",
+      operationId: "searchProposals",
+      path: "/proposals/search",
+      summary: "Search proposals",
+      description:
+        "Returns proposals whose title or identifier partially matches the query.",
+      tags: ["proposals"],
+      request: {
+        query: ProposalSearchRequestSchema,
+      },
+      responses: {
+        200: {
+          description: "Successfully retrieved matching proposals",
+          content: {
+            "application/json": {
+              schema: ProposalsResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { query, skip, limit } = context.req.valid("query");
+
+      const result = await service.searchProposals({
+        query,
+        skip,
+        limit,
+      });
+
+      const quorums = await Promise.all(
+        result.map((p) => client.getQuorum(p.id)),
+      );
+
+      return context.json(
+        {
+          items: result.map((p, index) =>
+            ProposalMapper.toApi(p, quorums[index]!, blockTime),
+          ),
+          totalCount: await service.getSearchProposalsCount(query),
+        },
+        200,
+      );
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
       operationId: "proposal",
       path: "/proposals/{id}",
       summary: "Get a proposal by ID",
       description: "Returns a single proposal by its ID",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         params: ProposalRequestSchema,
       },

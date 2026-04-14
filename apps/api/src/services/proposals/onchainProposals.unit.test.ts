@@ -39,22 +39,28 @@ const createMockProposal = (
 function createStubRepo(): ProposalsRepository & {
   proposals: DBProposal[];
   count: number;
+  searchCount: number;
   byId: DBProposal | undefined;
   lastStatusArg: string[] | undefined;
   lastProposalTypeExcludeArg: number[] | undefined;
+  lastSearchQueryArg: string | undefined;
 } {
   const stub: ProposalsRepository & {
     proposals: DBProposal[];
     count: number;
+    searchCount: number;
     byId: DBProposal | undefined;
     lastStatusArg: string[] | undefined;
     lastProposalTypeExcludeArg: number[] | undefined;
+    lastSearchQueryArg: string | undefined;
   } = {
     proposals: [],
     count: 0,
+    searchCount: 0,
     byId: undefined,
     lastStatusArg: undefined,
     lastProposalTypeExcludeArg: undefined,
+    lastSearchQueryArg: undefined,
     getProposals: async (
       _skip: number,
       _limit: number,
@@ -69,6 +75,14 @@ function createStubRepo(): ProposalsRepository & {
       return stub.proposals;
     },
     getProposalsCount: async () => stub.count,
+    searchProposals: async (query: string) => {
+      stub.lastSearchQueryArg = query;
+      return stub.proposals;
+    },
+    getSearchProposalsCount: async (query: string) => {
+      stub.lastSearchQueryArg = query;
+      return stub.searchCount;
+    },
     getProposalById: async () => stub.byId,
   };
   return stub;
@@ -125,6 +139,17 @@ describe("ProposalsService", () => {
       const result = await service.getProposalsCount();
 
       expect(result).toBe(42);
+    });
+  });
+
+  describe("getSearchProposalsCount", () => {
+    it("should return search count from repo", async () => {
+      repo.searchCount = 2;
+
+      const result = await service.getSearchProposalsCount("test");
+
+      expect(result).toBe(2);
+      expect(repo.lastSearchQueryArg).toBe("test");
     });
   });
 
@@ -250,6 +275,27 @@ describe("ProposalsService", () => {
 
       expect(result).toBeUndefined();
       expect(daoClient.getCurrentBlockNumberCallCount).toBe(0);
+    });
+  });
+
+  describe("searchProposals", () => {
+    it("should return matching proposals with on-chain status", async () => {
+      repo.proposals = [createMockProposal({ title: "Treasury Refresh" })];
+      daoClient.proposalStatus = ProposalStatus.ACTIVE;
+
+      const result = await service.searchProposals({
+        query: "refresh",
+        skip: 0,
+        limit: 10,
+      });
+
+      expect(repo.lastSearchQueryArg).toBe("refresh");
+      expect(result).toEqual([
+        createMockProposal({
+          title: "Treasury Refresh",
+          status: ProposalStatus.ACTIVE,
+        }),
+      ]);
     });
   });
 });
