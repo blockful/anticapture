@@ -35,8 +35,17 @@ export const ServiceProvidersSection = () => {
       icon={<Building2 className="section-layout-icon" />}
       description={PAGES_CONSTANTS.serviceProviders.description ?? ""}
       headerAction={
-        <a href={UPDATE_STATUS_URL} target="_blank" rel="noopener noreferrer">
-          <Button variant="primary" size="md" className="whitespace-nowrap">
+        <a
+          href={UPDATE_STATUS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full lg:w-auto"
+        >
+          <Button
+            variant="primary"
+            size="md"
+            className="w-full whitespace-nowrap lg:w-auto"
+          >
             <Pencil className="size-3.5" />
             Update report status
           </Button>

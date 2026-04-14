@@ -10,6 +10,7 @@ import {
   ProposalResponseSchema,
   ProposalMapper,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { ProposalsService } from "@/services";
 
 export function proposals(
@@ -26,6 +27,7 @@ export function proposals(
       summary: "Get proposals",
       description: "Returns a list of proposal",
       tags: ["proposals", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         query: ProposalsRequestSchema,
       },
@@ -134,6 +136,7 @@ export function proposals(
       summary: "Get a proposal by ID",
       description: "Returns a single proposal by its ID",
       tags: ["proposals"],
+      middleware: [setCacheControl(60)],
       request: {
         params: ProposalRequestSchema,
       },

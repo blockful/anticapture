@@ -130,12 +130,13 @@ export const GovernanceSection = () => {
   }
 
   return (
-    <div className="bg-background flex min-h-screen flex-col">
+    <div>
       <TheSectionLayout
         title="Proposals"
         icon={<Landmark className="section-layout-icon" />}
         description="View and vote on executable proposals from this DAO."
         className="lg:bg-transparent"
+        hideDivider
       >
         {hasOffchain && (
           <TabGroup

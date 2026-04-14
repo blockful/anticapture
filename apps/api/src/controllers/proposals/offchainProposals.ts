@@ -8,6 +8,7 @@ import {
   OffchainProposalsResponseSchema,
   OffchainProposalsRequestSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { OffchainProposalsService } from "@/services";
 
 export function offchainProposals(
@@ -22,6 +23,7 @@ export function offchainProposals(
       summary: "Get offchain proposals",
       description: "Returns a list of offchain (Snapshot) proposals",
       tags: ["offchain", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         query: OffchainProposalsRequestSchema,
       },
@@ -97,6 +99,7 @@ export function offchainProposals(
       summary: "Get an offchain proposal by ID",
       description: "Returns a single offchain (Snapshot) proposal by its ID",
       tags: ["offchain"],
+      middleware: [setCacheControl(60)],
       request: {
         params: OffchainProposalRequestSchema,
       },
