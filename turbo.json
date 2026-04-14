@@ -1,15 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "@anticapture/offchain-indexer#db:migrate": {
-      "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "@anticapture/offchain-indexer#db:push": {
-      "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "@anticapture/indexer#db:prune": {
+    "@anticapture/indexer#db:*": {
       "cache": false,
       "passThroughEnv": ["*"]
     },
@@ -18,16 +10,16 @@
       "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
     "@anticapture/client#build": {
-      "dependsOn": ["^build", "^codegen"],
+      "dependsOn": ["codegen"],
       "outputs": ["generated/**"]
     },
     "@anticapture/graphql-client#build": {
-      "dependsOn": ["^build", "^codegen"],
+      "dependsOn": ["codegen"],
       "outputs": ["dist/**"],
       "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
     "@anticapture/dashboard#build": {
-      "dependsOn": ["^build", "^codegen"],
+      "dependsOn": ["^codegen", "^build"],
       "outputs": ["dist/**", ".next/**"],
       "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
