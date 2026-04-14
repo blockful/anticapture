@@ -19,7 +19,6 @@ import type { ProposalDetails } from "@/features/governance/types";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type VoteTabId = "voted" | "didntVote";
 
@@ -54,7 +53,6 @@ export const VotesTabContent = ({
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
-        ...getAuthHeaders(),
       },
     },
   });
@@ -71,7 +69,6 @@ export const VotesTabContent = ({
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
-        ...getAuthHeaders(),
       },
     },
   });
@@ -86,7 +83,6 @@ export const VotesTabContent = ({
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
-        ...getAuthHeaders(),
       },
     },
   });
