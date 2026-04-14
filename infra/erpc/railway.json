@@ -3,7 +3,7 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "infra/erpc/Dockerfile",
-    "watchPath": ["/infra/erpc/**"]
+    "watchPatterns": ["/infra/erpc/**"]
   },
   "deploy": {
     "restartPolicyMaxRetries": 3,
