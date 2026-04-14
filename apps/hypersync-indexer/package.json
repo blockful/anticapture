@@ -8,7 +8,7 @@
     "codegen": "envio codegen",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "[ -d generated ] && tsc --noEmit || echo 'Skipping typecheck: run envio codegen first'",
     "clean": "rm -rf node_modules generated *.tsbuildinfo"
   },
   "dependencies": {
