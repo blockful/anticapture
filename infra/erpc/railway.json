@@ -5,8 +5,7 @@
     "dockerfilePath": "infra/erpc/Dockerfile"
   },
   "deploy": {
-    "healthcheckPath": "/healthcheck",
-    "restartPolicyType": "ALWAYS",
-    "restartPolicyMaxRetries": 3
+    "restartPolicyMaxRetries": 3,
+    "restartPolicyType": "ALWAYS"
   }
 }

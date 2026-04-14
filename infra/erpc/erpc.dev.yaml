@@ -179,7 +179,7 @@ projects:
             value: ${RPC_SECRET}
     cors:
       allowedOrigins:
-        - "*"
+        - "http://*.anticapture.com"
       allowedMethods:
         - GET
         - POST
