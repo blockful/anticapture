@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { renderToStaticMarkup } from "react-dom/server";
 
 import { FaqSection } from "@/features/faq";
 import { FAQ_ITEMS } from "@/features/faq/utils/faq-constants";
@@ -34,11 +33,7 @@ const faqSchema = {
     name: item.question,
     acceptedAnswer: {
       "@type": "Answer",
-      text: renderToStaticMarkup(item.answer)
-        .replace(/<br\s*\/?>/gi, "\n")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/\s+/g, " ")
-        .trim(),
+      text: item.answerText,
     },
     url: `${getSiteUrl()}/faq#${item.id}`,
   })),
