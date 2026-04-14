@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
+import { getOnchainProposalSeoData } from "@/shared/seo/graphql";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 type Props = {
@@ -10,22 +11,31 @@ type Props = {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
+  const proposal = await getOnchainProposalSeoData(
+    daoId,
+    params.proposalId,
+  ).catch(() => null);
 
   const canonicalPath = `/${params.daoId}/governance/proposal/${params.proposalId}`;
+  const proposalTitle = proposal?.title ?? `${daoId} DAO Governance Proposal`;
+  const description =
+    proposal?.description ||
+    `Analyze the governance security implications of "${proposalTitle}" in ${daoId} DAO, including vote distribution, delegate participation, and potential governance capture signals.`;
+  const fullTitle = `${proposalTitle} | ${daoId} DAO Governance Security Analysis | Anticapture`;
 
   return {
-    title: `${daoId} DAO Governance Proposal | Security Analysis — Anticapture`,
-    description: `Analyze the governance security implications of this proposal in ${daoId} DAO — including vote distribution, delegate participation, and potential governance capture signals.`,
+    title: fullTitle,
+    description,
     alternates: { canonical: canonicalPath },
     openGraph: {
       url: canonicalPath,
-      title: `${daoId} DAO Governance Proposal | Security Analysis — Anticapture`,
-      description: `Analyze the governance security implications of this proposal in ${daoId} DAO — including vote distribution, delegate participation, and potential governance capture signals.`,
+      title: fullTitle,
+      description,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${daoId} DAO Governance Proposal | Security Analysis — Anticapture`,
-      description: `Analyze the governance security implications of this proposal in ${daoId} DAO — including vote distribution, delegate participation, and potential governance capture signals.`,
+      title: fullTitle,
+      description,
     },
   };
 }

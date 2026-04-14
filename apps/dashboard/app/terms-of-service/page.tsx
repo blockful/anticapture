@@ -6,16 +6,19 @@ import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 export const metadata: Metadata = {
-  title: "Anticapture - Terms of Service",
-  description: "Terms of service for Anticapture platform.",
+  title: "Anticapture Terms of Service | Governance Security Platform",
+  description:
+    "Read the terms of service for Anticapture, the open governance security and DAO risk analysis platform.",
   openGraph: {
-    title: "Anticapture - Terms of Service",
-    description: "Terms of service for Anticapture platform.",
+    title: "Anticapture Terms of Service | Governance Security Platform",
+    description:
+      "Read the terms of service for Anticapture, the open governance security and DAO risk analysis platform.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Anticapture - Terms of Service",
-    description: "Terms of service for Anticapture platform.",
+    title: "Anticapture Terms of Service | Governance Security Platform",
+    description:
+      "Read the terms of service for Anticapture, the open governance security and DAO risk analysis platform.",
   },
 };
 
