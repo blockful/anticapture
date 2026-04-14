@@ -2,7 +2,8 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "infra/erpc/Dockerfile"
+    "dockerfilePath": "infra/erpc/Dockerfile",
+    "watchPath": ["/infra/erpc/**"]
   },
   "deploy": {
     "restartPolicyMaxRetries": 3,
