@@ -22,11 +22,7 @@
     }
   },
   "files": [
-    "client.ts",
-    "generated",
-    "hooks.ts",
-    "index.ts",
-    "openapi/gateful.json"
+    "src/*.ts"
   ],
   "devDependencies": {
     "@kubb/cli": "^4.37.2",
