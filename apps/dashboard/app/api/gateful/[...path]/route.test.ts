@@ -42,6 +42,31 @@ describe("Gateful proxy route", () => {
     );
   });
 
+  it("treats absolute URL-shaped params as upstream path segments", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+      }),
+    );
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/gateful/http://attacker.com?limit=5",
+    );
+
+    await GET(request, {
+      params: Promise.resolve({
+        path: ["http:", "attacker.com"],
+      }),
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      new URL(`${MOCK_GATEFUL_URL}/http%3A/attacker.com?limit=5`),
+      expect.objectContaining({
+        method: "GET",
+      }),
+    );
+  });
+
   it("injects the server-side BLOCKFUL_API_TOKEN as authorization header", async () => {
     process.env.BLOCKFUL_API_TOKEN = "server-secret";
 
