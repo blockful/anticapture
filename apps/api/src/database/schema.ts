@@ -1,151 +1,116 @@
 import { relations } from "drizzle-orm";
-import {
-  pgTable,
-  index,
-  bigint,
-  pgEnum,
-  primaryKey,
-} from "drizzle-orm/pg-core";
+import { pgTable, index, bigint } from "drizzle-orm/pg-core";
 import { Address, zeroAddress } from "viem";
 
-import { MetricTypesArray } from "@/lib/constants";
+import { FeedEventType } from "@/lib/constants";
 
-export const token = pgTable("token", (drizzle) => ({
+export const token = pgTable("Token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   name: drizzle.text(),
   decimals: drizzle.integer().notNull(),
-  totalSupply: bigint("total_supply", { mode: "bigint" }).notNull().default(0n),
-  delegatedSupply: bigint("delegated_supply", { mode: "bigint" })
+  totalSupply: bigint("totalSupply", { mode: "bigint" }).notNull().default(0n),
+  delegatedSupply: bigint("delegatedSupply", { mode: "bigint" })
     .notNull()
     .default(0n),
-  cexSupply: bigint("cex_supply", { mode: "bigint" }).notNull().default(0n),
-  dexSupply: bigint("dex_supply", { mode: "bigint" }).notNull().default(0n),
-  lendingSupply: bigint("lending_supply", { mode: "bigint" })
+  cexSupply: bigint("cexSupply", { mode: "bigint" }).notNull().default(0n),
+  dexSupply: bigint("dexSupply", { mode: "bigint" }).notNull().default(0n),
+  lendingSupply: bigint("lendingSupply", { mode: "bigint" })
     .notNull()
     .default(0n),
-  circulatingSupply: bigint("circulating_supply", { mode: "bigint" })
+  circulatingSupply: bigint("circulatingSupply", { mode: "bigint" })
     .notNull()
     .default(0n),
   treasury: bigint({ mode: "bigint" }).notNull().default(0n),
-  nonCirculatingSupply: bigint("non_circulating_supply", { mode: "bigint" })
+  nonCirculatingSupply: bigint("nonCirculatingSupply", { mode: "bigint" })
     .notNull()
     .default(0n),
 }));
 
-export const account = pgTable("account", (drizzle) => ({
+export const account = pgTable("Account", (drizzle) => ({
   id: drizzle.text().primaryKey(),
 }));
 
 export const accountBalance = pgTable(
-  "account_balance",
+  "AccountBalance",
   (drizzle) => ({
-    accountId: drizzle.text("account_id").$type<Address>().notNull(),
-    tokenId: drizzle.text("token_id").notNull(),
+    id: drizzle.text().primaryKey(),
+    accountId: drizzle.text("accountId").$type<Address>().notNull(),
+    tokenId: drizzle.text("tokenId").notNull(),
     balance: bigint({ mode: "bigint" }).notNull(),
-    // This field represents for who the account is delegating their voting power to
     delegate: drizzle.text().$type<Address>().default(zeroAddress).notNull(),
   }),
-  (table) => [
-    primaryKey({
-      columns: [table.accountId, table.tokenId],
-    }),
-    index().on(table.delegate),
-  ],
+  (table) => [index().on(table.delegate)],
 );
 
 export const accountPower = pgTable(
-  "account_power",
+  "AccountPower",
   (drizzle) => ({
-    accountId: drizzle.text("account_id").$type<Address>().notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
-    votingPower: bigint("voting_power", { mode: "bigint" })
+    id: drizzle.text().primaryKey(),
+    accountId: drizzle.text("accountId").$type<Address>().notNull(),
+    daoId: drizzle.text("daoId").notNull(),
+    votingPower: bigint("votingPower", { mode: "bigint" })
       .default(BigInt(0))
       .notNull(),
-    votesCount: drizzle.integer("votes_count").default(0).notNull(),
-    proposalsCount: drizzle.integer("proposals_count").default(0).notNull(),
-    delegationsCount: drizzle.integer("delegations_count").default(0).notNull(),
-    lastVoteTimestamp: bigint("last_vote_timestamp", { mode: "bigint" })
+    votesCount: drizzle.integer("votesCount").default(0).notNull(),
+    proposalsCount: drizzle.integer("proposalsCount").default(0).notNull(),
+    delegationsCount: drizzle.integer("delegationsCount").default(0).notNull(),
+    lastVoteTimestamp: bigint("lastVoteTimestamp", { mode: "bigint" })
       .default(BigInt(0))
       .notNull(),
   }),
-  (table) => [
-    primaryKey({
-      columns: [table.accountId],
-    }),
-    index().on(table.lastVoteTimestamp),
-  ],
+  (table) => [index().on(table.lastVoteTimestamp)],
 );
 
-export const votingPowerHistory = pgTable(
-  "voting_power_history",
-  (drizzle) => ({
-    transactionHash: drizzle.text("transaction_hash").notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
-    accountId: drizzle.text("account_id").$type<Address>().notNull(),
-    votingPower: bigint("voting_power", { mode: "bigint" }).notNull(),
-    delta: bigint({ mode: "bigint" }).notNull(),
-    deltaMod: bigint("delta_mod", { mode: "bigint" }).notNull(),
-    timestamp: bigint({ mode: "bigint" }).notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
-  }),
-  (table) => [
-    primaryKey({
-      columns: [table.transactionHash, table.accountId, table.logIndex],
-    }),
-  ],
-);
+export const votingPowerHistory = pgTable("VotingPowerHistory", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  transactionHash: drizzle.text("transactionHash").notNull(),
+  daoId: drizzle.text("daoId").notNull(),
+  accountId: drizzle.text("accountId").$type<Address>().notNull(),
+  votingPower: bigint("votingPower", { mode: "bigint" }).notNull(),
+  delta: bigint({ mode: "bigint" }).notNull(),
+  deltaMod: bigint("deltaMod", { mode: "bigint" }).notNull(),
+  timestamp: bigint({ mode: "bigint" }).notNull(),
+  logIndex: drizzle.integer("logIndex").notNull(),
+}));
 
-export const balanceHistory = pgTable(
-  "balance_history",
-  (drizzle) => ({
-    transactionHash: drizzle.text("transaction_hash").notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
-    accountId: drizzle.text("account_id").$type<Address>().notNull(),
-    balance: bigint({ mode: "bigint" }).notNull(),
-    delta: bigint({ mode: "bigint" }).notNull(),
-    deltaMod: bigint("delta_mod", { mode: "bigint" }).notNull(),
-    timestamp: bigint({ mode: "bigint" }).notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
-  }),
-  (table) => [
-    primaryKey({
-      columns: [table.transactionHash, table.accountId, table.logIndex],
-    }),
-  ],
-);
+export const balanceHistory = pgTable("BalanceHistory", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  transactionHash: drizzle.text("transactionHash").notNull(),
+  daoId: drizzle.text("daoId").notNull(),
+  accountId: drizzle.text("accountId").$type<Address>().notNull(),
+  balance: bigint({ mode: "bigint" }).notNull(),
+  delta: bigint({ mode: "bigint" }).notNull(),
+  deltaMod: bigint("deltaMod", { mode: "bigint" }).notNull(),
+  timestamp: bigint({ mode: "bigint" }).notNull(),
+  logIndex: drizzle.integer("logIndex").notNull(),
+}));
 
 export const delegation = pgTable(
-  "delegations",
+  "Delegation",
   (drizzle) => ({
-    transactionHash: drizzle.text("transaction_hash").notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
+    id: drizzle.text().primaryKey(),
+    transactionHash: drizzle.text("transactionHash").notNull(),
+    daoId: drizzle.text("daoId").notNull(),
     delegateAccountId: drizzle
-      .text("delegate_account_id")
+      .text("delegateAccountId")
       .$type<Address>()
       .notNull(),
     delegatorAccountId: drizzle
-      .text("delegator_account_id")
+      .text("delegatorAccountId")
       .$type<Address>()
       .notNull(),
-    delegatedValue: bigint("delegated_value", { mode: "bigint" })
+    delegatedValue: bigint("delegatedValue", { mode: "bigint" })
       .notNull()
       .default(0n),
-    previousDelegate: drizzle.text("previous_delegate"),
+    previousDelegate: drizzle.text("previousDelegate"),
     timestamp: bigint({ mode: "bigint" }).notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
-    isCex: drizzle.boolean("is_cex").notNull().default(false),
-    isDex: drizzle.boolean("is_dex").notNull().default(false),
-    isLending: drizzle.boolean("is_lending").notNull().default(false),
-    isTotal: drizzle.boolean("is_total").notNull().default(false),
+    logIndex: drizzle.integer("logIndex").notNull(),
+    isCex: drizzle.boolean("isCex").notNull().default(false),
+    isDex: drizzle.boolean("isDex").notNull().default(false),
+    isLending: drizzle.boolean("isLending").notNull().default(false),
+    isTotal: drizzle.boolean("isTotal").notNull().default(false),
   }),
   (table) => [
-    primaryKey({
-      columns: [
-        table.transactionHash,
-        table.delegatorAccountId,
-        table.delegateAccountId,
-      ],
-    }),
     index().on(table.transactionHash),
     index().on(table.timestamp),
     index().on(table.delegatorAccountId),
@@ -155,25 +120,23 @@ export const delegation = pgTable(
 );
 
 export const transfer = pgTable(
-  "transfers",
+  "Transfer",
   (drizzle) => ({
-    transactionHash: drizzle.text("transaction_hash").notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
-    tokenId: drizzle.text("token_id").notNull(),
+    id: drizzle.text().primaryKey(),
+    transactionHash: drizzle.text("transactionHash").notNull(),
+    daoId: drizzle.text("daoId").notNull(),
+    tokenId: drizzle.text("tokenId").notNull(),
     amount: bigint({ mode: "bigint" }).notNull(),
-    fromAccountId: drizzle.text("from_account_id").$type<Address>().notNull(),
-    toAccountId: drizzle.text("to_account_id").$type<Address>().notNull(),
+    fromAccountId: drizzle.text("fromAccountId").$type<Address>().notNull(),
+    toAccountId: drizzle.text("toAccountId").$type<Address>().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
-    isCex: drizzle.boolean("is_cex").notNull().default(false),
-    isDex: drizzle.boolean("is_dex").notNull().default(false),
-    isLending: drizzle.boolean("is_lending").notNull().default(false),
-    isTotal: drizzle.boolean("is_total").notNull().default(false),
+    logIndex: drizzle.integer("logIndex").notNull(),
+    isCex: drizzle.boolean("isCex").notNull().default(false),
+    isDex: drizzle.boolean("isDex").notNull().default(false),
+    isLending: drizzle.boolean("isLending").notNull().default(false),
+    isTotal: drizzle.boolean("isTotal").notNull().default(false),
   }),
   (table) => [
-    primaryKey({
-      columns: [table.transactionHash, table.fromAccountId, table.toAccountId],
-    }),
     index().on(table.transactionHash),
     index().on(table.timestamp),
     index().on(table.fromAccountId),
@@ -182,54 +145,47 @@ export const transfer = pgTable(
   ],
 );
 
-export const votesOnchain = pgTable(
-  "votes_onchain",
-  (drizzle) => ({
-    txHash: drizzle.text("tx_hash").notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
-    voterAccountId: drizzle.text("voter_account_id").$type<Address>().notNull(),
-    proposalId: drizzle.text("proposal_id").notNull(),
-    support: drizzle.text().notNull(),
-    votingPower: bigint("voting_power", { mode: "bigint" }).notNull(),
-    reason: drizzle.text(),
-    timestamp: bigint({ mode: "bigint" }).notNull(),
-  }),
-  (table) => [
-    primaryKey({
-      columns: [table.voterAccountId, table.proposalId],
-    }),
-  ],
-);
+export const votesOnchain = pgTable("VoteOnchain", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  txHash: drizzle.text("txHash").notNull(),
+  daoId: drizzle.text("daoId").notNull(),
+  voterAccountId: drizzle.text("voterAccountId").$type<Address>().notNull(),
+  proposalId: drizzle.text("proposalId").notNull(),
+  support: drizzle.text().notNull(),
+  votingPower: bigint("votingPower", { mode: "bigint" }).notNull(),
+  reason: drizzle.text(),
+  timestamp: bigint({ mode: "bigint" }).notNull(),
+}));
 
 export const proposalsOnchain = pgTable(
-  "proposals_onchain",
+  "ProposalOnchain",
   (drizzle) => ({
     id: drizzle.text().primaryKey(),
-    txHash: drizzle.text("tx_hash").notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
+    txHash: drizzle.text("txHash").notNull(),
+    daoId: drizzle.text("daoId").notNull(),
     proposerAccountId: drizzle
-      .text("proposer_account_id")
+      .text("proposerAccountId")
       .$type<Address>()
       .notNull(),
     targets: drizzle.json().$type<string[]>().notNull(),
     values: drizzle.json().$type<bigint[]>().notNull(),
     signatures: drizzle.json().$type<string[]>().notNull(),
     calldatas: drizzle.json().$type<string[]>().notNull(),
-    startBlock: drizzle.integer("start_block").notNull(),
-    endBlock: drizzle.integer("end_block").notNull(),
+    startBlock: drizzle.integer("startBlock").notNull(),
+    endBlock: drizzle.integer("endBlock").notNull(),
     title: drizzle.text().notNull(),
     description: drizzle.text().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
-    endTimestamp: bigint("end_timestamp", { mode: "bigint" }).notNull(),
+    endTimestamp: bigint("endTimestamp", { mode: "bigint" }).notNull(),
     status: drizzle.text().notNull(),
-    forVotes: bigint("for_votes", { mode: "bigint" }).default(0n).notNull(),
-    againstVotes: bigint("against_votes", { mode: "bigint" })
+    forVotes: bigint("forVotes", { mode: "bigint" }).default(0n).notNull(),
+    againstVotes: bigint("againstVotes", { mode: "bigint" })
       .default(0n)
       .notNull(),
-    abstainVotes: bigint("abstain_votes", { mode: "bigint" })
+    abstainVotes: bigint("abstainVotes", { mode: "bigint" })
       .default(0n)
       .notNull(),
-    proposalType: drizzle.integer("proposal_type"),
+    proposalType: drizzle.integer("proposalType"),
   }),
   (table) => [index().on(table.proposerAccountId)],
 );
@@ -241,15 +197,14 @@ export const votesOnchainRelations = relations(votesOnchain, ({ one }) => ({
   }),
 }));
 
-export const metricType = pgEnum("metricType", MetricTypesArray);
-
 export const daoMetricsDayBucket = pgTable(
-  "dao_metrics_day_buckets",
+  "DaoMetricsDayBucket",
   (drizzle) => ({
+    id: drizzle.text().primaryKey(),
     date: bigint({ mode: "bigint" }).notNull(),
-    daoId: drizzle.text("dao_id").notNull(),
-    tokenId: drizzle.text("token_id").notNull(),
-    metricType: metricType("metricType").notNull(),
+    daoId: drizzle.text("daoId").notNull(),
+    tokenId: drizzle.text("tokenId").notNull(),
+    metricType: drizzle.text("metricType").notNull(),
     open: bigint({ mode: "bigint" }).notNull(),
     close: bigint({ mode: "bigint" }).notNull(),
     low: bigint({ mode: "bigint" }).notNull(),
@@ -257,54 +212,40 @@ export const daoMetricsDayBucket = pgTable(
     average: bigint({ mode: "bigint" }).notNull(),
     volume: bigint({ mode: "bigint" }).notNull(),
     count: drizzle.integer().notNull(),
-    lastUpdate: bigint("last_update", { mode: "bigint" }).notNull(),
+    lastUpdate: bigint("lastUpdate", { mode: "bigint" }).notNull(),
   }),
-  (table) => [
-    primaryKey({
-      columns: [table.date, table.tokenId, table.metricType],
-    }),
-  ],
 );
 
-export const transaction = pgTable("transaction", (drizzle) => ({
-  transactionHash: drizzle.text("transaction_hash").primaryKey(),
-  fromAddress: drizzle.text("from_address"),
-  toAddress: drizzle.text("to_address"),
-  isCex: drizzle.boolean("is_cex").notNull().default(false),
-  isDex: drizzle.boolean("is_dex").notNull().default(false),
-  isLending: drizzle.boolean("is_lending").notNull().default(false),
-  isTotal: drizzle.boolean("is_total").notNull().default(false),
+export const transaction = pgTable("Transaction", (drizzle) => ({
+  id: drizzle.text().primaryKey(),
+  transactionHash: drizzle.text("transactionHash").notNull(),
+  fromAddress: drizzle.text("fromAddress"),
+  toAddress: drizzle.text("toAddress"),
+  isCex: drizzle.boolean("isCex").notNull().default(false),
+  isDex: drizzle.boolean("isDex").notNull().default(false),
+  isLending: drizzle.boolean("isLending").notNull().default(false),
+  isTotal: drizzle.boolean("isTotal").notNull().default(false),
   timestamp: bigint({ mode: "bigint" }).notNull(),
 }));
 
-export const tokenPrice = pgTable("token_price", (_drizzle) => ({
-  price: bigint({ mode: "bigint" }).notNull(), // price in ETH
-  timestamp: bigint({ mode: "bigint" }).primaryKey(),
+export const tokenPrice = pgTable("TokenPrice", (_drizzle) => ({
+  id: _drizzle.text().primaryKey(),
+  price: bigint({ mode: "bigint" }).notNull(),
+  timestamp: bigint({ mode: "bigint" }).notNull(),
 }));
 
-export const evenTypeEnum = pgEnum("event_type", [
-  "VOTE",
-  "PROPOSAL",
-  "DELEGATION",
-  "TRANSFER",
-  "DELEGATION_VOTES_CHANGED",
-  "PROPOSAL_EXTENDED",
-]);
-
 export const feedEvent = pgTable(
-  "feed_event",
+  "FeedEvent",
   (drizzle) => ({
-    txHash: drizzle.text("tx_hash").notNull(),
-    logIndex: drizzle.integer("log_index").notNull(),
-    type: evenTypeEnum("type").notNull(),
+    id: drizzle.text().primaryKey(),
+    txHash: drizzle.text("txHash").notNull(),
+    logIndex: drizzle.integer("logIndex").notNull(),
+    type: drizzle.text("type").$type<FeedEventType>().notNull(),
     value: bigint({ mode: "bigint" }).notNull().default(0n),
     timestamp: bigint({ mode: "number" }).notNull(),
     metadata: drizzle.json().$type<Record<string, unknown>>(),
   }),
   (table) => [
-    primaryKey({
-      columns: [table.txHash, table.logIndex],
-    }),
     index().on(table.timestamp),
     index().on(table.type),
     index().on(table.value),

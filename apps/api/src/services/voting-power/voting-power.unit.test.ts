@@ -16,6 +16,7 @@ function createStubVariationRepo(variations: DBVotingPowerVariation[] = []) {
 }
 
 const makeDBAccountPower = (overrides = {}): DBAccountPower => ({
+  id: "test-id",
   accountId: "0x1111111111111111111111111111111111111111" as Address,
   daoId: "UNI",
   votingPower: 1000n,

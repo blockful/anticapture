@@ -21,6 +21,7 @@ const createMockVariation = (
 const createMockBalance = (
   overrides: Partial<DBAccountBalance> = {},
 ): DBAccountBalance => ({
+  id: "test-id",
   accountId: ADDR_A,
   tokenId: MOCK_TOKEN,
   balance: 500n,

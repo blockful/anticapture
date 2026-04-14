@@ -31,6 +31,7 @@ export default [
       "apps/api-gateway/schema.graphql",
       "**/storybook-static/**",
       "**/.storybook/**",
+      "apps/hypersync-indexer/generated/**",
     ],
   },
 
@@ -129,6 +130,14 @@ export default [
   // API mappers - allow Zod schema + type with same name pattern
   {
     files: ["apps/api/src/mappers/**/*.{js,ts}"],
+    rules: {
+      "@typescript-eslint/no-redeclare": "off",
+    },
+  },
+
+  // HyperIndex indexer lib - allow const + type with same name pattern
+  {
+    files: ["apps/hypersync-indexer/src/lib/**/*.{js,ts}"],
     rules: {
       "@typescript-eslint/no-redeclare": "off",
     },

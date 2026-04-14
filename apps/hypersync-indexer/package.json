@@ -1,0 +1,30 @@
+{
+  "name": "@anticapture/hypersync-indexer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "envio dev",
+    "start": "envio start",
+    "codegen": "envio codegen",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf node_modules generated *.tsbuildinfo"
+  },
+  "dependencies": {
+    "viem": "^2.37.11"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "dotenv": "^16.5.0",
+    "envio": "^2.32.12",
+    "eslint": "^9",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18.14"
+  }
+}

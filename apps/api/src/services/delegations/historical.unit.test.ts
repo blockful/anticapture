@@ -11,6 +11,7 @@ import {
 const createMockDelegation = (
   overrides: Partial<DBDelegation> = {},
 ): DBDelegation => ({
+  id: "test-id",
   transactionHash: "0xabc123",
   daoId: "uni",
   delegateAccountId: "0x1234567890123456789012345678901234567890" as Address,

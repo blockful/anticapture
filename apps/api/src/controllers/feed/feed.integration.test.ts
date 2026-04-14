@@ -17,16 +17,18 @@ type FeedEventInsert = typeof feedEvent.$inferInsert;
 const nounsThresholds = getDaoRelevanceThreshold(DaoIdEnum.NOUNS);
 
 const createEvent = (
-  overrides: Partial<FeedEventInsert> = {},
-): FeedEventInsert => ({
-  txHash: "0xabc123def456abc1",
-  logIndex: 0,
-  type: "VOTE" as const,
-  value: nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
-  timestamp: 1700000000,
-  metadata: null,
-  ...overrides,
-});
+  overrides: Partial<Omit<FeedEventInsert, "type"> & { type: string }> = {},
+): FeedEventInsert =>
+  ({
+    id: "test-id",
+    txHash: "0xabc123def456abc1",
+    logIndex: 0,
+    type: "VOTE",
+    value: nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
+    timestamp: 1700000000,
+    metadata: null,
+    ...overrides,
+  }) as FeedEventInsert;
 
 let client: PGlite;
 let db: Drizzle;

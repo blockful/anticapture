@@ -27,6 +27,7 @@ const TX_HASH =
 const createAccountBalanceRow = (
   overrides: Partial<AccountBalanceInsert> = {},
 ): AccountBalanceInsert => ({
+  id: "test-id",
   accountId: VALID_ADDRESS,
   tokenId: "uni",
   balance: 1000000000000000000n,
@@ -37,6 +38,7 @@ const createAccountBalanceRow = (
 const createDelegationRow = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: DAO_ID,
   delegateAccountId: VALID_ADDRESS,

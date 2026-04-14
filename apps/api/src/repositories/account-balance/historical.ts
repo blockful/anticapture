@@ -53,8 +53,8 @@ export class HistoricalBalanceRepository {
       .offset(skip);
 
     return result.map((row) => ({
-      ...row.balance_history,
-      transfer: row.transfers,
+      ...row.BalanceHistory,
+      transfer: row.Transfer,
     }));
   }
 

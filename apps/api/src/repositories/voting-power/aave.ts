@@ -124,17 +124,16 @@ export class AAVEVotingPowerRepository {
       .offset(skip);
 
     return result.map((row) => ({
-      ...row.voting_power_history,
+      ...row.VotingPowerHistory,
       delegations:
-        row.transfers &&
-        row.transfers?.logIndex > (row.delegations?.logIndex || 0)
+        row.Transfer && row.Transfer?.logIndex > (row.Delegation?.logIndex || 0)
           ? null
-          : row.delegations,
+          : row.Delegation,
       transfers:
-        row.delegations &&
-        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
+        row.Delegation &&
+        row.Delegation?.logIndex > (row.Transfer?.logIndex || 0)
           ? null
-          : row.transfers,
+          : row.Transfer,
     }));
   }
 
@@ -226,6 +225,7 @@ export class AAVEVotingPowerRepository {
 
     const items = await this.db
       .select({
+        id: accountPower.id,
         accountId: allAccountIds.accountId,
         daoId: accountPower.daoId,
         votingPower: combinedPowerSql,
@@ -287,6 +287,7 @@ export class AAVEVotingPowerRepository {
     return {
       items: items.map((row) => ({
         ...row,
+        id: row.id ?? "",
         daoId: row.daoId ?? "",
         votesCount: row.votesCount ?? 0,
         proposalsCount: row.proposalsCount ?? 0,
@@ -341,6 +342,7 @@ export class AAVEVotingPowerRepository {
 
     const [result] = await this.db
       .select({
+        id: accountPower.id,
         accountId: accountPower.accountId,
         daoId: accountPower.daoId,
         votingPower: combinedPowerSql,
@@ -378,6 +380,7 @@ export class AAVEVotingPowerRepository {
           percentageChange: result.percentageChange,
         }
       : {
+          id: "",
           accountId: accountId,
           votingPower: 0n,
           delegationsCount: 0,

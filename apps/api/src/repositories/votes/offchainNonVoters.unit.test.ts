@@ -26,6 +26,7 @@ const SPACE_ID = "test.eth";
 const createAccountPower = (
   overrides: Partial<AccountPowerInsert> = {},
 ): AccountPowerInsert => ({
+  id: "test-id",
   accountId: VOTER_A,
   daoId: DAO_ID,
   votingPower: 100n,

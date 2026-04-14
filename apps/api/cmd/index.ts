@@ -174,7 +174,7 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+const pgClient = drizzle(env.DATABASE_URL, { schema });
 
 health(app, pgClient);
 
@@ -351,7 +351,6 @@ tokenMetrics(app, tokenMetricsService);
 if (daoClient.supportOffchainData()) {
   const pgUnifiedClient = drizzle(env.DATABASE_URL, {
     schema: { ...schema, ...offchainSchema },
-    casing: "snake_case",
   });
 
   const offchainProposalsRepo = wrapWithTracing(

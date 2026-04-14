@@ -5,6 +5,7 @@
   "scripts": {
     "dashboard": "dotenv -- turbo run --filter=@anticapture/dashboard",
     "indexer": "dotenv -- turbo run --filter=@anticapture/indexer",
+    "hypersync-indexer": "dotenv -- turbo run --filter=@anticapture/hypersync-indexer",
     "gateway": "dotenv -- turbo run --filter=@anticapture/api-gateway",
     "gateful": "dotenv -- turbo run --filter=@anticapture/gateful",
     "api": "dotenv -- turbo run --filter=@anticapture/api",

@@ -32,6 +32,7 @@ const TX_HASH_2 =
 const createDelegationRow = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: DAO_ID,
   delegatorAccountId: VALID_ADDRESS,

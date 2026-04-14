@@ -28,6 +28,7 @@ let repo: DrizzleRepository;
 let app: Hono;
 
 const createMetric = (overrides: Partial<MetricInsert> = {}): MetricInsert => ({
+  id: "test-id",
   date: BigInt(NOW - 10),
   daoId: "ENS",
   tokenId: "ens",

@@ -8,6 +8,7 @@ const MOCK_ACCOUNT = getAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 const createMockHistoricalBalance = (
   overrides: Partial<DBHistoricalBalanceWithRelations> = {},
 ): DBHistoricalBalanceWithRelations => ({
+  id: "test-id",
   transactionHash: "0xabc",
   daoId: "UNI",
   accountId: MOCK_ACCOUNT,
@@ -17,6 +18,7 @@ const createMockHistoricalBalance = (
   timestamp: 1700000000n,
   logIndex: 0,
   transfer: {
+    id: "test-id",
     transactionHash: "0xabc",
     daoId: "UNI",
     tokenId: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",

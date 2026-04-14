@@ -18,6 +18,7 @@ const delegate2: Address = "0x9999999999999999999999999999999999999999";
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: "test-id",
   transactionHash: "0xdefault",
   daoId: "uni",
   delegateAccountId: delegate1,

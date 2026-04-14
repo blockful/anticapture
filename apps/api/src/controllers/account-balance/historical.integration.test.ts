@@ -24,6 +24,7 @@ const DAO_ID = "ENS";
 const createHistoryRow = (
   overrides: Partial<BalanceHistoryInsert> = {},
 ): BalanceHistoryInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: DAO_ID,
   accountId: VALID_ADDRESS,
@@ -38,6 +39,7 @@ const createHistoryRow = (
 const createTransferRow = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: "test-id",
   transactionHash: TX_HASH,
   daoId: DAO_ID,
   tokenId: TOKEN_ID,

@@ -18,6 +18,7 @@ const delegatedAccount: Address = "0x2222222222222222222222222222222222222222";
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: "test-id",
   transactionHash: "0xdefault",
   daoId: "uni",
   delegateAccountId: accountAddress,
@@ -32,6 +33,7 @@ const createDelegation = (
 const createAccountBalance = (
   overrides: Partial<AccountBalanceInsert> = {},
 ): AccountBalanceInsert => ({
+  id: "test-id",
   accountId: accountAddress,
   tokenId: "uni",
   balance: 1000n,

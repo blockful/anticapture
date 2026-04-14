@@ -21,21 +21,26 @@ let txCounter = 0;
 
 const createHistoryRow = (
   overrides: Partial<VotingPowerHistoryInsert> = {},
-): VotingPowerHistoryInsert => ({
-  transactionHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  daoId: TEST_DAO,
-  accountId: TEST_ACCOUNT,
-  votingPower: 1000n,
-  delta: 200n,
-  deltaMod: 200n,
-  timestamp: 1700000000n,
-  logIndex: 10,
-  ...overrides,
-});
+): VotingPowerHistoryInsert => {
+  const n = txCounter++;
+  return {
+    id: `h-${n}`,
+    transactionHash: `0x${n.toString(16).padStart(64, "0")}`,
+    daoId: TEST_DAO,
+    accountId: TEST_ACCOUNT,
+    votingPower: 1000n,
+    delta: 200n,
+    deltaMod: 200n,
+    timestamp: 1700000000n,
+    logIndex: 10,
+    ...overrides,
+  };
+};
 
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
+  id: `d-${txCounter}`,
   transactionHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
   daoId: TEST_DAO,
   delegateAccountId: TEST_ACCOUNT,
@@ -49,6 +54,7 @@ const createDelegation = (
 const createTransfer = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: `tf-${txCounter}`,
   transactionHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
   daoId: TEST_DAO,
   tokenId: "token-1",

@@ -34,6 +34,7 @@ const TOKEN_ID = getAddress("0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72");
 const createAccountBalanceRow = (
   overrides: Partial<AccountBalanceInsert> = {},
 ): AccountBalanceInsert => ({
+  id: "test-id",
   accountId: VALID_ADDRESS,
   tokenId: TOKEN_ID,
   balance: 1200000000000000000n,
@@ -44,6 +45,7 @@ const createAccountBalanceRow = (
 const createTransferRow = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: "test-id",
   transactionHash:
     "0xabc1230000000000000000000000000000000000000000000000000000000001",
   daoId: "ENS",

@@ -105,7 +105,7 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+const pgClient = drizzle(env.DATABASE_URL, { schema });
 
 health(app, pgClient);
 

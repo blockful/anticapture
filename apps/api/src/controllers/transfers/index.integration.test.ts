@@ -20,6 +20,7 @@ type TransferInsert = typeof transfer.$inferInsert;
 const createTransfer = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
+  id: "test-id",
   transactionHash: "0xabc",
   daoId: "UNI",
   tokenId: "uni",
