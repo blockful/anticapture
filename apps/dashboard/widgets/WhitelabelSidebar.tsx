@@ -210,7 +210,15 @@ export const WhitelabelSidebar = ({
 
           {!isCollapsed && (
             <p className="text-dimmed w-full text-center text-xs font-medium leading-4">
-              Powered by <span className="text-link">Blockful</span>
+              Powered by{" "}
+              <a
+                href="https://www.blockful.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link"
+              >
+                Blockful
+              </a>
             </p>
           )}
         </div>

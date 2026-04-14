@@ -23,9 +23,6 @@ export const SHU: DaoConfiguration = {
   },
   forumLink: "https://shutternetwork.discourse.group/c/shutter-dao/14",
   icon: ShutterIcon,
-  customDomain: "governance.ens.domains", // TODO: update when domain is ready
-  hostnames: ["governance.ens.domains"], // TODO: update when domain is ready
-  whitelabel: {},
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },

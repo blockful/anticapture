@@ -9,7 +9,10 @@ import {
 } from "@/shared/utils/whitelabel";
 
 const resolveForcedDao = () => {
-  const forcedDao = process.env.FORCE_DAO?.trim().toUpperCase();
+  const forcedDao =
+    process.env.NODE_ENV !== "production"
+      ? process.env.FORCE_DAO?.trim().toUpperCase()
+      : undefined;
 
   if (!forcedDao) {
     return null;

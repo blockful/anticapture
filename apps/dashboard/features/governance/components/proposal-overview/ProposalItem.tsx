@@ -149,6 +149,57 @@ export const getStatusText = (status: ProposalStatus) => {
   }
 };
 
+type ProposalVoterBadgeProps = {
+  address: string;
+  daoId: DaoIdEnum;
+  proposalId: string;
+  decimals: number;
+};
+
+const ProposalVoterBadge = ({
+  address,
+  daoId,
+  proposalId,
+  decimals,
+}: ProposalVoterBadgeProps) => {
+  const { votes } = useVoterInfo({ address, daoId, proposalId, decimals });
+  const supportValue =
+    votes?.items[0]?.support != null
+      ? Number(votes.items[0].support)
+      : undefined;
+
+  if (supportValue === undefined) return null;
+
+  return (
+    <>
+      <BulletDivider />
+      <span className="flex items-center gap-1 font-medium">
+        {supportValue === 1 && (
+          <CheckCircle2 className="text-success size-3.5" />
+        )}
+        {supportValue === 0 && <XCircle className="text-error size-3.5" />}
+        {supportValue === 2 && (
+          <CircleMinus className="text-secondary size-3.5" />
+        )}
+        <span
+          className={cn(
+            supportValue === 1 && "text-success",
+            supportValue === 0 && "text-error",
+            supportValue === 2 && "text-secondary",
+          )}
+        >
+          You voted{" "}
+          {supportValue === 1
+            ? "For"
+            : supportValue === 0
+              ? "Against"
+              : "Abstain"}
+        </span>
+      </span>
+    </>
+  );
+};
+
 export const ProposalItem = ({
   proposal,
   offchainProposal,
@@ -159,16 +210,6 @@ export const ProposalItem = ({
   const pathname = usePathname();
   const { address } = useAccount();
   const decimals = daoConfigByDaoId[daoId].decimals;
-  const { votes } = useVoterInfo({
-    address: address ?? "",
-    daoId,
-    proposalId: proposal?.id ?? "",
-    decimals,
-  });
-  const supportValue =
-    votes?.items[0]?.support != null
-      ? Number(votes.items[0].support)
-      : undefined;
 
   const {
     offchainScores,
@@ -336,36 +377,12 @@ export const ProposalItem = ({
           <p className={getTextStatusColor(proposal!.status)}>
             {getStatusText(proposal!.status)}
           </p>
-          {supportValue !== undefined ? (
-            <>
-              <BulletDivider />
-              <span className="flex items-center gap-1 font-medium">
-                {supportValue === 1 && (
-                  <CheckCircle2 className="text-success size-3.5" />
-                )}
-                {supportValue === 0 && (
-                  <XCircle className="text-error size-3.5" />
-                )}
-                {supportValue === 2 && (
-                  <CircleMinus className="text-secondary size-3.5" />
-                )}
-                <span
-                  className={cn(
-                    supportValue === 1 && "text-success",
-                    supportValue === 0 && "text-error",
-                    supportValue === 2 && "text-secondary",
-                  )}
-                >
-                  You voted{" "}
-                  {supportValue === 1
-                    ? "For"
-                    : supportValue === 0
-                      ? "Against"
-                      : "Abstain"}
-                </span>
-              </span>
-            </>
-          ) : null}
+          <ProposalVoterBadge
+            address={address ?? ""}
+            daoId={daoId}
+            proposalId={proposal!.id}
+            decimals={decimals}
+          />
           <BulletDivider />
           <p>{proposal!.timeText}</p>
           <BulletDivider />
