@@ -19,7 +19,7 @@ const getForwardHeaders = (request: NextRequest) => {
   const headers = new Headers();
   const contentType = request.headers.get("content-type");
 
-  const token = process.env.BLOCKFUL_API_TOKEN;
+  const token = process.env.GATEFUL_API_TOKEN;
   if (token) {
     headers.set("authorization", `Bearer ${token}`);
   }

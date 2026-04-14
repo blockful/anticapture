@@ -1,0 +1,71 @@
+name: API Contract Updates
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "apps/api/src/controllers/**"
+      - "apps/api/src/mappers/**"
+      - "apps/api-gateway/schema.graphql"
+      - "apps/gateful/openapi/gateful.json"
+
+jobs:
+  require-contract-updates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require generated contract updates
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t changed_files < <(
+            git diff --name-only \
+              "${{ github.event.pull_request.base.sha }}" \
+              "${{ github.event.pull_request.head.sha }}"
+          )
+
+          api_implementation_changed=false
+          gateway_schema_changed=false
+          gateful_openapi_changed=false
+
+          for file in "${changed_files[@]}"; do
+            case "$file" in
+              apps/api/src/controllers/* | apps/api/src/mappers/*)
+                api_implementation_changed=true
+                ;;
+              apps/api-gateway/schema.graphql)
+                gateway_schema_changed=true
+                ;;
+              apps/gateful/openapi/gateful.json)
+                gateful_openapi_changed=true
+                ;;
+            esac
+          done
+
+          if [[ "$api_implementation_changed" != "true" ]]; then
+            echo "No API controller or mapper changes detected."
+            exit 0
+          fi
+
+          missing=()
+          if [[ "$gateway_schema_changed" != "true" ]]; then
+            missing+=("apps/api-gateway/schema.graphql")
+          fi
+          if [[ "$gateful_openapi_changed" != "true" ]]; then
+            missing+=("apps/gateful/openapi/gateful.json")
+          fi
+
+          if (( ${#missing[@]} > 0 )); then
+            echo "API controllers or mappers changed, so generated contracts must be updated in the same PR."
+            echo "Missing required changed file(s):"
+            printf ' - %s\n' "${missing[@]}"
+            exit 1
+          fi
+
+          echo "API contract updates are present."
