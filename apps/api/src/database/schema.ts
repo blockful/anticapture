@@ -299,7 +299,6 @@ export const feedEvent = pgTable(
     type: evenTypeEnum("type").notNull(),
     value: bigint({ mode: "bigint" }).notNull().default(0n),
     timestamp: bigint({ mode: "number" }).notNull(),
-    metadata: drizzle.json().$type<Record<string, unknown>>(),
   }),
   (table) => [
     primaryKey({

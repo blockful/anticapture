@@ -449,7 +449,6 @@ export const feedEvent = onchainTable(
     type: eventTypeEnum("type").notNull(),
     value: drizzle.bigint().notNull().default(0n),
     timestamp: drizzle.bigint().notNull(),
-    metadata: drizzle.json().$type<Record<string, unknown>>(),
   }),
   (table) => ({
     pk: primaryKey({

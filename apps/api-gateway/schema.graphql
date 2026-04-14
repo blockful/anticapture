@@ -1047,13 +1047,14 @@ type FeedResponse {
 }
 
 """Single event in the governance activity feed."""
-type FeedItem {
+union FeedItem = query_feedEvents_items_items_oneOf_0 | query_feedEvents_items_items_oneOf_1 | query_feedEvents_items_items_oneOf_2 | query_feedEvents_items_items_oneOf_3 | query_feedEvents_items_items_oneOf_4
+
+type query_feedEvents_items_items_oneOf_0 {
   """Transaction hash."""
   txHash: String!
 
   """Log index within the transaction receipt."""
   logIndex: Int!
-  type: FeedEventType!
 
   """Optional event value encoded as a decimal string when applicable."""
   value: String
@@ -1061,18 +1062,8 @@ type FeedItem {
   """Event timestamp in Unix seconds."""
   timestamp: Int!
   relevance: FeedRelevance!
-
-  """Type-specific metadata for the feed event."""
-  metadata: JSON
-}
-
-"""Filter events by governance activity type."""
-enum FeedEventType {
-  VOTE
-  PROPOSAL
-  DELEGATION
-  TRANSFER
-  PROPOSAL_EXTENDED
+  type: VOTE_const!
+  metadata: VoteFeedMetadata!
 }
 
 """Filter events by relevance tier."""
@@ -1082,10 +1073,130 @@ enum FeedRelevance {
   LOW
 }
 
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+enum VOTE_const {
+  VOTE
+}
+
+type VoteFeedMetadata {
+  voter: String!
+  reason: String
+  support: Int!
+  votingPower: String!
+  proposalId: String!
+  title: String
+}
+
+type query_feedEvents_items_items_oneOf_1 {
+  """Transaction hash."""
+  txHash: String!
+
+  """Log index within the transaction receipt."""
+  logIndex: Int!
+
+  """Optional event value encoded as a decimal string when applicable."""
+  value: String
+
+  """Event timestamp in Unix seconds."""
+  timestamp: Int!
+  relevance: FeedRelevance!
+  type: DELEGATION_const!
+  metadata: DelegationFeedMetadata!
+}
+
+enum DELEGATION_const {
+  DELEGATION
+}
+
+type DelegationFeedMetadata {
+  delegator: String!
+  delegate: String!
+  previousDelegate: String
+  amount: String!
+}
+
+type query_feedEvents_items_items_oneOf_2 {
+  """Transaction hash."""
+  txHash: String!
+
+  """Log index within the transaction receipt."""
+  logIndex: Int!
+
+  """Optional event value encoded as a decimal string when applicable."""
+  value: String
+
+  """Event timestamp in Unix seconds."""
+  timestamp: Int!
+  relevance: FeedRelevance!
+  type: TRANSFER_const!
+  metadata: TransferFeedMetadata!
+}
+
+enum TRANSFER_const {
+  TRANSFER
+}
+
+type TransferFeedMetadata {
+  from: String!
+  to: String!
+  amount: String!
+}
+
+type query_feedEvents_items_items_oneOf_3 {
+  """Transaction hash."""
+  txHash: String!
+
+  """Log index within the transaction receipt."""
+  logIndex: Int!
+
+  """Optional event value encoded as a decimal string when applicable."""
+  value: String
+
+  """Event timestamp in Unix seconds."""
+  timestamp: Int!
+  relevance: FeedRelevance!
+  type: PROPOSAL_const!
+  metadata: ProposalFeedMetadata!
+}
+
+enum PROPOSAL_const {
+  PROPOSAL
+}
+
+type ProposalFeedMetadata {
+  id: String!
+  proposer: String!
+  votingPower: String!
+  title: String!
+}
+
+type query_feedEvents_items_items_oneOf_4 {
+  """Transaction hash."""
+  txHash: String!
+
+  """Log index within the transaction receipt."""
+  logIndex: Int!
+
+  """Optional event value encoded as a decimal string when applicable."""
+  value: String
+
+  """Event timestamp in Unix seconds."""
+  timestamp: Int!
+  relevance: FeedRelevance!
+  type: PROPOSAL_EXTENDED_const!
+  metadata: ProposalExtendedFeedMetadata!
+}
+
+enum PROPOSAL_EXTENDED_const {
+  PROPOSAL_EXTENDED
+}
+
+type ProposalExtendedFeedMetadata {
+  id: String!
+  title: String!
+  endBlock: Int!
+  endTimestamp: String!
+  proposer: String!
+}
 
 """Field used to sort feed events."""
 enum queryInput_feedEvents_orderBy {
@@ -1113,6 +1224,15 @@ enum queryInput_feedEvents_type {
 type EventRelevanceThresholdResponse {
   """Threshold value encoded as a decimal string."""
   threshold: String!
+}
+
+"""Filter events by governance activity type."""
+enum FeedEventType {
+  VOTE
+  PROPOSAL
+  DELEGATION
+  TRANSFER
+  PROPOSAL_EXTENDED
 }
 
 """Supply metric comparison between current and previous periods."""
@@ -1977,6 +2097,11 @@ type query_offchainProposals_items_items_strategies_items {
   network: String!
   params: JSON!
 }
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 enum queryInput_offchainProposals_status_items {
   active

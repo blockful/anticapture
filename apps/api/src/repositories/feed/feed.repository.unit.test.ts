@@ -1,6 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
+import type { Address } from "viem";
 
 import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
@@ -11,6 +12,17 @@ import { FeedRequest } from "@/mappers";
 import { FeedRepository } from ".";
 
 type FeedEventInsert = typeof feedEvent.$inferInsert;
+type TestFeedEvent = Omit<FeedEventInsert, "value" | "timestamp"> & {
+  value: bigint;
+  timestamp: number;
+};
+
+let client: PGlite;
+let db: Drizzle;
+let repository: FeedRepository;
+
+const testAddress = (suffix: number): Address =>
+  `0x000000000000000000000000000000000000${suffix.toString().padStart(4, "0")}`;
 
 const defaultFeedParams = (
   overrides: Partial<FeedRequest> = {},
@@ -36,22 +48,128 @@ const defaultThresholds = (
 });
 
 const createFeedEvent = (
-  overrides: Partial<FeedEventInsert> = {},
-): FeedEventInsert => ({
+  overrides: Partial<TestFeedEvent> = {},
+): TestFeedEvent => ({
   txHash: "0xabc123",
   logIndex: 0,
   type: "VOTE",
   value: 1000n,
   timestamp: 1700000000,
-  metadata: null,
   ...overrides,
 });
 
-describe("FeedRepository", () => {
-  let client: PGlite;
-  let db: Drizzle;
-  let repository: FeedRepository;
+const asArray = (events: TestFeedEvent | TestFeedEvent[]) =>
+  Array.isArray(events) ? events : [events];
 
+const insertFeedEvents = async (events: TestFeedEvent | TestFeedEvent[]) => {
+  const rows = asArray(events);
+  await db.insert(feedEvent).values(rows);
+
+  const proposals = rows
+    .filter(
+      (event) =>
+        event.type === "PROPOSAL" ||
+        event.type === "PROPOSAL_EXTENDED" ||
+        event.type === "VOTE",
+    )
+    .map((event) => {
+      const id =
+        event.type === "VOTE"
+          ? `vote-proposal-${event.logIndex}`
+          : event.value.toString();
+      return {
+        id,
+        txHash: event.txHash,
+        daoId: "test-dao",
+        proposerAccountId: testAddress(100 + event.logIndex),
+        targets: [] as string[],
+        values: [] as bigint[],
+        signatures: [] as string[],
+        calldatas: [] as string[],
+        startBlock: 1,
+        endBlock: 2 + event.logIndex,
+        title: `Proposal ${id}`,
+        description: `Proposal ${id} description`,
+        timestamp: BigInt(event.timestamp),
+        endTimestamp: BigInt(event.timestamp + 1000),
+        status: "PENDING",
+      };
+    });
+  if (proposals.length > 0) {
+    await db
+      .insert(schema.proposalsOnchain)
+      .values(proposals)
+      .onConflictDoNothing();
+    await db
+      .insert(schema.votingPowerHistory)
+      .values(
+        proposals.map((proposal) => ({
+          transactionHash: proposal.txHash,
+          accountId: proposal.proposerAccountId,
+          daoId: "test-dao",
+          votingPower: 123n,
+          delta: 123n,
+          deltaMod: 123n,
+          timestamp: proposal.timestamp,
+          logIndex: 0,
+        })),
+      )
+      .onConflictDoNothing();
+  }
+
+  const votes = rows
+    .filter((event) => event.type === "VOTE")
+    .map((event) => ({
+      txHash: event.txHash,
+      daoId: "test-dao",
+      voterAccountId: testAddress(200 + event.logIndex),
+      proposalId: `vote-proposal-${event.logIndex}`,
+      support: "1",
+      votingPower: event.value,
+      reason: null,
+      timestamp: BigInt(event.timestamp),
+    }));
+  if (votes.length > 0) {
+    await db.insert(schema.votesOnchain).values(votes).onConflictDoNothing();
+  }
+
+  const delegations = rows
+    .filter((event) => event.type === "DELEGATION")
+    .map((event) => ({
+      transactionHash: event.txHash,
+      daoId: "test-dao",
+      delegateAccountId: testAddress(300 + event.logIndex),
+      delegatorAccountId: testAddress(400 + event.logIndex),
+      delegatedValue: event.value,
+      previousDelegate: null,
+      timestamp: BigInt(event.timestamp),
+      logIndex: event.logIndex,
+    }));
+  if (delegations.length > 0) {
+    await db
+      .insert(schema.delegation)
+      .values(delegations)
+      .onConflictDoNothing();
+  }
+
+  const transfers = rows
+    .filter((event) => event.type === "TRANSFER")
+    .map((event) => ({
+      transactionHash: event.txHash,
+      daoId: "test-dao",
+      tokenId: "token",
+      amount: event.value,
+      fromAccountId: testAddress(500 + event.logIndex),
+      toAccountId: testAddress(600 + event.logIndex),
+      timestamp: BigInt(event.timestamp),
+      logIndex: event.logIndex,
+    }));
+  if (transfers.length > 0) {
+    await db.insert(schema.transfer).values(transfers).onConflictDoNothing();
+  }
+};
+
+describe("FeedRepository", () => {
   beforeAll(async () => {
     client = new PGlite();
     db = drizzle(client, { schema });
@@ -70,16 +188,20 @@ describe("FeedRepository", () => {
 
   beforeEach(async () => {
     await db.delete(feedEvent);
+    await db.delete(schema.votesOnchain);
+    await db.delete(schema.delegation);
+    await db.delete(schema.transfer);
+    await db.delete(schema.votingPowerHistory);
+    await db.delete(schema.accountPower);
+    await db.delete(schema.proposalsOnchain);
   });
 
   describe("getFeedEvents", () => {
     it("should return items and totalCount", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0 }),
-          createFeedEvent({ logIndex: 1 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0 }),
+        createFeedEvent({ logIndex: 1 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams(),
@@ -101,13 +223,11 @@ describe("FeedRepository", () => {
     });
 
     it("should filter by fromDate (gte)", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, timestamp: 1000 }),
-          createFeedEvent({ logIndex: 1, timestamp: 2000 }),
-          createFeedEvent({ logIndex: 2, timestamp: 3000 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, timestamp: 1000 }),
+        createFeedEvent({ logIndex: 1, timestamp: 2000 }),
+        createFeedEvent({ logIndex: 2, timestamp: 3000 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ orderDirection: "asc", fromDate: 2000 }),
@@ -120,13 +240,11 @@ describe("FeedRepository", () => {
     });
 
     it("should filter by toDate (lte)", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, timestamp: 1000 }),
-          createFeedEvent({ logIndex: 1, timestamp: 2000 }),
-          createFeedEvent({ logIndex: 2, timestamp: 3000 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, timestamp: 1000 }),
+        createFeedEvent({ logIndex: 1, timestamp: 2000 }),
+        createFeedEvent({ logIndex: 2, timestamp: 3000 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ orderDirection: "asc", toDate: 2000 }),
@@ -139,14 +257,12 @@ describe("FeedRepository", () => {
     });
 
     it("should filter by both fromDate and toDate", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, timestamp: 1000 }),
-          createFeedEvent({ logIndex: 1, timestamp: 2000 }),
-          createFeedEvent({ logIndex: 2, timestamp: 3000 }),
-          createFeedEvent({ logIndex: 3, timestamp: 4000 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, timestamp: 1000 }),
+        createFeedEvent({ logIndex: 1, timestamp: 2000 }),
+        createFeedEvent({ logIndex: 2, timestamp: 3000 }),
+        createFeedEvent({ logIndex: 3, timestamp: 4000 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({
@@ -163,13 +279,11 @@ describe("FeedRepository", () => {
     });
 
     it("should filter by specific type with value threshold", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, type: "VOTE", value: 500n }),
-          createFeedEvent({ logIndex: 1, type: "VOTE", value: 1500n }),
-          createFeedEvent({ logIndex: 2, type: "DELEGATION", value: 2000n }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, type: "VOTE", value: 500n }),
+        createFeedEvent({ logIndex: 1, type: "VOTE", value: 1500n }),
+        createFeedEvent({ logIndex: 2, type: "DELEGATION", value: 2000n }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ type: FeedEventType.VOTE }),
@@ -181,7 +295,7 @@ describe("FeedRepository", () => {
     });
 
     it("should include PROPOSAL type without value threshold", async () => {
-      await db.insert(feedEvent).values([
+      await insertFeedEvents([
         createFeedEvent({
           logIndex: 0,
           type: "PROPOSAL",
@@ -203,15 +317,13 @@ describe("FeedRepository", () => {
     });
 
     it("should apply per-type value thresholds when no type filter", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, type: "VOTE", value: 500n }),
-          createFeedEvent({ logIndex: 1, type: "VOTE", value: 2000n }),
-          createFeedEvent({ logIndex: 2, type: "DELEGATION", value: 100n }),
-          createFeedEvent({ logIndex: 3, type: "DELEGATION", value: 600n }),
-          createFeedEvent({ logIndex: 4, type: "PROPOSAL", value: 0n }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, type: "VOTE", value: 500n }),
+        createFeedEvent({ logIndex: 1, type: "VOTE", value: 2000n }),
+        createFeedEvent({ logIndex: 2, type: "DELEGATION", value: 100n }),
+        createFeedEvent({ logIndex: 3, type: "DELEGATION", value: 600n }),
+        createFeedEvent({ logIndex: 4, type: "PROPOSAL", value: 0n }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams(),
@@ -227,13 +339,11 @@ describe("FeedRepository", () => {
     });
 
     it("should order by timestamp descending", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, timestamp: 1000 }),
-          createFeedEvent({ logIndex: 1, timestamp: 3000 }),
-          createFeedEvent({ logIndex: 2, timestamp: 2000 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, timestamp: 1000 }),
+        createFeedEvent({ logIndex: 1, timestamp: 3000 }),
+        createFeedEvent({ logIndex: 2, timestamp: 2000 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams(),
@@ -244,13 +354,11 @@ describe("FeedRepository", () => {
     });
 
     it("should order by timestamp ascending", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, timestamp: 3000 }),
-          createFeedEvent({ logIndex: 1, timestamp: 1000 }),
-          createFeedEvent({ logIndex: 2, timestamp: 2000 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, timestamp: 3000 }),
+        createFeedEvent({ logIndex: 1, timestamp: 1000 }),
+        createFeedEvent({ logIndex: 2, timestamp: 2000 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ orderDirection: "asc" }),
@@ -261,13 +369,11 @@ describe("FeedRepository", () => {
     });
 
     it("should order by value descending", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, value: 100n }),
-          createFeedEvent({ logIndex: 1, value: 300n }),
-          createFeedEvent({ logIndex: 2, value: 200n }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, value: 100n }),
+        createFeedEvent({ logIndex: 1, value: 300n }),
+        createFeedEvent({ logIndex: 2, value: 200n }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ orderBy: "value" }),
@@ -278,13 +384,11 @@ describe("FeedRepository", () => {
     });
 
     it("should apply pagination with skip", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, timestamp: 3000 }),
-          createFeedEvent({ logIndex: 1, timestamp: 2000 }),
-          createFeedEvent({ logIndex: 2, timestamp: 1000 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, timestamp: 3000 }),
+        createFeedEvent({ logIndex: 1, timestamp: 2000 }),
+        createFeedEvent({ logIndex: 2, timestamp: 1000 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ skip: 1 }),
@@ -296,13 +400,11 @@ describe("FeedRepository", () => {
     });
 
     it("should apply pagination with limit", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, timestamp: 3000 }),
-          createFeedEvent({ logIndex: 1, timestamp: 2000 }),
-          createFeedEvent({ logIndex: 2, timestamp: 1000 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0, timestamp: 3000 }),
+        createFeedEvent({ logIndex: 1, timestamp: 2000 }),
+        createFeedEvent({ logIndex: 2, timestamp: 1000 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ limit: 2 }),
@@ -314,15 +416,13 @@ describe("FeedRepository", () => {
     });
 
     it("should return totalCount independent of pagination", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0 }),
-          createFeedEvent({ logIndex: 1 }),
-          createFeedEvent({ logIndex: 2 }),
-          createFeedEvent({ logIndex: 3 }),
-          createFeedEvent({ logIndex: 4 }),
-        ]);
+      await insertFeedEvents([
+        createFeedEvent({ logIndex: 0 }),
+        createFeedEvent({ logIndex: 1 }),
+        createFeedEvent({ logIndex: 2 }),
+        createFeedEvent({ logIndex: 3 }),
+        createFeedEvent({ logIndex: 4 }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ skip: 2, limit: 2 }),
@@ -333,18 +433,69 @@ describe("FeedRepository", () => {
       expect(result.totalCount).toBe(5);
     });
 
-    it("should preserve metadata in returned items", async () => {
-      const metadata = { proposalId: "42", title: "Test Proposal" };
+    it("should build proposal metadata from related tables", async () => {
+      const txHash = "0xproposal42";
+      await db.insert(schema.proposalsOnchain).values({
+        id: "42",
+        txHash,
+        daoId: "test-dao",
+        proposerAccountId: testAddress(42),
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
+        startBlock: 1,
+        endBlock: 2,
+        title: "Test Proposal",
+        description: "Test proposal description",
+        timestamp: 1700000000n,
+        endTimestamp: 1700000100n,
+        status: "PENDING",
+      });
+      await db.insert(schema.accountPower).values({
+        accountId: "0x0000000000000000000000000000000000000042",
+        daoId: "test-dao",
+        votingPower: 999n,
+      });
+      await db.insert(schema.votingPowerHistory).values([
+        {
+          transactionHash: "0xhistoricalbeforeproposal",
+          daoId: "test-dao",
+          accountId: testAddress(42),
+          votingPower: 123n,
+          delta: 123n,
+          deltaMod: 123n,
+          timestamp: 1699999999n,
+          logIndex: 0,
+        },
+        {
+          transactionHash: "0xhistoricalafterproposal",
+          daoId: "test-dao",
+          accountId: testAddress(42),
+          votingPower: 999n,
+          delta: 876n,
+          deltaMod: 876n,
+          timestamp: 1700000001n,
+          logIndex: 0,
+        },
+      ]);
       await db
         .insert(feedEvent)
-        .values([createFeedEvent({ logIndex: 0, type: "PROPOSAL", metadata })]);
+        .values(
+          createFeedEvent({ txHash, logIndex: 0, type: "PROPOSAL", value: 0n }),
+        );
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ type: FeedEventType.PROPOSAL }),
         defaultThresholds(),
       );
 
-      expect(result.items[0]?.metadata).toEqual(metadata);
+      expect(result.items[0]?.metadata).toEqual({
+        id: "42",
+        proposer: "0x0000000000000000000000000000000000000042",
+        votingPower: "123",
+        title: "Test Proposal",
+      });
     });
   });
 });

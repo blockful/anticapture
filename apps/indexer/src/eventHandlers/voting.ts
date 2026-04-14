@@ -87,22 +87,12 @@ export const voteCast = async (
       abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
     }));
 
-  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
-
   await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
     type: "VOTE",
     value: votingPower,
     timestamp,
-    metadata: {
-      voter: getAddress(voter),
-      reason,
-      support,
-      votingPower,
-      proposalId,
-      title: proposal?.title ?? undefined,
-    },
   });
 };
 
@@ -220,7 +210,7 @@ export const proposalCreated = async (
   });
 
   // Update proposer's proposal count
-  const { votingPower: proposerVotingPower } = await context.db
+  await context.db
     .insert(accountPower)
     .values({
       accountId: getAddress(proposer),
@@ -238,12 +228,6 @@ export const proposalCreated = async (
     logIndex,
     type: "PROPOSAL",
     timestamp,
-    metadata: {
-      id: proposalId,
-      proposer: getAddress(proposer),
-      votingPower: proposerVotingPower,
-      title,
-    },
   });
 };
 
@@ -274,32 +258,20 @@ export const proposalExtended = async (
   logIndex: number,
   timestamp: bigint,
 ) => {
-  let endTimestamp: bigint | undefined;
-
   await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => {
-    endTimestamp =
-      row.endTimestamp +
-      BigInt((Number(extendedDeadline) - row.endBlock) * blockTime);
     return {
       row,
       endBlock: Number(extendedDeadline),
-      endTimestamp,
+      endTimestamp:
+        row.endTimestamp +
+        BigInt((Number(extendedDeadline) - row.endBlock) * blockTime),
     };
   });
-
-  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
 
   await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
     type: "PROPOSAL_EXTENDED",
     timestamp,
-    metadata: {
-      id: proposalId,
-      title: proposal?.title ?? undefined,
-      endBlock: Number(extendedDeadline),
-      endTimestamp,
-      proposer: getAddress(proposal!.proposerAccountId),
-    },
   });
 };

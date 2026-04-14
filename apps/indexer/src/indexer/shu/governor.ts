@@ -83,7 +83,7 @@ export function SHUGovernorIndexer(blockTime: number) {
         logIndex: event.log.logIndex,
       });
 
-    const { votingPower: proposerVotingPower } = await context.db
+    await context.db
       .insert(accountPower)
       .values({
         accountId: getAddress(proposer),
@@ -100,12 +100,6 @@ export function SHUGovernorIndexer(blockTime: number) {
       logIndex: event.log.logIndex,
       type: "PROPOSAL",
       timestamp: event.block.timestamp,
-      metadata: {
-        id: proposalIdStr,
-        proposer: getAddress(proposer),
-        votingPower: proposerVotingPower,
-        title,
-      },
     });
   });
 

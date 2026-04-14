@@ -2,13 +2,14 @@ import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
 import { DBFeedEvent, FeedRequest, FeedResponse } from "@/mappers";
+import type { DBFeedEventWithMetadata } from "@/repositories/feed";
 
 interface FeedRepository {
   getFeedEvents(
     req: FeedRequest,
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ): Promise<{
-    items: DBFeedEvent[];
+    items: DBFeedEventWithMetadata[];
     totalCount: number;
   }>;
 }
@@ -25,18 +26,33 @@ export class FeedService {
     );
     const response = await this.repo.getFeedEvents(req, valueThresholds);
     return {
-      items: response.items.map((item) => ({
-        ...item,
-        value:
-          item.type === FeedEventType.PROPOSAL ||
-          item.type === FeedEventType.PROPOSAL_EXTENDED
-            ? undefined
-            : item.value.toString(),
-        relevance: this.getItemRelevance(item),
-        type: item.type as FeedEventType,
-      })),
+      items: response.items.map((item) => this.mapFeedItem(item)),
       totalCount: response.totalCount,
     };
+  }
+
+  private mapFeedItem(
+    item: DBFeedEventWithMetadata,
+  ): FeedResponse["items"][number] {
+    const relevance = this.getItemRelevance(item);
+
+    switch (item.type) {
+      case FeedEventType.VOTE:
+      case FeedEventType.DELEGATION:
+      case FeedEventType.TRANSFER:
+        return {
+          ...item,
+          value: item.value.toString(),
+          relevance,
+        };
+      case FeedEventType.PROPOSAL:
+      case FeedEventType.PROPOSAL_EXTENDED:
+        return {
+          ...item,
+          value: undefined,
+          relevance,
+        };
+    }
   }
 
   private getItemRelevance(item: DBFeedEvent): FeedRelevance {

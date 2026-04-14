@@ -4,21 +4,87 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
-import { DBFeedEvent, FeedRequest } from "@/mappers";
+import { FeedItemMetadata, FeedRequest } from "@/mappers";
+import type { DBFeedEventWithMetadata } from "@/repositories/feed";
 
 import { FeedService } from ".";
 
 const createFeedEvent = (
-  overrides: Partial<DBFeedEvent> = {},
-): DBFeedEvent => ({
-  txHash: "0xabc123",
-  logIndex: 0,
-  type: "VOTE",
-  value: parseEther("100000"),
-  timestamp: 1700000000,
-  metadata: null,
-  ...overrides,
-});
+  overrides: Partial<Omit<DBFeedEventWithMetadata, "metadata">> & {
+    metadata?: FeedItemMetadata;
+  } = {},
+): DBFeedEventWithMetadata => {
+  const item = {
+    txHash: "0xabc123",
+    logIndex: 0,
+    type: FeedEventType.VOTE,
+    value: parseEther("100000"),
+    timestamp: 1700000000,
+    ...overrides,
+  };
+
+  switch (item.type) {
+    case FeedEventType.VOTE:
+      return {
+        ...item,
+        type: FeedEventType.VOTE,
+        metadata: overrides.metadata ?? {
+          voter: "0x0000000000000000000000000000000000000001",
+          reason: null,
+          support: 1,
+          votingPower: item.value.toString(),
+          proposalId: "1",
+          title: "Test Proposal",
+        },
+      };
+    case FeedEventType.DELEGATION:
+      return {
+        ...item,
+        type: FeedEventType.DELEGATION,
+        metadata: overrides.metadata ?? {
+          delegator: "0x0000000000000000000000000000000000000001",
+          delegate: "0x0000000000000000000000000000000000000002",
+          previousDelegate: null,
+          amount: item.value.toString(),
+        },
+      };
+    case FeedEventType.TRANSFER:
+      return {
+        ...item,
+        type: FeedEventType.TRANSFER,
+        metadata: overrides.metadata ?? {
+          from: "0x0000000000000000000000000000000000000001",
+          to: "0x0000000000000000000000000000000000000002",
+          amount: item.value.toString(),
+        },
+      };
+    case FeedEventType.PROPOSAL:
+      return {
+        ...item,
+        type: FeedEventType.PROPOSAL,
+        metadata: overrides.metadata ?? {
+          id: "1",
+          proposer: "0x0000000000000000000000000000000000000001",
+          votingPower: "100",
+          title: "Test Proposal",
+        },
+      };
+    case FeedEventType.PROPOSAL_EXTENDED:
+      return {
+        ...item,
+        type: FeedEventType.PROPOSAL_EXTENDED,
+        metadata: overrides.metadata ?? {
+          id: "1",
+          title: "Test Proposal",
+          endBlock: 100,
+          endTimestamp: "1700001000",
+          proposer: "0x0000000000000000000000000000000000000001",
+        },
+      };
+    default:
+      throw new Error(`Unsupported test feed event type ${item.type}`);
+  }
+};
 
 const createRequest = (overrides: Partial<FeedRequest> = {}): FeedRequest => ({
   skip: 0,
@@ -30,14 +96,13 @@ const createRequest = (overrides: Partial<FeedRequest> = {}): FeedRequest => ({
 });
 
 class SimpleFeedRepository {
-  items: DBFeedEvent[] = [];
+  items: DBFeedEventWithMetadata[] = [];
 
   async getFeedEvents(
     _req: FeedRequest,
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ) {
     const filtered = this.items.filter((e) => {
-      if (e.type === "DELEGATION_VOTES_CHANGED") return false;
       const threshold = valueThresholds[e.type];
       return threshold === undefined || e.value >= threshold;
     });
@@ -81,10 +146,15 @@ describe("FeedService", () => {
       const event = createFeedEvent({
         txHash: "0xdef456",
         logIndex: 5,
-        type: "DELEGATION",
+        type: FeedEventType.DELEGATION,
         value: ensThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM],
         timestamp: 1700001000,
-        metadata: { from: "0x1", to: "0x2" },
+        metadata: {
+          delegator: "0x0000000000000000000000000000000000000001",
+          delegate: "0x0000000000000000000000000000000000000002",
+          previousDelegate: null,
+          amount: "100",
+        },
       });
       simpleRepo.items = [event];
 
@@ -93,16 +163,23 @@ describe("FeedService", () => {
       expect(result.items[0]).toEqual({
         txHash: "0xdef456",
         logIndex: 5,
-        type: "DELEGATION",
+        type: FeedEventType.DELEGATION,
         value: event.value.toString(),
         timestamp: 1700001000,
-        metadata: { from: "0x1", to: "0x2" },
+        metadata: {
+          delegator: "0x0000000000000000000000000000000000000001",
+          delegate: "0x0000000000000000000000000000000000000002",
+          previousDelegate: null,
+          amount: "100",
+        },
         relevance: FeedRelevance.MEDIUM,
       });
     });
 
     it("should assign HIGH relevance for PROPOSAL type", async () => {
-      simpleRepo.items = [createFeedEvent({ type: "PROPOSAL", value: 0n })];
+      simpleRepo.items = [
+        createFeedEvent({ type: FeedEventType.PROPOSAL, value: 0n }),
+      ];
 
       const result = await service.getFeedEvents(createRequest());
 
@@ -113,7 +190,7 @@ describe("FeedService", () => {
       const highThreshold =
         ensThresholds[FeedEventType.VOTE][FeedRelevance.HIGH];
       simpleRepo.items = [
-        createFeedEvent({ type: "VOTE", value: highThreshold }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: highThreshold }),
       ];
 
       const result = await service.getFeedEvents(createRequest());
@@ -125,7 +202,7 @@ describe("FeedService", () => {
       const mediumThreshold =
         ensThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM];
       simpleRepo.items = [
-        createFeedEvent({ type: "VOTE", value: mediumThreshold }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: mediumThreshold }),
       ];
 
       const result = await service.getFeedEvents(createRequest());
@@ -136,7 +213,7 @@ describe("FeedService", () => {
     it("should assign LOW relevance when value is below MEDIUM threshold", async () => {
       const lowThreshold = ensThresholds[FeedEventType.VOTE][FeedRelevance.LOW];
       simpleRepo.items = [
-        createFeedEvent({ type: "VOTE", value: lowThreshold }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: lowThreshold }),
       ];
 
       const result = await service.getFeedEvents(
@@ -150,17 +227,17 @@ describe("FeedService", () => {
       const t = ensThresholds[FeedEventType.TRANSFER];
       simpleRepo.items = [
         createFeedEvent({
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           value: t[FeedRelevance.HIGH],
           logIndex: 0,
         }),
         createFeedEvent({
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           value: t[FeedRelevance.MEDIUM],
           logIndex: 1,
         }),
         createFeedEvent({
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           value: t[FeedRelevance.LOW],
           logIndex: 2,
         }),
@@ -178,12 +255,12 @@ describe("FeedService", () => {
     it("should filter out events below the relevance threshold", async () => {
       simpleRepo.items = [
         createFeedEvent({
-          type: "VOTE",
+          type: FeedEventType.VOTE,
           value: parseEther("500"),
           logIndex: 0,
         }),
         createFeedEvent({
-          type: "VOTE",
+          type: FeedEventType.VOTE,
           value: ensThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
           logIndex: 1,
         }),
@@ -200,8 +277,8 @@ describe("FeedService", () => {
     it("should use NOUNS thresholds for NOUNS dao", async () => {
       const nounsService = new FeedService(DaoIdEnum.NOUNS, simpleRepo);
       simpleRepo.items = [
-        createFeedEvent({ type: "VOTE", value: 5n, logIndex: 0 }),
-        createFeedEvent({ type: "VOTE", value: 20n, logIndex: 1 }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: 5n, logIndex: 0 }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: 20n, logIndex: 1 }),
       ];
 
       const result = await nounsService.getFeedEvents(
