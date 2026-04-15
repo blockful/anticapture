@@ -1973,7 +1973,13 @@
         "required": ["voter", "votingPower"]
       }
     },
-    "parameters": {}
+    "parameters": {},
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
   },
   "paths": {
     "/health": {
@@ -2230,7 +2236,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2330,7 +2348,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2372,7 +2402,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2455,7 +2497,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2506,7 +2560,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2557,7 +2622,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2608,7 +2684,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2664,7 +2751,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2721,7 +2819,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2848,7 +2958,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2899,7 +3020,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2940,7 +3072,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2981,7 +3124,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3022,7 +3176,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3063,7 +3228,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3104,7 +3280,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3145,7 +3332,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3186,7 +3384,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3227,7 +3436,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3268,7 +3488,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3309,7 +3540,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3350,7 +3592,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3462,7 +3715,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3571,7 +3835,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3639,7 +3914,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3693,7 +3979,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3821,7 +4118,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3968,7 +4277,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4017,7 +4337,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4114,7 +4445,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4242,7 +4584,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4372,7 +4726,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4472,7 +4838,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4536,7 +4913,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4673,7 +5061,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4737,7 +5137,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4837,7 +5249,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4901,7 +5324,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5055,7 +5489,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5121,7 +5567,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5259,7 +5717,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5405,7 +5875,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5537,7 +6019,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5659,7 +6152,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5745,7 +6249,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5777,7 +6292,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5884,7 +6411,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5980,7 +6518,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6048,7 +6586,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6102,7 +6640,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6215,7 +6753,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6338,7 +6876,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6432,12 +6970,17 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["uni"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
       ]
     }
   },
-  "webhooks": {}
+  "webhooks": {},
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
 }
