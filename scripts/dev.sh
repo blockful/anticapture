@@ -234,9 +234,11 @@ log "Starting Gateful..."
 run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" railway_run gateful pnpm gateful dev &
 wait_for_ready "$GATEFUL_READY" "Gateful"
 
-# 6. Client — codegen + build watch
+# 6. Clients — codegen + build watch
 export ANTICAPTURE_GRAPHQL_ENDPOINT="http://localhost:${PORT_GATEWAY}/graphql"
-log "Starting Client (silent, errors only)..."
+log "Starting GraphQL Client (silent, errors only)..."
+run_errors_only "$C_CODEGEN" "🤝 gql-client" pnpm gql-client dev &
+log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
 # 7. Dashboard
@@ -256,7 +258,8 @@ fi
 printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} http://localhost:${PORT_ADDRESS_ENRICHMENT}\n"
 printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:${PORT_GATEWAY}\n"
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
-printf "  ${C_CODEGEN}🤝 Client${C_RESET}    codegen + build watch\n"
+printf "  ${C_CODEGEN}🤝 GraphQL Client${C_RESET} codegen + build watch\n"
+printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""
 log "Press Ctrl+C to stop all services."
