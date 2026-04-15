@@ -7,6 +7,7 @@ import {
   TokenPropertiesResponseSchema,
   TokenMapper,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { TokenService } from "@/services";
 
 export interface TokenPriceClient {
@@ -39,6 +40,7 @@ export function token(
       summary: "Get token properties",
       description: "Get property data for a specific token",
       tags: ["tokens"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: TokenPropertiesQuerySchema,
       },

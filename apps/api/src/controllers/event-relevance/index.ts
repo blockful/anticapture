@@ -6,6 +6,7 @@ import {
   EventRelevanceThresholdQuerySchema,
   EventRelevanceThresholdResponseSchema,
 } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { EventRelevanceService } from "@/services";
 
 export function eventRelevance(app: Hono, service: EventRelevanceService) {
@@ -16,6 +17,7 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
       path: "/event-relevance/threshold",
       summary: "Get event relevance threshold",
       tags: ["feed"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: EventRelevanceThresholdQuerySchema,
       },

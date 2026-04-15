@@ -1,14 +1,17 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
-import { ButtonHeaderDAOSidebarMobile } from "@/shared/components";
+import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const HeaderNavMobile = () => {
   const { daoId }: { daoId: string } = useParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
   if (!daoId) {
     return null;
   }
@@ -28,14 +31,13 @@ export const HeaderNavMobile = () => {
     },
     {
       page: "governance",
-      title: "Governance",
+      title: "Proposals",
       enabled: !!daoConfig.governancePage,
     },
     {
       page: PAGES_CONSTANTS.activityFeed.page,
       title: PAGES_CONSTANTS.activityFeed.title,
-      enabled: daoConfig.activityFeed,
-      isNew: true,
+      enabled: !!daoConfig.activityFeed,
     },
     {
       page: PAGES_CONSTANTS.attackProfitability.page,
@@ -61,15 +63,35 @@ export const HeaderNavMobile = () => {
       page: PAGES_CONSTANTS.serviceProviders.page,
       title: PAGES_CONSTANTS.serviceProviders.title,
       enabled: !!daoConfig.serviceProviders,
-      isNew: true,
     },
   ];
 
+  const enabledOptions = options.filter((o) => o.enabled);
+  const items = enabledOptions.map((o) => ({ value: o.page, label: o.title }));
+
+  const isDaoOverviewPage =
+    pathname === `/${daoId}` || pathname === `/${daoId}/`;
+  const currentPage = isDaoOverviewPage
+    ? "/"
+    : (enabledOptions.find((o) => pathname?.includes(`/${o.page}`))?.page ??
+      "/");
+
+  const handleChange = (value: string) => {
+    if (value === "/") {
+      router.push(`/${daoId}`);
+    } else {
+      router.push(`/${daoId}/${value}`);
+    }
+  };
+
   return (
-    <div className="w-full">
-      <div className="scrollbar-none w-full overflow-x-auto">
-        <ButtonHeaderDAOSidebarMobile options={options} />
-      </div>
+    <div className="w-full px-4 py-2">
+      <Select
+        items={items}
+        value={currentPage}
+        onValueChange={handleChange}
+        placeholder="Navigate to…"
+      />
     </div>
   );
 };

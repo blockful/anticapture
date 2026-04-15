@@ -15,7 +15,7 @@ export const LIL_NOUNS: DaoConfiguration = {
   icon: NounsIcon,
   ogIcon: NounsOgIcon,
   overviewPage: false,
-  initialPage: "governance",
+  initialPage: "proposals",
   daoOverview: {
     token: "ERC721",
     chain: { ...mainnet, icon: MainnetIcon },

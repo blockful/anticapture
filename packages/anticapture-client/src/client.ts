@@ -66,19 +66,26 @@ const resolveUrl = (
   baseURL = DEFAULT_BASE_URL,
 ) => {
   const isAbsolute = /^https?:\/\//.test(url);
+  const hasAbsoluteBaseUrl = /^https?:\/\//.test(baseURL);
   const normalizedBaseUrl = baseURL.replace(/\/$/, "");
-  const normalizedPath = url.startsWith("/") ? url : `/${url}`;
+  const normalizedPath = url.replace(/^\/+/, "");
 
-  const target = new URL(
-    isAbsolute ? url : `${normalizedBaseUrl}${normalizedPath}`,
-    "http://localhost",
-  );
+  const target = isAbsolute
+    ? new URL(url)
+    : new URL(
+        normalizedPath,
+        new URL(`${normalizedBaseUrl}/`, "http://localhost"),
+      );
 
   if (params && typeof params === "object") {
     appendSearchParams(target.searchParams, params as Record<string, unknown>);
   }
 
-  return isAbsolute ? target.toString() : `${target.pathname}${target.search}`;
+  if (isAbsolute || hasAbsoluteBaseUrl) {
+    return target.toString();
+  }
+
+  return `${target.pathname}${target.search}`;
 };
 
 const isFormData = (value: unknown): value is FormData =>

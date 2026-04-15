@@ -2,9 +2,16 @@ import { NextRequest } from "next/server";
 
 import { GET } from "./route";
 
+const MOCK_GATEFUL_URL = "https://gateful.mock.local";
+
 describe("Gateful proxy route", () => {
   beforeEach(() => {
+    process.env.NEXT_PUBLIC_GATEFUL_URL = MOCK_GATEFUL_URL;
     global.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_GATEFUL_URL;
   });
 
   it("forwards path segments and query params", async () => {
@@ -28,17 +35,40 @@ describe("Gateful proxy route", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      new URL(
-        "https://gateful.up.railway.app/comp/feed/events?limit=5&relevance=HIGH",
-      ),
+      new URL(`${MOCK_GATEFUL_URL}/comp/feed/events?limit=5&relevance=HIGH`),
       expect.objectContaining({
         method: "GET",
       }),
     );
   });
 
-  it("injects the server-side GATEFUL_API_TOKEN as authorization header", async () => {
-    process.env.GATEFUL_API_TOKEN = "server-secret";
+  it("treats absolute URL-shaped params as upstream path segments", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+      }),
+    );
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/gateful/http://attacker.com?limit=5",
+    );
+
+    await GET(request, {
+      params: Promise.resolve({
+        path: ["http:", "attacker.com"],
+      }),
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      new URL(`${MOCK_GATEFUL_URL}/http%3A/attacker.com?limit=5`),
+      expect.objectContaining({
+        method: "GET",
+      }),
+    );
+  });
+
+  it("injects the server-side BLOCKFUL_API_TOKEN as authorization header", async () => {
+    process.env.BLOCKFUL_API_TOKEN = "server-secret";
 
     (global.fetch as jest.Mock).mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), {
@@ -64,11 +94,11 @@ describe("Gateful proxy route", () => {
 
     expect(headers.get("authorization")).toBe("Bearer server-secret");
 
-    delete process.env.GATEFUL_API_TOKEN;
+    delete process.env.BLOCKFUL_API_TOKEN;
   });
 
-  it("sends no authorization header when GATEFUL_API_TOKEN is not set", async () => {
-    delete process.env.GATEFUL_API_TOKEN;
+  it("sends no authorization header when BLOCKFUL_API_TOKEN is not set", async () => {
+    delete process.env.BLOCKFUL_API_TOKEN;
 
     (global.fetch as jest.Mock).mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), {

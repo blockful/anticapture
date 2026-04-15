@@ -5,6 +5,7 @@ import {
   DelegationPercentageResponseSchema,
   toApi,
 } from "@/mappers/";
+import { setCacheControl } from "@/middlewares";
 import { DelegationPercentageService } from "@/services";
 
 export function delegationPercentage(
@@ -18,6 +19,7 @@ export function delegationPercentage(
       path: "/delegation-percentage",
       summary: "Get delegation percentage day buckets with forward-fill",
       tags: ["metrics"],
+      middleware: [setCacheControl(3600)],
       request: {
         query: DelegationPercentageRequestSchema,
       },

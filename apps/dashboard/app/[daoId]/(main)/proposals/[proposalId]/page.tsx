@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
 
 import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { HeaderSidebar, StickyPageHeader } from "@/widgets";
-import { HeaderMobile } from "@/widgets/HeaderMobile";
 
 type Props = {
   params: Promise<{ daoId: string; proposalId: string }>;
+  searchParams: Promise<{ proposalType?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
+  const { proposalType } = await props.searchParams;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
+  const isOffchain = proposalType === "offchain";
 
-  const canonicalPath = `/${params.daoId}/governance/proposal/${params.proposalId}`;
+  const canonicalPath = isOffchain
+    ? `/${params.daoId}/proposals/${params.proposalId}?proposalType=offchain`
+    : `/${params.daoId}/proposals/${params.proposalId}`;
 
   return {
     title: `${daoId} DAO Governance Proposal | Security Analysis — Anticapture`,
@@ -33,26 +35,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default function ProposalPage() {
+export default async function ProposalPage({ searchParams }: Props) {
+  const { proposalType } = await searchParams;
+
   return (
-    <div className="bg-surface-background dark flex h-screen overflow-hidden">
-      <div className="active relative hidden h-screen lg:flex">
-        <div className="h-full w-[68px] shrink-0 overflow-y-auto">
-          <HeaderSidebar />
-        </div>
-      </div>
-      <main className="relative flex-1 overflow-auto">
-        <div className="lg:hidden">
-          <HeaderMobile withMobileMenu={false} />
-          <StickyPageHeader withMobileMenu={false} />
-        </div>
-        <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="w-full flex-1">
-            <ProposalSection />
-          </div>
-          <Footer />
-        </div>
-      </main>
+    <div>
+      <ProposalSection isOffchain={proposalType === "offchain"} />
     </div>
   );
 }

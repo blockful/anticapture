@@ -1,7 +1,7 @@
 "use client";
 
 import { BarChart4 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 
 import {
@@ -20,8 +20,13 @@ export const StickyPageHeader = ({
 }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isProposalPage = !!pathname?.match(/\/proposals\/[^/]+/);
+  const showMobileMenu = withMobileMenu && !isProposalPage;
 
   const menuItems = useMemo(
     () => [
@@ -81,15 +86,16 @@ export const StickyPageHeader = ({
   }, [lastScrollY]);
 
   return (
-    <div className={cn(withMobileMenu ? "h-[98px]" : "h-[57px]")}>
+    <div className={cn(showMobileMenu ? "h-[110px]" : "h-13.75")}>
       <header
         className={cn(
-          "bg-surface-background fixed left-0 right-0 top-0 z-30 w-full shadow-md transition-transform duration-300",
+          "bg-surface-background fixed left-0 right-0 top-0 w-full shadow-md transition-transform duration-300",
+          isDropdownOpen ? "z-[60]" : "z-40",
         )}
       >
-        <HeaderDAOSidebarDropdown />
+        <HeaderDAOSidebarDropdown onOpenChange={setIsDropdownOpen} />
 
-        {withMobileMenu && <HeaderNavMobile />}
+        {showMobileMenu && <HeaderNavMobile />}
       </header>
 
       <div
@@ -99,7 +105,8 @@ export const StickyPageHeader = ({
       >
         <div
           className={cn(
-            `fixed left-0 right-0 top-[87px] z-30 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
+            `fixed left-0 right-0 z-30 flex h-[calc(100vh-57px)] w-screen bg-black/90 transition-all duration-300`,
+            showMobileMenu ? "top-[124px]" : "top-[64px]",
             isMenuOpen
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",

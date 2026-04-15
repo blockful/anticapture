@@ -1,15 +1,21 @@
 "use client";
 
 import { OrderDirection } from "@anticapture/graphql-client";
-import { Building2, Landmark } from "lucide-react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import {
+  useOffchainSearchProposalsQuery,
+  useSearchProposalsQuery,
+} from "@anticapture/graphql-client/hooks";
+import { Building2, Landmark, Search } from "lucide-react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
 
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
 import { useProposals } from "@/features/governance/hooks/useProposals";
+import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
 import { TheSectionLayout } from "@/shared/components";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
@@ -25,6 +31,7 @@ export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const hasOffchain = !!daoConfig[daoIdEnum]?.offchainProposals;
+  const { decimals } = daoConfig[daoIdEnum];
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
     parseAsStringEnum<"onchain" | "offchain">([
@@ -32,6 +39,9 @@ export const GovernanceSection = () => {
       "offchain",
     ]).withDefault("onchain"),
   );
+  const [search] = useQueryState("search", parseAsString.withDefault(""));
+  const trimmedSearch = search.trim();
+  const isSearchActive = trimmedSearch.length > 0;
 
   const {
     proposals,
@@ -62,6 +72,40 @@ export const GovernanceSection = () => {
     daoId: hasOffchain ? daoIdEnum : undefined,
   });
 
+  const authContext = useMemo(
+    () => ({
+      headers: { "anticapture-dao-id": daoIdEnum },
+    }),
+    [daoIdEnum],
+  );
+
+  const { data: searchData, loading: searchLoading } = useSearchProposalsQuery({
+    variables: { query: trimmedSearch, limit: 50, skip: null },
+    skip: !isSearchActive,
+    context: authContext,
+  });
+
+  const { data: offchainSearchData, loading: offchainSearchLoading } =
+    useOffchainSearchProposalsQuery({
+      variables: { query: trimmedSearch, limit: 50, skip: null },
+      skip: !isSearchActive || !hasOffchain,
+      context: authContext,
+    });
+
+  const searchOnchainProposals = useMemo(() => {
+    if (!isSearchActive) return [];
+    return (searchData?.searchProposals?.items ?? [])
+      .filter((p) => p !== null)
+      .map((p) => transformToGovernanceProposal(p, decimals));
+  }, [isSearchActive, searchData, decimals]);
+
+  const searchOffchainProposals = useMemo(() => {
+    if (!isSearchActive) return [];
+    return (offchainSearchData?.offchainSearchProposals?.items ?? []).filter(
+      (p) => p !== null,
+    );
+  }, [isSearchActive, offchainSearchData]);
+
   const loadMoreOnchainRef = useRef<HTMLDivElement>(null);
   const loadMoreOffchainRef = useRef<HTMLDivElement>(null);
 
@@ -80,6 +124,7 @@ export const GovernanceSection = () => {
   }, [fetchNextPage, isPaginationLoading, pagination.hasNextPage]);
 
   useEffect(() => {
+    if (isSearchActive) return;
     const ref = isOnchain
       ? loadMoreOnchainRef.current
       : loadMoreOffchainRef.current;
@@ -97,7 +142,7 @@ export const GovernanceSection = () => {
     observer.observe(ref);
 
     return () => observer.disconnect();
-  }, [handleLoadMore, isOnchain]);
+  }, [handleLoadMore, isOnchain, isSearchActive]);
 
   if (error) {
     return (
@@ -130,12 +175,13 @@ export const GovernanceSection = () => {
   }
 
   return (
-    <div className="bg-background flex min-h-screen flex-col">
+    <div>
       <TheSectionLayout
         title="Proposals"
         icon={<Landmark className="section-layout-icon" />}
         description="View and vote on executable proposals from this DAO."
         className="lg:bg-transparent"
+        hideDivider
       >
         {hasOffchain && (
           <TabGroup
@@ -152,25 +198,44 @@ export const GovernanceSection = () => {
         <div className="flex-1">
           {isOnchain ? (
             <ProposalListSection
-              loading={onchainLoading}
-              hasItems={proposals.length > 0}
-              isPaginationLoading={isOnchainPaginationLoading}
+              loading={isSearchActive ? searchLoading : onchainLoading}
+              hasItems={
+                isSearchActive
+                  ? searchOnchainProposals.length > 0
+                  : proposals.length > 0
+              }
+              isPaginationLoading={
+                isSearchActive ? false : isOnchainPaginationLoading
+              }
               loadMoreRef={loadMoreOnchainRef}
+              isSearchActive={isSearchActive}
               emptyMessage="No proposals found"
             >
-              {proposals.map((proposal) => (
-                <ProposalItem key={proposal.id} proposal={proposal} />
-              ))}
+              {(isSearchActive ? searchOnchainProposals : proposals).map(
+                (proposal) => (
+                  <ProposalItem key={proposal.id} proposal={proposal} />
+                ),
+              )}
             </ProposalListSection>
           ) : (
             <ProposalListSection
-              loading={offchainLoading}
-              hasItems={offchainProposals.length > 0}
-              isPaginationLoading={isOffchainPaginationLoading}
+              loading={isSearchActive ? offchainSearchLoading : offchainLoading}
+              hasItems={
+                isSearchActive
+                  ? searchOffchainProposals.length > 0
+                  : offchainProposals.length > 0
+              }
+              isPaginationLoading={
+                isSearchActive ? false : isOffchainPaginationLoading
+              }
               loadMoreRef={loadMoreOffchainRef}
+              isSearchActive={isSearchActive}
               emptyMessage="No off-chain proposals found"
             >
-              {offchainProposals.map((proposal) => (
+              {(isSearchActive
+                ? searchOffchainProposals
+                : offchainProposals
+              ).map((proposal) => (
                 <ProposalItem key={proposal.id} offchainProposal={proposal} />
               ))}
             </ProposalListSection>
@@ -186,6 +251,7 @@ const ProposalListSection = ({
   hasItems,
   isPaginationLoading,
   loadMoreRef,
+  isSearchActive,
   emptyMessage,
   children,
 }: {
@@ -193,6 +259,7 @@ const ProposalListSection = ({
   hasItems: boolean;
   isPaginationLoading: boolean;
   loadMoreRef: RefObject<HTMLDivElement | null>;
+  isSearchActive: boolean;
   emptyMessage: string;
   children: React.ReactNode;
 }) => {
@@ -207,6 +274,15 @@ const ProposalListSection = ({
   }
 
   if (!hasItems) {
+    if (isSearchActive) {
+      return (
+        <BlankSlate
+          variant="default"
+          icon={Search}
+          description="No proposals match your search"
+        />
+      );
+    }
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <p className="text-muted-foreground mb-4">{emptyMessage}</p>

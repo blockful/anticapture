@@ -1,37 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "@anticapture/offchain-indexer#db:migrate": {
+    "@anticapture/indexer#db:*": {
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "@anticapture/offchain-indexer#db:push": {
-      "cache": false,
-      "passThroughEnv": ["*"]
+    "@anticapture/graphql-client#codegen": {
+      "inputs": ["documents/**/*", "codegen.ts"],
+      "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
-    "@anticapture/indexer#db:prune": {
-      "cache": false,
-      "passThroughEnv": ["*"]
+    "@anticapture/client#build": {
+      "dependsOn": ["codegen"],
+      "outputs": ["generated/**"]
     },
     "@anticapture/graphql-client#build": {
-      "outputs": ["generated/**"]
-    },
-    "@anticapture/client#codegen": {
-      "outputs": ["generated/**"]
-    },
-    "@anticapture/dashboard#dev": {
-      "dependsOn": [
-        "@anticapture/graphql-client#codegen",
-        "@anticapture/client#codegen"
-      ],
-      "persistent": true,
-      "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "@anticapture/graphql-client#dev": {
-      "persistent": true
+      "dependsOn": ["codegen"],
+      "outputs": ["dist/**"],
+      "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
     "@anticapture/dashboard#build": {
+      "dependsOn": ["^codegen", "^build"],
       "outputs": ["dist/**", ".next/**"],
       "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
@@ -40,6 +28,7 @@
       "outputs": ["dist/**"]
     },
     "storybook": {
+      "dependsOn": ["^codegen"],
       "persistent": true,
       "cache": false
     },
@@ -88,7 +77,6 @@
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {
-      "inputs": ["documents/**/*", "codegen.ts"],
       "outputs": ["generated/**"]
     },
     "db:generate": {

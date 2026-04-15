@@ -1,6 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import { FeedRequestSchema, FeedResponseSchema } from "@/mappers";
+import { setCacheControl } from "@/middlewares";
 import { FeedService } from "@/services";
 
 export function feed(app: Hono, service: FeedService) {
@@ -11,6 +12,7 @@ export function feed(app: Hono, service: FeedService) {
       path: "/feed/events",
       summary: "Get feed events",
       tags: ["feed", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         query: FeedRequestSchema,
       },

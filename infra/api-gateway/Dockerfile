@@ -15,7 +15,7 @@ COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
-COPY turbo.json turbo.json
+COPY --from=builder /app/turbo.json turbo.json
 RUN pnpm --filter @anticapture/api-gateway... build
 
 FROM base AS runner

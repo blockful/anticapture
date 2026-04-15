@@ -14,9 +14,10 @@ pnpm dev
 bun dev
 ```
 
-GraphQL Client
+Generated clients
 
 ```bash
+pnpm gql-client dev
 pnpm client dev
 ```
 

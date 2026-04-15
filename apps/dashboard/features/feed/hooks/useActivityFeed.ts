@@ -18,7 +18,7 @@ export const useActivityFeed = ({
     refetch,
     isFetching,
   } = useFeedEventsSuspenseInfinite(
-    "ens",
+    "uni",
     {
       limit: filters.limit,
       orderBy: filters.orderBy,

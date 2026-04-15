@@ -154,3 +154,46 @@ query GetAccountPower(
     totalCount
   }
 }
+
+query SearchProposals($query: NonEmptyString!, $limit: Int, $skip: Int) {
+  searchProposals(query: $query, limit: $limit, skip: $skip) {
+    items {
+      id
+      daoId
+      txHash
+      quorum
+      forVotes
+      againstVotes
+      abstainVotes
+      timestamp
+      status
+      proposerAccountId
+      title
+      startTimestamp
+      endTimestamp
+      targets
+      values
+    }
+    totalCount
+  }
+}
+
+query OffchainSearchProposals($query: NonEmptyString!, $limit: Int, $skip: Int) {
+  offchainSearchProposals(query: $query, limit: $limit, skip: $skip) {
+    items {
+      id
+      spaceId
+      author
+      title
+      type
+      state
+      start
+      end
+      created
+      updated
+      scores
+      choices
+    }
+    totalCount
+  }
+}

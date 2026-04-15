@@ -4,7 +4,6 @@ import {
 } from "@anticapture/graphql-client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const useActiveSupply = (daoId: DaoIdEnum, days: string) => {
   const daysKey = days as keyof typeof DaysWindow;
@@ -16,7 +15,6 @@ export const useActiveSupply = (daoId: DaoIdEnum, days: string) => {
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     skip: !daoId || !days,

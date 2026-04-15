@@ -4,6 +4,7 @@ import {
   TransactionsRequestSchema,
   TransactionsResponseSchema,
 } from "@/mappers/";
+import { setCacheControl } from "@/middlewares";
 import { TransactionsService } from "@/services";
 
 export function transactions(app: Hono, service: TransactionsService) {
@@ -16,6 +17,7 @@ export function transactions(app: Hono, service: TransactionsService) {
       description:
         "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
       tags: ["transactions", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         query: TransactionsRequestSchema,
       },

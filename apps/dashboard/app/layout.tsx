@@ -2,15 +2,16 @@ import "@/app/globals.css";
 import "tailwindcss";
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { CookieConsent } from "@/features/cookie";
 import { HelpPopover } from "@/shared/components";
-import { ShutterAttackBanner } from "@/shared/components/banners/ShutterAttackBanner";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
+import { resolveDaoIdFromHostname } from "@/shared/utils/whitelabel";
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
@@ -56,27 +57,47 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const headersList = await headers();
+  const host =
+    headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
+  const hostname = host.split(":")[0];
+  const isWhitelabel = !!resolveDaoIdFromHostname(hostname);
+
   return (
-    <html lang="en" className="dark">
+    <html
+      lang="en"
+      className={isWhitelabel ? undefined : "dark"}
+      suppressHydrationWarning
+    >
       <head>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
+        {!isWhitelabel && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `if(location.pathname.startsWith('/whitelabel/'))document.documentElement.classList.remove('dark')`,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${inter.className} ${roboto.variable} bg-surface-background`}
       >
         <div
           data-vaul-drawer-wrapper=""
-          className="border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
+          className="border-border-default mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
         >
           <GlobalProviders>
-            <ShutterAttackBanner />
             {children}
-            <CookieConsent />
-            <HelpPopover />
+            <CookieConsent isWhitelabel={isWhitelabel} />
+            <HelpPopover isWhitelabel={isWhitelabel} />
           </GlobalProviders>
           <Toaster position="bottom-left" reverseOrder={false} />
           <ConditionalPostHog />

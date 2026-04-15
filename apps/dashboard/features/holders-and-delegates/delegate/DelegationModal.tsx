@@ -2,7 +2,7 @@
 
 import { Check, Hourglass, PenLine } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import type { Account, Address } from "viem";
+import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useReadContract, useWalletClient } from "wagmi";
 
@@ -45,7 +45,6 @@ export const DelegationModal = ({
   onSuccess,
 }: DelegationModalProps) => {
   const { address: userAddress } = useAccount();
-  const { data: walletClient } = useWalletClient();
   const [step, setStep] = useState<DelegationStep>("waiting-signature");
   const [error, setError] = useState<string | null>(null);
 
@@ -53,6 +52,8 @@ export const DelegationModal = ({
   const tokenAddress = daoConfig?.daoOverview?.contracts?.token as
     | Address
     | undefined;
+  const chain = daoConfig?.daoOverview?.chain;
+  const { data: walletClient } = useWalletClient({ chainId: chain?.id });
   const decimals = daoConfig?.decimals ?? 18;
 
   const { data: votingPowerRaw } = useReadContract({
@@ -79,9 +80,10 @@ export const DelegationModal = ({
       await delegateTo(
         tokenAddress,
         delegateAddress,
-        userAddress as unknown as Account,
+        userAddress,
         walletClient,
         () => setStep("pending-tx"),
+        chain,
       );
       setStep("success");
       showCustomToast("Delegation successful!", "success");
@@ -145,7 +147,7 @@ export const DelegationModal = ({
         <StepRow
           done={step === "success" || step === "pending-tx"}
           active={step === "waiting-signature"}
-          icon={<PenLine className="size-3.5 text-black" />}
+          icon={<PenLine className="text-inverted size-3.5" />}
           label="Confirm your delegation in your wallet"
           error={step === "error" ? error : undefined}
         />
@@ -155,7 +157,7 @@ export const DelegationModal = ({
         <StepRow
           done={step === "success"}
           active={step === "pending-tx"}
-          icon={<Hourglass className="size-3.5 text-black" />}
+          icon={<Hourglass className="text-inverted size-3.5" />}
           label="Wait for the delegation to complete"
         />
       </div>
@@ -183,7 +185,7 @@ const StepRow = ({ done, active, icon, label, error }: StepRowProps) => {
       <div className="flex w-full items-center gap-2">
         <div className="relative flex size-8 shrink-0 items-center justify-center">
           {active && (
-            <SpinIcon className="absolute inset-0 size-8 animate-spin text-orange-500" />
+            <SpinIcon className="text-link absolute inset-0 size-8 animate-spin" />
           )}
           <div
             className={cn(

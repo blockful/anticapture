@@ -3,7 +3,6 @@ import { useGetDaoAddressesAccountBalancesQuery } from "@anticapture/graphql-cli
 import type { ApolloError, ApolloQueryResult } from "@apollo/client";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface TopTokenHolderNonDaoResponse {
   data:
@@ -38,7 +37,6 @@ export const useTopTokenHolderNonDao = (
       context: {
         headers: {
           "anticapture-dao-id": daoId,
-          ...getAuthHeaders(),
         },
       },
       variables: {
