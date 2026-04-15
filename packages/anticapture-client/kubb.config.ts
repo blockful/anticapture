@@ -10,13 +10,13 @@ const gatefulOpenApiSpecPath = fileURLToPath(
   new URL("../../apps/gateful/openapi/gateful.json", import.meta.url),
 );
 
-export default defineConfig({
+export default defineConfig(({ watch }) => ({
   input: {
     path: gatefulOpenApiSpecPath,
   },
   output: {
     path: "./generated",
-    clean: true,
+    clean: !watch,
   },
   plugins: [
     pluginOas(),
@@ -68,4 +68,4 @@ export default defineConfig({
       ],
     }),
   ],
-});
+}));

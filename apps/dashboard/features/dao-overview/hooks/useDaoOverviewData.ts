@@ -16,7 +16,6 @@ import {
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const useDaoOverviewData = ({
   daoId,
@@ -43,7 +42,6 @@ export const useDaoOverviewData = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,

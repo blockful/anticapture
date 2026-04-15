@@ -9,7 +9,6 @@ import { NetworkStatus } from "@apollo/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type ProposalActivityItem = NonNullable<
   NonNullable<
@@ -68,7 +67,6 @@ export const useProposalsActivity = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,

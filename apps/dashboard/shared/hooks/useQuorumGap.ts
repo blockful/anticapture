@@ -9,7 +9,6 @@ import {
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const useQuorumGap = (daoId: DaoIdEnum) => {
   const days = 90;
@@ -20,7 +19,6 @@ export const useQuorumGap = (daoId: DaoIdEnum) => {
   const context = {
     headers: {
       "anticapture-dao-id": daoId,
-      ...getAuthHeaders(),
     },
   };
 

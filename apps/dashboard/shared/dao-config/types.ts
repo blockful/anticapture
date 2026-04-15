@@ -121,6 +121,14 @@ export interface AttackProfitabilityConfig {
 }
 export type GovernanceImplementationConfig = GovernanceImplementation;
 
+export interface WhitelabelConfig {
+  governanceParameters?: Array<{
+    label: string;
+    value: string;
+    description?: string;
+  }>;
+}
+
 export type DefenseAreaDescription = {
   description: string;
 };
@@ -132,8 +140,9 @@ export type AttackExposureConfig = {
 /** Feature page slugs — the set of pages a DAO can enable. */
 export type DaoFeaturePageSlug =
   | "holders-and-delegates"
-  | "governance"
+  | "proposals"
   | "activity-feed"
+  | "service-providers"
   | "attack-profitability"
   | "resilience-stages"
   | "risk-analysis"
@@ -142,6 +151,9 @@ export type DaoFeaturePageSlug =
 // Complete DAO configuration structure
 export interface DaoConfiguration extends BaseInfo {
   daoOverview: DaoOverviewConfig;
+  whitelabel?: WhitelabelConfig;
+  customDomain?: string;
+  hostnames?: string[];
   activityFeed?: boolean;
   attackProfitability?: AttackProfitabilityConfig;
   governanceImplementation?: GovernanceImplementationConfig;
