@@ -200,36 +200,36 @@ rateLimiters:
     - id: nodeful
       rules:
         - method: "*"
-          maxCount: 500
+          maxCount: 400
           period: 1s
           waitTime: 10s
         - method: eth_getLogs
-          maxCount: 100
+          maxCount: 80
           period: 1s
           waitTime: 10s
         - method: eth_call
-          maxCount: 200
+          maxCount: 160
           period: 1s
           waitTime: 10s
         - method: eth_getCode
-          maxCount: 200
+          maxCount: 160
           period: 1s
           waitTime: 10s
         - method: eth_getStorageAt
-          maxCount: 200
+          maxCount: 160
           period: 1s
           waitTime: 10s
     - id: chainstack
       rules:
         - method: "*"
-          maxCount: 400
+          maxCount: 320
           period: 1s
           waitTime: 30s
 
     - id: indexer-limit
       rules:
         - method: "*"
-          maxCount: 300
+          maxCount: 240
           period: 1s
     - id: api-limit
       rules:
