@@ -62,8 +62,8 @@ export default defineConfig(({ watch }) => ({
           pattern: /skip-pagination/,
           options: {
             infinite: {
-              initialPageParam: 0,
               queryParam: "skip",
+              initialPageParam: 0,
             },
           },
         },
