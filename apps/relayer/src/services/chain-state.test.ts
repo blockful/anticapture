@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { type Address } from "viem";
+import { getAddress } from "viem";
 
 import { ChainStateService } from "./chain-state";
 import { ProposalState } from "@/abi/governor";
 import { createStubPublicClient } from "../test-utils/stub-public-client";
 
-const GOVERNOR = "0x1111111111111111111111111111111111111111" as Address;
-const TOKEN = "0x2222222222222222222222222222222222222222" as Address;
-const VOTER = "0x3333333333333333333333333333333333333333" as Address;
+const GOVERNOR = getAddress("0x1111111111111111111111111111111111111111");
+const TOKEN = getAddress("0x2222222222222222222222222222222222222222");
+const VOTER = getAddress("0x3333333333333333333333333333333333333333");
 
 describe("ChainStateService", () => {
   let service: ChainStateService;

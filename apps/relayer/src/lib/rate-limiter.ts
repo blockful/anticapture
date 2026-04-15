@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { type Address, getAddress } from "viem";
 
 import { Errors } from "@/errors";
 
@@ -19,7 +19,7 @@ export class RateLimiter {
    */
   checkAllowed(address: Address): void {
     const now = Date.now();
-    const key = address.toLowerCase() as Address;
+    const key = getAddress(address);
     const timestamps = this.requests.get(key) ?? [];
 
     // Prune entries older than 24h
@@ -43,7 +43,7 @@ export class RateLimiter {
    */
   recordUsage(address: Address): void {
     const now = Date.now();
-    const key = address.toLowerCase() as Address;
+    const key = getAddress(address);
     const dayAgo = now - 24 * 60 * 60 * 1000;
     const timestamps = (this.requests.get(key) ?? []).filter((t) => t > dayAgo);
     timestamps.push(now);

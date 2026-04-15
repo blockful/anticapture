@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { setupServer } from "msw/node";
 import { http, HttpResponse } from "msw";
-import { type Address, type Hex, parseEther } from "viem";
+import { getAddress, type Hex, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 import { relayVote } from "./relay-vote";
@@ -19,10 +19,10 @@ import { fromZodError } from "zod-validation-error";
 import { createPublicClient, http as viemHttp } from "viem";
 import { mainnet } from "viem/chains";
 
-const TEST_PK =
-  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" as Hex;
-const GOVERNOR = "0x1111111111111111111111111111111111111111" as Address;
-const TOKEN = "0x2222222222222222222222222222222222222222" as Address;
+const TEST_PK: Hex =
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+const GOVERNOR = getAddress("0x1111111111111111111111111111111111111111");
+const TOKEN = getAddress("0x2222222222222222222222222222222222222222");
 const RPC_URL = "http://localhost:8545";
 
 function encodeStringResult(str: string): string {

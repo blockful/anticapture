@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { type Address } from "viem";
+import { getAddress } from "viem";
 
 import { RateLimiter } from "./rate-limiter";
 
-const ADDR = "0x3333333333333333333333333333333333333333" as Address;
+const ADDR = getAddress("0x3333333333333333333333333333333333333333");
 
 describe("RateLimiter", () => {
   let limiter: RateLimiter;
@@ -60,7 +60,7 @@ describe("RateLimiter", () => {
   });
 
   it("isolates rate limits per address", () => {
-    const OTHER = "0x4444444444444444444444444444444444444444" as Address;
+    const OTHER = getAddress("0x4444444444444444444444444444444444444444");
     limiter.recordUsage(ADDR);
     limiter.recordUsage(ADDR);
     // ADDR is at hourly limit, but OTHER should be fine

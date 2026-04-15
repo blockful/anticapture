@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { privateKeyToAccount } from "viem/accounts";
-import { type Address, type Hex } from "viem";
+import { getAddress, type Hex } from "viem";
 
 import { SignatureVerifier } from "./signature-verifier";
 
@@ -12,14 +12,14 @@ const GOVERNOR_DOMAIN = {
   name: "TestGovernor",
   version: "1",
   chainId: 1,
-  verifyingContract: "0x1111111111111111111111111111111111111111" as Address,
+  verifyingContract: getAddress("0x1111111111111111111111111111111111111111"),
 };
 
 const TOKEN_DOMAIN = {
   name: "TestToken",
   version: "1",
   chainId: 1,
-  verifyingContract: "0x2222222222222222222222222222222222222222" as Address,
+  verifyingContract: getAddress("0x2222222222222222222222222222222222222222"),
 };
 
 describe("SignatureVerifier", () => {
@@ -58,7 +58,7 @@ describe("SignatureVerifier", () => {
   });
 
   it("recovers the correct signer from a delegation signature", async () => {
-    const delegatee = "0x4444444444444444444444444444444444444444" as Address;
+    const delegatee = getAddress("0x4444444444444444444444444444444444444444");
     const nonce = 0n;
     const expiry = BigInt(Math.floor(Date.now() / 1000) + 3600);
 

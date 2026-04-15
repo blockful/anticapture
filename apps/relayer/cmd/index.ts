@@ -3,7 +3,7 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import pino from "pino";
-import { createPublicClient, http, type Address, type Chain } from "viem";
+import { createPublicClient, http, type Chain } from "viem";
 import { mainnet, optimism, scroll, arbitrum, zkSync } from "viem/chains";
 import { fromZodError } from "zod-validation-error";
 
@@ -33,8 +33,8 @@ async function main() {
   const chain = CHAINS[env.CHAIN_ID];
   if (!chain) throw new Error(`Unsupported chain ID: ${env.CHAIN_ID}`);
 
-  const governorAddress = env.GOVERNOR_ADDRESS as Address;
-  const tokenAddress = env.TOKEN_ADDRESS as Address;
+  const governorAddress = env.GOVERNOR_ADDRESS;
+  const tokenAddress = env.TOKEN_ADDRESS;
 
   // --- Infrastructure ---
   const publicClient = createPublicClient({
@@ -42,11 +42,7 @@ async function main() {
     transport: http(env.RPC_URL),
   });
 
-  const signer = createLocalSigner(
-    env.RELAYER_PRIVATE_KEY as `0x${string}`,
-    chain,
-    env.RPC_URL,
-  );
+  const signer = createLocalSigner(env.RELAYER_PRIVATE_KEY, chain, env.RPC_URL);
 
   // --- Services ---
   const chainState = new ChainStateService(

@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { type Address } from "viem";
+import { getAddress } from "viem";
 
 import { EligibilityService } from "./eligibility";
 import type { ChainStateService } from "./chain-state";
 
-const VOTER = "0x3333333333333333333333333333333333333333" as Address;
+const VOTER = getAddress("0x3333333333333333333333333333333333333333");
 
 function createStubChainState(
   overrides: Partial<ChainStateService> = {},
@@ -15,7 +15,7 @@ function createStubChainState(
     hasVoted: async () => false,
     getDelegationNonce: async () => 0n,
     getCurrentDelegate: async () =>
-      "0x0000000000000000000000000000000000000000" as Address,
+      getAddress("0x0000000000000000000000000000000000000000"),
     getGovernorName: async () => "TestGovernor",
     getTokenName: async () => "TestToken",
     ...overrides,

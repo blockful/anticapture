@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { isAddress, isHex } from "viem";
+import { getAddress, isAddress, isHex } from "viem";
 import { z } from "zod";
 
 dotenv.config();
@@ -8,10 +8,19 @@ const envSchema = z.object({
   RPC_URL: z.string().url(),
   CHAIN_ID: z.coerce.number(),
 
-  GOVERNOR_ADDRESS: z.string().refine(isAddress, "Invalid Ethereum address"),
-  TOKEN_ADDRESS: z.string().refine(isAddress, "Invalid Ethereum address"),
+  GOVERNOR_ADDRESS: z
+    .string()
+    .refine(isAddress, "Invalid Ethereum address")
+    .transform((v) => getAddress(v)),
+  TOKEN_ADDRESS: z
+    .string()
+    .refine(isAddress, "Invalid Ethereum address")
+    .transform((v) => getAddress(v)),
 
-  RELAYER_PRIVATE_KEY: z.string().refine(isHex, "Invalid hex string"),
+  RELAYER_PRIVATE_KEY: z
+    .string()
+    .refine(isHex, "Invalid hex string")
+    .transform((v) => v as `0x${string}`),
 
   MIN_VOTING_POWER: z.string().default("0"),
   DELEGATION_COOLDOWN_DAYS: z.coerce.number().default(7),

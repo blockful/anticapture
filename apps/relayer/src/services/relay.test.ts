@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { type Address, type Hash, type Hex, parseEther } from "viem";
+import { getAddress, type Hash, type Hex, parseEther } from "viem";
 
 import { RelayService } from "./relay";
 import { ProposalState } from "@/abi/governor";
@@ -10,22 +10,22 @@ import type { ChainStateService } from "./chain-state";
 import type { RateLimiter } from "@/lib/rate-limiter";
 import { createStubPublicClient } from "../test-utils/stub-public-client";
 
-const VOTER = "0x3333333333333333333333333333333333333333" as Address;
-const GOVERNOR = "0x1111111111111111111111111111111111111111" as Address;
-const TOKEN = "0x2222222222222222222222222222222222222222" as Address;
-const TX_HASH =
-  "0xabcd000000000000000000000000000000000000000000000000000000000001" as Hash;
+const VOTER = getAddress("0x3333333333333333333333333333333333333333");
+const GOVERNOR = getAddress("0x1111111111111111111111111111111111111111");
+const TOKEN = getAddress("0x2222222222222222222222222222222222222222");
+const TX_HASH: Hash =
+  "0xabcd000000000000000000000000000000000000000000000000000000000001";
 
-const SAMPLE_R =
-  "0x1111111111111111111111111111111111111111111111111111111111111111" as Hex;
-const SAMPLE_S =
-  "0x2222222222222222222222222222222222222222222222222222222222222222" as Hex;
+const SAMPLE_R: Hex =
+  "0x1111111111111111111111111111111111111111111111111111111111111111";
+const SAMPLE_S: Hex =
+  "0x2222222222222222222222222222222222222222222222222222222222222222";
 
 function createStubSigner(
   overrides: Partial<RelayerSigner> = {},
 ): RelayerSigner {
   return {
-    address: "0x9999999999999999999999999999999999999999" as Address,
+    address: getAddress("0x9999999999999999999999999999999999999999"),
     sendTransaction: async () => TX_HASH,
     ...overrides,
   };
@@ -60,7 +60,7 @@ function createStubChainState(
     getDelegationNonce: async () => 0n,
     getVotingPower: async () => 0n,
     getCurrentDelegate: async () =>
-      "0x0000000000000000000000000000000000000000" as Address,
+      getAddress("0x0000000000000000000000000000000000000000"),
     getGovernorName: async () => "TestGovernor",
     getTokenName: async () => "TestToken",
     ...overrides,
@@ -156,7 +156,7 @@ describe("RelayService", () => {
 
   describe("relayDelegation", () => {
     const delegateParams = {
-      delegatee: "0x5555555555555555555555555555555555555555" as Address,
+      delegatee: getAddress("0x5555555555555555555555555555555555555555"),
       nonce: 0n,
       expiry: BigInt(Math.floor(Date.now() / 1000) + 3600),
       v: 27,
