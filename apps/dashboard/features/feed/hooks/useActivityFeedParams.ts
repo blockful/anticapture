@@ -11,6 +11,8 @@ import {
   orderDirectionEnum,
 } from "@anticapture/client";
 
+import { getActiveActivityFeedFiltersCount } from "@/features/feed/hooks/activityFeedFilters";
+
 export function useActivityFeedParams() {
   const [orderDirection, setOrderDirection] = useQueryState(
     "sort",
@@ -62,14 +64,3 @@ export function useActivityFeedParams() {
 
   return { filters, setFilters, clearFilters, activeFiltersCount };
 }
-
-export const getActiveActivityFeedFiltersCount = (
-  filters: FeedEventsQueryParams,
-) =>
-  [
-    filters.fromDate,
-    filters.toDate,
-    filters.orderDirection !== "desc",
-    filters.relevance !== feedRelevanceEnum.MEDIUM,
-    filters.type,
-  ].filter(Boolean).length;
