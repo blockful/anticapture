@@ -6,7 +6,7 @@ interface SearchFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const SearchField = ({ ...props }: SearchFieldProps) => {
   return (
-    <div className="border-border-default bg-surface-default hover:border-border-contrast focus-within:border-border-contrast focus-within:shadow-focus-ring flex items-center gap-2.5 border px-2.5 py-2 transition-all duration-200">
+    <div className="border-border-default bg-surface-default hover:border-border-contrast focus-within:border-border-contrast focus-within:shadow-focus-ring rounded-base flex items-center gap-2.5 border px-2.5 py-2 transition-all duration-200">
       <input
         type="text"
         {...props}

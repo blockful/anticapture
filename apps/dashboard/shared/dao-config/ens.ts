@@ -24,6 +24,8 @@ export const ENS: DaoConfiguration = {
   forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
   ogIcon: EnsOgIcon,
+  hostnames: ["staging.anticapture.com"],
+  whitelabel: {},
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -44,7 +46,7 @@ export const ENS: DaoConfiguration = {
     },
     govPlatform: {
       name: "Anticapture",
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}/ens/governance/proposal/`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/ens/proposals/`,
     },
     securityCouncil: {
       isActive: true,

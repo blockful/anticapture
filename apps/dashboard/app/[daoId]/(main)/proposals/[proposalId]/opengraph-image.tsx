@@ -15,6 +15,6 @@ export default async function OpengraphImage({
 
   return await createDaoSectionOgImage({
     daoId: daoIdEnum,
-    sectionTitle: "<governance>",
+    sectionTitle: "<proposals>",
   });
 }
