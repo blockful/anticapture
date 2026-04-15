@@ -1,8 +1,8 @@
 query GetDelegators(
   $address: String!
   $skip: Int
-  $orderBy: queryInput_delegators_orderBy = amount
   $limit: Int = 10
+  $orderBy: queryInput_delegators_orderBy = amount
   $orderDirection: OrderDirection = desc
 ) {
   delegators(
