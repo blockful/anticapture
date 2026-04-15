@@ -1,39 +1,60 @@
 "use client";
 
-import { Calendar } from "lucide-react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
-import type { ActivityFeedFilterState } from "@/features/feed/types";
-import { FeedEventRelevance, FeedEventType } from "@/features/feed/types";
+import type {
+  FeedEventsQueryParams,
+  OrderDirection,
+} from "@anticapture/client";
+import {
+  feedRelevanceEnum,
+  feedEventTypeEnum,
+  type FeedRelevance,
+  type FeedEventType,
+} from "@anticapture/client";
 import {
   Button,
   DrawerRoot,
   DrawerContent,
   DrawerHeader,
-} from "@/shared/components";
+} from "@/shared/components/";
 import { RadioButton } from "@/shared/components/design-system/form/fields";
-import { Input } from "@/shared/components/design-system/form/fields/input/Input";
+import { Calendar } from "@/shared/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/components/ui/popover";
+import { cn } from "@/shared/utils/";
 
 interface ActivityFeedFiltersDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  filters: ActivityFeedFilterState;
-  onApplyFilters: (filters: ActivityFeedFilterState) => void;
+  filters: FeedEventsQueryParams;
+  onApplyFilters: (filters: FeedEventsQueryParams) => void;
+  onClearFilters: () => void;
 }
 
-const relevanceOptions: { value: FeedEventRelevance; label: string }[] = [
-  { value: FeedEventRelevance.Low, label: "Low" },
-  { value: FeedEventRelevance.Medium, label: "Medium" },
-  { value: FeedEventRelevance.High, label: "High" },
+const relevanceOptions: { value: FeedRelevance; label: string }[] = [
+  { value: feedRelevanceEnum.LOW, label: "Low" },
+  { value: feedRelevanceEnum.MEDIUM, label: "Medium" },
+  { value: feedRelevanceEnum.HIGH, label: "High" },
 ];
 
 const typeOptions: { value: FeedEventType; label: string }[] = [
-  { value: FeedEventType.Vote, label: "Vote" },
-  { value: FeedEventType.Proposal, label: "Proposal" },
-  { value: FeedEventType.ProposalExtended, label: "Proposal Extended" },
-  { value: FeedEventType.Transfer, label: "Transfer" },
-  { value: FeedEventType.Delegation, label: "Delegation" },
+  { value: feedEventTypeEnum.VOTE, label: "Vote" },
+  { value: feedEventTypeEnum.PROPOSAL, label: "Proposal" },
+  { value: feedEventTypeEnum.PROPOSAL_EXTENDED, label: "Proposal Extended" },
+  { value: feedEventTypeEnum.TRANSFER, label: "Transfer" },
+  { value: feedEventTypeEnum.DELEGATION, label: "Delegation" },
 ];
+
+const timestampToDate = (ts: number | undefined): Date | undefined => {
+  if (!ts) return undefined;
+  return new Date(ts);
+};
 
 const SectionDivider = () => (
   <div className="border-border-default w-full border-t border-dashed" />
@@ -50,15 +71,16 @@ export const ActivityFeedFiltersDrawer = ({
   onClose,
   filters,
   onApplyFilters,
+  onClearFilters,
 }: ActivityFeedFiltersDrawerProps) => {
   const [localFilters, setLocalFilters] =
-    useState<ActivityFeedFilterState>(filters);
+    useState<FeedEventsQueryParams>(filters);
 
-  const handleSortOrderChange = (sortOrder: "desc" | "asc") => {
-    setLocalFilters((prev) => ({ ...prev, sortOrder }));
+  const handleSortOrderChange = (orderDirection: OrderDirection) => {
+    setLocalFilters((prev) => ({ ...prev, orderDirection }));
   };
 
-  const handleRelevanceChange = (relevance: FeedEventRelevance) => {
+  const handleRelevanceChange = (relevance: FeedRelevance) => {
     setLocalFilters((prev) => ({ ...prev, relevance }));
   };
 
@@ -66,40 +88,57 @@ export const ActivityFeedFiltersDrawer = ({
     setLocalFilters((prev) => ({ ...prev, type }));
   };
 
-  const handleFromDateChange = (value: string) => {
-    setLocalFilters((prev) => ({ ...prev, fromDate: value }));
+  const handleFromDateChange = (value: number | undefined) => {
+    if (value === undefined) {
+      setLocalFilters((prev) => ({ ...prev, fromDate: undefined }));
+      return;
+    }
+
+    const d = new Date(value);
+    d.setHours(0, 0, 0, 0);
+    setLocalFilters((prev) => ({ ...prev, fromDate: d.getTime() }));
   };
 
-  const handleToDateChange = (value: string) => {
-    setLocalFilters((prev) => ({ ...prev, toDate: value }));
+  const handleToDateChange = (value: number | undefined) => {
+    if (value === undefined) {
+      setLocalFilters((prev) => ({ ...prev, toDate: undefined }));
+      return;
+    }
+
+    const d = new Date(value);
+    d.setHours(23, 59, 59, 999);
+    setLocalFilters((prev) => ({ ...prev, toDate: d.getTime() }));
   };
 
   const handleApply = () => {
-    onApplyFilters(localFilters);
+    onApplyFilters({
+      ...localFilters,
+      fromDate: localFilters.fromDate
+        ? Math.floor(localFilters.fromDate / 1000)
+        : undefined,
+      toDate: localFilters.toDate
+        ? Math.floor(localFilters.toDate / 1000)
+        : undefined,
+    });
     onClose();
   };
 
   const handleClear = () => {
-    const clearedFilters: ActivityFeedFilterState = {
-      sortOrder: "desc",
-      relevance: FeedEventRelevance.Medium,
-      type: undefined,
-      fromDate: "",
-      toDate: "",
-    };
-    setLocalFilters(clearedFilters);
-    onApplyFilters(clearedFilters);
+    onClearFilters();
     onClose();
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-    }
+    if (!open) onClose();
   };
 
   useEffect(() => {
-    if (isOpen) setLocalFilters(filters);
+    if (isOpen)
+      setLocalFilters({
+        ...filters,
+        fromDate: filters.fromDate ? filters.fromDate * 1000 : undefined,
+        toDate: filters.toDate ? filters.toDate * 1000 : undefined,
+      });
   }, [isOpen, filters]);
 
   return (
@@ -115,15 +154,15 @@ export const ActivityFeedFiltersDrawer = ({
               <div className="flex items-center gap-6">
                 <RadioButton
                   label="Newest first"
-                  checked={localFilters.sortOrder === "desc"}
+                  checked={localFilters.orderDirection === "desc"}
                   onChange={() => handleSortOrderChange("desc")}
-                  name="sortOrder"
+                  name="orderDirection"
                 />
                 <RadioButton
                   label="Oldest first"
-                  checked={localFilters.sortOrder === "asc"}
+                  checked={localFilters.orderDirection === "asc"}
                   onChange={() => handleSortOrderChange("asc")}
-                  name="sortOrder"
+                  name="orderDirection"
                 />
               </div>
             </div>
@@ -176,27 +215,63 @@ export const ActivityFeedFiltersDrawer = ({
             <div className="flex flex-col gap-3">
               <SectionLabel>Time Frame</SectionLabel>
               <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Calendar className="text-dimmed pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2" />
-                  <Input
-                    type="date"
-                    value={localFilters.fromDate}
-                    onChange={(e) => handleFromDateChange(e.target.value)}
-                    placeholder="MM/DD/YYYY"
-                    className="pl-9 [&::-webkit-calendar-picker-indicator]:hidden"
-                  />
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "border-border-default bg-surface-default text-secondary hover:bg-surface-default h-9 flex-1 justify-start px-3 text-sm font-normal",
+                        !localFilters.fromDate && "text-dimmed",
+                      )}
+                    >
+                      <CalendarIcon className="text-dimmed size-4 shrink-0" />
+                      {localFilters.fromDate
+                        ? format(
+                            timestampToDate(localFilters.fromDate)!,
+                            "MMM d, yyyy",
+                          )
+                        : "From date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="z-[200] w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={timestampToDate(localFilters.fromDate)}
+                      onSelect={(date) => handleFromDateChange(date?.getTime())}
+                    />
+                  </PopoverContent>
+                </Popover>
                 <span className="text-dimmed">–</span>
-                <div className="relative flex-1">
-                  <Calendar className="text-dimmed pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2" />
-                  <Input
-                    type="date"
-                    value={localFilters.toDate}
-                    onChange={(e) => handleToDateChange(e.target.value)}
-                    placeholder="MM/DD/YYYY"
-                    className="pl-9 [&::-webkit-calendar-picker-indicator]:hidden"
-                  />
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "border-border-default bg-surface-default text-secondary hover:bg-surface-default h-9 flex-1 justify-start px-3 text-sm font-normal",
+                        !localFilters.toDate && "text-dimmed",
+                      )}
+                    >
+                      <CalendarIcon className="text-dimmed size-4 shrink-0" />
+                      {localFilters.toDate
+                        ? format(
+                            timestampToDate(localFilters.toDate)!,
+                            "MMM d, yyyy",
+                          )
+                        : "To date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="z-[200] w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={timestampToDate(localFilters.toDate)}
+                      onSelect={(date) => handleToDateChange(date?.getTime())}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             {/* Spacer for fixed footer on mobile */}

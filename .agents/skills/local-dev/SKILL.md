@@ -45,14 +45,14 @@ pnpm dev <dao_id>
 
 ## Services & Ports
 
-| Service            | Command                | Port  | Description                                      |
-| ------------------ | ---------------------- | ----- | ------------------------------------------------ |
-| **API**            | `pnpm api dev <dao>`   | 42069 | REST API (only when dao_id is provided)          |
-| **Gateway**        | `pnpm gateway dev`     | 4000  | GraphQL Mesh aggregating DAO APIs                |
-| **Gateful**        | `pnpm gateful dev`     | 4001  | REST gateway wrapping the GraphQL layer          |
-| **GraphQL Client** | `pnpm gql-client dev`  | --    | GraphQL codegen + build watch (no port)          |
-| **REST Client**    | `pnpm client dev`      | --    | Kubb REST codegen watch from Gateful OpenAPI     |
-| **Dashboard**      | `pnpm dashboard dev`   | 3000  | Next.js frontend                                 |
+| Service            | Command               | Port  | Description                                  |
+| ------------------ | --------------------- | ----- | -------------------------------------------- |
+| **API**            | `pnpm api dev <dao>`  | 42069 | REST API (only when dao_id is provided)      |
+| **Gateway**        | `pnpm gateway dev`    | 4000  | GraphQL Mesh aggregating DAO APIs            |
+| **Gateful**        | `pnpm gateful dev`    | 4001  | REST gateway wrapping the GraphQL layer      |
+| **GraphQL Client** | `pnpm gql-client dev` | --    | GraphQL codegen + build watch (no port)      |
+| **REST Client**    | `pnpm client dev`     | --    | Kubb REST codegen watch from Gateful OpenAPI |
+| **Dashboard**      | `pnpm dashboard dev`  | 3000  | Next.js frontend                             |
 
 ## Startup Order & Dependencies
 
@@ -114,14 +114,14 @@ pnpm gateful dev
 
 ## Troubleshooting
 
-| Problem                                | Likely Cause                             | Fix                                                              |
-| -------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------- |
-| Gateway fails to start                 | Missing `DAO_API_*` env vars             | Ensure at least one DAO API URL is set in env or run with dao_id |
-| Port already in use                    | Another process on 42069/4000/4001/3000  | `lsof -i :<port>` to find and kill the process                   |
-| GraphQL client codegen errors          | Gateway not ready or schema changed      | Ensure Gateway is running and healthy before starting `pnpm gql-client dev` |
+| Problem                                | Likely Cause                             | Fix                                                                           |
+| -------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| Gateway fails to start                 | Missing `DAO_API_*` env vars             | Ensure at least one DAO API URL is set in env or run with dao_id              |
+| Port already in use                    | Another process on 42069/4000/4001/3000  | `lsof -i :<port>` to find and kill the process                                |
+| GraphQL client codegen errors          | Gateway not ready or schema changed      | Ensure Gateway is running and healthy before starting `pnpm gql-client dev`   |
 | REST client codegen errors             | Gateful OpenAPI spec changed             | Ensure Gateful generated OpenAPI is current before starting `pnpm client dev` |
-| Dashboard type errors after API change | Stale generated types                    | Re-run `pnpm gql-client dev` and `pnpm client dev`               |
-| Timeout waiting for service            | Service crashed silently or slow startup | Check service logs directly: `pnpm <service> dev`                |
+| Dashboard type errors after API change | Stale generated types                    | Re-run `pnpm gql-client dev` and `pnpm client dev`                            |
+| Timeout waiting for service            | Service crashed silently or slow startup | Check service logs directly: `pnpm <service> dev`                             |
 
 ## pnpm Shortcuts Reference
 
