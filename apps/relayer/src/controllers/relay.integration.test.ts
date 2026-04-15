@@ -5,9 +5,9 @@ import { http, HttpResponse } from "msw";
 import { type Address, type Hex, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { relayVote } from "../relay-vote";
-import { relayDelegate } from "../relay-delegate";
-import { health } from "../health";
+import { relayVote } from "./relay-vote";
+import { relayDelegate } from "./relay-delegate";
+import { health } from "./health";
 import { RelayService } from "@/services/relay";
 import { ChainStateService } from "@/services/chain-state";
 import { EligibilityService } from "@/services/eligibility";
