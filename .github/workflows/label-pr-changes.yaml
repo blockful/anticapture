@@ -22,12 +22,14 @@ jobs:
               - 'apps/address-enrichment/**/*'
             indexer:
               - 'apps/indexer/**/*'
+            offchain:
               - 'apps/offchain-indexer/**/*'
             dashboard:
               - 'apps/dashboard/**/*'
-              - 'packages/graphql-client/**/*'
+              - 'packages/*-client/**/*'
             gateway:
               - 'apps/api-gateway/**/*'
+              - 'apps/gateful/**/*'
 
       - name: Add API label
         if: ${{ steps.changes.outputs.api == 'true' }}
@@ -42,6 +44,13 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: Indexer
+
+      - name: Add offchain label
+        if: ${{ steps.changes.outputs.offchain == 'true' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: Offchain
 
       - name: Add dashboard label
         if: ${{ steps.changes.outputs.dashboard == 'true' }}

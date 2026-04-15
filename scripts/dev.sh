@@ -215,8 +215,9 @@ if [ "$RUN_API" = true ]; then
       sleep 3
       if lsof -i ":$PORT_API" -sTCP:LISTEN >/dev/null 2>&1; then
         if [ "$api_was_up" = false ]; then
-          log "API recovered — reloading Gateway..."
+          log "API recovered — reloading Gateway and Gateful..."
           touch "$(dirname "$0")/../apps/api-gateway/src/_dev-reload.ts"
+          touch "$(dirname "$0")/../apps/gateful/src/_dev-reload.ts"
           api_was_up=true
         fi
       else
@@ -233,13 +234,16 @@ log "Starting Gateful..."
 run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" railway_run gateful pnpm gateful dev &
 wait_for_ready "$GATEFUL_READY" "Gateful"
 
-# 6. Client — codegen + build watch
+# 6. Clients — codegen + build watch
 export ANTICAPTURE_GRAPHQL_ENDPOINT="http://localhost:${PORT_GATEWAY}/graphql"
-log "Starting Client (silent, errors only)..."
+log "Starting GraphQL Client (silent, errors only)..."
+run_errors_only "$C_CODEGEN" "🤝 gql-client" pnpm gql-client dev &
+log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
 # 7. Dashboard
 export NEXT_PUBLIC_BASE_URL="http://localhost:${PORT_GATEWAY}/graphql"
+export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 
@@ -254,7 +258,8 @@ fi
 printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} http://localhost:${PORT_ADDRESS_ENRICHMENT}\n"
 printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:${PORT_GATEWAY}\n"
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
-printf "  ${C_CODEGEN}🤝 Client${C_RESET}    codegen + build watch\n"
+printf "  ${C_CODEGEN}🤝 GraphQL Client${C_RESET} codegen + build watch\n"
+printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""
 log "Press Ctrl+C to stop all services."

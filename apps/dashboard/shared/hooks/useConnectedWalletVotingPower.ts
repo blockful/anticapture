@@ -9,7 +9,6 @@ import { useAccount } from "wagmi";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export const useConnectedWalletVotingPower = () => {
   const { address } = useAccount();
@@ -25,7 +24,6 @@ export const useConnectedWalletVotingPower = () => {
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
-        ...getAuthHeaders(),
       },
     },
     skip: !address || !daoIdEnum || !daoConfig,

@@ -45,13 +45,14 @@ pnpm dev <dao_id>
 
 ## Services & Ports
 
-| Service       | Command              | Port  | Description                             |
-| ------------- | -------------------- | ----- | --------------------------------------- |
-| **API**       | `pnpm api dev <dao>` | 42069 | REST API (only when dao_id is provided) |
-| **Gateway**   | `pnpm gateway dev`   | 4000  | GraphQL Mesh aggregating DAO APIs       |
-| **Gateful**   | `pnpm gateful dev`   | 5000  | REST gateway wrapping the GraphQL layer |
-| **Client**    | `pnpm client dev`    | --    | GraphQL codegen + build watch (no port) |
-| **Dashboard** | `pnpm dashboard dev` | 3000  | Next.js frontend                        |
+| Service            | Command                | Port  | Description                                      |
+| ------------------ | ---------------------- | ----- | ------------------------------------------------ |
+| **API**            | `pnpm api dev <dao>`   | 42069 | REST API (only when dao_id is provided)          |
+| **Gateway**        | `pnpm gateway dev`     | 4000  | GraphQL Mesh aggregating DAO APIs                |
+| **Gateful**        | `pnpm gateful dev`     | 4001  | REST gateway wrapping the GraphQL layer          |
+| **GraphQL Client** | `pnpm gql-client dev`  | --    | GraphQL codegen + build watch (no port)          |
+| **REST Client**    | `pnpm client dev`      | --    | Kubb REST codegen watch from Gateful OpenAPI     |
+| **Dashboard**      | `pnpm dashboard dev`   | 3000  | Next.js frontend                                 |
 
 ## Startup Order & Dependencies
 
@@ -62,9 +63,9 @@ The services must start in this exact order because each depends on the previous
        |
 2. Gateway              -- needs API URLs via DAO_API_* env vars; listens on :4000
        |
-3. Gateful              -- needs Gateway; listens on :5000
+3. Gateful              -- needs Gateway; listens on :4001
        |
-4. Client (codegen)     -- needs Gateway schema to generate types
+4. Clients (codegen)    -- need Gateway schema and Gateful OpenAPI to generate types
        |
 5. Dashboard            -- needs generated client types; listens on :3000
 ```
@@ -74,7 +75,7 @@ The services must start in this exact order because each depends on the previous
 1. If a `dao_id` argument is provided, starts the API and waits for port 42069 to be listening. Sets `DAO_API_<DAO_UPPER>=http://localhost:42069` so the Gateway discovers it.
 2. Starts the Gateway and waits for the log line `"Mesh running at"` to confirm readiness.
 3. Starts Gateful and waits for the log line `"REST Gateway running"` to confirm readiness.
-4. Starts Client in errors-only mode (suppresses output unless error/fail is detected).
+4. Starts GraphQL Client and REST Client in errors-only mode (suppresses output unless error/fail is detected).
 5. Starts the Dashboard.
 6. On `Ctrl+C`, sends TERM to all child processes and cleans up temp files.
 
@@ -84,10 +85,11 @@ When you only need a subset (common during development):
 
 ### UI-only work (dashboard changes)
 
-Point the client and dashboard at the deployed dev Gateway -- no need to run API/Gateway locally:
+Point the clients and dashboard at the deployed dev Gateway/Gateful -- no need to run API/Gateway locally:
 
 ```bash
-pnpm client dev       # codegen against remote gateway
+pnpm gql-client dev   # GraphQL codegen against the gateway
+pnpm client dev       # REST codegen watch from Gateful OpenAPI via Kubb
 pnpm dashboard dev    # start frontend
 ```
 
@@ -115,9 +117,10 @@ pnpm gateful dev
 | Problem                                | Likely Cause                             | Fix                                                              |
 | -------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------- |
 | Gateway fails to start                 | Missing `DAO_API_*` env vars             | Ensure at least one DAO API URL is set in env or run with dao_id |
-| Port already in use                    | Another process on 42069/4000/5000/3000  | `lsof -i :<port>` to find and kill the process                   |
-| Client codegen errors                  | Gateway not ready or schema changed      | Ensure Gateway is running and healthy before starting client     |
-| Dashboard type errors after API change | Stale generated types                    | Re-run `pnpm client dev` or `pnpm client codegen`                |
+| Port already in use                    | Another process on 42069/4000/4001/3000  | `lsof -i :<port>` to find and kill the process                   |
+| GraphQL client codegen errors          | Gateway not ready or schema changed      | Ensure Gateway is running and healthy before starting `pnpm gql-client dev` |
+| REST client codegen errors             | Gateful OpenAPI spec changed             | Ensure Gateful generated OpenAPI is current before starting `pnpm client dev` |
+| Dashboard type errors after API change | Stale generated types                    | Re-run `pnpm gql-client dev` and `pnpm client dev`               |
 | Timeout waiting for service            | Service crashed silently or slow startup | Check service logs directly: `pnpm <service> dev`                |
 
 ## pnpm Shortcuts Reference
@@ -128,7 +131,8 @@ These are defined in the root `package.json` and map to workspace filters:
 pnpm api <cmd>       # --filter=@anticapture/api
 pnpm gateway <cmd>   # --filter=@anticapture/api-gateway
 pnpm gateful <cmd>   # --filter=@anticapture/gateful
-pnpm client <cmd>    # --filter=@anticapture/graphql-client
+pnpm gql-client <cmd> # --filter=@anticapture/graphql-client
+pnpm client <cmd>    # --filter=@anticapture/client
 pnpm dashboard <cmd> # --filter=@anticapture/dashboard (with dotenv)
 pnpm indexer <cmd>   # --filter=@anticapture/indexer
 ```

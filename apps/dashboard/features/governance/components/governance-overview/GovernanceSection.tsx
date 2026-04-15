@@ -21,7 +21,6 @@ import { EmptyState } from "@/shared/components/design-system/table/components/E
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 const PROPOSAL_TABS = [
   { label: "Onchain", value: "onchain" },
@@ -75,7 +74,7 @@ export const GovernanceSection = () => {
 
   const authContext = useMemo(
     () => ({
-      headers: { "anticapture-dao-id": daoIdEnum, ...getAuthHeaders() },
+      headers: { "anticapture-dao-id": daoIdEnum },
     }),
     [daoIdEnum],
   );

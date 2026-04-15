@@ -6,7 +6,6 @@ import {
 import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
 import type { PriceEntry } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type HistoricalTokenDataItem = NonNullable<
   NonNullable<HistoricalTokenDataQuery["historicalTokenData"]>[number]
@@ -30,7 +29,6 @@ export const useDaoTokenHistoricalData = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     variables: { limit: limit ?? null, skip: null },

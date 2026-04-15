@@ -20,7 +20,6 @@ import { PillTab } from "@/shared/components/design-system/tabs/pill-tab/PillTab
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type VoteTabId = "voted" | "didntVote";
 
@@ -54,7 +53,6 @@ export const VotesTabContent = ({
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
-        ...getAuthHeaders(),
       },
     },
   });
@@ -70,7 +68,6 @@ export const VotesTabContent = ({
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
-        ...getAuthHeaders(),
       },
     },
   });
@@ -84,7 +81,6 @@ export const VotesTabContent = ({
     context: {
       headers: {
         "anticapture-dao-id": daoIdEnum,
-        ...getAuthHeaders(),
       },
     },
   });

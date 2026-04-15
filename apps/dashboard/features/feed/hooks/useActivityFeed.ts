@@ -11,7 +11,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivityFeedFilters, FeedEvent } from "@/features/feed/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseActivityFeedParams {
   daoId: DaoIdEnum;
@@ -72,7 +71,6 @@ export const useActivityFeed = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
   });

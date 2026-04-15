@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@anticapture/graphql-client"],
+  transpilePackages: ["@anticapture/graphql-client", "@anticapture/client"],
   images: {
     remotePatterns: [
       {

@@ -27,7 +27,7 @@ export default [
       "*.config.js",
       "*.config.ts",
       "*.config.mjs",
-      "packages/graphql-client/generated/**.ts",
+      "**/generated/**/*.ts",
       "apps/api-gateway/schema.graphql",
       "**/storybook-static/**",
       "**/.storybook/**",
