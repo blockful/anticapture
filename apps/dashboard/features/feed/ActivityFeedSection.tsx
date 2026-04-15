@@ -1,8 +1,9 @@
 "use client";
 
 import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
+
+import type { FeedEventsPathParams } from "@anticapture/client";
 
 import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
 import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
@@ -17,11 +18,15 @@ import {
   BulletDivider,
 } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { useDaoId } from "@/shared/providers/DaoIdProvider";
 import { cn } from "@/shared/utils/cn";
 
-export const ActivityFeedSection = () => {
-  const { daoId } = useParams<{ daoId: string }>();
+export const ActivityFeedSection = ({
+  feedDaoId,
+}: {
+  feedDaoId: FeedEventsPathParams["dao"];
+}) => {
+  const daoId = useDaoId();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [drawerState, setDrawerState] = useState<{
     address: string;
@@ -38,6 +43,7 @@ export const ActivityFeedSection = () => {
     fetchNextPage,
     refetch,
   } = useActivityFeed({
+    daoId: feedDaoId,
     filters: {
       limit: 20,
       orderBy: filters.orderBy,
@@ -102,7 +108,7 @@ export const ActivityFeedSection = () => {
           onClose={() => setDrawerState(null)}
           entityType={drawerState.entityType}
           address={drawerState.address}
-          daoId={daoId.toUpperCase() as DaoIdEnum}
+          daoId={daoId}
         />
       )}
 

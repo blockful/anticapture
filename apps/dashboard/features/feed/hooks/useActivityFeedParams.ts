@@ -2,21 +2,19 @@ import { useCallback } from "react";
 import { useQueryState, parseAsStringEnum, parseAsInteger } from "nuqs";
 
 import {
+  type FeedEventsQueryParams,
+  type OrderDirection,
   type FeedRelevance,
   type FeedEventType,
   feedRelevanceEnum,
   feedEventTypeEnum,
   orderDirectionEnum,
 } from "@anticapture/client";
-import type {
-  FeedEventsQueryParams,
-  OrderDirectionEnumKey,
-} from "@anticapture/client";
 
 export function useActivityFeedParams() {
   const [orderDirection, setOrderDirection] = useQueryState(
     "sort",
-    parseAsStringEnum<OrderDirectionEnumKey>(
+    parseAsStringEnum<OrderDirection>(
       Object.values(orderDirectionEnum),
     ).withDefault("desc"),
   );

@@ -1,20 +1,18 @@
+import type { FeedEventsPathParams } from "@anticapture/client";
 import {
   type FeedItem,
   type FeedEventsQueryParams,
-  type FeedEventsPathParams,
   getNextPageParam,
 } from "@anticapture/client";
 import { useFeedEventsSuspenseInfinite } from "@anticapture/client/hooks";
-import { useParams } from "next/navigation";
 
 export const useActivityFeed = ({
+  daoId,
   filters,
 }: {
+  daoId: FeedEventsPathParams["dao"];
   filters: FeedEventsQueryParams;
 }) => {
-  const { daoId } = useParams<{ daoId: string }>();
-  const dao = daoId.toLowerCase() as FeedEventsPathParams["dao"];
-
   const {
     data,
     isLoading,
@@ -25,7 +23,7 @@ export const useActivityFeed = ({
     refetch,
     isFetching,
   } = useFeedEventsSuspenseInfinite(
-    dao,
+    daoId,
     {
       limit: filters.limit,
       orderBy: filters.orderBy,

@@ -19,7 +19,9 @@ export default defineConfig(({ watch }) => ({
     clean: !watch,
   },
   plugins: [
-    pluginOas(),
+    pluginOas({
+      collisionDetection: false,
+    }),
     pluginTs({
       output: {
         path: "models.ts",

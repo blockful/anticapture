@@ -39,10 +39,11 @@ export default async function ActivityFeedPage({
   params: Promise<{ daoId: string }>;
 }) {
   const { daoId } = await params;
+  const feedDaoId = daoId.toLowerCase();
 
-  if (!isSupportedDao(daoId.toLowerCase())) {
+  if (!isSupportedDao(feedDaoId)) {
     redirect(`/${daoId}`);
   }
 
-  return <ActivityFeedSection />;
+  return <ActivityFeedSection feedDaoId={feedDaoId} />;
 }
