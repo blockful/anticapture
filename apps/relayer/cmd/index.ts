@@ -63,13 +63,13 @@ async function main() {
   const signatureVerifier = new SignatureVerifier(
     {
       name: governorName,
-      version: env.GOVERNOR_EIP712_VERSION,
+      version: "1",
       chainId: env.CHAIN_ID,
       verifyingContract: governorAddress,
     },
     {
       name: tokenName,
-      version: env.TOKEN_EIP712_VERSION,
+      version: "1",
       chainId: env.CHAIN_ID,
       verifyingContract: tokenAddress,
     },

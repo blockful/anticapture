@@ -23,9 +23,6 @@ const envSchema = z.object({
 
   MIN_BALANCE_WEI: z.string().default("100000000000000000"),
 
-  GOVERNOR_EIP712_VERSION: z.string().default("1"),
-  TOKEN_EIP712_VERSION: z.string().default("1"),
-
   ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
 
   PORT: z.coerce.number().default(4001),
