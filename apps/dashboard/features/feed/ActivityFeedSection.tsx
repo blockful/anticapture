@@ -10,9 +10,12 @@ import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton";
 import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
+import { getActivityFeedRenderState } from "@/features/feed/utils/activityFeedRenderState";
 import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
-import { Button, BlankSlate, TheSectionLayout } from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import {
   SubSectionsContainer,
   BulletDivider,
@@ -54,6 +57,11 @@ export const ActivityFeedSection = ({
       toDate: filters.toDate,
     },
   });
+  const { showInitialSkeleton, showIncrementalSpinner } =
+    getActivityFeedRenderState({
+      groupCount: events.length,
+      loading,
+    });
 
   // Infinite scroll with Intersection Observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -137,7 +145,7 @@ export const ActivityFeedSection = ({
           </SubSectionsContainer>
         )}
 
-        {loading && (
+        {showInitialSkeleton && (
           <SubSectionsContainer>
             <div className="flex flex-col">
               {Array.from({ length: 10 }).map((_, i) => (
@@ -147,7 +155,7 @@ export const ActivityFeedSection = ({
           </SubSectionsContainer>
         )}
 
-        {!loading && !error && events.length === 0 && (
+        {!showInitialSkeleton && !error && events.length === 0 && (
           <SubSectionsContainer>
             <BlankSlate
               variant="default"
@@ -204,7 +212,7 @@ export const ActivityFeedSection = ({
         {/* Infinite scroll sentinel */}
         <div ref={loadMoreRef} className="h-1" />
 
-        {loading && (
+        {showIncrementalSpinner && (
           <div className="flex justify-center py-4">
             <Loader2 className="text-secondary size-6 animate-spin" />
           </div>
