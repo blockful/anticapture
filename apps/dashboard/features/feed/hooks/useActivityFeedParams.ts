@@ -58,12 +58,16 @@ export function useActivityFeedParams() {
     setEventType(null);
   }, [setOrderDirection, setRelevance, setFromDate, setToDate, setEventType]);
 
-  const activeFiltersCount =
-    (filters.fromDate ? 1 : 0) +
-    (filters.toDate ? 1 : 0) +
-    (filters.orderDirection !== "desc" ? 1 : 0) +
-    (filters.relevance !== feedRelevanceEnum.MEDIUM ? 1 : 0) +
-    (filters.type ? 1 : 0);
+  const activeFiltersCount = getActiveActivityFeedFiltersCount(filters);
 
   return { filters, setFilters, clearFilters, activeFiltersCount };
 }
+
+const getActiveActivityFeedFiltersCount = (filters: FeedEventsQueryParams) =>
+  [
+    filters.fromDate,
+    filters.toDate,
+    filters.orderDirection !== "desc",
+    filters.relevance !== feedRelevanceEnum.MEDIUM,
+    filters.type,
+  ].filter(Boolean).length;

@@ -88,13 +88,23 @@ export const ActivityFeedFiltersDrawer = ({
     setLocalFilters((prev) => ({ ...prev, type }));
   };
 
-  const handleFromDateChange = (value: number) => {
+  const handleFromDateChange = (value: number | undefined) => {
+    if (value === undefined) {
+      setLocalFilters((prev) => ({ ...prev, fromDate: undefined }));
+      return;
+    }
+
     const d = new Date(value);
     d.setHours(0, 0, 0, 0);
     setLocalFilters((prev) => ({ ...prev, fromDate: d.getTime() }));
   };
 
-  const handleToDateChange = (value: number) => {
+  const handleToDateChange = (value: number | undefined) => {
+    if (value === undefined) {
+      setLocalFilters((prev) => ({ ...prev, toDate: undefined }));
+      return;
+    }
+
     const d = new Date(value);
     d.setHours(23, 59, 59, 999);
     setLocalFilters((prev) => ({ ...prev, toDate: d.getTime() }));
@@ -207,9 +217,12 @@ export const ActivityFeedFiltersDrawer = ({
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
                       className={cn(
-                        "border-border-default bg-surface-default text-secondary flex h-9 flex-1 items-center gap-2 rounded-md border px-3 text-sm",
+                        "border-border-default bg-surface-default text-secondary hover:bg-surface-default h-9 flex-1 justify-start px-3 text-sm font-normal",
                         !localFilters.fromDate && "text-dimmed",
                       )}
                     >
@@ -220,24 +233,25 @@ export const ActivityFeedFiltersDrawer = ({
                             "MMM d, yyyy",
                           )
                         : "From date"}
-                    </button>
+                    </Button>
                   </PopoverTrigger>
                   <PopoverContent className="z-[200] w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={timestampToDate(localFilters.fromDate)}
-                      onSelect={(date) => {
-                        if (date) handleFromDateChange(date.getTime());
-                      }}
+                      onSelect={(date) => handleFromDateChange(date?.getTime())}
                     />
                   </PopoverContent>
                 </Popover>
                 <span className="text-dimmed">–</span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
                       className={cn(
-                        "border-border-default bg-surface-default text-secondary flex h-9 flex-1 items-center gap-2 rounded-md border px-3 text-sm",
+                        "border-border-default bg-surface-default text-secondary hover:bg-surface-default h-9 flex-1 justify-start px-3 text-sm font-normal",
                         !localFilters.toDate && "text-dimmed",
                       )}
                     >
@@ -248,15 +262,13 @@ export const ActivityFeedFiltersDrawer = ({
                             "MMM d, yyyy",
                           )
                         : "To date"}
-                    </button>
+                    </Button>
                   </PopoverTrigger>
                   <PopoverContent className="z-[200] w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={timestampToDate(localFilters.toDate)}
-                      onSelect={(date) => {
-                        if (date) handleToDateChange(date.getTime());
-                      }}
+                      onSelect={(date) => handleToDateChange(date?.getTime())}
                     />
                   </PopoverContent>
                 </Popover>

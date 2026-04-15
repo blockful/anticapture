@@ -13,11 +13,12 @@ type Props = {
   params: Promise<{ daoId: string }>;
 };
 
-const supportedDaos: string[] = Object.values(feedEventsPathParamsDaoEnum);
+const supportedDaos: FeedEventsPathParams["dao"][] = Object.values(
+  feedEventsPathParamsDaoEnum,
+);
 
-function isSupportedDao(value: string): value is FeedEventsPathParams["dao"] {
-  return supportedDaos.includes(value);
-}
+const isSupportedDao = (value: string): value is FeedEventsPathParams["dao"] =>
+  supportedDaos.includes(value as FeedEventsPathParams["dao"]);
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;

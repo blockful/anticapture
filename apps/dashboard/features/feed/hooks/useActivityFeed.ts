@@ -4,7 +4,7 @@ import {
   type FeedEventsQueryParams,
   getNextPageParam,
 } from "@anticapture/client";
-import { useFeedEventsSuspenseInfinite } from "@anticapture/client/hooks";
+import { useFeedEventsInfinite } from "@anticapture/client/hooks";
 
 export const useActivityFeed = ({
   daoId,
@@ -22,7 +22,7 @@ export const useActivityFeed = ({
     hasPreviousPage,
     refetch,
     isFetching,
-  } = useFeedEventsSuspenseInfinite(
+  } = useFeedEventsInfinite(
     daoId,
     {
       limit: filters.limit,
