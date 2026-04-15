@@ -69,7 +69,7 @@ export const HeaderDAOSidebar = () => {
             )}
             {daoConfig.governancePage && (
               <ButtonHeaderSidebar
-                page={"governance"}
+                page={"proposals"}
                 icon={Landmark}
                 label="Proposals"
                 key="Proposals"

@@ -11,7 +11,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const daoId = params.daoId.toUpperCase() as DaoIdEnum;
 
-  const canonicalPath = `/${params.daoId}/governance`;
+  const canonicalPath = `/${params.daoId}/proposals`;
 
   return {
     title: `${daoId} DAO Governance Proposals | Security Analysis — Anticapture`,
@@ -30,7 +30,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default function GovernancePage() {
+export default function ProposalsPage() {
   return (
     <div>
       <GovernanceSection />

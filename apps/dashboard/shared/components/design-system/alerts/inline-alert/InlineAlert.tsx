@@ -7,7 +7,7 @@ import type { InlineAlertProps } from "@/shared/components/design-system/alerts/
 
 const mapVariantToIcon = {
   info: {
-    icon: <Info className="size-4 text-white" />,
+    icon: <Info className="text-secondary size-4" />,
     color: "text-secondary",
     bgColor: "bg-surface-contrast",
   },
