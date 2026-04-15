@@ -1,11 +1,12 @@
-import { Address, PublicClient } from "viem";
+import { Address } from "viem";
 
 import { governorAbi, ProposalState } from "@/abi/governor";
 import { erc20VotesAbi } from "@/abi/token";
+import type { ChainReader } from "./chain-reader";
 
 export class ChainStateService {
   constructor(
-    private client: PublicClient,
+    private client: ChainReader,
     private governorAddress: Address,
     private tokenAddress: Address,
   ) {}

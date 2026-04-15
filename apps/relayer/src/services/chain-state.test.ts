@@ -3,7 +3,24 @@ import { getAddress } from "viem";
 
 import { ChainStateService } from "./chain-state";
 import { ProposalState } from "@/abi/governor";
-import { createStubPublicClient } from "../test-utils/stub-public-client";
+import type { ChainReader } from "./chain-reader";
+
+function createStubChainReader<T>() {
+  let readContractResult: T = undefined as T;
+
+  const stub: ChainReader & {
+    setReadContractResult(value: T): void;
+  } = {
+    readContract: (async () =>
+      readContractResult) as ChainReader["readContract"],
+    getBalance: async () => 0n,
+    setReadContractResult(value: T) {
+      readContractResult = value;
+    },
+  };
+
+  return stub;
+}
 
 const GOVERNOR = getAddress("0x1111111111111111111111111111111111111111");
 const TOKEN = getAddress("0x2222222222222222222222222222222222222222");
@@ -11,10 +28,10 @@ const VOTER = getAddress("0x3333333333333333333333333333333333333333");
 
 describe("ChainStateService", () => {
   let service: ChainStateService;
-  let stubClient: ReturnType<typeof createStubPublicClient>;
+  let stubClient: ReturnType<typeof createStubChainReader>;
 
   beforeEach(() => {
-    stubClient = createStubPublicClient();
+    stubClient = createStubChainReader();
     service = new ChainStateService(stubClient, GOVERNOR, TOKEN);
   });
 

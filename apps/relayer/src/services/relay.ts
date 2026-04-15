@@ -1,11 +1,4 @@
-import {
-  Address,
-  encodeFunctionData,
-  formatEther,
-  Hash,
-  Hex,
-  PublicClient,
-} from "viem";
+import { Address, encodeFunctionData, formatEther, Hash, Hex } from "viem";
 import pino from "pino";
 
 import { governorAbi, ProposalState } from "@/abi/governor";
@@ -14,6 +7,7 @@ import { Errors } from "@/errors";
 import { RateLimiter } from "@/lib/rate-limiter";
 import { RelayerSigner } from "@/signer/types";
 
+import type { ChainReader } from "./chain-reader";
 import { ChainStateService } from "./chain-state";
 import { EligibilityService } from "./eligibility";
 import { SignatureVerifier } from "./signature-verifier";
@@ -50,7 +44,7 @@ export class RelayService {
     private eligibility: EligibilityService,
     private chainState: ChainStateService,
     private rateLimiter: RateLimiter,
-    private publicClient: PublicClient,
+    private publicClient: ChainReader,
     private minBalanceWei: bigint,
     private governorAddress: Address,
     private tokenAddress: Address,

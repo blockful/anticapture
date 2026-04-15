@@ -1,7 +1,8 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
-import { formatEther, type PublicClient } from "viem";
+import { formatEther } from "viem";
 
 import { RelayerSigner } from "@/signer/types";
+import type { ChainReader } from "@/services/chain-reader";
 
 const HealthResponseSchema = z
   .object({
@@ -15,7 +16,7 @@ const HealthResponseSchema = z
 export function health(
   app: Hono,
   signer: RelayerSigner,
-  publicClient: PublicClient,
+  publicClient: ChainReader,
   minBalanceWei: bigint,
 ) {
   app.openapi(

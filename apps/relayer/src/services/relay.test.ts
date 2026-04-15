@@ -8,7 +8,7 @@ import type { SignatureVerifier } from "./signature-verifier";
 import type { EligibilityService } from "./eligibility";
 import type { ChainStateService } from "./chain-state";
 import type { RateLimiter } from "@/lib/rate-limiter";
-import { createStubPublicClient } from "../test-utils/stub-public-client";
+import type { ChainReader } from "./chain-reader";
 
 const VOTER = getAddress("0x3333333333333333333333333333333333333333");
 const GOVERNOR = getAddress("0x1111111111111111111111111111111111111111");
@@ -75,6 +75,13 @@ function createStubRateLimiter(): RateLimiter {
   } as unknown as RateLimiter;
 }
 
+function createStubBalanceReader(balance: bigint): ChainReader {
+  return {
+    getBalance: async () => balance,
+    readContract: (async () => undefined) as ChainReader["readContract"],
+  };
+}
+
 function createService(
   overrides: {
     signer?: RelayerSigner;
@@ -85,16 +92,13 @@ function createService(
     balance?: bigint;
   } = {},
 ): RelayService {
-  const stubClient = createStubPublicClient();
-  stubClient.setGetBalanceResult(overrides.balance ?? parseEther("1.0"));
-
   return new RelayService(
     overrides.signer ?? createStubSigner(),
     overrides.signatureVerifier ?? createStubSignatureVerifier(),
     overrides.eligibility ?? createStubEligibility(),
     overrides.chainState ?? createStubChainState(),
     overrides.rateLimiter ?? createStubRateLimiter(),
-    stubClient,
+    createStubBalanceReader(overrides.balance ?? parseEther("1.0")),
     parseEther("0.1"),
     GOVERNOR,
     TOKEN,
