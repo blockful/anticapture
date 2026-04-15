@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import pino from "pino";
 import { createPublicClient, http, type Address, type Chain } from "viem";
@@ -112,12 +113,10 @@ async function main() {
     },
   });
 
-  // CORS — allow dashboard frontend to call the relayer
-  app.use(
-    cors({
-      origin: env.ALLOWED_ORIGINS.split(",").map((o) => o.trim()),
-    }),
-  );
+  app.use(cors({ origin: "*" }));
+  if (env.BLOCKFUL_API_TOKEN) {
+    app.use(bearerAuth({ token: env.BLOCKFUL_API_TOKEN }));
+  }
 
   // Request logging
   app.use(async (c, next) => {

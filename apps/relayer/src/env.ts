@@ -23,7 +23,7 @@ const envSchema = z.object({
 
   MIN_BALANCE_WEI: z.string().default("100000000000000000"),
 
-  ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
+  BLOCKFUL_API_TOKEN: z.string().optional(),
 
   PORT: z.coerce.number().default(4001),
 });
