@@ -137,7 +137,7 @@ export const ActivityFeedSection = ({
           </SubSectionsContainer>
         )}
 
-        {loading && events.length === 0 && (
+        {loading && (
           <SubSectionsContainer>
             <div className="flex flex-col">
               {Array.from({ length: 10 }).map((_, i) => (
@@ -147,7 +147,7 @@ export const ActivityFeedSection = ({
           </SubSectionsContainer>
         )}
 
-        {!loading && events.length === 0 && !error && (
+        {!loading && !error && events.length === 0 && (
           <SubSectionsContainer>
             <BlankSlate
               variant="default"

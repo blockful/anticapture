@@ -43,10 +43,12 @@ export const useActivityFeed = ({
   const events = data?.pages ? data.pages.flatMap((page) => page.items) : [];
   const groupedEvents = groupEventsByDate(events, filters.orderDirection);
 
+  const hasEvents = groupedEvents.length > 0;
+  const loading = isLoading && !hasEvents;
   return {
     data: groupedEvents,
     loading: isLoading || isFetching,
-    error: error || !data,
+    error: !loading && Boolean(error),
     hasNextPage,
     hasPreviousPage,
     fetchNextPage,

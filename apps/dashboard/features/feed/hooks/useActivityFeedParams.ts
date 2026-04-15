@@ -63,7 +63,9 @@ export function useActivityFeedParams() {
   return { filters, setFilters, clearFilters, activeFiltersCount };
 }
 
-const getActiveActivityFeedFiltersCount = (filters: FeedEventsQueryParams) =>
+export const getActiveActivityFeedFiltersCount = (
+  filters: FeedEventsQueryParams,
+) =>
   [
     filters.fromDate,
     filters.toDate,

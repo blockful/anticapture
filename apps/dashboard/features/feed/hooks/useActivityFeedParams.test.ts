@@ -1,7 +1,7 @@
 import type { FeedEventsQueryParams } from "@anticapture/client";
 import { feedEventTypeEnum, feedRelevanceEnum } from "@anticapture/client";
 
-import { getActiveActivityFeedFiltersCount } from "@/features/feed/utils/activityFeedFilters";
+import { getActiveActivityFeedFiltersCount } from "@/features/feed/hooks/useActivityFeedParams";
 
 describe("getActiveActivityFeedFiltersCount", () => {
   test("returns zero for the default filters", () => {
