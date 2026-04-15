@@ -11,7 +11,7 @@
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
-      "outputs": ["generated/**"]
+      "outputs": ["dist/**"]
     },
     "@anticapture/graphql-client#build": {
       "dependsOn": ["codegen"],
