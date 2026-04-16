@@ -32,7 +32,11 @@ if (config.blockfulApiToken) {
   const requireBearerAuth = bearerAuth({ token: config.blockfulApiToken });
 
   app.use("*", async (c, next) => {
-    if (c.req.path === "/docs" || c.req.path === "/docs/json") {
+    if (
+      c.req.path === "/docs" ||
+      c.req.path === "/docs/json" ||
+      c.req.path === "/health"
+    ) {
       await next();
       return;
     }
