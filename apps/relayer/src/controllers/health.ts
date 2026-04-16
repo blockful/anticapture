@@ -33,11 +33,12 @@ export function health(
         address: signer.address,
       });
       const belowThreshold = balance < minBalanceWei;
+      const status: "healthy" | "degraded" = belowThreshold
+        ? "degraded"
+        : "healthy";
       return c.json(
         {
-          status: (belowThreshold ? "degraded" : "healthy") as
-            | "healthy"
-            | "degraded",
+          status,
           relayerAddress: signer.address,
           balance: formatEther(balance),
           belowThreshold,
