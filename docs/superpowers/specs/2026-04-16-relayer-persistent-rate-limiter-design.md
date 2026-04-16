@@ -126,6 +126,20 @@ This ordering deliberately makes the slot cost "pay-on-attempt" rather than "pay
 - `relay-usage.ts` — data-access functions. Specifically:
   - `reserveSlot(db, { address, operation, maxPerHour, maxPerDay })` — runs the atomic conditional `INSERT`. Returns a boolean: `true` if slot granted, `false` if over limit. Throws on DB errors.
 
+Reference shape for the atomic conditional `INSERT`:
+
+```sql
+INSERT INTO snapshot.relay_usage (address, operation)
+SELECT $1, $2
+WHERE (SELECT count(*) FROM snapshot.relay_usage
+       WHERE address = $1 AND created_at > now() - interval '1 hour') < $3
+  AND (SELECT count(*) FROM snapshot.relay_usage
+       WHERE address = $1 AND created_at > now() - interval '24 hours') < $4
+RETURNING id;
+```
+
+Zero rows returned → over limit (`reserveSlot` returns `false`). One row returned → slot granted (`reserveSlot` returns `true`).
+
 The repository layer is pure data access: no policy, no error semantics, no config state. This boundary lets the repository be tested against pglite while the rate-limiter service can be unit-tested against a mocked repository if desired.
 
 ### Modified: `apps/relayer/src/services/guards/rate-limiter.ts`
@@ -198,7 +212,7 @@ Mirrors the `offchain-indexer` pattern using `@electric-sql/pglite` for in-proce
   - window expiry (old rows don't count),
   - address isolation,
   - operation coexistence (vote and delegation both count against the combined limit).
-- `apps/relayer/src/services/guards/rate-limiter.test.ts` — adapted from the existing tests to the new single-method API. Preserves all sliding-window assertions.
+- `apps/relayer/src/services/guards/rate-limiter.test.ts` — adapted from the existing tests to the new single-method API. Preserves all sliding-window assertions. These tests use the same pglite-backed repository as the repository tests (no mock), so the service's error-mapping (`RATE_LIMITED` vs `DATABASE_UNAVAILABLE`) is exercised against real SQL behavior.
 
 Time control in tests uses explicit `created_at` values on inserted rows to simulate history (the `now()` default is overridable per-insert).
 
