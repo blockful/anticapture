@@ -14,19 +14,10 @@ import { useParams, usePathname } from "next/navigation";
 import type { Address } from "viem";
 import { formatUnits, zeroAddress } from "viem";
 
-import type {
-  DelegationDetail,
-  ProposalDetail,
-  ProposalExtendedDetail,
-  TransferDetail,
-  VoteDetail,
-} from "@/features/feed/types";
 import {
   type FeedItem,
   type FeedRelevance,
-  feedRelevanceEnum,
   type FeedEventType,
-  feedEventTypeEnum,
 } from "@anticapture/client";
 import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
@@ -39,6 +30,13 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getDaoProposalPath } from "@/shared/utils/whitelabel";
+import type {
+  DelegationDetail,
+  ProposalDetail,
+  ProposalExtendedDetail,
+  TransferDetail,
+  VoteDetail,
+} from "@/features/feed/types";
 
 interface FeedEventItemProps {
   event: FeedItem;
@@ -49,26 +47,26 @@ interface FeedEventItemProps {
 
 const getBadgeIcon = (type: FeedEventType) => {
   switch (type) {
-    case feedEventTypeEnum.VOTE:
+    case "VOTE":
       return Inbox;
-    case feedEventTypeEnum.PROPOSAL:
+    case "PROPOSAL":
       return FileText;
-    case feedEventTypeEnum.TRANSFER:
+    case "TRANSFER":
       return ArrowLeftRight;
-    case feedEventTypeEnum.DELEGATION:
+    case "DELEGATION":
       return HeartHandshake;
-    case feedEventTypeEnum.PROPOSAL_EXTENDED:
+    case "PROPOSAL_EXTENDED":
       return Clock;
   }
 };
 
 const getBadgeVariant = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case feedRelevanceEnum.HIGH:
+    case "HIGH":
       return "error";
-    case feedRelevanceEnum.MEDIUM:
+    case "MEDIUM":
       return "warning";
-    case feedRelevanceEnum.LOW:
+    case "LOW":
       return "success";
     default:
       return "secondary";
@@ -77,11 +75,11 @@ const getBadgeVariant = (relevance: FeedRelevance) => {
 
 const getRelevanceLabel = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case feedRelevanceEnum.HIGH:
+    case "HIGH":
       return "High Relevance";
-    case feedRelevanceEnum.MEDIUM:
+    case "MEDIUM":
       return "Medium Relevance";
-    case feedRelevanceEnum.LOW:
+    case "LOW":
       return "Low Relevance";
     default:
       return "No Relevance";
@@ -90,11 +88,11 @@ const getRelevanceLabel = (relevance: FeedRelevance) => {
 
 const getRelevanceColor = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case feedRelevanceEnum.HIGH:
+    case "HIGH":
       return "text-error";
-    case feedRelevanceEnum.MEDIUM:
+    case "MEDIUM":
       return "text-warning";
-    case feedRelevanceEnum.LOW:
+    case "LOW":
       return "text-success";
     default:
       return "text-secondary";
@@ -103,15 +101,15 @@ const getRelevanceColor = (relevance: FeedRelevance) => {
 
 const getEventTypeLabel = (type: FeedEventType) => {
   switch (type) {
-    case feedEventTypeEnum.VOTE:
+    case "VOTE":
       return "Vote";
-    case feedEventTypeEnum.PROPOSAL:
+    case "PROPOSAL":
       return "Proposal Creation";
-    case feedEventTypeEnum.TRANSFER:
+    case "TRANSFER":
       return "Transfer";
-    case feedEventTypeEnum.DELEGATION:
+    case "DELEGATION":
       return "Delegation";
-    case feedEventTypeEnum.PROPOSAL_EXTENDED:
+    case "PROPOSAL_EXTENDED":
       return "Proposal Extended";
   }
 };
@@ -175,7 +173,7 @@ export const FeedEventItem = ({
 
   const renderEventContent = () => {
     switch (event.type) {
-      case feedEventTypeEnum.VOTE: {
+      case "VOTE": {
         const voteMetadata = event.metadata as VoteDetail | undefined;
         if (!voteMetadata) return null;
         return (
@@ -248,7 +246,7 @@ export const FeedEventItem = ({
         );
       }
 
-      case feedEventTypeEnum.PROPOSAL: {
+      case "PROPOSAL": {
         const proposalMetadata = event.metadata as ProposalDetail | undefined;
         if (!proposalMetadata) return null;
         return (
@@ -299,7 +297,7 @@ export const FeedEventItem = ({
         );
       }
 
-      case feedEventTypeEnum.PROPOSAL_EXTENDED: {
+      case "PROPOSAL_EXTENDED": {
         const proposalExtendedMetadata = event.metadata as
           | ProposalExtendedDetail
           | undefined;
@@ -339,7 +337,7 @@ export const FeedEventItem = ({
         );
       }
 
-      case feedEventTypeEnum.TRANSFER: {
+      case "TRANSFER": {
         const transferMetadata = event.metadata as TransferDetail | undefined;
         if (!transferMetadata) return null;
         return (
@@ -381,10 +379,8 @@ export const FeedEventItem = ({
         );
       }
 
-      case feedEventTypeEnum.DELEGATION: {
-        const delegationMetadata = event.metadata as
-          | DelegationDetail
-          | undefined;
+      case "DELEGATION": {
+        const delegationMetadata = event.metadata as DelegationDetail | null;
         if (!delegationMetadata) return null;
         const hasRedelegation =
           delegationMetadata.previousDelegate !== null &&
@@ -455,7 +451,7 @@ export const FeedEventItem = ({
   };
 
   return (
-    <div className={cn("flex items-stretch gap-4", className)}>
+    <div className={cn("ml-5 flex items-stretch gap-4", className)}>
       {/* Badge and Connector */}
       <div className="flex flex-col items-center">
         <BadgeStatus
