@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { getAddress } from "viem";
 
 import { EligibilityService } from "./eligibility";
-import type { ChainStateService } from "./chain-state";
+import type { ChainStateService } from "../chain/chain-state";
 
 const VOTER = getAddress("0x3333333333333333333333333333333333333333");
 

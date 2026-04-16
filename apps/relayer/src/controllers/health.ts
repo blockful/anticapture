@@ -2,7 +2,7 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { formatEther } from "viem";
 
 import { RelayerSigner } from "@/signer/types";
-import type { ChainReader } from "@/services/chain-reader";
+import type { ChainReader } from "@/services/chain/chain-reader";
 import { HealthResponseSchema } from "@/schemas/health";
 
 export function health(

@@ -4,11 +4,11 @@ import { getAddress, type Hash, type Hex, parseEther } from "viem";
 import { RelayService } from "./relay";
 import { ProposalState } from "@/abi/governor";
 import type { RelayerSigner } from "@/signer/types";
-import type { SignatureVerifier } from "./signature-verifier";
-import type { EligibilityService } from "./eligibility";
-import type { ChainStateService } from "./chain-state";
-import type { RateLimiter } from "@/lib/rate-limiter";
-import type { ChainReader } from "./chain-reader";
+import type { SignatureVerifier } from "./guards/signature-verifier";
+import type { EligibilityService } from "./guards/eligibility";
+import type { ChainStateService } from "./chain/chain-state";
+import type { RateLimiter } from "@/services/guards/rate-limiter";
+import type { ChainReader } from "./chain/chain-reader";
 
 const VOTER = getAddress("0x3333333333333333333333333333333333333333");
 const GOVERNOR = getAddress("0x1111111111111111111111111111111111111111");

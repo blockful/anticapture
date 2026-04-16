@@ -1,7 +1,7 @@
 import { Address } from "viem";
 
 import { Errors } from "@/errors";
-import { ChainStateService } from "./chain-state";
+import { ChainStateService } from "../chain-state";
 
 export interface EligibilityConfig {
   minVotingPower: bigint;

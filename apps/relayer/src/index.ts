@@ -12,11 +12,11 @@ import { relayDelegate } from "@/controllers/relay-delegate";
 import { relayVote } from "@/controllers/relay-vote";
 import { env } from "@/env";
 import { RelayError } from "@/errors";
-import { RateLimiter } from "@/lib/rate-limiter";
-import { ChainStateService } from "@/services/chain-state";
-import { EligibilityService } from "@/services/eligibility";
+import { RateLimiter } from "@/services/guards/rate-limiter";
+import { ChainStateService } from "@/services/chain/chain-state";
+import { EligibilityService } from "@/services/guards/eligibility";
 import { RelayService } from "@/services/relay";
-import { SignatureVerifier } from "@/services/signature-verifier";
+import { SignatureVerifier } from "@/services/guards/signature-verifier";
 import { createLocalSigner } from "@/signer/local-signer";
 
 const logger = pino({ name: "relayer" });

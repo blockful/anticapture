@@ -4,13 +4,13 @@ import pino from "pino";
 import { governorAbi, ProposalState } from "@/abi/governor";
 import { erc20VotesAbi } from "@/abi/token";
 import { Errors } from "@/errors";
-import { RateLimiter } from "@/lib/rate-limiter";
+import { RateLimiter } from "@/services/guards/rate-limiter";
 import { RelayerSigner } from "@/signer/types";
 
-import type { ChainReader } from "./chain-reader";
-import { ChainStateService } from "./chain-state";
-import { EligibilityService } from "./eligibility";
-import { SignatureVerifier } from "./signature-verifier";
+import type { ChainReader } from "./chain/chain-reader";
+import { ChainStateService } from "./chain/chain-state";
+import { EligibilityService } from "./guards/eligibility";
+import { SignatureVerifier } from "./guards/signature-verifier";
 
 const logger = pino({ name: "relay-service" });
 
