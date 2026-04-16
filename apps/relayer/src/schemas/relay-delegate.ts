@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { AddressSchema, Bytes32Schema, TxHashSchema } from "./shared";
+import { AddressSchema, Bytes32Schema, TxHashSchema } from "./evm-primitives";
 
 export const RelayDelegateRequestSchema = z
   .object({

@@ -4,7 +4,7 @@ import {
   RelayVoteRequestSchema,
   RelayVoteResponseSchema,
 } from "@/schemas/relay-vote";
-import { ErrorResponseSchema } from "@/schemas/shared";
+import { ErrorResponseSchema } from "@/errors";
 import { RelayService } from "@/services/relay";
 
 export function relayVote(app: Hono, relayService: RelayService) {

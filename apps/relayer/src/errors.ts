@@ -1,3 +1,12 @@
+import { z } from "@hono/zod-openapi";
+
+export const ErrorResponseSchema = z
+  .object({
+    error: z.string(),
+    code: z.string(),
+  })
+  .openapi("ErrorResponse");
+
 export class RelayError extends Error {
   constructor(
     message: string,

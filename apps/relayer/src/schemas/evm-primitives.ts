@@ -13,10 +13,3 @@ export const TxHashSchema = HexSchema.refine(
   (v) => v.length === 66,
   "Must be a valid transaction hash",
 );
-
-export const ErrorResponseSchema = z
-  .object({
-    error: z.string(),
-    code: z.string(),
-  })
-  .openapi("ErrorResponse");

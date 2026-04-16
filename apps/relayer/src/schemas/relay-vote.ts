@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Bytes32Schema, TxHashSchema } from "./shared";
+import { Bytes32Schema, TxHashSchema } from "./evm-primitives";
 
 export const RelayVoteRequestSchema = z
   .object({

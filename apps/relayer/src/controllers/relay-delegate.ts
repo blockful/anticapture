@@ -4,7 +4,7 @@ import {
   RelayDelegateRequestSchema,
   RelayDelegateResponseSchema,
 } from "@/schemas/relay-delegate";
-import { ErrorResponseSchema } from "@/schemas/shared";
+import { ErrorResponseSchema } from "@/errors";
 import { RelayService } from "@/services/relay";
 
 export function relayDelegate(app: Hono, relayService: RelayService) {
