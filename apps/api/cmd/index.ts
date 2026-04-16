@@ -7,6 +7,7 @@ import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { seed } from "drizzle-seed";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
@@ -377,6 +378,7 @@ if (daoClient.supportOffchainData()) {
 }
 
 if (process.env.CI === "true" || process.env.CI === "1") {
+  await migrate(pgClient, { migrationsFolder: "./drizzle" });
   await seed(pgClient, schema, { count: 1000 });
 }
 
