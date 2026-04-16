@@ -219,16 +219,14 @@ export const useChartMetrics = ({
           existing.PROPOSALS_GOVERNANCE_TEXT.length > 0
             ? existing.PROPOSALS_GOVERNANCE_TEXT
             : null;
-
-        const governanceCount = existingCount + 1;
         const governanceText = existingText
-          ? `${existingText} + ${governanceCount} proposals`
+          ? `${existingText} + ${existingCount} proposals`
           : proposal.title || "";
 
         result[timestamp] = {
           ...existing,
           date: timestamp,
-          PROPOSALS_GOVERNANCE: governanceCount,
+          PROPOSALS_GOVERNANCE: existingCount + 1,
           PROPOSALS_GOVERNANCE_TEXT: governanceText,
         };
       });
