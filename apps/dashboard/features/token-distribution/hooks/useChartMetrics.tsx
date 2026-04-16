@@ -209,25 +209,19 @@ export const useChartMetrics = ({
         if (!proposal || !proposal.id) return;
 
         const timestamp = normalizeTimestamp(proposal.timestamp);
-        const existing = result[timestamp];
-        const existingCount =
-          typeof existing?.PROPOSALS_GOVERNANCE === "number"
-            ? existing.PROPOSALS_GOVERNANCE
-            : 0;
-        const existingText =
-          typeof existing?.PROPOSALS_GOVERNANCE_TEXT === "string" &&
-          existing.PROPOSALS_GOVERNANCE_TEXT.length > 0
-            ? existing.PROPOSALS_GOVERNANCE_TEXT
-            : null;
-        const governanceText = existingText
-          ? `${existingText} + ${existingCount} proposals`
+        const proposals = result[timestamp]?.PROPOSALS;
+        const exists = Array.isArray(proposals) && proposals.length;
+        const count = exists ? proposals.length : 0;
+        const existingText = exists ? proposals[0] : null;
+        const governanceText = exists
+          ? `${existingText} + ${count} ${count > 1 ? "proposals" : "proposal"}`
           : proposal.title || "";
 
         result[timestamp] = {
-          ...existing,
+          ...result[timestamp],
           date: timestamp,
-          PROPOSALS_GOVERNANCE: existingCount + 1,
           PROPOSALS_GOVERNANCE_TEXT: governanceText,
+          PROPOSALS: exists ? proposals + proposal.title : [proposal.title],
         };
       });
     }
