@@ -3,23 +3,33 @@
 import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
+import type { FeedEventsPathParams } from "@anticapture/client";
+
 import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
 import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton";
 import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
+import { getActivityFeedRenderState } from "@/features/feed/utils/activityFeedRenderState";
 import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
-import { Button, BlankSlate, TheSectionLayout } from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import {
   SubSectionsContainer,
   BulletDivider,
 } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { useDaoId } from "@/shared/providers/DaoIdProvider";
 import { cn } from "@/shared/utils/cn";
 
-export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
+export const ActivityFeedSection = ({
+  feedDaoId,
+}: {
+  feedDaoId: FeedEventsPathParams["dao"];
+}) => {
+  const daoId = useDaoId();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [drawerState, setDrawerState] = useState<{
     address: string;
@@ -36,7 +46,7 @@ export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
     fetchNextPage,
     refetch,
   } = useActivityFeed({
-    daoId: daoId.toUpperCase() as DaoIdEnum,
+    daoId: feedDaoId,
     filters: {
       limit: 20,
       orderBy: filters.orderBy,
@@ -47,6 +57,11 @@ export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
       toDate: filters.toDate,
     },
   });
+  const { showInitialSkeleton, showIncrementalSpinner } =
+    getActivityFeedRenderState({
+      groupCount: events.length,
+      loading,
+    });
 
   // Infinite scroll with Intersection Observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -101,7 +116,7 @@ export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
           onClose={() => setDrawerState(null)}
           entityType={drawerState.entityType}
           address={drawerState.address}
-          daoId={daoId.toUpperCase() as DaoIdEnum}
+          daoId={daoId}
         />
       )}
 
@@ -130,7 +145,7 @@ export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
           </SubSectionsContainer>
         )}
 
-        {loading && events.length === 0 && (
+        {showInitialSkeleton && (
           <SubSectionsContainer>
             <div className="flex flex-col">
               {Array.from({ length: 10 }).map((_, i) => (
@@ -140,7 +155,7 @@ export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
           </SubSectionsContainer>
         )}
 
-        {!loading && events.length === 0 && !error && (
+        {!showInitialSkeleton && !error && events.length === 0 && (
           <SubSectionsContainer>
             <BlankSlate
               variant="default"
@@ -197,7 +212,7 @@ export const ActivityFeedSection = ({ daoId }: { daoId: string }) => {
         {/* Infinite scroll sentinel */}
         <div ref={loadMoreRef} className="h-1" />
 
-        {loading && (
+        {showIncrementalSpinner && (
           <div className="flex justify-center py-4">
             <Loader2 className="text-secondary size-6 animate-spin" />
           </div>

@@ -17,6 +17,7 @@ export default [
   // Global ignores
   {
     ignores: [
+      "apps/gateful/openapi/gateful.json",
       "apps/api-gateway/**",
       "**/node_modules/**",
       "**/dist/**",

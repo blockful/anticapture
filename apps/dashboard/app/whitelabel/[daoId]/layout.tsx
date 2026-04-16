@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoApolloProvider } from "@/shared/providers/DaoApolloProvider";
+import { DaoIdProvider } from "@/shared/providers/DaoIdProvider";
 import { WhitelabelThemeInjector } from "@/shared/components/WhitelabelThemeInjector";
-import type { DaoIdEnum } from "@/shared/types/daos";
-import { ALL_DAOS } from "@/shared/types/daos";
+import { toDaoIdEnum } from "@/shared/types/daos";
 import { getThemeCSSVariables } from "@/shared/utils/theme";
 import { isWhitelabelDao } from "@/shared/utils/whitelabel";
 import { WhitelabelShell } from "@/widgets/WhitelabelShell";
@@ -20,7 +20,12 @@ export async function generateMetadata({
   params,
 }: WhitelabelLayoutProps): Promise<Metadata> {
   const { daoId } = await params;
-  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoIdEnum = toDaoIdEnum(daoId);
+
+  if (!daoIdEnum) {
+    return {};
+  }
+
   const daoConfig = daoConfigByDaoId[daoIdEnum];
 
   if (!daoConfig || !isWhitelabelDao(daoConfig)) {
@@ -41,9 +46,9 @@ export default async function WhitelabelLayout({
   params,
 }: WhitelabelLayoutProps) {
   const { daoId } = await params;
-  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const daoIdEnum = toDaoIdEnum(daoId);
 
-  if (!ALL_DAOS.includes(daoIdEnum)) {
+  if (!daoIdEnum) {
     notFound();
   }
 
@@ -56,11 +61,13 @@ export default async function WhitelabelLayout({
   const themeVariables = getThemeCSSVariables(daoIdEnum);
 
   return (
-    <DaoApolloProvider daoId={daoIdEnum}>
-      <WhitelabelThemeInjector variables={themeVariables} />
-      <div style={themeVariables as CSSProperties}>
-        <WhitelabelShell daoId={daoIdEnum}>{children}</WhitelabelShell>
-      </div>
-    </DaoApolloProvider>
+    <DaoIdProvider daoId={daoIdEnum}>
+      <DaoApolloProvider daoId={daoIdEnum}>
+        <WhitelabelThemeInjector variables={themeVariables} />
+        <div style={themeVariables as CSSProperties}>
+          <WhitelabelShell daoId={daoIdEnum}>{children}</WhitelabelShell>
+        </div>
+      </DaoApolloProvider>
+    </DaoIdProvider>
   );
 }

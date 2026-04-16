@@ -1,11 +1,16 @@
-import type { FeedItem, FeedEventsQueryParams } from "@anticapture/client";
-import { useFeedEventsSuspenseInfinite } from "@anticapture/client/hooks";
+import type { FeedEventsPathParams } from "@anticapture/client";
+import {
+  type FeedItem,
+  type FeedEventsQueryParams,
+  getNextPageParam,
+} from "@anticapture/client";
+import { useFeedEventsInfinite } from "@anticapture/client/hooks";
 
 export const useActivityFeed = ({
-  // daoId,
+  daoId,
   filters,
 }: {
-  daoId: string;
+  daoId: FeedEventsPathParams["dao"];
   filters: FeedEventsQueryParams;
 }) => {
   const {
@@ -17,8 +22,8 @@ export const useActivityFeed = ({
     hasPreviousPage,
     refetch,
     isFetching,
-  } = useFeedEventsSuspenseInfinite(
-    "uni",
+  } = useFeedEventsInfinite(
+    daoId,
     {
       limit: filters.limit,
       orderBy: filters.orderBy,
@@ -30,18 +35,7 @@ export const useActivityFeed = ({
     },
     {
       query: {
-        getNextPageParam: (lastPage, allPages) => {
-          const loadedCount = allPages.reduce(
-            (sum, page) => sum + page.items.length,
-            0,
-          );
-
-          if (loadedCount >= lastPage.totalCount) {
-            return undefined;
-          }
-
-          return loadedCount;
-        },
+        getNextPageParam,
       },
     },
   );
@@ -49,10 +43,12 @@ export const useActivityFeed = ({
   const events = data?.pages ? data.pages.flatMap((page) => page.items) : [];
   const groupedEvents = groupEventsByDate(events, filters.orderDirection);
 
+  const hasEvents = groupedEvents.length > 0;
+  const loading = isLoading && !hasEvents;
   return {
     data: groupedEvents,
     loading: isLoading || isFetching,
-    error: error || !data,
+    error: !loading && Boolean(error),
     hasNextPage,
     hasPreviousPage,
     fetchNextPage,

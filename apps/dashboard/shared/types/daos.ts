@@ -14,3 +14,12 @@ export enum DaoIdEnum {
 }
 
 export const ALL_DAOS = Object.values(DaoIdEnum);
+
+export const isDaoIdEnum = (daoId: string): daoId is DaoIdEnum =>
+  (ALL_DAOS as readonly string[]).includes(daoId);
+
+export const toDaoIdEnum = (daoId: string): DaoIdEnum | null => {
+  const normalizedDaoId = daoId.toUpperCase();
+
+  return isDaoIdEnum(normalizedDaoId) ? normalizedDaoId : null;
+};

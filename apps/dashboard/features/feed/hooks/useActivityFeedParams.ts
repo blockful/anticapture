@@ -2,21 +2,21 @@ import { useCallback } from "react";
 import { useQueryState, parseAsStringEnum, parseAsInteger } from "nuqs";
 
 import {
+  type FeedEventsQueryParams,
+  type OrderDirection,
   type FeedRelevance,
   type FeedEventType,
   feedRelevanceEnum,
   feedEventTypeEnum,
   orderDirectionEnum,
 } from "@anticapture/client";
-import type {
-  FeedEventsQueryParams,
-  OrderDirectionEnumKey,
-} from "@anticapture/client";
+
+import { getActiveActivityFeedFiltersCount } from "@/features/feed/hooks/activityFeedFilters";
 
 export function useActivityFeedParams() {
   const [orderDirection, setOrderDirection] = useQueryState(
     "sort",
-    parseAsStringEnum<OrderDirectionEnumKey>(
+    parseAsStringEnum<OrderDirection>(
       Object.values(orderDirectionEnum),
     ).withDefault("desc"),
   );
@@ -60,12 +60,7 @@ export function useActivityFeedParams() {
     setEventType(null);
   }, [setOrderDirection, setRelevance, setFromDate, setToDate, setEventType]);
 
-  const activeFiltersCount =
-    (filters.fromDate ? 1 : 0) +
-    (filters.toDate ? 1 : 0) +
-    (filters.orderDirection !== "desc" ? 1 : 0) +
-    (filters.relevance !== feedRelevanceEnum.MEDIUM ? 1 : 0) +
-    (filters.type ? 1 : 0);
+  const activeFiltersCount = getActiveActivityFeedFiltersCount(filters);
 
   return { filters, setFilters, clearFilters, activeFiltersCount };
 }
