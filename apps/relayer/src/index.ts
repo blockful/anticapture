@@ -14,7 +14,6 @@ import { env } from "@/env";
 import { RelayError } from "@/errors";
 import { RateLimiter } from "@/services/guards/rate-limiter";
 import { ChainStateService } from "@/services/chain/chain-state";
-import { EligibilityService } from "@/services/guards/eligibility";
 import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
 import { createLocalSigner } from "@/signer/local-signer";
@@ -72,11 +71,6 @@ async function main() {
     },
   );
 
-  const eligibility = new EligibilityService(chainState, {
-    minVotingPower: BigInt(env.MIN_VOTING_POWER),
-    delegationCooldownDays: env.DELEGATION_COOLDOWN_DAYS,
-  });
-
   const rateLimiter = new RateLimiter({
     maxPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
     maxPerAddressPerHour: env.MAX_RELAY_PER_ADDRESS_PER_HOUR,
@@ -87,11 +81,11 @@ async function main() {
   const relayService = new RelayService(
     signer,
     signatureVerifier,
-    eligibility,
     chainState,
     rateLimiter,
     publicClient,
     minBalanceWei,
+    BigInt(env.MIN_VOTING_POWER),
     governorAddress,
     tokenAddress,
   );

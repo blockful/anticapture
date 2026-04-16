@@ -5,7 +5,6 @@ import { RelayService } from "./relay";
 import { ProposalState } from "@/abi/governor";
 import type { RelayerSigner } from "@/signer/types";
 import type { SignatureVerifier } from "./guards/signature-verifier";
-import type { EligibilityService } from "./guards/eligibility";
 import type { ChainStateService } from "./chain/chain-state";
 import type { RateLimiter } from "@/services/guards/rate-limiter";
 import type { ChainReader } from "./chain/chain-reader";
@@ -39,16 +38,6 @@ function createStubSignatureVerifier(
     recoverDelegationSigner: async () => VOTER,
     ...overrides,
   } as SignatureVerifier;
-}
-
-function createStubEligibility(
-  overrides: Partial<EligibilityService> = {},
-): EligibilityService {
-  return {
-    assertCanVote: async () => {},
-    assertCanDelegate: async () => {},
-    ...overrides,
-  } as EligibilityService;
 }
 
 function createStubChainState(
@@ -86,20 +75,20 @@ function createService(
   overrides: {
     signer?: RelayerSigner;
     signatureVerifier?: SignatureVerifier;
-    eligibility?: EligibilityService;
     chainState?: ChainStateService;
     rateLimiter?: RateLimiter;
     balance?: bigint;
+    minVotingPower?: bigint;
   } = {},
 ): RelayService {
   return new RelayService(
     overrides.signer ?? createStubSigner(),
     overrides.signatureVerifier ?? createStubSignatureVerifier(),
-    overrides.eligibility ?? createStubEligibility(),
     overrides.chainState ?? createStubChainState(),
     overrides.rateLimiter ?? createStubRateLimiter(),
     createStubBalanceReader(overrides.balance ?? parseEther("1.0")),
     parseEther("0.1"),
+    overrides.minVotingPower ?? 0n,
     GOVERNOR,
     TOKEN,
   );
@@ -154,6 +143,19 @@ describe("RelayService", () => {
 
       await expect(service.relayVote(voteParams)).rejects.toThrow(
         "balance is too low",
+      );
+    });
+
+    it("rejects when voting power is below threshold", async () => {
+      const service = createService({
+        chainState: createStubChainState({
+          getVotingPower: async () => 999n,
+        }),
+        minVotingPower: 1000n,
+      });
+
+      await expect(service.relayVote(voteParams)).rejects.toThrow(
+        "minimum voting power",
       );
     });
   });

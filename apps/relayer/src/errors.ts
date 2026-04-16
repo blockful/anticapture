@@ -23,13 +23,8 @@ export class RelayError extends Error {
 export const Errors = {
   INSUFFICIENT_VOTING_POWER: (min: string) =>
     new RelayError(
-      `Voter does not meet minimum voting power: ${min}`,
+      `Signer does not meet minimum voting power: ${min}`,
       "INSUFFICIENT_VOTING_POWER",
-    ),
-  DELEGATION_COOLDOWN: (days: number) =>
-    new RelayError(
-      `Last delegation change was less than ${days} days ago`,
-      "DELEGATION_COOLDOWN",
     ),
   INVALID_SIGNATURE: () =>
     new RelayError(

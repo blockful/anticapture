@@ -23,7 +23,6 @@ const envSchema = z.object({
     .transform((v) => v as `0x${string}`),
 
   MIN_VOTING_POWER: z.string().default("0"),
-  DELEGATION_COOLDOWN_DAYS: z.coerce.number().default(7),
 
   MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().default(50),
   MAX_RELAY_PER_ADDRESS_PER_HOUR: z.coerce.number().default(5),

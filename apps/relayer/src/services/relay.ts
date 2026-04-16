@@ -9,7 +9,6 @@ import { RelayerSigner } from "@/signer/types";
 
 import type { ChainReader } from "./chain/chain-reader";
 import { ChainStateService } from "./chain/chain-state";
-import { EligibilityService } from "./guards/eligibility";
 import { SignatureVerifier } from "./guards/signature-verifier";
 
 const logger = pino({ name: "relay-service" });
@@ -41,11 +40,11 @@ export class RelayService {
   constructor(
     private signer: RelayerSigner,
     private signatureVerifier: SignatureVerifier,
-    private eligibility: EligibilityService,
     private chainState: ChainStateService,
     private rateLimiter: RateLimiter,
     private publicClient: ChainReader,
     private minBalanceWei: bigint,
+    private minVotingPower: bigint,
     private governorAddress: Address,
     private tokenAddress: Address,
   ) {}
@@ -61,7 +60,7 @@ export class RelayService {
     this.rateLimiter.checkAllowed(voter);
 
     // 3. Eligibility
-    await this.eligibility.assertCanVote(voter);
+    await this.assertSufficientVotingPower(voter);
 
     // 4. On-chain state checks
     const state = await this.chainState.getProposalState(params.proposalId);
@@ -107,7 +106,7 @@ export class RelayService {
     this.rateLimiter.checkAllowed(delegator);
 
     // 3. Eligibility
-    await this.eligibility.assertCanDelegate(delegator);
+    await this.assertSufficientVotingPower(delegator);
 
     // 4. On-chain checks
     if (params.expiry <= BigInt(Math.floor(Date.now() / 1000))) {
@@ -145,6 +144,13 @@ export class RelayService {
     this.rateLimiter.recordUsage(delegator);
 
     return { hash, signer: delegator };
+  }
+
+  private async assertSufficientVotingPower(address: Address): Promise<void> {
+    const votingPower = await this.chainState.getVotingPower(address);
+    if (votingPower < this.minVotingPower) {
+      throw Errors.INSUFFICIENT_VOTING_POWER(this.minVotingPower.toString());
+    }
   }
 
   private async assertSufficientBalance(): Promise<void> {
