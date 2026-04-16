@@ -132,7 +132,7 @@ export const ActivityFeedSection = ({
       {/* Feed content */}
       <div className={cn("flex flex-col gap-2")}>
         {error && (
-          <SubSectionsContainer>
+          <SubSectionsContainer className="p-0">
             <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
               <p className="text-error text-sm">Failed to load activity feed</p>
               <button
@@ -146,7 +146,7 @@ export const ActivityFeedSection = ({
         )}
 
         {showInitialSkeleton && (
-          <SubSectionsContainer>
+          <SubSectionsContainer className="p-0">
             <div className="flex flex-col">
               {Array.from({ length: 10 }).map((_, i) => (
                 <FeedEventSkeleton key={i} />
@@ -156,7 +156,7 @@ export const ActivityFeedSection = ({
         )}
 
         {!showInitialSkeleton && !error && events.length === 0 && (
-          <SubSectionsContainer>
+          <SubSectionsContainer className="p-0">
             <BlankSlate
               variant="default"
               icon={Activity}
@@ -176,11 +176,11 @@ export const ActivityFeedSection = ({
 
         {events.map((group) => (
           <SubSectionsContainer
-            className="py-0 sm:py-0 lg:py-0"
+            className="py-0 sm:py-0 lg:py-0 dark:lg:p-0"
             key={group.date}
           >
             {/* Sticky date header */}
-            <div className="bg-surface-contrast sticky top-0 z-10 px-5 py-3 sm:-mx-5">
+            <div className="bg-surface-contrast top-0 z-10 mx-0 px-5 py-3">
               <div className="flex items-center gap-2">
                 <span className="text-primary font-mono text-xs font-medium uppercase">
                   {group.label}
