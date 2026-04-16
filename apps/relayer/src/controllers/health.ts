@@ -33,8 +33,8 @@ export function health(
         address: signer.address,
       });
       const belowThreshold = balance < minBalanceWei;
-      const status: "healthy" | "degraded" = belowThreshold
-        ? "degraded"
+      const status: "healthy" | "balance_below_threshold" = belowThreshold
+        ? "balance_below_threshold"
         : "healthy";
       return c.json(
         {
