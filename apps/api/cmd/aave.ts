@@ -5,6 +5,7 @@ import {
 } from "@anticapture/observability";
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { seed } from "drizzle-seed";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { logger } from "hono/logger";
 import { createPublicClient, http } from "viem";
@@ -188,6 +189,10 @@ transfers(
 );
 dao(app, daoService);
 docs(app);
+
+if (process.env.CI === "true" || process.env.CI === "1") {
+  await seed(pgClient, schema, { count: 1000 });
+}
 
 serve(
   {

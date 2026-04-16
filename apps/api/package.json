@@ -31,10 +31,11 @@
     "axios": "^1.9.0",
     "drizzle-kit": "^0.31.9",
     "drizzle-orm": "^0.45.1",
+    "drizzle-seed": "^0.3.1",
     "hono": "^4.7.10",
     "pg": "^8.17.2",
-    "viem": "^2.41.2",
     "pino-http": "^10.4.0",
+    "viem": "^2.41.2",
     "zod": "^4.3.6",
     "zod-validation-error": "^5.0.0"
   },
