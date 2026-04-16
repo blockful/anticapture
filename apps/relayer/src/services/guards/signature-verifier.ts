@@ -2,6 +2,11 @@ import { Address, Hex, recoverTypedDataAddress } from "viem";
 
 import { Errors } from "@/errors";
 
+/**
+ * EIP-712 typed data for Governor.castVoteBySig.
+ * - proposalId: the governance proposal being voted on
+ * - support: 0 = Against, 1 = For, 2 = Abstain
+ */
 const BALLOT_TYPES = {
   Ballot: [
     { name: "proposalId", type: "uint256" },
@@ -9,6 +14,12 @@ const BALLOT_TYPES = {
   ],
 } as const;
 
+/**
+ * EIP-712 typed data for ERC20Votes.delegateBySig.
+ * - delegatee: address receiving the voting power
+ * - nonce: signer's current nonce (replay protection)
+ * - expiry: unix timestamp after which the signature is invalid
+ */
 const DELEGATION_TYPES = {
   Delegation: [
     { name: "delegatee", type: "address" },
@@ -94,6 +105,7 @@ export class SignatureVerifier {
     const rClean = r.slice(2);
     const sClean = s.slice(2);
     const vHex = v.toString(16).padStart(2, "0");
-    return `0x${rClean}${sClean}${vHex}` as Hex;
+    const signature: Hex = `0x${rClean}${sClean}${vHex}`;
+    return signature;
   }
 }
