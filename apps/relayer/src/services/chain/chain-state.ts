@@ -4,7 +4,17 @@ import { governorAbi, ProposalState } from "@/abi/governor";
 import { erc20VotesAbi } from "@/abi/token";
 import type { ChainReader } from "./chain-reader";
 
-export class ChainStateService {
+export interface IChainStateService {
+  getVotingPower(address: Address): Promise<bigint>;
+  getProposalState(proposalId: bigint): Promise<ProposalState>;
+  hasVoted(proposalId: bigint, voter: Address): Promise<boolean>;
+  getDelegationNonce(address: Address): Promise<bigint>;
+  getCurrentDelegate(address: Address): Promise<Address>;
+  getGovernorName(): Promise<string>;
+  getTokenName(): Promise<string>;
+}
+
+export class ChainStateService implements IChainStateService {
   constructor(
     private client: ChainReader,
     private governorAddress: Address,

@@ -4,12 +4,12 @@ import pino from "pino";
 import { governorAbi, ProposalState } from "@/abi/governor";
 import { erc20VotesAbi } from "@/abi/token";
 import { Errors } from "@/errors";
-import { RateLimiter } from "@/services/guards/rate-limiter";
+import type { IRateLimiter } from "@/services/guards/rate-limiter";
 import { RelayerSigner } from "@/signer/types";
 
 import type { ChainReader } from "./chain/chain-reader";
-import { ChainStateService } from "./chain/chain-state";
-import { SignatureVerifier } from "./guards/signature-verifier";
+import type { IChainStateService } from "./chain/chain-state";
+import type { ISignatureVerifier } from "./guards/signature-verifier";
 
 const logger = pino({ name: "relay-service" });
 
@@ -39,9 +39,9 @@ export interface RelayResult {
 export class RelayService {
   constructor(
     private signer: RelayerSigner,
-    private signatureVerifier: SignatureVerifier,
-    private chainState: ChainStateService,
-    private rateLimiter: RateLimiter,
+    private signatureVerifier: ISignatureVerifier,
+    private chainState: IChainStateService,
+    private rateLimiter: IRateLimiter,
     private publicClient: ChainReader,
     private minBalanceWei: bigint,
     private minVotingPower: bigint,

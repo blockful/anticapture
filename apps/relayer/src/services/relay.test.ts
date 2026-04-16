@@ -4,9 +4,9 @@ import { getAddress, type Hash, type Hex, parseEther } from "viem";
 import { RelayService } from "./relay";
 import { ProposalState } from "@/abi/governor";
 import type { RelayerSigner } from "@/signer/types";
-import type { SignatureVerifier } from "./guards/signature-verifier";
-import type { ChainStateService } from "./chain/chain-state";
-import type { RateLimiter } from "@/services/guards/rate-limiter";
+import type { ISignatureVerifier } from "./guards/signature-verifier";
+import type { IChainStateService } from "./chain/chain-state";
+import type { IRateLimiter } from "@/services/guards/rate-limiter";
 import type { ChainReader } from "./chain/chain-reader";
 
 const VOTER = getAddress("0x3333333333333333333333333333333333333333");
@@ -31,18 +31,18 @@ function createStubSigner(
 }
 
 function createStubSignatureVerifier(
-  overrides: Partial<SignatureVerifier> = {},
-): SignatureVerifier {
+  overrides: Partial<ISignatureVerifier> = {},
+): ISignatureVerifier {
   return {
     recoverVoteSigner: async () => VOTER,
     recoverDelegationSigner: async () => VOTER,
     ...overrides,
-  } as SignatureVerifier;
+  };
 }
 
 function createStubChainState(
-  overrides: Partial<ChainStateService> = {},
-): ChainStateService {
+  overrides: Partial<IChainStateService> = {},
+): IChainStateService {
   return {
     getProposalState: async () => ProposalState.Active,
     hasVoted: async () => false,
@@ -53,15 +53,15 @@ function createStubChainState(
     getGovernorName: async () => "TestGovernor",
     getTokenName: async () => "TestToken",
     ...overrides,
-  } as ChainStateService;
+  };
 }
 
-function createStubRateLimiter(): RateLimiter {
+function createStubRateLimiter(): IRateLimiter {
   return {
     checkAllowed: () => {},
     recordUsage: () => {},
     reset: () => {},
-  } as unknown as RateLimiter;
+  };
 }
 
 function createStubBalanceReader(balance: bigint): ChainReader {
@@ -74,9 +74,9 @@ function createStubBalanceReader(balance: bigint): ChainReader {
 function createService(
   overrides: {
     signer?: RelayerSigner;
-    signatureVerifier?: SignatureVerifier;
-    chainState?: ChainStateService;
-    rateLimiter?: RateLimiter;
+    signatureVerifier?: ISignatureVerifier;
+    chainState?: IChainStateService;
+    rateLimiter?: IRateLimiter;
     balance?: bigint;
     minVotingPower?: bigint;
   } = {},

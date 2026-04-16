@@ -2,6 +2,26 @@ import { Address, Hex, recoverTypedDataAddress } from "viem";
 
 import { Errors } from "@/errors";
 
+export interface ISignatureVerifier {
+  recoverVoteSigner(params: {
+    proposalId: bigint;
+    support: number;
+    v: number;
+    r: Hex;
+    s: Hex;
+    expectedVoter?: Address;
+  }): Promise<Address>;
+
+  recoverDelegationSigner(params: {
+    delegatee: Address;
+    nonce: bigint;
+    expiry: bigint;
+    v: number;
+    r: Hex;
+    s: Hex;
+  }): Promise<Address>;
+}
+
 /**
  * EIP-712 typed data for Governor.castVoteBySig.
  * - proposalId: the governance proposal being voted on
@@ -35,7 +55,7 @@ type EIP712Domain = {
   verifyingContract: Address;
 };
 
-export class SignatureVerifier {
+export class SignatureVerifier implements ISignatureVerifier {
   constructor(
     private governorDomain: EIP712Domain,
     private tokenDomain: EIP712Domain,

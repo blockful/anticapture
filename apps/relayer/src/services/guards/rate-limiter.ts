@@ -2,12 +2,18 @@ import { type Address, getAddress } from "viem";
 
 import { Errors } from "@/errors";
 
+export interface IRateLimiter {
+  checkAllowed(address: Address): void;
+  recordUsage(address: Address): void;
+  reset(): void;
+}
+
 interface RateLimiterConfig {
   maxPerAddressPerDay: number;
   maxPerAddressPerHour: number;
 }
 
-export class RateLimiter {
+export class RateLimiter implements IRateLimiter {
   // address → list of timestamps (ms)
   private requests = new Map<Address, number[]>();
 
