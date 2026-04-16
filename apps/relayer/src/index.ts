@@ -3,8 +3,8 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import pino from "pino";
-import { createPublicClient, http, type Chain } from "viem";
-import { mainnet, optimism, scroll, arbitrum, zkSync } from "viem/chains";
+import { createPublicClient, extractChain, http } from "viem";
+import * as chains from "viem/chains";
 import { fromZodError } from "zod-validation-error";
 
 import { health } from "@/controllers/health";
@@ -20,17 +20,13 @@ import { createLocalSigner } from "@/signer/local-signer";
 
 const logger = pino({ name: "relayer" });
 
-const CHAINS: Record<number, Chain> = {
-  1: mainnet,
-  10: optimism,
-  534352: scroll,
-  42161: arbitrum,
-  324: zkSync,
-};
+const allChains = Object.values(chains);
 
 async function main() {
-  const chain = CHAINS[env.CHAIN_ID];
-  if (!chain) throw new Error(`Unsupported chain ID: ${env.CHAIN_ID}`);
+  const chain = extractChain({
+    chains: allChains,
+    id: env.CHAIN_ID as (typeof allChains)[number]["id"],
+  });
 
   const governorAddress = env.GOVERNOR_ADDRESS;
   const tokenAddress = env.TOKEN_ADDRESS;
