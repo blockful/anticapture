@@ -1,10 +1,14 @@
-import { isAddress, isHex } from "viem";
+import { getAddress, isAddress, isHex } from "viem";
 import { z } from "zod";
 
-export const HexSchema = z.string().refine(isHex, "Invalid hex");
+export const HexSchema = z
+  .string()
+  .refine(isHex, "Invalid hex")
+  .transform((v) => v as `0x${string}`);
 export const AddressSchema = z
   .string()
-  .refine(isAddress, "Invalid Ethereum address");
+  .refine(isAddress, "Invalid Ethereum address")
+  .transform((v) => getAddress(v));
 export const Bytes32Schema = HexSchema.refine(
   (v) => v.length === 66,
   "Must be 32 bytes",

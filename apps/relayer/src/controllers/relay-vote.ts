@@ -53,14 +53,12 @@ export function relayVote(app: Hono, relayService: RelayService) {
     }),
     async (c) => {
       const body = c.req.valid("json");
-
-      // Errors propagate to global onError handler (no try/catch needed)
       const result = await relayService.relayVote({
         proposalId: BigInt(body.proposalId),
         support: body.support,
         v: body.v,
-        r: body.r as `0x${string}`,
-        s: body.s as `0x${string}`,
+        r: body.r,
+        s: body.s,
       });
 
       return c.json(
