@@ -43,7 +43,7 @@ describe("gateful app auth", () => {
   });
 
   it("requires bearer auth outside docs endpoints", async () => {
-    const res = await app.request("/health");
+    const res = await app.request("/votes");
 
     expect(res.status).toBe(401);
   });
