@@ -38,8 +38,7 @@ export class RateLimiter {
   }
 
   /**
-   * Record a successful relay. Call AFTER the transaction was submitted,
-   * so failed validations don't burn rate limit slots.
+   * Record a successful relay.
    */
   recordUsage(address: Address): void {
     const now = Date.now();
