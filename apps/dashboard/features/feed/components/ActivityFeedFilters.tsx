@@ -8,12 +8,7 @@ import type {
   FeedEventsQueryParams,
   OrderDirection,
 } from "@anticapture/client";
-import {
-  feedRelevanceEnum,
-  feedEventTypeEnum,
-  type FeedRelevance,
-  type FeedEventType,
-} from "@anticapture/client";
+import { type FeedRelevance, type FeedEventType } from "@anticapture/client";
 import {
   Button,
   DrawerRoot,
@@ -38,17 +33,17 @@ interface ActivityFeedFiltersDrawerProps {
 }
 
 const relevanceOptions: { value: FeedRelevance; label: string }[] = [
-  { value: feedRelevanceEnum.LOW, label: "Low" },
-  { value: feedRelevanceEnum.MEDIUM, label: "Medium" },
-  { value: feedRelevanceEnum.HIGH, label: "High" },
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "HIGH", label: "High" },
 ];
 
 const typeOptions: { value: FeedEventType; label: string }[] = [
-  { value: feedEventTypeEnum.VOTE, label: "Vote" },
-  { value: feedEventTypeEnum.PROPOSAL, label: "Proposal" },
-  { value: feedEventTypeEnum.PROPOSAL_EXTENDED, label: "Proposal Extended" },
-  { value: feedEventTypeEnum.TRANSFER, label: "Transfer" },
-  { value: feedEventTypeEnum.DELEGATION, label: "Delegation" },
+  { value: "VOTE", label: "Vote" },
+  { value: "PROPOSAL", label: "Proposal" },
+  { value: "PROPOSAL_EXTENDED", label: "Proposal Extended" },
+  { value: "TRANSFER", label: "Transfer" },
+  { value: "DELEGATION", label: "Delegation" },
 ];
 
 const timestampToDate = (ts: number | undefined): Date | undefined => {

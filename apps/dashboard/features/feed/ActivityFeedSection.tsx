@@ -180,7 +180,7 @@ export const ActivityFeedSection = ({
             key={group.date}
           >
             {/* Sticky date header */}
-            <div className="bg-surface-contrast sticky top-0 z-10 px-5 py-3 sm:-mx-5">
+            <div className="bg-surface-contrast top-0 z-10 mx-0 px-5 py-3">
               <div className="flex items-center gap-2">
                 <span className="text-primary font-mono text-xs font-medium uppercase">
                   {group.label}

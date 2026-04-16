@@ -4,15 +4,13 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
-import { FeedItemMetadata, FeedRequest } from "@/mappers";
+import { FeedRequest } from "@/mappers";
 import type { DBFeedEventWithMetadata } from "@/repositories/feed";
 
 import { FeedService } from ".";
 
 const createFeedEvent = (
-  overrides: Partial<Omit<DBFeedEventWithMetadata, "metadata">> & {
-    metadata?: FeedItemMetadata;
-  } = {},
+  overrides: Partial<Omit<DBFeedEventWithMetadata, "metadata">> = {},
 ): DBFeedEventWithMetadata => {
   const item = {
     txHash: "0xabc123",
@@ -28,7 +26,7 @@ const createFeedEvent = (
       return {
         ...item,
         type: FeedEventType.VOTE,
-        metadata: overrides.metadata ?? {
+        metadata: {
           voter: "0x0000000000000000000000000000000000000001",
           reason: null,
           support: 1,
@@ -41,7 +39,7 @@ const createFeedEvent = (
       return {
         ...item,
         type: FeedEventType.DELEGATION,
-        metadata: overrides.metadata ?? {
+        metadata: {
           delegator: "0x0000000000000000000000000000000000000001",
           delegate: "0x0000000000000000000000000000000000000002",
           previousDelegate: null,
@@ -52,7 +50,7 @@ const createFeedEvent = (
       return {
         ...item,
         type: FeedEventType.TRANSFER,
-        metadata: overrides.metadata ?? {
+        metadata: {
           from: "0x0000000000000000000000000000000000000001",
           to: "0x0000000000000000000000000000000000000002",
           amount: item.value.toString(),
@@ -62,7 +60,7 @@ const createFeedEvent = (
       return {
         ...item,
         type: FeedEventType.PROPOSAL,
-        metadata: overrides.metadata ?? {
+        metadata: {
           id: "1",
           proposer: "0x0000000000000000000000000000000000000001",
           votingPower: "100",
@@ -73,7 +71,7 @@ const createFeedEvent = (
       return {
         ...item,
         type: FeedEventType.PROPOSAL_EXTENDED,
-        metadata: overrides.metadata ?? {
+        metadata: {
           id: "1",
           title: "Test Proposal",
           endBlock: 100,
@@ -143,7 +141,7 @@ describe("FeedService", () => {
     });
 
     it("should preserve item fields from repository", async () => {
-      const event = createFeedEvent({
+      const event: DBFeedEventWithMetadata = {
         txHash: "0xdef456",
         logIndex: 5,
         type: FeedEventType.DELEGATION,
@@ -155,7 +153,7 @@ describe("FeedService", () => {
           previousDelegate: null,
           amount: "100",
         },
-      });
+      };
       simpleRepo.items = [event];
 
       const result = await service.getFeedEvents(createRequest());
