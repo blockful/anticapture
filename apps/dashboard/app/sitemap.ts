@@ -15,7 +15,7 @@ const STATIC_ROUTES = [
 const DAO_SUB_ROUTES = [
   "",
   "/risk-analysis",
-  "/governance",
+  "/proposals",
   "/token-distribution",
   "/holders-and-delegates",
   "/activity-feed",

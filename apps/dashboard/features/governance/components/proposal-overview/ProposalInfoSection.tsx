@@ -2,7 +2,7 @@ import {
   BarChart4,
   Check,
   CheckCircle2,
-  DivideCircle,
+  CircleMinus,
   Users,
   XCircle,
 } from "lucide-react";
@@ -68,7 +68,7 @@ const ChoiceIcon = ({ label, color }: { label: string; color: string }) => {
   if (lower === "against")
     return <XCircle className="text-error size-3.5 shrink-0" />;
   if (lower === "abstain")
-    return <DivideCircle className="text-secondary size-3.5 shrink-0" />;
+    return <CircleMinus className="text-secondary size-3.5 shrink-0" />;
   return (
     <div
       className="size-2 shrink-0 rounded-[2px]"
@@ -126,7 +126,7 @@ export const ProposalInfoSection = ({
                   </p>
                 </div>
 
-                <div className="relative h-1 min-w-0 flex-1 bg-[#3F3F46]">
+                <div className="bg-surface-contrast relative h-1 min-w-0 flex-1">
                   <div
                     className="absolute h-full"
                     style={{
@@ -219,7 +219,7 @@ export const ProposalInfoSection = ({
     },
     {
       label: "Abstain",
-      icon: <DivideCircle className="text-secondary size-3.5" />,
+      icon: <CircleMinus className="text-secondary size-3.5" />,
       barClass: "bg-secondary",
       rawVotes: proposal.abstainVotes || "0",
       percentage: choicePercentage(proposal.abstainVotes),
@@ -246,7 +246,7 @@ export const ProposalInfoSection = ({
                 </p>
               </div>
 
-              <div className="relative h-1 w-full bg-[#3F3F46] lg:w-[184px] lg:flex-1">
+              <div className="bg-surface-contrast relative h-1 w-full lg:w-[184px] lg:flex-1">
                 <div
                   className={`${row.barClass} absolute h-full`}
                   style={{ width: `${row.percentage}%` }}

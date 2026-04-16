@@ -23,6 +23,7 @@ import { cn } from "@/shared/utils/cn";
 
 interface HelpPopoverProps {
   className?: string;
+  isWhitelabel?: boolean;
 }
 
 type HelpLinkKey = "calendly" | "framework" | "faq";
@@ -81,8 +82,10 @@ const LinkButton = ({ link }: { link: HelpLink }) => {
   );
 };
 
-export const HelpPopover = ({ className }: HelpPopoverProps) => {
+export const HelpPopover = ({ className, isWhitelabel }: HelpPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  if (isWhitelabel) return null;
 
   return (
     <div className={cn("fixed bottom-4 right-4 z-10", className)}>
