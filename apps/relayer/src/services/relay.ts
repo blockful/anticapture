@@ -19,7 +19,7 @@ export interface RelayVoteParams {
   v: number;
   r: Hex;
   s: Hex;
-  expectedVoter?: Address; // Optional pre-flight check against griefing
+  expectedVoter?: Address;
 }
 
 export interface RelayDelegateParams {
