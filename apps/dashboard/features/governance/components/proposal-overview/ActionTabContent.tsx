@@ -138,7 +138,7 @@ const ActionItem = ({
             calldata:
           </p>
           <div className="border-border-contrast relative min-w-0 flex-1 border">
-            <div className="scrollbar-thin max-h-62 overflow-y-auto p-3">
+            <div className="scrollbar-thin max-h-62 overflow-y-auto p-3 pb-9">
               {isDecoded && !isLoading && decodedCalldata ? (
                 <div className="text-secondary whitespace-pre-wrap font-mono text-sm font-normal not-italic leading-5">
                   <CalldataWithEns text={decodedCalldata} />
@@ -157,7 +157,7 @@ const ActionItem = ({
                 size="sm"
                 onClick={handleToggleDecode}
                 loading={isLoading}
-                className="bg-surface-default border-border-contrast absolute -bottom-px -right-px border"
+                className="bg-surface-default border-border-contrast absolute bottom-2 right-2 border"
               >
                 {isDecoded ? "Encode" : "Decode"}
               </Button>

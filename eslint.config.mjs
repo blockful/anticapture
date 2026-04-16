@@ -17,6 +17,7 @@ export default [
   // Global ignores
   {
     ignores: [
+      "apps/gateful/openapi/gateful.json",
       "apps/api-gateway/**",
       "**/node_modules/**",
       "**/dist/**",
@@ -27,7 +28,7 @@ export default [
       "*.config.js",
       "*.config.ts",
       "*.config.mjs",
-      "packages/graphql-client/generated/**.ts",
+      "**/generated/**/*.ts",
       "apps/api-gateway/schema.graphql",
       "**/storybook-static/**",
       "**/.storybook/**",

@@ -3,7 +3,6 @@ import type { TokenInfoQuery } from "@anticapture/graphql-client/hooks";
 import { useTokenInfoQuery } from "@anticapture/graphql-client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface UseTokenInfoResult {
   data: TokenInfoQuery["token"] | null;
@@ -20,7 +19,6 @@ export const useTokenInfo = (
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     variables: {

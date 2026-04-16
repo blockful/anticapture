@@ -10,8 +10,9 @@ export type DaoFeaturePage = "/" | DaoFeaturePageSlug;
 const FEATURE_PAGE_SET = new Set<DaoFeaturePage>([
   "/",
   "holders-and-delegates",
-  "governance",
+  "proposals",
   "activity-feed",
+  "service-providers",
   "attack-profitability",
   "resilience-stages",
   "risk-analysis",
@@ -27,10 +28,12 @@ export const isFeatureEnabledForDao = (
       return daoConfig.overviewPage !== false && !!daoConfig.daoOverview;
     case "holders-and-delegates":
       return !!daoConfig.dataTables;
-    case "governance":
+    case "proposals":
       return !!daoConfig.governancePage;
     case "activity-feed":
-      return true;
+      return !!daoConfig.activityFeed;
+    case "service-providers":
+      return !!daoConfig.serviceProviders;
     case "attack-profitability":
       return !!daoConfig.attackProfitability?.supportsLiquidTreasuryCall;
     case "resilience-stages":
@@ -63,10 +66,6 @@ export const getCurrentDaoFeaturePage = (
   const section = pathSegments[1];
   if (!section || section === currentDaoSlug) {
     return "/";
-  }
-
-  if (section === "governance") {
-    return "governance";
   }
 
   if (FEATURE_PAGE_SET.has(section as DaoFeaturePage)) {

@@ -1,32 +1,44 @@
 "use client";
 
 import { UserCheck } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import type { ReactElement } from "react";
 
 import { Delegates } from "@/features/holders-and-delegates/components";
-import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
+import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-group/PillTabGroup";
 import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
+import {
+  getWhitelabelBasePath,
+  isWhitelabelDao,
+} from "@/shared/utils/whitelabel";
+import daoConfigByDaoId from "@/shared/dao-config";
 
 type TabId = "tokenHolders" | "delegates";
 
-interface TabConfig {
-  id: TabId;
-  label: string;
-}
+const NORMAL_TABS = [
+  { value: "tokenHolders", label: "Token Holders" },
+  { value: "delegates", label: "Delegates" },
+];
 
-const TABS: TabConfig[] = [
-  { id: "tokenHolders", label: "TOKEN HOLDERS" },
-  { id: "delegates", label: "DELEGATES" },
-] as const;
+const WHITELABEL_TABS = [
+  { value: "delegates", label: "Delegates" },
+  { value: "tokenHolders", label: "Token Holders" },
+];
 
 export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const pathname = usePathname();
+  const basePath = getWhitelabelBasePath({ daoId, pathname });
+  const isWhitelabel =
+    basePath.startsWith("/whitelabel/") ||
+    (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoId]));
+
   const defaultDays = TimeInterval.NINETY_DAYS;
   const [days, setDays] = useQueryState(
     "days",
@@ -34,7 +46,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   );
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsString.withDefault("tokenHolders"),
+    parseAsString.withDefault(isWhitelabel ? "delegates" : "tokenHolders"),
   );
 
   // clean up filters when switching tabs
@@ -56,26 +68,19 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   };
 
   // Map from tab ID to tab component
+  const tabs = isWhitelabel ? WHITELABEL_TABS : NORMAL_TABS;
+  const defaultTab = isWhitelabel ? "delegates" : "tokenHolders";
+
   const tabComponentMap: Record<TabId, ReactElement> = {
     tokenHolders: <TokenHolders days={days || defaultDays} daoId={daoId} />,
-    delegates: <Delegates daoId={daoId} timePeriod={days || defaultDays} />,
+    delegates: (
+      <Delegates
+        daoId={daoId}
+        timePeriod={days || defaultDays}
+        isWhitelabel={isWhitelabel}
+      />
+    ),
   };
-
-  const TabsHeader = () => (
-    <div className="flex h-full w-full items-center justify-between">
-      <div className="flex gap-2">
-        {TABS.map((tab) => (
-          <TabButton
-            key={tab.id}
-            id={tab.id}
-            label={tab.label}
-            activeTab={activeTab as TabId}
-            setActiveTab={handleTabChange}
-          />
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <div>
@@ -87,7 +92,11 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
       >
         <SubSectionsContainer>
           <div className="flex w-full items-center justify-between">
-            <TabsHeader />
+            <PillTabGroup
+              tabs={tabs}
+              activeTab={activeTab ?? defaultTab}
+              onTabChange={(value) => handleTabChange(value as TabId)}
+            />
             <SwitcherDateMobile
               defaultValue={days || defaultDays}
               setTimeInterval={setDays}

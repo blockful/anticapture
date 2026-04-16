@@ -8,7 +8,6 @@ import { NetworkStatus } from "@apollo/client";
 import { useMemo, useCallback } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 // Non-voter type
 export type NonVoter = NonNullable<
@@ -60,7 +59,6 @@ export const useNonVoters = ({
       context: {
         headers: {
           "anticapture-dao-id": daoId,
-          ...getAuthHeaders(),
         },
       },
       skip: !proposalId,

@@ -12,7 +12,6 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 type VotingPowerVariation = {
   previousVotingPower: string;
@@ -84,7 +83,6 @@ export const useVotes = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,
@@ -118,7 +116,6 @@ export const useVotes = ({
           context: {
             headers: {
               "anticapture-dao-id": daoId,
-              ...getAuthHeaders(),
             },
           },
         });
