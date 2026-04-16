@@ -17,6 +17,8 @@ export const TEST_USER_KEY: Hex =
   "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
 export const BROKE_USER_KEY: Hex =
   "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
+export const PROPOSER_KEY: Hex =
+  "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6";
 
 export const RELAYER_ADDRESS: Address =
   privateKeyToAccount(RELAYER_KEY).address;
@@ -24,9 +26,14 @@ export const TEST_USER_ADDRESS: Address =
   privateKeyToAccount(TEST_USER_KEY).address;
 export const DELEGATEE_ADDRESS: Address =
   privateKeyToAccount(BROKE_USER_KEY).address;
+export const PROPOSER_ADDRESS: Address =
+  privateKeyToAccount(PROPOSER_KEY).address;
 
 export const WHALE_ADDRESS: Address =
   "0x28C6c06298d514Db089934071355E5743bf21d60";
+
+export const DEAD_ADDRESS: Address =
+  "0x000000000000000000000000000000000000dEaD";
 
 // --- EIP-712 domains ---
 

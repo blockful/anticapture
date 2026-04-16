@@ -3,6 +3,7 @@ import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 
 import { relayDelegate } from "@/controllers/relay-delegate";
+import { relayVote } from "@/controllers/relay-vote";
 import { RelayError } from "@/errors";
 import { ChainStateService } from "@/services/chain/chain-state";
 import { RateLimiter } from "@/services/guards/rate-limiter";
@@ -73,6 +74,7 @@ export async function createTestApp(rpcUrl: string) {
   });
 
   relayDelegate(app, relayService);
+  relayVote(app, relayService);
 
   return app;
 }
