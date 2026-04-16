@@ -1,17 +1,9 @@
-import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { formatEther } from "viem";
 
 import { RelayerSigner } from "@/signer/types";
 import type { ChainReader } from "@/services/chain-reader";
-
-const HealthResponseSchema = z
-  .object({
-    status: z.enum(["healthy", "degraded"]),
-    relayerAddress: z.string(),
-    balance: z.string().openapi({ description: "Balance in ETH" }),
-    belowThreshold: z.boolean(),
-  })
-  .openapi("HealthResponse");
+import { HealthResponseSchema } from "@/schemas/health";
 
 export function health(
   app: Hono,
