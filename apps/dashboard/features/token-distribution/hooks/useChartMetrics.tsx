@@ -222,6 +222,7 @@ export const useChartMetrics = ({
           date: timestamp,
           PROPOSALS_GOVERNANCE_TEXT: governanceText,
           PROPOSALS: exists ? proposals + proposal.title : [proposal.title],
+          PROPOSALS_GOVERNANCE: count + 1,
         };
       });
     }
