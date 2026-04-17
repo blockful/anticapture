@@ -12,6 +12,8 @@ import { relayDelegate } from "@/controllers/relay-delegate";
 import { relayVote } from "@/controllers/relay-vote";
 import { env } from "@/env";
 import { RelayError } from "@/errors";
+import { createClient } from "redis";
+import { RedisRateLimitStorage } from "@/repository/rate-limit-storage";
 import { RateLimiter } from "@/services/guards/rate-limiter";
 import { ChainStateService } from "@/services/chain/chain-state";
 import { RelayService } from "@/services/relay";
@@ -67,9 +69,16 @@ async function main() {
     },
   );
 
-  const rateLimiter = new RateLimiter({
+  const redis = createClient({ url: env.REDIS_URL });
+  redis.on("error", (err: Error) => logger.error({ err }, "[redis] error"));
+  await redis.connect();
+
+  const rateLimitStorage = new RedisRateLimitStorage(redis);
+
+  const rateLimiter = new RateLimiter(rateLimitStorage, {
+    daoName: env.DAO_NAME,
+    governorAddress: governorAddress,
     maxPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
-    maxPerAddressPerHour: env.MAX_RELAY_PER_ADDRESS_PER_HOUR,
   });
 
   const minBalanceWei = BigInt(env.MIN_BALANCE_WEI);

@@ -5,6 +5,10 @@ import { z } from "zod";
 dotenv.config();
 
 const envSchema = z.object({
+  REDIS_URL: z.url(),
+
+  DAO_NAME: z.string().min(1),
+
   RPC_URL: z.string().url(),
   CHAIN_ID: z.coerce.number(),
 
@@ -24,8 +28,7 @@ const envSchema = z.object({
 
   MIN_VOTING_POWER: z.string().default("0"),
 
-  MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().default(50),
-  MAX_RELAY_PER_ADDRESS_PER_HOUR: z.coerce.number().default(5),
+  MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().default(3),
 
   MIN_BALANCE_WEI: z.string().default("100000000000000000"),
 
