@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   pgTable,
   index,
@@ -14,22 +14,30 @@ export const token = pgTable("token", (drizzle) => ({
   id: drizzle.text().primaryKey(),
   name: drizzle.text(),
   decimals: drizzle.integer().notNull(),
-  totalSupply: bigint("total_supply", { mode: "bigint" }).notNull().default(0n),
+  totalSupply: bigint("total_supply", { mode: "bigint" })
+    .notNull()
+    .default(sql`0`),
   delegatedSupply: bigint("delegated_supply", { mode: "bigint" })
     .notNull()
-    .default(0n),
-  cexSupply: bigint("cex_supply", { mode: "bigint" }).notNull().default(0n),
-  dexSupply: bigint("dex_supply", { mode: "bigint" }).notNull().default(0n),
+    .default(sql`0`),
+  cexSupply: bigint("cex_supply", { mode: "bigint" })
+    .notNull()
+    .default(sql`0`),
+  dexSupply: bigint("dex_supply", { mode: "bigint" })
+    .notNull()
+    .default(sql`0`),
   lendingSupply: bigint("lending_supply", { mode: "bigint" })
     .notNull()
-    .default(0n),
+    .default(sql`0`),
   circulatingSupply: bigint("circulating_supply", { mode: "bigint" })
     .notNull()
-    .default(0n),
-  treasury: bigint({ mode: "bigint" }).notNull().default(0n),
+    .default(sql`0`),
+  treasury: bigint({ mode: "bigint" })
+    .notNull()
+    .default(sql`0`),
   nonCirculatingSupply: bigint("non_circulating_supply", { mode: "bigint" })
     .notNull()
-    .default(0n),
+    .default(sql`0`),
 }));
 
 export const account = pgTable("account", (drizzle) => ({
@@ -59,13 +67,13 @@ export const accountPower = pgTable(
     accountId: drizzle.text("account_id").$type<Address>().notNull(),
     daoId: drizzle.text("dao_id").notNull(),
     votingPower: bigint("voting_power", { mode: "bigint" })
-      .default(BigInt(0))
+      .default(sql`0`)
       .notNull(),
     votesCount: drizzle.integer("votes_count").default(0).notNull(),
     proposalsCount: drizzle.integer("proposals_count").default(0).notNull(),
     delegationsCount: drizzle.integer("delegations_count").default(0).notNull(),
     lastVoteTimestamp: bigint("last_vote_timestamp", { mode: "bigint" })
-      .default(BigInt(0))
+      .default(sql`0`)
       .notNull(),
   }),
   (table) => [
@@ -129,7 +137,7 @@ export const delegation = pgTable(
       .notNull(),
     delegatedValue: bigint("delegated_value", { mode: "bigint" })
       .notNull()
-      .default(0n),
+      .default(sql`0`),
     previousDelegate: drizzle.text("previous_delegate"),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
@@ -222,12 +230,14 @@ export const proposalsOnchain = pgTable(
     timestamp: bigint({ mode: "bigint" }).notNull(),
     endTimestamp: bigint("end_timestamp", { mode: "bigint" }).notNull(),
     status: drizzle.text().notNull(),
-    forVotes: bigint("for_votes", { mode: "bigint" }).default(0n).notNull(),
+    forVotes: bigint("for_votes", { mode: "bigint" })
+      .default(sql`0`)
+      .notNull(),
     againstVotes: bigint("against_votes", { mode: "bigint" })
-      .default(0n)
+      .default(sql`0`)
       .notNull(),
     abstainVotes: bigint("abstain_votes", { mode: "bigint" })
-      .default(0n)
+      .default(sql`0`)
       .notNull(),
     proposalType: drizzle.integer("proposal_type"),
   }),
@@ -297,7 +307,9 @@ export const feedEvent = pgTable(
     txHash: drizzle.text("tx_hash").notNull(),
     logIndex: drizzle.integer("log_index").notNull(),
     type: evenTypeEnum("type").notNull(),
-    value: bigint({ mode: "bigint" }).notNull().default(0n),
+    value: bigint({ mode: "bigint" })
+      .notNull()
+      .default(sql`0`),
     timestamp: bigint({ mode: "number" }).notNull(),
     metadata: drizzle.json().$type<Record<string, unknown>>(),
   }),
