@@ -386,7 +386,134 @@ if (CI) {
     "Deploying CI configuration; migrating database schema with test data seed",
   );
   await migrate(pgClient, { migrationsFolder: "./drizzle" });
-  await seed(pgClient, schema, { count: 1000 });
+  const ADDRESSES = Array.from(
+    { length: 50 },
+    (_, i) => `0x${String(i).padStart(40, "0")}` as const,
+  );
+  const TX_HASHES = Array.from(
+    { length: 200 },
+    (_, i) => `0x${String(i).padStart(64, "0")}` as const,
+  );
+  const TOKEN_IDS = ADDRESSES.slice(0, 5);
+  const DAO_ID = env.DAO_ID;
+  const PROPOSAL_STATUSES = [
+    "ACTIVE",
+    "CANCELED",
+    "DEFEATED",
+    "SUCCEEDED",
+    "QUEUED",
+    "EXECUTED",
+    "EXPIRED",
+  ];
+  const VOTE_SUPPORTS = ["FOR", "AGAINST", "ABSTAIN"];
+  const FEED_EVENT_TYPES = [
+    "VOTE",
+    "PROPOSAL",
+    "DELEGATION",
+    "TRANSFER",
+    "DELEGATION_VOTES_CHANGED",
+    "PROPOSAL_EXTENDED",
+  ];
+
+  await seed(pgClient, schema, { count: 1000 }).refine((f) => ({
+    token: {
+      columns: {
+        id: f.valuesFromArray({ values: TOKEN_IDS, isUnique: true }),
+      },
+    },
+    account: {
+      columns: {
+        id: f.valuesFromArray({ values: ADDRESSES, isUnique: true }),
+      },
+    },
+    accountBalance: {
+      columns: {
+        accountId: f.valuesFromArray({ values: ADDRESSES }),
+        tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
+        delegate: f.valuesFromArray({ values: ADDRESSES }),
+      },
+    },
+    accountPower: {
+      columns: {
+        accountId: f.valuesFromArray({ values: ADDRESSES, isUnique: true }),
+        daoId: f.default({ defaultValue: DAO_ID }),
+      },
+    },
+    votingPowerHistory: {
+      columns: {
+        transactionHash: f.valuesFromArray({ values: TX_HASHES }),
+        daoId: f.default({ defaultValue: DAO_ID }),
+        accountId: f.valuesFromArray({ values: ADDRESSES }),
+      },
+    },
+    balanceHistory: {
+      columns: {
+        transactionHash: f.valuesFromArray({ values: TX_HASHES }),
+        daoId: f.default({ defaultValue: DAO_ID }),
+        accountId: f.valuesFromArray({ values: ADDRESSES }),
+      },
+    },
+    delegation: {
+      columns: {
+        transactionHash: f.valuesFromArray({ values: TX_HASHES }),
+        daoId: f.default({ defaultValue: DAO_ID }),
+        delegateAccountId: f.valuesFromArray({ values: ADDRESSES }),
+        delegatorAccountId: f.valuesFromArray({ values: ADDRESSES }),
+        previousDelegate: f.valuesFromArray({ values: ADDRESSES }),
+      },
+    },
+    transfer: {
+      columns: {
+        transactionHash: f.valuesFromArray({ values: TX_HASHES }),
+        daoId: f.default({ defaultValue: DAO_ID }),
+        tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
+        fromAccountId: f.valuesFromArray({ values: ADDRESSES }),
+        toAccountId: f.valuesFromArray({ values: ADDRESSES }),
+      },
+    },
+    votesOnchain: {
+      columns: {
+        txHash: f.valuesFromArray({ values: TX_HASHES }),
+        daoId: f.default({ defaultValue: DAO_ID }),
+        voterAccountId: f.valuesFromArray({ values: ADDRESSES }),
+        support: f.valuesFromArray({ values: VOTE_SUPPORTS }),
+      },
+    },
+    proposalsOnchain: {
+      columns: {
+        txHash: f.valuesFromArray({ values: TX_HASHES }),
+        daoId: f.default({ defaultValue: DAO_ID }),
+        proposerAccountId: f.valuesFromArray({ values: ADDRESSES }),
+        status: f.valuesFromArray({ values: PROPOSAL_STATUSES }),
+        targets: f.default({ defaultValue: [] }),
+        values: f.default({ defaultValue: [] }),
+        signatures: f.default({ defaultValue: [] }),
+        calldatas: f.default({ defaultValue: [] }),
+      },
+    },
+    daoMetricsDayBucket: {
+      columns: {
+        daoId: f.default({ defaultValue: DAO_ID }),
+        tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
+      },
+    },
+    transaction: {
+      columns: {
+        transactionHash: f.valuesFromArray({
+          values: TX_HASHES,
+          isUnique: true,
+        }),
+        fromAddress: f.valuesFromArray({ values: ADDRESSES }),
+        toAddress: f.valuesFromArray({ values: ADDRESSES }),
+      },
+    },
+    feedEvent: {
+      columns: {
+        txHash: f.valuesFromArray({ values: TX_HASHES }),
+        type: f.valuesFromArray({ values: FEED_EVENT_TYPES }),
+      },
+    },
+  }));
 }
 
 serve(
