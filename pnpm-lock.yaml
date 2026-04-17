@@ -9,6 +9,10 @@ overrides:
 
 importers:
   .:
+    dependencies:
+      husky:
+        specifier: ^9.1.6
+        version: 9.1.7
     devDependencies:
       "@commitlint/cli":
         specifier: ^19.5.0
@@ -61,9 +65,6 @@ importers:
       globals:
         specifier: ^17.3.0
         version: 17.4.0
-      husky:
-        specifier: ^9.1.6
-        version: 9.1.7
       lint-staged:
         specifier: ^16.1.2
         version: 16.3.3
