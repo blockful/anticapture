@@ -6,6 +6,7 @@ import {
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
+import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { seed } from "drizzle-seed";
@@ -386,12 +387,18 @@ if (CI) {
     "Deploying CI configuration; migrating database schema with test data seed",
   );
   await migrate(pgClient, { migrationsFolder: "./drizzle" });
+  const ciClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+  await ciClient.execute(
+    sql.raw(
+      `TRUNCATE anticapture.token, anticapture.account, anticapture.account_balance, anticapture.account_power, anticapture.voting_power_history, anticapture.balance_history, anticapture.delegations, anticapture.transfers, anticapture.votes_onchain, anticapture.proposals_onchain, anticapture.dao_metrics_day_buckets, anticapture.transaction, anticapture.token_price, anticapture.feed_event CASCADE`,
+    ),
+  );
   const ADDRESSES = Array.from(
-    { length: 50 },
+    { length: 1000 },
     (_, i) => `0x${String(i).padStart(40, "0")}` as const,
   );
   const TX_HASHES = Array.from(
-    { length: 200 },
+    { length: 1000 },
     (_, i) => `0x${String(i).padStart(64, "0")}` as const,
   );
   const TOKEN_IDS = ADDRESSES.slice(0, 5);
@@ -415,8 +422,40 @@ if (CI) {
     "PROPOSAL_EXTENDED",
   ];
 
-  await seed(pgClient, schema, { count: 1000 }).refine((f) => ({
+  const accountBalanceRows = ADDRESSES.slice(0, 200).flatMap((accountId, i) =>
+    TOKEN_IDS.map((tokenId) => ({
+      accountId: accountId as `0x${string}`,
+      tokenId,
+      balance: BigInt(i + 1),
+      delegate: ADDRESSES[i % ADDRESSES.length] as `0x${string}`,
+    })),
+  );
+  for (let i = 0; i < accountBalanceRows.length; i += 500) {
+    await ciClient
+      .insert(schema.accountBalance)
+      .values(accountBalanceRows.slice(i, i + 500));
+  }
+
+  const PROPOSAL_IDS = Array.from({ length: 1000 }, (_, i) => `proposal-${i}`);
+  const votesOnchainRows = ADDRESSES.map((voterAccountId, i) => ({
+    txHash: TX_HASHES[i] as `0x${string}`,
+    daoId: DAO_ID,
+    voterAccountId: voterAccountId as `0x${string}`,
+    proposalId: PROPOSAL_IDS[i]!,
+    support: VOTE_SUPPORTS[i % VOTE_SUPPORTS.length]!,
+    votingPower: BigInt(i + 1),
+    reason: null,
+    timestamp: BigInt(i + 1),
+  }));
+  for (let i = 0; i < votesOnchainRows.length; i += 500) {
+    await ciClient
+      .insert(schema.votesOnchain)
+      .values(votesOnchainRows.slice(i, i + 500));
+  }
+
+  await seed(ciClient, schema, { count: 1000 }).refine((f) => ({
     token: {
+      count: TOKEN_IDS.length,
       columns: {
         id: f.valuesFromArray({ values: TOKEN_IDS, isUnique: true }),
       },
@@ -426,13 +465,7 @@ if (CI) {
         id: f.valuesFromArray({ values: ADDRESSES, isUnique: true }),
       },
     },
-    accountBalance: {
-      columns: {
-        accountId: f.valuesFromArray({ values: ADDRESSES }),
-        tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
-        delegate: f.valuesFromArray({ values: ADDRESSES }),
-      },
-    },
+    accountBalance: { count: 0 },
     accountPower: {
       columns: {
         accountId: f.valuesFromArray({ values: ADDRESSES, isUnique: true }),
@@ -471,14 +504,7 @@ if (CI) {
         toAccountId: f.valuesFromArray({ values: ADDRESSES }),
       },
     },
-    votesOnchain: {
-      columns: {
-        txHash: f.valuesFromArray({ values: TX_HASHES }),
-        daoId: f.default({ defaultValue: DAO_ID }),
-        voterAccountId: f.valuesFromArray({ values: ADDRESSES }),
-        support: f.valuesFromArray({ values: VOTE_SUPPORTS }),
-      },
-    },
+    votesOnchain: { count: 0 },
     proposalsOnchain: {
       columns: {
         txHash: f.valuesFromArray({ values: TX_HASHES }),
