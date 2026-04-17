@@ -61,4 +61,10 @@ export const Errors = {
       "Target contract is not in the whitelist",
       "INVALID_CONTRACT",
     ),
+  RATE_LIMITER_UNAVAILABLE: () =>
+    new RelayError(
+      "Rate limiter is unavailable, please try again later",
+      "RATE_LIMITER_UNAVAILABLE",
+      503,
+    ),
 } as const;
