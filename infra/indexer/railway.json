@@ -10,5 +10,10 @@
     "restartPolicyType": "NEVER",
     "healthcheckTimeout": 172800,
     "preDeployCommand": "npm run db:prune"
+  },
+  "environments": {
+    "pr": {
+      "deploy": "echo'noop'"
+    }
   }
 }
