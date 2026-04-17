@@ -47,10 +47,14 @@ export async function createTestApp(rpcUrl: string) {
     },
   );
 
-  const rateLimiter = new RateLimiter({
-    maxPerAddressPerDay: 50,
-    maxPerAddressPerHour: 5,
-  });
+  const rateLimiter = new RateLimiter(
+    { incrementIfAllowed: async () => true },
+    {
+      daoName: "test",
+      governorAddress: GOVERNOR_ADDRESS,
+      maxPerAddressPerDay: 50,
+    },
+  );
 
   const relayService = new RelayService(
     signer,

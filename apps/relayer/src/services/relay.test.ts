@@ -58,9 +58,7 @@ function createStubChainState(
 
 function createStubRateLimiter(): IRateLimiter {
   return {
-    checkAllowed: () => {},
-    recordUsage: () => {},
-    reset: () => {},
+    assertWithinLimit: async () => {},
   };
 }
 

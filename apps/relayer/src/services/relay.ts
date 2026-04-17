@@ -56,13 +56,10 @@ export class RelayService {
     // 1. Recover voter from signature
     const voter = await this.signatureVerifier.recoverVoteSigner(params);
 
-    // 2. Rate limit (read-only check — doesn't consume a slot)
-    this.rateLimiter.checkAllowed(voter);
-
-    // 3. Eligibility
+    // 2. Eligibility — validation before slot is spent
     await this.assertSufficientVotingPower(voter);
 
-    // 4. On-chain state checks
+    // 3. On-chain state checks
     const state = await this.chainState.getProposalState(params.proposalId);
     if (state !== ProposalState.Active) {
       throw Errors.PROPOSAL_NOT_ACTIVE();
@@ -76,6 +73,9 @@ export class RelayService {
       throw Errors.ALREADY_VOTED();
     }
 
+    // 4. Rate-limit check — after validation, before submission
+    await this.rateLimiter.assertWithinLimit(voter, "vote");
+
     // 5. Submit transaction
     const data = encodeFunctionData({
       abi: governorAbi,
@@ -88,9 +88,6 @@ export class RelayService {
       data,
     });
 
-    // 6. Record usage AFTER successful submission
-    this.rateLimiter.recordUsage(voter);
-
     return { hash, signer: voter };
   }
 
@@ -102,13 +99,10 @@ export class RelayService {
     const delegator =
       await this.signatureVerifier.recoverDelegationSigner(params);
 
-    // 2. Rate limit (read-only check)
-    this.rateLimiter.checkAllowed(delegator);
-
-    // 3. Eligibility
+    // 2. Eligibility — validation before slot is spent
     await this.assertSufficientVotingPower(delegator);
 
-    // 4. On-chain checks
+    // 3. On-chain checks
     if (params.expiry <= BigInt(Math.floor(Date.now() / 1000))) {
       throw Errors.SIGNATURE_EXPIRED();
     }
@@ -120,6 +114,9 @@ export class RelayService {
         params.nonce.toString(),
       );
     }
+
+    // 4. Rate-limit check — after validation, before submission
+    await this.rateLimiter.assertWithinLimit(delegator, "delegation");
 
     // 5. Submit transaction
     const data = encodeFunctionData({
@@ -139,9 +136,6 @@ export class RelayService {
       to: this.tokenAddress,
       data,
     });
-
-    // 6. Record usage AFTER successful submission
-    this.rateLimiter.recordUsage(delegator);
 
     return { hash, signer: delegator };
   }
