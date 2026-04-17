@@ -14,7 +14,9 @@
   "environments": {
     "pr": {
       "deploy": {
-        "startCommand": "echo 'NOOP'"
+        "startCommand": "echo 'NOOP'",
+        "healthcheckPath": null,
+        "preDeployCommand": null
       }
     }
   }
