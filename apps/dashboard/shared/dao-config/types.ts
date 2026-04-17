@@ -24,7 +24,7 @@ export interface MultilineChartDataSetPoint {
 
 export interface ChartDataSetPoint {
   date: number;
-  [key: string]: number | string | undefined;
+  [key: string]: number | string | string[] | undefined;
 }
 
 export type GovernanceImplementation = {
