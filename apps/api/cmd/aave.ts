@@ -7,7 +7,7 @@ import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { logger } from "@/logger";
-import { runCiSeed } from "./seed-ci";
+import { isCi, runCiSeed } from "./seed-ci";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 
@@ -59,9 +59,7 @@ import { AAVEVotingPowerService } from "@/services/voting-power/aave";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
 import { HTTPException } from "hono/http-exception";
 
-const CI = !["dev", "production"].includes(
-  process.env.RAILWAY_ENVIRONMENT_NAME || "rw",
-);
+const CI = isCi();
 
 const app = new Hono({
   defaultHook: (result, c) => {

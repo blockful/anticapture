@@ -7,6 +7,12 @@ import * as schema from "@/database/schema";
 import { env } from "@/env";
 import { logger } from "@/logger";
 
+export function isCi(): boolean {
+  return !["dev", "production"].includes(
+    process.env.RAILWAY_ENVIRONMENT_NAME || "dev",
+  );
+}
+
 export async function runCiSeed(pgClient: ReturnType<typeof drizzle>) {
   logger.info(
     "Deploying CI configuration; migrating database schema with test data seed",
