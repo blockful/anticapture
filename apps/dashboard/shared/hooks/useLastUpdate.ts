@@ -4,7 +4,6 @@ import {
 } from "@anticapture/graphql-client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export enum ChartType {
   CostComparison = "cost_comparison",
@@ -27,7 +26,6 @@ export const useLastUpdate = (daoId: DaoIdEnum, chart: ChartType) => {
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
   });

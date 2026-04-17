@@ -6,6 +6,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import type { OpenAPIObject } from "openapi3-ts/oas31";
 
 import { config } from "./config.js";
 import { createRedisClient } from "./cache/redis.js";
@@ -17,7 +18,7 @@ import { daos } from "./resolvers/daos/route.js";
 import { DaosService } from "./resolvers/daos/service.js";
 import { averageDelegation } from "./resolvers/delegation/route.js";
 import { DelegationService } from "./resolvers/delegation/service.js";
-import { mergeUpstreamDocs } from "./upstream-docs.js";
+import { storeOpenApiSpec } from "./upstream-docs.js";
 
 // "verbatim" preserves the DNS response order so AAAA records
 // are used directly, allowing fetch() to resolve *.railway.internal correctly.
@@ -28,7 +29,20 @@ const app = new OpenAPIHono();
 app.use("*", cors({ origin: "*" }));
 app.use("*", logger());
 if (config.blockfulApiToken) {
-  app.use("*", bearerAuth({ token: config.blockfulApiToken }));
+  const requireBearerAuth = bearerAuth({ token: config.blockfulApiToken });
+
+  app.use("*", async (c, next) => {
+    if (
+      c.req.path === "/docs" ||
+      c.req.path === "/docs/json" ||
+      c.req.path === "/health"
+    ) {
+      await next();
+      return;
+    }
+
+    return requireBearerAuth(c, next);
+  });
 }
 if (config.redisUrl) {
   const redis = createRedisClient(config.redisUrl);
@@ -51,14 +65,27 @@ daos(app, daosService);
 averageDelegation(app, delegationService);
 
 // OpenAPI docs
-app.get("/docs/json", async (c) => {
-  const ownSpec = app.getOpenAPI31Document({
-    openapi: "3.1.0",
-    info: { title: "Anticapture REST Gateway", version: "1.0.0" },
-  });
+const openApiDocument = app.getOpenAPI31Document({
+  openapi: "3.1.0",
+  info: { title: "Anticapture REST Gateway", version: "1.0.0" },
+}) as OpenAPIObject;
 
-  const merged = await mergeUpstreamDocs(ownSpec, config.daoApis);
-  return c.json(merged);
+openApiDocument.security = [{ bearerAuth: [] }];
+openApiDocument.components = {
+  ...openApiDocument.components,
+  securitySchemes: {
+    ...openApiDocument.components?.securitySchemes,
+    bearerAuth: {
+      type: "http",
+      scheme: "bearer",
+    },
+  },
+};
+
+const getOpenApiSpec = storeOpenApiSpec(openApiDocument, config.daoApis);
+
+app.get("/docs/json", async (c) => {
+  return c.json(await getOpenApiSpec());
 });
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 

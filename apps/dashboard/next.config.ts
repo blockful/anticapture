@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@anticapture/graphql-client"],
+  transpilePackages: ["@anticapture/graphql-client", "@anticapture/client"],
   images: {
     remotePatterns: [
       {
@@ -34,6 +34,25 @@ const nextConfig = {
         permanent: false,
       });
     }
+
+    // Permanent redirects: governance → proposals
+    redirects.push(
+      {
+        source: "/:daoId/governance",
+        destination: "/:daoId/proposals",
+        permanent: true,
+      },
+      {
+        source: "/:daoId/governance/proposal/:proposalId",
+        destination: "/:daoId/proposals/:proposalId",
+        permanent: true,
+      },
+      {
+        source: "/:daoId/governance/offchain-proposal/:proposalId",
+        destination: "/:daoId/proposals/:proposalId?proposalType=offchain",
+        permanent: true,
+      },
+    );
 
     return redirects;
   },

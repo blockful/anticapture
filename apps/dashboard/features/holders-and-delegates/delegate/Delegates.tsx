@@ -13,6 +13,7 @@ import {
   useDelegates,
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
+import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import {
   getAvgVoteTimingData,
@@ -49,8 +50,9 @@ interface DelegateTableData {
 }
 
 interface DelegatesProps {
-  timePeriod?: TimeInterval; // Use TimeInterval enum directly
+  timePeriod?: TimeInterval;
   daoId: DaoIdEnum;
+  isWhitelabel?: boolean;
 }
 
 type DelegateSortKey =
@@ -62,6 +64,7 @@ type DelegateSortKey =
 export const Delegates = ({
   timePeriod = TimeInterval.THIRTY_DAYS,
   daoId,
+  isWhitelabel = false,
 }: DelegatesProps) => {
   const pageLimit: number = 20;
 
@@ -214,7 +217,7 @@ export const Delegates = ({
         }
 
         return (
-          <div className="group flex w-full items-center">
+          <div className="group flex w-40 items-center lg:w-full">
             <div className="min-w-0 flex-1">
               <EnsAvatar
                 address={address as Address}
@@ -445,7 +448,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-[15%]",
+        columnClassName: "w-[10%]",
       },
     },
     {
@@ -488,9 +491,41 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-20",
+        columnClassName: "w-18",
       },
     },
+    ...(isWhitelabel
+      ? [
+          {
+            id: "delegate",
+            cell: ({
+              row,
+            }: {
+              row: { getValue: (key: string) => unknown };
+            }) => {
+              const address = row.getValue("address") as string | undefined;
+              if (!address) return null;
+              return (
+                <div
+                  className="flex items-center justify-end"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <DelegateButton
+                    delegateAddress={address as Address}
+                    daoId={daoId}
+                    size="sm"
+                    variant="outline"
+                  />
+                </div>
+              );
+            },
+            header: () => null,
+            meta: {
+              columnClassName: "w-18",
+            },
+          } satisfies ColumnDef<DelegateTableData>,
+        ]
+      : []),
   ];
 
   return (

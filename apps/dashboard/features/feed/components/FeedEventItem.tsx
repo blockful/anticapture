@@ -10,19 +10,15 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import type { Address } from "viem";
 import { formatUnits, zeroAddress } from "viem";
 
-import type {
-  DelegationDetail,
-  FeedEvent,
-  ProposalDetail,
-  ProposalExtendedDetail,
-  TransferDetail,
-  VoteDetail,
-} from "@/features/feed/types";
-import { FeedEventRelevance, FeedEventType } from "@/features/feed/types";
+import {
+  type FeedItem,
+  type FeedRelevance,
+  type FeedEventType,
+} from "@anticapture/client";
 import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -31,10 +27,19 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { getDaoProposalPath } from "@/shared/utils/whitelabel";
+import type {
+  DelegationDetail,
+  ProposalDetail,
+  ProposalExtendedDetail,
+  TransferDetail,
+  VoteDetail,
+} from "@/features/feed/types";
 
 interface FeedEventItemProps {
-  event: FeedEvent;
+  event: FeedItem;
   className?: string;
   isLast?: boolean;
   onRowClick?: (address: string, entityType: EntityType) => void;
@@ -42,52 +47,52 @@ interface FeedEventItemProps {
 
 const getBadgeIcon = (type: FeedEventType) => {
   switch (type) {
-    case FeedEventType.Vote:
+    case "VOTE":
       return Inbox;
-    case FeedEventType.Proposal:
+    case "PROPOSAL":
       return FileText;
-    case FeedEventType.Transfer:
+    case "TRANSFER":
       return ArrowLeftRight;
-    case FeedEventType.Delegation:
+    case "DELEGATION":
       return HeartHandshake;
-    case FeedEventType.ProposalExtended:
+    case "PROPOSAL_EXTENDED":
       return Clock;
   }
 };
 
-const getBadgeVariant = (relevance: FeedEventRelevance) => {
+const getBadgeVariant = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case FeedEventRelevance.High:
+    case "HIGH":
       return "error";
-    case FeedEventRelevance.Medium:
+    case "MEDIUM":
       return "warning";
-    case FeedEventRelevance.Low:
+    case "LOW":
       return "success";
     default:
       return "secondary";
   }
 };
 
-const getRelevanceLabel = (relevance: FeedEventRelevance) => {
+const getRelevanceLabel = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case FeedEventRelevance.High:
+    case "HIGH":
       return "High Relevance";
-    case FeedEventRelevance.Medium:
+    case "MEDIUM":
       return "Medium Relevance";
-    case FeedEventRelevance.Low:
+    case "LOW":
       return "Low Relevance";
     default:
       return "No Relevance";
   }
 };
 
-const getRelevanceColor = (relevance: FeedEventRelevance) => {
+const getRelevanceColor = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case FeedEventRelevance.High:
+    case "HIGH":
       return "text-error";
-    case FeedEventRelevance.Medium:
+    case "MEDIUM":
       return "text-warning";
-    case FeedEventRelevance.Low:
+    case "LOW":
       return "text-success";
     default:
       return "text-secondary";
@@ -96,15 +101,15 @@ const getRelevanceColor = (relevance: FeedEventRelevance) => {
 
 const getEventTypeLabel = (type: FeedEventType) => {
   switch (type) {
-    case FeedEventType.Vote:
+    case "VOTE":
       return "Vote";
-    case FeedEventType.Proposal:
+    case "PROPOSAL":
       return "Proposal Creation";
-    case FeedEventType.Transfer:
+    case "TRANSFER":
       return "Transfer";
-    case FeedEventType.Delegation:
+    case "DELEGATION":
       return "Delegation";
-    case FeedEventType.ProposalExtended:
+    case "PROPOSAL_EXTENDED":
       return "Proposal Extended";
   }
 };
@@ -148,6 +153,7 @@ export const FeedEventItem = ({
   onRowClick,
 }: FeedEventItemProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
+  const pathname = usePathname();
   const config = daoConfig[daoId.toUpperCase() as DaoIdEnum];
 
   const BadgeIcon = getBadgeIcon(event.type);
@@ -167,7 +173,7 @@ export const FeedEventItem = ({
 
   const renderEventContent = () => {
     switch (event.type) {
-      case FeedEventType.Vote: {
+      case "VOTE": {
         const voteMetadata = event.metadata as VoteDetail | undefined;
         if (!voteMetadata) return null;
         return (
@@ -212,7 +218,11 @@ export const FeedEventItem = ({
             <Link
               href={
                 config?.governancePage
-                  ? `/${daoId}/governance/proposal/${voteMetadata.proposalId}`
+                  ? getDaoProposalPath({
+                      daoId: daoId.toUpperCase() as DaoIdEnum,
+                      pathname,
+                      proposalId: voteMetadata.proposalId,
+                    })
                   : `${config?.daoOverview?.govPlatform?.url ?? ""}${voteMetadata.proposalId}`
               }
               target="_blank"
@@ -236,7 +246,7 @@ export const FeedEventItem = ({
         );
       }
 
-      case FeedEventType.Proposal: {
+      case "PROPOSAL": {
         const proposalMetadata = event.metadata as ProposalDetail | undefined;
         if (!proposalMetadata) return null;
         return (
@@ -262,7 +272,11 @@ export const FeedEventItem = ({
             <Link
               href={
                 config?.governancePage
-                  ? `/${daoId}/governance/proposal/${proposalMetadata.id}`
+                  ? getDaoProposalPath({
+                      daoId: daoId.toUpperCase() as DaoIdEnum,
+                      pathname,
+                      proposalId: proposalMetadata.id,
+                    })
                   : `${config?.daoOverview?.govPlatform?.url ?? ""}${proposalMetadata.id}`
               }
               target="_blank"
@@ -283,7 +297,7 @@ export const FeedEventItem = ({
         );
       }
 
-      case FeedEventType.ProposalExtended: {
+      case "PROPOSAL_EXTENDED": {
         const proposalExtendedMetadata = event.metadata as
           | ProposalExtendedDetail
           | undefined;
@@ -295,7 +309,11 @@ export const FeedEventItem = ({
               <Link
                 href={
                   config?.governancePage
-                    ? `/${daoId}/governance/proposal/${proposalExtendedMetadata.id}`
+                    ? getDaoProposalPath({
+                        daoId: daoId.toUpperCase() as DaoIdEnum,
+                        pathname,
+                        proposalId: proposalExtendedMetadata.id,
+                      })
                     : `${config?.daoOverview?.govPlatform?.url ?? ""}${proposalExtendedMetadata.id}`
                 }
                 target="_blank"
@@ -319,7 +337,7 @@ export const FeedEventItem = ({
         );
       }
 
-      case FeedEventType.Transfer: {
+      case "TRANSFER": {
         const transferMetadata = event.metadata as TransferDetail | undefined;
         if (!transferMetadata) return null;
         return (
@@ -361,10 +379,8 @@ export const FeedEventItem = ({
         );
       }
 
-      case FeedEventType.Delegation: {
-        const delegationMetadata = event.metadata as
-          | DelegationDetail
-          | undefined;
+      case "DELEGATION": {
+        const delegationMetadata = event.metadata as DelegationDetail | null;
         if (!delegationMetadata) return null;
         const hasRedelegation =
           delegationMetadata.previousDelegate !== null &&
@@ -435,7 +451,7 @@ export const FeedEventItem = ({
   };
 
   return (
-    <div className={cn("flex items-stretch gap-4", className)}>
+    <div className={cn("ml-5 flex items-stretch gap-4", className)}>
       {/* Badge and Connector */}
       <div className="flex flex-col items-center">
         <BadgeStatus

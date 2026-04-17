@@ -147,7 +147,7 @@ export const DelegationModal = ({
         <StepRow
           done={step === "success" || step === "pending-tx"}
           active={step === "waiting-signature"}
-          icon={<PenLine className="size-3.5 text-black" />}
+          icon={<PenLine className="text-inverted size-3.5" />}
           label="Confirm your delegation in your wallet"
           error={step === "error" ? error : undefined}
         />
@@ -157,7 +157,7 @@ export const DelegationModal = ({
         <StepRow
           done={step === "success"}
           active={step === "pending-tx"}
-          icon={<Hourglass className="size-3.5 text-black" />}
+          icon={<Hourglass className="text-inverted size-3.5" />}
           label="Wait for the delegation to complete"
         />
       </div>
@@ -185,7 +185,7 @@ const StepRow = ({ done, active, icon, label, error }: StepRowProps) => {
       <div className="flex w-full items-center gap-2">
         <div className="relative flex size-8 shrink-0 items-center justify-center">
           {active && (
-            <SpinIcon className="absolute inset-0 size-8 animate-spin text-orange-500" />
+            <SpinIcon className="text-link absolute inset-0 size-8 animate-spin" />
           )}
           <div
             className={cn(

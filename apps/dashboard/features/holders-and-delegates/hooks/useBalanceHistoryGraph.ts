@@ -10,7 +10,6 @@ import { formatUnits } from "viem";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface BalanceHistoryGraphItem {
   timestamp: number;
@@ -44,7 +43,6 @@ export function useBalanceHistoryGraph(
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
   });
