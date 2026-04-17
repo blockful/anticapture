@@ -382,6 +382,10 @@ if (process.env.CI === "true" || process.env.CI === "1") {
   await seed(pgClient, schema, { count: 1000 });
 }
 
+logger.info({
+  RAILWAY_ENVIRONMENT_NAME: process.env.RAILWAY_ENVIRONMENT_NAME,
+});
+
 serve(
   {
     fetch: app.fetch,
