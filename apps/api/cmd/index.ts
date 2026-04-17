@@ -12,6 +12,10 @@ import { seed } from "drizzle-seed";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 
+const CI = !["dev", "production"].includes(
+  process.env.RAILWAY_ENVIRONMENT_NAME || "rw",
+);
+
 import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalanceVariations,
@@ -377,14 +381,13 @@ if (daoClient.supportOffchainData()) {
   offchainNonVoters(app, new OffchainNonVotersService(offchainNonVotersRepo));
 }
 
-if (process.env.CI === "true" || process.env.CI === "1") {
+if (CI) {
+  logger.info(
+    "Deploying CI configuration; migrating database schema with test data seed",
+  );
   await migrate(pgClient, { migrationsFolder: "./drizzle" });
   await seed(pgClient, schema, { count: 1000 });
 }
-
-logger.info({
-  RAILWAY_ENVIRONMENT_NAME: process.env.RAILWAY_ENVIRONMENT_NAME,
-});
 
 serve(
   {

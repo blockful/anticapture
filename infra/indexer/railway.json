@@ -13,7 +13,9 @@
   },
   "environments": {
     "pr": {
-      "deploy": "echo'noop'"
+      "deploy": {
+        "startCommand": "echo 'NOOP'"
+      }
     }
   }
 }

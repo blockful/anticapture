@@ -7,7 +7,8 @@ import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { seed } from "drizzle-seed";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { logger } from "hono/logger";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { logger } from "@/logger";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 
@@ -57,6 +58,11 @@ import {
 } from "@/services";
 import { AAVEVotingPowerService } from "@/services/voting-power/aave";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
+import { HTTPException } from "hono/http-exception";
+
+const CI = !["dev", "production"].includes(
+  process.env.RAILWAY_ENVIRONMENT_NAME || "rw",
+);
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -74,7 +80,26 @@ const app = new Hono({
   },
 });
 
-app.use(logger());
+app.use(async (c, next) => {
+  const start = Date.now();
+  let status: number | undefined;
+  try {
+    await next();
+  } catch (err) {
+    status = err instanceof HTTPException ? err.status : 500;
+    throw err;
+  } finally {
+    logger.info(
+      {
+        method: c.req.method,
+        url: c.req.path,
+        status: status ?? c.res?.status ?? 500,
+        durationMs: Date.now() - start,
+      },
+      "request",
+    );
+  }
+});
 app.onError(errorHandler);
 
 app.get("/metrics", async (c) => {
@@ -190,7 +215,11 @@ transfers(
 dao(app, daoService);
 docs(app);
 
-if (process.env.CI === "true" || process.env.CI === "1") {
+if (CI) {
+  logger.info(
+    "Deploying CI configuration; migrating database schema with test data seed",
+  );
+  await migrate(pgClient, { migrationsFolder: "./drizzle" });
   await seed(pgClient, schema, { count: 1000 });
 }
 
