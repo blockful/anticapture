@@ -3,12 +3,7 @@ import { createMeshHTTPHandler } from "@graphql-mesh/http";
 import { createServer } from "node:http";
 import { writeFileSync } from "node:fs";
 import { printSchema } from "graphql";
-import {
-  PROMETHEUS_MIME_TYPE,
-  PrometheusSerializer,
-} from "@anticapture/observability";
-
-const prometheusSerializer = new PrometheusSerializer();
+import { collectPrometheusMetrics } from "@anticapture/observability";
 
 import "./_dev-reload";
 import config from "../meshrc";
@@ -33,12 +28,9 @@ const bootstrap = async () => {
     }
     if (req.url === "/metrics") {
       try {
-        const result = await exporter.collect();
-        const serialized = prometheusSerializer.serialize(
-          result.resourceMetrics,
-        );
-        res.writeHead(200, { "Content-Type": PROMETHEUS_MIME_TYPE });
-        res.end(serialized);
+        const { body, contentType } = await collectPrometheusMetrics(exporter);
+        res.writeHead(200, { "Content-Type": contentType });
+        res.end(body);
       } catch (err) {
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Failed to collect metrics" }));

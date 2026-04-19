@@ -9,6 +9,8 @@ import type {
   PathsObject,
 } from "openapi3-ts/oas31";
 
+import { logger } from "./logger.js";
+
 type Schemas = NonNullable<ComponentsObject["schemas"]>;
 
 async function fetchDoc(
@@ -20,7 +22,7 @@ async function fetchDoc(
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return (await res.json()) as OpenAPIObject;
   } catch (err) {
-    console.warn(`[upstream-docs] Failed to fetch ${name}:`, err);
+    logger.warn({ err, name }, "failed to fetch upstream OpenAPI spec");
     return null;
   }
 }
@@ -125,7 +127,7 @@ export function storeOpenApiSpec(
       await mkdir(dirname(outputPath), { recursive: true });
       await writeFile(outputPath, `${JSON.stringify(spec, null, 2)}\n`);
     } catch (err) {
-      console.warn("[upstream-docs] Failed to store OpenAPI spec:", err);
+      logger.warn({ err }, "failed to store OpenAPI spec");
     }
 
     return spec;

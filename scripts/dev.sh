@@ -110,6 +110,21 @@ wait_for_port() {
   log "$name is ready on port $port"
 }
 
+wait_for_optional_port() {
+  local port=$1 name=$2 timeout=${3:-20} elapsed=0
+  log "Waiting for optional $name on port $port..."
+  while ! (lsof -i ":$port" -sTCP:LISTEN >/dev/null 2>&1 || ss -tlnH "sport = :$port" 2>/dev/null | grep -q LISTEN); do
+    sleep 1
+    elapsed=$((elapsed + 1))
+    if [ "$elapsed" -ge "$timeout" ]; then
+      log "Optional $name did not become ready; continuing without it"
+      return 1
+    fi
+  done
+  log "$name is ready on port $port"
+  return 0
+}
+
 cleanup() {
   echo ""
   log "Shutting down..."
@@ -152,6 +167,11 @@ railway_run_api() {
   fi
 }
 
+railway_service_available() {
+  local service=$1
+  pnpm railway run -e dev -s "$service" true >/dev/null 2>&1
+}
+
 # Kill anything already running on our ports
 for port in "${PORTS[@]}"; do
   pid=$(lsof -ti ":$port" 2>/dev/null || true)
@@ -190,11 +210,18 @@ else
   log "Skipping API (no DAO_NAME provided, using DAO_API_* from .env)"
 fi
 
-# 3. Address Enrichment (always runs with railway env injection)
-log "Starting Address Enrichment..."
-run_with_prefix "$C_ADDRESS_ENRICHMENT" "💰 enrichment" "" "" pnpm railway run -e dev -s address-enrichment pnpm address dev &
-wait_for_port "$PORT_ADDRESS_ENRICHMENT" "Address Enrichment"
-export ADDRESS_ENRICHMENT_API_URL="http://localhost:${PORT_ADDRESS_ENRICHMENT}"
+# 3. Address Enrichment (optional; do not block the rest of the stack)
+ADDRESS_ENRICHMENT_AVAILABLE=false
+if railway_service_available "address-enrichment"; then
+  log "Starting optional Address Enrichment..."
+  run_with_prefix "$C_ADDRESS_ENRICHMENT" "💰 enrichment" "" "" pnpm railway run -e dev -s address-enrichment pnpm address dev &
+  if wait_for_optional_port "$PORT_ADDRESS_ENRICHMENT" "Address Enrichment"; then
+    ADDRESS_ENRICHMENT_AVAILABLE=true
+    export ADDRESS_ENRICHMENT_API_URL="http://localhost:${PORT_ADDRESS_ENRICHMENT}"
+  fi
+else
+  log "Skipping optional Address Enrichment (Railway CLI/service unavailable)"
+fi
 
 # 4. Gateway
 GATEWAY_READY=$(mktemp)
@@ -231,7 +258,7 @@ fi
 GATEFUL_READY=$(mktemp)
 rm -f "$GATEFUL_READY"
 log "Starting Gateful..."
-run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" railway_run gateful pnpm gateful dev &
+run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "Gateful REST API running" railway_run gateful pnpm gateful dev &
 wait_for_ready "$GATEFUL_READY" "Gateful"
 
 # 6. Clients — codegen + build watch
@@ -255,7 +282,11 @@ fi
 if [ "$RUN_API" = true ]; then
   printf "  ${C_API}🐙 API${C_RESET}       http://localhost:${PORT_API}  ($DAO_NAME)\n"
 fi
-printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} http://localhost:${PORT_ADDRESS_ENRICHMENT}\n"
+if [ "$ADDRESS_ENRICHMENT_AVAILABLE" = true ]; then
+  printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} http://localhost:${PORT_ADDRESS_ENRICHMENT}\n"
+else
+  printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
+fi
 printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:${PORT_GATEWAY}\n"
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
 printf "  ${C_CODEGEN}🤝 GraphQL Client${C_RESET} codegen + build watch\n"

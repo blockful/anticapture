@@ -1,11 +1,11 @@
 {
   "name": "@anticapture/gateful",
   "version": "1.0.0",
-  "description": "REST API Gateway for Anticapture DAO APIs",
+  "description": "Gateful REST API aggregator for Anticapture DAO APIs",
   "main": "dist/src/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/src/index.js",
+    "start": "node --import ./dist/src/instrumentation.js dist/src/index.js",
     "build": "tsc",
     "test": "vitest run",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'"
@@ -22,6 +22,7 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "@anticapture/observability": "workspace:*",
     "@hono/node-server": "^1.14.0",
     "@hono/swagger-ui": "^0.5.3",
     "@hono/zod-openapi": "^1.2.2",
