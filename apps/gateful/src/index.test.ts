@@ -42,6 +42,15 @@ describe("gateful app auth", () => {
     expect(res.headers.get("content-type")).toContain("text/html");
   });
 
+  it("serves Prometheus metrics without a bearer token", async () => {
+    const res = await app.request("/metrics");
+    const body = await res.text();
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/plain");
+    expect(body).toContain("# HELP");
+  });
+
   it("requires bearer auth outside docs endpoints", async () => {
     const res = await app.request("/votes");
 

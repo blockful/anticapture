@@ -231,7 +231,7 @@ fi
 GATEFUL_READY=$(mktemp)
 rm -f "$GATEFUL_READY"
 log "Starting Gateful..."
-run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" railway_run gateful pnpm gateful dev &
+run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "Gateful REST API running" railway_run gateful pnpm gateful dev &
 wait_for_ready "$GATEFUL_READY" "Gateful"
 
 # 6. Clients — codegen + build watch
