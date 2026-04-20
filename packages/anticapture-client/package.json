@@ -2,7 +2,7 @@
   "name": "@anticapture/client",
   "version": "1.0.0",
   "repository": {
-    "url": "https://github.com/blockful/anticapture"
+    "url": "git+https://github.com/blockful/anticapture.git"
   },
   "description": "TypeScript SDK for the Anticapture Gateful API.",
   "license": "MIT",

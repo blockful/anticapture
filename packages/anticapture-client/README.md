@@ -46,6 +46,8 @@ npm run build
 npm publish
 ```
 
+Do not pass `--provenance` when publishing from a local shell. npm can only generate provenance from a supported cloud CI provider with OIDC, so local publishes should omit that flag. For a provenance-backed publish, use the GitHub Actions workflow below.
+
 `prepack` runs `npm run build` before `npm pack` and `npm publish`, so the tarball is generated from a fresh OpenAPI SDK build.
 
 Automated publish:
