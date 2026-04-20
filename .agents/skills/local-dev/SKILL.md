@@ -45,14 +45,15 @@ pnpm dev <dao_id>
 
 ## Services & Ports
 
-| Service            | Command               | Port  | Description                                  |
-| ------------------ | --------------------- | ----- | -------------------------------------------- |
-| **API**            | `pnpm api dev <dao>`  | 42069 | REST API (only when dao_id is provided)      |
-| **Gateway**        | `pnpm gateway dev`    | 4000  | GraphQL Mesh aggregating DAO APIs            |
-| **Gateful**        | `pnpm gateful dev`    | 4001  | REST gateway wrapping the GraphQL layer      |
-| **GraphQL Client** | `pnpm gql-client dev` | --    | GraphQL codegen + build watch (no port)      |
-| **REST Client**    | `pnpm client dev`     | --    | Kubb REST codegen watch from Gateful OpenAPI |
-| **Dashboard**      | `pnpm dashboard dev`  | 3000  | Next.js frontend                             |
+| Service                | Command               | Port  | Description                                                               |
+| ---------------------- | --------------------- | ----- | ------------------------------------------------------------------------- |
+| **API**                | `pnpm api dev <dao>`  | 42069 | REST API (only when dao_id is provided)                                   |
+| **Gateway**            | `pnpm gateway dev`    | 4000  | GraphQL Mesh aggregating DAO APIs                                         |
+| **Gateful**            | `pnpm gateful dev`    | 4001  | REST gateway wrapping the GraphQL layer                                   |
+| **GraphQL Client**     | `pnpm gql-client dev` | --    | GraphQL codegen + build watch (no port)                                   |
+| **REST Client**        | `pnpm client dev`     | --    | Kubb REST codegen watch from Gateful OpenAPI                              |
+| **Dashboard**          | `pnpm dashboard dev`  | 3000  | Next.js frontend                                                          |
+| **Address Enrichment** | `pnpm address dev`    | 3001  | Optional address metadata service, started through Railway when available |
 
 ## Startup Order & Dependencies
 
@@ -73,11 +74,12 @@ The services must start in this exact order because each depends on the previous
 ### How `pnpm dev` orchestrates this
 
 1. If a `dao_id` argument is provided, starts the API and waits for port 42069 to be listening. Sets `DAO_API_<DAO_UPPER>=http://localhost:42069` so the Gateway discovers it.
-2. Starts the Gateway and waits for the log line `"Mesh running at"` to confirm readiness.
-3. Starts Gateful and waits for the log line `"REST Gateway running"` to confirm readiness.
-4. Starts GraphQL Client and REST Client in errors-only mode (suppresses output unless error/fail is detected).
-5. Starts the Dashboard.
-6. On `Ctrl+C`, sends TERM to all child processes and cleans up temp files.
+2. Attempts to start Address Enrichment through Railway. This service is optional: if Railway CLI/service lookup fails or the port does not become ready, `pnpm dev` logs the skip and continues without `ADDRESS_ENRICHMENT_API_URL`.
+3. Starts the Gateway and waits for the log line `"Mesh running at"` to confirm readiness.
+4. Starts Gateful and waits for port 4001 to listen, so readiness does not depend on info-level logs.
+5. Starts GraphQL Client and REST Client in errors-only mode (suppresses output unless error/fail is detected).
+6. Starts the Dashboard.
+7. On `Ctrl+C`, sends TERM to all child processes and cleans up temp files.
 
 ## Running Individual Services
 

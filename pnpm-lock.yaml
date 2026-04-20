@@ -522,6 +522,9 @@ importers:
 
   apps/gateful:
     dependencies:
+      "@anticapture/observability":
+        specifier: workspace:*
+        version: link:../../packages/observability
       "@hono/node-server":
         specifier: ^1.14.0
         version: 1.19.11(hono@4.12.7)

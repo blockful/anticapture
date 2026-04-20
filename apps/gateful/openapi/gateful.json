@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Anticapture REST Gateway",
+    "title": "Anticapture Gateful REST API",
     "version": "1.0.0"
   },
   "components": {
