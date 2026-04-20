@@ -125,11 +125,21 @@ wait_for_optional_port() {
   return 0
 }
 
+start_gateful() {
+  log "Starting Gateful..."
+  run_with_prefix "$C_GATEFUL" "🚪 gateful" "" "" railway_run gateful pnpm gateful dev &
+  wait_for_port "$PORT_GATEFUL" "Gateful" 120
+}
+
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+  return 0
+fi
+
 cleanup() {
   echo ""
   log "Shutting down..."
   trap - INT TERM EXIT
-  rm -f "${GATEWAY_READY:-}" "${GATEFUL_READY:-}" 2>/dev/null
+  rm -f "${GATEWAY_READY:-}" 2>/dev/null
   kill 0 2>/dev/null || true
   wait 2>/dev/null
 }
@@ -255,11 +265,7 @@ if [ "$RUN_API" = true ]; then
 fi
 
 # 5. Gateful
-GATEFUL_READY=$(mktemp)
-rm -f "$GATEFUL_READY"
-log "Starting Gateful..."
-run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "Gateful REST API running" railway_run gateful pnpm gateful dev &
-wait_for_ready "$GATEFUL_READY" "Gateful"
+start_gateful
 
 # 6. Clients — codegen + build watch
 export ANTICAPTURE_GRAPHQL_ENDPOINT="http://localhost:${PORT_GATEWAY}/graphql"
