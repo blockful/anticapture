@@ -36,17 +36,19 @@ Prerequisites:
 
 - The `@anticapture` npm organization exists.
 - The publisher is authenticated with npm and has publish access for `@anticapture/client`.
-- For GitHub Actions publishing, the repository has an `NPM_TOKEN` secret with publish access.
+- Local publishes use an npm account with two-factor authentication enabled. If npm does not prompt for a one-time password, pass it explicitly with `--otp`.
+- Token-based publishes use a granular npm access token with publish access and bypass 2FA enabled.
+- For GitHub Actions publishing, the repository has an `NPM_TOKEN` secret configured with that granular token.
 
 Manual publish:
 
 ```sh
 npm login
 npm run build
-npm publish
+npm publish --access public --otp=123456
 ```
 
-Do not pass `--provenance` when publishing from a local shell. npm can only generate provenance from a supported cloud CI provider with OIDC, so local publishes should omit that flag. For a provenance-backed publish, use the GitHub Actions workflow below.
+Replace `123456` with the current one-time password from the publisher's npm authenticator app. Do not pass `--provenance` when publishing from a local shell. npm can only generate provenance from a supported cloud CI provider with OIDC, so local publishes should omit that flag. For a provenance-backed publish, use the GitHub Actions workflow below.
 
 `prepack` runs `npm run build` before `npm pack` and `npm publish`, so the tarball is generated from a fresh OpenAPI SDK build.
 
