@@ -1,13 +1,16 @@
 {
   "name": "@anticapture/client",
   "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/blockful/anticapture"
+  },
   "description": "TypeScript SDK for the Anticapture Gateful API.",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "kubb generate --config kubb.config.ts --watch",
     "codegen": "kubb --config kubb.config.ts",
-    "build": "tsup",
+    "build": "pnpm codegen && tsup",
     "clean": "rm -rf node_modules dist generated *.tsbuildinfo",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
