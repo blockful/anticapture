@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
+import { notFound } from "next/navigation";
 
 import { DaoApolloProvider } from "@/shared/providers/DaoApolloProvider";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdProvider } from "@/shared/providers/DaoIdProvider";
+import { toDaoIdEnum } from "@/shared/types/daos";
 
 interface DaoRootLayoutProps {
   children: ReactNode;
@@ -13,10 +15,15 @@ export default async function DaoRootLayout({
   params,
 }: DaoRootLayoutProps) {
   const { daoId } = await params;
+  const daoIdEnum = toDaoIdEnum(daoId);
+
+  if (!daoIdEnum) {
+    notFound();
+  }
 
   return (
-    <DaoApolloProvider daoId={daoId.toUpperCase() as DaoIdEnum}>
-      {children}
-    </DaoApolloProvider>
+    <DaoIdProvider daoId={daoIdEnum}>
+      <DaoApolloProvider daoId={daoIdEnum}>{children}</DaoApolloProvider>
+    </DaoIdProvider>
   );
 }

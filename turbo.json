@@ -7,7 +7,16 @@
     },
     "@anticapture/graphql-client#codegen": {
       "inputs": ["documents/**/*", "codegen.ts"],
+      "outputs": ["generated/**"],
       "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
+    },
+    "@anticapture/client#codegen": {
+      "inputs": [
+        "kubb.config.ts",
+        "src/**",
+        "../../apps/gateful/openapi/gateful.json"
+      ],
+      "outputs": ["generated/**"]
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
@@ -15,7 +24,7 @@
     },
     "@anticapture/graphql-client#build": {
       "dependsOn": ["codegen"],
-      "outputs": ["dist/**"],
+      "outputs": ["generated/**"],
       "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
     "@anticapture/dashboard#build": {

@@ -7,3 +7,4 @@ export type {
 } from "./client.js";
 export * from "../generated/models.js";
 export * from "../generated/sdk.js";
+export { getNextPageParam } from "./getNextPageParam.js";
