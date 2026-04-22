@@ -53,6 +53,10 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
       "DELEGATION_VOTES_CHANGED",
       "PROPOSAL_EXTENDED",
     ];
+    const PROPOSAL_IDS = Array.from(
+      { length: 1000 },
+      (_, i) => `proposal-${i}`,
+    );
 
     // accountBalance and votesOnchain have composite PKs where drizzle-seed cycles
     // each column independently, producing collisions. We insert deterministic rows
@@ -70,11 +74,6 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
         .insert(schema.accountBalance)
         .values(accountBalanceRows.slice(i, i + 500));
     }
-
-    const PROPOSAL_IDS = Array.from(
-      { length: 1000 },
-      (_, i) => `proposal-${i}`,
-    );
     const votesOnchainRows = ADDRESSES.map((voterAccountId, i) => ({
       txHash: TX_HASHES[i] as `0x${string}`,
       daoId: DAO_ID,
@@ -145,6 +144,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
       votesOnchain: { count: 0 }, // inserted manually above
       proposalsOnchain: {
         columns: {
+          id: f.valuesFromArray({ values: PROPOSAL_IDS, isUnique: true }),
           txHash: f.valuesFromArray({ values: TX_HASHES }),
           daoId: f.default({ defaultValue: DAO_ID }),
           proposerAccountId: f.valuesFromArray({ values: ADDRESSES }),
