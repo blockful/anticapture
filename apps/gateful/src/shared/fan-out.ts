@@ -25,10 +25,17 @@ export async function fanOutGet<T = unknown>(
           signal: AbortSignal.timeout(5000),
         });
         if (res.status >= 500) throw new Error(`${dao}: ${res.status}`);
+        if (!res.ok) {
+          logger.warn(
+            { dao, status: res.status, path },
+            "fan-out upstream returned non-ok status, excluding from results",
+          );
+          return { dao, skip: true as const };
+        }
         const cacheControl = res.headers?.get("cache-control") ?? null;
 
         const data = (await res.json()) as T;
-        return { dao, data, cacheControl };
+        return { dao, data, cacheControl, skip: false as const };
       });
     }),
   );
@@ -38,6 +45,7 @@ export async function fanOutGet<T = unknown>(
 
   for (const result of results) {
     if (result.status === "fulfilled") {
+      if (result.value.skip) continue;
       data.set(result.value.dao, result.value.data);
       if (cacheControl === null) {
         cacheControl = result.value.cacheControl;
