@@ -8,6 +8,7 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
 
 import { config } from "./config.js";
@@ -36,6 +37,7 @@ const app = new OpenAPIHono();
 app.onError((err, c) => {
   if (err instanceof CircuitOpenError)
     return c.json({ error: "DAO service temporarily unavailable" }, 503);
+  if (err instanceof HTTPException) return err.getResponse();
   return c.json({ error: "Internal server error" }, 500);
 });
 
