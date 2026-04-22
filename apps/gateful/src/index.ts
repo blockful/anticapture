@@ -30,7 +30,7 @@ const app = new OpenAPIHono();
 app.onError((err, c) => {
   if (err instanceof CircuitOpenError)
     return c.json({ error: "DAO service temporarily unavailable" }, 503);
-  throw err;
+  return c.json({ error: "Internal server error" }, 500);
 });
 
 app.use("*", cors({ origin: "*" }));
