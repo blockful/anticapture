@@ -120,151 +120,133 @@
     {
       "id": 101,
       "type": "row",
-      "title": "Requests per Route per DAO",
+      "title": "Traffic Overview — Table View",
       "collapsed": false,
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 1 }
     },
     {
       "id": 3,
-      "title": "Request Rate by DAO & Route (req/s)",
-      "type": "timeseries",
-      "gridPos": { "x": 0, "y": 7, "w": 24, "h": 9 },
+      "title": "DAO × Route — Request Rate / Latency / Error Rate (Table)",
+      "description": "One row per (DAO, route). Columns: req/s (5m avg), p99 latency, error ratio. Error ratio cell is threshold-colored: green <1%, yellow <5%, red ≥5%.",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 7, "w": 24, "h": 12 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps",
-          "color": { "mode": "palette-classic" },
           "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "showPoints": "never"
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "filterable": true
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "req/s" },
+            "properties": [
+              { "id": "unit", "value": "reqps" },
+              { "id": "decimals", "value": 3 },
+              { "id": "custom.width", "value": 100 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "p99 latency" },
+            "properties": [
+              { "id": "unit", "value": "s" },
+              { "id": "decimals", "value": 3 },
+              { "id": "custom.width", "value": 120 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "error ratio" },
+            "properties": [
+              { "id": "unit", "value": "percentunit" },
+              { "id": "decimals", "value": 2 },
+              { "id": "custom.width", "value": 120 },
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-background" }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 0.01 },
+                    { "color": "red", "value": 0.05 }
+                  ]
+                }
+              },
+              { "id": "color", "value": { "mode": "thresholds" } }
+            ]
+          }
+        ]
       },
       "options": {
-        "tooltip": { "mode": "multi", "sort": "desc" },
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": ["mean", "max"]
-        }
+        "sortBy": [{ "displayName": "error ratio", "desc": true }],
+        "footer": { "show": false },
+        "frameIndex": 0,
+        "showHeader": true
       },
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "req/s",
+              "Value #B": "p99 latency",
+              "Value #C": "error ratio",
+              "job": "DAO",
+              "http_route": "route"
+            }
+          }
+        }
+      ],
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[1m])) by (job, http_route)",
-          "legendFormat": "{{job}} — {{http_route}}",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "title": "p99 Latency by DAO & Route",
-      "type": "timeseries",
-      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 9 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "color": { "mode": "palette-classic" },
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "showPoints": "never"
-          }
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route)",
+          "legendFormat": "{{job}}|{{http_route}}",
+          "instant": true,
+          "refId": "A",
+          "format": "table"
         },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": { "mode": "multi", "sort": "desc" },
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": ["mean", "max"]
-        }
-      },
-      "targets": [
         {
           "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le, job, http_route))",
-          "legendFormat": "p99 {{job}} — {{http_route}}",
-          "refId": "A"
+          "legendFormat": "{{job}}|{{http_route}}",
+          "instant": true,
+          "refId": "B",
+          "format": "table"
+        },
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\",http_response_status_code=~\"5..\"}[5m])) by (job, http_route) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route)",
+          "legendFormat": "{{job}}|{{http_route}}",
+          "instant": true,
+          "refId": "C",
+          "format": "table"
         }
       ]
     },
     {
       "id": 102,
       "type": "row",
-      "title": "Error Rates per Route per DAO",
+      "title": "Traffic Overview — Heatmap View",
       "collapsed": false,
-      "gridPos": { "x": 0, "y": 25, "w": 24, "h": 1 }
+      "gridPos": { "x": 0, "y": 19, "w": 24, "h": 1 }
     },
     {
-      "id": 5,
-      "title": "5xx Error Rate by DAO & Route (req/s)",
-      "type": "timeseries",
-      "gridPos": { "x": 0, "y": 26, "w": 16, "h": 9 },
+      "id": 4,
+      "title": "Error Ratio Heatmap — DAO × Route (color = error %)",
+      "description": "Each cell is a (DAO, route) pair colored by its 5xx error ratio. Tooltip shows req/s and p99 latency via additional series. Uses xy-chart to render a categorical DAO (Y) × route (X) matrix.",
+      "type": "xychart",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 12 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps",
-          "color": { "mode": "palette-classic" },
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "showPoints": "never"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": { "mode": "multi", "sort": "desc" },
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": ["mean", "max"]
-        }
-      },
-      "targets": [
-        {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\", http_response_status_code=~\"5..\"}[1m])) by (job, http_route)",
-          "legendFormat": "{{job}} — {{http_route}}",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "title": "Error Ratio by DAO (5xx / total)",
-      "type": "timeseries",
-      "gridPos": { "x": 16, "y": 26, "w": 8, "h": 9 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percentunit",
-          "min": 0,
-          "max": 1,
-          "color": { "mode": "palette-classic" },
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "showPoints": "never"
-          },
+          "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -272,23 +254,149 @@
               { "color": "yellow", "value": 0.01 },
               { "color": "red", "value": 0.05 }
             ]
+          },
+          "custom": {
+            "pointSize": { "fixed": 40 },
+            "fillOpacity": 80,
+            "show": "points"
           }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": { "mode": "multi", "sort": "desc" },
+        "mapping": "auto",
+        "series": [],
+        "tooltip": { "mode": "single" },
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         }
       },
+      "transformations": [
+        { "id": "merge", "options": {} },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "error ratio",
+              "job": "DAO",
+              "http_route": "route"
+            }
+          }
+        }
+      ],
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\", http_response_status_code=~\"5..\"}[5m])) by (job) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job)",
-          "legendFormat": "{{job}}",
-          "refId": "A"
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\",http_response_status_code=~\"5..\"}[5m])) by (job, http_route) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route)",
+          "legendFormat": "{{job}} | {{http_route}}",
+          "instant": true,
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Request Rate Heatmap — DAO × Route (color = req/s)",
+      "description": "Same DAO × route matrix, colored by request rate instead of error ratio.",
+      "type": "xychart",
+      "gridPos": { "x": 0, "y": 32, "w": 12, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "continuous-BlYlRd" },
+          "custom": {
+            "pointSize": { "fixed": 40 },
+            "fillOpacity": 80,
+            "show": "points"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "mapping": "auto",
+        "series": [],
+        "tooltip": { "mode": "single" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "transformations": [
+        { "id": "merge", "options": {} },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "req/s",
+              "job": "DAO",
+              "http_route": "route"
+            }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route)",
+          "legendFormat": "{{job}} | {{http_route}}",
+          "instant": true,
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "p99 Latency Heatmap — DAO × Route (color = latency)",
+      "description": "Same DAO × route matrix, colored by p99 latency.",
+      "type": "xychart",
+      "gridPos": { "x": 12, "y": 32, "w": 12, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "continuous-BlYlRd" },
+          "custom": {
+            "pointSize": { "fixed": 40 },
+            "fillOpacity": 80,
+            "show": "points"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "mapping": "auto",
+        "series": [],
+        "tooltip": { "mode": "single" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "transformations": [
+        { "id": "merge", "options": {} },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value #A": "p99 latency",
+              "job": "DAO",
+              "http_route": "route"
+            }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le, job, http_route))",
+          "legendFormat": "{{job}} | {{http_route}}",
+          "instant": true,
+          "refId": "A",
+          "format": "table"
         }
       ]
     }
