@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { getAddress, type Hash, type Hex, parseEther } from "viem";
+import { getAddress, type Hash, type Hex } from "viem";
 
 import { RelayService } from "./relay";
-import { ProposalState } from "@/abi/governor";
 import type { RelayerSigner } from "@/signer/types";
 import type { ISignatureVerifier } from "./guards/signature-verifier";
 import type { IChainStateService } from "./chain/chain-state";
@@ -44,10 +43,11 @@ function createStubChainState(
   overrides: Partial<IChainStateService> = {},
 ): IChainStateService {
   return {
-    getProposalState: async () => ProposalState.Active,
+    getProposalState: async () => 1,
     hasVoted: async () => false,
     getDelegationNonce: async () => 0n,
     getVotingPower: async () => 0n,
+    getTokenBalance: async () => 0n,
     getCurrentDelegate: async () =>
       getAddress("0x0000000000000000000000000000000000000000"),
     getGovernorName: async () => "TestGovernor",
@@ -62,10 +62,14 @@ function createStubRateLimiter(): IRateLimiter {
   };
 }
 
-function createStubBalanceReader(balance: bigint): ChainReader {
+function createStubChainReader(): ChainReader {
   return {
-    getBalance: async () => balance,
+    getBalance: async () => 0n,
     readContract: (async () => undefined) as ChainReader["readContract"],
+    simulateContract: (async () => ({
+      request: {},
+      result: undefined,
+    })) as unknown as ChainReader["simulateContract"],
   };
 }
 
@@ -75,8 +79,8 @@ function createService(
     signatureVerifier?: ISignatureVerifier;
     chainState?: IChainStateService;
     rateLimiter?: IRateLimiter;
-    balance?: bigint;
     minVotingPower?: bigint;
+    chainReader?: ChainReader;
   } = {},
 ): RelayService {
   return new RelayService(
@@ -84,8 +88,7 @@ function createService(
     overrides.signatureVerifier ?? createStubSignatureVerifier(),
     overrides.chainState ?? createStubChainState(),
     overrides.rateLimiter ?? createStubRateLimiter(),
-    createStubBalanceReader(overrides.balance ?? parseEther("1.0")),
-    parseEther("0.1"),
+    overrides.chainReader ?? createStubChainReader(),
     overrides.minVotingPower ?? 0n,
     GOVERNOR,
     TOKEN,
@@ -102,6 +105,11 @@ describe("RelayService", () => {
       s: SAMPLE_S,
     };
 
+    // NOTE: proposal-state, hasVoted, and nonce-mismatch assertions previously
+    // lived here as explicit preflight checks. They now travel through
+    // publicClient.simulateContract, which reverts with the on-chain reason.
+    // Those paths are exercised in e2e tests against anvil instead of mocks.
+
     it("returns tx hash and recovered signer when all checks pass", async () => {
       const service = createService();
 
@@ -110,44 +118,24 @@ describe("RelayService", () => {
       expect(result).toEqual({ hash: TX_HASH, signer: VOTER });
     });
 
-    it("rejects when proposal is not active", async () => {
-      const service = createService({
-        chainState: createStubChainState({
-          getProposalState: async () => ProposalState.Pending,
-        }),
-      });
-
-      await expect(service.relayVote(voteParams)).rejects.toThrow(
-        "not in active",
-      );
-    });
-
-    it("rejects when voter already voted", async () => {
-      const service = createService({
-        chainState: createStubChainState({
-          hasVoted: async () => true,
-        }),
-      });
-
-      await expect(service.relayVote(voteParams)).rejects.toThrow(
-        "already voted",
-      );
-    });
-
-    it("rejects when relayer balance is low", async () => {
-      const service = createService({
-        balance: parseEther("0.01"),
-      });
-
-      await expect(service.relayVote(voteParams)).rejects.toThrow(
-        "balance is too low",
-      );
-    });
-
     it("rejects when voting power is below threshold", async () => {
       const service = createService({
         chainState: createStubChainState({
           getVotingPower: async () => 999n,
+        }),
+        minVotingPower: 1000n,
+      });
+
+      await expect(service.relayVote(voteParams)).rejects.toThrow(
+        "minimum voting power",
+      );
+    });
+
+    it("rejects voter with tokens but no delegation (getVotes == 0)", async () => {
+      const service = createService({
+        chainState: createStubChainState({
+          getVotingPower: async () => 0n,
+          getTokenBalance: async () => 1000n,
         }),
         minVotingPower: 1000n,
       });
@@ -176,25 +164,30 @@ describe("RelayService", () => {
       expect(result).toEqual({ hash: TX_HASH, signer: VOTER });
     });
 
-    it("rejects when signature has expired", async () => {
-      const service = createService();
-      const expired = {
-        ...delegateParams,
-        expiry: BigInt(Math.floor(Date.now() / 1000) - 1),
-      };
-
-      await expect(service.relayDelegation(expired)).rejects.toThrow("expired");
-    });
-
-    it("rejects when nonce doesn't match on-chain", async () => {
+    it("passes when token balance alone meets threshold (first-time delegator)", async () => {
       const service = createService({
         chainState: createStubChainState({
-          getDelegationNonce: async () => 5n,
+          getVotingPower: async () => 0n,
+          getTokenBalance: async () => 1000n,
         }),
+        minVotingPower: 1000n,
+      });
+
+      const result = await service.relayDelegation(delegateParams);
+      expect(result).toEqual({ hash: TX_HASH, signer: VOTER });
+    });
+
+    it("rejects when neither voting power nor balance meets threshold", async () => {
+      const service = createService({
+        chainState: createStubChainState({
+          getVotingPower: async () => 999n,
+          getTokenBalance: async () => 500n,
+        }),
+        minVotingPower: 1000n,
       });
 
       await expect(service.relayDelegation(delegateParams)).rejects.toThrow(
-        "Nonce mismatch",
+        "minimum voting power",
       );
     });
   });

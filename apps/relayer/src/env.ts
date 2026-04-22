@@ -9,8 +9,8 @@ const envSchema = z.object({
 
   DAO_NAME: z.string().min(1),
 
-  RPC_URL: z.string().url(),
-  CHAIN_ID: z.coerce.number(),
+  RPC_URL: z.url(),
+  CHAIN_ID: z.coerce.number().int(),
 
   GOVERNOR_ADDRESS: z
     .string()
@@ -28,20 +28,9 @@ const envSchema = z.object({
 
   MIN_VOTING_POWER: z.string().default("0"),
 
-  MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().default(3),
+  MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().int().optional().default(3),
 
-  MIN_BALANCE_WEI: z.string().default("100000000000000000"),
-
-  BLOCKFUL_API_TOKEN: z.string().optional(),
-
-  PORT: z.coerce.number().default(4001),
+  PORT: z.coerce.number().default(3002),
 });
 
-const _env = envSchema.safeParse(process.env);
-
-if (!_env.success) {
-  console.error("Invalid environment variables", _env.error.issues);
-  throw new Error("Invalid environment variables");
-}
-
-export const env = _env.data;
+export const env = envSchema.parse(process.env);

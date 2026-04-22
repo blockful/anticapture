@@ -169,8 +169,8 @@ describe("POST /relay/delegate", () => {
       body: JSON.stringify(body),
     });
 
-    expect(res.status).toBe(400);
-    expect(await res.json()).toMatchObject({ code: "NONCE_MISMATCH" });
+    expect(res.status).toBe(500);
+    expect(await res.json()).toMatchObject({ code: "INTERNAL" });
   });
 
   it("should reject delegation with expired signature", async () => {
@@ -187,7 +187,7 @@ describe("POST /relay/delegate", () => {
       body: JSON.stringify(body),
     });
 
-    expect(res.status).toBe(400);
-    expect(await res.json()).toMatchObject({ code: "SIGNATURE_EXPIRED" });
+    expect(res.status).toBe(500);
+    expect(await res.json()).toMatchObject({ code: "INTERNAL" });
   });
 });

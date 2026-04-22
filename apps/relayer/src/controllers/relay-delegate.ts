@@ -53,15 +53,7 @@ export function relayDelegate(app: Hono, relayService: RelayService) {
     }),
     async (c) => {
       const body = c.req.valid("json");
-
-      const result = await relayService.relayDelegation({
-        delegatee: body.delegatee,
-        nonce: BigInt(body.nonce),
-        expiry: BigInt(body.expiry),
-        v: body.v,
-        r: body.r,
-        s: body.s,
-      });
+      const result = await relayService.relayDelegation(body);
 
       return c.json(
         {

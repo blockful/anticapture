@@ -31,23 +31,6 @@ export const Errors = {
       "Could not recover a valid signer from signature",
       "INVALID_SIGNATURE",
     ),
-  PROPOSAL_NOT_ACTIVE: () =>
-    new RelayError(
-      "Proposal is not in active voting period",
-      "PROPOSAL_NOT_ACTIVE",
-    ),
-  ALREADY_VOTED: () =>
-    new RelayError(
-      "Address has already voted on this proposal",
-      "ALREADY_VOTED",
-    ),
-  SIGNATURE_EXPIRED: () =>
-    new RelayError("Delegation signature has expired", "SIGNATURE_EXPIRED"),
-  NONCE_MISMATCH: (expected: string, got: string) =>
-    new RelayError(
-      `Nonce mismatch: on-chain=${expected}, provided=${got}`,
-      "NONCE_MISMATCH",
-    ),
   RATE_LIMITED: () =>
     new RelayError("Rate limit exceeded for this address", "RATE_LIMITED", 429),
   RELAYER_LOW_BALANCE: () =>

@@ -6,6 +6,7 @@ import type { ChainReader } from "./chain-reader";
 
 export interface IChainStateService {
   getVotingPower(address: Address): Promise<bigint>;
+  getTokenBalance(address: Address): Promise<bigint>;
   getProposalState(proposalId: bigint): Promise<ProposalState>;
   hasVoted(proposalId: bigint, voter: Address): Promise<boolean>;
   getDelegationNonce(address: Address): Promise<bigint>;
@@ -26,6 +27,15 @@ export class ChainStateService implements IChainStateService {
       address: this.tokenAddress,
       abi: erc20VotesAbi,
       functionName: "getVotes",
+      args: [address],
+    });
+  }
+
+  async getTokenBalance(address: Address): Promise<bigint> {
+    return this.client.readContract({
+      address: this.tokenAddress,
+      abi: erc20VotesAbi,
+      functionName: "balanceOf",
       args: [address],
     });
   }

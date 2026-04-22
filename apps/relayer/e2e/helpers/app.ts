@@ -62,7 +62,6 @@ export async function createTestApp(rpcUrl: string) {
     chainState,
     rateLimiter,
     publicClient,
-    1n,
     1_000_000_000_000_000_000_000n,
     GOVERNOR_ADDRESS,
     TOKEN_ADDRESS,

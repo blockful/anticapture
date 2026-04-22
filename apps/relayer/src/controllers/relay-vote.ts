@@ -53,13 +53,7 @@ export function relayVote(app: Hono, relayService: RelayService) {
     }),
     async (c) => {
       const body = c.req.valid("json");
-      const result = await relayService.relayVote({
-        proposalId: BigInt(body.proposalId),
-        support: body.support,
-        v: body.v,
-        r: body.r,
-        s: body.s,
-      });
+      const result = await relayService.relayVote(body);
 
       return c.json(
         {

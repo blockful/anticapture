@@ -1,10 +1,9 @@
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
-import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import pino from "pino";
-import { createPublicClient, extractChain, http } from "viem";
-import * as chains from "viem/chains";
+import { createPublicClient, http } from "viem";
+import { mainnet } from "viem/chains";
 import { fromZodError } from "zod-validation-error";
 
 import { health } from "@/controllers/health";
@@ -22,13 +21,8 @@ import { createLocalSigner } from "@/signer/local-signer";
 
 const logger = pino({ name: "relayer" });
 
-const allChains = Object.values(chains);
-
 async function main() {
-  const chain = extractChain({
-    chains: allChains,
-    id: env.CHAIN_ID as (typeof allChains)[number]["id"],
-  });
+  const chain = mainnet;
 
   const governorAddress = env.GOVERNOR_ADDRESS;
   const tokenAddress = env.TOKEN_ADDRESS;
@@ -81,15 +75,12 @@ async function main() {
     maxPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
   });
 
-  const minBalanceWei = BigInt(env.MIN_BALANCE_WEI);
-
   const relayService = new RelayService(
     signer,
     signatureVerifier,
     chainState,
     rateLimiter,
     publicClient,
-    minBalanceWei,
     BigInt(env.MIN_VOTING_POWER),
     governorAddress,
     tokenAddress,
@@ -109,9 +100,6 @@ async function main() {
   });
 
   app.use(cors({ origin: "*" }));
-  if (env.BLOCKFUL_API_TOKEN) {
-    app.use(bearerAuth({ token: env.BLOCKFUL_API_TOKEN }));
-  }
 
   // Request logging
   app.use(async (c, next) => {
@@ -140,7 +128,7 @@ async function main() {
   // --- Routes ---
   relayVote(app, relayService);
   relayDelegate(app, relayService);
-  health(app, signer, publicClient, minBalanceWei);
+  health(app);
 
   // --- OpenAPI docs ---
   app.doc("/openapi.json", {

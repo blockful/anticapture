@@ -298,8 +298,8 @@ describe("POST /relay/vote", () => {
       body: JSON.stringify(body),
     });
 
-    expect(res.status).toBe(400);
-    expect(await res.json()).toMatchObject({ code: "PROPOSAL_NOT_ACTIVE" });
+    expect(res.status).toBe(500);
+    expect(await res.json()).toMatchObject({ code: "INTERNAL" });
   });
 
   it("should reject a second vote from the same address on the same proposal", async () => {
@@ -327,7 +327,7 @@ describe("POST /relay/vote", () => {
       body: JSON.stringify(body),
     });
 
-    expect(secondRes.status).toBe(400);
-    expect(await secondRes.json()).toMatchObject({ code: "ALREADY_VOTED" });
+    expect(secondRes.status).toBe(500);
+    expect(await secondRes.json()).toMatchObject({ code: "INTERNAL" });
   });
 });

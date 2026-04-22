@@ -1,7 +1,13 @@
-import { Address, encodeFunctionData, formatEther, Hash, Hex } from "viem";
-import pino from "pino";
+import {
+  Address,
+  BaseError,
+  encodeFunctionData,
+  Hash,
+  Hex,
+  InsufficientFundsError,
+} from "viem";
 
-import { governorAbi, ProposalState } from "@/abi/governor";
+import { governorAbi } from "@/abi/governor";
 import { erc20VotesAbi } from "@/abi/token";
 import { Errors } from "@/errors";
 import type { IRateLimiter } from "@/services/guards/rate-limiter";
@@ -10,8 +16,6 @@ import { RelayerSigner } from "@/signer/types";
 import type { ChainReader } from "./chain/chain-reader";
 import type { IChainStateService } from "./chain/chain-state";
 import type { ISignatureVerifier } from "./guards/signature-verifier";
-
-const logger = pino({ name: "relay-service" });
 
 export interface RelayVoteParams {
   proposalId: bigint;
@@ -43,38 +47,33 @@ export class RelayService {
     private chainState: IChainStateService,
     private rateLimiter: IRateLimiter,
     private publicClient: ChainReader,
-    private minBalanceWei: bigint,
     private minVotingPower: bigint,
     private governorAddress: Address,
     private tokenAddress: Address,
   ) {}
 
   async relayVote(params: RelayVoteParams): Promise<RelayResult> {
-    // 0. Check relayer has enough balance
-    await this.assertSufficientBalance();
-
     // 1. Recover voter from signature
     const voter = await this.signatureVerifier.recoverVoteSigner(params);
 
-    // 2. Eligibility — validation before slot is spent
-    await this.assertSufficientVotingPower(voter);
-
-    // 3. On-chain state checks
-    const state = await this.chainState.getProposalState(params.proposalId);
-    if (state !== ProposalState.Active) {
-      throw Errors.PROPOSAL_NOT_ACTIVE();
+    // 2. Eligibility — on-chain vote weight is getVotes(), so a holder who
+    //    never delegated would cost the relayer gas for a zero-weight vote.
+    const votingPower = await this.chainState.getVotingPower(voter);
+    if (votingPower < this.minVotingPower) {
+      throw Errors.INSUFFICIENT_VOTING_POWER(this.minVotingPower.toString());
     }
 
-    const alreadyVoted = await this.chainState.hasVoted(
-      params.proposalId,
-      voter,
-    );
-    if (alreadyVoted) {
-      throw Errors.ALREADY_VOTED();
-    }
-
-    // 4. Rate-limit check — after validation, before submission
+    // 3. Rate-limit check — after eligibility, before simulation/submission
     await this.rateLimiter.assertWithinLimit(voter, "vote");
+
+    // 4. Simulate the call. Covers: proposal state, hasVoted, signature validity.
+    await this.publicClient.simulateContract({
+      address: this.governorAddress,
+      abi: governorAbi,
+      functionName: "castVoteBySig",
+      args: [params.proposalId, params.support, params.v, params.r, params.s],
+      account: this.signer.address,
+    });
 
     // 5. Submit transaction
     const data = encodeFunctionData({
@@ -83,7 +82,7 @@ export class RelayService {
       args: [params.proposalId, params.support, params.v, params.r, params.s],
     });
 
-    const hash = await this.signer.sendTransaction({
+    const hash = await this.sendTransaction({
       to: this.governorAddress,
       data,
     });
@@ -92,31 +91,31 @@ export class RelayService {
   }
 
   async relayDelegation(params: RelayDelegateParams): Promise<RelayResult> {
-    // 0. Check relayer has enough balance
-    await this.assertSufficientBalance();
-
     // 1. Recover delegator from signature
     const delegator =
       await this.signatureVerifier.recoverDelegationSigner(params);
 
-    // 2. Eligibility — validation before slot is spent
-    await this.assertSufficientVotingPower(delegator);
+    // 2. Eligibility — validated before a rate-limit slot is spent
+    await this.assertDelegationEligible(delegator);
 
-    // 3. On-chain checks
-    if (params.expiry <= BigInt(Math.floor(Date.now() / 1000))) {
-      throw Errors.SIGNATURE_EXPIRED();
-    }
-
-    const onChainNonce = await this.chainState.getDelegationNonce(delegator);
-    if (params.nonce !== onChainNonce) {
-      throw Errors.NONCE_MISMATCH(
-        onChainNonce.toString(),
-        params.nonce.toString(),
-      );
-    }
-
-    // 4. Rate-limit check — after validation, before submission
+    // 3. Rate-limit check — after eligibility, before simulation/submission
     await this.rateLimiter.assertWithinLimit(delegator, "delegation");
+
+    // 4. Simulate the call. Covers: nonce match, signature validity, expiry.
+    await this.publicClient.simulateContract({
+      address: this.tokenAddress,
+      abi: erc20VotesAbi,
+      functionName: "delegateBySig",
+      args: [
+        params.delegatee,
+        params.nonce,
+        params.expiry,
+        params.v,
+        params.r,
+        params.s,
+      ],
+      account: this.signer.address,
+    });
 
     // 5. Submit transaction
     const data = encodeFunctionData({
@@ -132,7 +131,7 @@ export class RelayService {
       ],
     });
 
-    const hash = await this.signer.sendTransaction({
+    const hash = await this.sendTransaction({
       to: this.tokenAddress,
       data,
     });
@@ -140,28 +139,37 @@ export class RelayService {
     return { hash, signer: delegator };
   }
 
-  private async assertSufficientVotingPower(address: Address): Promise<void> {
-    const votingPower = await this.chainState.getVotingPower(address);
-    if (votingPower < this.minVotingPower) {
+  /**
+   * Delegation accepts voting power OR raw token balance. The balance fallback
+   * covers first-time delegators, whose getVotes() is 0 until they delegate at
+   * least once.
+   */
+  private async assertDelegationEligible(address: Address): Promise<void> {
+    const [votingPower, balance] = await Promise.all([
+      this.chainState.getVotingPower(address),
+      this.chainState.getTokenBalance(address),
+    ]);
+
+    if (votingPower < this.minVotingPower && balance < this.minVotingPower) {
       throw Errors.INSUFFICIENT_VOTING_POWER(this.minVotingPower.toString());
     }
   }
 
-  private async assertSufficientBalance(): Promise<void> {
-    const balance = await this.publicClient.getBalance({
-      address: this.signer.address,
-    });
-
-    if (balance < this.minBalanceWei) {
-      logger.warn(
-        {
-          address: this.signer.address,
-          balance: formatEther(balance),
-          threshold: formatEther(this.minBalanceWei),
-        },
-        "Relayer balance below threshold",
-      );
-      throw Errors.RELAYER_LOW_BALANCE();
+  /**
+   * Wraps the signer so viem's InsufficientFundsError surfaces as a clean
+   * 503 RELAYER_LOW_BALANCE instead of bubbling up as a 500.
+   */
+  private async sendTransaction(tx: { to: Address; data: Hex }): Promise<Hash> {
+    try {
+      return await this.signer.sendTransaction(tx);
+    } catch (err) {
+      if (
+        err instanceof BaseError &&
+        err.walk((e) => e instanceof InsufficientFundsError)
+      ) {
+        throw Errors.RELAYER_LOW_BALANCE();
+      }
+      throw err;
     }
   }
 }
