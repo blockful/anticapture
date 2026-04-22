@@ -72,7 +72,7 @@ export class RelayService {
       abi: governorAbi,
       functionName: "castVoteBySig",
       args: [params.proposalId, params.support, params.v, params.r, params.s],
-      account: this.signer.address,
+      account: await this.signer.getAddress(),
     });
 
     // 5. Submit transaction
@@ -114,7 +114,7 @@ export class RelayService {
         params.r,
         params.s,
       ],
-      account: this.signer.address,
+      account: await this.signer.getAddress(),
     });
 
     // 5. Submit transaction

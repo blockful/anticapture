@@ -23,7 +23,8 @@ function createStubSigner(
   overrides: Partial<RelayerSigner> = {},
 ): RelayerSigner {
   return {
-    address: getAddress("0x9999999999999999999999999999999999999999"),
+    getAddress: async () =>
+      getAddress("0x9999999999999999999999999999999999999999"),
     sendTransaction: async () => TX_HASH,
     ...overrides,
   };

@@ -2,7 +2,7 @@ import { Address, Hash, Hex } from "viem";
 
 export interface RelayerSigner {
   /** The Ethereum address of this signer */
-  readonly address: Address;
+  getAddress(): Promise<Address>;
 
   /**
    * Send a raw transaction to the network.

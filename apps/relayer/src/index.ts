@@ -141,7 +141,7 @@ async function main() {
     {
       port: env.PORT,
       chain: chain.name,
-      relayer: signer.address,
+      relayer: await signer.getAddress(),
       governor: governorAddress,
       token: tokenAddress,
     },

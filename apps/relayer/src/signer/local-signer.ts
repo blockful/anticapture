@@ -25,7 +25,9 @@ export function createLocalSigner(
   }).extend(publicActions);
 
   return {
-    address: account.address,
+    async getAddress(): Promise<Address> {
+      return account.address;
+    },
 
     async sendTransaction(tx: {
       to: Address;
