@@ -6,12 +6,12 @@ import {
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
-import { isCi, runCiSeed } from "./seed-ci";
+import { isRailwayPreviewEnv, runCiSeed } from "./seed-ci";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 
-const CI = isCi();
+const CI = isRailwayPreviewEnv();
 
 import { DaoCache } from "@/cache/dao-cache";
 import {

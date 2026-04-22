@@ -32,7 +32,6 @@
     "axios": "^1.9.0",
     "drizzle-kit": "^0.31.9",
     "drizzle-orm": "^0.45.1",
-    "drizzle-seed": "^0.3.1",
     "hono": "^4.7.10",
     "pg": "^8.17.2",
     "pino-http": "^10.4.0",
@@ -41,6 +40,7 @@
     "zod-validation-error": "^5.0.0"
   },
   "devDependencies": {
+    "drizzle-seed": "^0.3.1",
     "@electric-sql/pglite": "^0.3.15",
     "@types/node": "^20.16.5",
     "@types/pg": "^8.15.6",
