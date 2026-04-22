@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsup",
-    "start": "node dist/index.js",
+    "start": "node --import ./dist/instrumentation.js dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run src/",
     "test:e2e": "dotenv -- vitest run --testTimeout 30000 e2e/",
@@ -15,12 +15,12 @@
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },
   "dependencies": {
+    "@anticapture/observability": "workspace:*",
     "@hono/node-server": "^1.19.9",
     "@hono/zod-openapi": "^1.2.2",
     "dotenv": "^16.5.0",
     "hono": "^4.7.10",
     "redis": "^4.7.1",
-    "pino": "^9.6.0",
     "viem": "^2.41.2",
     "zod": "^4.3.6",
     "zod-validation-error": "^5.0.0"

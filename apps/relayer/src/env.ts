@@ -31,6 +31,8 @@ const envSchema = z.object({
   MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().int().optional().default(3),
 
   PORT: z.coerce.number().default(3002),
+
+  OTEL_EXPORTER_OTLP_ENDPOINT: z.url().optional(),
 });
 
 export const env = envSchema.parse(process.env);

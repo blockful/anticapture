@@ -1,7 +1,13 @@
+import "./instrumentation";
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import pino from "pino";
+import {
+  createLogger,
+  PROMETHEUS_MIME_TYPE,
+  PrometheusSerializer,
+  wrapWithTracing,
+} from "@anticapture/observability";
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { fromZodError } from "zod-validation-error";
@@ -18,8 +24,9 @@ import { ChainStateService } from "@/services/chain/chain-state";
 import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
 import { createLocalSigner } from "@/signer/local-signer";
+import { exporter } from "@/instrumentation";
 
-const logger = pino({ name: "relayer" });
+const logger = createLogger("anticapture-relayer");
 
 async function main() {
   const chain = mainnet;
@@ -36,10 +43,8 @@ async function main() {
   const signer = createLocalSigner(env.RELAYER_PRIVATE_KEY, chain, env.RPC_URL);
 
   // --- Services ---
-  const chainState = new ChainStateService(
-    publicClient,
-    governorAddress,
-    tokenAddress,
+  const chainState = wrapWithTracing(
+    new ChainStateService(publicClient, governorAddress, tokenAddress),
   );
 
   // Read contract names for EIP-712 domains
@@ -48,42 +53,48 @@ async function main() {
     chainState.getTokenName(),
   ]);
 
-  const signatureVerifier = new SignatureVerifier(
-    {
-      name: governorName,
-      version: "1",
-      chainId: env.CHAIN_ID,
-      verifyingContract: governorAddress,
-    },
-    {
-      name: tokenName,
-      version: "1",
-      chainId: env.CHAIN_ID,
-      verifyingContract: tokenAddress,
-    },
+  const signatureVerifier = wrapWithTracing(
+    new SignatureVerifier(
+      {
+        name: governorName,
+        version: "1",
+        chainId: env.CHAIN_ID,
+        verifyingContract: governorAddress,
+      },
+      {
+        name: tokenName,
+        version: "1",
+        chainId: env.CHAIN_ID,
+        verifyingContract: tokenAddress,
+      },
+    ),
   );
 
   const redis = createClient({ url: env.REDIS_URL });
   redis.on("error", (err: Error) => logger.error({ err }, "[redis] error"));
   await redis.connect();
 
-  const rateLimitStorage = new RedisRateLimitStorage(redis);
+  const rateLimitStorage = wrapWithTracing(new RedisRateLimitStorage(redis));
 
-  const rateLimiter = new RateLimiter(rateLimitStorage, {
-    daoName: env.DAO_NAME,
-    governorAddress: governorAddress,
-    maxPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
-  });
+  const rateLimiter = wrapWithTracing(
+    new RateLimiter(rateLimitStorage, {
+      daoName: env.DAO_NAME,
+      governorAddress: governorAddress,
+      maxPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
+    }),
+  );
 
-  const relayService = new RelayService(
-    signer,
-    signatureVerifier,
-    chainState,
-    rateLimiter,
-    publicClient,
-    BigInt(env.MIN_VOTING_POWER),
-    governorAddress,
-    tokenAddress,
+  const relayService = wrapWithTracing(
+    new RelayService(
+      signer,
+      signatureVerifier,
+      chainState,
+      rateLimiter,
+      publicClient,
+      BigInt(env.MIN_VOTING_POWER),
+      governorAddress,
+      tokenAddress,
+    ),
   );
 
   // --- App ---
@@ -100,6 +111,14 @@ async function main() {
   });
 
   app.use(cors({ origin: "*" }));
+
+  app.get("/metrics", async (c) => {
+    const result = await exporter.collect();
+    const serialized = new PrometheusSerializer().serialize(
+      result.resourceMetrics,
+    );
+    return c.text(serialized, 200, { "Content-Type": PROMETHEUS_MIME_TYPE });
+  });
 
   // Request logging
   app.use(async (c, next) => {
