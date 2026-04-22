@@ -42,5 +42,9 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "claude-mem@thedotmack": true,
+    "andrej-karpathy-skills@karpathy-skills": true
   }
 }

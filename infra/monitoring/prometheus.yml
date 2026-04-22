@@ -121,6 +121,18 @@ scrape_configs:
     static_configs:
       - targets: ["${GATEWAY_ENDPOINT}"]
 
+  - job_name: anticapture-gateful
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${GATEFUL_ENDPOINT}"]
+
+  - job_name: anticapture-erpc
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${ERPC_METRICS_ENDPOINT}"]
+
   - job_name: tempo
     metrics_path: "/metrics"
     scrape_interval: 15s

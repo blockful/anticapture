@@ -16,7 +16,7 @@ export function transfers(app: Hono, service: TransfersService) {
       path: "/accounts/{address}/transfers",
       summary: "Get transfers",
       description: "Get transfers of a given address",
-      tags: ["transfers"],
+      tags: ["transfers", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {
         params: TransfersRequestRouteSchema,

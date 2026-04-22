@@ -1,3 +1,4 @@
+import { logger } from "../logger.js";
 import { CircuitOpenError } from "./circuit-breaker.js";
 import type { CircuitBreakerRegistry } from "./circuit-breaker-registry.js";
 
@@ -43,9 +44,9 @@ export async function fanOutGet<T = unknown>(
       }
     } else {
       if (result.reason instanceof CircuitOpenError) {
-        console.warn(`[fan-out] `, result.reason);
+        logger.warn({ err: result.reason }, "fan-out circuit open");
       } else {
-        console.error(`[fan-out] `, result.reason);
+        logger.error({ err: result.reason }, "fan-out request failed");
       }
     }
   }

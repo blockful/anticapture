@@ -11,7 +11,6 @@ import {
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export type TreasuryType = "liquid" | "dao-token" | "total";
 
@@ -41,7 +40,6 @@ const useQueryByType = (
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
   };

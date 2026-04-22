@@ -5,7 +5,6 @@ import { formatUnits } from "viem";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface UseAccountPowerResult {
   accountPower: GetAccountPowerQuery["votingPowerByAccountId"] | null;
@@ -41,7 +40,6 @@ export const useVoterInfo = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     skip: !address || !proposalId, // Skip query if no address or proposalId provided

@@ -1,3 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+
 import type {
   ComponentsObject,
   OpenAPIObject,
@@ -5,6 +8,8 @@ import type {
   PathItemObject,
   PathsObject,
 } from "openapi3-ts/oas31";
+
+import { logger } from "./logger.js";
 
 type Schemas = NonNullable<ComponentsObject["schemas"]>;
 
@@ -17,7 +22,7 @@ async function fetchDoc(
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return (await res.json()) as OpenAPIObject;
   } catch (err) {
-    console.warn(`[upstream-docs] Failed to fetch ${name}:`, err);
+    logger.warn({ err, name }, "failed to fetch upstream OpenAPI spec");
     return null;
   }
 }
@@ -104,5 +109,27 @@ export async function mergeUpstreamDocs(
         ...mergeSchemas(docs),
       },
     },
+  };
+}
+
+/**
+ * Stores the merged OpenAPI spec locally.
+ */
+export function storeOpenApiSpec(
+  ownSpec: OpenAPIObject,
+  daoApis: Map<string, string>,
+  outputPath = join(process.cwd(), "openapi", "gateful.json"),
+): () => Promise<OpenAPIObject> {
+  return async () => {
+    const spec = await mergeUpstreamDocs(ownSpec, daoApis);
+
+    try {
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, `${JSON.stringify(spec, null, 2)}\n`);
+    } catch (err) {
+      logger.warn({ err }, "failed to store OpenAPI spec");
+    }
+
+    return spec;
   };
 }

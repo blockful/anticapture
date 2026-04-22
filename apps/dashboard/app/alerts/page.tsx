@@ -31,7 +31,7 @@ export default function DonatePage() {
           <HeaderMobile className="fixed! top-0" />
         </div>
         <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="w-full flex-1">
+          <div className="mt-14 w-full flex-1 lg:mt-0">
             <AlertsSection />
           </div>
           <Footer />

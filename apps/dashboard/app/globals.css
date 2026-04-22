@@ -76,8 +76,12 @@
   --color-surface-default: var(--base-primary-foreground);
   --color-surface-contrast: var(--base-muted);
   --color-surface-hover: var(--base-border);
-  --color-surface-action: var(--base-primary);
-  --color-surface-action-hover: var(--base-primary-opacity-darker);
+  --color-surface-action: var(--base-brand);
+  --color-surface-action-hover: color-mix(
+    in srgb,
+    var(--base-brand) 80%,
+    black
+  );
   --color-surface-destructive: var(--base-destructive);
   --color-surface-destructive-hover: var(--base-destructive-hover);
   --color-surface-disabled: var(--base-muted);
@@ -186,6 +190,7 @@
 
   /* root colors  */
   --radius: 0.625rem;
+  --radius-base: 0px;
   --base-background: #ffffff;
   --base-foreground: #09090b;
   --base-muted: #f4f4f5;

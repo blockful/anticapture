@@ -56,7 +56,7 @@ export const Select = ({
             // Typography
             "text-sm font-normal leading-5",
             // Colors/surfaces — matches Input: bg-surface-default, border-border-contrast
-            "bg-surface-default border-border-contrast border",
+            "bg-surface-default border-border-contrast rounded-base border",
             // Transitions
             "transition-all duration-200",
             // Hover (suppressed when disabled)
@@ -107,7 +107,7 @@ export const Select = ({
           // Colors/surfaces
           "bg-surface-default",
           // Border
-          "border-border-contrast border",
+          "rounded-base border-border-contrast border",
           // Z-index
           "z-50",
           // Animation

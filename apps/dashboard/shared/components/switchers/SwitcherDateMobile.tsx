@@ -62,7 +62,7 @@ export const SwitcherDateMobile = ({
         className={cn(
           "text-primary flex min-w-[49px] cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 transition-all duration-200",
           isOpen
-            ? "border-tangerine bg-[#26262A]"
+            ? "border-tangerine bg-surface-contrast"
             : "bg-surface-contrast border-transparent",
         )}
       >
@@ -78,12 +78,12 @@ export const SwitcherDateMobile = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[100px] rounded-md border border-white/10 bg-[#1C1C1F] py-1">
+        <div className="border-border-contrast bg-surface-default min-w-25 absolute right-0 top-full z-50 mt-1 rounded-md border py-1">
           {activeTimeIntervals.map((interval) => (
             <button
               key={interval}
               className={cn(
-                "text-primary flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal hover:bg-[#26262A]",
+                "text-primary hover:bg-surface-hover flex w-full items-center justify-between gap-1.5 px-3 py-2 text-left text-sm font-normal",
                 isSelected == interval && "bg-middle-dark",
               )}
               onClick={() => handleSelect(interval)}

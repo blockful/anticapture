@@ -1,48 +1,47 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "@anticapture/offchain-indexer#db:migrate": {
+    "@anticapture/indexer#db:*": {
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "@anticapture/offchain-indexer#db:push": {
-      "cache": false,
-      "passThroughEnv": ["*"]
+    "@anticapture/graphql-client#codegen": {
+      "inputs": ["documents/**/*", "codegen.ts"],
+      "outputs": ["generated/**"],
+      "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
-    "@anticapture/indexer#db:prune": {
-      "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "@anticapture/observability#build": {
-      "outputs": ["dist/**"]
-    },
-    "@anticapture/graphql-client#build": {
+    "@anticapture/client#codegen": {
+      "inputs": [
+        "kubb.config.ts",
+        "src/**",
+        "../../apps/gateful/openapi/gateful.json"
+      ],
       "outputs": ["generated/**"]
     },
-    "@anticapture/dashboard#dev": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
-      "persistent": true,
-      "cache": false
+    "@anticapture/client#build": {
+      "outputs": ["generated/**"]
     },
-    "@anticapture/graphql-client#dev": {
-      "persistent": true
+    "@anticapture/graphql-client#build": {
+      "dependsOn": ["codegen"],
+      "outputs": ["generated/**"],
+      "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
     "@anticapture/dashboard#build": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "dependsOn": ["^codegen", "^build"],
       "outputs": ["dist/**", ".next/**"],
       "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
     },
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "dependsOn": ["^build", "^codegen"],
+      "outputs": ["dist/**"]
     },
     "storybook": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "dependsOn": ["^codegen"],
       "persistent": true,
       "cache": false
     },
     "build-storybook": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
+      "dependsOn": ["^codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
@@ -86,7 +85,6 @@
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {
-      "inputs": ["documents/**/*", "codegen.ts"],
       "outputs": ["generated/**"]
     },
     "db:generate": {
@@ -111,12 +109,8 @@
     "dev": {
       "persistent": true,
       "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "dev:rw": {
-      "persistent": true,
-      "cache": false,
-      "passThroughEnv": ["*"]
+      "passThroughEnv": ["*"],
+      "dependsOn": ["^codegen"]
     }
   }
 }
