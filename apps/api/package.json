@@ -25,6 +25,7 @@
   "description": "",
   "dependencies": {
     "@anticapture/observability": "workspace:*",
+    "drizzle-seed": "^0.3.1",
     "@hono/node-server": "^1.19.9",
     "@hono/zod-openapi": "^1.2.2",
     "@opentelemetry/api": "^1.9.0",
@@ -40,7 +41,6 @@
     "zod-validation-error": "^5.0.0"
   },
   "devDependencies": {
-    "drizzle-seed": "^0.3.1",
     "@electric-sql/pglite": "^0.3.15",
     "@types/node": "^20.16.5",
     "@types/pg": "^8.15.6",
