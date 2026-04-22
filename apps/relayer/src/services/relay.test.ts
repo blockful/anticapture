@@ -43,13 +43,8 @@ function createStubChainState(
   overrides: Partial<IChainStateService> = {},
 ): IChainStateService {
   return {
-    getProposalState: async () => 1,
-    hasVoted: async () => false,
-    getDelegationNonce: async () => 0n,
     getVotingPower: async () => 0n,
     getTokenBalance: async () => 0n,
-    getCurrentDelegate: async () =>
-      getAddress("0x0000000000000000000000000000000000000000"),
     getGovernorName: async () => "TestGovernor",
     getTokenName: async () => "TestToken",
     ...overrides,
