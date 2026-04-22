@@ -30,13 +30,9 @@ export function createLocalSigner(
     async sendTransaction(tx: {
       to: Address;
       data: Hex;
-      value?: bigint;
+      value: bigint;
     }): Promise<Hash> {
-      return client.sendTransaction({
-        to: tx.to,
-        data: tx.data,
-        value: tx.value ?? 0n,
-      });
+      return client.sendTransaction(tx);
     },
   };
 }
