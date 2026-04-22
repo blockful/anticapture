@@ -11,11 +11,14 @@
       "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
     "@anticapture/client#codegen": {
-      "inputs": ["kubb.config.ts", "src/**", "../../apps/gateful/openapi/gateful.json"],
+      "inputs": [
+        "kubb.config.ts",
+        "src/**",
+        "../../apps/gateful/openapi/gateful.json"
+      ],
       "outputs": ["generated/**"]
     },
     "@anticapture/client#build": {
-      "dependsOn": ["codegen"],
       "outputs": ["generated/**"]
     },
     "@anticapture/graphql-client#build": {

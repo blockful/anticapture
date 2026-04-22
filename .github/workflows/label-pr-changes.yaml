@@ -29,6 +29,7 @@ jobs:
               - 'packages/*-client/**/*'
             gateway:
               - 'apps/api-gateway/**/*'
+            gateful:
               - 'apps/gateful/**/*'
 
       - name: Add API label
@@ -65,3 +66,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: Gateway
+
+      - name: Add gateful label
+        if: ${{ steps.changes.outputs.gateful == 'true' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: Gateful

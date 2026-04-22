@@ -1,3 +1,5 @@
+import { logger } from "../logger.js";
+
 /**
  * Fetches a path from all configured DAO APIs in parallel.
  * Returns both the parsed response data and the Cache-Control header from
@@ -36,7 +38,7 @@ export async function fanOutGet<T = unknown>(
         cacheControl = result.value.cacheControl;
       }
     } else {
-      console.error(`[fan-out] `, result.reason);
+      logger.error({ err: result.reason }, "fan-out request failed");
     }
   }
 
