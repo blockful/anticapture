@@ -23,7 +23,7 @@ export async function fanOutGet<T = unknown>(
         const res = await fetch(url.toString(), {
           signal: AbortSignal.timeout(5000),
         });
-        if (!res.ok) throw new Error(`${dao}: ${res.status}`);
+        if (res.status >= 500) throw new Error(`${dao}: ${res.status}`);
         const cacheControl = res.headers?.get("cache-control") ?? null;
 
         const data = (await res.json()) as T;
