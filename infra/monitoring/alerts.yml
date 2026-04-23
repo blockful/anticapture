@@ -4,12 +4,22 @@ groups:
     rules:
       # Service is not responding (no scrape data for 1 minute)
       - alert: ServiceDown
-        expr: up == 0
+        expr: up == 0 and on(job) group_left() (group by(job) ({job!~".*-indexer"}))
         for: 1m
         labels:
           severity: critical
         annotations:
           summary: "Service {{ $labels.job }} is down"
+          description: "Prometheus cannot scrape {{ $labels.job }} at {{ $labels.instance }}"
+
+      # Indexer is not responding — longer window to account for slow startup
+      - alert: IndexerDown
+        expr: up == 0 and on(job) group_left() (group by(job) ({job=~".*-indexer"}))
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Indexer {{ $labels.job }} is down"
           description: "Prometheus cannot scrape {{ $labels.job }} at {{ $labels.instance }}"
 
       # CPU usage above 80% for 5 minutes
