@@ -8,15 +8,8 @@ export const httpRequestDuration = meter.createHistogram(
     description: "Duration of HTTP requests in seconds",
     advice: {
       explicitBucketBoundaries: [
-        0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5,
+        0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10,
       ],
     },
-  },
-);
-
-export const httpRequestTotal = meter.createCounter(
-  "http_server_requests_total",
-  {
-    description: "Total number of HTTP requests",
   },
 );
