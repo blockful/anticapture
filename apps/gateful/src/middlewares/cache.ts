@@ -1,5 +1,7 @@
 import type { Context, Next } from "hono";
 
+import { cacheRequestTotal } from "../metrics.js";
+
 /** Minimal interface the middleware actually needs */
 export interface CacheStore {
   get(key: string): Promise<string | null>;
@@ -44,6 +46,7 @@ export function cacheMiddleware(redis: CacheStore) {
     if (raw) {
       const entry = safeParse<CachedEntry>(raw);
       if (!entry) return next();
+      cacheRequestTotal.add(1, { result: "hit", route: c.req.path });
       return new Response(entry.body, {
         status: entry.status,
         headers: {
@@ -54,6 +57,7 @@ export function cacheMiddleware(redis: CacheStore) {
       });
     }
 
+    cacheRequestTotal.add(1, { result: "miss", route: c.req.path });
     await next();
 
     // --- Response phase: store the response if eligible ---

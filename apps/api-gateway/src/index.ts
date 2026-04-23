@@ -9,6 +9,13 @@ import "./_dev-reload";
 import config from "../meshrc";
 import { exporter } from "./instrumentation";
 import { validateAuthToken } from "./auth";
+import { httpRequestDuration, httpRequestTotal } from "./metrics";
+
+function resolveClientSource(header: string | undefined): string {
+  if (header === "notification-system") return "notification-system";
+  if (header === "anticapture-frontend") return "anticapture-frontend";
+  return "other";
+}
 
 const bootstrap = async () => {
   const mesh = await getMesh(await config);
@@ -38,6 +45,24 @@ const bootstrap = async () => {
       return;
     }
     if (!validateAuthToken(req, res)) return;
+
+    const start = performance.now();
+    const clientSource = resolveClientSource(
+      req.headers["x-client-source"] as string | undefined,
+    );
+
+    res.on("finish", () => {
+      const duration = (performance.now() - start) / 1000;
+      const labels = {
+        http_request_method: req.method ?? "UNKNOWN",
+        http_route: req.url ?? "/",
+        http_response_status_code: res.statusCode,
+        client_source: clientSource,
+      };
+      httpRequestDuration.record(duration, labels);
+      httpRequestTotal.add(1, labels);
+    });
+
     handler(req, res);
   });
 

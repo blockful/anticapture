@@ -60,8 +60,8 @@
       },
       "targets": [
         {
-          "expr": "up{job=~\"anticapture-.*-api\"}",
-          "legendFormat": "{{job}}",
+          "expr": "label_replace(label_replace(up{job=~\"anticapture-.*-api\"}, \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}",
           "instant": true,
           "refId": "A"
         }
@@ -110,8 +110,8 @@
       },
       "targets": [
         {
-          "expr": "up{job=~\"anticapture-.*-indexer\"}",
-          "legendFormat": "{{job}}",
+          "expr": "label_replace(label_replace(up{job=~\"anticapture-.*-indexer\"}, \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-indexer\")",
+          "legendFormat": "{{dao}}",
           "instant": true,
           "refId": "A"
         }
@@ -196,6 +196,12 @@
         {
           "id": "organize",
           "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true
+            },
             "renameByName": {
               "Value #A": "req/s",
               "Value #B": "p99 latency",
@@ -227,6 +233,252 @@
           "instant": true,
           "refId": "C",
           "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "type": "row",
+      "title": "Gateful Cache",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 1 }
+    },
+    {
+      "id": 6,
+      "title": "Cache Hit Rate (gateful)",
+      "description": "hits / (hits + misses) per route over time. A healthy cache stays well above 50%.",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 25, "w": 16, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "showPoints": "never"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "green", "value": 0.8 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(cache_requests_total{job=\"anticapture-gateful\", result=\"hit\"}[5m])) by (route) / sum(rate(cache_requests_total{job=\"anticapture-gateful\"}[5m])) by (route)",
+          "legendFormat": "{{route}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Cache Hits vs Misses (gateful)",
+      "description": "Absolute hit and miss rate in req/s.",
+      "type": "timeseries",
+      "gridPos": { "x": 16, "y": 25, "w": 8, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 60,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "stacking": { "mode": "normal", "group": "A" }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "hit" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "green", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "miss" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "red", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(cache_requests_total{job=\"anticapture-gateful\"}[5m])) by (result)",
+          "legendFormat": "{{result}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "type": "row",
+      "title": "Client Traffic",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 35, "w": 24, "h": 1 }
+    },
+    {
+      "id": 4,
+      "title": "Requests by Client Source — Share (donut)",
+      "description": "Split by x-client-source header from the API gateway. Three values: 'anticapture-frontend' (dashboard), 'notification-system' (bot), 'other' (unidentified callers).",
+      "type": "piechart",
+      "gridPos": { "x": 0, "y": 36, "w": 8, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "percentunit"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "notification-system" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "orange", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "anticapture-frontend" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "blue", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "other" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "gray", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "pieType": "donut",
+        "tooltip": { "mode": "single" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "displayLabels": ["percent"]
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(http_server_request_duration_seconds_count{job=\"anticapture-gateway\"}[$__range])) by (client_source)",
+          "legendFormat": "{{client_source}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Requests by Client Source — Rate over time",
+      "description": "req/s per client source at the gateway level, useful for spotting bot spikes vs normal dashboard load.",
+      "type": "timeseries",
+      "gridPos": { "x": 8, "y": 36, "w": 16, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 15,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "notification-system" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "orange", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "anticapture-frontend" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "blue", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "other" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "gray", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateway\"}[5m])) by (client_source)",
+          "legendFormat": "{{client_source}}",
+          "refId": "A"
         }
       ]
     }
