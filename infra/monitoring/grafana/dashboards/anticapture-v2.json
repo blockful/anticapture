@@ -194,13 +194,14 @@
               "Time": true,
               "Time 1": true,
               "Time 2": true,
-              "Time 3": true
+              "Time 3": true,
+              "job": true
             },
             "renameByName": {
               "Value #A": "req/s",
               "Value #B": "p99 latency",
               "Value #C": "error ratio",
-              "job": "DAO",
+              "dao": "DAO",
               "http_route": "route"
             }
           }
@@ -208,22 +209,22 @@
       ],
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route)",
-          "legendFormat": "{{job}}|{{http_route}}",
+          "expr": "label_replace(label_replace(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route), \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
           "instant": true,
           "refId": "A",
           "format": "table"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le, job, http_route))",
-          "legendFormat": "{{job}}|{{http_route}}",
+          "expr": "label_replace(label_replace(histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le, job, http_route)), \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
           "instant": true,
           "refId": "B",
           "format": "table"
         },
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\",http_response_status_code=~\"5..\"}[5m])) by (job, http_route) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route)",
-          "legendFormat": "{{job}}|{{http_route}}",
+          "expr": "label_replace(label_replace(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\",http_response_status_code=~\"5..\"}[5m])) by (job, http_route) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route), \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
           "instant": true,
           "refId": "C",
           "format": "table"
