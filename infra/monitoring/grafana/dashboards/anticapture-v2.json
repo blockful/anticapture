@@ -763,6 +763,185 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "id": 130,
+      "type": "row",
+      "title": "eRPC",
+      "collapsed": true,
+      "gridPos": { "x": 0, "y": 88, "w": 24, "h": 1 },
+      "panels": [
+        {
+          "id": 1301,
+          "title": "Incoming RPS",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 89, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "palette-classic" }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(erpc_network_request_received_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (network, category)",
+              "legendFormat": "{{network}} / {{category}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1302,
+          "title": "Successful Responses RPS",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 89, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "palette-classic" }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(erpc_network_successful_request_total{job=\"anticapture-erpc\"}[1m])) by (network, vendor, category)",
+              "legendFormat": "{{network}} / {{vendor}} / {{category}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1303,
+          "title": "Network-level Critical Errors",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 97, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "color": { "mode": "palette-classic" },
+              "custom": { "fillOpacity": 10 }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(erpc_network_failed_request_total{job=\"anticapture-erpc\", severity=\"critical\"}[1m])) by (network, category, error) > 0",
+              "legendFormat": "{{network}} / {{error}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1304,
+          "title": "Upstream-level Critical Errors",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 97, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "color": { "mode": "palette-classic" },
+              "custom": { "fillOpacity": 10 }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(erpc_upstream_request_errors_total{job=\"anticapture-erpc\", severity=\"critical\", composite=\"none\"}[1m])) by (upstream, network, error) > 0",
+              "legendFormat": "{{upstream}} / {{error}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1305,
+          "title": "Vendor P99 Response Time",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 105, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": { "unit": "s", "color": { "mode": "palette-classic" } },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[1m])) by (le, vendor, category))",
+              "legendFormat": "p99 {{vendor}} / {{category}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1306,
+          "title": "Upstream P99 Response Time",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 105, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": { "unit": "s", "color": { "mode": "palette-classic" } },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[1m])) by (le, upstream, category))",
+              "legendFormat": "p99 {{upstream}} / {{category}}",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
