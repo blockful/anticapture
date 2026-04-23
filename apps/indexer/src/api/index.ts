@@ -1,7 +1,7 @@
 import {
   PROMETHEUS_MIME_TYPE,
   PrometheusSerializer,
-} from "@anticapture/observability";
+} from "@blockful/observability";
 import { Hono } from "hono/tiny";
 
 import { exporter } from "@/metrics";

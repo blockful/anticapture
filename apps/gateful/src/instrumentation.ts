@@ -1,4 +1,4 @@
-import { createObservabilityProvider } from "@anticapture/observability";
+import { createObservabilityProvider } from "@blockful/observability";
 
 const observability = createObservabilityProvider("anticapture-gateful");
 

@@ -23,7 +23,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@anticapture/observability": "workspace:*",
+    "@blockful/observability": "workspace:*",
     "@hono/node-server": "^1.19.9",
     "@hono/zod-openapi": "^1.2.2",
     "@opentelemetry/api": "^1.9.0",

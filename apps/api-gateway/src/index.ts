@@ -3,7 +3,7 @@ import { createMeshHTTPHandler } from "@graphql-mesh/http";
 import { createServer } from "node:http";
 import { writeFileSync } from "node:fs";
 import { printSchema } from "graphql";
-import { collectPrometheusMetrics } from "@anticapture/observability";
+import { collectPrometheusMetrics } from "@blockful/observability";
 
 import "./_dev-reload";
 import config from "../meshrc";

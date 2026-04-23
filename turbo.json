@@ -73,7 +73,7 @@
       ]
     },
     "typecheck": {
-      "dependsOn": ["^build", "@anticapture/observability#build"],
+      "dependsOn": ["^build", "@blockful/observability#build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "test": {
@@ -92,7 +92,7 @@
       "outputs": ["drizzle/**"]
     },
     "@anticapture/api#dev": {
-      "dependsOn": ["@anticapture/observability#build"],
+      "dependsOn": ["@blockful/observability#build"],
       "passThroughEnv": ["*"]
     },
     "@anticapture/indexer": {

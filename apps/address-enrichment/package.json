@@ -13,8 +13,9 @@
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },
   "dependencies": {
-    "@anticapture/observability": "workspace:*",
+    "@blockful/observability": "workspace:*",
     "@hono/node-server": "^1.13.7",
+    "@opentelemetry/api": "^1.9.0",
     "@hono/swagger-ui": "^0.5.1",
     "@hono/zod-openapi": "^0.19.6",
     "dotenv": "^17.2.4",

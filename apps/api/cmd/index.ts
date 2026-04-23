@@ -2,7 +2,7 @@ import {
   PROMETHEUS_MIME_TYPE,
   PrometheusSerializer,
   wrapWithTracing,
-} from "@anticapture/observability";
+} from "@blockful/observability";
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
