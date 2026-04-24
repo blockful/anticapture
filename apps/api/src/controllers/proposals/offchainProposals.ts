@@ -64,6 +64,7 @@ export function offchainProposals(
       description:
         "Returns offchain proposals whose title or identifier partially matches the query.",
       tags: ["offchain", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         query: OffchainProposalSearchRequestSchema,
       },
