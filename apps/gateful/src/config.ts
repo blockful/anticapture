@@ -10,24 +10,25 @@ const envSchema = z.object({
   REDIS_URL: z.string().optional(),
 });
 
-function loadDaoApis(
+function loadDaoMap(
+  prefix: string,
   source: Record<string, string | undefined> = process.env,
 ): Map<string, string> {
-  const daoApis = new Map<string, string>();
+  const result = new Map<string, string>();
   const urlSchema = z.url();
 
   for (const [key, value] of Object.entries(source)) {
-    if (key.startsWith("DAO_API_") && value) {
+    if (key.startsWith(prefix) && value) {
       const parsed = urlSchema.safeParse(value);
       if (!parsed.success) {
         throw new Error(`Invalid URL for ${key}: ${parsed.error.message}`);
       }
-      const daoName = key.replace("DAO_API_", "").toLowerCase();
-      daoApis.set(daoName, parsed.data);
+      const daoName = key.replace(prefix, "").toLowerCase();
+      result.set(daoName, parsed.data);
     }
   }
 
-  return daoApis;
+  return result;
 }
 
 const env = envSchema.parse(process.env);
@@ -37,5 +38,6 @@ export const config = {
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
   blockfulApiToken: env.BLOCKFUL_API_TOKEN,
   redisUrl: env.REDIS_URL,
-  daoApis: loadDaoApis(),
+  daoApis: loadDaoMap("DAO_API_"),
+  daoRelayers: loadDaoMap("DAO_RELAYER_"),
 };

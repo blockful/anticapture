@@ -13,6 +13,7 @@ import { createRedisClient } from "./cache/redis.js";
 import { cacheMiddleware } from "./middlewares/cache.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
+import { relayerProxy } from "./proxy/relayer.js";
 import { addressEnrichment } from "./resolvers/address-enrichment/route.js";
 import { daos } from "./resolvers/daos/route.js";
 import { DaosService } from "./resolvers/daos/service.js";
@@ -88,6 +89,8 @@ app.get("/docs/json", async (c) => {
   return c.json(await getOpenApiSpec());
 });
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
+
+relayerProxy(app, config.daoRelayers);
 
 // Proxy catch-all (must be last)
 proxy(app, config.daoApis);
