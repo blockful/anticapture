@@ -8,9 +8,11 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
 
 import { config } from "./config.js";
+import { CircuitOpenError } from "./shared/circuit-breaker.js";
 import { createRedisClient } from "./cache/redis.js";
 import { exporter } from "./instrumentation.js";
 import { logger } from "./logger.js";
@@ -23,6 +25,7 @@ import { daos } from "./resolvers/daos/route.js";
 import { DaosService } from "./resolvers/daos/service.js";
 import { averageDelegation } from "./resolvers/delegation/route.js";
 import { DelegationService } from "./resolvers/delegation/service.js";
+import { CircuitBreakerRegistry } from "./shared/circuit-breaker-registry.js";
 import { storeOpenApiSpec } from "./upstream-docs.js";
 
 // "verbatim" preserves the DNS response order so AAAA records
@@ -30,6 +33,13 @@ import { storeOpenApiSpec } from "./upstream-docs.js";
 dns.setDefaultResultOrder("verbatim");
 
 const app = new OpenAPIHono();
+
+app.onError((err, c) => {
+  if (err instanceof CircuitOpenError)
+    return c.json({ error: "DAO service temporarily unavailable" }, 503);
+  if (err instanceof HTTPException) return err.getResponse();
+  return c.json({ error: "Internal server error" }, 500);
+});
 
 app.use("*", cors({ origin: "*" }));
 app.use("*", requestLogger());
@@ -66,13 +76,15 @@ logger.info(
   `discovered ${config.daoApis.size} DAO APIs`,
 );
 
+const registry = new CircuitBreakerRegistry(config.circuitBreaker);
+
 // OpenAPI routes
-health(app);
+health(app, registry);
 addressEnrichment(app, config.addressEnrichmentUrl);
 
 // Aggregation routes
-const daosService = new DaosService(config.daoApis);
-const delegationService = new DelegationService(config.daoApis);
+const daosService = new DaosService(config.daoApis, registry);
+const delegationService = new DelegationService(config.daoApis, registry);
 
 daos(app, daosService);
 averageDelegation(app, delegationService);
@@ -103,7 +115,7 @@ app.get("/docs/json", async (c) => {
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
 // Proxy catch-all (must be last)
-proxy(app, config.daoApis);
+proxy(app, config.daoApis, registry);
 
 logger.info({ port: config.port }, "Gateful REST API running");
 

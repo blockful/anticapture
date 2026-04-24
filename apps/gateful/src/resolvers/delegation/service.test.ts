@@ -1,5 +1,7 @@
 import { vi } from "vitest";
 
+import { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry";
+
 import { DelegationService } from "./service";
 import type { DelegationPercentageResponse } from "./service";
 
@@ -43,7 +45,7 @@ describe("DelegationService", () => {
   let service: DelegationService;
 
   beforeEach(() => {
-    service = new DelegationService(daoApis);
+    service = new DelegationService(daoApis, new CircuitBreakerRegistry());
   });
 
   afterEach(() => {

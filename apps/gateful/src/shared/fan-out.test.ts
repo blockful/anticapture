@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 
+import { CircuitBreakerRegistry } from "./circuit-breaker-registry";
 import { fanOutGet } from "./fan-out";
 
 // ---------------------------------------------------------------------------
@@ -8,6 +9,7 @@ import { fanOutGet } from "./fan-out";
 // ---------------------------------------------------------------------------
 
 const server = setupServer();
+const registry = new CircuitBreakerRegistry();
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
@@ -39,7 +41,7 @@ describe("fanOutGet", () => {
       ["uni", "http://uni-api"],
     ]);
 
-    const result = await fanOutGet(daoApis, "/dao");
+    const result = await fanOutGet(daoApis, registry, "/dao");
 
     expect(result).toEqual({
       data: new Map([
@@ -61,7 +63,7 @@ describe("fanOutGet", () => {
       ["uni", "http://uni-api"],
     ]);
 
-    const result = await fanOutGet(daoApis, "/dao");
+    const result = await fanOutGet(daoApis, registry, "/dao");
 
     expect(result).toEqual({
       data: new Map([
@@ -90,7 +92,7 @@ describe("fanOutGet", () => {
       ["uni", "http://uni-api"],
     ]);
 
-    const result = await fanOutGet(daoApis, "/dao");
+    const result = await fanOutGet(daoApis, registry, "/dao");
 
     expect(result).toEqual({
       data: new Map([["uni", { id: "uni" }]]),
