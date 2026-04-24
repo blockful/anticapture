@@ -108,7 +108,6 @@ const ActionItem = ({
         </div>
         <DefaultLink
           href={`${blockExplorerUrl}/address/${target}`}
-          openInNewTab
           className="text-secondary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider"
         >
           Contract
@@ -121,7 +120,6 @@ const ActionItem = ({
           </p>
           <DefaultLink
             href={`${blockExplorerUrl}/address/${target}`}
-            openInNewTab
             className="font-mono text-sm font-normal not-italic leading-5"
           >
             {target && (

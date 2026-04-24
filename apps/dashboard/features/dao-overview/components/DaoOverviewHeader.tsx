@@ -73,7 +73,6 @@ export const DaoOverviewHeader = ({
         {daoOverview.contracts?.governor && (
           <DefaultLink
             href={`${baseLinkRoute}/${daoOverview.contracts?.governor}`}
-            openInNewTab
             className="after:text-border-contrast text-xs uppercase after:content-['•']"
           >
             Governor
@@ -82,7 +81,6 @@ export const DaoOverviewHeader = ({
         {daoOverview.contracts?.timelock && (
           <DefaultLink
             href={`${baseLinkRoute}/${daoOverview.contracts.timelock}`}
-            openInNewTab
             className="after:text-border-contrast text-xs uppercase after:content-['•']"
           >
             Timelock
@@ -91,7 +89,6 @@ export const DaoOverviewHeader = ({
         {daoOverview.snapshot && (
           <DefaultLink
             href={daoOverview.snapshot || "#"}
-            openInNewTab
             className="after:text-border-contrast text-xs uppercase after:content-['•']"
           >
             Snapshot
@@ -102,7 +99,6 @@ export const DaoOverviewHeader = ({
             <DefaultLink
               key={address}
               href={`${baseLinkRoute}/${address}`}
-              openInNewTab
               className={cn(
                 `after:text-border-contrast text-xs uppercase`,
                 (i < daoOverview.contracts.token.length - 1 ||
@@ -116,7 +112,6 @@ export const DaoOverviewHeader = ({
         ) : (
           <DefaultLink
             href={`${baseLinkRoute}/${daoOverview.contracts?.token}`}
-            openInNewTab
             className={cn(
               `after:text-border-contrast text-xs uppercase`,
               daoConfig.forumLink && `after:content-['•']`,
@@ -126,11 +121,7 @@ export const DaoOverviewHeader = ({
           </DefaultLink>
         )}
         {daoConfig.forumLink && (
-          <DefaultLink
-            href={daoConfig.forumLink}
-            openInNewTab
-            className="text-xs uppercase"
-          >
+          <DefaultLink href={daoConfig.forumLink} className="text-xs uppercase">
             Forum
           </DefaultLink>
         )}

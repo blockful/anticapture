@@ -3,7 +3,9 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Github, Twitter } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { TelegramIcon } from "@/shared/components/icons/TelegramIcon";
 import { useGitHubRelease } from "@/shared/hooks";
@@ -28,6 +30,7 @@ export type FooterProps = VariantProps<typeof footerVariant> & {
 };
 
 export const Footer = ({ variant, className }: FooterProps) => {
+  const router = useRouter();
   const { data: release } = useGitHubRelease();
   const version = release?.tag_name || "v1.1.0";
   const releaseUrl =
@@ -35,13 +38,12 @@ export const Footer = ({ variant, className }: FooterProps) => {
 
   return (
     <footer
-      className={cn(footerVariant({ variant }), className, "pb-20 lg:pb-0")}
+      className={cn(footerVariant({ variant }), className, "pb-20 lg:pb-2")}
     >
       <div className="flex flex-col items-center justify-center gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2">
           <DefaultLink
             href={releaseUrl}
-            openInNewTab
             variant="default"
             className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider"
           >
@@ -52,35 +54,31 @@ export const Footer = ({ variant, className }: FooterProps) => {
           </p>
           <DefaultLink
             href="https://blockful.io/"
-            openInNewTab
             variant="default"
             className="text-alternative-xs text-secondary flex font-mono uppercase leading-none"
           >
             Blockful
           </DefaultLink>
         </div>
-        <div className="flex gap-2 lg:hidden">
+        <div className="flex items-baseline gap-2 lg:hidden">
           <DefaultLink
             href="https://blockful.gitbook.io/anticapture/"
-            openInNewTab
             variant="default"
             className="uppercase leading-none"
           >
             Docs
           </DefaultLink>
           <p className="text-alternative-xs text-secondary">/</p>
-          <DefaultLink
-            href="/terms-of-service"
-            openInNewTab
-            variant="default"
-            className="uppercase leading-none"
+          <Button
+            variant="link"
+            onClick={() => router.push("/terms-of-service")}
+            className="text-secondary hover:text-primary font-mono text-[13px] font-medium uppercase tracking-wider"
           >
             Terms of Service
-          </DefaultLink>
+          </Button>
           <p className="text-alternative-xs text-secondary">/</p>
           <DefaultLink
             href="https://surveys.hotjar.com/346670a7-5423-4d65-8e93-30d0191a926a"
-            openInNewTab
             variant="default"
             className="uppercase leading-none"
           >
@@ -88,10 +86,9 @@ export const Footer = ({ variant, className }: FooterProps) => {
           </DefaultLink>
         </div>
         <div className="flex items-center gap-2">
-          <div className="hidden lg:flex">
+          <div className="hidden items-baseline lg:flex">
             <DefaultLink
               href="https://blockful.gitbook.io/anticapture/"
-              openInNewTab
               variant="default"
               className="uppercase leading-none"
             >
@@ -100,20 +97,18 @@ export const Footer = ({ variant, className }: FooterProps) => {
             <p className="text-dimmed mx-2 hidden items-center uppercase lg:flex">
               /
             </p>
-            <DefaultLink
-              href="/terms-of-service"
-              openInNewTab
-              variant="default"
-              className="uppercase leading-none"
+            <Button
+              variant="link"
+              onClick={() => router.push("/terms-of-service")}
+              className="text-secondary hover:text-primary font-mono text-[13px] font-medium uppercase tracking-wider"
             >
               Terms of Service
-            </DefaultLink>
+            </Button>
             <p className="text-dimmed mx-2 hidden items-center uppercase lg:flex">
               /
             </p>
             <DefaultLink
               href="https://surveys.hotjar.com/346670a7-5423-4d65-8e93-30d0191a926a"
-              openInNewTab
               variant="default"
               className="uppercase leading-none"
             >

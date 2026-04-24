@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
-import { UnderlinedButton } from "@/shared/components/design-system/links/underlined-link";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import type { GovernanceImplementationField } from "@/shared/dao-config/types";
 import { RiskLevel } from "@/shared/types/enums/RiskLevel";
 import { cn } from "@/shared/utils";
@@ -100,12 +100,13 @@ export const FrameworkOverviewCard = ({
                       <DotFilledIcon
                         className={cn("size-4 shrink-0", group.config.dotColor)}
                       />
-                      <UnderlinedButton
-                        className="text-primary border-border-contrast"
+                      <Button
+                        variant="link"
+                        className="font-mono text-[13px] font-medium uppercase tracking-wider"
                         onClick={() => onMetricClick?.(field)}
                       >
                         {field.name}
-                      </UnderlinedButton>
+                      </Button>
                     </div>
                   ))}
                 </div>

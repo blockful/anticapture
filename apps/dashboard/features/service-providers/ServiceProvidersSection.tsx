@@ -79,7 +79,6 @@ export const ServiceProvidersSection = () => {
                     <div className="mt-3 flex items-center gap-1.5 sm:mt-0">
                       <DefaultLink
                         size="sm"
-                        openInNewTab
                         href={activeProgramDef.discussionUrl}
                       >
                         DISCUSSION
@@ -87,7 +86,6 @@ export const ServiceProvidersSection = () => {
                       <BulletDivider />
                       <DefaultLink
                         size="sm"
-                        openInNewTab
                         href={activeProgramDef.budgetProposal.forumUrl}
                       >
                         {activeProgramDef.budgetProposal.title.toUpperCase()}
@@ -95,7 +93,6 @@ export const ServiceProvidersSection = () => {
                       <BulletDivider />
                       <DefaultLink
                         size="sm"
-                        openInNewTab
                         href={activeProgramDef.selectionProposal.forumUrl}
                       >
                         PROVIDER SELECTION

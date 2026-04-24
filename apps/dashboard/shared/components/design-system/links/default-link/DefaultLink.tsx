@@ -28,14 +28,13 @@ export const defaultLinkVariants = cva(
 export type DefaultLinkProps = LinkProps &
   VariantProps<typeof defaultLinkVariants> & {
     children?: ReactNode;
-    openInNewTab: boolean;
     className?: string;
   };
 
+// For external URLs (http/https) only. Use Button variant="link" for internal navigation.
 export const DefaultLink = ({
   children,
   href,
-  openInNewTab = true,
   variant,
   size,
   className,
@@ -44,7 +43,7 @@ export const DefaultLink = ({
   return (
     <Link
       href={href}
-      target={openInNewTab ? "_blank" : "_self"}
+      target="_blank"
       rel="noopener noreferrer"
       className={cn(defaultLinkVariants({ variant, size }), className)}
       {...props}

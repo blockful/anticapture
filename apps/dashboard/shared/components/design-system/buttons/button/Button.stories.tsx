@@ -33,7 +33,7 @@ const meta: Meta<ButtonStoryArgs> = {
     },
     variant: {
       control: "select",
-      options: ["primary", "outline", "ghost", "destructive"],
+      options: ["primary", "outline", "ghost", "destructive", "link"],
       description: "Button variant",
     },
     showIcon: {
@@ -149,6 +149,10 @@ export const Variants: Story = {
         <Button variant="destructive">Button</Button>
         <span className="text-xs text-gray-400">Destructive</span>
       </div>
+      <div className="flex flex-col items-center gap-2">
+        <Button variant="link">Button</Button>
+        <span className="text-xs text-gray-400">Link</span>
+      </div>
     </div>
   ),
 };
@@ -159,4 +163,17 @@ export const WithCustomStyling: Story = {
       "border-2 border-blue-500 shadow-lg bg-blue-600 hover:bg-blue-700",
     children: "Custom Button",
   },
+};
+
+export const LinkAsNavigation: Story = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      <Button variant="link" onClick={() => console.log("navigate")}>
+        Internal navigation
+      </Button>
+      <Button variant="link" disabled>
+        Disabled link
+      </Button>
+    </div>
+  ),
 };

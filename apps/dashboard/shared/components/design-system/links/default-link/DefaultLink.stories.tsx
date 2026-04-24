@@ -13,7 +13,6 @@ const meta: Meta<typeof DefaultLink> = {
   tags: ["autodocs"],
   argTypes: {
     href: { control: "text" },
-    openInNewTab: { control: "boolean" },
     variant: {
       control: "select",
       options: ["default", "highlight"],
@@ -28,7 +27,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     href: "https://example.com",
-    openInNewTab: true,
     variant: "default",
     children: "Example Link",
   },
@@ -37,25 +35,14 @@ export const Default: Story = {
 export const Highlight: Story = {
   args: {
     href: "https://example.com",
-    openInNewTab: true,
     variant: "highlight",
     children: "Highlighted Link",
-  },
-};
-
-export const InternalLink: Story = {
-  args: {
-    href: "/example",
-    openInNewTab: false,
-    variant: "default",
-    children: "Internal Link",
   },
 };
 
 export const WithIcon: Story = {
   args: {
     href: "https://example.com",
-    openInNewTab: true,
     variant: "default",
     children: (
       <>
