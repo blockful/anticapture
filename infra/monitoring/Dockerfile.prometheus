@@ -1,7 +1,6 @@
 FROM prom/prometheus:latest AS prometheus
 
 FROM alpine:3.19
-ARG CACHEBUST=1
 RUN apk add --no-cache gettext
 COPY --from=prometheus /bin/prometheus /bin/prometheus
 COPY --from=prometheus /bin/promtool /bin/promtool

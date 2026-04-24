@@ -1,5 +1,4 @@
 FROM prom/alertmanager:latest
-ARG CACHEBUST=1
 COPY alertmanager.yml /etc/alertmanager/config.yml.tmpl
 COPY slack.tmpl /etc/alertmanager/slack.tmpl
 COPY entrypoint.alertmanager.sh /entrypoint.sh
