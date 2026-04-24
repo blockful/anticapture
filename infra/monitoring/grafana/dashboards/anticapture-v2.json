@@ -251,7 +251,7 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count[1m])) by (http_route, http_request_method)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[1m])) by (http_route, http_request_method)",
           "legendFormat": "{{http_request_method}} {{http_route}}",
           "refId": "A"
         }
@@ -273,7 +273,7 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[1m])) by (http_route)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\", http_response_status_code=~\"5..\"}[1m])) by (http_route)",
           "legendFormat": "5xx {{http_route}}",
           "refId": "A"
         }
@@ -292,17 +292,17 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
           "legendFormat": "p99",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
           "legendFormat": "p95",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
           "legendFormat": "p50",
           "refId": "C"
         }
@@ -321,7 +321,7 @@
       "options": { "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le, http_route))",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le, http_route))",
           "legendFormat": "p99 {{http_route}}",
           "refId": "A"
         }
@@ -344,7 +344,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(http_server_request_duration_seconds_count[5m])) by (http_response_status_code)",
+          "expr": "sum(increase(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (http_response_status_code)",
           "legendFormat": "{{http_response_status_code}}",
           "refId": "A"
         }
@@ -523,7 +523,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(http_server_request_duration_seconds_count{job=\"anticapture-gateway\"}[$__range])) by (client_source)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateway\"}[5m])) by (client_source)",
           "legendFormat": "{{client_source}}",
           "instant": true,
           "refId": "A"
@@ -824,7 +824,7 @@
           },
           "targets": [
             {
-              "expr": "sum(rate(erpc_network_successful_request_total{job=\"anticapture-erpc\"}[1m])) by (network, vendor, category)",
+              "expr": "sum(rate(erpc_network_successful_request_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (network, vendor, category)",
               "legendFormat": "{{network}} / {{vendor}} / {{category}}",
               "refId": "A"
             }
@@ -854,7 +854,7 @@
           },
           "targets": [
             {
-              "expr": "sum(increase(erpc_network_failed_request_total{job=\"anticapture-erpc\", severity=\"critical\"}[1m])) by (network, category, error) > 0",
+              "expr": "sum(increase(erpc_network_failed_request_total{job=\"anticapture-erpc\", severity=\"critical\"}[$__rate_interval])) by (network, category, error) > 0",
               "legendFormat": "{{network}} / {{error}}",
               "refId": "A"
             }
@@ -884,7 +884,7 @@
           },
           "targets": [
             {
-              "expr": "sum(increase(erpc_upstream_request_errors_total{job=\"anticapture-erpc\", severity=\"critical\", composite=\"none\"}[1m])) by (upstream, network, error) > 0",
+              "expr": "sum(increase(erpc_upstream_request_errors_total{job=\"anticapture-erpc\", severity=\"critical\", composite=\"none\"}[$__rate_interval])) by (upstream, network, error) > 0",
               "legendFormat": "{{upstream}} / {{error}}",
               "refId": "A"
             }
@@ -910,7 +910,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[1m])) by (le, vendor, category))",
+              "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[$__rate_interval])) by (le, vendor, category))",
               "legendFormat": "p99 {{vendor}} / {{category}}",
               "refId": "A"
             }
@@ -936,7 +936,7 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[1m])) by (le, upstream, category))",
+              "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[$__rate_interval])) by (le, upstream, category))",
               "legendFormat": "p99 {{upstream}} / {{category}}",
               "refId": "A"
             }

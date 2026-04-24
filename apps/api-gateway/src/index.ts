@@ -9,7 +9,7 @@ import "./_dev-reload";
 import config from "../meshrc";
 import { exporter } from "./instrumentation";
 import { validateAuthToken } from "./auth";
-import { httpRequestDuration, httpRequestTotal } from "./metrics";
+import { httpRequestDuration } from "./metrics";
 
 function resolveClientSource(header: string | undefined): string {
   if (header === "notification-system") return "notification-system";
@@ -60,7 +60,6 @@ const bootstrap = async () => {
         client_source: clientSource,
       };
       httpRequestDuration.record(duration, labels);
-      httpRequestTotal.add(1, labels);
     });
 
     handler(req, res);
