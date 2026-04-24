@@ -15,8 +15,8 @@ const config: CodegenConfig = {
         "typescript-react-apollo",
       ],
       config: {
-        dedupeFragments: true,
         avoidOptionals: true,
+        dedupeFragments: true,
         strictScalars: true,
         scalars: {
           DateTime: "string",
