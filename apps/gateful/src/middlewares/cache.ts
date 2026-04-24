@@ -44,7 +44,7 @@ export function cacheMiddleware(redis: CacheStore) {
     // DAO segment (useful for per-DAO cache panels) while collapsing all
     // sub-resource segments so each DAO produces exactly one time-series.
     const [, dao] = c.req.path.split("/");
-    const route = dao ? `/${dao}/*` : "/";
+    const route = dao ? `/${dao.toLowerCase()}/*` : "/";
 
     // --- Request phase: check for a cached response ---
     // Fail open: if Redis is unavailable, .catch returns null and we proceed normally.
