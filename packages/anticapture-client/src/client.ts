@@ -109,6 +109,8 @@ const getHeaders = (
 ) => {
   const resolvedHeaders = new Headers(headers);
 
+  resolvedHeaders.set("x-client-source", "anticapture-frontend");
+
   if (data !== undefined && data !== null && !isFormData(data)) {
     resolvedHeaders.set("Content-Type", "application/json");
   }
