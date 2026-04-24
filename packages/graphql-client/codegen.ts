@@ -11,8 +11,8 @@ const config: CodegenConfig = {
     "./generated/hooks.ts": {
       plugins: [
         "typescript",
-        "typescript-operations",
         "typescript-react-apollo",
+        "typescript-operations",
       ],
       config: {
         dedupeFragments: true,
