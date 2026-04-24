@@ -4,7 +4,7 @@ groups:
     rules:
       # Service is not responding (no scrape data for 1 minute)
       - alert: ServiceDown
-        expr: up == 0 and on(job) group_left() (group by(job) ({job!~".*-indexer"}))
+        expr: up{job!~".*-indexer"} == 0
         for: 1m
         labels:
           severity: critical
@@ -17,7 +17,7 @@ groups:
 
       # Indexer is not responding — longer window to account for slow startup
       - alert: IndexerDown
-        expr: up == 0 and on(job) group_left() (group by(job) ({job=~".*-indexer"}))
+        expr: up{job=~".*-indexer"} == 0
         for: 10m
         labels:
           severity: critical
