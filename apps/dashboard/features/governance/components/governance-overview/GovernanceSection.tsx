@@ -8,7 +8,7 @@ import {
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Building2, Landmark, MessageSquare, Plus, Search } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -37,6 +37,11 @@ import { EmptyState } from "@/shared/components/design-system/table/components/E
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import daoConfigByDaoId from "@/shared/dao-config";
+import {
+  isWhitelabelDao,
+  getWhitelabelBasePath,
+} from "@/shared/utils/whitelabel";
 
 const PROPOSAL_TABS = [
   { label: "Onchain", value: "onchain" },
@@ -45,7 +50,13 @@ const PROPOSAL_TABS = [
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
+  const pathname = usePathname();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+
+  const basePath = getWhitelabelBasePath({ daoId: daoIdEnum, pathname });
+  const isWhitelabel =
+    basePath.startsWith("/whitelabel/") ||
+    (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoIdEnum]));
   const hasOffchain = !!daoConfig[daoIdEnum]?.offchainProposals;
   const { decimals } = daoConfig[daoIdEnum];
   const router = useRouter();
@@ -201,15 +212,17 @@ export const GovernanceSection = () => {
           </a>
         </Button>
       )}
-      <Button
-        variant="primary"
-        size="md"
-        onClick={handleNewProposal}
-        className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
-      >
-        <Plus className="size-4" />
-        New Proposal
-      </Button>
+      {isWhitelabel && (
+        <Button
+          variant="primary"
+          size="md"
+          onClick={handleNewProposal}
+          className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
+        >
+          <Plus className="size-4" />
+          New Proposal
+        </Button>
+      )}
     </div>
   );
 
