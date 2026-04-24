@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { getAddress } from "viem";
 
-import { env } from "@/env";
 import {
   RedisRateLimitStorage,
   buildKey,
@@ -9,7 +8,7 @@ import {
   type RedisClient,
 } from "./rate-limit-storage";
 
-const MAX_PER_DAY = env.MAX_RELAY_PER_ADDRESS_PER_DAY;
+const MAX_PER_DAY = 3;
 
 /**
  * In-memory counter store for fixed-window rate limiting tests.
