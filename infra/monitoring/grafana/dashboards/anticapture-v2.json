@@ -1,0 +1,948 @@
+{
+  "title": "Anticapture V2",
+  "uid": "anticapture-v2",
+  "editable": true,
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "15s",
+  "time": { "from": "now-30m", "to": "now" },
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "Service Health",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+    },
+    {
+      "id": 1,
+      "title": "API Health",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": { "1": { "text": "UP", "color": "green" } }
+            },
+            {
+              "type": "value",
+              "options": { "0": { "text": "DOWN", "color": "red" } }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "label_replace(label_replace(up{job=~\"anticapture-.*-api\"}, \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Indexer Health",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": { "1": { "text": "UP", "color": "green" } }
+            },
+            {
+              "type": "value",
+              "options": { "0": { "text": "DOWN", "color": "red" } }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "label_replace(label_replace(up{job=~\"anticapture-.*-indexer\"}, \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-indexer\")",
+          "legendFormat": "{{dao}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "type": "row",
+      "title": "Traffic Overview",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 11, "w": 24, "h": 1 }
+    },
+    {
+      "id": 3,
+      "title": "DAO × Route — Request Rate / Latency / Error Rate",
+      "description": "One row per (DAO, route). Columns: req/s (5m avg), p99 latency, error ratio. Error ratio cell is threshold-colored: green <1%, yellow <5%, red ≥5%.",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "req/s" },
+            "properties": [
+              { "id": "unit", "value": "reqps" },
+              { "id": "decimals", "value": 3 },
+              { "id": "custom.width", "value": 100 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "p99 latency" },
+            "properties": [
+              { "id": "unit", "value": "s" },
+              { "id": "decimals", "value": 3 },
+              { "id": "custom.width", "value": 120 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "error ratio" },
+            "properties": [
+              { "id": "unit", "value": "percentunit" },
+              { "id": "decimals", "value": 2 },
+              { "id": "custom.width", "value": 120 },
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-background" }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 0.01 },
+                    { "color": "red", "value": 0.05 }
+                  ]
+                }
+              },
+              { "id": "color", "value": { "mode": "thresholds" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "sortBy": [{ "displayName": "error ratio", "desc": true }],
+        "footer": { "show": false },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "transformations": [
+        { "id": "merge", "options": {} },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "job": true
+            },
+            "renameByName": {
+              "Value #A": "req/s",
+              "Value #B": "p99 latency",
+              "Value #C": "error ratio",
+              "dao": "DAO",
+              "http_route": "route"
+            }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "expr": "label_replace(label_replace(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route), \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
+          "instant": true,
+          "refId": "A",
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(label_replace(histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le, job, http_route)), \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
+          "instant": true,
+          "refId": "B",
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(label_replace(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\",http_response_status_code=~\"5..\"}[5m])) by (job, http_route) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route), \"dao\", \"$1\", \"job\", \".*\"), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
+          "instant": true,
+          "refId": "C",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "type": "row",
+      "title": "Traffic Detail",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 1 }
+    },
+    {
+      "id": 1101,
+      "title": "Request Rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 25, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" } },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[1m])) by (http_route, http_request_method)",
+          "legendFormat": "{{http_request_method}} {{http_route}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 1102,
+      "title": "Error Rate (5xx)",
+      "type": "timeseries",
+      "gridPos": { "x": 8, "y": 25, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\", http_response_status_code=~\"5..\"}[1m])) by (http_route)",
+          "legendFormat": "5xx {{http_route}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 1103,
+      "title": "P99 / P95 / P50 Latency",
+      "type": "timeseries",
+      "gridPos": { "x": 16, "y": 25, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "s", "color": { "mode": "palette-classic" } },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
+          "legendFormat": "p99",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
+          "legendFormat": "p50",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 1104,
+      "title": "Latency by Route (p99)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 33, "w": 16, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "s", "color": { "mode": "palette-classic" } },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le, http_route))",
+          "legendFormat": "p99 {{http_route}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 1105,
+      "title": "Status Code Breakdown",
+      "type": "piechart",
+      "gridPos": { "x": 16, "y": 33, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (http_response_status_code)",
+          "legendFormat": "{{http_response_status_code}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "type": "row",
+      "title": "Gateful Cache",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 41, "w": 24, "h": 1 }
+    },
+    {
+      "id": 6,
+      "title": "Cache Hit Rate (gateful)",
+      "description": "hits / (hits + misses) per route over time. A healthy cache stays well above 50%.",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 42, "w": 16, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "showPoints": "never"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "green", "value": 0.8 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(cache_requests_total{job=\"anticapture-gateful\", result=\"hit\"}[5m])) by (route) / sum(rate(cache_requests_total{job=\"anticapture-gateful\"}[5m])) by (route)",
+          "legendFormat": "{{route}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Cache Hits vs Misses (gateful)",
+      "description": "Absolute hit and miss rate in req/s.",
+      "type": "timeseries",
+      "gridPos": { "x": 16, "y": 42, "w": 8, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 60,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "stacking": { "mode": "normal", "group": "A" }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "hit" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "green", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "miss" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "red", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(cache_requests_total{job=\"anticapture-gateful\"}[5m])) by (result)",
+          "legendFormat": "{{result}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "type": "row",
+      "title": "Client Traffic",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 52, "w": 24, "h": 1 }
+    },
+    {
+      "id": 4,
+      "title": "Requests by Client Source — Share (donut)",
+      "description": "Split by x-client-source header from the API gateway. Three values: 'anticapture-frontend' (dashboard), 'notification-system' (bot), 'other' (unidentified callers).",
+      "type": "piechart",
+      "gridPos": { "x": 0, "y": 53, "w": 8, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "percentunit"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "notification-system" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "orange", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "anticapture-frontend" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "blue", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "other" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "gray", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "pieType": "donut",
+        "tooltip": { "mode": "single" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "displayLabels": ["percent"]
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateway\"}[5m])) by (client_source)",
+          "legendFormat": "{{client_source}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Requests by Client Source — Rate over time",
+      "description": "req/s per client source at the gateway level, useful for spotting bot spikes vs normal dashboard load.",
+      "type": "timeseries",
+      "gridPos": { "x": 8, "y": 53, "w": 16, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 15,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "notification-system" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "orange", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "anticapture-frontend" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "blue", "mode": "fixed" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "other" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "gray", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateway\"}[5m])) by (client_source)",
+          "legendFormat": "{{client_source}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 120,
+      "type": "row",
+      "title": "System Metrics",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 63, "w": 24, "h": 1 }
+    },
+    {
+      "id": 1209,
+      "title": "Process CPU Usage %",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 64, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "sum(process_cpu_utilization) by (job, process_cpu_state)",
+          "legendFormat": "{{job}} - {{process_cpu_state}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12010,
+      "title": "Process Memory Usage",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 64, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "color": { "mode": "palette-classic" } },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "sum(process_memory_usage) by (job, process_memory_type)",
+          "legendFormat": "{{job}} - {{process_memory_type}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12011,
+      "title": "System CPU Usage %",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 72, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "sum(system_cpu_utilization) by (system_cpu_state)",
+          "legendFormat": "{{system_cpu_state}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12012,
+      "title": "System Memory Usage",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 72, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "color": { "mode": "palette-classic" } },
+        "overrides": []
+      },
+      "options": { "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "sum(system_memory_usage) by (system_memory_state)",
+          "legendFormat": "{{system_memory_state}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 1207,
+      "title": "RPC Request Rate",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 80, "w": 16, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "pointSize": 5,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "none" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (method) (rate(rpc_requests_total[5m]))",
+          "legendFormat": "{{method}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 1208,
+      "title": "RPC Requests Total",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 80, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "sum by (method) (rpc_requests_total)",
+          "legendFormat": "{{method}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 130,
+      "type": "row",
+      "title": "eRPC",
+      "collapsed": true,
+      "gridPos": { "x": 0, "y": 88, "w": 24, "h": 1 },
+      "panels": [
+        {
+          "id": 1301,
+          "title": "Incoming RPS",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 89, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "palette-classic" }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(erpc_network_request_received_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (network, category)",
+              "legendFormat": "{{network}} / {{category}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1302,
+          "title": "Successful Responses RPS",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 89, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "palette-classic" }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(erpc_network_successful_request_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (network, vendor, category)",
+              "legendFormat": "{{network}} / {{vendor}} / {{category}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1303,
+          "title": "Network-level Critical Errors",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 97, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "color": { "mode": "palette-classic" },
+              "custom": { "fillOpacity": 10 }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(erpc_network_failed_request_total{job=\"anticapture-erpc\", severity=\"critical\"}[$__rate_interval])) by (network, category, error) > 0",
+              "legendFormat": "{{network}} / {{error}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1304,
+          "title": "Upstream-level Critical Errors",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 97, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "color": { "mode": "palette-classic" },
+              "custom": { "fillOpacity": 10 }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(erpc_upstream_request_errors_total{job=\"anticapture-erpc\", severity=\"critical\", composite=\"none\"}[$__rate_interval])) by (upstream, network, error) > 0",
+              "legendFormat": "{{upstream}} / {{error}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1305,
+          "title": "Vendor P99 Response Time",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 105, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": { "unit": "s", "color": { "mode": "palette-classic" } },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[$__rate_interval])) by (le, vendor, category))",
+              "legendFormat": "p99 {{vendor}} / {{category}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1306,
+          "title": "Upstream P99 Response Time",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 105, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": { "unit": "s", "color": { "mode": "palette-classic" } },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[$__rate_interval])) by (le, upstream, category))",
+              "legendFormat": "p99 {{upstream}} / {{category}}",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
