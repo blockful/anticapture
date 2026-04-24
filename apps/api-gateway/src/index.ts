@@ -55,7 +55,7 @@ const bootstrap = async () => {
       const duration = (performance.now() - start) / 1000;
       const labels = {
         http_request_method: req.method ?? "UNKNOWN",
-        http_route: req.url ?? "/",
+        http_route: req.url ? new URL(req.url, "http://localhost").pathname : "/",
         http_response_status_code: res.statusCode,
         client_source: clientSource,
       };
