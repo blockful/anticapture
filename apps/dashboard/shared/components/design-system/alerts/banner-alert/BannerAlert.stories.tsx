@@ -81,6 +81,20 @@ export const AllStates: Story = {
           variant="highlight"
         />
       </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-secondary px-2 text-xs">Internal link</span>
+        <BannerAlert
+          icon={<Info className="size-4" />}
+          text="This DAO has an ongoing proposal."
+          links={{
+            url: "/proposals",
+            text: "View proposals",
+            openInNewTab: false,
+          }}
+          storageKey="sb-states-internal-link"
+          variant="default"
+        />
+      </div>
     </div>
   ),
 };

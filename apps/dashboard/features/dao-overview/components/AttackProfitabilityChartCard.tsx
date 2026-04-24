@@ -1,15 +1,16 @@
 "use client";
 
-import { cn } from "@/shared/utils";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { CircleSlash, Hammer } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { ElementType } from "react";
 import { useMemo } from "react";
 
 import { MultilineChartAttackProfitability } from "@/features/attack-profitability/components";
 import { OverviewMetric } from "@/features/dao-overview/components/OverviewMetric";
 import { BlankSlate, TooltipInfo } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { cn } from "@/shared/utils";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -93,30 +94,35 @@ const CardHeader = ({
 }: {
   daoId: DaoIdEnum;
   disabled: boolean;
-}) => (
-  <div className="flex h-5 items-center gap-2">
-    {disabled ? (
-      <span
-        className={cn(
-          "text-primary border-border-contrast font-mono text-[13px] font-medium tracking-wider",
-          !disabled && "border-b border-dashed",
-        )}
-      >
-        ATTACK PROFITABILITY
-      </span>
-    ) : (
-      <DefaultLink
-        href={`/${daoId.toLowerCase()}/attack-profitability`}
-        openInNewTab={false}
-        className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
-      >
-        ATTACK PROFITABILITY
-      </DefaultLink>
-    )}
+}) => {
+  const router = useRouter();
+  return (
+    <div className="flex h-5 items-center gap-2">
+      {disabled ? (
+        <span
+          className={cn(
+            "text-primary border-border-contrast font-mono text-[13px] font-medium tracking-wider",
+            !disabled && "border-b border-dashed",
+          )}
+        >
+          ATTACK PROFITABILITY
+        </span>
+      ) : (
+        <Button
+          variant="link"
+          onClick={() =>
+            router.push(`/${daoId.toLowerCase()}/attack-profitability`)
+          }
+          className="font-mono text-[13px] font-medium tracking-wider"
+        >
+          ATTACK PROFITABILITY
+        </Button>
+      )}
 
-    <TooltipInfo text="Takes into account the maximum cost and the minimum profit possible. If it looks bad, it's bad. If it looks good, it's better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other formats beyond direct buying and selling assets." />
-  </div>
-);
+      <TooltipInfo text="Takes into account the maximum cost and the minimum profit possible. If it looks bad, it's bad. If it looks good, it's better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other formats beyond direct buying and selling assets." />
+    </div>
+  );
+};
 
 const ChartEmptyState = ({
   icon,

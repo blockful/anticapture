@@ -110,7 +110,6 @@ export const DaoProtectionLevels = () => {
         <DefaultLink
           href="https://blockful.gitbook.io/anticapture/anticapture/framework"
           variant="highlight"
-          openInNewTab
         >
           Learn the Stage Criteria
           <ChevronRight className="size-4" />

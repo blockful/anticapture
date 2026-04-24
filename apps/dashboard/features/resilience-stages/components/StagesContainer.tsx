@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
-
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 
 import { StageRequirementsTooltip } from "@/features/dao-overview/components/StageRequirementsTooltip";
 import { StageTag } from "@/features/resilience-stages/components";
@@ -12,7 +12,6 @@ import {
   TooltipInfo,
 } from "@/shared/components";
 import { OutlinedBox } from "@/shared/components/boxes/OutlinedBox";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { DaoAvatarIcon, PointerIcon } from "@/shared/components/icons";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -90,6 +89,7 @@ export const StagesContainer = ({
   context,
   currentDaoStage,
 }: StagesContainerProps) => {
+  const router = useRouter();
   const [showTooltip, setShowTooltip] = useState(false);
   const { isMobile } = useScreenSize();
   const isStageKnown = ![Stage.UNKNOWN, Stage.NONE].includes(currentDaoStage);
@@ -143,16 +143,15 @@ export const StagesContainer = ({
       })}
     >
       <div className="flex h-5 items-center gap-2">
-        <DefaultLink
-          href={`${daoId.toLowerCase()}/resilience-stages`}
-          openInNewTab={false}
-          className={cn(
-            "text-primary border-border-contrast hover:border-primary font-mono text-[13px] font-medium tracking-wider",
-            currentDaoStage !== Stage.UNKNOWN && "border-b border-dashed",
-          )}
+        <Button
+          variant="link"
+          onClick={() =>
+            router.push(`${daoId.toLowerCase()}/resilience-stages`)
+          }
+          className="font-mono text-[13px] font-medium tracking-wider"
         >
           RESILIENCE STAGES
-        </DefaultLink>
+        </Button>
         <TooltipInfo text="Resilience Stages are based on governance mechanisms, considering the riskiest exposed vector as criteria for progression." />
       </div>
       {currentDaoStage === Stage.UNKNOWN ? (

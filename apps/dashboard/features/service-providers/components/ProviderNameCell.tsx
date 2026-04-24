@@ -45,13 +45,13 @@ export const ProviderNameCell = ({
         </span>
         <div className="hidden items-center gap-1.5 sm:flex">
           {websiteUrl && (
-            <DefaultLink size="sm" openInNewTab href={websiteUrl}>
+            <DefaultLink size="sm" href={websiteUrl}>
               WEBSITE
             </DefaultLink>
           )}
           {websiteUrl && proposalUrl && <BulletDivider />}
           {proposalUrl && (
-            <DefaultLink size="sm" openInNewTab href={proposalUrl}>
+            <DefaultLink size="sm" href={proposalUrl}>
               PROPOSAL
             </DefaultLink>
           )}

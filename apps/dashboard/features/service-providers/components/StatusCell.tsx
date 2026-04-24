@@ -58,7 +58,6 @@ export const StatusCell = ({ status, reportUrl }: StatusCellProps) => {
     return (
       <DefaultLink
         href={reportUrl}
-        openInNewTab
         className="text-primary border-border-contrast hover:border-primary text-alternative-sm mx-2 border-b border-dashed font-mono font-medium tracking-wider"
       >
         <Icon className={cn("size-3.5 shrink-0", config.iconClassName)} />

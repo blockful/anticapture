@@ -1,8 +1,10 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { BulletDivider } from "@/shared/components/design-system/section";
@@ -24,6 +26,7 @@ export const BannerAlert = ({
   persist = true,
   className,
 }: BannerAlertProps) => {
+  const router = useRouter();
   // Initialize as null to prevent rendering during hydration
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
 
@@ -69,13 +72,19 @@ export const BannerAlert = ({
                   {allLinks.map((l, i) => (
                     <div key={l.url} className="flex items-center gap-2">
                       {i > 0 && <BulletDivider />}
-                      <DefaultLink
-                        href={l.url}
-                        openInNewTab={l.openInNewTab ?? true}
-                        variant="highlight"
-                      >
-                        {l.text}
-                      </DefaultLink>
+                      {l.openInNewTab === false ? (
+                        <Button
+                          variant="link"
+                          onClick={() => router.push(l.url)}
+                          className="font-mono text-xs font-medium uppercase tracking-wider"
+                        >
+                          {l.text}
+                        </Button>
+                      ) : (
+                        <DefaultLink href={l.url} variant="highlight">
+                          {l.text}
+                        </DefaultLink>
+                      )}
                     </div>
                   ))}
                 </div>

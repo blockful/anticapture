@@ -2,7 +2,12 @@ import type { ButtonHTMLAttributes } from "react";
 
 export type ButtonSize = "sm" | "md" | "lg";
 
-export type ButtonVariant = "primary" | "outline" | "ghost" | "destructive";
+export type ButtonVariant =
+  | "primary"
+  | "outline"
+  | "ghost"
+  | "destructive"
+  | "link";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;

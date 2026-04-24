@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { ProgressBar } from "@/features/dao-overview/components";
 import { TooltipInfo } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
-import { UnderlinedLink } from "@/shared/components/design-system/links/underlined-link/UnderlinedLink";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import type { DaoOverviewConfig } from "@/shared/dao-config/types";
 
 export const SecurityCouncilCard = ({
@@ -64,10 +64,7 @@ export const SecurityCouncilCard = ({
             </p>
             <div className="hidden size-1 items-center rounded-full bg-[#3F3F46] lg:flex" />
             <div className="flex items-center gap-1.5">
-              <UnderlinedLink
-                href={securityCouncil.multisig.externalLink}
-                openInNewTab
-              >
+              <DefaultLink href={securityCouncil.multisig.externalLink}>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     <Key className="text-link size-3.5" /> Multisig:
@@ -81,7 +78,7 @@ export const SecurityCouncilCard = ({
                   </span>
                   <span className="inline lg:hidden">required</span>
                 </div>
-              </UnderlinedLink>
+              </DefaultLink>
               <div className="hidden lg:flex">
                 <TooltipInfo text="The security council is set up as a multisig with eight signers, needing the signature of 4 out of 8 to execute a cancel transaction for an approved proposal in the Timelock contract." />
               </div>

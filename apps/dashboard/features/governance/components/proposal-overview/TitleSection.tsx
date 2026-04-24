@@ -87,7 +87,6 @@ export const TitleSection = ({
       <div className="flex w-full items-center justify-start gap-2">
         <DefaultLink
           href={`https://x.com/intent/tweet?text=${encodeURIComponent(twitterText)}`}
-          openInNewTab
         >
           <XLogo className="size-4" /> Share
         </DefaultLink>

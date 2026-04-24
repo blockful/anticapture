@@ -2,11 +2,12 @@
 
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
 import { RiskTooltipCard, TooltipInfo } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { RISK_AREAS } from "@/shared/constants/risk-areas";
 import daoConfig from "@/shared/dao-config";
@@ -348,6 +349,7 @@ export const RiskAreaCardWrapper = ({
   withTitle = true,
   currentDaoStage,
 }: RiskAreaCardWrapperProps) => {
+  const router = useRouter();
   const isUnknown = currentDaoStage === Stage.UNKNOWN;
 
   return (
@@ -365,16 +367,15 @@ export const RiskAreaCardWrapper = ({
           </h3>
         ) : (
           <div className="flex h-5 items-center gap-2 px-5 lg:px-0">
-            <DefaultLink
-              href={`${daoId.toLowerCase()}/risk-analysis`}
-              openInNewTab={false}
-              className={cn(
-                "text-primary border-border-contrast hover:border-primary font-mono text-[13px] font-medium tracking-wider",
-                currentDaoStage !== Stage.UNKNOWN && "border-b border-dashed",
-              )}
+            <Button
+              variant="link"
+              onClick={() =>
+                router.push(`${daoId.toLowerCase()}/risk-analysis`)
+              }
+              className="font-mono text-[13px] font-medium tracking-wider"
             >
               ATTACK EXPOSURE
-            </DefaultLink>
+            </Button>
             <TooltipInfo text="Assess critical vulnerabilities in the DAO's governance setup. Each item highlights a specific attack exposure, showing which issues are resolved and which still expose the system to threats." />
           </div>
         ))}

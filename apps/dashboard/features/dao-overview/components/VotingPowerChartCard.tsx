@@ -4,6 +4,7 @@ import {
   OrderDirection,
   QueryInput_VotingPowers_OrderBy,
 } from "@anticapture/graphql-client";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
@@ -11,13 +12,14 @@ import type { TopAccountChartData } from "@/features/dao-overview/components/Top
 import { TopAccountsChart } from "@/features/dao-overview/components/TopAccountsChart";
 import { useDelegates } from "@/features/holders-and-delegates/hooks/useDelegates";
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 
 export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const router = useRouter();
   const { data: delegatesData, loading } = useDelegates({
     daoId,
     orderBy: QueryInput_VotingPowers_OrderBy.Variation,
@@ -65,13 +67,17 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   return (
     <div className="lg:bg-surface-default flex w-full flex-col gap-4 px-5 lg:p-4">
       <div className="flex h-5 items-center gap-2">
-        <DefaultLink
-          href={`${daoId.toLowerCase()}/holders-and-delegates?days=90d&tab=delegates&sortBy=variation`}
-          openInNewTab={false}
-          className="text-primary border-border-contrast hover:border-primary border-b border-dashed font-mono text-[13px] font-medium tracking-wider"
+        <Button
+          variant="link"
+          onClick={() =>
+            router.push(
+              `${daoId.toLowerCase()}/holders-and-delegates?days=90d&tab=delegates&sortBy=variation`,
+            )
+          }
+          className="font-mono text-[13px] font-medium tracking-wider"
         >
           BIGGEST DELEGATE CHANGE: LAST 90D ({daoId})
-        </DefaultLink>
+        </Button>
         <TooltipInfo text="Addresses with the most delegated votes." />
       </div>
       {loading && <SkeletonRow className="h-52 w-full" />}

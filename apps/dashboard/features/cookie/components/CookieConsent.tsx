@@ -1,11 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
 
 import { Button } from "@/shared/components";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { CookieIcon, CookieBackground } from "@/shared/components/icons";
 import { cn } from "@/shared/utils";
 
@@ -21,6 +20,7 @@ export const CookieConsent = ({
   isWhitelabel,
 }: CookieConsentProps) => {
   const pathname = usePathname();
+  const router = useRouter();
   const isWhitelabelMode = isWhitelabel || pathname.startsWith("/whitelabel/");
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
 
@@ -90,11 +90,16 @@ export const CookieConsent = ({
   return (
     <div
       className={cn(
-        "fixed bottom-7 left-1/2 right-auto z-50 flex w-full -translate-x-1/2 flex-col gap-6 rounded-lg p-4 lg:max-w-[974px] lg:flex-row lg:items-center",
+        "fixed bottom-7 left-1/2 right-auto z-50 flex w-full -translate-x-1/2 flex-col gap-6 rounded-none p-4 lg:max-w-[974px] lg:flex-row lg:items-center",
         className,
       )}
     >
-      <div className="border-border-default bg-surface-default relative z-50 flex w-full flex-col items-start gap-4 overflow-hidden rounded-lg border p-4 shadow-lg lg:flex-row lg:items-center lg:gap-6">
+      <div
+        className={cn(
+          "border-border-default bg-surface-default relative z-50 flex w-full flex-col items-start gap-4 overflow-hidden rounded-lg border p-4 shadow-lg lg:flex-row lg:items-center lg:gap-6",
+          !isWhitelabelMode && "rounded-none",
+        )}
+      >
         {!isWhitelabelMode && (
           <Image
             className="absolute right-0 top-0 h-full w-[330px] object-cover opacity-50"
@@ -126,14 +131,13 @@ export const CookieConsent = ({
               We use cookies to run the site, improve insights, and personalize
               your experience. You can manage your preferences anytime.
             </div>
-            <DefaultLink
-              href="/terms-of-service"
-              openInNewTab
-              variant="default"
-              className="text-alternative-xs text-secondary mt-3 flex font-mono uppercase leading-none"
+            <Button
+              variant="link"
+              onClick={() => router.push("/terms-of-service")}
+              className="text-alternative-xs text-secondary mt-3 self-start font-mono uppercase leading-none"
             >
               Read our terms of service
-            </DefaultLink>
+            </Button>
           </div>
         </div>
         <div className="z-50 flex w-full flex-shrink-0 gap-2 lg:w-auto">
