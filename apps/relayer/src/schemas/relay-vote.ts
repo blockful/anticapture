@@ -1,12 +1,11 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
-import { Bytes32Schema, TxHashSchema } from "./evm-primitives";
-
-// Decimal uint256 as string; reject anything that would throw inside BigInt().
-const DecimalUint256Schema = z
-  .string()
-  .regex(/^\d+$/, "must be a non-negative decimal integer")
-  .transform((v) => BigInt(v));
+import {
+  AddressSchema,
+  Bytes32Schema,
+  DecimalUint256Schema,
+  TxHashSchema,
+} from "./evm-primitives";
 
 export const RelayVoteRequestSchema = z
   .object({
@@ -30,7 +29,7 @@ export const RelayVoteRequestSchema = z
 export const RelayVoteResponseSchema = z
   .object({
     transactionHash: TxHashSchema,
-    voter: z.string(),
+    voter: AddressSchema,
   })
   .openapi("RelayVoteResponse");
 

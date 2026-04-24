@@ -1,5 +1,5 @@
 import { getAddress, isAddress, isHex } from "viem";
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 export const HexSchema = z
   .string()
@@ -17,3 +17,8 @@ export const TxHashSchema = HexSchema.refine(
   (v) => v.length === 66,
   "Must be a valid transaction hash",
 );
+
+export const DecimalUint256Schema = z
+  .string()
+  .regex(/^\d+$/, "must be a non-negative decimal integer")
+  .transform((v) => BigInt(v));
