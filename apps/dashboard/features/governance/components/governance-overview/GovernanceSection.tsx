@@ -146,11 +146,11 @@ export const GovernanceSection = () => {
 
   const visibleTabs = useMemo(() => {
     const tabs = [...PROPOSAL_TABS];
-    if (isConnected) {
+    if (isConnected && isWhitelabel) {
       tabs.push({ label: "My Drafts", value: "drafts" });
     }
     return tabs;
-  }, [isConnected]);
+  }, [isConnected, isWhitelabel]);
 
   const isOnchain = activeTab === "onchain" || !hasOffchain;
   const error = isOnchain ? onchainError : offchainError;
