@@ -15,8 +15,8 @@ export default defineConfig(({ watch }) => ({
     path: gatefulOpenApiSpecPath,
   },
   output: {
-    path: "./generated",
     clean: !watch,
+    path: "./generated",
   },
   plugins: [
     pluginOas({
