@@ -5,8 +5,8 @@ const config: CodegenConfig = {
   schema:
     process.env.ANTICAPTURE_GRAPHQL_ENDPOINT ||
     "../../apps/api-gateway/schema.graphql",
-  documents: "./documents/**/*.graphql",
   ignoreNoDocuments: true,
+  documents: "./documents/**/*.graphql",
   generates: {
     "./generated/hooks.ts": {
       plugins: [
