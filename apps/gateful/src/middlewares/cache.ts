@@ -45,7 +45,10 @@ export function cacheMiddleware(redis: CacheStore) {
     const raw = await redis.get(key).catch(() => null);
     if (raw) {
       const entry = safeParse<CachedEntry>(raw);
-      if (!entry) return next();
+      if (!entry) {
+        cacheRequestTotal.add(1, { result: "corrupt", route: c.req.path });
+        return next();
+      }
       cacheRequestTotal.add(1, { result: "hit", route: c.req.path });
       return new Response(entry.body, {
         status: entry.status,
