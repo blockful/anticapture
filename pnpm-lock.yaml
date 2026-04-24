@@ -83,7 +83,7 @@ importers:
 
   apps/address-enrichment:
     dependencies:
-      "@blockful/observability":
+      "@anticapture/observability":
         specifier: workspace:*
         version: link:../../packages/observability
       "@hono/node-server":
@@ -144,7 +144,7 @@ importers:
 
   apps/api:
     dependencies:
-      "@blockful/observability":
+      "@anticapture/observability":
         specifier: workspace:*
         version: link:../../packages/observability
       "@hono/node-server":
@@ -232,7 +232,7 @@ importers:
 
   apps/api-gateway:
     dependencies:
-      "@blockful/observability":
+      "@anticapture/observability":
         specifier: workspace:*
         version: link:../../packages/observability
       "@graphql-mesh/config":
@@ -528,7 +528,7 @@ importers:
 
   apps/gateful:
     dependencies:
-      "@blockful/observability":
+      "@anticapture/observability":
         specifier: workspace:*
         version: link:../../packages/observability
       "@hono/node-server":
@@ -580,7 +580,7 @@ importers:
 
   apps/indexer:
     dependencies:
-      "@blockful/observability":
+      "@anticapture/observability":
         specifier: workspace:*
         version: link:../../packages/observability
       "@opentelemetry/api":
@@ -629,7 +629,7 @@ importers:
 
   apps/offchain-indexer:
     dependencies:
-      "@blockful/observability":
+      "@anticapture/observability":
         specifier: workspace:*
         version: link:../../packages/observability
       "@electric-sql/pglite":

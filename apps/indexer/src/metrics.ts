@@ -1,4 +1,4 @@
-import { createObservabilityProvider } from "@blockful/observability";
+import { createObservabilityProvider } from "@anticapture/observability";
 
 import { env } from "@/env";
 

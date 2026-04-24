@@ -2,7 +2,7 @@ import {
   PROMETHEUS_MIME_TYPE,
   PrometheusSerializer,
   wrapWithTracing,
-} from "@blockful/observability";
+} from "@anticapture/observability";
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";

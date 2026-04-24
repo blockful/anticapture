@@ -34,7 +34,7 @@
     "@graphql-mesh/transform-filter-schema": "^0.104.19",
     "@graphql-mesh/transform-rename": "^0.105.7",
     "@graphql-mesh/types": "^0.104.3",
-    "@blockful/observability": "workspace:*",
+    "@anticapture/observability": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
     "dotenv": "^16.5.0",
     "graphql": "^16.11.0"

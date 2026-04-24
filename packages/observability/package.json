@@ -1,5 +1,5 @@
 {
-  "name": "@blockful/observability",
+  "name": "@anticapture/observability",
   "version": "1.0.1",
   "type": "module",
   "main": "./dist/index.js",
@@ -15,7 +15,7 @@
     "dist"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "repository": {
     "type": "git",

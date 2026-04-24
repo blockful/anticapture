@@ -1,4 +1,4 @@
-import { wrapWithTracing } from "@blockful/observability";
+import { wrapWithTracing } from "@anticapture/observability";
 import {
   Abi,
   Account,

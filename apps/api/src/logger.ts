@@ -1,4 +1,4 @@
-import { createLogger } from "@blockful/observability";
+import { createLogger } from "@anticapture/observability";
 
 import { env } from "@/env";
 

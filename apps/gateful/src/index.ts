@@ -2,7 +2,7 @@ import "./instrumentation.js";
 
 import dns from "node:dns";
 
-import { collectPrometheusMetrics } from "@blockful/observability";
+import { collectPrometheusMetrics } from "@anticapture/observability";
 import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";

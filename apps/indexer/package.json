@@ -13,7 +13,7 @@
     "clean": "rm -rf node_modules generated .ponder dump *.tsbuildinfo"
   },
   "dependencies": {
-    "@blockful/observability": "workspace:*",
+    "@anticapture/observability": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
     "hono": "^4.10.7",
     "ponder": "^0.16.2",
