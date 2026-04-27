@@ -1986,7 +1986,37 @@
       "get": {
         "responses": {
           "200": {
-            "description": "Health check"
+            "description": "Gateway health and per-DAO circuit breaker states",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["ok"]
+                    },
+                    "circuits": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "enum": ["CLOSED", "OPEN", "HALF_OPEN"]
+                          },
+                          "nextRetryIn": {
+                            "type": "number"
+                          }
+                        },
+                        "required": ["state"]
+                      }
+                    }
+                  },
+                  "required": ["status", "circuits"]
+                }
+              }
+            }
           }
         }
       }
@@ -6975,6 +7005,235 @@
           "description": "DAO identifier"
         }
       ]
+    },
+    "/address-enrichment/address/{address}": {
+      "get": {
+        "operationId": "getAddress",
+        "summary": "Get enriched data for an address",
+        "description": "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
+        "tags": ["address"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Ethereum address (checksummed or lowercase)",
+              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved address enrichment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "EIP-55 checksummed Ethereum address",
+                      "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                    },
+                    "isContract": {
+                      "type": "boolean",
+                      "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
+                      "example": false
+                    },
+                    "arkham": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "entity": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
+                          "example": "Vitalik Buterin"
+                        },
+                        "entityType": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
+                          "example": "individual"
+                        },
+                        "label": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Fine-grained label for the specific address within the entity",
+                          "example": "Vitalik Buterin: Personal Wallet"
+                        },
+                        "twitter": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Twitter/X handle associated with the entity, without '@'",
+                          "example": "VitalikButerin"
+                        }
+                      },
+                      "required": ["entity", "entityType", "label", "twitter"],
+                      "description": "Arkham Intelligence label data. null when no data is available for the address."
+                    },
+                    "ens": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Primary ENS name reverse-resolved for this address",
+                          "example": "vitalik.eth"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL of the ENS avatar image",
+                          "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
+                        },
+                        "banner": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL of the ENS profile banner image",
+                          "example": null
+                        }
+                      },
+                      "required": ["name", "avatar", "banner"],
+                      "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
+                    }
+                  },
+                  "required": ["address", "isContract", "arkham", "ens"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/address-enrichment/addresses": {
+      "get": {
+        "operationId": "getAddresses",
+        "summary": "Get enriched data for multiple addresses",
+        "description": "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
+        "tags": ["address"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "maxItems": 100,
+              "description": "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
+              "example": [
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"
+              ]
+            },
+            "required": true,
+            "name": "addresses",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved batch enrichment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "address": {
+                            "type": "string",
+                            "description": "EIP-55 checksummed Ethereum address",
+                            "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                          },
+                          "isContract": {
+                            "type": "boolean",
+                            "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
+                            "example": false
+                          },
+                          "arkham": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "entity": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
+                                "example": "Vitalik Buterin"
+                              },
+                              "entityType": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
+                                "example": "individual"
+                              },
+                              "label": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Fine-grained label for the specific address within the entity",
+                                "example": "Vitalik Buterin: Personal Wallet"
+                              },
+                              "twitter": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Twitter/X handle associated with the entity, without '@'",
+                                "example": "VitalikButerin"
+                              }
+                            },
+                            "required": [
+                              "entity",
+                              "entityType",
+                              "label",
+                              "twitter"
+                            ],
+                            "description": "Arkham Intelligence label data. null when no data is available for the address."
+                          },
+                          "ens": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Primary ENS name reverse-resolved for this address",
+                                "example": "vitalik.eth"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "URL of the ENS avatar image",
+                                "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
+                              },
+                              "banner": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "URL of the ENS profile banner image",
+                                "example": null
+                              }
+                            },
+                            "required": ["name", "avatar", "banner"],
+                            "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
+                          }
+                        },
+                        "required": ["address", "isContract", "arkham", "ens"]
+                      },
+                      "description": "Enrichment results for each successfully resolved address. Addresses that failed to resolve are omitted."
+                    }
+                  },
+                  "required": ["results"]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {},

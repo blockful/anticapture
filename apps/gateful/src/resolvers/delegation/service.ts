@@ -1,6 +1,7 @@
 import type { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry.js";
 import { fanOutGet } from "../../shared/fan-out.js";
 
+// TEST: trigger cache
 export type DelegationPercentageResponse = {
   items: { date: string; high: string }[];
   totalCount: number;
