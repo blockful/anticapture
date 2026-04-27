@@ -156,8 +156,8 @@ railway_run() {
   local service=$1
   shift
   if [ "$USE_RAILWAY" = true ]; then
-    log "railway_run: pnpm railway run -e dev -s $service $*"
-    pnpm railway run -e dev -s "$service" "$@"
+    log "railway_run: railway run -e dev -s $service $*"
+    railway run -e dev -s "$service" "$@"
   else
     log "railway_run (no --rw): $*"
     "$@"
@@ -168,9 +168,9 @@ railway_run() {
 railway_run_api() {
   local service=$1
   shift
-  if pnpm railway run -e dev -s "$service" true >/dev/null 2>&1; then
-    log "railway_run_api: pnpm railway run -e dev -s $service $*"
-    pnpm railway run -e dev -s "$service" "$@"
+  if railway run -e dev -s "$service" true >/dev/null 2>&1; then
+    log "railway_run_api: railway run -e dev -s $service $*"
+    railway run -e dev -s "$service" "$@"
   else
     log "railway_run_api: Railway service '$service' not found, falling back to: $*"
     "$@"
@@ -179,7 +179,7 @@ railway_run_api() {
 
 railway_service_available() {
   local service=$1
-  pnpm railway run -e dev -s "$service" true >/dev/null 2>&1
+  railway run -e dev -s "$service" true >/dev/null 2>&1
 }
 
 # Kill anything already running on our ports
@@ -224,7 +224,7 @@ fi
 ADDRESS_ENRICHMENT_AVAILABLE=false
 if railway_service_available "address-enrichment"; then
   log "Starting optional Address Enrichment..."
-  run_with_prefix "$C_ADDRESS_ENRICHMENT" "💰 enrichment" "" "" pnpm railway run -e dev -s address-enrichment pnpm address dev &
+  run_with_prefix "$C_ADDRESS_ENRICHMENT" "💰 enrichment" "" "" railway run -e dev -s address-enrichment pnpm address dev &
   if wait_for_optional_port "$PORT_ADDRESS_ENRICHMENT" "Address Enrichment"; then
     ADDRESS_ENRICHMENT_AVAILABLE=true
     export ADDRESS_ENRICHMENT_API_URL="http://localhost:${PORT_ADDRESS_ENRICHMENT}"
