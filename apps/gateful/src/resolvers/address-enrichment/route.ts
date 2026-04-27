@@ -10,8 +10,8 @@ export function addressEnrichment(app: OpenAPIHono, upstreamUrl?: string) {
       );
     }
 
-    const path = c.req.path.replace(/^\/address-enrichment/, "/");
-    const url = new URL(path || "/", upstreamUrl);
+    const path = c.req.path.replace(/^\/address-enrichment/, "") || "/";
+    const url = new URL(path, upstreamUrl);
     url.search = new URL(c.req.url).search;
 
     return proxy(url.toString(), { ...c.req });
