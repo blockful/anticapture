@@ -1,5 +1,6 @@
 // === TYPES ===
 
+// TEST: trigger cache
 export type DelegationPercentageResponse = {
   items: { date: string; high: string }[];
   totalCount: number;
@@ -136,7 +137,7 @@ export async function fetchAndExtractDaoData(
       client
         .delegationPercentageByDay({
           root,
-          args: { ...queryArgs, orderDirection: 'asc' },  
+          args: { ...queryArgs, orderDirection: 'asc' },
           context,
           selectionSet: `
             {
@@ -161,7 +162,7 @@ export async function fetchAndExtractDaoData(
 
   // Extract successful responses
   const daoResponses = new Map<string,
-  DelegationPercentageResponse>();
+    DelegationPercentageResponse>();
   results.forEach((result) => {
     if (result.status === 'fulfilled' && result.value.response) {
       daoResponses.set(result.value.daoId, result.value.response);

@@ -5,6 +5,10 @@ vi.mock("@hono/node-server", () => ({
   serve: vi.fn(),
 }));
 
+vi.mock("./upstream-docs.js", () => ({
+  storeOpenApiSpec: (ownSpec: unknown) => async () => ownSpec,
+}));
+
 describe("gateful app auth", () => {
   let app: typeof import("./index.js").app;
 
