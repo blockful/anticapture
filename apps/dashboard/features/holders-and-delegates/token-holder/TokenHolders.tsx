@@ -1,13 +1,10 @@
 "use client";
 
-import type { OrderDirection } from "@anticapture/graphql-client";
-import { QueryInput_AccountBalances_OrderBy } from "@anticapture/graphql-client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useMemo } from "react";
 import type { Address } from "viem";
-import { formatUnits, zeroAddress } from "viem";
+import { zeroAddress } from "viem";
 
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
@@ -21,13 +18,18 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
-import daoConfig from "@/shared/dao-config";
-import { useScreenSize } from "@/shared/hooks";
+import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { formatNumberUserReadable } from "@/shared/utils";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import {
+  accountBalancesQueryParamsOrderByEnum,
+  orderDirectionEnum,
+  type AccountBalancesQueryParamsOrderByEnumKey,
+  type OrderDirection,
+} from "@anticapture/client";
+import { parseAsAddress } from "@/shared/utils/parseAsAddress";
 
 interface TokenHolderTableData {
   address: Address;
@@ -35,8 +37,6 @@ interface TokenHolderTableData {
   variation: { percentageChange: number; absoluteChange: number } | null;
   delegate: Address;
 }
-
-type TokenHolderSortKey = "balance" | "signedVariation" | "variation";
 
 const TypeCell = ({ address }: { address: Address }) => {
   const { isContract, isLoading: isArkhamLoading } = useArkhamData(address);
@@ -66,101 +66,69 @@ export const TokenHolders = ({
   daoId: DaoIdEnum;
   showTokenName?: boolean;
 }) => {
-  const pageLimit: number = 20;
-  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
+  const [drawerAddress, setDrawerAddress] = useQueryState(
+    "drawerAddress",
+    parseAsAddress,
+  );
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
-  const [sortOrder, setSortOrder] = useQueryState(
+  const [orderDirection, setOrderDirection] = useQueryState(
     "sort",
-    parseAsStringEnum(["desc", "asc"]).withDefault("desc"),
+    parseAsStringEnum<OrderDirection>(
+      Object.values(orderDirectionEnum),
+    ).withDefault("desc"),
   );
-  const [sortBy, setSortBy] = useQueryState(
+  const [orderBy, setOrderBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum(["balance", "signedVariation", "variation"]).withDefault(
-      "balance" as TokenHolderSortKey,
-    ),
+    parseAsStringEnum<AccountBalancesQueryParamsOrderByEnumKey>(
+      Object.values(accountBalancesQueryParamsOrderByEnum),
+    ).withDefault("balance"),
   );
-  const orderByMap: Record<
-    TokenHolderSortKey,
-    QueryInput_AccountBalances_OrderBy
-  > = {
-    balance: QueryInput_AccountBalances_OrderBy.Balance,
-    signedVariation: QueryInput_AccountBalances_OrderBy.SignedVariation,
-    variation: QueryInput_AccountBalances_OrderBy.Variation,
-  };
+
   const { isMobile } = useScreenSize();
-  const { decimals } = daoConfig[daoId];
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || null);
   };
 
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  const handleSort = (field: AccountBalancesQueryParamsOrderByEnumKey) => {
+    if (orderBy === field) {
+      setOrderDirection(orderDirection === "asc" ? "desc" : "asc");
     } else {
-      setSortBy(field as TokenHolderSortKey);
-      setSortOrder("desc");
+      setOrderBy(field);
+      setOrderDirection("desc");
     }
   };
 
   // Cycles: no-arrow (balance desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows (variation desc) → no-arrow
   const handleVariationSort = () => {
-    if (sortBy === "signedVariation" && sortOrder === "desc") {
-      setSortOrder("asc");
-    } else if (sortBy === "signedVariation" && sortOrder === "asc") {
-      setSortBy("variation");
-      setSortOrder("desc");
-    } else if (sortBy === "variation") {
-      setSortBy("balance");
-      setSortOrder("desc");
+    if (orderBy === "signedVariation" && orderDirection === "desc") {
+      setOrderDirection("asc");
+    } else if (orderBy === "signedVariation" && orderDirection === "asc") {
+      setOrderBy("variation");
+      setOrderDirection("desc");
+    } else if (orderBy === "variation") {
+      setOrderBy("balance");
+      setOrderDirection("desc");
     } else {
-      setSortBy("signedVariation");
-      setSortOrder("desc");
+      setOrderBy("signedVariation");
+      setOrderDirection("desc");
     }
   };
 
   const {
-    data: tokenHoldersData,
-    loading,
-    error,
-    pagination,
+    data: tableData,
+    isLoading,
+    isFetchingNextPage,
     fetchNextPage,
-    fetchingMore,
-  } = useTokenHolders({
-    daoId: daoId,
-    limit: pageLimit,
-    orderBy: orderByMap[sortBy],
-    orderDirection: sortOrder as OrderDirection,
-    address: currentAddressFilter || undefined,
-    days: days,
+    hasNextPage,
+  } = useTokenHolders(daoId, {
+    limit: 20,
+    orderBy,
+    orderDirection,
+    addresses: currentAddressFilter ? [currentAddressFilter] : undefined,
+    fromDay: days,
   });
-
-  const tableData: TokenHolderTableData[] = useMemo(() => {
-    return (
-      tokenHoldersData?.map((holder) => {
-        const variation = holder.variation
-          ? {
-              percentageChange:
-                holder.variation.percentageChange === PERCENTAGE_NO_BASELINE
-                  ? 9999
-                  : Number(
-                      Number(holder.variation.percentageChange).toFixed(2),
-                    ),
-              absoluteChange: Number(
-                formatUnits(BigInt(holder.variation.absoluteChange), decimals),
-              ),
-            }
-          : null;
-        return {
-          address: holder.accountId as Address,
-          balance: Number(formatUnits(BigInt(holder.balance), decimals)),
-          variation,
-          delegate: holder.delegate as Address,
-        };
-      }) || []
-    );
-  }, [tokenHoldersData, decimals]);
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -175,7 +143,7 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (loading) {
+        if (isLoading) {
           return (
             <div className="flex w-full items-center gap-3">
               <SkeletonRow
@@ -239,7 +207,7 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (loading) {
+        if (isLoading) {
           return (
             <SkeletonRow
               parentClassName="flex animate-pulse"
@@ -268,8 +236,8 @@ export const TokenHolders = ({
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              sortBy === "balance"
-                ? sortOrder === "asc"
+              orderBy === "balance"
+                ? orderDirection === "asc"
                   ? ArrowState.UP
                   : ArrowState.DOWN
                 : ArrowState.DEFAULT
@@ -278,7 +246,7 @@ export const TokenHolders = ({
         </Button>
       ),
       cell: ({ row }) => {
-        if (loading) {
+        if (isLoading) {
           return (
             <div className="flex w-full items-center justify-end">
               <SkeletonRow className="h-4 w-20" />
@@ -312,11 +280,11 @@ export const TokenHolders = ({
           <ArrowUpDown
             props={{ className: "size-4" }}
             activeState={
-              sortBy === "signedVariation"
-                ? sortOrder === "desc"
+              orderBy === "signedVariation"
+                ? orderDirection === "desc"
                   ? ArrowState.DOWN
                   : ArrowState.UP
-                : sortBy === "variation"
+                : orderBy === "variation"
                   ? ArrowState.BOTH
                   : ArrowState.DEFAULT
             }
@@ -331,7 +299,7 @@ export const TokenHolders = ({
             }
           | undefined;
 
-        if (loading) {
+        if (isLoading) {
           return (
             <div className="flex w-full items-center justify-center">
               <SkeletonRow
@@ -369,7 +337,7 @@ export const TokenHolders = ({
         </div>
       ),
       cell: ({ row }) => {
-        if (loading) {
+        if (isLoading) {
           return (
             <div className="flex items-center gap-1.5">
               <SkeletonRow
@@ -413,15 +381,15 @@ export const TokenHolders = ({
       <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col text-white">
         <Table
           columns={tokenHoldersColumns}
-          data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
-          hasMore={pagination.hasNextPage}
-          isLoadingMore={fetchingMore}
+          data={tableData ?? Array(DEFAULT_ITEMS_PER_PAGE).fill({})}
+          hasMore={hasNextPage}
+          isLoadingMore={isFetchingNextPage}
           onLoadMore={fetchNextPage}
-          onRowClick={(row) => setDrawerAddress(row.address as Address)}
+          onRowClick={(row) => setDrawerAddress(row.address)}
           size="sm"
           withDownloadCSV={true}
           csvFilename="token-holders.csv"
-          error={error}
+          // error={error}
           fillHeight
         />
       </div>

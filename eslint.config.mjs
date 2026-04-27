@@ -179,24 +179,6 @@ export default [
       "no-restricted-imports": [
         "warn",
         {
-          // Exact barrel-file imports — block index re-exports
-          paths: [
-            {
-              name: "@/shared/components",
-              message:
-                "Import directly from the source file (e.g., @/shared/components/cards/MetricCard).",
-            },
-            {
-              name: "@/shared/hooks",
-              message:
-                "Import directly from the source file (e.g., @/shared/hooks/useMessageStack).",
-            },
-            {
-              name: "@/shared/utils",
-              message:
-                "Import directly from the source file (e.g., @/shared/utils/cn).",
-            },
-          ],
           patterns: [
             // Prefer @/* aliases over parent-directory traversal
             {
