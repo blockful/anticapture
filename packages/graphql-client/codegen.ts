@@ -15,8 +15,8 @@ const config: CodegenConfig = {
         "typescript-operations",
       ],
       config: {
-        dedupeFragments: true,
         avoidOptionals: true,
+        dedupeFragments: true,
         strictScalars: true,
         scalars: {
           DateTime: "string",
