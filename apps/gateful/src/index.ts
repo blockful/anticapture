@@ -72,8 +72,13 @@ if (config.redisUrl) {
 }
 
 logger.info(
-  { daoApis: Array.from(config.daoApis.keys()) },
-  `discovered ${config.daoApis.size} DAO APIs`,
+  {
+    daoApis: Array.from(config.daoApis.keys()),
+    addressEnrichmentUrl: config.addressEnrichmentUrl ?? null,
+  },
+  `discovered ${config.daoApis.size} DAO APIs${
+    config.addressEnrichmentUrl ? " + address enrichment" : ""
+  }`,
 );
 
 const registry = new CircuitBreakerRegistry(config.circuitBreaker);
@@ -107,7 +112,11 @@ openApiDocument.components = {
   },
 };
 
-const getOpenApiSpec = storeOpenApiSpec(openApiDocument, config.daoApis);
+const getOpenApiSpec = storeOpenApiSpec(
+  openApiDocument,
+  config.daoApis,
+  config.addressEnrichmentUrl,
+);
 
 app.get("/docs/json", async (c) => {
   return c.json(await getOpenApiSpec());
