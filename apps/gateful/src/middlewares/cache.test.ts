@@ -38,9 +38,10 @@ function buildApp(
   handler: (
     c: import("hono").Context,
   ) => Response | Promise<Response> = defaultHandler,
+  daoApis: Map<string, string> = new Map(),
 ): OpenAPIHono {
   const app = new OpenAPIHono();
-  app.use("*", cacheMiddleware(redis));
+  app.use("*", cacheMiddleware(redis, daoApis));
   app.get("/test", handler);
   return app;
 }

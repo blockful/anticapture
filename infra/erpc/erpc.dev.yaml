@@ -68,6 +68,15 @@ projects:
         vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
+        routing:
+          scoreMultipliers:
+            - network: "*"
+              method: "*"
+              overall: 10
+              blockHeadLag: 0
+              errorRate: 2
+              respLatency: 0.5
+              throttledRate: 1
       - id: chainstack
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
         vendorName: Chainstack
@@ -117,6 +126,15 @@ projects:
         vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
+        routing:
+          scoreMultipliers:
+            - network: "*"
+              method: "*"
+              overall: 10
+              blockHeadLag: 0
+              errorRate: 2
+              respLatency: 0.5
+              throttledRate: 1
       - id: chainstack
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
         vendorName: Chainstack
@@ -166,6 +184,15 @@ projects:
         vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
+        routing:
+          scoreMultipliers:
+            - network: "*"
+              method: "*"
+              overall: 10
+              blockHeadLag: 0
+              errorRate: 2
+              respLatency: 0.5
+              throttledRate: 1
       - id: chainstack
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
         vendorName: Chainstack

@@ -5,6 +5,10 @@ vi.mock("@hono/node-server", () => ({
   serve: vi.fn(),
 }));
 
+vi.mock("./upstream-docs.js", () => ({
+  storeOpenApiSpec: (ownSpec: unknown) => async () => ownSpec,
+}));
+
 describe("gateful app auth", () => {
   let app: typeof import("./index.js").app;
 
@@ -40,6 +44,15 @@ describe("gateful app auth", () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("text/html");
+  });
+
+  it("serves Prometheus metrics without a bearer token", async () => {
+    const res = await app.request("/metrics");
+    const body = await res.text();
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/plain");
+    expect(body).toContain("# HELP");
   });
 
   it("requires bearer auth outside docs endpoints", async () => {

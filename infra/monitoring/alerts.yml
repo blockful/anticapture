@@ -4,13 +4,30 @@ groups:
     rules:
       # Service is not responding (no scrape data for 1 minute)
       - alert: ServiceDown
-        expr: up == 0
+        expr: up{job!~".*-indexer"} == 0
         for: 1m
         labels:
           severity: critical
         annotations:
-          summary: "Service {{ $labels.job }} is down"
-          description: "Prometheus cannot scrape {{ $labels.job }} at {{ $labels.instance }}"
+          summary: "[CRITICAL] {{ $labels.job }} is unreachable"
+          description: >
+            Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
+            for more than 1 minute. The service may be crashed, OOM-killed, or misconfigured.
+            Check container/process status and recent logs immediately.
+
+      # Indexer is not responding — longer window to account for slow startup
+      # - alert: IndexerDown
+      #   expr: up{job=~".*-indexer"} == 0
+      #   for: 10m
+      #   labels:
+      #     severity: critical
+      #   annotations:
+      #     summary: "[CRITICAL] {{ $labels.job }} is unreachable"
+      #     description: >
+      #       Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
+      #       for more than 10 minutes. Note: indexers take time to bind their HTTP server on
+      #       cold start, so this alert has an extended window. If the indexer was not recently
+      #       deployed, check container/process status and recent logs.
 
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage
@@ -19,8 +36,11 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High CPU on {{ $labels.job }}"
-          description: '{{ $labels.job }} CPU at {{ printf "%.1f" $value }}% for 5 minutes'
+          summary: "[WARNING] High CPU usage on {{ $labels.job }}"
+          description: >
+            {{ $labels.job }} has been using {{ printf "%.1f" $value }}% CPU for more than
+            5 minutes. This may indicate a processing backlog, tight indexing loop, or a
+            runaway query. Review process metrics and recent workload.
 
       # p99 HTTP latency above 2s for 5 minutes
       - alert: HighLatency
@@ -32,8 +52,11 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High p99 latency"
-          description: 'p99 latency is {{ printf "%.2f" $value }}s'
+          summary: "[WARNING] High p99 HTTP latency"
+          description: >
+            The p99 HTTP response time has been {{ printf "%.2f" $value }}s for more than
+            5 minutes (threshold: 2s). This may indicate slow database queries, resource
+            contention, or downstream bottlenecks. Check slow query logs and DB connection pool.
 
       # 5xx error rate above 1% for 2 minutes
       - alert: HighErrorRate
@@ -46,5 +69,9 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "High 5xx error rate"
-          description: '5xx rate is {{ printf "%.2f" $value }}%'
+          summary: "[CRITICAL] Elevated 5xx error rate"
+          description: >
+            The 5xx error rate has been {{ printf "%.2f" $value }}% for more than 2 minutes
+            (threshold: 1%). Users are experiencing server errors. Check application logs for
+            stack traces, database connectivity, and any recent deployments that may have
+            introduced regressions.

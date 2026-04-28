@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  OrderDirection,
-  QueryInput_HistoricalBalances_OrderBy,
-} from "@anticapture/graphql-client";
-import { useBalanceHistoryGraphQuery } from "@anticapture/graphql-client/hooks";
+import type { HistoricalBalancesPathParamsDaoEnumKey } from "@anticapture/client";
+import { useHistoricalBalances } from "@anticapture/client/hooks";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
@@ -33,24 +30,21 @@ export function useBalanceHistoryGraph(
 } {
   const { decimals } = daoConfig[daoId];
 
-  const { data, loading, error } = useBalanceHistoryGraphQuery({
-    variables: {
-      address: accountId,
-      fromDate: fromDate ?? null,
-      orderBy: QueryInput_HistoricalBalances_OrderBy.Timestamp,
-      orderDirection: OrderDirection.Desc,
+  const { data, isLoading, error } = useHistoricalBalances(
+    // this works because this endpoint is supported for all DAOs
+    daoId.toLowerCase() as HistoricalBalancesPathParamsDaoEnumKey,
+    accountId,
+    {
+      fromDate,
+      orderBy: "timestamp",
+      orderDirection: "desc",
     },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
+  );
 
   const balanceHistory = useMemo(() => {
-    if (!data?.historicalBalances?.items) return [];
+    if (!data?.items) return [];
 
-    return data.historicalBalances.items
+    return data.items
       .filter((item) => !!item)
       .map((item) => ({
         ...item,
@@ -66,7 +60,7 @@ export function useBalanceHistoryGraph(
 
   return {
     balanceHistory,
-    loading,
-    error: !!error,
+    loading: isLoading,
+    error: !isLoading && Boolean(error),
   };
 }

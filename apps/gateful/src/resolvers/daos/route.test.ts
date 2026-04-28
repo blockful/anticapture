@@ -1,8 +1,12 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
 
+import { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry";
+
 import { daos } from "./route";
 import { DaosService } from "./service";
+
+const registry = new CircuitBreakerRegistry();
 
 function stubFetch(
   responses: Record<string, object>,
@@ -30,7 +34,7 @@ describe("daos route", () => {
 
   beforeEach(() => {
     app = new OpenAPIHono();
-    daos(app, new DaosService(daoApis));
+    daos(app, new DaosService(daoApis, registry));
   });
 
   afterEach(() => {
@@ -72,7 +76,7 @@ describe("daos route", () => {
 
   it("should return empty list when no DAOs are configured", async () => {
     const emptyApp = new OpenAPIHono();
-    daos(emptyApp, new DaosService(new Map()));
+    daos(emptyApp, new DaosService(new Map(), registry));
 
     const res = await emptyApp.request("/daos");
     const body = (await res.json()) as {

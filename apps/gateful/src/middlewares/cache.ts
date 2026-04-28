@@ -1,5 +1,7 @@
 import type { Context, Next } from "hono";
 
+import { cacheRequestTotal } from "../metrics.js";
+
 /** Minimal interface the middleware actually needs */
 export interface CacheStore {
   get(key: string): Promise<string | null>;
@@ -31,19 +33,39 @@ function safeParse<T>(raw: string): T | null {
  *     - The upstream set a `Cache-Control: max-age=<n>` header with n > 0.
  * - All Redis errors are swallowed (fail open) to preserve availability.
  */
-export function cacheMiddleware(redis: CacheStore) {
+export function cacheMiddleware(
+  redis: CacheStore,
+  daoApis: Map<string, string>,
+) {
   return async (c: Context, next: Next) => {
     // Only cache GET requests.
     if (c.req.method !== "GET") return next();
 
     const key = c.req.url;
 
+    // Normalize the path to a fixed-cardinality label: "/<dao>/*" keeps the
+    // DAO segment (useful for per-DAO cache panels) while collapsing all
+    // sub-resource segments so each DAO produces exactly one time-series.
+    // Unknown/non-DAO paths bucket into "/unknown/*" to bound Prometheus
+    // cardinality regardless of what clients send.
+    const [, segment] = c.req.path.split("/");
+    const dao = segment?.toLowerCase();
+    const route = !dao
+      ? "/" //If nothing, route is root path
+      : daoApis.has(dao) // if has something, verify if is a dao.
+        ? `/${dao}/*` // Route is /{dao}/
+        : "/unknown/*"; // Route is /unknown/
+
     // --- Request phase: check for a cached response ---
     // Fail open: if Redis is unavailable, .catch returns null and we proceed normally.
     const raw = await redis.get(key).catch(() => null);
     if (raw) {
       const entry = safeParse<CachedEntry>(raw);
-      if (!entry) return next();
+      if (!entry) {
+        cacheRequestTotal.add(1, { result: "corrupt", route });
+        return next();
+      }
+      cacheRequestTotal.add(1, { result: "hit", route });
       return new Response(entry.body, {
         status: entry.status,
         headers: {
@@ -54,6 +76,7 @@ export function cacheMiddleware(redis: CacheStore) {
       });
     }
 
+    cacheRequestTotal.add(1, { result: "miss", route });
     await next();
 
     // --- Response phase: store the response if eligible ---
