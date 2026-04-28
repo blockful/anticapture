@@ -18,6 +18,10 @@
       ],
       "outputs": ["generated/**"]
     },
+    "@anticapture/graphql-client#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "generated/**"]
+    },
     "@anticapture/dashboard#build": {
       "outputs": ["dist/**", ".next/**"]
     },
