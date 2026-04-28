@@ -262,10 +262,13 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           values: f.default({ defaultValue: [] }),
           signatures: f.default({ defaultValue: [] }),
           calldatas: f.default({ defaultValue: [] }),
-          // Realistic Unix seconds so Number(timestamp) fits in a 32-bit signed
-          // int — drizzle-seed's default bigint range overflows GraphQL Int
+          // Realistic Unix seconds / block numbers so startTimestamp
+          // (computed as endTimestamp - blockDelta * blockTime) stays within
+          // the 32-bit signed int range required by GraphQL Int.
           timestamp: f.default({ defaultValue: BigInt(1_700_000_000) }),
           endTimestamp: f.default({ defaultValue: BigInt(1_700_604_800) }),
+          startBlock: f.default({ defaultValue: 18_500_000 }),
+          endBlock: f.default({ defaultValue: 18_504_200 }),
           forVotes: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
           againstVotes: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
           abstainVotes: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
