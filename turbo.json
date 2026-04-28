@@ -22,7 +22,12 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "generated/**"]
     },
+    "@anticapture/client#build": {
+      "dependsOn": ["codegen"],
+      "outputs": ["dist/**", "generated/**"]
+    },
     "@anticapture/dashboard#build": {
+      "dependsOn": ["^codegen", "^build"],
       "outputs": ["dist/**", ".next/**"]
     },
     "build": {
