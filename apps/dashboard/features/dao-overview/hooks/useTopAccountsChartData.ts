@@ -1,5 +1,7 @@
 "use client";
 
+import { zeroAddress, type Address } from "viem";
+
 import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 
@@ -14,7 +16,9 @@ export function useTopAccountsChartData({
 
   const delegateAddresses = chartData
     .map((item) => item.delegate)
-    .filter((address) => !!address);
+    .filter(
+      (address): address is Address => !!address && address !== zeroAddress,
+    );
 
   const { data: ensData } = useMultipleEnsData([
     ...addresses,
@@ -25,9 +29,10 @@ export function useTopAccountsChartData({
     return {
       ...item,
       name: ensData[item.address]?.ens,
-      latestDelegate: item.delegate
-        ? ensData[item.delegate]?.ens || item.delegate
-        : undefined,
+      latestDelegate:
+        item.delegate && item.delegate !== zeroAddress
+          ? ensData[item.delegate]?.ens || item.delegate
+          : undefined,
       totalDelegators: item.delegationsCount ?? 0,
     };
   });
