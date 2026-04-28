@@ -18,31 +18,18 @@
       ],
       "outputs": ["generated/**"]
     },
-    "@anticapture/client#build": {
-      "dependsOn": ["codegen"],
-      "outputs": ["dist/**"]
-    },
-    "@anticapture/graphql-client#build": {
-      "dependsOn": ["codegen"],
-      "outputs": ["generated/**"],
-      "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
-    },
     "@anticapture/dashboard#build": {
-      "dependsOn": ["^codegen", "^build"],
-      "outputs": ["dist/**", ".next/**"],
-      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+      "outputs": ["dist/**", ".next/**"]
     },
     "build": {
-      "dependsOn": ["^build", "^codegen"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "storybook": {
-      "dependsOn": ["^codegen"],
       "persistent": true,
       "cache": false
     },
     "build-storybook": {
-      "dependsOn": ["^codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
@@ -110,8 +97,7 @@
     "dev": {
       "persistent": true,
       "cache": false,
-      "passThroughEnv": ["*"],
-      "dependsOn": ["^codegen"]
+      "passThroughEnv": ["*"]
     }
   }
 }
