@@ -35,6 +35,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
     );
     const TOKEN_IDS = ADDRESSES.slice(0, 5);
     const DAO_ID = env.DAO_ID;
+    const NOW = BigInt(Math.floor(Date.now() / 1000));
+    // 1e18 tokens with 18 decimals = 1 token; scale up for realistic supply figures
+    const UNIT = BigInt("1000000000000000000"); // 1e18
     const PROPOSAL_STATUSES = [
       "ACTIVE",
       "CANCELED",
@@ -80,9 +83,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
       voterAccountId: voterAccountId as `0x${string}`,
       proposalId: PROPOSAL_IDS[i]!,
       support: VOTE_SUPPORTS[i % VOTE_SUPPORTS.length]!,
-      votingPower: BigInt(i + 1),
+      votingPower: UNIT * BigInt(i + 1),
       reason: null,
-      timestamp: BigInt(i + 1),
+      timestamp: NOW - BigInt(i * 3600),
     }));
     for (let i = 0; i < votesOnchainRows.length; i += 500) {
       await pgClient
@@ -92,9 +95,25 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
 
     await seed(pgClient, schema, { count: 1000 }).refine((f) => ({
       token: {
+        // One token per TOKEN_ID; the first one uses DAO_ID as its name so
+        // TokenRepository.getTokenPropertiesByName(daoId) finds it.
         count: TOKEN_IDS.length,
         columns: {
           id: f.valuesFromArray({ values: TOKEN_IDS, isUnique: true }),
+          name: f.default({ defaultValue: DAO_ID }),
+          decimals: f.default({ defaultValue: 18 }),
+          totalSupply: f.default({ defaultValue: UNIT * BigInt(1_000_000) }),
+          delegatedSupply: f.default({ defaultValue: UNIT * BigInt(400_000) }),
+          circulatingSupply: f.default({
+            defaultValue: UNIT * BigInt(800_000),
+          }),
+          cexSupply: f.default({ defaultValue: UNIT * BigInt(50_000) }),
+          dexSupply: f.default({ defaultValue: UNIT * BigInt(30_000) }),
+          lendingSupply: f.default({ defaultValue: UNIT * BigInt(20_000) }),
+          nonCirculatingSupply: f.default({
+            defaultValue: UNIT * BigInt(200_000),
+          }),
+          treasury: f.default({ defaultValue: UNIT * BigInt(100_000) }),
         },
       },
       account: {
@@ -107,6 +126,17 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
         columns: {
           accountId: f.valuesFromArray({ values: ADDRESSES, isUnique: true }),
           daoId: f.default({ defaultValue: DAO_ID }),
+          // Realistic voting power (1–1000 tokens) and a recent last-vote
+          // timestamp so getActiveSupply(90d) returns non-zero results
+          votingPower: f.default({ defaultValue: UNIT * BigInt(100) }),
+          lastVoteTimestamp: f.default({ defaultValue: NOW - BigInt(86_400) }),
+        },
+      },
+      tokenPrice: {
+        columns: {
+          // ~$2 per token in wei-equivalent (price stored as bigint in ETH units)
+          price: f.default({ defaultValue: BigInt(2_000_000_000_000_000) }),
+          timestamp: f.default({ defaultValue: NOW }),
         },
       },
       votingPowerHistory: {
