@@ -68,7 +68,8 @@ if (config.blockfulApiToken) {
 }
 if (config.redisUrl) {
   const redis = createRedisClient(config.redisUrl);
-  app.use("*", cacheMiddleware(redis));
+  const knownDaos = new Set(config.daoApis.keys());
+  app.use("*", cacheMiddleware(redis, knownDaos));
 }
 
 logger.info(

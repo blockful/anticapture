@@ -33,18 +33,22 @@ function safeParse<T>(raw: string): T | null {
  *     - The upstream set a `Cache-Control: max-age=<n>` header with n > 0.
  * - All Redis errors are swallowed (fail open) to preserve availability.
  */
-export function cacheMiddleware(redis: CacheStore) {
+export function cacheMiddleware(
+  redis: CacheStore,
+  knownDaos: ReadonlySet<string>,
+) {
   return async (c: Context, next: Next) => {
     // Only cache GET requests.
     if (c.req.method !== "GET") return next();
 
     const key = c.req.url;
 
-    // Normalize the path to a fixed-cardinality label: "/<dao>/*" keeps the
-    // DAO segment (useful for per-DAO cache panels) while collapsing all
-    // sub-resource segments so each DAO produces exactly one time-series.
-    const [, dao] = c.req.path.split("/");
-    const route = dao ? `/${dao.toLowerCase()}/*` : "/";
+    // Normalize the path to a fixed-cardinality label. Only known DAO ids
+    // produce a "/<dao>/*" series; anything else collapses to "/unknown/*"
+    // so unauthenticated or noisy traffic can't mint unbounded time-series.
+    const [, segment] = c.req.path.split("/");
+    const dao = segment?.toLowerCase() ?? "";
+    const route = !dao ? "/" : knownDaos.has(dao) ? `/${dao}/*` : "/unknown/*";
 
     // --- Request phase: check for a cached response ---
     // Fail open: if Redis is unavailable, .catch returns null and we proceed normally.
