@@ -1,4 +1,4 @@
-export { default as client } from "./client.js";
+export { default as client, setClientConfig } from "./client.js";
 export type {
   Client,
   RequestConfig,
