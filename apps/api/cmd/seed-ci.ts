@@ -168,6 +168,18 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
         .values(transferRows.slice(i, i + 500));
     }
 
+    // tokenPrice PK: timestamp — drizzle-seed can generate duplicate timestamps
+    // within the [NOW-86400, NOW] window. Insert 1000 rows with evenly-spaced timestamps.
+    const tokenPriceRows = Array.from({ length: 1000 }, (_, i) => ({
+      price: BIGINT_MAX,
+      timestamp: NOW - BigInt(i * 86),
+    }));
+    for (let i = 0; i < tokenPriceRows.length; i += 500) {
+      await pgClient
+        .insert(schema.tokenPrice)
+        .values(tokenPriceRows.slice(i, i + 500));
+    }
+
     // feedEvent PK: (txHash, logIndex) — logIndex=0 for all + repeated txHash = collision
     // timestamp uses mode:"number" in the API schema, so pass a JS number not bigint.
     const feedEventRows = ADDRESSES.map((_, i) => ({
@@ -233,12 +245,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           }),
         },
       },
-      tokenPrice: {
-        columns: {
-          price: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          timestamp: f.int({ minValue: NOW - BigInt(86_400), maxValue: NOW }),
-        },
-      },
+      tokenPrice: { count: 0 },
       votingPowerHistory: { count: 0 },
       balanceHistory: { count: 0 },
       delegation: { count: 0 },
