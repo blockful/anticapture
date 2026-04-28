@@ -145,6 +145,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           transactionHash: f.valuesFromArray({ values: TX_HASHES }),
           daoId: f.default({ defaultValue: DAO_ID }),
           accountId: f.valuesFromArray({ values: ADDRESSES }),
+          votingPower: f.default({ defaultValue: UNIT * BigInt(100) }),
+          delta: f.default({ defaultValue: UNIT }),
+          deltaMod: f.default({ defaultValue: UNIT }),
           // logIndex=0 on all rows so the join in getHistoricalVotingPowers
           // (votingPowerHistory.logIndex < delegation/transfer.logIndex) resolves
           logIndex: f.default({ defaultValue: 0 }),
@@ -155,6 +158,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           transactionHash: f.valuesFromArray({ values: TX_HASHES }),
           daoId: f.default({ defaultValue: DAO_ID }),
           accountId: f.valuesFromArray({ values: ADDRESSES }),
+          balance: f.default({ defaultValue: UNIT * BigInt(100) }),
+          delta: f.default({ defaultValue: UNIT }),
+          deltaMod: f.default({ defaultValue: UNIT }),
           // logIndex=0 matches transfer rows so the inner join in
           // getHistoricalBalances produces results instead of an empty set
           logIndex: f.default({ defaultValue: 0 }),
@@ -167,6 +173,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           delegateAccountId: f.valuesFromArray({ values: ADDRESSES }),
           delegatorAccountId: f.valuesFromArray({ values: ADDRESSES }),
           previousDelegate: f.valuesFromArray({ values: ADDRESSES }),
+          delegatedValue: f.default({ defaultValue: UNIT * BigInt(100) }),
           logIndex: f.default({ defaultValue: 0 }),
         },
       },
@@ -177,6 +184,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
           fromAccountId: f.valuesFromArray({ values: ADDRESSES }),
           toAccountId: f.valuesFromArray({ values: ADDRESSES }),
+          amount: f.default({ defaultValue: UNIT * BigInt(10) }),
           logIndex: f.default({ defaultValue: 0 }),
         },
       },
@@ -196,12 +204,21 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           // int — drizzle-seed's default bigint range overflows GraphQL Int
           timestamp: f.default({ defaultValue: BigInt(1_700_000_000) }),
           endTimestamp: f.default({ defaultValue: BigInt(1_700_604_800) }),
+          forVotes: f.default({ defaultValue: UNIT * BigInt(100) }),
+          againstVotes: f.default({ defaultValue: UNIT * BigInt(50) }),
+          abstainVotes: f.default({ defaultValue: UNIT * BigInt(10) }),
         },
       },
       daoMetricsDayBucket: {
         columns: {
           daoId: f.default({ defaultValue: DAO_ID }),
           tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
+          open: f.default({ defaultValue: UNIT * BigInt(2) }),
+          close: f.default({ defaultValue: UNIT * BigInt(2) }),
+          low: f.default({ defaultValue: UNIT }),
+          high: f.default({ defaultValue: UNIT * BigInt(3) }),
+          average: f.default({ defaultValue: UNIT * BigInt(2) }),
+          volume: f.default({ defaultValue: UNIT * BigInt(1000) }),
         },
       },
       transaction: {
@@ -218,6 +235,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
         columns: {
           txHash: f.valuesFromArray({ values: TX_HASHES }),
           type: f.valuesFromArray({ values: FEED_EVENT_TYPES }),
+          value: f.default({ defaultValue: UNIT * BigInt(10) }),
         },
       },
     }));
