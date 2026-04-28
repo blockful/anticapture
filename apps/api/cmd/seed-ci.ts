@@ -36,8 +36,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
     const TOKEN_IDS = ADDRESSES.slice(0, 5);
     const DAO_ID = env.DAO_ID;
     const NOW = BigInt(Math.floor(Date.now() / 1000));
-    // 1e18 tokens with 18 decimals = 1 token; scale up for realistic supply figures
-    const UNIT = BigInt("1000000000000000000"); // 1e18
+    // pg bigint max is ~9.2e18. Use 1e12 as the base unit so the largest
+    // multiplier in this file (1_000_000 for supply) stays at 1e18.
+    const UNIT = BigInt("1000000000000"); // 1e12
     const PROPOSAL_STATUSES = [
       "ACTIVE",
       "CANCELED",
