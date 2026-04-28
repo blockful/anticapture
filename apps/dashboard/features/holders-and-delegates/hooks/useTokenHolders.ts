@@ -33,22 +33,56 @@ export const useTokenHolders = (
     toDay?: TimeInterval;
   },
 ) => {
-  const { fromDay, toDay, ...accountBalancesParams } = params;
+  const {
+    fromDay,
+    toDay,
+    fromDate: fromDateParam,
+    toDate: toDateParam,
+    limit,
+    skip,
+    orderDirection,
+    orderBy,
+    excludeDaoAddresses,
+    addresses,
+    delegates,
+    fromValue,
+    toValue,
+  } = params;
   const { decimals } = daoConfigByDaoId[daoId];
+  const addressesKey = addresses?.join(",") ?? "";
+  const delegatesKey = delegates?.join(",") ?? "";
 
   const queryParams = useMemo<AccountBalancesQueryParams>(() => {
     const now = Math.floor(Date.now() / 1000);
 
     return {
-      ...accountBalancesParams,
-      fromDate: fromDay
-        ? now - DAYS_IN_SECONDS[fromDay]
-        : accountBalancesParams.fromDate,
-      toDate: toDay
-        ? now - DAYS_IN_SECONDS[toDay]
-        : accountBalancesParams.toDate,
+      fromDate: fromDay ? now - DAYS_IN_SECONDS[fromDay] : fromDateParam,
+      toDate: toDay ? now - DAYS_IN_SECONDS[toDay] : toDateParam,
+      limit,
+      skip,
+      orderDirection,
+      orderBy,
+      excludeDaoAddresses,
+      addresses: addressesKey ? addressesKey.split(",") : undefined,
+      delegates: delegatesKey ? delegatesKey.split(",") : undefined,
+      fromValue,
+      toValue,
     };
-  }, [accountBalancesParams, fromDay, toDay]);
+  }, [
+    fromDay,
+    toDay,
+    fromDateParam,
+    toDateParam,
+    limit,
+    skip,
+    orderDirection,
+    orderBy,
+    excludeDaoAddresses,
+    addressesKey,
+    delegatesKey,
+    fromValue,
+    toValue,
+  ]);
 
   const {
     data,
