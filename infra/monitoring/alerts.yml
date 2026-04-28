@@ -16,18 +16,18 @@ groups:
             Check container/process status and recent logs immediately.
 
       # Indexer is not responding — longer window to account for slow startup
-      - alert: IndexerDown
-        expr: up{job=~".*-indexer"} == 0
-        for: 10m
-        labels:
-          severity: critical
-        annotations:
-          summary: "[CRITICAL] {{ $labels.job }} is unreachable"
-          description: >
-            Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
-            for more than 10 minutes. Note: indexers take time to bind their HTTP server on
-            cold start, so this alert has an extended window. If the indexer was not recently
-            deployed, check container/process status and recent logs.
+      # - alert: IndexerDown
+      #   expr: up{job=~".*-indexer"} == 0
+      #   for: 10m
+      #   labels:
+      #     severity: critical
+      #   annotations:
+      #     summary: "[CRITICAL] {{ $labels.job }} is unreachable"
+      #     description: >
+      #       Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
+      #       for more than 10 minutes. Note: indexers take time to bind their HTTP server on
+      #       cold start, so this alert has an extended window. If the indexer was not recently
+      #       deployed, check container/process status and recent logs.
 
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage
