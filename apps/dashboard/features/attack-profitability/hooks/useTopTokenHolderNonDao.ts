@@ -1,57 +1,26 @@
-import type { GetDaoAddressesAccountBalancesQuery } from "@anticapture/graphql-client/hooks";
-import { useGetDaoAddressesAccountBalancesQuery } from "@anticapture/graphql-client/hooks";
-import type { ApolloError, ApolloQueryResult } from "@apollo/client";
-
 import type { DaoIdEnum } from "@/shared/types/daos";
+import type { AccountBalancesPathParamsDaoEnumKey } from "@anticapture/client";
+import { useAccountBalances } from "@anticapture/client/hooks";
 
-interface TopTokenHolderNonDaoResponse {
-  data:
-    | NonNullable<
-        NonNullable<
-          GetDaoAddressesAccountBalancesQuery["accountBalances"]
-        >["items"][number]
-      >
-    | null
-    | undefined;
-  loading: boolean;
-  error: ApolloError | undefined;
-  refetch: () => Promise<
-    ApolloQueryResult<GetDaoAddressesAccountBalancesQuery>
-  >;
-}
-/**
- * Hook to fetch the top token holder excluding DAO addresses this is used to calculate the attack profitability
- * @param daoId The DAO ID to fetch data for
- * @param options Additional options
- */
-export const useTopTokenHolderNonDao = (
-  daoId: DaoIdEnum,
-  options?: {
-    refreshInterval?: number;
-    revalidateOnFocus?: boolean;
-    revalidateOnReconnect?: boolean;
-  },
-): TopTokenHolderNonDaoResponse => {
-  const { data, loading, error, refetch } =
-    useGetDaoAddressesAccountBalancesQuery({
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-        },
-      },
-      variables: {
-        excludeDaoAddresses: true,
-      },
-      notifyOnNetworkStatusChange: true,
-      fetchPolicy: "cache-and-network",
-      pollInterval: options?.refreshInterval || 0,
-      errorPolicy: "all",
-    });
+export const useTopTokenHolderNonDao = (daoId: DaoIdEnum) => {
+  const {
+    data: listData,
+    isLoading: isListLoading,
+    error: listError,
+  } = useAccountBalances(
+    // this works because this endpoint is supported for all DAOs
+    String(daoId).toLowerCase() as AccountBalancesPathParamsDaoEnumKey,
+    {
+      excludeDaoAddresses: true,
+      limit: 1,
+      orderBy: "balance",
+      orderDirection: "desc",
+    },
+  );
 
   return {
-    data: data?.accountBalances?.items[0] || undefined,
-    loading,
-    error: error || undefined,
-    refetch,
+    data: listData?.items[0],
+    loading: isListLoading,
+    error: listError ?? undefined,
   };
 };

@@ -29,4 +29,4 @@ COPY --from=installer --chown=app:app /app .
 USER app
 WORKDIR /app/apps/gateful
 EXPOSE 4001
-ENTRYPOINT ["node", "dist/src/index.js"]
+ENTRYPOINT ["node", "--import", "./dist/src/instrumentation.js", "dist/src/index.js"]

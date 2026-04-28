@@ -1,5 +1,17 @@
 const DEFAULT_BASE_URL = "/api/gateful";
 
+const clientConfig: { defaultHeaders: Record<string, string> } = {
+  defaultHeaders: {},
+};
+
+export const setClientConfig = (cfg: {
+  defaultHeaders?: Record<string, string>;
+}) => {
+  if (cfg.defaultHeaders) {
+    Object.assign(clientConfig.defaultHeaders, cfg.defaultHeaders);
+  }
+};
+
 type HttpMethod =
   | "GET"
   | "POST"
@@ -107,7 +119,13 @@ const getHeaders = (
   headers?: [string, string][] | Record<string, string>,
   data?: unknown,
 ) => {
-  const resolvedHeaders = new Headers(headers);
+  const resolvedHeaders = new Headers(clientConfig.defaultHeaders);
+
+  if (headers) {
+    new Headers(headers).forEach((value, key) =>
+      resolvedHeaders.set(key, value),
+    );
+  }
 
   if (data !== undefined && data !== null && !isFormData(data)) {
     resolvedHeaders.set("Content-Type", "application/json");

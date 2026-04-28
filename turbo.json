@@ -11,34 +11,34 @@
       "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
     },
     "@anticapture/client#codegen": {
-      "inputs": ["kubb.config.ts", "src/**", "../../apps/gateful/openapi/gateful.json"],
-      "outputs": ["generated/**"]
-    },
-    "@anticapture/client#build": {
-      "dependsOn": ["codegen"],
+      "inputs": [
+        "kubb.config.ts",
+        "src/**",
+        "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
+      ],
       "outputs": ["generated/**"]
     },
     "@anticapture/graphql-client#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "generated/**"]
+    },
+    "@anticapture/client#build": {
       "dependsOn": ["codegen"],
-      "outputs": ["generated/**"],
-      "env": ["ANTICAPTURE_GRAPHQL_ENDPOINT"]
+      "outputs": ["dist/**", "generated/**"]
     },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
-      "outputs": ["dist/**", ".next/**"],
-      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+      "outputs": ["dist/**", ".next/**"]
     },
     "build": {
-      "dependsOn": ["^build", "^codegen"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "storybook": {
-      "dependsOn": ["^codegen"],
       "persistent": true,
       "cache": false
     },
     "build-storybook": {
-      "dependsOn": ["^codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
@@ -106,8 +106,7 @@
     "dev": {
       "persistent": true,
       "cache": false,
-      "passThroughEnv": ["*"],
-      "dependsOn": ["^codegen"]
+      "passThroughEnv": ["*"]
     }
   }
 }

@@ -11,8 +11,14 @@ import type { ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 
+import { setClientConfig } from "@anticapture/client";
+
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
+
+setClientConfig({
+  defaultHeaders: { "x-client-source": "anticapture-frontend" },
+});
 
 const queryClient = new QueryClient();
 
