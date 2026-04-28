@@ -150,7 +150,7 @@ async function main() {
   health(app);
 
   // --- OpenAPI docs ---
-  app.doc("/openapi.json", {
+  app.doc("/docs", {
     openapi: "3.0.0",
     info: { title: "Anticapture Relayer", version: "1.0.0" },
   });

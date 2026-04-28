@@ -117,6 +117,8 @@ const getOpenApiSpec = storeOpenApiSpec(
   openApiDocument,
   config.daoApis,
   config.addressEnrichmentUrl,
+  undefined,
+  config.daoRelayers,
 );
 
 app.get("/docs/json", async (c) => {
