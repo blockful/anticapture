@@ -11,13 +11,13 @@ import { Input } from "@/shared/components/design-system/form/fields/input/Input
 import { RadioCard } from "@/shared/components/design-system/form/fields/radio-card/RadioCard";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import daoConfig from "@/shared/dao-config";
+import { isEnsAddress } from "@/shared/hooks/useEnsData";
 import { useTokenData } from "@/shared/hooks/useTokenData";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type {
   ERC20TransferAction,
   EthTransferAction,
 } from "@/features/create-proposal/types";
-import { isValidAddressOrEns } from "@/features/create-proposal/utils/addressValidation";
 
 type TokenType = "eth" | "erc20";
 
@@ -67,6 +67,8 @@ export const AddTransferModal = ({
   const [amount, setAmount] = useState(initialValue?.amount ?? "");
   const [isResolvingDecimals, setIsResolvingDecimals] = useState(false);
   const [decimalsError, setDecimalsError] = useState<string | null>(null);
+  const [tokenAddressTouched, setTokenAddressTouched] = useState(false);
+  const [recipientTouched, setRecipientTouched] = useState(false);
 
   // Re-hydrate fields whenever the modal opens with a new initialValue
   useEffect(() => {
@@ -141,14 +143,23 @@ export const AddTransferModal = ({
     setRecipient("");
     setTokenAddress("");
     setAmount("");
+    setTokenAddressTouched(false);
+    setRecipientTouched(false);
   };
 
+  const recipientTrimmed = recipient.trim();
+  const recipientIsValid =
+    recipientTrimmed !== "" &&
+    (isAddress(recipientTrimmed) || isEnsAddress(recipientTrimmed));
+  // Defer the error UI until the field has been blurred so the user doesn't
+  // see "invalid" while still typing a long address/ENS name.
   const recipientError =
-    recipient.trim() !== "" && !isValidAddressOrEns(recipient);
+    recipientTouched && recipientTrimmed !== "" && !recipientIsValid;
   const tokenAddressError =
-    tokenAddress.trim() !== "" && !isAddress(tokenAddress.trim());
-  const recipientValid =
-    recipient.trim() !== "" && isValidAddressOrEns(recipient);
+    tokenAddressTouched &&
+    tokenAddress.trim() !== "" &&
+    !isAddress(tokenAddress.trim());
+  const recipientValid = recipientIsValid;
   const tokenAddressValid =
     tokenType === "eth" ||
     (tokenAddress.trim() !== "" && isAddress(tokenAddress.trim()));
@@ -220,6 +231,7 @@ export const AddTransferModal = ({
           <Input
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
+            onBlur={() => setRecipientTouched(true)}
             placeholder="Address or ENS"
             error={recipientError}
           />
@@ -256,6 +268,7 @@ export const AddTransferModal = ({
             <Input
               value={tokenAddress}
               onChange={(e) => setTokenAddress(e.target.value)}
+              onBlur={() => setTokenAddressTouched(true)}
               placeholder="0x…"
               error={tokenAddressError}
             />
@@ -271,6 +284,9 @@ export const AddTransferModal = ({
         )}
 
         <div className="flex flex-col gap-1.5">
+          {/* Reserve a 50/50 split for the USD column even when it's hidden so
+              switching tokens (ETH ↔ ERC-20) doesn't reflow the Amount input
+              from full-width to half-width. */}
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-1.5">
               <FormLabel isRequired>Amount</FormLabel>
@@ -281,17 +297,19 @@ export const AddTransferModal = ({
                 inputMode="decimal"
               />
             </div>
-            {showUsd && (
-              <div className="flex flex-1 flex-col gap-1.5">
-                <FormLabel isRequired>USD</FormLabel>
-                <Input
-                  value={usdDisplay}
-                  disabled
-                  placeholder="$0.00"
-                  tabIndex={-1}
-                />
-              </div>
-            )}
+            <div
+              className="flex flex-1 flex-col gap-1.5"
+              aria-hidden={!showUsd}
+              style={!showUsd ? { visibility: "hidden" } : undefined}
+            >
+              <FormLabel isRequired>USD</FormLabel>
+              <Input
+                value={showUsd ? usdDisplay : ""}
+                disabled
+                placeholder="$0.00"
+                tabIndex={-1}
+              />
+            </div>
           </div>
           {showUsd && (
             <span className="text-secondary text-xs">

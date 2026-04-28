@@ -49,9 +49,10 @@ export const BodyField = () => {
     <div className="flex w-full flex-col gap-1">
       <div
         className={[
-          "border-border-contrast rounded-base flex w-full flex-col overflow-hidden border",
-          "[&_.mdxeditor-toolbar]:!bg-surface-default [&_.mdxeditor-toolbar]:!px-2 [&_.mdxeditor-toolbar]:!py-0",
-          "[&_.cm-editor]:min-h-[520px] [&_.cm-scroller]:min-h-[520px]",
+          "border-border-contrast rounded-base flex w-full flex-col overflow-hidden border bg-transparent",
+          "[&_.mdxeditor-toolbar]:!mb-2 [&_.mdxeditor-toolbar]:!bg-transparent [&_.mdxeditor-toolbar]:!px-2 [&_.mdxeditor-toolbar]:!py-0",
+          "[&_.mdxeditor-root-contenteditable]:max-h-100 [&_.mdxeditor-root-contenteditable]:overflow-y-auto",
+          "[&_.cm-editor]:min-h-75 [&_.cm-editor]:max-h-100 [&_.cm-scroller]:min-h-75 [&_.cm-scroller]:max-h-100 md:[&_.cm-editor]:min-h-130 md:[&_.cm-editor]:max-h-150 md:[&_.cm-scroller]:min-h-130 md:[&_.cm-scroller]:max-h-150",
           // Heading styles for Visual Editor content (mdxeditor content area)
           "[&_.mdxeditor-root-contenteditable_h1]:mb-3 [&_.mdxeditor-root-contenteditable_h1]:mt-4 [&_.mdxeditor-root-contenteditable_h1]:text-2xl [&_.mdxeditor-root-contenteditable_h1]:font-semibold",
           "[&_.mdxeditor-root-contenteditable_h2]:mb-2 [&_.mdxeditor-root-contenteditable_h2]:mt-4 [&_.mdxeditor-root-contenteditable_h2]:text-xl [&_.mdxeditor-root-contenteditable_h2]:font-semibold",
@@ -74,7 +75,7 @@ export const BodyField = () => {
               key={mode}
               markdown={field.value}
               onChange={(md) => field.onChange(md)}
-              contentEditableClassName="!min-h-[520px] max-w-none px-4 py-4 focus:outline-none"
+              contentEditableClassName="!min-h-75 md:!min-h-130 max-w-none px-4 py-4 focus:outline-none"
               plugins={[
                 headingsPlugin(),
                 listsPlugin(),
@@ -89,7 +90,7 @@ export const BodyField = () => {
                 }),
                 toolbarPlugin({
                   toolbarContents: () => (
-                    <div className="flex w-full flex-col-reverse gap-2 md:flex-row md:items-center md:justify-between">
+                    <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
                       <TabGroup
                         tabs={[
                           { label: "Visual Editor", value: "visual" },
@@ -97,11 +98,11 @@ export const BodyField = () => {
                         ]}
                         activeTab={mode}
                         onTabChange={(v) => setMode(v as Mode)}
-                        className="border-b-0"
+                        className="w-full border-b-0 md:w-auto"
                         size="md"
                       />
                       {mode === "visual" && (
-                        <div className="flex flex-wrap items-center gap-0.5">
+                        <div className="order-2 flex flex-wrap items-center gap-0.5 md:order-none">
                           <BoldItalicUnderlineToggles
                             options={["Bold", "Italic"]}
                           />

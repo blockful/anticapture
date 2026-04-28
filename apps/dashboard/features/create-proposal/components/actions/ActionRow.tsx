@@ -10,6 +10,7 @@ import { BadgeStatus } from "@/shared/components/design-system/badges/badge-stat
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import type { ProposalAction } from "@/features/create-proposal/types";
+import { BulletDivider } from "@/shared/components/design-system/section";
 
 interface ActionRowProps {
   id: string;
@@ -122,14 +123,16 @@ export const ActionRow = ({
       <BadgeStatus variant="outline" className="size-5 justify-center px-0">
         {index + 1}
       </BadgeStatus>
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 lg:flex-row lg:items-center">
         <span className="text-primary truncate text-sm font-medium">
           {actionTypeLabel(action)}
         </span>
-        <span className="text-secondary truncate text-xs">
+        <BulletDivider className="hidden lg:block" />
+        <span className="text-secondary truncate text-sm">
           {actionSubtitle(action, tokenSymbol)}
         </span>
-        <span className="text-secondary truncate text-xs">
+        <BulletDivider className="hidden lg:block" />
+        <span className="text-secondary truncate text-sm">
           {actionTarget(action)}
         </span>
       </div>

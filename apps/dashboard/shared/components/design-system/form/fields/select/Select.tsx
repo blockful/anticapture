@@ -97,7 +97,7 @@ export const Select = ({
         <PopoverPrimitive.Content
           role="listbox"
           align="start"
-          side={"bottom"}
+          side="bottom"
           sideOffset={4}
           collisionPadding={16}
           // Match trigger width; cap height via Radix CSS var to available space in viewport

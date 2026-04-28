@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
-import { notFound } from "next/navigation";
 
+import NotFound from "@/app/not-found";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoApolloProvider } from "@/shared/providers/DaoApolloProvider";
 import { DaoIdProvider } from "@/shared/providers/DaoIdProvider";
@@ -16,9 +16,16 @@ type WhitelabelLayoutProps = {
   params: Promise<{ daoId: string }>;
 };
 
+const isWhitelabelInternalRouteAllowed = () =>
+  process.env.VERCEL_ENV !== "production";
+
 export async function generateMetadata({
   params,
 }: WhitelabelLayoutProps): Promise<Metadata> {
+  if (!isWhitelabelInternalRouteAllowed()) {
+    return {};
+  }
+
   const { daoId } = await params;
   const daoIdEnum = toDaoIdEnum(daoId);
 
@@ -45,17 +52,21 @@ export default async function WhitelabelLayout({
   children,
   params,
 }: WhitelabelLayoutProps) {
+  if (!isWhitelabelInternalRouteAllowed()) {
+    return <NotFound />;
+  }
+
   const { daoId } = await params;
   const daoIdEnum = toDaoIdEnum(daoId);
 
   if (!daoIdEnum) {
-    notFound();
+    return <NotFound />;
   }
 
   const daoConfig = daoConfigByDaoId[daoIdEnum];
 
   if (!isWhitelabelDao(daoConfig)) {
-    notFound();
+    return <NotFound />;
   }
 
   const themeVariables = getThemeCSSVariables(daoIdEnum);

@@ -4,6 +4,7 @@ import {
   isAddress,
   parseEther,
   parseUnits,
+  toFunctionSignature,
   type AbiFunction,
   type Hex,
 } from "viem";
@@ -48,17 +49,32 @@ export const encodeActions = async (
       continue;
     }
 
+    const target = await resolve(action.contractAddress);
+    const ethValue = action.value ? BigInt(action.value) : 0n;
+
+    if (action.calldata && action.calldata.trim().length > 0) {
+      targets.push(target);
+      values.push(ethValue);
+      calldatas.push(action.calldata.trim() as Hex);
+      continue;
+    }
+
+    // The picker stores the function signature (e.g. "transfer(address,uint256)")
+    // so overloads stay distinct. Fall back to a name match for older drafts
+    // that were saved before signatures were used.
     const fn = action.abi.find(
       (item): item is AbiFunction =>
-        item.type === "function" && item.name === action.functionName,
+        item.type === "function" &&
+        (toFunctionSignature(item) === action.functionName ||
+          item.name === action.functionName),
     );
     const resolvedArgs = await Promise.all(
       action.args.map((arg, i) =>
         fn?.inputs[i]?.type === "address" ? resolve(arg) : Promise.resolve(arg),
       ),
     );
-    targets.push(await resolve(action.contractAddress));
-    values.push(0n);
+    targets.push(target);
+    values.push(ethValue);
     calldatas.push(
       encodeFunctionData({
         abi: action.abi,

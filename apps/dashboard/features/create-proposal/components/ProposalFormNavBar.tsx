@@ -24,7 +24,7 @@ export const ProposalFormNavBar = ({
 }: ProposalFormNavBarProps) => {
   const percent = (filledCount / totalCount) * 100;
   return (
-    <div className="bg-surface-default border-border-default h-15 sticky bottom-0 flex items-center justify-between gap-4 border-t px-5 py-2">
+    <div className="bg-surface-default border-border-default min-h-15 sticky bottom-0 flex items-center justify-between gap-4 border-t px-5 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
       <ProgressBar
         value={percent}
         label={`${filledCount}/${totalCount}`}

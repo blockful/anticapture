@@ -15,6 +15,11 @@ export const WhitelabelThemeInjector = ({
   useEffect(() => {
     const root = document.documentElement;
     const entries = Object.entries(variables);
+    const hasDark = root.classList.contains("dark");
+
+    if (hasDark) {
+      root.classList.remove("dark");
+    }
 
     entries.forEach(([key, value]) => {
       root.style.setProperty(key, value);
@@ -24,6 +29,9 @@ export const WhitelabelThemeInjector = ({
       entries.forEach(([key]) => {
         root.style.removeProperty(key);
       });
+      if (hasDark) {
+        root.classList.add("dark");
+      }
     };
   }, [variables]);
 

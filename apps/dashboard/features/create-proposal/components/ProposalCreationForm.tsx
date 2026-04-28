@@ -1,13 +1,21 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { useAccount } from "wagmi";
 import { formatUnits } from "viem";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
@@ -67,6 +75,8 @@ export const ProposalCreationForm = () => {
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const governorAddress = daoConfig[daoIdEnum]?.daoOverview?.contracts
     ?.governor as `0x${string}` | undefined;
+  const pathname = usePathname();
+  const basePath = getWhitelabelBasePath({ daoId: daoIdEnum, pathname });
   const router = useRouter();
   const searchParams = useSearchParams();
   const draftId = searchParams?.get("draftId") ?? undefined;
@@ -119,16 +129,30 @@ export const ProposalCreationForm = () => {
   const [insufficientOpen, setInsufficientOpen] = useState(false);
 
   const values = form.watch();
+  const hasTitle = Boolean(values.title);
+  // Treat the body as filled when the user has edited it (RHF dirty flag) or
+  // when it was hydrated from a saved draft (form.reset clears dirty state,
+  // so we also accept any non-empty body that doesn't match the placeholder
+  // exactly).
+  const hasBody =
+    Boolean(values.body) &&
+    (Boolean(form.formState.dirtyFields.body) ||
+      values.body !== BODY_PLACEHOLDER);
+  const hasActions = values.actions.length > 0;
   const filledCount =
-    (values.title ? 1 : 0) +
-    (values.discussionUrl ? 1 : 0) +
-    (values.body && values.body !== BODY_PLACEHOLDER ? 1 : 0);
+    (hasTitle ? 1 : 0) + (hasBody ? 1 : 0) + (hasActions ? 1 : 0);
   const canPublish =
-    filledCount === 3 &&
+    hasTitle &&
+    hasBody &&
+    hasActions &&
     form.formState.isValid &&
     (values.body?.length ?? 0) <= 10_000;
 
   const handleSaveDraft = (options?: { navigateToDrafts?: boolean }) => {
+    if (!address) {
+      showCustomToast("Connect a wallet to save drafts", "error");
+      return;
+    }
     const id = drafts.saveDraft(
       {
         daoId,
@@ -139,11 +163,15 @@ export const ProposalCreationForm = () => {
       },
       currentDraftId,
     );
+    if (!id) {
+      showCustomToast("Could not save draft", "error");
+      return;
+    }
     setCurrentDraftId(id);
     form.reset(values, { keepValues: true, keepDirty: false });
     showCustomToast("Draft saved", "success");
     if (options?.navigateToDrafts !== false) {
-      router.push(`/whitelabel/${daoId}/proposals?tab=drafts`);
+      router.push(`${basePath}/proposals?tab=drafts`);
     }
   };
 
@@ -242,12 +270,37 @@ export const ProposalCreationForm = () => {
     <FormProvider {...form}>
       <NavigationGuard
         isDirty={form.formState.isDirty}
-        allowedPathname={`/whitelabel/${daoId}/proposals/new`}
-        onLeave={() => router.push(`/whitelabel/${daoId}/proposals`)}
+        allowedPathname={`${basePath}/proposals/new`}
+        onLeave={() => router.push(`${basePath}/proposals`)}
       />
-      <form className="flex flex-col gap-6 px-5 pb-20 pt-5" noValidate>
+      <nav
+        aria-label="Breadcrumb"
+        className="border-light-dark flex items-center gap-2 border-b px-5 py-3 lg:hidden"
+      >
+        <button
+          type="button"
+          onClick={() => router.push(`${basePath}/proposals`)}
+          className="text-secondary hover:text-primary -ml-1 flex items-center gap-1 text-sm"
+          aria-label="Back to proposals"
+        >
+          <ChevronLeft className="size-4" />
+          Proposals
+        </button>
+        <span className="text-secondary text-sm">/</span>
+        <span className="text-primary text-sm">New Proposal</span>
+      </nav>
+      <form
+        className="animate-page-slide-in flex flex-col gap-6 px-5 pb-20 pt-5"
+        noValidate
+      >
         {showInsufficientInline && threshold.thresholdFormatted && (
-          <InsufficientVPAlert threshold={threshold.thresholdFormatted} />
+          <InsufficientVPAlert
+            threshold={formatNumberUserReadable(
+              Number(threshold.thresholdFormatted),
+              0,
+            )}
+            tokenSymbol={daoConfig[daoIdEnum]?.name ?? ""}
+          />
         )}
 
         <div className="flex w-full flex-col gap-1">
@@ -365,7 +418,7 @@ export const ProposalCreationForm = () => {
         onViewProposal={() => {
           if (publisher.proposalId != null) {
             router.push(
-              `/whitelabel/${daoId}/proposals/${publisher.proposalId.toString()}`,
+              `${basePath}/proposals/${publisher.proposalId.toString()}`,
             );
           }
         }}
@@ -385,9 +438,7 @@ export const ProposalCreationForm = () => {
         onOpenChange={setInsufficientOpen}
         currentVp={currentVpText}
         requiredVp={threshold.thresholdFormatted ?? "—"}
-        onFindDelegate={() =>
-          router.push(`/whitelabel/${daoId}/holders-and-delegates`)
-        }
+        onFindDelegate={() => router.push(`${basePath}/holders-and-delegates`)}
       />
     </FormProvider>
   );

@@ -5,7 +5,6 @@ import { Loader2 } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { isAddress } from "viem";
-import { normalize } from "viem/ens";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import SearchField from "@/shared/components/design-system/SearchField";
@@ -15,7 +14,10 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/shared/components/ui/popover";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import {
+  fetchAddressFromEnsName,
+  isEnsAddress,
+} from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/";
 
 interface AddressFilterProps {
@@ -23,16 +25,6 @@ interface AddressFilterProps {
   currentFilter?: string;
   className?: string;
 }
-
-const isEnsAddress = (address: string) => {
-  try {
-    normalize(address);
-  } catch {
-    return false;
-  }
-
-  return address.endsWith(".eth") && address.slice(0, -4).length >= 3;
-};
 
 export function AddressFilter({
   onApply,

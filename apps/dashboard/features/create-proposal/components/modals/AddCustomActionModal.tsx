@@ -2,7 +2,12 @@
 
 import { ArrowLeft, ArrowRight, Upload } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Abi, AbiFunction } from "viem";
+import {
+  isAddress,
+  toFunctionSignature,
+  type Abi,
+  type AbiFunction,
+} from "viem";
 
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -15,13 +20,16 @@ import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import daoConfig from "@/shared/dao-config";
+import {
+  fetchAddressFromEnsName,
+  isEnsAddress,
+} from "@/shared/hooks/useEnsData";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { CustomAction } from "@/features/create-proposal/types";
 import {
   fetchAbi,
   parseAbiStrict,
 } from "@/features/create-proposal/utils/fetchAbi";
-import { isValidAddressOrEns } from "@/features/create-proposal/utils/addressValidation";
 import ensGovernorAbi from "@/abis/ens-governor.json";
 
 type Step = 1 | 2;
@@ -149,11 +157,17 @@ export const AddCustomActionModal = ({
   }, [abiText]);
 
   const isAddressValid =
-    contractAddress.trim() === "" || isValidAddressOrEns(contractAddress);
+    contractAddress.trim() === "" ||
+    isAddress(contractAddress.trim()) ||
+    isEnsAddress(contractAddress.trim());
 
   const functions: AbiFunction[] =
     abi?.filter((item): item is AbiFunction => item.type === "function") ?? [];
-  const selectedFn = functions.find((f) => f.name === functionName);
+  const selectedFn = functions.find(
+    (f) => toFunctionSignature(f) === functionName,
+  );
+  const hasOverloads = (fn: AbiFunction) =>
+    functions.filter((f) => f.name === fn.name).length > 1;
 
   const resetAll = () => {
     setStep(1);
@@ -172,12 +186,24 @@ export const AddCustomActionModal = ({
   const handleAddressBlur = async () => {
     if (mode !== "fetch") return;
     const v = contractAddress.trim();
-    if (!v || !isValidAddressOrEns(v)) return;
+    if (!v) return;
+    const isHex = isAddress(v);
+    const isEns = isEnsAddress(v);
+    if (!isHex && !isEns) return;
     setIsFetchingAbi(true);
     setFetchError(null);
     setAbiText("");
     try {
-      const found = await lookupAbi(daoId, v);
+      const resolved = isHex
+        ? v
+        : await fetchAddressFromEnsName({ ensName: v as `${string}.eth` });
+      if (!resolved) {
+        setFetchError(
+          "Couldn't resolve the address. Check the value and try again.",
+        );
+        return;
+      }
+      const found = await lookupAbi(daoId, resolved);
       if (found) {
         setAbiText(JSON.stringify(found, null, 2));
       } else {
@@ -375,7 +401,7 @@ export const AddCustomActionModal = ({
                           : 'Paste ABI JSON here — e.g. [{"type":"function",...}]'
                       }
                       className="min-h-32 font-mono text-xs"
-                      disabled={showEmptyAbiState}
+                      disabled={fetchError === null}
                     />
                   )}
                   {showEmptyAbiState && (
@@ -449,15 +475,20 @@ export const AddCustomActionModal = ({
                 <div className="flex flex-col gap-1.5">
                   <FormLabel isRequired>Function</FormLabel>
                   <Select
-                    items={functions.map((fn) => ({
-                      label: fn.name,
-                      value: fn.name,
-                    }))}
+                    items={functions.map((fn) => {
+                      const signature = toFunctionSignature(fn);
+                      return {
+                        label: hasOverloads(fn) ? signature : fn.name,
+                        value: signature,
+                      };
+                    })}
                     value={functionName}
                     placeholder="Select a function…"
-                    onValueChange={(name) => {
-                      setFunctionName(name);
-                      const fn = functions.find((f) => f.name === name);
+                    onValueChange={(signature) => {
+                      setFunctionName(signature);
+                      const fn = functions.find(
+                        (f) => toFunctionSignature(f) === signature,
+                      );
                       setArgs(
                         new Array(fn?.inputs.length ?? 0).fill("") as string[],
                       );

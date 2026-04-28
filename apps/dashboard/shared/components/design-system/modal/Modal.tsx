@@ -1,6 +1,7 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { useEffect, useState } from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { ModalFooter } from "@/shared/components/design-system/modal/modal-footer/ModalFooter";
@@ -32,11 +33,21 @@ export const Modal = ({
   className,
 }: ModalProps) => {
   const { isMobile } = useScreenSize();
+  // useScreenSize defaults to false until the effect runs, which would render
+  // the Dialog on first paint and swap to a Drawer after hydration on mobile.
+  // Wait for mount before deciding which surface to show so the user doesn't
+  // see a desktop dialog flash.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleCancel = () => {
     onCancel?.();
     onOpenChange(false);
   };
+
+  if (!isMounted && open) return null;
 
   const footer = (cancelLabel || confirmLabel || footerLeading) && (
     <ModalFooter
@@ -62,7 +73,7 @@ export const Modal = ({
           <DrawerPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50" />
           <DrawerPrimitive.Content
             className={cn(
-              "bg-surface-default border-border-default fixed inset-x-0 bottom-0 z-50 flex max-h-[90vh] flex-col overflow-hidden border-t",
+              "bg-surface-default border-border-default fixed inset-x-0 bottom-0 z-50 flex max-h-[90vh] flex-col overflow-hidden rounded-t-lg border-t",
               className,
             )}
           >
