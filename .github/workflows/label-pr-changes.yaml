@@ -73,3 +73,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: Gateful
+
+      - name: Add Relayer label
+        if: ${{ steps.changes.outputs.relayer == 'true' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: Relayer
