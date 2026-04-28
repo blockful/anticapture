@@ -114,6 +114,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           transactionHash: f.valuesFromArray({ values: TX_HASHES }),
           daoId: f.default({ defaultValue: DAO_ID }),
           accountId: f.valuesFromArray({ values: ADDRESSES }),
+          // logIndex=0 on all rows so the join in getHistoricalVotingPowers
+          // (votingPowerHistory.logIndex < delegation/transfer.logIndex) resolves
+          logIndex: f.default({ defaultValue: 0 }),
         },
       },
       balanceHistory: {
@@ -121,6 +124,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           transactionHash: f.valuesFromArray({ values: TX_HASHES }),
           daoId: f.default({ defaultValue: DAO_ID }),
           accountId: f.valuesFromArray({ values: ADDRESSES }),
+          // logIndex=0 matches transfer rows so the inner join in
+          // getHistoricalBalances produces results instead of an empty set
+          logIndex: f.default({ defaultValue: 0 }),
         },
       },
       delegation: {
@@ -130,6 +136,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           delegateAccountId: f.valuesFromArray({ values: ADDRESSES }),
           delegatorAccountId: f.valuesFromArray({ values: ADDRESSES }),
           previousDelegate: f.valuesFromArray({ values: ADDRESSES }),
+          logIndex: f.default({ defaultValue: 0 }),
         },
       },
       transfer: {
@@ -139,6 +146,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
           fromAccountId: f.valuesFromArray({ values: ADDRESSES }),
           toAccountId: f.valuesFromArray({ values: ADDRESSES }),
+          logIndex: f.default({ defaultValue: 0 }),
         },
       },
       votesOnchain: { count: 0 }, // inserted manually above
@@ -153,6 +161,10 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           values: f.default({ defaultValue: [] }),
           signatures: f.default({ defaultValue: [] }),
           calldatas: f.default({ defaultValue: [] }),
+          // Realistic Unix seconds so Number(timestamp) fits in a 32-bit signed
+          // int — drizzle-seed's default bigint range overflows GraphQL Int
+          timestamp: f.default({ defaultValue: BigInt(1_700_000_000) }),
+          endTimestamp: f.default({ defaultValue: BigInt(1_700_604_800) }),
         },
       },
       daoMetricsDayBucket: {

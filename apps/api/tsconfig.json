@@ -13,7 +13,8 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "drizzle-seed": ["../../node_modules/.pnpm/node_modules/drizzle-seed"]
     },
     "outDir": "./dist",
     "moduleResolution": "bundler",
