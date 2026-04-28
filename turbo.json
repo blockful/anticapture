@@ -26,6 +26,10 @@
       "dependsOn": ["codegen"],
       "outputs": ["dist/**", "generated/**"]
     },
+    "@anticapture/client#typecheck": {
+      "dependsOn": ["build"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
+    },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
       "outputs": ["dist/**", ".next/**"]
