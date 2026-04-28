@@ -14,7 +14,7 @@
       "inputs": [
         "kubb.config.ts",
         "src/**",
-        "../../apps/gateful/openapi/gateful.json"
+        "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
       ],
       "outputs": ["generated/**"]
     },
