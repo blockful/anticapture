@@ -75,9 +75,12 @@ function mergeRelayerPaths(doc: OpenAPIObject, daos: string[]): PathsObject {
 
   const paths: PathsObject = {};
   for (const [path, pathItem] of Object.entries(doc.paths)) {
+    if (path !== "/relay" && !path.startsWith("/relay/")) {
+      continue;
+    }
     const item: PathItemObject = { ...pathItem };
     item.parameters = [daoParam, ...(item.parameters ?? [])];
-    paths[`/{dao}${path.startsWith("/") ? path : `/${path}`}`] = item;
+    paths[`/{dao}${path}`] = item;
   }
   return paths;
 }
