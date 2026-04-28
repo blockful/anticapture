@@ -1,6 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
-import { cacheRequestTotal } from "../metrics";
 import { type CacheStore, cacheMiddleware } from "./cache";
 
 // ---------------------------------------------------------------------------
@@ -33,20 +32,16 @@ const defaultHandler = (c: import("hono").Context) => {
   return c.json({ ok: true }, 200);
 };
 
-const DEFAULT_KNOWN_DAOS = new Set(["test"]);
-
 /** Builds a minimal Hono app wired with the cache middleware and one GET route. */
 function buildApp(
   redis: CacheStore,
   handler: (
     c: import("hono").Context,
   ) => Response | Promise<Response> = defaultHandler,
-  knownDaos: ReadonlySet<string> = DEFAULT_KNOWN_DAOS,
 ): OpenAPIHono {
   const app = new OpenAPIHono();
-  app.use("*", cacheMiddleware(redis, knownDaos));
+  app.use("*", cacheMiddleware(redis));
   app.get("/test", handler);
-  app.get("/:dao/*", handler);
   return app;
 }
 
@@ -159,35 +154,5 @@ describe("cacheMiddleware", () => {
     await app.request("/test");
 
     expect(redis.store.size).toBe(0);
-  });
-
-  // -------------------------------------------------------------------------
-  // Route label cardinality
-  // -------------------------------------------------------------------------
-
-  it("records route='/unknown/*' for unknown DAO path segments", async () => {
-    const spy = vi.spyOn(cacheRequestTotal, "add");
-    const app = buildApp(redis, defaultHandler, new Set(["ens"]));
-
-    await app.request("/random-id-123/foo");
-
-    expect(spy).toHaveBeenCalledWith(
-      expect.any(Number),
-      expect.objectContaining({ route: "/unknown/*" }),
-    );
-    spy.mockRestore();
-  });
-
-  it("records route='/<dao>/*' for known DAO path segments", async () => {
-    const spy = vi.spyOn(cacheRequestTotal, "add");
-    const app = buildApp(redis, defaultHandler, new Set(["ens"]));
-
-    await app.request("/ens/some-endpoint");
-
-    expect(spy).toHaveBeenCalledWith(
-      expect.any(Number),
-      expect.objectContaining({ route: "/ens/*" }),
-    );
-    spy.mockRestore();
   });
 });
