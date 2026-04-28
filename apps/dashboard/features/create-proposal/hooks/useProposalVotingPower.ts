@@ -5,6 +5,8 @@ import { type Abi } from "viem";
 import { useBlockNumber, useReadContract } from "wagmi";
 
 import { useProposalThreshold } from "@/features/create-proposal/hooks/useProposalThreshold";
+import daoConfig from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type UseProposalVotingPowerReturn = {
   votingPower: bigint;
@@ -31,7 +33,10 @@ export function useProposalVotingPower(
   address: string | undefined,
   governorAddress: `0x${string}` | undefined,
 ): UseProposalVotingPowerReturn {
-  const { data: currentBlock } = useBlockNumber();
+  const chainId =
+    daoConfig[daoId.toUpperCase() as DaoIdEnum]?.daoOverview?.chain?.id;
+
+  const { data: currentBlock } = useBlockNumber({ chainId });
   const snapshotBlock =
     currentBlock !== undefined ? currentBlock - 1n : undefined;
 
@@ -39,6 +44,7 @@ export function useProposalVotingPower(
     abi: getVotesAbi,
     address: governorAddress,
     functionName: "getVotes",
+    chainId,
     args:
       address && snapshotBlock !== undefined
         ? [address as `0x${string}`, snapshotBlock]

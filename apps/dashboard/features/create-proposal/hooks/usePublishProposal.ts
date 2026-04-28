@@ -177,11 +177,13 @@ export const usePublishProposal = () => {
         form.body,
       );
 
+      const chainId = daoConfigByDaoId[daoIdEnum]?.daoOverview?.chain?.id;
       writeContract({
         address: governorAddress,
         abi: ozProposeAbi,
         functionName: "propose",
         args: [encoded.targets, encoded.values, encoded.calldatas, description],
+        chainId,
       });
     },
     [writeContract, ensClient],

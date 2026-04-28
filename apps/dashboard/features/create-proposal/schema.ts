@@ -16,17 +16,23 @@ const strictAddressSchema = z
   .min(1, "Required")
   .refine((v) => isAddress(v.trim()), "Must be a valid Ethereum address");
 
+const positiveDecimalAmountSchema = z
+  .string()
+  .min(1, "Required")
+  .refine((v) => /^\d+(\.\d+)?$/.test(v.trim()), "Must be a valid number")
+  .refine((v) => parseFloat(v.trim()) > 0, "Must be greater than 0");
+
 const EthTransferSchema = z.object({
   type: z.literal("eth-transfer"),
   recipient: addressOrEnsSchema,
-  amount: z.string().min(1, "Required"),
+  amount: positiveDecimalAmountSchema,
 });
 
 const ERC20TransferSchema = z.object({
   type: z.literal("erc20-transfer"),
   recipient: addressOrEnsSchema,
   tokenAddress: strictAddressSchema,
-  amount: z.string().min(1, "Required"),
+  amount: positiveDecimalAmountSchema,
   decimals: z.number().int().nonnegative(),
 });
 
