@@ -11,8 +11,80 @@ npm install @anticapture/client
 React Query hooks are available from the `@anticapture/client/hooks` subpath:
 
 ```ts
-import { getDaos } from "@anticapture/client";
-import { useGetDaos } from "@anticapture/client/hooks";
+import { accountBalances } from "@anticapture/client";
+import { useAccountBalances } from "@anticapture/client/hooks";
+```
+
+## Usage
+
+### Vanilla fetch (no framework)
+
+```ts
+import { accountBalances } from "@anticapture/client";
+
+const response = await accountBalances("uniswap", { limit: 10 });
+const topHolders = response.data;
+```
+
+### React Query hook
+
+```tsx
+import { useAccountBalances } from "@anticapture/client/hooks";
+
+function TopHolders() {
+  const { data, isPending, isError } = useAccountBalances("uniswap", {
+    limit: 10,
+  });
+
+  if (isPending) return <p>Loading…</p>;
+  if (isError) return <p>Failed to load holders.</p>;
+
+  return (
+    <ul>
+      {data?.items.map((account) => (
+        <li key={account.address}>
+          {account.address} — {account.balance}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### Default headers
+
+Use `setClientConfig` to inject headers on every request — useful for
+attaching an API key or a `x-client-source` identifier at app startup.
+
+```ts
+import { setClientConfig } from "@anticapture/client";
+
+setClientConfig({
+  defaultHeaders: {
+    "x-client-source": "my-app",
+    "x-api-key": "your-api-key",
+  },
+});
+```
+
+Call `setClientConfig` once before any API calls are made (e.g. in your app's
+entry point or a provider component). Headers are merged into every subsequent
+request; calling `setClientConfig` again adds or overrides individual keys
+without clearing the ones already set.
+
+### Custom base URL
+
+The client defaults to `/api/gateful` (relative, works with a Next.js proxy).
+Pass `baseURL` per-call to target a different host:
+
+```ts
+import { accountBalances } from "@anticapture/client";
+
+const response = await accountBalances(
+  "uniswap",
+  { limit: 10 },
+  { baseURL: "https://api.anticapture.xyz" },
+);
 ```
 
 ## Development

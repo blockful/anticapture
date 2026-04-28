@@ -50,8 +50,7 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         );
 
         return {
-          address: item.accountId,
-          value: absoluteChange,
+          address: item.accountId as `0x${string}`,
           balance,
           delegationsCount: item.delegationsCount,
           variation: {
