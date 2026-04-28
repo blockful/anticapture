@@ -151,12 +151,13 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
     }
 
     // transfer PK: (transactionHash, fromAccountId, toAccountId)
-    // Same independent cycling issue.
+    // Amounts vary by index so that fromChange + toChange != 0 for each account,
+    // giving non-zero balance variation in the variationCTE.
     const transferRows = ADDRESSES.map((fromAccountId, i) => ({
       transactionHash: TX_HASHES[i] as `0x${string}`,
       daoId: DAO_ID,
       tokenId: TOKEN_IDS[i % TOKEN_IDS.length]!,
-      amount: BIGINT_MAX,
+      amount: BigInt(i + 1) * (BIGINT_MAX / BigInt(1000)),
       fromAccountId: fromAccountId as `0x${string}`,
       toAccountId: ADDRESSES[(i + 1) % ADDRESSES.length] as `0x${string}`,
       timestamp: NOW - BigInt(i * 3600),
