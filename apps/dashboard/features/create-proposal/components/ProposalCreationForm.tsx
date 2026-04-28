@@ -82,7 +82,7 @@ export const ProposalCreationForm = () => {
   const draftId = searchParams?.get("draftId") ?? undefined;
   const { address } = useAccount();
   const drafts = useDrafts(daoId, address);
-  const vp = useProposalVotingPower(daoId, address);
+  const vp = useProposalVotingPower(daoId, address, governorAddress);
   const threshold = useProposalThreshold(daoId);
   const publisher = usePublishProposal();
 
@@ -185,7 +185,7 @@ export const ProposalCreationForm = () => {
       showCustomToast("Governor not configured for this DAO", "error");
       return;
     }
-    void publisher.publish(values, governorAddress, daoIdEnum);
+    void publisher.publish(values, daoIdEnum);
     setPublishOpen(true);
   };
 

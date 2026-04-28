@@ -9,10 +9,8 @@ import {
   useWriteContract,
 } from "wagmi";
 import { mainnet } from "wagmi/chains";
-// TODO(multi-dao): load governor ABI from
-// daoConfig[daoIdEnum].daoOverview.contracts.governor once we support non-ENS
-// DAOs. Today this hook only supports ENS — see the assertion in `publish`.
-import ensGovernorAbi from "@/abis/ens-governor.json";
+
+import daoConfigByDaoId from "@/shared/dao-config";
 import {
   encodeActions,
   makeAddressResolver,
@@ -21,7 +19,63 @@ import { encodeDescription } from "@/features/create-proposal/utils/encodeDescri
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
 import { DaoIdEnum } from "@/shared/types/daos";
 
-const governorAbi = ensGovernorAbi as unknown as Abi;
+// Typed-const ABI fragments for the two `propose` shapes we know how to build
+// today. Keeping them inline (instead of importing the full governor JSON)
+// lets viem infer arg/return types from literals — no `as unknown as Abi`
+// casts at call sites.
+
+// OZ Governor (ENS, OP, GTC, FLUID, OBOL, SCR, …)
+const ozProposeAbi = [
+  {
+    type: "function",
+    name: "propose",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "targets", type: "address[]" },
+      { name: "values", type: "uint256[]" },
+      { name: "calldatas", type: "bytes[]" },
+      { name: "description", type: "string" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const satisfies Abi;
+
+// `ProposalCreated` event used by both OZ Governor and Governor Bravo. The
+// `signatures` field is present on both (OZ emits an empty array). Inlining as
+// a typed const lets viem infer `args.proposalId: bigint` from literals.
+const proposalCreatedEventAbi = [
+  {
+    type: "event",
+    name: "ProposalCreated",
+    inputs: [
+      { indexed: false, name: "proposalId", type: "uint256" },
+      { indexed: false, name: "proposer", type: "address" },
+      { indexed: false, name: "targets", type: "address[]" },
+      { indexed: false, name: "values", type: "uint256[]" },
+      { indexed: false, name: "signatures", type: "string[]" },
+      { indexed: false, name: "calldatas", type: "bytes[]" },
+      { indexed: false, name: "startBlock", type: "uint256" },
+      { indexed: false, name: "endBlock", type: "uint256" },
+      { indexed: false, name: "description", type: "string" },
+    ],
+  },
+] as const satisfies Abi;
+
+// Governor variant tags drive the ABI + arg shape used by `propose`. Mirrors
+// the per-DAO switch in `submitGovernanceAction.ts` so the two stay in sync.
+type GovernorVariant = "oz" | "bravo" | "azorius";
+
+const governorVariantByDao: Partial<Record<DaoIdEnum, GovernorVariant>> = {
+  [DaoIdEnum.ENS]: "oz",
+  [DaoIdEnum.UNISWAP]: "bravo",
+  [DaoIdEnum.NOUNS]: "bravo",
+  [DaoIdEnum.LIL_NOUNS]: "bravo",
+  [DaoIdEnum.COMP]: "bravo",
+  [DaoIdEnum.SHU]: "azorius",
+  // OZ Governor variants for the rest. AAVE is intentionally absent — its
+  // dao-config has no `governor` address, so publish() can't be wired up
+  // without first sourcing one.
+};
 
 export const usePublishProposal = () => {
   const {
@@ -56,23 +110,47 @@ export const usePublishProposal = () => {
   const ensClient = usePublicClient({ chainId: mainnet.id });
 
   const publish = useCallback(
-    async (
-      form: ProposalFormValues,
-      governorAddress: `0x${string}`,
-      daoIdEnum: DaoIdEnum,
-    ) => {
+    async (form: ProposalFormValues, daoIdEnum: DaoIdEnum) => {
       setResolveError(null);
-      // TODO(multi-dao): remove this guard when we load the governor ABI per
-      // DAO. Today the ABI is hardcoded to ENS, so other DAOs would decode
-      // logs and call `propose` with the wrong interface.
-      if (daoIdEnum !== DaoIdEnum.ENS) {
+
+      const governorAddress = daoConfigByDaoId[daoIdEnum]?.daoOverview
+        ?.contracts?.governor as `0x${string}` | undefined;
+      if (!governorAddress) {
         setResolveError(
           new Error(
-            `Proposal publishing is only supported for ENS at the moment (got ${daoIdEnum}).`,
+            `No governor address configured for ${daoIdEnum}. Add one to dao-config to enable publishing.`,
           ),
         );
         return;
       }
+
+      const variant = governorVariantByDao[daoIdEnum];
+      if (variant === "bravo") {
+        // Bravo publish is not enabled yet — the encoder produces 4-arg OZ
+        // calldata, and there's no UI for the per-action `signatures` slot.
+        // Wire this up once the multi-DAO encoder lands.
+        setResolveError(
+          new Error(
+            `Publishing for ${daoIdEnum} (Governor Bravo) isn't supported yet.`,
+          ),
+        );
+        return;
+      }
+      if (variant === "azorius") {
+        setResolveError(
+          new Error(
+            `Publishing for ${daoIdEnum} (Azorius) isn't supported — proposals go through a separate strategy contract.`,
+          ),
+        );
+        return;
+      }
+      if (variant !== "oz") {
+        setResolveError(
+          new Error(`Publishing for ${daoIdEnum} isn't supported yet.`),
+        );
+        return;
+      }
+
       if (!ensClient) {
         setResolveError(new Error("No public client available"));
         return;
@@ -101,7 +179,7 @@ export const usePublishProposal = () => {
 
       writeContract({
         address: governorAddress,
-        abi: governorAbi,
+        abi: ozProposeAbi,
         functionName: "propose",
         args: [encoded.targets, encoded.values, encoded.calldatas, description],
       });
@@ -116,13 +194,11 @@ export const usePublishProposal = () => {
 
   const proposalId =
     receipt && isReceiptSuccess
-      ? ((
-          parseEventLogs({
-            abi: governorAbi,
-            logs: receipt.logs,
-            eventName: "ProposalCreated",
-          })[0]?.args as { proposalId?: bigint } | undefined
-        )?.proposalId ?? null)
+      ? (parseEventLogs({
+          abi: proposalCreatedEventAbi,
+          logs: receipt.logs,
+          eventName: "ProposalCreated",
+        })[0]?.args.proposalId ?? null)
       : null;
 
   const revertError =

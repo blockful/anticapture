@@ -1,8 +1,6 @@
 import type { Abi } from "viem";
 import { z } from "zod";
 
-const ETHERSCAN_V2_ENDPOINT = "https://api.etherscan.io/v2/api";
-
 // Minimal structural validation for an ABI: an array of objects each with a
 // string `type` field. Extra keys are allowed (ABI items carry many shapes:
 // function, event, error, constructor, fallback, receive) — we preserve them
@@ -31,9 +29,10 @@ type EtherscanResponse = {
 };
 
 /**
- * Fetches a verified contract ABI from Etherscan v2. Returns null when:
+ * Fetches a verified contract ABI via the server-side Etherscan proxy. Returns
+ * null when:
  * - the address is malformed
- * - NEXT_PUBLIC_ETHERSCAN_API_KEY is not set
+ * - the proxy is not configured (missing ETHERSCAN_API_KEY on the server)
  * - the contract is not verified on Etherscan
  * - the response is malformed
  */
@@ -42,17 +41,12 @@ export const fetchAbi = async (
   address: string,
 ): Promise<Abi | null> => {
   if (!isValidAddress(address)) return null;
-  const apiKey = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY;
-  if (!apiKey) return null;
 
   const params = new URLSearchParams({
     chainid: String(chainId),
-    module: "contract",
-    action: "getabi",
     address,
-    apikey: apiKey,
   });
-  const res = await fetch(`${ETHERSCAN_V2_ENDPOINT}?${params.toString()}`);
+  const res = await fetch(`/api/etherscan?${params.toString()}`);
   if (!res.ok) return null;
 
   const json = (await res.json()) as EtherscanResponse;

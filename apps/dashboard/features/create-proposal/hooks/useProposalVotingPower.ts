@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { useGetVotingPowerQuery } from "@anticapture/graphql-client/hooks";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { type Abi } from "viem";
+import { useBlockNumber, useReadContract } from "wagmi";
+
 import { useProposalThreshold } from "@/features/create-proposal/hooks/useProposalThreshold";
 
 export type UseProposalVotingPowerReturn = {
@@ -12,22 +13,48 @@ export type UseProposalVotingPowerReturn = {
   isLoading: boolean;
 };
 
+const getVotesAbi = [
+  {
+    type: "function",
+    name: "getVotes",
+    stateMutability: "view",
+    inputs: [
+      { name: "account", type: "address" },
+      { name: "blockNumber", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const satisfies Abi;
+
 export function useProposalVotingPower(
   daoId: string,
   address: string | undefined,
+  governorAddress: `0x${string}` | undefined,
 ): UseProposalVotingPowerReturn {
-  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const { data, loading: isVpLoading } = useGetVotingPowerQuery({
-    variables: { address: address ?? "" },
-    context: { headers: { "anticapture-dao-id": daoIdEnum } },
-    skip: !address,
+  const { data: currentBlock } = useBlockNumber();
+  const snapshotBlock =
+    currentBlock !== undefined ? currentBlock - 1n : undefined;
+
+  const { data: votesRaw, isLoading: isVpLoading } = useReadContract({
+    abi: getVotesAbi,
+    address: governorAddress,
+    functionName: "getVotes",
+    args:
+      address && snapshotBlock !== undefined
+        ? [address as `0x${string}`, snapshotBlock]
+        : undefined,
+    query: {
+      enabled: Boolean(
+        address && governorAddress && snapshotBlock !== undefined,
+      ),
+    },
   });
+
   const { threshold, isLoading: isThresholdLoading } =
     useProposalThreshold(daoId);
 
   return useMemo(() => {
-    const raw = data?.votingPowerByAccountId?.votingPower;
-    const votingPower = raw != null ? BigInt(raw) : 0n;
+    const votingPower = votesRaw ?? 0n;
     const hasEnough = threshold != null && votingPower >= threshold;
     return {
       votingPower,
@@ -35,5 +62,5 @@ export function useProposalVotingPower(
       hasEnough,
       isLoading: isVpLoading || isThresholdLoading,
     };
-  }, [data, threshold, isVpLoading, isThresholdLoading]);
+  }, [votesRaw, threshold, isVpLoading, isThresholdLoading]);
 }

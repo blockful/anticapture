@@ -31,13 +31,16 @@ export type ProposalAction =
   | ERC20TransferAction
   | CustomAction;
 
-export type ProposalDraft = {
+export type ProposalContent = {
+  title: string;
+  discussionUrl: string;
+  body: string;
+};
+
+export type ProposalDraft = ProposalContent & {
   id: string;
   daoId: string;
   createdAt: number;
   updatedAt: number;
-  title: string;
-  discussionUrl: string;
-  body: string;
   actions: ProposalAction[];
 };

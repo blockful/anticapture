@@ -44,12 +44,6 @@ export default defineConfig(({ watch }) => ({
       client: {
         importPath: "../src/client",
       },
-      exclude: [
-        {
-          type: "operationId",
-          pattern: "dao",
-        },
-      ],
       mutation: false,
       transformers: {
         name: (name, type) =>

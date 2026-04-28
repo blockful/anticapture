@@ -1,6 +1,5 @@
 import { fetchAbi } from "@/features/create-proposal/utils/fetchAbi";
 
-const ORIGINAL_KEY = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY;
 const VALID_ADDR = `0x${"a".repeat(40)}`;
 
 describe("fetchAbi", () => {
@@ -9,21 +8,10 @@ describe("fetchAbi", () => {
   beforeEach(() => {
     global.fetch = mockFetch as unknown as typeof fetch;
     mockFetch.mockReset();
-    process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY = "testkey";
-  });
-
-  afterAll(() => {
-    process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY = ORIGINAL_KEY;
   });
 
   test("returns null for an invalid address", async () => {
     await expect(fetchAbi(1, "not-an-address")).resolves.toBeNull();
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
-
-  test("returns null when the API key is missing", async () => {
-    process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY = "";
-    await expect(fetchAbi(1, VALID_ADDR)).resolves.toBeNull();
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
@@ -42,9 +30,10 @@ describe("fetchAbi", () => {
     await expect(fetchAbi(1, VALID_ADDR)).resolves.toEqual(abi);
     expect(mockFetch).toHaveBeenCalledTimes(1);
     const [calledUrl] = mockFetch.mock.calls[0] as [string];
+    expect(calledUrl).toContain("/api/etherscan");
     expect(calledUrl).toContain("chainid=1");
     expect(calledUrl).toContain(`address=${VALID_ADDR}`);
-    expect(calledUrl).toContain("apikey=testkey");
+    expect(calledUrl).not.toContain("apikey");
   });
 
   test("returns null when contract is not verified", async () => {

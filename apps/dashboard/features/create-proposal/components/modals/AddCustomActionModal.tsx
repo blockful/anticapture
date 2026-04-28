@@ -240,8 +240,14 @@ export const AddCustomActionModal = ({
     isAddressValid &&
     (mode === "fetch" ? Boolean(abi) : calldata.trim().length > 0);
 
+  const allArgsFilled =
+    selectedFn !== undefined &&
+    selectedFn.inputs.every((_, i) => (args[i] ?? "").trim().length > 0);
+
   const step2Ready =
-    mode === "fetch" ? Boolean(functionName) : calldata.trim().length > 0;
+    mode === "fetch"
+      ? Boolean(functionName) && allArgsFilled
+      : calldata.trim().length > 0;
 
   const handleConfirm = () => {
     if (mode === "fetch") {
