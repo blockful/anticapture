@@ -31,6 +31,8 @@ jobs:
               - 'apps/api-gateway/**/*'
             gateful:
               - 'apps/gateful/**/*'
+            relayer:
+              - 'apps/relayer/**/*'
 
       - name: Add API label
         if: ${{ steps.changes.outputs.api == 'true' }}
