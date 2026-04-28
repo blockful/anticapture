@@ -1,5 +1,7 @@
 import type { Context, Next } from "hono";
 
+import { cacheRequestTotal } from "../metrics.js";
+
 /** Minimal interface the middleware actually needs */
 export interface CacheStore {
   get(key: string): Promise<string | null>;
@@ -38,12 +40,22 @@ export function cacheMiddleware(redis: CacheStore) {
 
     const key = c.req.url;
 
+    // Normalize the path to a fixed-cardinality label: "/<dao>/*" keeps the
+    // DAO segment (useful for per-DAO cache panels) while collapsing all
+    // sub-resource segments so each DAO produces exactly one time-series.
+    const [, dao] = c.req.path.split("/");
+    const route = dao ? `/${dao.toLowerCase()}/*` : "/";
+
     // --- Request phase: check for a cached response ---
     // Fail open: if Redis is unavailable, .catch returns null and we proceed normally.
     const raw = await redis.get(key).catch(() => null);
     if (raw) {
       const entry = safeParse<CachedEntry>(raw);
-      if (!entry) return next();
+      if (!entry) {
+        cacheRequestTotal.add(1, { result: "corrupt", route });
+        return next();
+      }
+      cacheRequestTotal.add(1, { result: "hit", route });
       return new Response(entry.body, {
         status: entry.status,
         headers: {
@@ -54,6 +66,7 @@ export function cacheMiddleware(redis: CacheStore) {
       });
     }
 
+    cacheRequestTotal.add(1, { result: "miss", route });
     await next();
 
     // --- Response phase: store the response if eligible ---
