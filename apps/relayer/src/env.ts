@@ -26,7 +26,10 @@ const envSchema = z.object({
     .refine(isHex, "Invalid hex string")
     .transform((v) => v as `0x${string}`),
 
-  MIN_VOTING_POWER: z.string().default("0"),
+  MIN_VOTING_POWER: z
+    .string()
+    .regex(/^\d+$/, "Must be a non-negative decimal")
+    .default("0"),
 
   MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().int().optional().default(3),
 
