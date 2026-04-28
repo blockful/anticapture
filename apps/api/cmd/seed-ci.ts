@@ -62,9 +62,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
       (_, i) => `proposal-${i}`,
     );
 
-    // accountBalance and votesOnchain have composite PKs where drizzle-seed cycles
-    // each column independently, producing collisions. We insert deterministic rows
-    // manually and pass count:0 in the refine block below to skip them there.
+    // Tables with composite PKs where drizzle-seed cycles each column independently
+    // produce collisions. We insert deterministic rows manually and pass count:0
+    // in the refine block below to skip them there.
     const accountBalanceRows = ADDRESSES.slice(0, 200).flatMap((accountId, i) =>
       TOKEN_IDS.map((tokenId) => ({
         accountId: accountId as `0x${string}`,
@@ -78,6 +78,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
         .insert(schema.accountBalance)
         .values(accountBalanceRows.slice(i, i + 500));
     }
+
     const votesOnchainRows = ADDRESSES.map((voterAccountId, i) => ({
       txHash: TX_HASHES[i] as `0x${string}`,
       daoId: DAO_ID,
@@ -92,6 +93,100 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
       await pgClient
         .insert(schema.votesOnchain)
         .values(votesOnchainRows.slice(i, i + 500));
+    }
+
+    // votingPowerHistory PK: (transactionHash, accountId, logIndex)
+    // Using logIndex=0 + drizzle-seed cycling causes (tx, account, 0) collisions.
+    // Insert manually with unique logIndex per row.
+    const votingPowerHistoryRows = ADDRESSES.map((accountId, i) => ({
+      transactionHash: TX_HASHES[i % TX_HASHES.length] as `0x${string}`,
+      daoId: DAO_ID,
+      accountId: accountId as `0x${string}`,
+      votingPower: BIGINT_MAX,
+      delta: BIGINT_MAX,
+      deltaMod: BIGINT_MAX,
+      timestamp: NOW - BigInt(i * 3600),
+      logIndex: i,
+    }));
+    for (let i = 0; i < votingPowerHistoryRows.length; i += 500) {
+      await pgClient
+        .insert(schema.votingPowerHistory)
+        .values(votingPowerHistoryRows.slice(i, i + 500));
+    }
+
+    // balanceHistory PK: (transactionHash, accountId, logIndex) — same issue
+    const balanceHistoryRows = ADDRESSES.map((accountId, i) => ({
+      transactionHash: TX_HASHES[i % TX_HASHES.length] as `0x${string}`,
+      daoId: DAO_ID,
+      accountId: accountId as `0x${string}`,
+      balance: BIGINT_MAX,
+      delta: BIGINT_MAX,
+      deltaMod: BIGINT_MAX,
+      timestamp: NOW - BigInt(i * 3600),
+      logIndex: i,
+    }));
+    for (let i = 0; i < balanceHistoryRows.length; i += 500) {
+      await pgClient
+        .insert(schema.balanceHistory)
+        .values(balanceHistoryRows.slice(i, i + 500));
+    }
+
+    // delegation PK: (transactionHash, delegatorAccountId, delegateAccountId)
+    // With 1000 TX_HASHES and 1000 ADDRESSES cycled independently by drizzle-seed
+    // the triplet collisions are possible. Insert manually with guaranteed uniqueness.
+    const delegationRows = ADDRESSES.map((delegatorAccountId, i) => ({
+      transactionHash: TX_HASHES[i] as `0x${string}`,
+      daoId: DAO_ID,
+      delegateAccountId: ADDRESSES[(i + 1) % ADDRESSES.length] as `0x${string}`,
+      delegatorAccountId: delegatorAccountId as `0x${string}`,
+      previousDelegate: ADDRESSES[(i + 2) % ADDRESSES.length] as `0x${string}`,
+      delegatedValue: BIGINT_MAX,
+      timestamp: NOW - BigInt(i * 3600),
+      logIndex: i,
+    }));
+    for (let i = 0; i < delegationRows.length; i += 500) {
+      await pgClient
+        .insert(schema.delegation)
+        .values(delegationRows.slice(i, i + 500));
+    }
+
+    // transfer PK: (transactionHash, fromAccountId, toAccountId)
+    // Same independent cycling issue.
+    const transferRows = ADDRESSES.map((fromAccountId, i) => ({
+      transactionHash: TX_HASHES[i] as `0x${string}`,
+      daoId: DAO_ID,
+      tokenId: TOKEN_IDS[i % TOKEN_IDS.length]!,
+      amount: BIGINT_MAX,
+      fromAccountId: fromAccountId as `0x${string}`,
+      toAccountId: ADDRESSES[(i + 1) % ADDRESSES.length] as `0x${string}`,
+      timestamp: NOW - BigInt(i * 3600),
+      logIndex: i,
+    }));
+    for (let i = 0; i < transferRows.length; i += 500) {
+      await pgClient
+        .insert(schema.transfer)
+        .values(transferRows.slice(i, i + 500));
+    }
+
+    // feedEvent PK: (txHash, logIndex) — logIndex=0 for all + repeated txHash = collision
+    // timestamp uses mode:"number" in the API schema, so pass a JS number not bigint.
+    const feedEventRows = ADDRESSES.map((_, i) => ({
+      txHash: TX_HASHES[i] as `0x${string}`,
+      logIndex: i,
+      type: FEED_EVENT_TYPES[i % FEED_EVENT_TYPES.length]! as
+        | "VOTE"
+        | "PROPOSAL"
+        | "DELEGATION"
+        | "TRANSFER"
+        | "DELEGATION_VOTES_CHANGED"
+        | "PROPOSAL_EXTENDED",
+      value: BIGINT_MAX,
+      timestamp: Number(NOW) - i * 3600,
+    }));
+    for (let i = 0; i < feedEventRows.length; i += 500) {
+      await pgClient
+        .insert(schema.feedEvent)
+        .values(feedEventRows.slice(i, i + 500));
     }
 
     await seed(pgClient, schema, { count: 1000 }).refine((f) => ({
@@ -124,7 +219,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           id: f.valuesFromArray({ values: ADDRESSES, isUnique: true }),
         },
       },
-      accountBalance: { count: 0 }, // inserted manually above
+      accountBalance: { count: 0 },
       accountPower: {
         columns: {
           accountId: f.valuesFromArray({ values: ADDRESSES, isUnique: true }),
@@ -144,55 +239,11 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           timestamp: f.int({ minValue: NOW - BigInt(86_400), maxValue: NOW }),
         },
       },
-      votingPowerHistory: {
-        columns: {
-          transactionHash: f.valuesFromArray({ values: TX_HASHES }),
-          daoId: f.default({ defaultValue: DAO_ID }),
-          accountId: f.valuesFromArray({ values: ADDRESSES }),
-          votingPower: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          delta: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          deltaMod: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          // logIndex=0 on all rows so the join in getHistoricalVotingPowers
-          // (votingPowerHistory.logIndex < delegation/transfer.logIndex) resolves
-          logIndex: f.default({ defaultValue: 0 }),
-        },
-      },
-      balanceHistory: {
-        columns: {
-          transactionHash: f.valuesFromArray({ values: TX_HASHES }),
-          daoId: f.default({ defaultValue: DAO_ID }),
-          accountId: f.valuesFromArray({ values: ADDRESSES }),
-          balance: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          delta: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          deltaMod: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          // logIndex=0 matches transfer rows so the inner join in
-          // getHistoricalBalances produces results instead of an empty set
-          logIndex: f.default({ defaultValue: 0 }),
-        },
-      },
-      delegation: {
-        columns: {
-          transactionHash: f.valuesFromArray({ values: TX_HASHES }),
-          daoId: f.default({ defaultValue: DAO_ID }),
-          delegateAccountId: f.valuesFromArray({ values: ADDRESSES }),
-          delegatorAccountId: f.valuesFromArray({ values: ADDRESSES }),
-          previousDelegate: f.valuesFromArray({ values: ADDRESSES }),
-          delegatedValue: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          logIndex: f.default({ defaultValue: 0 }),
-        },
-      },
-      transfer: {
-        columns: {
-          transactionHash: f.valuesFromArray({ values: TX_HASHES }),
-          daoId: f.default({ defaultValue: DAO_ID }),
-          tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
-          fromAccountId: f.valuesFromArray({ values: ADDRESSES }),
-          toAccountId: f.valuesFromArray({ values: ADDRESSES }),
-          amount: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-          logIndex: f.default({ defaultValue: 0 }),
-        },
-      },
-      votesOnchain: { count: 0 }, // inserted manually above
+      votingPowerHistory: { count: 0 },
+      balanceHistory: { count: 0 },
+      delegation: { count: 0 },
+      transfer: { count: 0 },
+      votesOnchain: { count: 0 },
       proposalsOnchain: {
         columns: {
           id: f.valuesFromArray({ values: PROPOSAL_IDS, isUnique: true }),
@@ -235,13 +286,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           toAddress: f.valuesFromArray({ values: ADDRESSES }),
         },
       },
-      feedEvent: {
-        columns: {
-          txHash: f.valuesFromArray({ values: TX_HASHES }),
-          type: f.valuesFromArray({ values: FEED_EVENT_TYPES }),
-          value: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
-        },
-      },
+      feedEvent: { count: 0 },
     }));
   } catch (err) {
     logger.error({ err }, "CI seed failed; aborting startup");
