@@ -63,7 +63,7 @@ export class DrizzleRepository {
 
   async getActiveSupply(days: DaysEnum) {
     const query = sql`
-      SELECT COALESCE(SUM(ap."voting_power"), 0) as "activeSupply"
+      SELECT COALESCE(SUM(ap."voting_power"), 0)::text as "activeSupply"
       FROM "account_power" ap
       WHERE ap."last_vote_timestamp" >= ${this.now() - days}
     `;
@@ -110,13 +110,13 @@ export class DrizzleRepository {
   async getAverageTurnoutCompare(days: DaysEnum) {
     const query = sql<AverageTurnoutCompareQueryResult>`
       WITH old_average_turnout AS (
-        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "oldAverageTurnout"
+        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0)::text AS "oldAverageTurnout"
         FROM ${proposalsOnchain}
         WHERE ${proposalsOnchain.timestamp} <= ${this.now() - days}
         AND ${proposalsOnchain.status} NOT IN ('ACTIVE', 'PENDING', 'CANCELED')
       ),
       current_average_turnout AS (
-        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0) AS "currentAverageTurnout"
+        SELECT COALESCE(AVG(${proposalsOnchain.forVotes} + ${proposalsOnchain.againstVotes} + ${proposalsOnchain.abstainVotes}), 0)::text AS "currentAverageTurnout"
         FROM ${proposalsOnchain}
         WHERE ${proposalsOnchain.timestamp} >= ${this.now() - days}
         AND ${proposalsOnchain.status} NOT IN ('ACTIVE', 'PENDING', 'CANCELED')
