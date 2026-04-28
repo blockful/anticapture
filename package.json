@@ -21,8 +21,7 @@
     "typecheck": "turbo typecheck",
     "prepare": "husky",
     "test": "turbo test",
-    "test:unit": "turbo test:unit",
-    "postinstall": "pnpm codegen"
+    "test:unit": "turbo test:unit"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
