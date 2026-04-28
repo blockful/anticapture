@@ -1,5 +1,0 @@
-query GetVotingPowerCounting($delegates: [String]) {
-  accountBalances(delegates: $delegates) {
-    totalCount
-  }
-}

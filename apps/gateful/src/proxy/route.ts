@@ -1,8 +1,9 @@
 import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { proxy as honoProxy } from "hono/proxy";
-
 import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
+
+const PROXY_TIMEOUT_MS = 30000;
 
 /**
  * Registers a catch-all reverse proxy that forwards requests to the
@@ -46,7 +47,10 @@ export function proxy(
     return registry.get(resolved.dao).execute(async () => {
       const url = new URL(resolved.path || "/", daoAPI);
       url.search = new URL(c.req.url).search;
-      const res = await honoProxy(url.toString(), { ...c.req });
+      const res = await honoProxy(url.toString(), {
+        ...c.req,
+        signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
+      });
       if (res.status >= 500) {
         throw new Error(`Upstream ${resolved.dao} returned ${res.status}`);
       }

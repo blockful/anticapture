@@ -10,6 +10,7 @@
       "Write",
       "Bash(git status)",
       "Bash(git diff *)",
+      "Bash(git push *)",
       "Bash(git log *)",
       "Bash(git branch *)",
       "Bash(git show *)",
