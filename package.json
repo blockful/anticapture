@@ -8,6 +8,7 @@
     "gateway": "dotenv -- turbo run --filter=@anticapture/api-gateway",
     "gateful": "dotenv -- turbo run --filter=@anticapture/gateful",
     "api": "dotenv -- turbo run --filter=@anticapture/api",
+    "codegen": "turbo run codegen",
     "gql-client": "turbo run --filter=@anticapture/graphql-client",
     "client": "turbo run --filter=@anticapture/client",
     "offchain-indexer": "turbo run --filter=@anticapture/offchain-indexer",
