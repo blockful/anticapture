@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import Link from "next/link";
 import {
   useParams,
   usePathname,
@@ -277,15 +278,14 @@ export const ProposalCreationForm = () => {
         aria-label="Breadcrumb"
         className="border-light-dark flex items-center gap-2 border-b px-5 py-3 lg:hidden"
       >
-        <button
-          type="button"
-          onClick={() => router.push(`${basePath}/proposals`)}
+        <Link
+          href={`${basePath}/proposals`}
           className="text-secondary hover:text-primary -ml-1 flex items-center gap-1 text-sm"
           aria-label="Back to proposals"
         >
           <ChevronLeft className="size-4" />
           Proposals
-        </button>
+        </Link>
         <span className="text-secondary text-sm">/</span>
         <span className="text-primary text-sm">New Proposal</span>
       </nav>
