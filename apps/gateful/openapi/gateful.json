@@ -2296,15 +2296,50 @@
     "/{dao}/health": {
       "get": {
         "operationId": "health",
-        "summary": "Relayer health check",
+        "summary": "Check API and database health",
         "tags": ["system"],
         "responses": {
           "200": {
-            "description": "Health status",
+            "description": "API and database are healthy",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["ok"]
+                    },
+                    "database": {
+                      "type": "string",
+                      "enum": ["ok"]
+                    }
+                  },
+                  "required": ["status", "database"]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database connectivity check failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["error"]
+                    },
+                    "database": {
+                      "type": "string",
+                      "enum": ["error"]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["status", "database", "message"]
                 }
               }
             }
