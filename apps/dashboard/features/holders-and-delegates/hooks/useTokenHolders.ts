@@ -1,13 +1,16 @@
 import type { DaoIdEnum } from "@/shared/types/daos";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import { useAccountBalancesInfinite } from "@anticapture/client/hooks";
 import type {
   AccountBalancesPathParamsDaoEnumKey,
   AccountBalancesQueryParams,
 } from "@anticapture/client";
 import type { Address } from "viem";
-import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import { formatUnits } from "viem";
 import type { TimeInterval } from "@/shared/types/enums";
+import { useMemo } from "react";
 
 export type TokenHolder = {
   address: Address;
@@ -30,6 +33,23 @@ export const useTokenHolders = (
     toDay?: TimeInterval;
   },
 ) => {
+  const { fromDay, toDay, ...accountBalancesParams } = params;
+  const { decimals } = daoConfigByDaoId[daoId];
+
+  const queryParams = useMemo<AccountBalancesQueryParams>(() => {
+    const now = Math.floor(Date.now() / 1000);
+
+    return {
+      ...accountBalancesParams,
+      fromDate: fromDay
+        ? now - DAYS_IN_SECONDS[fromDay]
+        : accountBalancesParams.fromDate,
+      toDate: toDay
+        ? now - DAYS_IN_SECONDS[toDay]
+        : accountBalancesParams.toDate,
+    };
+  }, [accountBalancesParams, fromDay, toDay]);
+
   const {
     data,
     isLoading,
@@ -42,8 +62,15 @@ export const useTokenHolders = (
   } = useAccountBalancesInfinite(
     // this works because this endpoint is supported for all DAOs
     daoId.toLowerCase() as AccountBalancesPathParamsDaoEnumKey,
-    params,
+    queryParams,
   );
+
+  const normalizedError =
+    !isLoading && error
+      ? error instanceof Error
+        ? error
+        : new Error("Unable to load token holders")
+      : null;
 
   return {
     data: data?.pages.flatMap((page) =>
@@ -51,17 +78,17 @@ export const useTokenHolders = (
         ...item,
         address: item.address as unknown as Address,
         delegate: item.delegate as unknown as Address,
-        balance: Number(formatUnits(BigInt(item.balance), 18)),
+        balance: Number(formatUnits(BigInt(item.balance), decimals)),
         variation: {
           accountId: item.variation.accountId as unknown as Address,
           absoluteChange: Number(
-            formatUnits(BigInt(item.variation.absoluteChange), 18),
+            formatUnits(BigInt(item.variation.absoluteChange), decimals),
           ),
           previousBalance: Number(
-            formatUnits(BigInt(item.variation.previousBalance), 18),
+            formatUnits(BigInt(item.variation.previousBalance), decimals),
           ),
           currentBalance: Number(
-            formatUnits(BigInt(item.variation.currentBalance), 18),
+            formatUnits(BigInt(item.variation.currentBalance), decimals),
           ),
           percentageChange:
             item.variation.percentageChange === PERCENTAGE_NO_BASELINE
@@ -72,7 +99,7 @@ export const useTokenHolders = (
     ),
     isLoading,
     isFetchingNextPage,
-    error: !isLoading && Boolean(error),
+    error: normalizedError,
     hasNextPage,
     hasPreviousPage,
     fetchNextPage,

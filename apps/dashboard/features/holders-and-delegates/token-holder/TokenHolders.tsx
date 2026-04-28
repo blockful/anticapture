@@ -122,6 +122,7 @@ export const TokenHolders = ({
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
+    error,
   } = useTokenHolders(daoId, {
     limit: 20,
     orderBy,
@@ -129,6 +130,10 @@ export const TokenHolders = ({
     addresses: currentAddressFilter ? [currentAddressFilter] : undefined,
     fromDay: days,
   });
+
+  const rows = isLoading
+    ? Array(DEFAULT_ITEMS_PER_PAGE).fill({} as TokenHolderTableData)
+    : (tableData ?? []);
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -381,7 +386,7 @@ export const TokenHolders = ({
       <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col text-white">
         <Table
           columns={tokenHoldersColumns}
-          data={tableData ?? Array(DEFAULT_ITEMS_PER_PAGE).fill({})}
+          data={rows}
           hasMore={hasNextPage}
           isLoadingMore={isFetchingNextPage}
           onLoadMore={fetchNextPage}
@@ -389,7 +394,7 @@ export const TokenHolders = ({
           size="sm"
           withDownloadCSV={true}
           csvFilename="token-holders.csv"
-          // error={error}
+          error={error}
           fillHeight
         />
       </div>
