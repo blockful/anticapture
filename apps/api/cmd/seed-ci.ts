@@ -36,9 +36,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
     const TOKEN_IDS = ADDRESSES.slice(0, 5);
     const DAO_ID = env.DAO_ID;
     const NOW = BigInt(Math.floor(Date.now() / 1000));
-    // pg bigint max is ~9.2e18. Use 1e12 as the base unit so the largest
-    // multiplier in this file (1_000_000 for supply) stays at 1e18.
-    const UNIT = BigInt("1000000000000"); // 1e12
+    // Safe upper bound for drizzle-seed f.int() bigint columns: well under pg
+    // bigint max of 9.2e18 so generated values never overflow.
+    const BIGINT_MAX = BigInt("1000000000000000"); // 1e15
     const PROPOSAL_STATUSES = [
       "ACTIVE",
       "CANCELED",
@@ -84,7 +84,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
       voterAccountId: voterAccountId as `0x${string}`,
       proposalId: PROPOSAL_IDS[i]!,
       support: VOTE_SUPPORTS[i % VOTE_SUPPORTS.length]!,
-      votingPower: UNIT * BigInt(i + 1),
+      votingPower: BIGINT_MAX * BigInt(i + 1),
       reason: null,
       timestamp: NOW - BigInt(i * 3600),
     }));
@@ -103,18 +103,20 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           id: f.valuesFromArray({ values: TOKEN_IDS, isUnique: true }),
           name: f.default({ defaultValue: DAO_ID }),
           decimals: f.default({ defaultValue: 18 }),
-          totalSupply: f.default({ defaultValue: UNIT * BigInt(1_000_000) }),
-          delegatedSupply: f.default({ defaultValue: UNIT * BigInt(400_000) }),
-          circulatingSupply: f.default({
-            defaultValue: UNIT * BigInt(800_000),
+          totalSupply: f.int({ minValue: BIGINT_MAX, maxValue: BIGINT_MAX }),
+          delegatedSupply: f.int({
+            minValue: BIGINT_MAX,
+            maxValue: BIGINT_MAX,
           }),
-          cexSupply: f.default({ defaultValue: UNIT * BigInt(50_000) }),
-          dexSupply: f.default({ defaultValue: UNIT * BigInt(30_000) }),
-          lendingSupply: f.default({ defaultValue: UNIT * BigInt(20_000) }),
-          nonCirculatingSupply: f.default({
-            defaultValue: UNIT * BigInt(200_000),
+          circulatingSupply: f.int({
+            minValue: BIGINT_MAX,
+            maxValue: BIGINT_MAX,
           }),
-          treasury: f.default({ defaultValue: UNIT * BigInt(100_000) }),
+          cexSupply: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          dexSupply: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          lendingSupply: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          nonCirculatingSupply: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          treasury: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
         },
       },
       account: {
@@ -127,17 +129,19 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
         columns: {
           accountId: f.valuesFromArray({ values: ADDRESSES, isUnique: true }),
           daoId: f.default({ defaultValue: DAO_ID }),
-          // Realistic voting power (1–1000 tokens) and a recent last-vote
-          // timestamp so getActiveSupply(90d) returns non-zero results
-          votingPower: f.default({ defaultValue: UNIT * BigInt(100) }),
-          lastVoteTimestamp: f.default({ defaultValue: NOW - BigInt(86_400) }),
+          // Realistic voting power and a recent last-vote timestamp so
+          // getActiveSupply(90d) returns non-zero results
+          votingPower: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          lastVoteTimestamp: f.int({
+            minValue: NOW - BigInt(86_400),
+            maxValue: NOW,
+          }),
         },
       },
       tokenPrice: {
         columns: {
-          // ~$2 per token in wei-equivalent (price stored as bigint in ETH units)
-          price: f.default({ defaultValue: BigInt(2_000_000_000_000_000) }),
-          timestamp: f.default({ defaultValue: NOW }),
+          price: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          timestamp: f.int({ minValue: NOW - BigInt(86_400), maxValue: NOW }),
         },
       },
       votingPowerHistory: {
@@ -145,9 +149,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           transactionHash: f.valuesFromArray({ values: TX_HASHES }),
           daoId: f.default({ defaultValue: DAO_ID }),
           accountId: f.valuesFromArray({ values: ADDRESSES }),
-          votingPower: f.default({ defaultValue: UNIT * BigInt(100) }),
-          delta: f.default({ defaultValue: UNIT }),
-          deltaMod: f.default({ defaultValue: UNIT }),
+          votingPower: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          delta: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          deltaMod: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
           // logIndex=0 on all rows so the join in getHistoricalVotingPowers
           // (votingPowerHistory.logIndex < delegation/transfer.logIndex) resolves
           logIndex: f.default({ defaultValue: 0 }),
@@ -158,9 +162,9 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           transactionHash: f.valuesFromArray({ values: TX_HASHES }),
           daoId: f.default({ defaultValue: DAO_ID }),
           accountId: f.valuesFromArray({ values: ADDRESSES }),
-          balance: f.default({ defaultValue: UNIT * BigInt(100) }),
-          delta: f.default({ defaultValue: UNIT }),
-          deltaMod: f.default({ defaultValue: UNIT }),
+          balance: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          delta: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          deltaMod: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
           // logIndex=0 matches transfer rows so the inner join in
           // getHistoricalBalances produces results instead of an empty set
           logIndex: f.default({ defaultValue: 0 }),
@@ -173,7 +177,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           delegateAccountId: f.valuesFromArray({ values: ADDRESSES }),
           delegatorAccountId: f.valuesFromArray({ values: ADDRESSES }),
           previousDelegate: f.valuesFromArray({ values: ADDRESSES }),
-          delegatedValue: f.default({ defaultValue: UNIT * BigInt(100) }),
+          delegatedValue: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
           logIndex: f.default({ defaultValue: 0 }),
         },
       },
@@ -184,7 +188,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
           fromAccountId: f.valuesFromArray({ values: ADDRESSES }),
           toAccountId: f.valuesFromArray({ values: ADDRESSES }),
-          amount: f.default({ defaultValue: UNIT * BigInt(10) }),
+          amount: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
           logIndex: f.default({ defaultValue: 0 }),
         },
       },
@@ -204,21 +208,21 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
           // int — drizzle-seed's default bigint range overflows GraphQL Int
           timestamp: f.default({ defaultValue: BigInt(1_700_000_000) }),
           endTimestamp: f.default({ defaultValue: BigInt(1_700_604_800) }),
-          forVotes: f.default({ defaultValue: UNIT * BigInt(100) }),
-          againstVotes: f.default({ defaultValue: UNIT * BigInt(50) }),
-          abstainVotes: f.default({ defaultValue: UNIT * BigInt(10) }),
+          forVotes: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          againstVotes: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          abstainVotes: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
         },
       },
       daoMetricsDayBucket: {
         columns: {
           daoId: f.default({ defaultValue: DAO_ID }),
           tokenId: f.valuesFromArray({ values: TOKEN_IDS }),
-          open: f.default({ defaultValue: UNIT * BigInt(2) }),
-          close: f.default({ defaultValue: UNIT * BigInt(2) }),
-          low: f.default({ defaultValue: UNIT }),
-          high: f.default({ defaultValue: UNIT * BigInt(3) }),
-          average: f.default({ defaultValue: UNIT * BigInt(2) }),
-          volume: f.default({ defaultValue: UNIT * BigInt(1000) }),
+          open: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          close: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          low: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          high: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          average: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
+          volume: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
         },
       },
       transaction: {
@@ -235,7 +239,7 @@ export async function runCiSeed(pgClient: NodePgDatabase<typeof schema>) {
         columns: {
           txHash: f.valuesFromArray({ values: TX_HASHES }),
           type: f.valuesFromArray({ values: FEED_EVENT_TYPES }),
-          value: f.default({ defaultValue: UNIT * BigInt(10) }),
+          value: f.int({ minValue: 1n, maxValue: BIGINT_MAX }),
         },
       },
     }));
