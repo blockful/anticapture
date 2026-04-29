@@ -1,72 +1,14 @@
-"use client";
+import { useVotingPowerByAccountId } from "@anticapture/client/hooks";
+import type { VotingPowerByAccountIdPathParams } from "@anticapture/client";
 
-import { useMemo } from "react";
-import { type Abi } from "viem";
-import { useBlockNumber, useReadContract } from "wagmi";
+export function useProposalVotingPower(daoId: string, address: string) {
+  const daoPathParam =
+    daoId.toLowerCase() as VotingPowerByAccountIdPathParams["dao"];
 
-import { useProposalThreshold } from "@/features/create-proposal/hooks/useProposalThreshold";
-import daoConfig from "@/shared/dao-config";
-import type { DaoIdEnum } from "@/shared/types/daos";
+  const { data, isLoading } = useVotingPowerByAccountId(daoPathParam, address);
 
-export type UseProposalVotingPowerReturn = {
-  votingPower: bigint;
-  threshold: bigint | null;
-  hasEnough: boolean | null;
-  isLoading: boolean;
-};
-
-const getVotesAbi = [
-  {
-    type: "function",
-    name: "getVotes",
-    stateMutability: "view",
-    inputs: [
-      { name: "account", type: "address" },
-      { name: "blockNumber", type: "uint256" },
-    ],
-    outputs: [{ name: "", type: "uint256" }],
-  },
-] as const satisfies Abi;
-
-export function useProposalVotingPower(
-  daoId: string,
-  address: string | undefined,
-  governorAddress: `0x${string}` | undefined,
-): UseProposalVotingPowerReturn {
-  const chainId =
-    daoConfig[daoId.toUpperCase() as DaoIdEnum]?.daoOverview?.chain?.id;
-
-  const { data: currentBlock } = useBlockNumber({ chainId });
-  const snapshotBlock =
-    currentBlock !== undefined ? currentBlock - 1n : undefined;
-
-  const { data: votesRaw, isLoading: isVpLoading } = useReadContract({
-    abi: getVotesAbi,
-    address: governorAddress,
-    functionName: "getVotes",
-    chainId,
-    args:
-      address && snapshotBlock !== undefined
-        ? [address as `0x${string}`, snapshotBlock]
-        : undefined,
-    query: {
-      enabled: Boolean(
-        address && governorAddress && snapshotBlock !== undefined,
-      ),
-    },
-  });
-
-  const { threshold, isLoading: isThresholdLoading } =
-    useProposalThreshold(daoId);
-
-  return useMemo(() => {
-    const isLoading = isVpLoading || isThresholdLoading;
-    const isKnown = !isLoading && votesRaw !== undefined && threshold != null;
-    return {
-      votingPower: votesRaw ?? 0n,
-      threshold,
-      hasEnough: isKnown ? votesRaw >= threshold : null,
-      isLoading,
-    };
-  }, [votesRaw, threshold, isVpLoading, isThresholdLoading]);
+  return {
+    votingPower: BigInt(data?.votingPower ?? 0n),
+    isLoading,
+  };
 }
