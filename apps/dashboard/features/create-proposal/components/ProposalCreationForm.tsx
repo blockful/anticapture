@@ -131,10 +131,6 @@ export const ProposalCreationForm = () => {
 
   const values = form.watch();
   const hasTitle = Boolean(values.title);
-  // Treat the body as filled when the user has edited it (RHF dirty flag) or
-  // when it was hydrated from a saved draft (form.reset clears dirty state,
-  // so we also accept any non-empty body that doesn't match the placeholder
-  // exactly).
   const hasBody =
     Boolean(values.body) &&
     (Boolean(form.formState.dirtyFields.body) ||
@@ -146,6 +142,7 @@ export const ProposalCreationForm = () => {
     hasTitle &&
     hasBody &&
     hasActions &&
+    !!address &&
     form.formState.isValid &&
     (values.body?.length ?? 0) <= 10_000;
 
