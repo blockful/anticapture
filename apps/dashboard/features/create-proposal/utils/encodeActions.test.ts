@@ -3,7 +3,13 @@ import {
   makeAddressResolver,
 } from "@/features/create-proposal/utils/encodeActions";
 import type { ProposalAction } from "@/features/create-proposal/types";
-import { parseEther, parseUnits, encodeFunctionData, erc20Abi } from "viem";
+import {
+  parseEther,
+  parseUnits,
+  encodeFunctionData,
+  erc20Abi,
+  type Abi,
+} from "viem";
 
 const passthrough = makeAddressResolver(async () => null);
 
@@ -72,6 +78,72 @@ describe("encodeActions", () => {
     ];
     await expect(encodeActions(actions, passthrough)).rejects.toThrow(
       /Could not resolve ENS name/,
+    );
+  });
+
+  test("custom action with overloaded function encodes by signature", async () => {
+    const overloadedAbi: Abi = [
+      {
+        type: "function",
+        name: "execute",
+        stateMutability: "nonpayable",
+        inputs: [{ name: "id", type: "uint256" }],
+        outputs: [],
+      },
+      {
+        type: "function",
+        name: "execute",
+        stateMutability: "nonpayable",
+        inputs: [
+          { name: "to", type: "address" },
+          { name: "value", type: "uint256" },
+        ],
+        outputs: [],
+      },
+    ];
+    const actions: ProposalAction[] = [
+      {
+        type: "custom",
+        contractAddress: "0x5555555555555555555555555555555555555555",
+        abi: overloadedAbi,
+        // The picker stores the full signature so overloads stay distinct.
+        functionName: "execute(address,uint256)",
+        args: ["0x6666666666666666666666666666666666666666", "42"],
+      },
+    ];
+    const result = await encodeActions(actions, passthrough);
+    expect(result.calldatas[0]).toBe(
+      encodeFunctionData({
+        abi: [overloadedAbi[1]!],
+        functionName: "execute",
+        args: ["0x6666666666666666666666666666666666666666", "42"] as never,
+      }),
+    );
+  });
+
+  test("custom action throws when functionName has no ABI match", async () => {
+    const actions: ProposalAction[] = [
+      {
+        type: "custom",
+        contractAddress: "0x5555555555555555555555555555555555555555",
+        abi: [
+          {
+            type: "function",
+            name: "transfer",
+            stateMutability: "nonpayable",
+            inputs: [
+              { name: "to", type: "address" },
+              { name: "amount", type: "uint256" },
+            ],
+            outputs: [{ type: "bool" }],
+          },
+        ],
+        functionName: "missing()",
+        args: [],
+      },
+    ];
+    await expect(encodeActions(actions, passthrough)).rejects.toThrow(
+      /Function "missing\(\)" not found/,
     );
   });
 });

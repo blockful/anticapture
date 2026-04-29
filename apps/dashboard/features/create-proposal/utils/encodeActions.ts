@@ -59,26 +59,32 @@ export const encodeActions = async (
       continue;
     }
 
-    // The picker stores the function signature (e.g. "transfer(address,uint256)")
-    // so overloads stay distinct. Fall back to a name match for older drafts
-    // that were saved before signatures were used.
     const fn = action.abi.find(
       (item): item is AbiFunction =>
         item.type === "function" &&
         (toFunctionSignature(item) === action.functionName ||
           item.name === action.functionName),
     );
+    if (!fn) {
+      throw new Error(
+        `Function "${action.functionName}" not found in the action's ABI.`,
+      );
+    }
     const resolvedArgs = await Promise.all(
       action.args.map((arg, i) =>
-        fn?.inputs[i]?.type === "address" ? resolve(arg) : Promise.resolve(arg),
+        fn.inputs[i]?.type === "address" ? resolve(arg) : Promise.resolve(arg),
       ),
     );
     targets.push(target);
     values.push(ethValue);
+    // Encode against a single-function ABI keyed by the resolved function's
+    // name. Passing the raw signature string as `functionName` to viem fails
+    // because viem looks up functions by name/selector, not by signature; and
+    // passing the original ABI plus a name would be ambiguous for overloads.
     calldatas.push(
       encodeFunctionData({
-        abi: action.abi,
-        functionName: action.functionName,
+        abi: [fn],
+        functionName: fn.name,
         args: resolvedArgs,
       }),
     );
