@@ -5,7 +5,7 @@ export const ErrorResponseSchema = z
     error: z.string(),
     code: z.string(),
   })
-  .openapi("ErrorResponse");
+  .openapi("RelayerErrorResponse");
 
 export class RelayError extends Error {
   constructor(

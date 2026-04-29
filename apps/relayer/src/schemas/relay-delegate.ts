@@ -24,13 +24,13 @@ export const RelayDelegateRequestSchema = z
     r: Bytes32Schema,
     s: Bytes32Schema,
   })
-  .openapi("RelayDelegateRequest");
+  .openapi("RelayerDelegateRequest");
 
 export const RelayDelegateResponseSchema = z
   .object({
     transactionHash: TxHashSchema,
     delegator: AddressSchema,
   })
-  .openapi("RelayDelegateResponse");
+  .openapi("RelayerDelegateResponse");
 
 export type RelayDelegateRequest = z.input<typeof RelayDelegateRequestSchema>;

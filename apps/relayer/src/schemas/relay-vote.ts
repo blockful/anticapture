@@ -24,13 +24,13 @@ export const RelayVoteRequestSchema = z
     r: Bytes32Schema,
     s: Bytes32Schema,
   })
-  .openapi("RelayVoteRequest");
+  .openapi("RelayerVoteRequest");
 
 export const RelayVoteResponseSchema = z
   .object({
     transactionHash: TxHashSchema,
     voter: AddressSchema,
   })
-  .openapi("RelayVoteResponse");
+  .openapi("RelayerVoteResponse");
 
 export type RelayVoteRequest = z.input<typeof RelayVoteRequestSchema>;
