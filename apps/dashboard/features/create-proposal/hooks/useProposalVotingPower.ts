@@ -11,7 +11,7 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 export type UseProposalVotingPowerReturn = {
   votingPower: bigint;
   threshold: bigint | null;
-  hasEnough: boolean;
+  hasEnough: boolean | null;
   isLoading: boolean;
 };
 
@@ -60,13 +60,13 @@ export function useProposalVotingPower(
     useProposalThreshold(daoId);
 
   return useMemo(() => {
-    const votingPower = votesRaw ?? 0n;
-    const hasEnough = threshold != null && votingPower >= threshold;
+    const isLoading = isVpLoading || isThresholdLoading;
+    const isKnown = !isLoading && votesRaw !== undefined && threshold != null;
     return {
-      votingPower,
+      votingPower: votesRaw ?? 0n,
       threshold,
-      hasEnough,
-      isLoading: isVpLoading || isThresholdLoading,
+      hasEnough: isKnown ? votesRaw >= threshold : null,
+      isLoading,
     };
   }, [votesRaw, threshold, isVpLoading, isThresholdLoading]);
 }

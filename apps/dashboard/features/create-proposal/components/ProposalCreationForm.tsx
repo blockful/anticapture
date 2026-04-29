@@ -177,9 +177,18 @@ export const ProposalCreationForm = () => {
   };
 
   const handlePublishClick = () => {
-    if (!vp.hasEnough) {
+    if (vp.hasEnough === false) {
       handleSaveDraft({ navigateToDrafts: false });
       setInsufficientOpen(true);
+      return;
+    }
+    if (vp.hasEnough === null) {
+      showCustomToast(
+        vp.isLoading
+          ? "Still checking your voting power — try again in a moment."
+          : "Couldn't verify your voting power. Try again in a moment.",
+        "error",
+      );
       return;
     }
     if (!governorAddress) {
@@ -256,14 +265,13 @@ export const ProposalCreationForm = () => {
     return formatUnits(vp.votingPower, decimals);
   }, [vp.votingPower, daoIdEnum]);
 
-  // Gate the alert on BOTH the voting-power hook (so we know the user is
-  // short) AND the threshold display value (so we never render "—" as the
-  // required number). Otherwise the alert can briefly flash with "—" while
-  // useProposalThreshold is still loading.
+  // Gate the alert on a *confirmed* shortfall (`hasEnough === false`) plus the
+  // threshold display value, so we never render "—" as the required number
+  // and never flash the alert during loading or transient threshold-fetch
+  // failures (where `hasEnough` is `null`).
   const showInsufficientInline =
     Boolean(address) &&
-    vp.threshold != null &&
-    !vp.hasEnough &&
+    vp.hasEnough === false &&
     !threshold.isLoading &&
     threshold.thresholdFormatted != null;
 
