@@ -2,9 +2,7 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-  schema:
-    process.env.ANTICAPTURE_GRAPHQL_ENDPOINT ||
-    "../../apps/api-gateway/schema.graphql",
+  schema: "../../apps/api-gateway/schema.graphql",
   documents: "./documents/**/*.graphql",
   ignoreNoDocuments: true,
   generates: {
