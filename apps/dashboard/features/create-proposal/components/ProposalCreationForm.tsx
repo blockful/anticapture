@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import Link from "next/link";
@@ -16,7 +16,10 @@ import { formatUnits } from "viem";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
+import {
+  getWhitelabelBasePath,
+  isWhitelabelDao,
+} from "@/shared/utils/whitelabel";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
@@ -262,10 +265,15 @@ export const ProposalCreationForm = () => {
     return formatUnits(vp.votingPower, decimals);
   }, [vp.votingPower, daoIdEnum]);
 
-  // Gate the alert on a *confirmed* shortfall (`hasEnough === false`) plus the
-  // threshold display value, so we never render "—" as the required number
-  // and never flash the alert during loading or transient threshold-fetch
-  // failures (where `hasEnough` is `null`).
+  const votingPowerDisplay = useMemo(() => {
+    const numeric = Number(currentVpText);
+    if (!Number.isFinite(numeric)) return "0";
+    return formatNumberUserReadable(numeric, 0);
+  }, [currentVpText]);
+
+  const isWhitelabel = isWhitelabelDao(daoConfig[daoIdEnum]);
+  const proposalsListHref = `${basePath}/proposals`;
+
   const showInsufficientInline =
     Boolean(address) &&
     vp.hasEnough === false &&
@@ -284,7 +292,7 @@ export const ProposalCreationForm = () => {
         className="border-light-dark flex items-center gap-2 border-b px-5 py-3 lg:hidden"
       >
         <Link
-          href={`${basePath}/proposals`}
+          href={proposalsListHref}
           className="text-secondary hover:text-primary -ml-1 flex items-center gap-1 text-sm"
           aria-label="Back to proposals"
         >
@@ -294,6 +302,34 @@ export const ProposalCreationForm = () => {
         <span className="text-secondary text-sm">/</span>
         <span className="text-primary text-sm">New Proposal</span>
       </nav>
+      {!isWhitelabel && (
+        <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
+          <div className="mx-auto flex w-full flex-1 items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Link
+                href={proposalsListHref}
+                className="text-secondary hover:text-primary inline-flex items-center gap-2 text-[14px] font-normal leading-[20px] transition-colors"
+              >
+                <span>Proposals</span>
+                <ChevronRight className="size-4" />
+              </Link>
+              <p className="text-primary text-[14px] font-medium leading-[20px]">
+                New Proposal
+              </p>
+            </div>
+            {address && (
+              <div className="flex flex-col items-end">
+                <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+                  Your voting power
+                </p>
+                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                  {votingPowerDisplay}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <form
         className="animate-page-slide-in flex min-h-screen flex-col gap-6 px-5 pb-5 pt-5"
         noValidate
