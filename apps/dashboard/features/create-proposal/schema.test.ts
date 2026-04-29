@@ -5,7 +5,13 @@ describe("ProposalFormSchema", () => {
     title: "My proposal",
     discussionUrl: "https://discuss.ens.domains/t/1",
     body: "Body content",
-    actions: [],
+    actions: [
+      {
+        type: "eth-transfer" as const,
+        recipient: "0x1111111111111111111111111111111111111111",
+        amount: "1",
+      },
+    ],
   };
 
   test("accepts a valid form", () => {

@@ -2,8 +2,13 @@
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
-import { Drawer as DrawerPrimitive } from "vaul";
 
+import {
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  DrawerRoot,
+} from "@/shared/components/design-system/drawer";
 import { ModalFooter } from "@/shared/components/design-system/modal/modal-footer/ModalFooter";
 import { ModalHeader } from "@/shared/components/design-system/modal/modal-header/ModalHeader";
 import type { ModalProps } from "@/shared/components/design-system/modal/types";
@@ -64,35 +69,17 @@ export const Modal = ({
 
   if (isMobile) {
     return (
-      <DrawerPrimitive.Root
-        open={open}
-        onOpenChange={onOpenChange}
-        direction="bottom"
-      >
-        <DrawerPrimitive.Portal>
-          <DrawerPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50" />
-          <DrawerPrimitive.Content
-            className={cn(
-              "bg-surface-default border-border-default fixed inset-x-0 bottom-0 z-50 flex max-h-[90vh] flex-col overflow-hidden rounded-t-lg border-t",
-              className,
-            )}
-          >
-            <DrawerPrimitive.Title className="sr-only">
-              {title}
-            </DrawerPrimitive.Title>
-            {description && (
-              <DrawerPrimitive.Description className="sr-only">
-                {description}
-              </DrawerPrimitive.Description>
-            )}
-            <ModalHeader title={title} description={description} />
-            <div className="bg-surface-default w-full flex-1 overflow-y-auto p-4">
-              {children}
-            </div>
-            {footer}
-          </DrawerPrimitive.Content>
-        </DrawerPrimitive.Portal>
-      </DrawerPrimitive.Root>
+      <DrawerRoot open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className={className}>
+          <DrawerHeader
+            title={title}
+            subtitle={description}
+            onClose={() => onOpenChange(false)}
+          />
+          <DrawerBody className="overflow-y-auto p-4">{children}</DrawerBody>
+          {footer}
+        </DrawerContent>
+      </DrawerRoot>
     );
   }
 

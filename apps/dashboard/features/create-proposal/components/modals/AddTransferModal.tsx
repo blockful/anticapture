@@ -90,18 +90,11 @@ export const AddTransferModal = ({
     }
   }, [open, initialValue]);
   const { data: governanceTokenData } = useTokenData(daoIdEnum);
-  const publicClient = usePublicClient();
+  const governanceChainId = daoConfig[daoIdEnum]?.daoOverview?.chain?.id;
+  const publicClient = usePublicClient(
+    governanceChainId ? { chainId: governanceChainId } : undefined,
+  );
 
-  // USD conversion is only shown when we have a trustworthy price for the
-  // selected token. Today that means:
-  // - the governance token (we fetch its price via useTokenData), or
-  // - native ETH when the governance token happens to be ETH-priced
-  //   (i.e. useTokenData returns an ETH-denominated USD price — we do not
-  //   currently fetch a separate ETH price, so we only show USD for ETH when
-  //   the current DAO's governance token price is available and the user is
-  //   sending ETH).
-  // For any other ERC-20 we hide the USD field rather than multiplying the
-  // amount by an unrelated token's price.
   const usd = useMemo(() => {
     const n = Number(amount);
     if (!amount || Number.isNaN(n)) return null;
@@ -109,9 +102,6 @@ export const AddTransferModal = ({
     if (!price) return null;
 
     if (tokenType === "eth") {
-      // Only meaningful if the governance token price is ETH-denominated.
-      // We don't have a separate ETH price source, so this mirrors the
-      // previous behaviour for the one DAO (ENS) where this path ran.
       return n * price;
     }
 
@@ -151,8 +141,6 @@ export const AddTransferModal = ({
   const recipientIsValid =
     recipientTrimmed !== "" &&
     (isAddress(recipientTrimmed) || isEnsAddress(recipientTrimmed));
-  // Defer the error UI until the field has been blurred so the user doesn't
-  // see "invalid" while still typing a long address/ENS name.
   const recipientError =
     recipientTouched && recipientTrimmed !== "" && !recipientIsValid;
   const tokenAddressError =
@@ -284,9 +272,6 @@ export const AddTransferModal = ({
         )}
 
         <div className="flex flex-col gap-1.5">
-          {/* Reserve a 50/50 split for the USD column even when it's hidden so
-              switching tokens (ETH ↔ ERC-20) doesn't reflow the Amount input
-              from full-width to half-width. */}
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-1.5">
               <FormLabel isRequired>Amount</FormLabel>
