@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Upload } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   isAddress,
+  isHex,
   toFunctionSignature,
   type Abi,
   type AbiFunction,
@@ -111,6 +112,7 @@ export const AddCustomActionModal = ({
   );
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isFetchingAbi, setIsFetchingAbi] = useState(false);
+  const [isManualAbiEntry, setIsManualAbiEntry] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Calldata flow
@@ -139,6 +141,7 @@ export const AddCustomActionModal = ({
       setArgs(initialValue.args);
       setFetchError(null);
       setIsFetchingAbi(false);
+      setIsManualAbiEntry(initialValue.abi.length > 0);
     } else {
       setMode("fetch");
       setContractAddress("");
@@ -148,6 +151,7 @@ export const AddCustomActionModal = ({
       setArgs([]);
       setFetchError(null);
       setIsFetchingAbi(false);
+      setIsManualAbiEntry(false);
     }
   }, [open, initialValue]);
 
@@ -176,6 +180,7 @@ export const AddCustomActionModal = ({
     setAbiText("");
     setFetchError(null);
     setIsFetchingAbi(false);
+    setIsManualAbiEntry(false);
     setCalldata("");
     setFunctionName("");
     setArgs([]);
@@ -192,6 +197,7 @@ export const AddCustomActionModal = ({
     if (!isHex && !isEns) return;
     setIsFetchingAbi(true);
     setFetchError(null);
+    setIsManualAbiEntry(false);
     setAbiText("");
     try {
       const resolved = isHex
@@ -201,6 +207,7 @@ export const AddCustomActionModal = ({
         setFetchError(
           "Couldn't resolve the address. Check the value and try again.",
         );
+        setIsManualAbiEntry(true);
         return;
       }
       const found = await lookupAbi(daoId, resolved);
@@ -210,11 +217,13 @@ export const AddCustomActionModal = ({
         setFetchError(
           "Couldn't fetch the contract interface automatically. Paste it below or upload a JSON file.",
         );
+        setIsManualAbiEntry(true);
       }
     } catch {
       setFetchError(
         "Couldn't fetch the contract interface automatically. Paste it below or upload a JSON file.",
       );
+      setIsManualAbiEntry(true);
     } finally {
       setIsFetchingAbi(false);
     }
@@ -235,19 +244,23 @@ export const AddCustomActionModal = ({
     }
   };
 
+  const trimmedCalldata = calldata.trim();
+  const isCalldataValid =
+    trimmedCalldata.length > 0 &&
+    isHex(trimmedCalldata) &&
+    trimmedCalldata.length % 2 === 0;
+
   const step1Ready =
     contractAddress.trim().length > 0 &&
     isAddressValid &&
-    (mode === "fetch" ? Boolean(abi) : calldata.trim().length > 0);
+    (mode === "fetch" ? Boolean(abi) : isCalldataValid);
 
   const allArgsFilled =
     selectedFn !== undefined &&
     selectedFn.inputs.every((_, i) => (args[i] ?? "").trim().length > 0);
 
   const step2Ready =
-    mode === "fetch"
-      ? Boolean(functionName) && allArgsFilled
-      : calldata.trim().length > 0;
+    mode === "fetch" ? Boolean(functionName) && allArgsFilled : isCalldataValid;
 
   const handleConfirm = () => {
     if (mode === "fetch") {
@@ -279,8 +292,7 @@ export const AddCustomActionModal = ({
   };
 
   const showEmptyAbiState = !hasAddress && !abiText && !isFetchingAbi;
-  // Only show the dropzone fallback when an automatic fetch failed.
-  const showDropzone = mode === "fetch" && fetchError !== null;
+  const showDropzone = mode === "fetch" && isManualAbiEntry;
 
   return (
     <Modal
@@ -407,7 +419,7 @@ export const AddCustomActionModal = ({
                           : 'Paste ABI JSON here — e.g. [{"type":"function",...}]'
                       }
                       className="min-h-32 font-mono text-xs"
-                      disabled={fetchError === null}
+                      disabled={!isManualAbiEntry}
                     />
                   )}
                   {showEmptyAbiState && (
@@ -466,11 +478,18 @@ export const AddCustomActionModal = ({
                   onChange={(e) => setCalldata(e.target.value)}
                   placeholder="0x…"
                   className="min-h-32 font-mono text-xs"
+                  error={trimmedCalldata.length > 0 && !isCalldataValid}
                 />
-                <span className="text-secondary text-xs">
-                  Paste the raw hex-encoded calldata that will be sent to the
-                  contract.
-                </span>
+                {trimmedCalldata.length > 0 && !isCalldataValid ? (
+                  <span className="text-error text-xs">
+                    Must be 0x-prefixed hex with an even number of characters.
+                  </span>
+                ) : (
+                  <span className="text-secondary text-xs">
+                    Paste the raw hex-encoded calldata that will be sent to the
+                    contract.
+                  </span>
+                )}
               </div>
             )}
           </div>
