@@ -18,12 +18,22 @@ const parseArg = async (
   value: unknown,
   resolve: AddressResolver,
 ): Promise<unknown> => {
-  if (type.endsWith("[]")) {
-    const elementType = type.slice(0, -2);
+  const arrayMatch = type.match(/^(.*)\[(\d*)\]$/);
+  if (arrayMatch) {
+    const elementType = arrayMatch[1];
+    const fixedLength = arrayMatch[2] ? Number(arrayMatch[2]) : null;
+
     const arr = typeof value === "string" ? JSON.parse(value) : value;
     if (!Array.isArray(arr)) {
       throw new Error(`Expected JSON array for type "${type}".`);
     }
+
+    if (fixedLength !== null && arr.length !== fixedLength) {
+      throw new Error(
+        `Expected array of length ${fixedLength} for type "${type}", got ${arr.length}.`,
+      );
+    }
+
     return Promise.all(
       arr.map((item) => parseArg(elementType, components, item, resolve)),
     );
