@@ -37,10 +37,7 @@ import { EmptyState } from "@/shared/components/design-system/table/components/E
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import {
-  isWhitelabelDao,
-  getWhitelabelBasePath,
-} from "@/shared/utils/whitelabel";
+import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 
 const ONCHAIN_TAB = { label: "Onchain", value: "onchain" };
 const OFFCHAIN_TAB = { label: "Offchain", value: "offchain" };
@@ -51,9 +48,6 @@ export const GovernanceSection = () => {
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
 
   const basePath = getWhitelabelBasePath({ daoId: daoIdEnum, pathname });
-  const isWhitelabel =
-    basePath.startsWith("/whitelabel/") ||
-    (basePath === "" && isWhitelabelDao(daoConfig[daoIdEnum]));
   const hasOffchain = !!daoConfig[daoIdEnum]?.offchainProposals;
   const { decimals } = daoConfig[daoIdEnum];
   const router = useRouter();
@@ -144,11 +138,11 @@ export const GovernanceSection = () => {
   const visibleTabs = useMemo(() => {
     const tabs = [ONCHAIN_TAB];
     if (hasOffchain) tabs.push(OFFCHAIN_TAB);
-    if (isConnected && isWhitelabel) {
+    if (isConnected) {
       tabs.push({ label: "My Drafts", value: "drafts" });
     }
     return tabs;
-  }, [hasOffchain, isConnected, isWhitelabel]);
+  }, [hasOffchain, isConnected]);
 
   const isOnchain = activeTab === "onchain" || !hasOffchain;
   const error = isOnchain ? onchainError : offchainError;
@@ -216,17 +210,15 @@ export const GovernanceSection = () => {
           </a>
         </Button>
       )}
-      {isWhitelabel && (
-        <Button
-          variant="primary"
-          size="md"
-          onClick={handleNewProposal}
-          className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
-        >
-          <Plus className="size-4" />
-          New Proposal
-        </Button>
-      )}
+      <Button
+        variant="primary"
+        size="md"
+        onClick={handleNewProposal}
+        className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
+      >
+        <Plus className="size-4" />
+        New Proposal
+      </Button>
     </div>
   );
 
