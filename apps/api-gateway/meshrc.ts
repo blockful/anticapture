@@ -22,8 +22,8 @@ export default processConfig(
             name: "address_enrichment",
             handler: {
               openapi: {
-                endpoint: process.env.ADDRESS_ENRICHMENT_API_URL,
                 source: `${process.env.ADDRESS_ENRICHMENT_API_URL}/docs/json`,
+                endpoint: process.env.ADDRESS_ENRICHMENT_API_URL,
               },
             },
           },

@@ -5,14 +5,14 @@ const config: CodegenConfig = {
   schema:
     process.env.ANTICAPTURE_GRAPHQL_ENDPOINT ||
     "../../apps/api-gateway/schema.graphql",
-  ignoreNoDocuments: true,
   documents: "./documents/**/*.graphql",
+  ignoreNoDocuments: true,
   generates: {
     "./generated/hooks.ts": {
       plugins: [
         "typescript",
-        "typescript-react-apollo",
         "typescript-operations",
+        "typescript-react-apollo",
       ],
       config: {
         avoidOptionals: true,

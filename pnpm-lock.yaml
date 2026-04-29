@@ -168,9 +168,6 @@ importers:
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.1(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.26.3)(pg@8.20.0)
-      drizzle-seed:
-        specifier: ^0.3.1
-        version: 0.3.1(drizzle-orm@0.45.1(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.26.3)(pg@8.20.0))
       hono:
         specifier: ^4.7.10
         version: 4.12.7
@@ -12073,17 +12070,6 @@ packages:
       sql.js:
         optional: true
       sqlite3:
-        optional: true
-
-  drizzle-seed@0.3.1:
-    resolution:
-      {
-        integrity: sha512-F/0lgvfOAsqlYoHM/QAGut4xXIOXoE5VoAdv2FIl7DpGYVXlAzKuJO+IphkKUFK3Dz+rFlOsQLnMNrvoQ0cx7g==,
-      }
-    peerDependencies:
-      drizzle-orm: ">=0.36.4"
-    peerDependenciesMeta:
-      drizzle-orm:
         optional: true
 
   dset@3.1.4:
@@ -30663,12 +30649,6 @@ snapshots:
       "@types/pg": 8.18.0
       kysely: 0.26.3
       pg: 8.20.0
-
-  drizzle-seed@0.3.1(drizzle-orm@0.45.1(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.26.3)(pg@8.20.0)):
-    dependencies:
-      pure-rand: 6.1.0
-    optionalDependencies:
-      drizzle-orm: 0.45.1(@electric-sql/pglite@0.3.16)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(kysely@0.26.3)(pg@8.20.0)
 
   dset@3.1.4: {}
 
