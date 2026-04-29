@@ -22,6 +22,7 @@ export const LeaveWithoutSavingModal = ({
     confirmVariant="destructive"
     onCancel={() => onOpenChange(false)}
     onConfirm={onLeave}
+    className="data-[vaul-drawer-direction=bottom]:h-auto!"
   >
     <p className="text-secondary text-sm leading-5">
       It looks like you&apos;re in the middle of writing a proposal. If you

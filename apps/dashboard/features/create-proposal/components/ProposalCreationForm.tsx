@@ -295,7 +295,7 @@ export const ProposalCreationForm = () => {
         <span className="text-primary text-sm">New Proposal</span>
       </nav>
       <form
-        className="animate-page-slide-in flex h-screen flex-col gap-6 px-5 pb-20 pt-5"
+        className="animate-page-slide-in flex min-h-screen flex-col gap-6 px-5 pb-5 pt-5"
         noValidate
       >
         {showInsufficientInline && threshold.thresholdFormatted && (

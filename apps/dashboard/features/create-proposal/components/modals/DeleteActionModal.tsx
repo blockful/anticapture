@@ -22,6 +22,7 @@ export const DeleteActionModal = ({
     confirmVariant="destructive"
     onCancel={() => onOpenChange(false)}
     onConfirm={onConfirm}
+    className="data-[vaul-drawer-direction=bottom]:h-auto!"
   >
     <p className="text-secondary text-sm leading-5">
       This will permanently remove the action from your proposal.
