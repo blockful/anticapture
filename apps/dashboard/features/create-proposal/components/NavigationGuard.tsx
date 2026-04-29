@@ -19,9 +19,6 @@ export const NavigationGuard = ({
   const [showModal, setShowModal] = useState(false);
   const pendingHrefRef = useRef<string | null>(null);
   const isDirtyRef = useRef(isDirty);
-  // Mutable reference to the current beforeunload handler so we can detach it
-  // imperatively before a programmatic navigation triggers the browser's
-  // native "Leave site?" dialog on top of our in-app modal.
   const beforeUnloadHandlerRef = useRef<
     ((e: BeforeUnloadEvent) => void) | null
   >(null);
@@ -50,6 +47,11 @@ export const NavigationGuard = ({
       const href = anchor.getAttribute("href");
       if (!href) return;
       if (anchor.target && anchor.target !== "_self") return;
+
+      const interactive = (e.target as HTMLElement).closest(
+        "button, input, select, textarea, [role='button']",
+      );
+      if (interactive && anchor.contains(interactive)) return;
 
       const url = new URL(href, window.location.href);
       if (url.origin !== window.location.origin) return;

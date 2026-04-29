@@ -12,6 +12,7 @@ import { RadioCard } from "@/shared/components/design-system/form/fields/radio-c
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import daoConfig from "@/shared/dao-config";
 import { isEnsAddress } from "@/shared/hooks/useEnsData";
+import { useEthPrice } from "@/shared/hooks/useEthPrice";
 import { useTokenData } from "@/shared/hooks/useTokenData";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type {
@@ -89,7 +90,9 @@ export const AddTransferModal = ({
       setAmount("");
     }
   }, [open, initialValue]);
+
   const { data: governanceTokenData } = useTokenData(daoIdEnum);
+  const { price: ethPrice } = useEthPrice();
   const governanceChainId = daoConfig[daoIdEnum]?.daoOverview?.chain?.id;
   const publicClient = usePublicClient(
     governanceChainId ? { chainId: governanceChainId } : undefined,
@@ -97,26 +100,33 @@ export const AddTransferModal = ({
 
   const usd = useMemo(() => {
     const n = Number(amount);
-    if (!amount || Number.isNaN(n)) return null;
-    const price = Number(governanceTokenData?.price ?? 0);
-    if (!price) return null;
+    if (!amount || Number.isNaN(n) || n <= 0) return null;
 
+    // ETH transfer — convert using live ETH price
+    if (tokenType === "eth") {
+      if (!ethPrice) return null;
+      return n * ethPrice;
+    }
+
+    // ERC-20 governance token — use existing token data price
     const govAddress = governanceTokenAddress(daoIdEnum);
     const isGovToken =
-      tokenType === "erc20" &&
       govAddress &&
+      tokenAddress.trim() !== "" &&
       tokenAddress.toLowerCase() === govAddress.toLowerCase();
     if (!isGovToken) return null;
-    return n * price;
-  }, [tokenType, amount, tokenAddress, daoIdEnum, governanceTokenData]);
 
-  const govAddress = governanceTokenAddress(daoIdEnum);
-  const isGovToken =
-    tokenType === "erc20" &&
-    !!govAddress &&
-    tokenAddress.trim() !== "" &&
-    tokenAddress.toLowerCase() === govAddress.toLowerCase();
-  const showUsd = isGovToken;
+    const price = Number(governanceTokenData?.price ?? 0);
+    if (!price) return null;
+    return n * price;
+  }, [
+    tokenType,
+    amount,
+    tokenAddress,
+    daoIdEnum,
+    governanceTokenData,
+    ethPrice,
+  ]);
 
   const usdDisplay =
     usd !== null
@@ -125,6 +135,12 @@ export const AddTransferModal = ({
           maximumFractionDigits: 2,
         })}`
       : "";
+
+  const usdSourceLabel = useMemo(() => {
+    if (tokenType === "eth")
+      return "Conversion price was resolved using CoinGecko.";
+    return "Conversion price was resolved using CoinGecko.";
+  }, [tokenType]);
 
   const reset = () => {
     setTokenType("eth");
@@ -289,24 +305,18 @@ export const AddTransferModal = ({
                 inputMode="decimal"
               />
             </div>
-            <div
-              className="flex flex-1 flex-col gap-1.5"
-              aria-hidden={!showUsd}
-              style={!showUsd ? { visibility: "hidden" } : undefined}
-            >
-              <FormLabel isRequired>USD</FormLabel>
+            <div className="flex flex-1 flex-col gap-1.5">
+              <FormLabel>USD</FormLabel>
               <Input
-                value={showUsd ? usdDisplay : ""}
+                value={usdDisplay}
                 disabled
                 placeholder="$0.00"
                 tabIndex={-1}
               />
             </div>
           </div>
-          {showUsd && (
-            <span className="text-secondary text-xs">
-              Conversion price was resolved using Coingecko.
-            </span>
+          {usd !== null && (
+            <span className="text-secondary text-xs">{usdSourceLabel}</span>
           )}
         </div>
       </div>

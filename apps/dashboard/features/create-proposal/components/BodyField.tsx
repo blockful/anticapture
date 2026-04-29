@@ -125,7 +125,7 @@ export const BodyField = () => {
                 }),
                 toolbarPlugin({
                   toolbarContents: () => (
-                    <div className="bg-surface-default flex w-full flex-col gap-2 px-2 md:flex-row md:items-center md:justify-between">
+                    <div className="bg-surface-default border-border-contrast flex w-full flex-col gap-2 border-b px-2 md:flex-row md:items-center md:justify-between">
                       <TabGroup
                         tabs={[
                           { label: "Visual Editor", value: "visual" },
