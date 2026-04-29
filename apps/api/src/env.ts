@@ -10,6 +10,9 @@ const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .transform((val) => `${val}?options=-c%20search_path%3Danticapture`),
+  DATABASE_PUBLIC_URL: z
+    .string()
+    .transform((val) => `${val}?options=-c%20search_path%3Danticapture`),
   DAO_ID: z.enum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
 
