@@ -20,8 +20,6 @@ import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-// ENS uses the OZ Governor `propose` shape. Keeping the fragment inline lets
-// viem infer arg/return types from literals without casts at call sites.
 const ozProposeAbi = [
   {
     type: "function",
@@ -37,7 +35,6 @@ const ozProposeAbi = [
   },
 ] as const satisfies Abi;
 
-// Inlining as a typed const lets viem infer `args.proposalId: bigint`.
 const proposalCreatedEventAbi = [
   {
     type: "event",
@@ -57,6 +54,10 @@ const proposalCreatedEventAbi = [
 ] as const satisfies Abi;
 
 export const usePublishProposal = () => {
+  const [resolveError, setResolveError] = useState<Error | null>(null);
+  const [isResolving, setIsResolving] = useState(false);
+  const [txChainId, setTxChainId] = useState<number | undefined>();
+
   const {
     writeContract,
     data: txHash,
@@ -71,21 +72,12 @@ export const usePublishProposal = () => {
     isLoading: isReceiptLoading,
     isSuccess: isReceiptMined,
     isError: isReceiptFetchError,
-  } = useWaitForTransactionReceipt({ hash: txHash });
+  } = useWaitForTransactionReceipt({ hash: txHash, chainId: txChainId });
 
-  // `isSuccess` from wagmi only means the receipt was retrieved, not that the
-  // tx succeeded on-chain. A reverted tx has status === "reverted" but still
-  // resolves the receipt. Gate success explicitly on receipt.status.
   const isReceiptSuccess = isReceiptMined && receipt?.status === "success";
   const isReceiptError =
     isReceiptFetchError || (isReceiptMined && receipt?.status === "reverted");
 
-  const [resolveError, setResolveError] = useState<Error | null>(null);
-  const [isResolving, setIsResolving] = useState(false);
-
-  // ENS resolution always happens against mainnet regardless of the governance
-  // chain. For multi-chain DAOs this is correct for ENS names but means raw
-  // addresses are used as-is on the governance chain.
   const ensClient = usePublicClient({ chainId: mainnet.id });
 
   const publish = useCallback(
@@ -98,7 +90,6 @@ export const usePublishProposal = () => {
         );
         return;
       }
-
       const governorAddress = daoConfigByDaoId[daoIdEnum]?.daoOverview
         ?.contracts?.governor as `0x${string}` | undefined;
       if (!governorAddress) {
@@ -137,6 +128,7 @@ export const usePublishProposal = () => {
       );
 
       const chainId = daoConfigByDaoId[daoIdEnum]?.daoOverview?.chain?.id;
+      setTxChainId(chainId);
       writeContract({
         address: governorAddress,
         abi: ozProposeAbi,
