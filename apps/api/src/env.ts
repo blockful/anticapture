@@ -12,7 +12,10 @@ const envSchema = z.object({
     .transform((val) => `${val}?options=-c%20search_path%3Danticapture`),
   DATABASE_PUBLIC_URL: z
     .string()
-    .transform((val) => `${val}?options=-c%20search_path%3Danticapture`),
+    .optional()
+    .transform((val) =>
+      val ? `${val}?options=-c%20search_path%3Danticapture` : undefined,
+    ),
   DAO_ID: z.enum(DaoIdEnum),
   CHAIN_ID: z.coerce.number(),
 
