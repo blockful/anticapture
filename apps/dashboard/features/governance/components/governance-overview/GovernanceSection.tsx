@@ -25,6 +25,7 @@ import {
   DeleteDraftModal,
   useDrafts,
 } from "@/features/create-proposal";
+import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
 import { useProposals } from "@/features/governance/hooks/useProposals";
@@ -49,6 +50,7 @@ export const GovernanceSection = () => {
 
   const basePath = getWhitelabelBasePath({ daoId: daoIdEnum, pathname });
   const hasOffchain = !!daoConfig[daoIdEnum]?.offchainProposals;
+  const canCreateProposal = canCreateProposalForDao(daoIdEnum);
   const { decimals } = daoConfig[daoIdEnum];
   const router = useRouter();
   const { address, isConnected } = useAccount();
@@ -138,11 +140,11 @@ export const GovernanceSection = () => {
   const visibleTabs = useMemo(() => {
     const tabs = [ONCHAIN_TAB];
     if (hasOffchain) tabs.push(OFFCHAIN_TAB);
-    if (isConnected) {
+    if (isConnected && canCreateProposal) {
       tabs.push({ label: "My Drafts", value: "drafts" });
     }
     return tabs;
-  }, [hasOffchain, isConnected]);
+  }, [canCreateProposal, hasOffchain, isConnected]);
 
   const isOnchain = activeTab === "onchain" || !hasOffchain;
   const error = isOnchain ? onchainError : offchainError;
@@ -159,10 +161,10 @@ export const GovernanceSection = () => {
   }, [fetchNextPage, isPaginationLoading, pagination.hasNextPage]);
 
   useEffect(() => {
-    if (activeTab === "drafts" && !isConnected) {
+    if (activeTab === "drafts" && (!isConnected || !canCreateProposal)) {
       void setActiveTab("onchain");
     }
-  }, [activeTab, isConnected, setActiveTab]);
+  }, [activeTab, canCreateProposal, isConnected, setActiveTab]);
 
   useEffect(() => {
     if (isSearchActive) return;
@@ -210,15 +212,17 @@ export const GovernanceSection = () => {
           </a>
         </Button>
       )}
-      <Button
-        variant="primary"
-        size="md"
-        onClick={handleNewProposal}
-        className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
-      >
-        <Plus className="size-4" />
-        New Proposal
-      </Button>
+      {canCreateProposal && (
+        <Button
+          variant="primary"
+          size="md"
+          onClick={handleNewProposal}
+          className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
+        >
+          <Plus className="size-4" />
+          New Proposal
+        </Button>
+      )}
     </div>
   );
 
@@ -231,7 +235,7 @@ export const GovernanceSection = () => {
           description="View and vote on executable proposals from this DAO."
           headerAction={headerActions}
         >
-          {(hasOffchain || isConnected) && (
+          {visibleTabs.length > 1 && (
             <TabGroup
               tabs={visibleTabs}
               activeTab={activeTab}
@@ -263,7 +267,7 @@ export const GovernanceSection = () => {
         hideDivider
         headerAction={headerActions}
       >
-        {(hasOffchain || isConnected) && (
+        {visibleTabs.length > 1 && (
           <TabGroup
             tabs={visibleTabs}
             activeTab={activeTab}

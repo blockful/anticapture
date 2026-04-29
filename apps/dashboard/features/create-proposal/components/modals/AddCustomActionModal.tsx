@@ -36,6 +36,10 @@ import ensGovernorAbi from "@/abis/ens-governor.json";
 type Step = 1 | 2;
 type ConfigMode = "fetch" | "calldata";
 
+const BUNDLED_GOVERNOR_ABIS: Partial<Record<DaoIdEnum, unknown>> = {
+  ENS: ensGovernorAbi,
+};
+
 interface AddCustomActionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -46,12 +50,14 @@ interface AddCustomActionModalProps {
 
 const bundledAbisByAddress = (daoId: string): Record<string, Abi> => {
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const bundledGovernorAbi = BUNDLED_GOVERNOR_ABIS[daoIdEnum];
+  if (!bundledGovernorAbi) return {};
   const governor = daoConfig[daoIdEnum]?.daoOverview?.contracts?.governor;
   if (!governor) return {};
   // Validate the bundled JSON once at the boundary rather than casting it
   // straight through. If the import is ever corrupted this returns null and
   // we fall through to the remote fetch path below.
-  const validated = parseAbiStrict(ensGovernorAbi);
+  const validated = parseAbiStrict(bundledGovernorAbi);
   if (!validated) return {};
   return { [governor.toLowerCase()]: validated };
 };

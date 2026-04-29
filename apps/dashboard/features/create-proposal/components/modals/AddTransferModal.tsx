@@ -101,13 +101,11 @@ export const AddTransferModal = ({
     const price = Number(governanceTokenData?.price ?? 0);
     if (!price) return null;
 
-    if (tokenType === "eth") {
-      return n * price;
-    }
-
     const govAddress = governanceTokenAddress(daoIdEnum);
     const isGovToken =
-      govAddress && tokenAddress.toLowerCase() === govAddress.toLowerCase();
+      tokenType === "erc20" &&
+      govAddress &&
+      tokenAddress.toLowerCase() === govAddress.toLowerCase();
     if (!isGovToken) return null;
     return n * price;
   }, [tokenType, amount, tokenAddress, daoIdEnum, governanceTokenData]);
@@ -118,7 +116,7 @@ export const AddTransferModal = ({
     !!govAddress &&
     tokenAddress.trim() !== "" &&
     tokenAddress.toLowerCase() === govAddress.toLowerCase();
-  const showUsd = tokenType === "eth" || isGovToken;
+  const showUsd = isGovToken;
 
   const usdDisplay =
     usd !== null
@@ -151,6 +149,12 @@ export const AddTransferModal = ({
   const tokenAddressValid =
     tokenType === "eth" ||
     (tokenAddress.trim() !== "" && isAddress(tokenAddress.trim()));
+
+  const amountTrimmed = amount.trim();
+  const amountIsValid =
+    amountTrimmed !== "" &&
+    /^\d+(\.\d+)?$/.test(amountTrimmed) &&
+    parseFloat(amountTrimmed) > 0;
 
   const handleConfirm = async () => {
     setDecimalsError(null);
@@ -209,7 +213,10 @@ export const AddTransferModal = ({
         void handleConfirm();
       }}
       isConfirmDisabled={
-        !recipientValid || !amount || !tokenAddressValid || isResolvingDecimals
+        !recipientValid ||
+        !amountIsValid ||
+        !tokenAddressValid ||
+        isResolvingDecimals
       }
       isConfirmLoading={isResolvingDecimals}
     >

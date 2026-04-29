@@ -2,7 +2,7 @@ import { encodeDescription } from "@/features/create-proposal/utils/encodeDescri
 import { decodeDescription } from "@/features/create-proposal/utils/decodeDescription";
 
 describe("encodeDescription", () => {
-  test("produces Tally-style description", () => {
+  test("produces description", () => {
     expect(
       encodeDescription(
         "My proposal",
@@ -10,6 +10,15 @@ describe("encodeDescription", () => {
         "Body text",
       ),
     ).toBe("# My proposal\n\nhttps://discuss.example/1\n\nBody text");
+  });
+
+  test("omits discussion URL section when blank", () => {
+    expect(encodeDescription("My proposal", "", "Body text")).toBe(
+      "# My proposal\n\nBody text",
+    );
+    expect(encodeDescription("My proposal", "   ", "Body text")).toBe(
+      "# My proposal\n\nBody text",
+    );
   });
 });
 

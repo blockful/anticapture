@@ -35,9 +35,9 @@ export const InsufficientVPModal = ({
         Insufficient voting power
       </h3>
       <p className="text-secondary max-w-sm text-center text-sm leading-5">
-        You don't have enough voting power to create a proposal on ENS. Vote on
-        active proposals, or delegate your tokens to someone who can propose on
-        your behalf.
+        You don&apos;t have enough voting power to create an ENS proposal. Vote
+        on active proposals, or delegate your tokens to someone who can propose
+        on your behalf.
       </p>
       <div className="border-border-default rounded-base mt-2 flex w-full flex-col gap-2 border p-3 text-sm">
         <div className="flex items-center justify-between">

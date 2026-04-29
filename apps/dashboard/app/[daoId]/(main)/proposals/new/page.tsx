@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
+import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import { ProposalCreationForm } from "@/features/create-proposal/components/ProposalCreationForm";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { toDaoIdEnum } from "@/shared/types/daos";
@@ -28,6 +30,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function NewProposalPage() {
+export default async function NewProposalPage({ params }: Props) {
+  const { daoId } = await params;
+  const daoIdEnum = toDaoIdEnum(daoId);
+
+  if (!canCreateProposalForDao(daoIdEnum)) {
+    notFound();
+  }
+
   return <ProposalCreationForm />;
 }

@@ -16,10 +16,7 @@ import { formatUnits } from "viem";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import {
-  getWhitelabelBasePath,
-  isWhitelabelDao,
-} from "@/shared/utils/whitelabel";
+import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
@@ -73,7 +70,13 @@ const DEFAULTS: ProposalFormValues = {
   actions: [],
 };
 
-export const ProposalCreationForm = () => {
+type ProposalCreationFormProps = {
+  isWhitelabelRoute?: boolean;
+};
+
+export const ProposalCreationForm = ({
+  isWhitelabelRoute = false,
+}: ProposalCreationFormProps) => {
   const { daoId: daoIdParam } = useParams();
   const daoId = (daoIdParam as string).toLowerCase();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
@@ -95,13 +98,6 @@ export const ProposalCreationForm = () => {
     defaultValues: DEFAULTS,
     mode: "onChange",
   });
-
-  // Hydrate from draft. `useDrafts` reads localStorage in a useEffect on
-  // mount, so `drafts.drafts` may be empty on first render and populated a
-  // tick later. We depend on the collection itself so the effect re-runs
-  // once drafts load, and use a ref guard to make sure we only hydrate the
-  // form once — otherwise subsequent draft list updates (e.g. after the
-  // user saves) would overwrite in-progress edits.
   const hasHydratedDraftRef = useRef(false);
   useEffect(() => {
     if (!draftId) return;
@@ -220,6 +216,7 @@ export const ProposalCreationForm = () => {
   ) => {
     form.setValue("actions", [...values.actions, toFormAction(action)], {
       shouldDirty: true,
+      shouldValidate: true,
     });
   };
 
@@ -229,7 +226,10 @@ export const ProposalCreationForm = () => {
     if (editActionIndex !== null) {
       const next = [...values.actions];
       next[editActionIndex] = toFormAction(action);
-      form.setValue("actions", next, { shouldDirty: true });
+      form.setValue("actions", next, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
       setEditActionIndex(null);
     } else {
       addAction(action);
@@ -271,7 +271,6 @@ export const ProposalCreationForm = () => {
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
-  const isWhitelabel = isWhitelabelDao(daoConfig[daoIdEnum]);
   const proposalsListHref = `${basePath}/proposals`;
 
   const showInsufficientInline =
@@ -302,7 +301,7 @@ export const ProposalCreationForm = () => {
         <span className="text-secondary text-sm">/</span>
         <span className="text-primary text-sm">New Proposal</span>
       </nav>
-      {!isWhitelabel && (
+      {!isWhitelabelRoute && (
         <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
           <div className="mx-auto flex w-full flex-1 items-center justify-between">
             <div className="flex items-center gap-2">
@@ -438,7 +437,10 @@ export const ProposalCreationForm = () => {
           if (deleteActionIndex !== null) {
             const next = [...values.actions];
             next.splice(deleteActionIndex, 1);
-            form.setValue("actions", next, { shouldDirty: true });
+            form.setValue("actions", next, {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
           }
           setDeleteActionIndex(null);
         }}

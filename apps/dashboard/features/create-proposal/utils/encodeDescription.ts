@@ -3,5 +3,7 @@ export const encodeDescription = (
   discussionUrl: string,
   body: string,
 ): string => {
-  return `# ${title}\n\n${discussionUrl}\n\n${body}`;
+  const trimmedUrl = discussionUrl.trim();
+  if (!trimmedUrl) return `# ${title}\n\n${body}`;
+  return `# ${title}\n\n${trimmedUrl}\n\n${body}`;
 };

@@ -1,5 +1,10 @@
+import { DaoIdEnum } from "@/shared/types/daos";
+
 export const BODY_CHAR_LIMIT = 10_000;
 export const BODY_WARNING_THRESHOLD = 9_500;
+
+export const canCreateProposalForDao = (daoId: DaoIdEnum | null | undefined) =>
+  daoId === DaoIdEnum.ENS;
 
 export const BODY_PLACEHOLDER = `## Synopsis
 

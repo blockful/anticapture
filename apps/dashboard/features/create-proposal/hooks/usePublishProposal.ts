@@ -16,15 +16,12 @@ import {
   makeAddressResolver,
 } from "@/features/create-proposal/utils/encodeActions";
 import { encodeDescription } from "@/features/create-proposal/utils/encodeDescription";
+import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
-// Typed-const ABI fragments for the two `propose` shapes we know how to build
-// today. Keeping them inline (instead of importing the full governor JSON)
-// lets viem infer arg/return types from literals — no `as unknown as Abi`
-// casts at call sites.
-
-// OZ Governor (ENS, OP, GTC, FLUID, OBOL, SCR, …)
+// ENS uses the OZ Governor `propose` shape. Keeping the fragment inline lets
+// viem infer arg/return types from literals without casts at call sites.
 const ozProposeAbi = [
   {
     type: "function",
@@ -40,9 +37,7 @@ const ozProposeAbi = [
   },
 ] as const satisfies Abi;
 
-// `ProposalCreated` event used by both OZ Governor and Governor Bravo. The
-// `signatures` field is present on both (OZ emits an empty array). Inlining as
-// a typed const lets viem infer `args.proposalId: bigint` from literals.
+// Inlining as a typed const lets viem infer `args.proposalId: bigint`.
 const proposalCreatedEventAbi = [
   {
     type: "event",
@@ -60,22 +55,6 @@ const proposalCreatedEventAbi = [
     ],
   },
 ] as const satisfies Abi;
-
-// Governor variant tags drive the ABI + arg shape used by `propose`. Mirrors
-// the per-DAO switch in `submitGovernanceAction.ts` so the two stay in sync.
-type GovernorVariant = "oz" | "bravo" | "azorius";
-
-const governorVariantByDao: Partial<Record<DaoIdEnum, GovernorVariant>> = {
-  [DaoIdEnum.ENS]: "oz",
-  [DaoIdEnum.UNISWAP]: "bravo",
-  [DaoIdEnum.NOUNS]: "bravo",
-  [DaoIdEnum.LIL_NOUNS]: "bravo",
-  [DaoIdEnum.COMP]: "bravo",
-  [DaoIdEnum.SHU]: "azorius",
-  // OZ Governor variants for the rest. AAVE is intentionally absent — its
-  // dao-config has no `governor` address, so publish() can't be wired up
-  // without first sourcing one.
-};
 
 export const usePublishProposal = () => {
   const {
@@ -113,6 +92,13 @@ export const usePublishProposal = () => {
     async (form: ProposalFormValues, daoIdEnum: DaoIdEnum) => {
       setResolveError(null);
 
+      if (!canCreateProposalForDao(daoIdEnum)) {
+        setResolveError(
+          new Error(`Publishing for ${daoIdEnum} isn't supported yet.`),
+        );
+        return;
+      }
+
       const governorAddress = daoConfigByDaoId[daoIdEnum]?.daoOverview
         ?.contracts?.governor as `0x${string}` | undefined;
       if (!governorAddress) {
@@ -120,33 +106,6 @@ export const usePublishProposal = () => {
           new Error(
             `No governor address configured for ${daoIdEnum}. Add one to dao-config to enable publishing.`,
           ),
-        );
-        return;
-      }
-
-      const variant = governorVariantByDao[daoIdEnum];
-      if (variant === "bravo") {
-        // Bravo publish is not enabled yet — the encoder produces 4-arg OZ
-        // calldata, and there's no UI for the per-action `signatures` slot.
-        // Wire this up once the multi-DAO encoder lands.
-        setResolveError(
-          new Error(
-            `Publishing for ${daoIdEnum} (Governor Bravo) isn't supported yet.`,
-          ),
-        );
-        return;
-      }
-      if (variant === "azorius") {
-        setResolveError(
-          new Error(
-            `Publishing for ${daoIdEnum} (Azorius) isn't supported — proposals go through a separate strategy contract.`,
-          ),
-        );
-        return;
-      }
-      if (variant !== "oz") {
-        setResolveError(
-          new Error(`Publishing for ${daoIdEnum} isn't supported yet.`),
         );
         return;
       }
