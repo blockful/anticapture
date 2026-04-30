@@ -21,7 +21,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     decodedProposalId,
   ).catch(() => null);
 
-  const canonicalPath = `/${params.daoId}/governance/offchain-proposal/${params.proposalId}`;
+  const canonicalPath = `/${params.daoId}/governance/offchain-proposal/${encodeURIComponent(params.proposalId)}`;
   const { description, fullTitle } = buildProposalSeoText({
     daoId,
     isOffchain: true,

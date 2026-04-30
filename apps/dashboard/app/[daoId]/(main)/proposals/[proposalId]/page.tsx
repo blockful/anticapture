@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
 import { buildProposalSeoText } from "@/shared/seo/proposalMetadata";
@@ -47,7 +48,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     : undefined;
 
   const canonicalPath = isOffchain
-    ? `/${params.daoId}/proposals/${params.proposalId}?proposalType=offchain`
+    ? `/${params.daoId}/governance/offchain-proposal/${encodeURIComponent(params.proposalId)}`
     : `/${params.daoId}/proposals/${params.proposalId}`;
   const { description, fullTitle } = buildProposalSeoText({
     daoId,
@@ -73,12 +74,20 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default async function ProposalPage({ searchParams }: Props) {
+export default async function ProposalPage({ params, searchParams }: Props) {
   const { proposalType } = await searchParams;
+
+  if (proposalType === "offchain") {
+    const { daoId, proposalId } = await params;
+
+    redirect(
+      `/${daoId}/governance/offchain-proposal/${encodeURIComponent(proposalId)}`,
+    );
+  }
 
   return (
     <div>
-      <ProposalSection isOffchain={proposalType === "offchain"} />
+      <ProposalSection isOffchain={false} />
     </div>
   );
 }

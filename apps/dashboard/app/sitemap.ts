@@ -36,9 +36,21 @@ const DAO_SUB_ROUTES = [
   "/service-providers",
 ];
 
-interface ProposalPath {
+export interface ProposalPath {
   id: string;
   kind: "onchain" | "offchain";
+}
+
+export function getProposalSitemapRoute(
+  daoId: string,
+  path: ProposalPath,
+): string {
+  const encodedId =
+    path.kind === "offchain" ? encodeURIComponent(path.id) : path.id;
+
+  return path.kind === "offchain"
+    ? `/${daoId}/governance/offchain-proposal/${encodedId}`
+    : `/${daoId}/proposals/${encodedId}`;
 }
 
 async function withTimeout<T>(
@@ -110,15 +122,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       );
 
       return paths.map((path: ProposalPath) => {
-        const encodedId =
-          path.kind === "offchain" ? encodeURIComponent(path.id) : path.id;
-        const route =
-          path.kind === "offchain"
-            ? `/${daoId}/governance/offchain-proposal/${encodedId}`
-            : `/${daoId}/governance/proposal/${encodedId}`;
-
         return {
-          url: `${baseUrl}${route}`,
+          url: `${baseUrl}${getProposalSitemapRoute(daoId, path)}`,
           changeFrequency: "daily" as const,
           priority: 0.7,
         };
