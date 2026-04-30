@@ -80,6 +80,13 @@
       "dependsOn": ["^build", "@anticapture/observability#build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
+    "@anticapture/client#typecheck": {
+      "dependsOn": [
+        "@anticapture/client#codegen",
+        "@anticapture/observability#build"
+      ],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
+    },
     "test": {
       "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]

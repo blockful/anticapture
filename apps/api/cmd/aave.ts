@@ -6,7 +6,7 @@ import {
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { logger } from "hono/logger";
+import { logger } from "@/logger";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 
@@ -56,6 +56,7 @@ import {
 } from "@/services";
 import { AAVEVotingPowerService } from "@/services/voting-power/aave";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
+import { HTTPException } from "hono/http-exception";
 
 const app = new Hono({
   defaultHook: (result, c) => {
@@ -73,7 +74,26 @@ const app = new Hono({
   },
 });
 
-app.use(logger());
+app.use(async (c, next) => {
+  const start = Date.now();
+  let status: number | undefined;
+  try {
+    await next();
+  } catch (err) {
+    status = err instanceof HTTPException ? err.status : 500;
+    throw err;
+  } finally {
+    logger.info(
+      {
+        method: c.req.method,
+        url: c.req.path,
+        status: status ?? c.res?.status ?? 500,
+        durationMs: Date.now() - start,
+      },
+      "request",
+    );
+  }
+});
 app.onError(errorHandler);
 
 app.get("/metrics", async (c) => {
@@ -105,7 +125,10 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+const pgClient = drizzle(env.DATABASE_URL, {
+  schema,
+  casing: "snake_case",
+});
 
 health(app, pgClient);
 

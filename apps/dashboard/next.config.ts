@@ -1,5 +1,22 @@
 /** @type {import('next').NextConfig} */
+
+const resolveApiUrls = () => {
+  const prId = process.env.VERCEL_GIT_PULL_REQUEST_ID;
+  const vercelEnv = process.env.VERCEL_ENV; // 'production' | 'preview' | 'development'
+
+  if (vercelEnv === "preview" && prId) {
+    return {
+      NEXT_PUBLIC_BASE_URL: `https://api-gateway-anticapture-pr-${prId}.up.railway.app/graphql`,
+      NEXT_PUBLIC_GATEFUL_URL: `https://gateful-anticapture-pr-${prId}.up.railway.app`,
+    };
+  }
+
+  // Production and local dev: fall through to values already set in Vercel / .env
+  return {};
+};
+
 const nextConfig = {
+  env: resolveApiUrls(),
   transpilePackages: ["@anticapture/graphql-client", "@anticapture/client"],
   images: {
     remotePatterns: [
