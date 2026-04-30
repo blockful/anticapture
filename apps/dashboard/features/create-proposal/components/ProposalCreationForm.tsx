@@ -13,6 +13,7 @@ import {
 } from "next/navigation";
 import { useAccount } from "wagmi";
 import { formatUnits, zeroAddress } from "viem";
+
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
