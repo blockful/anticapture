@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
 import { buildProposalSeoText } from "@/shared/seo/proposalMetadata";
@@ -80,7 +80,7 @@ export default async function ProposalPage({ params, searchParams }: Props) {
   if (proposalType === "offchain") {
     const { daoId, proposalId } = await params;
 
-    redirect(
+    permanentRedirect(
       `/${daoId}/governance/offchain-proposal/${encodeURIComponent(proposalId)}`,
     );
   }
