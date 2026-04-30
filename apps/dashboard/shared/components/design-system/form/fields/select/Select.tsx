@@ -93,76 +93,84 @@ export const Select = ({
         </button>
       </PopoverPrimitive.Trigger>
 
-      <PopoverPrimitive.Content
-        role="listbox"
-        align="start"
-        sideOffset={4}
-        // Match trigger width
-        style={{ width: "var(--radix-popover-trigger-width)" }}
-        className={cn(
-          // Base/layout
-          "flex flex-col",
-          // Padding around items
-          "py-1",
-          // Colors/surfaces
-          "bg-surface-default",
-          // Border
-          "rounded-base border-border-contrast border",
-          // Z-index
-          "z-50",
-          // Animation
-          "animate-[popover-slide-in_0.15s_ease-out]",
-        )}
-      >
-        {items.map((item) => {
-          const isSelected = item.value === value;
-          const isHovered = hoveredValue === item.value;
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          role="listbox"
+          align="start"
+          side="bottom"
+          sideOffset={4}
+          collisionPadding={16}
+          // Match trigger width; cap height via Radix CSS var to available space in viewport
+          style={{
+            width: "var(--radix-popover-trigger-width)",
+            maxHeight:
+              "min(320px, var(--radix-popover-content-available-height))",
+          }}
+          className={cn(
+            // Base/layout
+            "flex flex-col overflow-y-auto",
+            // Padding around items
+            "py-1",
+            // Colors/surfaces
+            "bg-surface-default",
+            // Border
+            "rounded-base border-border-contrast border",
+            // Z-index — must beat modal overlay (z-50)
+            "z-50",
+            // Animation
+            "animate-[popover-slide-in_0.15s_ease-out]",
+          )}
+        >
+          {items.map((item) => {
+            const isSelected = item.value === value;
+            const isHovered = hoveredValue === item.value;
 
-          return (
-            <button
-              key={item.value}
-              type="button"
-              role="option"
-              aria-selected={isSelected}
-              onClick={() => handleSelect(item.value)}
-              onMouseEnter={() => setHoveredValue(item.value)}
-              onMouseLeave={() => setHoveredValue(null)}
-              className={cn(
-                // Base/layout
-                "flex w-full items-center gap-1.5",
-                // Sizing
-                "px-2.5 py-2",
-                // Typography
-                "text-sm font-normal leading-5",
-                // Colors
-                "text-primary",
-                // Background: hover or selected+hover → surface-hover, selected → surface-contrast, default → transparent
-                isSelected && isHovered && "bg-surface-hover",
-                isSelected && !isHovered && "bg-surface-contrast",
-                !isSelected && isHovered && "bg-surface-hover",
-                !isSelected && !isHovered && "bg-transparent",
-                // Transitions
-                "transition-colors duration-150",
-                // Interactive
-                "cursor-pointer",
-              )}
-            >
-              {/* Label — fills remaining space */}
-              <span className="min-w-0 flex-1 truncate text-left">
-                {item.label}
-              </span>
+            return (
+              <button
+                key={item.value}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => handleSelect(item.value)}
+                onMouseEnter={() => setHoveredValue(item.value)}
+                onMouseLeave={() => setHoveredValue(null)}
+                className={cn(
+                  // Base/layout
+                  "flex w-full items-center gap-1.5",
+                  // Sizing
+                  "px-2.5 py-2",
+                  // Typography
+                  "text-sm font-normal leading-5",
+                  // Colors
+                  "text-primary",
+                  // Background: hover or selected+hover → surface-hover, selected → surface-contrast, default → transparent
+                  isSelected && isHovered && "bg-surface-hover",
+                  isSelected && !isHovered && "bg-surface-contrast",
+                  !isSelected && isHovered && "bg-surface-hover",
+                  !isSelected && !isHovered && "bg-transparent",
+                  // Transitions
+                  "transition-colors duration-150",
+                  // Interactive
+                  "cursor-pointer",
+                )}
+              >
+                {/* Label — fills remaining space */}
+                <span className="min-w-0 flex-1 truncate text-left">
+                  {item.label}
+                </span>
 
-              {/* Trailing check icon — shown when item is selected */}
-              {isSelected && (
-                <CheckIcon
-                  className="text-primary size-3.5 shrink-0"
-                  aria-hidden="true"
-                />
-              )}
-            </button>
-          );
-        })}
-      </PopoverPrimitive.Content>
+                {/* Trailing check icon — shown when item is selected */}
+                {isSelected && (
+                  <CheckIcon
+                    className="text-primary size-3.5 shrink-0"
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
     </PopoverPrimitive.Root>
   );
 };

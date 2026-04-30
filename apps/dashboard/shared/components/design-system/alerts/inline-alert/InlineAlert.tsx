@@ -5,7 +5,7 @@ import { cn } from "@/shared/utils/cn";
 
 import type { InlineAlertProps } from "@/shared/components/design-system/alerts/types";
 
-const mapVariantToIcon = {
+const mapVariant = {
   info: {
     icon: <Info className="text-secondary size-4" />,
     color: "text-secondary",
@@ -29,15 +29,18 @@ export const InlineAlert = ({
   className,
 }: InlineAlertProps) => {
   return (
-    <div className={cn("bg-surface-contrast w-full", className)}>
-      <CardDescription
-        className={cn(
-          "flex w-full items-center gap-2 p-2",
-          mapVariantToIcon[variant].bgColor,
-        )}
-      >
-        <div className="mt-0.5 lg:mt-0">{mapVariantToIcon[variant].icon}</div>
-        <p className="text-secondary text-sm font-normal">{text}</p>
+    <div
+      className={cn(
+        "rounded-base w-full",
+        mapVariant[variant].bgColor,
+        className,
+      )}
+    >
+      <CardDescription className="rounded-base flex w-full items-center gap-2 p-2">
+        <div className="mt-0.5 lg:mt-0">{mapVariant[variant].icon}</div>
+        <p className={cn("text-sm font-normal", mapVariant[variant].color)}>
+          {text}
+        </p>
       </CardDescription>
     </div>
   );

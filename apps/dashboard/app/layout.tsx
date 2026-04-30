@@ -11,7 +11,13 @@ import { HelpPopover } from "@/shared/components";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
+import { ALL_DAOS, type DaoIdEnum } from "@/shared/types/daos";
 import { resolveDaoIdFromHostname } from "@/shared/utils/whitelabel";
+
+const isForceDaoSet = () => {
+  const forced = process.env.FORCE_DAO?.trim().toUpperCase();
+  return !!forced && ALL_DAOS.includes(forced as DaoIdEnum);
+};
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
@@ -66,7 +72,12 @@ export default async function RootLayout({
   const host =
     headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
   const hostname = host.split(":")[0];
-  const isWhitelabel = !!resolveDaoIdFromHostname(hostname);
+  const pathname =
+    headersList.get("x-invoke-path") ?? headersList.get("next-url") ?? "";
+  const isWhitelabel =
+    !!resolveDaoIdFromHostname(hostname) ||
+    isForceDaoSet() ||
+    pathname.startsWith("/whitelabel/");
 
   return (
     <html
@@ -79,13 +90,6 @@ export default async function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        {!isWhitelabel && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `if(location.pathname.startsWith('/whitelabel/'))document.documentElement.classList.remove('dark')`,
-            }}
-          />
-        )}
       </head>
       <body
         className={`${inter.className} ${roboto.variable} bg-surface-background`}
