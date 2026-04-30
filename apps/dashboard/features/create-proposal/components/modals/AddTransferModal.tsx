@@ -195,9 +195,9 @@ export const AddTransferModal = ({
       });
       onSubmit({
         type: "erc20-transfer",
-        recipient,
+        recipient: recipientTrimmed,
         tokenAddress,
-        amount,
+        amount: amountTrimmed,
         decimals: Number(decimals),
       });
       reset();
