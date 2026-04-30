@@ -33,8 +33,8 @@
     "drizzle-orm": "^0.45.1",
     "hono": "^4.7.10",
     "pg": "^8.17.2",
-    "pino-http": "^10.4.0",
     "viem": "^2.41.2",
+    "pino-http": "^10.4.0",
     "zod": "^4.3.6",
     "zod-validation-error": "^5.0.0"
   },
