@@ -230,22 +230,6 @@ rateLimiters:
           maxCount: 400
           period: 1s
           waitTime: 10s
-        - method: eth_getLogs
-          maxCount: 80
-          period: 1s
-          waitTime: 10s
-        - method: eth_call
-          maxCount: 160
-          period: 1s
-          waitTime: 10s
-        - method: eth_getCode
-          maxCount: 160
-          period: 1s
-          waitTime: 10s
-        - method: eth_getStorageAt
-          maxCount: 160
-          period: 1s
-          waitTime: 10s
     - id: chainstack
       rules:
         - method: "*"
