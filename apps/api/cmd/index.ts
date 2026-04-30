@@ -6,7 +6,6 @@ import {
 import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
-import { isRailwayPreviewEnv } from "./ci";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
@@ -107,14 +106,6 @@ import {
 } from "@/services";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
 
-const CI = isRailwayPreviewEnv();
-
-if (CI) {
-  logger.info(
-    "CI environment detected; PGClient will connect to the development database public URL",
-  );
-}
-
 const app = new Hono({
   defaultHook: (result, c) => {
     if (!result.success) {
@@ -182,13 +173,7 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-if (CI && !env.DATABASE_PUBLIC_URL) {
-  const message = "DATABASE_PUBLIC_URL is required in CI environments";
-  logger.error(message);
-  throw new Error(message);
-}
-
-const pgClient = drizzle(CI ? env.DATABASE_PUBLIC_URL! : env.DATABASE_URL, {
+const pgClient = drizzle(env.DATABASE_URL, {
   schema,
   casing: "snake_case",
 });

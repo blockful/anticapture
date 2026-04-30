@@ -16,8 +16,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "dev": "tsx watch cmd/index.ts",
-    "dev:rw": "sh -c 'dao_id=\"$1\"; exec railway run -e dev -s \"${dao_id}-api\" -- pnpm dev' --",
-    "db:migrate": "drizzle-kit migrate"
+    "dev:rw": "sh -c 'dao_id=\"$1\"; exec railway run -e dev -s \"${dao_id}-api\" -- pnpm dev' --"
   },
   "keywords": [],
   "author": "",
