@@ -1,6 +1,7 @@
 import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { proxy as honoProxy } from "hono/proxy";
+const PROXY_TIMEOUT_MS = 30000;
 
 /**
  * Forwards /:dao/relay/* to the per-DAO relayer configured via
@@ -27,6 +28,9 @@ export function relayerProxy(
     const upstreamPath = c.req.path.replace(`/${paramDao}`, "");
     const url = new URL(upstreamPath, relayerUrl);
     url.search = new URL(c.req.url).search;
-    return honoProxy(url.toString(), { ...c.req });
+    return honoProxy(url.toString(), {
+      ...c.req,
+      signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
+    });
   }
 }
