@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-const PERMANENT_BRANCHES = ["dev", "main", "staging"];
+const PERMANENT_BRANCHES = ["dev", "main"];
 
 const resolveApiUrls = () => {
   const prId = process.env.VERCEL_GIT_PULL_REQUEST_ID;
