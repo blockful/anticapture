@@ -63,5 +63,8 @@
     "react": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "zod": "^4.4.1"
   }
 }
