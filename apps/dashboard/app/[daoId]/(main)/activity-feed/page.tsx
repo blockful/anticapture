@@ -5,9 +5,7 @@ import {
   feedEventsPathParamsDaoEnum,
   type FeedEventsPathParams,
 } from "@anticapture/client";
-
 import { ActivityFeedSection } from "@/features/feed";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
 type Props = {
   params: Promise<{ daoId: string }>;
@@ -25,12 +23,23 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const daoId = params.daoId.toUpperCase();
 
   const canonicalPath = `/${params.daoId}/activity-feed`;
+  const title = `${daoId} DAO Governance Activity Feed | Risk Signals | Anticapture`;
+  const description = `Track governance activity for ${daoId} DAO, including proposal events, delegate behavior, and power shifts that may signal emerging governance risk.`;
 
   return {
-    title: `${PAGES_CONSTANTS.activityFeed.title} - ${daoId} | Anticapture`,
-    description: PAGES_CONSTANTS.activityFeed.description,
+    title,
+    description,
     alternates: { canonical: canonicalPath },
-    openGraph: { url: canonicalPath },
+    openGraph: {
+      url: canonicalPath,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 

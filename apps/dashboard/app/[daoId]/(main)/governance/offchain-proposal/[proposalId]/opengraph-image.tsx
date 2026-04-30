@@ -1,7 +1,7 @@
 import { createDaoSectionOgImage } from "@/shared/og";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-export const alt = "Anticapture Governance Proposal";
+export const alt = "Anticapture Offchain Governance Proposal";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -15,6 +15,6 @@ export default async function OpengraphImage({
 
   return await createDaoSectionOgImage({
     daoId: daoIdEnum,
-    sectionTitle: "<onchain proposal>",
+    sectionTitle: "<offchain proposal>",
   });
 }

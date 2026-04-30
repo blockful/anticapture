@@ -9,6 +9,14 @@ import { Toaster } from "react-hot-toast";
 import { CookieConsent } from "@/features/cookie";
 import { HelpPopover } from "@/shared/components";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
+import { JsonLd } from "@/shared/seo/JsonLd";
+import {
+  ORGANIZATION_ALT_NAME,
+  ORGANIZATION_NAME,
+  SITE_DESCRIPTION,
+  SITE_TAGLINE,
+  getSiteUrl,
+} from "@/shared/seo/site";
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
 import { ALL_DAOS, type DaoIdEnum } from "@/shared/types/daos";
@@ -28,15 +36,11 @@ const roboto = Roboto_Mono({
   variable: "--font-mono",
 });
 
-const baseUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000");
+const baseUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Anticapture | DAO Governance Security Dashboard",
+  title: `Anticapture | ${SITE_TAGLINE}`,
   keywords: [
     "DAO governance security",
     "hostile takeover prevention",
@@ -50,9 +54,8 @@ export const metadata: Metadata = {
     "on-chain governance security",
   ],
   openGraph: {
-    title: "Anticapture — DAO Governance Security & Risk Analysis Platform",
-    description:
-      "Anticapture is a DAO governance security platform that quantifies hostile takeover risk, detects governance capture, and tracks resilience metrics across major DAOs.",
+    title: "Anticapture | DAO Governance Security & Risk Analysis Platform",
+    description: SITE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
@@ -62,6 +65,25 @@ export const metadata: Metadata = {
       "Monitor governance security, hostile takeover risks, and token distribution across DAOs. Anticapture is the open security framework for decentralized governance.",
   },
 };
+
+const rootSchemas = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: ORGANIZATION_NAME,
+    alternateName: ORGANIZATION_ALT_NAME,
+    url: baseUrl,
+    sameAs: ["https://x.com/anticapture_", "https://blockful.io"],
+    description: SITE_DESCRIPTION,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Anticapture",
+    url: baseUrl,
+    description: SITE_DESCRIPTION,
+  },
+];
 
 export default async function RootLayout({
   children,
@@ -94,6 +116,7 @@ export default async function RootLayout({
       <body
         className={`${inter.className} ${roboto.variable} bg-surface-background`}
       >
+        <JsonLd data={rootSchemas} />
         <div
           data-vaul-drawer-wrapper=""
           className="border-border-default mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"

@@ -102,10 +102,6 @@
       "inputs": ["src/**/*.ts"],
       "outputs": ["drizzle/**"]
     },
-    "@anticapture/api#dev": {
-      "dependsOn": ["@anticapture/observability#build"],
-      "passThroughEnv": ["*"]
-    },
     "@anticapture/indexer": {
       "env": ["DAO_ID"]
     },
@@ -118,6 +114,7 @@
       ]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]

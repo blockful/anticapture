@@ -23,14 +23,6 @@
     "test": "turbo test",
     "test:unit": "turbo test:unit"
   },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --write"
-    ]
-  },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "dependencies": {

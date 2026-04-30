@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 
 import { FaqSection } from "@/features/faq";
+import { FAQ_ITEMS } from "@/features/faq/utils/faq-constants";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { JsonLd } from "@/shared/seo/JsonLd";
+import { getSiteUrl } from "@/shared/seo/site";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
@@ -22,9 +25,24 @@ export const metadata: Metadata = {
   },
 };
 
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answerText,
+    },
+    url: `${getSiteUrl()}/faq#${item.id}`,
+  })),
+};
+
 export default function FAQPage() {
   return (
     <div className="bg-surface-background dark flex h-screen">
+      <JsonLd data={faqSchema} />
       <HeaderSidebar />
       <main className="flex-1 overflow-auto">
         <div className="lg:hidden">
