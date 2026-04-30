@@ -1,58 +1,19 @@
 "use client";
 
-import { QueryInput_AccountBalances_OrderBy } from "@anticapture/graphql-client";
-import { useMemo } from "react";
-import { formatUnits } from "viem";
-
-import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 import { TopAccountsChart } from "@/features/dao-overview/components/TopAccountsChart";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
-import daoConfig from "@/shared/dao-config";
+
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 
 export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
-  const { data: tokenHoldersData, loading } = useTokenHolders({
-    daoId,
-    orderBy: QueryInput_AccountBalances_OrderBy.Variation,
+  const { data: chartData, isLoading } = useTokenHolders(daoId, {
+    orderBy: "variation",
     limit: 10,
-    days: TimeInterval.NINETY_DAYS,
+    fromDay: TimeInterval.NINETY_DAYS,
   });
-
-  const chartData: TopAccountChartData[] = useMemo(() => {
-    if (!tokenHoldersData) return [];
-
-    return tokenHoldersData.map((item) => {
-      const absoluteChange = Number(
-        formatUnits(
-          BigInt(item.variation?.absoluteChange || 0),
-          daoConfig[daoId].decimals,
-        ),
-      );
-      const percentageChange =
-        item.variation?.percentageChange === PERCENTAGE_NO_BASELINE
-          ? 0
-          : Number(item.variation?.percentageChange || 0);
-
-      const balance = Number(
-        formatUnits(BigInt(item.balance || 0), daoConfig[daoId].decimals),
-      );
-
-      return {
-        address: item.accountId,
-        value: absoluteChange,
-        balance,
-        delegate: item.delegate,
-        variation: {
-          absoluteChange,
-          percentageChange,
-        },
-      };
-    });
-  }, [tokenHoldersData, daoId]);
 
   return (
     <div className="lg:bg-surface-default flex w-full flex-col gap-4 px-5 lg:p-4">
@@ -66,8 +27,8 @@ export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         </DefaultLink>
         <TooltipInfo text="Addresses with the highest number of governance tokens." />
       </div>
-      {loading && <SkeletonRow className="h-52 w-full" />}
-      {!loading && (
+      {isLoading && <SkeletonRow className="h-52 w-full" />}
+      {chartData && !isLoading && (
         <TopAccountsChart
           daoId={daoId}
           chartData={chartData}
