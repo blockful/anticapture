@@ -146,4 +146,30 @@ describe("getAllProposalPaths", () => {
       skip: 100,
     });
   });
+
+  test("keeps onchain proposal paths when offchain proposal fetching fails", async () => {
+    mockedProposals.mockResolvedValue({
+      items: [buildOnchainProposal("onchain-1")],
+      totalCount: 1,
+    });
+    mockedOffchainProposals.mockRejectedValue(
+      new Error("offchain unavailable"),
+    );
+
+    const paths = await getAllProposalPaths(DaoIdEnum.ENS);
+
+    expect(paths).toEqual([{ id: "onchain-1", kind: "onchain" }]);
+  });
+
+  test("keeps offchain proposal paths when onchain proposal fetching fails", async () => {
+    mockedProposals.mockRejectedValue(new Error("onchain unavailable"));
+    mockedOffchainProposals.mockResolvedValue({
+      items: [buildOffchainProposal("offchain-1")],
+      totalCount: 1,
+    });
+
+    const paths = await getAllProposalPaths(DaoIdEnum.ENS);
+
+    expect(paths).toEqual([{ id: "offchain-1", kind: "offchain" }]);
+  });
 });

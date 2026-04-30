@@ -105,8 +105,12 @@ export async function getAllProposalPaths(
   const offchainDao = daoId.toLowerCase() as OffchainProposalsPathParams["dao"];
 
   const [onchainItems, offchainItems] = await Promise.all([
-    getAllProposalPages((params) => proposals(onchainDao, params)),
-    getAllProposalPages((params) => offchainProposals(offchainDao, params)),
+    getAllProposalPages((params) => proposals(onchainDao, params)).catch(
+      () => [],
+    ),
+    getAllProposalPages((params) =>
+      offchainProposals(offchainDao, params),
+    ).catch(() => []),
   ]);
 
   return [
