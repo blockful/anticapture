@@ -3,8 +3,7 @@
     "anticapture": {
       "type": "stdio",
       "command": "sh",
-      "args": ["-c", "node_modules/.bin/tsx mcp-server.ts"],
-      "cwd": "./packages/anticapture-client"
+      "args": ["packages/anticapture-client/mcp-server.sh"]
     }
   }
 }
