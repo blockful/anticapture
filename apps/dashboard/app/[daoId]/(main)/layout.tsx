@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import NotFound from "@/app/not-found";
-import { Footer } from "@/shared/components/design-system/footer/Footer";
+import { ConditionalFooter } from "@/app/[daoId]/(main)/ConditionalFooter";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { ALL_DAOS } from "@/shared/types/daos";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
@@ -44,7 +44,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
         </div>
         <div className="flex w-full flex-col items-center lg:h-screen">
           <div className="w-full flex-1">{children}</div>
-          <Footer />
+          <ConditionalFooter />
         </div>
       </main>
     </div>

@@ -1,48 +1,51 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "@anticapture/offchain-indexer#db:migrate": {
+    "@anticapture/indexer#db:*": {
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "@anticapture/offchain-indexer#db:push": {
-      "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "@anticapture/indexer#db:prune": {
-      "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "@anticapture/observability#build": {
-      "outputs": ["dist/**"]
-    },
-    "@anticapture/graphql-client#build": {
+    "@anticapture/graphql-client#codegen": {
+      "inputs": [
+        "documents/**/*",
+        "codegen.ts",
+        "$TURBO_ROOT$/apps/api-gateway/schema.graphql"
+      ],
       "outputs": ["generated/**"]
     },
-    "@anticapture/dashboard#dev": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
-      "persistent": true,
-      "cache": false
+    "@anticapture/client#codegen": {
+      "inputs": [
+        "kubb.config.ts",
+        "src/**",
+        "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
+      ],
+      "outputs": ["generated/**"]
     },
-    "@anticapture/graphql-client#dev": {
-      "persistent": true
+    "@anticapture/graphql-client#build": {
+      "dependsOn": ["codegen", "^build"],
+      "outputs": ["dist/**"]
+    },
+    "@anticapture/client#build": {
+      "dependsOn": ["codegen"],
+      "outputs": ["dist/**"]
+    },
+    "@anticapture/client#typecheck": {
+      "dependsOn": ["codegen"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "@anticapture/dashboard#build": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
-      "outputs": ["dist/**", ".next/**"],
-      "env": ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_EMAIL"]
+      "dependsOn": ["^codegen", "^build"],
+      "outputs": ["dist/**", ".next/**"]
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": ["dist/**"]
     },
     "storybook": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "persistent": true,
       "cache": false
     },
     "build-storybook": {
-      "dependsOn": ["@anticapture/graphql-client#codegen"],
       "outputs": ["storybook-static/**"]
     },
     "start": {
@@ -86,16 +89,11 @@
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "codegen": {
-      "inputs": ["documents/**/*", "codegen.ts"],
       "outputs": ["generated/**"]
     },
     "db:generate": {
       "inputs": ["src/**/*.ts"],
       "outputs": ["drizzle/**"]
-    },
-    "@anticapture/api#dev": {
-      "dependsOn": ["@anticapture/observability#build"],
-      "passThroughEnv": ["*"]
     },
     "@anticapture/indexer": {
       "env": ["DAO_ID"]
@@ -109,11 +107,7 @@
       ]
     },
     "dev": {
-      "persistent": true,
-      "cache": false,
-      "passThroughEnv": ["*"]
-    },
-    "dev:rw": {
+      "dependsOn": ["^build"],
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]

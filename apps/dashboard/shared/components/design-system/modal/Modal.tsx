@@ -1,10 +1,18 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { useEffect, useState } from "react";
 
+import {
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  DrawerRoot,
+} from "@/shared/components/design-system/drawer";
 import { ModalFooter } from "@/shared/components/design-system/modal/modal-footer/ModalFooter";
 import { ModalHeader } from "@/shared/components/design-system/modal/modal-header/ModalHeader";
 import type { ModalProps } from "@/shared/components/design-system/modal/types";
+import { useScreenSize } from "@/shared/hooks";
 import { cn } from "@/shared/utils/cn";
 
 /**
@@ -25,12 +33,55 @@ export const Modal = ({
   onConfirm,
   isConfirmLoading = false,
   isConfirmDisabled = false,
+  confirmVariant = "primary",
+  footerLeading,
   className,
 }: ModalProps) => {
+  const { isMobile } = useScreenSize();
+  // useScreenSize defaults to false until the effect runs, which would render
+  // the Dialog on first paint and swap to a Drawer after hydration on mobile.
+  // Wait for mount before deciding which surface to show so the user doesn't
+  // see a desktop dialog flash.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const handleCancel = () => {
     onCancel?.();
     onOpenChange(false);
   };
+
+  if (!isMounted && open) return null;
+
+  const footer = (cancelLabel || confirmLabel || footerLeading) && (
+    <ModalFooter
+      cancelLabel={cancelLabel}
+      confirmLabel={confirmLabel}
+      onCancel={handleCancel}
+      onConfirm={onConfirm}
+      isConfirmLoading={isConfirmLoading}
+      isConfirmDisabled={isConfirmDisabled}
+      confirmVariant={confirmVariant}
+      leading={footerLeading}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <DrawerRoot open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className={className}>
+          <DrawerHeader
+            title={title}
+            subtitle={description}
+            onClose={() => onOpenChange(false)}
+          />
+          <DrawerBody className="overflow-y-auto p-4">{children}</DrawerBody>
+          {footer}
+        </DrawerContent>
+      </DrawerRoot>
+    );
+  }
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -54,7 +105,7 @@ export const Modal = ({
             // Layout — centered in viewport
             "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
             // Sizing
-            "w-full max-w-[600px]",
+            "max-w-150 rounded-base w-full",
             // Surface
             "bg-surface-default border-border-default border",
             // Shadow — matches Figma tailwind/shadow-xl
@@ -73,16 +124,7 @@ export const Modal = ({
           <div className="bg-surface-default w-full p-4">{children}</div>
 
           {/* Footer */}
-          {(cancelLabel || confirmLabel) && (
-            <ModalFooter
-              cancelLabel={cancelLabel}
-              confirmLabel={confirmLabel}
-              onCancel={handleCancel}
-              onConfirm={onConfirm}
-              isConfirmLoading={isConfirmLoading}
-              isConfirmDisabled={isConfirmDisabled}
-            />
-          )}
+          {footer}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

@@ -1,9 +1,14 @@
 import type { MetadataRoute } from "next";
 
 import daoConfigByDaoId from "@/shared/dao-config";
-import { getAllProposalPaths } from "@/shared/seo/graphql";
 import { getSiteUrl } from "@/shared/seo/site";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import {
+  type OffchainProposalsPathParams,
+  type ProposalsPathParams,
+  offchainProposals,
+  proposals,
+} from "@anticapture/client";
 
 const STATIC_ROUTES = [
   "/",
@@ -18,7 +23,7 @@ const STATIC_ROUTES = [
 const DAO_SUB_ROUTES = [
   "",
   "/risk-analysis",
-  "/governance",
+  "/proposals",
   "/token-distribution",
   "/holders-and-delegates",
   "/activity-feed",
@@ -26,6 +31,35 @@ const DAO_SUB_ROUTES = [
   "/attack-profitability",
   "/service-providers",
 ];
+
+interface ProposalPath {
+  id: string;
+  kind: "onchain" | "offchain";
+}
+
+async function getAllProposalPaths(daoId: DaoIdEnum): Promise<ProposalPath[]> {
+  const onchainDao = daoId.toLowerCase() as ProposalsPathParams["dao"];
+  const offchainDao = daoId.toLowerCase() as OffchainProposalsPathParams["dao"];
+
+  const [onchainPaths, offchainPaths] = await Promise.all([
+    proposals(onchainDao, { skip: 0, limit: 10 }),
+    offchainProposals(offchainDao, {
+      skip: 0,
+      limit: 20,
+    }),
+  ]);
+
+  return [
+    ...onchainPaths.items.map((item) => ({
+      id: item.id,
+      kind: "onchain" as const,
+    })),
+    ...offchainPaths.items.map((item) => ({
+      id: item.id,
+      kind: "offchain" as const,
+    })),
+  ];
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteUrl();
@@ -51,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         daoId.toUpperCase() as DaoIdEnum,
       ).catch(() => []);
 
-      return paths.map((path) => {
+      return paths.map((path: ProposalPath) => {
         const encodedId =
           path.kind === "offchain" ? encodeURIComponent(path.id) : path.id;
         const route =

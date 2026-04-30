@@ -1,3 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+
 import type {
   ComponentsObject,
   OpenAPIObject,
@@ -6,18 +9,25 @@ import type {
   PathsObject,
 } from "openapi3-ts/oas31";
 
+import { logger } from "./logger.js";
+
 type Schemas = NonNullable<ComponentsObject["schemas"]>;
 
 async function fetchDoc(
   name: string,
   baseUrl: string,
+  docsPath = "/docs",
 ): Promise<OpenAPIObject | null> {
   try {
-    const res = await fetch(`${baseUrl}/docs`);
+    const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+    const normalizedDocsPath = docsPath.startsWith("/")
+      ? docsPath
+      : `/${docsPath}`;
+    const res = await fetch(`${normalizedBaseUrl}${normalizedDocsPath}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return (await res.json()) as OpenAPIObject;
   } catch (err) {
-    console.warn(`[upstream-docs] Failed to fetch ${name}:`, err);
+    logger.warn({ err, name }, "failed to fetch upstream OpenAPI spec");
     return null;
   }
 }
@@ -30,6 +40,22 @@ function mergeSchemas(docs: OpenAPIObject[]): Schemas {
     }
   }
   return schemas;
+}
+
+function mergeAddressEnrichmentPaths(doc: OpenAPIObject): PathsObject {
+  const paths: PathsObject = {};
+
+  if (!doc.paths) return paths;
+
+  for (const [path, pathItem] of Object.entries(doc.paths)) {
+    const prefixedPath =
+      path === "/"
+        ? "/address-enrichment"
+        : `/address-enrichment${path.startsWith("/") ? path : `/${path}`}`;
+    paths[prefixedPath] = { ...pathItem };
+  }
+
+  return paths;
 }
 
 function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
@@ -77,11 +103,15 @@ function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
 export async function mergeUpstreamDocs(
   ownSpec: OpenAPIObject,
   daoApis: Map<string, string>,
+  addressEnrichmentUrl?: string,
 ): Promise<OpenAPIObject> {
   const entries = Array.from(daoApis.entries());
-  const results = await Promise.all(
-    entries.map(([name, url]) => fetchDoc(name, url)),
-  );
+  const [results, addressEnrichmentDoc] = await Promise.all([
+    Promise.all(entries.map(([name, url]) => fetchDoc(name, url))),
+    addressEnrichmentUrl
+      ? fetchDoc("address-enrichment", addressEnrichmentUrl, "/docs/json")
+      : Promise.resolve(null),
+  ]);
 
   // Keep only successful fetches, with matching names
   const docs: OpenAPIObject[] = [];
@@ -94,15 +124,52 @@ export async function mergeUpstreamDocs(
     }
   }
 
+  const schemaDocs = addressEnrichmentDoc
+    ? [...docs, addressEnrichmentDoc]
+    : docs;
+
   return {
     ...ownSpec,
-    paths: { ...ownSpec.paths, ...mergePaths(docs, daoNames) },
+    paths: {
+      ...ownSpec.paths,
+      ...mergePaths(docs, daoNames),
+      ...(addressEnrichmentDoc
+        ? mergeAddressEnrichmentPaths(addressEnrichmentDoc)
+        : {}),
+    },
     components: {
       ...ownSpec.components,
       schemas: {
         ...ownSpec.components?.schemas,
-        ...mergeSchemas(docs),
+        ...mergeSchemas(schemaDocs),
       },
     },
+  };
+}
+
+/**
+ * Stores the merged OpenAPI spec locally.
+ */
+export function storeOpenApiSpec(
+  ownSpec: OpenAPIObject,
+  daoApis: Map<string, string>,
+  addressEnrichmentUrl?: string,
+  outputPath = join(process.cwd(), "openapi", "gateful.json"),
+): () => Promise<OpenAPIObject> {
+  return async () => {
+    const spec = await mergeUpstreamDocs(
+      ownSpec,
+      daoApis,
+      addressEnrichmentUrl,
+    );
+
+    try {
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, `${JSON.stringify(spec, null, 2)}\n`);
+    } catch (err) {
+      logger.warn({ err }, "failed to store OpenAPI spec");
+    }
+
+    return spec;
   };
 }

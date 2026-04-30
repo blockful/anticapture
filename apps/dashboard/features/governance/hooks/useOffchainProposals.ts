@@ -11,7 +11,6 @@ import { useCallback, useMemo, useState } from "react";
 
 import type { PaginationInfo } from "@/features/governance/hooks/useProposals";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export type OffchainProposalItem = NonNullable<
   NonNullable<
@@ -63,7 +62,6 @@ export const useOffchainProposals = ({
       context: {
         headers: {
           "anticapture-dao-id": daoId,
-          ...getAuthHeaders(),
         },
       },
     });

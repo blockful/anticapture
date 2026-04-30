@@ -1,299 +1,142 @@
-"use client";
-
-import {
-  OrderDirection,
-  QueryInput_AccountBalances_OrderBy,
-} from "@anticapture/graphql-client";
-import { useGetTokenHoldersQuery } from "@anticapture/graphql-client/hooks";
-import { NetworkStatus } from "@apollo/client";
-import { useMemo, useCallback, useState } from "react";
-
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import { useAccountBalancesInfinite } from "@anticapture/client/hooks";
+import type {
+  AccountBalancesPathParamsDaoEnumKey,
+  AccountBalancesQueryParams,
+} from "@anticapture/client";
+import type { Address } from "viem";
+import { formatUnits } from "viem";
 import type { TimeInterval } from "@/shared/types/enums";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
+import { useMemo } from "react";
 
-export interface TokenHolderVariation {
-  previousBalance: string;
-  absoluteChange: string;
-  percentageChange: string;
-}
-
-export interface TokenHolder {
-  accountId: string;
-  balance: string;
-  delegate: string;
+export type TokenHolder = {
+  address: Address;
+  delegate: Address;
+  balance: number;
   tokenId: string;
-  variation: TokenHolderVariation | null;
-}
+  variation: {
+    absoluteChange: number;
+    previousBalance: number;
+    currentBalance: number;
+    percentageChange: number;
+    accountId: Address;
+  };
+};
 
-interface PaginationInfo {
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  endCursor?: string | null;
-  startCursor?: string | null;
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
-  limit: number;
-  currentItemsCount: number;
-}
-
-interface UseTokenHoldersResult {
-  data: TokenHolder[] | null;
-  loading: boolean;
-  error: Error | null;
-  refetch: () => void;
-  pagination: PaginationInfo;
-  fetchNextPage: () => Promise<void>;
-  fetchPreviousPage: () => Promise<void>;
-  fetchingMore: boolean;
-}
-
-interface UseTokenHoldersParams {
-  daoId: DaoIdEnum;
-  address?: string;
-  orderBy?: QueryInput_AccountBalances_OrderBy;
-  orderDirection?: OrderDirection;
-  limit?: number;
-  days: TimeInterval;
-}
-
-export const useTokenHolders = ({
-  daoId,
-  orderBy = QueryInput_AccountBalances_OrderBy.Balance,
-  orderDirection = OrderDirection.Desc,
-  limit = 10,
-  address,
-  days,
-}: UseTokenHoldersParams): UseTokenHoldersResult => {
-  // Track current page - this is the source of truth for page number
-  const [currentPage, setCurrentPage] = useState<number>(1);
-
-  // Track pagination loading state to prevent rapid clicks
-  const [isPaginationLoading, setIsPaginationLoading] =
-    useState<boolean>(false);
-
-  const fromDate = useMemo(() => {
-    return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days];
-  }, [days]);
-
+export const useTokenHolders = (
+  daoId: DaoIdEnum,
+  params: AccountBalancesQueryParams & {
+    fromDay?: TimeInterval;
+    toDay?: TimeInterval;
+  },
+) => {
   const {
-    data: tokenHoldersData,
-    error: tokenHoldersError,
-    refetch,
-    fetchMore,
-    networkStatus,
-  } = useGetTokenHoldersQuery({
-    variables: {
-      limit,
-      skip: 0,
-      orderDirection,
-      orderBy,
-      fromDate,
-      addresses: address ? [address] : null,
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
-      },
-    },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network",
-  });
+    fromDay,
+    toDay,
+    fromDate: fromDateParam,
+    toDate: toDateParam,
+    limit,
+    skip,
+    orderDirection,
+    orderBy,
+    excludeDaoAddresses,
+    addresses,
+    delegates,
+    fromValue,
+    toValue,
+  } = params;
+  const { decimals } = daoConfigByDaoId[daoId];
+  const addressesKey = addresses?.join(",") ?? "";
+  const delegatesKey = delegates?.join(",") ?? "";
 
-  const processedData = useMemo(() => {
-    if (!tokenHoldersData?.accountBalances?.items) return null;
-
-    return tokenHoldersData.accountBalances.items
-      .filter((holder) => holder !== null)
-      .map((holder) => ({
-        accountId: holder.address,
-        balance: holder.balance,
-        delegate: holder.delegate,
-        tokenId: holder.tokenId,
-        variation: holder.variation
-          ? {
-              previousBalance: holder.variation.previousBalance,
-              absoluteChange: holder.variation.absoluteChange,
-              percentageChange: holder.variation.percentageChange,
-            }
-          : null,
-      }));
-  }, [tokenHoldersData]);
-
-  // Pagination info - combines GraphQL data with our page tracking
-  const pagination = useMemo<PaginationInfo>(() => {
-    const totalCount = tokenHoldersData?.accountBalances?.totalCount || 0;
-    const currentItemsCount =
-      tokenHoldersData?.accountBalances?.items?.length || 0;
-    const totalPages = Math.ceil(totalCount / limit);
+  const queryParams = useMemo<AccountBalancesQueryParams>(() => {
+    const now = Math.floor(Date.now() / 1000);
 
     return {
-      hasNextPage: currentPage < totalPages,
-      hasPreviousPage: currentPage > 1,
-      endCursor: null,
-      startCursor: null,
-      totalCount,
-      currentPage,
-      totalPages,
+      fromDate: fromDay ? now - DAYS_IN_SECONDS[fromDay] : fromDateParam,
+      toDate: toDay ? now - DAYS_IN_SECONDS[toDay] : toDateParam,
       limit,
-      currentItemsCount,
+      skip,
+      orderDirection,
+      orderBy,
+      excludeDaoAddresses,
+      addresses: addressesKey ? addressesKey.split(",") : undefined,
+      delegates: delegatesKey ? delegatesKey.split(",") : undefined,
+      fromValue,
+      toValue,
     };
   }, [
-    tokenHoldersData?.accountBalances?.totalCount,
-    tokenHoldersData?.accountBalances?.items?.length,
-    currentPage,
+    fromDay,
+    toDay,
+    fromDateParam,
+    toDateParam,
     limit,
-  ]);
-
-  // Fetch next page function
-  const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || isPaginationLoading) {
-      console.warn("No next page available or already loading");
-      return;
-    }
-
-    setIsPaginationLoading(true);
-
-    try {
-      // Calculate skip based on current loaded items count
-      const currentItemsCount =
-        tokenHoldersData?.accountBalances?.items?.length || 0;
-      const skip = currentItemsCount;
-
-      await fetchMore({
-        variables: {
-          limit,
-          skip,
-          orderDirection,
-          orderBy,
-          fromDate,
-          addresses: address ? [address] : null,
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.accountBalances) return previousResult;
-
-          // Append new items to existing ones (infinite scroll)
-          const prevItems = previousResult.accountBalances?.items ?? [];
-          const newItems = fetchMoreResult.accountBalances.items ?? [];
-
-          // Filter out duplicates based on accountId
-          const merged = [
-            ...prevItems,
-            ...newItems.filter(
-              (n) => n && !prevItems.some((p) => p?.address === n.address),
-            ),
-          ];
-
-          return {
-            ...fetchMoreResult,
-            accountBalances: {
-              ...fetchMoreResult.accountBalances,
-              items: merged,
-            },
-          };
-        },
-      });
-
-      // Update page number after successful fetch
-      setCurrentPage((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error fetching next page:", error);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    pagination.hasNextPage,
-    limit,
+    skip,
     orderDirection,
     orderBy,
-    fromDate,
-    address,
-    isPaginationLoading,
-    tokenHoldersData?.accountBalances?.items?.length,
+    excludeDaoAddresses,
+    addressesKey,
+    delegatesKey,
+    fromValue,
+    toValue,
   ]);
 
-  // Fetch previous page function
-  const fetchPreviousPage = useCallback(async () => {
-    if (!pagination.hasPreviousPage || isPaginationLoading) {
-      console.warn("No previous page available or already loading");
-      return;
-    }
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    hasPreviousPage,
+    refetch,
+    isFetchingNextPage,
+  } = useAccountBalancesInfinite(
+    // this works because this endpoint is supported for all DAOs
+    daoId.toLowerCase() as AccountBalancesPathParamsDaoEnumKey,
+    queryParams,
+  );
 
-    setIsPaginationLoading(true);
-
-    try {
-      // Calculate skip for the previous page
-      const skip = (currentPage - 2) * limit;
-
-      await fetchMore({
-        variables: {
-          limit,
-          skip,
-          orderDirection,
-          orderBy,
-          fromDate,
-          addresses: address ? [address] : null,
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.accountBalances) return previousResult;
-
-          // Replace the current data with the new page data
-          return {
-            ...fetchMoreResult,
-            accountBalances: {
-              ...fetchMoreResult.accountBalances,
-              items: fetchMoreResult.accountBalances.items,
-            },
-          };
-        },
-      });
-
-      // Update page number after successful fetch
-      setCurrentPage((prev) => prev - 1);
-    } catch (error) {
-      console.error("Error fetching previous page:", error);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    pagination.hasPreviousPage,
-    limit,
-    orderDirection,
-    orderBy,
-    fromDate,
-    address,
-    isPaginationLoading,
-    currentPage,
-  ]);
-
-  // Enhanced refetch that resets pagination
-  const handleRefetch = useCallback(() => {
-    setCurrentPage(1);
-    refetch();
-  }, [refetch]);
-
-  const isLoading = useMemo(() => {
-    return (
-      (networkStatus === NetworkStatus.loading && !processedData?.length) ||
-      networkStatus === NetworkStatus.setVariables ||
-      networkStatus === NetworkStatus.refetch
-    );
-  }, [networkStatus, processedData]);
+  const normalizedError =
+    !isLoading && error
+      ? error instanceof Error
+        ? error
+        : new Error("Unable to load token holders")
+      : null;
 
   return {
-    data: processedData,
-    loading: isLoading,
-    error: tokenHoldersError || null,
-    refetch: handleRefetch,
-    pagination,
+    data: data?.pages.flatMap((page) =>
+      page.items.map((item) => ({
+        ...item,
+        address: item.address as unknown as Address,
+        delegate: item.delegate as unknown as Address,
+        balance: Number(formatUnits(BigInt(item.balance), decimals)),
+        variation: {
+          accountId: item.variation.accountId as unknown as Address,
+          absoluteChange: Number(
+            formatUnits(BigInt(item.variation.absoluteChange), decimals),
+          ),
+          previousBalance: Number(
+            formatUnits(BigInt(item.variation.previousBalance), decimals),
+          ),
+          currentBalance: Number(
+            formatUnits(BigInt(item.variation.currentBalance), decimals),
+          ),
+          percentageChange:
+            item.variation.percentageChange === PERCENTAGE_NO_BASELINE
+              ? 9999
+              : Number(item.variation.percentageChange),
+        },
+      })),
+    ),
+    isLoading,
+    isFetchingNextPage,
+    error: normalizedError,
+    hasNextPage,
+    hasPreviousPage,
     fetchNextPage,
-    fetchPreviousPage,
-    fetchingMore:
-      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
+    refetch,
   };
 };

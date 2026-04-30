@@ -2,6 +2,7 @@ import "@/app/globals.css";
 import "tailwindcss";
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
@@ -18,6 +19,13 @@ import {
 } from "@/shared/seo/site";
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
+import { ALL_DAOS, type DaoIdEnum } from "@/shared/types/daos";
+import { resolveDaoIdFromHostname } from "@/shared/utils/whitelabel";
+
+const isForceDaoSet = () => {
+  const forced = process.env.FORCE_DAO?.trim().toUpperCase();
+  return !!forced && ALL_DAOS.includes(forced as DaoIdEnum);
+};
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
@@ -77,9 +85,28 @@ const rootSchemas = [
   },
 ];
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const headersList = await headers();
+  const host =
+    headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
+  const hostname = host.split(":")[0];
+  const pathname =
+    headersList.get("x-invoke-path") ?? headersList.get("next-url") ?? "";
+  const isWhitelabel =
+    !!resolveDaoIdFromHostname(hostname) ||
+    isForceDaoSet() ||
+    pathname.startsWith("/whitelabel/");
+
   return (
-    <html lang="en" className="dark">
+    <html
+      lang="en"
+      className={isWhitelabel ? undefined : "dark"}
+      suppressHydrationWarning
+    >
       <head>
         <meta
           name="viewport"
@@ -92,12 +119,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <JsonLd data={rootSchemas} />
         <div
           data-vaul-drawer-wrapper=""
-          className="border-light-dark mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
+          className="border-border-default mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"
         >
           <GlobalProviders>
             {children}
-            <CookieConsent />
-            <HelpPopover />
+            <CookieConsent isWhitelabel={isWhitelabel} />
+            <HelpPopover isWhitelabel={isWhitelabel} />
           </GlobalProviders>
           <Toaster position="bottom-left" reverseOrder={false} />
           <ConditionalPostHog />

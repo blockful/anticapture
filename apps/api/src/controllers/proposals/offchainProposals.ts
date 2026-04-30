@@ -22,7 +22,7 @@ export function offchainProposals(
       path: "/offchain/proposals",
       summary: "Get offchain proposals",
       description: "Returns a list of offchain (Snapshot) proposals",
-      tags: ["offchain"],
+      tags: ["offchain", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {
         query: OffchainProposalsRequestSchema,
@@ -63,7 +63,8 @@ export function offchainProposals(
       summary: "Search offchain proposals",
       description:
         "Returns offchain proposals whose title or identifier partially matches the query.",
-      tags: ["offchain"],
+      tags: ["offchain", "skip-pagination"],
+      middleware: [setCacheControl(60)],
       request: {
         query: OffchainProposalSearchRequestSchema,
       },

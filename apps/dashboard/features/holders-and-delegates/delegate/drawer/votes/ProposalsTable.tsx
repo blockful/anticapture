@@ -4,6 +4,7 @@ import type { GetProposalsActivityQuery } from "@anticapture/graphql-client/hook
 import type { ColumnDef } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 
@@ -28,7 +29,9 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
 import { useDaoData } from "@/shared/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { formatNumberUserReadable, cn } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { getDaoProposalPath } from "@/shared/utils/whitelabel";
 
 type ProposalActivityItem = NonNullable<
   NonNullable<
@@ -79,6 +82,7 @@ export const ProposalsTable = ({
   fetchingMore,
   fetchNextPage,
 }: ProposalsTableProps) => {
+  const pathname = usePathname();
   const { data: daoData } = useDaoData(daoIdEnum);
   const {
     daoOverview: { token },
@@ -146,9 +150,12 @@ export const ProposalsTable = ({
           );
         }
 
-        const daoIdLower = daoIdEnum.toLowerCase();
         const href = daoConfig[daoIdEnum]?.governancePage
-          ? `/${daoIdLower}/governance/proposal/${proposalId}`
+          ? getDaoProposalPath({
+              daoId: daoIdEnum,
+              pathname,
+              proposalId,
+            })
           : `${daoConfig[daoIdEnum]?.daoOverview?.govPlatform?.url ?? ""}${proposalId}`;
 
         return (

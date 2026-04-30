@@ -1,37 +1,75 @@
 "use client";
 
 import { OrderDirection } from "@anticapture/graphql-client";
-import { Building2, Landmark } from "lucide-react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, type RefObject } from "react";
+import {
+  useOffchainSearchProposalsQuery,
+  useSearchProposalsQuery,
+} from "@anticapture/graphql-client/hooks";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { Building2, Landmark, MessageSquare, Plus, Search } from "lucide-react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
+import { useAccount } from "wagmi";
 
+import {
+  DraftCard,
+  DraftEmptyState,
+  DeleteDraftModal,
+  useDrafts,
+} from "@/features/create-proposal";
+import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
 import { useProposals } from "@/features/governance/hooks/useProposals";
+import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
 import { TheSectionLayout } from "@/shared/components";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 
-const PROPOSAL_TABS = [
-  { label: "Onchain", value: "onchain" },
-  { label: "Offchain", value: "offchain" },
-];
+const ONCHAIN_TAB = { label: "Onchain", value: "onchain" };
+const OFFCHAIN_TAB = { label: "Offchain", value: "offchain" };
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
+  const pathname = usePathname();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+
+  const basePath = getWhitelabelBasePath({ daoId: daoIdEnum, pathname });
   const hasOffchain = !!daoConfig[daoIdEnum]?.offchainProposals;
+  const canCreateProposal = canCreateProposalForDao(daoIdEnum);
+  const { decimals } = daoConfig[daoIdEnum];
+  const router = useRouter();
+  const { address, isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
+
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsStringEnum<"onchain" | "offchain">([
+    parseAsStringEnum<"onchain" | "offchain" | "drafts">([
       "onchain",
       "offchain",
+      "drafts",
     ]).withDefault("onchain"),
   );
+
+  const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
+  const { drafts, deleteDraft } = useDrafts(daoId, address);
+  const [search] = useQueryState("search", parseAsString.withDefault(""));
+  const trimmedSearch = search.trim();
+  const isSearchActive = trimmedSearch.length > 0;
 
   const {
     proposals,
@@ -62,8 +100,51 @@ export const GovernanceSection = () => {
     daoId: hasOffchain ? daoIdEnum : undefined,
   });
 
+  const authContext = useMemo(
+    () => ({
+      headers: { "anticapture-dao-id": daoIdEnum },
+    }),
+    [daoIdEnum],
+  );
+
+  const { data: searchData, loading: searchLoading } = useSearchProposalsQuery({
+    variables: { query: trimmedSearch, limit: 50, skip: null },
+    skip: !isSearchActive,
+    context: authContext,
+  });
+
+  const { data: offchainSearchData, loading: offchainSearchLoading } =
+    useOffchainSearchProposalsQuery({
+      variables: { query: trimmedSearch, limit: 50, skip: null },
+      skip: !isSearchActive || !hasOffchain,
+      context: authContext,
+    });
+
+  const searchOnchainProposals = useMemo(() => {
+    if (!isSearchActive) return [];
+    return (searchData?.searchProposals?.items ?? [])
+      .filter((p) => p !== null)
+      .map((p) => transformToGovernanceProposal(p, decimals));
+  }, [isSearchActive, searchData, decimals]);
+
+  const searchOffchainProposals = useMemo(() => {
+    if (!isSearchActive) return [];
+    return (offchainSearchData?.offchainSearchProposals?.items ?? []).filter(
+      (p) => p !== null,
+    );
+  }, [isSearchActive, offchainSearchData]);
+
   const loadMoreOnchainRef = useRef<HTMLDivElement>(null);
   const loadMoreOffchainRef = useRef<HTMLDivElement>(null);
+
+  const visibleTabs = useMemo(() => {
+    const tabs = [ONCHAIN_TAB];
+    if (hasOffchain) tabs.push(OFFCHAIN_TAB);
+    if (isConnected && canCreateProposal) {
+      tabs.push({ label: "My Drafts", value: "drafts" });
+    }
+    return tabs;
+  }, [canCreateProposal, hasOffchain, isConnected]);
 
   const isOnchain = activeTab === "onchain" || !hasOffchain;
   const error = isOnchain ? onchainError : offchainError;
@@ -80,6 +161,13 @@ export const GovernanceSection = () => {
   }, [fetchNextPage, isPaginationLoading, pagination.hasNextPage]);
 
   useEffect(() => {
+    if (activeTab === "drafts" && (!isConnected || !canCreateProposal)) {
+      void setActiveTab("onchain");
+    }
+  }, [activeTab, canCreateProposal, isConnected, setActiveTab]);
+
+  useEffect(() => {
+    if (isSearchActive) return;
     const ref = isOnchain
       ? loadMoreOnchainRef.current
       : loadMoreOffchainRef.current;
@@ -97,7 +185,46 @@ export const GovernanceSection = () => {
     observer.observe(ref);
 
     return () => observer.disconnect();
-  }, [handleLoadMore, isOnchain]);
+  }, [handleLoadMore, isOnchain, isSearchActive]);
+
+  const handleNewProposal = () => {
+    if (!isConnected) {
+      openConnectModal?.();
+    } else {
+      router.push(`${basePath}/proposals/new`);
+    }
+  };
+
+  const forumLink = daoConfig[daoIdEnum]?.forumLink;
+
+  const headerActions = (
+    <div className="flex w-full items-center gap-2 lg:w-auto">
+      {forumLink && (
+        <Button
+          variant="outline"
+          size="md"
+          asChild
+          className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
+        >
+          <a href={forumLink} target="_blank" rel="noopener noreferrer">
+            <MessageSquare className="size-4" />
+            Forum
+          </a>
+        </Button>
+      )}
+      {canCreateProposal && (
+        <Button
+          variant="primary"
+          size="md"
+          onClick={handleNewProposal}
+          className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
+        >
+          <Plus className="size-4" />
+          New Proposal
+        </Button>
+      )}
+    </div>
+  );
 
   if (error) {
     return (
@@ -106,13 +233,14 @@ export const GovernanceSection = () => {
           title="Proposals"
           icon={<Building2 className="section-layout-icon" />}
           description="View and vote on executable proposals from this DAO."
+          headerAction={headerActions}
         >
-          {hasOffchain && (
+          {visibleTabs.length > 1 && (
             <TabGroup
-              tabs={PROPOSAL_TABS}
+              tabs={visibleTabs}
               activeTab={activeTab}
               onTabChange={(value) =>
-                setActiveTab(value as "onchain" | "offchain")
+                setActiveTab(value as "onchain" | "offchain" | "drafts")
               }
               className="mb-4"
               size="md"
@@ -137,13 +265,14 @@ export const GovernanceSection = () => {
         description="View and vote on executable proposals from this DAO."
         className="lg:bg-transparent"
         hideDivider
+        headerAction={headerActions}
       >
-        {hasOffchain && (
+        {visibleTabs.length > 1 && (
           <TabGroup
-            tabs={PROPOSAL_TABS}
+            tabs={visibleTabs}
             activeTab={activeTab}
             onTabChange={(value) =>
-              setActiveTab(value as "onchain" | "offchain")
+              setActiveTab(value as "onchain" | "offchain" | "drafts")
             }
             className="mb-4"
             size="md"
@@ -151,27 +280,77 @@ export const GovernanceSection = () => {
         )}
 
         <div className="flex-1">
-          {isOnchain ? (
+          {activeTab === "drafts" && isConnected ? (
+            <>
+              {drafts.length === 0 ? (
+                <DraftEmptyState />
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {drafts.map((draft) => (
+                    <DraftCard
+                      key={draft.id}
+                      draft={draft}
+                      onEdit={(id) =>
+                        router.push(`${basePath}/proposals/new?draftId=${id}`)
+                      }
+                      onDelete={(id) => setDraftToDelete(id)}
+                    />
+                  ))}
+                </div>
+              )}
+              <DeleteDraftModal
+                open={draftToDelete !== null}
+                onOpenChange={(open) => {
+                  if (!open) setDraftToDelete(null);
+                }}
+                onConfirm={() => {
+                  if (draftToDelete !== null) {
+                    deleteDraft(draftToDelete);
+                    setDraftToDelete(null);
+                  }
+                }}
+              />
+            </>
+          ) : isOnchain ? (
             <ProposalListSection
-              loading={onchainLoading}
-              hasItems={proposals.length > 0}
-              isPaginationLoading={isOnchainPaginationLoading}
+              loading={isSearchActive ? searchLoading : onchainLoading}
+              hasItems={
+                isSearchActive
+                  ? searchOnchainProposals.length > 0
+                  : proposals.length > 0
+              }
+              isPaginationLoading={
+                isSearchActive ? false : isOnchainPaginationLoading
+              }
               loadMoreRef={loadMoreOnchainRef}
+              isSearchActive={isSearchActive}
               emptyMessage="No proposals found"
             >
-              {proposals.map((proposal) => (
-                <ProposalItem key={proposal.id} proposal={proposal} />
-              ))}
+              {(isSearchActive ? searchOnchainProposals : proposals).map(
+                (proposal) => (
+                  <ProposalItem key={proposal.id} proposal={proposal} />
+                ),
+              )}
             </ProposalListSection>
           ) : (
             <ProposalListSection
-              loading={offchainLoading}
-              hasItems={offchainProposals.length > 0}
-              isPaginationLoading={isOffchainPaginationLoading}
+              loading={isSearchActive ? offchainSearchLoading : offchainLoading}
+              hasItems={
+                isSearchActive
+                  ? searchOffchainProposals.length > 0
+                  : offchainProposals.length > 0
+              }
+              isPaginationLoading={
+                isSearchActive ? false : isOffchainPaginationLoading
+              }
               loadMoreRef={loadMoreOffchainRef}
+              isSearchActive={isSearchActive}
               emptyMessage="No off-chain proposals found"
             >
-              {offchainProposals.map((proposal) => (
+              {(isSearchActive
+                ? searchOffchainProposals
+                : offchainProposals
+              ).map((proposal) => (
                 <ProposalItem key={proposal.id} offchainProposal={proposal} />
               ))}
             </ProposalListSection>
@@ -187,6 +366,7 @@ const ProposalListSection = ({
   hasItems,
   isPaginationLoading,
   loadMoreRef,
+  isSearchActive,
   emptyMessage,
   children,
 }: {
@@ -194,6 +374,7 @@ const ProposalListSection = ({
   hasItems: boolean;
   isPaginationLoading: boolean;
   loadMoreRef: RefObject<HTMLDivElement | null>;
+  isSearchActive: boolean;
   emptyMessage: string;
   children: React.ReactNode;
 }) => {
@@ -208,6 +389,15 @@ const ProposalListSection = ({
   }
 
   if (!hasItems) {
+    if (isSearchActive) {
+      return (
+        <BlankSlate
+          variant="default"
+          icon={Search}
+          description="No proposals match your search"
+        />
+      );
+    }
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <p className="text-muted-foreground mb-4">{emptyMessage}</p>

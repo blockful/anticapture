@@ -1,120 +1,141 @@
-"use client";
-
+import type { FeedEventsPathParams } from "@anticapture/client";
 import {
-  OrderDirection,
-  QueryInput_FeedEvents_OrderBy,
-  QueryInput_FeedEvents_Relevance,
-  type QueryInput_FeedEvents_Type,
-  useGetFeedEventsQuery,
-} from "@anticapture/graphql-client/hooks";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import type { ActivityFeedFilters, FeedEvent } from "@/features/feed/types";
-import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
-
-interface UseActivityFeedParams {
-  daoId: DaoIdEnum;
-  filters?: ActivityFeedFilters;
-  enabled?: boolean;
-}
-
-interface PaginationInfo {
-  totalCount: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  currentPage: number;
-  itemsPerPage: number;
-}
+  type FeedItem,
+  type FeedEventsQueryParams,
+  getNextPageParam,
+} from "@anticapture/client";
+import { useFeedEventsInfinite } from "@anticapture/client/hooks";
 
 export const useActivityFeed = ({
   daoId,
-  filters = {},
-  enabled = true,
-}: UseActivityFeedParams) => {
-  const limit = filters.limit ?? 10;
-  const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    limit,
-    filters.sortOrder,
-    filters.relevance,
-    filters.type,
-    filters.fromTimestamp,
-    filters.toTimestamp,
-  ]);
-
-  const requestedLimit = limit * currentPage;
-
+  filters,
+}: {
+  daoId: FeedEventsPathParams["dao"];
+  filters: FeedEventsQueryParams;
+}) => {
   const {
-    data: queryData,
-    loading,
+    data,
+    isLoading,
+    fetchNextPage,
     error,
+    hasNextPage,
+    hasPreviousPage,
     refetch,
-  } = useGetFeedEventsQuery({
-    variables: {
-      skip: 0,
-      limit: requestedLimit,
-      orderBy: QueryInput_FeedEvents_OrderBy.Timestamp,
-      orderDirection:
-        filters.sortOrder === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
-      relevance:
-        (filters.relevance as unknown as QueryInput_FeedEvents_Relevance) ??
-        QueryInput_FeedEvents_Relevance.Medium,
-      type: (filters.type as unknown as QueryInput_FeedEvents_Type) ?? null,
-      fromDate: filters.fromTimestamp ?? null,
-      toDate: filters.toTimestamp ?? null,
+    isFetching,
+  } = useFeedEventsInfinite(
+    daoId,
+    {
+      limit: filters.limit,
+      orderBy: filters.orderBy,
+      orderDirection: filters.orderDirection,
+      relevance: filters.relevance ?? undefined,
+      type: filters.type ?? undefined,
+      fromDate: filters.fromDate ?? undefined,
+      toDate: filters.toDate ?? undefined,
     },
-    skip: !enabled,
-    notifyOnNetworkStatusChange: true,
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
+    {
+      query: {
+        getNextPageParam,
       },
     },
-  });
-
-  const isLoadingMore = loading && currentPage > 1;
-
-  const data = useMemo(() => {
-    const items =
-      (queryData?.feedEvents?.items.filter(
-        (item): item is NonNullable<typeof item> => item !== null,
-      ) as unknown as FeedEvent[]) ?? [];
-
-    return items.slice(0, requestedLimit);
-  }, [queryData, requestedLimit]);
-
-  const totalCount = queryData?.feedEvents?.totalCount ?? 0;
-
-  const fetchNextPage = useCallback(async () => {
-    if (loading || data.length >= totalCount) return;
-
-    setCurrentPage((page) => page + 1);
-  }, [loading, data.length, totalCount]);
-
-  const pagination: PaginationInfo = useMemo(
-    () => ({
-      totalCount,
-      hasNextPage: data.length < totalCount,
-      hasPreviousPage: currentPage > 1,
-      currentPage,
-      itemsPerPage: limit,
-    }),
-    [totalCount, data.length, currentPage, limit],
   );
 
+  const events = data?.pages ? data.pages.flatMap((page) => page.items) : [];
+  const groupedEvents = groupEventsByDate(events, filters.orderDirection);
+
+  const hasEvents = groupedEvents.length > 0;
+  const loading = isLoading && !hasEvents;
   return {
-    data,
-    totalCount,
-    loading,
-    error,
-    refetch,
-    pagination,
+    data: groupedEvents,
+    loading: isLoading || isFetching,
+    error: !loading && Boolean(error),
+    hasNextPage,
+    hasPreviousPage,
     fetchNextPage,
-    isLoadingMore,
+    refetch,
   };
+};
+
+// Helper to get local date key (YYYY-MM-DD in local timezone)
+const getLocalDateKey = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// Helper to group events by date
+const groupEventsByDate = (
+  events: FeedItem[],
+  sortOrder: "asc" | "desc" = "desc",
+) => {
+  const groups: {
+    label: string;
+    date: string;
+    events: FeedItem[];
+    highRelevanceCount: number;
+  }[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const currentYear = today.getFullYear();
+
+  const todayKey = getLocalDateKey(today);
+  const yesterdayKey = getLocalDateKey(yesterday);
+
+  const eventsByDate = new Map<string, FeedItem[]>();
+
+  events.forEach((event) => {
+    const eventDate = new Date(Number(event.timestamp) * 1000);
+    const dateKey = getLocalDateKey(eventDate);
+
+    if (!eventsByDate.has(dateKey)) {
+      eventsByDate.set(dateKey, []);
+    }
+    eventsByDate.get(dateKey)!.push(event);
+  });
+
+  // Sort dates to match the selected sort order
+  const sortedDates = Array.from(eventsByDate.keys()).sort((a, b) =>
+    sortOrder === "asc" ? a.localeCompare(b) : b.localeCompare(a),
+  );
+
+  sortedDates.forEach((dateKey) => {
+    const dateEvents = eventsByDate.get(dateKey)!;
+    // Parse the local date key back to a date at midnight local time
+    const [year, month, day] = dateKey.split("-").map(Number);
+    const eventDate = new Date(year, month - 1, day);
+    const isCurrentYear = year === currentYear;
+
+    let label: string;
+    if (dateKey === todayKey) {
+      label = "TODAY";
+    } else if (dateKey === yesterdayKey) {
+      label = "YESTERDAY";
+    } else {
+      const formatOptions: Intl.DateTimeFormatOptions = {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+        ...(isCurrentYear ? {} : { year: "numeric" }),
+      };
+      label = eventDate
+        .toLocaleDateString("en-US", formatOptions)
+        .toUpperCase();
+    }
+
+    const highRelevanceCount = dateEvents.filter(
+      (e) => e.relevance === "HIGH",
+    ).length;
+
+    groups.push({
+      label,
+      date: dateKey,
+      events: dateEvents,
+      highRelevanceCount,
+    });
+  });
+
+  return groups;
 };

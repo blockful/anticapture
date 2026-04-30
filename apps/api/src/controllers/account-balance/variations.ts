@@ -24,7 +24,7 @@ export function accountBalanceVariations(
       summary: "Get variations in account balances for a given period",
       description:
         "Returns a mapping of the biggest variations to account balances associated by account address",
-      tags: ["account-balances"],
+      tags: ["account-balances", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {
         query: AccountBalanceVariationsRequestQuerySchema,

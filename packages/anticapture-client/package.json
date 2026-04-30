@@ -1,0 +1,64 @@
+{
+  "name": "@anticapture/client",
+  "version": "1.0.0",
+  "repository": {
+    "url": "git+https://github.com/blockful/anticapture.git"
+  },
+  "description": "TypeScript SDK for the Anticapture Gateful API.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "kubb generate --config kubb.config.ts --watch",
+    "codegen": "kubb --config kubb.config.ts",
+    "build": "tsup",
+    "clean": "rm -rf node_modules dist generated *.tsbuildinfo",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks.d.ts",
+      "import": "./dist/hooks.js",
+      "default": "./dist/hooks.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@kubb/cli": "^4.37.2",
+    "@kubb/core": "^4.37.2",
+    "@kubb/plugin-client": "^4.37.2",
+    "@kubb/plugin-oas": "^4.37.2",
+    "@kubb/plugin-react-query": "^4.37.2",
+    "@kubb/plugin-ts": "^4.37.2",
+    "@tanstack/react-query": "^5.90.21",
+    "@types/node": "^20.16.5",
+    "react": "19.2.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  }
+}

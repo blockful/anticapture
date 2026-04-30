@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import type { Address } from "viem";
 
 import type { CustomBarShapeProps } from "@/features/dao-overview/components/TopAccountsChartBarShape";
 import { CustomBarShape } from "@/features/dao-overview/components/TopAccountsChartBarShape";
@@ -19,13 +20,13 @@ import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export interface TopAccountChartData {
-  address: string;
+  address: Address;
   balance: number;
   variation: { absoluteChange: number; percentageChange: number };
   name?: string;
-  latestDelegate?: string;
+  latestDelegate?: Address;
   totalDelegators?: number;
-  delegate?: string;
+  delegate?: Address;
   delegationsCount?: number;
 }
 
@@ -39,7 +40,7 @@ export const TopAccountsChart = ({
   entityType: EntityType;
 }) => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-  const chartConfig = useTopAccountsChartData({ chartData, daoId });
+  const chartConfig = useTopAccountsChartData({ chartData });
 
   const handleOpenDrawer = useCallback(
     (item: { address: string }) => setSelectedAddress(item.address),
@@ -58,7 +59,9 @@ export const TopAccountsChart = ({
           />
           <ReferenceLine y={0} stroke="#3f3f46" />
           <Bar
-            dataKey="value"
+            dataKey={(item: TopAccountChartData) =>
+              item.variation?.absoluteChange ?? 0
+            }
             shape={(props: BarProps) => (
               <CustomBarShape {...(props as CustomBarShapeProps)} />
             )}

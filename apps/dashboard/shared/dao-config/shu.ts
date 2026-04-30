@@ -18,7 +18,7 @@ export const SHU: DaoConfiguration = {
   ogIcon: ShutterOgIcon,
   decimals: 18,
   color: {
-    svgColor: "#0080bc",
+    svgColor: "#1e1e1e",
     svgBgColor: "#fff",
   },
   forumLink: "https://shutternetwork.discourse.group/c/shutter-dao/14",

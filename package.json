@@ -8,7 +8,9 @@
     "gateway": "dotenv -- turbo run --filter=@anticapture/api-gateway",
     "gateful": "dotenv -- turbo run --filter=@anticapture/gateful",
     "api": "dotenv -- turbo run --filter=@anticapture/api",
-    "client": "turbo run --filter=@anticapture/graphql-client",
+    "codegen": "turbo run codegen",
+    "gql-client": "turbo run --filter=@anticapture/graphql-client",
+    "client": "turbo run --filter=@anticapture/client",
     "offchain-indexer": "turbo run --filter=@anticapture/offchain-indexer",
     "address": "turbo run --filter=@anticapture/address-enrichment",
     "dev": "bash scripts/dev.sh",
@@ -21,16 +23,11 @@
     "test": "turbo test",
     "test:unit": "turbo test:unit"
   },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --write"
-    ]
-  },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
+  "dependencies": {
+    "husky": "^9.1.6"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
@@ -48,13 +45,11 @@
     "eslint-plugin-react-hooks": "^7.0.0",
     "eslint-plugin-storybook": "^10.2.0",
     "globals": "^17.3.0",
-    "husky": "^9.1.6",
     "lint-staged": "^16.1.2",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "turbo": "^2.3.1",
-    "typescript": "^5.8.3",
-    "@railway/cli": "^4.31.0"
+    "typescript": "^5.8.3"
   },
   "pnpm": {
     "overrides": {

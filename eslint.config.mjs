@@ -17,6 +17,7 @@ export default [
   // Global ignores
   {
     ignores: [
+      "apps/gateful/openapi/gateful.json",
       "apps/api-gateway/**",
       "**/node_modules/**",
       "**/dist/**",
@@ -27,7 +28,7 @@ export default [
       "*.config.js",
       "*.config.ts",
       "*.config.mjs",
-      "packages/graphql-client/generated/**.ts",
+      "**/generated/**/*.ts",
       "apps/api-gateway/schema.graphql",
       "**/storybook-static/**",
       "**/.storybook/**",
@@ -178,24 +179,6 @@ export default [
       "no-restricted-imports": [
         "warn",
         {
-          // Exact barrel-file imports — block index re-exports
-          paths: [
-            {
-              name: "@/shared/components",
-              message:
-                "Import directly from the source file (e.g., @/shared/components/cards/MetricCard).",
-            },
-            {
-              name: "@/shared/hooks",
-              message:
-                "Import directly from the source file (e.g., @/shared/hooks/useMessageStack).",
-            },
-            {
-              name: "@/shared/utils",
-              message:
-                "Import directly from the source file (e.g., @/shared/utils/cn).",
-            },
-          ],
           patterns: [
             // Prefer @/* aliases over parent-directory traversal
             {

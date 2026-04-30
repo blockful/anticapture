@@ -1,6 +1,8 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
 
+import { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry";
+
 import { averageDelegation } from "./route";
 import { DelegationService } from "./service";
 import type { DelegationPercentageResponse } from "./service";
@@ -27,7 +29,10 @@ describe("average-delegation route", () => {
     } as Response);
 
     app = new OpenAPIHono();
-    averageDelegation(app, new DelegationService(daoApis));
+    averageDelegation(
+      app,
+      new DelegationService(daoApis, new CircuitBreakerRegistry()),
+    );
   });
 
   afterEach(() => {
