@@ -39,12 +39,24 @@ export async function generateMetadata({
     return {};
   }
 
+  const title = `${daoConfig.name} Governance`;
+  const description = `Browse proposals, delegates, and voting activity, review governance parameters, and monitor security metrics across the ${daoConfig.name} DAO.`;
+
   return {
     title: {
-      default: `${daoConfig.name} Governance`,
-      template: `%s | ${daoConfig.name} Governance`,
+      default: title,
+      template: `%s | ${title}`,
     },
-    description: `Governance hub for ${daoConfig.name}.`,
+    description,
+    openGraph: {
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
