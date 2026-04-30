@@ -22,15 +22,15 @@
       "outputs": ["generated/**"]
     },
     "@anticapture/graphql-client#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", "generated/**"]
+      "dependsOn": ["codegen", "^build"],
+      "outputs": ["dist/**"]
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
-      "outputs": ["dist/**", "generated/**"]
+      "outputs": ["dist/**"]
     },
     "@anticapture/client#typecheck": {
-      "dependsOn": ["build"],
+      "dependsOn": ["codegen"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "@anticapture/dashboard#build": {

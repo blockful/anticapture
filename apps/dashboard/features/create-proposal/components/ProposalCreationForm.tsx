@@ -12,7 +12,8 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useAccount } from "wagmi";
-import { formatUnits } from "viem";
+import { formatUnits, zeroAddress } from "viem";
+
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -80,8 +81,7 @@ export const ProposalCreationForm = ({
   const { daoId: daoIdParam } = useParams();
   const daoId = (daoIdParam as string).toLowerCase();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const governorAddress = daoConfig[daoIdEnum]?.daoOverview?.contracts
-    ?.governor as `0x${string}` | undefined;
+
   const pathname = usePathname();
   const basePath = getWhitelabelBasePath({ daoId: daoIdEnum, pathname });
   const router = useRouter();
@@ -89,8 +89,14 @@ export const ProposalCreationForm = ({
   const draftId = searchParams?.get("draftId") ?? undefined;
   const { address } = useAccount();
   const drafts = useDrafts(daoId, address);
-  const vp = useProposalVotingPower(daoId, address, governorAddress);
-  const threshold = useProposalThreshold(daoId);
+
+  const vp = useProposalVotingPower(daoId, address || zeroAddress);
+
+  const {
+    threshold,
+    isLoading: isLoadingThreshold,
+    thresholdFormatted,
+  } = useProposalThreshold(daoId);
   const publisher = usePublishProposal();
 
   const form = useForm<ProposalFormValues>({
@@ -99,6 +105,7 @@ export const ProposalCreationForm = ({
     mode: "onChange",
   });
   const hasHydratedDraftRef = useRef(false);
+
   useEffect(() => {
     if (!draftId) return;
     if (hasHydratedDraftRef.current) return;
@@ -173,22 +180,18 @@ export const ProposalCreationForm = ({
   };
 
   const handlePublishClick = () => {
-    if (vp.hasEnough === false) {
+    if (vp.votingPower < threshold) {
       handleSaveDraft({ navigateToDrafts: false });
       setInsufficientOpen(true);
       return;
     }
-    if (vp.hasEnough === null) {
+    if (vp.isLoading) {
       showCustomToast(
         vp.isLoading
           ? "Still checking your voting power — try again in a moment."
           : "Couldn't verify your voting power. Try again in a moment.",
         "error",
       );
-      return;
-    }
-    if (!governorAddress) {
-      showCustomToast("Governor not configured for this DAO", "error");
       return;
     }
     void publisher.publish(values, daoIdEnum);
@@ -274,10 +277,7 @@ export const ProposalCreationForm = ({
   const proposalsListHref = `${basePath}/proposals`;
 
   const showInsufficientInline =
-    Boolean(address) &&
-    vp.hasEnough === false &&
-    !threshold.isLoading &&
-    threshold.thresholdFormatted != null;
+    Boolean(address) && vp.votingPower < threshold && !isLoadingThreshold;
 
   return (
     <FormProvider {...form}>
@@ -333,13 +333,10 @@ export const ProposalCreationForm = ({
         className="animate-page-slide-in flex min-h-screen flex-col gap-6 px-5 pb-5 pt-5"
         noValidate
       >
-        {showInsufficientInline && threshold.thresholdFormatted && (
+        {showInsufficientInline && thresholdFormatted && (
           <InsufficientVPAlert
-            threshold={formatNumberUserReadable(
-              Number(threshold.thresholdFormatted),
-              0,
-            )}
-            tokenSymbol={daoConfig[daoIdEnum]?.name ?? ""}
+            threshold={formatNumberUserReadable(Number(thresholdFormatted), 0)}
+            tokenSymbol={daoIdEnum}
           />
         )}
 
@@ -480,7 +477,7 @@ export const ProposalCreationForm = ({
         open={insufficientOpen}
         onOpenChange={setInsufficientOpen}
         currentVp={currentVpText}
-        requiredVp={threshold.thresholdFormatted ?? "—"}
+        requiredVp={thresholdFormatted ?? "—"}
         onFindDelegate={() => router.push(`${basePath}/holders-and-delegates`)}
       />
     </FormProvider>
