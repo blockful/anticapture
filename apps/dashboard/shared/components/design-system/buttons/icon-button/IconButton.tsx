@@ -51,6 +51,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
           boxSizeStyles[size],
           className,
         )}
+        type="button"
         onClick={onClick}
         disabled={disabled || loading}
         {...props}

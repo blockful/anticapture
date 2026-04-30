@@ -33,6 +33,7 @@ export const Button = ({
   loading = false,
   loadingText,
   asChild = false,
+  type,
   ...props
 }: ButtonProps) => {
   // When loading is true, we can't use asChild because we need to render Spinner
@@ -53,6 +54,7 @@ export const Button = ({
       onClick={onClick}
       disabled={!asChild && isDisabled}
       aria-disabled={isDisabled}
+      type={asChild ? type : (type ?? "button")}
       {...props}
     >
       {loading ? <Spinner label={loadingText} /> : children}

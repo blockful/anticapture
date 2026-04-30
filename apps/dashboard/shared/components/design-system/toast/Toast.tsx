@@ -21,7 +21,7 @@ export const Toast = ({ message, type, visible, onClose }: ToastProps) => {
   return (
     <div
       className={cn(
-        "flex min-w-[400px] max-w-[500px] items-center justify-between gap-4 px-4 py-3 text-black shadow-lg",
+        "text-inverted flex min-w-[400px] max-w-[500px] items-center justify-between gap-4 px-4 py-3 shadow-lg",
         config.bgColor,
         visible ? "animate-toast-slide-in" : "animate-toast-slide-out",
       )}
