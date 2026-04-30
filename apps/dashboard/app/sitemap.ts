@@ -10,6 +10,10 @@ import {
   proposals,
 } from "@anticapture/client";
 
+export const dynamic = "force-dynamic";
+
+const PROPOSAL_PATHS_TIMEOUT_MS = 5_000;
+
 const STATIC_ROUTES = [
   "/",
   "/faq",
@@ -35,6 +39,24 @@ const DAO_SUB_ROUTES = [
 interface ProposalPath {
   id: string;
   kind: "onchain" | "offchain";
+}
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  fallback: T,
+  timeoutMs: number,
+): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timeout = setTimeout(() => resolve(fallback), timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  });
 }
 
 async function getAllProposalPaths(daoId: DaoIdEnum): Promise<ProposalPath[]> {
@@ -81,9 +103,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const proposalEntriesNested = await Promise.all(
     daoIds.map(async (daoId) => {
-      const paths = await getAllProposalPaths(
-        daoId.toUpperCase() as DaoIdEnum,
-      ).catch(() => []);
+      const paths = await withTimeout(
+        getAllProposalPaths(daoId.toUpperCase() as DaoIdEnum).catch(() => []),
+        [],
+        PROPOSAL_PATHS_TIMEOUT_MS,
+      );
 
       return paths.map((path: ProposalPath) => {
         const encodedId =

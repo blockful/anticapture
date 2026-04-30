@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
+import { buildProposalSeoText } from "@/shared/seo/proposalMetadata";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import {
   type OffchainProposalByIdPathParams,
@@ -32,12 +33,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const proposal = isOffchain
     ? await offchainProposalById(
         params.daoId as OffchainProposalByIdPathParams["dao"],
-        params.proposalId,
-      )
+        decodeURIComponent(params.proposalId),
+      ).catch(() => null)
     : await proposalById(
         params.daoId as ProposalPathParams["dao"],
         params.proposalId,
-      );
+      ).catch(() => null);
 
   const descriptionBody = proposal
     ? isOffchainProposal(proposal)
@@ -48,10 +49,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const canonicalPath = isOffchain
     ? `/${params.daoId}/proposals/${params.proposalId}?proposalType=offchain`
     : `/${params.daoId}/proposals/${params.proposalId}`;
-  const description =
-    descriptionBody ||
-    `Analyze the governance security implications of "${proposal.title}" in ${daoId} DAO, including vote distribution, delegate participation, and potential governance capture signals.`;
-  const fullTitle = `${proposal.title} | ${daoId} DAO Governance Security Analysis | Anticapture`;
+  const { description, fullTitle } = buildProposalSeoText({
+    daoId,
+    isOffchain,
+    title: proposal?.title,
+    descriptionBody,
+  });
 
   return {
     title: fullTitle,

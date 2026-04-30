@@ -47,11 +47,6 @@ const nextConfig = {
         destination: "/:daoId/proposals/:proposalId",
         permanent: true,
       },
-      {
-        source: "/:daoId/governance/offchain-proposal/:proposalId",
-        destination: "/:daoId/proposals/:proposalId?proposalType=offchain",
-        permanent: true,
-      },
     );
 
     return redirects;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
+import { buildProposalSeoText } from "@/shared/seo/proposalMetadata";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import {
   type OffchainProposalByIdPathParams,
@@ -21,12 +22,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   ).catch(() => null);
 
   const canonicalPath = `/${params.daoId}/governance/offchain-proposal/${params.proposalId}`;
-  const proposalTitle =
-    proposal?.title ?? `${daoId} DAO Offchain Governance Proposal`;
-  const description =
-    proposal?.body ||
-    `Analyze the governance security implications of "${proposalTitle}" in ${daoId} DAO, including delegate participation, offchain voting dynamics, and governance capture signals.`;
-  const fullTitle = `${proposalTitle} | ${daoId} DAO Governance Security Analysis | Anticapture`;
+  const { description, fullTitle } = buildProposalSeoText({
+    daoId,
+    isOffchain: true,
+    title: proposal?.title,
+    descriptionBody: proposal?.body,
+  });
 
   return {
     title: fullTitle,
