@@ -12,6 +12,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const PROPOSAL_PAGE_LIMIT = 100;
 const PROPOSAL_PATHS_TIMEOUT_MS = 5_000;
 
 const STATIC_ROUTES = [
@@ -39,6 +40,11 @@ const DAO_SUB_ROUTES = [
 export interface ProposalPath {
   id: string;
   kind: "onchain" | "offchain";
+}
+
+interface ProposalPage<TItem extends { id: string }> {
+  items: TItem[];
+  totalCount: number;
 }
 
 export function getProposalSitemapRoute(
@@ -71,24 +77,44 @@ async function withTimeout<T>(
   });
 }
 
-async function getAllProposalPaths(daoId: DaoIdEnum): Promise<ProposalPath[]> {
+async function getAllProposalPages<TItem extends { id: string }>(
+  getPage: (params: {
+    skip: number;
+    limit: number;
+  }) => Promise<ProposalPage<TItem>>,
+): Promise<TItem[]> {
+  const items: TItem[] = [];
+
+  for (let skip = 0; ; skip += PROPOSAL_PAGE_LIMIT) {
+    const page = await getPage({ skip, limit: PROPOSAL_PAGE_LIMIT });
+    items.push(...page.items);
+
+    if (
+      items.length >= page.totalCount ||
+      page.items.length < PROPOSAL_PAGE_LIMIT
+    ) {
+      return items;
+    }
+  }
+}
+
+export async function getAllProposalPaths(
+  daoId: DaoIdEnum,
+): Promise<ProposalPath[]> {
   const onchainDao = daoId.toLowerCase() as ProposalsPathParams["dao"];
   const offchainDao = daoId.toLowerCase() as OffchainProposalsPathParams["dao"];
 
-  const [onchainPaths, offchainPaths] = await Promise.all([
-    proposals(onchainDao, { skip: 0, limit: 10 }),
-    offchainProposals(offchainDao, {
-      skip: 0,
-      limit: 20,
-    }),
+  const [onchainItems, offchainItems] = await Promise.all([
+    getAllProposalPages((params) => proposals(onchainDao, params)),
+    getAllProposalPages((params) => offchainProposals(offchainDao, params)),
   ]);
 
   return [
-    ...onchainPaths.items.map((item) => ({
+    ...onchainItems.map((item) => ({
       id: item.id,
       kind: "onchain" as const,
     })),
-    ...offchainPaths.items.map((item) => ({
+    ...offchainItems.map((item) => ({
       id: item.id,
       kind: "offchain" as const,
     })),
