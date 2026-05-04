@@ -75,9 +75,6 @@ export default defineConfig(({ watch }) => ({
         path: "./mcp",
         barrelType: "named",
       },
-      client: {
-        baseURL: "http://localhost:4001",
-      },
       group: {
         type: "tag",
         name: ({ group }) => `${group}Handlers`,
