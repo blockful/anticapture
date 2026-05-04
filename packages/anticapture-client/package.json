@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "kubb generate --config kubb.config.ts --watch",
     "codegen": "kubb --config kubb.config.ts",
+    "mcp": "tsx mcp-server.ts",
+    "mcp-http": "tsx mcp-server-http.ts",
     "build": "tsup",
     "clean": "rm -rf node_modules dist generated *.tsbuildinfo",
     "lint": "eslint .",

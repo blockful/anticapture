@@ -1,9 +1,11 @@
 {
   "mcpServers": {
     "anticapture": {
-      "type": "stdio",
-      "command": "sh",
-      "args": ["packages/anticapture-client/mcp-server.sh"]
+      "type": "http",
+      "url": "http://127.0.0.1:3100",
+      "headers": {
+        "Authorization": "Bearer secret"
+      }
     }
   }
 }

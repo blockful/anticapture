@@ -149,7 +149,7 @@ importers:
         version: 1.19.11(hono@4.12.7)
       "@hono/zod-openapi":
         specifier: ^1.2.2
-        version: 1.2.2(hono@4.12.7)(zod@4.3.6)
+        version: 1.2.2(hono@4.12.7)(zod@4.4.1)
       "@opentelemetry/api":
         specifier: ^1.9.0
         version: 1.9.0
@@ -176,13 +176,13 @@ importers:
         version: 10.5.0
       viem:
         specifier: ^2.41.2
-        version: 2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
+        version: 2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.1)
       zod:
         specifier: ^4.3.6
-        version: 4.3.6
+        version: 4.4.1
       zod-validation-error:
         specifier: ^5.0.0
-        version: 5.0.0(zod@4.3.6)
+        version: 5.0.0(zod@4.4.1)
     devDependencies:
       "@electric-sql/pglite":
         specifier: ^0.3.15
@@ -557,7 +557,7 @@ importers:
         version: 0.5.3(hono@4.12.7)
       "@hono/zod-openapi":
         specifier: ^1.2.2
-        version: 1.2.2(hono@4.12.7)(zod@4.3.6)
+        version: 1.2.2(hono@4.12.7)(zod@4.4.1)
       "@opentelemetry/api":
         specifier: ^1.9.0
         version: 1.9.0
@@ -575,7 +575,7 @@ importers:
         version: 4.7.1
       zod:
         specifier: ^4.3.6
-        version: 4.3.6
+        version: 4.4.1
     devDependencies:
       "@types/node":
         specifier: ^25.4.0
@@ -16135,12 +16135,6 @@ packages:
         integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==,
       }
 
-  json-schema-typed@8.0.1:
-    resolution:
-      {
-        integrity: sha512-XQmWYj2Sm4kn4WeTYvmpKEbyPsL7nBsb647c7pMe6l02/yx2+Jfc4dT6UZkEXnIUb5LhD55r2HPsJ1milQ4rDg==,
-      }
-
   json-schema-typed@8.0.2:
     resolution:
       {
@@ -22829,12 +22823,6 @@ packages:
         integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==,
       }
 
-  zod@4.3.6:
-    resolution:
-      {
-        integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==,
-      }
-
   zod@4.4.1:
     resolution:
       {
@@ -23011,10 +22999,10 @@ snapshots:
       openapi3-ts: 4.5.0
       zod: 3.25.76
 
-  "@asteasolutions/zod-to-openapi@8.4.3(zod@4.3.6)":
+  "@asteasolutions/zod-to-openapi@8.4.3(zod@4.4.1)":
     dependencies:
       openapi3-ts: 4.5.0
-      zod: 4.3.6
+      zod: 4.4.1
 
   "@babel/code-frame@7.27.1":
     dependencies:
@@ -26885,23 +26873,23 @@ snapshots:
       openapi3-ts: 4.5.0
       zod: 3.25.76
 
-  "@hono/zod-openapi@1.2.2(hono@4.12.7)(zod@4.3.6)":
+  "@hono/zod-openapi@1.2.2(hono@4.12.7)(zod@4.4.1)":
     dependencies:
-      "@asteasolutions/zod-to-openapi": 8.4.3(zod@4.3.6)
-      "@hono/zod-validator": 0.7.6(hono@4.12.7)(zod@4.3.6)
+      "@asteasolutions/zod-to-openapi": 8.4.3(zod@4.4.1)
+      "@hono/zod-validator": 0.7.6(hono@4.12.7)(zod@4.4.1)
       hono: 4.12.7
       openapi3-ts: 4.5.0
-      zod: 4.3.6
+      zod: 4.4.1
 
   "@hono/zod-validator@0.7.2(hono@4.12.7)(zod@3.25.76)":
     dependencies:
       hono: 4.12.7
       zod: 3.25.76
 
-  "@hono/zod-validator@0.7.6(hono@4.12.7)(zod@4.3.6)":
+  "@hono/zod-validator@0.7.6(hono@4.12.7)(zod@4.4.1)":
     dependencies:
       hono: 4.12.7
-      zod: 4.3.6
+      zod: 4.4.1
 
   "@hookform/resolvers@5.2.2(react-hook-form@7.71.2(react@19.2.3))":
     dependencies:
@@ -31824,10 +31812,10 @@ snapshots:
       typescript: 5.9.3
       zod: 3.25.76
 
-  abitype@1.2.3(typescript@5.9.3)(zod@4.3.6):
+  abitype@1.2.3(typescript@5.9.3)(zod@4.4.1):
     optionalDependencies:
       typescript: 5.9.3
-      zod: 4.3.6
+      zod: 4.4.1
 
   abort-controller@3.0.0:
     dependencies:
@@ -32740,7 +32728,7 @@ snapshots:
       debounce-fn: 5.1.2
       dot-prop: 8.0.2
       env-paths: 3.0.0
-      json-schema-typed: 8.0.1
+      json-schema-typed: 8.0.2
       semver: 7.7.4
       uint8array-extras: 0.3.0
 
@@ -35751,8 +35739,6 @@ snapshots:
 
   json-schema-traverse@1.0.0: {}
 
-  json-schema-typed@8.0.1: {}
-
   json-schema-typed@8.0.2: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
@@ -37088,7 +37074,7 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  ox@0.14.0(typescript@5.9.3)(zod@4.3.6):
+  ox@0.14.0(typescript@5.9.3)(zod@4.4.1):
     dependencies:
       "@adraffy/ens-normalize": 1.11.1
       "@noble/ciphers": 1.3.0
@@ -37096,7 +37082,7 @@ snapshots:
       "@noble/hashes": 1.8.0
       "@scure/bip32": 1.7.0
       "@scure/bip39": 1.6.0
-      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.4.1)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.9.3
@@ -37131,7 +37117,7 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  ox@0.9.17(typescript@5.9.3)(zod@4.3.6):
+  ox@0.9.17(typescript@5.9.3)(zod@4.4.1):
     dependencies:
       "@adraffy/ens-normalize": 1.11.1
       "@noble/ciphers": 1.3.0
@@ -37139,7 +37125,7 @@ snapshots:
       "@noble/hashes": 1.8.0
       "@scure/bip32": 1.7.0
       "@scure/bip39": 1.6.0
-      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.4.1)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.9.3
@@ -37578,9 +37564,9 @@ snapshots:
       hono: 4.12.7
       idb-keyval: 6.2.2
       mipd: 0.0.7(typescript@5.9.3)
-      ox: 0.9.17(typescript@5.9.3)(zod@4.3.6)
+      ox: 0.9.17(typescript@5.9.3)(zod@4.4.1)
       viem: 2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
-      zod: 4.3.6
+      zod: 4.4.1
       zustand: 5.0.11(@types/react@19.2.8)(react@19.2.3)(use-sync-external-store@1.4.0(react@19.2.3))
     optionalDependencies:
       "@tanstack/react-query": 5.90.21(react@19.2.3)
@@ -38707,7 +38693,7 @@ snapshots:
     dependencies:
       "@open-draft/deferred-promise": 2.2.0
       dotenv: 16.6.1
-      mime-db: 1.52.0
+      mime-db: 1.54.0
       outvariant: 1.4.3
 
   statuses@2.0.2: {}
@@ -39763,15 +39749,15 @@ snapshots:
       - utf-8-validate
       - zod
 
-  viem@2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6):
+  viem@2.47.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.1):
     dependencies:
       "@noble/curves": 1.9.1
       "@noble/hashes": 1.8.0
       "@scure/bip32": 1.7.0
       "@scure/bip39": 1.6.0
-      abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.4.1)
       isows: 1.0.7(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      ox: 0.14.0(typescript@5.9.3)(zod@4.3.6)
+      ox: 0.14.0(typescript@5.9.3)(zod@4.4.1)
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 5.9.3
@@ -40299,17 +40285,15 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  zod-validation-error@5.0.0(zod@4.3.6):
+  zod-validation-error@5.0.0(zod@4.4.1):
     dependencies:
-      zod: 4.3.6
+      zod: 4.4.1
 
   zod@3.22.4: {}
 
   zod@3.25.58: {}
 
   zod@3.25.76: {}
-
-  zod@4.3.6: {}
 
   zod@4.4.1: {}
 
