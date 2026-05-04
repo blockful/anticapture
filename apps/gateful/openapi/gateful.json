@@ -224,18 +224,13 @@
         "type": "object",
         "properties": {
           "error": {
-            "type": "string",
-            "description": "Human-readable error message",
-            "example": "Proposal not found"
+            "type": "string"
           },
-          "message": {
-            "type": "string",
-            "description": "Optional implementation detail or validation context for the error.",
-            "example": "Validation error: Expected number, received string"
+          "code": {
+            "type": "string"
           }
         },
-        "required": ["error"],
-        "description": "Generic error payload returned by the API."
+        "required": ["error", "code"]
       },
       "FeedResponse": {
         "type": "object",
@@ -1971,6 +1966,98 @@
           }
         },
         "required": ["voter", "votingPower"]
+      },
+      "RelayVoteResponse": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string"
+          },
+          "voter": {
+            "type": "string"
+          }
+        },
+        "required": ["transactionHash", "voter"]
+      },
+      "RelayVoteRequest": {
+        "type": "object",
+        "properties": {
+          "proposalId": {
+            "type": "string",
+            "description": "Proposal ID as decimal string",
+            "example": "42"
+          },
+          "support": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2,
+            "description": "0=against, 1=for, 2=abstain"
+          },
+          "v": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "r": {
+            "type": "string"
+          },
+          "s": {
+            "type": "string"
+          }
+        },
+        "required": ["proposalId", "support", "v", "r", "s"]
+      },
+      "RelayDelegateResponse": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string"
+          },
+          "delegator": {
+            "type": "string"
+          }
+        },
+        "required": ["transactionHash", "delegator"]
+      },
+      "RelayDelegateRequest": {
+        "type": "object",
+        "properties": {
+          "delegatee": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Delegation nonce as decimal string",
+            "example": "0"
+          },
+          "expiry": {
+            "type": "string",
+            "description": "Signature expiry timestamp as decimal string",
+            "example": "1718000000"
+          },
+          "v": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "r": {
+            "type": "string"
+          },
+          "s": {
+            "type": "string"
+          }
+        },
+        "required": ["delegatee", "nonce", "expiry", "v", "r", "s"]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok"]
+          }
+        },
+        "required": ["status"]
       }
     },
     "parameters": {},
@@ -7234,6 +7321,148 @@
           }
         }
       }
+    },
+    "/{dao}/relay/vote": {
+      "post": {
+        "operationId": "relayVote",
+        "summary": "Relay a gasless vote",
+        "description": "Submit an EIP-712 signed vote on behalf of a user. The relayer pays gas.",
+        "tags": ["relay"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelayVoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vote transaction submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayVoteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or eligibility error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Relayer unavailable (low balance)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/delegate": {
+      "post": {
+        "operationId": "relayDelegate",
+        "summary": "Relay a gasless delegation",
+        "description": "Submit an EIP-712 signed delegation on behalf of a user. The relayer pays gas.",
+        "tags": ["relay"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelayDelegateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delegation transaction submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayDelegateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or eligibility error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Relayer unavailable (low balance)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
     }
   },
   "webhooks": {},
