@@ -224,18 +224,13 @@
         "type": "object",
         "properties": {
           "error": {
-            "type": "string",
-            "description": "Human-readable error message",
-            "example": "Proposal not found"
+            "type": "string"
           },
-          "message": {
-            "type": "string",
-            "description": "Optional implementation detail or validation context for the error.",
-            "example": "Validation error: Expected number, received string"
+          "code": {
+            "type": "string"
           }
         },
-        "required": ["error"],
-        "description": "Generic error payload returned by the API."
+        "required": ["error", "code"]
       },
       "FeedResponse": {
         "type": "object",
@@ -1972,7 +1967,7 @@
         },
         "required": ["voter", "votingPower"]
       },
-      "RelayerVoteResponse": {
+      "RelayVoteResponse": {
         "type": "object",
         "properties": {
           "transactionHash": {
@@ -1984,19 +1979,7 @@
         },
         "required": ["transactionHash", "voter"]
       },
-      "RelayerErrorResponse": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          }
-        },
-        "required": ["error", "code"]
-      },
-      "RelayerVoteRequest": {
+      "RelayVoteRequest": {
         "type": "object",
         "properties": {
           "proposalId": {
@@ -2024,7 +2007,7 @@
         },
         "required": ["proposalId", "support", "v", "r", "s"]
       },
-      "RelayerDelegateResponse": {
+      "RelayDelegateResponse": {
         "type": "object",
         "properties": {
           "transactionHash": {
@@ -2036,7 +2019,7 @@
         },
         "required": ["transactionHash", "delegator"]
       },
-      "RelayerDelegateRequest": {
+      "RelayDelegateRequest": {
         "type": "object",
         "properties": {
           "delegatee": {
@@ -2066,7 +2049,7 @@
         },
         "required": ["delegatee", "nonce", "expiry", "v", "r", "s"]
       },
-      "RelayerHealthResponse": {
+      "HealthResponse": {
         "type": "object",
         "properties": {
           "status": {
@@ -2370,7 +2353,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2470,7 +2465,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2512,7 +2519,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2595,7 +2614,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2646,7 +2677,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2697,7 +2739,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2748,7 +2801,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2804,7 +2868,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2861,7 +2936,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -2988,7 +3075,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3039,7 +3137,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3080,7 +3189,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3121,7 +3241,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3162,7 +3293,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3203,7 +3345,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3244,7 +3397,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3285,7 +3449,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3326,7 +3501,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3367,7 +3553,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3408,7 +3605,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3449,7 +3657,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3490,7 +3709,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3602,7 +3832,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3711,7 +3952,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3779,7 +4031,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3833,7 +4096,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -3961,7 +4235,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4108,7 +4394,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4157,7 +4454,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4254,7 +4562,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4382,7 +4701,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4512,7 +4843,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4612,7 +4955,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4676,7 +5030,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4813,7 +5178,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4877,7 +5254,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -4977,7 +5366,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5041,7 +5441,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5195,7 +5606,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5261,7 +5684,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5399,7 +5834,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5545,7 +5992,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5677,7 +6136,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5799,7 +6269,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5885,7 +6366,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -5917,7 +6409,19 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -6024,7 +6528,18 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }
@@ -6120,7 +6635,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6188,7 +6703,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6242,7 +6757,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6355,7 +6870,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6478,7 +6993,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
@@ -6572,11 +7087,240 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["ens"]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }
       ]
+    },
+    "/address-enrichment/address/{address}": {
+      "get": {
+        "operationId": "getAddress",
+        "summary": "Get enriched data for an address",
+        "description": "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
+        "tags": ["address"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Ethereum address (checksummed or lowercase)",
+              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved address enrichment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "EIP-55 checksummed Ethereum address",
+                      "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                    },
+                    "isContract": {
+                      "type": "boolean",
+                      "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
+                      "example": false
+                    },
+                    "arkham": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "entity": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
+                          "example": "Vitalik Buterin"
+                        },
+                        "entityType": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
+                          "example": "individual"
+                        },
+                        "label": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Fine-grained label for the specific address within the entity",
+                          "example": "Vitalik Buterin: Personal Wallet"
+                        },
+                        "twitter": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Twitter/X handle associated with the entity, without '@'",
+                          "example": "VitalikButerin"
+                        }
+                      },
+                      "required": ["entity", "entityType", "label", "twitter"],
+                      "description": "Arkham Intelligence label data. null when no data is available for the address."
+                    },
+                    "ens": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Primary ENS name reverse-resolved for this address",
+                          "example": "vitalik.eth"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL of the ENS avatar image",
+                          "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
+                        },
+                        "banner": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL of the ENS profile banner image",
+                          "example": null
+                        }
+                      },
+                      "required": ["name", "avatar", "banner"],
+                      "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
+                    }
+                  },
+                  "required": ["address", "isContract", "arkham", "ens"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/address-enrichment/addresses": {
+      "get": {
+        "operationId": "getAddresses",
+        "summary": "Get enriched data for multiple addresses",
+        "description": "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
+        "tags": ["address"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "maxItems": 100,
+              "description": "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
+              "example": [
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"
+              ]
+            },
+            "required": true,
+            "name": "addresses",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved batch enrichment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "address": {
+                            "type": "string",
+                            "description": "EIP-55 checksummed Ethereum address",
+                            "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                          },
+                          "isContract": {
+                            "type": "boolean",
+                            "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
+                            "example": false
+                          },
+                          "arkham": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "entity": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
+                                "example": "Vitalik Buterin"
+                              },
+                              "entityType": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
+                                "example": "individual"
+                              },
+                              "label": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Fine-grained label for the specific address within the entity",
+                                "example": "Vitalik Buterin: Personal Wallet"
+                              },
+                              "twitter": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Twitter/X handle associated with the entity, without '@'",
+                                "example": "VitalikButerin"
+                              }
+                            },
+                            "required": [
+                              "entity",
+                              "entityType",
+                              "label",
+                              "twitter"
+                            ],
+                            "description": "Arkham Intelligence label data. null when no data is available for the address."
+                          },
+                          "ens": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Primary ENS name reverse-resolved for this address",
+                                "example": "vitalik.eth"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "URL of the ENS avatar image",
+                                "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
+                              },
+                              "banner": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "URL of the ENS profile banner image",
+                                "example": null
+                              }
+                            },
+                            "required": ["name", "avatar", "banner"],
+                            "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
+                          }
+                        },
+                        "required": ["address", "isContract", "arkham", "ens"]
+                      },
+                      "description": "Enrichment results for each successfully resolved address. Addresses that failed to resolve are omitted."
+                    }
+                  },
+                  "required": ["results"]
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "/{dao}/relay/vote": {
       "post": {
@@ -6588,7 +7332,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RelayerVoteRequest"
+                "$ref": "#/components/schemas/RelayVoteRequest"
               }
             }
           }
@@ -6599,7 +7343,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayerVoteResponse"
+                  "$ref": "#/components/schemas/RelayVoteResponse"
                 }
               }
             }
@@ -6609,7 +7353,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -6619,7 +7363,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -6629,7 +7373,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -6659,7 +7403,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RelayerDelegateRequest"
+                "$ref": "#/components/schemas/RelayDelegateRequest"
               }
             }
           }
@@ -6670,7 +7414,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayerDelegateResponse"
+                  "$ref": "#/components/schemas/RelayDelegateResponse"
                 }
               }
             }
@@ -6680,7 +7424,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -6690,7 +7434,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -6700,7 +7444,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }

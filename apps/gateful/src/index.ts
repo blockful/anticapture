@@ -121,6 +121,10 @@ const getOpenApiSpec = storeOpenApiSpec(
   config.daoRelayers,
 );
 
+getOpenApiSpec().catch((err) => {
+  logger.warn({ err }, "failed to generate OpenAPI spec on startup");
+});
+
 app.get("/docs/json", async (c) => {
   return c.json(await getOpenApiSpec());
 });
