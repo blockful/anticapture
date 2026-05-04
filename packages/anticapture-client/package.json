@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "kubb generate --config kubb.config.ts --watch",
     "codegen": "kubb --config kubb.config.ts",
+    "mcp": "tsx mcp-server.ts",
+    "mcp-http": "tsx mcp-server-http.ts",
     "build": "tsup",
     "clean": "rm -rf node_modules dist generated *.tsbuildinfo",
     "lint": "eslint .",
@@ -40,9 +42,12 @@
     "@kubb/cli": "^4.37.2",
     "@kubb/core": "^4.37.2",
     "@kubb/plugin-client": "^4.37.2",
+    "@kubb/plugin-mcp": "^4.37.5",
     "@kubb/plugin-oas": "^4.37.2",
     "@kubb/plugin-react-query": "^4.37.2",
     "@kubb/plugin-ts": "^4.37.2",
+    "@kubb/plugin-zod": "^4.37.5",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@tanstack/react-query": "^5.90.21",
     "@types/node": "^20.16.5",
     "react": "19.2.3",
@@ -60,5 +65,8 @@
     "react": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "zod": "^4.4.1"
   }
 }

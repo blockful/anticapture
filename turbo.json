@@ -118,6 +118,16 @@
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]
+    },
+    "mcp": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "mcp-http": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
     }
   }
 }
