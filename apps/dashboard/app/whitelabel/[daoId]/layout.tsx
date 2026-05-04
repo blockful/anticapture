@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import type { CSSProperties, ReactNode } from "react";
 
@@ -6,9 +7,13 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoApolloProvider } from "@/shared/providers/DaoApolloProvider";
 import { DaoIdProvider } from "@/shared/providers/DaoIdProvider";
 import { WhitelabelThemeInjector } from "@/shared/components/WhitelabelThemeInjector";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { toDaoIdEnum } from "@/shared/types/daos";
 import { getThemeCSSVariables } from "@/shared/utils/theme";
-import { isWhitelabelDao } from "@/shared/utils/whitelabel";
+import {
+  isWhitelabelDao,
+  resolveDaoIdFromHostname,
+} from "@/shared/utils/whitelabel";
 import { WhitelabelShell } from "@/widgets/WhitelabelShell";
 
 type WhitelabelLayoutProps = {
@@ -16,20 +21,25 @@ type WhitelabelLayoutProps = {
   params: Promise<{ daoId: string }>;
 };
 
-const isWhitelabelInternalRouteAllowed = () =>
-  process.env.VERCEL_ENV !== "production";
+const isWhitelabelRouteBlocked = async (daoIdEnum: DaoIdEnum) => {
+  if (process.env.VERCEL_ENV !== "production") return false;
+
+  const host = (await headers()).get("host") ?? "";
+  const hostname = host.split(":")[0];
+  return resolveDaoIdFromHostname(hostname) !== daoIdEnum;
+};
 
 export async function generateMetadata({
   params,
 }: WhitelabelLayoutProps): Promise<Metadata> {
-  if (!isWhitelabelInternalRouteAllowed()) {
-    return {};
-  }
-
   const { daoId } = await params;
   const daoIdEnum = toDaoIdEnum(daoId);
 
   if (!daoIdEnum) {
+    return {};
+  }
+
+  if (await isWhitelabelRouteBlocked(daoIdEnum)) {
     return {};
   }
 
@@ -64,14 +74,14 @@ export default async function WhitelabelLayout({
   children,
   params,
 }: WhitelabelLayoutProps) {
-  if (!isWhitelabelInternalRouteAllowed()) {
-    notFound();
-  }
-
   const { daoId } = await params;
   const daoIdEnum = toDaoIdEnum(daoId);
 
   if (!daoIdEnum) {
+    notFound();
+  }
+
+  if (await isWhitelabelRouteBlocked(daoIdEnum)) {
     notFound();
   }
 
