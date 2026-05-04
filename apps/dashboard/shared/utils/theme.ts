@@ -18,8 +18,7 @@ const LIGHT_THEME_VARIABLES = {
   "--base-secondary-foreground": "#18181B",
   "--base-accent": "#F4F4F5",
   "--base-accent-foreground": "#18181B",
-  "--base-destructive": "#ef4444",
-  "--base-destructive-foreground": "#f4f4f5",
+  "--base-destructive": "#B91C1C",
   "--base-ring": "#71717a",
   "--base-sidebar": "#f4f4f5",
   "--base-sidebar-foreground": "#09090b",
@@ -36,7 +35,7 @@ const LIGHT_THEME_VARIABLES = {
   "--base-warning-opacity": "#ca8a041f",
   "--base-error": "#dc2626",
   "--base-error-opacity": "#dc26261f",
-  "--base-destructive-hover": "#f87171",
+  "--base-destructive-hover": "#7F1D1D",
   "--base-dimmed": "#a1a1aa",
   "--radius-base": "8px",
 } satisfies Record<string, string>;

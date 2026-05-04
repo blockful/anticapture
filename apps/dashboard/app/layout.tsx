@@ -9,9 +9,23 @@ import { Toaster } from "react-hot-toast";
 import { CookieConsent } from "@/features/cookie";
 import { HelpPopover } from "@/shared/components";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
+import { JsonLd } from "@/shared/seo/JsonLd";
+import {
+  ORGANIZATION_ALT_NAME,
+  ORGANIZATION_NAME,
+  SITE_DESCRIPTION,
+  SITE_TAGLINE,
+  getSiteUrl,
+} from "@/shared/seo/site";
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
+import { ALL_DAOS, type DaoIdEnum } from "@/shared/types/daos";
 import { resolveDaoIdFromHostname } from "@/shared/utils/whitelabel";
+
+const isForceDaoSet = () => {
+  const forced = process.env.FORCE_DAO?.trim().toUpperCase();
+  return !!forced && ALL_DAOS.includes(forced as DaoIdEnum);
+};
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
 
@@ -22,15 +36,11 @@ const roboto = Roboto_Mono({
   variable: "--font-mono",
 });
 
-const baseUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000");
+const baseUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: "Anticapture | DAO Governance Security Dashboard",
+  title: `Anticapture | ${SITE_TAGLINE}`,
   keywords: [
     "DAO governance security",
     "hostile takeover prevention",
@@ -44,9 +54,8 @@ export const metadata: Metadata = {
     "on-chain governance security",
   ],
   openGraph: {
-    title: "Anticapture — DAO Governance Security & Risk Analysis Platform",
-    description:
-      "Anticapture is a DAO governance security platform that quantifies hostile takeover risk, detects governance capture, and tracks resilience metrics across major DAOs.",
+    title: "Anticapture | DAO Governance Security & Risk Analysis Platform",
+    description: SITE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
@@ -57,6 +66,25 @@ export const metadata: Metadata = {
   },
 };
 
+const rootSchemas = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: ORGANIZATION_NAME,
+    alternateName: ORGANIZATION_ALT_NAME,
+    url: baseUrl,
+    sameAs: ["https://x.com/anticapture_", "https://blockful.io"],
+    description: SITE_DESCRIPTION,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Anticapture",
+    url: baseUrl,
+    description: SITE_DESCRIPTION,
+  },
+];
+
 export default async function RootLayout({
   children,
 }: {
@@ -66,7 +94,12 @@ export default async function RootLayout({
   const host =
     headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
   const hostname = host.split(":")[0];
-  const isWhitelabel = !!resolveDaoIdFromHostname(hostname);
+  const pathname =
+    headersList.get("x-invoke-path") ?? headersList.get("next-url") ?? "";
+  const isWhitelabel =
+    !!resolveDaoIdFromHostname(hostname) ||
+    isForceDaoSet() ||
+    pathname.startsWith("/whitelabel/");
 
   return (
     <html
@@ -79,17 +112,11 @@ export default async function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        {!isWhitelabel && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `if(location.pathname.startsWith('/whitelabel/'))document.documentElement.classList.remove('dark')`,
-            }}
-          />
-        )}
       </head>
       <body
         className={`${inter.className} ${roboto.variable} bg-surface-background`}
       >
+        <JsonLd data={rootSchemas} />
         <div
           data-vaul-drawer-wrapper=""
           className="border-border-default mx-auto max-w-screen-2xl overflow-x-hidden border xl:overflow-hidden"

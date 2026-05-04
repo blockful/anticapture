@@ -19,6 +19,15 @@ type PrimaryNameResponse = {
 
 const ETH_COIN_TYPE = "60"; // ETH
 
+export const isEnsAddress = (value: string): boolean => {
+  try {
+    normalize(value);
+  } catch {
+    return false;
+  }
+  return value.endsWith(".eth") && value.slice(0, -4).length >= 3;
+};
+
 /**
  * Hook to fetch ENS data for a single address
  * @param address - Ethereum address (e.g., "0x123...")
