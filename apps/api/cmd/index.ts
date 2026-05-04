@@ -9,7 +9,6 @@ import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
-
 import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalanceVariations,
@@ -174,7 +173,10 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pgClient = drizzle(env.DATABASE_URL, { schema, casing: "snake_case" });
+const pgClient = drizzle(env.DATABASE_URL, {
+  schema,
+  casing: "snake_case",
+});
 
 health(app, pgClient);
 

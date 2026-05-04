@@ -22,12 +22,16 @@
       "outputs": ["generated/**"]
     },
     "@anticapture/graphql-client#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", "generated/**"]
+      "dependsOn": ["codegen", "^build"],
+      "outputs": ["dist/**"]
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
-      "outputs": ["dist/**", "generated/**"]
+      "outputs": ["dist/**"]
+    },
+    "@anticapture/client#typecheck": {
+      "dependsOn": ["codegen"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
@@ -76,6 +80,13 @@
       "dependsOn": ["^build", "@anticapture/observability#build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
+    "@anticapture/client#typecheck": {
+      "dependsOn": [
+        "@anticapture/client#codegen",
+        "@anticapture/observability#build"
+      ],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
+    },
     "test": {
       "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
@@ -91,10 +102,6 @@
       "inputs": ["src/**/*.ts"],
       "outputs": ["drizzle/**"]
     },
-    "@anticapture/api#dev": {
-      "dependsOn": ["@anticapture/observability#build"],
-      "passThroughEnv": ["*"]
-    },
     "@anticapture/indexer": {
       "env": ["DAO_ID"]
     },
@@ -107,6 +114,7 @@
       ]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]

@@ -15,8 +15,7 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "tsx watch cmd/index.ts",
-    "dev:rw": "sh -c 'dao_id=\"$1\"; exec railway run -e dev -s \"${dao_id}-api\" -- pnpm dev' --"
+    "dev": "tsx watch cmd/index.ts"
   },
   "keywords": [],
   "author": "",

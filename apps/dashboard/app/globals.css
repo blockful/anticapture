@@ -47,6 +47,7 @@
   --animate-pulse-ring: pulse-ring 1.5s ease-out infinite;
   --animate-modal-in: modal-in 0.25s ease-out;
   --animate-modal-out: modal-out 0.15s ease-in;
+  --animate-page-slide-in: page-slide-in 0.3s ease-out;
 
   /* Shadow Styles */
   --shadow-focus-ring: 0px 0px 0px 2px rgba(82, 82, 91, 0.3);
@@ -206,7 +207,6 @@
   --base-accent: #f4f4f5;
   --base-accent-foreground: #18181b;
   --base-destructive: #ef4444;
-  --base-destructive-foreground: #fafafa;
   --base-ring: #71717a;
   --base-popover: #ffffff;
   --base-popover-foreground: #09090b;
@@ -326,6 +326,17 @@
     to {
       opacity: 0;
       translate: -50% calc(-50% + 20px);
+    }
+  }
+
+  @keyframes page-slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
@@ -633,7 +644,6 @@
     --base-accent: #27272a;
     --base-accent-foreground: #fafafa;
     --base-destructive: #7f1d1d;
-    --base-destructive-foreground: #fafafa;
     --base-ring: #a1a1aa;
 
     --base-chart-1: #3b82f6;

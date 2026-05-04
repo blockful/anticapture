@@ -13,7 +13,6 @@
     "client": "turbo run --filter=@anticapture/client",
     "offchain-indexer": "turbo run --filter=@anticapture/offchain-indexer",
     "address": "turbo run --filter=@anticapture/address-enrichment",
-    "codegen": "turbo run codegen",
     "dev": "bash scripts/dev.sh",
     "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
     "lint": "turbo lint",
@@ -23,14 +22,6 @@
     "prepare": "husky",
     "test": "turbo test",
     "test:unit": "turbo test:unit"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --write"
-    ]
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
@@ -58,8 +49,7 @@
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "turbo": "^2.3.1",
-    "typescript": "^5.8.3",
-    "@railway/cli": "^4.31.0"
+    "typescript": "^5.8.3"
   },
   "pnpm": {
     "overrides": {

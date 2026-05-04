@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "kubb generate --config kubb.config.ts --watch",
     "codegen": "kubb --config kubb.config.ts",
-    "build": "pnpm codegen && tsup",
+    "build": "tsup",
     "clean": "rm -rf node_modules dist generated *.tsbuildinfo",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
