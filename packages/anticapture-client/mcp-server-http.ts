@@ -2,7 +2,7 @@ import http from "node:http";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp";
 import { setConfig } from "@kubb/plugin-client/clients/axios";
-import { server } from "./generated/mcp/server.ts";
+import { createMcpServer } from "./src/create-mcp-server.ts";
 import pino from "pino";
 
 const baseURL = process.env["ANTICAPTURE_API_URL"] ?? "http://localhost:4001";
@@ -11,9 +11,7 @@ const API_KEY = process.env["ANTICAPTURE_MCP_API_KEY"];
 const port = Number(process.env["PORT"] ?? 3100);
 const host = process.env["HOST"] ?? "0.0.0.0";
 
-let activeTransport: StreamableHTTPServerTransport | null = null;
-let activeSessionId: string | null = null;
-let connectPromise: Promise<StreamableHTTPServerTransport> | null = null;
+const sessions = new Map<string, StreamableHTTPServerTransport>();
 let shuttingDown = false;
 
 setConfig({
@@ -31,10 +29,7 @@ log.info(
 function isValidToken(token: string): boolean {
   if (!API_KEY) return true;
   try {
-    const a = Buffer.from(token.padEnd(API_KEY.length));
-    const b = Buffer.from(API_KEY.padEnd(token.length));
-
-    if (a.length !== b.length) return false;
+    if (token.length !== API_KEY.length) return false;
     return timingSafeEqual(Buffer.from(token), Buffer.from(API_KEY));
   } catch {
     return false;
@@ -44,49 +39,26 @@ function isValidToken(token: string): boolean {
 async function getOrCreateTransport(
   requestSessionId: string | undefined,
 ): Promise<StreamableHTTPServerTransport> {
-  if (
-    requestSessionId &&
-    activeSessionId === requestSessionId &&
-    activeTransport
-  ) {
-    return activeTransport;
+  if (requestSessionId) {
+    const existing = sessions.get(requestSessionId);
+    if (existing) return existing;
   }
 
-  if (connectPromise) {
-    return connectPromise;
-  }
-
-  connectPromise = (async () => {
-    if (activeTransport) {
-      await activeTransport.close();
-      await server.close();
-      activeTransport = null;
-      activeSessionId = null;
-    }
-
-    const sessionId = randomUUID();
-    const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => sessionId,
-    });
-
-    await server.connect(transport);
-
-    transport.onclose = () => {
-      if (activeSessionId === sessionId) {
-        server.close().catch(() => {});
-        activeTransport = null;
-        activeSessionId = null;
-      }
-    };
-
-    activeTransport = transport;
-    activeSessionId = sessionId;
-    return transport;
-  })().finally(() => {
-    connectPromise = null;
+  const sessionId = randomUUID();
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: () => sessionId,
   });
 
-  return connectPromise;
+  const mcpServer = createMcpServer();
+  await mcpServer.connect(transport);
+
+  transport.onclose = () => {
+    sessions.delete(sessionId);
+    mcpServer.close().catch(() => {});
+  };
+
+  sessions.set(sessionId, transport);
+  return transport;
 }
 
 const httpServer = http.createServer(async (req, res) => {
@@ -141,7 +113,7 @@ const httpServer = http.createServer(async (req, res) => {
   try {
     const transport = await getOrCreateTransport(sessionId);
     await transport.handleRequest(req, res);
-    finish(200, { sessionId: activeSessionId });
+    finish(200, { sessionId });
   } catch (err) {
     log.error({ reqId, err: String(err) }, "request failed");
     if (!res.headersSent) res.writeHead(500).end(String(err));
@@ -152,12 +124,11 @@ const httpServer = http.createServer(async (req, res) => {
 async function shutdown(signal: string) {
   if (shuttingDown) return;
   shuttingDown = true;
-  log.info({ signal }, "shutting down");
+  log.info({ signal, activeSessions: sessions.size }, "shutting down");
 
   httpServer.close(async () => {
     try {
-      if (activeTransport) await activeTransport.close();
-      await server.close();
+      await Promise.all([...sessions.values()].map((t) => t.close()));
     } catch (err) {
       log.error({ err: String(err) });
     }
