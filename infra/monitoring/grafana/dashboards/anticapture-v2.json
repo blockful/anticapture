@@ -472,7 +472,7 @@
     {
       "id": 4,
       "title": "Requests by Client Source — Share (donut)",
-      "description": "Split by x-client-source header from the API gateway. Three values: 'anticapture-frontend' (dashboard), 'notification-system' (bot), 'other' (unidentified callers).",
+      "description": "Split by x-client-source header from the API gateway. Four values: 'anticapture-frontend' (dashboard), 'notification-system' (bot), 'anticapture-mcp' (MCP server), 'other' (unidentified callers).",
       "type": "piechart",
       "gridPos": { "x": 0, "y": 53, "w": 8, "h": 10 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },

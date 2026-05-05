@@ -16,7 +16,10 @@ let shuttingDown = false;
 
 setConfig({
   baseURL,
-  headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
+  headers: {
+    "x-client-source": "anticapture-mcp",
+    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+  },
 });
 
 const log = pino({ name: "anticapture-mcp" });

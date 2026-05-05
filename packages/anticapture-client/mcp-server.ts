@@ -6,7 +6,10 @@ const apiKey = process.env["ANTICAPTURE_API_KEY"];
 
 setConfig({
   baseURL,
-  headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
+  headers: {
+    "x-client-source": "anticapture-mcp",
+    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+  },
 });
 
 startServer();
