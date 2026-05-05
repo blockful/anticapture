@@ -24,7 +24,7 @@ setConfig({
 const log = pino({ name: "anticapture-mcp" });
 
 log.info(
-  { baseURL, hasApiKey: !!apiKey, hasMcpKey: !!API_KEY, port, host, publicUrl },
+  { baseURL, hasApiKey: !!apiKey, hasMcpKey: !!API_KEY, port, host },
   "server starting",
 );
 
