@@ -766,6 +766,9 @@ importers:
 
   packages/anticapture-client:
     dependencies:
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
       zod:
         specifier: ^4.4.1
         version: 4.4.1
