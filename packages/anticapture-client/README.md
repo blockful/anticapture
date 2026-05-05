@@ -87,6 +87,61 @@ const response = await accountBalances(
 );
 ```
 
+### Testing with MSW
+
+Mock Service Worker handlers seeded with faker data are available from the
+`@anticapture/client/msw` subpath. Use them to mock the Gateful API in tests
+without hitting the network.
+
+```sh
+npm install --save-dev msw
+```
+
+The simplest path is `createTestServer`, which wraps `setupServer` from
+`msw/node` with all generated handlers pre-registered:
+
+```ts
+import { createTestServer } from "@anticapture/client/msw";
+
+const server = createTestServer();
+
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+test("intercepts a generated route", async () => {
+  const res = await fetch("http://localhost/health");
+  const body = await res.json();
+  expect(body).toBeTruthy();
+});
+```
+
+Handlers match any host (the generator emits `*/path` patterns), so calls to
+`http://localhost`, `https://api.anticapture.xyz`, or any other base URL are
+intercepted without extra configuration.
+
+To append a custom handler, import `http` and `HttpResponse` **from this
+subpath** (not from `msw` directly) and pass them to `createTestServer`:
+
+```ts
+import { createTestServer, http, HttpResponse } from "@anticapture/client/msw";
+
+const custom = http.get("*/custom", () => HttpResponse.json({ ok: true }));
+const server = createTestServer(custom);
+```
+
+> **Why import `http`/`HttpResponse` from this subpath?** MSW v2.8+ ships dual
+> `.d.ts` files that TypeScript treats as nominally distinct via a private
+> `__kind` brand on `RequestHandler` (see
+> [mswjs/msw#498](https://github.com/mswjs/msw/discussions/498)). Routing
+> consumer-built handlers through this re-export funnels them into the same
+> module identity our types resolve to, which avoids `as any` casts at the
+> `setupServer` boundary.
+
+Required `tsconfig` setting: `"moduleResolution": "bundler"` or `"nodenext"`
+so the `@anticapture/client/msw` subpath in `package.json#exports` resolves.
+Classic `"node"` resolution does not honor `exports` maps.
+
 ## Development
 
 The SDK is generated from `apps/gateful/openapi/gateful.json` with Kubb.
