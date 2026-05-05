@@ -14,7 +14,7 @@ setConfig({
 
 const API_KEY = process.env["ANTICAPTURE_MCP_API_KEY"];
 const port = Number(process.env["PORT"] ?? 3100);
-const host = process.env["HOST"] ?? "127.0.0.1";
+const host = process.env["HOST"] ?? "0.0.0.0";
 
 let activeTransport: StreamableHTTPServerTransport | null = null;
 let activeSessionId: string | null = null;
