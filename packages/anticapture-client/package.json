@@ -28,6 +28,11 @@
       "types": "./dist/hooks.d.ts",
       "import": "./dist/hooks.js",
       "default": "./dist/hooks.js"
+    },
+    "./msw": {
+      "types": "./dist/msw.d.ts",
+      "import": "./dist/msw.js",
+      "default": "./dist/msw.js"
     }
   },
   "files": [
@@ -40,6 +45,8 @@
     "@kubb/cli": "^4.37.2",
     "@kubb/core": "^4.37.2",
     "@kubb/plugin-client": "^4.37.2",
+    "@kubb/plugin-faker": "^4.37.2",
+    "@kubb/plugin-msw": "^4.37.2",
     "@kubb/plugin-oas": "^4.37.2",
     "@kubb/plugin-react-query": "^4.37.2",
     "@kubb/plugin-ts": "^4.37.2",
@@ -50,11 +57,19 @@
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
+    "@faker-js/faker": "^9.0.0",
     "@tanstack/react-query": "^5.0.0",
+    "msw": "^2.0.0",
     "react": "^19.0.0"
   },
   "peerDependenciesMeta": {
+    "@faker-js/faker": {
+      "optional": true
+    },
     "@tanstack/react-query": {
+      "optional": true
+    },
+    "msw": {
       "optional": true
     },
     "react": {
