@@ -47,6 +47,7 @@
     "@kubb/plugin-react-query": "^4.37.2",
     "@kubb/plugin-ts": "^4.37.2",
     "@kubb/plugin-zod": "^4.37.5",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@tanstack/react-query": "^5.90.21",
     "@types/node": "^20.16.5",
     "react": "19.2.3",
@@ -66,7 +67,6 @@
     }
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "pino": "^9.14.0",
     "tsx": "^4.19.2",
     "zod": "^4.4.1"
