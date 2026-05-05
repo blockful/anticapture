@@ -64,6 +64,7 @@ async function getOrCreateTransport(
     transport.onclose = () => {
       if (activeSessionId === sessionId) {
         console.error(`Session closed: ${sessionId}`);
+        server.close().catch(() => {});
         activeTransport = null;
         activeSessionId = null;
       }
