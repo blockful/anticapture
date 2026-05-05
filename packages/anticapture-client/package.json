@@ -41,6 +41,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "dependencies": {
+    "@faker-js/faker": "^9.0.0"
+  },
   "devDependencies": {
     "@kubb/cli": "^4.37.2",
     "@kubb/core": "^4.37.2",
@@ -57,15 +60,11 @@
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
-    "@faker-js/faker": "^9.0.0",
     "@tanstack/react-query": "^5.0.0",
     "msw": "^2.0.0",
     "react": "^19.0.0"
   },
   "peerDependenciesMeta": {
-    "@faker-js/faker": {
-      "optional": true
-    },
     "@tanstack/react-query": {
       "optional": true
     },
