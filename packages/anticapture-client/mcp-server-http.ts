@@ -15,9 +15,12 @@ setConfig({
 const API_KEY = process.env["ANTICAPTURE_MCP_API_KEY"];
 const port = Number(process.env["PORT"] ?? 3100);
 const host = process.env["HOST"] ?? "0.0.0.0";
+// Public URL for OAuth metadata — use Railway's public URL in production
+const publicUrl = process.env["PUBLIC_URL"] ?? `http://localhost:${port}`;
 
 let activeTransport: StreamableHTTPServerTransport | null = null;
 let activeSessionId: string | null = null;
+let connectPromise: Promise<StreamableHTTPServerTransport> | null = null;
 
 async function getOrCreateTransport(
   requestSessionId: string | undefined,
@@ -30,38 +33,48 @@ async function getOrCreateTransport(
     return activeTransport;
   }
 
-  // Close existing session if any
-  if (activeTransport) {
-    await activeTransport.close();
-    await server.close();
-    activeTransport = null;
-    activeSessionId = null;
+  // Serialize concurrent initialization requests
+  if (connectPromise) {
+    return connectPromise;
   }
 
-  const sessionId = randomUUID();
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: () => sessionId,
-  });
-
-  await server.connect(transport);
-
-  transport.onclose = () => {
-    if (activeSessionId === sessionId) {
+  connectPromise = (async () => {
+    if (activeTransport) {
+      await activeTransport.close();
+      await server.close();
       activeTransport = null;
       activeSessionId = null;
     }
-  };
 
-  activeTransport = transport;
-  activeSessionId = sessionId;
-  return transport;
+    const sessionId = randomUUID();
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: () => sessionId,
+    });
+
+    await server.connect(transport);
+
+    transport.onclose = () => {
+      if (activeSessionId === sessionId) {
+        activeTransport = null;
+        activeSessionId = null;
+      }
+    };
+
+    activeTransport = transport;
+    activeSessionId = sessionId;
+    return transport;
+  })().finally(() => {
+    connectPromise = null;
+  });
+
+  return connectPromise;
 }
 
 const httpServer = http.createServer(async (req, res) => {
   if (req.url === "/.well-known/oauth-protected-resource") {
     res.writeHead(200, { "Content-Type": "application/json" }).end(
       JSON.stringify({
-        resource: `http://${host}:${port}`,
+        resource: publicUrl,
         bearer_methods_supported: ["header"],
       }),
     );
