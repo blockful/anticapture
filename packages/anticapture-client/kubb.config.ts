@@ -85,9 +85,6 @@ export default defineConfig(({ watch }) => ({
       },
       parser: "faker",
       handlers: true,
-      // Wildcard baseURL so handlers match any host (e.g. http://localhost,
-      // production URL). Without this, MSW v2 treats the bare path as
-      // origin-less and consumer Node tests miss the handler.
       baseURL: "*",
       transformers: {
         name: renameDaoOperation,
