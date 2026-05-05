@@ -13,6 +13,7 @@ COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
+RUN pnpm --filter @anticapture/client codegen
 
 FROM base AS runner
 ENV NODE_ENV=production
