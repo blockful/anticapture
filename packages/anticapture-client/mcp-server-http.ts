@@ -10,7 +10,6 @@ const apiKey = process.env["ANTICAPTURE_API_KEY"];
 const API_KEY = process.env["ANTICAPTURE_MCP_API_KEY"];
 const port = Number(process.env["PORT"] ?? 3100);
 const host = process.env["HOST"] ?? "0.0.0.0";
-const publicUrl = process.env["PUBLIC_URL"] ?? `http://localhost:${port}`;
 
 let activeTransport: StreamableHTTPServerTransport | null = null;
 let activeSessionId: string | null = null;
@@ -112,17 +111,6 @@ const httpServer = http.createServer(async (req, res) => {
     res
       .writeHead(200, { "Content-Type": "application/json" })
       .end(JSON.stringify({ status: "ok" }));
-    finish(200);
-    return;
-  }
-
-  if (req.url === "/.well-known/oauth-protected-resource") {
-    res.writeHead(200, { "Content-Type": "application/json" }).end(
-      JSON.stringify({
-        resource: publicUrl,
-        bearer_methods_supported: ["header"],
-      }),
-    );
     finish(200);
     return;
   }
