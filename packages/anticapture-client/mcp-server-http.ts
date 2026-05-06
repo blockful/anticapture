@@ -1,39 +1,28 @@
 import http from "node:http";
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp";
-import { setConfig } from "@kubb/plugin-client/clients/axios";
 import { createMcpServer } from "./src/create-mcp-server.ts";
+import { configureUpstreamClient } from "./src/configure-upstream-client.ts";
 import pino from "pino";
 
-const baseURL = process.env["ANTICAPTURE_API_URL"] ?? "http://localhost:4001";
-const apiKey = process.env["ANTICAPTURE_API_KEY"];
-const API_KEY = process.env["ANTICAPTURE_MCP_API_KEY"];
+const mcpApiKey = process.env["ANTICAPTURE_MCP_API_KEY"];
 const port = Number(process.env["PORT"] ?? 3100);
 const host = process.env["HOST"] ?? "0.0.0.0";
 
 const sessions = new Map<string, StreamableHTTPServerTransport>();
 let shuttingDown = false;
 
-setConfig({
-  baseURL,
-  headers: {
-    "x-client-source": "anticapture-mcp",
-    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-  },
-});
+configureUpstreamClient();
 
 const log = pino({ name: "anticapture-mcp" });
 
-log.info(
-  { baseURL, hasApiKey: !!apiKey, hasMcpKey: !!API_KEY, port, host },
-  "server starting",
-);
+log.info({ hasMcpKey: !!mcpApiKey, port, host }, "server starting");
 
 function isValidToken(token: string): boolean {
-  if (!API_KEY) return true;
+  if (!mcpApiKey) return true;
   try {
-    if (token.length !== API_KEY.length) return false;
-    return timingSafeEqual(Buffer.from(token), Buffer.from(API_KEY));
+    if (token.length !== mcpApiKey.length) return false;
+    return timingSafeEqual(Buffer.from(token), Buffer.from(mcpApiKey));
   } catch {
     return false;
   }
@@ -96,7 +85,7 @@ const httpServer = http.createServer(async (req, res) => {
     return;
   }
 
-  if (API_KEY) {
+  if (mcpApiKey) {
     const auth = req.headers["authorization"];
     const token = auth?.startsWith("Bearer ") ? auth.slice(7) : "";
     if (!isValidToken(token)) {

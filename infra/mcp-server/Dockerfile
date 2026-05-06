@@ -14,7 +14,8 @@ COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 COPY apps/gateful/openapi/gateful.json apps/gateful/openapi/gateful.json
-RUN pnpm --filter @anticapture/client codegen
+RUN pnpm --filter @anticapture/client codegen \
+ && pnpm --filter @anticapture/client build
 
 FROM base AS runner
 ENV NODE_ENV=production
@@ -24,4 +25,4 @@ COPY --from=installer --chown=app:app /app .
 USER app
 WORKDIR /app/packages/anticapture-client
 EXPOSE 3100
-CMD ["node_modules/.bin/tsx", "mcp-server-http.ts"]
+CMD ["node", "dist/mcp-server-http.cjs"]

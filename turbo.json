@@ -119,12 +119,14 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "mcp": {
+    "@anticapture/client#mcp": {
+      "dependsOn": ["@anticapture/client#codegen"],
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "mcp-http": {
+    "@anticapture/client#mcp-http": {
+      "dependsOn": ["@anticapture/client#codegen"],
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]
