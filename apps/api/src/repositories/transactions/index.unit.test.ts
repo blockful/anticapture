@@ -4,13 +4,12 @@ import { drizzle } from "drizzle-orm/pglite";
 import { Address } from "viem";
 
 import type { Drizzle } from "@/database";
-import { transaction, transfer, delegation } from "@/database/schema";
+import { transfer, delegation } from "@/database/schema";
 import * as schema from "@/database/schema";
 import { TransactionsRequest } from "@/mappers/transactions";
 
 import { TransactionsRepository } from ".";
 
-type TransactionInsert = typeof transaction.$inferInsert;
 type TransferInsert = typeof transfer.$inferInsert;
 type DelegationInsert = typeof delegation.$inferInsert;
 
@@ -18,22 +17,11 @@ const ACCOUNT_A: Address = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const ACCOUNT_B: Address = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 const TEST_DAO = "test-dao";
 
-let txCounter = 0;
-
-const createTransaction = (
-  overrides: Partial<TransactionInsert> = {},
-): TransactionInsert => ({
-  transactionHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
-  fromAddress: ACCOUNT_A,
-  toAddress: ACCOUNT_B,
-  timestamp: 1700000000n,
-  ...overrides,
-});
-
 const createTransfer = (
   overrides: Partial<TransferInsert> = {},
 ): TransferInsert => ({
-  transactionHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
+  transactionHash:
+    "0x0000000000000000000000000000000000000000000000000000000000000000",
   daoId: TEST_DAO,
   tokenId: "token-1",
   amount: 100n,
@@ -47,7 +35,8 @@ const createTransfer = (
 const createDelegation = (
   overrides: Partial<DelegationInsert> = {},
 ): DelegationInsert => ({
-  transactionHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
+  transactionHash:
+    "0x0000000000000000000000000000000000000000000000000000000000000000",
   daoId: TEST_DAO,
   delegateAccountId: ACCOUNT_B,
   delegatorAccountId: ACCOUNT_A,
@@ -90,17 +79,12 @@ describe("TransactionsRepository", () => {
   beforeEach(async () => {
     await db.delete(transfer);
     await db.delete(delegation);
-    await db.delete(transaction);
-    txCounter = 0;
   });
 
   describe("getFilteredAggregateTransactions", () => {
     it("should return transactions with nested transfers", async () => {
       const txHash =
         "0x0000000000000000000000000000000000000000000000000000000000000001";
-      await db
-        .insert(transaction)
-        .values(createTransaction({ transactionHash: txHash }));
       await db
         .insert(transfer)
         .values(createTransfer({ transactionHash: txHash, amount: 200n }));
@@ -116,9 +100,6 @@ describe("TransactionsRepository", () => {
     it("should return transactions with nested delegations", async () => {
       const txHash =
         "0x0000000000000000000000000000000000000000000000000000000000000001";
-      await db
-        .insert(transaction)
-        .values(createTransaction({ transactionHash: txHash }));
       await db
         .insert(delegation)
         .values(
@@ -136,9 +117,6 @@ describe("TransactionsRepository", () => {
       const txHash =
         "0x0000000000000000000000000000000000000000000000000000000000000001";
       await db
-        .insert(transaction)
-        .values(createTransaction({ transactionHash: txHash }));
-      await db
         .insert(transfer)
         .values(createTransfer({ transactionHash: txHash }));
 
@@ -155,12 +133,6 @@ describe("TransactionsRepository", () => {
         "0x0000000000000000000000000000000000000000000000000000000000000001";
       const txHash2 =
         "0x0000000000000000000000000000000000000000000000000000000000000002";
-      await db
-        .insert(transaction)
-        .values([
-          createTransaction({ transactionHash: txHash1, timestamp: 1000n }),
-          createTransaction({ transactionHash: txHash2, timestamp: 3000n }),
-        ]);
       await db
         .insert(transfer)
         .values([
@@ -181,12 +153,6 @@ describe("TransactionsRepository", () => {
         "0x0000000000000000000000000000000000000000000000000000000000000001";
       const txHash2 =
         "0x0000000000000000000000000000000000000000000000000000000000000002";
-      await db
-        .insert(transaction)
-        .values([
-          createTransaction({ transactionHash: txHash1, timestamp: 2000n }),
-          createTransaction({ transactionHash: txHash2, timestamp: 1000n }),
-        ]);
       await db
         .insert(transfer)
         .values([
@@ -212,9 +178,6 @@ describe("TransactionsRepository", () => {
       const txHash =
         "0x0000000000000000000000000000000000000000000000000000000000000001";
       await db
-        .insert(transaction)
-        .values(createTransaction({ transactionHash: txHash }));
-      await db
         .insert(transfer)
         .values(createTransfer({ transactionHash: txHash }));
 
@@ -228,9 +191,6 @@ describe("TransactionsRepository", () => {
     it("should filter delegations only when includes.transfers is false", async () => {
       const txHash =
         "0x0000000000000000000000000000000000000000000000000000000000000001";
-      await db
-        .insert(transaction)
-        .values(createTransaction({ transactionHash: txHash }));
       await db
         .insert(delegation)
         .values(createDelegation({ transactionHash: txHash }));
@@ -247,12 +207,6 @@ describe("TransactionsRepository", () => {
         "0x0000000000000000000000000000000000000000000000000000000000000001";
       const txHash2 =
         "0x0000000000000000000000000000000000000000000000000000000000000002";
-      await db
-        .insert(transaction)
-        .values([
-          createTransaction({ transactionHash: txHash1 }),
-          createTransaction({ transactionHash: txHash2 }),
-        ]);
       await db.insert(transfer).values([
         createTransfer({
           transactionHash: txHash1,

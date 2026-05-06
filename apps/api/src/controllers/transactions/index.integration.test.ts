@@ -6,29 +6,14 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { getAddress } from "viem";
 import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
-import { transaction, transfer, delegation } from "@/database/schema";
+import { transfer, delegation } from "@/database/schema";
 import { TransactionsRepository } from "@/repositories/transactions";
 import { TransactionsService } from "@/services";
 import { transactions } from "./index";
 const TX_HASH = "0xabc123def456";
 
-type TransactionInsert = typeof transaction.$inferInsert;
 type TransferInsert = typeof transfer.$inferInsert;
 type DelegationInsert = typeof delegation.$inferInsert;
-
-const createTransaction = (
-  overrides: Partial<TransactionInsert> = {},
-): TransactionInsert => ({
-  transactionHash: TX_HASH,
-  fromAddress: getAddress("0x1111111111111111111111111111111111111111"),
-  toAddress: getAddress("0x2222222222222222222222222222222222222222"),
-  isCex: false,
-  isDex: false,
-  isLending: false,
-  isTotal: false,
-  timestamp: 1700000000n,
-  ...overrides,
-});
 
 const createTransfer = (
   overrides: Partial<TransferInsert> = {},
@@ -91,7 +76,6 @@ describe("Transactions Controller", () => {
   beforeEach(async () => {
     await db.delete(transfer);
     await db.delete(delegation);
-    await db.delete(transaction);
   });
 
   describe("GET /transactions", () => {
@@ -103,8 +87,7 @@ describe("Transactions Controller", () => {
       expect(body).toEqual({ items: [], totalCount: 0 });
     });
 
-    it("should return 200 with 1 item when a transfer and transaction row share the same hash", async () => {
-      await db.insert(transaction).values(createTransaction());
+    it("should return 200 with 1 item when a transfer exists", async () => {
       await db.insert(transfer).values(createTransfer());
 
       const res = await app.request("/transactions");
@@ -149,8 +132,7 @@ describe("Transactions Controller", () => {
       });
     });
 
-    it("should return 200 with item when a delegation and transaction row share the same hash", async () => {
-      await db.insert(transaction).values(createTransaction());
+    it("should return 200 with item when a delegation exists", async () => {
       await db.insert(delegation).values(createDelegation());
 
       const res = await app.request("/transactions");
@@ -163,7 +145,7 @@ describe("Transactions Controller", () => {
           {
             transactionHash: TX_HASH,
             from: getAddress("0x1111111111111111111111111111111111111111"),
-            to: getAddress("0x2222222222222222222222222222222222222222"),
+            to: getAddress("0x3333333333333333333333333333333333333333"),
             isCex: false,
             isDex: false,
             isLending: false,

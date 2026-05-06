@@ -1,6 +1,6 @@
 import { sql, eq, or, countDistinct, SQLChunk } from "drizzle-orm";
 
-import { Drizzle, delegation, transaction, transfer } from "@/database";
+import { Drizzle, delegation, transfer } from "@/database";
 import { DBTransaction, TransactionsRequest } from "@/mappers";
 
 export class TransactionsRepository {
@@ -13,24 +13,56 @@ export class TransactionsRepository {
     const orderDirection = sql.raw(filter.orderDirection ?? "desc");
     const query = sql`
     WITH filtered_transactions AS (${hashQuery}),
-    latest_filtered_transactions AS (
-        SELECT 
-          ${transaction.transactionHash},
-          ${transaction.fromAddress},
-          ${transaction.toAddress},
-          ${transaction.isCex},
-          ${transaction.isDex},
-          ${transaction.isLending},
-          ${transaction.isTotal},
-          ${transaction.timestamp}
-        FROM ${transaction}
-        WHERE ${transaction.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
-        ORDER BY ${transaction.timestamp} ${orderDirection}
+    event_rollup AS (
+        SELECT
+          events.transaction_hash,
+          (ARRAY_AGG(events.from_address ORDER BY events.kind_priority, events.log_index ASC))[1] AS from_address,
+          (ARRAY_AGG(events.to_address   ORDER BY events.kind_priority, events.log_index ASC))[1] AS to_address,
+          BOOL_OR(events.is_cex)     AS is_cex,
+          BOOL_OR(events.is_dex)     AS is_dex,
+          BOOL_OR(events.is_lending) AS is_lending,
+          BOOL_OR(events.is_total)   AS is_total,
+          MIN(events.timestamp)      AS timestamp
+        FROM (
+          SELECT
+            ${transfer.transactionHash} AS transaction_hash,
+            ${transfer.fromAccountId}   AS from_address,
+            ${transfer.toAccountId}     AS to_address,
+            ${transfer.isCex}           AS is_cex,
+            ${transfer.isDex}           AS is_dex,
+            ${transfer.isLending}       AS is_lending,
+            ${transfer.isTotal}         AS is_total,
+            ${transfer.timestamp}       AS timestamp,
+            ${transfer.logIndex}        AS log_index,
+            0                           AS kind_priority
+          FROM ${transfer}
+          WHERE ${transfer.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
+          UNION ALL
+          SELECT
+            ${delegation.transactionHash}      AS transaction_hash,
+            ${delegation.delegatorAccountId}   AS from_address,
+            ${delegation.delegateAccountId}    AS to_address,
+            ${delegation.isCex}                AS is_cex,
+            ${delegation.isDex}                AS is_dex,
+            ${delegation.isLending}            AS is_lending,
+            ${delegation.isTotal}              AS is_total,
+            ${delegation.timestamp}            AS timestamp,
+            ${delegation.logIndex}             AS log_index,
+            1                                  AS kind_priority
+          FROM ${delegation}
+          WHERE ${delegation.transactionHash} IN (SELECT transaction_hash FROM filtered_transactions)
+        ) events
+        GROUP BY events.transaction_hash
+    ),
+    paginated_transactions AS (
+        SELECT *
+        FROM event_rollup
+        ORDER BY timestamp ${orderDirection}
         LIMIT ${filter.limit}
         OFFSET ${filter.skip ?? 0}
     ),
     transfer_aggregates AS (
-        SELECT 
+        SELECT
           ${transfer.transactionHash},
           JSON_AGG(JSON_BUILD_OBJECT(
             'transactionHash', ${transfer.transactionHash},
@@ -47,11 +79,11 @@ export class TransactionsRepository {
             'isTotal', ${transfer.isTotal}
           )) as transfers
         FROM ${transfer}
-        WHERE ${transfer.transactionHash} IN (SELECT transaction_hash FROM latest_filtered_transactions)
+        WHERE ${transfer.transactionHash} IN (SELECT transaction_hash FROM paginated_transactions)
         GROUP BY ${transfer.transactionHash}
     ),
     delegation_aggregates AS (
-        SELECT 
+        SELECT
           ${delegation.transactionHash},
           JSON_AGG(JSON_BUILD_OBJECT(
             'transactionHash', ${delegation.transactionHash},
@@ -68,24 +100,24 @@ export class TransactionsRepository {
             'isTotal', ${delegation.isTotal}
           )) as delegations
         FROM ${delegation}
-        WHERE ${delegation.transactionHash} IN (SELECT ${delegation.transactionHash} FROM latest_filtered_transactions)
+        WHERE ${delegation.transactionHash} IN (SELECT transaction_hash FROM paginated_transactions)
         GROUP BY ${delegation.transactionHash}
     )
-    SELECT 
-      lt.transaction_hash AS "transactionHash",
-      lt.from_address AS "fromAddress", 
-      lt.to_address AS "toAddress",
-      lt.is_cex AS "isCex",
-      lt.is_dex AS "isDex",
-      lt.is_lending AS "isLending", 
-      lt.is_total AS "isTotal", 
-      lt.timestamp,
+    SELECT
+      pt.transaction_hash AS "transactionHash",
+      pt.from_address AS "fromAddress",
+      pt.to_address AS "toAddress",
+      pt.is_cex AS "isCex",
+      pt.is_dex AS "isDex",
+      pt.is_lending AS "isLending",
+      pt.is_total AS "isTotal",
+      pt.timestamp,
       COALESCE(ta.transfers, '[]'::json) as transfers,
       COALESCE(da.delegations, '[]'::json) as delegations
-    FROM latest_filtered_transactions lt
-    LEFT JOIN transfer_aggregates ta ON ta.transaction_hash = lt.transaction_hash
-    LEFT JOIN delegation_aggregates da ON da.transaction_hash = lt.transaction_hash
-    ORDER BY lt.timestamp ${orderDirection};
+    FROM paginated_transactions pt
+    LEFT JOIN transfer_aggregates ta ON ta.transaction_hash = pt.transaction_hash
+    LEFT JOIN delegation_aggregates da ON da.transaction_hash = pt.transaction_hash
+    ORDER BY pt.timestamp ${orderDirection};
 `;
     const result = await this.db.execute<DBTransaction>(query);
 

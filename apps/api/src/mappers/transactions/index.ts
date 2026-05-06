@@ -1,7 +1,5 @@
 import { z } from "@hono/zod-openapi";
 
-import { transaction } from "@/database";
-
 import { DBDelegation } from "../delegations";
 import {
   DBTransfer,
@@ -17,7 +15,15 @@ import {
   unixTimestampQueryParam,
 } from "../shared";
 
-export type DBTransaction = typeof transaction.$inferSelect & {
+export type DBTransaction = {
+  transactionHash: string;
+  fromAddress: string | null;
+  toAddress: string | null;
+  isCex: boolean;
+  isDex: boolean;
+  isLending: boolean;
+  isTotal: boolean;
+  timestamp: bigint;
   transfers: DBTransfer[];
   delegations: DBDelegation[];
 };
@@ -197,10 +203,12 @@ export const TransactionResponseSchema = z
   .object({
     transactionHash: z.string().openapi({ description: "Transaction hash." }),
     from: z.string().nullable().openapi({
-      description: "Resolved sender address, if known.",
+      description:
+        "Sender address derived from the transaction's first child event by log index (transfer.fromAccountId, or delegation.delegatorAccountId when no transfers exist).",
     }),
     to: z.string().nullable().openapi({
-      description: "Resolved recipient address, if known.",
+      description:
+        "Recipient address derived from the transaction's first child event by log index (transfer.toAccountId, or delegation.delegateAccountId when no transfers exist).",
     }),
     isCex: z.boolean().openapi({
       description: "Whether the transaction touched a centralized exchange.",
