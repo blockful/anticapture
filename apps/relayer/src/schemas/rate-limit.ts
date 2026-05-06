@@ -13,7 +13,7 @@ const OperationUsageSchema = z.object({
 
 export const RateLimitResponseSchema = z
   .object({
-    address: z.string(),
+    address: AddressSchema.describe("EIP-55 checksummed Ethereum address."),
     maxPerDay: z.number().int().min(0),
     vote: OperationUsageSchema,
     delegation: OperationUsageSchema,
