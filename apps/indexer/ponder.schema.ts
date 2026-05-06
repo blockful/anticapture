@@ -250,17 +250,6 @@ export const daoMetricsDayBucket = onchainTable(
   }),
 );
 
-export const transaction = onchainTable("transaction", (drizzle) => ({
-  transactionHash: drizzle.text("transaction_hash").primaryKey(),
-  fromAddress: drizzle.text("from_address"),
-  toAddress: drizzle.text("to_address"),
-  isCex: drizzle.boolean().notNull().default(false),
-  isDex: drizzle.boolean().notNull().default(false),
-  isLending: drizzle.boolean().notNull().default(false),
-  isTotal: drizzle.boolean().notNull().default(false),
-  timestamp: drizzle.bigint().notNull(),
-}));
-
 export const tokenPrice = onchainTable("token_price", (drizzle) => ({
   price: drizzle.bigint().notNull(), // price in ETH
   timestamp: drizzle.bigint().primaryKey(),
@@ -312,11 +301,6 @@ export const transferRelations = relations(transfer, ({ one }) => ({
     references: [token.id],
     relationName: "token",
   }),
-  transaction: one(transaction, {
-    fields: [transfer.transactionHash],
-    references: [transaction.transactionHash],
-    relationName: "transactionTransfers",
-  }),
 }));
 
 export const accountPowerRelations = relations(accountPower, ({ one }) => ({
@@ -366,11 +350,6 @@ export const delegationsRelations = relations(delegation, ({ one }) => ({
     references: [account.id],
     relationName: "delegator",
   }),
-  transaction: one(transaction, {
-    fields: [delegation.transactionHash],
-    references: [transaction.transactionHash],
-    relationName: "transactionDelegations",
-  }),
 }));
 
 export const votingPowerHistoryRelations = relations(
@@ -392,15 +371,6 @@ export const votingPowerHistoryRelations = relations(
     }),
   }),
 );
-
-export const transactionRelations = relations(transaction, ({ many }) => ({
-  transfers: many(transfer, {
-    relationName: "transactionTransfers",
-  }),
-  delegations: many(delegation, {
-    relationName: "transactionDelegations",
-  }),
-}));
 
 export const accountRelations = relations(account, ({ many }) => ({
   balances: many(accountBalance, {
