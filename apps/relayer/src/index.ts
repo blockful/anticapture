@@ -12,7 +12,9 @@ import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { fromZodError } from "zod-validation-error";
 
+import { config } from "@/controllers/config";
 import { health } from "@/controllers/health";
+import { rateLimit } from "@/controllers/rate-limit";
 import { relayDelegate } from "@/controllers/relay-delegate";
 import { relayVote } from "@/controllers/relay-vote";
 import { env } from "@/env";
@@ -148,6 +150,16 @@ async function main() {
   relayVote(app, relayService);
   relayDelegate(app, relayService);
   health(app);
+  config(app, {
+    minVotingPower: env.MIN_VOTING_POWER,
+    maxRelayPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
+  });
+  rateLimit(app, {
+    storage: rateLimitStorage,
+    daoName: env.DAO_NAME,
+    governorAddress: governorAddress,
+    maxPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
+  });
 
   // --- OpenAPI docs ---
   app.doc("/docs", {
