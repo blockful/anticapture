@@ -8,6 +8,10 @@ import { useAccount, useReadContract, useWalletClient } from "wagmi";
 
 import { delegateTo } from "@/features/holders-and-delegates/delegate/utils/delegateTo";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import {
+  isUserRejection,
+  mapRelayerError,
+} from "@/shared/utils/gaslessRelayerError";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { SpinIcon } from "@/shared/components/icons/SpinIcon";
@@ -84,15 +88,33 @@ export const DelegationModal = ({
         walletClient,
         () => setStep("pending-tx"),
         chain,
+        daoId,
       );
       setStep("success");
       showCustomToast("Delegation successful!", "success");
       onSuccess?.();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Delegation failed.";
-      const isRejected =
-        message.includes("rejected") || message.includes("denied");
-      setError(isRejected ? "Transaction rejected by user." : message);
+      if (isUserRejection(err)) {
+        setError("Transaction rejected by user.");
+        setStep("error");
+        return;
+      }
+
+      const gasless = daoConfig?.gaslessRelayer;
+      if (gasless?.enabled) {
+        const message = mapRelayerError(err, {
+          operation: "delegate",
+          minVotingPower: gasless.minVotingPower,
+          decimals,
+          symbol: daoConfig.name,
+        });
+        showCustomToast(message, "error");
+        setError(message);
+      } else {
+        const message =
+          err instanceof Error ? err.message : "Delegation failed.";
+        setError(message);
+      }
       setStep("error");
     }
   }, [
@@ -102,6 +124,10 @@ export const DelegationModal = ({
     step,
     delegateAddress,
     onSuccess,
+    chain,
+    daoId,
+    daoConfig,
+    decimals,
   ]);
 
   useEffect(() => {

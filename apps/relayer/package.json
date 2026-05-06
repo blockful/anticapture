@@ -4,14 +4,15 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:fork": "dotenv -- tsx scripts/dev-fork.ts",
     "build": "tsup",
     "start": "node --import ./dist/instrumentation.js dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run src/",
     "test:e2e": "dotenv -- vitest run --testTimeout 30000 e2e/",
     "test:watch": "vitest",
-    "lint": "eslint src e2e",
-    "lint:fix": "eslint src e2e --fix",
+    "lint": "eslint src e2e scripts",
+    "lint:fix": "eslint src e2e scripts --fix",
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },
   "dependencies": {
