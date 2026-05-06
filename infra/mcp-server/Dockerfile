@@ -3,7 +3,7 @@ FROM node:20-slim AS base
 FROM base AS builder
 WORKDIR /app
 COPY . .
-RUN npx turbo@2.3.1 prune @anticapture/client --docker
+RUN npx turbo@2.8.16 prune @anticapture/client --docker
 
 FROM base AS installer
 RUN npm install -g pnpm@10.10.0
