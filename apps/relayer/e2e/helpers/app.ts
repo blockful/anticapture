@@ -48,7 +48,7 @@ export async function createTestApp(rpcUrl: string) {
   );
 
   const rateLimiter = new RateLimiter(
-    { incrementIfAllowed: async () => true },
+    { incrementIfAllowed: async () => true, getCount: async () => 0 },
     {
       daoName: "test",
       governorAddress: GOVERNOR_ADDRESS,
