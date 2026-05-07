@@ -30,9 +30,10 @@ function isValidToken(token: string): boolean {
 
 async function getOrCreateTransport(
   requestSessionId: string | undefined,
-): Promise<StreamableHTTPServerTransport | null> {
+): Promise<StreamableHTTPServerTransport> {
   if (requestSessionId) {
-    return sessions.get(requestSessionId) ?? null;
+    const existing = sessions.get(requestSessionId);
+    if (existing) return existing;
   }
 
   const sessionId = randomUUID();
@@ -103,19 +104,12 @@ const httpServer = http.createServer(async (req, res) => {
 
   try {
     const transport = await getOrCreateTransport(sessionId);
-    if (!transport) {
-      res
-        .writeHead(404, { "Content-Type": "application/json" })
-        .end(JSON.stringify({ error: "session_not_found" }));
-      finish(404, { sessionId });
-      return;
-    }
     await transport.handleRequest(req, res);
-    finish(res.statusCode, { sessionId });
+    finish(200, { sessionId });
   } catch (err) {
     log.error({ reqId, err: String(err) }, "request failed");
     if (!res.headersSent) res.writeHead(500).end(String(err));
-    finish(res.statusCode || 500);
+    finish(500);
   }
 });
 
