@@ -81,7 +81,7 @@ Anticapture offers MCP tooling for LLM consumption of the API resources; in orde
   "mcpServers": {
     "anticapture": {
       "type": "http",
-      "url": "https://anticapture-mcp-server-dev.up.railway.app/",
+      "url": "https://anticapture-mcp-server.up.railway.app/",
       "headers": {
         "Authorization": "Bearer <ANTICAPTURE_MCP_API_KEY>"
       }
