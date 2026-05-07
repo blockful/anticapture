@@ -5,7 +5,7 @@ import {
   RateLimitParamsSchema,
   RateLimitResponseSchema,
 } from "@/schemas/rate-limit";
-import { ErrorResponseSchema } from "@/errors";
+import { ErrorResponseSchema, Errors } from "@/errors";
 import type { RateLimitStorage } from "@/repository/rate-limit-storage";
 
 interface RateLimitControllerDeps {
@@ -52,25 +52,37 @@ export function rateLimit(app: Hono, deps: RateLimitControllerDeps) {
             "application/json": { schema: ErrorResponseSchema },
           },
         },
+        503: {
+          description: "Rate limiter storage is unavailable",
+          content: {
+            "application/json": { schema: ErrorResponseSchema },
+          },
+        },
       },
     }),
     async (c) => {
       const { address } = c.req.valid("param");
 
-      const [voteUsed, delegationUsed] = await Promise.all([
-        deps.storage.getCount({
-          daoName: deps.daoName,
-          governorAddress: deps.governorAddress,
-          address,
-          operation: "vote",
-        }),
-        deps.storage.getCount({
-          daoName: deps.daoName,
-          governorAddress: deps.governorAddress,
-          address,
-          operation: "delegation",
-        }),
-      ]);
+      let voteUsed: number;
+      let delegationUsed: number;
+      try {
+        [voteUsed, delegationUsed] = await Promise.all([
+          deps.storage.getCount({
+            daoName: deps.daoName,
+            governorAddress: deps.governorAddress,
+            address,
+            operation: "vote",
+          }),
+          deps.storage.getCount({
+            daoName: deps.daoName,
+            governorAddress: deps.governorAddress,
+            address,
+            operation: "delegation",
+          }),
+        ]);
+      } catch {
+        throw Errors.RATE_LIMITER_UNAVAILABLE();
+      }
 
       return c.json(
         {
