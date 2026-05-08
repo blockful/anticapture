@@ -72,6 +72,26 @@ pnpm gateful test
 
 See individual application READMEs for detailed setup and development instructions.
 
+## Anticapture MCP
+
+Anticapture offers MCP tooling for LLM consumption of the API resources; in order to connect to it, use the following configuration snippet (contact the Anticapture team for an API key):
+
+```json
+{
+  "mcpServers": {
+    "anticapture": {
+      "type": "http",
+      "url": "https://anticapture-mcp-server.up.railway.app/",
+      "headers": {
+        "Authorization": "Bearer <ANTICAPTURE_MCP_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+More information on developing and running the MCP locally in the [`anticapture-client` package](./packages/anticapture-client/README.md#) documentation section "MCP Server".
+
 ## Contributing
 
 1. Fork the repository

@@ -118,6 +118,18 @@
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]
+    },
+    "@anticapture/client#mcp": {
+      "dependsOn": ["@anticapture/client#codegen"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/client#mcp-http": {
+      "dependsOn": ["@anticapture/client#codegen"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
     }
   }
 }
