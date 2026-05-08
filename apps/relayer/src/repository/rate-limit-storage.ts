@@ -11,13 +11,22 @@ export interface IncrementIfAllowedParams {
   maxPerDay: number;
 }
 
+export interface GetCountParams {
+  daoName: string;
+  governorAddress: Address;
+  address: Address;
+  operation: RelayOperation;
+}
+
 export interface RateLimitStorage {
   incrementIfAllowed(params: IncrementIfAllowedParams): Promise<boolean>;
+  getCount(params: GetCountParams): Promise<number>;
 }
 
 export interface RedisClient {
   incr(key: string): Promise<number>;
   expire(key: string, seconds: number): Promise<unknown>;
+  get(key: string): Promise<string | null>;
 }
 
 const DAY_MS = 86_400_000;
@@ -74,5 +83,22 @@ export class RedisRateLimitStorage implements RateLimitStorage {
     if (dayCount === 1) await this.redis.expire(dayKey, DAY_SECONDS);
 
     return dayCount <= maxPerDay;
+  }
+
+  /**
+   * Reads the current daily counter without incrementing. Returns 0 if no calls have
+   * been made in the current UTC-day window (or if the key has expired).
+   */
+  async getCount({
+    daoName,
+    governorAddress,
+    address,
+    operation,
+  }: GetCountParams): Promise<number> {
+    const base = buildKey(daoName, governorAddress, address, operation);
+    const dayKey = dailyKey(base, Date.now());
+
+    const raw = await this.redis.get(dayKey);
+    return raw === null ? 0 : Number(raw);
   }
 }

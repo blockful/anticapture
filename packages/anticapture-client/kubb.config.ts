@@ -7,6 +7,8 @@ import { pluginMsw } from "@kubb/plugin-msw";
 import { pluginOas } from "@kubb/plugin-oas";
 import { pluginReactQuery } from "@kubb/plugin-react-query";
 import { pluginTs } from "@kubb/plugin-ts";
+import { pluginMcp } from "@kubb/plugin-mcp";
+import { pluginZod } from "@kubb/plugin-zod";
 
 const gatefulOpenApiSpecPath = fileURLToPath(
   new URL("../../apps/gateful/openapi/gateful.json", import.meta.url),
@@ -70,6 +72,21 @@ export default defineConfig(({ watch }) => ({
           },
         },
       ],
+    }),
+    pluginZod({
+      output: {
+        path: "zod.ts",
+      },
+    }),
+    pluginMcp({
+      output: {
+        path: "./mcp",
+        barrelType: "named",
+      },
+      group: {
+        type: "tag",
+        name: ({ group }) => `${group}Handlers`,
+      },
     }),
     pluginFaker({
       output: {
