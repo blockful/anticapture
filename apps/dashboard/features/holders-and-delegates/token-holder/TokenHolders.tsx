@@ -167,13 +167,15 @@ export const TokenHolders = ({
 
         return (
           <div className="group flex w-full items-center">
-            <EnsAvatar
-              address={addressValue as Address}
-              size="sm"
-              variant="rounded"
-              isDashed={true}
-              nameClassName="[tr:hover_&]:border-primary"
-            />
+            <div className="min-w-0 flex-1">
+              <EnsAvatar
+                address={addressValue as Address}
+                size="sm"
+                variant="rounded"
+                isDashed={true}
+                nameClassName="[tr:hover_&]:border-primary"
+              />
+            </div>
             {!isMobile && (
               <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
                 <CopyAndPasteButton
