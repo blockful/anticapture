@@ -126,10 +126,11 @@ export const delegateTo = async (
   onTxHash: (hash: `0x${string}`) => void,
   chain?: Chain,
   daoId?: DaoIdEnum,
+  useGasless: boolean = false,
 ) => {
   const client = walletClient.extend(publicActions) as DelegateClient;
 
-  if (daoId && daoConfigByDaoId[daoId].gaslessRelayer?.enabled) {
+  if (useGasless && daoId && daoConfigByDaoId[daoId].gaslessRelayer) {
     return gaslessDelegate(
       client,
       daoId,

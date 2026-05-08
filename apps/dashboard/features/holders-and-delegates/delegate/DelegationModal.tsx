@@ -12,10 +12,15 @@ import {
   isUserRejection,
   mapRelayerError,
 } from "@/shared/utils/gaslessRelayerError";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { SpinIcon } from "@/shared/components/icons/SpinIcon";
 import daoConfigByDaoId from "@/shared/dao-config";
+import {
+  useGaslessEligibility,
+  useRelayerConfig,
+} from "@/shared/hooks/useGaslessRelayer";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { cn } from "@/shared/utils/cn";
@@ -60,6 +65,10 @@ export const DelegationModal = ({
   const { data: walletClient } = useWalletClient({ chainId: chain?.id });
   const decimals = daoConfig?.decimals ?? 18;
 
+  const { minVotingPower } = useRelayerConfig(daoId);
+  const { isEligible: isGaslessEligible, remaining: delegationRemaining } =
+    useGaslessEligibility(daoId, userAddress, "delegate");
+
   const { data: votingPowerRaw } = useReadContract({
     abi: ERC20VotesAbi,
     address: tokenAddress,
@@ -89,6 +98,7 @@ export const DelegationModal = ({
         () => setStep("pending-tx"),
         chain,
         daoId,
+        isGaslessEligible,
       );
       setStep("success");
       showCustomToast("Delegation successful!", "success");
@@ -100,11 +110,10 @@ export const DelegationModal = ({
         return;
       }
 
-      const gasless = daoConfig?.gaslessRelayer;
-      if (gasless?.enabled) {
+      if (isGaslessEligible && daoConfig?.gaslessRelayer) {
         const message = mapRelayerError(err, {
           operation: "delegate",
-          minVotingPower: gasless.minVotingPower,
+          minVotingPower,
           decimals,
           symbol: daoConfig.name,
         });
@@ -128,6 +137,8 @@ export const DelegationModal = ({
     daoId,
     daoConfig,
     decimals,
+    minVotingPower,
+    isGaslessEligible,
   ]);
 
   useEffect(() => {
@@ -166,6 +177,19 @@ export const DelegationModal = ({
             showCopyAddress={false}
           />
         </div>
+        {isGaslessEligible && delegationRemaining !== null && (
+          <InlineAlert
+            variant="success"
+            text={
+              delegationRemaining === 1
+                ? "This delegation is free! Last one for today — refreshes tomorrow."
+                : `This delegation is free! You'll still have ${
+                    delegationRemaining - 1
+                  } left to use today.`
+            }
+            className="mt-2"
+          />
+        )}
       </div>
 
       {/* Stepper */}

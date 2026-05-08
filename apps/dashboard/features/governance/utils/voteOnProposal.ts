@@ -158,8 +158,8 @@ const gaslessVoteHandler =
     return response.transactionHash as `0x${string}`;
   };
 
-function getVoteHandler(daoId: DaoIdEnum): VoteHandler {
-  if (daoConfigByDaoId[daoId].gaslessRelayer?.enabled) {
+function getVoteHandler(daoId: DaoIdEnum, useGasless: boolean): VoteHandler {
+  if (useGasless && daoConfigByDaoId[daoId].gaslessRelayer) {
     return gaslessVoteHandler(daoId);
   }
   switch (daoId) {
@@ -179,12 +179,14 @@ export const voteOnProposal = async (
   walletClient: WalletClient,
   setTransactionhash: (hash: string) => void,
   comment?: string,
+  minVotingPower: bigint | null = null,
+  useGasless: boolean = false,
 ) => {
   const client = walletClient.extend(publicActions);
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
 
   try {
-    const handler = getVoteHandler(daoId);
+    const handler = getVoteHandler(daoId, useGasless);
     const hash = await handler(client as VoteClient, {
       proposalId,
       voteNumber,
@@ -202,10 +204,10 @@ export const voteOnProposal = async (
     if (isUserRejection(error)) return null;
 
     const config = daoConfigByDaoId[daoId];
-    if (config.gaslessRelayer?.enabled) {
+    if (useGasless && config.gaslessRelayer) {
       const message = mapRelayerError(error, {
         operation: "vote",
-        minVotingPower: config.gaslessRelayer.minVotingPower,
+        minVotingPower,
         decimals: config.decimals,
         symbol: config.name,
       });

@@ -170,8 +170,5 @@ export interface DaoConfiguration extends BaseInfo {
   overviewPage?: boolean;
   /** When set, visiting /{daoId}/ redirects to /{daoId}/{initialPage}. */
   initialPage?: DaoFeaturePageSlug;
-  gaslessRelayer?: {
-    enabled: boolean;
-    minVotingPower: bigint;
-  };
+  gaslessRelayer?: true;
 }

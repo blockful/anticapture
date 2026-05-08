@@ -1,6 +1,10 @@
 import { formatUnits } from "viem";
 
-import type { ErrorResponse, ResponseErrorConfig } from "@anticapture/client";
+import type {
+  ErrorResponse,
+  RelayerErrorResponse,
+  ResponseErrorConfig,
+} from "@anticapture/client";
 
 const INSUFFICIENT_VOTING_POWER = "INSUFFICIENT_VOTING_POWER";
 const RATE_LIMITED = "RATE_LIMITED";
@@ -16,16 +20,21 @@ export const mapRelayerError = (
   error: unknown,
   context: {
     operation: "vote" | "delegate";
-    minVotingPower: bigint;
+    minVotingPower: bigint | null;
     decimals: number;
     symbol: string;
   },
 ): string => {
-  const relayerError = error as ResponseErrorConfig<ErrorResponse> | undefined;
+  const relayerError = error as
+    | ResponseErrorConfig<ErrorResponse | RelayerErrorResponse>
+    | undefined;
   const code = relayerError?.response?.data?.code;
   const status = relayerError?.status;
 
   if (code === INSUFFICIENT_VOTING_POWER) {
+    if (context.minVotingPower === null) {
+      return `You don't have sufficient voting power to ${context.operation}.`;
+    }
     const formatted = formatThreshold(
       context.minVotingPower,
       context.decimals,

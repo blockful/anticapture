@@ -372,8 +372,5 @@ export const ENS: DaoConfiguration = {
   governancePage: true,
   serviceProviders: true,
   offchainProposals: true,
-  gaslessRelayer: {
-    enabled: true,
-    minVotingPower: 1n * 10n ** 18n,
-  },
+  gaslessRelayer: true,
 };
