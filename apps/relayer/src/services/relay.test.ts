@@ -173,11 +173,25 @@ describe("RelayService", () => {
       expect(result).toEqual({ hash: TX_HASH, signer: VOTER });
     });
 
-    it("rejects when neither voting power nor balance meets threshold", async () => {
+    it("rejects when balance is below threshold", async () => {
       const service = createService({
         chainState: createStubChainState({
-          getVotingPower: async () => 999n,
+          getVotingPower: async () => 0n,
           getTokenBalance: async () => 500n,
+        }),
+        minVotingPower: 1000n,
+      });
+
+      await expect(service.relayDelegation(delegateParams)).rejects.toThrow(
+        "minimum voting power",
+      );
+    });
+
+    it("rejects delegate-of-whale: voting power alone does not qualify", async () => {
+      const service = createService({
+        chainState: createStubChainState({
+          getVotingPower: async () => 5000n,
+          getTokenBalance: async () => 0n,
         }),
         minVotingPower: 1000n,
       });
