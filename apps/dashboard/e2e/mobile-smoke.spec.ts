@@ -14,14 +14,11 @@ test.describe("Mobile smoke tests", () => {
     });
   });
 
-  test("DAO Overview (/ens) renders heading on mobile", async ({
-    goto,
-    page,
-  }) => {
+  test("DAO Overview (/ens) renders on mobile", async ({ goto, page }) => {
     await goto("/ens");
-    await expect(
-      page.locator("h4").filter({ hasText: "DAO Overview" }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("h3").filter({ hasText: "ENS" })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("Holders & Delegates (/ens/holders-and-delegates) renders heading on mobile", async ({

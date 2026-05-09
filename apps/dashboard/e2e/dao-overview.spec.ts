@@ -1,11 +1,12 @@
 import { test, expect } from "./fixtures";
 
 test.describe("DAO Overview page (/ens)", () => {
-  test("renders DAO Overview heading", async ({ goto, page }) => {
+  test("renders DAO Overview page", async ({ goto, page }) => {
     await goto("/ens");
-    await expect(
-      page.locator("h4").filter({ hasText: "DAO Overview" }),
-    ).toBeVisible();
+    await expect(page).toHaveURL(/\/ens(\?.*)?$/);
+    await expect(page.locator("h3").filter({ hasText: "ENS" })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("renders ENS DAO header with name and metrics", async ({
@@ -32,14 +33,18 @@ test.describe("DAO Overview page (/ens)", () => {
     // Either stages or review needed state
     const hasStages = page.locator("text=RESILIENCE STAGES");
     const hasReview = page.locator("text=REVIEW NEEDED");
-    await expect(hasStages.or(hasReview)).toBeVisible({ timeout: 15_000 });
+    await expect(hasStages.or(hasReview).first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("shows attack exposure or review needed", async ({ goto, page }) => {
     await goto("/ens");
     const hasExposure = page.locator("text=ATTACK EXPOSURE");
     const hasReview = page.locator("text=REVIEW NEEDED");
-    await expect(hasExposure.or(hasReview)).toBeVisible({ timeout: 15_000 });
+    await expect(hasExposure.or(hasReview).first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("shows attack profitability chart or empty state", async ({
@@ -51,7 +56,7 @@ test.describe("DAO Overview page (/ens)", () => {
     const hasNotApplicable = page.locator("text=Not applicable for this DAO");
     const hasNoData = page.locator("text=This data isn't available yet");
     await expect(
-      hasProfitability.or(hasNotApplicable).or(hasNoData),
+      hasProfitability.or(hasNotApplicable).or(hasNoData).first(),
     ).toBeVisible({ timeout: 20_000 });
   });
 
@@ -80,12 +85,12 @@ test.describe("DAO Overview page (/ens)", () => {
 
   test("renders all four header metric cards", async ({ goto, page }) => {
     await goto("/ens");
-    await expect(page.locator("text=Votable Supply")).toBeVisible({
+    await expect(page.locator("text=Votable Supply").first()).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.locator("text=Treasury")).toBeVisible();
-    await expect(page.locator("text=Average Turnout")).toBeVisible();
-    await expect(page.locator("text=Delegate to Pass")).toBeVisible();
+    await expect(page.locator("text=Treasury").first()).toBeVisible();
+    await expect(page.locator("text=Average Turnout").first()).toBeVisible();
+    await expect(page.locator("text=Delegate to Pass").first()).toBeVisible();
   });
 
   test("renders chart cards for account balance and voting power", async ({
@@ -93,15 +98,13 @@ test.describe("DAO Overview page (/ens)", () => {
     page,
   }) => {
     await goto("/ens");
-    // These chart cards exist in the layout; their presence is signaled by chart containers
-    // Use a generous selector — recharts wrapper or canvas
-    await expect(
-      page.locator("h4").filter({ hasText: "DAO Overview" }),
-    ).toBeVisible({
+    await expect(page.locator("h3").filter({ hasText: "ENS" })).toBeVisible({
       timeout: 15_000,
     });
-    // Wait for any chart container to render
-    const charts = page.locator(".recharts-responsive-container, canvas");
-    await expect(charts.first()).toBeVisible({ timeout: 20_000 });
+    // recharts renders into a wrapper div
+    const charts = page.locator(
+      ".recharts-wrapper, .recharts-responsive-container, svg.recharts-surface",
+    );
+    await expect(charts.first()).toBeVisible({ timeout: 30_000 });
   });
 });

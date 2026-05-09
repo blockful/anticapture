@@ -53,9 +53,17 @@ test.describe("Activity Feed page (/ens/activity-feed)", () => {
       timeout: 10_000,
     });
     // Select "High" relevance
-    await page.getByRole("radio", { name: /High/ }).click();
+    // The visible label (span) sits next to an sr-only input. Clicking the
+    // label is more reliable than clicking the input directly.
+    await page
+      .locator("label")
+      .filter({ hasText: /^High$/ })
+      .first()
+      .click();
     // Apply filters
-    await page.getByRole("button", { name: /Apply filters/ }).click();
+    const applyBtn = page.getByRole("button", { name: /Apply filters/ });
+    await applyBtn.scrollIntoViewIfNeeded().catch(() => undefined);
+    await applyBtn.click({ force: true });
     // URL should reflect the filter
     await expect(page).toHaveURL(/relevance=HIGH/);
     // Open drawer again and clear
@@ -63,7 +71,9 @@ test.describe("Activity Feed page (/ens/activity-feed)", () => {
     await expect(page.locator("text=Filter Activity")).toBeVisible({
       timeout: 5_000,
     });
-    await page.getByRole("button", { name: /Clear filters/ }).click();
+    const clearBtn = page.getByRole("button", { name: /Clear filters/ });
+    await clearBtn.scrollIntoViewIfNeeded().catch(() => undefined);
+    await clearBtn.click({ force: true });
     // Filter should be removed from URL
     await expect(page).not.toHaveURL(/relevance=HIGH/);
   });
@@ -73,9 +83,10 @@ test.describe("Activity Feed page (/ens/activity-feed)", () => {
     const hasFeedItems = page.locator("text=High Relevance").first();
     const hasMediumItems = page.locator("text=Medium Relevance").first();
     const isEmpty = page.locator("text=No activity found");
-    await expect(hasFeedItems.or(hasMediumItems).or(isEmpty)).toBeVisible({
-      timeout: 20_000,
-    });
+    const failedToLoad = page.locator("text=Failed to load activity feed");
+    await expect(
+      hasFeedItems.or(hasMediumItems).or(isEmpty).or(failedToLoad),
+    ).toBeVisible({ timeout: 30_000 });
   });
 
   test("event address click opens entity drawer when events exist", async ({

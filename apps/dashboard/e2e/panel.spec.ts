@@ -78,7 +78,7 @@ test.describe("Panel page", () => {
     });
     // Each column header text should appear in the table thead
     const thead = page.locator("table thead").first();
-    await expect(thead.getByText(/Organizations|Orgs/)).toBeVisible();
+    await expect(thead.getByText(/Organizations|Orgs/).first()).toBeVisible();
     await expect(thead.getByText("Chain")).toBeVisible();
     await expect(thead.getByText("Stage")).toBeVisible();
     await expect(thead.getByText("Attack Exposure")).toBeVisible();
