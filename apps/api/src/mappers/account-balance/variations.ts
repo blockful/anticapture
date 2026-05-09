@@ -56,15 +56,21 @@ export const AccountBalanceVariationsRequestQuerySchema =
 
 export const AccountBalanceVariationSchema = z
   .object({
-    accountId: z.string().openapi({ description: "Account address." }),
+    accountId: z.string().openapi({
+      description: "Account address.",
+      format: "ethereum-address",
+    }),
     previousBalance: z.string().openapi({
       description: "Balance at the start of the comparison window.",
+      format: "bigint",
     }),
     currentBalance: z.string().openapi({
       description: "Balance at the end of the comparison window.",
+      format: "bigint",
     }),
     absoluteChange: z.string().openapi({
       description: "Absolute balance change encoded as a decimal string.",
+      format: "bigint",
     }),
     percentageChange: z.string().openapi({
       description: "Relative balance change encoded as a decimal string.",
