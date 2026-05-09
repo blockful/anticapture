@@ -23,7 +23,8 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 
 type PanelDao = {
-  dao: string;
+  dao: DaoIdEnum;
+  isPartiallyIndexed: boolean;
 };
 
 type SortValuesRef = React.RefObject<Record<number, number>>;
@@ -48,14 +49,20 @@ export const PanelTable = () => {
   const attackProfitabilitySort = useRef<Record<number, number>>({});
   const activeTokensSort = useRef<Record<number, number>>({});
 
-  const allDaos = Object.values(DaoIdEnum).map((daoId) => ({
-    dao: daoId,
-  }));
+  const allDaos = Object.values(DaoIdEnum)
+    .map((daoId) => ({
+      dao: daoId,
+      isPartiallyIndexed: !daoConfigByDaoId[daoId].governanceImplementation,
+    }))
+    .sort(
+      (daoA, daoB) =>
+        Number(daoA.isPartiallyIndexed) - Number(daoB.isPartiallyIndexed),
+    );
 
   const panelColumns: ColumnDef<PanelDao>[] = [
     {
       accessorKey: "dao",
-      cell: ({ row }) => <DaoCell daoId={row.getValue("dao") as DaoIdEnum} />,
+      cell: ({ row }) => <DaoCell daoId={row.original.dao} />,
       header: () => (
         <>
           <h4 className="text-table-header hidden px-4 py-3 md:block">
@@ -68,13 +75,13 @@ export const PanelTable = () => {
     },
     {
       accessorKey: "chain",
-      cell: ({ row }) => <ChainCell daoId={row.getValue("dao") as DaoIdEnum} />,
+      cell: ({ row }) => <ChainCell daoId={row.original.dao} />,
       header: () => <h4 className="text-table-header">Chain</h4>,
       meta: { columnClassName: "w-[8%]" },
     },
     {
       accessorKey: "stage",
-      cell: ({ row }) => <StageCell daoId={row.getValue("dao") as DaoIdEnum} />,
+      cell: ({ row }) => <StageCell daoId={row.original.dao} />,
       header: () => (
         <div className="w-full justify-end px-0 text-left">
           <Tooltip
@@ -96,9 +103,7 @@ export const PanelTable = () => {
     {
       accessorKey: "riskareas",
       cell: ({ row }) => {
-        const daoId = row.getValue("dao") as DaoIdEnum;
-        const isPartiallyIndexed =
-          !daoConfigByDaoId[daoId].governanceImplementation;
+        const { dao: daoId, isPartiallyIndexed } = row.original;
         return <RiskAreasCell daoId={daoId} disabled={isPartiallyIndexed} />;
       },
       header: () => (
@@ -125,7 +130,7 @@ export const PanelTable = () => {
       accessorKey: "costOfAttack",
       cell: ({ row }) => (
         <CostOfAttackCell
-          daoId={row.getValue("dao") as DaoIdEnum}
+          daoId={row.original.dao}
           onSortValueChange={createSortValueHandler(
             costOfAttackSort,
             row.index,
@@ -147,7 +152,7 @@ export const PanelTable = () => {
       accessorKey: "attackProfitability",
       cell: ({ row }) => (
         <AttackProfitabilityCell
-          daoId={row.getValue("dao") as DaoIdEnum}
+          daoId={row.original.dao}
           onSortValueChange={createSortValueHandler(
             attackProfitabilitySort,
             row.index,
@@ -168,10 +173,8 @@ export const PanelTable = () => {
     {
       accessorKey: "activeTokensInGovernance",
       cell: ({ row }) => {
-        const daoId = row.getValue("dao") as DaoIdEnum;
-        const isFullyAnalyzed =
-          !!daoConfigByDaoId[daoId].governanceImplementation;
-        if (isFullyAnalyzed) {
+        const { dao: daoId, isPartiallyIndexed } = row.original;
+        if (!isPartiallyIndexed) {
           return (
             <ActiveTokensCell
               daoId={daoId}
@@ -220,6 +223,20 @@ export const PanelTable = () => {
       data={allDaos}
       withSorting={true}
       stickyFirstColumn={true}
+      pinRowsToBottom={(row) => row.isPartiallyIndexed}
+      getRowClassName={(row, index, rows) => {
+        if (!row.isPartiallyIndexed) return undefined;
+
+        const previousRow = rows[index - 1];
+        const isFirstPartiallyIndexedRow = !previousRow?.isPartiallyIndexed;
+
+        return [
+          "[&_td]:bg-surface-background/60 [&_td]:text-secondary/80",
+          isFirstPartiallyIndexedRow
+            ? "[&_td]:border-t [&_td]:border-light-dark"
+            : "",
+        ].join(" ");
+      }}
     />
   );
 };
