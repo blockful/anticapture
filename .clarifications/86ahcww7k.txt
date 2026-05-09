@@ -1,0 +1,2 @@
+ClickUp task 86ahcww7k is a CRM contact record (Person type), not a software development task.
+No code change is possible. See the draft PR for details.
