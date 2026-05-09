@@ -24,7 +24,7 @@ export interface DelegationHistoryItem {
     from: string;
     value: string;
     to: string;
-    previousDelegate: string | null;
+    previousDelegate?: string | null;
   } | null;
   transfer?: {
     value: string;

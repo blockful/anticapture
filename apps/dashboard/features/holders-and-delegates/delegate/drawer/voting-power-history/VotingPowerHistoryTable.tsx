@@ -93,9 +93,9 @@ export const VotingPowerHistoryTable = ({
         statusText = "Delegator Balance Decrease";
       }
     } else if (item.type === "delegation") {
-      const prev = item.delegation?.previousDelegate;
       const isRedelegation =
-        prev != null && prev !== "" && prev !== zeroAddress;
+        item.delegation?.previousDelegate != null &&
+        item.delegation.previousDelegate !== zeroAddress;
       statusText = isRedelegation ? "Redelegation" : "Delegation";
     }
 
