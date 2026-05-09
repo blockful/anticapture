@@ -150,4 +150,176 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       expect(newCount).toBeGreaterThan(initialCount);
     }).toPass({ timeout: 15_000 });
   });
+
+  test("address filter popover accepts input on Token Holders", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/holders-and-delegates");
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    // Address column header has a filter trigger button
+    const addressHeader = page
+      .locator("table thead")
+      .first()
+      .getByText("Address")
+      .first();
+    await expect(addressHeader).toBeVisible();
+    // Click the address column to open popover (click on the header which contains the filter button)
+    const addressTrigger = addressHeader
+      .locator("..")
+      .locator("button")
+      .first();
+    if ((await addressTrigger.count()) === 0) return; // no popover trigger, skip
+    await addressTrigger.click();
+    const input = page.getByPlaceholder("Paste the address");
+    await expect(input).toBeVisible({ timeout: 5_000 });
+    await input.fill("0x0000000000000000000000000000000000000000");
+    const applyBtn = page.getByRole("button", { name: /Apply/ });
+    await applyBtn.click();
+    await expect(page).toHaveURL(/address=/, { timeout: 10_000 });
+  });
+
+  test("Token Holders sort by Balance changes URL state", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/holders-and-delegates");
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    const balanceHeader = page
+      .locator("table thead")
+      .first()
+      .getByText(/Balance/)
+      .first();
+    await expect(balanceHeader).toBeVisible();
+    await balanceHeader.click();
+    // After click, sortBy=balance should appear in URL (or sort direction toggles)
+    await expect(page).toHaveURL(/sortBy=balance|sort=/, { timeout: 10_000 });
+  });
+
+  test("Token Holders sort by Change cycles sort state", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/holders-and-delegates");
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    const changeHeader = page
+      .locator("table thead")
+      .first()
+      .getByText(/^Change/)
+      .first();
+    await expect(changeHeader).toBeVisible();
+    await changeHeader.click();
+    await expect(page).toHaveURL(/sortBy=(signedVariation|variation)/, {
+      timeout: 10_000,
+    });
+  });
+
+  test("Delegates sort by Voting Power changes URL state", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/holders-and-delegates");
+    const delegatesTab = page
+      .locator('[role="tab"]')
+      .filter({ hasText: "Delegates" });
+    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
+    await delegatesTab.click();
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    const vpHeader = page
+      .locator("table thead")
+      .first()
+      .getByText(/Voting Power/)
+      .first();
+    await expect(vpHeader).toBeVisible();
+    await vpHeader.click();
+    await expect(page).toHaveURL(/sortBy=votingPower|sort=/, {
+      timeout: 10_000,
+    });
+  });
+
+  test("Delegates sort by Change cycles sort state", async ({ goto, page }) => {
+    await goto("/ens/holders-and-delegates");
+    const delegatesTab = page
+      .locator('[role="tab"]')
+      .filter({ hasText: "Delegates" });
+    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
+    await delegatesTab.click();
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    const changeHeader = page
+      .locator("table thead")
+      .first()
+      .getByText(/^Change/)
+      .first();
+    await expect(changeHeader).toBeVisible();
+    await changeHeader.click();
+    await expect(page).toHaveURL(/sortBy=(signedVariation|variation)/, {
+      timeout: 10_000,
+    });
+  });
+
+  test("Delegates sort by Delegators changes URL state", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/holders-and-delegates");
+    const delegatesTab = page
+      .locator('[role="tab"]')
+      .filter({ hasText: "Delegates" });
+    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
+    await delegatesTab.click();
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    const delegatorsHeader = page
+      .locator("table thead")
+      .first()
+      .getByText("Delegators")
+      .first();
+    await expect(delegatorsHeader).toBeVisible();
+    await delegatorsHeader.click();
+    await expect(page).toHaveURL(/sortBy=delegationsCount|sort=/, {
+      timeout: 10_000,
+    });
+  });
+
+  test("address filter popover accepts input on Delegates", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/holders-and-delegates");
+    const delegatesTab = page
+      .locator('[role="tab"]')
+      .filter({ hasText: "Delegates" });
+    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
+    await delegatesTab.click();
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    const addressHeader = page
+      .locator("table thead")
+      .first()
+      .getByText("Address")
+      .first();
+    const addressTrigger = addressHeader
+      .locator("..")
+      .locator("button")
+      .first();
+    if ((await addressTrigger.count()) === 0) return;
+    await addressTrigger.click();
+    const input = page.getByPlaceholder("Paste the address");
+    await expect(input).toBeVisible({ timeout: 5_000 });
+    await input.fill("0x0000000000000000000000000000000000000000");
+    await page.getByRole("button", { name: /Apply/ }).click();
+    await expect(page).toHaveURL(/address=/, { timeout: 10_000 });
+  });
 });

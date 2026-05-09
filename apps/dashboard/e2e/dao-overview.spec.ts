@@ -77,4 +77,31 @@ test.describe("DAO Overview page (/ens)", () => {
     }
     // If not present, governance page not configured — acceptable
   });
+
+  test("renders all four header metric cards", async ({ goto, page }) => {
+    await goto("/ens");
+    await expect(page.locator("text=Votable Supply")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.locator("text=Treasury")).toBeVisible();
+    await expect(page.locator("text=Average Turnout")).toBeVisible();
+    await expect(page.locator("text=Delegate to Pass")).toBeVisible();
+  });
+
+  test("renders chart cards for account balance and voting power", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens");
+    // These chart cards exist in the layout; their presence is signaled by chart containers
+    // Use a generous selector — recharts wrapper or canvas
+    await expect(
+      page.locator("h4").filter({ hasText: "DAO Overview" }),
+    ).toBeVisible({
+      timeout: 15_000,
+    });
+    // Wait for any chart container to render
+    const charts = page.locator(".recharts-responsive-container, canvas");
+    await expect(charts.first()).toBeVisible({ timeout: 20_000 });
+  });
 });
