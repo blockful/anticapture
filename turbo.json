@@ -95,6 +95,16 @@
       "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
+    "test:e2e": {
+      "cache": false,
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BASE_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "NEXT_PUBLIC_WC_PROJECT_ID"
+      ]
+    },
     "codegen": {
       "outputs": ["generated/**"]
     },

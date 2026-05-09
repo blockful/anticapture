@@ -1,0 +1,93 @@
+import { test, expect } from "./fixtures";
+
+test.describe("Governance page (/ens/proposals)", () => {
+  test("renders Proposals heading and description", async ({ goto, page }) => {
+    await goto("/ens/proposals");
+    await expect(
+      page.locator("h4").filter({ hasText: "Proposals" }),
+    ).toBeVisible();
+    await expect(
+      page.locator("text=View and vote on executable proposals"),
+    ).toBeVisible();
+  });
+
+  test("shows Onchain tab as default", async ({ goto, page }) => {
+    await goto("/ens/proposals");
+    const onchainTab = page.getByRole("tab", { name: /Onchain/ });
+    await expect(onchainTab).toBeVisible({ timeout: 15_000 });
+    await expect(onchainTab).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("shows proposal list or explicit empty state on Onchain tab", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/proposals");
+    await expect(page.getByRole("tab", { name: /Onchain/ })).toBeVisible({
+      timeout: 15_000,
+    });
+    const hasProposals = page
+      .getByRole("link")
+      .filter({ has: page.locator("h3") })
+      .first();
+    const isEmpty = page.locator("text=No proposals found");
+    await expect(hasProposals.or(isEmpty)).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("Offchain tab is visible and switchable", async ({ goto, page }) => {
+    await goto("/ens/proposals");
+    const offchainTab = page.getByRole("tab", { name: /Offchain/ });
+    await expect(offchainTab).toBeVisible({ timeout: 15_000 });
+    await offchainTab.click();
+    await expect(offchainTab).toHaveAttribute("aria-selected", "true");
+    await expect(page).toHaveURL(/tab=offchain/);
+    // Check offchain content loads or shows empty state
+    const hasProposals = page
+      .getByRole("link")
+      .filter({ has: page.locator("h3") })
+      .first();
+    const isEmpty = page.locator("text=No off-chain proposals found");
+    await expect(hasProposals.or(isEmpty)).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("New Proposal button triggers wallet connect when disconnected", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/proposals");
+    const newProposalBtn = page.getByRole("button", { name: /New Proposal/ });
+    const count = await newProposalBtn.count();
+    if (count === 0) return; // DAO doesn't support proposals, skip
+    await expect(newProposalBtn).toBeVisible({ timeout: 15_000 });
+    await newProposalBtn.click();
+    // Wallet connect modal should open (RainbowKit)
+    await expect(
+      page
+        .locator("text=Connect Wallet")
+        .or(page.locator("text=Connect a Wallet")),
+    ).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("navigates to first proposal detail when proposals exist", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/proposals");
+    await expect(page.getByRole("tab", { name: /Onchain/ })).toBeVisible({
+      timeout: 15_000,
+    });
+    const proposalLinks = page
+      .getByRole("link")
+      .filter({ has: page.locator("h3") });
+    const count = await proposalLinks.count();
+    if (count === 0) return; // no proposals live, skip
+    const href = await proposalLinks.first().getAttribute("href");
+    await proposalLinks.first().click();
+    await expect(page).toHaveURL(/\/ens\/proposals\//, { timeout: 15_000 });
+    if (href) {
+      await expect(page).toHaveURL(
+        new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+      );
+    }
+  });
+});
