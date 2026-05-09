@@ -1,10 +1,8 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
-import { cn } from "@/shared/utils/cn";
 import {
   DaoCell,
   ChainCell,
@@ -45,15 +43,7 @@ const createSortingFn = (ref: SortValuesRef) => {
     (ref.current[rowA.index] ?? 0) - (ref.current[rowB.index] ?? 0);
 };
 
-const TABS = {
-  FULLY_ANALYZED: "fully-analyzed",
-  NOT_REVIEWED: "not-reviewed",
-} as const;
-
-type TabValue = (typeof TABS)[keyof typeof TABS];
-
 export const PanelTable = () => {
-  const [activeTab, setActiveTab] = useState<TabValue>(TABS.FULLY_ANALYZED);
   const costOfAttackSort = useRef<Record<number, number>>({});
   const attackProfitabilitySort = useRef<Record<number, number>>({});
   const activeTokensSort = useRef<Record<number, number>>({});
@@ -61,16 +51,6 @@ export const PanelTable = () => {
   const allDaos = Object.values(DaoIdEnum).map((daoId) => ({
     dao: daoId,
   }));
-
-  const fullyAnalyzedDaos = allDaos.filter(
-    ({ dao }) => !!daoConfigByDaoId[dao].governanceImplementation,
-  );
-  const notReviewedDaos = allDaos.filter(
-    ({ dao }) => !daoConfigByDaoId[dao].governanceImplementation,
-  );
-
-  const data =
-    activeTab === TABS.FULLY_ANALYZED ? fullyAnalyzedDaos : notReviewedDaos;
 
   const panelColumns: ColumnDef<PanelDao>[] = [
     {
@@ -115,12 +95,12 @@ export const PanelTable = () => {
     },
     {
       accessorKey: "riskareas",
-      cell: ({ row }) => (
-        <RiskAreasCell
-          daoId={row.getValue("dao") as DaoIdEnum}
-          disabled={activeTab === TABS.NOT_REVIEWED}
-        />
-      ),
+      cell: ({ row }) => {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        const isPartiallyIndexed =
+          !daoConfigByDaoId[daoId].governanceImplementation;
+        return <RiskAreasCell daoId={daoId} disabled={isPartiallyIndexed} />;
+      },
       header: () => (
         <div className="w-full justify-end px-0 text-left lg:px-4">
           <Tooltip
@@ -188,10 +168,13 @@ export const PanelTable = () => {
     {
       accessorKey: "activeTokensInGovernance",
       cell: ({ row }) => {
-        if (activeTab === TABS.FULLY_ANALYZED) {
+        const daoId = row.getValue("dao") as DaoIdEnum;
+        const isFullyAnalyzed =
+          !!daoConfigByDaoId[daoId].governanceImplementation;
+        if (isFullyAnalyzed) {
           return (
             <ActiveTokensCell
-              daoId={row.getValue("dao") as DaoIdEnum}
+              daoId={daoId}
               onSortValueChange={createSortValueHandler(
                 activeTokensSort,
                 row.index,
@@ -232,48 +215,11 @@ export const PanelTable = () => {
   ];
 
   return (
-    <div className="flex flex-col">
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as TabValue)}
-      >
-        <TabsList className="mb-4 flex border-b border-b-white/10 text-sm">
-          <TabsTrigger
-            value={TABS.FULLY_ANALYZED}
-            className={cn(
-              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 font-medium",
-              "data-[state=active]:text-link",
-              "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
-              "data-[state=active]:after:bg-surface-solid-brand",
-            )}
-          >
-            Fully Analyzed
-            <span className="bg-surface-contrast text-secondary w-6 rounded-md px-1.5 py-0.5">
-              {fullyAnalyzedDaos.length}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger
-            value={TABS.NOT_REVIEWED}
-            className={cn(
-              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 font-medium",
-              "data-[state=active]:text-link",
-              "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
-              "data-[state=active]:after:bg-surface-solid-brand",
-            )}
-          >
-            Not Reviewed
-            <span className="bg-surface-contrast text-secondary w-6 rounded-md px-1.5 py-0.5">
-              {notReviewedDaos.length}
-            </span>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      <Table
-        columns={panelColumns}
-        data={data}
-        withSorting={true}
-        stickyFirstColumn={true}
-      />
-    </div>
+    <Table
+      columns={panelColumns}
+      data={allDaos}
+      withSorting={true}
+      stickyFirstColumn={true}
+    />
   );
 };

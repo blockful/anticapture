@@ -46,13 +46,23 @@ export const StageCell = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   if (!daoConfig.governanceImplementation) {
     return (
-      <div className="scrollbar-none text-primary flex items-center gap-3 space-x-1 overflow-auto">
-        <div className="bg-surface-contrast inline-flex h-7 items-center px-2 py-1">
-          <span className="text-secondary text-alternative-sm whitespace-nowrap font-mono text-[13px] font-medium leading-[20px]">
-            NEEDS REVIEW
-          </span>
+      <Tooltip
+        tooltipContent={
+          <p className="text-secondary text-sm font-normal leading-5">
+            Some features are available for this DAO. Full analysis and all
+            features coming soon.
+          </p>
+        }
+        triggerClassName="w-full"
+      >
+        <div className="scrollbar-none text-primary flex items-center gap-3 space-x-1 overflow-auto">
+          <div className="bg-surface-contrast inline-flex h-7 items-center px-2 py-1">
+            <span className="text-secondary text-alternative-sm whitespace-nowrap font-mono text-[13px] font-medium leading-[20px]">
+              NOT ASSESSED
+            </span>
+          </div>
         </div>
-      </div>
+      </Tooltip>
     );
   }
 
