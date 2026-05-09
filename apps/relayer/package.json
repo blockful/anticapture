@@ -1,0 +1,41 @@
+{
+  "name": "@anticapture/relayer",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node --import ./dist/instrumentation.js dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run src/",
+    "test:e2e": "dotenv -- vitest run --testTimeout 30000 e2e/",
+    "test:watch": "vitest",
+    "lint": "eslint src e2e",
+    "lint:fix": "eslint src e2e --fix",
+    "clean": "rm -rf node_modules dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@anticapture/observability": "workspace:*",
+    "@hono/node-server": "^1.19.9",
+    "@hono/zod-openapi": "^1.2.2",
+    "dotenv": "^16.5.0",
+    "hono": "^4.7.10",
+    "redis": "^4.7.1",
+    "viem": "^2.41.2",
+    "zod": "^4.3.6",
+    "zod-validation-error": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "eslint": "^9",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "msw": "^2.7.0",
+    "prettier": "^3.5.3",
+    "prool": "^0.2.4",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.0.5"
+  }
+}
