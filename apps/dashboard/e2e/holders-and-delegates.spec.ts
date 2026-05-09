@@ -106,4 +106,48 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       page.locator('[role="tab"]').filter({ hasText: "Voting Power History" }),
     ).toBeVisible();
   });
+
+  test("infinite scroll loads more token holders when available", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/holders-and-delegates");
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    const rows = page.locator("tbody tr");
+    await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+    const initialCount = await rows.count();
+    // Page size is 20. Need at least one full page to test pagination.
+    if (initialCount < 20) return;
+    await rows.last().scrollIntoViewIfNeeded();
+    await expect(async () => {
+      const newCount = await rows.count();
+      expect(newCount).toBeGreaterThan(initialCount);
+    }).toPass({ timeout: 15_000 });
+  });
+
+  test("infinite scroll loads more delegates when available", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/holders-and-delegates");
+    const delegatesTab = page
+      .locator('[role="tab"]')
+      .filter({ hasText: "Delegates" });
+    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
+    await delegatesTab.click();
+    await expect(page.locator("table").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    const rows = page.locator("tbody tr");
+    await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+    const initialCount = await rows.count();
+    if (initialCount < 20) return;
+    await rows.last().scrollIntoViewIfNeeded();
+    await expect(async () => {
+      const newCount = await rows.count();
+      expect(newCount).toBeGreaterThan(initialCount);
+    }).toPass({ timeout: 15_000 });
+  });
 });

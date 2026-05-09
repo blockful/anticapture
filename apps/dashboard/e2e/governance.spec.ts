@@ -90,4 +90,26 @@ test.describe("Governance page (/ens/proposals)", () => {
       );
     }
   });
+
+  test("infinite scroll loads more onchain proposals when available", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens/proposals");
+    await expect(page.getByRole("tab", { name: /Onchain/ })).toBeVisible({
+      timeout: 15_000,
+    });
+    const proposalLinks = page
+      .getByRole("link")
+      .filter({ has: page.locator("h3") });
+    await expect(proposalLinks.first()).toBeVisible({ timeout: 20_000 });
+    const initialCount = await proposalLinks.count();
+    // Page size is 10. Need at least one full page to test pagination.
+    if (initialCount < 10) return;
+    await proposalLinks.last().scrollIntoViewIfNeeded();
+    await expect(async () => {
+      const newCount = await proposalLinks.count();
+      expect(newCount).toBeGreaterThan(initialCount);
+    }).toPass({ timeout: 15_000 });
+  });
 });
