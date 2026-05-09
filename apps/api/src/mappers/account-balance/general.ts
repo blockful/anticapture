@@ -85,21 +85,31 @@ export const AccountBalanceRequestQuerySchema = z
 
 export const AccountBalanceResponseSchema = z
   .object({
-    address: z.string().openapi({ description: "Account address." }),
+    address: z.string().openapi({
+      description: "Account address.",
+      format: "ethereum-address",
+    }),
     balance: z.string().openapi({
       description: "Current token balance encoded as a decimal string.",
+      format: "bigint",
     }),
-    tokenId: z.string().openapi({ description: "Token contract address." }),
-    delegate: z.string().openapi({ description: "Current delegate address." }),
+    tokenId: z.string().openapi({
+      description: "Token contract address.",
+      format: "ethereum-address",
+    }),
+    delegate: z.string().openapi({
+      description: "Current delegate address.",
+      format: "ethereum-address",
+    }),
   })
   .openapi("AccountBalance");
 
 export const AccountBalanceWithVariationSchema = z
   .object({
-    address: z.string(),
-    balance: z.string(),
-    tokenId: z.string(),
-    delegate: z.string(),
+    address: z.string().openapi({ format: "ethereum-address" }),
+    balance: z.string().openapi({ format: "bigint" }),
+    tokenId: z.string().openapi({ format: "ethereum-address" }),
+    delegate: z.string().openapi({ format: "ethereum-address" }),
     variation: AccountBalanceVariationSchema,
   })
   .openapi("AccountBalanceWithVariation");

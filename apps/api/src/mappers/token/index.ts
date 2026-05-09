@@ -53,14 +53,14 @@ export const TokenPropertiesSchema = z
       example: 18,
       type: "integer",
     }),
-    totalSupply: z.string(),
-    delegatedSupply: z.string(),
-    cexSupply: z.string(),
-    dexSupply: z.string(),
-    lendingSupply: z.string(),
-    circulatingSupply: z.string(),
-    nonCirculatingSupply: z.string(),
-    treasury: z.string(),
+    totalSupply: z.string().openapi({ format: "bigint" }),
+    delegatedSupply: z.string().openapi({ format: "bigint" }),
+    cexSupply: z.string().openapi({ format: "bigint" }),
+    dexSupply: z.string().openapi({ format: "bigint" }),
+    lendingSupply: z.string().openapi({ format: "bigint" }),
+    circulatingSupply: z.string().openapi({ format: "bigint" }),
+    nonCirculatingSupply: z.string().openapi({ format: "bigint" }),
+    treasury: z.string().openapi({ format: "bigint" }),
   })
   .openapi("TokenProperties", {
     description:
@@ -84,8 +84,8 @@ export const TokenDistributionComparisonQuerySchema = z
 
 export const SupplyComparisonResponseSchema = z
   .object({
-    previousValue: z.string(),
-    currentValue: z.string(),
+    previousValue: z.string().openapi({ format: "bigint" }),
+    currentValue: z.string().openapi({ format: "bigint" }),
     changeRate: z.number(),
   })
   .openapi("SupplyComparisonResponse", {
