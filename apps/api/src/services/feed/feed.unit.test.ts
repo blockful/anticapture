@@ -8,14 +8,19 @@ import { DBFeedEvent, FeedRequest } from "@/mappers";
 
 import { FeedService } from ".";
 
+type FeedEventWithMetadata = DBFeedEvent & {
+  metadata: Record<string, unknown> | null;
+};
+
 const createFeedEvent = (
-  overrides: Partial<DBFeedEvent> = {},
-): DBFeedEvent => ({
+  overrides: Partial<FeedEventWithMetadata> = {},
+): FeedEventWithMetadata => ({
   txHash: "0xabc123",
   logIndex: 0,
   type: "VOTE",
   value: parseEther("100000"),
   timestamp: 1700000000,
+  proposalId: null,
   metadata: null,
   ...overrides,
 });
@@ -30,7 +35,7 @@ const createRequest = (overrides: Partial<FeedRequest> = {}): FeedRequest => ({
 });
 
 class SimpleFeedRepository {
-  items: DBFeedEvent[] = [];
+  items: FeedEventWithMetadata[] = [];
 
   async getFeedEvents(
     _req: FeedRequest,
@@ -96,6 +101,7 @@ describe("FeedService", () => {
         type: "DELEGATION",
         value: event.value.toString(),
         timestamp: 1700001000,
+        proposalId: null,
         metadata: { from: "0x1", to: "0x2" },
         relevance: FeedRelevance.MEDIUM,
       });

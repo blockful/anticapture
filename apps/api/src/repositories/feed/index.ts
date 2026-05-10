@@ -1,17 +1,70 @@
-import { and, asc, desc, eq, gte, lte, or, SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  inArray,
+  lte,
+  or,
+  SQL,
+  sql,
+} from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
-import { feedEvent, ReadonlyDrizzle } from "@/database";
+import {
+  accountPower,
+  delegation,
+  feedEvent,
+  proposalsOnchain,
+  ReadonlyDrizzle,
+  transfer,
+  votesOnchain,
+} from "@/database";
 import { FeedEventType } from "@/lib/constants";
 import { DBFeedEvent, FeedRequest } from "@/mappers";
+
+type DelegationMeta = {
+  delegator: string;
+  delegate: string;
+  previousDelegate: string | null;
+  amount: string;
+};
+type TransferMeta = { from: string; to: string; amount: string };
+type VoteMeta = {
+  voter: string;
+  reason: string | null;
+  support: number;
+  votingPower: string;
+  proposalId: string;
+  title: string | undefined;
+};
+type ProposalMeta = {
+  id: string;
+  proposer: string;
+  votingPower: string;
+  title: string;
+};
+type ProposalExtendedMeta = {
+  id: string;
+  title: string;
+  endBlock: number;
+  endTimestamp: string;
+  proposer: string;
+};
+
+type EnrichedFeedEvent = DBFeedEvent & {
+  metadata: Record<string, unknown> | null;
+};
 
 export class FeedRepository {
   constructor(private readonly db: ReadonlyDrizzle) {}
 
   async getFeedEvents(
     req: FeedRequest,
-    valueThresholds: Record<FeedEventType, bigint>,
+    valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ): Promise<{
-    items: DBFeedEvent[];
+    items: EnrichedFeedEvent[];
     totalCount: number;
   }> {
     const { skip, limit, orderBy, orderDirection, type, fromDate, toDate } =
@@ -30,7 +83,7 @@ export class FeedRepository {
     const orderByFn =
       orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn);
 
-    const [items, totalCount] = await Promise.all([
+    const [rows, totalCount] = await Promise.all([
       this.db.query.feedEvent.findMany({
         where,
         orderBy: orderByFn,
@@ -40,35 +93,285 @@ export class FeedRepository {
       this.db.$count(feedEvent, where),
     ]);
 
-    return {
-      items,
-      totalCount,
-    };
+    const items = await this.enrichWithMetadata(rows);
+
+    return { items, totalCount };
+  }
+
+  private async enrichWithMetadata(
+    rows: DBFeedEvent[],
+  ): Promise<EnrichedFeedEvent[]> {
+    if (rows.length === 0) return [];
+
+    const delegationKeys = rows
+      .filter((r) => r.type === FeedEventType.DELEGATION)
+      .map((r) => ({ txHash: r.txHash, logIndex: r.logIndex }));
+    const transferKeys = rows
+      .filter((r) => r.type === FeedEventType.TRANSFER)
+      .map((r) => ({ txHash: r.txHash, logIndex: r.logIndex }));
+    const voteKeys = rows
+      .filter((r) => r.type === FeedEventType.VOTE)
+      .map((r) => ({ txHash: r.txHash, logIndex: r.logIndex }));
+    const proposalIds = Array.from(
+      new Set(
+        rows
+          .filter(
+            (r) =>
+              r.type === FeedEventType.PROPOSAL ||
+              r.type === FeedEventType.PROPOSAL_EXTENDED,
+          )
+          .map((r) => r.proposalId)
+          .filter((id): id is string => id != null),
+      ),
+    );
+
+    const [delegations, transfers, votes, proposals] = await Promise.all([
+      this.fetchDelegations(delegationKeys),
+      this.fetchTransfers(transferKeys),
+      this.fetchVotes(voteKeys),
+      this.fetchProposals(proposalIds),
+    ]);
+
+    const delegationByKey = new Map(
+      delegations.map((d) => [`${d.transactionHash}:${d.logIndex}`, d]),
+    );
+    const transferByKey = new Map(
+      transfers.map((t) => [`${t.transactionHash}:${t.logIndex}`, t]),
+    );
+    const voteByKey = new Map(
+      votes.map((v) => [`${v.txHash}:${v.logIndex}`, v]),
+    );
+    const proposalById = new Map(proposals.map((p) => [p.id, p]));
+
+    return rows.map((row) => ({
+      ...row,
+      metadata: this.buildMetadata(row, {
+        delegationByKey,
+        transferByKey,
+        voteByKey,
+        proposalById,
+      }),
+    }));
+  }
+
+  private buildMetadata(
+    row: DBFeedEvent,
+    lookups: {
+      delegationByKey: Map<string, DelegationRow>;
+      transferByKey: Map<string, TransferRow>;
+      voteByKey: Map<string, VoteRow>;
+      proposalById: Map<string, ProposalRow>;
+    },
+  ): Record<string, unknown> | null {
+    const key = `${row.txHash}:${row.logIndex}`;
+    switch (row.type) {
+      case FeedEventType.DELEGATION: {
+        const d = lookups.delegationByKey.get(key);
+        if (!d) return null;
+        const meta: DelegationMeta = {
+          delegator: d.delegatorAccountId,
+          delegate: d.delegateAccountId,
+          previousDelegate: d.previousDelegate,
+          amount: d.delegatedValue.toString(),
+        };
+        return meta;
+      }
+      case FeedEventType.TRANSFER: {
+        const t = lookups.transferByKey.get(key);
+        if (!t) return null;
+        const meta: TransferMeta = {
+          from: t.fromAccountId,
+          to: t.toAccountId,
+          amount: t.amount.toString(),
+        };
+        return meta;
+      }
+      case FeedEventType.VOTE: {
+        const v = lookups.voteByKey.get(key);
+        if (!v) return null;
+        const meta: VoteMeta = {
+          voter: v.voterAccountId,
+          reason: v.reason,
+          support: Number(v.support),
+          votingPower: v.votingPower.toString(),
+          proposalId: v.proposalId,
+          title: v.proposalTitle ?? undefined,
+        };
+        return meta;
+      }
+      case FeedEventType.PROPOSAL: {
+        if (!row.proposalId) return null;
+        const p = lookups.proposalById.get(row.proposalId);
+        if (!p) return null;
+        const meta: ProposalMeta = {
+          id: p.id,
+          proposer: p.proposerAccountId,
+          votingPower: (p.proposerVotingPower ?? 0n).toString(),
+          title: p.title,
+        };
+        return meta;
+      }
+      case FeedEventType.PROPOSAL_EXTENDED: {
+        if (!row.proposalId) return null;
+        const p = lookups.proposalById.get(row.proposalId);
+        if (!p) return null;
+        const meta: ProposalExtendedMeta = {
+          id: p.id,
+          title: p.title,
+          endBlock: p.endBlock,
+          endTimestamp: p.endTimestamp.toString(),
+          proposer: p.proposerAccountId,
+        };
+        return meta;
+      }
+      default:
+        return null;
+    }
+  }
+
+  private async fetchDelegations(
+    keys: { txHash: string; logIndex: number }[],
+  ): Promise<DelegationRow[]> {
+    if (keys.length === 0) return [];
+    return this.db
+      .select({
+        transactionHash: delegation.transactionHash,
+        logIndex: delegation.logIndex,
+        delegatorAccountId: delegation.delegatorAccountId,
+        delegateAccountId: delegation.delegateAccountId,
+        previousDelegate: delegation.previousDelegate,
+        delegatedValue: delegation.delegatedValue,
+      })
+      .from(delegation)
+      .where(
+        buildKeyFilter(delegation.transactionHash, delegation.logIndex, keys),
+      );
+  }
+
+  private async fetchTransfers(
+    keys: { txHash: string; logIndex: number }[],
+  ): Promise<TransferRow[]> {
+    if (keys.length === 0) return [];
+    return this.db
+      .select({
+        transactionHash: transfer.transactionHash,
+        logIndex: transfer.logIndex,
+        fromAccountId: transfer.fromAccountId,
+        toAccountId: transfer.toAccountId,
+        amount: transfer.amount,
+      })
+      .from(transfer)
+      .where(buildKeyFilter(transfer.transactionHash, transfer.logIndex, keys));
+  }
+
+  private async fetchVotes(
+    keys: { txHash: string; logIndex: number }[],
+  ): Promise<VoteRow[]> {
+    if (keys.length === 0) return [];
+    return this.db
+      .select({
+        txHash: votesOnchain.txHash,
+        logIndex: votesOnchain.logIndex,
+        voterAccountId: votesOnchain.voterAccountId,
+        proposalId: votesOnchain.proposalId,
+        support: votesOnchain.support,
+        votingPower: votesOnchain.votingPower,
+        reason: votesOnchain.reason,
+        proposalTitle: proposalsOnchain.title,
+      })
+      .from(votesOnchain)
+      .leftJoin(
+        proposalsOnchain,
+        eq(votesOnchain.proposalId, proposalsOnchain.id),
+      )
+      .where(buildKeyFilter(votesOnchain.txHash, votesOnchain.logIndex, keys));
+  }
+
+  private async fetchProposals(proposalIds: string[]): Promise<ProposalRow[]> {
+    if (proposalIds.length === 0) return [];
+    return this.db
+      .select({
+        id: proposalsOnchain.id,
+        proposerAccountId: proposalsOnchain.proposerAccountId,
+        title: proposalsOnchain.title,
+        endBlock: proposalsOnchain.endBlock,
+        endTimestamp: proposalsOnchain.endTimestamp,
+        proposerVotingPower: accountPower.votingPower,
+      })
+      .from(proposalsOnchain)
+      .leftJoin(
+        accountPower,
+        eq(accountPower.accountId, proposalsOnchain.proposerAccountId),
+      )
+      .where(inArray(proposalsOnchain.id, proposalIds));
   }
 
   private buildRelevanceFilter(
-    type: FeedEventType | undefined,
-    valueThresholds: Record<FeedEventType, bigint>,
+    types: FeedEventType[] | undefined,
+    valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ): SQL | undefined {
     const conditions: SQL[] = [];
+    const selectedTypes =
+      types && types.length > 0
+        ? types
+        : (Object.keys(valueThresholds) as FeedEventType[]);
 
-    if (type) {
-      const threshold = valueThresholds[type];
+    for (const eventType of selectedTypes) {
+      const threshold = valueThresholds[eventType];
+      if (threshold === undefined) continue;
       conditions.push(
-        and(eq(feedEvent.type, type), gte(feedEvent.value, threshold))!,
+        and(eq(feedEvent.type, eventType), gte(feedEvent.value, threshold))!,
       );
-    } else {
-      // No type filter - build per-type conditions with OR
-      for (const [eventType, minValue] of Object.entries(valueThresholds)) {
-        conditions.push(
-          and(
-            eq(feedEvent.type, eventType as FeedEventType),
-            gte(feedEvent.value, minValue),
-          )!,
-        );
-      }
     }
 
     return conditions.length > 0 ? or(...conditions) : undefined;
   }
+}
+
+type DelegationRow = {
+  transactionHash: string;
+  logIndex: number;
+  delegatorAccountId: string;
+  delegateAccountId: string;
+  previousDelegate: string | null;
+  delegatedValue: bigint;
+};
+
+type TransferRow = {
+  transactionHash: string;
+  logIndex: number;
+  fromAccountId: string;
+  toAccountId: string;
+  amount: bigint;
+};
+
+type VoteRow = {
+  txHash: string;
+  logIndex: number;
+  voterAccountId: string;
+  proposalId: string;
+  support: string;
+  votingPower: bigint;
+  reason: string | null;
+  proposalTitle: string | null;
+};
+
+type ProposalRow = {
+  id: string;
+  proposerAccountId: string;
+  title: string;
+  endBlock: number;
+  endTimestamp: bigint;
+  proposerVotingPower: bigint | null;
+};
+
+function buildKeyFilter(
+  txHashCol: AnyPgColumn,
+  logIndexCol: AnyPgColumn,
+  keys: { txHash: string; logIndex: number }[],
+): SQL {
+  return sql`(${txHashCol}, ${logIndexCol}) IN (${sql.join(
+    keys.map((k) => sql`(${k.txHash}, ${k.logIndex})`),
+    sql.raw(", "),
+  )})`;
 }

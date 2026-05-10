@@ -6,6 +6,7 @@ import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import {
   FeedEventTypeSchema,
   FeedRelevanceSchema,
+  normalizeQueryArray,
   OrderDirectionSchema,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
@@ -13,6 +14,22 @@ import {
 } from "../shared";
 
 export type DBFeedEvent = typeof feedEvent.$inferSelect;
+
+const FeedEventTypeValues = Object.values(FeedEventType) as [
+  FeedEventType,
+  ...FeedEventType[],
+];
+
+const FeedEventTypeListSchema = z
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const types = normalizeQueryArray(value);
+    return types
+      ? z
+          .array(z.enum(FeedEventTypeValues))
+          .parse(types.map((type) => String(type).toUpperCase()))
+      : undefined;
+  });
 
 export const FeedRequestSchema = z
   .object({
@@ -34,8 +51,15 @@ export const FeedRequestSchema = z
     relevance: z.enum(FeedRelevance).optional().openapi({
       description: "Filter events by relevance tier.",
     }),
-    type: z.enum(FeedEventType).optional().openapi({
-      description: "Filter events by governance activity type.",
+    type: FeedEventTypeListSchema.optional().openapi("FeedEventTypeList", {
+      type: "array",
+      items: {
+        type: "string",
+        enum: FeedEventTypeValues,
+      },
+      description:
+        "Filter events by governance activity type. Pass repeated query params or a comma-delimited list.",
+      example: ["VOTE"],
     }),
     fromDate: unixTimestampQueryParam(
       "Earliest event timestamp, in Unix seconds.",
