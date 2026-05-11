@@ -40,13 +40,13 @@ export type DelegatorsRequestQuery = z.infer<
 
 export const DelegatorItemSchema = z
   .object({
-    delegatorAddress: AddressSchema,
+    delegatorAddress: AddressSchema.openapi({ format: "ethereum-address" }),
     amount: z
       .union([z.bigint().transform((val) => val.toString()), z.string()])
-      .openapi({ type: "string" }),
+      .openapi({ type: "string", format: "bigint" }),
     timestamp: z
       .union([z.bigint().transform((val) => val.toString()), z.string()])
-      .openapi({ type: "string" }),
+      .openapi({ type: "string", format: "bigint" }),
   })
   .openapi("DelegatorItem", {
     description:

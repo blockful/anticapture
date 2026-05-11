@@ -26,16 +26,20 @@
         "type": "object",
         "properties": {
           "delegatorAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "delegateAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "amount": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "timestamp": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "transactionHash": {
             "type": "string"
@@ -76,13 +80,16 @@
         "type": "object",
         "properties": {
           "delegatorAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "amount": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "timestamp": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         },
         "required": ["delegatorAddress", "amount", "timestamp"],
@@ -181,28 +188,36 @@
             "example": 18
           },
           "totalSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "delegatedSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "cexSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "dexSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "lendingSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "circulatingSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "nonCirculatingSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "treasury": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         },
         "required": [
@@ -271,6 +286,7 @@
           },
           "value": {
             "type": "string",
+            "format": "bigint",
             "description": "Optional event value encoded as a decimal string when applicable."
           },
           "timestamp": {
@@ -324,6 +340,7 @@
         "properties": {
           "threshold": {
             "type": "string",
+            "format": "bigint",
             "description": "Threshold value encoded as a decimal string.",
             "example": "1000000000000000000"
           }
@@ -335,10 +352,12 @@
         "type": "object",
         "properties": {
           "previousValue": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "currentValue": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "changeRate": {
             "type": "number"
@@ -352,6 +371,7 @@
         "properties": {
           "activeSupply": {
             "type": "string",
+            "format": "bigint",
             "description": "Active token supply encoded as a decimal string.",
             "example": "1000000000000000000000000"
           }
@@ -438,6 +458,7 @@
         "properties": {
           "address": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Delegate address."
           },
           "totalProposals": {
@@ -509,6 +530,7 @@
           },
           "proposerAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Address that created the proposal."
           },
           "title": {
@@ -539,14 +561,17 @@
           },
           "forVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Votes cast in favor, encoded as a decimal string."
           },
           "againstVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Votes cast against, encoded as a decimal string."
           },
           "abstainVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Abstain votes, encoded as a decimal string."
           }
         },
@@ -575,6 +600,7 @@
           },
           "voterAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Address that cast the vote."
           },
           "proposalId": {
@@ -586,6 +612,7 @@
           },
           "votingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power used by the delegate, encoded as a string."
           },
           "reason": {
@@ -640,6 +667,7 @@
           },
           "proposerAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Address that created the proposal."
           },
           "title": {
@@ -668,14 +696,17 @@
           },
           "forVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Votes cast in favor, encoded as a decimal string."
           },
           "againstVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Votes cast against, encoded as a decimal string."
           },
           "abstainVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Abstain votes, encoded as a decimal string."
           },
           "startTimestamp": {
@@ -688,6 +719,7 @@
           },
           "quorum": {
             "type": "string",
+            "format": "bigint",
             "description": "Required quorum encoded as a decimal string."
           },
           "calldatas": {
@@ -700,14 +732,16 @@
           "values": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "format": "bigint"
             },
             "description": "ETH values attached to each call, encoded as strings."
           },
           "targets": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "format": "ethereum-address"
             },
             "description": "Contract targets invoked by the proposal."
           },
@@ -791,18 +825,22 @@
           },
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "balance": {
             "type": "string",
+            "format": "bigint",
             "description": "Account balance after the historical event."
           },
           "delta": {
             "type": "string",
+            "format": "bigint",
             "description": "Balance change introduced by the historical event."
           },
           "timestamp": {
             "type": "string",
+            "format": "bigint",
             "description": "Event timestamp in Unix seconds as a string.",
             "example": "1704067200"
           },
@@ -831,14 +869,17 @@
         "properties": {
           "value": {
             "type": "string",
+            "format": "bigint",
             "description": "Transferred amount encoded as a decimal string."
           },
           "from": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Sender address."
           },
           "to": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Recipient address."
           }
         },
@@ -872,11 +913,13 @@
           "from": {
             "type": "string",
             "nullable": true,
+            "format": "ethereum-address",
             "description": "Resolved sender address, if known."
           },
           "to": {
             "type": "string",
             "nullable": true,
+            "format": "ethereum-address",
             "description": "Resolved recipient address, if known."
           },
           "isCex": {
@@ -897,6 +940,7 @@
           },
           "timestamp": {
             "type": "string",
+            "format": "bigint",
             "description": "Transaction timestamp in Unix seconds as a string.",
             "example": "1704067200"
           },
@@ -940,22 +984,27 @@
           },
           "tokenId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Token contract address."
           },
           "amount": {
             "type": "string",
+            "format": "bigint",
             "description": "Transferred amount encoded as a decimal string."
           },
           "fromAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Sender address."
           },
           "toAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Recipient address."
           },
           "timestamp": {
             "type": "string",
+            "format": "bigint",
             "description": "Transfer timestamp in Unix seconds as a string.",
             "example": "1704067200"
           },
@@ -1008,23 +1057,28 @@
           },
           "delegateAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Delegate address."
           },
           "delegatorAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Delegator address."
           },
           "delegatedValue": {
             "type": "string",
+            "format": "bigint",
             "description": "Delegated amount encoded as a decimal string."
           },
           "previousDelegate": {
             "type": "string",
             "nullable": true,
+            "format": "ethereum-address",
             "description": "Previous delegate address, if one existed."
           },
           "timestamp": {
             "type": "string",
+            "format": "bigint",
             "description": "Delegation timestamp in Unix seconds as a string.",
             "example": "1704067200"
           },
@@ -1167,18 +1221,22 @@
           },
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "votingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power after the event, encoded as a decimal string."
           },
           "delta": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power change introduced by the event."
           },
           "timestamp": {
             "type": "string",
+            "format": "bigint",
             "description": "Event timestamp in Unix seconds as a string.",
             "example": "1704067200"
           },
@@ -1211,17 +1269,21 @@
         "nullable": true,
         "properties": {
           "from": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "to": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "previousDelegate": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "format": "ethereum-address"
           }
         },
         "required": ["from", "value", "to", "previousDelegate"],
@@ -1232,13 +1294,16 @@
         "nullable": true,
         "properties": {
           "value": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "from": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "to": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           }
         },
         "required": ["value", "from", "to"],
@@ -1278,18 +1343,22 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "previousVotingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power at the start of the comparison window."
           },
           "currentVotingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power at the end of the comparison window."
           },
           "absoluteChange": {
             "type": "string",
+            "format": "bigint",
             "description": "Absolute voting power change encoded as a decimal string."
           },
           "percentageChange": {
@@ -1341,10 +1410,12 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "votingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Current voting power encoded as a decimal string."
           },
           "votesCount": {
@@ -1361,6 +1432,7 @@
           },
           "balance": {
             "type": "string",
+            "format": "bigint",
             "description": "Current token balance encoded as a decimal string."
           },
           "variation": {
@@ -1381,7 +1453,8 @@
         "type": "object",
         "properties": {
           "absoluteChange": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "percentageChange": {
             "type": "string"
@@ -1411,18 +1484,22 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "previousBalance": {
             "type": "string",
+            "format": "bigint",
             "description": "Balance at the start of the comparison window."
           },
           "currentBalance": {
             "type": "string",
+            "format": "bigint",
             "description": "Balance at the end of the comparison window."
           },
           "absoluteChange": {
             "type": "string",
+            "format": "bigint",
             "description": "Absolute balance change encoded as a decimal string."
           },
           "percentageChange": {
@@ -1474,16 +1551,20 @@
         "type": "object",
         "properties": {
           "address": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "balance": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "tokenId": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "delegate": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "variation": {
             "$ref": "#/components/schemas/AccountBalanceVariation"
@@ -1527,18 +1608,22 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Counterparty account ID."
           },
           "amountTransferred": {
             "type": "string",
+            "format": "bigint",
             "description": "Net amount transferred between the requested account and the counterparty."
           },
           "totalVolume": {
             "type": "string",
+            "format": "bigint",
             "description": "Gross transfer volume between the requested account and the counterparty."
           },
           "transferCount": {
             "type": "string",
+            "format": "bigint",
             "description": "Number of transfers observed for the interaction pair."
           }
         },
@@ -1585,7 +1670,8 @@
         "type": "object",
         "properties": {
           "voterAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "transactionHash": {
             "type": "string"
@@ -1598,6 +1684,7 @@
           },
           "votingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power encoded as a decimal string."
           },
           "reason": {
@@ -1641,16 +1728,19 @@
         "type": "object",
         "properties": {
           "voter": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "votingPower": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "lastVoteTimestamp": {
             "type": "number"
           },
           "votingPowerVariation": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         },
         "required": [
@@ -1671,19 +1761,24 @@
             "type": "integer"
           },
           "quorum": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "proposalThreshold": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "votingDelay": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "votingPeriod": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "timelockDelay": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "alreadySupportCalldataReview": {
             "type": "boolean"
@@ -1730,13 +1825,15 @@
           },
           "high": {
             "type": "string",
+            "format": "bigint",
             "description": "Highest observed value for the period.",
-            "example": "14.25"
+            "example": "14250000000000000000"
           },
           "volume": {
             "type": "string",
+            "format": "bigint",
             "description": "Total volume observed for the period.",
-            "example": "1200.5"
+            "example": "1200500000000000000000"
           }
         },
         "required": ["date", "high", "volume"]
@@ -1906,7 +2003,8 @@
         "type": "object",
         "properties": {
           "voter": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "proposalId": {
             "type": "string"
@@ -1964,13 +2062,107 @@
         "type": "object",
         "properties": {
           "voter": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "votingPower": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         },
         "required": ["voter", "votingPower"]
+      },
+      "RelayVoteResponse": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string"
+          },
+          "voter": {
+            "type": "string"
+          }
+        },
+        "required": ["transactionHash", "voter"]
+      },
+      "RelayVoteRequest": {
+        "type": "object",
+        "properties": {
+          "proposalId": {
+            "type": "string",
+            "description": "Proposal ID as decimal string",
+            "example": "42"
+          },
+          "support": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2,
+            "description": "0=against, 1=for, 2=abstain"
+          },
+          "v": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "r": {
+            "type": "string"
+          },
+          "s": {
+            "type": "string"
+          }
+        },
+        "required": ["proposalId", "support", "v", "r", "s"]
+      },
+      "RelayDelegateResponse": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string"
+          },
+          "delegator": {
+            "type": "string"
+          }
+        },
+        "required": ["transactionHash", "delegator"]
+      },
+      "RelayDelegateRequest": {
+        "type": "object",
+        "properties": {
+          "delegatee": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Delegation nonce as decimal string",
+            "example": "0"
+          },
+          "expiry": {
+            "type": "string",
+            "description": "Signature expiry timestamp as decimal string",
+            "example": "1718000000"
+          },
+          "v": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "r": {
+            "type": "string"
+          },
+          "s": {
+            "type": "string"
+          }
+        },
+        "required": ["delegatee", "nonce", "expiry", "v", "r", "s"]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok"]
+          }
+        },
+        "required": ["status"]
       }
     },
     "parameters": {},
@@ -7234,6 +7426,148 @@
           }
         }
       }
+    },
+    "/{dao}/relay/vote": {
+      "post": {
+        "operationId": "relayVote",
+        "summary": "Relay a gasless vote",
+        "description": "Submit an EIP-712 signed vote on behalf of a user. The relayer pays gas.",
+        "tags": ["relay"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelayVoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vote transaction submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayVoteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or eligibility error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Relayer unavailable (low balance)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/delegate": {
+      "post": {
+        "operationId": "relayDelegate",
+        "summary": "Relay a gasless delegation",
+        "description": "Submit an EIP-712 signed delegation on behalf of a user. The relayer pays gas.",
+        "tags": ["relay"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelayDelegateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delegation transaction submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayDelegateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or eligibility error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Relayer unavailable (low balance)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
     }
   },
   "webhooks": {},

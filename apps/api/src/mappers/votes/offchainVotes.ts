@@ -53,7 +53,7 @@ export const OffchainVoteChoiceSchema = z
 
 export const OffchainVoteResponseSchema = z
   .object({
-    voter: z.string(),
+    voter: z.string().openapi({ format: "ethereum-address" }),
     proposalId: z.string(),
     choice: OffchainVoteChoiceSchema,
     vp: z.coerce.number(),
