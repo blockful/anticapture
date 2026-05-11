@@ -2,13 +2,17 @@ import { useMemo } from "react";
 import { zeroAddress, type Address } from "viem";
 
 import {
+  useAccountBalanceByAccountId,
   useGetConfig,
   useGetRateLimit,
+  useGetRelayerBalance,
   useVotingPowerByAccountId,
 } from "@anticapture/client/hooks";
 import type {
+  AccountBalanceByAccountIdPathParamsDaoEnumKey,
   GetConfigPathParamsDaoEnumKey,
   GetRateLimitPathParamsDaoEnumKey,
+  GetRelayerBalancePathParamsDaoEnumKey,
   VotingPowerByAccountIdPathParamsDaoEnumKey,
 } from "@anticapture/client";
 
@@ -24,8 +28,32 @@ interface UseRelayerConfigResult {
 
 const toDaoKey = (daoId: DaoIdEnum) => daoId.toLowerCase();
 
-export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
+interface UseRelayerBalanceResult {
+  hasEnoughBalance: boolean | null;
+  isLoading: boolean;
+}
+
+export const useRelayerBalance = (
+  daoId: DaoIdEnum,
+): UseRelayerBalanceResult => {
   const enabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
+
+  const { data, isLoading } = useGetRelayerBalance(
+    toDaoKey(daoId) as GetRelayerBalancePathParamsDaoEnumKey,
+    { query: { enabled } },
+  );
+
+  return {
+    hasEnoughBalance: data?.hasEnoughBalance ?? null,
+    isLoading: enabled && isLoading,
+  };
+};
+
+export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
+  const gaslessEnabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
+  const { hasEnoughBalance, isLoading: balanceLoading } =
+    useRelayerBalance(daoId);
+  const enabled = gaslessEnabled && hasEnoughBalance === true;
 
   const { data, isLoading } = useGetConfig(
     toDaoKey(daoId) as GetConfigPathParamsDaoEnumKey,
@@ -45,7 +73,7 @@ export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
     enabled,
     minVotingPower,
     maxRelayPerAddressPerDay: data?.maxRelayPerAddressPerDay ?? null,
-    isLoading: enabled && isLoading,
+    isLoading: gaslessEnabled && (balanceLoading || (enabled && isLoading)),
   };
 };
 
@@ -61,7 +89,11 @@ export const useRelayerRateLimit = (
   daoId: DaoIdEnum,
   address: Address | undefined,
 ): UseRelayerRateLimitResult => {
-  const enabled = daoConfigByDaoId[daoId].gaslessRelayer === true && !!address;
+  const gaslessEnabled =
+    daoConfigByDaoId[daoId].gaslessRelayer === true && !!address;
+  const { hasEnoughBalance, isLoading: balanceLoading } =
+    useRelayerBalance(daoId);
+  const enabled = gaslessEnabled && hasEnoughBalance === true;
 
   const { data, isLoading } = useGetRateLimit(
     toDaoKey(daoId) as GetRateLimitPathParamsDaoEnumKey,
@@ -74,7 +106,7 @@ export const useRelayerRateLimit = (
     delegationRemaining: data?.delegation.remaining ?? null,
     maxPerDay: data?.maxPerDay ?? null,
     resetsAt: data?.resetsAt ?? null,
-    isLoading: enabled && isLoading,
+    isLoading: gaslessEnabled && (balanceLoading || (enabled && isLoading)),
   };
 };
 
@@ -91,6 +123,8 @@ export const useGaslessEligibility = (
 ): UseGaslessEligibilityResult => {
   const gaslessEnabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
 
+  const { hasEnoughBalance, isLoading: balanceLoading } =
+    useRelayerBalance(daoId);
   const { minVotingPower, isLoading: configLoading } = useRelayerConfig(daoId);
   const {
     voteRemaining,
@@ -98,26 +132,45 @@ export const useGaslessEligibility = (
     isLoading: rateLimitLoading,
   } = useRelayerRateLimit(daoId, address);
 
-  const queryEnabled = gaslessEnabled && !!address;
+  const queryEnabled = gaslessEnabled && !!address && hasEnoughBalance === true;
+
+  const isVote = operation === "vote";
+
   const { data: vpData, isLoading: vpLoading } = useVotingPowerByAccountId(
     toDaoKey(daoId) as VotingPowerByAccountIdPathParamsDaoEnumKey,
     address ?? zeroAddress,
     undefined,
-    { query: { enabled: queryEnabled } },
+    { query: { enabled: queryEnabled && isVote } },
   );
 
-  const rawVotingPower = vpData?.votingPower ?? null;
-  const remaining = operation === "vote" ? voteRemaining : delegationRemaining;
+  const { data: balanceData, isLoading: balanceQueryLoading } =
+    useAccountBalanceByAccountId(
+      toDaoKey(daoId) as AccountBalanceByAccountIdPathParamsDaoEnumKey,
+      address ?? zeroAddress,
+      undefined,
+      { query: { enabled: queryEnabled && !isVote } },
+    );
+
+  const rawEligibilityAmount = isVote
+    ? (vpData?.votingPower ?? null)
+    : (balanceData?.data?.balance ?? null);
+  const eligibilityLoading = isVote ? vpLoading : balanceQueryLoading;
+  const remaining = isVote ? voteRemaining : delegationRemaining;
 
   const isLoading =
-    queryEnabled && (configLoading || rateLimitLoading || vpLoading);
+    gaslessEnabled &&
+    !!address &&
+    (balanceLoading ||
+      (hasEnoughBalance === true &&
+        (configLoading || rateLimitLoading || eligibilityLoading)));
 
   const isEligible =
     gaslessEnabled &&
     !isLoading &&
-    rawVotingPower !== null &&
+    hasEnoughBalance === true &&
+    rawEligibilityAmount !== null &&
     minVotingPower !== null &&
-    BigInt(rawVotingPower) >= minVotingPower &&
+    BigInt(rawEligibilityAmount) >= minVotingPower &&
     remaining !== null &&
     remaining > 0;
 
