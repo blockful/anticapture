@@ -31,6 +31,12 @@ const envSchema = z.object({
     .regex(/^\d+$/, "Must be a non-negative decimal")
     .default("0"),
 
+  // 0.1 ETH default — below this the relayer reports hasEnoughBalance: false
+  MIN_RELAYER_BALANCE_WEI: z
+    .string()
+    .regex(/^\d+$/, "Must be a non-negative decimal")
+    .default("100000000000000000"),
+
   MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().int().optional().default(3),
 
   PORT: z.coerce.number().default(3002),
