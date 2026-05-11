@@ -60,101 +60,6 @@
         "default": "desc",
         "description": "Sort direction for ordered query results."
       },
-      "DelegatorsResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DelegatorItem"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"],
-        "description": "Paginated delegators for a delegate address."
-      },
-      "DelegatorItem": {
-        "type": "object",
-        "properties": {
-          "delegatorAddress": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "amount": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint"
-          }
-        },
-        "required": ["delegatorAddress", "amount", "timestamp"],
-        "description": "Aggregated delegation amount and latest timestamp for one delegator."
-      },
-      "TreasuryResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TreasuryItem"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "Total number of items"
-          }
-        },
-        "required": ["items", "totalCount"],
-        "description": "Paginated treasury time-series response."
-      },
-      "TreasuryItem": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "number",
-            "description": "Treasury value in USD"
-          },
-          "date": {
-            "type": "number",
-            "description": "Unix timestamp in milliseconds"
-          }
-        },
-        "required": ["value", "date"],
-        "description": "Single treasury time-series datapoint."
-      },
-      "DaysWindow": {
-        "type": "string",
-        "enum": ["7d", "30d", "90d", "180d", "365d"],
-        "default": "365d"
-      },
-      "TokenHistoricalPriceResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/TokenHistoricalPriceItem"
-        },
-        "description": "Historical token price points ordered by timestamp."
-      },
-      "TokenHistoricalPriceItem": {
-        "type": "object",
-        "properties": {
-          "price": {
-            "type": "string",
-            "description": "Historical price value as a decimal string.",
-            "example": "0.1234"
-          },
-          "timestamp": {
-            "type": "integer",
-            "description": "Unix timestamp in seconds.",
-            "example": 1704067200
-          }
-        },
-        "required": ["price", "timestamp"]
-      },
       "TokenPropertiesResponse": {
         "allOf": [
           {
@@ -251,6 +156,679 @@
         },
         "required": ["error"],
         "description": "Generic error payload returned by the API."
+      },
+      "DelegatorsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DelegatorItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Paginated delegators for a delegate address."
+      },
+      "DelegatorItem": {
+        "type": "object",
+        "properties": {
+          "delegatorAddress": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "amount": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "bigint"
+          }
+        },
+        "required": ["delegatorAddress", "amount", "timestamp"],
+        "description": "Aggregated delegation amount and latest timestamp for one delegator."
+      },
+      "HistoricalBalancesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalBalance"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of matching historical balance rows."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Paginated historical balance records for one account."
+      },
+      "HistoricalBalance": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "description": "Transaction hash."
+          },
+          "daoId": {
+            "type": "string",
+            "description": "DAO identifier."
+          },
+          "accountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Account address."
+          },
+          "balance": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Account balance after the historical event."
+          },
+          "delta": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Balance change introduced by the historical event."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Event timestamp in Unix seconds as a string.",
+            "example": "1704067200"
+          },
+          "logIndex": {
+            "type": "integer",
+            "description": "Log index within the transaction receipt."
+          },
+          "transfer": {
+            "$ref": "#/components/schemas/HistoricalBalanceTransfer"
+          }
+        },
+        "required": [
+          "transactionHash",
+          "daoId",
+          "accountId",
+          "balance",
+          "delta",
+          "timestamp",
+          "logIndex",
+          "transfer"
+        ],
+        "description": "Single historical balance record enriched with transfer context."
+      },
+      "HistoricalBalanceTransfer": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transferred amount encoded as a decimal string."
+          },
+          "from": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Sender address."
+          },
+          "to": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Recipient address."
+          }
+        },
+        "required": ["value", "from", "to"],
+        "description": "Transfer event associated with a historical balance row."
+      },
+      "HistoricalVotingPowersResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalVotingPower"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of matching historical voting power rows."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Paginated historical voting power records."
+      },
+      "HistoricalVotingPower": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "description": "Transaction hash."
+          },
+          "daoId": {
+            "type": "string",
+            "description": "DAO identifier."
+          },
+          "accountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Account address."
+          },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Voting power after the event, encoded as a decimal string."
+          },
+          "delta": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Voting power change introduced by the event."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Event timestamp in Unix seconds as a string.",
+            "example": "1704067200"
+          },
+          "logIndex": {
+            "type": "integer",
+            "description": "Log index within the transaction receipt."
+          },
+          "delegation": {
+            "$ref": "#/components/schemas/HistoricalVotingPowerDelegation"
+          },
+          "transfer": {
+            "$ref": "#/components/schemas/HistoricalVotingPowerTransfer"
+          }
+        },
+        "required": [
+          "transactionHash",
+          "daoId",
+          "accountId",
+          "votingPower",
+          "delta",
+          "timestamp",
+          "logIndex",
+          "delegation",
+          "transfer"
+        ],
+        "description": "Single historical voting power record enriched with delegation and transfer context."
+      },
+      "HistoricalVotingPowerDelegation": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "value": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "to": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "previousDelegate": {
+            "type": "string",
+            "nullable": true,
+            "format": "ethereum-address"
+          }
+        },
+        "required": ["from", "value", "to", "previousDelegate"],
+        "description": "Delegation event associated with a historical voting power row."
+      },
+      "HistoricalVotingPowerTransfer": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "from": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "to": {
+            "type": "string",
+            "format": "ethereum-address"
+          }
+        },
+        "required": ["value", "from", "to"],
+        "description": "Transfer event associated with a historical voting power row."
+      },
+      "VotingPowersResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VotingPower"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of matching voting power rows."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Paginated current voting power records."
+      },
+      "VotingPower": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Account address."
+          },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Current voting power encoded as a decimal string."
+          },
+          "votesCount": {
+            "type": "integer",
+            "description": "Total votes cast by the account."
+          },
+          "proposalsCount": {
+            "type": "integer",
+            "description": "Total proposals created by the account."
+          },
+          "delegationsCount": {
+            "type": "integer",
+            "description": "Total delegations associated with the account."
+          },
+          "balance": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Current token balance encoded as a decimal string."
+          },
+          "variation": {
+            "$ref": "#/components/schemas/VotingPowerVariationField"
+          }
+        },
+        "required": [
+          "accountId",
+          "votingPower",
+          "votesCount",
+          "proposalsCount",
+          "delegationsCount",
+          "variation"
+        ],
+        "description": "Current voting power snapshot for one account."
+      },
+      "VotingPowerVariationField": {
+        "type": "object",
+        "properties": {
+          "absoluteChange": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "percentageChange": {
+            "type": "string"
+          }
+        },
+        "required": ["absoluteChange", "percentageChange"],
+        "description": "Embedded voting power delta metadata for a current voting power row."
+      },
+      "AccountBalancesWithVariationResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountBalanceWithVariation"
+            }
+          },
+          "period": {
+            "$ref": "#/components/schemas/PeriodResponse"
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "period", "totalCount"]
+      },
+      "AccountBalanceWithVariation": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "balance": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "tokenId": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "delegate": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "variation": {
+            "$ref": "#/components/schemas/AccountBalanceVariation"
+          }
+        },
+        "required": ["address", "balance", "tokenId", "delegate", "variation"]
+      },
+      "AccountBalanceVariation": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Account address."
+          },
+          "previousBalance": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Balance at the start of the comparison window."
+          },
+          "currentBalance": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Balance at the end of the comparison window."
+          },
+          "absoluteChange": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Absolute balance change encoded as a decimal string."
+          },
+          "percentageChange": {
+            "type": "string",
+            "description": "Relative balance change encoded as a decimal string."
+          }
+        },
+        "required": [
+          "accountId",
+          "previousBalance",
+          "currentBalance",
+          "absoluteChange",
+          "percentageChange"
+        ],
+        "description": "Balance delta for a single account across two timestamps."
+      },
+      "PeriodResponse": {
+        "type": "object",
+        "properties": {
+          "startTimestamp": {
+            "type": "string"
+          },
+          "endTimestamp": {
+            "type": "string"
+          }
+        },
+        "required": ["startTimestamp", "endTimestamp"],
+        "description": "Inclusive time period represented as ISO-8601 timestamps."
+      },
+      "AccountBalanceWithVariationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AccountBalanceWithVariation"
+          },
+          "period": {
+            "$ref": "#/components/schemas/PeriodResponse"
+          }
+        },
+        "required": ["data", "period"]
+      },
+      "AccountInteractionsResponse": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/PeriodResponse"
+          },
+          "totalCount": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountInteraction"
+            }
+          }
+        },
+        "required": ["period", "totalCount", "items"],
+        "description": "Paginated list of account interaction aggregates."
+      },
+      "AccountInteraction": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Counterparty account ID."
+          },
+          "amountTransferred": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Net amount transferred between the requested account and the counterparty."
+          },
+          "totalVolume": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Gross transfer volume between the requested account and the counterparty."
+          },
+          "transferCount": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Number of transfers observed for the interaction pair."
+          }
+        },
+        "required": [
+          "accountId",
+          "amountTransferred",
+          "totalVolume",
+          "transferCount"
+        ],
+        "description": "Aggregated interaction metrics between the requested account and another account."
+      },
+      "TransfersResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transfer"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of matching transfers."
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "Transfer": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "description": "Transaction hash."
+          },
+          "daoId": {
+            "type": "string",
+            "description": "DAO identifier."
+          },
+          "tokenId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Token contract address."
+          },
+          "amount": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transferred amount encoded as a decimal string."
+          },
+          "fromAccountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Sender address."
+          },
+          "toAccountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Recipient address."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transfer timestamp in Unix seconds as a string.",
+            "example": "1704067200"
+          },
+          "logIndex": {
+            "type": "integer",
+            "description": "Log index within the transaction receipt."
+          },
+          "isCex": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a centralized exchange."
+          },
+          "isDex": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a decentralized exchange."
+          },
+          "isLending": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a lending protocol."
+          },
+          "isTotal": {
+            "type": "boolean",
+            "description": "Whether the transfer counts toward total tracked supply."
+          }
+        },
+        "required": [
+          "transactionHash",
+          "daoId",
+          "tokenId",
+          "amount",
+          "fromAccountId",
+          "toAccountId",
+          "timestamp",
+          "logIndex",
+          "isCex",
+          "isDex",
+          "isLending",
+          "isTotal"
+        ]
+      },
+      "DaoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "quorum": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "proposalThreshold": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "votingDelay": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "votingPeriod": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "timelockDelay": {
+            "type": "string",
+            "format": "bigint"
+          },
+          "alreadySupportCalldataReview": {
+            "type": "boolean"
+          },
+          "supportOffchainData": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "chainId",
+          "quorum",
+          "proposalThreshold",
+          "votingDelay",
+          "votingPeriod",
+          "timelockDelay",
+          "alreadySupportCalldataReview",
+          "supportOffchainData"
+        ],
+        "description": "Current governance parameters and feature flags for the active DAO."
+      },
+      "TreasuryResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TreasuryItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items"
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Paginated treasury time-series response."
+      },
+      "TreasuryItem": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Treasury value in USD"
+          },
+          "date": {
+            "type": "number",
+            "description": "Unix timestamp in milliseconds"
+          }
+        },
+        "required": ["value", "date"],
+        "description": "Single treasury time-series datapoint."
+      },
+      "DaysWindow": {
+        "type": "string",
+        "enum": ["7d", "30d", "90d", "180d", "365d"],
+        "default": "365d"
+      },
+      "TokenHistoricalPriceResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TokenHistoricalPriceItem"
+        },
+        "description": "Historical token price points ordered by timestamp."
+      },
+      "TokenHistoricalPriceItem": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "string",
+            "description": "Historical price value as a decimal string.",
+            "example": "0.1234"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "example": 1704067200
+          }
+        },
+        "required": ["price", "timestamp"]
       },
       "FeedResponse": {
         "type": "object",
@@ -795,97 +1373,6 @@
         "description": "Proposal status filter. Pass repeated query params or a comma-delimited list.",
         "example": ["ACTIVE"]
       },
-      "HistoricalBalancesResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HistoricalBalance"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "Total number of matching historical balance rows."
-          }
-        },
-        "required": ["items", "totalCount"],
-        "description": "Paginated historical balance records for one account."
-      },
-      "HistoricalBalance": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "daoId": {
-            "type": "string",
-            "description": "DAO identifier."
-          },
-          "accountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Account address."
-          },
-          "balance": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Account balance after the historical event."
-          },
-          "delta": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Balance change introduced by the historical event."
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Event timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "logIndex": {
-            "type": "integer",
-            "description": "Log index within the transaction receipt."
-          },
-          "transfer": {
-            "$ref": "#/components/schemas/HistoricalBalanceTransfer"
-          }
-        },
-        "required": [
-          "transactionHash",
-          "daoId",
-          "accountId",
-          "balance",
-          "delta",
-          "timestamp",
-          "logIndex",
-          "transfer"
-        ],
-        "description": "Single historical balance record enriched with transfer context."
-      },
-      "HistoricalBalanceTransfer": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Transferred amount encoded as a decimal string."
-          },
-          "from": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Sender address."
-          },
-          "to": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Recipient address."
-          }
-        },
-        "required": ["value", "from", "to"],
-        "description": "Transfer event associated with a historical balance row."
-      },
       "TransactionsResponse": {
         "type": "object",
         "properties": {
@@ -970,79 +1457,6 @@
           "delegations"
         ],
         "description": "Transaction response enriched with transfer and delegation events."
-      },
-      "Transfer": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "daoId": {
-            "type": "string",
-            "description": "DAO identifier."
-          },
-          "tokenId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Token contract address."
-          },
-          "amount": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Transferred amount encoded as a decimal string."
-          },
-          "fromAccountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Sender address."
-          },
-          "toAccountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Recipient address."
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Transfer timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "logIndex": {
-            "type": "integer",
-            "description": "Log index within the transaction receipt."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the transfer counts toward total tracked supply."
-          }
-        },
-        "required": [
-          "transactionHash",
-          "daoId",
-          "tokenId",
-          "amount",
-          "fromAccountId",
-          "toAccountId",
-          "timestamp",
-          "logIndex",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal"
-        ]
       },
       "TransactionDelegation": {
         "type": "object",
@@ -1191,124 +1605,6 @@
         },
         "required": ["hasNextPage", "hasPreviousPage", "endDate", "startDate"]
       },
-      "HistoricalVotingPowersResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HistoricalVotingPower"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "Total number of matching historical voting power rows."
-          }
-        },
-        "required": ["items", "totalCount"],
-        "description": "Paginated historical voting power records."
-      },
-      "HistoricalVotingPower": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "daoId": {
-            "type": "string",
-            "description": "DAO identifier."
-          },
-          "accountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Account address."
-          },
-          "votingPower": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Voting power after the event, encoded as a decimal string."
-          },
-          "delta": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Voting power change introduced by the event."
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Event timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "logIndex": {
-            "type": "integer",
-            "description": "Log index within the transaction receipt."
-          },
-          "delegation": {
-            "$ref": "#/components/schemas/HistoricalVotingPowerDelegation"
-          },
-          "transfer": {
-            "$ref": "#/components/schemas/HistoricalVotingPowerTransfer"
-          }
-        },
-        "required": [
-          "transactionHash",
-          "daoId",
-          "accountId",
-          "votingPower",
-          "delta",
-          "timestamp",
-          "logIndex",
-          "delegation",
-          "transfer"
-        ],
-        "description": "Single historical voting power record enriched with delegation and transfer context."
-      },
-      "HistoricalVotingPowerDelegation": {
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "from": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "value": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "to": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "previousDelegate": {
-            "type": "string",
-            "nullable": true,
-            "format": "ethereum-address"
-          }
-        },
-        "required": ["from", "value", "to", "previousDelegate"],
-        "description": "Delegation event associated with a historical voting power row."
-      },
-      "HistoricalVotingPowerTransfer": {
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "value": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "from": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "to": {
-            "type": "string",
-            "format": "ethereum-address"
-          }
-        },
-        "required": ["value", "from", "to"],
-        "description": "Transfer event associated with a historical voting power row."
-      },
       "VotingPowerVariationsResponse": {
         "type": "object",
         "properties": {
@@ -1324,19 +1620,6 @@
         },
         "required": ["period", "items"],
         "description": "List of voting power variations for multiple accounts in the selected period."
-      },
-      "PeriodResponse": {
-        "type": "object",
-        "properties": {
-          "startTimestamp": {
-            "type": "string"
-          },
-          "endTimestamp": {
-            "type": "string"
-          }
-        },
-        "required": ["startTimestamp", "endTimestamp"],
-        "description": "Inclusive time period represented as ISO-8601 timestamps."
       },
       "VotingPowerVariation": {
         "type": "object",
@@ -1388,81 +1671,6 @@
         "required": ["period", "data"],
         "description": "Voting power variation response for a single account."
       },
-      "VotingPowersResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VotingPower"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "Total number of matching voting power rows."
-          }
-        },
-        "required": ["items", "totalCount"],
-        "description": "Paginated current voting power records."
-      },
-      "VotingPower": {
-        "type": "object",
-        "properties": {
-          "accountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Account address."
-          },
-          "votingPower": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Current voting power encoded as a decimal string."
-          },
-          "votesCount": {
-            "type": "integer",
-            "description": "Total votes cast by the account."
-          },
-          "proposalsCount": {
-            "type": "integer",
-            "description": "Total proposals created by the account."
-          },
-          "delegationsCount": {
-            "type": "integer",
-            "description": "Total delegations associated with the account."
-          },
-          "balance": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Current token balance encoded as a decimal string."
-          },
-          "variation": {
-            "$ref": "#/components/schemas/VotingPowerVariationField"
-          }
-        },
-        "required": [
-          "accountId",
-          "votingPower",
-          "votesCount",
-          "proposalsCount",
-          "delegationsCount",
-          "variation"
-        ],
-        "description": "Current voting power snapshot for one account."
-      },
-      "VotingPowerVariationField": {
-        "type": "object",
-        "properties": {
-          "absoluteChange": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "percentageChange": {
-            "type": "string"
-          }
-        },
-        "required": ["absoluteChange", "percentageChange"],
-        "description": "Embedded voting power delta metadata for a current voting power row."
-      },
       "AccountBalanceVariationsResponse": {
         "type": "object",
         "properties": {
@@ -1479,43 +1687,6 @@
         "required": ["period", "items"],
         "description": "List of balance variations for multiple accounts in the selected period."
       },
-      "AccountBalanceVariation": {
-        "type": "object",
-        "properties": {
-          "accountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Account address."
-          },
-          "previousBalance": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Balance at the start of the comparison window."
-          },
-          "currentBalance": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Balance at the end of the comparison window."
-          },
-          "absoluteChange": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Absolute balance change encoded as a decimal string."
-          },
-          "percentageChange": {
-            "type": "string",
-            "description": "Relative balance change encoded as a decimal string."
-          }
-        },
-        "required": [
-          "accountId",
-          "previousBalance",
-          "currentBalance",
-          "absoluteChange",
-          "percentageChange"
-        ],
-        "description": "Balance delta for a single account across two timestamps."
-      },
       "AccountBalanceVariationsByAccountIdResponse": {
         "type": "object",
         "properties": {
@@ -1528,128 +1699,6 @@
         },
         "required": ["period", "data"],
         "description": "Balance variation response for a single account."
-      },
-      "AccountBalancesWithVariationResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AccountBalanceWithVariation"
-            }
-          },
-          "period": {
-            "$ref": "#/components/schemas/PeriodResponse"
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "period", "totalCount"]
-      },
-      "AccountBalanceWithVariation": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "balance": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "tokenId": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "delegate": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "variation": {
-            "$ref": "#/components/schemas/AccountBalanceVariation"
-          }
-        },
-        "required": ["address", "balance", "tokenId", "delegate", "variation"]
-      },
-      "AccountBalanceWithVariationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/AccountBalanceWithVariation"
-          },
-          "period": {
-            "$ref": "#/components/schemas/PeriodResponse"
-          }
-        },
-        "required": ["data", "period"]
-      },
-      "AccountInteractionsResponse": {
-        "type": "object",
-        "properties": {
-          "period": {
-            "$ref": "#/components/schemas/PeriodResponse"
-          },
-          "totalCount": {
-            "type": "integer"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AccountInteraction"
-            }
-          }
-        },
-        "required": ["period", "totalCount", "items"],
-        "description": "Paginated list of account interaction aggregates."
-      },
-      "AccountInteraction": {
-        "type": "object",
-        "properties": {
-          "accountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Counterparty account ID."
-          },
-          "amountTransferred": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Net amount transferred between the requested account and the counterparty."
-          },
-          "totalVolume": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Gross transfer volume between the requested account and the counterparty."
-          },
-          "transferCount": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Number of transfers observed for the interaction pair."
-          }
-        },
-        "required": [
-          "accountId",
-          "amountTransferred",
-          "totalVolume",
-          "transferCount"
-        ],
-        "description": "Aggregated interaction metrics between the requested account and another account."
-      },
-      "TransfersResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transfer"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "Total number of matching transfers."
-          }
-        },
-        "required": ["items", "totalCount"]
       },
       "OnchainVotesResponse": {
         "type": "object",
@@ -1750,55 +1799,6 @@
           "votingPowerVariation"
         ],
         "description": "Voter or non-voter record associated with a proposal."
-      },
-      "DaoResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "chainId": {
-            "type": "integer"
-          },
-          "quorum": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "proposalThreshold": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "votingDelay": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "votingPeriod": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "timelockDelay": {
-            "type": "string",
-            "format": "bigint"
-          },
-          "alreadySupportCalldataReview": {
-            "type": "boolean"
-          },
-          "supportOffchainData": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "id",
-          "chainId",
-          "quorum",
-          "proposalThreshold",
-          "votingDelay",
-          "votingPeriod",
-          "timelockDelay",
-          "alreadySupportCalldataReview",
-          "supportOffchainData"
-        ],
-        "description": "Current governance parameters and feature flags for the active DAO."
       },
       "TokenMetricsResponse": {
         "type": "object",
@@ -2239,6 +2239,26 @@
           }
         },
         "required": ["address", "maxPerDay", "vote", "delegation", "resetsAt"]
+      },
+      "RelayerBalanceResponse": {
+        "type": "object",
+        "properties": {
+          "hasEnoughBalance": {
+            "type": "boolean",
+            "description": "True when the relayer wallet's native balance is at or above the configured threshold."
+          },
+          "balanceWei": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Current native balance of the relayer wallet, as a decimal string (uint256, in wei)."
+          },
+          "thresholdWei": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Minimum native balance the relayer must hold to be considered funded, as a decimal string (uint256, in wei)."
+          }
+        },
+        "required": ["hasEnoughBalance", "balanceWei", "thresholdWei"]
       }
     },
     "parameters": {},
@@ -2664,6 +2684,75 @@
         }
       ]
     },
+    "/{dao}/token": {
+      "get": {
+        "operationId": "token",
+        "summary": "Get token properties",
+        "description": "Get property data for a specific token",
+        "tags": ["tokens"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["eth", "usd"],
+              "default": "usd",
+              "description": "Currency to use when fetching token price data.",
+              "example": "usd"
+            },
+            "required": false,
+            "description": "Currency to use when fetching token price data.",
+            "name": "currency",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns data concerning token-specific values and attributes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPropertiesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
     "/{dao}/accounts/{address}/delegations": {
       "get": {
         "operationId": "delegations",
@@ -2782,6 +2871,1249 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DelegatorsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/accounts/{address}/balances/historical": {
+      "get": {
+        "operationId": "historicalBalances",
+        "summary": "Get historical token balances",
+        "description": "Returns historical balance deltas for one account, enriched with the transfer that caused each change.",
+        "tags": ["account-balances", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of historical balance rows to skip.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of historical balance rows to skip.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of historical balance rows to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of historical balance rows to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["timestamp", "delta"],
+              "default": "timestamp",
+              "description": "Field used to sort historical balance rows.",
+              "example": "timestamp"
+            },
+            "required": false,
+            "description": "Field used to sort historical balance rows.",
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for historical balance timestamps, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for historical balance timestamps, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for historical balance timestamps, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for historical balance timestamps, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Minimum balance delta encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Minimum balance delta encoded as a decimal string.",
+            "name": "fromValue",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Maximum balance delta encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Maximum balance delta encoded as a decimal string.",
+            "name": "toValue",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved historical balances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoricalBalancesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/accounts/{address}/voting-powers/historical": {
+      "get": {
+        "operationId": "historicalVotingPowerByAccountId",
+        "summary": "Get voting power changes by account",
+        "description": "Returns a list of voting power changes for a specific account",
+        "tags": ["voting-power", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of historical voting power rows to skip.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of historical voting power rows to skip.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of historical voting power rows to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of historical voting power rows to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["timestamp", "delta"],
+              "default": "timestamp",
+              "description": "Field used to sort historical voting power rows.",
+              "example": "timestamp"
+            },
+            "required": false,
+            "description": "Field used to sort historical voting power rows.",
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for voting power timestamps, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for voting power timestamps, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for voting power timestamps, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for voting power timestamps, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Minimum voting power delta encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Minimum voting power delta encoded as a decimal string.",
+            "name": "fromValue",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Maximum voting power delta encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Maximum voting power delta encoded as a decimal string.",
+            "name": "toValue",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved voting power changes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoricalVotingPowersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/voting-powers/historical": {
+      "get": {
+        "operationId": "historicalVotingPower",
+        "summary": "Get voting power changes",
+        "description": "Returns a list of voting power changes.",
+        "tags": ["voting-power", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of historical voting power rows to skip.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of historical voting power rows to skip.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of historical voting power rows to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of historical voting power rows to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["timestamp", "delta"],
+              "default": "timestamp",
+              "description": "Field used to sort historical voting power rows.",
+              "example": "timestamp"
+            },
+            "required": false,
+            "description": "Field used to sort historical voting power rows.",
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for voting power timestamps, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for voting power timestamps, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for voting power timestamps, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for voting power timestamps, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Minimum voting power delta encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Minimum voting power delta encoded as a decimal string.",
+            "name": "fromValue",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Maximum voting power delta encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Maximum voting power delta encoded as a decimal string.",
+            "name": "toValue",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Optional account address used to scope the historical voting power results."
+            },
+            "required": false,
+            "description": "Optional account address used to scope the historical voting power results.",
+            "name": "address",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved voting power changes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoricalVotingPowersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/voting-powers": {
+      "get": {
+        "operationId": "votingPowers",
+        "summary": "Get voting powers",
+        "description": "Returns sorted and paginated account voting power records",
+        "tags": ["voting-power", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of current voting power rows to return.",
+              "example": 20
+            },
+            "required": false,
+            "description": "Maximum number of current voting power rows to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of current voting power rows to skip.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of current voting power rows to skip.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "votingPower",
+                "delegationsCount",
+                "variation",
+                "signedVariation",
+                "total",
+                "balance"
+              ],
+              "default": "votingPower"
+            },
+            "required": false,
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list."
+            },
+            "required": false,
+            "description": "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
+            "name": "addresses",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Minimum voting power encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Minimum voting power encoded as a decimal string.",
+            "name": "fromValue",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Maximum voting power encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Maximum voting power encoded as a decimal string.",
+            "name": "toValue",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved voting power changes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VotingPowersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/voting-powers/{accountId}": {
+      "get": {
+        "operationId": "votingPowerByAccountId",
+        "summary": "Get account powers",
+        "description": "Returns voting power information for a specific address (account)",
+        "tags": ["voting-power"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "accountId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved voting power changes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VotingPower"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/balances": {
+      "get": {
+        "operationId": "accountBalances",
+        "summary": "Get account balance records",
+        "description": "Returns sorted and paginated account balance records",
+        "tags": ["account-balances", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for balance history filters, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for balance history filters, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for balance history filters, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for balance history filters, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of records to skip before collecting results.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of records to skip before collecting results.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["balance", "variation", "signedVariation"],
+              "default": "balance"
+            },
+            "required": false,
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "nullable": true,
+              "default": false,
+              "description": "Whether DAO-owned addresses should be excluded from the results.",
+              "example": false
+            },
+            "required": false,
+            "description": "Whether DAO-owned addresses should be excluded from the results.",
+            "name": "excludeDaoAddresses",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "required": false,
+            "name": "addresses",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Filter by one or more delegate addresses. Pass repeated query params or a comma-delimited list."
+            },
+            "required": false,
+            "description": "Filter by one or more delegate addresses. Pass repeated query params or a comma-delimited list.",
+            "name": "delegates",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Minimum balance encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Minimum balance encoded as a decimal string.",
+            "name": "fromValue",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Maximum balance encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Maximum balance encoded as a decimal string.",
+            "name": "toValue",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved account balances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountBalancesWithVariationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/accounts/{address}/balances": {
+      "get": {
+        "operationId": "accountBalanceByAccountId",
+        "summary": "Get account balance",
+        "description": "Returns account balance information for a specific address",
+        "tags": ["account-balances"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Wallet address whose balance is being queried.",
+            "example": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "address",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the returned balance period, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the returned balance period, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the returned balance period, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the returned balance period, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved account balance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountBalanceWithVariationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/balances/{address}/interactions": {
+      "get": {
+        "operationId": "accountInteractions",
+        "summary": "Get top interactions between accounts for a given period",
+        "description": "Returns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>",
+        "tags": ["account-balances", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for transfer timestamps, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for transfer timestamps, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for transfer timestamps, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for transfer timestamps, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of interaction rows to return.",
+              "example": 20
+            },
+            "required": false,
+            "description": "Maximum number of interaction rows to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of interaction rows to skip.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of interaction rows to skip.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Minimum net amount transferred, encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Minimum net amount transferred, encoded as a decimal string.",
+            "name": "minAmount",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Maximum net amount transferred, encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Maximum net amount transferred, encoded as a decimal string.",
+            "name": "maxAmount",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["volume", "count"],
+              "default": "count",
+              "description": "Field used to sort interaction rows.",
+              "example": "count"
+            },
+            "required": false,
+            "description": "Field used to sort interaction rows.",
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Optional counterparty address used to narrow the results."
+            },
+            "required": false,
+            "description": "Optional counterparty address used to narrow the results.",
+            "name": "filterAddress",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved account interactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountInteractionsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/accounts/{address}/transfers": {
+      "get": {
+        "operationId": "transfers",
+        "summary": "Get transfers",
+        "description": "Get transfers of a given address",
+        "tags": ["transfers", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Wallet address whose transfers are being queried.",
+            "example": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "name": "address",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of records to skip before collecting results.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of records to skip before collecting results.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["timestamp", "amount"],
+              "default": "timestamp",
+              "description": "Field used to sort transfers.",
+              "example": "timestamp"
+            },
+            "required": false,
+            "description": "Field used to sort transfers.",
+            "name": "orderBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "to",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Earliest transfer timestamp, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Earliest transfer timestamp, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Latest transfer timestamp, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Latest transfer timestamp, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Minimum transfer amount encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Minimum transfer amount encoded as a decimal string.",
+            "name": "fromValue",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Maximum transfer amount encoded as a decimal string."
+            },
+            "required": false,
+            "description": "Maximum transfer amount encoded as a decimal string.",
+            "name": "toValue",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns transfers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransfersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/dao": {
+      "get": {
+        "operationId": "dao",
+        "summary": "Get DAO governance parameters",
+        "description": "Returns current governance parameters for this DAO",
+        "tags": ["governance"],
+        "responses": {
+          "200": {
+            "description": "DAO governance parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DaoResponse"
                 }
               }
             }
@@ -3050,75 +4382,6 @@
           "schema": {
             "type": "string",
             "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/token": {
-      "get": {
-        "operationId": "token",
-        "summary": "Get token properties",
-        "description": "Get property data for a specific token",
-        "tags": ["tokens"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["eth", "usd"],
-              "default": "usd",
-              "description": "Currency to use when fetching token price data.",
-              "example": "usd"
-            },
-            "required": false,
-            "description": "Currency to use when fetching token price data.",
-            "name": "currency",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns data concerning token-specific values and attributes",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenPropertiesResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Token not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
               "comp",
               "ens",
               "fluid",
@@ -4294,146 +5557,6 @@
         }
       ]
     },
-    "/{dao}/accounts/{address}/balances/historical": {
-      "get": {
-        "operationId": "historicalBalances",
-        "summary": "Get historical token balances",
-        "description": "Returns historical balance deltas for one account, enriched with the transfer that caused each change.",
-        "tags": ["account-balances", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "name": "address",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of historical balance rows to skip.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of historical balance rows to skip.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of historical balance rows to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of historical balance rows to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["timestamp", "delta"],
-              "default": "timestamp",
-              "description": "Field used to sort historical balance rows.",
-              "example": "timestamp"
-            },
-            "required": false,
-            "description": "Field used to sort historical balance rows.",
-            "name": "orderBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for historical balance timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for historical balance timestamps, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for historical balance timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for historical balance timestamps, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Minimum balance delta encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Minimum balance delta encoded as a decimal string.",
-            "name": "fromValue",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Maximum balance delta encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Maximum balance delta encoded as a decimal string.",
-            "name": "toValue",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved historical balances",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HistoricalBalancesResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
     "/{dao}/transactions": {
       "get": {
         "operationId": "transactions",
@@ -4760,288 +5883,6 @@
         }
       ]
     },
-    "/{dao}/accounts/{address}/voting-powers/historical": {
-      "get": {
-        "operationId": "historicalVotingPowerByAccountId",
-        "summary": "Get voting power changes by account",
-        "description": "Returns a list of voting power changes for a specific account",
-        "tags": ["voting-power", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "name": "address",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of historical voting power rows to skip.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of historical voting power rows to skip.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of historical voting power rows to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of historical voting power rows to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["timestamp", "delta"],
-              "default": "timestamp",
-              "description": "Field used to sort historical voting power rows.",
-              "example": "timestamp"
-            },
-            "required": false,
-            "description": "Field used to sort historical voting power rows.",
-            "name": "orderBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for voting power timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for voting power timestamps, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for voting power timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for voting power timestamps, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Minimum voting power delta encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Minimum voting power delta encoded as a decimal string.",
-            "name": "fromValue",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Maximum voting power delta encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Maximum voting power delta encoded as a decimal string.",
-            "name": "toValue",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved voting power changes",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HistoricalVotingPowersResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/voting-powers/historical": {
-      "get": {
-        "operationId": "historicalVotingPower",
-        "summary": "Get voting power changes",
-        "description": "Returns a list of voting power changes.",
-        "tags": ["voting-power", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of historical voting power rows to skip.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of historical voting power rows to skip.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of historical voting power rows to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of historical voting power rows to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["timestamp", "delta"],
-              "default": "timestamp",
-              "description": "Field used to sort historical voting power rows.",
-              "example": "timestamp"
-            },
-            "required": false,
-            "description": "Field used to sort historical voting power rows.",
-            "name": "orderBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for voting power timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for voting power timestamps, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for voting power timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for voting power timestamps, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Minimum voting power delta encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Minimum voting power delta encoded as a decimal string.",
-            "name": "fromValue",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Maximum voting power delta encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Maximum voting power delta encoded as a decimal string.",
-            "name": "toValue",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Optional account address used to scope the historical voting power results."
-            },
-            "required": false,
-            "description": "Optional account address used to scope the historical voting power results.",
-            "name": "address",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved voting power changes",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HistoricalVotingPowersResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
     "/{dao}/accounts/voting-powers/variations": {
       "get": {
         "operationId": "votingPowerVariations",
@@ -5228,231 +6069,6 @@
         }
       ]
     },
-    "/{dao}/voting-powers": {
-      "get": {
-        "operationId": "votingPowers",
-        "summary": "Get voting powers",
-        "description": "Returns sorted and paginated account voting power records",
-        "tags": ["voting-power", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of current voting power rows to return.",
-              "example": 20
-            },
-            "required": false,
-            "description": "Maximum number of current voting power rows to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of current voting power rows to skip.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of current voting power rows to skip.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "votingPower",
-                "delegationsCount",
-                "variation",
-                "signedVariation",
-                "total",
-                "balance"
-              ],
-              "default": "votingPower"
-            },
-            "required": false,
-            "name": "orderBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list."
-            },
-            "required": false,
-            "description": "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
-            "name": "addresses",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Minimum voting power encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Minimum voting power encoded as a decimal string.",
-            "name": "fromValue",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Maximum voting power encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Maximum voting power encoded as a decimal string.",
-            "name": "toValue",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved voting power changes",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VotingPowersResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/voting-powers/{accountId}": {
-      "get": {
-        "operationId": "votingPowerByAccountId",
-        "summary": "Get account powers",
-        "description": "Returns voting power information for a specific address (account)",
-        "tags": ["voting-power"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "name": "accountId",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved voting power changes",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VotingPower"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
     "/{dao}/balances/variations": {
       "get": {
         "operationId": "accountBalanceVariations",
@@ -5623,558 +6239,6 @@
           "schema": {
             "type": "string",
             "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/balances": {
-      "get": {
-        "operationId": "accountBalances",
-        "summary": "Get account balance records",
-        "description": "Returns sorted and paginated account balance records",
-        "tags": ["account-balances", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for balance history filters, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for balance history filters, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for balance history filters, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for balance history filters, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of records to skip before collecting results.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of records to skip before collecting results.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["balance", "variation", "signedVariation"],
-              "default": "balance"
-            },
-            "required": false,
-            "name": "orderBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "boolean",
-              "nullable": true,
-              "default": false,
-              "description": "Whether DAO-owned addresses should be excluded from the results.",
-              "example": false
-            },
-            "required": false,
-            "description": "Whether DAO-owned addresses should be excluded from the results.",
-            "name": "excludeDaoAddresses",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "required": false,
-            "name": "addresses",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "Filter by one or more delegate addresses. Pass repeated query params or a comma-delimited list."
-            },
-            "required": false,
-            "description": "Filter by one or more delegate addresses. Pass repeated query params or a comma-delimited list.",
-            "name": "delegates",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Minimum balance encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Minimum balance encoded as a decimal string.",
-            "name": "fromValue",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Maximum balance encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Maximum balance encoded as a decimal string.",
-            "name": "toValue",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved account balances",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccountBalancesWithVariationResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/accounts/{address}/balances": {
-      "get": {
-        "operationId": "accountBalanceByAccountId",
-        "summary": "Get account balance",
-        "description": "Returns account balance information for a specific address",
-        "tags": ["account-balances"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "Wallet address whose balance is being queried.",
-            "example": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "name": "address",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the returned balance period, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the returned balance period, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the returned balance period, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the returned balance period, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved account balance",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccountBalanceWithVariationResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/balances/{address}/interactions": {
-      "get": {
-        "operationId": "accountInteractions",
-        "summary": "Get top interactions between accounts for a given period",
-        "description": "Returns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>",
-        "tags": ["account-balances", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "name": "address",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for transfer timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for transfer timestamps, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for transfer timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for transfer timestamps, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of interaction rows to return.",
-              "example": 20
-            },
-            "required": false,
-            "description": "Maximum number of interaction rows to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of interaction rows to skip.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of interaction rows to skip.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Minimum net amount transferred, encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Minimum net amount transferred, encoded as a decimal string.",
-            "name": "minAmount",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Maximum net amount transferred, encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Maximum net amount transferred, encoded as a decimal string.",
-            "name": "maxAmount",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["volume", "count"],
-              "default": "count",
-              "description": "Field used to sort interaction rows.",
-              "example": "count"
-            },
-            "required": false,
-            "description": "Field used to sort interaction rows.",
-            "name": "orderBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Optional counterparty address used to narrow the results."
-            },
-            "required": false,
-            "description": "Optional counterparty address used to narrow the results.",
-            "name": "filterAddress",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved account interactions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccountInteractionsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/accounts/{address}/transfers": {
-      "get": {
-        "operationId": "transfers",
-        "summary": "Get transfers",
-        "description": "Get transfers of a given address",
-        "tags": ["transfers", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "Wallet address whose transfers are being queried.",
-            "example": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "name": "address",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of records to skip before collecting results.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of records to skip before collecting results.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": ["timestamp", "amount"],
-              "default": "timestamp",
-              "description": "Field used to sort transfers.",
-              "example": "timestamp"
-            },
-            "required": false,
-            "description": "Field used to sort transfers.",
-            "name": "orderBy",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "from",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "to",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Earliest transfer timestamp, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Earliest transfer timestamp, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Latest transfer timestamp, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Latest transfer timestamp, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Minimum transfer amount encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Minimum transfer amount encoded as a decimal string.",
-            "name": "fromValue",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Maximum transfer amount encoded as a decimal string."
-            },
-            "required": false,
-            "description": "Maximum transfer amount encoded as a decimal string.",
-            "name": "toValue",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns transfers",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransfersResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
               "comp",
               "ens",
               "fluid",
@@ -6548,50 +6612,6 @@
           "schema": {
             "type": "string",
             "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/dao": {
-      "get": {
-        "operationId": "dao",
-        "summary": "Get DAO governance parameters",
-        "description": "Returns current governance parameters for this DAO",
-        "tags": ["governance"],
-        "responses": {
-          "200": {
-            "description": "DAO governance parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DaoResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
               "comp",
               "ens",
               "fluid",
@@ -7645,7 +7665,7 @@
         }
       ]
     },
-    "/{dao}/config": {
+    "/{dao}/relay/config": {
       "get": {
         "operationId": "getConfig",
         "summary": "Public relayer configuration",
@@ -7677,7 +7697,7 @@
         }
       ]
     },
-    "/{dao}/rate-limit/{address}": {
+    "/{dao}/relay/rate-limit/{address}": {
       "get": {
         "operationId": "getRateLimit",
         "summary": "Per-address relay usage for the current UTC day",
@@ -7716,6 +7736,48 @@
           },
           "503": {
             "description": "Rate limiter storage is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/balance": {
+      "get": {
+        "operationId": "getRelayerBalance",
+        "summary": "Relayer wallet funding status",
+        "description": "Returns the relayer wallet's current native balance and whether it meets the configured threshold. Lets the dashboard hide or warn about gasless actions before users sign a request.",
+        "tags": ["system"],
+        "responses": {
+          "200": {
+            "description": "Relayer balance status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerBalanceResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to read on-chain balance",
             "content": {
               "application/json": {
                 "schema": {

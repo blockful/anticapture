@@ -12,7 +12,7 @@ export function config(app: Hono, deps: ConfigControllerDeps) {
     createRoute({
       method: "get",
       operationId: "getConfig",
-      path: "/config",
+      path: "/relay/config",
       summary: "Public relayer configuration",
       description:
         "Returns the static configuration values the dashboard needs to render eligibility hints.",
