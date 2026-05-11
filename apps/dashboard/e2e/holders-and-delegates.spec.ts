@@ -273,9 +273,12 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       .first()
       .getByRole("button", { name: /^Balance/ });
     await expect(balanceHeader).toBeVisible();
-    await balanceHeader.click();
-    // After click, sortBy=balance should appear in URL (or sort direction toggles)
-    await expect(page).toHaveURL(/sortBy=balance|sort=/, { timeout: 10_000 });
+    // First click on Token Holders headers can be dropped before React is
+    // ready; retry click + URL assertion until one toggle lands.
+    await expect(async () => {
+      await balanceHeader.click();
+      await expect(page).toHaveURL(/sortBy=balance|sort=/, { timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
   });
 
   test("Token Holders sort by Change cycles sort state", async ({
@@ -291,10 +294,12 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       .first()
       .getByRole("button", { name: /^Change/ });
     await expect(changeHeader).toBeVisible();
-    await changeHeader.click();
-    await expect(page).toHaveURL(/sortBy=(signedVariation|variation)/, {
-      timeout: 10_000,
-    });
+    await expect(async () => {
+      await changeHeader.click();
+      await expect(page).toHaveURL(/sortBy=(signedVariation|variation)/, {
+        timeout: 2_000,
+      });
+    }).toPass({ timeout: 15_000 });
   });
 
   test("Delegates sort by Voting Power changes URL state", async ({
