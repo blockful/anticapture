@@ -130,7 +130,24 @@ export const voteOnProposal = async (
     return transaction;
   } catch (error) {
     console.error(error);
-    showCustomToast("Failed to vote", "error");
+    const message =
+      error instanceof Error ? error.message.toLowerCase() : "";
+    if (message.includes("insufficient_voting_power")) {
+      showCustomToast(
+        "You don't have sufficient voting power to delegate.",
+        "error",
+      );
+    } else if (message.includes("daily_limit_reached")) {
+      showCustomToast(
+        "You've reached the maximum operations per day.",
+        "error",
+      );
+    } else {
+      showCustomToast(
+        "Something went wrong with your operation. Try again later.",
+        "error",
+      );
+    }
     return null;
   }
 };

@@ -13,6 +13,7 @@ import type { ProposalDetails } from "@/features/governance/types";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import {
   DrawerContent,
   DrawerRoot,
@@ -29,6 +30,7 @@ interface VotingModalProps {
   rawVotingPower: string;
   decimals: number;
   daoId: DaoIdEnum;
+  relayerOpsRemaining?: number;
 }
 
 export const VotingModal = ({
@@ -39,6 +41,7 @@ export const VotingModal = ({
   rawVotingPower,
   decimals,
   daoId,
+  relayerOpsRemaining,
 }: VotingModalProps) => {
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
@@ -279,6 +282,15 @@ export const VotingModal = ({
               onChange={(e) => setComment(e.target.value)}
             />
           </div>
+
+          {relayerOpsRemaining !== undefined && (
+            <div className="px-4 pb-2">
+              <InlineAlert
+                variant="info"
+                text={`You have ${relayerOpsRemaining} free vote${relayerOpsRemaining === 1 ? "" : "s"} remaining today.`}
+              />
+            </div>
+          )}
         </>
       )}
 

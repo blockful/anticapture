@@ -22,6 +22,7 @@ interface ProposalHeaderProps {
   proposalStatus: string;
   snapshotLink?: string | null;
   isWhitelabel?: boolean;
+  isRelayerEligible?: boolean;
 }
 
 const ProposalHeaderAction = ({
@@ -30,12 +31,14 @@ const ProposalHeaderAction = ({
   proposalStatus,
   setIsVotingModalOpen,
   isWhitelabel,
+  isRelayerEligible,
 }: {
   address: string | undefined;
   supportValue: number | undefined;
   proposalStatus: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
   isWhitelabel: boolean;
+  isRelayerEligible?: boolean;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
 
@@ -48,6 +51,11 @@ const ProposalHeaderAction = ({
             onClick={() => setIsVotingModalOpen(true)}
           >
             Cast your vote
+            {isRelayerEligible && (
+              <span className="rounded-sm bg-success/20 px-1 py-0.5 text-[10px] font-semibold uppercase leading-none text-success">
+                Free
+              </span>
+            )}
             <ArrowRight className="size-3.5" />
           </Button>
         );
@@ -85,6 +93,7 @@ export const ProposalHeader = ({
   proposalStatus,
   snapshotLink,
   isWhitelabel = false,
+  isRelayerEligible,
 }: ProposalHeaderProps) => {
   const pathname = usePathname();
   const supportValue =
@@ -150,6 +159,7 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                isRelayerEligible={isRelayerEligible}
               />
             </>
           ) : snapshotLink ? (
@@ -170,6 +180,7 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                isRelayerEligible={isRelayerEligible}
               />
             </>
           ) : (
@@ -195,6 +206,7 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                isRelayerEligible={isRelayerEligible}
               />
               {address &&
                 proposalStatus === "succeeded" &&
