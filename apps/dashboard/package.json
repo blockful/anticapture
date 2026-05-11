@@ -13,7 +13,10 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "pnpm --filter @anticapture/graphql-client codegen && pnpm --filter @anticapture/client codegen && storybook build",
     "clean": "rm -rf node_modules .next out build coverage storybook-static *.tsbuildinfo *storybook.log",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@anticapture/client": "workspace:*",
