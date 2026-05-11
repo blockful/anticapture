@@ -1,5 +1,6 @@
 import type { Context, Next } from "hono";
 
+import { logger } from "../logger.js";
 import { cacheRequestTotal } from "../metrics.js";
 
 /** Minimal interface the middleware actually needs */
@@ -58,7 +59,10 @@ export function cacheMiddleware(
 
     // --- Request phase: check for a cached response ---
     // Fail open: if Redis is unavailable, .catch returns null and we proceed normally.
-    const raw = await redis.get(key).catch(() => null);
+    const raw = await redis.get(key).catch((err: unknown) => {
+      logger.warn({ err, key }, "redis read failed");
+      return null;
+    });
     if (raw) {
       const entry = safeParse<CachedEntry>(raw);
       if (!entry) {
@@ -107,6 +111,9 @@ export function cacheMiddleware(
         };
         return redis.set(key, JSON.stringify(entry), { EX: ttl });
       })
-      .catch(() => null);
+      .catch((err: unknown) => {
+        logger.warn({ err, key, ttl }, "redis write failed");
+        return null;
+      });
   };
 }

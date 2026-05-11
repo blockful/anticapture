@@ -67,15 +67,26 @@ export const TransferResponseSchema = z
   .object({
     transactionHash: z.string().openapi({ description: "Transaction hash." }),
     daoId: z.string().openapi({ description: "DAO identifier." }),
-    tokenId: z.string().openapi({ description: "Token contract address." }),
+    tokenId: z.string().openapi({
+      description: "Token contract address.",
+      format: "ethereum-address",
+    }),
     amount: z.string().openapi({
       description: "Transferred amount encoded as a decimal string.",
+      format: "bigint",
     }),
-    fromAccountId: z.string().openapi({ description: "Sender address." }),
-    toAccountId: z.string().openapi({ description: "Recipient address." }),
+    fromAccountId: z.string().openapi({
+      description: "Sender address.",
+      format: "ethereum-address",
+    }),
+    toAccountId: z.string().openapi({
+      description: "Recipient address.",
+      format: "ethereum-address",
+    }),
     timestamp: z.string().openapi({
       description: "Transfer timestamp in Unix seconds as a string.",
       example: "1704067200",
+      format: "bigint",
     }),
     logIndex: z.number().int().openapi({
       description: "Log index within the transaction receipt.",

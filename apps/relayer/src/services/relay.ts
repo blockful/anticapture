@@ -140,17 +140,12 @@ export class RelayService {
   }
 
   /**
-   * Delegation accepts voting power OR raw token balance. The balance fallback
-   * covers first-time delegators, whose getVotes() is 0 until they delegate at
-   * least once.
+   * `delegateBySig` moves balanceOf(delegator) on-chain, so eligibility must
+   * gate on balance .
    */
   private async assertDelegationEligible(address: Address): Promise<void> {
-    const [votingPower, balance] = await Promise.all([
-      this.chainState.getVotingPower(address),
-      this.chainState.getTokenBalance(address),
-    ]);
-
-    if (votingPower < this.minVotingPower && balance < this.minVotingPower) {
+    const balance = await this.chainState.getTokenBalance(address);
+    if (balance < this.minVotingPower) {
       throw Errors.INSUFFICIENT_VOTING_POWER(this.minVotingPower.toString());
     }
   }
