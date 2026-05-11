@@ -48,9 +48,10 @@ export const ProposalActivityProposalSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),
     daoId: z.string().openapi({ description: "DAO identifier." }),
-    proposerAccountId: z
-      .string()
-      .openapi({ description: "Address that created the proposal." }),
+    proposerAccountId: z.string().openapi({
+      description: "Address that created the proposal.",
+      format: "ethereum-address",
+    }),
     title: z.string().openapi({ description: "Proposal title." }),
     description: z.string().openapi({ description: "Proposal body." }),
     startBlock: z.number().openapi({ description: "Start block number." }),
@@ -65,6 +66,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Votes cast in favor, encoded as a decimal string.",
       }),
     againstVotes: z
@@ -72,6 +74,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Votes cast against, encoded as a decimal string.",
       }),
     abstainVotes: z
@@ -79,6 +82,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Abstain votes, encoded as a decimal string.",
       }),
   })
@@ -90,13 +94,15 @@ export const ProposalActivityProposalSchema = z
 export const ProposalActivityUserVoteSchema = z
   .object({
     id: z.string().openapi({ description: "Vote identifier." }),
-    voterAccountId: z
-      .string()
-      .openapi({ description: "Address that cast the vote." }),
+    voterAccountId: z.string().openapi({
+      description: "Address that cast the vote.",
+      format: "ethereum-address",
+    }),
     proposalId: z.string().openapi({ description: "Related proposal ID." }),
     support: VoteSupportSchema,
     votingPower: z.coerce.string().openapi({
       type: "string",
+      format: "bigint",
       description: "Voting power used by the delegate, encoded as a string.",
     }),
     reason: z.string().nullable().openapi({
@@ -123,7 +129,10 @@ export const ProposalActivityItemSchema = z
 
 export const ProposalActivityResponseSchema = z
   .object({
-    address: z.string().openapi({ description: "Delegate address." }),
+    address: z.string().openapi({
+      description: "Delegate address.",
+      format: "ethereum-address",
+    }),
     totalProposals: z
       .number()
       .int()

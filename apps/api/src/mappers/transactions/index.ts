@@ -159,19 +159,26 @@ export const DelegationResponseSchema = z
   .object({
     transactionHash: z.string().openapi({ description: "Transaction hash." }),
     daoId: z.string().openapi({ description: "DAO identifier." }),
-    delegateAccountId: z.string().openapi({ description: "Delegate address." }),
-    delegatorAccountId: z
-      .string()
-      .openapi({ description: "Delegator address." }),
+    delegateAccountId: z.string().openapi({
+      description: "Delegate address.",
+      format: "ethereum-address",
+    }),
+    delegatorAccountId: z.string().openapi({
+      description: "Delegator address.",
+      format: "ethereum-address",
+    }),
     delegatedValue: z.string().openapi({
       description: "Delegated amount encoded as a decimal string.",
+      format: "bigint",
     }),
     previousDelegate: z.string().nullable().openapi({
       description: "Previous delegate address, if one existed.",
+      format: "ethereum-address",
     }),
     timestamp: z.string().openapi({
       description: "Delegation timestamp in Unix seconds as a string.",
       example: "1704067200",
+      format: "bigint",
     }),
     logIndex: z.number().int().openapi({
       description: "Log index within the transaction receipt.",
@@ -198,9 +205,11 @@ export const TransactionResponseSchema = z
     transactionHash: z.string().openapi({ description: "Transaction hash." }),
     from: z.string().nullable().openapi({
       description: "Resolved sender address, if known.",
+      format: "ethereum-address",
     }),
     to: z.string().nullable().openapi({
       description: "Resolved recipient address, if known.",
+      format: "ethereum-address",
     }),
     isCex: z.boolean().openapi({
       description: "Whether the transaction touched a centralized exchange.",
@@ -218,6 +227,7 @@ export const TransactionResponseSchema = z
     timestamp: z.string().openapi({
       description: "Transaction timestamp in Unix seconds as a string.",
       example: "1704067200",
+      format: "bigint",
     }),
     transfers: z.array(TransferResponseSchema),
     delegations: z.array(DelegationResponseSchema),
