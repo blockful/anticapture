@@ -28,7 +28,7 @@ import { useAmountFilterStore } from "@/shared/components/design-system/table/fi
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import { fetchAddressFromEnsName } from "@/shared/utils/ens";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/";
 

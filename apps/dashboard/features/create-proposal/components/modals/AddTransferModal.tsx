@@ -11,7 +11,7 @@ import { Input } from "@/shared/components/design-system/form/fields/input/Input
 import { RadioCard } from "@/shared/components/design-system/form/fields/radio-card/RadioCard";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import daoConfig from "@/shared/dao-config";
-import { isEnsAddress } from "@/shared/hooks/useEnsData";
+import { isEnsAddress } from "@/shared/utils/ens";
 import { useEthPrice } from "@/shared/hooks/useEthPrice";
 import { useTokenData } from "@/shared/hooks/useTokenData";
 import type { DaoIdEnum } from "@/shared/types/daos";
