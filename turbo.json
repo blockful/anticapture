@@ -96,6 +96,7 @@
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
     "test:e2e": {
+      "dependsOn": ["^build"],
       "cache": false,
       "passThroughEnv": [
         "CI",
