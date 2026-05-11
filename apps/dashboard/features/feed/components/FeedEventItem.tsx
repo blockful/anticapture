@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import type { Address } from "viem";
-import { formatUnits, zeroAddress } from "viem";
+import { formatUnits, isAddressEqual, zeroAddress } from "viem";
 
 import {
   type FeedItem,
@@ -384,7 +384,11 @@ export const FeedEventItem = ({
         if (!delegationMetadata) return null;
         const hasRedelegation =
           delegationMetadata.previousDelegate !== null &&
-          delegationMetadata.previousDelegate !== zeroAddress;
+          !isAddressEqual(delegationMetadata.previousDelegate, zeroAddress) &&
+          !isAddressEqual(
+            delegationMetadata.previousDelegate,
+            delegationMetadata.delegator,
+          );
 
         return (
           <div className="leading-relaxed">

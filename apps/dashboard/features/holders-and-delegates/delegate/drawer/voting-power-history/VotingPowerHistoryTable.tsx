@@ -11,7 +11,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import type { Address } from "viem";
-import { formatUnits, parseUnits, zeroAddress } from "viem";
+import { formatUnits, isAddressEqual, parseUnits, zeroAddress } from "viem";
 
 import type { DelegationHistoryItem } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import { useDelegateDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
@@ -93,9 +93,13 @@ export const VotingPowerHistoryTable = ({
         statusText = "Delegator Balance Decrease";
       }
     } else if (item.type === "delegation") {
+      const previousDelegate = item.delegation?.previousDelegate;
+      const delegator = item.delegation?.from;
       const isRedelegation =
-        item.delegation?.previousDelegate != null &&
-        item.delegation.previousDelegate !== zeroAddress;
+        previousDelegate != null &&
+        !isAddressEqual(previousDelegate as Address, zeroAddress) &&
+        delegator != null &&
+        !isAddressEqual(previousDelegate as Address, delegator as Address);
       statusText = isRedelegation ? "Redelegation" : "Delegation";
     }
 
