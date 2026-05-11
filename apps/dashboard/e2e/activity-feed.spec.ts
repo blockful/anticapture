@@ -94,16 +94,19 @@ test.describe("Activity Feed page (/ens/activity-feed)", () => {
     page,
   }) => {
     await goto("/ens/activity-feed");
-    // Look for any clickable address button in feed items
-    // Address buttons are inside feed event items and trigger a drawer
+    // Feed AddressButtons open a drawer via local state (no URL update).
     const addressBtn = page
-      .locator(
-        '[data-ph-event="holder_details"], [data-ph-event="delegate_details"]',
-      )
+      .locator('[data-testid="feed-address-button"]')
       .first();
     const count = await addressBtn.count();
     if (count === 0) return; // no events with address links, skip
     await addressBtn.click();
-    await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
+    // Drawer renders entity tabs; assert one is visible.
+    await expect(
+      page
+        .locator('[role="tab"]')
+        .filter({ hasText: /Delegation History|Voting Power History/ })
+        .first(),
+    ).toBeVisible({ timeout: 10_000 });
   });
 });

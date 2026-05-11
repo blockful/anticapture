@@ -267,8 +267,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const balanceHeader = page
       .locator("table thead")
       .first()
-      .getByText(/Balance/)
-      .first();
+      .getByRole("button", { name: /^Balance/ });
     await expect(balanceHeader).toBeVisible();
     await balanceHeader.click();
     // After click, sortBy=balance should appear in URL (or sort direction toggles)
@@ -286,8 +285,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const changeHeader = page
       .locator("table thead")
       .first()
-      .getByText(/^Change/)
-      .first();
+      .getByRole("button", { name: /^Change/ });
     await expect(changeHeader).toBeVisible();
     await changeHeader.click();
     await expect(page).toHaveURL(/sortBy=(signedVariation|variation)/, {
@@ -311,8 +309,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const vpHeader = page
       .locator("table thead")
       .first()
-      .getByText(/Voting Power/)
-      .first();
+      .getByRole("button", { name: /^Voting Power/ });
     await expect(vpHeader).toBeVisible();
     await vpHeader.click();
     await expect(page).toHaveURL(/sortBy=votingPower|sort=/, {
@@ -333,8 +330,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const changeHeader = page
       .locator("table thead")
       .first()
-      .getByText(/^Change/)
-      .first();
+      .getByRole("button", { name: /^Change/ });
     await expect(changeHeader).toBeVisible();
     await changeHeader.click();
     await expect(page).toHaveURL(/sortBy=(signedVariation|variation)/, {
@@ -358,8 +354,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const delegatorsHeader = page
       .locator("table thead")
       .first()
-      .getByText("Delegators")
-      .first();
+      .getByRole("button", { name: /^Delegators/ });
     await expect(delegatorsHeader).toBeVisible();
     await delegatorsHeader.click();
     await expect(page).toHaveURL(/sortBy=delegationsCount|sort=/, {
