@@ -22,6 +22,7 @@ export type SubSectionProps = {
   switcherComponent?: ReactNode;
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
 };
 
 export type SubSectionsContainerProps = {
