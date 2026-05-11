@@ -2072,7 +2072,7 @@
         },
         "required": ["voter", "votingPower"]
       },
-      "RelayVoteResponse": {
+      "RelayerVoteResponse": {
         "type": "object",
         "properties": {
           "transactionHash": {
@@ -2084,7 +2084,19 @@
         },
         "required": ["transactionHash", "voter"]
       },
-      "RelayVoteRequest": {
+      "RelayerErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": ["error", "code"]
+      },
+      "RelayerVoteRequest": {
         "type": "object",
         "properties": {
           "proposalId": {
@@ -2112,7 +2124,7 @@
         },
         "required": ["proposalId", "support", "v", "r", "s"]
       },
-      "RelayDelegateResponse": {
+      "RelayerDelegateResponse": {
         "type": "object",
         "properties": {
           "transactionHash": {
@@ -2124,7 +2136,7 @@
         },
         "required": ["transactionHash", "delegator"]
       },
-      "RelayDelegateRequest": {
+      "RelayerDelegateRequest": {
         "type": "object",
         "properties": {
           "delegatee": {
@@ -2154,7 +2166,7 @@
         },
         "required": ["delegatee", "nonce", "expiry", "v", "r", "s"]
       },
-      "HealthResponse": {
+      "RelayerHealthResponse": {
         "type": "object",
         "properties": {
           "status": {
@@ -2163,6 +2175,70 @@
           }
         },
         "required": ["status"]
+      },
+      "RelayerConfigResponse": {
+        "type": "object",
+        "properties": {
+          "minVotingPower": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Minimum voting power required to relay, as a decimal string (uint256)."
+          },
+          "maxRelayPerAddressPerDay": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "bigint",
+            "description": "Maximum number of relays per address per UTC day, per operation."
+          }
+        },
+        "required": ["minVotingPower", "maxRelayPerAddressPerDay"]
+      },
+      "RelayerRateLimitResponse": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "EIP-55 checksummed Ethereum address."
+          },
+          "maxPerDay": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "vote": {
+            "type": "object",
+            "properties": {
+              "used": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "remaining": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": ["used", "remaining"]
+          },
+          "delegation": {
+            "type": "object",
+            "properties": {
+              "used": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "remaining": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": ["used", "remaining"]
+          },
+          "resetsAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the next UTC-midnight reset."
+          }
+        },
+        "required": ["address", "maxPerDay", "vote", "delegation", "resetsAt"]
       }
     },
     "parameters": {},
@@ -7437,7 +7513,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RelayVoteRequest"
+                "$ref": "#/components/schemas/RelayerVoteRequest"
               }
             }
           }
@@ -7448,7 +7524,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayVoteResponse"
+                  "$ref": "#/components/schemas/RelayerVoteResponse"
                 }
               }
             }
@@ -7458,7 +7534,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7468,7 +7544,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7478,7 +7554,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7508,7 +7584,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RelayDelegateRequest"
+                "$ref": "#/components/schemas/RelayerDelegateRequest"
               }
             }
           }
@@ -7519,7 +7595,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RelayDelegateResponse"
+                  "$ref": "#/components/schemas/RelayerDelegateResponse"
                 }
               }
             }
@@ -7529,7 +7605,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7539,7 +7615,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7549,7 +7625,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }

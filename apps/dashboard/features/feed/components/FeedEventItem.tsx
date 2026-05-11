@@ -133,6 +133,7 @@ const AddressButton = ({
   onRowClick?: (address: string, entityType: EntityType) => void;
 }) => (
   <button
+    data-testid="feed-address-button"
     className="group inline-flex cursor-pointer items-center gap-1.5 align-middle"
     onClick={() => onRowClick?.(address, entityType)}
   >
