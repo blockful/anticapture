@@ -38,8 +38,7 @@ export const InsufficientVPModal = ({
       </h3>
       <p className="text-secondary max-w-sm text-center text-sm leading-5">
         You don&apos;t have enough voting power to submit this proposal. Your
-        draft has been saved — share it with a delegate who has enough voting
-        power to submit it on your behalf.
+        draft has been saved.
       </p>
       <div className="border-border-default rounded-base mt-2 flex w-full flex-col gap-2 border p-3 text-sm">
         <div className="flex items-center justify-between">
