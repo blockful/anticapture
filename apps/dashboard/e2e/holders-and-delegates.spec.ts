@@ -240,9 +240,13 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       .locator("button")
       .first();
     if ((await addressTrigger.count()) === 0) return; // no popover trigger, skip
-    await addressTrigger.click();
     const input = page.getByPlaceholder("Paste the address");
-    await expect(input).toBeVisible({ timeout: 5_000 });
+    // Retry the trigger click until the popover opens; the click can be
+    // dropped if React hasn't hydrated the Radix Popover yet.
+    await expect(async () => {
+      await addressTrigger.click();
+      await expect(input).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
     await input.fill("0x0000000000000000000000000000000000000000");
     const popover = page
       .locator(
@@ -385,9 +389,11 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       .locator("button")
       .first();
     if ((await addressTrigger.count()) === 0) return;
-    await addressTrigger.click();
     const input = page.getByPlaceholder("Paste the address");
-    await expect(input).toBeVisible({ timeout: 5_000 });
+    await expect(async () => {
+      await addressTrigger.click();
+      await expect(input).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
     await input.fill("0x0000000000000000000000000000000000000000");
     const popover = page
       .locator(
