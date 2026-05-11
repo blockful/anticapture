@@ -192,6 +192,12 @@ async function main() {
   );
   await activateProposal(testClient, proposalId);
 
+  // Re-arm automine. After mining a large batch (votingDelay blocks), some
+  // anvil builds leave automine in a drained state where dashboard txs
+  // (delegate, castVote) sit in the mempool until mined manually.
+  await testClient.setAutomine(true);
+  await testClient.setIntervalMining({ interval: 0 });
+
   // Sanity-check the dev wallet's ENS balance before printing.
   const ensBalance = await testClient.readContract({
     address: TOKEN_ADDRESS,
