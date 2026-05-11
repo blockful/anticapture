@@ -20,12 +20,13 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: process.env.CI
+  // Skip webServer when PLAYWRIGHT_BASE_URL points to a remote target.
+  webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
         command: "pnpm dev",
         url: "http://localhost:3000",
-        reuseExistingServer: true,
-        timeout: 120_000,
+        reuseExistingServer: !process.env.CI,
+        timeout: 180_000,
       },
 });
