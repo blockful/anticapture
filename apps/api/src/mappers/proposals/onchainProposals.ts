@@ -126,6 +126,22 @@ export const ProposalResponseSchema = z
     endTimestamp: z.number().int().openapi({
       description: "Proposal end timestamp in Unix seconds.",
     }),
+    queuedTimestamp: z.number().int().nullable().openapi({
+      description:
+        "Timestamp (Unix seconds) when the proposal was queued, or null if it never was.",
+    }),
+    executedTimestamp: z.number().int().nullable().openapi({
+      description:
+        "Timestamp (Unix seconds) when the proposal was executed, or null if it never was.",
+    }),
+    queuedTxHash: z.string().nullable().openapi({
+      description:
+        "Transaction hash of the queue event, or null if the proposal was never queued.",
+    }),
+    executedTxHash: z.string().nullable().openapi({
+      description:
+        "Transaction hash of the execute event, or null if the proposal was never executed.",
+    }),
     quorum: z.string().openapi({
       description: "Required quorum encoded as a decimal string.",
       format: "bigint",
@@ -200,6 +216,12 @@ export const ProposalMapper = {
       values: p.values.map((v) => v.toString()),
       targets: p.targets,
       proposalType: p.proposalType,
+      queuedTimestamp:
+        p.queuedTimestamp === null ? null : Number(p.queuedTimestamp),
+      executedTimestamp:
+        p.executedTimestamp === null ? null : Number(p.executedTimestamp),
+      queuedTxHash: p.queuedTxHash,
+      executedTxHash: p.executedTxHash,
     };
   },
 };
