@@ -53,29 +53,32 @@ const chartConfig = {
   },
 };
 
-const generateMonthlyTicks = (chartData: Array<{ timestamp: number }>) => {
+const generateAdaptiveTicks = (chartData: Array<{ timestamp: number }>) => {
   if (!chartData.length) return [];
 
   const firstTimestamp = Math.min(...chartData.map((d) => d.timestamp));
   const lastTimestamp = Math.max(...chartData.map((d) => d.timestamp));
+  const daysInRange = (lastTimestamp - firstTimestamp) / (1000 * 60 * 60 * 24);
 
-  const ticks: number[] = [];
+  // Scale month step so we get roughly 5-7 ticks regardless of range length
+  let monthStep = 1;
+  if (daysInRange > 180) monthStep = 2;
+  if (daysInRange > 365) monthStep = 3;
+  if (daysInRange > 730) monthStep = 6;
+
   const startDate = new Date(firstTimestamp);
   const endDate = new Date(lastTimestamp);
 
-  // Ensure the first tick aligns with the first data point to avoid leading blank space
-  ticks.push(firstTimestamp);
-
-  // Then add monthly ticks starting from the first day of the next month
+  const ticks: number[] = [firstTimestamp];
   const current = new Date(
     startDate.getFullYear(),
-    startDate.getMonth() + 1,
+    startDate.getMonth() + monthStep,
     1,
   );
 
   while (current <= endDate) {
     ticks.push(current.getTime());
-    current.setMonth(current.getMonth() + 1);
+    current.setMonth(current.getMonth() + monthStep);
   }
 
   return Array.from(new Set(ticks));
@@ -225,7 +228,7 @@ export const BalanceHistoryVariationGraph = ({
               type="number"
               scale="time"
               domain={["dataMin", "dataMax"]}
-              ticks={generateMonthlyTicks(extendedChartData)}
+              ticks={generateAdaptiveTicks(extendedChartData)}
               tickFormatter={(value: number) => {
                 const date = new Date(value);
                 const month = date.toLocaleDateString("en-US", {

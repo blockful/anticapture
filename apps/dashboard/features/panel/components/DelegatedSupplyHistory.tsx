@@ -87,6 +87,35 @@ export const DelegatedSupplyHistory = () => {
       .filter((item): item is NonNullable<typeof item> => item !== null);
   }, [data]);
 
+  // Generate evenly-spaced monthly tick timestamps limited to ~6 labels
+  const xAxisTicks = useMemo(() => {
+    if (!chartData.length) return [];
+    const first = chartData[0].timestamp;
+    const last = chartData[chartData.length - 1].timestamp;
+    const daysInRange = (last - first) / (1000 * 60 * 60 * 24);
+    // Pick a month step so we get roughly 5-7 ticks across the range
+    let monthStep = 1;
+    if (daysInRange > 270) monthStep = 2;
+    if (daysInRange > 540) monthStep = 3;
+
+    const ticks: number[] = [first];
+    const start = new Date(first);
+    const end = new Date(last);
+    const current = new Date(start.getFullYear(), start.getMonth() + monthStep, 1);
+    while (current <= end) {
+      const ideal = current.getTime();
+      const nearest = chartData.reduce((prev, curr) =>
+        Math.abs(curr.timestamp - ideal) < Math.abs(prev.timestamp - ideal)
+          ? curr
+          : prev,
+      );
+      ticks.push(nearest.timestamp);
+      current.setMonth(current.getMonth() + monthStep);
+    }
+    ticks.push(last);
+    return Array.from(new Set(ticks));
+  }, [chartData]);
+
   // Calculate Y-axis domain and ticks with standard increments (5% or 10%)
   const yAxisConfig = useMemo(() => {
     if (!chartData || chartData.length === 0) {
@@ -157,7 +186,12 @@ export const DelegatedSupplyHistory = () => {
         >
           <CartesianGrid vertical={false} stroke="#27272a" />
           <XAxis
-            dataKey="date"
+            dataKey="timestamp"
+            type="number"
+            scale="time"
+            domain={["dataMin", "dataMax"]}
+            ticks={xAxisTicks}
+            interval={0}
             tickLine={false}
             axisLine={false}
             tickMargin={8}
@@ -167,7 +201,12 @@ export const DelegatedSupplyHistory = () => {
               fontFamily: "Inter",
               fontWeight: 400,
             }}
-            tickFormatter={(value) => value}
+            tickFormatter={(value: number) => {
+              const date = new Date(value);
+              const month = date.toLocaleDateString("en-US", { month: "short" });
+              const year = date.getFullYear().toString().slice(-2);
+              return `${month} '${year}`;
+            }}
           />
           <YAxis
             domain={yAxisConfig.domain}

@@ -273,6 +273,7 @@ export const MultilineChartAttackProfitability = ({
             scale="time"
             type="number"
             domain={["auto", "auto"]}
+            tickCount={7}
             tickMargin={8}
             tickFormatter={(timestamp) =>
               timestampToReadableDate(timestamp, "abbreviated")
