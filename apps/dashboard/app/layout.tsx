@@ -121,7 +121,7 @@ export default async function RootLayout({
           data-vaul-drawer-wrapper=""
           className="border-border-default mx-auto max-w-screen-2xl overflow-x-hidden border-x xl:overflow-hidden"
         >
-          <GlobalProviders>
+          <GlobalProviders isWhitelabel={isWhitelabel}>
             {children}
             <CookieConsent isWhitelabel={isWhitelabel} />
             <HelpPopover isWhitelabel={isWhitelabel} />
