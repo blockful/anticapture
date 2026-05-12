@@ -158,7 +158,9 @@ export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
 export const DelegationResponseSchema = z
   .object({
     transactionHash: z.string().openapi({ description: "Transaction hash." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
+    daoId: z
+      .string()
+      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
     delegateAccountId: z.string().openapi({ description: "Delegate address." }),
     delegatorAccountId: z
       .string()

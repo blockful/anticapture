@@ -66,7 +66,9 @@ export type TransfersRequest = z.infer<typeof TransfersRequestQuerySchema> &
 export const TransferResponseSchema = z
   .object({
     transactionHash: z.string().openapi({ description: "Transaction hash." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
+    daoId: z
+      .string()
+      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
     tokenId: z.string().openapi({ description: "Token contract address." }),
     amount: z.string().openapi({
       description: "Transferred amount encoded as a decimal string.",

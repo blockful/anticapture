@@ -89,7 +89,9 @@ export type ProposalSearchRequest = z.infer<typeof ProposalSearchRequestSchema>;
 export const ProposalResponseSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
+    daoId: z
+      .string()
+      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
     txHash: z
       .string()
       .openapi({ description: "Proposal creation transaction hash." }),
