@@ -192,12 +192,13 @@ export const voteOnProposal = async (
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
 
   try {
-    const handler = getVoteHandler(daoId, useGasless, !!comment);
+    const trimmedComment = comment?.trim() || undefined;
+    const handler = getVoteHandler(daoId, useGasless, !!trimmedComment);
     const hash = await handler(client as VoteClient, {
       proposalId,
       voteNumber,
       account,
-      comment,
+      comment: trimmedComment,
     });
 
     setTransactionhash(hash);
