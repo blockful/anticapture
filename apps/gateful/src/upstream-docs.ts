@@ -73,9 +73,16 @@ function mergeRelayerPaths(doc: OpenAPIObject, daos: string[]): PathsObject {
     description: "DAO identifier",
   };
 
+  const isRelayerPath = (path: string) =>
+    path === "/relay" ||
+    path.startsWith("/relay/") ||
+    path === "/config" ||
+    path === "/rate-limit" ||
+    path.startsWith("/rate-limit/");
+
   const paths: PathsObject = {};
   for (const [path, pathItem] of Object.entries(doc.paths)) {
-    if (path !== "/relay" && !path.startsWith("/relay/")) {
+    if (!isRelayerPath(path)) {
       continue;
     }
     const item: PathItemObject = { ...pathItem };
