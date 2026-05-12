@@ -2,38 +2,31 @@ import { z } from "@hono/zod-openapi";
 
 import {
   AddressSchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
   PeriodResponseSchema,
   TimestampResponseMapper,
-  unixTimestampQueryParam,
+  addressPathParams,
+  defaultDescOrderDirection,
+  inclusiveDateRangeQueryParams,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
 } from "../shared";
 
 import { DBAccountBalanceVariation } from "./variations";
 
-export const AccountInteractionsParamsSchema = z
-  .object({
-    address: AddressSchema,
-  })
-  .openapi("AccountInteractionsParams", {
-    description: "Path params for account interaction queries.",
-  });
+export const AccountInteractionsParamsSchema = addressPathParams(
+  "AccountInteractionsParams",
+  "Path params for account interaction queries.",
+);
 
 export const AccountInteractionsQuerySchema = z
   .object({
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for transfer timestamps, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for transfer timestamps, in Unix seconds.",
-    ),
+    ...inclusiveDateRangeQueryParams("transfer timestamps"),
     limit: paginationLimitQueryParam(
       "Maximum number of interaction rows to return.",
       20,
     ),
     skip: paginationSkipQueryParam("Number of interaction rows to skip."),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
     minAmount: z
       .string()
       .transform((val) => BigInt(val))

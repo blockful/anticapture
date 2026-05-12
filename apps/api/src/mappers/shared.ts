@@ -147,6 +147,140 @@ export const unixTimestampQueryParam = (description: string) =>
     example: 1700000000,
   });
 
+export const addressOutputField = (description: string) =>
+  z.string().openapi({ description });
+
+export const decimalStringField = (description: string) =>
+  z.string().openapi({ description });
+
+export const txHashField = () =>
+  z.string().openapi({ description: "Transaction hash." });
+
+export const daoIdField = () =>
+  z.string().openapi({ description: "DAO identifier." });
+
+export const paginatedListResponse = <T extends z.ZodTypeAny>(
+  itemSchema: T,
+  totalCountDescription?: string,
+) =>
+  z.object({
+    items: z.array(itemSchema),
+    totalCount: totalCountDescription
+      ? z.number().int().openapi({ description: totalCountDescription })
+      : z.number().int(),
+  });
+
+export const defaultDescOrderDirection = () =>
+  OrderDirectionSchema.optional().default("desc");
+
+export const logIndexField = () =>
+  z.number().int().openapi({
+    description: "Log index within the transaction receipt.",
+  });
+
+export const unixSecondsStringField = (subject: string) =>
+  z.string().openapi({
+    description: `${subject} timestamp in Unix seconds as a string.`,
+    example: "1704067200",
+  });
+
+export const unixSecondsIntField = (description: string) =>
+  z.number().int().openapi({ description });
+
+export const inclusiveDateRangeQueryParams = (subject: string) => ({
+  fromDate: unixTimestampQueryParam(
+    `Inclusive lower bound for ${subject}, in Unix seconds.`,
+  ),
+  toDate: unixTimestampQueryParam(
+    `Inclusive upper bound for ${subject}, in Unix seconds.`,
+  ),
+});
+
+export const earliestLatestDateRangeQueryParams = (subject: string) => ({
+  fromDate: unixTimestampQueryParam(
+    `Earliest ${subject} timestamp, in Unix seconds.`,
+  ),
+  toDate: unixTimestampQueryParam(
+    `Latest ${subject} timestamp, in Unix seconds.`,
+  ),
+});
+
+export const paginationQueryParams = (overrides?: {
+  skipDescription?: string;
+  limitDescription?: string;
+  limitDefault?: number;
+}) => ({
+  skip: paginationSkipQueryParam(overrides?.skipDescription),
+  limit: paginationLimitQueryParam(
+    overrides?.limitDescription,
+    overrides?.limitDefault,
+  ),
+});
+
+export const bigIntRangeQueryParams = (subject: string) => ({
+  fromValue: z
+    .string()
+    .transform((val) => BigInt(val))
+    .openapi({
+      description: `Minimum ${subject} encoded as a decimal string.`,
+    })
+    .optional(),
+  toValue: z
+    .string()
+    .transform((val) => BigInt(val))
+    .openapi({
+      description: `Maximum ${subject} encoded as a decimal string.`,
+    })
+    .optional(),
+});
+
+export const addressesQueryFilter = () =>
+  AddressQueryArraySchema.openapi({
+    description:
+      "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
+  }).optional();
+
+export const commaDelimitedEnumQueryParam = <T extends string>(
+  values: readonly [T, ...T[]],
+  normalizer?: (input: string) => string,
+) =>
+  z.union([z.string(), z.array(z.string())]).transform((value) => {
+    const items = normalizeQueryArray(value);
+    if (!items) return undefined;
+    const normalized = normalizer
+      ? items.map((item) => normalizer(String(item)))
+      : items;
+    return z.array(z.enum(values)).parse(normalized);
+  });
+
+export const affectedSupplyFlagsFields = (subject: string) => ({
+  isCex: z.boolean().openapi({
+    description: `Whether the ${subject} touched a centralized exchange.`,
+  }),
+  isDex: z.boolean().openapi({
+    description: `Whether the ${subject} touched a decentralized exchange.`,
+  }),
+  isLending: z.boolean().openapi({
+    description: `Whether the ${subject} touched a lending protocol.`,
+  }),
+  isTotal: z.boolean().openapi({
+    description: `Whether the ${subject} affects total-supply accounting.`,
+  }),
+});
+
+export const addressPathParams = (openapiName: string, description: string) =>
+  z.object({ address: AddressSchema }).openapi(openapiName, { description });
+
+export const bigintAsStringField = (description?: string) => {
+  const schema = z.union([
+    z.bigint().transform((val) => val.toString()),
+    z.string(),
+  ]);
+  return description
+    ? schema.openapi({ type: "string", description })
+    : schema.openapi({ type: "string" });
+};
+
 const errorResponseContent = {
   "application/json": {
     schema: ErrorResponseSchema,

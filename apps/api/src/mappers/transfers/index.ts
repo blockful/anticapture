@@ -4,9 +4,17 @@ import { transfer } from "@/database";
 import {
   AddressSchema,
   OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
-  unixTimestampQueryParam,
+  addressOutputField,
+  affectedSupplyFlagsFields,
+  bigIntRangeQueryParams,
+  daoIdField,
+  decimalStringField,
+  earliestLatestDateRangeQueryParams,
+  logIndexField,
+  paginatedListResponse,
+  paginationQueryParams,
+  txHashField,
+  unixSecondsStringField,
 } from "../shared";
 
 export type DBTransfer = typeof transfer.$inferSelect;
@@ -24,8 +32,7 @@ export const TransfersRequestRouteSchema = z
 
 export const TransfersRequestQuerySchema = z
   .object({
-    limit: paginationLimitQueryParam(),
-    skip: paginationSkipQueryParam(),
+    ...paginationQueryParams(),
     orderBy: z
       .enum(["timestamp", "amount"])
       .optional()
@@ -37,26 +44,8 @@ export const TransfersRequestQuerySchema = z
     orderDirection: OrderDirectionSchema.optional(),
     from: AddressSchema.optional(),
     to: AddressSchema.optional(),
-    fromDate: unixTimestampQueryParam(
-      "Earliest transfer timestamp, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Latest transfer timestamp, in Unix seconds.",
-    ),
-    fromValue: z
-      .string()
-      .transform((val) => BigInt(val))
-      .openapi({
-        description: "Minimum transfer amount encoded as a decimal string.",
-      })
-      .optional(),
-    toValue: z
-      .string()
-      .transform((val) => BigInt(val))
-      .openapi({
-        description: "Maximum transfer amount encoded as a decimal string.",
-      })
-      .optional(),
+    ...earliestLatestDateRangeQueryParams("transfer"),
+    ...bigIntRangeQueryParams("transfer amount"),
   })
   .openapi("TransfersRequestQuery");
 
@@ -65,44 +54,24 @@ export type TransfersRequest = z.infer<typeof TransfersRequestQuerySchema> &
 
 export const TransferResponseSchema = z
   .object({
-    transactionHash: z.string().openapi({ description: "Transaction hash." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
-    tokenId: z.string().openapi({ description: "Token contract address." }),
-    amount: z.string().openapi({
-      description: "Transferred amount encoded as a decimal string.",
-    }),
-    fromAccountId: z.string().openapi({ description: "Sender address." }),
-    toAccountId: z.string().openapi({ description: "Recipient address." }),
-    timestamp: z.string().openapi({
-      description: "Transfer timestamp in Unix seconds as a string.",
-      example: "1704067200",
-    }),
-    logIndex: z.number().int().openapi({
-      description: "Log index within the transaction receipt.",
-    }),
-    isCex: z.boolean().openapi({
-      description: "Whether the transfer touched a centralized exchange.",
-    }),
-    isDex: z.boolean().openapi({
-      description: "Whether the transfer touched a decentralized exchange.",
-    }),
-    isLending: z.boolean().openapi({
-      description: "Whether the transfer touched a lending protocol.",
-    }),
-    isTotal: z.boolean().openapi({
-      description: "Whether the transfer counts toward total tracked supply.",
-    }),
+    transactionHash: txHashField(),
+    daoId: daoIdField(),
+    tokenId: addressOutputField("Token contract address."),
+    amount: decimalStringField(
+      "Transferred amount encoded as a decimal string.",
+    ),
+    fromAccountId: addressOutputField("Sender address."),
+    toAccountId: addressOutputField("Recipient address."),
+    timestamp: unixSecondsStringField("Transfer"),
+    logIndex: logIndexField(),
+    ...affectedSupplyFlagsFields("transfer"),
   })
   .openapi("Transfer");
 
-export const TransfersResponseSchema = z
-  .object({
-    items: z.array(TransferResponseSchema),
-    totalCount: z.number().int().openapi({
-      description: "Total number of matching transfers.",
-    }),
-  })
-  .openapi("TransfersResponse");
+export const TransfersResponseSchema = paginatedListResponse(
+  TransferResponseSchema,
+  "Total number of matching transfers.",
+).openapi("TransfersResponse");
 
 export type TransferResponse = z.infer<typeof TransferResponseSchema>;
 export type TransfersResponse = z.infer<typeof TransfersResponseSchema>;

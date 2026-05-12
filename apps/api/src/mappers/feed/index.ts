@@ -6,10 +6,12 @@ import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import {
   FeedEventTypeSchema,
   FeedRelevanceSchema,
-  OrderDirectionSchema,
+  defaultDescOrderDirection,
+  earliestLatestDateRangeQueryParams,
+  logIndexField,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
-  unixTimestampQueryParam,
+  txHashField,
 } from "../shared";
 
 export type DBFeedEvent = typeof feedEvent.$inferSelect;
@@ -30,17 +32,14 @@ export const FeedRequestSchema = z
         description: "Field used to sort feed events.",
         example: "timestamp",
       }),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
     relevance: z.enum(FeedRelevance).optional().openapi({
       description: "Filter events by relevance tier.",
     }),
     type: z.enum(FeedEventType).optional().openapi({
       description: "Filter events by governance activity type.",
     }),
-    fromDate: unixTimestampQueryParam(
-      "Earliest event timestamp, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam("Latest event timestamp, in Unix seconds."),
+    ...earliestLatestDateRangeQueryParams("event"),
   })
   .openapi("FeedRequest", {
     description: "Query params used to page and filter feed events.",
@@ -48,10 +47,8 @@ export const FeedRequestSchema = z
 
 export const FeedItemSchema = z
   .object({
-    txHash: z.string().openapi({ description: "Transaction hash." }),
-    logIndex: z.number().int().openapi({
-      description: "Log index within the transaction receipt.",
-    }),
+    txHash: txHashField(),
+    logIndex: logIndexField(),
     type: FeedEventTypeSchema,
     value: z.string().optional().openapi({
       description:

@@ -1,16 +1,11 @@
 import { z } from "@hono/zod-openapi";
 
 import { token } from "@/database";
-import {
-  DaysWindow,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
-} from "../shared";
+import { DaysWindow, paginationQueryParams } from "../shared";
 
 export const TokenHistoricalPriceRequest = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
+    ...paginationQueryParams(),
   })
   .openapi("TokenHistoricalPriceRequest", {
     description: "Pagination query for historical token market data.",

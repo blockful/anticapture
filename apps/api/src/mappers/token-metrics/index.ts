@@ -5,8 +5,7 @@ import { MetricTypesEnum } from "@/lib/constants";
 import {
   OrderDirectionSchema,
   PageInfoSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
+  paginationQueryParams,
 } from "../shared";
 
 // === ZOD SCHEMAS ===
@@ -28,8 +27,7 @@ export const TokenMetricsRequestSchema = z
       type: "integer",
     }),
     orderDirection: OrderDirectionSchema.optional(),
-    limit: paginationLimitQueryParam(),
-    skip: paginationSkipQueryParam(),
+    ...paginationQueryParams(),
   })
   .openapi("TokenMetricsRequest");
 

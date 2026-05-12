@@ -3,16 +3,15 @@ import { z } from "@hono/zod-openapi";
 import {
   AddressQueryArraySchema,
   AddressSchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
+  defaultDescOrderDirection,
+  paginatedListResponse,
+  paginationQueryParams,
 } from "../shared";
 
 export const VotersRequestSchema = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    ...paginationQueryParams(),
+    orderDirection: defaultDescOrderDirection(),
     addresses: AddressQueryArraySchema.optional(),
   })
   .openapi("VotersRequest", {
@@ -35,13 +34,10 @@ export const VoterResponseSchema = z
 
 export type VoterResponse = z.infer<typeof VoterResponseSchema>;
 
-export const VotersResponseSchema = z
-  .object({
-    items: z.array(VoterResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("VotersResponse", {
-    description: "Paginated voter or non-voter records for a proposal.",
-  });
+export const VotersResponseSchema = paginatedListResponse(
+  VoterResponseSchema,
+).openapi("VotersResponse", {
+  description: "Paginated voter or non-voter records for a proposal.",
+});
 
 export type VotersResponse = z.infer<typeof VotersResponseSchema>;

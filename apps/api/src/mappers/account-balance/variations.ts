@@ -3,32 +3,27 @@ import { Address } from "viem";
 
 import { PERCENTAGE_NO_BASELINE } from "../constants";
 import {
-  AddressQueryArraySchema,
-  AddressSchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
   PeriodResponseSchema,
   TimestampResponseMapper,
-  unixTimestampQueryParam,
+  addressOutputField,
+  addressPathParams,
+  addressesQueryFilter,
+  decimalStringField,
+  defaultDescOrderDirection,
+  inclusiveDateRangeQueryParams,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
 } from "../shared";
 
-export const AccountBalanceVariationsByAccountIdRequestParamsSchema = z
-  .object({
-    address: AddressSchema,
-  })
-  .openapi("AccountBalanceVariationsByAccountIdRequestParams", {
-    description: "Path params for a single-account balance variation request.",
-  });
+export const AccountBalanceVariationsByAccountIdRequestParamsSchema =
+  addressPathParams(
+    "AccountBalanceVariationsByAccountIdRequestParams",
+    "Path params for a single-account balance variation request.",
+  );
 
 export const AccountBalanceVariationsByAccountIdRequestQuerySchema = z
   .object({
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for the comparison window, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for the comparison window, in Unix seconds.",
-    ),
+    ...inclusiveDateRangeQueryParams("the comparison window"),
   })
   .openapi("AccountBalanceVariationsByAccountIdRequestQuery", {
     description:
@@ -44,11 +39,8 @@ export const AccountBalanceVariationsRequestQuerySchema =
     skip: paginationSkipQueryParam(
       "Number of account balance variations to skip.",
     ),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
-    addresses: AddressQueryArraySchema.openapi({
-      description:
-        "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
-    }).optional(),
+    orderDirection: defaultDescOrderDirection(),
+    addresses: addressesQueryFilter(),
   }).openapi("AccountBalanceVariationsRequestQuery", {
     description:
       "Query params used to page and filter account balance variations.",
@@ -56,19 +48,19 @@ export const AccountBalanceVariationsRequestQuerySchema =
 
 export const AccountBalanceVariationSchema = z
   .object({
-    accountId: z.string().openapi({ description: "Account address." }),
+    accountId: addressOutputField("Account address."),
     previousBalance: z.string().openapi({
       description: "Balance at the start of the comparison window.",
     }),
     currentBalance: z.string().openapi({
       description: "Balance at the end of the comparison window.",
     }),
-    absoluteChange: z.string().openapi({
-      description: "Absolute balance change encoded as a decimal string.",
-    }),
-    percentageChange: z.string().openapi({
-      description: "Relative balance change encoded as a decimal string.",
-    }),
+    absoluteChange: decimalStringField(
+      "Absolute balance change encoded as a decimal string.",
+    ),
+    percentageChange: decimalStringField(
+      "Relative balance change encoded as a decimal string.",
+    ),
   })
   .openapi("AccountBalanceVariation", {
     description: "Balance delta for a single account across two timestamps.",

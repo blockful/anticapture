@@ -4,33 +4,30 @@ import { Address } from "viem";
 import { accountPower } from "@/database";
 
 import {
-  AddressQueryArraySchema,
-  AddressSchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
   PeriodResponseSchema,
   TimestampResponseMapper,
-  unixTimestampQueryParam,
+  addressOutputField,
+  addressPathParams,
+  addressesQueryFilter,
+  bigIntRangeQueryParams,
+  bigintAsStringField,
+  decimalStringField,
+  defaultDescOrderDirection,
+  inclusiveDateRangeQueryParams,
+  paginatedListResponse,
+  paginationLimitQueryParam,
+  paginationSkipQueryParam,
 } from "../shared";
 
-export const VotingPowerVariationsByAccountIdRequestParamsSchema = z
-  .object({
-    address: AddressSchema,
-  })
-  .openapi("VotingPowerVariationsByAccountIdRequestParams", {
-    description:
-      "Path params for a single-account voting power variation request.",
-  });
+export const VotingPowerVariationsByAccountIdRequestParamsSchema =
+  addressPathParams(
+    "VotingPowerVariationsByAccountIdRequestParams",
+    "Path params for a single-account voting power variation request.",
+  );
 
 export const VotingPowerVariationsByAccountIdRequestQuerySchema = z
   .object({
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for the comparison window, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for the comparison window, in Unix seconds.",
-    ),
+    ...inclusiveDateRangeQueryParams("the comparison window"),
   })
   .openapi("VotingPowerVariationsByAccountIdRequestQuery", {
     description:
@@ -46,11 +43,8 @@ export const VotingPowerVariationsRequestQuerySchema = z
     skip: paginationSkipQueryParam(
       "Number of voting power variation rows to skip.",
     ),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
-    addresses: AddressQueryArraySchema.openapi({
-      description:
-        "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
-    }).optional(),
+    orderDirection: defaultDescOrderDirection(),
+    addresses: addressesQueryFilter(),
   })
   .extend(VotingPowerVariationsByAccountIdRequestQuerySchema.shape)
   .openapi("VotingPowerVariationsRequestQuery", {
@@ -67,7 +61,7 @@ export const VotingPowersRequestSchema = z
     skip: paginationSkipQueryParam(
       "Number of current voting power rows to skip.",
     ),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
     orderBy: z
       .enum([
         "votingPower",
@@ -79,55 +73,23 @@ export const VotingPowersRequestSchema = z
       ])
       .optional()
       .default("votingPower"),
-    addresses: AddressQueryArraySchema.openapi({
-      description:
-        "Filter by one or more account addresses. Pass repeated query params or a comma-delimited list.",
-    })
-      .optional()
-      .transform((val) => val ?? []),
-    fromValue: z
-      .string()
-      .transform((val) => BigInt(val))
-      .openapi({
-        description: "Minimum voting power encoded as a decimal string.",
-      })
-      .optional(),
-    toValue: z
-      .string()
-      .transform((val) => BigInt(val))
-      .openapi({
-        description: "Maximum voting power encoded as a decimal string.",
-      })
-      .optional(),
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for variation enrichment, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for variation enrichment, in Unix seconds.",
-    ),
+    addresses: addressesQueryFilter().transform((val) => val ?? []),
+    ...bigIntRangeQueryParams("voting power"),
+    ...inclusiveDateRangeQueryParams("variation enrichment"),
   })
   .openapi("VotingPowersRequest", {
     description:
       "Query params used to page and filter current voting power records.",
   });
 
-export const VotingPowerByAccountIdRequestParamsSchema = z
-  .object({
-    address: AddressSchema,
-  })
-  .openapi("VotingPowerByAccountIdRequestParams", {
-    description:
-      "Path params for fetching the current voting power of a single account.",
-  });
+export const VotingPowerByAccountIdRequestParamsSchema = addressPathParams(
+  "VotingPowerByAccountIdRequestParams",
+  "Path params for fetching the current voting power of a single account.",
+);
 
 export const VotingPowerByAccountIdRequestQuerySchema = z
   .object({
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for variation enrichment, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for variation enrichment, in Unix seconds.",
-    ),
+    ...inclusiveDateRangeQueryParams("variation enrichment"),
   })
   .openapi("VotingPowerByAccountIdRequestQuery", {
     description:
@@ -136,19 +98,19 @@ export const VotingPowerByAccountIdRequestQuerySchema = z
 
 export const VotingPowerVariationResponseSchema = z
   .object({
-    accountId: z.string().openapi({ description: "Account address." }),
+    accountId: addressOutputField("Account address."),
     previousVotingPower: z.string().openapi({
       description: "Voting power at the start of the comparison window.",
     }),
     currentVotingPower: z.string().openapi({
       description: "Voting power at the end of the comparison window.",
     }),
-    absoluteChange: z.string().openapi({
-      description: "Absolute voting power change encoded as a decimal string.",
-    }),
-    percentageChange: z.string().openapi({
-      description: "Relative voting power change encoded as a decimal string.",
-    }),
+    absoluteChange: decimalStringField(
+      "Absolute voting power change encoded as a decimal string.",
+    ),
+    percentageChange: decimalStringField(
+      "Relative voting power change encoded as a decimal string.",
+    ),
   })
   .openapi("VotingPowerVariation", {
     description:
@@ -157,9 +119,7 @@ export const VotingPowerVariationResponseSchema = z
 
 export const VotingPowerVariationFieldSchema = z
   .object({
-    absoluteChange: z
-      .union([z.bigint().transform((val) => val.toString()), z.string()])
-      .openapi({ type: "string" }),
+    absoluteChange: bigintAsStringField(),
     percentageChange: z.string(),
   })
   .openapi("VotingPowerVariationField", {
@@ -169,13 +129,10 @@ export const VotingPowerVariationFieldSchema = z
 
 export const VotingPowerResponseSchema = z
   .object({
-    accountId: z.string().openapi({ description: "Account address." }),
-    votingPower: z
-      .union([z.bigint().transform((val) => val.toString()), z.string()])
-      .openapi({
-        type: "string",
-        description: "Current voting power encoded as a decimal string.",
-      }),
+    accountId: addressOutputField("Account address."),
+    votingPower: bigintAsStringField(
+      "Current voting power encoded as a decimal string.",
+    ),
     votesCount: z.number().int().openapi({
       description: "Total votes cast by the account.",
     }),
@@ -199,16 +156,12 @@ export const VotingPowerResponseSchema = z
     description: "Current voting power snapshot for one account.",
   });
 
-export const VotingPowersResponseSchema = z
-  .object({
-    items: z.array(VotingPowerResponseSchema),
-    totalCount: z.number().int().openapi({
-      description: "Total number of matching voting power rows.",
-    }),
-  })
-  .openapi("VotingPowersResponse", {
-    description: "Paginated current voting power records.",
-  });
+export const VotingPowersResponseSchema = paginatedListResponse(
+  VotingPowerResponseSchema,
+  "Total number of matching voting power rows.",
+).openapi("VotingPowersResponse", {
+  description: "Paginated current voting power records.",
+});
 
 export const VotingPowerVariationsByAccountIdResponseSchema = z
   .object({

@@ -10,11 +10,18 @@ import {
 } from "../transfers";
 import {
   AddressSchema,
-  normalizeQueryArray,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
-  unixTimestampQueryParam,
+  addressOutputField,
+  affectedSupplyFlagsFields,
+  commaDelimitedEnumQueryParam,
+  daoIdField,
+  decimalStringField,
+  defaultDescOrderDirection,
+  inclusiveDateRangeQueryParams,
+  logIndexField,
+  paginatedListResponse,
+  paginationQueryParams,
+  txHashField,
+  unixSecondsStringField,
 } from "../shared";
 
 export type DBTransaction = typeof transaction.$inferSelect & {
@@ -35,53 +42,19 @@ export enum TransactionType {
   DELEGATION = "DELEGATION",
 }
 
-const AffectedSupplyListSchema = z
-  .union([z.string(), z.array(z.string())])
-  .transform((value) => {
-    const items = normalizeQueryArray(value);
-    return items
-      ? z
-          .array(
-            z.enum(
-              Object.values(AffectedSupply) as [
-                AffectedSupply,
-                ...AffectedSupply[],
-              ],
-            ),
-          )
-          .parse(items)
-      : undefined;
-  });
+const AffectedSupplyListSchema = commaDelimitedEnumQueryParam(
+  Object.values(AffectedSupply) as [AffectedSupply, ...AffectedSupply[]],
+);
 
-const TransactionIncludeListSchema = z
-  .union([z.string(), z.array(z.string())])
-  .transform((value) => {
-    const items = normalizeQueryArray(value);
-    return items
-      ? z
-          .array(
-            z.enum(
-              Object.values(TransactionType) as [
-                TransactionType,
-                ...TransactionType[],
-              ],
-            ),
-          )
-          .parse(items)
-      : undefined;
-  });
+const TransactionIncludeListSchema = commaDelimitedEnumQueryParam(
+  Object.values(TransactionType) as [TransactionType, ...TransactionType[]],
+);
 
 export const TransactionsRequestSchema = z
   .object({
-    limit: paginationLimitQueryParam(),
-    skip: paginationSkipQueryParam(),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for transaction timestamps, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for transaction timestamps, in Unix seconds.",
-    ),
+    ...paginationQueryParams(),
+    orderDirection: defaultDescOrderDirection(),
+    ...inclusiveDateRangeQueryParams("transaction timestamps"),
     from: AddressSchema.optional(),
     to: AddressSchema.optional(),
     minAmount: z
@@ -157,37 +130,21 @@ export type TransactionsRequest = z.infer<typeof TransactionsRequestSchema>;
 
 export const DelegationResponseSchema = z
   .object({
-    transactionHash: z.string().openapi({ description: "Transaction hash." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
-    delegateAccountId: z.string().openapi({ description: "Delegate address." }),
+    transactionHash: txHashField(),
+    daoId: daoIdField(),
+    delegateAccountId: addressOutputField("Delegate address."),
     delegatorAccountId: z
       .string()
       .openapi({ description: "Delegator address." }),
-    delegatedValue: z.string().openapi({
-      description: "Delegated amount encoded as a decimal string.",
-    }),
+    delegatedValue: decimalStringField(
+      "Delegated amount encoded as a decimal string.",
+    ),
     previousDelegate: z.string().nullable().openapi({
       description: "Previous delegate address, if one existed.",
     }),
-    timestamp: z.string().openapi({
-      description: "Delegation timestamp in Unix seconds as a string.",
-      example: "1704067200",
-    }),
-    logIndex: z.number().int().openapi({
-      description: "Log index within the transaction receipt.",
-    }),
-    isCex: z.boolean().openapi({
-      description: "Whether the delegation touched a centralized exchange.",
-    }),
-    isDex: z.boolean().openapi({
-      description: "Whether the delegation touched a decentralized exchange.",
-    }),
-    isLending: z.boolean().openapi({
-      description: "Whether the delegation touched a lending protocol.",
-    }),
-    isTotal: z.boolean().openapi({
-      description: "Whether the delegation counts toward total tracked supply.",
-    }),
+    timestamp: unixSecondsStringField("Delegation"),
+    logIndex: logIndexField(),
+    ...affectedSupplyFlagsFields("delegation"),
   })
   .openapi("TransactionDelegation", {
     description: "Delegation event embedded within a transaction response.",
@@ -195,30 +152,15 @@ export const DelegationResponseSchema = z
 
 export const TransactionResponseSchema = z
   .object({
-    transactionHash: z.string().openapi({ description: "Transaction hash." }),
+    transactionHash: txHashField(),
     from: z.string().nullable().openapi({
       description: "Resolved sender address, if known.",
     }),
     to: z.string().nullable().openapi({
       description: "Resolved recipient address, if known.",
     }),
-    isCex: z.boolean().openapi({
-      description: "Whether the transaction touched a centralized exchange.",
-    }),
-    isDex: z.boolean().openapi({
-      description: "Whether the transaction touched a decentralized exchange.",
-    }),
-    isLending: z.boolean().openapi({
-      description: "Whether the transaction touched a lending protocol.",
-    }),
-    isTotal: z.boolean().openapi({
-      description:
-        "Whether the transaction counts toward total tracked supply.",
-    }),
-    timestamp: z.string().openapi({
-      description: "Transaction timestamp in Unix seconds as a string.",
-      example: "1704067200",
-    }),
+    ...affectedSupplyFlagsFields("transaction"),
+    timestamp: unixSecondsStringField("Transaction"),
     transfers: z.array(TransferResponseSchema),
     delegations: z.array(DelegationResponseSchema),
   })
@@ -227,17 +169,13 @@ export const TransactionResponseSchema = z
       "Transaction response enriched with transfer and delegation events.",
   });
 
-export const TransactionsResponseSchema = z
-  .object({
-    items: z.array(TransactionResponseSchema),
-    totalCount: z.number().int().openapi({
-      description: "Total number of matching transactions.",
-    }),
-  })
-  .openapi("TransactionsResponse", {
-    description:
-      "Paginated transactions with embedded transfer and delegation data.",
-  });
+export const TransactionsResponseSchema = paginatedListResponse(
+  TransactionResponseSchema,
+  "Total number of matching transactions.",
+).openapi("TransactionsResponse", {
+  description:
+    "Paginated transactions with embedded transfer and delegation data.",
+});
 
 export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>;
 export type TransactionResponse = z.infer<typeof TransactionResponseSchema>;
