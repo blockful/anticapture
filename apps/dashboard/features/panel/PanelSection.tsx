@@ -21,9 +21,9 @@ export const PanelSection = () => {
       title={PAGES_CONSTANTS.panel.title}
       icon={<BarChart4 className="section-layout-icon" />}
       description={PAGES_CONSTANTS.panel.description}
-      className="mt-14 lg:mt-0"
+      className="mt-12 lg:mt-0 lg:min-h-0"
     >
-      <div className="flex flex-col gap-8 lg:gap-2">
+      <div className="flex flex-col gap-8 lg:h-full lg:min-h-0 lg:flex-1 lg:gap-2">
         <div className="lg:hidden">
           <Carousel
             slides={[
@@ -43,11 +43,12 @@ export const PanelSection = () => {
           <DividerDefault isHorizontal />
         </div>
 
-        <SubSectionsContainer className="gap-3">
+        <SubSectionsContainer className="gap-3 lg:min-h-0 lg:flex-1">
           <SubSection
             className="gap-0"
             subsectionTitle={"Monitored DAOs"}
             dateRange=""
+            contentClassName="lg:flex lg:flex-col lg:flex-1 lg:min-h-0"
           >
             <PanelTable />
           </SubSection>

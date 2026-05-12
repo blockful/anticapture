@@ -1,6 +1,6 @@
 import { Address, getAddress } from "viem";
 import { Context } from "ponder:registry";
-import { account, daoMetricsDayBucket, transaction } from "ponder:schema";
+import { account, daoMetricsDayBucket } from "ponder:schema";
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { delta, max, min } from "@/lib/utils";
@@ -98,68 +98,5 @@ export const storeDailyBucket = async (
       volume: row.volume + volume,
       count: row.count + 1,
       lastUpdate: timestamp,
-    }));
-};
-
-export const handleTransaction = async (
-  context: Context,
-  transactionHash: string,
-  from: Address,
-  to: Address,
-  timestamp: bigint,
-  addresses: AddressCollection, // The addresses involved in this event
-  {
-    cex = [],
-    dex = [],
-    lending = [],
-    burning = [],
-  }: {
-    cex?: AddressCollection;
-    dex?: AddressCollection;
-    lending?: AddressCollection;
-    burning?: AddressCollection;
-  } = {
-    cex: [],
-    dex: [],
-    lending: [],
-    burning: [],
-  },
-) => {
-  const normalizedAddresses = normalizeAddressCollection(addresses);
-  const normalizedCex = toAddressSet(cex);
-  const normalizedDex = toAddressSet(dex);
-  const normalizedLending = toAddressSet(lending);
-  const normalizedBurning = toAddressSet(burning);
-
-  const isCex = normalizedAddresses.some((addr) => normalizedCex.has(addr));
-  const isDex = normalizedAddresses.some((addr) => normalizedDex.has(addr));
-  const isLending = normalizedAddresses.some((addr) =>
-    normalizedLending.has(addr),
-  );
-  const isTotal = normalizedAddresses.some((addr) =>
-    normalizedBurning.has(addr),
-  );
-
-  if (!(isCex || isDex || isLending || isTotal)) {
-    return;
-  }
-
-  await context.db
-    .insert(transaction)
-    .values({
-      transactionHash,
-      fromAddress: getAddress(from),
-      toAddress: getAddress(to),
-      timestamp,
-      isCex,
-      isDex,
-      isLending,
-      isTotal,
-    })
-    .onConflictDoUpdate((existing) => ({
-      isCex: existing.isCex || isCex,
-      isDex: existing.isDex || isDex,
-      isLending: existing.isLending || isLending,
-      isTotal: existing.isTotal || isTotal,
     }));
 };

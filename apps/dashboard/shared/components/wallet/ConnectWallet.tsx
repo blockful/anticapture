@@ -1,11 +1,12 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Wallet } from "lucide-react";
+import { AlertTriangle, Wallet } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 
 import { Button } from "@/shared/components";
+import { Tooltip } from "@/shared/components/design-system/tooltips";
 import { cn } from "@/shared/utils";
 
 const Jazzicon = dynamic(
@@ -68,9 +69,21 @@ export const ConnectWallet = ({
               }
               if (chain.unsupported) {
                 return (
-                  <Button onClick={openChainModal} type="button">
-                    Wrong network
-                  </Button>
+                  <Tooltip
+                    tooltipContent="Wrong network"
+                    asChild
+                    triggerClassName="flex"
+                  >
+                    <Button
+                      onClick={openChainModal}
+                      type="button"
+                      variant="destructive"
+                      aria-label="Wrong network"
+                      className={cn(className, "px-2.5")}
+                    >
+                      <AlertTriangle className="size-4" />
+                    </Button>
+                  </Tooltip>
                 );
               }
               return (

@@ -13,6 +13,6 @@ export const InsufficientVPAlert = ({
 }: InsufficientVPAlertProps) => (
   <InlineAlert
     variant="warning"
-    text={`Your current voting power is insufficient to submit a proposal. A minimum of ${threshold} ${tokenSymbol} is required.`}
+    text={`Your voting power is below the ${threshold} ${tokenSymbol} minimum required to submit. You can still save a draft and share it with a delegate who can submit it on your behalf.`}
   />
 );

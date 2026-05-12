@@ -2,17 +2,18 @@ groups:
   - name: anticapture
     interval: 30s
     rules:
-      # Service is not responding (no scrape data for 1 minute)
+      # Service is not responding (no scrape data for 5 minutes)
       - alert: ServiceDown
         expr: up{job!~".*-indexer"} == 0
-        for: 1m
+        for: 5m
+        keep_firing_for: 5m
         labels:
           severity: critical
         annotations:
           summary: "[CRITICAL] {{ $labels.job }} is unreachable"
           description: >
             Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
-            for more than 1 minute. The service may be crashed, OOM-killed, or misconfigured.
+            for more than 5 minutes. The service may be crashed, OOM-killed, or misconfigured.
             Check container/process status and recent logs immediately.
 
       # Indexer is not responding — longer window to account for slow startup

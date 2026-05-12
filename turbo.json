@@ -29,10 +29,6 @@
       "dependsOn": ["codegen"],
       "outputs": ["dist/**"]
     },
-    "@anticapture/client#typecheck": {
-      "dependsOn": ["codegen"],
-      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
-    },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
       "outputs": ["dist/**", ".next/**"]
@@ -44,6 +40,10 @@
     "storybook": {
       "persistent": true,
       "cache": false
+    },
+    "@anticapture/dashboard#build-storybook": {
+      "dependsOn": ["^codegen", "^build"],
+      "outputs": ["storybook-static/**"]
     },
     "build-storybook": {
       "outputs": ["storybook-static/**"]
@@ -77,14 +77,11 @@
       ]
     },
     "typecheck": {
-      "dependsOn": ["^build", "@anticapture/observability#build"],
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "@anticapture/client#typecheck": {
-      "dependsOn": [
-        "@anticapture/client#codegen",
-        "@anticapture/observability#build"
-      ],
+      "dependsOn": ["@anticapture/client#codegen", "^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "test": {
@@ -94,6 +91,38 @@
     "test:unit": {
       "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BASE_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "NEXT_PUBLIC_WC_PROJECT_ID"
+      ]
+    },
+    "@anticapture/dashboard#test:e2e:headed": {
+      "cache": false,
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BASE_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "NEXT_PUBLIC_WC_PROJECT_ID"
+      ]
+    },
+    "@anticapture/dashboard#test:e2e:ui": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BASE_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "NEXT_PUBLIC_WC_PROJECT_ID"
+      ]
     },
     "codegen": {
       "outputs": ["generated/**"]
@@ -115,6 +144,23 @@
     },
     "dev": {
       "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/client#mcp": {
+      "dependsOn": ["@anticapture/client#codegen"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/client#mcp-http": {
+      "dependsOn": ["@anticapture/client#codegen"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/relayer#dev:fork": {
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]

@@ -479,6 +479,10 @@ export const ProposalCreationForm = ({
         currentVp={currentVpText}
         requiredVp={thresholdFormatted ?? "—"}
         onFindDelegate={() => router.push(`${basePath}/holders-and-delegates`)}
+        onViewDraft={() => {
+          setInsufficientOpen(false);
+          router.push(`${basePath}/proposals?tab=drafts`);
+        }}
       />
     </FormProvider>
   );
