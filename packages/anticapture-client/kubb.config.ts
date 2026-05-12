@@ -7,6 +7,25 @@ import { pluginMsw } from "@kubb/plugin-msw";
 import { pluginOas } from "@kubb/plugin-oas";
 import { pluginReactQuery } from "@kubb/plugin-react-query";
 import { pluginTs } from "@kubb/plugin-ts";
+import { pluginMcp } from "@kubb/plugin-mcp";
+import { pluginZod } from "@kubb/plugin-zod";
+
+import {
+  EthereumGenerator,
+  generatedFormatTypes,
+  mapEthereumFormatFakers,
+  mapEthereumFormatTypes,
+} from "./src/generators";
+
+type PluginTsOptions = NonNullable<Parameters<typeof pluginTs>[0]>;
+type PluginTsOptionsWithSchemaTransformer = Omit<
+  PluginTsOptions,
+  "transformers"
+> & {
+  transformers?: PluginTsOptions["transformers"] & {
+    schema: typeof mapEthereumFormatTypes;
+  };
+};
 
 const gatefulOpenApiSpecPath = fileURLToPath(
   new URL("../../apps/gateful/openapi/gateful.json", import.meta.url),
@@ -20,6 +39,17 @@ const renameDaoOperation = (
   type?: "function" | "type" | "file" | "const",
 ) => (name === "dao" && type === "function" ? "getDao" : name);
 
+const pluginTsOptions: PluginTsOptionsWithSchemaTransformer = {
+  output: {
+    path: "models.ts",
+    banner: generatedFormatTypes,
+  },
+  transformers: {
+    schema: mapEthereumFormatTypes,
+  },
+  generators: [EthereumGenerator],
+};
+
 export default defineConfig(({ watch }) => ({
   input: {
     path: gatefulOpenApiSpecPath,
@@ -32,11 +62,7 @@ export default defineConfig(({ watch }) => ({
     pluginOas({
       collisionDetection: false,
     }),
-    pluginTs({
-      output: {
-        path: "models.ts",
-      },
-    }),
+    pluginTs(pluginTsOptions),
     pluginClient({
       importPath: "../src/client",
       output: {
@@ -71,11 +97,27 @@ export default defineConfig(({ watch }) => ({
         },
       ],
     }),
+    pluginZod({
+      output: {
+        path: "zod.ts",
+      },
+    }),
+    pluginMcp({
+      output: {
+        path: "./mcp",
+        barrelType: "named",
+      },
+      group: {
+        type: "tag",
+        name: ({ group }) => `${group}Handlers`,
+      },
+    }),
     pluginFaker({
       output: {
         path: "mocks/faker.ts",
       },
       transformers: {
+        schema: mapEthereumFormatFakers,
         name: renameDaoOperation,
       },
     }),

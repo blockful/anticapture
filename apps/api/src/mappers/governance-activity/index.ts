@@ -15,6 +15,7 @@ export const ActiveSupplyResponseSchema = z
     activeSupply: z.string().openapi({
       description: "Active token supply encoded as a decimal string.",
       example: "1000000000000000000000000",
+      format: "bigint",
     }),
   })
   .openapi("ActiveSupplyResponse", {

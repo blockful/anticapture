@@ -224,6 +224,10 @@ export const proposalsOnchain = pgTable(
     description: drizzle.text().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     endTimestamp: bigint("end_timestamp", { mode: "bigint" }).notNull(),
+    queuedTimestamp: bigint("queued_timestamp", { mode: "bigint" }),
+    executedTimestamp: bigint("executed_timestamp", { mode: "bigint" }),
+    queuedTxHash: drizzle.text("queued_tx_hash"),
+    executedTxHash: drizzle.text("executed_tx_hash"),
     status: drizzle.text().notNull(),
     forVotes: bigint("for_votes", { mode: "bigint" }).default(0n).notNull(),
     againstVotes: bigint("against_votes", { mode: "bigint" })

@@ -80,6 +80,7 @@ export const FeedItemSchema = z
     value: z.string().optional().openapi({
       description:
         "Optional event value encoded as a decimal string when applicable.",
+      format: "bigint",
     }),
     timestamp: z.number().int().openapi({
       description: "Event timestamp in Unix seconds.",

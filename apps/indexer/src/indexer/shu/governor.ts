@@ -174,6 +174,8 @@ export function SHUGovernorIndexer(blockTime: number) {
       context,
       event.args.proposalId.toString(),
       ProposalStatus.EXECUTED,
+      event.block.timestamp,
+      event.transaction.hash,
     );
   });
 }
