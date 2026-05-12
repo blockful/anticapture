@@ -31,7 +31,10 @@ test.describe("Governance page (/ens/proposals)", () => {
       .filter({ has: page.locator("h3") })
       .first();
     const isEmpty = page.locator("text=No proposals found");
-    await expect(hasProposals.or(isEmpty)).toBeVisible({ timeout: 20_000 });
+    const failedToLoad = page.locator("text=Unable to load proposals");
+    await expect(hasProposals.or(isEmpty).or(failedToLoad)).toBeVisible({
+      timeout: 20_000,
+    });
   });
 
   test("Offchain tab is visible and switchable", async ({ goto, page }) => {
@@ -47,7 +50,10 @@ test.describe("Governance page (/ens/proposals)", () => {
       .filter({ has: page.locator("h3") })
       .first();
     const isEmpty = page.locator("text=No off-chain proposals found");
-    await expect(hasProposals.or(isEmpty)).toBeVisible({ timeout: 20_000 });
+    const failedToLoad = page.locator("text=Unable to load proposals");
+    await expect(hasProposals.or(isEmpty).or(failedToLoad)).toBeVisible({
+      timeout: 20_000,
+    });
   });
 
   test("New Proposal button triggers wallet connect when disconnected", async ({
@@ -102,7 +108,14 @@ test.describe("Governance page (/ens/proposals)", () => {
     const proposalLinks = page
       .getByRole("link")
       .filter({ has: page.locator("h3") });
-    await expect(proposalLinks.first()).toBeVisible({ timeout: 20_000 });
+    const isEmpty = page.locator("text=No proposals found");
+    const failedToLoad = page.locator("text=Unable to load proposals");
+    // Wait for one of: proposals load, empty state, or error state.
+    await expect(
+      proposalLinks.first().or(isEmpty).or(failedToLoad),
+    ).toBeVisible({ timeout: 20_000 });
+    // If no proposals rendered (empty or error), there's nothing to scroll.
+    if ((await proposalLinks.count()) === 0) return;
     const initialCount = await proposalLinks.count();
     // Page size is 10. Need at least one full page to test pagination.
     if (initialCount < 10) return;

@@ -51,12 +51,12 @@ export default function Home() {
     <div className="bg-surface-background dark flex h-screen overflow-hidden">
       <JsonLd data={softwareApplicationSchema} />
       <HeaderSidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto lg:flex lg:min-h-0 lg:flex-col lg:overflow-hidden">
         <div className="lg:hidden">
           <HeaderMobile className="fixed! top-0" />
         </div>
-        <div className="flex min-h-screen w-full flex-col items-center">
-          <div className="w-full flex-1">
+        <div className="flex min-h-screen w-full flex-col items-center lg:h-full lg:min-h-0 lg:flex-1">
+          <div className="w-full flex-1 lg:flex lg:min-h-0 lg:flex-col">
             <PanelSection />
           </div>
           <Footer />
