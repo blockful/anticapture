@@ -55,7 +55,7 @@ export const StageCell = ({ daoId }: { daoId: DaoIdEnum }) => {
         }
         triggerClassName="w-full"
       >
-        <div className="scrollbar-none text-primary flex items-center gap-3 space-x-1 overflow-auto">
+        <div className="scrollbar-none text-primary flex items-center justify-start gap-3 space-x-1 overflow-auto px-0 py-3">
           <div className="bg-surface-contrast inline-flex h-7 items-center px-2 py-1">
             <span className="text-secondary text-alternative-sm whitespace-nowrap font-mono text-[13px] font-medium leading-[20px]">
               NOT ASSESSED
@@ -110,7 +110,7 @@ export const StageCell = ({ daoId }: { daoId: DaoIdEnum }) => {
     >
       <ClickableCell
         href={`/${daoId.toLowerCase()}/resilience-stages`}
-        className="px-0 py-3 text-end text-sm font-normal lg:px-4"
+        className="px-0 py-3 text-end text-sm font-normal"
       >
         <StageTag daoStage={stage} tagStage={stage} showStageText />
       </ClickableCell>

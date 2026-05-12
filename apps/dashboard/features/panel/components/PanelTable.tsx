@@ -226,15 +226,18 @@ export const PanelTable = () => {
       stickyFirstColumn={true}
       pinRowsToBottom={(row) => row.isPartiallyIndexed}
       getRowClassName={(row, index, rows) => {
-        if (!row.isPartiallyIndexed) return undefined;
+        const noFirstColumnBorder = "[&>td:first-child]:border-r-0";
+
+        if (!row.isPartiallyIndexed) return noFirstColumnBorder;
 
         const previousRow = rows[index - 1];
         const isFirstPartiallyIndexedRow = !previousRow?.isPartiallyIndexed;
 
         return [
-          "[&_td]:bg-surface-background/60 [&_td]:text-secondary/80 [&>td:first-child]:bg-surface-background",
+          noFirstColumnBorder,
+          "[&_td]:bg-surface-background [&_td]:text-secondary/80",
           isFirstPartiallyIndexedRow
-            ? "[&_td]:border-t [&_td]:border-light-dark"
+            ? "[&_td]:border-t [&_td]:border-solid [&_td]:border-light-dark lg:[&_td:first-child]:border-t lg:[&_td:first-child]:border-solid lg:[&_td:first-child]:border-light-dark"
             : "",
         ].join(" ");
       }}
