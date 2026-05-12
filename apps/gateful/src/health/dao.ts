@@ -35,7 +35,10 @@ const route = createRoute({
   path: "/{dao}/health",
   request: {
     params: z.object({
-      dao: z.string().openapi({ description: "DAO identifier" }),
+      dao: z.string().openapi({
+        description:
+          'DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. "ens").',
+      }),
     }),
   },
   responses: {

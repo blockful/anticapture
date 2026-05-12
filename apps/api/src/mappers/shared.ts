@@ -157,7 +157,9 @@ export const txHashField = () =>
   z.string().openapi({ description: "Transaction hash." });
 
 export const daoIdField = () =>
-  z.string().openapi({ description: "DAO identifier." });
+  z
+    .string()
+    .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' });
 
 export const paginatedListResponse = <T extends z.ZodTypeAny>(
   itemSchema: T,

@@ -70,7 +70,8 @@ function mergeRelayerPaths(doc: OpenAPIObject, daos: string[]): PathsObject {
     in: "path",
     required: true,
     schema: { type: "string", enum: [...daos].sort() },
-    description: "DAO identifier",
+    description:
+      'DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. "ens").',
   };
 
   const paths: PathsObject = {};
@@ -119,7 +120,8 @@ function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
       in: "path",
       required: true,
       schema: { type: "string", enum: [...supportedDaos].sort() },
-      description: "DAO identifier",
+      description:
+        'DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. "ens").',
     };
 
     const item = pathItems.get(path)!;

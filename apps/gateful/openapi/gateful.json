@@ -330,16 +330,23 @@
         "type": "object",
         "properties": {
           "previousValue": {
-            "type": "string"
+            "type": "string",
+            "description": "Supply value at the start of the comparison window, encoded as a decimal string (raw token base units)."
           },
           "currentValue": {
-            "type": "string"
+            "type": "string",
+            "description": "Supply value at the end of the comparison window, encoded as a decimal string (raw token base units)."
           },
           "changeRate": {
-            "type": "number"
+            "type": "number",
+            "description": "Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0."
+          },
+          "rawDelta": {
+            "type": "string",
+            "description": "Signed bigint delta as a decimal string: currentValue - previousValue."
           }
         },
-        "required": ["previousValue", "currentValue", "changeRate"],
+        "required": ["previousValue", "currentValue", "changeRate", "rawDelta"],
         "description": "Supply metric comparison between current and previous periods."
       },
       "ActiveSupplyResponse": {
@@ -369,14 +376,20 @@
           },
           "changeRate": {
             "type": "number",
-            "description": "Relative change between current and previous periods.",
+            "description": "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
             "example": 0.6
+          },
+          "rawDelta": {
+            "type": "integer",
+            "description": "Signed integer delta: currentProposalsLaunched - oldProposalsLaunched.",
+            "example": 3
           }
         },
         "required": [
           "currentProposalsLaunched",
           "oldProposalsLaunched",
-          "changeRate"
+          "changeRate",
+          "rawDelta"
         ],
         "description": "Proposal launch comparison between two adjacent time windows."
       },
@@ -395,11 +408,16 @@
           },
           "changeRate": {
             "type": "number",
-            "description": "Relative change between current and previous periods.",
+            "description": "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
             "example": 0.33
+          },
+          "rawDelta": {
+            "type": "integer",
+            "description": "Signed integer delta: currentVotes - oldVotes.",
+            "example": 32
           }
         },
-        "required": ["currentVotes", "oldVotes", "changeRate"],
+        "required": ["currentVotes", "oldVotes", "changeRate", "rawDelta"],
         "description": "Vote-count comparison between two adjacent time windows."
       },
       "AverageTurnoutComparisonResponse": {
@@ -417,14 +435,20 @@
           },
           "changeRate": {
             "type": "number",
-            "description": "Relative change between current and previous periods.",
+            "description": "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
             "example": 0.33
+          },
+          "rawDelta": {
+            "type": "string",
+            "description": "Signed bigint delta as a decimal string: currentAverageTurnout - oldAverageTurnout.",
+            "example": "30000000000000000"
           }
         },
         "required": [
           "currentAverageTurnout",
           "oldAverageTurnout",
-          "changeRate"
+          "changeRate",
+          "rawDelta"
         ],
         "description": "Average turnout comparison between two adjacent time windows."
       },
@@ -500,7 +524,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "proposerAccountId": {
             "type": "string",
@@ -627,7 +651,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "txHash": {
             "type": "string",
@@ -782,7 +806,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "accountId": {
             "type": "string",
@@ -931,7 +955,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "tokenId": {
             "type": "string",
@@ -999,7 +1023,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "delegateAccountId": {
             "type": "string",
@@ -1158,7 +1182,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "accountId": {
             "type": "string",
@@ -1660,7 +1684,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "DAO identifier (uppercase, e.g. \"ENS\").",
+            "example": "ENS"
           },
           "chainId": {
             "type": "integer"
@@ -2068,7 +2094,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "txHash": {
             "type": "string",
@@ -2771,7 +2797,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -2825,7 +2851,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -2920,7 +2946,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -2982,7 +3008,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3044,7 +3070,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3106,7 +3132,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3173,7 +3199,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3242,7 +3268,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3380,7 +3406,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3442,7 +3468,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3494,7 +3520,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3546,7 +3572,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3598,7 +3624,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3650,7 +3676,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3702,7 +3728,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3754,7 +3780,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3806,7 +3832,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3858,7 +3884,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3910,7 +3936,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3962,7 +3988,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4014,7 +4040,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4137,7 +4163,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4257,7 +4283,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4336,7 +4362,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4401,7 +4427,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4541,7 +4567,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4699,7 +4725,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4759,7 +4785,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4867,7 +4893,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5007,7 +5033,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5149,7 +5175,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5260,7 +5286,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5335,7 +5361,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5484,7 +5510,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5595,7 +5621,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5670,7 +5696,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5836,7 +5862,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5914,7 +5940,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6064,7 +6090,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6222,7 +6248,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6365,7 +6391,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6498,7 +6524,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6595,7 +6621,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6639,7 +6665,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6757,7 +6783,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6853,7 +6879,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6921,7 +6947,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6975,7 +7001,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7088,7 +7114,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7211,7 +7237,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7305,7 +7331,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7605,7 +7631,7 @@
             "type": "string",
             "enum": ["ens"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7676,7 +7702,7 @@
             "type": "string",
             "enum": ["ens"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7796,7 +7822,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7875,7 +7901,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7940,7 +7966,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -8036,7 +8062,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -8104,7 +8130,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -8158,7 +8184,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -8234,7 +8260,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     }

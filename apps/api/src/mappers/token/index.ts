@@ -79,9 +79,22 @@ export const TokenDistributionComparisonQuerySchema = z
 
 export const SupplyComparisonResponseSchema = z
   .object({
-    previousValue: z.string(),
-    currentValue: z.string(),
-    changeRate: z.number(),
+    previousValue: z.string().openapi({
+      description:
+        "Supply value at the start of the comparison window, encoded as a decimal string (raw token base units).",
+    }),
+    currentValue: z.string().openapi({
+      description:
+        "Supply value at the end of the comparison window, encoded as a decimal string (raw token base units).",
+    }),
+    changeRate: z.number().openapi({
+      description:
+        "Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0.",
+    }),
+    rawDelta: z.string().openapi({
+      description:
+        "Signed bigint delta as a decimal string: currentValue - previousValue.",
+    }),
   })
   .openapi("SupplyComparisonResponse", {
     description:

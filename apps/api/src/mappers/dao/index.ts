@@ -2,7 +2,10 @@ import { z } from "@hono/zod-openapi";
 
 export const DaoResponseSchema = z
   .object({
-    id: z.string(),
+    id: z.string().openapi({
+      description: 'DAO identifier (uppercase, e.g. "ENS").',
+      example: "ENS",
+    }),
     chainId: z.number().int(),
     quorum: z.string(),
     proposalThreshold: z.string(),
