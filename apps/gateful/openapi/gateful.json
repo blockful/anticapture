@@ -2058,6 +2058,246 @@
           }
         },
         "required": ["status"]
+      },
+      "OnchainProposalLean": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Onchain proposal identifier."
+          },
+          "daoId": {
+            "type": "string",
+            "description": "DAO identifier."
+          },
+          "txHash": {
+            "type": "string",
+            "description": "Proposal creation transaction hash."
+          },
+          "proposerAccountId": {
+            "type": "string",
+            "description": "Address that created the proposal."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          },
+          "description": {
+            "type": "string",
+            "description": "Proposal body."
+          },
+          "startBlock": {
+            "type": "integer",
+            "description": "Start block number."
+          },
+          "endBlock": {
+            "type": "integer",
+            "description": "End block number."
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Proposal creation timestamp in Unix seconds."
+          },
+          "status": {
+            "type": "string",
+            "description": "Current proposal status."
+          },
+          "forVotes": {
+            "type": "string",
+            "description": "Votes cast in favor, encoded as a decimal string."
+          },
+          "againstVotes": {
+            "type": "string",
+            "description": "Votes cast against, encoded as a decimal string."
+          },
+          "abstainVotes": {
+            "type": "string",
+            "description": "Abstain votes, encoded as a decimal string."
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "description": "Proposal start timestamp in Unix seconds."
+          },
+          "endTimestamp": {
+            "type": "integer",
+            "description": "Proposal end timestamp in Unix seconds."
+          },
+          "quorum": {
+            "type": "string",
+            "description": "Required quorum encoded as a decimal string."
+          },
+          "proposalType": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Optional proposal type discriminator."
+          }
+        },
+        "required": [
+          "id",
+          "daoId",
+          "txHash",
+          "proposerAccountId",
+          "title",
+          "description",
+          "startBlock",
+          "endBlock",
+          "timestamp",
+          "status",
+          "forVotes",
+          "againstVotes",
+          "abstainVotes",
+          "startTimestamp",
+          "endTimestamp",
+          "quorum",
+          "proposalType"
+        ]
+      },
+      "OnchainProposalsLeanResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnchainProposalLean"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainProposalLean": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Snapshot proposal identifier."
+          },
+          "spaceId": {
+            "type": "string",
+            "description": "Snapshot space identifier."
+          },
+          "author": {
+            "type": "string",
+            "description": "Address or ENS of the author."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          },
+          "discussion": {
+            "type": "string",
+            "description": "Discussion URL or thread reference."
+          },
+          "type": {
+            "type": "string",
+            "description": "Snapshot proposal type."
+          },
+          "start": {
+            "type": "integer",
+            "description": "Voting start timestamp in Unix seconds."
+          },
+          "end": {
+            "type": "integer",
+            "description": "Voting end timestamp in Unix seconds."
+          },
+          "state": {
+            "type": "string",
+            "description": "Current Snapshot proposal state."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Creation timestamp in Unix seconds."
+          },
+          "updated": {
+            "type": "integer",
+            "description": "Last update timestamp in Unix seconds."
+          },
+          "link": {
+            "type": "string",
+            "description": "Canonical Snapshot proposal URL."
+          },
+          "flagged": {
+            "type": "boolean",
+            "description": "Whether the proposal was flagged by Snapshot."
+          },
+          "scores": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "network": {
+            "type": "string"
+          },
+          "snapshot": {
+            "type": "number",
+            "nullable": true
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "network": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "nullable": true
+                  }
+                }
+              },
+              "required": ["name", "network", "params"]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "spaceId",
+          "author",
+          "title",
+          "discussion",
+          "type",
+          "start",
+          "end",
+          "state",
+          "created",
+          "updated",
+          "link",
+          "flagged",
+          "scores",
+          "choices",
+          "network",
+          "snapshot",
+          "strategies"
+        ]
+      },
+      "OffchainProposalsLeanResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainProposalLean"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
       }
     },
     "parameters": {},
@@ -7459,6 +7699,488 @@
           "schema": {
             "type": "string",
             "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/proposals/lean": {
+      "get": {
+        "operationId": "proposalsLean",
+        "summary": "Get proposals (lean)",
+        "description": "Returns a list of proposal",
+        "tags": ["proposals", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of records to skip before collecting results.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of records to skip before collecting results.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OnchainProposalStatusList"
+            },
+            "required": false,
+            "description": "Proposal status filter. Pass repeated query params or a comma-delimited list.",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Earliest proposal timestamp, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Earliest proposal timestamp, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Latest proposal end timestamp, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Latest proposal end timestamp, in Unix seconds.",
+            "name": "fromEndDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "nullable": true,
+              "default": true,
+              "description": "Whether optimistic proposals should be included.",
+              "example": false
+            },
+            "required": false,
+            "description": "Whether optimistic proposals should be included.",
+            "name": "includeOptimisticProposals",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved proposals activity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnchainProposalsLeanResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/proposals/lean/search": {
+      "get": {
+        "operationId": "searchProposalsLean",
+        "summary": "Search proposals (lean)",
+        "description": "Returns proposals whose title or identifier partially matches the query.",
+        "tags": ["proposals", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Partial proposal identifier or title to search for.",
+              "example": "test"
+            },
+            "required": true,
+            "description": "Partial proposal identifier or title to search for.",
+            "name": "query",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of records to skip before collecting results.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of records to skip before collecting results.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved matching proposals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnchainProposalsLeanResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/proposals/lean/{id}": {
+      "get": {
+        "operationId": "proposalLean",
+        "summary": "Get a proposal by ID (lean)",
+        "description": "Returns a single proposal by its ID",
+        "tags": ["proposals"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Onchain proposal identifier.",
+            "example": "proposal-1",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved proposal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnchainProposalLean"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Proposal not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/offchain/proposals/lean": {
+      "get": {
+        "operationId": "offchainProposalsLean",
+        "summary": "Get offchain proposals (lean)",
+        "description": "Returns a list of offchain (Snapshot) proposals",
+        "tags": ["offchain", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of records to skip before collecting results.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of records to skip before collecting results.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OffchainProposalStatusList"
+            },
+            "required": false,
+            "description": "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Earliest proposal creation timestamp, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Earliest proposal creation timestamp, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Latest proposal creation timestamp, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Latest proposal creation timestamp, in Unix seconds.",
+            "name": "endDate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved offchain proposals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffchainProposalsLeanResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["comp", "ens", "gtc", "uni"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/offchain/proposals/lean/search": {
+      "get": {
+        "operationId": "offchainSearchProposalsLean",
+        "summary": "Search offchain proposals (lean)",
+        "description": "Returns offchain proposals whose title or identifier partially matches the query.",
+        "tags": ["offchain", "skip-pagination"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Partial Snapshot proposal identifier or title to search for.",
+              "example": "test"
+            },
+            "required": true,
+            "description": "Partial Snapshot proposal identifier or title to search for.",
+            "name": "query",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Number of records to skip before collecting results.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of records to skip before collecting results.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved matching offchain proposals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffchainProposalsLeanResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["comp", "ens", "gtc", "uni"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/offchain/proposals/lean/{id}": {
+      "get": {
+        "operationId": "offchainProposalByIdLean",
+        "summary": "Get an offchain proposal by ID (lean)",
+        "description": "Returns a single offchain (Snapshot) proposal by its ID",
+        "tags": ["offchain"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Snapshot proposal identifier.",
+            "example": "proposal-1",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved offchain proposal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffchainProposalLean"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Proposal not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier"
         }

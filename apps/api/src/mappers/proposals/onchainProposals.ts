@@ -149,6 +149,23 @@ export const ProposalsResponseSchema = z
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
+export const ProposalLeanResponseSchema = ProposalResponseSchema.omit({
+  calldatas: true,
+  values: true,
+  targets: true,
+}).openapi("OnchainProposalLean");
+
+export type ProposalLeanResponse = z.infer<typeof ProposalLeanResponseSchema>;
+
+export const ProposalsLeanResponseSchema = z
+  .object({
+    items: z.array(ProposalLeanResponseSchema),
+    totalCount: z.number().int(),
+  })
+  .openapi("OnchainProposalsLeanResponse");
+
+export type ProposalsLeanResponse = z.infer<typeof ProposalsLeanResponseSchema>;
+
 export const ProposalRequestSchema = z
   .object({
     id: z.string().openapi({
@@ -194,5 +211,18 @@ export const ProposalMapper = {
       targets: p.targets,
       proposalType: p.proposalType,
     };
+  },
+  toLeanApi: (
+    p: DBProposal,
+    quorum: bigint,
+    blockTime: number,
+  ): ProposalLeanResponse => {
+    const {
+      calldatas: _c,
+      values: _v,
+      targets: _t,
+      ...lean
+    } = ProposalMapper.toApi(p, quorum, blockTime);
+    return lean;
   },
 };

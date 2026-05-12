@@ -1,10 +1,13 @@
 /**
- * Factory for the Anticapture MCP server.
+ * Factory for the Anticapture MCP server, used by both the stdio and HTTP
+ * entrypoints. McpServer only supports one active transport at a time, so the
+ * HTTP server needs a fresh instance per session.
  *
- * Keep in sync with generated/mcp/server.ts — when kubb codegen adds or
- * removes tools, mirror those changes here. The generated file remains the
- * reference; this file exists solely because McpServer only supports one
- * active transport at a time, requiring a fresh instance per HTTP session.
+ * This is a curated tool set: proposal-related tools are intentionally bound
+ * to the /proposals/lean and /offchain/proposals/lean endpoints to keep
+ * payloads small for LLM clients. The generated kubb server (generated/mcp/
+ * server.ts) exposes every endpoint one-to-one and is no longer used; it
+ * remains as a reference for the available handlers and schemas.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
@@ -31,17 +34,17 @@ import { daoHandler } from "../generated/mcp/governanceHandlers/dao.ts";
 import { delegationPercentageByDayHandler } from "../generated/mcp/metricsHandlers/delegationPercentageByDay.ts";
 import { lastUpdateHandler } from "../generated/mcp/metricsHandlers/lastUpdate.ts";
 import { tokenMetricsHandler } from "../generated/mcp/metricsHandlers/tokenMetrics.ts";
-import { offchainProposalByIdHandler } from "../generated/mcp/offchainHandlers/offchainProposalById.ts";
+import { offchainProposalByIdLeanHandler } from "../generated/mcp/offchainHandlers/offchainProposalByIdLean.ts";
 import { offchainProposalNonVotersHandler } from "../generated/mcp/offchainHandlers/offchainProposalNonVoters.ts";
-import { offchainProposalsHandler } from "../generated/mcp/offchainHandlers/offchainProposals.ts";
-import { offchainSearchProposalsHandler } from "../generated/mcp/offchainHandlers/offchainSearchProposals.ts";
+import { offchainProposalsLeanHandler } from "../generated/mcp/offchainHandlers/offchainProposalsLean.ts";
+import { offchainSearchProposalsLeanHandler } from "../generated/mcp/offchainHandlers/offchainSearchProposalsLean.ts";
 import { votesOffchainHandler } from "../generated/mcp/offchainHandlers/votesOffchain.ts";
 import { votesOffchainByProposalIdHandler } from "../generated/mcp/offchainHandlers/votesOffchainByProposalId.ts";
-import { proposalHandler } from "../generated/mcp/proposalsHandlers/proposal.ts";
+import { proposalLeanHandler } from "../generated/mcp/proposalsHandlers/proposalLean.ts";
 import { proposalNonVotersHandler } from "../generated/mcp/proposalsHandlers/proposalNonVoters.ts";
-import { proposalsHandler } from "../generated/mcp/proposalsHandlers/proposals.ts";
+import { proposalsLeanHandler } from "../generated/mcp/proposalsHandlers/proposalsLean.ts";
 import { proposalsActivityHandler } from "../generated/mcp/proposalsHandlers/proposalsActivity.ts";
-import { searchProposalsHandler } from "../generated/mcp/proposalsHandlers/searchProposals.ts";
+import { searchProposalsLeanHandler } from "../generated/mcp/proposalsHandlers/searchProposalsLean.ts";
 import { votesByProposalIdHandler } from "../generated/mcp/proposalsHandlers/votesByProposalId.ts";
 import { relayDelegateHandler } from "../generated/mcp/relayHandlers/relayDelegate.ts";
 import { relayVoteHandler } from "../generated/mcp/relayHandlers/relayVote.ts";
@@ -140,26 +143,26 @@ import {
   historicalVotingPowerQueryResponseSchema,
   lastUpdateQueryParamsSchema,
   lastUpdateQueryResponseSchema,
-  offchainProposalByIdQueryResponseSchema,
+  offchainProposalByIdLeanQueryResponseSchema,
   offchainProposalNonVotersQueryParamsSchema,
   offchainProposalNonVotersQueryResponseSchema,
-  offchainProposalsQueryParamsSchema,
-  offchainProposalsQueryResponseSchema,
-  offchainSearchProposalsQueryParamsSchema,
-  offchainSearchProposalsQueryResponseSchema,
+  offchainProposalsLeanQueryParamsSchema,
+  offchainProposalsLeanQueryResponseSchema,
+  offchainSearchProposalsLeanQueryParamsSchema,
+  offchainSearchProposalsLeanQueryResponseSchema,
+  proposalLeanQueryResponseSchema,
   proposalNonVotersQueryParamsSchema,
   proposalNonVotersQueryResponseSchema,
-  proposalQueryResponseSchema,
   proposalsActivityQueryParamsSchema,
   proposalsActivityQueryResponseSchema,
-  proposalsQueryParamsSchema,
-  proposalsQueryResponseSchema,
+  proposalsLeanQueryParamsSchema,
+  proposalsLeanQueryResponseSchema,
   relayDelegateMutationRequestSchema,
   relayDelegateMutationResponseSchema,
   relayVoteMutationRequestSchema,
   relayVoteMutationResponseSchema,
-  searchProposalsQueryParamsSchema,
-  searchProposalsQueryResponseSchema,
+  searchProposalsLeanQueryParamsSchema,
+  searchProposalsLeanQueryResponseSchema,
   tokenMetricsQueryParamsSchema,
   tokenMetricsQueryResponseSchema,
   tokenQueryParamsSchema,
@@ -579,41 +582,43 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     "proposals",
     {
-      title: "Get proposals",
-      description: "Returns a list of proposal",
-      outputSchema: { data: proposalsQueryResponseSchema },
+      title: "Get proposals (lean)",
+      description:
+        "Returns a list of proposals in a lean shape (no calldatas/values/targets execution payload). Use the REST endpoint /{dao}/proposals if you need the full execution payload.",
+      outputSchema: { data: proposalsLeanQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
-        params: proposalsQueryParamsSchema,
+        params: proposalsLeanQueryParamsSchema,
       },
     },
-    async ({ dao, params }) => proposalsHandler({ dao, params }),
+    async ({ dao, params }) => proposalsLeanHandler({ dao, params }),
   );
 
   server.registerTool(
     "searchProposals",
     {
-      title: "Search proposals",
+      title: "Search proposals (lean)",
       description:
-        "Returns proposals whose title or identifier partially matches the query.",
-      outputSchema: { data: searchProposalsQueryResponseSchema },
+        "Returns proposals whose title or identifier partially matches the query, in a lean shape (no calldatas/values/targets execution payload).",
+      outputSchema: { data: searchProposalsLeanQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
-        params: searchProposalsQueryParamsSchema,
+        params: searchProposalsLeanQueryParamsSchema,
       },
     },
-    async ({ dao, params }) => searchProposalsHandler({ dao, params }),
+    async ({ dao, params }) => searchProposalsLeanHandler({ dao, params }),
   );
 
   server.registerTool(
     "proposal",
     {
-      title: "Get a proposal by ID",
-      description: "Returns a single proposal by its ID",
-      outputSchema: { data: proposalQueryResponseSchema },
+      title: "Get a proposal by ID (lean)",
+      description:
+        "Returns a single proposal by its ID in a lean shape (no calldatas/values/targets execution payload). Use the REST endpoint /{dao}/proposals/{id} if you need the full execution payload.",
+      outputSchema: { data: proposalLeanQueryResponseSchema },
       inputSchema: { dao: z.enum(DAO_NO_AAVE), id: z.string() },
     },
-    async ({ dao, id }) => proposalHandler({ dao, id }),
+    async ({ dao, id }) => proposalLeanHandler({ dao, id }),
   );
 
   server.registerTool(
@@ -946,41 +951,44 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     "offchainProposals",
     {
-      title: "Get offchain proposals",
-      description: "Returns a list of offchain (Snapshot) proposals",
-      outputSchema: { data: offchainProposalsQueryResponseSchema },
+      title: "Get offchain proposals (lean)",
+      description:
+        "Returns a list of offchain (Snapshot) proposals in a lean shape (no markdown body). Use the REST endpoint /{dao}/offchain/proposals if you need the full body.",
+      outputSchema: { data: offchainProposalsLeanQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
-        params: offchainProposalsQueryParamsSchema,
+        params: offchainProposalsLeanQueryParamsSchema,
       },
     },
-    async ({ dao, params }) => offchainProposalsHandler({ dao, params }),
+    async ({ dao, params }) => offchainProposalsLeanHandler({ dao, params }),
   );
 
   server.registerTool(
     "offchainSearchProposals",
     {
-      title: "Search offchain proposals",
+      title: "Search offchain proposals (lean)",
       description:
-        "Returns offchain proposals whose title or identifier partially matches the query.",
-      outputSchema: { data: offchainSearchProposalsQueryResponseSchema },
+        "Returns offchain proposals whose title or identifier partially matches the query, in a lean shape (no markdown body).",
+      outputSchema: { data: offchainSearchProposalsLeanQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
-        params: offchainSearchProposalsQueryParamsSchema,
+        params: offchainSearchProposalsLeanQueryParamsSchema,
       },
     },
-    async ({ dao, params }) => offchainSearchProposalsHandler({ dao, params }),
+    async ({ dao, params }) =>
+      offchainSearchProposalsLeanHandler({ dao, params }),
   );
 
   server.registerTool(
     "offchainProposalById",
     {
-      title: "Get an offchain proposal by ID",
-      description: "Returns a single offchain (Snapshot) proposal by its ID",
-      outputSchema: { data: offchainProposalByIdQueryResponseSchema },
+      title: "Get an offchain proposal by ID (lean)",
+      description:
+        "Returns a single offchain (Snapshot) proposal by its ID in a lean shape (no markdown body). Use the REST endpoint /{dao}/offchain/proposals/{id} if you need the full body.",
+      outputSchema: { data: offchainProposalByIdLeanQueryResponseSchema },
       inputSchema: { dao: z.enum(DAO_OFFCHAIN), id: z.string() },
     },
-    async ({ dao, id }) => offchainProposalByIdHandler({ dao, id }),
+    async ({ dao, id }) => offchainProposalByIdLeanHandler({ dao, id }),
   );
 
   server.registerTool(
