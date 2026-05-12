@@ -29,6 +29,12 @@ Non-clickable card container. Renders as a `div` (not a `button`) with:
 
 Rationale: `ClickableCard` renders as `<button>` with hover/focus/disabled states. The Revenue cards are display-only — wrong semantics for a non-interactive container.
 
+### `ProgressBar` (extension)
+
+**Path:** `shared/components/design-system/progress-bar/` (existing component)
+
+Add optional `color?: string` prop to `ProgressBarProps` and `ProgressBarProps` types. When provided, it overrides the `segmentColorStyles.default` fill with an inline `style={{ backgroundColor: color }}`. Existing semantic color props (`default/success/error/warning`) remain unchanged — `color` only applies when no `segments` array is used. No breaking changes.
+
 ### `StackedBarChart`
 
 **Path:** `shared/components/design-system/charts/stacked-bar-chart/`
@@ -150,11 +156,11 @@ Shape matches what a real API would return so the swap is a single import change
 Uses `Card` as container. Two sections separated by a bottom border:
 
 1. Hero: "Total Protocol Revenue" label + "$127.3M" (Inter Medium 30px) + "since May 2019 · $3.2M YTD" (baseline-aligned)
-2. Three-column stream grid: each column renders a custom inline progress bar (track `div` with `rgba(24,24,27,0.12)` bg, fill `div` with `style={{ width: '${share}%', backgroundColor: accentColor }}`, 4px height, 8px border-radius) — the existing `ProgressBar` DS component is NOT used here because it only supports a fixed semantic color set (`default/success/error/warning`) and cannot accept arbitrary hex fill colors. Label row: name left / share % right in accent color + dollar amount (24px, accent color) + volume · avg revenue subtext.
+2. Three-column stream grid: each column uses the existing `ProgressBar` DS component (4px height) with the new `color` prop (see DS change below) passing the stream accent hex. Label row: name left / share % right in accent color + dollar amount (24px, accent color) + volume · avg revenue subtext.
 
 **`MonthlyRevenueChart`** — `StackedBarChart` with `yAxisFormatter` producing `$0 / $20M / $40M / $60M` labels. Colors: Registration `#0080bc`, Renewals `#15803d`, Premium `#f472b6`.
 
-**`KpiRow`** — `grid grid-cols-4 gap-4`. Each cell is a `Card` with:
+**`KpiRow`** — Section header "Usage & Adoption" on the left + existing `SegmentedControl` DS component on the right (day-period options, e.g. 7D / 30D / 90D — static/non-functional for v1 since data is mocked). Below: `grid grid-cols-4 gap-4`. Each cell is a `Card` with:
 
 - Title (Inter Medium 14px, `text-secondary`)
 - Headline value (`font-mono` Medium 30px, `text-primary`)
@@ -166,7 +172,7 @@ Uses `Card` as container. Two sections separated by a bottom border:
 
 **`UpcomingExpirationsChart`** — `StackedBarChart` with subtitle "629K names expire in the next 24 months" (629K in `#0080bc`). Four series: Never renewed `#f87171`, Renewed once `#fb923c`, Renewed twice `#a855f7`, Renewed 3+ times `#15803d`.
 
-**`RenewalRateCohort`** — Four rows with custom inline progress bars (same pattern as stream bars — `ProgressBar` DS not used due to fixed color set). Track: `rgba(24,24,27,0.12)`, fill: `#fb923c`. Each row: year label left + progress bar + percentage right.
+**`RenewalRateCohort`** — Four rows using `ProgressBar` DS component with `color="#fb923c"`. Track: `rgba(24,24,27,0.12)`, fill: amber `#fb923c`. Each row: year label left + progress bar + percentage right.
 
 **`DataProvenance`** — `<p className="text-[11px] text-[#a1a1aa] font-normal">` with the Dune/Steakhouse attribution text.
 
@@ -176,7 +182,7 @@ Uses `Card` as container. Two sections separated by a bottom border:
 <SectionTitle title="Revenue" description="Protocol financial health: revenue, registrations, and name retention." />
 <RevenueOverviewCard />
 <MonthlyRevenueChart />
-{/* "Usage & Adoption" section label — SegmentedControl omitted (filtering is v2) */}
+{/* "Usage & Adoption" header + SegmentedControl (day filter, static for v1) */}
 <KpiRow />
 <NameGrowthChart />
 <NewUsersChart />
