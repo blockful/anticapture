@@ -22,6 +22,8 @@ interface ProposalHeaderProps {
   proposalStatus: string;
   snapshotLink?: string | null;
   isWhitelabel?: boolean;
+  offchainHasVoted?: boolean;
+  offchainVoteLabel?: string | null;
 }
 
 const ProposalHeaderAction = ({
@@ -30,16 +32,52 @@ const ProposalHeaderAction = ({
   proposalStatus,
   setIsVotingModalOpen,
   isWhitelabel,
+  offchainHasVoted,
+  offchainVoteLabel,
 }: {
   address: string | undefined;
   supportValue: number | undefined;
   proposalStatus: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
   isWhitelabel: boolean;
+  offchainHasVoted?: boolean;
+  offchainVoteLabel?: string | null;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
 
   if (address) {
+    if (offchainHasVoted !== undefined) {
+      if (offchainHasVoted) {
+        return (
+          <div className="hidden items-center gap-4 lg:flex">
+            <div className="bg-secondary ml-4 h-7 w-px shrink-0" />
+            <OffchainVotedBadge label={offchainVoteLabel ?? null} />
+            {isOngoing && (
+              <Button
+                className="hidden lg:flex"
+                onClick={() => setIsVotingModalOpen(true)}
+              >
+                Change your vote
+                <ArrowRight className="size-3.5" />
+              </Button>
+            )}
+          </div>
+        );
+      }
+      if (isOngoing) {
+        return (
+          <Button
+            className="hidden lg:flex"
+            onClick={() => setIsVotingModalOpen(true)}
+          >
+            Cast your vote
+            <ArrowRight className="size-3.5" />
+          </Button>
+        );
+      }
+      return null;
+    }
+
     if (supportValue === undefined) {
       if (isOngoing) {
         return (
@@ -85,6 +123,8 @@ export const ProposalHeader = ({
   proposalStatus,
   snapshotLink,
   isWhitelabel = false,
+  offchainHasVoted,
+  offchainVoteLabel,
 }: ProposalHeaderProps) => {
   const pathname = usePathname();
   const supportValue =
@@ -170,6 +210,8 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                offchainHasVoted={offchainHasVoted}
+                offchainVoteLabel={offchainVoteLabel}
               />
             </>
           ) : (
@@ -233,6 +275,21 @@ const VotedBadge = ({ vote }: { vote: number }) => {
         You voted
       </p>
       {getVoteText(vote)}
+    </div>
+  );
+};
+
+const OffchainVotedBadge = ({ label }: { label: string | null }) => {
+  return (
+    <div className="flex flex-col items-end">
+      <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+        You voted
+      </p>
+      {label && (
+        <span className="text-primary bg-surface-default font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
+          {label}
+        </span>
+      )}
     </div>
   );
 };
