@@ -717,6 +717,26 @@
             "type": "integer",
             "description": "Proposal end timestamp in Unix seconds."
           },
+          "queuedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was queued, or null if it never was."
+          },
+          "executedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was executed, or null if it never was."
+          },
+          "queuedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the queue event, or null if the proposal was never queued."
+          },
+          "executedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the execute event, or null if the proposal was never executed."
+          },
           "quorum": {
             "type": "string",
             "format": "bigint",
@@ -767,6 +787,10 @@
           "abstainVotes",
           "startTimestamp",
           "endTimestamp",
+          "queuedTimestamp",
+          "executedTimestamp",
+          "queuedTxHash",
+          "executedTxHash",
           "quorum",
           "calldatas",
           "values",
@@ -886,91 +910,6 @@
         "required": ["value", "from", "to"],
         "description": "Transfer event associated with a historical balance row."
       },
-      "TransactionsResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transaction"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "Total number of matching transactions."
-          }
-        },
-        "required": ["items", "totalCount"],
-        "description": "Paginated transactions with embedded transfer and delegation data."
-      },
-      "Transaction": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "from": {
-            "type": "string",
-            "nullable": true,
-            "format": "ethereum-address",
-            "description": "Resolved sender address, if known."
-          },
-          "to": {
-            "type": "string",
-            "nullable": true,
-            "format": "ethereum-address",
-            "description": "Resolved recipient address, if known."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the transaction counts toward total tracked supply."
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Transaction timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "transfers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transfer"
-            }
-          },
-          "delegations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TransactionDelegation"
-            }
-          }
-        },
-        "required": [
-          "transactionHash",
-          "from",
-          "to",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal",
-          "timestamp",
-          "transfers",
-          "delegations"
-        ],
-        "description": "Transaction response enriched with transfer and delegation events."
-      },
       "Transfer": {
         "type": "object",
         "properties": {
@@ -1043,81 +982,6 @@
           "isLending",
           "isTotal"
         ]
-      },
-      "TransactionDelegation": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "daoId": {
-            "type": "string",
-            "description": "DAO identifier."
-          },
-          "delegateAccountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Delegate address."
-          },
-          "delegatorAccountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Delegator address."
-          },
-          "delegatedValue": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Delegated amount encoded as a decimal string."
-          },
-          "previousDelegate": {
-            "type": "string",
-            "nullable": true,
-            "format": "ethereum-address",
-            "description": "Previous delegate address, if one existed."
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Delegation timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "logIndex": {
-            "type": "integer",
-            "description": "Log index within the transaction receipt."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the delegation counts toward total tracked supply."
-          }
-        },
-        "required": [
-          "transactionHash",
-          "daoId",
-          "delegateAccountId",
-          "delegatorAccountId",
-          "delegatedValue",
-          "previousDelegate",
-          "timestamp",
-          "logIndex",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal"
-        ],
-        "description": "Delegation event embedded within a transaction response."
       },
       "LastUpdateResponse": {
         "type": "object",
@@ -2239,6 +2103,26 @@
           }
         },
         "required": ["address", "maxPerDay", "vote", "delegation", "resetsAt"]
+      },
+      "RelayerBalanceResponse": {
+        "type": "object",
+        "properties": {
+          "hasEnoughBalance": {
+            "type": "boolean",
+            "description": "True when the relayer wallet's native balance is at or above the configured threshold."
+          },
+          "balanceWei": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Current native balance of the relayer wallet, as a decimal string (uint256, in wei)."
+          },
+          "thresholdWei": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Minimum native balance the relayer must hold to be considered funded, as a decimal string (uint256, in wei)."
+          }
+        },
+        "required": ["hasEnoughBalance", "balanceWei", "thresholdWei"]
       }
     },
     "parameters": {},
@@ -4418,164 +4302,6 @@
             "type": "string",
             "enum": [
               "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/transactions": {
-      "get": {
-        "operationId": "transactions",
-        "summary": "Get transactions with transfers and delegations",
-        "description": "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
-        "tags": ["transactions", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of records to skip before collecting results.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of records to skip before collecting results.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for transaction timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for transaction timestamps, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for transaction timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for transaction timestamps, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "from",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "to",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "minAmount",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "maxAmount",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["CEX", "DEX", "LENDING", "TOTAL", "UNASSIGNED"]
-              },
-              "description": "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'"
-            },
-            "required": false,
-            "description": "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
-            "name": "affectedSupply",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["TRANSFER", "DELEGATION"]
-              },
-              "description": "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'"
-            },
-            "required": false,
-            "description": "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
-            "name": "includes",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns transactions with their transfers and delegations",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransactionsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
               "comp",
               "ens",
               "fluid",
@@ -7622,6 +7348,142 @@
           },
           "503": {
             "description": "Relayer unavailable (low balance)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/config": {
+      "get": {
+        "operationId": "getConfig",
+        "summary": "Public relayer configuration",
+        "description": "Returns the static configuration values the dashboard needs to render eligibility hints.",
+        "tags": ["system"],
+        "responses": {
+          "200": {
+            "description": "Relayer configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/rate-limit/{address}": {
+      "get": {
+        "operationId": "getRateLimit",
+        "summary": "Per-address relay usage for the current UTC day",
+        "description": "Returns the number of relay calls already used and remaining for the given address, split by operation. Reads do not consume the rate limit.",
+        "tags": ["system"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current usage and remaining quota",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerRateLimitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Rate limiter storage is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/balance": {
+      "get": {
+        "operationId": "getRelayerBalance",
+        "summary": "Relayer wallet funding status",
+        "description": "Returns the relayer wallet's current native balance and whether it meets the configured threshold. Lets the dashboard hide or warn about gasless actions before users sign a request.",
+        "tags": ["system"],
+        "responses": {
+          "200": {
+            "description": "Relayer balance status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerBalanceResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to read on-chain balance",
             "content": {
               "application/json": {
                 "schema": {

@@ -55,7 +55,6 @@ import { compareTotalSupplyHandler } from "../generated/mcp/tokensHandlers/compa
 import { compareTreasuryHandler } from "../generated/mcp/tokensHandlers/compareTreasury.ts";
 import { historicalTokenDataHandler } from "../generated/mcp/tokensHandlers/historicalTokenData.ts";
 import { tokenHandler } from "../generated/mcp/tokensHandlers/token.ts";
-import { transactionsHandler } from "../generated/mcp/transactionsHandlers/transactions.ts";
 import { transfersHandler } from "../generated/mcp/transfersHandlers/transfers.ts";
 import { getDaoTokenTreasuryHandler } from "../generated/mcp/treasuryHandlers/getDaoTokenTreasury.ts";
 import { getLiquidTreasuryHandler } from "../generated/mcp/treasuryHandlers/getLiquidTreasury.ts";
@@ -164,8 +163,6 @@ import {
   tokenMetricsQueryResponseSchema,
   tokenQueryParamsSchema,
   tokenQueryResponseSchema,
-  transactionsQueryParamsSchema,
-  transactionsQueryResponseSchema,
   transfersQueryParamsSchema,
   transfersQueryResponseSchema,
   votesByProposalIdQueryParamsSchema,
@@ -631,21 +628,6 @@ export function createMcpServer(): McpServer {
     },
     async ({ dao, address, params }) =>
       historicalBalancesHandler({ dao, address, params }),
-  );
-
-  server.registerTool(
-    "transactions",
-    {
-      title: "Get transactions with transfers and delegations",
-      description:
-        "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
-      outputSchema: { data: transactionsQueryResponseSchema },
-      inputSchema: {
-        dao: z.enum(DAO_NO_AAVE),
-        params: transactionsQueryParamsSchema,
-      },
-    },
-    async ({ dao, params }) => transactionsHandler({ dao, params }),
   );
 
   server.registerTool(

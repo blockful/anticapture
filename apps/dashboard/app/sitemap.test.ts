@@ -35,6 +35,10 @@ function buildOnchainProposal(id: string): OnchainProposal {
     title: `Proposal ${id}`,
     txHash: "0x0",
     values: [],
+    executedTimestamp: null,
+    queuedTimestamp: null,
+    queuedTxHash: null,
+    executedTxHash: null,
   };
 }
 
