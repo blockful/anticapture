@@ -8,7 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet } from "@/eventHandlers/shared";
 import {
   MetricTypesEnum,
   BurningAddresses,
@@ -156,22 +156,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
       ) {
         await updateCirculatingSupply(context, daoId, address, timestamp);
       }
-
-      if (!event.transaction.to) return;
-
-      await handleTransaction(
-        context,
-        event.transaction.hash,
-        event.transaction.from,
-        event.transaction.to,
-        event.block.timestamp,
-        [event.args.from, event.args.to],
-        {
-          cex: cexAddressSet,
-          dex: dexAddressSet,
-          burning: burningAddressSet,
-        },
-      );
     },
   );
 
@@ -189,17 +173,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
         logIndex: event.log.logIndex,
       },
       delegationAddressSets,
-    );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegator, event.args.toDelegate], // Addresses to check
     );
   });
 
@@ -219,17 +192,6 @@ export function GTCTokenIndexer(address: Address, decimals: number) {
       event.log.address,
       event.args.newBalance - event.args.previousBalance,
       event.block.timestamp,
-    );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegate], // Address to check
     );
   });
 }

@@ -8,7 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet } from "@/eventHandlers/shared";
 import {
   BurningAddresses,
   MetricTypesEnum,
@@ -122,17 +122,6 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
           );
         }
       }
-
-      if (!event.transaction.to) return;
-
-      await handleTransaction(
-        context,
-        event.transaction.hash,
-        event.transaction.from,
-        event.transaction.to,
-        event.block.timestamp,
-        [event.args.from, event.args.to],
-      );
     },
   );
 
@@ -173,17 +162,6 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
       },
       delegationAddressSets,
     );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegator, event.args.toDelegate],
-    );
   });
 
   ponder.on(
@@ -197,17 +175,6 @@ export function LilNounsTokenIndexer(address: Address, decimals: number) {
         timestamp: event.block.timestamp,
         logIndex: event.log.logIndex,
       });
-
-      if (!event.transaction.to) return;
-
-      await handleTransaction(
-        context,
-        event.transaction.hash,
-        event.transaction.from,
-        event.transaction.to,
-        event.block.timestamp,
-        [event.args.delegate],
-      );
     },
   );
 }
