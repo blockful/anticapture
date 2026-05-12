@@ -71,10 +71,16 @@ export const ProposalTimeline = ({
       ? [
           {
             label: "Queued",
-            timestamp: endTime + 1,
-            date: undefined as string | undefined,
-            status: "completed" as const,
-            txLink: undefined,
+            timestamp: proposal.queuedTimestamp ?? endTime + 1,
+            date: proposal.queuedTimestamp
+              ? formatTimestamp(proposal.queuedTimestamp)
+              : undefined,
+            status: proposal.queuedTimestamp
+              ? getTimelineItemStatus(proposal.queuedTimestamp)
+              : ("completed" as const),
+            txLink: proposal.queuedTxHash
+              ? `${blockExplorerUrl}/tx/${proposal.queuedTxHash}`
+              : undefined,
           },
         ]
       : []),
@@ -82,10 +88,16 @@ export const ProposalTimeline = ({
       ? [
           {
             label: "Executed",
-            timestamp: endTime + 2,
-            date: undefined as string | undefined,
-            status: "completed" as const,
-            txLink: undefined,
+            timestamp: proposal.executedTimestamp ?? endTime + 2,
+            date: proposal.executedTimestamp
+              ? formatTimestamp(proposal.executedTimestamp)
+              : undefined,
+            status: proposal.executedTimestamp
+              ? getTimelineItemStatus(proposal.executedTimestamp)
+              : ("completed" as const),
+            txLink: proposal.executedTxHash
+              ? `${blockExplorerUrl}/tx/${proposal.executedTxHash}`
+              : undefined,
           },
         ]
       : []),

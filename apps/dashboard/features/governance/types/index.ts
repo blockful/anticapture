@@ -29,6 +29,10 @@ export interface ProposalViewData {
   abstainVotes: string;
   startTimestamp: number;
   endTimestamp: number;
+  queuedTimestamp: number | null;
+  executedTimestamp: number | null;
+  queuedTxHash: string | null;
+  executedTxHash: string | null;
   calldatas: Array<string | null> | null;
   targets: Array<string | null>;
   values: Array<string | null>;
