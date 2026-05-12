@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { zeroAddress, type Address } from "viem";
 
 import { useGetAddresses } from "@anticapture/client/hooks";
@@ -22,9 +21,8 @@ export function useTopAccountsChartData({
       (address): address is Address => !!address && address !== zeroAddress,
     );
 
-  const lookupAddresses = useMemo(
-    () => Array.from(new Set([...addresses, ...delegateAddresses])),
-    [addresses, delegateAddresses],
+  const lookupAddresses = Array.from(
+    new Set([...addresses, ...delegateAddresses]),
   );
 
   const { data } = useGetAddresses(
@@ -32,13 +30,10 @@ export function useTopAccountsChartData({
     { query: { enabled: lookupAddresses.length > 0 } },
   );
 
-  const ensNameByAddress = useMemo(() => {
-    const map: Record<string, string | null | undefined> = {};
-    data?.results?.forEach((result) => {
-      map[result.address.toLowerCase()] = result.ens?.name;
-    });
-    return map;
-  }, [data]);
+  const ensNameByAddress: Record<string, string | null | undefined> = {};
+  data?.results?.forEach((result) => {
+    ensNameByAddress[result.address.toLowerCase()] = result.ens?.name;
+  });
 
   const lookupEnsName = (address: string | undefined) =>
     address ? ensNameByAddress[address.toLowerCase()] : undefined;
