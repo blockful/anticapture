@@ -24,6 +24,7 @@ export const ProgressBar = ({
   labelPosition = "top",
   size = "default",
   marker,
+  color,
   className,
 }: ProgressBarProps) => {
   const isRow = labelPosition === "left" || labelPosition === "right";
@@ -62,9 +63,12 @@ export const ProgressBar = ({
           <div
             className={cn(
               "h-full transition-all duration-300 ease-in-out",
-              segmentColorStyles.default,
+              !color && segmentColorStyles.default,
             )}
-            style={{ width: `${clampedValue}%` }}
+            style={{
+              width: `${clampedValue}%`,
+              ...(color ? { backgroundColor: color } : {}),
+            }}
           />
         )}
       </div>

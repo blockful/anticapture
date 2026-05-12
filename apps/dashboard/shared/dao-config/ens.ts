@@ -371,6 +371,7 @@ export const ENS: DaoConfiguration = {
   activityFeed: true,
   governancePage: true,
   serviceProviders: true,
+  revenue: true,
   offchainProposals: true,
   gaslessRelayer: true,
 };
