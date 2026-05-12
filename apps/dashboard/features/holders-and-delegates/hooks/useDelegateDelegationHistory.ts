@@ -187,12 +187,9 @@ export function useDelegateDelegationHistory({
       });
   }, [data, accountId, token]);
 
-  const hasNextPage = useMemo(() => {
-    return (
-      currentPage * limit <
-      (data?.historicalVotingPowerByAccountId?.totalCount || 0)
-    );
-  }, [currentPage, limit, data?.historicalVotingPowerByAccountId?.totalCount]);
+  const hasNextPage =
+    currentPage * limit <
+    (data?.historicalVotingPowerByAccountId?.totalCount ?? 0);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {
