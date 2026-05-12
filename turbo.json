@@ -29,10 +29,6 @@
       "dependsOn": ["codegen"],
       "outputs": ["dist/**"]
     },
-    "@anticapture/client#typecheck": {
-      "dependsOn": ["codegen"],
-      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
-    },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
       "outputs": ["dist/**", ".next/**"]
@@ -44,6 +40,10 @@
     "storybook": {
       "persistent": true,
       "cache": false
+    },
+    "@anticapture/dashboard#build-storybook": {
+      "dependsOn": ["^codegen", "^build"],
+      "outputs": ["storybook-static/**"]
     },
     "build-storybook": {
       "outputs": ["storybook-static/**"]
@@ -77,14 +77,11 @@
       ]
     },
     "typecheck": {
-      "dependsOn": ["^build", "@anticapture/observability#build"],
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "@anticapture/client#typecheck": {
-      "dependsOn": [
-        "@anticapture/client#codegen",
-        "@anticapture/observability#build"
-      ],
+      "dependsOn": ["@anticapture/client#codegen", "^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"]
     },
     "test": {
