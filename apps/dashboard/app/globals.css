@@ -226,6 +226,11 @@
   --base-chart-6: #06b6d4;
   --base-chart-7: #fbbf24;
 
+  /* ECharts theme tokens */
+  --color-chart-grid: #e4e4e7;
+  --color-chart-axis-label: #a1a1aa;
+  --color-chart-legend-text: #52525b;
+
   /* Custom Colors */
   --base-primary-opacity: #fafafa1f;
   --base-primary-opacity-darker: #fafafab2;
@@ -653,6 +658,11 @@
     --base-chart-5: #10b981;
     --base-chart-6: #06b6d4;
     --base-chart-7: #fbbf24;
+
+    /* ECharts theme tokens — dark mode */
+    --color-chart-grid: #3f3f46;
+    --color-chart-axis-label: #a1a1aa;
+    --color-chart-legend-text: #d4d4d8;
 
     /* Custom Colors */
     --base-primary-opacity: #fafafa1f;

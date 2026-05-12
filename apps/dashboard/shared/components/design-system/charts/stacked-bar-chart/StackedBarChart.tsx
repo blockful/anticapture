@@ -1,14 +1,14 @@
 "use client";
 
 import ReactECharts from "echarts-for-react";
+import { useMemo } from "react";
 
+import {
+  CHART_FONT_FAMILY,
+  getChartTheme,
+} from "@/shared/components/design-system/charts/chart-theme";
 import type { StackedBarChartProps } from "@/shared/components/design-system/charts/types";
 import { cn } from "@/shared/utils/cn";
-
-const GRID_LINE_COLOR = "#e4e4e7";
-const AXIS_LABEL_COLOR = "#a1a1aa";
-const LABEL_FONT_FAMILY = "Inter, sans-serif";
-const LEGEND_TEXT_COLOR = "#52525b";
 
 export const StackedBarChart = ({
   series,
@@ -17,6 +17,8 @@ export const StackedBarChart = ({
   height = 300,
   className,
 }: StackedBarChartProps) => {
+  const theme = useMemo(() => getChartTheme(), []);
+
   const option = {
     tooltip: {
       trigger: "axis" as const,
@@ -30,9 +32,9 @@ export const StackedBarChart = ({
       itemHeight: 8,
       itemGap: 16,
       textStyle: {
-        fontFamily: LABEL_FONT_FAMILY,
+        fontFamily: CHART_FONT_FAMILY,
         fontSize: 14,
-        color: LEGEND_TEXT_COLOR,
+        color: theme.legendTextColor,
       },
     },
     grid: {
@@ -48,11 +50,10 @@ export const StackedBarChart = ({
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
-        fontFamily: LABEL_FONT_FAMILY,
+        fontFamily: CHART_FONT_FAMILY,
         fontSize: 12,
         fontWeight: 500,
-        color: AXIS_LABEL_COLOR,
-        // For dense labels (monthly data), show only Jan of each year
+        color: theme.axisLabelColor,
         interval:
           xAxisLabels.length > 12
             ? (index: number) => xAxisLabels[index]?.startsWith("Jan")
@@ -65,14 +66,14 @@ export const StackedBarChart = ({
     },
     yAxis: {
       type: "value" as const,
-      splitLine: { lineStyle: { color: GRID_LINE_COLOR } },
+      splitLine: { lineStyle: { color: theme.gridLineColor } },
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
-        fontFamily: LABEL_FONT_FAMILY,
+        fontFamily: CHART_FONT_FAMILY,
         fontSize: 12,
         fontWeight: 500,
-        color: AXIS_LABEL_COLOR,
+        color: theme.axisLabelColor,
         formatter: yAxisFormatter,
       },
     },
