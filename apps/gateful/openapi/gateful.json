@@ -2298,6 +2298,60 @@
           }
         },
         "required": ["items", "totalCount"]
+      },
+      "DaoHealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok", "degraded", "error"]
+          },
+          "database": {
+            "type": "string",
+            "enum": ["ok", "error"]
+          },
+          "chain": {
+            "type": "object",
+            "properties": {
+              "head": {
+                "type": "integer",
+                "nullable": true
+              }
+            },
+            "required": ["head"]
+          },
+          "indexer": {
+            "type": "object",
+            "properties": {
+              "lastEventTimestamp": {
+                "type": "integer",
+                "nullable": true
+              },
+              "lagSeconds": {
+                "type": "integer",
+                "nullable": true
+              },
+              "fresh": {
+                "type": "boolean"
+              }
+            },
+            "required": ["lastEventTimestamp", "lagSeconds", "fresh"]
+          },
+          "circuit": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "type": "string",
+                "enum": ["CLOSED", "OPEN", "HALF_OPEN"]
+              },
+              "nextRetryIn": {
+                "type": "integer"
+              }
+            },
+            "required": ["state"]
+          }
+        },
+        "required": ["status", "database", "chain", "indexer", "circuit"]
       }
     },
     "parameters": {},
@@ -2536,80 +2590,72 @@
     "/{dao}/health": {
       "get": {
         "operationId": "health",
-        "summary": "Check API and database health",
+        "summary": "Per-DAO indexer, database, and gateway health",
+        "description": "Returns database connectivity, chain head, indexer freshness, and gateway circuit-breaker state for the given DAO.",
         "tags": ["system"],
+        "parameters": [
+          {
+            "name": "dao",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "aave",
+                "comp",
+                "ens",
+                "fluid",
+                "gtc",
+                "lil_nouns",
+                "nouns",
+                "obol",
+                "scr",
+                "shu",
+                "uni"
+              ]
+            },
+            "description": "DAO identifier"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "API and database are healthy",
+            "description": "Health snapshot (status may be ok or degraded).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DaoHealthResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "DAO not configured.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": ["ok"]
-                    },
-                    "database": {
-                      "type": "string",
-                      "enum": ["ok"]
+                    "error": {
+                      "type": "string"
                     }
                   },
-                  "required": ["status", "database"]
+                  "required": ["error"]
                 }
               }
             }
           },
           "503": {
-            "description": "Database connectivity check failed",
+            "description": "Upstream DAO API unavailable.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": ["error"]
-                    },
-                    "database": {
-                      "type": "string",
-                      "enum": ["error"]
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["status", "database", "message"]
+                  "$ref": "#/components/schemas/DaoHealthResponse"
                 }
               }
             }
           }
         }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
+      }
     },
     "/{dao}/accounts/{address}/delegations/historical": {
       "get": {

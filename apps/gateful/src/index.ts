@@ -18,6 +18,7 @@ import { exporter } from "./instrumentation.js";
 import { logger } from "./logger.js";
 import { cacheMiddleware } from "./middlewares/cache.js";
 import { requestLogger } from "./middlewares/logger.js";
+import { daoHealth } from "./health/dao.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
 import { relayerProxy } from "./proxy/relayer.js";
@@ -86,6 +87,7 @@ const registry = new CircuitBreakerRegistry(config.circuitBreaker);
 
 // OpenAPI routes
 health(app, registry);
+daoHealth(app, config.daoApis, registry);
 addressEnrichment(app, config.addressEnrichmentUrl);
 
 // Aggregation routes
