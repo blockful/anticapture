@@ -256,7 +256,7 @@ export const proposalCreated = async (
 export const updateProposalStatus = async (
   context: Context,
   proposalId: string,
-  status: string,
+  status: ProposalStatus,
   timestamp: bigint,
   txHash: Hex,
 ) => {
