@@ -938,13 +938,13 @@
             "type": "string",
             "nullable": true,
             "format": "ethereum-address",
-            "description": "Resolved sender address, if known."
+            "description": "Sender address derived from the transaction's first child event by log index (transfer.fromAccountId, or delegation.delegatorAccountId when no transfers exist)."
           },
           "to": {
             "type": "string",
             "nullable": true,
             "format": "ethereum-address",
-            "description": "Resolved recipient address, if known."
+            "description": "Recipient address derived from the transaction's first child event by log index (transfer.toAccountId, or delegation.delegateAccountId when no transfers exist)."
           },
           "isCex": {
             "type": "boolean",
@@ -2263,6 +2263,26 @@
           }
         },
         "required": ["address", "maxPerDay", "vote", "delegation", "resetsAt"]
+      },
+      "RelayerBalanceResponse": {
+        "type": "object",
+        "properties": {
+          "hasEnoughBalance": {
+            "type": "boolean",
+            "description": "True when the relayer wallet's native balance is at or above the configured threshold."
+          },
+          "balanceWei": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Current native balance of the relayer wallet, as a decimal string (uint256, in wei)."
+          },
+          "thresholdWei": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Minimum native balance the relayer must hold to be considered funded, as a decimal string (uint256, in wei)."
+          }
+        },
+        "required": ["hasEnoughBalance", "balanceWei", "thresholdWei"]
       }
     },
     "parameters": {},
@@ -7646,6 +7666,142 @@
           },
           "503": {
             "description": "Relayer unavailable (low balance)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/config": {
+      "get": {
+        "operationId": "getConfig",
+        "summary": "Public relayer configuration",
+        "description": "Returns the static configuration values the dashboard needs to render eligibility hints.",
+        "tags": ["system"],
+        "responses": {
+          "200": {
+            "description": "Relayer configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/rate-limit/{address}": {
+      "get": {
+        "operationId": "getRateLimit",
+        "summary": "Per-address relay usage for the current UTC day",
+        "description": "Returns the number of relay calls already used and remaining for the given address, split by operation. Reads do not consume the rate limit.",
+        "tags": ["system"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current usage and remaining quota",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerRateLimitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Rate limiter storage is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/relay/balance": {
+      "get": {
+        "operationId": "getRelayerBalance",
+        "summary": "Relayer wallet funding status",
+        "description": "Returns the relayer wallet's current native balance and whether it meets the configured threshold. Lets the dashboard hide or warn about gasless actions before users sign a request.",
+        "tags": ["system"],
+        "responses": {
+          "200": {
+            "description": "Relayer balance status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerBalanceResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to read on-chain balance",
             "content": {
               "application/json": {
                 "schema": {
