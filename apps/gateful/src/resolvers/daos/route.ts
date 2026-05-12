@@ -11,8 +11,8 @@ const DaoResponseSchema = z.object({
   votingDelay: z.string(),
   votingPeriod: z.string(),
   timelockDelay: z.string(),
-  alreadySupportCalldataReview: z.boolean(),
-  supportOffchainData: z.boolean(),
+  supportsCalldataReview: z.boolean(),
+  supportsOffchainData: z.boolean(),
 });
 
 const DaosResponseSchema = z.object({
@@ -25,7 +25,10 @@ export type DaosResponse = z.infer<typeof DaosResponseSchema>;
 
 const route = createRoute({
   method: "get",
+  operationId: "daos",
   path: "/daos",
+  summary: "List of all configured DAOs",
+  tags: ["governance"],
   responses: {
     200: {
       content: { "application/json": { schema: DaosResponseSchema } },

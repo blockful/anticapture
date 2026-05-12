@@ -1680,10 +1680,10 @@
           "timelockDelay": {
             "type": "string"
           },
-          "alreadySupportCalldataReview": {
+          "supportsCalldataReview": {
             "type": "boolean"
           },
-          "supportOffchainData": {
+          "supportsOffchainData": {
             "type": "boolean"
           }
         },
@@ -1695,8 +1695,8 @@
           "votingDelay",
           "votingPeriod",
           "timelockDelay",
-          "alreadySupportCalldataReview",
-          "supportOffchainData"
+          "supportsCalldataReview",
+          "supportsOffchainData"
         ],
         "description": "Current governance parameters and feature flags for the active DAO."
       },
@@ -2399,7 +2399,9 @@
               }
             }
           }
-        }
+        },
+        "operationId": "gatewayHealth",
+        "tags": []
       }
     },
     "/daos": {
@@ -2467,7 +2469,9 @@
               }
             }
           }
-        }
+        },
+        "operationId": "daos",
+        "tags": []
       }
     },
     "/aggregations/average-delegation-percentage": {
@@ -2584,7 +2588,9 @@
               }
             }
           }
-        }
+        },
+        "operationId": "averageDelegationPercentage",
+        "tags": []
       }
     },
     "/{dao}/health": {
@@ -5482,82 +5488,6 @@
         }
       ]
     },
-    "/{dao}/voting-powers/{accountId}": {
-      "get": {
-        "operationId": "votingPowerByAccountId",
-        "summary": "Get account powers",
-        "description": "Returns voting power information for a specific address (account)",
-        "tags": ["voting-power"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "name": "accountId",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved voting power changes",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VotingPower"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
     "/{dao}/balances/variations": {
       "get": {
         "operationId": "accountBalanceVariations",
@@ -8227,6 +8157,82 @@
           "schema": {
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/voting-powers/{address}": {
+      "get": {
+        "operationId": "votingPowerByAccountId",
+        "summary": "Get account powers",
+        "description": "Returns voting power information for a specific address (account)",
+        "tags": ["voting-power"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for variation enrichment, in Unix seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for variation enrichment, in Unix seconds.",
+            "name": "toDate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved voting power changes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VotingPower"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }

@@ -9,8 +9,8 @@ export const DaoResponseSchema = z
     votingDelay: z.string(),
     votingPeriod: z.string(),
     timelockDelay: z.string(),
-    alreadySupportCalldataReview: z.boolean(),
-    supportOffchainData: z.boolean(),
+    supportsCalldataReview: z.boolean(),
+    supportsOffchainData: z.boolean(),
   })
   .openapi("DaoResponse", {
     description:

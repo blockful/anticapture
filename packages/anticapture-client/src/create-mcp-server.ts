@@ -63,9 +63,9 @@ import { transfersHandler } from "../generated/mcp/transfersHandlers/transfers.t
 import { getDaoTokenTreasuryHandler } from "../generated/mcp/treasuryHandlers/getDaoTokenTreasury.ts";
 import { getLiquidTreasuryHandler } from "../generated/mcp/treasuryHandlers/getLiquidTreasury.ts";
 import { getTotalTreasuryHandler } from "../generated/mcp/treasuryHandlers/getTotalTreasury.ts";
-import { getAggregationsAverageDelegationPercentageHandler } from "../generated/mcp/undefinedHandlers/getAggregationsAverageDelegationPercentage.ts";
-import { getDaosHandler } from "../generated/mcp/undefinedHandlers/getDaos.ts";
-import { getHealthHandler } from "../generated/mcp/undefinedHandlers/getHealth.ts";
+import { averageDelegationPercentageHandler } from "../generated/mcp/undefinedHandlers/averageDelegationPercentage.ts";
+import { daosHandler } from "../generated/mcp/undefinedHandlers/daos.ts";
+import { gatewayHealthHandler } from "../generated/mcp/undefinedHandlers/gatewayHealth.ts";
 import { votesHandler } from "../generated/mcp/votesHandlers/votes.ts";
 import { historicalVotingPowerHandler } from "../generated/mcp/voting-powerHandlers/historicalVotingPower.ts";
 import { historicalVotingPowerByAccountIdHandler } from "../generated/mcp/voting-powerHandlers/historicalVotingPowerByAccountId.ts";
@@ -118,14 +118,14 @@ import {
   getAddressQueryResponseSchema,
   getAddressesQueryParamsSchema,
   getAddressesQueryResponseSchema,
-  getAggregationsAverageDelegationPercentageQueryParamsSchema,
-  getAggregationsAverageDelegationPercentageQueryResponseSchema,
+  averageDelegationPercentageQueryParamsSchema,
+  averageDelegationPercentageQueryResponseSchema,
+  daosQueryResponseSchema,
+  gatewayHealthQueryResponseSchema,
   getDaoTokenTreasuryQueryParamsSchema,
   getDaoTokenTreasuryQueryResponseSchema,
-  getDaosQueryResponseSchema,
   getEventRelevanceThresholdQueryParamsSchema,
   getEventRelevanceThresholdQueryResponseSchema,
-  getHealthQueryResponseSchema,
   getLiquidTreasuryQueryParamsSchema,
   getLiquidTreasuryQueryResponseSchema,
   getTotalTreasuryQueryParamsSchema,
@@ -223,37 +223,41 @@ export function createMcpServer(): McpServer {
   });
 
   server.registerTool(
-    "get_health",
+    "gatewayHealth",
     {
-      description: "Make a GET request to /health",
-      outputSchema: { data: getHealthQueryResponseSchema },
-    },
-    async () => getHealthHandler(),
-  );
-
-  server.registerTool(
-    "get_daos",
-    {
-      description: "Make a GET request to /daos",
-      outputSchema: { data: getDaosQueryResponseSchema },
-    },
-    async () => getDaosHandler(),
-  );
-
-  server.registerTool(
-    "get_aggregations-average-delegation-percentage",
-    {
+      title: "Gateway health and per-DAO circuit breaker states",
       description:
-        "Make a GET request to /aggregations/average-delegation-percentage",
+        "Returns gateway readiness and the current circuit-breaker state of every configured DAO API.",
+      outputSchema: { data: gatewayHealthQueryResponseSchema },
+    },
+    async () => gatewayHealthHandler(),
+  );
+
+  server.registerTool(
+    "daos",
+    {
+      title: "List of all configured DAOs",
+      description:
+        "Returns governance parameters and feature flags for every configured DAO.",
+      outputSchema: { data: daosQueryResponseSchema },
+    },
+    async () => daosHandler(),
+  );
+
+  server.registerTool(
+    "averageDelegationPercentage",
+    {
+      title: "Average delegation percentage across all DAOs",
+      description:
+        "Returns the average delegation percentage across all configured DAOs for a given time window.",
       outputSchema: {
-        data: getAggregationsAverageDelegationPercentageQueryResponseSchema,
+        data: averageDelegationPercentageQueryResponseSchema,
       },
       inputSchema: {
-        params: getAggregationsAverageDelegationPercentageQueryParamsSchema,
+        params: averageDelegationPercentageQueryParamsSchema,
       },
     },
-    async ({ params }) =>
-      getAggregationsAverageDelegationPercentageHandler({ params }),
+    async ({ params }) => averageDelegationPercentageHandler({ params }),
   );
 
   server.registerTool(
@@ -774,12 +778,12 @@ export function createMcpServer(): McpServer {
       outputSchema: { data: votingPowerByAccountIdQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_ALL),
-        accountId: z.string(),
+        address: z.string(),
         params: votingPowerByAccountIdQueryParamsSchema,
       },
     },
-    async ({ dao, accountId, params }) =>
-      votingPowerByAccountIdHandler({ dao, accountId, params }),
+    async ({ dao, address, params }) =>
+      votingPowerByAccountIdHandler({ dao, address, params }),
   );
 
   server.registerTool(

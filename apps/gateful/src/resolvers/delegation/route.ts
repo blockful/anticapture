@@ -42,7 +42,10 @@ const ResponseSchema = z.object({
 
 const route = createRoute({
   method: "get",
+  operationId: "averageDelegationPercentage",
   path: "/aggregations/average-delegation-percentage",
+  summary: "Average delegation percentage across all DAOs",
+  tags: ["governance"],
   request: { query: QuerySchema },
   responses: {
     200: {
