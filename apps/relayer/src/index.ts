@@ -12,7 +12,10 @@ import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { fromZodError } from "zod-validation-error";
 
+import { balance } from "@/controllers/balance";
+import { config } from "@/controllers/config";
 import { health } from "@/controllers/health";
+import { rateLimit } from "@/controllers/rate-limit";
 import { relayDelegate } from "@/controllers/relay-delegate";
 import { relayVote } from "@/controllers/relay-vote";
 import { env } from "@/env";
@@ -41,6 +44,7 @@ async function main() {
   });
 
   const signer = createLocalSigner(env.RELAYER_PRIVATE_KEY, chain, env.RPC_URL);
+  const relayerAddress = await signer.getAddress();
 
   // --- Services ---
   const chainState = wrapWithTracing(
@@ -148,6 +152,21 @@ async function main() {
   relayVote(app, relayService);
   relayDelegate(app, relayService);
   health(app);
+  config(app, {
+    minVotingPower: env.MIN_VOTING_POWER,
+    maxRelayPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
+  });
+  rateLimit(app, {
+    storage: rateLimitStorage,
+    daoName: env.DAO_NAME,
+    governorAddress: governorAddress,
+    maxPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
+  });
+  balance(app, {
+    publicClient,
+    relayerAddress,
+    thresholdWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
+  });
 
   // --- OpenAPI docs ---
   app.doc("/docs", {
@@ -160,7 +179,7 @@ async function main() {
     {
       port: env.PORT,
       chain: chain.name,
-      relayer: await signer.getAddress(),
+      relayer: relayerAddress,
       governor: governorAddress,
       token: tokenAddress,
     },

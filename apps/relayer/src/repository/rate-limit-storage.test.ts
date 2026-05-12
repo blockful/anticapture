@@ -27,6 +27,11 @@ class FakeRedis implements RedisClient {
     return 1;
   }
 
+  async get(key: string): Promise<string | null> {
+    const value = this.counters.get(key);
+    return value === undefined ? null : String(value);
+  }
+
   seed(key: string, delta: number): void {
     this.counters.set(key, (this.counters.get(key) ?? 0) + delta);
   }
@@ -127,5 +132,69 @@ describe("RedisRateLimitStorage.incrementIfAllowed", () => {
       maxPerDay: MAX_PER_DAY,
     });
     expect(granted).toBe(true);
+  });
+});
+
+describe("RedisRateLimitStorage.getCount", () => {
+  it("returns 0 when no calls have been made", async () => {
+    const count = await store.getCount({
+      daoName: DAO,
+      governorAddress: GOVERNOR,
+      address: ADDR_A,
+      operation: "vote",
+    });
+
+    expect(count).toBe(0);
+  });
+
+  it("reflects current usage without consuming the limit", async () => {
+    await store.incrementIfAllowed({
+      daoName: DAO,
+      governorAddress: GOVERNOR,
+      address: ADDR_A,
+      operation: "vote",
+      maxPerDay: MAX_PER_DAY,
+    });
+    await store.incrementIfAllowed({
+      daoName: DAO,
+      governorAddress: GOVERNOR,
+      address: ADDR_A,
+      operation: "vote",
+      maxPerDay: MAX_PER_DAY,
+    });
+
+    // Read multiple times — must not consume slots.
+    for (let i = 0; i < 5; i++) {
+      const count = await store.getCount({
+        daoName: DAO,
+        governorAddress: GOVERNOR,
+        address: ADDR_A,
+        operation: "vote",
+      });
+      expect(count).toBe(2);
+    }
+
+    // Third increment must still be granted (limit is 3) — proving reads didn't consume.
+    const granted = await store.incrementIfAllowed({
+      daoName: DAO,
+      governorAddress: GOVERNOR,
+      address: ADDR_A,
+      operation: "vote",
+      maxPerDay: MAX_PER_DAY,
+    });
+    expect(granted).toBe(true);
+  });
+
+  it("ignores entries outside the current UTC-day window", async () => {
+    insertUsage(ADDR_A, "vote", 25);
+
+    const count = await store.getCount({
+      daoName: DAO,
+      governorAddress: GOVERNOR,
+      address: ADDR_A,
+      operation: "vote",
+    });
+
+    expect(count).toBe(0);
   });
 });

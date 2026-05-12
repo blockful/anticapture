@@ -126,6 +126,10 @@ const BASE_PROPOSAL_FIELDS = {
   values: ["0"],
   targets: ["0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"],
   proposalType: null,
+  queuedTimestamp: null,
+  executedTimestamp: null,
+  queuedTxHash: null,
+  executedTxHash: null,
 };
 
 describe("Onchain Proposals Controller", () => {

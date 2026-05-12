@@ -6,18 +6,19 @@ import type { Address } from "viem";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import type { ArkhamDataResult } from "@/shared/hooks/graphql-client/useArkhamData";
+import type { GetAddress200 } from "@anticapture/client";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
 const UPPERCASE_ENTITY_TYPES = new Set(["cex", "dex"]);
 
-interface AddressDetailsTooltipProps extends Pick<
-  ArkhamDataResult,
-  "arkhamData" | "ens" | "isContract" | "isLoading"
-> {
+interface AddressDetailsTooltipProps {
   address: Address;
   children: ReactNode;
+  arkhamData: GetAddress200["arkham"];
+  ens: GetAddress200["ens"];
+  isContract: boolean | null;
+  isLoading: boolean;
 }
 
 const DashedDivider = () => {

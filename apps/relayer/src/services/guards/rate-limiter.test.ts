@@ -25,6 +25,9 @@ function makeStore(): RateLimitStorage {
       counters.set(id, next);
       return next <= maxPerDay;
     },
+    async getCount({ address, operation }) {
+      return counters.get(`${address}:${operation}`) ?? 0;
+    },
   };
 }
 
@@ -73,8 +76,9 @@ describe("RateLimiter", () => {
   });
 
   it("throws RATE_LIMITER_UNAVAILABLE when store is unreachable", async () => {
-    const brokenStore = {
+    const brokenStore: RateLimitStorage = {
       incrementIfAllowed: () => Promise.reject(new Error("connection refused")),
+      getCount: () => Promise.reject(new Error("connection refused")),
     };
 
     const brokenLimiter = new RateLimiter(brokenStore, {

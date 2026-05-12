@@ -14,6 +14,7 @@ import { httpRequestDuration } from "./metrics";
 function resolveClientSource(header: string | undefined): string {
   if (header === "notification-system") return "notification-system";
   if (header === "anticapture-frontend") return "anticapture-frontend";
+  if (header === "anticapture-mcp") return "anticapture-mcp";
   return "other";
 }
 

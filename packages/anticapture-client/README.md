@@ -142,6 +142,50 @@ Required `tsconfig` setting: `"moduleResolution": "bundler"` or `"nodenext"`
 so the `@anticapture/client/msw` subpath in `package.json#exports` resolves.
 Classic `"node"` resolution does not honor `exports` maps.
 
+## MCP server
+
+The package ships an MCP server that exposes the Gateful API as tools for
+agentic clients. Two transports are available:
+
+- `pnpm mcp` (`mcp-server.ts`) — stdio, for clients that spawn the server as a
+  child process (Claude Desktop, local agents).
+- `pnpm mcp-http` (`mcp-server-http.ts`) — Streamable HTTP with session
+  management and bearer auth, used by the deployed `infra/mcp-server` image.
+
+Environment:
+
+- `ANTICAPTURE_API_URL` — upstream Gateful base URL (default
+  `http://localhost:4001`).
+- `ANTICAPTURE_API_KEY` — bearer token sent to the upstream Gateful API.
+- `ANTICAPTURE_MCP_API_KEY` — bearer token required from inbound MCP HTTP
+  clients (omit to disable auth).
+- `PORT` / `HOST` — HTTP server bind (default `3100` / `0.0.0.0`).
+
+### Wiring into Claude Desktop (stdio)
+
+`mcp-server.sh` is a thin launcher that `cd`s into the package directory and
+runs `mcp-server.ts` with the bundled `tsx`. Claude Desktop spawns the script
+from an arbitrary cwd, so the `cd` is what makes the relative `tsx` lookup
+work. Point Claude Desktop at the script with the absolute path to your
+checkout:
+
+```json
+{
+  "mcpServers": {
+    "anticapture": {
+      "type": "stdio",
+      "command": "sh",
+      "args": [
+        "/absolute/path/to/anticapture/packages/anticapture-client/mcp-server.sh"
+      ]
+    }
+  }
+}
+```
+
+Run `pnpm install` and `pnpm codegen` in the package once before launching so
+that `node_modules/.bin/tsx` and `generated/` are present.
+
 ## Development
 
 The SDK is generated from `apps/gateful/openapi/gateful.json` with Kubb.
