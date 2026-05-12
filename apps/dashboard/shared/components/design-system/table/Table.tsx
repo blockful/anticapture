@@ -74,6 +74,12 @@ interface DataTableProps<TData, TValue> {
   wrapperClassName?: string;
   enableExpanding?: boolean;
   getRowCanExpand?: (row: Row<TData>) => boolean;
+  getRowClassName?: (
+    row: TData,
+    index: number,
+    rows: TData[],
+  ) => string | undefined;
+  pinRowsToBottom?: (row: TData) => boolean;
   renderSubComponent?: (row: Row<TData>) => ReactNode;
   getSubRows?: (originalRow: TData, index: number) => TData[] | undefined;
   error?: Error | null;
@@ -104,6 +110,8 @@ export const Table = <TData, TValue>({
   wrapperClassName,
   enableExpanding = false,
   getRowCanExpand,
+  getRowClassName,
+  pinRowsToBottom,
   renderSubComponent,
   getSubRows,
   error,
@@ -181,6 +189,15 @@ export const Table = <TData, TValue>({
 
   const table = useReactTable(tableConfig);
 
+  const visibleRows = table.getRowModel().rows;
+  const rowsToRender = pinRowsToBottom
+    ? [
+        ...visibleRows.filter((row) => !pinRowsToBottom(row.original)),
+        ...visibleRows.filter((row) => pinRowsToBottom(row.original)),
+      ]
+    : visibleRows;
+  const originalRowsToRender = rowsToRender.map((row) => row.original);
+
   return (
     <div
       className={cn(
@@ -230,9 +247,9 @@ export const Table = <TData, TValue>({
           ))}
         </TableHeader>
         <TableBody className={cn(className, fillHeight && "flex-1")}>
-          {table.getRowModel().rows.length > 0 ? (
+          {rowsToRender.length > 0 ? (
             <>
-              {table.getRowModel().rows.map((row) => {
+              {rowsToRender.map((row, rowIndex) => {
                 const isLastNestedRow =
                   row.getParentRow()?.getLeafRows().slice(-1)[0].id === row.id;
 
@@ -253,6 +270,11 @@ export const Table = <TData, TValue>({
                           "border-light-dark",
                         row.getIsExpanded() && "border-b-transparent",
                         isLastNestedRow && "border-b-light-dark",
+                        getRowClassName?.(
+                          row.original,
+                          rowIndex,
+                          originalRowsToRender,
+                        ),
                       )}
                       onClick={(e) => {
                         // Don't handle click if it came from a Link inside
