@@ -50,6 +50,10 @@ query GetProposal($id: String!) {
       abstainVotes
       startTimestamp
       endTimestamp
+      queuedTimestamp
+      executedTimestamp
+      queuedTxHash
+      executedTxHash
       calldatas
       targets
       values

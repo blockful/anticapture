@@ -15,7 +15,7 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 import { AmountFilter } from "@/shared/components/design-system/table/filters/AmountFilter";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import { Button } from "@/shared/components/ui/button";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import { fetchAddressFromEnsName } from "@/shared/utils/ens";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 

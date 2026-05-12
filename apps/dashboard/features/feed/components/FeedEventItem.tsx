@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import type { Address } from "viem";
-import { formatUnits, zeroAddress } from "viem";
+import { formatUnits, isAddressEqual, zeroAddress } from "viem";
 
 import {
   type FeedItem,
@@ -133,6 +133,7 @@ const AddressButton = ({
   onRowClick?: (address: string, entityType: EntityType) => void;
 }) => (
   <button
+    data-testid="feed-address-button"
     className="group inline-flex cursor-pointer items-center gap-1.5 align-middle"
     onClick={() => onRowClick?.(address, entityType)}
   >
@@ -384,7 +385,11 @@ export const FeedEventItem = ({
         if (!delegationMetadata) return null;
         const hasRedelegation =
           delegationMetadata.previousDelegate !== null &&
-          delegationMetadata.previousDelegate !== zeroAddress;
+          !isAddressEqual(delegationMetadata.previousDelegate, zeroAddress) &&
+          !isAddressEqual(
+            delegationMetadata.previousDelegate,
+            delegationMetadata.delegator,
+          );
 
         return (
           <div className="leading-relaxed">

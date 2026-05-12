@@ -1,14 +1,14 @@
+import { useGetAddresses } from "@anticapture/client/hooks";
 import { zeroAddress, type Address } from "viem";
 
 import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 import { useTopAccountsChartData } from "@/features/dao-overview/hooks/useTopAccountsChartData";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 
-jest.mock("@/shared/hooks/useEnsData", () => ({
-  useMultipleEnsData: jest.fn(),
+jest.mock("@anticapture/client/hooks", () => ({
+  useGetAddresses: jest.fn(),
 }));
 
-const mockUseMultipleEnsData = jest.mocked(useMultipleEnsData);
+const mockUseGetAddresses = jest.mocked(useGetAddresses);
 
 const HOLDER_ADDRESS: Address = "0x1111111111111111111111111111111111111111";
 const DELEGATE_ADDRESS: Address = "0x2222222222222222222222222222222222222222";
@@ -27,13 +27,28 @@ function createChartData(
   };
 }
 
+function mockGetAddressesResult(
+  results: Array<{ address: string; ensName?: string }>,
+) {
+  return {
+    data: {
+      results: results.map(({ address, ensName }) => ({
+        address,
+        isContract: false,
+        arkham: null,
+        ens: ensName
+          ? { name: ensName, avatar: null, banner: null }
+          : { name: null, avatar: null, banner: null },
+      })),
+    },
+    isLoading: false,
+    error: null,
+  } as unknown as ReturnType<typeof useGetAddresses>;
+}
+
 describe("useTopAccountsChartData", () => {
   beforeEach(() => {
-    mockUseMultipleEnsData.mockReturnValue({
-      data: {},
-      error: undefined,
-      isLoading: false,
-    });
+    mockUseGetAddresses.mockReturnValue(mockGetAddressesResult([]));
   });
 
   afterEach(() => {
@@ -49,7 +64,12 @@ describe("useTopAccountsChartData", () => {
 
     const result = useTopAccountsChartData({ chartData });
 
-    expect(mockUseMultipleEnsData).toHaveBeenCalledWith([HOLDER_ADDRESS]);
+    expect(mockUseGetAddresses).toHaveBeenCalledWith(
+      { addresses: [HOLDER_ADDRESS] },
+      expect.objectContaining({
+        query: expect.objectContaining({ enabled: true }),
+      }),
+    );
     expect(result).toEqual({
       data: [
         {
@@ -69,22 +89,12 @@ describe("useTopAccountsChartData", () => {
   });
 
   test("enriches non-zero delegates with ENS names", () => {
-    mockUseMultipleEnsData.mockReturnValue({
-      data: {
-        [HOLDER_ADDRESS]: {
-          address: HOLDER_ADDRESS,
-          ens: "holder.eth",
-          avatarUrl: null,
-        },
-        [DELEGATE_ADDRESS]: {
-          address: DELEGATE_ADDRESS,
-          ens: "delegate.eth",
-          avatarUrl: null,
-        },
-      },
-      error: undefined,
-      isLoading: false,
-    });
+    mockUseGetAddresses.mockReturnValue(
+      mockGetAddressesResult([
+        { address: HOLDER_ADDRESS, ensName: "holder.eth" },
+        { address: DELEGATE_ADDRESS, ensName: "delegate.eth" },
+      ]),
+    );
 
     const chartData = [
       createChartData({
@@ -96,10 +106,12 @@ describe("useTopAccountsChartData", () => {
 
     const result = useTopAccountsChartData({ chartData });
 
-    expect(mockUseMultipleEnsData).toHaveBeenCalledWith([
-      HOLDER_ADDRESS,
-      DELEGATE_ADDRESS,
-    ]);
+    expect(mockUseGetAddresses).toHaveBeenCalledWith(
+      { addresses: [HOLDER_ADDRESS, DELEGATE_ADDRESS] },
+      expect.objectContaining({
+        query: expect.objectContaining({ enabled: true }),
+      }),
+    );
     expect(result).toEqual({
       data: [
         {

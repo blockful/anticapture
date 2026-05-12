@@ -1326,6 +1326,18 @@ type OnchainProposal {
   """Proposal end timestamp in Unix seconds."""
   endTimestamp: Int!
 
+  """Timestamp (Unix seconds) when the proposal was queued, or null if it never was."""
+  queuedTimestamp: Int
+
+  """Timestamp (Unix seconds) when the proposal was executed, or null if it never was."""
+  executedTimestamp: Int
+
+  """Transaction hash of the queue event, or null if the proposal was never queued."""
+  queuedTxHash: String
+
+  """Transaction hash of the execute event, or null if the proposal was never executed."""
+  executedTxHash: String
+
   """Required quorum encoded as a decimal string."""
   quorum: String!
 
