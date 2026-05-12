@@ -11,13 +11,6 @@ import { exporter } from "./instrumentation";
 import { validateAuthToken } from "./auth";
 import { httpRequestDuration } from "./metrics";
 
-function resolveClientSource(header: string | undefined): string {
-  if (header === "notification-system") return "notification-system";
-  if (header === "anticapture-frontend") return "anticapture-frontend";
-  if (header === "anticapture-mcp") return "anticapture-mcp";
-  return "other";
-}
-
 const bootstrap = async () => {
   const mesh = await getMesh(await config);
 
@@ -48,17 +41,16 @@ const bootstrap = async () => {
     if (!validateAuthToken(req, res)) return;
 
     const start = performance.now();
-    const clientSource = resolveClientSource(
-      req.headers["x-client-source"] as string | undefined,
-    );
 
     res.on("finish", () => {
       const duration = (performance.now() - start) / 1000;
       const labels = {
         http_request_method: req.method ?? "UNKNOWN",
-        http_route: req.url ? new URL(req.url, "http://localhost").pathname : "/",
+        http_route: req.url
+          ? new URL(req.url, "http://localhost").pathname
+          : "/",
         http_response_status_code: res.statusCode,
-        client_source: clientSource,
+        client_source: req.headers["x-client-source"] ?? "other",
       };
       httpRequestDuration.record(duration, labels);
     });
