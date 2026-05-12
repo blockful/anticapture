@@ -159,6 +159,11 @@
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]
+    },
+    "@anticapture/relayer#dev:fork": {
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
     }
   }
 }
