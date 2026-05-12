@@ -290,6 +290,12 @@ export const VotingModal = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
+            {isGaslessEligible && comment.trim().length > 0 && (
+              <p className="text-warning text-xs">
+                Adding a comment requires a wallet transaction (gas fee). Votes
+                without comments are gasless.
+              </p>
+            )}
           </div>
         </>
       )}
