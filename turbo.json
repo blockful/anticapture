@@ -95,6 +95,38 @@
       "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
     },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BASE_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "NEXT_PUBLIC_WC_PROJECT_ID"
+      ]
+    },
+    "@anticapture/dashboard#test:e2e:headed": {
+      "cache": false,
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BASE_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "NEXT_PUBLIC_WC_PROJECT_ID"
+      ]
+    },
+    "@anticapture/dashboard#test:e2e:ui": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": [
+        "CI",
+        "PLAYWRIGHT_BASE_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "NEXT_PUBLIC_WC_PROJECT_ID"
+      ]
+    },
     "codegen": {
       "outputs": ["generated/**"]
     },

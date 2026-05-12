@@ -15,18 +15,18 @@ jest.mock("@anticapture/client", () => ({
 
 function buildOnchainProposal(id: string): OnchainProposal {
   return {
-    abstainVotes: 0n,
-    againstVotes: 0n,
+    abstainVotes: "0",
+    againstVotes: "0",
     calldatas: [],
     daoId: "ENS",
     description: "",
     endBlock: 2,
     endTimestamp: 2,
-    forVotes: 0n,
+    forVotes: "0",
     id,
     proposalType: null,
     proposerAccountId: "0x0000000000000000000000000000000000000000",
-    quorum: 0n,
+    quorum: "0",
     startBlock: 1,
     startTimestamp: 1,
     status: "ACTIVE",
