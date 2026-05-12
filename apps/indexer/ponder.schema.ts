@@ -85,6 +85,10 @@ export const votingPowerHistory = onchainTable(
     pk: primaryKey({
       columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
+    votingPowerHistoryAccountTimestampIdx: index().on(
+      table.accountId,
+      table.timestamp,
+    ),
   }),
 );
 
@@ -439,7 +443,6 @@ export const eventTypeEnum = onchainEnum("event_type", [
   "PROPOSAL",
   "PROPOSAL_EXTENDED",
   "DELEGATION",
-  "DELEGATION_VOTES_CHANGED",
   "TRANSFER",
 ]);
 

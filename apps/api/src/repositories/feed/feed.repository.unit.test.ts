@@ -6,12 +6,12 @@ import { zeroAddress } from "viem";
 import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
 import {
-  accountPower,
   delegation,
   feedEvent,
   proposalsOnchain,
   transfer,
   votesOnchain,
+  votingPowerHistory,
 } from "@/database/schema";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { FeedRequest } from "@/mappers";
@@ -37,7 +37,6 @@ const defaultThresholds = (
   [FeedEventType.VOTE]: 0n,
   [FeedEventType.DELEGATION]: 0n,
   [FeedEventType.TRANSFER]: 0n,
-  // [FeedEventType.DELEGATION_VOTES_CHANGED]: 0n,
   [FeedEventType.PROPOSAL]: 0n,
   [FeedEventType.PROPOSAL_EXTENDED]: 0n,
   ...overrides,
@@ -78,6 +77,11 @@ describe("FeedRepository", () => {
 
   beforeEach(async () => {
     await db.delete(feedEvent);
+    await db.delete(votesOnchain);
+    await db.delete(proposalsOnchain);
+    await db.delete(delegation);
+    await db.delete(transfer);
+    await db.delete(votingPowerHistory);
   });
 
   describe("getFeedEvents", () => {
@@ -343,11 +347,31 @@ describe("FeedRepository", () => {
 
     it("should synthesize metadata for PROPOSAL events from related tables", async () => {
       const proposerAccountId = zeroAddress;
-      await db.insert(accountPower).values({
-        accountId: proposerAccountId,
-        daoId: "ENS",
-        votingPower: 12345n,
-      });
+      const proposalTimestamp = 1700000000n;
+      // Seed two votingPowerHistory rows: one before the proposal (should be
+      // picked), one after (must be ignored).
+      await db.insert(votingPowerHistory).values([
+        {
+          transactionHash: "0xprior",
+          daoId: "ENS",
+          accountId: proposerAccountId,
+          votingPower: 12345n,
+          delta: 12345n,
+          deltaMod: 12345n,
+          timestamp: proposalTimestamp - 100n,
+          logIndex: 0,
+        },
+        {
+          transactionHash: "0xlater",
+          daoId: "ENS",
+          accountId: proposerAccountId,
+          votingPower: 999999n,
+          delta: 987654n,
+          deltaMod: 987654n,
+          timestamp: proposalTimestamp + 100n,
+          logIndex: 0,
+        },
+      ]);
       await db.insert(proposalsOnchain).values({
         id: "42",
         txHash: "0xabc123",
@@ -361,7 +385,7 @@ describe("FeedRepository", () => {
         endBlock: 100,
         title: "Test Proposal",
         description: "desc",
-        timestamp: 1700000000n,
+        timestamp: proposalTimestamp,
         endTimestamp: 1700001000n,
         status: "ACTIVE",
       });
@@ -383,6 +407,43 @@ describe("FeedRepository", () => {
         proposer: proposerAccountId,
         votingPower: "12345",
         title: "Test Proposal",
+      });
+    });
+
+    it("should fall back to '0' for PROPOSAL voting power when no history exists", async () => {
+      const proposerAccountId = zeroAddress;
+      await db.insert(proposalsOnchain).values({
+        id: "43",
+        txHash: "0xabc123",
+        daoId: "ENS",
+        proposerAccountId,
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
+        startBlock: 0,
+        endBlock: 100,
+        title: "No History",
+        description: "desc",
+        timestamp: 1700000000n,
+        endTimestamp: 1700001000n,
+        status: "ACTIVE",
+      });
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 0,
+          type: "PROPOSAL",
+          proposalId: "43",
+        }),
+      ]);
+
+      const result = await repository.getFeedEvents(
+        defaultFeedParams({ type: [FeedEventType.PROPOSAL] }),
+        defaultThresholds(),
+      );
+
+      expect(result.items[0]?.metadata).toMatchObject({
+        votingPower: "0",
       });
     });
 

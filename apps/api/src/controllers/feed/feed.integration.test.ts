@@ -6,12 +6,12 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { zeroAddress } from "viem";
 import * as schema from "@/database/schema";
 import {
-  accountPower,
   delegation,
   feedEvent,
   proposalsOnchain,
   transfer,
   votesOnchain,
+  votingPowerHistory,
 } from "@/database/schema";
 import type { Drizzle } from "@/database";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
@@ -58,7 +58,7 @@ beforeEach(async () => {
   await db.delete(proposalsOnchain);
   await db.delete(delegation);
   await db.delete(transfer);
-  await db.delete(accountPower);
+  await db.delete(votingPowerHistory);
   const repo = new FeedRepository(db);
   const service = new FeedService(DaoIdEnum.NOUNS, repo);
   app = new Hono();
@@ -361,12 +361,17 @@ describe("Feed Controller (integration)", () => {
       });
     });
 
-    it("should synthesize PROPOSAL metadata from proposalsOnchain + accountPower", async () => {
+    it("should synthesize PROPOSAL metadata using historical proposer voting power", async () => {
       const proposer = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
-      await db.insert(accountPower).values({
-        accountId: proposer,
+      await db.insert(votingPowerHistory).values({
+        transactionHash: "0xvph",
         daoId: "NOUNS",
+        accountId: proposer,
         votingPower: 99n,
+        delta: 99n,
+        deltaMod: 99n,
+        timestamp: 1699999900n,
+        logIndex: 0,
       });
       await db.insert(proposalsOnchain).values({
         id: "1",
@@ -569,11 +574,6 @@ describe("Feed Controller (integration)", () => {
       const fromAddr = "0x1111111111111111111111111111111111111111";
       const toAddr = "0x2222222222222222222222222222222222222222";
 
-      await db.insert(accountPower).values({
-        accountId: proposer,
-        daoId: "NOUNS",
-        votingPower: 0n,
-      });
       await db.insert(proposalsOnchain).values({
         id: "1",
         txHash: "0xprop",

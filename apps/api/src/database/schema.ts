@@ -92,6 +92,7 @@ export const votingPowerHistory = pgTable(
     primaryKey({
       columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
+    index().on(table.accountId, table.timestamp),
   ],
 );
 
@@ -289,7 +290,6 @@ export const evenTypeEnum = pgEnum("event_type", [
   "PROPOSAL",
   "DELEGATION",
   "TRANSFER",
-  "DELEGATION_VOTES_CHANGED",
   "PROPOSAL_EXTENDED",
 ]);
 

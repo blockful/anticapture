@@ -13,7 +13,6 @@ import {
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 import {
-  accountPower,
   delegation,
   feedEvent,
   proposalsOnchain,
@@ -206,7 +205,7 @@ export class FeedRepository {
         const meta: ProposalMeta = {
           id: p.id,
           proposer: p.proposerAccountId,
-          votingPower: (p.proposerVotingPower ?? 0n).toString(),
+          votingPower: p.proposerVotingPower ?? "0",
           title: p.title,
         };
         return meta;
@@ -296,13 +295,23 @@ export class FeedRepository {
         title: proposalsOnchain.title,
         endBlock: proposalsOnchain.endBlock,
         endTimestamp: proposalsOnchain.endTimestamp,
-        proposerVotingPower: accountPower.votingPower,
+        // Proposer voting power at the moment the proposal was created — the
+        // latest voting_power_history row for the proposer at or before the
+        // proposal's timestamp. Cast to text so the value is a string in both
+        // node-postgres and PGlite. Inline raw column references with
+        // explicit aliases — Drizzle's sql`` template strips table prefixes
+        // for column refs, which makes `timestamp <= timestamp` resolve as
+        // self-comparison inside a correlated subquery.
+        proposerVotingPower: sql<string | null>`(
+          SELECT vph.voting_power::text
+          FROM voting_power_history AS vph
+          WHERE vph.account_id = proposals_onchain.proposer_account_id
+            AND vph.timestamp <= proposals_onchain.timestamp
+          ORDER BY vph.timestamp DESC
+          LIMIT 1
+        )`,
       })
       .from(proposalsOnchain)
-      .leftJoin(
-        accountPower,
-        eq(accountPower.accountId, proposalsOnchain.proposerAccountId),
-      )
       .where(inArray(proposalsOnchain.id, proposalIds));
   }
 
@@ -362,7 +371,9 @@ type ProposalRow = {
   title: string;
   endBlock: number;
   endTimestamp: bigint;
-  proposerVotingPower: bigint | null;
+  // Returned as a string from the scalar subquery (node-postgres serializes
+  // int8 as a string when there's no Drizzle column descriptor to bind it to).
+  proposerVotingPower: string | null;
 };
 
 function buildKeyFilter(

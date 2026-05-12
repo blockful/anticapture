@@ -42,7 +42,6 @@ class SimpleFeedRepository {
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ) {
     const filtered = this.items.filter((e) => {
-      if (e.type === "DELEGATION_VOTES_CHANGED") return false;
       const threshold = valueThresholds[e.type];
       return threshold === undefined || e.value >= threshold;
     });
