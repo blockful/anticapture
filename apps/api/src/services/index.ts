@@ -4,7 +4,6 @@ export * from "./voting-power";
 export * from "./coingecko";
 export * from "./dune";
 export * from "./proposals/onchainProposals";
-export * from "./transactions";
 export * from "./proposals-activity";
 export * from "./last-update";
 export * from "./account-balance";

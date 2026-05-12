@@ -240,36 +240,6 @@ type Query {
     toValue: String
   ): HistoricalBalancesResponse
 
-  """
-  Get transactions with their associated transfers and delegations, with optional filtering and sorting
-  """
-  transactions(
-    """Maximum number of records to return."""
-    limit: Int
-
-    """Number of records to skip before collecting results."""
-    skip: Int
-    orderDirection: OrderDirection = desc
-
-    """Inclusive lower bound for transaction timestamps, in Unix seconds."""
-    fromDate: Int
-
-    """Inclusive upper bound for transaction timestamps, in Unix seconds."""
-    toDate: Int
-    from: String
-    to: String
-    minAmount: String
-    maxAmount: String
-
-    """
-    Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'
-    """
-    affectedSupply: [queryInput_transactions_affectedSupply_items]
-
-    """Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'"""
-    includes: [queryInput_transactions_includes_items]
-  ): TransactionsResponse
-
   """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): LastUpdateResponse
 
@@ -1432,47 +1402,6 @@ enum queryInput_historicalBalances_orderBy {
   delta
 }
 
-"""Paginated transactions with embedded transfer and delegation data."""
-type TransactionsResponse {
-  items: [Transaction]!
-
-  """Total number of matching transactions."""
-  totalCount: Int!
-}
-
-"""Transaction response enriched with transfer and delegation events."""
-type Transaction {
-  """Transaction hash."""
-  transactionHash: String!
-
-  """
-  Sender address derived from the transaction's first child event by log index (transfer.fromAccountId, or delegation.delegatorAccountId when no transfers exist).
-  """
-  from: String
-
-  """
-  Recipient address derived from the transaction's first child event by log index (transfer.toAccountId, or delegation.delegateAccountId when no transfers exist).
-  """
-  to: String
-
-  """Whether the transaction touched a centralized exchange."""
-  isCex: Boolean!
-
-  """Whether the transaction touched a decentralized exchange."""
-  isDex: Boolean!
-
-  """Whether the transaction touched a lending protocol."""
-  isLending: Boolean!
-
-  """Whether the transaction counts toward total tracked supply."""
-  isTotal: Boolean!
-
-  """Transaction timestamp in Unix seconds as a string."""
-  timestamp: String!
-  transfers: [Transfer]!
-  delegations: [TransactionDelegation]!
-}
-
 type Transfer {
   """Transaction hash."""
   transactionHash: String!
@@ -1509,58 +1438,6 @@ type Transfer {
 
   """Whether the transfer counts toward total tracked supply."""
   isTotal: Boolean!
-}
-
-"""Delegation event embedded within a transaction response."""
-type TransactionDelegation {
-  """Transaction hash."""
-  transactionHash: String!
-
-  """DAO identifier."""
-  daoId: String!
-
-  """Delegate address."""
-  delegateAccountId: String!
-
-  """Delegator address."""
-  delegatorAccountId: String!
-
-  """Delegated amount encoded as a decimal string."""
-  delegatedValue: String!
-
-  """Previous delegate address, if one existed."""
-  previousDelegate: String
-
-  """Delegation timestamp in Unix seconds as a string."""
-  timestamp: String!
-
-  """Log index within the transaction receipt."""
-  logIndex: Int!
-
-  """Whether the delegation touched a centralized exchange."""
-  isCex: Boolean!
-
-  """Whether the delegation touched a decentralized exchange."""
-  isDex: Boolean!
-
-  """Whether the delegation touched a lending protocol."""
-  isLending: Boolean!
-
-  """Whether the delegation counts toward total tracked supply."""
-  isTotal: Boolean!
-}
-
-enum queryInput_transactions_affectedSupply_items {
-  CEX
-  DEX
-  LENDING
-  TOTAL
-  UNASSIGNED
-}
-
-enum queryInput_transactions_includes_items {
-  TRANSFER
-  DELEGATION
 }
 
 """Response payload describing the latest update time for a chart."""
