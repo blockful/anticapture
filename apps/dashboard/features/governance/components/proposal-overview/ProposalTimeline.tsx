@@ -75,6 +75,7 @@ export const ProposalTimeline = ({
             date: proposal.queuedTimestamp
               ? formatTimestamp(proposal.queuedTimestamp)
               : undefined,
+            // isQueued guarantees the event occurred; "completed" is correct even when timestamp not yet indexed
             status: proposal.queuedTimestamp
               ? getTimelineItemStatus(proposal.queuedTimestamp)
               : ("completed" as const),
@@ -92,6 +93,7 @@ export const ProposalTimeline = ({
             date: proposal.executedTimestamp
               ? formatTimestamp(proposal.executedTimestamp)
               : undefined,
+            // isExecuted guarantees the event occurred; "completed" is correct even when timestamp not yet indexed
             status: proposal.executedTimestamp
               ? getTimelineItemStatus(proposal.executedTimestamp)
               : ("completed" as const),
