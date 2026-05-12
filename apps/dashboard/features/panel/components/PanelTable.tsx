@@ -232,7 +232,7 @@ export const PanelTable = () => {
         const isFirstPartiallyIndexedRow = !previousRow?.isPartiallyIndexed;
 
         return [
-          "[&_td]:bg-surface-background/60 [&_td]:text-secondary/80",
+          "[&_td]:bg-surface-background/60 [&_td]:text-secondary/80 [&>td:first-child]:bg-surface-background",
           isFirstPartiallyIndexedRow
             ? "[&_td]:border-t [&_td]:border-light-dark"
             : "",
