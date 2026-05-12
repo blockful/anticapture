@@ -1,10 +1,8 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
-import { cn } from "@/shared/utils/cn";
 import {
   DaoCell,
   ChainCell,
@@ -25,7 +23,8 @@ import { DaoIdEnum } from "@/shared/types/daos";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 
 type PanelDao = {
-  dao: string;
+  dao: DaoIdEnum;
+  isPartiallyIndexed: boolean;
 };
 
 type SortValuesRef = React.RefObject<Record<number, number>>;
@@ -45,37 +44,25 @@ const createSortingFn = (ref: SortValuesRef) => {
     (ref.current[rowA.index] ?? 0) - (ref.current[rowB.index] ?? 0);
 };
 
-const TABS = {
-  FULLY_ANALYZED: "fully-analyzed",
-  NOT_REVIEWED: "not-reviewed",
-} as const;
-
-type TabValue = (typeof TABS)[keyof typeof TABS];
-
 export const PanelTable = () => {
-  const [activeTab, setActiveTab] = useState<TabValue>(TABS.FULLY_ANALYZED);
   const costOfAttackSort = useRef<Record<number, number>>({});
   const attackProfitabilitySort = useRef<Record<number, number>>({});
   const activeTokensSort = useRef<Record<number, number>>({});
 
-  const allDaos = Object.values(DaoIdEnum).map((daoId) => ({
-    dao: daoId,
-  }));
-
-  const fullyAnalyzedDaos = allDaos.filter(
-    ({ dao }) => !!daoConfigByDaoId[dao].governanceImplementation,
-  );
-  const notReviewedDaos = allDaos.filter(
-    ({ dao }) => !daoConfigByDaoId[dao].governanceImplementation,
-  );
-
-  const data =
-    activeTab === TABS.FULLY_ANALYZED ? fullyAnalyzedDaos : notReviewedDaos;
+  const allDaos = Object.values(DaoIdEnum)
+    .map((daoId) => ({
+      dao: daoId,
+      isPartiallyIndexed: !daoConfigByDaoId[daoId].governanceImplementation,
+    }))
+    .sort(
+      (daoA, daoB) =>
+        Number(daoA.isPartiallyIndexed) - Number(daoB.isPartiallyIndexed),
+    );
 
   const panelColumns: ColumnDef<PanelDao>[] = [
     {
       accessorKey: "dao",
-      cell: ({ row }) => <DaoCell daoId={row.getValue("dao") as DaoIdEnum} />,
+      cell: ({ row }) => <DaoCell daoId={row.original.dao} />,
       header: () => (
         <>
           <h4 className="text-table-header hidden px-4 py-3 md:block">
@@ -88,13 +75,13 @@ export const PanelTable = () => {
     },
     {
       accessorKey: "chain",
-      cell: ({ row }) => <ChainCell daoId={row.getValue("dao") as DaoIdEnum} />,
+      cell: ({ row }) => <ChainCell daoId={row.original.dao} />,
       header: () => <h4 className="text-table-header">Chain</h4>,
       meta: { columnClassName: "w-[8%]" },
     },
     {
       accessorKey: "stage",
-      cell: ({ row }) => <StageCell daoId={row.getValue("dao") as DaoIdEnum} />,
+      cell: ({ row }) => <StageCell daoId={row.original.dao} />,
       header: () => (
         <div className="w-full justify-end px-0 text-left">
           <Tooltip
@@ -115,12 +102,10 @@ export const PanelTable = () => {
     },
     {
       accessorKey: "riskareas",
-      cell: ({ row }) => (
-        <RiskAreasCell
-          daoId={row.getValue("dao") as DaoIdEnum}
-          disabled={activeTab === TABS.NOT_REVIEWED}
-        />
-      ),
+      cell: ({ row }) => {
+        const { dao: daoId, isPartiallyIndexed } = row.original;
+        return <RiskAreasCell daoId={daoId} disabled={isPartiallyIndexed} />;
+      },
       header: () => (
         <div className="w-full justify-end px-0 text-left lg:px-4">
           <Tooltip
@@ -145,7 +130,7 @@ export const PanelTable = () => {
       accessorKey: "costOfAttack",
       cell: ({ row }) => (
         <CostOfAttackCell
-          daoId={row.getValue("dao") as DaoIdEnum}
+          daoId={row.original.dao}
           onSortValueChange={createSortValueHandler(
             costOfAttackSort,
             row.index,
@@ -167,7 +152,7 @@ export const PanelTable = () => {
       accessorKey: "attackProfitability",
       cell: ({ row }) => (
         <AttackProfitabilityCell
-          daoId={row.getValue("dao") as DaoIdEnum}
+          daoId={row.original.dao}
           onSortValueChange={createSortValueHandler(
             attackProfitabilitySort,
             row.index,
@@ -188,10 +173,11 @@ export const PanelTable = () => {
     {
       accessorKey: "activeTokensInGovernance",
       cell: ({ row }) => {
-        if (activeTab === TABS.FULLY_ANALYZED) {
+        const { dao: daoId, isPartiallyIndexed } = row.original;
+        if (!isPartiallyIndexed) {
           return (
             <ActiveTokensCell
-              daoId={row.getValue("dao") as DaoIdEnum}
+              daoId={daoId}
               onSortValueChange={createSortValueHandler(
                 activeTokensSort,
                 row.index,
@@ -232,48 +218,29 @@ export const PanelTable = () => {
   ];
 
   return (
-    <div className="flex flex-col">
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as TabValue)}
-      >
-        <TabsList className="mb-4 flex border-b border-b-white/10 text-sm">
-          <TabsTrigger
-            value={TABS.FULLY_ANALYZED}
-            className={cn(
-              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 font-medium",
-              "data-[state=active]:text-link",
-              "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
-              "data-[state=active]:after:bg-surface-solid-brand",
-            )}
-          >
-            Fully Analyzed
-            <span className="bg-surface-contrast text-secondary w-6 rounded-md px-1.5 py-0.5">
-              {fullyAnalyzedDaos.length}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger
-            value={TABS.NOT_REVIEWED}
-            className={cn(
-              "text-secondary relative flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-2 font-medium",
-              "data-[state=active]:text-link",
-              "after:absolute after:-bottom-px after:left-0 after:right-0 after:h-px after:bg-transparent after:content-['']",
-              "data-[state=active]:after:bg-surface-solid-brand",
-            )}
-          >
-            Not Reviewed
-            <span className="bg-surface-contrast text-secondary w-6 rounded-md px-1.5 py-0.5">
-              {notReviewedDaos.length}
-            </span>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      <Table
-        columns={panelColumns}
-        data={data}
-        withSorting={true}
-        stickyFirstColumn={true}
-      />
-    </div>
+    <Table
+      columns={panelColumns}
+      data={allDaos}
+      withSorting={true}
+      fillHeight={true}
+      stickyFirstColumn={true}
+      pinRowsToBottom={(row) => row.isPartiallyIndexed}
+      getRowClassName={(row, index, rows) => {
+        const noFirstColumnBorder = "[&>td:first-child]:border-r-0";
+
+        if (!row.isPartiallyIndexed) return noFirstColumnBorder;
+
+        const previousRow = rows[index - 1];
+        const isFirstPartiallyIndexedRow = !previousRow?.isPartiallyIndexed;
+
+        return [
+          noFirstColumnBorder,
+          "[&_td]:bg-surface-background [&_td]:text-secondary/80",
+          isFirstPartiallyIndexedRow
+            ? "[&_td]:border-t [&_td]:border-solid [&_td]:border-light-dark lg:[&_td:first-child]:border-t lg:[&_td:first-child]:border-solid lg:[&_td:first-child]:border-light-dark"
+            : "",
+        ].join(" ");
+      }}
+    />
   );
 };

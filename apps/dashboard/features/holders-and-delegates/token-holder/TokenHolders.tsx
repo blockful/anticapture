@@ -19,7 +19,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
-import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
+import { useGetAddress } from "@anticapture/client/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -39,7 +39,10 @@ interface TokenHolderTableData {
 }
 
 const TypeCell = ({ address }: { address: Address }) => {
-  const { isContract, isLoading: isArkhamLoading } = useArkhamData(address);
+  const { data, isLoading: isArkhamLoading } = useGetAddress(address ?? "0x", {
+    query: { enabled: !!address },
+  });
+  const isContract = data?.isContract ?? null;
 
   if (isArkhamLoading) {
     return (

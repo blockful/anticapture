@@ -7,24 +7,9 @@ import type {
   AccountBalancesPathParamsDaoEnumKey,
   AccountBalancesQueryParams,
 } from "@anticapture/client";
-import type { Address } from "viem";
 import { formatUnits } from "viem";
 import type { TimeInterval } from "@/shared/types/enums";
 import { useMemo } from "react";
-
-export type TokenHolder = {
-  address: Address;
-  delegate: Address;
-  balance: number;
-  tokenId: string;
-  variation: {
-    absoluteChange: number;
-    previousBalance: number;
-    currentBalance: number;
-    percentageChange: number;
-    accountId: Address;
-  };
-};
 
 export const useTokenHolders = (
   daoId: DaoIdEnum,
@@ -110,19 +95,17 @@ export const useTokenHolders = (
     data: data?.pages.flatMap((page) =>
       page.items.map((item) => ({
         ...item,
-        address: item.address as unknown as Address,
-        delegate: item.delegate as unknown as Address,
-        balance: Number(formatUnits(BigInt(item.balance), decimals)),
+        balance: Number(formatUnits(item.balance, decimals)),
         variation: {
-          accountId: item.variation.accountId as unknown as Address,
+          accountId: item.variation.accountId,
           absoluteChange: Number(
-            formatUnits(BigInt(item.variation.absoluteChange), decimals),
+            formatUnits(item.variation.absoluteChange, decimals),
           ),
           previousBalance: Number(
-            formatUnits(BigInt(item.variation.previousBalance), decimals),
+            formatUnits(item.variation.previousBalance, decimals),
           ),
           currentBalance: Number(
-            formatUnits(BigInt(item.variation.currentBalance), decimals),
+            formatUnits(item.variation.currentBalance, decimals),
           ),
           percentageChange:
             item.variation.percentageChange === PERCENTAGE_NO_BASELINE
