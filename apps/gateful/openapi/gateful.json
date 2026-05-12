@@ -717,6 +717,26 @@
             "type": "integer",
             "description": "Proposal end timestamp in Unix seconds."
           },
+          "queuedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was queued, or null if it never was."
+          },
+          "executedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was executed, or null if it never was."
+          },
+          "queuedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the queue event, or null if the proposal was never queued."
+          },
+          "executedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the execute event, or null if the proposal was never executed."
+          },
           "quorum": {
             "type": "string",
             "format": "bigint",
@@ -767,6 +787,10 @@
           "abstainVotes",
           "startTimestamp",
           "endTimestamp",
+          "queuedTimestamp",
+          "executedTimestamp",
+          "queuedTxHash",
+          "executedTxHash",
           "quorum",
           "calldatas",
           "values",

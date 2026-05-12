@@ -1326,16 +1326,24 @@ type OnchainProposal {
   """Proposal end timestamp in Unix seconds."""
   endTimestamp: Int!
 
-  """Timestamp (Unix seconds) when the proposal was queued, or null if it never was."""
+  """
+  Timestamp (Unix seconds) when the proposal was queued, or null if it never was.
+  """
   queuedTimestamp: Int
 
-  """Timestamp (Unix seconds) when the proposal was executed, or null if it never was."""
+  """
+  Timestamp (Unix seconds) when the proposal was executed, or null if it never was.
+  """
   executedTimestamp: Int
 
-  """Transaction hash of the queue event, or null if the proposal was never queued."""
+  """
+  Transaction hash of the queue event, or null if the proposal was never queued.
+  """
   queuedTxHash: String
 
-  """Transaction hash of the execute event, or null if the proposal was never executed."""
+  """
+  Transaction hash of the execute event, or null if the proposal was never executed.
+  """
   executedTxHash: String
 
   """Required quorum encoded as a decimal string."""
@@ -1437,10 +1445,14 @@ type Transaction {
   """Transaction hash."""
   transactionHash: String!
 
-  """Resolved sender address, if known."""
+  """
+  Sender address derived from the transaction's first child event by log index (transfer.fromAccountId, or delegation.delegatorAccountId when no transfers exist).
+  """
   from: String
 
-  """Resolved recipient address, if known."""
+  """
+  Recipient address derived from the transaction's first child event by log index (transfer.toAccountId, or delegation.delegateAccountId when no transfers exist).
+  """
   to: String
 
   """Whether the transaction touched a centralized exchange."""
