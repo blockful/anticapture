@@ -49,6 +49,8 @@ export function GovernorIndexer(blockTime: number) {
       context,
       event.args.id.toString(),
       ProposalStatus.CANCELED,
+      event.block.timestamp,
+      event.transaction.hash,
     );
   });
 
@@ -57,6 +59,8 @@ export function GovernorIndexer(blockTime: number) {
       context,
       event.args.id.toString(),
       ProposalStatus.EXECUTED,
+      event.block.timestamp,
+      event.transaction.hash,
     );
   });
 
@@ -65,6 +69,8 @@ export function GovernorIndexer(blockTime: number) {
       context,
       event.args.id.toString(),
       ProposalStatus.QUEUED,
+      event.block.timestamp,
+      event.transaction.hash,
     );
   });
 
@@ -73,6 +79,8 @@ export function GovernorIndexer(blockTime: number) {
       context,
       event.args.id.toString(),
       ProposalStatus.VETOED,
+      event.block.timestamp,
+      event.transaction.hash,
     );
   });
 
