@@ -36,6 +36,40 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
+## E2E Tests (Playwright)
+
+Tests run against **live services** — feature data is not mocked.
+
+### Prerequisites
+
+The following environment variables must point to reachable services:
+
+| Variable                  | Purpose                                   |
+| ------------------------- | ----------------------------------------- |
+| `NEXT_PUBLIC_BASE_URL`    | GraphQL gateway URL (aggregates DAO data) |
+| `NEXT_PUBLIC_GATEFUL_URL` | Gateful feature-flag service URL          |
+
+Analytics and noise requests may be blocked, but GraphQL and Gateful calls must be live.
+
+Optionally set `PLAYWRIGHT_BASE_URL` to override the default `http://localhost:3000` target.
+
+### Running E2E Tests
+
+```bash
+# Headless (default) — starts dev server automatically
+pnpm dashboard test:e2e
+
+# Headed browser (watch mode)
+pnpm dashboard test:e2e:headed
+
+# Interactive UI mode
+pnpm dashboard test:e2e:ui
+```
+
+Tests live in `e2e/`. Coverage: Panel (`/`), DAO Overview (`/ens`), Holders & Delegates (`/ens/holders-and-delegates`), Proposals (`/ens/proposals`), Activity Feed (`/ens/activity-feed`), and mobile smoke tests at 390×844.
+
+Live upstream outages or missing ENS data fail clearly rather than silently pass with mocked fallbacks.
+
 ## Deploy Anticapture on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
