@@ -15,6 +15,7 @@ import {
   DrawerContent,
   DrawerHeader,
 } from "@/shared/components/";
+import { Checkbox } from "@/shared/components/design-system/form/fields/checkbox/Checkbox";
 import { RadioButton } from "@/shared/components/design-system/form/fields";
 import { Calendar } from "@/shared/components/ui/calendar";
 import {
@@ -79,8 +80,18 @@ export const ActivityFeedFiltersDrawer = ({
     setLocalFilters((prev) => ({ ...prev, relevance }));
   };
 
-  const handleTypeChange = (type: FeedEventType | undefined) => {
-    setLocalFilters((prev) => ({ ...prev, type }));
+  const handleTypeToggle = (type: FeedEventType) => {
+    setLocalFilters((prev) => {
+      const current = prev.type ?? [];
+      const next = current.includes(type)
+        ? current.filter((t) => t !== type)
+        : [...current, type];
+      return { ...prev, type: next.length > 0 ? next : undefined };
+    });
+  };
+
+  const handleClearTypes = () => {
+    setLocalFilters((prev) => ({ ...prev, type: undefined }));
   };
 
   const handleFromDateChange = (value: number | undefined) => {
@@ -188,19 +199,25 @@ export const ActivityFeedFiltersDrawer = ({
               <div className="flex flex-col gap-3">
                 <RadioButton
                   label="All"
-                  checked={localFilters.type === undefined}
-                  onChange={() => handleTypeChange(undefined)}
-                  name="eventType"
+                  checked={!localFilters.type || localFilters.type.length === 0}
+                  onChange={handleClearTypes}
+                  name="eventTypeAll"
                 />
-                {typeOptions.map(({ value, label }) => (
-                  <RadioButton
-                    key={value}
-                    label={label}
-                    checked={localFilters.type === value}
-                    onChange={() => handleTypeChange(value)}
-                    name="eventType"
-                  />
-                ))}
+                {typeOptions.map(({ value, label }) => {
+                  const checked = localFilters.type?.includes(value) ?? false;
+                  return (
+                    <label
+                      key={value}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={() => handleTypeToggle(value)}
+                      />
+                      <span className="text-primary text-sm">{label}</span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
 
