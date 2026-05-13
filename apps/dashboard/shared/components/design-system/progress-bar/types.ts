@@ -27,5 +27,7 @@ export type ProgressBarProps = {
   marker?: ProgressMarker;
   /** Custom fill color (CSS color string). Overrides the default fill when no `segments` are provided. */
   color?: string;
+  /** Pill-shaped (fully rounded) track. */
+  rounded?: boolean;
   className?: string;
 };

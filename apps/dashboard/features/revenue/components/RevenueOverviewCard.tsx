@@ -39,6 +39,7 @@ export const RevenueOverviewCard = () => {
               value={stream.sharePercent}
               color={stream.color}
               size="default"
+              rounded
             />
             <div className="mt-3 flex items-center justify-between">
               <span className="text-secondary text-sm font-medium">

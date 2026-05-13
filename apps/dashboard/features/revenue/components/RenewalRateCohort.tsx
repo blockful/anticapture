@@ -3,7 +3,7 @@ import { ProgressBar } from "@/shared/components/design-system/progress-bar/Prog
 
 import { RENEWAL_RATE_COHORTS } from "@/features/revenue/data/mock";
 
-const COHORT_COLOR = "#fb923c";
+const cohortColor = (rate: number) => (rate >= 65 ? "#15803d" : "#ca8a04");
 
 export const RenewalRateCohort = () => {
   return (
@@ -24,12 +24,16 @@ export const RenewalRateCohort = () => {
               </span>
               <span
                 className="text-sm font-medium"
-                style={{ color: COHORT_COLOR }}
+                style={{ color: cohortColor(cohort.rate) }}
               >
                 {cohort.rate}%
               </span>
             </div>
-            <ProgressBar value={cohort.rate} color={COHORT_COLOR} />
+            <ProgressBar
+              value={cohort.rate}
+              color={cohortColor(cohort.rate)}
+              rounded
+            />
           </div>
         ))}
       </div>

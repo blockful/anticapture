@@ -35,7 +35,7 @@ export const KpiRow = () => {
           className="hidden lg:inline-flex"
         />
 
-        {/* Mobile: Select dropdown */}
+        {/* Mobile: Select dropdown — TODO: replace with DS Select/Dropdown once available */}
         <select
           value={timePeriod}
           onChange={(e) => setTimePeriod(e.target.value)}
@@ -71,17 +71,17 @@ export const KpiRow = () => {
             </p>
             <p className="text-secondary mt-1 flex items-center gap-1 text-sm">
               {kpi.trend === "up" && (
-                <ArrowUp className="size-3.5 text-green-600" />
+                <ArrowUp className="size-3.5 text-[#15803d]" />
               )}
               {kpi.trend === "down" && (
-                <ArrowDown className="size-3.5 text-red-500" />
+                <ArrowDown className="size-3.5 text-[#f87171]" />
               )}
               <span
                 className={
                   kpi.trend === "up"
-                    ? "text-green-600"
+                    ? "text-[#15803d]"
                     : kpi.trend === "down"
-                      ? "text-red-500"
+                      ? "text-[#f87171]"
                       : "text-secondary"
                 }
               >

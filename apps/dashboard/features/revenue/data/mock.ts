@@ -274,7 +274,7 @@ export const NEW_USERS_SERIES = {
         1_150, 1_100, 1_050, 1_000, 980, 950, 920, 900, 880, 850, 820, 800,
         650, 600, 550,
       ],
-      color: "#7c3aed",
+      color: "#15803d",
     },
   ],
   lineSeries: [
@@ -322,7 +322,7 @@ export const UPCOMING_EXPIRATIONS_SERIES = {
         460, 440, 430, 420, 400, 390, 380, 370, 360, 350, 340, 330,
         300, 280, 260,
       ],
-      color: "#fb923c",
+      color: "#ca8a04",
     },
     {
       name: "Renewed twice",
@@ -335,7 +335,7 @@ export const UPCOMING_EXPIRATIONS_SERIES = {
         250, 240, 230, 220, 215, 210, 200, 195, 190, 185, 180, 175,
         160, 150, 140,
       ],
-      color: "#a855f7",
+      color: "#15803d",
     },
     {
       name: "Renewed 3+ times",
@@ -348,7 +348,7 @@ export const UPCOMING_EXPIRATIONS_SERIES = {
         145, 140, 135, 130, 125, 120, 118, 115, 110, 108, 105, 100,
         92, 85, 80,
       ],
-      color: "#15803d",
+      color: "#0080bc",
     },
   ],
 };

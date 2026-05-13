@@ -11,7 +11,7 @@ export const Card = ({ children, className, ...rest }: CardProps) => {
   return (
     <div
       className={cn(
-        "border-border-default bg-surface-default rounded-lg border",
+        "border-border-default bg-surface-default rounded-lg border dark:rounded-none",
         className,
       )}
       {...rest}

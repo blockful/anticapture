@@ -25,6 +25,7 @@ export const ProgressBar = ({
   size = "default",
   marker,
   color,
+  rounded = false,
   className,
 }: ProgressBarProps) => {
   const isRow = labelPosition === "left" || labelPosition === "right";
@@ -44,6 +45,7 @@ export const ProgressBar = ({
         className={cn(
           "bg-surface-hover w-full overflow-hidden",
           trackHeightStyles[size],
+          rounded && "rounded-full",
         )}
       >
         {segments ? (
