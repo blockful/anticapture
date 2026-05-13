@@ -29,7 +29,8 @@ const getForwardHeaders = (request: NextRequest) => {
     headers.set("content-type", contentType);
   }
 
-  headers.set("x-client-source", "anticapture-frontend");
+  const clientSource = request.headers.get("x-client-source");
+  headers.set("x-client-source", clientSource ?? "anticapture-dashboard");
 
   return headers;
 };

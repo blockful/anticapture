@@ -58,6 +58,40 @@ function mergeAddressEnrichmentPaths(doc: OpenAPIObject): PathsObject {
   return paths;
 }
 
+/**
+ * Relayers across DAOs share a single contract, so one fetched spec
+ * is enough — the dao enum comes straight from the configured map.
+ */
+function mergeRelayerPaths(doc: OpenAPIObject, daos: string[]): PathsObject {
+  if (!doc.paths) return {};
+
+  const daoParam: ParameterObject = {
+    name: "dao",
+    in: "path",
+    required: true,
+    schema: { type: "string", enum: [...daos].sort() },
+    description: "DAO identifier",
+  };
+
+  const isRelayerPath = (path: string) =>
+    path === "/relay" ||
+    path.startsWith("/relay/") ||
+    path === "/config" ||
+    path === "/rate-limit" ||
+    path.startsWith("/rate-limit/");
+
+  const paths: PathsObject = {};
+  for (const [path, pathItem] of Object.entries(doc.paths)) {
+    if (!isRelayerPath(path)) {
+      continue;
+    }
+    const item: PathItemObject = { ...pathItem };
+    item.parameters = [daoParam, ...(item.parameters ?? [])];
+    paths[`/{dao}${path}`] = item;
+  }
+  return paths;
+}
+
 function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
   const paths: PathsObject = {};
 
@@ -104,13 +138,16 @@ export async function mergeUpstreamDocs(
   ownSpec: OpenAPIObject,
   daoApis: Map<string, string>,
   addressEnrichmentUrl?: string,
+  daoRelayers?: Map<string, string>,
 ): Promise<OpenAPIObject> {
   const entries = Array.from(daoApis.entries());
-  const [results, addressEnrichmentDoc] = await Promise.all([
+  const relayerEntries = Array.from(daoRelayers?.entries() ?? []);
+  const [results, addressEnrichmentDoc, relayerResults] = await Promise.all([
     Promise.all(entries.map(([name, url]) => fetchDoc(name, url))),
     addressEnrichmentUrl
       ? fetchDoc("address-enrichment", addressEnrichmentUrl, "/docs/json")
       : Promise.resolve(null),
+    Promise.all(relayerEntries.map(([name, url]) => fetchDoc(name, url))),
   ]);
 
   // Keep only successful fetches, with matching names
@@ -124,9 +161,16 @@ export async function mergeUpstreamDocs(
     }
   }
 
-  const schemaDocs = addressEnrichmentDoc
-    ? [...docs, addressEnrichmentDoc]
-    : docs;
+  // All relayers share one schema — first reachable spec wins; enum
+  // is the configured DAO set.
+  const relayerDoc = relayerResults.find((r) => r !== null) ?? null;
+  const relayerDaoNames = relayerEntries.map(([name]) => name);
+
+  const schemaDocs = [
+    ...docs,
+    ...(addressEnrichmentDoc ? [addressEnrichmentDoc] : []),
+    ...(relayerDoc ? [relayerDoc] : []),
+  ];
 
   return {
     ...ownSpec,
@@ -136,6 +180,7 @@ export async function mergeUpstreamDocs(
       ...(addressEnrichmentDoc
         ? mergeAddressEnrichmentPaths(addressEnrichmentDoc)
         : {}),
+      ...(relayerDoc ? mergeRelayerPaths(relayerDoc, relayerDaoNames) : {}),
     },
     components: {
       ...ownSpec.components,
@@ -155,12 +200,14 @@ export function storeOpenApiSpec(
   daoApis: Map<string, string>,
   addressEnrichmentUrl?: string,
   outputPath = join(process.cwd(), "openapi", "gateful.json"),
+  daoRelayers?: Map<string, string>,
 ): () => Promise<OpenAPIObject> {
   return async () => {
     const spec = await mergeUpstreamDocs(
       ownSpec,
       daoApis,
       addressEnrichmentUrl,
+      daoRelayers,
     );
 
     try {

@@ -6,7 +6,6 @@ export type {
 } from "@/features/holders-and-delegates/hooks/types";
 export { useDelegates } from "@/features/holders-and-delegates/hooks/useDelegates";
 export { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
-export type { TokenHolder } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 export { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 export {
   useDelegateDelegationHistory,

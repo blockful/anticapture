@@ -14,10 +14,6 @@ import { setClientConfig } from "@anticapture/client";
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
 import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 
-setClientConfig({
-  defaultHeaders: { "x-client-source": "anticapture-frontend" },
-});
-
 const queryClient = new QueryClient();
 
 // Apollo Client setup
@@ -27,7 +23,21 @@ export const apolloClient = new ApolloClient({
   queryDeduplication: false,
 });
 
-export const GlobalProviders = ({ children }: { children: ReactNode }) => {
+export const GlobalProviders = ({
+  children,
+  isWhitelabel = false,
+}: {
+  children: ReactNode;
+  isWhitelabel?: boolean;
+}) => {
+  setClientConfig({
+    defaultHeaders: {
+      "x-client-source": isWhitelabel
+        ? "anticapture-whitelabel"
+        : "anticapture-dashboard",
+    },
+  });
+
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>

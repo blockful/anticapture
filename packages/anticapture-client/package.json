@@ -1,6 +1,6 @@
 {
   "name": "@anticapture/client",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": {
     "url": "git+https://github.com/blockful/anticapture.git"
   },
@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "kubb generate --config kubb.config.ts --watch",
     "codegen": "kubb --config kubb.config.ts",
+    "mcp": "tsx mcp-server.ts",
+    "mcp-http": "tsx mcp-server-http.ts",
     "build": "tsup",
     "clean": "rm -rf node_modules dist generated *.tsbuildinfo",
     "lint": "eslint .",
@@ -28,6 +30,11 @@
       "types": "./dist/hooks.d.ts",
       "import": "./dist/hooks.js",
       "default": "./dist/hooks.js"
+    },
+    "./msw": {
+      "types": "./dist/msw.d.ts",
+      "import": "./dist/msw.js",
+      "default": "./dist/msw.js"
     }
   },
   "files": [
@@ -40,9 +47,14 @@
     "@kubb/cli": "^4.37.2",
     "@kubb/core": "^4.37.2",
     "@kubb/plugin-client": "^4.37.2",
+    "@kubb/plugin-mcp": "^4.37.5",
+    "@kubb/plugin-faker": "^4.37.2",
+    "@kubb/plugin-msw": "^4.37.2",
     "@kubb/plugin-oas": "^4.37.2",
     "@kubb/plugin-react-query": "^4.37.2",
     "@kubb/plugin-ts": "^4.37.2",
+    "@kubb/plugin-zod": "^4.37.5",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@tanstack/react-query": "^5.90.21",
     "@types/node": "^20.16.5",
     "react": "19.2.3",
@@ -51,14 +63,24 @@
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.0.0",
+    "msw": "^2.0.0",
     "react": "^19.0.0"
   },
   "peerDependenciesMeta": {
     "@tanstack/react-query": {
       "optional": true
     },
+    "msw": {
+      "optional": true
+    },
     "react": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "pino": "^9.14.0",
+    "tsx": "^4.19.2",
+    "zod": "^4.4.1",
+    "@faker-js/faker": "^9.0.0"
   }
 }
