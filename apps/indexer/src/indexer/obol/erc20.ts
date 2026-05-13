@@ -13,7 +13,7 @@ import {
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
-import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet } from "@/eventHandlers/shared";
 import {
   MetricTypesEnum,
   BurningAddresses,
@@ -170,23 +170,6 @@ export function ObolTokenIndexer(
     ) {
       await updateCirculatingSupply(context, daoId, address, timestamp);
     }
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.from, event.args.to],
-      {
-        cex: cexAddressSet,
-        dex: dexAddressSet,
-        lending: lendingAddressSet,
-        burning: burningAddressSet,
-      },
-    );
   });
 
   ponder.on(`ObolToken:DelegateChanged`, async ({ event, context }) => {
@@ -203,17 +186,6 @@ export function ObolTokenIndexer(
         logIndex: event.log.logIndex,
       },
       delegationAddressSets,
-    );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegator, event.args.toDelegate], // Addresses to check
     );
   });
 
@@ -233,17 +205,6 @@ export function ObolTokenIndexer(
       event.log.address,
       event.args.newBalance - event.args.previousBalance,
       event.block.timestamp,
-    );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegate], // Address to check
     );
   });
 }

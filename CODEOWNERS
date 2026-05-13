@@ -2,6 +2,8 @@ apps/indexer/ @LeonardoVieira1630 @PedroBinotto @pikonha
 apps/api-gateway/ @LeonardoVieira1630 @PedroBinotto @pikonha
 apps/api/ @LeonardoVieira1630 @PedroBinotto @pikonha
 
-apps/dashboard/ @isadorable-png @brunod-e @pikonha
+apps/dashboard/ @brunod-e @pikonha
+apps/dashboard/**/*.tsx @isadorable-png
+apps/dashboard/**/*.css @isadorable-png
 
 packages/ @pikonha @alextnetto @LeonardoVieira1630 @PedroBinotto @brunod-e

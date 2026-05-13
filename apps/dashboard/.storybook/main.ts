@@ -47,6 +47,11 @@ const config: StorybookConfig = {
         __dirname,
         "../../../packages/graphql-client/generated/hooks.ts",
       ),
+      "@react-native-async-storage/async-storage": false,
+    };
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      "@react-native-async-storage/async-storage": false,
     };
     return config;
   },

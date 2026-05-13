@@ -18,6 +18,10 @@ import {
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
 import { useScreenSize } from "@/shared/hooks";
+import {
+  useGaslessEligibility,
+  useRelayerConfig,
+} from "@/shared/hooks/useGaslessRelayer";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
@@ -102,6 +106,10 @@ export const VotingModal = ({
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
 
+  const { minVotingPower } = useRelayerConfig(daoId);
+  const { isEligible: isGaslessEligible, remaining: voteRemaining } =
+    useGaslessEligibility(daoId, address, "vote");
+
   // Reset state when modal opens to prevent stale data from previous sessions
   useEffect(() => {
     if (isOpen) {
@@ -155,6 +163,8 @@ export const VotingModal = ({
       walletClient,
       setTransactionhash,
       comment,
+      minVotingPower,
+      isGaslessEligible,
     );
     setIsLoading(false);
     if (hash) {
@@ -206,6 +216,8 @@ export const VotingModal = ({
           proposalTitle={proposal?.title as string}
           votingPower={votingPower}
           vote={vote as "for" | "against" | "abstain"}
+          isGaslessEligible={isGaslessEligible}
+          voteRemaining={voteRemaining}
         />
       ) : (
         <>
@@ -278,6 +290,12 @@ export const VotingModal = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
+            {isGaslessEligible && comment.trim().length > 0 && (
+              <p className="text-warning text-xs">
+                Adding a comment requires a wallet transaction (gas fee). Votes
+                without comments are gasless.
+              </p>
+            )}
           </div>
         </>
       )}

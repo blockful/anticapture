@@ -152,7 +152,12 @@ export const WhitelabelSidebar = ({
     >
       {/* Header */}
       <div className="border-border-default relative flex h-[65px] shrink-0 items-center border-b px-2.5 py-2">
-        <div
+        <Link
+          href={getDaoPagePath({
+            daoId,
+            pathname,
+            page: WHITELABEL_ROUTES.proposals,
+          })}
           className={cn(
             "flex flex-1 items-center gap-2 p-1",
             isCollapsed && "justify-center",
@@ -173,7 +178,7 @@ export const WhitelabelSidebar = ({
               {daoConfig.name}
             </span>
           )}
-        </div>
+        </Link>
         <button
           type="button"
           onClick={onToggleCollapse}
