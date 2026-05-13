@@ -70,7 +70,7 @@ export class AccountBalanceRepository {
 
     return {
       items: page,
-      totalCount: totalCount[0]?.count ?? 0,
+      totalCount: Number(totalCount[0]?.count ?? 0),
     };
   }
 
@@ -157,7 +157,7 @@ export class AccountBalanceRepository {
           percentageChange: calculatePercentage(currentBalance, absoluteChange),
         }),
       ),
-      totalCount: totalCount?.count ?? 0,
+      totalCount: Number(totalCount?.count ?? 0),
     };
   }
 
