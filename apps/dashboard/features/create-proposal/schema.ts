@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { isAddress } from "viem";
 
-import { isEnsAddress } from "@/shared/hooks/useEnsData";
+import { isEnsAddress } from "@/shared/utils/ens";
 
 const addressOrEnsSchema = z
   .string()

@@ -4,11 +4,7 @@ import { Address, getAddress, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { delegatedVotesChanged, tokenTransfer } from "@/eventHandlers";
-import {
-  createAddressSet,
-  ensureAccountsExist,
-  handleTransaction,
-} from "@/eventHandlers/shared";
+import { createAddressSet, ensureAccountsExist } from "@/eventHandlers/shared";
 import {
   BurningAddresses,
   CEXAddresses,
@@ -161,17 +157,6 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
     ) {
       await updateCirculatingSupply(context, daoId, address, timestamp);
     }
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.from, event.args.to],
-    );
   });
 
   ponder.on(`SCRToken:DelegateChanged`, async ({ event, context }) => {
@@ -268,20 +253,6 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
           delegationsCount: current.delegationsCount + 1,
         }));
     }
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [
-        ...event.args.newDelegatees.map(({ _delegatee }) => _delegatee),
-        ...event.args.oldDelegatees.map(({ _delegatee }) => _delegatee),
-      ],
-    );
   });
 
   ponder.on(`SCRToken:DelegateVotesChanged`, async ({ event, context }) => {
@@ -300,17 +271,6 @@ export function SCRTokenIndexer(address: Address, decimals: number) {
       event.log.address,
       event.args.newVotes - event.args.previousVotes,
       event.block.timestamp,
-    );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegate], // Address to check
     );
   });
 }

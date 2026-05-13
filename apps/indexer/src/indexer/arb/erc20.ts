@@ -4,7 +4,7 @@ import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { tokenTransfer } from "@/eventHandlers";
-import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet } from "@/eventHandlers/shared";
 import {
   MetricTypesEnum,
   BurningAddresses,
@@ -156,22 +156,5 @@ export function ARBTokenIndexer(address: Address, decimals: number) {
     ) {
       await updateCirculatingSupply(context, daoId, address, timestamp);
     }
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.from, event.args.to],
-      {
-        cex: cexAddressSet,
-        dex: dexAddressSet,
-        lending: lendingAddressSet,
-        burning: burningAddressSet,
-      },
-    );
   });
 }

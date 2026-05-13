@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, ChevronDown } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { useScreenSize } from "@/shared/hooks";
@@ -24,6 +24,10 @@ export const SwitcherDate = ({
   const { isMobile } = useScreenSize();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSelected, setIsSelected] = useState<TimeInterval>(defaultValue);
+
+  useEffect(() => {
+    setIsSelected(defaultValue);
+  }, [defaultValue]);
 
   const activeTimeIntervals = useMemo(() => {
     const intervals = Object.values(TimeInterval);
@@ -96,7 +100,7 @@ export const SwitcherDate = ({
       )}
     </div>
   ) : (
-    <Tabs defaultValue={defaultValue} className="gap-1">
+    <Tabs value={isSelected} className="gap-1">
       <TabsList>
         {activeTimeIntervals.map((interval) => (
           <TabsTrigger
@@ -108,7 +112,7 @@ export const SwitcherDate = ({
                 : "min-w-[84px] px-3 py-1.5",
             )}
             value={interval}
-            onClick={() => setTimeInterval(interval)}
+            onClick={() => handleSelect(interval)}
           >
             {formatInterval(interval)}
           </TabsTrigger>
