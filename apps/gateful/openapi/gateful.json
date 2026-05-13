@@ -2466,10 +2466,10 @@
                           "timelockDelay": {
                             "type": "string"
                           },
-                          "alreadySupportCalldataReview": {
+                          "supportsCalldataReview": {
                             "type": "boolean"
                           },
-                          "supportOffchainData": {
+                          "supportsOffchainData": {
                             "type": "boolean"
                           }
                         },
@@ -2481,8 +2481,8 @@
                           "votingDelay",
                           "votingPeriod",
                           "timelockDelay",
-                          "alreadySupportCalldataReview",
-                          "supportOffchainData"
+                          "supportsCalldataReview",
+                          "supportsOffchainData"
                         ]
                       }
                     },
