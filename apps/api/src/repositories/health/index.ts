@@ -18,6 +18,7 @@ export class HealthRepositoryImpl implements HealthRepository {
     const row = await this.db
       .select({ timestamp: sql<number>`max(${feedEvent.timestamp})` })
       .from(feedEvent);
-    return row[0]?.timestamp ?? null;
+    const raw = row[0]?.timestamp;
+    return raw == null ? null : Number(raw);
   }
 }
