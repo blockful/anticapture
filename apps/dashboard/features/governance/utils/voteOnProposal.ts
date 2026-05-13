@@ -158,8 +158,14 @@ const gaslessVoteHandler =
     return response.transactionHash as `0x${string}`;
   };
 
-function getVoteHandler(daoId: DaoIdEnum, useGasless: boolean): VoteHandler {
-  if (useGasless && daoConfigByDaoId[daoId].gaslessRelayer) {
+function getVoteHandler(
+  daoId: DaoIdEnum,
+  useGasless: boolean,
+  hasComment: boolean,
+): VoteHandler {
+  // Gasless relay uses castVoteBySig which doesn't support vote reasons.
+  // Fall back to direct vote when a comment is present so it isn't silently dropped.
+  if (useGasless && daoConfigByDaoId[daoId].gaslessRelayer && !hasComment) {
     return gaslessVoteHandler(daoId);
   }
   switch (daoId) {
@@ -186,12 +192,13 @@ export const voteOnProposal = async (
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
 
   try {
-    const handler = getVoteHandler(daoId, useGasless);
+    const trimmedComment = comment?.trim() || undefined;
+    const handler = getVoteHandler(daoId, useGasless, !!trimmedComment);
     const hash = await handler(client as VoteClient, {
       proposalId,
       voteNumber,
       account,
-      comment,
+      comment: trimmedComment,
     });
 
     setTransactionhash(hash);
