@@ -107,7 +107,7 @@ describe("Transactions Controller", () => {
       await db.insert(transaction).values(createTransaction());
       await db.insert(transfer).values(createTransfer());
 
-      const res = await app.request("/transactions");
+      const res = await app.request("/transactions?fromDate=1700000000");
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -153,7 +153,7 @@ describe("Transactions Controller", () => {
       await db.insert(transaction).values(createTransaction());
       await db.insert(delegation).values(createDelegation());
 
-      const res = await app.request("/transactions");
+      const res = await app.request("/transactions?fromDate=1700000000");
 
       expect(res.status).toBe(200);
       const body = await res.json();

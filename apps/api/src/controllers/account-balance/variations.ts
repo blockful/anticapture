@@ -1,5 +1,6 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
+import { DaysEnum } from "@/lib/enums";
 import {
   AccountBalanceVariationsByAccountIdRequestQuerySchema,
   AccountBalanceVariationsResponseMapper,
@@ -43,10 +44,13 @@ export function accountBalanceVariations(
     async (context) => {
       const { fromDate, toDate, limit, skip, orderDirection, addresses } =
         context.req.valid("query");
+      const now = Math.floor(Date.now() / 1000);
+      const effectiveFromDate = fromDate ?? now - DaysEnum["90d"];
+      const effectiveToDate = toDate ?? now;
 
       const result = await service.getAccountBalanceVariations(
-        fromDate,
-        toDate,
+        effectiveFromDate,
+        effectiveToDate,
         limit,
         skip,
         orderDirection,
@@ -87,11 +91,14 @@ export function accountBalanceVariations(
     async (context) => {
       const { address } = context.req.valid("param");
       const { fromDate, toDate } = context.req.valid("query");
+      const now = Math.floor(Date.now() / 1000);
+      const effectiveFromDate = fromDate ?? now - DaysEnum["90d"];
+      const effectiveToDate = toDate ?? now;
 
       const result = await service.getAccountBalanceVariationsByAccountId(
         address,
-        fromDate,
-        toDate,
+        effectiveFromDate,
+        effectiveToDate,
       );
 
       return context.json(
