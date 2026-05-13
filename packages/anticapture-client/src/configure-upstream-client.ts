@@ -1,0 +1,14 @@
+import { setConfig } from "@kubb/plugin-client/clients/axios";
+
+export function configureUpstreamClient(): void {
+  const baseURL = process.env["ANTICAPTURE_API_URL"] ?? "http://localhost:4001";
+  const apiKey = process.env["ANTICAPTURE_API_KEY"];
+
+  setConfig({
+    baseURL,
+    headers: {
+      "x-client-source": "anticapture-mcp",
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+    },
+  });
+}

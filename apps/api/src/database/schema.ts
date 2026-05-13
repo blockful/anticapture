@@ -221,6 +221,10 @@ export const proposalsOnchain = pgTable(
     description: drizzle.text().notNull(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
     endTimestamp: bigint("end_timestamp", { mode: "bigint" }).notNull(),
+    queuedTimestamp: bigint("queued_timestamp", { mode: "bigint" }),
+    executedTimestamp: bigint("executed_timestamp", { mode: "bigint" }),
+    queuedTxHash: drizzle.text("queued_tx_hash"),
+    executedTxHash: drizzle.text("executed_tx_hash"),
     status: drizzle.text().notNull(),
     forVotes: bigint("for_votes", { mode: "bigint" }).default(0n).notNull(),
     againstVotes: bigint("against_votes", { mode: "bigint" })
@@ -265,17 +269,6 @@ export const daoMetricsDayBucket = pgTable(
     }),
   ],
 );
-
-export const transaction = pgTable("transaction", (drizzle) => ({
-  transactionHash: drizzle.text("transaction_hash").primaryKey(),
-  fromAddress: drizzle.text("from_address"),
-  toAddress: drizzle.text("to_address"),
-  isCex: drizzle.boolean("is_cex").notNull().default(false),
-  isDex: drizzle.boolean("is_dex").notNull().default(false),
-  isLending: drizzle.boolean("is_lending").notNull().default(false),
-  isTotal: drizzle.boolean("is_total").notNull().default(false),
-  timestamp: bigint({ mode: "bigint" }).notNull(),
-}));
 
 export const tokenPrice = pgTable("token_price", (_drizzle) => ({
   price: bigint({ mode: "bigint" }).notNull(), // price in ETH

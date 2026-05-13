@@ -14,10 +14,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/shared/components/ui/popover";
-import {
-  fetchAddressFromEnsName,
-  isEnsAddress,
-} from "@/shared/hooks/useEnsData";
+import { fetchAddressFromEnsName, isEnsAddress } from "@/shared/utils/ens";
 import { cn } from "@/shared/utils/";
 
 interface AddressFilterProps {

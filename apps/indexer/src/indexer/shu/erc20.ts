@@ -13,7 +13,7 @@ import {
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
-import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet } from "@/eventHandlers/shared";
 import {
   CEXAddresses,
   DEXAddresses,
@@ -150,22 +150,6 @@ export function SHUTokenIndexer(address: Address, decimals: number) {
         event.block.timestamp,
       );
     }
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.from, event.args.to],
-      {
-        cex: cexAddressSet,
-        dex: dexAddressSet,
-        burning: burningAddressSet,
-      },
-    );
   });
 
   ponder.on(`SHUToken:DelegateChanged`, async ({ event, context }) => {
@@ -182,17 +166,6 @@ export function SHUTokenIndexer(address: Address, decimals: number) {
         logIndex: event.log.logIndex,
       },
       delegationAddressSets,
-    );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegator, event.args.toDelegate], // Addresses to check
     );
   });
 
@@ -212,17 +185,6 @@ export function SHUTokenIndexer(address: Address, decimals: number) {
       event.log.address,
       event.args.newVotes - event.args.previousVotes,
       event.block.timestamp,
-    );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegate], // Address to check
     );
   });
 }

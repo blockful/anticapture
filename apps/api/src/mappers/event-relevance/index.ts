@@ -17,6 +17,7 @@ export const EventRelevanceThresholdResponseSchema = z
     threshold: z.string().openapi({
       description: "Threshold value encoded as a decimal string.",
       example: "1000000000000000000",
+      format: "bigint",
     }),
   })
   .openapi("EventRelevanceThresholdResponse", {

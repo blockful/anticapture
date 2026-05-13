@@ -10,7 +10,7 @@ import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
 import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-group/PillTabGroup";
 import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
-import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
+import { SwitcherDate } from "@/shared/components";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
@@ -97,7 +97,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               activeTab={activeTab ?? defaultTab}
               onTabChange={(value) => handleTabChange(value as TabId)}
             />
-            <SwitcherDateMobile
+            <SwitcherDate
               defaultValue={days || defaultDays}
               setTimeInterval={setDays}
             />

@@ -11,6 +11,7 @@ interface InsufficientVPModalProps {
   currentVp: string;
   requiredVp: string;
   onFindDelegate: () => void;
+  onViewDraft: () => void;
 }
 
 export const InsufficientVPModal = ({
@@ -19,14 +20,15 @@ export const InsufficientVPModal = ({
   currentVp,
   requiredVp,
   onFindDelegate,
+  onViewDraft,
 }: InsufficientVPModalProps) => (
   <Modal
     open={open}
     onOpenChange={onOpenChange}
     title="Insufficient voting power"
-    cancelLabel="Cancel"
+    cancelLabel="View draft"
     confirmLabel="Find a delegate"
-    onCancel={() => onOpenChange(false)}
+    onCancel={onViewDraft}
     onConfirm={onFindDelegate}
   >
     <div className="flex flex-col items-center gap-3 py-4">
@@ -35,9 +37,8 @@ export const InsufficientVPModal = ({
         Insufficient voting power
       </h3>
       <p className="text-secondary max-w-sm text-center text-sm leading-5">
-        You don&apos;t have enough voting power to create an ENS proposal. Vote
-        on active proposals, or delegate your tokens to someone who can propose
-        on your behalf.
+        You don&apos;t have enough voting power to submit this proposal. Your
+        draft has been saved.
       </p>
       <div className="border-border-default rounded-base mt-2 flex w-full flex-col gap-2 border p-3 text-sm">
         <div className="flex items-center justify-between">
