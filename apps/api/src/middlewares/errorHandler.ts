@@ -29,7 +29,7 @@ export const errorHandler: ErrorHandler = (err, c) => {
   return c.json(
     {
       error: "Internal Server Error",
-      message: err instanceof Error ? err.message : "Unknown error",
+      message: "Internal Server Error",
     },
     500,
   );

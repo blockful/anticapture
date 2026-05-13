@@ -233,7 +233,7 @@ rateLimiters:
     - id: chainstack
       rules:
         - method: "*"
-          maxCount: 80
+          maxCount: 50
           period: 1s
           waitTime: 30s
 
