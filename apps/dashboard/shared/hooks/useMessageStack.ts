@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { Message } from "@/widgets/MessageStacker";
 
@@ -11,31 +11,33 @@ export const useMessageStack = (messages: Message[]) => {
     new Set(),
   );
   const [isLoaded, setIsLoaded] = useState(false);
-  // Ref so the sync effect doesn't re-run merely because isLoaded changed to true
-  const isLoadedRef = useRef(false);
 
   // Load closed messages from localStorage on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(CLOSED_MESSAGES_KEY);
-      if (stored) {
-        setClosedMessageIds(new Set(JSON.parse(stored)));
+    const loadClosedMessages = () => {
+      try {
+        const stored = localStorage.getItem(CLOSED_MESSAGES_KEY);
+        if (stored) {
+          setClosedMessageIds(new Set(JSON.parse(stored)));
+        }
+      } catch (error) {
+        console.error("Error loading closed messages:", error);
       }
-    } catch (error) {
-      console.error("Error loading closed messages:", error);
-    }
-    isLoadedRef.current = true;
-    setIsLoaded(true);
+      setIsLoaded(true);
+    };
+
+    loadClosedMessages();
   }, []);
 
-  // Save to localStorage whenever closedMessageIds changes (not on the initial load pass)
+  // Save to localStorage whenever closedMessageIds changes
   useEffect(() => {
-    if (!isLoadedRef.current) return;
-    localStorage.setItem(
-      CLOSED_MESSAGES_KEY,
-      JSON.stringify(Array.from(closedMessageIds)),
-    );
-  }, [closedMessageIds]);
+    if (isLoaded) {
+      localStorage.setItem(
+        CLOSED_MESSAGES_KEY,
+        JSON.stringify(Array.from(closedMessageIds)),
+      );
+    }
+  }, [closedMessageIds, isLoaded]);
 
   const handleCloseMessage = useCallback((messageId: string) => {
     setClosedMessageIds((prev) => {
