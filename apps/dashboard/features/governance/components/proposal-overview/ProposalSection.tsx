@@ -7,7 +7,7 @@ import {
 } from "@anticapture/graphql-client/hooks";
 import { ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { useAccount } from "wagmi";
 
 import { GovernanceActionModal } from "@/features/governance/components/modals/GovernanceActionModal";
@@ -67,6 +67,14 @@ export const ProposalSection = ({
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
   const daoEnum = (daoId as string).toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
+
+  // Clear optimistic vote state when the viewer or proposal changes to prevent
+  // a previous session's label from bleeding into a new wallet or proposal.
+  const prevVoteKeyRef = useRef(`${address ?? ""}:${offchainProposalId}`);
+  if (prevVoteKeyRef.current !== `${address ?? ""}:${offchainProposalId}`) {
+    prevVoteKeyRef.current = `${address ?? ""}:${offchainProposalId}`;
+    if (localOffchainVoteLabel !== null) setLocalOffchainVoteLabel(null);
+  }
 
   const handleAddressClick = useCallback((addr: string) => {
     setDrawerAddress(addr);

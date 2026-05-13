@@ -190,6 +190,8 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                offchainHasVoted={snapshotLink ? offchainHasVoted : undefined}
+                offchainVoteLabel={snapshotLink ? offchainVoteLabel : undefined}
               />
             </>
           ) : snapshotLink ? (
