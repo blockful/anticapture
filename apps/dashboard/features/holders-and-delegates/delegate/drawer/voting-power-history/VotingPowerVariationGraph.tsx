@@ -61,11 +61,10 @@ const generateAdaptiveTicks = (chartData: Array<{ timestamp: number }>) => {
   const lastTimestamp = Math.max(...chartData.map((d) => d.timestamp));
   const daysInRange = (lastTimestamp - firstTimestamp) / (1000 * 60 * 60 * 24);
 
-  // Scale month step so we get roughly 5-7 ticks regardless of range length
-  let monthStep = 1;
-  if (daysInRange > 180) monthStep = 2;
-  if (daysInRange > 365) monthStep = 3;
-  if (daysInRange > 730) monthStep = 6;
+  // Derive month step from range so total ticks never exceeds MAX_TICKS
+  const MAX_TICKS = 7;
+  const totalMonths = Math.ceil(daysInRange / 30);
+  const monthStep = Math.max(1, Math.ceil(totalMonths / MAX_TICKS));
 
   const startDate = new Date(firstTimestamp);
   const endDate = new Date(lastTimestamp);

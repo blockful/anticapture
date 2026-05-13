@@ -227,9 +227,11 @@ export const DelegatedSupplyHistory = () => {
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               const data = payload[0];
+              const d = new Date(label as number);
+              const formattedLabel = `${d.toLocaleDateString("en-US", { month: "short" })} '${d.getFullYear().toString().slice(-2)}`;
               return (
                 <div className="border-light-dark bg-surface-default text-primary rounded-lg border px-3 py-2 shadow-lg">
-                  <p className="text-secondary text-xs">{label}</p>
+                  <p className="text-secondary text-xs">{formattedLabel}</p>
                   <p className="text-primary text-sm font-medium">
                     {data.value}%
                   </p>
