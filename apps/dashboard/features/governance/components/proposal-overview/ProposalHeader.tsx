@@ -4,10 +4,12 @@ import type { GetAccountPowerQuery } from "@anticapture/graphql-client";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { Address } from "viem";
 
-import { Button } from "@/shared/components";
+import { BadgeStatus, Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
+import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
 
@@ -30,14 +32,22 @@ const ProposalHeaderAction = ({
   proposalStatus,
   setIsVotingModalOpen,
   isWhitelabel,
+  daoId,
 }: {
   address: string | undefined;
   supportValue: number | undefined;
   proposalStatus: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
   isWhitelabel: boolean;
+  daoId: string;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { isEligible: isGaslessEligible } = useGaslessEligibility(
+    daoIdEnum,
+    address as Address | undefined,
+    "vote",
+  );
 
   if (address) {
     if (supportValue === undefined) {
@@ -49,6 +59,14 @@ const ProposalHeaderAction = ({
           >
             Cast your vote
             <ArrowRight className="size-3.5" />
+            {isGaslessEligible && (
+              <BadgeStatus
+                variant="success"
+                className="bg-success/80 text-inverted"
+              >
+                Free
+              </BadgeStatus>
+            )}
           </Button>
         );
       }
@@ -150,6 +168,7 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                daoId={daoId}
               />
             </>
           ) : snapshotLink ? (
@@ -170,6 +189,7 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                daoId={daoId}
               />
             </>
           ) : (
@@ -195,6 +215,7 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                daoId={daoId}
               />
               {address &&
                 proposalStatus === "succeeded" &&

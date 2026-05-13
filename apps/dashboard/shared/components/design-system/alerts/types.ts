@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export type InlineAlertProps = {
   text: string;
-  variant: "info" | "warning" | "error";
+  variant: "info" | "warning" | "error" | "success";
   className?: string;
 };
 

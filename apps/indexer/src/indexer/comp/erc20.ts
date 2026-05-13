@@ -8,7 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet } from "@/eventHandlers/shared";
 import {
   BurningAddresses,
   CEXAddresses,
@@ -169,29 +169,11 @@ export function COMPTokenIndexer(address: Address, decimals: number) {
     ) {
       await updateCirculatingSupply(context, daoId, address, timestamp);
     }
-
-    if (!to) return;
-
-    // Handle transaction creation/update with flag calculation
-    await handleTransaction(
-      context,
-      hash,
-      from,
-      to,
-      timestamp,
-      [from, to], // Addresses to check
-      {
-        cex: cexAddressSet,
-        dex: dexAddressSet,
-        lending: lendingAddressSet,
-        burning: burningAddressSet,
-      },
-    );
   });
 
   ponder.on(`COMPToken:DelegateChanged`, async ({ event, context }) => {
     const { logIndex, address } = event.log;
-    const { hash, from, to } = event.transaction;
+    const { hash } = event.transaction;
     const { delegator, toDelegate, fromDelegate } = event.args;
     const { timestamp } = event.block;
 
@@ -210,23 +192,11 @@ export function COMPTokenIndexer(address: Address, decimals: number) {
       },
       delegationAddressSets,
     );
-
-    if (!to) return;
-
-    // Handle transaction creation/update with flag calculation
-    await handleTransaction(
-      context,
-      hash,
-      from,
-      to,
-      timestamp,
-      [delegator, toDelegate], // Addresses to check
-    );
   });
 
   ponder.on(`COMPToken:DelegateVotesChanged`, async ({ event, context }) => {
     const { logIndex, address } = event.log;
-    const { hash, from, to } = event.transaction;
+    const { hash } = event.transaction;
     const { delegate, newBalance, previousBalance } = event.args;
     const { timestamp } = event.block;
 
@@ -246,18 +216,6 @@ export function COMPTokenIndexer(address: Address, decimals: number) {
       address,
       newBalance - previousBalance,
       timestamp,
-    );
-
-    if (!to) return;
-
-    // Handle transaction creation/update with flag calculation
-    await handleTransaction(
-      context,
-      hash,
-      from,
-      to,
-      timestamp,
-      [delegate], // Address to check
     );
   });
 }

@@ -64,17 +64,23 @@ export const AccountInteractionsQuerySchema = z
 
 export const AccountInteractionResponseSchema = z
   .object({
-    accountId: z.string().openapi({ description: "Counterparty account ID." }),
+    accountId: z.string().openapi({
+      description: "Counterparty account ID.",
+      format: "ethereum-address",
+    }),
     amountTransferred: z.string().openapi({
       description:
         "Net amount transferred between the requested account and the counterparty.",
+      format: "bigint",
     }),
     totalVolume: z.string().openapi({
       description:
         "Gross transfer volume between the requested account and the counterparty.",
+      format: "bigint",
     }),
     transferCount: z.string().openapi({
       description: "Number of transfers observed for the interaction pair.",
+      format: "bigint",
     }),
   })
   .openapi("AccountInteraction", {

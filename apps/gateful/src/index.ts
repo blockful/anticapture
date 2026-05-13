@@ -18,8 +18,10 @@ import { exporter } from "./instrumentation.js";
 import { logger } from "./logger.js";
 import { cacheMiddleware } from "./middlewares/cache.js";
 import { requestLogger } from "./middlewares/logger.js";
+import { metricsMiddleware } from "./middlewares/metrics.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
+import { relayerProxy } from "./proxy/relayer.js";
 import { addressEnrichment } from "./resolvers/address-enrichment/route.js";
 import { daos } from "./resolvers/daos/route.js";
 import { DaosService } from "./resolvers/daos/service.js";
@@ -43,6 +45,7 @@ app.onError((err, c) => {
 
 app.use("*", cors({ origin: "*" }));
 app.use("*", requestLogger());
+app.use("*", metricsMiddleware());
 
 app.get("/metrics", async (c) => {
   const { body, contentType } = await collectPrometheusMetrics(exporter);
@@ -116,12 +119,20 @@ const getOpenApiSpec = storeOpenApiSpec(
   openApiDocument,
   config.daoApis,
   config.addressEnrichmentUrl,
+  undefined,
+  config.daoRelayers,
 );
+
+getOpenApiSpec().catch((err) => {
+  logger.warn({ err }, "failed to generate OpenAPI spec on startup");
+});
 
 app.get("/docs/json", async (c) => {
   return c.json(await getOpenApiSpec());
 });
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
+
+relayerProxy(app, config.daoRelayers);
 
 // Proxy catch-all (must be last)
 proxy(app, config.daoApis, registry);

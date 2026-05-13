@@ -21,6 +21,11 @@ const mapVariant = {
     color: "text-error",
     bgColor: "bg-error/10",
   },
+  success: {
+    icon: <Info className="text-success size-4" />,
+    color: "text-success",
+    bgColor: "bg-success/10",
+  },
 };
 
 export const InlineAlert = ({

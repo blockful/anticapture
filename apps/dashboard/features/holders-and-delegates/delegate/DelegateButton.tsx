@@ -8,12 +8,13 @@ import { useAccount, useReadContract } from "wagmi";
 
 import { DelegationModal } from "@/features/holders-and-delegates/delegate/DelegationModal";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
-import { Button } from "@/shared/components";
+import { BadgeStatus, Button } from "@/shared/components";
 import type {
   ButtonSize,
   ButtonVariant,
 } from "@/shared/components/design-system/buttons/types";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 const ERC20VotesAbi = [
@@ -44,10 +45,8 @@ export const DelegateButton = ({
   const [waitingForConnection, setWaitingForConnection] = useState(false);
   const [delegationModalOpen, setDelegationModalOpen] = useState(false);
 
-  const daoConfig = daoConfigByDaoId[daoId];
-  const tokenAddress = daoConfig?.daoOverview?.contracts?.token as
-    | Address
-    | undefined;
+  const tokenAddress = daoConfigByDaoId[daoId]?.daoOverview?.contracts
+    ?.token as Address | undefined;
 
   const { data: currentDelegatee, refetch } = useReadContract({
     abi: ERC20VotesAbi,
@@ -56,6 +55,12 @@ export const DelegateButton = ({
     args: userAddress ? [userAddress] : undefined,
     query: { enabled: !!userAddress && !!tokenAddress },
   });
+
+  const { isEligible: isGaslessEligible } = useGaslessEligibility(
+    daoId,
+    userAddress,
+    "delegate",
+  );
 
   const isAlreadyDelegated =
     !!currentDelegatee &&
@@ -96,6 +101,14 @@ export const DelegateButton = ({
     <>
       <Button variant={variant} size={size} onClick={handleClick}>
         Delegate
+        {isGaslessEligible && (
+          <BadgeStatus
+            variant="success"
+            className="bg-success/80 text-inverted"
+          >
+            Free
+          </BadgeStatus>
+        )}
       </Button>
       <DelegationModal
         open={delegationModalOpen}
