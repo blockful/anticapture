@@ -3,15 +3,11 @@ import type { OpenAPIHono } from "@hono/zod-openapi";
 
 import type { DelegationService } from "./service.js";
 
-const SECONDS_PER_DAY = 86_400;
-const DEFAULT_WINDOW_DAYS = 90;
-
 const QuerySchema = z
   .object({
     startDate: z.coerce
       .number()
       .transform(String)
-      .optional()
       .openapi({ description: "Start date (Unix timestamp)" }),
     endDate: z.coerce
       .number()
@@ -24,10 +20,7 @@ const QuerySchema = z
     limit: z.coerce.number().optional().default(10),
   })
   .refine(
-    (data) =>
-      !data.startDate ||
-      !data.endDate ||
-      BigInt(data.startDate) < BigInt(data.endDate),
+    (data) => !data.endDate || BigInt(data.startDate) < BigInt(data.endDate),
     { message: "startDate must be before endDate" },
   );
 
@@ -70,14 +63,8 @@ export function averageDelegation(
     const { startDate, endDate, after, before, orderDirection, limit } =
       c.req.valid("query");
 
-    const effectiveStartDate =
-      startDate ??
-      String(
-        Math.floor(Date.now() / 1000) - DEFAULT_WINDOW_DAYS * SECONDS_PER_DAY,
-      );
-
     const result = await service.getAverageDelegationPercentage({
-      startDate: effectiveStartDate,
+      startDate,
       endDate,
       after,
       before,

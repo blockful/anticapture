@@ -78,13 +78,16 @@ export const AddressResponseSchema = z.object({
 
 export const AddressesRequestSchema = z.object({
   addresses: z
-    .union([
-      AddressSchema.transform((val) => [val]),
+    .preprocess(
+      (val) => {
+        if (val === undefined || val === null) return [];
+        return Array.isArray(val) ? val : [val];
+      },
       z
         .array(AddressSchema)
         .min(1, "At least one address is required")
         .max(100, "Maximum 100 addresses per request"),
-    ])
+    )
     .openapi({
       type: "array",
       items: { type: "string" },

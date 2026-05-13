@@ -39,22 +39,12 @@ describe("average-delegation route", () => {
     vi.restoreAllMocks();
   });
 
-  it("should default to a 90-day window when startDate is missing", async () => {
-    const fetchSpy = global.fetch as unknown as ReturnType<typeof vi.fn>;
+  it("should return 400 when startDate is missing", async () => {
     const res = await app.request(
       "/aggregations/average-delegation-percentage",
     );
 
-    expect(res.status).toBe(200);
-    expect(fetchSpy).toHaveBeenCalled();
-    const calledUrl = String(fetchSpy.mock.calls[0][0]);
-    const startDateParam = new URL(calledUrl).searchParams.get("startDate");
-    expect(startDateParam).not.toBeNull();
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    const ninetyDaysAgo = nowSeconds - 90 * 86_400;
-    const startDateNum = Number(startDateParam);
-    expect(startDateNum).toBeGreaterThanOrEqual(ninetyDaysAgo - 5);
-    expect(startDateNum).toBeLessThanOrEqual(ninetyDaysAgo + 5);
+    expect(res.status).toBe(400);
   });
 
   it("should return 400 when startDate >= endDate", async () => {

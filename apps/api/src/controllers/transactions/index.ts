@@ -1,6 +1,5 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { DaysEnum } from "@/lib/enums";
 import {
   TransactionsRequestSchema,
   TransactionsResponseSchema,
@@ -48,16 +47,13 @@ export function transactions(app: Hono, service: TransactionsService) {
         affectedSupply,
         includes,
       } = context.req.valid("query");
-      const now = Math.floor(Date.now() / 1000);
-      const fromTimestamp = fromDate ?? now - DaysEnum["90d"];
-      const toTimestamp = toDate ?? now;
 
       const result = await service.getTransactions({
         limit,
         skip,
         orderDirection,
-        fromDate: fromTimestamp,
-        toDate: toTimestamp,
+        fromDate,
+        toDate,
         from,
         to,
         minAmount,
