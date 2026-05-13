@@ -8,7 +8,7 @@ import {
   delegatedVotesChanged,
   tokenTransfer,
 } from "@/eventHandlers";
-import { createAddressSet, handleTransaction } from "@/eventHandlers/shared";
+import { createAddressSet } from "@/eventHandlers/shared";
 import {
   BurningAddresses,
   MetricTypesEnum,
@@ -143,17 +143,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
           event.block.timestamp,
         );
       }
-
-      if (!event.transaction.to) return;
-
-      await handleTransaction(
-        context,
-        event.transaction.hash,
-        event.transaction.from,
-        event.transaction.to,
-        event.block.timestamp,
-        [event.args.from, event.args.to],
-      );
     },
   );
 
@@ -194,17 +183,6 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       },
       delegationAddressSets,
     );
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegator, event.args.toDelegate],
-    );
   });
 
   ponder.on(`NounsToken:DelegateVotesChanged`, async ({ event, context }) => {
@@ -216,16 +194,5 @@ export function NounsTokenIndexer(address: Address, decimals: number) {
       timestamp: event.block.timestamp,
       logIndex: event.log.logIndex,
     });
-
-    if (!event.transaction.to) return;
-
-    await handleTransaction(
-      context,
-      event.transaction.hash,
-      event.transaction.from,
-      event.transaction.to,
-      event.block.timestamp,
-      [event.args.delegate],
-    );
   });
 }

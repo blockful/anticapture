@@ -7,7 +7,7 @@ import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
 import { Footer } from "@/shared/components/design-system/footer";
-import { SwitcherDateMobile } from "@/shared/components/switchers/SwitcherDateMobile";
+import { SwitcherDate } from "@/shared/components";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
@@ -90,7 +90,7 @@ function AavePageContent() {
                       />
                     ))}
                   </div>
-                  <SwitcherDateMobile
+                  <SwitcherDate
                     defaultValue={days || defaultDays}
                     setTimeInterval={setDays}
                   />

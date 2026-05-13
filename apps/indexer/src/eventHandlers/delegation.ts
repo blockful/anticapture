@@ -35,13 +35,11 @@ type DelegationAddressSets = {
  * - New `Delegation` record with calculated delegated value and flags
  * - New `AccountBalance` record (if delegator doesn't have one for this token)
  * - New `AccountPower` record (if delegate doesn't have one for this DAO)
- * - New `Transaction` record (if this transaction hasn't been processed)
  *
  * ### Updates:
  * - `Delegation`: Adds to existing delegated value if record already exists
  * - `AccountBalance`: Changes the delegate assignment for the delegator
  * - `AccountPower`: Increments the delegate's delegation count
- * - `Transaction`: Updates transaction flags if record already exists
  */
 export const delegateChanged = async (
   context: Context,

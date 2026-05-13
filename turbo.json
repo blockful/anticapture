@@ -57,6 +57,10 @@
     "clean": {
       "cache": false
     },
+    "//#changeset": {
+      "cache": false,
+      "interactive": true
+    },
     "lint": {
       "inputs": [
         "**/*.ts",
@@ -156,6 +160,11 @@
     },
     "@anticapture/client#mcp-http": {
       "dependsOn": ["@anticapture/client#codegen"],
+      "persistent": true,
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "@anticapture/relayer#dev:fork": {
       "persistent": true,
       "cache": false,
       "passThroughEnv": ["*"]

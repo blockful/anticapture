@@ -1,5 +1,6 @@
 import { Check, Hourglass, Pencil } from "lucide-react";
 
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { SpinIcon } from "@/shared/components/icons/SpinIcon";
 import { cn } from "@/shared/utils";
 
@@ -9,6 +10,8 @@ interface LoadingComponentProps {
   proposalTitle: string;
   votingPower: string;
   vote: "for" | "against" | "abstain";
+  isGaslessEligible?: boolean;
+  voteRemaining?: number | null;
 }
 
 export const LoadingComponent = ({
@@ -17,6 +20,8 @@ export const LoadingComponent = ({
   proposalTitle,
   votingPower,
   vote,
+  isGaslessEligible = false,
+  voteRemaining = null,
 }: LoadingComponentProps) => {
   return (
     <div className="flex flex-col items-start justify-start gap-3">
@@ -69,6 +74,18 @@ export const LoadingComponent = ({
       </div>
 
       <div className="flex w-full flex-col items-start justify-start gap-3 p-4">
+        {isGaslessEligible && voteRemaining !== null && (
+          <InlineAlert
+            variant="success"
+            text={
+              voteRemaining === 1
+                ? "This vote is free! Last one for today — refreshes tomorrow."
+                : `This vote is free! You'll still have ${
+                    voteRemaining - 1
+                  } left to use today.`
+            }
+          />
+        )}
         <div className="border-border-default flex w-full flex-col items-center justify-start gap-3 border p-3">
           {/* Confirm your vote in your wallet */}
           <div className="flex w-full items-center justify-start gap-3">

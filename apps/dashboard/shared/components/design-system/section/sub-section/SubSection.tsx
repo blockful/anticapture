@@ -11,6 +11,7 @@ export const SubSection = ({
   switcherComponent,
   children,
   className = "",
+  contentClassName,
 }: SubSectionProps) => {
   return (
     <>
@@ -22,7 +23,7 @@ export const SubSection = ({
           switcherComponent={switcherComponent}
         />
       </div>
-      <div>{children}</div>
+      <div className={contentClassName}>{children}</div>
     </>
   );
 };

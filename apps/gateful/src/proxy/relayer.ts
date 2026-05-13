@@ -4,15 +4,17 @@ import { proxy as honoProxy } from "hono/proxy";
 const PROXY_TIMEOUT_MS = 30000;
 
 /**
- * Forwards /:dao/relay/* to the per-DAO relayer configured via
- * DAO_RELAYER_<NAME>. Must be registered before the catch-all DAO API
- * proxy so relay traffic isn't swallowed by it.
+ * Forwards /:dao/relay/*, /:dao/config and /:dao/rate-limit/* to the
+ * per-DAO relayer configured via DAO_RELAYER_<NAME>. Must be registered
+ * before the catch-all DAO API proxy so relay traffic isn't swallowed by it.
  */
 export function relayerProxy(
   app: OpenAPIHono,
   daoRelayers: Map<string, string>,
 ) {
   app.all("/:dao{[^/]+}/relay/*", handler);
+  app.all("/:dao{[^/]+}/config", handler);
+  app.all("/:dao{[^/]+}/rate-limit/*", handler);
 
   async function handler(c: Context) {
     const paramDao = c.req.param("dao");
