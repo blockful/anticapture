@@ -115,3 +115,39 @@ export const RevenueNewWalletsResponseSchema = z
 export type RevenueNewWalletsResponse = z.infer<
   typeof RevenueNewWalletsResponseSchema
 >;
+
+export const RevenuePremiumEthItemSchema = z
+  .object({
+    date: z
+      .number()
+      .int()
+      .describe("Month start (Unix timestamp in seconds, UTC)."),
+    baseEth: z
+      .number()
+      .describe("Base registration ETH from temporary premium auctions."),
+    premiumEth: z
+      .number()
+      .describe("Premium ETH from temporary premium auctions."),
+    totalEth: z
+      .number()
+      .describe(
+        "Total ETH (base + premium) from temporary premium auctions in the given month.",
+      ),
+  })
+  .openapi("RevenuePremiumEthItem", {
+    description: "Single premium-ETH datapoint.",
+  });
+
+export const RevenuePremiumEthResponseSchema = z
+  .object({
+    items: z.array(RevenuePremiumEthItemSchema),
+    totalCount: z.number().int().describe("Total number of items returned."),
+  })
+  .openapi("RevenuePremiumEthResponse", {
+    description:
+      "Monthly base/premium/total ETH from temporary premium auctions. Data starts April 2023 (when premium auctions launched).",
+  });
+
+export type RevenuePremiumEthResponse = z.infer<
+  typeof RevenuePremiumEthResponseSchema
+>;

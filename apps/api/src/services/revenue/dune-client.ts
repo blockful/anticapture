@@ -64,6 +64,20 @@ type RawNewWalletsRow = {
   cumulative_wallets: number;
 };
 
+export type RevenuePremiumEthItem = {
+  date: number;
+  baseEth: number;
+  premiumEth: number;
+  totalEth: number;
+};
+
+type RawPremiumEthRow = {
+  date: string;
+  base_eth: number;
+  premium_eth: number;
+  total_eth: number;
+};
+
 export class RevenueDuneClient {
   private readonly cache = new RevenueCache();
 
@@ -99,6 +113,17 @@ export class RevenueDuneClient {
       date: parseDuneMonth(row.date),
       newWallets: row.new_wallets,
       cumulativeWallets: row.cumulative_wallets,
+    }));
+  }
+
+  public async fetchPremiumEth(): Promise<RevenuePremiumEthItem[]> {
+    const data =
+      await this.fetchJson<DuneRowsResponse<RawPremiumEthRow>>("premiumEth");
+    return data.result.rows.map((row) => ({
+      date: parseDuneMonth(row.date),
+      baseEth: row.base_eth,
+      premiumEth: row.premium_eth,
+      totalEth: row.total_eth,
     }));
   }
 

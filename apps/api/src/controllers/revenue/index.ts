@@ -4,6 +4,7 @@ import {
   RevenueActionsResponseSchema,
   RevenueActiveNamesResponseSchema,
   RevenueNewWalletsResponseSchema,
+  RevenuePremiumEthResponseSchema,
   RevenueQuerySchema,
 } from "@/mappers/revenue";
 import { setCacheControl } from "@/middlewares";
@@ -128,6 +129,47 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       }
 
       const rows = await revenueDuneClient.fetchNewWallets();
+      const filtered = filterByRange(rows, fromDate, toDate);
+      const sign = orderDirection === "desc" ? -1 : 1;
+      const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
+
+      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getRevenuePremiumEth",
+      path: "/revenue/premium-eth",
+      summary: "Get monthly base/premium/total ETH from premium auctions",
+      description:
+        "Monthly base/premium/total ETH from temporary premium auctions. Data starts April 2023 (when premium auctions launched).",
+      tags: ["revenue"],
+      middleware: [ensOnly, setCacheControl(60)],
+      request: {
+        query: RevenueQuerySchema,
+      },
+      responses: {
+        200: {
+          description:
+            "Monthly base/premium/total ETH from temporary premium auctions",
+          content: {
+            "application/json": {
+              schema: RevenuePremiumEthResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, orderDirection } = context.req.valid("query");
+
+      if (!revenueDuneClient) {
+        return context.json({ items: [], totalCount: 0 }, 200);
+      }
+
+      const rows = await revenueDuneClient.fetchPremiumEth();
       const filtered = filterByRange(rows, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
