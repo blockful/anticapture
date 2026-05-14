@@ -5,6 +5,7 @@ import {
   QueryInput_VotesOffchainByProposalId_OrderBy,
   useGetOffchainVotesByProposalIdQuery,
 } from "@anticapture/graphql-client/hooks";
+import { useApolloClient } from "@apollo/client";
 import { ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState, useCallback, useMemo, useRef } from "react";
@@ -154,9 +155,19 @@ export const ProposalSection = ({
   const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
   const offchainVoteLabel = localOffchainVoteLabel ?? apiOffchainVoteLabel;
 
-  const handleOffchainVoteSuccess = useCallback((voteLabel: string) => {
-    setLocalOffchainVoteLabel(voteLabel);
-  }, []);
+  const apolloClient = useApolloClient();
+
+  const handleOffchainVoteSuccess = useCallback(
+    (voteLabel: string) => {
+      setLocalOffchainVoteLabel(voteLabel);
+      // Refetch all active off-chain votes queries (user-vote badge + votes table)
+      // so the UI reflects the new vote without requiring a manual page reload.
+      apolloClient.refetchQueries({
+        include: ["GetOffchainVotesByProposalId"],
+      });
+    },
+    [apolloClient],
+  );
 
   const adaptedOffchainProposal: ProposalViewData | null = rawOffchainProposal
     ? {
