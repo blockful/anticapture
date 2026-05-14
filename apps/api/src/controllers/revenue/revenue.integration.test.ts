@@ -23,6 +23,7 @@ import actionsFixture from "@/services/revenue/__fixtures__/actions.json";
 import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.json";
 import newWalletsFixture from "@/services/revenue/__fixtures__/new-wallets.json";
 import premiumEthFixture from "@/services/revenue/__fixtures__/premium-eth.json";
+import renewalFunnelFixture from "@/services/revenue/__fixtures__/renewal-funnel.json";
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
@@ -404,6 +405,118 @@ describe("Revenue Controller", () => {
       };
       expect(body.items.length).toBe(premiumEthFixture.result.rows.length);
       expect(body.items.every((item) => item.date >= jan2020)).toBe(true);
+    });
+  });
+
+  describe("GET /revenue/renewal-funnel", () => {
+    it("returns happy-path data sorted ascending by date with mapped fields", async () => {
+      server.use(
+        http.get(urls.renewalFunnel, () =>
+          HttpResponse.json(renewalFunnelFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/renewal-funnel");
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        items: {
+          date: number;
+          termsExpiring: number;
+          renewedCount: number;
+          churnedCount: number;
+          renewalRatePct: number;
+        }[];
+        totalCount: number;
+      };
+
+      expect(body.totalCount).toBe(renewalFunnelFixture.result.rows.length);
+      expect(body.items).toHaveLength(renewalFunnelFixture.result.rows.length);
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        expect(prev.date).toBeLessThan(curr.date);
+      }
+
+      const first = body.items[0]!;
+      const firstRaw = renewalFunnelFixture.result.rows[0]!;
+      expect(first.termsExpiring).toBe(firstRaw.terms_expiring);
+      expect(first.renewedCount).toBe(firstRaw.renewed_count);
+      expect(first.churnedCount).toBe(firstRaw.churned_count);
+      expect(first.renewalRatePct).toBe(parseFloat(firstRaw.renewal_rate_pct));
+    });
+
+    it("returns 404 when DAO_ID is not ENS", async () => {
+      env.DAO_ID = DaoIdEnum.UNI;
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/renewal-funnel");
+
+      expect(res.status).toBe(404);
+      expect(await res.json()).toEqual({ error: "Not Found" });
+    });
+
+    it("returns empty items when the revenue client is not instantiated", async () => {
+      const app = createTestApp(undefined);
+
+      const res = await app.request("/revenue/renewal-funnel");
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("sorts descending when orderDirection=desc", async () => {
+      server.use(
+        http.get(urls.renewalFunnel, () =>
+          HttpResponse.json(renewalFunnelFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request(
+        "/revenue/renewal-funnel?orderDirection=desc",
+      );
+      const body = (await res.json()) as { items: { date: number }[] };
+
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        expect(prev.date).toBeGreaterThan(curr.date);
+      }
+    });
+
+    it("parses renewal_rate_pct strings with many decimals into finite numbers", async () => {
+      server.use(
+        http.get(urls.renewalFunnel, () =>
+          HttpResponse.json(renewalFunnelFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/renewal-funnel");
+      const body = (await res.json()) as {
+        items: { renewalRatePct: number }[];
+      };
+
+      expect(body.items.length).toBeGreaterThan(0);
+      for (const item of body.items) {
+        expect(typeof item.renewalRatePct).toBe("number");
+        expect(Number.isFinite(item.renewalRatePct)).toBe(true);
+      }
+
+      const highPrecisionRow = renewalFunnelFixture.result.rows.find((row) =>
+        row.renewal_rate_pct.includes("61.7"),
+      )!;
+      const highPrecisionItem = body.items.find(
+        (item) =>
+          item.renewalRatePct === parseFloat(highPrecisionRow.renewal_rate_pct),
+      );
+      expect(highPrecisionItem).toBeDefined();
     });
   });
 });

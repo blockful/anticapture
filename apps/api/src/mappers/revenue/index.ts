@@ -151,3 +151,40 @@ export const RevenuePremiumEthResponseSchema = z
 export type RevenuePremiumEthResponse = z.infer<
   typeof RevenuePremiumEthResponseSchema
 >;
+
+export const RevenueRenewalFunnelItemSchema = z
+  .object({
+    date: z
+      .number()
+      .int()
+      .describe("Expiry month start (Unix timestamp in seconds, UTC)."),
+    termsExpiring: z
+      .number()
+      .describe("Total .eth terms expiring in the given month."),
+    renewedCount: z
+      .number()
+      .describe("Number of expiring terms that were renewed."),
+    churnedCount: z
+      .number()
+      .describe("Number of expiring terms that were not renewed."),
+    renewalRatePct: z
+      .number()
+      .describe("Renewal rate for the month, as a percentage (0-100)."),
+  })
+  .openapi("RevenueRenewalFunnelItem", {
+    description: "Single renewal-funnel datapoint keyed by expiry month.",
+  });
+
+export const RevenueRenewalFunnelResponseSchema = z
+  .object({
+    items: z.array(RevenueRenewalFunnelItemSchema),
+    totalCount: z.number().int().describe("Total number of items returned."),
+  })
+  .openapi("RevenueRenewalFunnelResponse", {
+    description:
+      "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+  });
+
+export type RevenueRenewalFunnelResponse = z.infer<
+  typeof RevenueRenewalFunnelResponseSchema
+>;

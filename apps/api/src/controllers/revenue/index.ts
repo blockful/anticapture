@@ -6,6 +6,7 @@ import {
   RevenueNewWalletsResponseSchema,
   RevenuePremiumEthResponseSchema,
   RevenueQuerySchema,
+  RevenueRenewalFunnelResponseSchema,
 } from "@/mappers/revenue";
 import { setCacheControl } from "@/middlewares";
 import { RevenueDuneClient, ensOnly, filterByRange } from "@/services/revenue";
@@ -170,6 +171,47 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       }
 
       const rows = await revenueDuneClient.fetchPremiumEth();
+      const filtered = filterByRange(rows, fromDate, toDate);
+      const sign = orderDirection === "desc" ? -1 : 1;
+      const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
+
+      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getRevenueRenewalFunnel",
+      path: "/revenue/renewal-funnel",
+      summary: "Get monthly renewal funnel keyed by expiry month",
+      description:
+        "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+      tags: ["revenue"],
+      middleware: [ensOnly, setCacheControl(60)],
+      request: {
+        query: RevenueQuerySchema,
+      },
+      responses: {
+        200: {
+          description:
+            "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+          content: {
+            "application/json": {
+              schema: RevenueRenewalFunnelResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, orderDirection } = context.req.valid("query");
+
+      if (!revenueDuneClient) {
+        return context.json({ items: [], totalCount: 0 }, 200);
+      }
+
+      const rows = await revenueDuneClient.fetchRenewalFunnel();
       const filtered = filterByRange(rows, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
