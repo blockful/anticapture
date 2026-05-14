@@ -24,6 +24,7 @@ import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.jso
 import newWalletsFixture from "@/services/revenue/__fixtures__/new-wallets.json";
 import premiumEthFixture from "@/services/revenue/__fixtures__/premium-eth.json";
 import renewalFunnelFixture from "@/services/revenue/__fixtures__/renewal-funnel.json";
+import revenueByAccountFixture from "@/services/revenue/__fixtures__/revenue-by-account.json";
 import revenueTotalsFixture from "@/services/revenue/__fixtures__/revenue-totals.json";
 import {
   REVENUE_QUERY_KEYS,
@@ -629,6 +630,121 @@ describe("Revenue Controller", () => {
         expect(item.premiumUsd).toBeGreaterThan(0);
         expect(item.premiumEth).toBeGreaterThan(0);
       }
+    });
+  });
+
+  describe("GET /revenue/by-account", () => {
+    it("returns happy-path data sorted ascending by [date, account] with mapped fields", async () => {
+      server.use(
+        http.get(urls.revenueByAccount, () =>
+          HttpResponse.json(revenueByAccountFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/by-account");
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        items: {
+          date: number;
+          account: number;
+          usd: number;
+          eth: number;
+        }[];
+        totalCount: number;
+      };
+
+      expect(body.totalCount).toBe(revenueByAccountFixture.result.rows.length);
+      expect(body.items).toHaveLength(
+        revenueByAccountFixture.result.rows.length,
+      );
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        if (prev.date !== curr.date) {
+          expect(prev.date).toBeLessThan(curr.date);
+        } else {
+          expect(prev.account).toBeLessThanOrEqual(curr.account);
+        }
+      }
+
+      const first = body.items[0]!;
+      const firstRaw = revenueByAccountFixture.result.rows[0]!;
+      expect(first.account).toBe(firstRaw.account);
+      expect(first.usd).toBe(firstRaw.usd);
+      expect(first.eth).toBe(firstRaw.eth);
+    });
+
+    it("returns 404 when DAO_ID is not ENS", async () => {
+      env.DAO_ID = DaoIdEnum.UNI;
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/by-account");
+
+      expect(res.status).toBe(404);
+      expect(await res.json()).toEqual({ error: "Not Found" });
+    });
+
+    it("returns empty items when the revenue client is not instantiated", async () => {
+      const app = createTestApp(undefined);
+
+      const res = await app.request("/revenue/by-account");
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("sorts descending when orderDirection=desc", async () => {
+      server.use(
+        http.get(urls.revenueByAccount, () =>
+          HttpResponse.json(revenueByAccountFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/by-account?orderDirection=desc");
+      const body = (await res.json()) as {
+        items: { date: number; account: number }[];
+      };
+
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        if (prev.date !== curr.date) {
+          expect(prev.date).toBeGreaterThan(curr.date);
+        } else {
+          expect(prev.account).toBeGreaterThanOrEqual(curr.account);
+        }
+      }
+    });
+
+    it("filters by account when ?account=3211 is provided", async () => {
+      server.use(
+        http.get(urls.revenueByAccount, () =>
+          HttpResponse.json(revenueByAccountFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/by-account?account=3211");
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        items: { account: number }[];
+        totalCount: number;
+      };
+
+      const expectedCount = revenueByAccountFixture.result.rows.filter(
+        (row) => row.account === 3211,
+      ).length;
+      expect(body.totalCount).toBe(expectedCount);
+      expect(body.items.length).toBeGreaterThan(0);
+      expect(body.items.every((item) => item.account === 3211)).toBe(true);
     });
   });
 });

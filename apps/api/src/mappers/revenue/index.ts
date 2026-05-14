@@ -238,3 +238,44 @@ export const RevenueTotalsResponseSchema = z
   });
 
 export type RevenueTotalsResponse = z.infer<typeof RevenueTotalsResponseSchema>;
+
+export const RevenueByAccountQuerySchema = RevenueQuerySchema.extend({
+  account: z.coerce.number().int().optional().openapi({
+    type: "integer",
+    description: "Optional account ID to filter rows by.",
+    example: 3211,
+  }),
+}).openapi("RevenueByAccountQuery", {
+  description:
+    "Query params for /revenue/by-account, with optional account filter.",
+});
+
+export type RevenueByAccountQuery = z.infer<typeof RevenueByAccountQuerySchema>;
+
+export const RevenueByAccountItemSchema = z
+  .object({
+    date: z
+      .number()
+      .int()
+      .describe("Month start (Unix timestamp in seconds, UTC)."),
+    account: z.number().int().describe("Controller account ID for the row."),
+    usd: z.number().describe("USD revenue for the account in the given month."),
+    eth: z.number().describe("ETH revenue for the account in the given month."),
+  })
+  .openapi("RevenueByAccountItem", {
+    description: "Single revenue-by-account datapoint.",
+  });
+
+export const RevenueByAccountResponseSchema = z
+  .object({
+    items: z.array(RevenueByAccountItemSchema),
+    totalCount: z.number().int().describe("Total number of items returned."),
+  })
+  .openapi("RevenueByAccountResponse", {
+    description:
+      "Monthly revenue per controller account in USD and ETH, with an optional account filter.",
+  });
+
+export type RevenueByAccountResponse = z.infer<
+  typeof RevenueByAccountResponseSchema
+>;

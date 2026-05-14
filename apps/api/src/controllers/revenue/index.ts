@@ -3,6 +3,8 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import {
   RevenueActionsResponseSchema,
   RevenueActiveNamesResponseSchema,
+  RevenueByAccountQuerySchema,
+  RevenueByAccountResponseSchema,
   RevenueNewWalletsResponseSchema,
   RevenuePremiumEthResponseSchema,
   RevenueQuerySchema,
@@ -256,6 +258,55 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       const filtered = filterByRange(rows, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
+
+      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getRevenueByAccount",
+      path: "/revenue/by-account",
+      summary: "Get monthly ENS revenue per controller account",
+      description:
+        "Monthly revenue per controller account in USD and ETH, with an optional account filter.",
+      tags: ["revenue"],
+      middleware: [ensOnly, setCacheControl(60)],
+      request: {
+        query: RevenueByAccountQuerySchema,
+      },
+      responses: {
+        200: {
+          description: "Monthly ENS revenue per controller account",
+          content: {
+            "application/json": {
+              schema: RevenueByAccountResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, orderDirection, account } =
+        context.req.valid("query");
+
+      if (!revenueDuneClient) {
+        return context.json({ items: [], totalCount: 0 }, 200);
+      }
+
+      const rows = await revenueDuneClient.fetchRevenueByAccount();
+      const ranged = filterByRange(rows, fromDate, toDate);
+      const filtered =
+        account == null
+          ? ranged
+          : ranged.filter((row) => row.account === account);
+      const sign = orderDirection === "desc" ? -1 : 1;
+      const sorted = [...filtered].sort((a, b) => {
+        const byDate = a.date - b.date;
+        if (byDate !== 0) return sign * byDate;
+        return sign * (a.account - b.account);
+      });
 
       return context.json({ items: sorted, totalCount: sorted.length }, 200);
     },

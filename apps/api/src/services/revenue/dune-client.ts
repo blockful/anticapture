@@ -94,6 +94,20 @@ type RawRenewalFunnelRow = {
   renewal_rate_pct: string;
 };
 
+export type RevenueByAccountItem = {
+  date: number;
+  account: number;
+  usd: number;
+  eth: number;
+};
+
+type RawRevenueByAccountRow = {
+  date: string;
+  account: number;
+  usd: number;
+  eth: number;
+};
+
 export type RevenueTotalsItem = {
   date: number;
   registrationUsd: number;
@@ -176,6 +190,19 @@ export class RevenueDuneClient {
       renewedCount: row.renewed_count,
       churnedCount: row.churned_count,
       renewalRatePct: parseFloat(row.renewal_rate_pct),
+    }));
+  }
+
+  public async fetchRevenueByAccount(): Promise<RevenueByAccountItem[]> {
+    const data =
+      await this.fetchJson<DuneRowsResponse<RawRevenueByAccountRow>>(
+        "revenueByAccount",
+      );
+    return data.result.rows.map((row) => ({
+      date: parseDuneMonth(row.date),
+      account: row.account,
+      usd: row.usd,
+      eth: row.eth,
     }));
   }
 
