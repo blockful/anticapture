@@ -3,6 +3,7 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import {
   RevenueActionsResponseSchema,
   RevenueActiveNamesResponseSchema,
+  RevenueNewWalletsResponseSchema,
   RevenueQuerySchema,
 } from "@/mappers/revenue";
 import { setCacheControl } from "@/middlewares";
@@ -86,6 +87,47 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       }
 
       const rows = await revenueDuneClient.fetchActiveNames();
+      const filtered = filterByRange(rows, fromDate, toDate);
+      const sign = orderDirection === "desc" ? -1 : 1;
+      const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
+
+      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getRevenueNewWallets",
+      path: "/revenue/new-wallets",
+      summary: "Get monthly new-wallet counts and cumulative wallet total",
+      description:
+        "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+      tags: ["revenue"],
+      middleware: [ensOnly, setCacheControl(60)],
+      request: {
+        query: RevenueQuerySchema,
+      },
+      responses: {
+        200: {
+          description:
+            "Monthly new-wallet counts and the cumulative wallet total",
+          content: {
+            "application/json": {
+              schema: RevenueNewWalletsResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, orderDirection } = context.req.valid("query");
+
+      if (!revenueDuneClient) {
+        return context.json({ items: [], totalCount: 0 }, 200);
+      }
+
+      const rows = await revenueDuneClient.fetchNewWallets();
       const filtered = filterByRange(rows, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));

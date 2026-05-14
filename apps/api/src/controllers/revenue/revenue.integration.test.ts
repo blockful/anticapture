@@ -21,6 +21,7 @@ vi.mock("@/env", () => ({
 import { env } from "@/env";
 import actionsFixture from "@/services/revenue/__fixtures__/actions.json";
 import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.json";
+import newWalletsFixture from "@/services/revenue/__fixtures__/new-wallets.json";
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
@@ -230,6 +231,78 @@ describe("Revenue Controller", () => {
       const res = await app.request(
         "/revenue/active-names?orderDirection=desc",
       );
+      const body = (await res.json()) as { items: { date: number }[] };
+
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        expect(prev.date).toBeGreaterThan(curr.date);
+      }
+    });
+  });
+
+  describe("GET /revenue/new-wallets", () => {
+    it("returns happy-path data sorted ascending by date with mapped fields", async () => {
+      server.use(
+        http.get(urls.newWallets, () => HttpResponse.json(newWalletsFixture)),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/new-wallets");
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        items: {
+          date: number;
+          newWallets: number;
+          cumulativeWallets: number;
+        }[];
+        totalCount: number;
+      };
+
+      expect(body.totalCount).toBe(newWalletsFixture.result.rows.length);
+      expect(body.items).toHaveLength(newWalletsFixture.result.rows.length);
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        expect(prev.date).toBeLessThan(curr.date);
+      }
+
+      const first = body.items[0]!;
+      const firstRaw = newWalletsFixture.result.rows[0]!;
+      expect(first.newWallets).toBe(firstRaw.new_wallets);
+      expect(first.cumulativeWallets).toBe(firstRaw.cumulative_wallets);
+    });
+
+    it("returns 404 when DAO_ID is not ENS", async () => {
+      env.DAO_ID = DaoIdEnum.UNI;
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/new-wallets");
+
+      expect(res.status).toBe(404);
+      expect(await res.json()).toEqual({ error: "Not Found" });
+    });
+
+    it("returns empty items when the revenue client is not instantiated", async () => {
+      const app = createTestApp(undefined);
+
+      const res = await app.request("/revenue/new-wallets");
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("sorts descending when orderDirection=desc", async () => {
+      server.use(
+        http.get(urls.newWallets, () => HttpResponse.json(newWalletsFixture)),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/new-wallets?orderDirection=desc");
       const body = (await res.json()) as { items: { date: number }[] };
 
       for (let i = 1; i < body.items.length; i++) {

@@ -84,3 +84,34 @@ export const RevenueActiveNamesResponseSchema = z
 export type RevenueActiveNamesResponse = z.infer<
   typeof RevenueActiveNamesResponseSchema
 >;
+
+export const RevenueNewWalletsItemSchema = z
+  .object({
+    date: z
+      .number()
+      .int()
+      .describe("Month start (Unix timestamp in seconds, UTC)."),
+    newWallets: z
+      .number()
+      .describe("New wallets that interacted with ENS in the given month."),
+    cumulativeWallets: z
+      .number()
+      .describe("Cumulative count of ENS wallets as of the given month."),
+  })
+  .openapi("RevenueNewWalletsItem", {
+    description: "Single new-wallets datapoint.",
+  });
+
+export const RevenueNewWalletsResponseSchema = z
+  .object({
+    items: z.array(RevenueNewWalletsItemSchema),
+    totalCount: z.number().int().describe("Total number of items returned."),
+  })
+  .openapi("RevenueNewWalletsResponse", {
+    description:
+      "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+  });
+
+export type RevenueNewWalletsResponse = z.infer<
+  typeof RevenueNewWalletsResponseSchema
+>;

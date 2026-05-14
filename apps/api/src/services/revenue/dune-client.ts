@@ -52,6 +52,18 @@ type RawActiveNamesRow = {
   cumulative_active: number;
 };
 
+export type RevenueNewWalletsItem = {
+  date: number;
+  newWallets: number;
+  cumulativeWallets: number;
+};
+
+type RawNewWalletsRow = {
+  date: string;
+  new_wallets: number;
+  cumulative_wallets: number;
+};
+
 export class RevenueDuneClient {
   private readonly cache = new RevenueCache();
 
@@ -77,6 +89,16 @@ export class RevenueDuneClient {
       date: parseDuneMonth(row.date),
       netChange: row.net_change,
       cumulativeActive: row.cumulative_active,
+    }));
+  }
+
+  public async fetchNewWallets(): Promise<RevenueNewWalletsItem[]> {
+    const data =
+      await this.fetchJson<DuneRowsResponse<RawNewWalletsRow>>("newWallets");
+    return data.result.rows.map((row) => ({
+      date: parseDuneMonth(row.date),
+      newWallets: row.new_wallets,
+      cumulativeWallets: row.cumulative_wallets,
     }));
   }
 
