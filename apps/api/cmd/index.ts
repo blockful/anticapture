@@ -41,6 +41,7 @@ import {
   eventRelevance,
   feed,
   health,
+  revenue,
 } from "@/controllers";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
@@ -374,8 +375,8 @@ if (env.DAO_ID === DaoIdEnum.ENS) {
       "DAO_ID=ENS but REVENUE_DUNE_API_KEY is not set; /revenue/* endpoints will return empty data",
     );
   }
+  revenue(app, revenueDuneClient);
 }
-void revenueDuneClient;
 
 if (daoClient.supportOffchainData()) {
   const pgUnifiedClient = drizzle(env.DATABASE_URL, {

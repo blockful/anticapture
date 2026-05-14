@@ -3,6 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { logger } from "@/logger";
 
 import { RevenueCache } from "./cache";
+import { parseDuneMonth } from "./utils";
 
 export const REVENUE_QUERY_KEYS = [
   "actions",
@@ -19,6 +20,26 @@ export type RevenueQueryKey = (typeof REVENUE_QUERY_KEYS)[number];
 
 export type RevenueDuneUrls = Record<RevenueQueryKey, string>;
 
+export type DuneRowsResponse<T> = {
+  result: {
+    rows: T[];
+  };
+};
+
+export type RevenueActionCategory = "Registration" | "Renewal" | "Premium";
+
+export type RevenueActionItem = {
+  date: number;
+  category: RevenueActionCategory;
+  actions: number;
+};
+
+type RawActionRow = {
+  date: string;
+  category: RevenueActionCategory;
+  actions: number;
+};
+
 export class RevenueDuneClient {
   private readonly cache = new RevenueCache();
 
@@ -26,6 +47,16 @@ export class RevenueDuneClient {
     private readonly apiKey: string,
     private readonly urls: RevenueDuneUrls,
   ) {}
+
+  public async fetchActions(): Promise<RevenueActionItem[]> {
+    const data =
+      await this.fetchJson<DuneRowsResponse<RawActionRow>>("actions");
+    return data.result.rows.map((row) => ({
+      date: parseDuneMonth(row.date),
+      category: row.category,
+      actions: row.actions,
+    }));
+  }
 
   protected async fetchJson<T>(key: RevenueQueryKey): Promise<T> {
     const cached = this.cache.get<T>(key);
