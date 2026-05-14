@@ -10,7 +10,7 @@ import {
   Trigger,
 } from "@radix-ui/react-dialog";
 import { X, Plus, PlusIcon, Check } from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import type { MetricWithKey } from "@/features/token-distribution/types";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -60,6 +60,15 @@ export const TokenDistributionDialog = ({
       ([category, metrics]) =>
         appliedMetrics[category]?.length === metrics.length,
     );
+
+  const selectedMetricsSet = useMemo(
+    () => new Set(selectedMetrics),
+    [selectedMetrics],
+  );
+  const notSupportedMetricsSet = useMemo(
+    () => new Set(notSupportedMetrics),
+    [notSupportedMetrics],
+  );
 
   return (
     <Root>
@@ -112,7 +121,7 @@ export const TokenDistributionDialog = ({
                           category
                         ]?.some((i) => i.key === metric.key);
 
-                        const isSelected = selectedMetrics.includes(metric.key);
+                        const isSelected = selectedMetricsSet.has(metric.key);
 
                         if (isMetricAlreadyApplied) return null;
 
@@ -126,7 +135,7 @@ export const TokenDistributionDialog = ({
                                 ? "border-tangerine"
                                 : "border-transparent",
                             )}
-                            disabled={notSupportedMetrics.includes(
+                            disabled={notSupportedMetricsSet.has(
                               metric.key as MetricTypesEnum,
                             )}
                           >
