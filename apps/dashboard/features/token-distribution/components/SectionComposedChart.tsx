@@ -65,6 +65,13 @@ export const SectionComposedChart = ({
     },
     [chartData, setBrushRange],
   );
+  const appliedMetricTypes = new Set(
+    appliedMetrics.map((key) => chartConfig[key]?.type),
+  );
+  const appliedMetricAxes = new Set(
+    appliedMetrics.map((key) => chartConfig[key]?.axis),
+  );
+
   return (
     <ChartContainer
       className="h-full w-full justify-start"
@@ -139,9 +146,7 @@ export const SectionComposedChart = ({
         />
 
         {/* SECONDARY AXIS - For metrics configured with axis: "secondary" (TOKEN_PRICE) */}
-        {appliedMetrics.some(
-          (key) => chartConfig[key]?.axis === "secondary",
-        ) && (
+        {appliedMetricAxes.has("secondary") && (
           <YAxis
             yAxisId="secondary"
             orientation="right"
@@ -157,7 +162,7 @@ export const SectionComposedChart = ({
         )}
 
         {/* TERTIARY AXIS - For BAR type metrics (right side) */}
-        {appliedMetrics.some((key) => chartConfig[key]?.type === "BAR") && (
+        {appliedMetricTypes.has("BAR") && (
           <YAxis
             yAxisId="bars"
             orientation="right"
@@ -197,9 +202,7 @@ export const SectionComposedChart = ({
         )}
 
         {/* TERTIARY AXIS - For SPORADIC_LINE type metrics (right side) */}
-        {appliedMetrics.some(
-          (key) => chartConfig[key]?.type === "SPORADIC_LINE",
-        ) && (
+        {appliedMetricTypes.has("SPORADIC_LINE") && (
           <YAxis
             yAxisId="bars"
             orientation="right"
