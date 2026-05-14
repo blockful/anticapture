@@ -160,10 +160,10 @@ export const ProposalSection = ({
   const handleOffchainVoteSuccess = useCallback(
     (voteLabel: string) => {
       setLocalOffchainVoteLabel(voteLabel);
-      // Refetch all active off-chain votes queries (user-vote badge + votes table)
-      // so the UI reflects the new vote without requiring a manual page reload.
+      // Refetch votes (badge + table) and proposal scores so the UI reflects
+      // the new vote without requiring a manual page reload.
       apolloClient.refetchQueries({
-        include: ["GetOffchainVotesByProposalId"],
+        include: ["GetOffchainVotesByProposalId", "GetOffchainProposal"],
       });
     },
     [apolloClient],

@@ -217,7 +217,7 @@ export const ProposalHeader = ({
                 daoId={daoId}
               />
             </>
-          ) : snapshotLink ? (
+          ) : snapshotLink !== undefined ? (
             <>
               {address && (
                 <div className="hidden flex-col items-end lg:flex">
