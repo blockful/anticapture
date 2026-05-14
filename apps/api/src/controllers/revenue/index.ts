@@ -9,6 +9,7 @@ import {
   RevenuePremiumEthResponseSchema,
   RevenueQuerySchema,
   RevenueRenewalFunnelResponseSchema,
+  RevenueRenewalTenureResponseSchema,
   RevenueTotalsResponseSchema,
 } from "@/mappers/revenue";
 import { setCacheControl } from "@/middlewares";
@@ -306,6 +307,51 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
         const byDate = a.date - b.date;
         if (byDate !== 0) return sign * byDate;
         return sign * (a.account - b.account);
+      });
+
+      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getRevenueRenewalTenure",
+      path: "/revenue/renewal-tenure",
+      summary: "Get monthly renewal tenure distribution per expiry month",
+      description:
+        "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
+      tags: ["revenue"],
+      middleware: [ensOnly, setCacheControl(60)],
+      request: {
+        query: RevenueQuerySchema,
+      },
+      responses: {
+        200: {
+          description:
+            "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
+          content: {
+            "application/json": {
+              schema: RevenueRenewalTenureResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, orderDirection } = context.req.valid("query");
+
+      if (!revenueDuneClient) {
+        return context.json({ items: [], totalCount: 0 }, 200);
+      }
+
+      const rows = await revenueDuneClient.fetchRenewalTenure();
+      const filtered = filterByRange(rows, fromDate, toDate);
+      const sign = orderDirection === "desc" ? -1 : 1;
+      const sorted = [...filtered].sort((a, b) => {
+        const byDate = a.date - b.date;
+        if (byDate !== 0) return sign * byDate;
+        return sign * a.tenureBucket.localeCompare(b.tenureBucket);
       });
 
       return context.json({ items: sorted, totalCount: sorted.length }, 200);

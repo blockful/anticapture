@@ -24,6 +24,7 @@ import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.jso
 import newWalletsFixture from "@/services/revenue/__fixtures__/new-wallets.json";
 import premiumEthFixture from "@/services/revenue/__fixtures__/premium-eth.json";
 import renewalFunnelFixture from "@/services/revenue/__fixtures__/renewal-funnel.json";
+import renewalTenureFixture from "@/services/revenue/__fixtures__/renewal-tenure.json";
 import revenueByAccountFixture from "@/services/revenue/__fixtures__/revenue-by-account.json";
 import revenueTotalsFixture from "@/services/revenue/__fixtures__/revenue-totals.json";
 import {
@@ -745,6 +746,139 @@ describe("Revenue Controller", () => {
       expect(body.totalCount).toBe(expectedCount);
       expect(body.items.length).toBeGreaterThan(0);
       expect(body.items.every((item) => item.account === 3211)).toBe(true);
+    });
+  });
+
+  describe("GET /revenue/renewal-tenure", () => {
+    it("returns happy-path data sorted ascending by [date, tenureBucket] with mapped fields", async () => {
+      server.use(
+        http.get(urls.renewalTenure, () =>
+          HttpResponse.json(renewalTenureFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/renewal-tenure");
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        items: {
+          date: number;
+          tenureBucket: string;
+          names: number;
+          totalRenewalsInBucket: number;
+        }[];
+        totalCount: number;
+      };
+
+      expect(body.totalCount).toBe(renewalTenureFixture.result.rows.length);
+      expect(body.items).toHaveLength(renewalTenureFixture.result.rows.length);
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        if (prev.date !== curr.date) {
+          expect(prev.date).toBeLessThan(curr.date);
+        } else {
+          expect(
+            prev.tenureBucket.localeCompare(curr.tenureBucket),
+          ).toBeLessThanOrEqual(0);
+        }
+      }
+
+      const first = body.items[0]!;
+      const firstRaw = renewalTenureFixture.result.rows[0]!;
+      expect(first.tenureBucket).toBe(firstRaw.tenure_bucket);
+      expect(first.names).toBe(firstRaw.names);
+      expect(first.totalRenewalsInBucket).toBe(
+        firstRaw.total_renewals_in_bucket,
+      );
+    });
+
+    it("returns 404 when DAO_ID is not ENS", async () => {
+      env.DAO_ID = DaoIdEnum.UNI;
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/renewal-tenure");
+
+      expect(res.status).toBe(404);
+      expect(await res.json()).toEqual({ error: "Not Found" });
+    });
+
+    it("returns empty items when the revenue client is not instantiated", async () => {
+      const app = createTestApp(undefined);
+
+      const res = await app.request("/revenue/renewal-tenure");
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("sorts descending when orderDirection=desc", async () => {
+      server.use(
+        http.get(urls.renewalTenure, () =>
+          HttpResponse.json(renewalTenureFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request(
+        "/revenue/renewal-tenure?orderDirection=desc",
+      );
+      const body = (await res.json()) as {
+        items: { date: number; tenureBucket: string }[];
+      };
+
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        if (prev.date !== curr.date) {
+          expect(prev.date).toBeGreaterThan(curr.date);
+        } else {
+          expect(
+            prev.tenureBucket.localeCompare(curr.tenureBucket),
+          ).toBeGreaterThanOrEqual(0);
+        }
+      }
+    });
+
+    it("preserves far-future outlier rows when toDate is omitted", async () => {
+      server.use(
+        http.get(urls.renewalTenure, () =>
+          HttpResponse.json(renewalTenureFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/renewal-tenure");
+
+      const body = (await res.json()) as { items: { date: number }[] };
+      const farFutureUnix = Math.floor(Date.UTC(8966, 6, 1) / 1000);
+      expect(body.items.some((item) => item.date === farFutureUnix)).toBe(true);
+    });
+
+    it("excludes far-future outlier rows when toDate is near-term", async () => {
+      server.use(
+        http.get(urls.renewalTenure, () =>
+          HttpResponse.json(renewalTenureFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const feb1 = Math.floor(Date.UTC(2026, 1, 1) / 1000);
+      const res = await app.request(`/revenue/renewal-tenure?toDate=${feb1}`);
+
+      const body = (await res.json()) as { items: { date: number }[] };
+      const farFutureUnix = Math.floor(Date.UTC(8966, 6, 1) / 1000);
+      expect(body.items.length).toBeGreaterThan(0);
+      expect(body.items.every((item) => item.date <= feb1)).toBe(true);
+      expect(body.items.some((item) => item.date === farFutureUnix)).toBe(
+        false,
+      );
     });
   });
 });

@@ -239,6 +239,46 @@ export const RevenueTotalsResponseSchema = z
 
 export type RevenueTotalsResponse = z.infer<typeof RevenueTotalsResponseSchema>;
 
+export const RevenueRenewalTenureBucketSchema = z
+  .enum(["0 renewals (one-shot)", "1 renewal", "2 renewals", "3+ renewals"])
+  .openapi("RevenueRenewalTenureBucket", {
+    description: "Tenure bucket label as returned by Dune.",
+  });
+
+export const RevenueRenewalTenureItemSchema = z
+  .object({
+    date: z
+      .number()
+      .int()
+      .describe("Expiry month start (Unix timestamp in seconds, UTC)."),
+    tenureBucket: RevenueRenewalTenureBucketSchema,
+    names: z
+      .number()
+      .int()
+      .describe("Count of names in this tenure bucket for the expiry month."),
+    totalRenewalsInBucket: z
+      .number()
+      .int()
+      .describe("Total renewals contributed by names in this bucket."),
+  })
+  .openapi("RevenueRenewalTenureItem", {
+    description: "Single renewal-tenure datapoint keyed by expiry month.",
+  });
+
+export const RevenueRenewalTenureResponseSchema = z
+  .object({
+    items: z.array(RevenueRenewalTenureItemSchema),
+    totalCount: z.number().int().describe("Total number of items returned."),
+  })
+  .openapi("RevenueRenewalTenureResponse", {
+    description:
+      "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
+  });
+
+export type RevenueRenewalTenureResponse = z.infer<
+  typeof RevenueRenewalTenureResponseSchema
+>;
+
 export const RevenueByAccountQuerySchema = RevenueQuerySchema.extend({
   account: z.coerce.number().int().optional().openapi({
     type: "integer",

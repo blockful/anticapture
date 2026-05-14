@@ -108,6 +108,26 @@ type RawRevenueByAccountRow = {
   eth: number;
 };
 
+export type RevenueRenewalTenureBucket =
+  | "0 renewals (one-shot)"
+  | "1 renewal"
+  | "2 renewals"
+  | "3+ renewals";
+
+export type RevenueRenewalTenureItem = {
+  date: number;
+  tenureBucket: RevenueRenewalTenureBucket;
+  names: number;
+  totalRenewalsInBucket: number;
+};
+
+type RawRenewalTenureRow = {
+  expiry_month: string;
+  tenure_bucket: RevenueRenewalTenureBucket;
+  names: number;
+  total_renewals_in_bucket: number;
+};
+
 export type RevenueTotalsItem = {
   date: number;
   registrationUsd: number;
@@ -190,6 +210,19 @@ export class RevenueDuneClient {
       renewedCount: row.renewed_count,
       churnedCount: row.churned_count,
       renewalRatePct: parseFloat(row.renewal_rate_pct),
+    }));
+  }
+
+  public async fetchRenewalTenure(): Promise<RevenueRenewalTenureItem[]> {
+    const data =
+      await this.fetchJson<DuneRowsResponse<RawRenewalTenureRow>>(
+        "renewalTenure",
+      );
+    return data.result.rows.map((row) => ({
+      date: parseDuneMonth(row.expiry_month),
+      tenureBucket: row.tenure_bucket,
+      names: row.names,
+      totalRenewalsInBucket: row.total_renewals_in_bucket,
     }));
   }
 
