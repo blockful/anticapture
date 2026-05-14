@@ -3,7 +3,9 @@ name: anticapture-gateway
 description: Use for apps/api-gateway work: Mesh configuration, DAO source discovery, REST-to-GraphQL resolvers, schema aggregation, and gateway tests.
 ---
 
-# API Gateway Package Guide
+# [DEPRECATED] API Gateway Package Guide
+
+> This package is in the process of deprecation in favor of the Gateful package (@apps/gateful). Any new features should be added to there instead.
 
 ## Use This Skill When
 

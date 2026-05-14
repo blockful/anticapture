@@ -28,7 +28,7 @@ import { CategoriesFilter } from "@/shared/components/design-system/table/filter
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { fetchAddressFromEnsName } from "@/shared/hooks/useEnsData";
+import { fetchAddressFromEnsName } from "@/shared/utils/ens";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";

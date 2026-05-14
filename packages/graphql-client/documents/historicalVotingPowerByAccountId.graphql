@@ -36,6 +36,7 @@ query HistoricalVotingPowerByAccount(
         from
         to
         value
+        previousDelegate
       }
     }
     totalCount

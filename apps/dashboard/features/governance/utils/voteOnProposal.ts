@@ -1,4 +1,4 @@
-import { publicActions } from "viem";
+import { parseSignature, publicActions } from "viem";
 import type {
   Account,
   Chain,
@@ -7,10 +7,17 @@ import type {
   WalletClient,
 } from "viem";
 
+import { relayVote } from "@anticapture/client";
+import type { RelayVotePathParamsDaoEnumKey } from "@anticapture/client";
+
 import EnsGovernorAbi from "@/abis/ens-governor.json";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+import {
+  isUserRejection,
+  mapRelayerError,
+} from "@/shared/utils/gaslessRelayerError";
 
 const LinearVotingStrategyAbi = [
   {
@@ -24,6 +31,23 @@ const LinearVotingStrategyAbi = [
     type: "function",
   },
 ] as const;
+
+const GovernorNameAbi = [
+  {
+    inputs: [],
+    name: "name",
+    outputs: [{ internalType: "string", name: "", type: "string" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const;
+
+const BALLOT_TYPES = {
+  Ballot: [
+    { name: "proposalId", type: "uint256" },
+    { name: "support", type: "uint8" },
+  ],
+} as const;
 
 type VoteClient = WalletClient & PublicActions & WalletActions;
 
@@ -89,10 +113,61 @@ const ozGovernorVoteHandler =
     return client.writeContract(request);
   };
 
-/**
- * Returns the vote handler for a DAO. Add new cases for new governance frameworks.
- */
-function getVoteHandler(daoId: DaoIdEnum): VoteHandler {
+const gaslessVoteHandler =
+  (daoId: DaoIdEnum): VoteHandler =>
+  async (client, params) => {
+    const config = daoConfigByDaoId[daoId];
+    const governor = config.daoOverview.contracts.governor;
+    if (!governor) throw new Error("DAO governance address not found");
+
+    const name = await client.readContract({
+      abi: GovernorNameAbi,
+      address: governor,
+      functionName: "name",
+    });
+
+    const signature = await client.signTypedData({
+      account: params.account,
+      domain: {
+        name,
+        version: "1",
+        chainId: config.daoOverview.chain.id,
+        verifyingContract: governor,
+      },
+      types: BALLOT_TYPES,
+      primaryType: "Ballot",
+      message: {
+        proposalId: BigInt(params.proposalId),
+        support: params.voteNumber,
+      },
+    });
+
+    const { r, s, v } = parseSignature(signature);
+    if (v === undefined) throw new Error("Signature missing v");
+
+    const response = await relayVote(
+      daoId.toLowerCase() as RelayVotePathParamsDaoEnumKey,
+      {
+        proposalId: params.proposalId,
+        support: params.voteNumber,
+        r,
+        s,
+        v: Number(v),
+      },
+    );
+    return response.transactionHash as `0x${string}`;
+  };
+
+function getVoteHandler(
+  daoId: DaoIdEnum,
+  useGasless: boolean,
+  hasComment: boolean,
+): VoteHandler {
+  // Gasless relay uses castVoteBySig which doesn't support vote reasons.
+  // Fall back to direct vote when a comment is present so it isn't silently dropped.
+  if (useGasless && daoConfigByDaoId[daoId].gaslessRelayer && !hasComment) {
+    return gaslessVoteHandler(daoId);
+  }
   switch (daoId) {
     case DaoIdEnum.SHU:
       return azoriusVoteHandler(daoId);
@@ -110,17 +185,20 @@ export const voteOnProposal = async (
   walletClient: WalletClient,
   setTransactionhash: (hash: string) => void,
   comment?: string,
+  minVotingPower: bigint | null = null,
+  useGasless: boolean = false,
 ) => {
   const client = walletClient.extend(publicActions);
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
 
   try {
-    const handler = getVoteHandler(daoId);
+    const trimmedComment = comment?.trim() || undefined;
+    const handler = getVoteHandler(daoId, useGasless, !!trimmedComment);
     const hash = await handler(client as VoteClient, {
       proposalId,
       voteNumber,
       account,
-      comment,
+      comment: trimmedComment,
     });
 
     setTransactionhash(hash);
@@ -130,7 +208,20 @@ export const voteOnProposal = async (
     return transaction;
   } catch (error) {
     console.error(error);
-    showCustomToast("Failed to vote", "error");
+    if (isUserRejection(error)) return null;
+
+    const config = daoConfigByDaoId[daoId];
+    if (useGasless && config.gaslessRelayer) {
+      const message = mapRelayerError(error, {
+        operation: "vote",
+        minVotingPower,
+        decimals: config.decimals,
+        symbol: config.name,
+      });
+      showCustomToast(message, "error");
+    } else {
+      showCustomToast("Failed to vote", "error");
+    }
     return null;
   }
 };

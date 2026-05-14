@@ -24,7 +24,7 @@ export const ENS: DaoConfiguration = {
   forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
   ogIcon: EnsOgIcon,
-  hostnames: ["staging.anticapture.com"],
+  hostnames: ["ens.gov.blockful.io"],
   whitelabel: {},
   daoOverview: {
     token: "ERC20",
@@ -372,4 +372,5 @@ export const ENS: DaoConfiguration = {
   governancePage: true,
   serviceProviders: true,
   offchainProposals: true,
+  gaslessRelayer: true,
 };

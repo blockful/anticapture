@@ -61,7 +61,9 @@ export const ProposalSection = ({
 
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const [localOffchainVoteLabel, setLocalOffchainVoteLabel] = useState<string | null>(null);
+  const [localOffchainVoteLabel, setLocalOffchainVoteLabel] = useState<
+    string | null
+  >(null);
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
@@ -176,6 +178,10 @@ export const ProposalSection = ({
         abstainVotes: "0",
         startTimestamp: rawOffchainProposal.start,
         endTimestamp: rawOffchainProposal.end,
+        queuedTimestamp: null,
+        executedTimestamp: null,
+        queuedTxHash: null,
+        executedTxHash: null,
         calldatas: null,
         targets: [],
         values: [],
