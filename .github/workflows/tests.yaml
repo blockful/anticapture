@@ -33,29 +33,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Skip for Version Packages PR
+        if: startsWith(github.head_ref, 'changeset-release/')
+        run: |
+          echo "Version Packages PR detected (head ref: ${{ github.head_ref }})."
+          echo "Changesets have already been consumed by 'changeset version'; skipping changeset check."
+
       - name: Checkout repository
+        if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup pnpm
+        if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
         uses: pnpm/action-setup@v4
         with:
           version: 10.10.0
 
       - name: Setup Node.js
+        if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
 
       - name: Install dependencies
+        if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
         run: pnpm install --frozen-lockfile
 
       - name: Fetch dev
+        if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
         run: git fetch origin dev --depth=1
 
       - name: Verify changeset is present
+        if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
         shell: bash
         run: |
           set -euo pipefail
