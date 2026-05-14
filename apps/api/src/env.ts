@@ -33,6 +33,17 @@ const envSchema = z
     COINGECKO_API_KEY: z.string(),
     REDIS_URL: z.string().optional(),
     PORT: z.coerce.number().default(42069),
+
+    // Revenue (ENS-only) Dune configuration
+    REVENUE_DUNE_API_KEY: z.string().optional(),
+    REVENUE_DUNE_ACTIONS_URL: z.string().optional(),
+    REVENUE_DUNE_ACTIVE_NAMES_URL: z.string().optional(),
+    REVENUE_DUNE_NEW_WALLETS_URL: z.string().optional(),
+    REVENUE_DUNE_PREMIUM_ETH_URL: z.string().optional(),
+    REVENUE_DUNE_RENEWAL_FUNNEL_URL: z.string().optional(),
+    REVENUE_DUNE_REVENUE_TOTALS_URL: z.string().optional(),
+    REVENUE_DUNE_REVENUE_BY_ACCOUNT_URL: z.string().optional(),
+    REVENUE_DUNE_RENEWAL_TENURE_URL: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (CI && !data.DATABASE_PUBLIC_URL) {
