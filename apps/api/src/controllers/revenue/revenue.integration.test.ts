@@ -18,6 +18,7 @@ vi.mock("@/env", () => ({
   env: { DAO_ID: "ENS" },
 }));
 
+import { docs } from "@/docs";
 import { env } from "@/env";
 import actionsFixture from "@/services/revenue/__fixtures__/actions.json";
 import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.json";
@@ -31,9 +32,79 @@ import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
   RevenueDuneUrls,
+  RevenueQueryKey,
 } from "@/services/revenue/dune-client";
 
 import { revenue } from "./index";
+
+type RevenueFixture = { result: { rows: unknown[] } };
+
+type RevenueEndpointDef = {
+  path: string;
+  urlKey: RevenueQueryKey;
+  fixture: RevenueFixture;
+  operationId: string;
+  responseSchemaName: string;
+};
+
+const REVENUE_ENDPOINTS: readonly RevenueEndpointDef[] = [
+  {
+    path: "/revenue/actions",
+    urlKey: "actions",
+    fixture: actionsFixture,
+    operationId: "getRevenueActions",
+    responseSchemaName: "RevenueActionsResponse",
+  },
+  {
+    path: "/revenue/active-names",
+    urlKey: "activeNames",
+    fixture: activeNamesFixture,
+    operationId: "getRevenueActiveNames",
+    responseSchemaName: "RevenueActiveNamesResponse",
+  },
+  {
+    path: "/revenue/new-wallets",
+    urlKey: "newWallets",
+    fixture: newWalletsFixture,
+    operationId: "getRevenueNewWallets",
+    responseSchemaName: "RevenueNewWalletsResponse",
+  },
+  {
+    path: "/revenue/premium-eth",
+    urlKey: "premiumEth",
+    fixture: premiumEthFixture,
+    operationId: "getRevenuePremiumEth",
+    responseSchemaName: "RevenuePremiumEthResponse",
+  },
+  {
+    path: "/revenue/renewal-funnel",
+    urlKey: "renewalFunnel",
+    fixture: renewalFunnelFixture,
+    operationId: "getRevenueRenewalFunnel",
+    responseSchemaName: "RevenueRenewalFunnelResponse",
+  },
+  {
+    path: "/revenue/totals",
+    urlKey: "revenueTotals",
+    fixture: revenueTotalsFixture,
+    operationId: "getRevenueTotals",
+    responseSchemaName: "RevenueTotalsResponse",
+  },
+  {
+    path: "/revenue/by-account",
+    urlKey: "revenueByAccount",
+    fixture: revenueByAccountFixture,
+    operationId: "getRevenueByAccount",
+    responseSchemaName: "RevenueByAccountResponse",
+  },
+  {
+    path: "/revenue/renewal-tenure",
+    urlKey: "renewalTenure",
+    fixture: renewalTenureFixture,
+    operationId: "getRevenueRenewalTenure",
+    responseSchemaName: "RevenueRenewalTenureResponse",
+  },
+];
 
 const API_KEY = "test-api-key";
 const FIXTURE_BASE = "https://dune.test";
@@ -879,6 +950,126 @@ describe("Revenue Controller", () => {
       expect(body.items.some((item) => item.date === farFutureUnix)).toBe(
         false,
       );
+    });
+  });
+
+  describe("Revenue API surface (US-011)", () => {
+    it("returns 200 with the expected shape for every endpoint", async () => {
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        server.use(
+          http.get(urls[endpoint.urlKey], () =>
+            HttpResponse.json(endpoint.fixture),
+          ),
+        );
+      }
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        const res = await app.request(endpoint.path);
+        expect(res.status, `unexpected status for ${endpoint.path}`).toBe(200);
+
+        const body = (await res.json()) as {
+          items: { date: number }[];
+          totalCount: number;
+        };
+        expect(Array.isArray(body.items)).toBe(true);
+        expect(typeof body.totalCount).toBe("number");
+        expect(body.items.length).toBe(body.totalCount);
+        expect(body.items.length).toBeGreaterThan(0);
+        for (const item of body.items) {
+          expect(typeof item.date).toBe("number");
+        }
+      }
+    });
+
+    it("caches upstream Dune calls within TTL for every endpoint", async () => {
+      const callCounts: Record<RevenueQueryKey, number> = {
+        actions: 0,
+        activeNames: 0,
+        newWallets: 0,
+        premiumEth: 0,
+        renewalFunnel: 0,
+        revenueTotals: 0,
+        revenueByAccount: 0,
+        renewalTenure: 0,
+      };
+
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        server.use(
+          http.get(urls[endpoint.urlKey], () => {
+            callCounts[endpoint.urlKey] += 1;
+            return HttpResponse.json(endpoint.fixture);
+          }),
+        );
+      }
+
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        const first = await app.request(endpoint.path);
+        const second = await app.request(endpoint.path);
+        expect(first.status).toBe(200);
+        expect(second.status).toBe(200);
+      }
+
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        expect(
+          callCounts[endpoint.urlKey],
+          `expected exactly one upstream call for ${endpoint.path}`,
+        ).toBe(1);
+      }
+    });
+
+    it("returns 404 for every endpoint when DAO_ID is not ENS", async () => {
+      env.DAO_ID = DaoIdEnum.UNI;
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        const res = await app.request(endpoint.path);
+        expect(res.status, `expected 404 for ${endpoint.path}`).toBe(404);
+        expect(await res.json()).toEqual({ error: "Not Found" });
+      }
+    });
+
+    it("exposes every operationId in the OpenAPI document", async () => {
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+      docs(app);
+
+      const res = await app.request("/docs");
+      expect(res.status).toBe(200);
+
+      type OpenApiOperation = {
+        operationId?: string;
+        responses?: {
+          "200"?: {
+            content?: {
+              "application/json"?: {
+                schema?: { $ref?: string };
+              };
+            };
+          };
+        };
+      };
+      type OpenApiDoc = {
+        paths: Record<string, Record<string, OpenApiOperation>>;
+      };
+      const doc = (await res.json()) as OpenApiDoc;
+
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        const operation = doc.paths[endpoint.path]?.get;
+        expect(operation, `missing GET ${endpoint.path}`).toBeDefined();
+        expect(operation?.operationId).toBe(endpoint.operationId);
+        const ref =
+          operation?.responses?.["200"]?.content?.["application/json"]?.schema
+            ?.$ref;
+        expect(ref, `missing 200 schema ref for ${endpoint.path}`).toBe(
+          `#/components/schemas/${endpoint.responseSchemaName}`,
+        );
+      }
     });
   });
 });
