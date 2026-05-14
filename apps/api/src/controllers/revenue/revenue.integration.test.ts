@@ -20,6 +20,7 @@ vi.mock("@/env", () => ({
 
 import { env } from "@/env";
 import actionsFixture from "@/services/revenue/__fixtures__/actions.json";
+import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.json";
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
@@ -162,6 +163,80 @@ describe("Revenue Controller", () => {
       };
       expect(janOnlyBody.items.every((item) => item.date <= jan31)).toBe(true);
       expect(janOnlyBody.items.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("GET /revenue/active-names", () => {
+    it("returns happy-path data sorted ascending by date with mapped fields", async () => {
+      server.use(
+        http.get(urls.activeNames, () => HttpResponse.json(activeNamesFixture)),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/active-names");
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        items: {
+          date: number;
+          netChange: number;
+          cumulativeActive: number;
+        }[];
+        totalCount: number;
+      };
+
+      expect(body.totalCount).toBe(activeNamesFixture.result.rows.length);
+      expect(body.items).toHaveLength(activeNamesFixture.result.rows.length);
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        expect(prev.date).toBeLessThan(curr.date);
+      }
+
+      const first = body.items[0]!;
+      const firstRaw = activeNamesFixture.result.rows[0]!;
+      expect(first.netChange).toBe(firstRaw.net_change);
+      expect(first.cumulativeActive).toBe(firstRaw.cumulative_active);
+    });
+
+    it("returns 404 when DAO_ID is not ENS", async () => {
+      env.DAO_ID = DaoIdEnum.UNI;
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/active-names");
+
+      expect(res.status).toBe(404);
+      expect(await res.json()).toEqual({ error: "Not Found" });
+    });
+
+    it("returns empty items when the revenue client is not instantiated", async () => {
+      const app = createTestApp(undefined);
+
+      const res = await app.request("/revenue/active-names");
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("sorts descending when orderDirection=desc", async () => {
+      server.use(
+        http.get(urls.activeNames, () => HttpResponse.json(activeNamesFixture)),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request(
+        "/revenue/active-names?orderDirection=desc",
+      );
+      const body = (await res.json()) as { items: { date: number }[] };
+
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        expect(prev.date).toBeGreaterThan(curr.date);
+      }
     });
   });
 });

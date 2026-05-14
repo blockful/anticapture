@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
   RevenueActionsResponseSchema,
+  RevenueActiveNamesResponseSchema,
   RevenueQuerySchema,
 } from "@/mappers/revenue";
 import { setCacheControl } from "@/middlewares";
@@ -47,6 +48,47 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
         if (byDate !== 0) return sign * byDate;
         return sign * a.category.localeCompare(b.category);
       });
+
+      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getRevenueActiveNames",
+      path: "/revenue/active-names",
+      summary: "Get monthly net change and cumulative active .eth names",
+      description:
+        "Monthly net change and cumulative count of active .eth names.",
+      tags: ["revenue"],
+      middleware: [ensOnly, setCacheControl(60)],
+      request: {
+        query: RevenueQuerySchema,
+      },
+      responses: {
+        200: {
+          description:
+            "Monthly net change and cumulative count of active .eth names",
+          content: {
+            "application/json": {
+              schema: RevenueActiveNamesResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, orderDirection } = context.req.valid("query");
+
+      if (!revenueDuneClient) {
+        return context.json({ items: [], totalCount: 0 }, 200);
+      }
+
+      const rows = await revenueDuneClient.fetchActiveNames();
+      const filtered = filterByRange(rows, fromDate, toDate);
+      const sign = orderDirection === "desc" ? -1 : 1;
+      const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
 
       return context.json({ items: sorted, totalCount: sorted.length }, 200);
     },

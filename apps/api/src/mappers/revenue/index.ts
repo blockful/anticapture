@@ -53,3 +53,34 @@ export const RevenueActionsResponseSchema = z
 export type RevenueActionsResponse = z.infer<
   typeof RevenueActionsResponseSchema
 >;
+
+export const RevenueActiveNamesItemSchema = z
+  .object({
+    date: z
+      .number()
+      .int()
+      .describe("Month start (Unix timestamp in seconds, UTC)."),
+    netChange: z
+      .number()
+      .describe("Net change in active .eth names for the month."),
+    cumulativeActive: z
+      .number()
+      .describe("Cumulative count of active .eth names as of the month."),
+  })
+  .openapi("RevenueActiveNamesItem", {
+    description: "Single active-names datapoint.",
+  });
+
+export const RevenueActiveNamesResponseSchema = z
+  .object({
+    items: z.array(RevenueActiveNamesItemSchema),
+    totalCount: z.number().int().describe("Total number of items returned."),
+  })
+  .openapi("RevenueActiveNamesResponse", {
+    description:
+      "Monthly net change and cumulative count of active .eth names.",
+  });
+
+export type RevenueActiveNamesResponse = z.infer<
+  typeof RevenueActiveNamesResponseSchema
+>;

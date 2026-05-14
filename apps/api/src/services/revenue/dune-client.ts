@@ -40,6 +40,18 @@ type RawActionRow = {
   actions: number;
 };
 
+export type RevenueActiveNamesItem = {
+  date: number;
+  netChange: number;
+  cumulativeActive: number;
+};
+
+type RawActiveNamesRow = {
+  date: string;
+  net_change: number;
+  cumulative_active: number;
+};
+
 export class RevenueDuneClient {
   private readonly cache = new RevenueCache();
 
@@ -55,6 +67,16 @@ export class RevenueDuneClient {
       date: parseDuneMonth(row.date),
       category: row.category,
       actions: row.actions,
+    }));
+  }
+
+  public async fetchActiveNames(): Promise<RevenueActiveNamesItem[]> {
+    const data =
+      await this.fetchJson<DuneRowsResponse<RawActiveNamesRow>>("activeNames");
+    return data.result.rows.map((row) => ({
+      date: parseDuneMonth(row.date),
+      netChange: row.net_change,
+      cumulativeActive: row.cumulative_active,
     }));
   }
 
