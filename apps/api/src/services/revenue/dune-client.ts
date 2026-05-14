@@ -94,6 +94,28 @@ type RawRenewalFunnelRow = {
   renewal_rate_pct: string;
 };
 
+export type RevenueTotalsItem = {
+  date: number;
+  registrationUsd: number;
+  premiumUsd: number;
+  renewalUsd: number;
+  totalUsd: number;
+  registrationEth: number;
+  premiumEth: number;
+  renewalEth: number;
+};
+
+type RawRevenueTotalsRow = {
+  date: string;
+  registration_usd: number;
+  premium_usd: number;
+  renewal_usd: number;
+  total_usd: number;
+  registration_eth: number;
+  premium_eth: number;
+  renewal_eth: number;
+};
+
 export class RevenueDuneClient {
   private readonly cache = new RevenueCache();
 
@@ -154,6 +176,23 @@ export class RevenueDuneClient {
       renewedCount: row.renewed_count,
       churnedCount: row.churned_count,
       renewalRatePct: parseFloat(row.renewal_rate_pct),
+    }));
+  }
+
+  public async fetchRevenueTotals(): Promise<RevenueTotalsItem[]> {
+    const data =
+      await this.fetchJson<DuneRowsResponse<RawRevenueTotalsRow>>(
+        "revenueTotals",
+      );
+    return data.result.rows.map((row) => ({
+      date: parseDuneMonth(row.date),
+      registrationUsd: row.registration_usd,
+      premiumUsd: row.premium_usd,
+      renewalUsd: row.renewal_usd,
+      totalUsd: row.total_usd,
+      registrationEth: row.registration_eth,
+      premiumEth: row.premium_eth,
+      renewalEth: row.renewal_eth,
     }));
   }
 

@@ -188,3 +188,53 @@ export const RevenueRenewalFunnelResponseSchema = z
 export type RevenueRenewalFunnelResponse = z.infer<
   typeof RevenueRenewalFunnelResponseSchema
 >;
+
+export const RevenueTotalsItemSchema = z
+  .object({
+    date: z
+      .number()
+      .int()
+      .describe("Month start (Unix timestamp in seconds, UTC)."),
+    registrationUsd: z
+      .number()
+      .describe("USD revenue from new .eth registrations in the month."),
+    premiumUsd: z
+      .number()
+      .describe(
+        "USD revenue from temporary premium auctions in the given month.",
+      ),
+    renewalUsd: z
+      .number()
+      .describe("USD revenue from .eth renewals in the given month."),
+    totalUsd: z
+      .number()
+      .describe(
+        "Total USD revenue for the month (upstream sum; not recomputed).",
+      ),
+    registrationEth: z
+      .number()
+      .describe("ETH revenue from new .eth registrations in the month."),
+    premiumEth: z
+      .number()
+      .describe(
+        "ETH revenue from temporary premium auctions in the given month.",
+      ),
+    renewalEth: z
+      .number()
+      .describe("ETH revenue from .eth renewals in the given month."),
+  })
+  .openapi("RevenueTotalsItem", {
+    description: "Single revenue-totals datapoint.",
+  });
+
+export const RevenueTotalsResponseSchema = z
+  .object({
+    items: z.array(RevenueTotalsItemSchema),
+    totalCount: z.number().int().describe("Total number of items returned."),
+  })
+  .openapi("RevenueTotalsResponse", {
+    description:
+      "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+  });
+
+export type RevenueTotalsResponse = z.infer<typeof RevenueTotalsResponseSchema>;

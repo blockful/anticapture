@@ -24,6 +24,7 @@ import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.jso
 import newWalletsFixture from "@/services/revenue/__fixtures__/new-wallets.json";
 import premiumEthFixture from "@/services/revenue/__fixtures__/premium-eth.json";
 import renewalFunnelFixture from "@/services/revenue/__fixtures__/renewal-funnel.json";
+import revenueTotalsFixture from "@/services/revenue/__fixtures__/revenue-totals.json";
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
@@ -517,6 +518,117 @@ describe("Revenue Controller", () => {
           item.renewalRatePct === parseFloat(highPrecisionRow.renewal_rate_pct),
       );
       expect(highPrecisionItem).toBeDefined();
+    });
+  });
+
+  describe("GET /revenue/totals", () => {
+    it("returns happy-path data sorted ascending by date with mapped fields", async () => {
+      server.use(
+        http.get(urls.revenueTotals, () =>
+          HttpResponse.json(revenueTotalsFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/totals");
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        items: {
+          date: number;
+          registrationUsd: number;
+          premiumUsd: number;
+          renewalUsd: number;
+          totalUsd: number;
+          registrationEth: number;
+          premiumEth: number;
+          renewalEth: number;
+        }[];
+        totalCount: number;
+      };
+
+      expect(body.totalCount).toBe(revenueTotalsFixture.result.rows.length);
+      expect(body.items).toHaveLength(revenueTotalsFixture.result.rows.length);
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        expect(prev.date).toBeLessThan(curr.date);
+      }
+
+      const first = body.items[0]!;
+      const firstRaw = revenueTotalsFixture.result.rows[0]!;
+      expect(first.registrationUsd).toBe(firstRaw.registration_usd);
+      expect(first.premiumUsd).toBe(firstRaw.premium_usd);
+      expect(first.renewalUsd).toBe(firstRaw.renewal_usd);
+      expect(first.totalUsd).toBe(firstRaw.total_usd);
+      expect(first.registrationEth).toBe(firstRaw.registration_eth);
+      expect(first.premiumEth).toBe(firstRaw.premium_eth);
+      expect(first.renewalEth).toBe(firstRaw.renewal_eth);
+    });
+
+    it("returns 404 when DAO_ID is not ENS", async () => {
+      env.DAO_ID = DaoIdEnum.UNI;
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/totals");
+
+      expect(res.status).toBe(404);
+      expect(await res.json()).toEqual({ error: "Not Found" });
+    });
+
+    it("returns empty items when the revenue client is not instantiated", async () => {
+      const app = createTestApp(undefined);
+
+      const res = await app.request("/revenue/totals");
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("sorts descending when orderDirection=desc", async () => {
+      server.use(
+        http.get(urls.revenueTotals, () =>
+          HttpResponse.json(revenueTotalsFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const res = await app.request("/revenue/totals?orderDirection=desc");
+      const body = (await res.json()) as { items: { date: number }[] };
+
+      for (let i = 1; i < body.items.length; i++) {
+        const prev = body.items[i - 1]!;
+        const curr = body.items[i]!;
+        expect(prev.date).toBeGreaterThan(curr.date);
+      }
+    });
+
+    it("returns non-zero premiumUsd and premiumEth for an April-2023-onward row", async () => {
+      server.use(
+        http.get(urls.revenueTotals, () =>
+          HttpResponse.json(revenueTotalsFixture),
+        ),
+      );
+      const client = new RevenueDuneClient(API_KEY, urls);
+      const app = createTestApp(client);
+
+      const apr2023 = Math.floor(Date.UTC(2023, 3, 1) / 1000);
+      const res = await app.request(`/revenue/totals?fromDate=${apr2023}`);
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        items: { date: number; premiumUsd: number; premiumEth: number }[];
+      };
+
+      const aprilOrLater = body.items.filter((item) => item.date >= apr2023);
+      expect(aprilOrLater.length).toBeGreaterThan(0);
+      for (const item of aprilOrLater) {
+        expect(item.premiumUsd).toBeGreaterThan(0);
+        expect(item.premiumEth).toBeGreaterThan(0);
+      }
     });
   });
 });

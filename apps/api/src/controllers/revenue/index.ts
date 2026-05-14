@@ -7,6 +7,7 @@ import {
   RevenuePremiumEthResponseSchema,
   RevenueQuerySchema,
   RevenueRenewalFunnelResponseSchema,
+  RevenueTotalsResponseSchema,
 } from "@/mappers/revenue";
 import { setCacheControl } from "@/middlewares";
 import { RevenueDuneClient, ensOnly, filterByRange } from "@/services/revenue";
@@ -212,6 +213,46 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       }
 
       const rows = await revenueDuneClient.fetchRenewalFunnel();
+      const filtered = filterByRange(rows, fromDate, toDate);
+      const sign = orderDirection === "desc" ? -1 : 1;
+      const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
+
+      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getRevenueTotals",
+      path: "/revenue/totals",
+      summary: "Get monthly ENS revenue totals in USD and ETH",
+      description:
+        "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+      tags: ["revenue"],
+      middleware: [ensOnly, setCacheControl(60)],
+      request: {
+        query: RevenueQuerySchema,
+      },
+      responses: {
+        200: {
+          description: "Monthly ENS revenue totals in USD and ETH",
+          content: {
+            "application/json": {
+              schema: RevenueTotalsResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, orderDirection } = context.req.valid("query");
+
+      if (!revenueDuneClient) {
+        return context.json({ items: [], totalCount: 0 }, 200);
+      }
+
+      const rows = await revenueDuneClient.fetchRevenueTotals();
       const filtered = filterByRange(rows, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
