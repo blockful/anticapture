@@ -133,23 +133,15 @@ export const ProposalCreationForm = ({
       daoId as GetDraftProposalPathParamsDaoEnumKey,
       draftId,
     )
-      .then(
-        (shared: {
-          title: string;
-          discussionUrl: string;
-          body: string;
-          actions: unknown[];
-        }) => {
-          form.reset({
-            title: shared.title,
-            discussionUrl: shared.discussionUrl,
-            body: shared.body,
-            actions: shared.actions.map((a) =>
-              toFormAction(a as ProposalAction),
-            ),
-          });
-        },
-      )
+      .then((shared) => {
+        if (!shared) return;
+        form.reset({
+          title: shared.title,
+          discussionUrl: shared.discussionUrl,
+          body: shared.body,
+          actions: shared.actions.map((a) => toFormAction(a as ProposalAction)),
+        });
+      })
       .catch(() => {
         // Draft not found or fetch failed — leave form empty
       });
