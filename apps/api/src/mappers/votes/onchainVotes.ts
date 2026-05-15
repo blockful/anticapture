@@ -39,7 +39,7 @@ export type VotesRequest = z.infer<typeof VotesRequestSchema>;
 
 export const VoteResponseSchema = z
   .object({
-    voterAddress: z.string(),
+    voterAddress: z.string().openapi({ format: "ethereum-address" }),
     transactionHash: z.string(),
     proposalId: z.string(),
     support: VoteSupportSchema.optional(),
@@ -48,6 +48,7 @@ export const VoteResponseSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Voting power encoded as a decimal string.",
       }),
     reason: z.string().nullish(),

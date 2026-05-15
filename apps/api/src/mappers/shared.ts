@@ -148,10 +148,13 @@ export const unixTimestampQueryParam = (description: string) =>
   });
 
 export const addressOutputField = (description: string) =>
-  z.string().openapi({ description });
+  z.string().openapi({ description, format: "ethereum-address" });
 
 export const decimalStringField = (description: string) =>
-  z.string().openapi({ description });
+  z.string().openapi({
+    description,
+    format: "bigint",
+  });
 
 export const txHashField = () =>
   z.string().openapi({ description: "Transaction hash." });
@@ -184,6 +187,7 @@ export const unixSecondsStringField = (subject: string) =>
   z.string().openapi({
     description: `${subject} timestamp in Unix seconds as a string.`,
     example: "1704067200",
+    format: "bigint",
   });
 
 export const unixSecondsIntField = (description: string) =>
@@ -279,8 +283,8 @@ export const bigintAsStringField = (description?: string) => {
     z.string(),
   ]);
   return description
-    ? schema.openapi({ type: "string", description })
-    : schema.openapi({ type: "string" });
+    ? schema.openapi({ format: "bigint", type: "string", description })
+    : schema.openapi({ format: "bigint", type: "string" });
 };
 
 const errorResponseContent = {

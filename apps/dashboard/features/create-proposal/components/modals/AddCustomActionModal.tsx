@@ -21,10 +21,7 @@ import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import daoConfig from "@/shared/dao-config";
-import {
-  fetchAddressFromEnsName,
-  isEnsAddress,
-} from "@/shared/hooks/useEnsData";
+import { fetchAddressFromEnsName, isEnsAddress } from "@/shared/utils/ens";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { CustomAction } from "@/features/create-proposal/types";
 import {

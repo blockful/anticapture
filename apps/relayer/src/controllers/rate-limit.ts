@@ -30,7 +30,7 @@ export function rateLimit(app: Hono, deps: RateLimitControllerDeps) {
     createRoute({
       method: "get",
       operationId: "getRateLimit",
-      path: "/rate-limit/{address}",
+      path: "/relay/rate-limit/{address}",
       summary: "Per-address relay usage for the current UTC day",
       description:
         "Returns the number of relay calls already used and remaining for the given address, " +

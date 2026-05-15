@@ -88,9 +88,10 @@ export const ProposalResponseSchema = z
     txHash: z
       .string()
       .openapi({ description: "Proposal creation transaction hash." }),
-    proposerAccountId: z
-      .string()
-      .openapi({ description: "Address that created the proposal." }),
+    proposerAccountId: z.string().openapi({
+      description: "Address that created the proposal.",
+      format: "ethereum-address",
+    }),
     title: z.string().openapi({ description: "Proposal title." }),
     description: z.string().openapi({ description: "Proposal body." }),
     startBlock: z
@@ -117,16 +118,32 @@ export const ProposalResponseSchema = z
     endTimestamp: unixSecondsIntField(
       "Proposal end timestamp in Unix seconds.",
     ),
+    queuedTimestamp: unixSecondsIntField(
+      "Timestamp (Unix seconds) when the proposal was queued, or null if it never was.",
+    ).nullable(),
+    executedTimestamp: unixSecondsIntField(
+      "Timestamp (Unix seconds) when the proposal was executed, or null if it never was.",
+    ).nullable(),
+    queuedTxHash: z.string().nullable().openapi({
+      description:
+        "Transaction hash of the queue event, or null if the proposal was never queued.",
+    }),
+    executedTxHash: z.string().nullable().openapi({
+      description:
+        "Transaction hash of the execute event, or null if the proposal was never executed.",
+    }),
     quorum: decimalStringField("Required quorum encoded as a decimal string."),
     calldatas: z.array(z.string()).openapi({
       description: "Encoded calldata payloads executed by the proposal.",
     }),
-    values: z.array(z.string()).openapi({
+    values: z.array(z.string().openapi({ format: "bigint" })).openapi({
       description: "ETH values attached to each call, encoded as strings.",
     }),
-    targets: z.array(z.string()).openapi({
-      description: "Contract targets invoked by the proposal.",
-    }),
+    targets: z
+      .array(z.string().openapi({ format: "ethereum-address" }))
+      .openapi({
+        description: "Contract targets invoked by the proposal.",
+      }),
     proposalType: z.number().int().nullable().openapi({
       description: "Optional proposal type discriminator.",
     }),
@@ -197,6 +214,12 @@ export const ProposalMapper = {
       values: p.values.map((v) => v.toString()),
       targets: p.targets,
       proposalType: p.proposalType,
+      queuedTimestamp:
+        p.queuedTimestamp === null ? null : Number(p.queuedTimestamp),
+      executedTimestamp:
+        p.executedTimestamp === null ? null : Number(p.executedTimestamp),
+      queuedTxHash: p.queuedTxHash,
+      executedTxHash: p.executedTxHash,
     };
   },
   toLeanApi: (

@@ -38,10 +38,10 @@ export type HistoricalDelegationsRequestQuery = z.infer<
 
 export const DelegationItemSchema = z
   .object({
-    delegatorAddress: AddressSchema,
-    delegateAddress: AddressSchema,
-    amount: z.string(),
-    timestamp: z.string(),
+    delegatorAddress: AddressSchema.openapi({ format: "ethereum-address" }),
+    delegateAddress: AddressSchema.openapi({ format: "ethereum-address" }),
+    amount: z.string().openapi({ format: "bigint" }),
+    timestamp: z.string().openapi({ format: "bigint" }),
     transactionHash: z.string(),
   })
   .openapi("DelegationItem", {

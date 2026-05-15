@@ -48,14 +48,14 @@ export const TokenPropertiesSchema = z
       example: 18,
       type: "integer",
     }),
-    totalSupply: z.string(),
-    delegatedSupply: z.string(),
-    cexSupply: z.string(),
-    dexSupply: z.string(),
-    lendingSupply: z.string(),
-    circulatingSupply: z.string(),
-    nonCirculatingSupply: z.string(),
-    treasury: z.string(),
+    totalSupply: z.string().openapi({ format: "bigint" }),
+    delegatedSupply: z.string().openapi({ format: "bigint" }),
+    cexSupply: z.string().openapi({ format: "bigint" }),
+    dexSupply: z.string().openapi({ format: "bigint" }),
+    lendingSupply: z.string().openapi({ format: "bigint" }),
+    circulatingSupply: z.string().openapi({ format: "bigint" }),
+    nonCirculatingSupply: z.string().openapi({ format: "bigint" }),
+    treasury: z.string().openapi({ format: "bigint" }),
   })
   .openapi("TokenProperties", {
     description:
@@ -86,14 +86,17 @@ export const SupplyComparisonResponseSchema = z
     currentValue: z.string().openapi({
       description:
         "Supply value at the end of the comparison window, encoded as a decimal string (raw token base units).",
+      format: "bigint",
     }),
     changeRate: z.number().openapi({
       description:
         "Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0.",
+      format: "bigint",
     }),
     rawDelta: z.string().openapi({
       description:
         "Signed bigint delta as a decimal string: currentValue - previousValue.",
+      format: "bigint",
     }),
   })
   .openapi("SupplyComparisonResponse", {

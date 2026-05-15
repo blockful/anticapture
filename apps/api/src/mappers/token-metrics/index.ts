@@ -42,11 +42,13 @@ export const TokenMetricItemSchema = z
     }),
     high: z.string().openapi({
       description: "Highest observed value for the period.",
-      example: "14.25",
+      example: "14250000000000000000",
+      format: "bigint",
     }),
     volume: z.string().openapi({
       description: "Total volume observed for the period.",
-      example: "1200.5",
+      example: "1200500000000000000000",
+      format: "bigint",
     }),
   })
   .openapi("TokenMetricItem");

@@ -48,7 +48,7 @@ import { searchProposalsLeanHandler } from "../generated/mcp/proposalsHandlers/s
 import { votesByProposalIdHandler } from "../generated/mcp/proposalsHandlers/votesByProposalId.ts";
 import { relayDelegateHandler } from "../generated/mcp/relayHandlers/relayDelegate.ts";
 import { relayVoteHandler } from "../generated/mcp/relayHandlers/relayVote.ts";
-import { healthHandler } from "../generated/mcp/systemHandlers/health.ts";
+import { getDaoHealthHandler } from "../generated/mcp/undefinedHandlers/getDaoHealth.ts";
 import { compareCexSupplyHandler } from "../generated/mcp/tokensHandlers/compareCexSupply.ts";
 import { compareCirculatingSupplyHandler } from "../generated/mcp/tokensHandlers/compareCirculatingSupply.ts";
 import { compareDelegatedSupplyHandler } from "../generated/mcp/tokensHandlers/compareDelegatedSupply.ts";
@@ -58,14 +58,13 @@ import { compareTotalSupplyHandler } from "../generated/mcp/tokensHandlers/compa
 import { compareTreasuryHandler } from "../generated/mcp/tokensHandlers/compareTreasury.ts";
 import { historicalTokenDataHandler } from "../generated/mcp/tokensHandlers/historicalTokenData.ts";
 import { tokenHandler } from "../generated/mcp/tokensHandlers/token.ts";
-import { transactionsHandler } from "../generated/mcp/transactionsHandlers/transactions.ts";
 import { transfersHandler } from "../generated/mcp/transfersHandlers/transfers.ts";
 import { getDaoTokenTreasuryHandler } from "../generated/mcp/treasuryHandlers/getDaoTokenTreasury.ts";
 import { getLiquidTreasuryHandler } from "../generated/mcp/treasuryHandlers/getLiquidTreasury.ts";
 import { getTotalTreasuryHandler } from "../generated/mcp/treasuryHandlers/getTotalTreasury.ts";
-import { averageDelegationPercentageHandler } from "../generated/mcp/undefinedHandlers/averageDelegationPercentage.ts";
-import { daosHandler } from "../generated/mcp/undefinedHandlers/daos.ts";
-import { gatewayHealthHandler } from "../generated/mcp/undefinedHandlers/gatewayHealth.ts";
+import { averageDelegationPercentageHandler } from "../generated/mcp/governanceHandlers/averageDelegationPercentage.ts";
+import { daosHandler } from "../generated/mcp/governanceHandlers/daos.ts";
+import { gatewayHealthHandler } from "../generated/mcp/systemHandlers/gatewayHealth.ts";
 import { votesHandler } from "../generated/mcp/votesHandlers/votes.ts";
 import { historicalVotingPowerHandler } from "../generated/mcp/voting-powerHandlers/historicalVotingPower.ts";
 import { historicalVotingPowerByAccountIdHandler } from "../generated/mcp/voting-powerHandlers/historicalVotingPowerByAccountId.ts";
@@ -130,7 +129,7 @@ import {
   getLiquidTreasuryQueryResponseSchema,
   getTotalTreasuryQueryParamsSchema,
   getTotalTreasuryQueryResponseSchema,
-  healthQueryResponseSchema,
+  healthResponseSchema,
   historicalBalancesQueryParamsSchema,
   historicalBalancesQueryResponseSchema,
   historicalDelegationsQueryParamsSchema,
@@ -167,8 +166,6 @@ import {
   tokenMetricsQueryResponseSchema,
   tokenQueryParamsSchema,
   tokenQueryResponseSchema,
-  transactionsQueryParamsSchema,
-  transactionsQueryResponseSchema,
   transfersQueryParamsSchema,
   transfersQueryResponseSchema,
   votesByProposalIdQueryParamsSchema,
@@ -265,10 +262,10 @@ export function createMcpServer(): McpServer {
     {
       title: "Check API and database health",
       description: "Make a GET request to /{dao}/health",
-      outputSchema: { data: healthQueryResponseSchema },
+      outputSchema: { data: healthResponseSchema },
       inputSchema: { dao: z.enum(DAO_ALL) },
     },
-    async ({ dao }) => healthHandler({ dao }),
+    async ({ dao }) => getDaoHealthHandler({ dao }),
   );
 
   server.registerTool(
@@ -640,21 +637,6 @@ export function createMcpServer(): McpServer {
     },
     async ({ dao, address, params }) =>
       historicalBalancesHandler({ dao, address, params }),
-  );
-
-  server.registerTool(
-    "transactions",
-    {
-      title: "Get transactions with transfers and delegations",
-      description:
-        "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
-      outputSchema: { data: transactionsQueryResponseSchema },
-      inputSchema: {
-        dao: z.enum(DAO_NO_AAVE),
-        params: transactionsQueryParamsSchema,
-      },
-    },
-    async ({ dao, params }) => transactionsHandler({ dao, params }),
   );
 
   server.registerTool(

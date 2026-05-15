@@ -23,10 +23,10 @@ export type VotersRequest = z.infer<typeof VotersRequestSchema>;
 
 export const VoterResponseSchema = z
   .object({
-    voter: AddressSchema,
-    votingPower: z.string(),
+    voter: AddressSchema.openapi({ format: "ethereum-address" }),
+    votingPower: z.string().openapi({ format: "bigint" }),
     lastVoteTimestamp: z.number(),
-    votingPowerVariation: z.string(),
+    votingPowerVariation: z.string().openapi({ format: "bigint" }),
   })
   .openapi("Voter", {
     description: "Voter or non-voter record associated with a proposal.",
