@@ -11,104 +11,63 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "ok",
-              "degraded",
-              "error"
-            ]
+            "enum": ["ok", "degraded", "error"]
           },
           "database": {
             "type": "string",
-            "enum": [
-              "ok",
-              "error"
-            ]
+            "enum": ["ok", "error"]
           },
           "chain": {
             "type": "object",
             "properties": {
               "head": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
+                "type": ["integer", "null"]
               }
             },
-            "required": [
-              "head"
-            ]
+            "required": ["head"]
           },
           "indexer": {
             "type": "object",
             "properties": {
               "lastEventTimestamp": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
+                "type": ["integer", "null"]
               },
               "lagSeconds": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
+                "type": ["integer", "null"]
               },
               "fresh": {
                 "type": "boolean"
               }
             },
-            "required": [
-              "lastEventTimestamp",
-              "lagSeconds",
-              "fresh"
-            ]
+            "required": ["lastEventTimestamp", "lagSeconds", "fresh"]
           },
           "circuit": {
             "type": "object",
             "properties": {
               "state": {
                 "type": "string",
-                "enum": [
-                  "CLOSED",
-                  "OPEN",
-                  "HALF_OPEN"
-                ]
+                "enum": ["CLOSED", "OPEN", "HALF_OPEN"]
               },
               "nextRetryIn": {
                 "type": "integer"
               }
             },
-            "required": [
-              "state"
-            ]
+            "required": ["state"]
           }
         },
-        "required": [
-          "status",
-          "database",
-          "chain",
-          "indexer",
-          "circuit"
-        ]
+        "required": ["status", "database", "chain", "indexer", "circuit"]
       },
       "HealthResponse": {
         "type": "object",
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "ok",
-              "degraded",
-              "error"
-            ],
+            "enum": ["ok", "degraded", "error"],
             "description": "Overall health: ok when fresh, degraded when indexer is lagging, error when the database is unreachable."
           },
           "database": {
             "type": "string",
-            "enum": [
-              "ok",
-              "error"
-            ],
+            "enum": ["ok", "error"],
             "description": "Database connectivity status."
           },
           "chain": {
@@ -120,9 +79,7 @@
                 "description": "Latest block number reported by the RPC, or null if the RPC call failed."
               }
             },
-            "required": [
-              "head"
-            ],
+            "required": ["head"],
             "description": "On-chain state observed by this DAO API."
           },
           "indexer": {
@@ -143,20 +100,11 @@
                 "description": "True when lagSeconds is within the freshness threshold (300s)."
               }
             },
-            "required": [
-              "lastEventTimestamp",
-              "lagSeconds",
-              "fresh"
-            ],
+            "required": ["lastEventTimestamp", "lagSeconds", "fresh"],
             "description": "Indexer freshness signals derived from app tables."
           }
         },
-        "required": [
-          "status",
-          "database",
-          "chain",
-          "indexer"
-        ]
+        "required": ["status", "database", "chain", "indexer"]
       },
       "DelegationsResponse": {
         "type": "object",
@@ -171,10 +119,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ],
+        "required": ["items", "totalCount"],
         "description": "Paginated historical delegations response."
       },
       "DelegationItem": {
@@ -211,10 +156,7 @@
       },
       "OrderDirection": {
         "type": "string",
-        "enum": [
-          "asc",
-          "desc"
-        ],
+        "enum": ["asc", "desc"],
         "default": "desc",
         "description": "Sort direction for ordered query results."
       },
@@ -231,10 +173,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ],
+        "required": ["items", "totalCount"],
         "description": "Paginated delegators for a delegate address."
       },
       "DelegatorItem": {
@@ -253,11 +192,7 @@
             "format": "bigint"
           }
         },
-        "required": [
-          "delegatorAddress",
-          "amount",
-          "timestamp"
-        ],
+        "required": ["delegatorAddress", "amount", "timestamp"],
         "description": "Aggregated delegation amount and latest timestamp for one delegator."
       },
       "TreasuryResponse": {
@@ -274,10 +209,7 @@
             "description": "Total number of items"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ],
+        "required": ["items", "totalCount"],
         "description": "Paginated treasury time-series response."
       },
       "TreasuryItem": {
@@ -292,21 +224,12 @@
             "description": "Unix timestamp in milliseconds"
           }
         },
-        "required": [
-          "value",
-          "date"
-        ],
+        "required": ["value", "date"],
         "description": "Single treasury time-series datapoint."
       },
       "DaysWindow": {
         "type": "string",
-        "enum": [
-          "7d",
-          "30d",
-          "90d",
-          "180d",
-          "365d"
-        ],
+        "enum": ["7d", "30d", "90d", "180d", "365d"],
         "default": "365d"
       },
       "TokenHistoricalPriceResponse": {
@@ -330,10 +253,7 @@
             "example": 1704067200
           }
         },
-        "required": [
-          "price",
-          "timestamp"
-        ]
+        "required": ["price", "timestamp"]
       },
       "TokenPropertiesResponse": {
         "allOf": [
@@ -347,9 +267,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "price"
-            ]
+            "required": ["price"]
           }
         ],
         "description": "Token properties enriched with the current token price."
@@ -431,9 +349,7 @@
             "example": "Validation error: Expected number, received string"
           }
         },
-        "required": [
-          "error"
-        ],
+        "required": ["error"],
         "description": "Generic error payload returned by the API."
       },
       "FeedResponse": {
@@ -451,10 +367,7 @@
             "example": 128
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ],
+        "required": ["items", "totalCount"],
         "description": "Paginated governance activity feed response."
       },
       "FeedItem": {
@@ -511,11 +424,7 @@
       },
       "FeedRelevance": {
         "type": "string",
-        "enum": [
-          "HIGH",
-          "MEDIUM",
-          "LOW"
-        ],
+        "enum": ["HIGH", "MEDIUM", "LOW"],
         "description": "Filter events by relevance tier."
       },
       "FeedMetadata": {
@@ -536,9 +445,7 @@
             "example": "1000000000000000000"
           }
         },
-        "required": [
-          "threshold"
-        ],
+        "required": ["threshold"],
         "description": "Resolved threshold for a feed event type and relevance level."
       },
       "SupplyComparisonResponse": {
@@ -564,12 +471,7 @@
             "description": "Signed bigint delta as a decimal string: currentValue - previousValue."
           }
         },
-        "required": [
-          "previousValue",
-          "currentValue",
-          "changeRate",
-          "rawDelta"
-        ],
+        "required": ["previousValue", "currentValue", "changeRate", "rawDelta"],
         "description": "Supply metric comparison between current and previous periods."
       },
       "ActiveSupplyResponse": {
@@ -582,9 +484,7 @@
             "example": "1000000000000000000000000"
           }
         },
-        "required": [
-          "activeSupply"
-        ],
+        "required": ["activeSupply"],
         "description": "Active token supply for the selected comparison window."
       },
       "ProposalsComparisonResponse": {
@@ -643,12 +543,7 @@
             "example": 32
           }
         },
-        "required": [
-          "currentVotes",
-          "oldVotes",
-          "changeRate",
-          "rawDelta"
-        ],
+        "required": ["currentVotes", "oldVotes", "changeRate", "rawDelta"],
         "description": "Vote-count comparison between two adjacent time windows."
       },
       "AverageTurnoutComparisonResponse": {
@@ -744,10 +639,7 @@
             "$ref": "#/components/schemas/ProposalActivityUserVote"
           }
         },
-        "required": [
-          "proposal",
-          "userVote"
-        ],
+        "required": ["proposal", "userVote"],
         "description": "Combined proposal and delegate vote context for one activity row."
       },
       "ProposalActivityProposal": {
@@ -860,13 +752,7 @@
             "example": "1704067200"
           }
         },
-        "required": [
-          "id",
-          "voterAccountId",
-          "proposalId",
-          "support",
-          "reason"
-        ],
+        "required": ["id", "voterAccountId", "proposalId", "support", "reason"],
         "description": "Vote cast by the requested delegate for a given proposal."
       },
       "VoteSupport": {
@@ -887,10 +773,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "required": ["items", "totalCount"]
       },
       "OnchainProposal": {
         "type": "object",
@@ -1059,9 +942,7 @@
           ]
         },
         "description": "Proposal status filter. Pass repeated query params or a comma-delimited list.",
-        "example": [
-          "ACTIVE"
-        ]
+        "example": ["ACTIVE"]
       },
       "OnchainProposalsLeanResponse": {
         "type": "object",
@@ -1076,10 +957,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "required": ["items", "totalCount"]
       },
       "OnchainProposalLean": {
         "type": "object",
@@ -1217,10 +1095,7 @@
             "description": "Total number of matching historical balance rows."
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ],
+        "required": ["items", "totalCount"],
         "description": "Paginated historical balance records for one account."
       },
       "HistoricalBalance": {
@@ -1294,11 +1169,7 @@
             "description": "Recipient address."
           }
         },
-        "required": [
-          "value",
-          "from",
-          "to"
-        ],
+        "required": ["value", "from", "to"],
         "description": "Transfer event associated with a historical balance row."
       },
       "LastUpdateResponse": {
@@ -1310,9 +1181,7 @@
             "example": "2026-03-24T12:00:00.000Z"
           }
         },
-        "required": [
-          "lastUpdate"
-        ],
+        "required": ["lastUpdate"],
         "description": "Response payload describing the latest update time for a chart."
       },
       "DelegationPercentageResponse": {
@@ -1333,11 +1202,7 @@
             "$ref": "#/components/schemas/PageInfo"
           }
         },
-        "required": [
-          "items",
-          "totalCount",
-          "pageInfo"
-        ]
+        "required": ["items", "totalCount", "pageInfo"]
       },
       "DelegationPercentageItem": {
         "type": "object",
@@ -1353,10 +1218,7 @@
             "example": "42.75"
           }
         },
-        "required": [
-          "date",
-          "high"
-        ]
+        "required": ["date", "high"]
       },
       "PageInfo": {
         "type": "object",
@@ -1380,12 +1242,7 @@
             "description": "Start cursor for the current page."
           }
         },
-        "required": [
-          "hasNextPage",
-          "hasPreviousPage",
-          "endDate",
-          "startDate"
-        ]
+        "required": ["hasNextPage", "hasPreviousPage", "endDate", "startDate"]
       },
       "HistoricalVotingPowersResponse": {
         "type": "object",
@@ -1401,10 +1258,7 @@
             "description": "Total number of matching historical voting power rows."
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ],
+        "required": ["items", "totalCount"],
         "description": "Paginated historical voting power records."
       },
       "HistoricalVotingPower": {
@@ -1485,12 +1339,7 @@
             "format": "ethereum-address"
           }
         },
-        "required": [
-          "from",
-          "value",
-          "to",
-          "previousDelegate"
-        ],
+        "required": ["from", "value", "to", "previousDelegate"],
         "description": "Delegation event associated with a historical voting power row."
       },
       "HistoricalVotingPowerTransfer": {
@@ -1510,11 +1359,7 @@
             "format": "ethereum-address"
           }
         },
-        "required": [
-          "value",
-          "from",
-          "to"
-        ],
+        "required": ["value", "from", "to"],
         "description": "Transfer event associated with a historical voting power row."
       },
       "VotingPowerVariationsResponse": {
@@ -1530,10 +1375,7 @@
             }
           }
         },
-        "required": [
-          "period",
-          "items"
-        ],
+        "required": ["period", "items"],
         "description": "List of voting power variations for multiple accounts in the selected period."
       },
       "PeriodResponse": {
@@ -1546,10 +1388,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "startTimestamp",
-          "endTimestamp"
-        ],
+        "required": ["startTimestamp", "endTimestamp"],
         "description": "Inclusive time period represented as ISO-8601 timestamps."
       },
       "VotingPowerVariation": {
@@ -1599,10 +1438,7 @@
             "$ref": "#/components/schemas/VotingPowerVariation"
           }
         },
-        "required": [
-          "period",
-          "data"
-        ],
+        "required": ["period", "data"],
         "description": "Voting power variation response for a single account."
       },
       "VotingPowersResponse": {
@@ -1619,10 +1455,7 @@
             "description": "Total number of matching voting power rows."
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ],
+        "required": ["items", "totalCount"],
         "description": "Paginated current voting power records."
       },
       "VotingPower": {
@@ -1680,10 +1513,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "absoluteChange",
-          "percentageChange"
-        ],
+        "required": ["absoluteChange", "percentageChange"],
         "description": "Embedded voting power delta metadata for a current voting power row."
       },
       "AccountBalanceVariationsResponse": {
@@ -1699,10 +1529,7 @@
             }
           }
         },
-        "required": [
-          "period",
-          "items"
-        ],
+        "required": ["period", "items"],
         "description": "List of balance variations for multiple accounts in the selected period."
       },
       "AccountBalanceVariation": {
@@ -1752,10 +1579,7 @@
             "$ref": "#/components/schemas/AccountBalanceVariation"
           }
         },
-        "required": [
-          "period",
-          "data"
-        ],
+        "required": ["period", "data"],
         "description": "Balance variation response for a single account."
       },
       "AccountBalancesWithVariationResponse": {
@@ -1774,11 +1598,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "period",
-          "totalCount"
-        ]
+        "required": ["items", "period", "totalCount"]
       },
       "AccountBalanceWithVariation": {
         "type": "object",
@@ -1803,13 +1623,7 @@
             "$ref": "#/components/schemas/AccountBalanceVariation"
           }
         },
-        "required": [
-          "address",
-          "balance",
-          "tokenId",
-          "delegate",
-          "variation"
-        ]
+        "required": ["address", "balance", "tokenId", "delegate", "variation"]
       },
       "AccountBalanceWithVariationResponse": {
         "type": "object",
@@ -1821,10 +1635,7 @@
             "$ref": "#/components/schemas/PeriodResponse"
           }
         },
-        "required": [
-          "data",
-          "period"
-        ]
+        "required": ["data", "period"]
       },
       "AccountInteractionsResponse": {
         "type": "object",
@@ -1842,11 +1653,7 @@
             }
           }
         },
-        "required": [
-          "period",
-          "totalCount",
-          "items"
-        ],
+        "required": ["period", "totalCount", "items"],
         "description": "Paginated list of account interaction aggregates."
       },
       "AccountInteraction": {
@@ -1895,10 +1702,7 @@
             "description": "Total number of matching transfers."
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "required": ["items", "totalCount"]
       },
       "Transfer": {
         "type": "object",
@@ -1986,10 +1790,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "required": ["items", "totalCount"]
       },
       "OnchainVote": {
         "type": "object",
@@ -2046,10 +1847,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ],
+        "required": ["items", "totalCount"],
         "description": "Paginated voter or non-voter records for a proposal."
       },
       "Voter": {
@@ -2143,10 +1941,7 @@
             "$ref": "#/components/schemas/PageInfo"
           }
         },
-        "required": [
-          "items",
-          "pageInfo"
-        ]
+        "required": ["items", "pageInfo"]
       },
       "TokenMetricItem": {
         "type": "object",
@@ -2169,11 +1964,7 @@
             "example": "1200500000000000000000"
           }
         },
-        "required": [
-          "date",
-          "high",
-          "volume"
-        ]
+        "required": ["date", "high", "volume"]
       },
       "OffchainProposalsResponse": {
         "type": "object",
@@ -2188,10 +1979,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "required": ["items", "totalCount"]
       },
       "OffchainProposal": {
         "type": "object",
@@ -2289,11 +2077,7 @@
                   }
                 }
               },
-              "required": [
-                "name",
-                "network",
-                "params"
-              ]
+              "required": ["name", "network", "params"]
             }
           }
         },
@@ -2323,16 +2107,10 @@
         "type": "array",
         "items": {
           "type": "string",
-          "enum": [
-            "active",
-            "closed",
-            "pending"
-          ]
+          "enum": ["active", "closed", "pending"]
         },
         "description": "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
-        "example": [
-          "active"
-        ]
+        "example": ["active"]
       },
       "OffchainProposalsLeanResponse": {
         "type": "object",
@@ -2347,10 +2125,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "required": ["items", "totalCount"]
       },
       "OffchainProposalLean": {
         "type": "object",
@@ -2444,11 +2219,7 @@
                   }
                 }
               },
-              "required": [
-                "name",
-                "network",
-                "params"
-              ]
+              "required": ["name", "network", "params"]
             }
           }
         },
@@ -2486,10 +2257,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "required": ["items", "totalCount"]
       },
       "OffchainVote": {
         "type": "object",
@@ -2548,10 +2316,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "required": ["items", "totalCount"]
       },
       "OffchainNonVoter": {
         "type": "object",
@@ -2565,10 +2330,7 @@
             "format": "bigint"
           }
         },
-        "required": [
-          "voter",
-          "votingPower"
-        ]
+        "required": ["voter", "votingPower"]
       },
       "RelayerVoteResponse": {
         "type": "object",
@@ -2580,10 +2342,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "transactionHash",
-          "voter"
-        ]
+        "required": ["transactionHash", "voter"]
       },
       "RelayerErrorResponse": {
         "type": "object",
@@ -2595,10 +2354,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "error",
-          "code"
-        ]
+        "required": ["error", "code"]
       },
       "RelayerVoteRequest": {
         "type": "object",
@@ -2626,13 +2382,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "proposalId",
-          "support",
-          "v",
-          "r",
-          "s"
-        ]
+        "required": ["proposalId", "support", "v", "r", "s"]
       },
       "RelayerDelegateResponse": {
         "type": "object",
@@ -2644,10 +2394,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "transactionHash",
-          "delegator"
-        ]
+        "required": ["transactionHash", "delegator"]
       },
       "RelayerDelegateRequest": {
         "type": "object",
@@ -2677,28 +2424,17 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegatee",
-          "nonce",
-          "expiry",
-          "v",
-          "r",
-          "s"
-        ]
+        "required": ["delegatee", "nonce", "expiry", "v", "r", "s"]
       },
       "RelayerHealthResponse": {
         "type": "object",
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "ok"
-            ]
+            "enum": ["ok"]
           }
         },
-        "required": [
-          "status"
-        ]
+        "required": ["status"]
       },
       "RelayerConfigResponse": {
         "type": "object",
@@ -2715,10 +2451,7 @@
             "description": "Maximum number of relays per address per UTC day, per operation."
           }
         },
-        "required": [
-          "minVotingPower",
-          "maxRelayPerAddressPerDay"
-        ]
+        "required": ["minVotingPower", "maxRelayPerAddressPerDay"]
       },
       "RelayerRateLimitResponse": {
         "type": "object",
@@ -2743,10 +2476,7 @@
                 "minimum": 0
               }
             },
-            "required": [
-              "used",
-              "remaining"
-            ]
+            "required": ["used", "remaining"]
           },
           "delegation": {
             "type": "object",
@@ -2760,10 +2490,7 @@
                 "minimum": 0
               }
             },
-            "required": [
-              "used",
-              "remaining"
-            ]
+            "required": ["used", "remaining"]
           },
           "resetsAt": {
             "type": "string",
@@ -2771,13 +2498,7 @@
             "description": "ISO 8601 timestamp of the next UTC-midnight reset."
           }
         },
-        "required": [
-          "address",
-          "maxPerDay",
-          "vote",
-          "delegation",
-          "resetsAt"
-        ]
+        "required": ["address", "maxPerDay", "vote", "delegation", "resetsAt"]
       },
       "RelayerBalanceResponse": {
         "type": "object",
@@ -2797,11 +2518,7 @@
             "description": "Minimum native balance the relayer must hold to be considered funded, as a decimal string (uint256, in wei)."
           }
         },
-        "required": [
-          "hasEnoughBalance",
-          "balanceWei",
-          "thresholdWei"
-        ]
+        "required": ["hasEnoughBalance", "balanceWei", "thresholdWei"]
       }
     },
     "parameters": {},
@@ -2817,9 +2534,7 @@
       "get": {
         "operationId": "gatewayHealth",
         "summary": "Gateway health and per-DAO circuit breaker states",
-        "tags": [
-          "system"
-        ],
+        "tags": ["system"],
         "responses": {
           "200": {
             "description": "Gateway health and per-DAO circuit breaker states",
@@ -2830,9 +2545,7 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "ok"
-                      ]
+                      "enum": ["ok"]
                     },
                     "circuits": {
                       "type": "object",
@@ -2841,26 +2554,17 @@
                         "properties": {
                           "state": {
                             "type": "string",
-                            "enum": [
-                              "CLOSED",
-                              "OPEN",
-                              "HALF_OPEN"
-                            ]
+                            "enum": ["CLOSED", "OPEN", "HALF_OPEN"]
                           },
                           "nextRetryIn": {
                             "type": "number"
                           }
                         },
-                        "required": [
-                          "state"
-                        ]
+                        "required": ["state"]
                       }
                     }
                   },
-                  "required": [
-                    "status",
-                    "circuits"
-                  ]
+                  "required": ["status", "circuits"]
                 }
               }
             }
@@ -2884,7 +2588,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Per-DAO health snapshot — database, chain head, indexer freshness, and gateway circuit-breaker state.",
+            "description": "Per-DAO health snapshot \u2014 database, chain head, indexer freshness, and gateway circuit-breaker state.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2904,9 +2608,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ]
+                  "required": ["error"]
                 }
               }
             }
@@ -2928,9 +2630,7 @@
       "get": {
         "operationId": "daos",
         "summary": "List of all configured DAOs",
-        "tags": [
-          "governance"
-        ],
+        "tags": ["governance"],
         "responses": {
           "200": {
             "description": "List of all configured DAOs",
@@ -2989,10 +2689,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "items",
-                    "totalCount"
-                  ]
+                  "required": ["items", "totalCount"]
                 }
               }
             }
@@ -3004,16 +2701,11 @@
       "get": {
         "operationId": "averageDelegationPercentage",
         "summary": "Average delegation percentage across all DAOs",
-        "tags": [
-          "governance"
-        ],
+        "tags": ["governance"],
         "parameters": [
           {
             "schema": {
-              "type": [
-                "number",
-                "null"
-              ],
+              "type": ["number", "null"],
               "description": "Start date (Unix timestamp)"
             },
             "required": false,
@@ -3023,10 +2715,7 @@
           },
           {
             "schema": {
-              "type": [
-                "number",
-                "null"
-              ],
+              "type": ["number", "null"],
               "description": "End date (Unix timestamp)"
             },
             "required": false,
@@ -3053,10 +2742,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
+              "enum": ["asc", "desc"],
               "default": "asc"
             },
             "required": false,
@@ -3065,10 +2751,7 @@
           },
           {
             "schema": {
-              "type": [
-                "number",
-                "null"
-              ],
+              "type": ["number", "null"],
               "default": 10
             },
             "required": false,
@@ -3096,10 +2779,7 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "date",
-                          "high"
-                        ]
+                        "required": ["date", "high"]
                       }
                     },
                     "totalCount": {
@@ -3115,16 +2795,10 @@
                           "type": "boolean"
                         },
                         "endDate": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "startDate": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         }
                       },
                       "required": [
@@ -3135,11 +2809,7 @@
                       ]
                     }
                   },
-                  "required": [
-                    "items",
-                    "totalCount",
-                    "pageInfo"
-                  ]
+                  "required": ["items", "totalCount", "pageInfo"]
                 }
               }
             }
@@ -3152,10 +2822,7 @@
         "operationId": "historicalDelegations",
         "summary": "Get historical delegations",
         "description": "Get historical delegations for an account, with optional filtering and sorting",
-        "tags": [
-          "delegations",
-          "skip-pagination"
-        ],
+        "tags": ["delegations", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -3245,7 +2912,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3257,9 +2934,7 @@
         "operationId": "delegations",
         "summary": "Get delegations",
         "description": "Get current delegations for an account",
-        "tags": [
-          "delegations"
-        ],
+        "tags": ["delegations"],
         "parameters": [
           {
             "schema": {
@@ -3291,7 +2966,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3303,10 +2988,7 @@
         "operationId": "delegators",
         "summary": "Get delegators",
         "description": "Get current delegators of an account with voting power",
-        "tags": [
-          "delegations",
-          "skip-pagination"
-        ],
+        "tags": ["delegations", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -3341,10 +3023,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "amount",
-                "timestamp"
-              ],
+              "enum": ["amount", "timestamp"],
               "default": "amount"
             },
             "required": false,
@@ -3382,7 +3061,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3394,9 +3083,7 @@
         "operationId": "getLiquidTreasury",
         "summary": "Get liquid treasury data",
         "description": "Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)",
-        "tags": [
-          "treasury"
-        ],
+        "tags": ["treasury"],
         "parameters": [
           {
             "schema": {
@@ -3437,7 +3124,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3448,10 +3144,8 @@
       "get": {
         "operationId": "getDaoTokenTreasury",
         "summary": "Get DAO token treasury data",
-        "description": "Get historical DAO Token Treasury value (governance token quantity × token price)",
-        "tags": [
-          "treasury"
-        ],
+        "description": "Get historical DAO Token Treasury value (governance token quantity \u00d7 token price)",
+        "tags": ["treasury"],
         "parameters": [
           {
             "schema": {
@@ -3492,7 +3186,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3504,9 +3207,7 @@
         "operationId": "getTotalTreasury",
         "summary": "Get total treasury data",
         "description": "Get historical Total Treasury (liquid treasury + DAO token treasury)",
-        "tags": [
-          "treasury"
-        ],
+        "tags": ["treasury"],
         "parameters": [
           {
             "schema": {
@@ -3547,7 +3248,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3559,10 +3269,7 @@
         "operationId": "historicalTokenData",
         "summary": "Get historical token data",
         "description": "Get historical market data for a specific token",
-        "tags": [
-          "tokens",
-          "skip-pagination"
-        ],
+        "tags": ["tokens", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -3608,7 +3315,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3620,17 +3336,12 @@
         "operationId": "token",
         "summary": "Get token properties",
         "description": "Get property data for a specific token",
-        "tags": [
-          "tokens"
-        ],
+        "tags": ["tokens"],
         "parameters": [
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "eth",
-                "usd"
-              ],
+              "enum": ["eth", "usd"],
               "default": "usd",
               "description": "Currency to use when fetching token price data.",
               "example": "usd"
@@ -3672,7 +3383,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3683,10 +3404,7 @@
       "get": {
         "operationId": "feedEvents",
         "summary": "Get feed events",
-        "tags": [
-          "feed",
-          "skip-pagination"
-        ],
+        "tags": ["feed", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -3713,10 +3431,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "value"
-              ],
+              "enum": ["timestamp", "value"],
               "default": "timestamp",
               "description": "Field used to sort feed events.",
               "example": "timestamp"
@@ -3738,11 +3453,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "HIGH",
-                "MEDIUM",
-                "LOW"
-              ],
+              "enum": ["HIGH", "MEDIUM", "LOW"],
               "description": "Filter events by relevance tier."
             },
             "required": false,
@@ -3811,7 +3522,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3822,9 +3542,7 @@
       "get": {
         "operationId": "getEventRelevanceThreshold",
         "summary": "Get event relevance threshold",
-        "tags": [
-          "feed"
-        ],
+        "tags": ["feed"],
         "parameters": [
           {
             "schema": {
@@ -3866,7 +3584,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3877,9 +3604,7 @@
       "get": {
         "operationId": "compareTotalSupply",
         "summary": "Compare total supply between periods",
-        "tags": [
-          "tokens"
-        ],
+        "tags": ["tokens"],
         "parameters": [
           {
             "schema": {
@@ -3911,7 +3636,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3922,9 +3656,7 @@
       "get": {
         "operationId": "compareDelegatedSupply",
         "summary": "Compare delegated supply between periods",
-        "tags": [
-          "tokens"
-        ],
+        "tags": ["tokens"],
         "parameters": [
           {
             "schema": {
@@ -3956,7 +3688,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -3967,9 +3708,7 @@
       "get": {
         "operationId": "compareCirculatingSupply",
         "summary": "Compare circulating supply between periods",
-        "tags": [
-          "tokens"
-        ],
+        "tags": ["tokens"],
         "parameters": [
           {
             "schema": {
@@ -4001,7 +3740,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4012,9 +3760,7 @@
       "get": {
         "operationId": "compareTreasury",
         "summary": "Compare treasury between periods",
-        "tags": [
-          "tokens"
-        ],
+        "tags": ["tokens"],
         "parameters": [
           {
             "schema": {
@@ -4046,7 +3792,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4057,9 +3812,7 @@
       "get": {
         "operationId": "compareCexSupply",
         "summary": "Compare cex supply between periods",
-        "tags": [
-          "tokens"
-        ],
+        "tags": ["tokens"],
         "parameters": [
           {
             "schema": {
@@ -4091,7 +3844,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4102,9 +3864,7 @@
       "get": {
         "operationId": "compareDexSupply",
         "summary": "Compare dex supply between periods",
-        "tags": [
-          "tokens"
-        ],
+        "tags": ["tokens"],
         "parameters": [
           {
             "schema": {
@@ -4136,7 +3896,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4147,9 +3916,7 @@
       "get": {
         "operationId": "compareLendingSupply",
         "summary": "Compare lending supply between periods",
-        "tags": [
-          "tokens"
-        ],
+        "tags": ["tokens"],
         "parameters": [
           {
             "schema": {
@@ -4181,7 +3948,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4192,9 +3968,7 @@
       "get": {
         "operationId": "compareActiveSupply",
         "summary": "Get active token supply for DAO",
-        "tags": [
-          "governance"
-        ],
+        "tags": ["governance"],
         "parameters": [
           {
             "schema": {
@@ -4226,7 +4000,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4237,9 +4020,7 @@
       "get": {
         "operationId": "compareProposals",
         "summary": "Compare number of proposals between time periods",
-        "tags": [
-          "governance"
-        ],
+        "tags": ["governance"],
         "parameters": [
           {
             "schema": {
@@ -4271,7 +4052,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4282,9 +4072,7 @@
       "get": {
         "operationId": "compareVotes",
         "summary": "Compare number of votes between time periods",
-        "tags": [
-          "governance"
-        ],
+        "tags": ["governance"],
         "parameters": [
           {
             "schema": {
@@ -4316,7 +4104,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4327,9 +4124,7 @@
       "get": {
         "operationId": "compareAverageTurnout",
         "summary": "Compare average turnout between time periods",
-        "tags": [
-          "governance"
-        ],
+        "tags": ["governance"],
         "parameters": [
           {
             "schema": {
@@ -4361,7 +4156,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4373,10 +4177,7 @@
         "operationId": "proposalsActivity",
         "summary": "Get proposals activity for delegate",
         "description": "Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window",
-        "tags": [
-          "proposals",
-          "skip-pagination"
-        ],
+        "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -4425,11 +4226,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "votingPower",
-                "voteTiming"
-              ],
+              "enum": ["timestamp", "votingPower", "voteTiming"],
               "default": "timestamp",
               "description": "Field used to sort proposal activity results.",
               "example": "timestamp"
@@ -4451,12 +4248,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "yes",
-                "no",
-                "abstain",
-                "no_vote"
-              ],
+              "enum": ["yes", "no", "abstain", "no_vote"],
               "description": "Optional vote filter. Use yes, no, abstain, or no-vote to narrow the result set.",
               "example": "yes"
             },
@@ -4487,7 +4279,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4499,10 +4300,7 @@
         "operationId": "proposals",
         "summary": "Get proposals",
         "description": "Returns a list of proposal",
-        "tags": [
-          "proposals",
-          "skip-pagination"
-        ],
+        "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -4601,7 +4399,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4613,10 +4420,7 @@
         "operationId": "searchProposals",
         "summary": "Search proposals",
         "description": "Returns proposals whose title or identifier partially matches the query.",
-        "tags": [
-          "proposals",
-          "skip-pagination"
-        ],
+        "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -4674,7 +4478,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4686,10 +4499,7 @@
         "operationId": "proposalsLean",
         "summary": "Get proposals (lean)",
         "description": "Returns a list of proposals without execution payload fields (calldatas, values, targets). Use this when calldata is not needed.",
-        "tags": [
-          "proposals",
-          "skip-pagination"
-        ],
+        "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -4788,7 +4598,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4800,10 +4619,7 @@
         "operationId": "searchProposalsLean",
         "summary": "Search proposals (lean)",
         "description": "Returns matching proposals without execution payload fields (calldatas, values, targets).",
-        "tags": [
-          "proposals",
-          "skip-pagination"
-        ],
+        "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -4861,7 +4677,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4873,9 +4698,7 @@
         "operationId": "proposalLean",
         "summary": "Get a proposal by ID (lean)",
         "description": "Returns a single proposal by its ID without execution payload fields (calldatas, values, targets).",
-        "tags": [
-          "proposals"
-        ],
+        "tags": ["proposals"],
         "parameters": [
           {
             "schema": {
@@ -4919,7 +4742,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4931,9 +4763,7 @@
         "operationId": "proposal",
         "summary": "Get a proposal by ID",
         "description": "Returns a single proposal by its ID",
-        "tags": [
-          "proposals"
-        ],
+        "tags": ["proposals"],
         "parameters": [
           {
             "schema": {
@@ -4977,7 +4807,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -4989,10 +4828,7 @@
         "operationId": "historicalBalances",
         "summary": "Get historical token balances",
         "description": "Returns historical balance deltas for one account, enriched with the transfer that caused each change.",
-        "tags": [
-          "account-balances",
-          "skip-pagination"
-        ],
+        "tags": ["account-balances", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -5027,10 +4863,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "delta"
-              ],
+              "enum": ["timestamp", "delta"],
               "default": "timestamp",
               "description": "Field used to sort historical balance rows.",
               "example": "timestamp"
@@ -5113,7 +4946,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5124,9 +4967,7 @@
       "get": {
         "operationId": "lastUpdate",
         "summary": "Get the last update time",
-        "tags": [
-          "metrics"
-        ],
+        "tags": ["metrics"],
         "parameters": [
           {
             "schema": {
@@ -5166,7 +5007,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5177,9 +5027,7 @@
       "get": {
         "operationId": "delegationPercentageByDay",
         "summary": "Get delegation percentage day buckets with forward-fill",
-        "tags": [
-          "metrics"
-        ],
+        "tags": ["metrics"],
         "parameters": [
           {
             "schema": {
@@ -5267,7 +5115,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5279,10 +5136,7 @@
         "operationId": "historicalVotingPowerByAccountId",
         "summary": "Get voting power changes by account",
         "description": "Returns a list of voting power changes for a specific account",
-        "tags": [
-          "voting-power",
-          "skip-pagination"
-        ],
+        "tags": ["voting-power", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -5317,10 +5171,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "delta"
-              ],
+              "enum": ["timestamp", "delta"],
               "default": "timestamp",
               "description": "Field used to sort historical voting power rows.",
               "example": "timestamp"
@@ -5403,7 +5254,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5415,10 +5276,7 @@
         "operationId": "historicalVotingPower",
         "summary": "Get voting power changes",
         "description": "Returns a list of voting power changes.",
-        "tags": [
-          "voting-power",
-          "skip-pagination"
-        ],
+        "tags": ["voting-power", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -5445,10 +5303,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "delta"
-              ],
+              "enum": ["timestamp", "delta"],
               "default": "timestamp",
               "description": "Field used to sort historical voting power rows.",
               "example": "timestamp"
@@ -5541,7 +5396,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5553,10 +5418,7 @@
         "operationId": "votingPowerVariations",
         "summary": "Get voting power changes within a time frame for the given addresses",
         "description": "Returns a mapping of the voting power changes within a time frame for the given addresses",
-        "tags": [
-          "voting-power",
-          "skip-pagination"
-        ],
+        "tags": ["voting-power", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -5646,7 +5508,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5658,9 +5529,7 @@
         "operationId": "votingPowerVariationsByAccountId",
         "summary": "Get top changes in voting power for a given period for a single account",
         "description": "Returns a the changes to voting power by period and accountId",
-        "tags": [
-          "voting-power"
-        ],
+        "tags": ["voting-power"],
         "parameters": [
           {
             "schema": {
@@ -5714,7 +5583,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5726,10 +5604,7 @@
         "operationId": "votingPowers",
         "summary": "Get voting powers",
         "description": "Returns sorted and paginated account voting power records",
-        "tags": [
-          "voting-power",
-          "skip-pagination"
-        ],
+        "tags": ["voting-power", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -5856,7 +5731,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5868,9 +5753,7 @@
         "operationId": "votingPowerByAccountId",
         "summary": "Get account powers",
         "description": "Returns voting power information for a specific address (account)",
-        "tags": [
-          "voting-power"
-        ],
+        "tags": ["voting-power"],
         "parameters": [
           {
             "schema": {
@@ -5924,7 +5807,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -5936,10 +5829,7 @@
         "operationId": "accountBalanceVariations",
         "summary": "Get variations in account balances for a given period",
         "description": "Returns a mapping of the biggest variations to account balances associated by account address",
-        "tags": [
-          "account-balances",
-          "skip-pagination"
-        ],
+        "tags": ["account-balances", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -6029,7 +5919,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -6041,9 +5940,7 @@
         "operationId": "accountBalanceVariationsByAccountId",
         "summary": "Get changes in balance for a given period for a single account",
         "description": "Returns a the changes to balance by period and accountId",
-        "tags": [
-          "account-balances"
-        ],
+        "tags": ["account-balances"],
         "parameters": [
           {
             "schema": {
@@ -6097,7 +5994,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -6109,10 +6015,7 @@
         "operationId": "accountBalances",
         "summary": "Get account balance records",
         "description": "Returns sorted and paginated account balance records",
-        "tags": [
-          "account-balances",
-          "skip-pagination"
-        ],
+        "tags": ["account-balances", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -6170,11 +6073,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "balance",
-                "variation",
-                "signedVariation"
-              ],
+              "enum": ["balance", "variation", "signedVariation"],
               "default": "balance"
             },
             "required": false,
@@ -6260,7 +6159,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -6272,9 +6181,7 @@
         "operationId": "accountBalanceByAccountId",
         "summary": "Get account balance",
         "description": "Returns account balance information for a specific address",
-        "tags": [
-          "account-balances"
-        ],
+        "tags": ["account-balances"],
         "parameters": [
           {
             "schema": {
@@ -6340,7 +6247,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -6352,10 +6269,7 @@
         "operationId": "accountInteractions",
         "summary": "Get top interactions between accounts for a given period",
         "description": "Returns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>",
-        "tags": [
-          "account-balances",
-          "skip-pagination"
-        ],
+        "tags": ["account-balances", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -6441,10 +6355,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "volume",
-                "count"
-              ],
+              "enum": ["volume", "count"],
               "default": "count",
               "description": "Field used to sort interaction rows.",
               "example": "count"
@@ -6486,7 +6397,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -6498,10 +6419,7 @@
         "operationId": "transfers",
         "summary": "Get transfers",
         "description": "Get transfers of a given address",
-        "tags": [
-          "transfers",
-          "skip-pagination"
-        ],
+        "tags": ["transfers", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -6538,10 +6456,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "amount"
-              ],
+              "enum": ["timestamp", "amount"],
               "default": "timestamp",
               "description": "Field used to sort transfers.",
               "example": "timestamp"
@@ -6640,7 +6555,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -6652,10 +6577,7 @@
         "operationId": "votesByProposalId",
         "summary": "List of votes for a given proposal",
         "description": "Returns a paginated list of votes cast on a specific proposal",
-        "tags": [
-          "proposals",
-          "skip-pagination"
-        ],
+        "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -6705,10 +6627,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "votingPower"
-              ],
+              "enum": ["timestamp", "votingPower"],
               "default": "timestamp",
               "description": "Sort votes by timestamp or voting power.",
               "example": "timestamp"
@@ -6780,7 +6699,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -6792,10 +6720,7 @@
         "operationId": "votes",
         "summary": "Get all votes",
         "description": "Get all votes ordered by timestamp or voting power",
-        "tags": [
-          "votes",
-          "skip-pagination"
-        ],
+        "tags": ["votes", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -6835,10 +6760,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "votingPower"
-              ],
+              "enum": ["timestamp", "votingPower"],
               "default": "timestamp",
               "description": "Sort votes by timestamp or voting power.",
               "example": "timestamp"
@@ -6910,7 +6832,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -6922,10 +6853,7 @@
         "operationId": "proposalNonVoters",
         "summary": "Get a proposal non-voters",
         "description": "Returns the active delegates that did not vote on a given proposal",
-        "tags": [
-          "proposals",
-          "skip-pagination"
-        ],
+        "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7001,7 +6929,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -7013,9 +6950,7 @@
         "operationId": "dao",
         "summary": "Get DAO governance parameters",
         "description": "Returns current governance parameters for this DAO",
-        "tags": [
-          "governance"
-        ],
+        "tags": ["governance"],
         "responses": {
           "200": {
             "description": "DAO governance parameters",
@@ -7037,7 +6972,17 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -7049,10 +6994,7 @@
         "operationId": "tokenMetrics",
         "summary": "Get token related metrics",
         "description": "Returns token related metrics for a single metric type.",
-        "tags": [
-          "metrics",
-          "skip-pagination"
-        ],
+        "tags": ["metrics", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7149,7 +7091,16 @@
           "schema": {
             "type": "string",
             "enum": [
-              "ens"
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
             ]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
@@ -7161,10 +7112,7 @@
         "operationId": "offchainProposals",
         "summary": "Get offchain proposals",
         "description": "Returns a list of offchain (Snapshot) proposals",
-        "tags": [
-          "offchain",
-          "skip-pagination"
-        ],
+        "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7249,9 +7197,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7262,10 +7208,7 @@
         "operationId": "offchainSearchProposals",
         "summary": "Search offchain proposals",
         "description": "Returns offchain proposals whose title or identifier partially matches the query.",
-        "tags": [
-          "offchain",
-          "skip-pagination"
-        ],
+        "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7322,9 +7265,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7335,10 +7276,7 @@
         "operationId": "offchainProposalsLean",
         "summary": "Get offchain proposals (lean)",
         "description": "Returns a list of offchain (Snapshot) proposals without the body field. Use this when the markdown body is not needed.",
-        "tags": [
-          "offchain",
-          "skip-pagination"
-        ],
+        "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7423,9 +7361,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7436,10 +7372,7 @@
         "operationId": "offchainSearchProposalsLean",
         "summary": "Search offchain proposals (lean)",
         "description": "Returns matching offchain proposals without the body field.",
-        "tags": [
-          "offchain",
-          "skip-pagination"
-        ],
+        "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7496,9 +7429,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7509,9 +7440,7 @@
         "operationId": "offchainProposalByIdLean",
         "summary": "Get an offchain proposal by ID (lean)",
         "description": "Returns a single offchain (Snapshot) proposal by its ID without the body field.",
-        "tags": [
-          "offchain"
-        ],
+        "tags": ["offchain"],
         "parameters": [
           {
             "schema": {
@@ -7554,9 +7483,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7567,9 +7494,7 @@
         "operationId": "offchainProposalById",
         "summary": "Get an offchain proposal by ID",
         "description": "Returns a single offchain (Snapshot) proposal by its ID",
-        "tags": [
-          "offchain"
-        ],
+        "tags": ["offchain"],
         "parameters": [
           {
             "schema": {
@@ -7612,9 +7537,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7625,10 +7548,7 @@
         "operationId": "votesOffchain",
         "summary": "Get offchain votes",
         "description": "Returns a list of offchain (Snapshot) votes",
-        "tags": [
-          "offchain",
-          "skip-pagination"
-        ],
+        "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7655,10 +7575,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "votingPower"
-              ],
+              "enum": ["timestamp", "votingPower"],
               "default": "timestamp",
               "description": "Sort votes by timestamp or voting power.",
               "example": "timestamp"
@@ -7733,9 +7650,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7746,10 +7661,7 @@
         "operationId": "votesOffchainByProposalId",
         "summary": "Get offchain votes for a proposal",
         "description": "Returns a paginated list of offchain (Snapshot) votes for a specific proposal",
-        "tags": [
-          "offchain",
-          "skip-pagination"
-        ],
+        "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7786,10 +7698,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "timestamp",
-                "votingPower"
-              ],
+              "enum": ["timestamp", "votingPower"],
               "default": "timestamp",
               "description": "Sort votes by timestamp or voting power.",
               "example": "timestamp"
@@ -7864,9 +7773,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7877,10 +7784,7 @@
         "operationId": "offchainProposalNonVoters",
         "summary": "Get offchain proposal non-voters",
         "description": "Returns the active delegates that did not vote on a given offchain proposal",
-        "tags": [
-          "offchain",
-          "skip-pagination"
-        ],
+        "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
             "schema": {
@@ -7963,9 +7867,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["comp", "ens", "gtc", "uni"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7976,9 +7878,7 @@
         "operationId": "getAddress",
         "summary": "Get enriched data for an address",
         "description": "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
-        "tags": [
-          "address"
-        ],
+        "tags": ["address"],
         "parameters": [
           {
             "schema": {
@@ -8038,12 +7938,7 @@
                           "example": "VitalikButerin"
                         }
                       },
-                      "required": [
-                        "entity",
-                        "entityType",
-                        "label",
-                        "twitter"
-                      ],
+                      "required": ["entity", "entityType", "label", "twitter"],
                       "description": "Arkham Intelligence label data. null when no data is available for the address."
                     },
                     "ens": {
@@ -8069,20 +7964,11 @@
                           "example": null
                         }
                       },
-                      "required": [
-                        "name",
-                        "avatar",
-                        "banner"
-                      ],
+                      "required": ["name", "avatar", "banner"],
                       "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
                     }
                   },
-                  "required": [
-                    "address",
-                    "isContract",
-                    "arkham",
-                    "ens"
-                  ]
+                  "required": ["address", "isContract", "arkham", "ens"]
                 }
               }
             }
@@ -8098,9 +7984,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "error"
-                  ]
+                  "required": ["error"]
                 }
               }
             }
@@ -8113,9 +7997,7 @@
         "operationId": "getAddresses",
         "summary": "Get enriched data for multiple addresses",
         "description": "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
-        "tags": [
-          "address"
-        ],
+        "tags": ["address"],
         "parameters": [
           {
             "schema": {
@@ -8217,27 +8099,16 @@
                                 "example": null
                               }
                             },
-                            "required": [
-                              "name",
-                              "avatar",
-                              "banner"
-                            ],
+                            "required": ["name", "avatar", "banner"],
                             "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
                           }
                         },
-                        "required": [
-                          "address",
-                          "isContract",
-                          "arkham",
-                          "ens"
-                        ]
+                        "required": ["address", "isContract", "arkham", "ens"]
                       },
                       "description": "Enrichment results for each successfully resolved address. Addresses that failed to resolve are omitted."
                     }
                   },
-                  "required": [
-                    "results"
-                  ]
+                  "required": ["results"]
                 }
               }
             }
@@ -8250,9 +8121,7 @@
         "operationId": "relayVote",
         "summary": "Relay a gasless vote",
         "description": "Submit an EIP-712 signed vote on behalf of a user. The relayer pays gas.",
-        "tags": [
-          "relay"
-        ],
+        "tags": ["relay"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8312,9 +8181,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -8325,9 +8192,7 @@
         "operationId": "relayDelegate",
         "summary": "Relay a gasless delegation",
         "description": "Submit an EIP-712 signed delegation on behalf of a user. The relayer pays gas.",
-        "tags": [
-          "relay"
-        ],
+        "tags": ["relay"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8387,9 +8252,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -8400,9 +8263,7 @@
         "operationId": "getConfig",
         "summary": "Public relayer configuration",
         "description": "Returns the static configuration values the dashboard needs to render eligibility hints.",
-        "tags": [
-          "system"
-        ],
+        "tags": ["system"],
         "responses": {
           "200": {
             "description": "Relayer configuration",
@@ -8423,9 +8284,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -8436,9 +8295,7 @@
         "operationId": "getRateLimit",
         "summary": "Per-address relay usage for the current UTC day",
         "description": "Returns the number of relay calls already used and remaining for the given address, split by operation. Reads do not consume the rate limit.",
-        "tags": [
-          "system"
-        ],
+        "tags": ["system"],
         "parameters": [
           {
             "schema": {
@@ -8489,9 +8346,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -8502,9 +8357,7 @@
         "operationId": "getRelayerBalance",
         "summary": "Relayer wallet funding status",
         "description": "Returns the relayer wallet's current native balance and whether it meets the configured threshold. Lets the dashboard hide or warn about gasless actions before users sign a request.",
-        "tags": [
-          "system"
-        ],
+        "tags": ["system"],
         "responses": {
           "200": {
             "description": "Relayer balance status",
@@ -8535,9 +8388,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "ens"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
