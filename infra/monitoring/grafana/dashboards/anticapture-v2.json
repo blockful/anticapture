@@ -472,7 +472,7 @@
     {
       "id": 4,
       "title": "Requests by Client Source — Share (donut)",
-      "description": "Split by x-client-source header from the API gateway. Four values: 'anticapture-frontend' (dashboard), 'notification-system' (bot), 'anticapture-mcp' (MCP server), 'other' (unidentified callers).",
+      "description": "Split by x-client-source header from gateful. Four values: 'anticapture-frontend' (dashboard), 'notification-system' (bot), 'anticapture-mcp' (MCP server), 'other' (unidentified callers).",
       "type": "piechart",
       "gridPos": { "x": 0, "y": 53, "w": 8, "h": 10 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -523,7 +523,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateway\"}[5m])) by (client_source)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateful\"}[5m])) by (client_source)",
           "legendFormat": "{{client_source}}",
           "instant": true,
           "refId": "A"
@@ -533,7 +533,7 @@
     {
       "id": 5,
       "title": "Requests by Client Source — Rate over time",
-      "description": "req/s per client source at the gateway level, useful for spotting bot spikes vs normal dashboard load.",
+      "description": "req/s per client source at the gateful level, useful for spotting bot spikes vs normal dashboard load.",
       "type": "timeseries",
       "gridPos": { "x": 8, "y": 53, "w": 16, "h": 10 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -590,7 +590,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateway\"}[5m])) by (client_source)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateful\"}[5m])) by (client_source)",
           "legendFormat": "{{client_source}}",
           "refId": "A"
         }

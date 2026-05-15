@@ -19,6 +19,7 @@ import { logger } from "./logger.js";
 import { cacheMiddleware } from "./middlewares/cache.js";
 import { requestLogger } from "./middlewares/logger.js";
 import { daoHealth } from "./health/dao.js";
+import { metricsMiddleware } from "./middlewares/metrics.js";
 import { health } from "./health/route.js";
 import { proxy } from "./proxy/route.js";
 import { relayerProxy } from "./proxy/relayer.js";
@@ -45,6 +46,7 @@ app.onError((err, c) => {
 
 app.use("*", cors({ origin: "*" }));
 app.use("*", requestLogger());
+app.use("*", metricsMiddleware());
 
 app.get("/metrics", async (c) => {
   const { body, contentType } = await collectPrometheusMetrics(exporter);

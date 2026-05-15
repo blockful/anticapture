@@ -25,7 +25,6 @@ import {
   token,
   tokenDistribution,
   tokenHistoricalData,
-  transactions,
   transfers,
   tokenMetrics,
   treasury,
@@ -65,7 +64,6 @@ import {
   NFTPriceRepository,
   NounsVotingPowerRepository,
   TokenRepository,
-  TransactionsRepository,
   TransfersRepository,
   TreasuryRepository,
   VotingPowerRepository,
@@ -90,7 +88,6 @@ import {
   NFTPriceService,
   ProposalsService,
   TokenService,
-  TransactionsService,
   TransfersService,
   TokenMetricsService,
   VotingPowerService,
@@ -195,7 +192,6 @@ const votingPowerRepo = wrapWithTracing(new VotingPowerRepository(pgClient));
 const proposalsRepo = wrapWithTracing(
   new DrizzleProposalsActivityRepository(pgClient),
 );
-const transactionsRepo = wrapWithTracing(new TransactionsRepository(pgClient));
 const daoMetricsDayBucketRepo = wrapWithTracing(
   new DaoMetricsDayBucketRepository(pgClient),
 );
@@ -216,9 +212,6 @@ const accountBalanceRepo = wrapWithTracing(
 );
 const accountInteractionRepo = wrapWithTracing(
   new AccountInteractionsRepository(pgClient),
-);
-const transactionsService = wrapWithTracing(
-  new TransactionsService(transactionsRepo),
 );
 const votingPowerService = wrapWithTracing(
   new VotingPowerService(
@@ -324,7 +317,6 @@ historicalBalances(
   app,
   wrapWithTracing(new HistoricalBalancesService(historicalBalancesRepo)),
 );
-transactions(app, transactionsService);
 lastUpdate(app, pgClient);
 delegationPercentage(app, delegationPercentageService);
 historicalVotingPower(app, votingPowerService);

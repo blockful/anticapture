@@ -70,10 +70,13 @@ export type HistoricalVotingPowerRequest = z.infer<
 
 export const HistoricalVotingPowerDelegationSchema = z
   .object({
-    from: z.string(),
-    value: z.string(),
-    to: z.string(),
-    previousDelegate: z.string().nullable(),
+    from: z.string().openapi({ format: "ethereum-address" }),
+    value: z.string().openapi({ format: "bigint" }),
+    to: z.string().openapi({ format: "ethereum-address" }),
+    previousDelegate: z
+      .string()
+      .nullable()
+      .openapi({ format: "ethereum-address" }),
   })
   .openapi("HistoricalVotingPowerDelegation", {
     description:
@@ -82,9 +85,9 @@ export const HistoricalVotingPowerDelegationSchema = z
 
 export const HistoricalVotingPowerTransferSchema = z
   .object({
-    value: z.string(),
-    from: z.string(),
-    to: z.string(),
+    value: z.string().openapi({ format: "bigint" }),
+    from: z.string().openapi({ format: "ethereum-address" }),
+    to: z.string().openapi({ format: "ethereum-address" }),
   })
   .openapi("HistoricalVotingPowerTransfer", {
     description:
@@ -97,16 +100,21 @@ export const HistoricalVotingPowerResponseSchema = z
     daoId: z
       .string()
       .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
-    accountId: z.string().openapi({ description: "Account address." }),
+    accountId: z
+      .string()
+      .openapi({ description: "Account address.", format: "ethereum-address" }),
     votingPower: z.string().openapi({
       description: "Voting power after the event, encoded as a decimal string.",
+      format: "bigint",
     }),
     delta: z.string().openapi({
       description: "Voting power change introduced by the event.",
+      format: "bigint",
     }),
     timestamp: z.string().openapi({
       description: "Event timestamp in Unix seconds as a string.",
       example: "1704067200",
+      format: "bigint",
     }),
     logIndex: z.number().int().openapi({
       description: "Log index within the transaction receipt.",

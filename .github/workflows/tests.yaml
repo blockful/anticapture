@@ -5,6 +5,72 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  changeset-path-filter:
+    name: Detect changeset requirement
+    runs-on: ubuntu-latest
+    outputs:
+      needs_changeset: ${{ steps.filter.outputs.needs_changeset }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect non-exempt changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            needs_changeset:
+              - "**"
+              - "!**/*.md"
+              - "!.github/**"
+              - "!.changeset/config.json"
+
+  changeset-check:
+    name: Changeset check
+    needs: changeset-path-filter
+    if: needs.changeset-path-filter.outputs.needs_changeset == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch dev
+        run: git fetch origin dev --depth=1
+
+      - name: Verify changeset is present
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if pnpm changeset status --since=origin/dev; then
+            exit 0
+          fi
+
+          if git diff --name-only origin/dev... | grep -E '^\.changeset/[^/]+\.md$' | grep -v '^\.changeset/README\.md$'; then
+            echo "Changesets status did not find package bumps, but an empty changeset is present."
+            exit 0
+          fi
+
+          exit 1
+
   test:
     runs-on: ubuntu-latest
 
@@ -41,3 +107,65 @@ jobs:
           files: ./apps/api/coverage/coverage-final.json
           flags: api
           fail_ci_if_error: false
+
+  dashboard-e2e:
+    name: Dashboard E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
+
+      - name: Run dashboard E2E tests
+        run: pnpm dashboard test:e2e
+        env:
+          CI: "true"
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.E2E_NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_GATEFUL_URL: ${{ secrets.E2E_NEXT_PUBLIC_GATEFUL_URL }}
+          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/dashboard/playwright-report
+          retention-days: 14
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: apps/dashboard/test-results
+          retention-days: 14

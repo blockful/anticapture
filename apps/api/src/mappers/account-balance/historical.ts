@@ -69,9 +69,16 @@ export const HistoricalBalanceTransferSchema = z
   .object({
     value: z.string().openapi({
       description: "Transferred amount encoded as a decimal string.",
+      format: "bigint",
     }),
-    from: z.string().openapi({ description: "Sender address." }),
-    to: z.string().openapi({ description: "Recipient address." }),
+    from: z.string().openapi({
+      description: "Sender address.",
+      format: "ethereum-address",
+    }),
+    to: z.string().openapi({
+      description: "Recipient address.",
+      format: "ethereum-address",
+    }),
   })
   .openapi("HistoricalBalanceTransfer", {
     description: "Transfer event associated with a historical balance row.",
@@ -83,16 +90,22 @@ export const HistoricalBalanceResponseSchema = z
     daoId: z
       .string()
       .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
-    accountId: z.string().openapi({ description: "Account address." }),
+    accountId: z.string().openapi({
+      description: "Account address.",
+      format: "ethereum-address",
+    }),
     balance: z.string().openapi({
       description: "Account balance after the historical event.",
+      format: "bigint",
     }),
     delta: z.string().openapi({
       description: "Balance change introduced by the historical event.",
+      format: "bigint",
     }),
     timestamp: z.string().openapi({
       description: "Event timestamp in Unix seconds as a string.",
       example: "1704067200",
+      format: "bigint",
     }),
     logIndex: z.number().int().openapi({
       description: "Log index within the transaction receipt.",

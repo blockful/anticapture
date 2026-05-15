@@ -9,7 +9,6 @@ export * from "./governance-activity";
 export * from "./last-update";
 export * from "./proposals";
 export * from "./shared";
-export * from "./transactions";
 export * from "./transfers";
 export * from "./treasury";
 export * from "./votes";

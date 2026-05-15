@@ -250,15 +250,33 @@ export const proposalCreated = async (
 /**
  * ### Updates:
  * - `proposalsOnchain`: Sets the proposal status to the provided status value
+ * - `proposalsOnchain`: Sets queuedTimestamp and queuedTxHash when status is QUEUED
+ * - `proposalsOnchain`: Sets executedTimestamp and executedTxHash when status is EXECUTED
  */
 export const updateProposalStatus = async (
   context: Context,
   proposalId: string,
-  status: string,
+  status: ProposalStatus,
+  timestamp: bigint,
+  txHash: Hex,
 ) => {
-  await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status,
-  });
+  const extra: {
+    queuedTimestamp?: bigint;
+    executedTimestamp?: bigint;
+    queuedTxHash?: string;
+    executedTxHash?: string;
+  } = {};
+  if (status === ProposalStatus.QUEUED) {
+    extra.queuedTimestamp = timestamp;
+    extra.queuedTxHash = txHash;
+  }
+  if (status === ProposalStatus.EXECUTED) {
+    extra.executedTimestamp = timestamp;
+    extra.executedTxHash = txHash;
+  }
+  await context.db
+    .update(proposalsOnchain, { id: proposalId })
+    .set({ status, ...extra });
 };
 
 /**

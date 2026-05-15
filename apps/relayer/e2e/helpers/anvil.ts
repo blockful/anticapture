@@ -14,16 +14,31 @@ import { FORK_BLOCK, TEST_USER_KEY } from "./constants";
 
 let anvilInstance: Instance.Instance | undefined;
 
-export async function startAnvil(): Promise<string> {
-  const forkUrl = process.env["RPC_URL"];
+export async function startAnvil(options?: {
+  port?: number;
+  logs?: boolean;
+  forkUrl?: string;
+}): Promise<string> {
+  const forkUrl = options?.forkUrl ?? process.env["RPC_URL"];
   if (!forkUrl) {
-    throw new Error("FORK_RPC_URL (or RPC_URL) env var is required.");
+    throw new Error(
+      "Fork RPC URL is required. Pass --fork-url to the script or set RPC_URL in apps/relayer/.env.",
+    );
   }
 
   anvilInstance = Instance.anvil(
-    { forkUrl, forkBlockNumber: FORK_BLOCK },
+    {
+      forkUrl,
+      forkBlockNumber: FORK_BLOCK,
+      ...(options?.port !== undefined ? { port: options.port } : {}),
+    },
     { timeout: 30_000 },
   );
+
+  if (options?.logs) {
+    anvilInstance.on("stdout", (msg) => process.stdout.write(`[anvil] ${msg}`));
+    anvilInstance.on("stderr", (msg) => process.stderr.write(`[anvil] ${msg}`));
+  }
 
   await anvilInstance.start();
   return `http://${anvilInstance.host}:${anvilInstance.port}`;

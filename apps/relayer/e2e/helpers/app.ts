@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 
+import { balance } from "@/controllers/balance";
 import { relayDelegate } from "@/controllers/relay-delegate";
 import { relayVote } from "@/controllers/relay-vote";
 import { RelayError } from "@/errors";
@@ -11,9 +12,17 @@ import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
 import { createLocalSigner } from "@/signer/local-signer";
 
-import { GOVERNOR_ADDRESS, RELAYER_KEY, TOKEN_ADDRESS } from "./constants";
+import {
+  GOVERNOR_ADDRESS,
+  RELAYER_ADDRESS,
+  RELAYER_KEY,
+  TOKEN_ADDRESS,
+} from "./constants";
 
-export async function createTestApp(rpcUrl: string) {
+export async function createTestApp(
+  rpcUrl: string,
+  balanceThresholdWei?: bigint,
+) {
   const publicClient = createPublicClient({
     chain: mainnet,
     transport: http(rpcUrl),
@@ -78,6 +87,11 @@ export async function createTestApp(rpcUrl: string) {
 
   relayDelegate(app, relayService);
   relayVote(app, relayService);
+  balance(app, {
+    publicClient,
+    relayerAddress: RELAYER_ADDRESS,
+    thresholdWei: balanceThresholdWei ?? 100_000_000_000_000_000n,
+  });
 
   return app;
 }

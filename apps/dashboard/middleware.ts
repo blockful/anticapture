@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { ALL_DAOS } from "@/shared/types/daos";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import {
+  WHITELABEL_ROUTES,
   getWhitelabelInternalPath,
   resolveDaoIdFromHostname,
 } from "@/shared/utils/whitelabel";
@@ -29,6 +30,12 @@ export function middleware(request: NextRequest) {
 
   if (!daoId) {
     return NextResponse.next();
+  }
+
+  if (request.nextUrl.pathname === "/") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = `/${WHITELABEL_ROUTES.proposals}`;
+    return NextResponse.redirect(redirectUrl);
   }
 
   const rewrittenPathname = getWhitelabelInternalPath({

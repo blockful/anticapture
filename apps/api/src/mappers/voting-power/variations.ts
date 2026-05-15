@@ -136,15 +136,21 @@ export const VotingPowerByAccountIdRequestQuerySchema = z
 
 export const VotingPowerVariationResponseSchema = z
   .object({
-    accountId: z.string().openapi({ description: "Account address." }),
+    accountId: z.string().openapi({
+      description: "Account address.",
+      format: "ethereum-address",
+    }),
     previousVotingPower: z.string().openapi({
       description: "Voting power at the start of the comparison window.",
+      format: "bigint",
     }),
     currentVotingPower: z.string().openapi({
       description: "Voting power at the end of the comparison window.",
+      format: "bigint",
     }),
     absoluteChange: z.string().openapi({
       description: "Absolute voting power change encoded as a decimal string.",
+      format: "bigint",
     }),
     percentageChange: z.string().openapi({
       description: "Relative voting power change encoded as a decimal string.",
@@ -159,7 +165,7 @@ export const VotingPowerVariationFieldSchema = z
   .object({
     absoluteChange: z
       .union([z.bigint().transform((val) => val.toString()), z.string()])
-      .openapi({ type: "string" }),
+      .openapi({ type: "string", format: "bigint" }),
     percentageChange: z.string(),
   })
   .openapi("VotingPowerVariationField", {
@@ -169,11 +175,15 @@ export const VotingPowerVariationFieldSchema = z
 
 export const VotingPowerResponseSchema = z
   .object({
-    accountId: z.string().openapi({ description: "Account address." }),
+    accountId: z.string().openapi({
+      description: "Account address.",
+      format: "ethereum-address",
+    }),
     votingPower: z
       .union([z.bigint().transform((val) => val.toString()), z.string()])
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Current voting power encoded as a decimal string.",
       }),
     votesCount: z.number().int().openapi({
@@ -191,6 +201,7 @@ export const VotingPowerResponseSchema = z
       .optional()
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Current token balance encoded as a decimal string.",
       }),
     variation: VotingPowerVariationFieldSchema,

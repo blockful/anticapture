@@ -8,10 +8,19 @@ import { useAccount, useReadContract, useWalletClient } from "wagmi";
 
 import { delegateTo } from "@/features/holders-and-delegates/delegate/utils/delegateTo";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import {
+  isUserRejection,
+  mapRelayerError,
+} from "@/shared/utils/gaslessRelayerError";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { SpinIcon } from "@/shared/components/icons/SpinIcon";
 import daoConfigByDaoId from "@/shared/dao-config";
+import {
+  useGaslessEligibility,
+  useRelayerConfig,
+} from "@/shared/hooks/useGaslessRelayer";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { cn } from "@/shared/utils/cn";
@@ -56,6 +65,10 @@ export const DelegationModal = ({
   const { data: walletClient } = useWalletClient({ chainId: chain?.id });
   const decimals = daoConfig?.decimals ?? 18;
 
+  const { minVotingPower } = useRelayerConfig(daoId);
+  const { isEligible: isGaslessEligible, remaining: delegationRemaining } =
+    useGaslessEligibility(daoId, userAddress, "delegate");
+
   const { data: votingPowerRaw } = useReadContract({
     abi: ERC20VotesAbi,
     address: tokenAddress,
@@ -84,15 +97,33 @@ export const DelegationModal = ({
         walletClient,
         () => setStep("pending-tx"),
         chain,
+        daoId,
+        isGaslessEligible,
       );
       setStep("success");
       showCustomToast("Delegation successful!", "success");
       onSuccess?.();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Delegation failed.";
-      const isRejected =
-        message.includes("rejected") || message.includes("denied");
-      setError(isRejected ? "Transaction rejected by user." : message);
+      if (isUserRejection(err)) {
+        setError("Transaction rejected by user.");
+        setStep("error");
+        return;
+      }
+
+      if (isGaslessEligible && daoConfig?.gaslessRelayer) {
+        const message = mapRelayerError(err, {
+          operation: "delegate",
+          minVotingPower,
+          decimals,
+          symbol: daoConfig.name,
+        });
+        showCustomToast(message, "error");
+        setError(message);
+      } else {
+        const message =
+          err instanceof Error ? err.message : "Delegation failed.";
+        setError(message);
+      }
       setStep("error");
     }
   }, [
@@ -102,6 +133,12 @@ export const DelegationModal = ({
     step,
     delegateAddress,
     onSuccess,
+    chain,
+    daoId,
+    daoConfig,
+    decimals,
+    minVotingPower,
+    isGaslessEligible,
   ]);
 
   useEffect(() => {
@@ -140,6 +177,19 @@ export const DelegationModal = ({
             showCopyAddress={false}
           />
         </div>
+        {isGaslessEligible && delegationRemaining !== null && (
+          <InlineAlert
+            variant="success"
+            text={
+              delegationRemaining === 1
+                ? "This delegation is free! Last one for today — refreshes tomorrow."
+                : `This delegation is free! You'll still have ${
+                    delegationRemaining - 1
+                  } left to use today.`
+            }
+            className="mt-2"
+          />
+        )}
       </div>
 
       {/* Stepper */}
