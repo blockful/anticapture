@@ -122,6 +122,7 @@ export const ProposalCreationForm = ({
         actions: d.actions.map(toFormAction),
       });
       setCurrentDraftId(draftId);
+      setBodyVersion((v) => v + 1);
       hasHydratedDraftRef.current = true;
       return;
     }
@@ -141,6 +142,8 @@ export const ProposalCreationForm = ({
           body: shared.body,
           actions: shared.actions.map((a) => toFormAction(a as ProposalAction)),
         });
+        setCurrentDraftId(draftId);
+        setBodyVersion((v) => v + 1);
       })
       .catch(() => {
         // Draft not found or fetch failed — leave form empty
@@ -149,8 +152,9 @@ export const ProposalCreationForm = ({
   }, [draftId, drafts.drafts, drafts.isLoading]);
 
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(
-    undefined,
+    draftId,
   );
+  const [bodyVersion, setBodyVersion] = useState(0);
   const [transferOpen, setTransferOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [editActionIndex, setEditActionIndex] = useState<number | null>(null);
@@ -410,7 +414,7 @@ export const ProposalCreationForm = ({
 
         <div className="flex w-full flex-col gap-1">
           <FormLabel isRequired>Description</FormLabel>
-          <BodyField />
+          <BodyField version={bodyVersion} />
         </div>
 
         <div className="flex w-full flex-col gap-1">
