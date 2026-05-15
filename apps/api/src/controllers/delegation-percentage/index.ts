@@ -8,9 +8,6 @@ import {
 import { setCacheControl } from "@/middlewares";
 import { DelegationPercentageService } from "@/services";
 
-// TODO(schema-fix): this endpoint is the only one still using before/after cursor
-// pagination; everything else uses skip/limit. Migrate the request schema, the
-// service, and the response shape together (see TODOs in the mapper and service).
 export function delegationPercentage(
   app: Hono,
   service: DelegationPercentageService,

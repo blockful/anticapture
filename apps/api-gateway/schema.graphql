@@ -427,30 +427,25 @@ type Query {
   """
   delegationPercentageByDay(
     """
-    Inclusive lower bound cursor in Unix seconds.
+    Inclusive lower bound for the day-bucket window, in Unix seconds.
     """
     startDate: Int
 
     """
-    Inclusive upper bound cursor in Unix seconds.
+    Inclusive upper bound for the day-bucket window, in Unix seconds.
     """
     endDate: Int
     orderDirection: OrderDirection = desc
 
     """
-    Maximum number of records to return.
+    Maximum number of day buckets to return.
     """
     limit: Int
 
     """
-    Return items after this cursor, exclusive, in Unix seconds.
+    Number of day buckets to skip before returning results.
     """
-    after: Int
-
-    """
-    Return items before this cursor, exclusive, in Unix seconds.
-    """
-    before: Int
+    skip: Int
   ): DelegationPercentageResponse
 
   """
@@ -2301,10 +2296,9 @@ type DelegationPercentageResponse {
   items: [DelegationPercentageItem]!
 
   """
-  Total number of matching day buckets.
+  Total number of matching day buckets across the requested window (ignores skip/limit).
   """
   totalCount: Int!
-  pageInfo: PageInfo!
 }
 
 type DelegationPercentageItem {

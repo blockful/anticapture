@@ -2,10 +2,11 @@ import { z } from "@hono/zod-openapi";
 
 import { offchainProposals } from "@/database";
 import {
-  normalizeQueryArray,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
+  commaDelimitedEnumQueryParam,
+  defaultDescOrderDirection,
+  paginatedListResponse,
+  paginationQueryParams,
+  unixSecondsIntField,
   unixTimestampQueryParam,
 } from "../shared";
 
@@ -13,16 +14,10 @@ export type DBOffchainProposal = typeof offchainProposals.$inferSelect;
 
 const OffchainProposalStateValues = ["active", "closed", "pending"] as const;
 
-const OffchainProposalStatusListSchema = z
-  .union([z.string(), z.array(z.string())])
-  .transform((value) => {
-    const statuses = normalizeQueryArray(value);
-    return statuses
-      ? z
-          .array(z.enum(OffchainProposalStateValues))
-          .parse(statuses.map((status) => String(status).toLowerCase()))
-      : undefined;
-  });
+const OffchainProposalStatusListSchema = commaDelimitedEnumQueryParam(
+  OffchainProposalStateValues,
+  (input) => input.toLowerCase(),
+);
 
 export const OffchainProposalResponseSchema = z
   .object({
@@ -37,21 +32,13 @@ export const OffchainProposalResponseSchema = z
       .string()
       .openapi({ description: "Discussion URL or thread reference." }),
     type: z.string().openapi({ description: "Snapshot proposal type." }),
-    start: z.number().int().openapi({
-      description: "Voting start timestamp in Unix seconds.",
-    }),
-    end: z.number().int().openapi({
-      description: "Voting end timestamp in Unix seconds.",
-    }),
+    start: unixSecondsIntField("Voting start timestamp in Unix seconds."),
+    end: unixSecondsIntField("Voting end timestamp in Unix seconds."),
     state: z
       .string()
       .openapi({ description: "Current Snapshot proposal state." }),
-    created: z.number().int().openapi({
-      description: "Creation timestamp in Unix seconds.",
-    }),
-    updated: z.number().int().openapi({
-      description: "Last update timestamp in Unix seconds.",
-    }),
+    created: unixSecondsIntField("Creation timestamp in Unix seconds."),
+    updated: unixSecondsIntField("Last update timestamp in Unix seconds."),
     link: z
       .string()
       .openapi({ description: "Canonical Snapshot proposal URL." }),
@@ -113,19 +100,13 @@ export const OffchainProposalMapper = {
   },
 };
 
-export const OffchainProposalsResponseSchema = z
-  .object({
-    items: z.array(OffchainProposalResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("OffchainProposalsResponse");
+export const OffchainProposalsResponseSchema = paginatedListResponse(
+  OffchainProposalResponseSchema,
+).openapi("OffchainProposalsResponse");
 
-export const OffchainProposalsLeanResponseSchema = z
-  .object({
-    items: z.array(OffchainProposalLeanResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("OffchainProposalsLeanResponse");
+export const OffchainProposalsLeanResponseSchema = paginatedListResponse(
+  OffchainProposalLeanResponseSchema,
+).openapi("OffchainProposalsLeanResponse");
 
 export const OffchainProposalRequestSchema = z
   .object({
@@ -140,9 +121,8 @@ export const OffchainProposalRequestSchema = z
 
 export const OffchainProposalsRequestSchema = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
-    orderDirection: OrderDirectionSchema.default("desc").optional(),
+    ...paginationQueryParams(),
+    orderDirection: defaultDescOrderDirection(),
     status: OffchainProposalStatusListSchema.optional().openapi(
       "OffchainProposalStatusList",
       {
@@ -180,7 +160,6 @@ export const OffchainProposalSearchRequestSchema = z
           "Partial Snapshot proposal identifier or title to search for.",
         example: "test",
       }),
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
+    ...paginationQueryParams(),
   })
   .openapi("OffchainProposalSearchRequest");
