@@ -20,7 +20,10 @@ import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadabl
 import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
+import { getDraftProposal } from "@anticapture/client";
+import type { GetDraftProposalPathParamsDaoEnumKey } from "@anticapture/client";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
 import { BODY_PLACEHOLDER } from "@/features/create-proposal/constants";
 import {
   ProposalFormSchema,
@@ -109,20 +112,52 @@ export const ProposalCreationForm = ({
   useEffect(() => {
     if (!draftId) return;
     if (hasHydratedDraftRef.current) return;
+
     const d = drafts.getDraft(draftId);
-    if (!d) return;
-    form.reset({
-      title: d.title,
-      discussionUrl: d.discussionUrl,
-      body: d.body,
-      actions: d.actions.map(toFormAction),
-    });
+    if (d) {
+      form.reset({
+        title: d.title,
+        discussionUrl: d.discussionUrl,
+        body: d.body,
+        actions: d.actions.map(toFormAction),
+      });
+      setCurrentDraftId(draftId);
+      hasHydratedDraftRef.current = true;
+      return;
+    }
+
+    if (drafts.isLoading) return;
+
     hasHydratedDraftRef.current = true;
+    void getDraftProposal(
+      daoId as GetDraftProposalPathParamsDaoEnumKey,
+      draftId,
+    )
+      .then(
+        (shared: {
+          title: string;
+          discussionUrl: string;
+          body: string;
+          actions: unknown[];
+        }) => {
+          form.reset({
+            title: shared.title,
+            discussionUrl: shared.discussionUrl,
+            body: shared.body,
+            actions: shared.actions.map((a) =>
+              toFormAction(a as ProposalAction),
+            ),
+          });
+        },
+      )
+      .catch(() => {
+        // Draft not found or fetch failed — leave form empty
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftId, drafts.drafts]);
+  }, [draftId, drafts.drafts, drafts.isLoading]);
 
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(
-    draftId,
+    undefined,
   );
   const [transferOpen, setTransferOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
@@ -152,44 +187,52 @@ export const ProposalCreationForm = ({
     form.formState.isValid &&
     (values.body?.length ?? 0) <= 10_000;
 
-  const handleSaveDraft = (options?: { navigateToDrafts?: boolean }) => {
+  const handleShare = () => {
+    if (!currentDraftId) return;
+    copyDraftShareUrl(basePath, currentDraftId);
+    showCustomToast("Share link copied", "success");
+  };
+
+  const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
     if (!address) {
       showCustomToast("Connect a wallet to save drafts", "error");
       return;
     }
-    const id = drafts.saveDraft(
-      {
-        daoId,
-        title: values.title,
-        discussionUrl: values.discussionUrl ?? "",
-        body: values.body,
-        actions: values.actions,
-      },
-      currentDraftId,
-    );
-    if (!id) {
+    try {
+      const id = await drafts.saveDraft(
+        {
+          daoId,
+          title: values.title,
+          discussionUrl: values.discussionUrl ?? "",
+          body: values.body,
+          actions: values.actions,
+        },
+        currentDraftId,
+      );
+      if (!id) {
+        showCustomToast("Could not save draft", "error");
+        return;
+      }
+      setCurrentDraftId(id);
+      form.reset(values, { keepValues: true, keepDirty: false });
+      showCustomToast("Draft saved", "success");
+      if (options?.navigateToDrafts !== false) {
+        router.push(`${basePath}/proposals?tab=drafts`);
+      }
+    } catch {
       showCustomToast("Could not save draft", "error");
-      return;
-    }
-    setCurrentDraftId(id);
-    form.reset(values, { keepValues: true, keepDirty: false });
-    showCustomToast("Draft saved", "success");
-    if (options?.navigateToDrafts !== false) {
-      router.push(`${basePath}/proposals?tab=drafts`);
     }
   };
 
   const handlePublishClick = () => {
     if (vp.votingPower < threshold) {
-      handleSaveDraft({ navigateToDrafts: false });
+      void handleSaveDraft({ navigateToDrafts: false });
       setInsufficientOpen(true);
       return;
     }
     if (vp.isLoading) {
       showCustomToast(
-        vp.isLoading
-          ? "Still checking your voting power — try again in a moment."
-          : "Couldn't verify your voting power. Try again in a moment.",
+        "Still checking your voting power — try again in a moment.",
         "error",
       );
       return;
@@ -406,6 +449,7 @@ export const ProposalCreationForm = ({
         canPublish={canPublish}
         onSaveDraft={handleSaveDraft}
         onPublish={handlePublishClick}
+        onShare={currentDraftId ? handleShare : undefined}
       />
 
       <AddTransferModal

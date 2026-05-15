@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { Pencil, Trash2 } from "lucide-react";
+import { Link2, Pencil, Trash2 } from "lucide-react";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -11,9 +11,15 @@ interface DraftCardProps {
   draft: ProposalDraft;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onShare: (id: string) => void;
 }
 
-export const DraftCard = ({ draft, onEdit, onDelete }: DraftCardProps) => (
+export const DraftCard = ({
+  draft,
+  onEdit,
+  onDelete,
+  onShare,
+}: DraftCardProps) => (
   <div className="border-border-default bg-surface-default rounded-base flex flex-col gap-3 border p-4 sm:flex-row sm:items-center sm:justify-between">
     <div className="flex min-w-0 flex-1 flex-col gap-1">
       <div className="flex items-center gap-2">
@@ -27,6 +33,15 @@ export const DraftCard = ({ draft, onEdit, onDelete }: DraftCardProps) => (
       </span>
     </div>
     <div className="flex gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onShare(draft.id)}
+        className="flex-1 sm:flex-none"
+      >
+        <Link2 className="size-4" />
+        Share
+      </Button>
       <Button
         variant="outline"
         size="sm"
