@@ -93,11 +93,8 @@ function validateSolidityArg(abiType: string, value: string): string | null {
       if (!isDecimal && !isHexVal)
         return "Must be a non-negative integer (decimal or 0x hex)";
       const bits = parseInt(abiType.replace("uint", "") || "256", 10);
-      if (bits <= 52) {
-        const n = isHexVal ? parseInt(v, 16) : Number(v);
-        const max = 2 ** bits - 1;
-        if (n > max) return `Exceeds uint${bits} max (${max})`;
-      }
+      const max = (1n << BigInt(bits)) - 1n;
+      if (BigInt(v) > max) return `Exceeds uint${bits} max (${max})`;
       return null;
     }
     case "int": {
@@ -106,13 +103,11 @@ function validateSolidityArg(abiType: string, value: string): string | null {
       if (!isDecimal && !isHexVal)
         return "Must be an integer (decimal or 0x hex)";
       const bits = parseInt(abiType.replace("int", "") || "256", 10);
-      if (bits <= 52) {
-        const n = isHexVal ? parseInt(v, 16) : Number(v);
-        const max = 2 ** (bits - 1) - 1;
-        const min = -(2 ** (bits - 1));
-        if (n > max || n < min)
-          return `Out of range for int${bits} (${min} to ${max})`;
-      }
+      const max = (1n << BigInt(bits - 1)) - 1n;
+      const min = -(1n << BigInt(bits - 1));
+      const n = BigInt(v);
+      if (n > max || n < min)
+        return `Out of range for int${bits} (${min} to ${max})`;
       return null;
     }
     case "address":
@@ -288,16 +283,26 @@ export const AddCustomActionModal = ({
     isAddress(contractAddress.trim()) ||
     isEnsAddress(contractAddress.trim());
 
-  const functions: AbiFunction[] = (
-    abi?.filter((item): item is AbiFunction => item.type === "function") ?? []
-  ).filter(
-    (fn) => fn.stateMutability !== "view" && fn.stateMutability !== "pure",
+  const functions = useMemo<AbiFunction[]>(() => {
+    if (!abi) return [];
+    return abi
+      .filter((item): item is AbiFunction => item.type === "function")
+      .filter(
+        (fn) => fn.stateMutability !== "view" && fn.stateMutability !== "pure",
+      );
+  }, [abi]);
+  const selectedFn = useMemo(
+    () => functions.find((f) => toFunctionSignature(f) === functionName),
+    [functions, functionName],
   );
-  const selectedFn = functions.find(
-    (f) => toFunctionSignature(f) === functionName,
-  );
+  const overloadCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const fn of functions)
+      counts.set(fn.name, (counts.get(fn.name) ?? 0) + 1);
+    return counts;
+  }, [functions]);
   const hasOverloads = (fn: AbiFunction) =>
-    functions.filter((f) => f.name === fn.name).length > 1;
+    (overloadCounts.get(fn.name) ?? 0) > 1;
 
   const resetAll = () => {
     setStep(1);
@@ -313,11 +318,20 @@ export const AddCustomActionModal = ({
     setTouchedArgs(new Set());
   };
 
+  const markTouched = (i: number) => {
+    setTouchedArgs((prev) => {
+      if (prev.has(i)) return prev;
+      const next = new Set(prev);
+      next.add(i);
+      return next;
+    });
+  };
+
   const updateArg = (i: number, value: string) => {
     const next = [...args];
     next[i] = value;
     setArgs(next);
-    setTouchedArgs((prev) => new Set([...prev, i]));
+    markTouched(i);
   };
 
   const hasAddress = contractAddress.trim().length > 0;
@@ -392,11 +406,17 @@ export const AddCustomActionModal = ({
     isAddressValid &&
     (mode === "fetch" ? Boolean(abi) : isCalldataValid);
 
+  const argErrors = useMemo(() => {
+    if (!selectedFn) return [];
+    return selectedFn.inputs.map((input, i) =>
+      validateSolidityArg(input.type, args[i] ?? ""),
+    );
+  }, [selectedFn, args]);
+
   const allArgsFilled =
     selectedFn !== undefined &&
-    selectedFn.inputs.every((_, i) => (args[i] ?? "").trim().length > 0) &&
     selectedFn.inputs.every(
-      (input, i) => validateSolidityArg(input.type, args[i] ?? "") === null,
+      (_, i) => (args[i] ?? "").trim().length > 0 && argErrors[i] === null,
     );
 
   const step2Ready =
@@ -663,9 +683,7 @@ export const AddCustomActionModal = ({
                 </div>
                 {selectedFn?.inputs.map((input, i) => {
                   const category = getAbiTypeCategory(input.type);
-                  const fieldError = touchedArgs.has(i)
-                    ? validateSolidityArg(input.type, args[i] ?? "")
-                    : null;
+                  const fieldError = touchedArgs.has(i) ? argErrors[i] : null;
                   return (
                     <div
                       key={`${input.name ?? "arg"}-${i}`}
@@ -701,9 +719,7 @@ export const AddCustomActionModal = ({
                             }
                             updateArg(i, raw);
                           }}
-                          onBlur={() => {
-                            setTouchedArgs((prev) => new Set([...prev, i]));
-                          }}
+                          onBlur={() => markTouched(i)}
                           placeholder={getArgPlaceholder(input.type)}
                           error={Boolean(fieldError)}
                           inputMode={
