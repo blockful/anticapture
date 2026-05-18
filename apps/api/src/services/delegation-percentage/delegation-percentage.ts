@@ -167,6 +167,10 @@ export class DelegationPercentageService {
     );
 
     // 8. Apply cursor-based pagination
+    // TODO(schema-fix): replace cursor pagination with skip/limit to match every
+    // other paginated endpoint. After the migration this block should slice
+    // `allItems` by `skip..skip+limit` and report `hasNextPage` from a total
+    // count (see the mapper + controller TODOs).
     const { items, hasNextPage } = applyCursorPagination({
       items: allItems,
       limit,

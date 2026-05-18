@@ -97,11 +97,12 @@ export const HistoricalVotingPowerTransferSchema = z
 export const HistoricalVotingPowerResponseSchema = z
   .object({
     transactionHash: z.string().openapi({ description: "Transaction hash." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
-    accountId: z.string().openapi({
-      description: "Account address.",
-      format: "ethereum-address",
-    }),
+    daoId: z
+      .string()
+      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
+    accountId: z
+      .string()
+      .openapi({ description: "Account address.", format: "ethereum-address" }),
     votingPower: z.string().openapi({
       description: "Voting power after the event, encoded as a decimal string.",
       format: "bigint",

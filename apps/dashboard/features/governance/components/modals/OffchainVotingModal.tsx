@@ -140,7 +140,10 @@ export const OffchainVotingModal = ({
     }
     return Object.entries(value as Record<string, number>)
       .filter(([, weight]) => weight > 0)
-      .map(([idx, weight]) => `${choices[Number(idx) - 1] ?? `Choice ${idx}`} (${weight}%)`)
+      .map(
+        ([idx, weight]) =>
+          `${choices[Number(idx) - 1] ?? `Choice ${idx}`} (${weight}%)`,
+      )
       .join(", ");
   };
 

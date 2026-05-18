@@ -2737,8 +2737,8 @@ type DaoResponse {
   votingDelay: String!
   votingPeriod: String!
   timelockDelay: String!
-  alreadySupportCalldataReview: Boolean!
-  supportOffchainData: Boolean!
+  supportsCalldataReview: Boolean!
+  supportsOffchainData: Boolean!
 }
 
 type TokenMetricsResponse {

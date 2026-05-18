@@ -47,7 +47,9 @@ export const ProposalActivityRequestSchema = z
 export const ProposalActivityProposalSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
+    daoId: z
+      .string()
+      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
     proposerAccountId: z.string().openapi({
       description: "Address that created the proposal.",
       format: "ethereum-address",

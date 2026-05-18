@@ -113,7 +113,7 @@ export const VotingPowersRequestSchema = z
 
 export const VotingPowerByAccountIdRequestParamsSchema = z
   .object({
-    accountId: AddressSchema,
+    address: AddressSchema,
   })
   .openapi("VotingPowerByAccountIdRequestParams", {
     description:

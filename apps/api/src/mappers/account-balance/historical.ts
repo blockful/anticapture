@@ -87,7 +87,9 @@ export const HistoricalBalanceTransferSchema = z
 export const HistoricalBalanceResponseSchema = z
   .object({
     transactionHash: z.string().openapi({ description: "Transaction hash." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
+    daoId: z
+      .string()
+      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
     accountId: z.string().openapi({
       description: "Account address.",
       format: "ethereum-address",

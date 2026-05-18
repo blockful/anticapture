@@ -37,6 +37,9 @@ export const RepositoryFiltersSchema = BaseFiltersSchema.extend({
 });
 
 // HTTP query schema (extends base with pagination cursors and HTTP validations)
+// TODO(schema-fix): standardize pagination on skip/limit like every other paginated
+// endpoint. Drop `before`/`after` cursors; keep `startDate`/`endDate` as time-window
+// filters only. Also drop PageInfo from the response and use `paginatedListResponse`.
 export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
   // Cursor for pagination - returns items after this date (exclusive)
   after: unixTimestampQueryParam(
@@ -63,6 +66,8 @@ export const DelegationPercentageItemSchema = z
   })
   .openapi("DelegationPercentageItem");
 
+// TODO(schema-fix): drop `pageInfo` in favor of the standard `paginatedListResponse`
+// wrapper once `delegationPercentageByDay` migrates to skip/limit.
 export const DelegationPercentageResponseSchema = z
   .object({
     items: z.array(DelegationPercentageItemSchema),

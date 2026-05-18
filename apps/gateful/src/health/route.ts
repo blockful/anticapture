@@ -15,7 +15,10 @@ const HealthResponseSchema = z.object({
 
 const route = createRoute({
   method: "get",
+  operationId: "gatewayHealth",
   path: "/health",
+  summary: "Gateway health and per-DAO circuit breaker states",
+  tags: ["system"],
   responses: {
     200: {
       content: {

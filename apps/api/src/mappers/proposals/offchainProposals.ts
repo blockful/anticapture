@@ -76,6 +76,15 @@ export type OffchainProposalResponse = z.infer<
   typeof OffchainProposalResponseSchema
 >;
 
+export const OffchainProposalLeanResponseSchema =
+  OffchainProposalResponseSchema.omit({ body: true }).openapi(
+    "OffchainProposalLean",
+  );
+
+export type OffchainProposalLeanResponse = z.infer<
+  typeof OffchainProposalLeanResponseSchema
+>;
+
 export const OffchainProposalMapper = {
   toApi: (p: DBOffchainProposal): OffchainProposalResponse => ({
     id: p.id,
@@ -98,6 +107,10 @@ export const OffchainProposalMapper = {
     snapshot: p.snapshot,
     strategies: p.strategies,
   }),
+  toLeanApi: (p: DBOffchainProposal): OffchainProposalLeanResponse => {
+    const { body: _body, ...lean } = OffchainProposalMapper.toApi(p);
+    return lean;
+  },
 };
 
 export const OffchainProposalsResponseSchema = z
@@ -106,6 +119,13 @@ export const OffchainProposalsResponseSchema = z
     totalCount: z.number().int(),
   })
   .openapi("OffchainProposalsResponse");
+
+export const OffchainProposalsLeanResponseSchema = z
+  .object({
+    items: z.array(OffchainProposalLeanResponseSchema),
+    totalCount: z.number().int(),
+  })
+  .openapi("OffchainProposalsLeanResponse");
 
 export const OffchainProposalRequestSchema = z
   .object({

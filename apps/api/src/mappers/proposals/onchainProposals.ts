@@ -89,7 +89,9 @@ export type ProposalSearchRequest = z.infer<typeof ProposalSearchRequestSchema>;
 export const ProposalResponseSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
+    daoId: z
+      .string()
+      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
     txHash: z
       .string()
       .openapi({ description: "Proposal creation transaction hash." }),
@@ -172,6 +174,23 @@ export const ProposalsResponseSchema = z
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
+export const ProposalLeanResponseSchema = ProposalResponseSchema.omit({
+  calldatas: true,
+  values: true,
+  targets: true,
+}).openapi("OnchainProposalLean");
+
+export type ProposalLeanResponse = z.infer<typeof ProposalLeanResponseSchema>;
+
+export const ProposalsLeanResponseSchema = z
+  .object({
+    items: z.array(ProposalLeanResponseSchema),
+    totalCount: z.number().int(),
+  })
+  .openapi("OnchainProposalsLeanResponse");
+
+export type ProposalsLeanResponse = z.infer<typeof ProposalsLeanResponseSchema>;
+
 export const ProposalRequestSchema = z
   .object({
     id: z.string().openapi({
@@ -223,5 +242,18 @@ export const ProposalMapper = {
       queuedTxHash: p.queuedTxHash,
       executedTxHash: p.executedTxHash,
     };
+  },
+  toLeanApi: (
+    p: DBProposal,
+    quorum: bigint,
+    blockTime: number,
+  ): ProposalLeanResponse => {
+    const {
+      calldatas: _c,
+      values: _v,
+      targets: _t,
+      ...lean
+    } = ProposalMapper.toApi(p, quorum, blockTime);
+    return lean;
   },
 };

@@ -70,7 +70,8 @@ function mergeRelayerPaths(doc: OpenAPIObject, daos: string[]): PathsObject {
     in: "path",
     required: true,
     schema: { type: "string", enum: [...daos].sort() },
-    description: "DAO identifier",
+    description:
+      'DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. "ens").',
   };
 
   const isRelayerPath = (path: string) =>
@@ -92,6 +93,11 @@ function mergeRelayerPaths(doc: OpenAPIObject, daos: string[]): PathsObject {
   return paths;
 }
 
+// Upstream paths the gateway re-owns through dedicated resolvers; skip them
+// during merge so the resolver's OpenAPI definition is what ends up in the
+// public spec.
+const UPSTREAM_PATH_BLOCKLIST = new Set(["/health"]);
+
 function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
   const paths: PathsObject = {};
 
@@ -105,6 +111,7 @@ function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
     if (!doc.paths) continue;
 
     for (const [path, pathItem] of Object.entries(doc.paths)) {
+      if (UPSTREAM_PATH_BLOCKLIST.has(path)) continue;
       if (!pathDaoMap.has(path)) {
         pathDaoMap.set(path, new Set());
         pathItems.set(path, { ...pathItem });
@@ -120,7 +127,8 @@ function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
       in: "path",
       required: true,
       schema: { type: "string", enum: [...supportedDaos].sort() },
-      description: "DAO identifier",
+      description:
+        'DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. "ens").',
     };
 
     const item = pathItems.get(path)!;
