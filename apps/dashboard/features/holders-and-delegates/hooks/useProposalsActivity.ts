@@ -59,10 +59,6 @@ export const useProposalsActivity = ({
   userVoteFilter,
   limit,
 }: UseProposalsActivityParams): UseProposalsActivityResult => {
-  const [accumulatedProposals, setAccumulatedProposals] = useState<
-    ProposalActivityItem[]
-  >([]);
-
   const queryOptions = {
     context: {
       headers: {
@@ -92,18 +88,6 @@ export const useProposalsActivity = ({
     setCurrentPage(1);
   }, [address, daoId, fromDate, orderBy, orderDirection, userVoteFilter]);
 
-  useEffect(() => {
-    if (data?.proposalsActivity?.proposals) {
-      if (currentPage === 1) {
-        setAccumulatedProposals(
-          (data.proposalsActivity.proposals ?? []).filter(
-            Boolean,
-          ) as ProposalActivityItem[],
-        );
-      }
-    }
-  }, [data?.proposalsActivity?.proposals, currentPage]);
-
   const totalProposals = data?.proposalsActivity?.totalProposals || 0;
   const totalPages = totalProposals ? Math.ceil(totalProposals / limit) : 1;
   const hasNextPage = currentPage < totalPages;
@@ -119,6 +103,8 @@ export const useProposalsActivity = ({
     };
   }, [totalPages, hasNextPage, currentPage]);
 
+  const proposalsLength = data?.proposalsActivity?.proposals?.length ?? 0;
+
   const fetchNextPage = useCallback(async () => {
     if (!hasNextPage || networkStatus === NetworkStatus.fetchMore) return;
     try {
@@ -126,7 +112,7 @@ export const useProposalsActivity = ({
         variables: {
           address,
           fromDate: fromDate ?? null,
-          skip: accumulatedProposals.length,
+          skip: proposalsLength,
           limit,
           orderBy: orderBy ?? null,
           orderDirection: orderDirection ?? null,
@@ -150,7 +136,6 @@ export const useProposalsActivity = ({
             ),
           ].filter((item): item is ProposalActivityItem => item !== null);
 
-          setAccumulatedProposals(merged);
           return {
             ...fetchMoreResult,
             proposalsActivity: {
@@ -174,7 +159,7 @@ export const useProposalsActivity = ({
     orderBy,
     orderDirection,
     userVoteFilter,
-    accumulatedProposals.length,
+    proposalsLength,
   ]);
 
   const processedData: ProposalActivityData | null = useMemo(() => {
@@ -187,9 +172,11 @@ export const useProposalsActivity = ({
       winRate: data.proposalsActivity.winRate,
       yesRate: data.proposalsActivity.yesRate,
       avgTimeBeforeEnd: data.proposalsActivity.avgTimeBeforeEnd,
-      proposals: accumulatedProposals,
+      proposals: (data.proposalsActivity.proposals ?? []).filter(
+        Boolean,
+      ) as ProposalActivityItem[],
     };
-  }, [data, accumulatedProposals]);
+  }, [data]);
 
   const isLoading = useMemo(() => {
     return (

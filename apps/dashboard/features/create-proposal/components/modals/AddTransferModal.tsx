@@ -264,7 +264,7 @@ export const AddTransferModal = ({
               onClick={() => setTokenType("eth")}
             />
             <RadioCard
-              label="ERC-20"
+              label="ERC-20 Token"
               icon={<Coins className="size-4" />}
               placementRight
               isActive={tokenType === "erc20"}
