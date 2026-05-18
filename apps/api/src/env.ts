@@ -39,10 +39,9 @@ const envSchema = z
     REVENUE_DUNE_ACTIONS_URL: z.string().optional(),
     REVENUE_DUNE_ACTIVE_NAMES_URL: z.string().optional(),
     REVENUE_DUNE_NEW_WALLETS_URL: z.string().optional(),
-    REVENUE_DUNE_PREMIUM_ETH_URL: z.string().optional(),
     REVENUE_DUNE_RENEWAL_FUNNEL_URL: z.string().optional(),
     REVENUE_DUNE_REVENUE_TOTALS_URL: z.string().optional(),
-    REVENUE_DUNE_REVENUE_BY_ACCOUNT_URL: z.string().optional(),
+    REVENUE_DUNE_REVENUE_BY_CATEGORY_URL: z.string().optional(),
     REVENUE_DUNE_RENEWAL_TENURE_URL: z.string().optional(),
   })
   .superRefine((data, ctx) => {

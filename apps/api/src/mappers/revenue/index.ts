@@ -116,42 +116,6 @@ export type RevenueNewWalletsResponse = z.infer<
   typeof RevenueNewWalletsResponseSchema
 >;
 
-export const RevenuePremiumEthItemSchema = z
-  .object({
-    date: z
-      .number()
-      .int()
-      .describe("Month start (Unix timestamp in seconds, UTC)."),
-    baseEth: z
-      .number()
-      .describe("Base registration ETH from temporary premium auctions."),
-    premiumEth: z
-      .number()
-      .describe("Premium ETH from temporary premium auctions."),
-    totalEth: z
-      .number()
-      .describe(
-        "Total ETH (base + premium) from temporary premium auctions in the given month.",
-      ),
-  })
-  .openapi("RevenuePremiumEthItem", {
-    description: "Single premium-ETH datapoint.",
-  });
-
-export const RevenuePremiumEthResponseSchema = z
-  .object({
-    items: z.array(RevenuePremiumEthItemSchema),
-    totalCount: z.number().int().describe("Total number of items returned."),
-  })
-  .openapi("RevenuePremiumEthResponse", {
-    description:
-      "Monthly base/premium/total ETH from temporary premium auctions. Data starts April 2023 (when premium auctions launched).",
-  });
-
-export type RevenuePremiumEthResponse = z.infer<
-  typeof RevenuePremiumEthResponseSchema
->;
-
 export const RevenueRenewalFunnelItemSchema = z
   .object({
     date: z
@@ -279,43 +243,41 @@ export type RevenueRenewalTenureResponse = z.infer<
   typeof RevenueRenewalTenureResponseSchema
 >;
 
-export const RevenueByAccountQuerySchema = RevenueQuerySchema.extend({
-  account: z.coerce.number().int().optional().openapi({
-    type: "integer",
-    description: "Optional account ID to filter rows by.",
-    example: 3211,
-  }),
-}).openapi("RevenueByAccountQuery", {
-  description:
-    "Query params for /revenue/by-account, with optional account filter.",
-});
+export const RevenueByCategoryCategorySchema = z
+  .enum(["Registration", "Renewal"])
+  .openapi("RevenueByCategoryCategory", {
+    description:
+      "Revenue category as reported by the Steakhouse accounting ledger.",
+  });
 
-export type RevenueByAccountQuery = z.infer<typeof RevenueByAccountQuerySchema>;
-
-export const RevenueByAccountItemSchema = z
+export const RevenueByCategoryItemSchema = z
   .object({
     date: z
       .number()
       .int()
       .describe("Month start (Unix timestamp in seconds, UTC)."),
-    account: z.number().int().describe("Controller account ID for the row."),
-    usd: z.number().describe("USD revenue for the account in the given month."),
-    eth: z.number().describe("ETH revenue for the account in the given month."),
+    category: RevenueByCategoryCategorySchema,
+    revenueUsd: z
+      .number()
+      .describe("USD revenue for the category in the given month."),
+    revenueEth: z
+      .number()
+      .describe("ETH revenue for the category in the given month."),
   })
-  .openapi("RevenueByAccountItem", {
-    description: "Single revenue-by-account datapoint.",
+  .openapi("RevenueByCategoryItem", {
+    description: "Single revenue-by-category datapoint.",
   });
 
-export const RevenueByAccountResponseSchema = z
+export const RevenueByCategoryResponseSchema = z
   .object({
-    items: z.array(RevenueByAccountItemSchema),
+    items: z.array(RevenueByCategoryItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
   })
-  .openapi("RevenueByAccountResponse", {
+  .openapi("RevenueByCategoryResponse", {
     description:
-      "Monthly revenue per controller account in USD and ETH, with an optional account filter.",
+      "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
   });
 
-export type RevenueByAccountResponse = z.infer<
-  typeof RevenueByAccountResponseSchema
+export type RevenueByCategoryResponse = z.infer<
+  typeof RevenueByCategoryResponseSchema
 >;

@@ -2,27 +2,27 @@
   "result": {
     "rows": [
       {
-        "date": "2025-11-01 00:00:00.000 UTC",
+        "month": "2025-11-01 00:00:00.000 UTC",
         "new_wallets": 3200,
         "cumulative_wallets": 850000
       },
       {
-        "date": "2025-12-01 00:00:00.000 UTC",
+        "month": "2025-12-01 00:00:00.000 UTC",
         "new_wallets": 2800,
         "cumulative_wallets": 852800
       },
       {
-        "date": "2026-01-01 00:00:00.000 UTC",
+        "month": "2026-01-01 00:00:00.000 UTC",
         "new_wallets": 4100,
         "cumulative_wallets": 856900
       },
       {
-        "date": "2026-02-01 00:00:00.000 UTC",
+        "month": "2026-02-01 00:00:00.000 UTC",
         "new_wallets": 5300,
         "cumulative_wallets": 862200
       },
       {
-        "date": "2026-03-01 00:00:00.000 UTC",
+        "month": "2026-03-01 00:00:00.000 UTC",
         "new_wallets": 6100,
         "cumulative_wallets": 868300
       }

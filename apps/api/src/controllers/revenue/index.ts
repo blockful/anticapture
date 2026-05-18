@@ -3,10 +3,8 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import {
   RevenueActionsResponseSchema,
   RevenueActiveNamesResponseSchema,
-  RevenueByAccountQuerySchema,
-  RevenueByAccountResponseSchema,
+  RevenueByCategoryResponseSchema,
   RevenueNewWalletsResponseSchema,
-  RevenuePremiumEthResponseSchema,
   RevenueQuerySchema,
   RevenueRenewalFunnelResponseSchema,
   RevenueRenewalTenureResponseSchema,
@@ -145,47 +143,6 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "getRevenuePremiumEth",
-      path: "/revenue/premium-eth",
-      summary: "Get monthly base/premium/total ETH from premium auctions",
-      description:
-        "Monthly base/premium/total ETH from temporary premium auctions. Data starts April 2023 (when premium auctions launched).",
-      tags: ["revenue"],
-      middleware: [ensOnly, setCacheControl(60)],
-      request: {
-        query: RevenueQuerySchema,
-      },
-      responses: {
-        200: {
-          description:
-            "Monthly base/premium/total ETH from temporary premium auctions",
-          content: {
-            "application/json": {
-              schema: RevenuePremiumEthResponseSchema,
-            },
-          },
-        },
-      },
-    }),
-    async (context) => {
-      const { fromDate, toDate, orderDirection } = context.req.valid("query");
-
-      if (!revenueDuneClient) {
-        return context.json({ items: [], totalCount: 0 }, 200);
-      }
-
-      const rows = await revenueDuneClient.fetchPremiumEth();
-      const filtered = filterByRange(rows, fromDate, toDate);
-      const sign = orderDirection === "desc" ? -1 : 1;
-      const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
-
-      return context.json({ items: sorted, totalCount: sorted.length }, 200);
-    },
-  );
-
-  app.openapi(
-    createRoute({
-      method: "get",
       operationId: "getRevenueRenewalFunnel",
       path: "/revenue/renewal-funnel",
       summary: "Get monthly renewal funnel keyed by expiry month",
@@ -267,46 +224,41 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "getRevenueByAccount",
-      path: "/revenue/by-account",
-      summary: "Get monthly ENS revenue per controller account",
+      operationId: "getRevenueByCategory",
+      path: "/revenue/by-category",
+      summary: "Get monthly ENS revenue split by category (Steakhouse ledger)",
       description:
-        "Monthly revenue per controller account in USD and ETH, with an optional account filter.",
+        "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
       tags: ["revenue"],
       middleware: [ensOnly, setCacheControl(60)],
       request: {
-        query: RevenueByAccountQuerySchema,
+        query: RevenueQuerySchema,
       },
       responses: {
         200: {
-          description: "Monthly ENS revenue per controller account",
+          description: "Monthly ENS revenue split by category in USD and ETH",
           content: {
             "application/json": {
-              schema: RevenueByAccountResponseSchema,
+              schema: RevenueByCategoryResponseSchema,
             },
           },
         },
       },
     }),
     async (context) => {
-      const { fromDate, toDate, orderDirection, account } =
-        context.req.valid("query");
+      const { fromDate, toDate, orderDirection } = context.req.valid("query");
 
       if (!revenueDuneClient) {
         return context.json({ items: [], totalCount: 0 }, 200);
       }
 
-      const rows = await revenueDuneClient.fetchRevenueByAccount();
-      const ranged = filterByRange(rows, fromDate, toDate);
-      const filtered =
-        account == null
-          ? ranged
-          : ranged.filter((row) => row.account === account);
+      const rows = await revenueDuneClient.fetchRevenueByCategory();
+      const filtered = filterByRange(rows, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => {
         const byDate = a.date - b.date;
         if (byDate !== 0) return sign * byDate;
-        return sign * (a.account - b.account);
+        return sign * a.category.localeCompare(b.category);
       });
 
       return context.json({ items: sorted, totalCount: sorted.length }, 200);

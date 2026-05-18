@@ -23,10 +23,9 @@ import { env } from "@/env";
 import actionsFixture from "@/services/revenue/__fixtures__/actions.json";
 import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.json";
 import newWalletsFixture from "@/services/revenue/__fixtures__/new-wallets.json";
-import premiumEthFixture from "@/services/revenue/__fixtures__/premium-eth.json";
 import renewalFunnelFixture from "@/services/revenue/__fixtures__/renewal-funnel.json";
 import renewalTenureFixture from "@/services/revenue/__fixtures__/renewal-tenure.json";
-import revenueByAccountFixture from "@/services/revenue/__fixtures__/revenue-by-account.json";
+import revenueByCategoryFixture from "@/services/revenue/__fixtures__/revenue-by-category.json";
 import revenueTotalsFixture from "@/services/revenue/__fixtures__/revenue-totals.json";
 import {
   REVENUE_QUERY_KEYS,
@@ -70,13 +69,6 @@ const REVENUE_ENDPOINTS: readonly RevenueEndpointDef[] = [
     responseSchemaName: "RevenueNewWalletsResponse",
   },
   {
-    path: "/revenue/premium-eth",
-    urlKey: "premiumEth",
-    fixture: premiumEthFixture,
-    operationId: "getRevenuePremiumEth",
-    responseSchemaName: "RevenuePremiumEthResponse",
-  },
-  {
     path: "/revenue/renewal-funnel",
     urlKey: "renewalFunnel",
     fixture: renewalFunnelFixture,
@@ -91,11 +83,11 @@ const REVENUE_ENDPOINTS: readonly RevenueEndpointDef[] = [
     responseSchemaName: "RevenueTotalsResponse",
   },
   {
-    path: "/revenue/by-account",
-    urlKey: "revenueByAccount",
-    fixture: revenueByAccountFixture,
-    operationId: "getRevenueByAccount",
-    responseSchemaName: "RevenueByAccountResponse",
+    path: "/revenue/by-category",
+    urlKey: "revenueByCategory",
+    fixture: revenueByCategoryFixture,
+    operationId: "getRevenueByCategory",
+    responseSchemaName: "RevenueByCategoryResponse",
   },
   {
     path: "/revenue/renewal-tenure",
@@ -389,99 +381,6 @@ describe("Revenue Controller", () => {
     });
   });
 
-  describe("GET /revenue/premium-eth", () => {
-    it("returns happy-path data sorted ascending by date with mapped fields", async () => {
-      server.use(
-        http.get(urls.premiumEth, () => HttpResponse.json(premiumEthFixture)),
-      );
-      const client = new RevenueDuneClient(API_KEY, urls);
-      const app = createTestApp(client);
-
-      const res = await app.request("/revenue/premium-eth");
-
-      expect(res.status).toBe(200);
-      const body = (await res.json()) as {
-        items: {
-          date: number;
-          baseEth: number;
-          premiumEth: number;
-          totalEth: number;
-        }[];
-        totalCount: number;
-      };
-
-      expect(body.totalCount).toBe(premiumEthFixture.result.rows.length);
-      expect(body.items).toHaveLength(premiumEthFixture.result.rows.length);
-      for (let i = 1; i < body.items.length; i++) {
-        const prev = body.items[i - 1]!;
-        const curr = body.items[i]!;
-        expect(prev.date).toBeLessThan(curr.date);
-      }
-
-      const first = body.items[0]!;
-      const firstRaw = premiumEthFixture.result.rows[0]!;
-      expect(first.baseEth).toBe(firstRaw.base_eth);
-      expect(first.premiumEth).toBe(firstRaw.premium_eth);
-      expect(first.totalEth).toBe(firstRaw.total_eth);
-    });
-
-    it("returns 404 when DAO_ID is not ENS", async () => {
-      env.DAO_ID = DaoIdEnum.UNI;
-      const client = new RevenueDuneClient(API_KEY, urls);
-      const app = createTestApp(client);
-
-      const res = await app.request("/revenue/premium-eth");
-
-      expect(res.status).toBe(404);
-      expect(await res.json()).toEqual({ error: "Not Found" });
-    });
-
-    it("returns empty items when the revenue client is not instantiated", async () => {
-      const app = createTestApp(undefined);
-
-      const res = await app.request("/revenue/premium-eth");
-
-      expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
-    });
-
-    it("sorts descending when orderDirection=desc", async () => {
-      server.use(
-        http.get(urls.premiumEth, () => HttpResponse.json(premiumEthFixture)),
-      );
-      const client = new RevenueDuneClient(API_KEY, urls);
-      const app = createTestApp(client);
-
-      const res = await app.request("/revenue/premium-eth?orderDirection=desc");
-      const body = (await res.json()) as { items: { date: number }[] };
-
-      for (let i = 1; i < body.items.length; i++) {
-        const prev = body.items[i - 1]!;
-        const curr = body.items[i]!;
-        expect(prev.date).toBeGreaterThan(curr.date);
-      }
-    });
-
-    it("returns valid (smaller) data when fromDate is before April 2023", async () => {
-      server.use(
-        http.get(urls.premiumEth, () => HttpResponse.json(premiumEthFixture)),
-      );
-      const client = new RevenueDuneClient(API_KEY, urls);
-      const app = createTestApp(client);
-
-      const jan2020 = Math.floor(Date.UTC(2020, 0, 1) / 1000);
-      const res = await app.request(`/revenue/premium-eth?fromDate=${jan2020}`);
-
-      expect(res.status).toBe(200);
-      const body = (await res.json()) as {
-        items: { date: number }[];
-        totalCount: number;
-      };
-      expect(body.items.length).toBe(premiumEthFixture.result.rows.length);
-      expect(body.items.every((item) => item.date >= jan2020)).toBe(true);
-    });
-  });
-
   describe("GET /revenue/renewal-funnel", () => {
     it("returns happy-path data sorted ascending by date with mapped fields", async () => {
       server.use(
@@ -705,32 +604,32 @@ describe("Revenue Controller", () => {
     });
   });
 
-  describe("GET /revenue/by-account", () => {
-    it("returns happy-path data sorted ascending by [date, account] with mapped fields", async () => {
+  describe("GET /revenue/by-category", () => {
+    it("returns happy-path data sorted ascending by [date, category] with mapped fields", async () => {
       server.use(
-        http.get(urls.revenueByAccount, () =>
-          HttpResponse.json(revenueByAccountFixture),
+        http.get(urls.revenueByCategory, () =>
+          HttpResponse.json(revenueByCategoryFixture),
         ),
       );
       const client = new RevenueDuneClient(API_KEY, urls);
       const app = createTestApp(client);
 
-      const res = await app.request("/revenue/by-account");
+      const res = await app.request("/revenue/by-category");
 
       expect(res.status).toBe(200);
       const body = (await res.json()) as {
         items: {
           date: number;
-          account: number;
-          usd: number;
-          eth: number;
+          category: "Registration" | "Renewal";
+          revenueUsd: number;
+          revenueEth: number;
         }[];
         totalCount: number;
       };
 
-      expect(body.totalCount).toBe(revenueByAccountFixture.result.rows.length);
+      expect(body.totalCount).toBe(revenueByCategoryFixture.result.rows.length);
       expect(body.items).toHaveLength(
-        revenueByAccountFixture.result.rows.length,
+        revenueByCategoryFixture.result.rows.length,
       );
       for (let i = 1; i < body.items.length; i++) {
         const prev = body.items[i - 1]!;
@@ -738,15 +637,17 @@ describe("Revenue Controller", () => {
         if (prev.date !== curr.date) {
           expect(prev.date).toBeLessThan(curr.date);
         } else {
-          expect(prev.account).toBeLessThanOrEqual(curr.account);
+          expect(
+            prev.category.localeCompare(curr.category),
+          ).toBeLessThanOrEqual(0);
         }
       }
 
       const first = body.items[0]!;
-      const firstRaw = revenueByAccountFixture.result.rows[0]!;
-      expect(first.account).toBe(firstRaw.account);
-      expect(first.usd).toBe(firstRaw.usd);
-      expect(first.eth).toBe(firstRaw.eth);
+      const firstRaw = revenueByCategoryFixture.result.rows[0]!;
+      expect(first.category).toBe(firstRaw.category);
+      expect(first.revenueUsd).toBe(firstRaw.revenue_usd);
+      expect(first.revenueEth).toBe(firstRaw.revenue_eth);
     });
 
     it("returns 404 when DAO_ID is not ENS", async () => {
@@ -754,7 +655,7 @@ describe("Revenue Controller", () => {
       const client = new RevenueDuneClient(API_KEY, urls);
       const app = createTestApp(client);
 
-      const res = await app.request("/revenue/by-account");
+      const res = await app.request("/revenue/by-category");
 
       expect(res.status).toBe(404);
       expect(await res.json()).toEqual({ error: "Not Found" });
@@ -763,7 +664,7 @@ describe("Revenue Controller", () => {
     it("returns empty items when the revenue client is not instantiated", async () => {
       const app = createTestApp(undefined);
 
-      const res = await app.request("/revenue/by-account");
+      const res = await app.request("/revenue/by-category");
 
       expect(res.status).toBe(200);
       expect(await res.json()).toEqual({ items: [], totalCount: 0 });
@@ -771,16 +672,16 @@ describe("Revenue Controller", () => {
 
     it("sorts descending when orderDirection=desc", async () => {
       server.use(
-        http.get(urls.revenueByAccount, () =>
-          HttpResponse.json(revenueByAccountFixture),
+        http.get(urls.revenueByCategory, () =>
+          HttpResponse.json(revenueByCategoryFixture),
         ),
       );
       const client = new RevenueDuneClient(API_KEY, urls);
       const app = createTestApp(client);
 
-      const res = await app.request("/revenue/by-account?orderDirection=desc");
+      const res = await app.request("/revenue/by-category?orderDirection=desc");
       const body = (await res.json()) as {
-        items: { date: number; account: number }[];
+        items: { date: number; category: "Registration" | "Renewal" }[];
       };
 
       for (let i = 1; i < body.items.length; i++) {
@@ -789,34 +690,11 @@ describe("Revenue Controller", () => {
         if (prev.date !== curr.date) {
           expect(prev.date).toBeGreaterThan(curr.date);
         } else {
-          expect(prev.account).toBeGreaterThanOrEqual(curr.account);
+          expect(
+            prev.category.localeCompare(curr.category),
+          ).toBeGreaterThanOrEqual(0);
         }
       }
-    });
-
-    it("filters by account when ?account=3211 is provided", async () => {
-      server.use(
-        http.get(urls.revenueByAccount, () =>
-          HttpResponse.json(revenueByAccountFixture),
-        ),
-      );
-      const client = new RevenueDuneClient(API_KEY, urls);
-      const app = createTestApp(client);
-
-      const res = await app.request("/revenue/by-account?account=3211");
-
-      expect(res.status).toBe(200);
-      const body = (await res.json()) as {
-        items: { account: number }[];
-        totalCount: number;
-      };
-
-      const expectedCount = revenueByAccountFixture.result.rows.filter(
-        (row) => row.account === 3211,
-      ).length;
-      expect(body.totalCount).toBe(expectedCount);
-      expect(body.items.length).toBeGreaterThan(0);
-      expect(body.items.every((item) => item.account === 3211)).toBe(true);
     });
   });
 
@@ -988,10 +866,9 @@ describe("Revenue Controller", () => {
         actions: 0,
         activeNames: 0,
         newWallets: 0,
-        premiumEth: 0,
         renewalFunnel: 0,
         revenueTotals: 0,
-        revenueByAccount: 0,
+        revenueByCategory: 0,
         renewalTenure: 0,
       };
 

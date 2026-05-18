@@ -9,10 +9,9 @@ export const REVENUE_QUERY_KEYS = [
   "actions",
   "activeNames",
   "newWallets",
-  "premiumEth",
   "renewalFunnel",
   "revenueTotals",
-  "revenueByAccount",
+  "revenueByCategory",
   "renewalTenure",
 ] as const;
 
@@ -35,7 +34,7 @@ export type RevenueActionItem = {
 };
 
 type RawActionRow = {
-  date: string;
+  month: string;
   category: RevenueActionCategory;
   actions: number;
 };
@@ -47,7 +46,7 @@ export type RevenueActiveNamesItem = {
 };
 
 type RawActiveNamesRow = {
-  date: string;
+  month: string;
   net_change: number;
   cumulative_active: number;
 };
@@ -59,23 +58,9 @@ export type RevenueNewWalletsItem = {
 };
 
 type RawNewWalletsRow = {
-  date: string;
+  month: string;
   new_wallets: number;
   cumulative_wallets: number;
-};
-
-export type RevenuePremiumEthItem = {
-  date: number;
-  baseEth: number;
-  premiumEth: number;
-  totalEth: number;
-};
-
-type RawPremiumEthRow = {
-  date: string;
-  base_eth: number;
-  premium_eth: number;
-  total_eth: number;
 };
 
 export type RevenueRenewalFunnelItem = {
@@ -94,18 +79,20 @@ type RawRenewalFunnelRow = {
   renewal_rate_pct: string;
 };
 
-export type RevenueByAccountItem = {
+export type RevenueByCategoryCategory = "Registration" | "Renewal";
+
+export type RevenueByCategoryItem = {
   date: number;
-  account: number;
-  usd: number;
-  eth: number;
+  category: RevenueByCategoryCategory;
+  revenueUsd: number;
+  revenueEth: number;
 };
 
-type RawRevenueByAccountRow = {
-  date: string;
-  account: number;
-  usd: number;
-  eth: number;
+type RawRevenueByCategoryRow = {
+  month: string;
+  category: RevenueByCategoryCategory;
+  revenue_usd: number;
+  revenue_eth: number;
 };
 
 export type RevenueRenewalTenureBucket =
@@ -140,7 +127,7 @@ export type RevenueTotalsItem = {
 };
 
 type RawRevenueTotalsRow = {
-  date: string;
+  month: string;
   registration_usd: number;
   premium_usd: number;
   renewal_usd: number;
@@ -162,7 +149,7 @@ export class RevenueDuneClient {
     const data =
       await this.fetchJson<DuneRowsResponse<RawActionRow>>("actions");
     return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.date),
+      date: parseDuneMonth(row.month),
       category: row.category,
       actions: row.actions,
     }));
@@ -172,7 +159,7 @@ export class RevenueDuneClient {
     const data =
       await this.fetchJson<DuneRowsResponse<RawActiveNamesRow>>("activeNames");
     return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.date),
+      date: parseDuneMonth(row.month),
       netChange: row.net_change,
       cumulativeActive: row.cumulative_active,
     }));
@@ -182,20 +169,9 @@ export class RevenueDuneClient {
     const data =
       await this.fetchJson<DuneRowsResponse<RawNewWalletsRow>>("newWallets");
     return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.date),
+      date: parseDuneMonth(row.month),
       newWallets: row.new_wallets,
       cumulativeWallets: row.cumulative_wallets,
-    }));
-  }
-
-  public async fetchPremiumEth(): Promise<RevenuePremiumEthItem[]> {
-    const data =
-      await this.fetchJson<DuneRowsResponse<RawPremiumEthRow>>("premiumEth");
-    return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.date),
-      baseEth: row.base_eth,
-      premiumEth: row.premium_eth,
-      totalEth: row.total_eth,
     }));
   }
 
@@ -226,16 +202,16 @@ export class RevenueDuneClient {
     }));
   }
 
-  public async fetchRevenueByAccount(): Promise<RevenueByAccountItem[]> {
+  public async fetchRevenueByCategory(): Promise<RevenueByCategoryItem[]> {
     const data =
-      await this.fetchJson<DuneRowsResponse<RawRevenueByAccountRow>>(
-        "revenueByAccount",
+      await this.fetchJson<DuneRowsResponse<RawRevenueByCategoryRow>>(
+        "revenueByCategory",
       );
     return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.date),
-      account: row.account,
-      usd: row.usd,
-      eth: row.eth,
+      date: parseDuneMonth(row.month),
+      category: row.category,
+      revenueUsd: row.revenue_usd,
+      revenueEth: row.revenue_eth,
     }));
   }
 
@@ -245,7 +221,7 @@ export class RevenueDuneClient {
         "revenueTotals",
       );
     return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.date),
+      date: parseDuneMonth(row.month),
       registrationUsd: row.registration_usd,
       premiumUsd: row.premium_usd,
       renewalUsd: row.renewal_usd,
@@ -259,10 +235,13 @@ export class RevenueDuneClient {
   protected async fetchJson<T>(key: RevenueQueryKey): Promise<T> {
     const cached = this.cache.get<T>(key);
     if (cached !== null) {
+      logger.debug({ key }, "revenue cache hit");
       return cached;
     }
 
     const url = this.urls[key];
+    const start = Date.now();
+    logger.info({ key, url }, "fetching revenue data from Dune");
     try {
       const response = await fetch(url, {
         headers: {
@@ -276,10 +255,20 @@ export class RevenueDuneClient {
 
       const data = (await response.json()) as T;
       this.cache.set(key, data);
+      const rowCount = (data as DuneRowsResponse<unknown>).result?.rows?.length;
+      logger.info(
+        {
+          key,
+          status: response.status,
+          rowCount,
+          durationMs: Date.now() - start,
+        },
+        "revenue fetch succeeded",
+      );
       return data;
     } catch (error) {
       logger.error(
-        { err: error, key },
+        { err: error, key, durationMs: Date.now() - start },
         "failed to fetch revenue data from Dune",
       );
       throw new HTTPException(503, {

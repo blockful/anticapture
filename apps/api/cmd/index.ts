@@ -360,10 +360,9 @@ if (env.DAO_ID === DaoIdEnum.ENS) {
       actions: env.REVENUE_DUNE_ACTIONS_URL ?? "",
       activeNames: env.REVENUE_DUNE_ACTIVE_NAMES_URL ?? "",
       newWallets: env.REVENUE_DUNE_NEW_WALLETS_URL ?? "",
-      premiumEth: env.REVENUE_DUNE_PREMIUM_ETH_URL ?? "",
       renewalFunnel: env.REVENUE_DUNE_RENEWAL_FUNNEL_URL ?? "",
       revenueTotals: env.REVENUE_DUNE_REVENUE_TOTALS_URL ?? "",
-      revenueByAccount: env.REVENUE_DUNE_REVENUE_BY_ACCOUNT_URL ?? "",
+      revenueByCategory: env.REVENUE_DUNE_REVENUE_BY_CATEGORY_URL ?? "",
       renewalTenure: env.REVENUE_DUNE_RENEWAL_TENURE_URL ?? "",
     };
     revenueDuneClient = new RevenueDuneClient(
