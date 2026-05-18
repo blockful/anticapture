@@ -19,7 +19,7 @@ import {
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
+import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -162,7 +162,9 @@ const ProposalVoterBadge = ({
   proposalId,
   decimals,
 }: ProposalVoterBadgeProps) => {
-  const { votes } = useVoterInfo({ address, daoId, proposalId, decimals });
+  const {
+    data: { votes },
+  } = useAccountPower({ address, daoId, proposalId, decimals });
   const supportValue =
     votes?.items[0]?.support != null
       ? Number(votes.items[0].support)

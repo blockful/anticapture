@@ -1,52 +1,47 @@
-import type {
-  OrderDirection,
-  QueryInput_VotesByProposalId_OrderBy,
-} from "@anticapture/graphql-client";
-import type { GetVotesQuery } from "@anticapture/graphql-client/hooks";
 import {
-  useGetVotesQuery,
-  useGetVotingPowerChangeLazyQuery,
-} from "@anticapture/graphql-client/hooks";
-import type { ApolloError } from "@apollo/client";
-import { useMemo, useState, useCallback, useEffect } from "react";
+  getNextPageParam,
+  type OrderDirection,
+  type VotesByProposalIdPathParamsDaoEnumKey,
+  type VotesByProposalIdQueryParams,
+  type VotesByProposalIdQueryParamsOrderByEnumKey,
+  type VotesByProposalIdQueryResponse,
+  type VotingPowerVariation,
+  type VotingPowerVariationsPathParamsDaoEnumKey,
+} from "@anticapture/client";
+import {
+  useVotesByProposalIdInfinite,
+  votingPowerVariationsQueryOptions,
+} from "@anticapture/client/hooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-type VotingPowerVariation = {
-  previousVotingPower: string;
-  currentVotingPower: string;
-  absoluteChange: string;
-  percentageChange: string;
-};
-
-// Enhanced vote type with historical voting power
-export type VoteWithHistoricalPower = NonNullable<
-  NonNullable<GetVotesQuery["votesByProposalId"]>["items"][number]
-> & {
-  votingPowerVariation?: VotingPowerVariation;
-  isSubRow?: boolean;
-};
+export type VoteWithHistoricalPower =
+  VotesByProposalIdQueryResponse["items"][number] & {
+    votingPowerVariation?: VotingPowerVariation;
+    isSubRow?: boolean;
+  };
 
 export interface UseVotesResult {
-  votes: VoteWithHistoricalPower[];
+  data: VoteWithHistoricalPower[];
   totalCount: number;
-  loading: boolean;
-  error: ApolloError | undefined;
-  // Infinite scroll functions
-  loadMore: () => Promise<void>;
+  isLoading: boolean;
+  error: Error | null;
+  fetchNextPage: () => Promise<void>;
   hasNextPage: boolean;
-  isLoadingMore: boolean;
+  isFetchingNextPage: boolean;
 }
 
 export interface UseVotesParams {
   daoId?: DaoIdEnum;
   proposalId?: string;
   limit?: number;
-  orderBy?: string;
-  orderDirection?: string;
+  orderBy?: VotesByProposalIdQueryParamsOrderByEnumKey;
+  orderDirection?: OrderDirection;
   proposalStartTimestamp?: number;
-  support?: number | null;
+  support?: string | null;
   voterAddress?: string | null;
 }
 
@@ -60,194 +55,114 @@ export const useVotes = ({
   support = null,
   voterAddress = null,
 }: UseVotesParams = {}): UseVotesResult => {
-  // State for infinite scroll
-  const [allVotes, setAllVotes] = useState<VoteWithHistoricalPower[]>([]);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const queryClient = useQueryClient();
+  const [powerMap, setPowerMap] = useState<
+    Record<string, VotingPowerVariation>
+  >({});
+  const fetchedPageIndexesRef = useRef<Set<number>>(new Set());
+  const daoKey = daoId?.toLowerCase() as VotesByProposalIdPathParamsDaoEnumKey;
+  const variationsDaoKey =
+    daoId?.toLowerCase() as VotingPowerVariationsPathParamsDaoEnumKey;
 
-  // Build query variables for skip-based pagination
-  const queryVariables = useMemo(() => {
-    return {
-      proposalId: proposalId!,
+  const queryParams = useMemo<VotesByProposalIdQueryParams>(
+    () => ({
       limit,
-      skip: 0, // Always fetch from beginning, we'll handle append in fetchMore
-      orderBy: orderBy as QueryInput_VotesByProposalId_OrderBy,
-      orderDirection: orderDirection as OrderDirection,
-      support: support !== null ? String(support) : null,
-      voterAddressIn: voterAddress ? [voterAddress] : null,
-    };
-  }, [proposalId, limit, orderBy, orderDirection, support, voterAddress]);
-
-  // Main votes query
-  const { data, loading, error, fetchMore } = useGetVotesQuery({
-    variables: queryVariables,
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    notifyOnNetworkStatusChange: true,
-  });
-
-  // Lazy query for fetching voting power changes
-  const [getVotingPowerChange] = useGetVotingPowerChangeLazyQuery();
-
-  // Function to fetch voting power for specific votes
-  const fetchVotingPowerForVotes = useCallback(
-    async (votes: VoteWithHistoricalPower[]) => {
-      if (!votes.length || !daoId) return;
-
-      // Filter out votes that already have historical voting power
-      const votesNeedingData = votes.filter(
-        (vote) => !vote.votingPowerVariation,
-      );
-
-      if (!votesNeedingData.length || proposalStartTimestamp === undefined)
-        return;
-
-      try {
-        const addresses = votesNeedingData.map((vote) => vote.voterAddress);
-
-        const result = await getVotingPowerChange({
-          variables: {
-            addresses,
-            fromDate: proposalStartTimestamp / 1000 - DAYS_IN_SECONDS["30d"],
-            toDate: proposalStartTimestamp / 1000,
-          },
-          context: {
-            headers: {
-              "anticapture-dao-id": daoId,
-            },
-          },
-        });
-
-        // Update votes with historical voting power
-        if (result.data?.votingPowerVariations) {
-          const powerChanges = result.data.votingPowerVariations.items?.reduce(
-            (acc, item) => {
-              if (item?.accountId) acc[item.accountId] = item;
-              return acc;
-            },
-            {} as Record<string, VotingPowerVariation>,
-          );
-
-          // Update only the votes that were fetched and don't already have historical voting power
-          setAllVotes((prevVotes) =>
-            prevVotes.map((vote) => {
-              // Only update if this vote was in the fetch list
-              const wasFetched = votesNeedingData.some(
-                (v) => v.voterAddress === vote.voterAddress,
-              );
-              if (wasFetched) {
-                return {
-                  ...vote,
-                  votingPowerVariation: powerChanges[vote.voterAddress],
-                };
-              }
-              // Return the vote unchanged
-              return vote;
-            }),
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching voting power changes:", error);
-      }
-    },
-    [daoId, getVotingPowerChange, proposalStartTimestamp],
+      orderBy,
+      orderDirection,
+      support: support ?? undefined,
+      voterAddressIn: voterAddress ? [voterAddress] : undefined,
+    }),
+    [limit, orderBy, orderDirection, support, voterAddress],
   );
 
-  // Reset accumulated votes when sorting or filter parameters change
-  useEffect(() => {
-    setAllVotes([]);
-    setIsLoadingMore(false);
-  }, [orderBy, orderDirection, support, voterAddress]);
-
-  // Initialize allVotes on first load or when data changes after reset
-  useEffect(() => {
-    if (data?.votesByProposalId?.items && allVotes.length === 0) {
-      const initialVotes = data.votesByProposalId
-        .items as VoteWithHistoricalPower[];
-      setAllVotes(initialVotes);
-      // Fetch voting power for initial votes
-      fetchVotingPowerForVotes(initialVotes);
-    }
-  }, [
-    data?.votesByProposalId?.items,
-    allVotes.length,
-    fetchVotingPowerForVotes,
-  ]);
-
-  // Use accumulated votes for infinite scroll
-  const votes = allVotes;
-
-  // Extract total count
-  const totalCount = useMemo(() => {
-    return data?.votesByProposalId?.totalCount || 0;
-  }, [data?.votesByProposalId?.totalCount]);
-
-  // Calculate if there are more pages
-  const hasNextPage = useMemo(() => {
-    return allVotes.length < totalCount;
-  }, [allVotes.length, totalCount]);
-
-  // Load more votes for infinite scroll with skip-based pagination
-  const loadMore = useCallback(async () => {
-    if (!hasNextPage || isLoadingMore) return;
-
-    setIsLoadingMore(true);
-
-    try {
-      await fetchMore({
-        variables: {
-          proposalId,
-          limit,
-          skip: allVotes.length, // Skip already loaded votes
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.votesByProposalId?.items) return previousResult;
-
-          // Append new votes to existing ones in the GraphQL cache
-          const newVotes = fetchMoreResult.votesByProposalId
-            .items as VoteWithHistoricalPower[];
-          setAllVotes((prev) => [...prev, ...newVotes]);
-
-          // Fetch voting power for new votes
-          fetchVotingPowerForVotes(newVotes);
-
-          // Return the merged result for the cache
-          return {
-            votesByProposalId: {
-              ...fetchMoreResult.votesByProposalId,
-              items: [
-                ...(previousResult.votesByProposalId?.items || []),
-                ...newVotes,
-              ],
-              totalCount: fetchMoreResult.votesByProposalId.totalCount || 0,
-            },
-          };
-        },
-      });
-    } catch (error) {
-      console.error("Error loading more votes:", error);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
     hasNextPage,
-    isLoadingMore,
-    fetchMore,
-    proposalId,
-    limit,
-    allVotes.length,
-    fetchVotingPowerForVotes,
+    isFetchingNextPage,
+  } = useVotesByProposalIdInfinite(daoKey, proposalId ?? "", queryParams, {
+    query: {
+      enabled: !!daoId && !!proposalId,
+      getNextPageParam,
+    },
+  });
+
+  useEffect(() => {
+    setPowerMap({});
+    fetchedPageIndexesRef.current = new Set();
+  }, [daoId, proposalId, proposalStartTimestamp, queryParams]);
+
+  const pagesLength = data?.pages.length ?? 0;
+
+  useEffect(() => {
+    if (!daoId || !proposalStartTimestamp || !data?.pages.length) return;
+
+    const pageIndex = data.pages.length - 1;
+    if (fetchedPageIndexesRef.current.has(pageIndex)) return;
+
+    const newestPage = data.pages[pageIndex];
+    const addresses = newestPage.items
+      .map((vote) => vote.voterAddress)
+      .filter((address) => !powerMap[address.toLowerCase()]);
+
+    if (addresses.length === 0) {
+      fetchedPageIndexesRef.current.add(pageIndex);
+      return;
+    }
+
+    fetchedPageIndexesRef.current.add(pageIndex);
+    const toDate = Math.floor(proposalStartTimestamp / 1000);
+
+    void queryClient
+      .fetchQuery(
+        votingPowerVariationsQueryOptions(variationsDaoKey, {
+          addresses,
+          fromDate: toDate - DAYS_IN_SECONDS["30d"],
+          toDate,
+        }),
+      )
+      .then((result) => {
+        setPowerMap((current) => ({
+          ...current,
+          ...Object.fromEntries(
+            result.items.map((item) => [item.accountId.toLowerCase(), item]),
+          ),
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching voting power changes:", error);
+      });
+  }, [
+    daoId,
+    data?.pages,
+    pagesLength,
+    powerMap,
+    proposalStartTimestamp,
+    queryClient,
+    variationsDaoKey,
   ]);
+
+  const votes = useMemo(
+    () =>
+      (data?.pages.flatMap((page) => page.items) ?? []).map((vote) => ({
+        ...vote,
+        votingPowerVariation: powerMap[vote.voterAddress.toLowerCase()],
+      })),
+    [data, powerMap],
+  );
+  const totalCount = data?.pages[0]?.totalCount ?? 0;
 
   return {
-    votes,
+    data: votes,
     totalCount,
-    loading,
-    error,
-    loadMore,
+    isLoading,
+    error: error instanceof Error ? error : null,
+    fetchNextPage: async () => {
+      await fetchNextPage();
+    },
     hasNextPage,
-    isLoadingMore,
+    isFetchingNextPage,
   };
 };
