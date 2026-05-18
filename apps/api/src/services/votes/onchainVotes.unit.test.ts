@@ -27,6 +27,7 @@ const createMockDBVote = (
   votingPower: 1000n,
   reason: null,
   timestamp: 1700000000n,
+  logIndex: 0,
   proposalTitle: "Test Proposal",
   ...overrides,
 });

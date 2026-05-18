@@ -1,10 +1,18 @@
 import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
+import { zeroAddress } from "viem";
 
 import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
-import { feedEvent } from "@/database/schema";
+import {
+  delegation,
+  feedEvent,
+  proposalsOnchain,
+  transfer,
+  votesOnchain,
+  votingPowerHistory,
+} from "@/database/schema";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { FeedRequest } from "@/mappers";
 
@@ -29,7 +37,6 @@ const defaultThresholds = (
   [FeedEventType.VOTE]: 0n,
   [FeedEventType.DELEGATION]: 0n,
   [FeedEventType.TRANSFER]: 0n,
-  // [FeedEventType.DELEGATION_VOTES_CHANGED]: 0n,
   [FeedEventType.PROPOSAL]: 0n,
   [FeedEventType.PROPOSAL_EXTENDED]: 0n,
   ...overrides,
@@ -43,7 +50,7 @@ const createFeedEvent = (
   type: "VOTE",
   value: 1000n,
   timestamp: 1700000000,
-  metadata: null,
+  proposalId: null,
   ...overrides,
 });
 
@@ -70,6 +77,11 @@ describe("FeedRepository", () => {
 
   beforeEach(async () => {
     await db.delete(feedEvent);
+    await db.delete(votesOnchain);
+    await db.delete(proposalsOnchain);
+    await db.delete(delegation);
+    await db.delete(transfer);
+    await db.delete(votingPowerHistory);
   });
 
   describe("getFeedEvents", () => {
@@ -172,7 +184,7 @@ describe("FeedRepository", () => {
         ]);
 
       const result = await repository.getFeedEvents(
-        defaultFeedParams({ type: FeedEventType.VOTE }),
+        defaultFeedParams({ type: [FeedEventType.VOTE] }),
         defaultThresholds({ [FeedEventType.VOTE]: 1000n }),
       );
 
@@ -195,7 +207,7 @@ describe("FeedRepository", () => {
       ]);
 
       const result = await repository.getFeedEvents(
-        defaultFeedParams({ type: FeedEventType.PROPOSAL }),
+        defaultFeedParams({ type: [FeedEventType.PROPOSAL] }),
         defaultThresholds(),
       );
 
@@ -333,18 +345,248 @@ describe("FeedRepository", () => {
       expect(result.totalCount).toBe(5);
     });
 
-    it("should preserve metadata in returned items", async () => {
-      const metadata = { proposalId: "42", title: "Test Proposal" };
-      await db
-        .insert(feedEvent)
-        .values([createFeedEvent({ logIndex: 0, type: "PROPOSAL", metadata })]);
+    it("should synthesize metadata for PROPOSAL events from related tables", async () => {
+      const proposerAccountId = zeroAddress;
+      const proposalTimestamp = 1700000000n;
+      // Seed two votingPowerHistory rows: one before the proposal (should be
+      // picked), one after (must be ignored).
+      await db.insert(votingPowerHistory).values([
+        {
+          transactionHash: "0xprior",
+          daoId: "ENS",
+          accountId: proposerAccountId,
+          votingPower: 12345n,
+          delta: 12345n,
+          deltaMod: 12345n,
+          timestamp: proposalTimestamp - 100n,
+          logIndex: 0,
+        },
+        {
+          transactionHash: "0xlater",
+          daoId: "ENS",
+          accountId: proposerAccountId,
+          votingPower: 999999n,
+          delta: 987654n,
+          deltaMod: 987654n,
+          timestamp: proposalTimestamp + 100n,
+          logIndex: 0,
+        },
+      ]);
+      await db.insert(proposalsOnchain).values({
+        id: "42",
+        txHash: "0xabc123",
+        daoId: "ENS",
+        proposerAccountId,
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
+        startBlock: 0,
+        endBlock: 100,
+        title: "Test Proposal",
+        description: "desc",
+        timestamp: proposalTimestamp,
+        endTimestamp: 1700001000n,
+        status: "ACTIVE",
+      });
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 0,
+          type: "PROPOSAL",
+          proposalId: "42",
+        }),
+      ]);
 
       const result = await repository.getFeedEvents(
-        defaultFeedParams({ type: FeedEventType.PROPOSAL }),
+        defaultFeedParams({ type: [FeedEventType.PROPOSAL] }),
         defaultThresholds(),
       );
 
-      expect(result.items[0]?.metadata).toEqual(metadata);
+      expect(result.items[0]?.metadata).toEqual({
+        id: "42",
+        proposer: proposerAccountId,
+        votingPower: "12345",
+        title: "Test Proposal",
+      });
+    });
+
+    it("should fall back to '0' for PROPOSAL voting power when no history exists", async () => {
+      const proposerAccountId = zeroAddress;
+      await db.insert(proposalsOnchain).values({
+        id: "43",
+        txHash: "0xabc123",
+        daoId: "ENS",
+        proposerAccountId,
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
+        startBlock: 0,
+        endBlock: 100,
+        title: "No History",
+        description: "desc",
+        timestamp: 1700000000n,
+        endTimestamp: 1700001000n,
+        status: "ACTIVE",
+      });
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 0,
+          type: "PROPOSAL",
+          proposalId: "43",
+        }),
+      ]);
+
+      const result = await repository.getFeedEvents(
+        defaultFeedParams({ type: [FeedEventType.PROPOSAL] }),
+        defaultThresholds(),
+      );
+
+      expect(result.items[0]?.metadata).toMatchObject({
+        votingPower: "0",
+      });
+    });
+
+    it("should synthesize metadata for DELEGATION events from delegations table", async () => {
+      const delegator = "0x1111111111111111111111111111111111111111";
+      const delegate = "0x2222222222222222222222222222222222222222";
+      await db.insert(delegation).values({
+        transactionHash: "0xabc123",
+        daoId: "ENS",
+        delegatorAccountId: delegator,
+        delegateAccountId: delegate,
+        delegatedValue: 9999n,
+        previousDelegate: zeroAddress,
+        timestamp: 1700000000n,
+        logIndex: 7,
+      });
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 7,
+          type: "DELEGATION",
+          value: 9999n,
+        }),
+      ]);
+
+      const result = await repository.getFeedEvents(
+        defaultFeedParams({ type: [FeedEventType.DELEGATION] }),
+        defaultThresholds(),
+      );
+
+      expect(result.items[0]?.metadata).toEqual({
+        delegator,
+        delegate,
+        previousDelegate: zeroAddress,
+        amount: "9999",
+      });
+    });
+
+    it("should synthesize metadata for TRANSFER events from transfers table", async () => {
+      const fromAddr = "0x3333333333333333333333333333333333333333";
+      const toAddr = "0x4444444444444444444444444444444444444444";
+      await db.insert(transfer).values({
+        transactionHash: "0xabc123",
+        daoId: "ENS",
+        tokenId: zeroAddress,
+        amount: 4242n,
+        fromAccountId: fromAddr,
+        toAccountId: toAddr,
+        timestamp: 1700000000n,
+        logIndex: 3,
+      });
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 3,
+          type: "TRANSFER",
+          value: 4242n,
+        }),
+      ]);
+
+      const result = await repository.getFeedEvents(
+        defaultFeedParams({ type: [FeedEventType.TRANSFER] }),
+        defaultThresholds(),
+      );
+
+      expect(result.items[0]?.metadata).toEqual({
+        from: fromAddr,
+        to: toAddr,
+        amount: "4242",
+      });
+    });
+
+    it("should synthesize metadata for VOTE events with proposal title", async () => {
+      const voter = "0x5555555555555555555555555555555555555555";
+      await db.insert(proposalsOnchain).values({
+        id: "99",
+        txHash: "0xdef",
+        daoId: "ENS",
+        proposerAccountId: zeroAddress,
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
+        startBlock: 0,
+        endBlock: 100,
+        title: "Voted Proposal",
+        description: "desc",
+        timestamp: 1700000000n,
+        endTimestamp: 1700001000n,
+        status: "ACTIVE",
+      });
+      await db.insert(votesOnchain).values({
+        txHash: "0xabc123",
+        daoId: "ENS",
+        voterAccountId: voter,
+        proposalId: "99",
+        support: "1",
+        votingPower: 7777n,
+        reason: "Because",
+        timestamp: 1700000000n,
+        logIndex: 4,
+      });
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 4,
+          type: "VOTE",
+          value: 7777n,
+          proposalId: "99",
+        }),
+      ]);
+
+      const result = await repository.getFeedEvents(
+        defaultFeedParams({ type: [FeedEventType.VOTE] }),
+        defaultThresholds(),
+      );
+
+      expect(result.items[0]?.metadata).toEqual({
+        voter,
+        reason: "Because",
+        support: 1,
+        votingPower: "7777",
+        proposalId: "99",
+        title: "Voted Proposal",
+      });
+    });
+
+    it("should support filtering by multiple types in one request", async () => {
+      await db
+        .insert(feedEvent)
+        .values([
+          createFeedEvent({ logIndex: 0, type: "VOTE", value: 1500n }),
+          createFeedEvent({ logIndex: 1, type: "DELEGATION", value: 600n }),
+          createFeedEvent({ logIndex: 2, type: "TRANSFER", value: 5000n }),
+        ]);
+
+      const result = await repository.getFeedEvents(
+        defaultFeedParams({
+          type: [FeedEventType.VOTE, FeedEventType.DELEGATION],
+        }),
+        defaultThresholds(),
+      );
+
+      expect(result.items).toHaveLength(2);
+      const types = result.items.map((i) => i.type).sort();
+      expect(types).toEqual(["DELEGATION", "VOTE"]);
     });
   });
 });

@@ -193,11 +193,6 @@ export async function aaveTransfer(
     type: "TRANSFER",
     value,
     timestamp,
-    metadata: {
-      from,
-      to,
-      amount: value,
-    },
   });
 
   const { cex, dex, lending, treasury, nonCirculating, burning } = addressSets;
@@ -412,11 +407,5 @@ export async function aaveDelegateChanged(
     type: "DELEGATION",
     value: delegatorBalance.balance,
     timestamp,
-    metadata: {
-      delegator,
-      delegate,
-      previousDelegate,
-      amount: delegatorBalance.balance,
-    },
   });
 }

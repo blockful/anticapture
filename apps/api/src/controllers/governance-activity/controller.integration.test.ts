@@ -210,6 +210,7 @@ describe("GovernanceActivity Controller", () => {
           support: "FOR",
           votingPower: 1000n,
           timestamp: RECENT_TS,
+          logIndex: 0,
         },
         {
           txHash: "0xv2",
@@ -219,6 +220,7 @@ describe("GovernanceActivity Controller", () => {
           support: "AGAINST",
           votingPower: 500n,
           timestamp: RECENT_TS,
+          logIndex: 0,
         },
         {
           txHash: "0xv3",
@@ -228,6 +230,7 @@ describe("GovernanceActivity Controller", () => {
           support: "FOR",
           votingPower: 300n,
           timestamp: OLD_TS,
+          logIndex: 0,
         },
       ]);
 

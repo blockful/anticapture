@@ -92,6 +92,7 @@ export const votingPowerHistory = pgTable(
     primaryKey({
       columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
+    index().on(table.accountId, table.timestamp),
   ],
 );
 
@@ -193,11 +194,13 @@ export const votesOnchain = pgTable(
     votingPower: bigint("voting_power", { mode: "bigint" }).notNull(),
     reason: drizzle.text(),
     timestamp: bigint({ mode: "bigint" }).notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
   }),
   (table) => [
     primaryKey({
       columns: [table.voterAccountId, table.proposalId],
     }),
+    index().on(table.txHash, table.logIndex),
   ],
 );
 
@@ -280,7 +283,6 @@ export const evenTypeEnum = pgEnum("event_type", [
   "PROPOSAL",
   "DELEGATION",
   "TRANSFER",
-  "DELEGATION_VOTES_CHANGED",
   "PROPOSAL_EXTENDED",
 ]);
 
@@ -292,7 +294,7 @@ export const feedEvent = pgTable(
     type: evenTypeEnum("type").notNull(),
     value: bigint({ mode: "bigint" }).notNull().default(0n),
     timestamp: bigint({ mode: "number" }).notNull(),
-    metadata: drizzle.json().$type<Record<string, unknown>>(),
+    proposalId: drizzle.text("proposal_id"),
   }),
   (table) => [
     primaryKey({

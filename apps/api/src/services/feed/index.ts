@@ -3,12 +3,16 @@ import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
 import { DBFeedEvent, FeedRequest, FeedResponse } from "@/mappers";
 
+type FeedEventWithMetadata = DBFeedEvent & {
+  metadata: Record<string, unknown> | null;
+};
+
 interface FeedRepository {
   getFeedEvents(
     req: FeedRequest,
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ): Promise<{
-    items: DBFeedEvent[];
+    items: FeedEventWithMetadata[];
     totalCount: number;
   }>;
 }

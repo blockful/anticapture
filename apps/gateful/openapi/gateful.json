@@ -3242,18 +3242,22 @@
           },
           {
             "schema": {
-              "type": "string",
-              "enum": [
-                "VOTE",
-                "PROPOSAL",
-                "DELEGATION",
-                "TRANSFER",
-                "PROPOSAL_EXTENDED"
-              ],
-              "description": "Filter events by governance activity type."
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "VOTE",
+                  "PROPOSAL",
+                  "DELEGATION",
+                  "TRANSFER",
+                  "PROPOSAL_EXTENDED"
+                ]
+              },
+              "description": "Filter events by governance activity type. Pass repeated query params or a comma-delimited list.",
+              "example": ["VOTE"]
             },
             "required": false,
-            "description": "Filter events by governance activity type.",
+            "description": "Filter events by governance activity type. Pass repeated query params or a comma-delimited list.",
             "name": "type",
             "in": "query"
           },
