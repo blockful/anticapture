@@ -14,6 +14,8 @@ export const StackedBarChart = ({
   series,
   xAxisLabels,
   yAxisFormatter,
+  xAxisLabelInterval,
+  gridRight = 12,
   height = 300,
   className,
 }: StackedBarChartProps) => {
@@ -39,7 +41,7 @@ export const StackedBarChart = ({
     },
     grid: {
       top: 12,
-      right: 12,
+      right: gridRight,
       bottom: 56,
       left: 0,
       containLabel: true,
@@ -55,9 +57,10 @@ export const StackedBarChart = ({
         fontWeight: 500,
         color: theme.axisLabelColor,
         interval:
-          xAxisLabels.length > 12
+          xAxisLabelInterval ??
+          (xAxisLabels.length > 12
             ? (index: number) => xAxisLabels[index]?.startsWith("Jan")
-            : "auto",
+            : "auto"),
         formatter:
           xAxisLabels.length > 12
             ? (value: string) => `20${value.split(" ")[1]}`
