@@ -78,14 +78,13 @@ export const DelegationHistoryTable = ({
     data: delegationHistory,
     loading,
     error,
-    pagination,
+    hasNextPage,
     fetchNextPage,
     fetchingMore,
   } = useDelegationHistory({
     daoId,
     delegatorAccountId: address,
     delegateAccountId: addressFilter ?? "",
-    orderBy: sortBy,
     orderDirection: sortOrder,
     filterVariables,
     limit,
@@ -353,7 +352,7 @@ export const DelegationHistoryTable = ({
         columns={delegationHistoryColumns}
         data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : data}
         filterColumn="address"
-        hasMore={pagination.hasNextPage}
+        hasMore={hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}

@@ -72,7 +72,6 @@ export const VotingPowerHistoryTable = ({
     useDelegateDelegationHistory({
       accountId,
       daoId,
-      orderBy: sortBy,
       orderDirection: sortDirection,
       filterVariables,
       fromTimestamp,

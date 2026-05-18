@@ -1,11 +1,12 @@
-import { useGetAddresses } from "@anticapture/client/hooks";
 import type {
-  GetAccountInteractionsQuery,
-  OrderDirection,
-  QueryInput_AccountInteractions_OrderBy,
-} from "@anticapture/graphql-client/hooks";
-import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
-import { NetworkStatus } from "@apollo/client";
+  AccountInteraction,
+  AccountInteractionsPathParamsDaoEnumKey,
+  AccountInteractionsQueryResponse,
+} from "@anticapture/client";
+import {
+  useGetAddresses,
+  useAccountInteractionsInfinite,
+} from "@anticapture/client/hooks";
 import { useState, useCallback, useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
@@ -15,21 +16,9 @@ import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
-interface Interaction {
-  accountId: string;
-  transferCount: string;
-  totalVolume: string;
-  amountTransferred: string;
-  __typename?: NonNullable<
-    NonNullable<
-      GetAccountInteractionsQuery["accountInteractions"]
-    >["items"][number]
-  >["__typename"];
-}
-
 interface InteractionResponse {
-  topFive: Array<Interaction>;
-  interactions: Array<Interaction>;
+  topFive: Array<AccountInteraction>;
+  interactions: Array<AccountInteraction>;
   netBalanceChange: number;
   loading: boolean;
   chartConfig: Record<
@@ -57,6 +46,14 @@ interface InteractionResponse {
   hasNextPage: boolean;
 }
 
+const getNextPageParam = (
+  lastPage: AccountInteractionsQueryResponse,
+  allPages: AccountInteractionsQueryResponse[],
+): number | undefined => {
+  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
+  return loaded >= lastPage.totalCount ? undefined : loaded;
+};
+
 export const useAccountInteractionsData = ({
   daoId,
   address,
@@ -81,99 +78,52 @@ export const useAccountInteractionsData = ({
 
   const [isPaginationLoading, setIsPaginationLoading] = useState(false);
 
-  const { data, loading, error, fetchMore, networkStatus } =
-    useGetAccountInteractionsQuery({
-      variables: {
-        address,
-        orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
-        orderDirection: sortDirection as OrderDirection,
-        minAmount: filterVariables?.minAmount ?? null,
-        maxAmount: filterVariables?.maxAmount ?? null,
-        limit,
-        skip: null,
-        filterAddress: filterAddress ?? null,
-      },
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-        },
-      },
-      notifyOnNetworkStatusChange: true,
-      fetchPolicy: "cache-and-network",
-    });
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useAccountInteractionsInfinite(
+    daoId.toLowerCase() as AccountInteractionsPathParamsDaoEnumKey,
+    address,
+    {
+      orderBy: sortBy,
+      orderDirection: sortDirection,
+      minAmount: filterVariables?.minAmount ?? undefined,
+      maxAmount: filterVariables?.maxAmount ?? undefined,
+      limit,
+      filterAddress: filterAddress ?? undefined,
+    },
+    { query: { getNextPageParam } },
+  );
 
-  const interactionsData = data?.accountInteractions?.items;
-  const totalCount = data?.accountInteractions?.totalCount || 0n;
-  const numericTotalCount = Number(totalCount);
-  const currentItemsCount = interactionsData?.length || 0;
-  const hasNextPage = currentItemsCount < numericTotalCount;
+  const interactionsData = useMemo(
+    () => data?.pages.flatMap((p) => p.items) ?? [],
+    [data],
+  );
+  const totalCount = data?.pages[data.pages.length - 1]?.totalCount ?? 0;
+  const computedHasNextPage = hasNextPage ?? false;
 
-  const fetchNextPage = useCallback(async () => {
-    if (!hasNextPage || isPaginationLoading) return;
-
+  const fetchNextPageFn = useCallback(async () => {
+    if (!computedHasNextPage || isPaginationLoading) return;
     setIsPaginationLoading(true);
     try {
-      await fetchMore({
-        variables: {
-          address,
-          orderBy: sortBy as QueryInput_AccountInteractions_OrderBy,
-          orderDirection: sortDirection as OrderDirection,
-          minAmount: filterVariables?.minAmount,
-          maxAmount: filterVariables?.maxAmount,
-          limit,
-          filterAddress,
-          skip: currentItemsCount,
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.accountInteractions) return previousResult;
-
-          const prevItems = previousResult.accountInteractions?.items ?? [];
-          const newItems = fetchMoreResult.accountInteractions.items ?? [];
-
-          const merged = [
-            ...prevItems,
-            ...newItems.filter(
-              (n) => n && !prevItems.some((p) => p?.accountId === n.accountId),
-            ),
-          ];
-
-          return {
-            ...fetchMoreResult,
-            accountInteractions: {
-              ...fetchMoreResult.accountInteractions,
-              items: merged,
-            },
-          };
-        },
-      });
+      await fetchNextPage();
     } catch (err) {
       console.error("Error fetching next page:", err);
     } finally {
       setIsPaginationLoading(false);
     }
-  }, [
-    hasNextPage,
-    isPaginationLoading,
-    fetchMore,
-    address,
-    sortBy,
-    sortDirection,
-    filterVariables,
-    limit,
-    filterAddress,
-    currentItemsCount,
-  ]);
-  const topFive: Interaction[] =
-    interactionsData && interactionsData?.length > 0
-      ? interactionsData
-          .slice(0, 5)
-          .filter((item): item is Interaction => item !== null)
-      : [];
+  }, [computedHasNextPage, isPaginationLoading, fetchNextPage]);
 
-  const interactionsAddresses: Address[] =
-    topFive
-      .filter((interaction) => interaction?.accountId)
-      .map((interaction) => interaction?.accountId as Address) || [];
+  const topFive =
+    interactionsData.length > 0 ? interactionsData.slice(0, 5) : [];
+
+  const interactionsAddresses: Address[] = topFive
+    .filter((interaction) => interaction?.accountId)
+    .map((interaction) => interaction.accountId as Address);
 
   const { data: enrichmentData } = useGetAddresses(
     { addresses: interactionsAddresses },
@@ -188,25 +138,24 @@ export const useAccountInteractionsData = ({
     return map;
   }, [enrichmentData]);
 
-  const defaultData = {
+  const defaultData: InteractionResponse = {
     topFive: [],
     interactions: [],
     netBalanceChange: 0,
     totalIndividualInteractions: 0,
-    loading,
+    loading: isLoading,
     chartConfig: {},
     pieData: [],
     legendItems: [],
     totalCount: 0,
     totalTransfers: 0,
-    error,
-    fetchNextPage,
-    fetchingMore:
-      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
-    hasNextPage,
+    error: error as Error | undefined,
+    fetchNextPage: fetchNextPageFn,
+    fetchingMore: isFetchingNextPage || isPaginationLoading,
+    hasNextPage: computedHasNextPage,
   };
 
-  if (!topFive.length || totalCount === 0n) {
+  if (!topFive.length || totalCount === 0) {
     return defaultData;
   }
 
@@ -225,31 +174,22 @@ export const useAccountInteractionsData = ({
     }
   > = {};
 
-  const pieData: {
-    name: string;
-    label: string;
-    value: number;
-  }[] = [];
+  const pieData: { name: string; label: string; value: number }[] = [];
 
-  const totalTransfers = interactionsData
-    ? interactionsData.reduce((acc, item) => {
-        return acc + Number(item?.transferCount || 0);
-      }, 0)
-    : 0;
+  const totalTransfers = interactionsData.reduce((acc, item) => {
+    return acc + Number(item?.transferCount || 0);
+  }, 0);
 
   const topFiveTransfers = topFive.reduce((acc, item) => {
     return acc + Number(item?.transferCount || 0);
   }, 0);
 
   const othersValue = totalTransfers - topFiveTransfers;
-
   const othersPercentage =
     totalTransfers > 0 ? (othersValue / totalTransfers) * 100 : 0;
 
   topFive.forEach((interaction, index) => {
-    if (!interaction?.accountId) {
-      return;
-    }
+    if (!interaction?.accountId) return;
 
     const percentage =
       totalTransfers > 0
@@ -276,7 +216,7 @@ export const useAccountInteractionsData = ({
     });
   });
 
-  if (othersValue > BigInt(0)) {
+  if (othersValue > 0) {
     chartConfig["others"] = {
       label: "Others",
       color: "#9CA3AF",
@@ -302,7 +242,7 @@ export const useAccountInteractionsData = ({
     }),
   );
 
-  const netBalanceChange = interactionsData?.reduce((acc, item) => {
+  const netBalanceChange = interactionsData.reduce((acc, item) => {
     return (
       acc + Number(formatUnits(BigInt(item?.amountTransferred || 0), decimals))
     );
@@ -310,21 +250,18 @@ export const useAccountInteractionsData = ({
 
   return {
     topFive,
-    interactions:
-      interactionsData?.filter((item): item is Interaction => item !== null) ||
-      [],
-    loading,
+    interactions: interactionsData,
+    loading: isLoading,
     chartConfig,
-    netBalanceChange: netBalanceChange || 0,
+    netBalanceChange,
     totalCount,
     totalTransfers,
     pieData,
     legendItems,
     totalIndividualInteractions,
-    error,
-    fetchNextPage,
-    fetchingMore:
-      networkStatus === NetworkStatus.fetchMore || isPaginationLoading,
-    hasNextPage,
+    error: error as Error | undefined,
+    fetchNextPage: fetchNextPageFn,
+    fetchingMore: isFetchingNextPage || isPaginationLoading,
+    hasNextPage: computedHasNextPage,
   };
 };

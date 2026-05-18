@@ -1,14 +1,16 @@
 "use client";
 
+import type {
+  ProposalsActivityPathParamsDaoEnumKey,
+  VotingPowersPathParamsDaoEnumKey,
+  VotingPowersQueryParamsOrderByEnumKey,
+  VotingPowersQueryResponse,
+} from "@anticapture/client";
 import {
-  OrderDirection,
-  type QueryInput_VotingPowers_OrderBy,
-} from "@anticapture/graphql-client";
-import {
-  useGetDelegatesQuery,
-  useGetDelegateProposalsActivityLazyQuery,
-} from "@anticapture/graphql-client/hooks";
-import { NetworkStatus } from "@apollo/client";
+  proposalsActivityQueryOptions,
+  useVotingPowersInfinite,
+} from "@anticapture/client/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useCallback, useState, useEffect } from "react";
 
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
@@ -36,18 +38,11 @@ export interface Delegate {
   balance?: string;
 }
 
-interface PaginationInfo {
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  currentPage: number;
-}
-
 interface UseDelegatesResult {
   data: Delegate[] | null;
   loading: boolean;
   error: Error | null;
-  refetch: () => void;
-  pagination: PaginationInfo;
+  hasNextPage: boolean;
   fetchNextPage: () => Promise<void>;
   fetchingMore: boolean;
   isActivityLoadingFor: (addr: string) => boolean;
@@ -57,26 +52,30 @@ interface UseDelegatesParams {
   days: TimeInterval;
   daoId: DaoIdEnum;
   address?: string;
-  orderBy?: QueryInput_VotingPowers_OrderBy;
-  orderDirection?: OrderDirection;
+  orderBy?: VotingPowersQueryParamsOrderByEnumKey;
+  orderDirection?: "asc" | "desc";
   limit?: number;
   skipActivity?: boolean;
 }
 
+const getNextPageParam = (
+  lastPage: VotingPowersQueryResponse,
+  allPages: VotingPowersQueryResponse[],
+): number | undefined => {
+  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
+  return loaded >= lastPage.totalCount ? undefined : loaded;
+};
+
 export const useDelegates = ({
   daoId,
   orderBy,
-  orderDirection = OrderDirection.Desc,
+  orderDirection = "desc",
   days,
   address,
   limit = 15,
   skipActivity = false,
 }: UseDelegatesParams): UseDelegatesResult => {
-  // Track current page - this is the source of truth for page number
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Track pagination loading state to prevent rapid clicks
-  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const [delegateActivities, setDelegateActivities] = useState<
     Map<string, ProposalsActivity>
@@ -89,72 +88,52 @@ export const useDelegates = ({
     return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days];
   }, [days]);
 
-  // Reset to page 1 and refetch when sorting changes (new query)
   useEffect(() => {
-    setCurrentPage(1);
     setDelegateActivities(new Map());
     setLoadingActivityAddresses(new Set());
   }, [orderDirection, address, days, orderBy]);
 
-  const {
-    data: delegatesData,
-    error: delegatesError,
-    refetch,
-    fetchMore,
-    networkStatus,
-  } = useGetDelegatesQuery({
-    variables: {
+  const params = useMemo(
+    () => ({
       orderDirection,
-      orderBy,
+      ...(orderBy ? { orderBy } : {}),
       limit,
       fromDate,
-      toDate: null,
-      addresses: address ? [address] : null,
-    },
-    context: {
-      headers: { "anticapture-dao-id": daoId },
-    },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network",
-  });
+      ...(address ? { addresses: [address] } : {}),
+    }),
+    [orderDirection, orderBy, limit, fromDate, address],
+  );
 
-  // Refetch data when sorting changes to ensure we start from page 1
-  useEffect(() => {
-    refetch({
-      orderDirection,
-      orderBy,
-      fromDate,
-      toDate: null,
-      addresses: address ? [address] : null,
-    });
-  }, [orderDirection, address, refetch, orderBy, fromDate]);
+  const {
+    data: delegatesData,
+    error,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useVotingPowersInfinite(
+    daoId.toLowerCase() as VotingPowersPathParamsDaoEnumKey,
+    params,
+    { query: { getNextPageParam } },
+  );
 
-  const delegateAddresses = useMemo(
-    () =>
-      delegatesData?.votingPowers?.items
-        ?.map((delegate) => delegate?.accountId)
-        .filter(Boolean) || [],
+  const allDelegates = useMemo(
+    () => delegatesData?.pages.flatMap((p) => p.items) ?? [],
     [delegatesData],
   );
 
-  const [getDelegateProposalsActivity] =
-    useGetDelegateProposalsActivityLazyQuery({
-      context: {
-        headers: { "anticapture-dao-id": daoId },
-      },
-    });
+  const delegateAddresses = useMemo(
+    () => allDelegates.map((d) => d.accountId).filter(Boolean),
+    [allDelegates],
+  );
 
-  // Fetch proposals activity for all delegates using Promise.all
   useEffect(() => {
     if (skipActivity) return;
 
-    const newAddresses = delegateAddresses
-      .filter((addr) => addr !== undefined)
-      .filter(
-        (addr) =>
-          !delegateActivities.has(addr) && !loadingActivityAddresses.has(addr),
-      );
-
+    const newAddresses = delegateAddresses.filter(
+      (addr) =>
+        !delegateActivities.has(addr) && !loadingActivityAddresses.has(addr),
+    );
     if (newAddresses.length === 0) return;
 
     const fetchDelegateActivities = async () => {
@@ -163,19 +142,26 @@ export const useDelegates = ({
       );
       try {
         const activityPromises = newAddresses.map(async (addr) => {
-          const result = await getDelegateProposalsActivity({
-            variables: { address: addr, fromDate },
-          });
-          return {
-            address: addr,
-            activity: result.data?.proposalsActivity ?? null,
-          };
+          const result = await queryClient.fetchQuery(
+            proposalsActivityQueryOptions(
+              daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
+              { address: addr, fromDate },
+            ),
+          );
+          return { address: addr, activity: result ?? null };
         });
         const activities = await Promise.all(activityPromises);
         setDelegateActivities((prev) => {
           const next = new Map(prev);
-          activities.forEach(({ address, activity }) => {
-            if (activity) next.set(address, activity);
+          activities.forEach(({ address: addr, activity }) => {
+            if (activity) {
+              next.set(addr, {
+                totalProposals: activity.totalProposals,
+                votedProposals: activity.votedProposals,
+                neverVoted: activity.neverVoted,
+                avgTimeBeforeEnd: activity.avgTimeBeforeEnd,
+              });
+            }
           });
           return next;
         });
@@ -189,124 +175,50 @@ export const useDelegates = ({
         });
       }
     };
-    fetchDelegateActivities();
+    void fetchDelegateActivities();
   }, [
     delegateAddresses,
     delegateActivities,
-    getDelegateProposalsActivity,
+    queryClient,
     fromDate,
     loadingActivityAddresses,
     skipActivity,
+    daoId,
   ]);
 
   const finalData = useMemo(() => {
-    if (!delegatesData?.votingPowers?.items) return null;
-
-    return delegatesData.votingPowers.items
-      .filter((item) => item !== null)
-      .map((delegate) => {
-        const proposalsActivity = delegateActivities.get(delegate.accountId);
-
-        return {
-          ...delegate,
-          balance: delegate.balance ?? undefined,
-          variation: delegate.variation
-            ? {
-                absoluteChange: delegate.variation.absoluteChange,
-                percentageChange: delegate.variation.percentageChange,
-              }
-            : { absoluteChange: "0", percentageChange: "0" },
-          proposalsActivity,
-        };
-      });
-  }, [delegatesData, delegateActivities]);
+    if (!allDelegates.length) return null;
+    return allDelegates.map((delegate) => ({
+      accountId: delegate.accountId,
+      votingPower: delegate.votingPower.toString(),
+      delegationsCount: delegate.delegationsCount,
+      balance: delegate.balance?.toString() ?? undefined,
+      variation: delegate.variation
+        ? {
+            absoluteChange: delegate.variation.absoluteChange.toString(),
+            percentageChange: delegate.variation.percentageChange,
+          }
+        : { absoluteChange: "0", percentageChange: "0" },
+      proposalsActivity: delegateActivities.get(delegate.accountId),
+    }));
+  }, [allDelegates, delegateActivities]);
 
   const isActivityLoadingFor = useCallback(
     (addr: string) => loadingActivityAddresses.has(addr),
     [loadingActivityAddresses],
   );
 
-  const totalCount = delegatesData?.votingPowers?.totalCount || 0;
-  const currentItemsCount = finalData?.length || 0;
-  const hasNextPage = currentItemsCount < totalCount;
-
-  // Fetch next page function
-  const fetchNextPage = useCallback(async () => {
-    if (isPaginationLoading || !hasNextPage) return;
-    setIsPaginationLoading(true);
-
-    try {
-      await fetchMore({
-        variables: {
-          orderDirection,
-          orderBy,
-          fromDate,
-          toDate: null,
-          addresses: address ? [address] : null,
-          skip: currentItemsCount,
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.votingPowers?.items) return previousResult;
-          const prevItems = previousResult?.votingPowers?.items ?? [];
-          const newItems = fetchMoreResult.votingPowers.items ?? [];
-          return {
-            ...fetchMoreResult,
-            votingPowers: {
-              ...fetchMoreResult.votingPowers,
-              items: [...prevItems, ...newItems],
-            },
-          };
-        },
-      });
-      setCurrentPage((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error fetching next page:", error);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    isPaginationLoading,
-    currentItemsCount,
-    hasNextPage,
-    address,
-    orderDirection,
-    orderBy,
-    fromDate,
-  ]);
-
-  const handleRefetch = useCallback(() => {
-    setCurrentPage(1);
-    refetch({
-      orderDirection,
-      orderBy,
-      fromDate,
-      toDate: null,
-      addresses: address ? [address] : null,
-    });
-  }, [refetch, orderDirection, address, orderBy, fromDate]);
-
-  const isLoading = useMemo(() => {
-    return (
-      (networkStatus === NetworkStatus.loading && !finalData?.length) ||
-      networkStatus === NetworkStatus.setVariables ||
-      networkStatus === NetworkStatus.refetch
-    );
-  }, [networkStatus, finalData]);
+  const fetchNextPageStable = useCallback(async () => {
+    await fetchNextPage();
+  }, [fetchNextPage]);
 
   return {
     data: finalData,
-    loading: isLoading,
-    error: delegatesError || null,
-    refetch: handleRefetch,
-    pagination: {
-      currentPage,
-      hasNextPage: currentPage * limit < (totalCount || 0),
-      hasPreviousPage: currentPage > 1,
-    },
-    fetchNextPage,
-    fetchingMore:
-      isPaginationLoading || networkStatus === NetworkStatus.fetchMore,
+    loading: isLoading && !allDelegates.length,
+    error: error ?? null,
+    hasNextPage: hasNextPage ?? false,
+    fetchNextPage: fetchNextPageStable,
+    fetchingMore: isFetchingNextPage,
     isActivityLoadingFor,
   };
 };

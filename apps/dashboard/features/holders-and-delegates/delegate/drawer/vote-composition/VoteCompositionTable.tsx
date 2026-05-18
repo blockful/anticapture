@@ -3,7 +3,7 @@
 import type {
   OrderDirection,
   QueryInput_Delegators_OrderBy,
-} from "@anticapture/graphql-client";
+} from "@/shared/hooks/graphql-client/types";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";

@@ -24,20 +24,21 @@ export function useBalanceHistoryGraph(
   daoId: DaoIdEnum,
   fromDate?: number,
 ): {
-  balanceHistory: BalanceHistoryGraphItem[];
-  loading: boolean;
+  data: BalanceHistoryGraphItem[];
+  isLoading: boolean;
   error: boolean;
 } {
   const { decimals } = daoConfig[daoId];
 
   const { data, isLoading, error } = useHistoricalBalances(
-    // this works because this endpoint is supported for all DAOs
     daoId.toLowerCase() as HistoricalBalancesPathParamsDaoEnumKey,
     accountId,
     {
       fromDate,
+      fromValue: "1",
+      limit: 1000,
       orderBy: "timestamp",
-      orderDirection: "desc",
+      orderDirection: "asc",
     },
   );
 
@@ -54,13 +55,12 @@ export function useBalanceHistoryGraph(
         from: item.transfer.from,
         to: item.transfer.to,
         amount: Number(formatUnits(BigInt(item.transfer.value), decimals)),
-      }))
-      .sort((a, b) => a.timestamp - b.timestamp);
+      }));
   }, [data, accountId, decimals]);
 
   return {
-    balanceHistory,
-    loading: isLoading,
+    data: balanceHistory,
+    isLoading,
     error: !isLoading && Boolean(error),
   };
 }

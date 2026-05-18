@@ -1,13 +1,11 @@
 "use client";
 
 import type {
-  OrderDirection,
-  QueryInput_ProposalsActivity_OrderBy,
-  QueryInput_ProposalsActivity_UserVoteFilter,
-} from "@anticapture/graphql-client";
+  ProposalsActivityQueryParamsOrderByEnumKey,
+  ProposalsActivityQueryParamsUserVoteFilterEnumKey,
+} from "@anticapture/client";
 import { Hand, Trophy, Check, Zap } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useState } from "react";
 
 import { ProposalsTable } from "@/features/holders-and-delegates";
 import { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
@@ -43,7 +41,12 @@ export const DelegateProposalsActivity = ({
 }: DelegateProposalsActivityProps) => {
   const limit: number = 20;
 
-  const [userVoteFilter, setUserVoteFilter] = useState<string>("all");
+  const [userVoteFilter, setUserVoteFilter] = useQueryState(
+    "userVoteFilter",
+    parseAsStringEnum(["all", "yes", "no", "abstain", "no_vote"]).withDefault(
+      "all",
+    ),
+  );
   const [orderBy, setOrderBy] = useQueryState(
     "orderBy",
     parseAsStringEnum(["timestamp", "votingPower"]).withDefault("timestamp"),
@@ -72,12 +75,12 @@ export const DelegateProposalsActivity = ({
     useProposalsActivity({
       address,
       daoId,
-      orderBy: orderBy as QueryInput_ProposalsActivity_OrderBy,
-      orderDirection: orderDirection as OrderDirection,
+      orderBy: orderBy as ProposalsActivityQueryParamsOrderByEnumKey,
+      orderDirection,
       userVoteFilter:
         userVoteFilter === "all"
-          ? null
-          : (userVoteFilter as QueryInput_ProposalsActivity_UserVoteFilter),
+          ? undefined
+          : (userVoteFilter as ProposalsActivityQueryParamsUserVoteFilterEnumKey),
       limit,
     });
 
@@ -133,7 +136,11 @@ export const DelegateProposalsActivity = ({
             loading={loading}
             error={error}
             userVoteFilter={userVoteFilter}
-            onUserVoteFilterChange={setUserVoteFilter}
+            onUserVoteFilterChange={(filter) => {
+              void setUserVoteFilter(
+                filter as "all" | "yes" | "no" | "abstain" | "no_vote",
+              );
+            }}
             userVoteFilterOptions={userVoteFilterOptions}
             orderBy={orderBy}
             orderDirection={orderDirection}

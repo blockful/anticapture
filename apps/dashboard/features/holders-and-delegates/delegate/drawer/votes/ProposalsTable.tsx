@@ -1,6 +1,6 @@
 "use client";
 
-import type { GetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
+import type { ProposalActivityItem } from "@anticapture/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
@@ -32,12 +32,6 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getDaoProposalPath } from "@/shared/utils/whitelabel";
-
-type ProposalActivityItem = NonNullable<
-  NonNullable<
-    NonNullable<GetProposalsActivityQuery["proposalsActivity"]>["proposals"]
-  >[number]
->;
 
 interface ProposalTableData {
   proposalId: string;

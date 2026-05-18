@@ -97,21 +97,26 @@ export const BalanceHistoryTable = ({
   const transactionType = typeFilter as "all" | "buy" | "sell";
 
   // Use the balance history hook
-  const { transfers, loading, fetchNextPage, error, hasNextPage } =
-    useBalanceHistory({
-      decimals,
-      accountId,
-      daoId,
-      orderBy,
-      orderDirection,
-      transactionType,
-      customFromFilter,
-      customToFilter,
-      filterVariables,
-      fromTimestamp,
-      toTimestamp,
-      limit,
-    });
+  const {
+    data: transfers,
+    loading,
+    fetchNextPage,
+    error,
+    hasNextPage,
+  } = useBalanceHistory({
+    decimals,
+    accountId,
+    daoId,
+    orderBy,
+    orderDirection,
+    transactionType,
+    customFromFilter,
+    customToFilter,
+    filterVariables,
+    fromTimestamp,
+    toTimestamp,
+    limit,
+  });
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
 

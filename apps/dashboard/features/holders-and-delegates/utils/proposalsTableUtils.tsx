@@ -1,4 +1,4 @@
-import type { GetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
+import type { ProposalActivityItem } from "@anticapture/client";
 import {
   XCircle,
   CheckCircle,
@@ -11,11 +11,6 @@ import type { ReactNode } from "react";
 
 import { ActivityIndicator } from "@/shared/components";
 
-type ProposalActivityItem = NonNullable<
-  NonNullable<
-    NonNullable<GetProposalsActivityQuery["proposalsActivity"]>["proposals"]
-  >[number]
->;
 type ProposalActivityProposal = ProposalActivityItem["proposal"];
 type ProposalActivityUserVote = ProposalActivityItem["userVote"];
 

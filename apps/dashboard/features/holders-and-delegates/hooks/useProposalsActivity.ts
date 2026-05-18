@@ -1,28 +1,30 @@
 "use client";
 
 import type {
-  GetProposalsActivityQuery,
-  GetProposalsActivityQueryVariables,
-} from "@anticapture/graphql-client";
-import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
-import { NetworkStatus } from "@apollo/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+  ProposalActivityResponse,
+  ProposalsActivityPathParamsDaoEnumKey,
+  ProposalsActivityQueryParams,
+  ProposalsActivityQueryParamsOrderByEnumKey,
+  ProposalsActivityQueryParamsUserVoteFilterEnumKey,
+} from "@anticapture/client";
+import { useProposalsActivityInfinite } from "@anticapture/client/hooks";
+import { useMemo } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-type ProposalActivityItem = NonNullable<
-  NonNullable<
-    NonNullable<GetProposalsActivityQuery["proposalsActivity"]>["proposals"]
-  >[number]
->;
-
-interface UseProposalsActivityParams extends Partial<
-  Omit<GetProposalsActivityQueryVariables, "address">
-> {
-  address: GetProposalsActivityQueryVariables["address"];
-  limit: number;
+interface UseProposalsActivityParams {
+  address: string;
   daoId: DaoIdEnum;
+  fromDate?: number;
+  orderBy?: ProposalsActivityQueryParamsOrderByEnumKey;
+  orderDirection?: "asc" | "desc";
+  userVoteFilter?: ProposalsActivityQueryParamsUserVoteFilterEnumKey | null;
+  limit: number;
 }
+
+type ProposalActivityItem = NonNullable<
+  ProposalActivityResponse["proposals"][number]
+>;
 
 type ProposalActivityData = {
   totalProposals: number;
@@ -38,7 +40,6 @@ interface UseProposalsActivityResult {
   data: ProposalActivityData | null;
   loading: boolean;
   error: Error | null;
-  refetch: () => void;
   pagination: {
     totalPages: number;
     hasNextPage: boolean;
@@ -49,163 +50,83 @@ interface UseProposalsActivityResult {
   fetchingMore: boolean;
 }
 
+const getProposalsNextPage = (
+  lastPage: ProposalActivityResponse,
+  allPages: ProposalActivityResponse[],
+): number | undefined => {
+  const loaded = allPages.reduce((s, p) => s + p.proposals.length, 0);
+  return loaded >= lastPage.totalProposals ? undefined : loaded;
+};
+
 export const useProposalsActivity = ({
   address,
   daoId,
   fromDate,
-  skip,
   orderBy,
   orderDirection,
   userVoteFilter,
   limit,
 }: UseProposalsActivityParams): UseProposalsActivityResult => {
-  const [accumulatedProposals, setAccumulatedProposals] = useState<
-    ProposalActivityItem[]
-  >([]);
+  const params = useMemo<ProposalsActivityQueryParams>(
+    () => ({
+      address,
+      limit,
+      ...(fromDate ? { fromDate } : {}),
+      ...(orderBy ? { orderBy } : {}),
+      ...(orderDirection ? { orderDirection } : {}),
+      ...(userVoteFilter ? { userVoteFilter } : {}),
+    }),
+    [address, limit, fromDate, orderBy, orderDirection, userVoteFilter],
+  );
 
-  const queryOptions = {
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network" as const,
-  };
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useProposalsActivityInfinite(
+    daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
+    params,
+    { query: { getNextPageParam: getProposalsNextPage } },
+  );
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const { data, networkStatus, error, refetch, fetchMore } =
-    useGetProposalsActivityQuery({
-      variables: {
-        address,
-        fromDate: fromDate ?? null,
-        skip: skip ?? null,
-        limit,
-        orderBy: orderBy ?? null,
-        orderDirection: orderDirection ?? null,
-        userVoteFilter: userVoteFilter ?? null,
-      },
-      ...queryOptions,
-    });
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [address, daoId, fromDate, orderBy, orderDirection, userVoteFilter]);
-
-  useEffect(() => {
-    if (data?.proposalsActivity?.proposals) {
-      if (currentPage === 1) {
-        setAccumulatedProposals(
-          (data.proposalsActivity.proposals ?? []).filter(
-            Boolean,
-          ) as ProposalActivityItem[],
-        );
-      }
-    }
-  }, [data?.proposalsActivity?.proposals, currentPage]);
-
-  const totalProposals = data?.proposalsActivity?.totalProposals || 0;
-  const totalPages = totalProposals ? Math.ceil(totalProposals / limit) : 1;
-  const hasNextPage = currentPage < totalPages;
-
-  // Pagination uses the accumulated state (currentPage) rather than the
-  // initial skip variable, so infinite scroll works beyond the first page.
-  const pagination = useMemo(() => {
+  const processedData = useMemo((): ProposalActivityData | null => {
+    if (!data?.pages?.length) return null;
+    const lastPage = data.pages[data.pages.length - 1];
+    const proposals = data.pages.flatMap((p) => p.proposals);
     return {
+      totalProposals: lastPage.totalProposals,
+      votedProposals: lastPage.votedProposals,
+      neverVoted: lastPage.neverVoted ? 1 : 0,
+      winRate: lastPage.winRate,
+      yesRate: lastPage.yesRate,
+      avgTimeBeforeEnd: lastPage.avgTimeBeforeEnd,
+      proposals,
+    };
+  }, [data]);
+
+  const totalProposals = processedData?.totalProposals ?? 0;
+  const currentPage = data?.pages?.length ?? 0;
+  const totalPages = totalProposals ? Math.ceil(totalProposals / limit) : 1;
+
+  const pagination = useMemo(
+    () => ({
       totalPages,
-      hasNextPage,
+      hasNextPage: hasNextPage ?? false,
       hasPreviousPage: currentPage > 1,
       currentPage,
-    };
-  }, [totalPages, hasNextPage, currentPage]);
-
-  const fetchNextPage = useCallback(async () => {
-    if (!hasNextPage || networkStatus === NetworkStatus.fetchMore) return;
-    try {
-      await fetchMore({
-        variables: {
-          address,
-          fromDate: fromDate ?? null,
-          skip: accumulatedProposals.length,
-          limit,
-          orderBy: orderBy ?? null,
-          orderDirection: orderDirection ?? null,
-          userVoteFilter: userVoteFilter ?? null,
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (
-            !fetchMoreResult ||
-            !prev.proposalsActivity ||
-            !fetchMoreResult.proposalsActivity
-          )
-            return prev;
-          const prevItems = prev.proposalsActivity.proposals ?? [];
-          const newItems = fetchMoreResult.proposalsActivity.proposals ?? [];
-          const merged = [
-            ...prevItems,
-            ...newItems.filter(
-              (n) =>
-                n &&
-                !prevItems.some((p) => p?.proposal?.id === n?.proposal?.id),
-            ),
-          ].filter((item): item is ProposalActivityItem => item !== null);
-
-          setAccumulatedProposals(merged);
-          return {
-            ...fetchMoreResult,
-            proposalsActivity: {
-              ...fetchMoreResult.proposalsActivity,
-              proposals: merged,
-            },
-          };
-        },
-      });
-      setCurrentPage((p) => p + 1);
-    } catch (error) {
-      console.error("Error fetching next page:", error);
-    }
-  }, [
-    fetchMore,
-    hasNextPage,
-    networkStatus,
-    address,
-    fromDate,
-    limit,
-    orderBy,
-    orderDirection,
-    userVoteFilter,
-    accumulatedProposals.length,
-  ]);
-
-  const processedData: ProposalActivityData | null = useMemo(() => {
-    if (!data?.proposalsActivity) return null;
-
-    return {
-      totalProposals: data.proposalsActivity.totalProposals,
-      votedProposals: data.proposalsActivity.votedProposals,
-      neverVoted: data.proposalsActivity.neverVoted ? 1 : 0,
-      winRate: data.proposalsActivity.winRate,
-      yesRate: data.proposalsActivity.yesRate,
-      avgTimeBeforeEnd: data.proposalsActivity.avgTimeBeforeEnd,
-      proposals: accumulatedProposals,
-    };
-  }, [data, accumulatedProposals]);
-
-  const isLoading = useMemo(() => {
-    return (
-      networkStatus === NetworkStatus.loading ||
-      networkStatus === NetworkStatus.setVariables ||
-      networkStatus === NetworkStatus.refetch
-    );
-  }, [networkStatus]);
+    }),
+    [totalPages, hasNextPage, currentPage],
+  );
 
   return {
     data: processedData,
     loading: isLoading,
-    error: error || null,
-    refetch,
+    error: error ?? null,
     pagination,
     fetchNextPage,
-    fetchingMore: networkStatus === NetworkStatus.fetchMore,
+    fetchingMore: isFetchingNextPage,
   };
 };
