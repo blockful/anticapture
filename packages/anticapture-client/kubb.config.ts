@@ -17,6 +17,13 @@ import {
   mapEthereumFormatTypes,
 } from "./src/generators";
 
+export function isRailwayPreviewEnv(): boolean {
+  // HACK: This will remain coupled to the raiwlay environment for now as we have no way to avoid it
+  return !["dev", "production"].includes(
+    process.env.RAILWAY_ENVIRONMENT_NAME || "dev",
+  );
+}
+
 type PluginTsOptions = NonNullable<Parameters<typeof pluginTs>[0]>;
 type PluginTsOptionsWithSchemaTransformer = Omit<
   PluginTsOptions,
@@ -52,7 +59,9 @@ const pluginTsOptions: PluginTsOptionsWithSchemaTransformer = {
 
 export default defineConfig(({ watch }) => ({
   input: {
-    path: gatefulOpenApiSpecPath,
+    path: isRailwayPreviewEnv()
+      ? `https://gateful-anticapture-pr-${process.env.VERCEL_GIT_PULL_REQUEST_ID}.up.railway.app`
+      : gatefulOpenApiSpecPath,
   },
   output: {
     clean: !watch,
