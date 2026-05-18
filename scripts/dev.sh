@@ -23,7 +23,8 @@ PORT_GATEWAY=4000
 PORT_GATEFUL=4001
 PORT_DASHBOARD=3000
 PORT_ADDRESS_ENRICHMENT=3001
-PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEWAY" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT")
+PORT_RELAYER=3002
+PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEWAY" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT" "$PORT_RELAYER")
 
 # DAO name → short ID mapping (used to run the API)
 dao_id_for() {
@@ -53,6 +54,7 @@ C_GATEFUL="\033[36m"           # cyan
 C_CODEGEN="\033[33m"           # yellow
 C_DASHBOARD="\033[32m"         # green
 C_ADDRESS_ENRICHMENT="\033[96m" # bright cyan
+C_RELAYER="\033[93m"           # bright yellow
 C_SCRIPT="\033[90m"            # gray
 C_RESET="\033[0m"
 
@@ -129,6 +131,12 @@ start_gateful() {
   log "Starting Gateful..."
   run_with_prefix "$C_GATEFUL" "🚪 gateful" "" "" railway_run gateful pnpm gateful dev &
   wait_for_port "$PORT_GATEFUL" "Gateful" 120
+}
+
+start_relayer() {
+  log "Starting Relayer..."
+  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway_run relayer pnpm relayer dev &
+  wait_for_port "$PORT_RELAYER" "Relayer" 60
 }
 
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
@@ -267,14 +275,17 @@ fi
 # 5. Gateful
 start_gateful
 
-# 6. Clients — codegen + build watch
+# 6. Relayer
+start_relayer
+
+# 7. Clients — codegen + build watch
 export ANTICAPTURE_GRAPHQL_ENDPOINT="http://localhost:${PORT_GATEWAY}/graphql"
 log "Starting GraphQL Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 gql-client" pnpm gql-client dev &
 log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
-# 7. Dashboard
+# 8. Dashboard
 export NEXT_PUBLIC_BASE_URL="http://localhost:${PORT_GATEWAY}/graphql"
 export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting Dashboard..."
@@ -295,6 +306,7 @@ else
 fi
 printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:${PORT_GATEWAY}\n"
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
+printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
 printf "  ${C_CODEGEN}🤝 GraphQL Client${C_RESET} codegen + build watch\n"
 printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"

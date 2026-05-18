@@ -25,6 +25,8 @@ import {
   DeleteDraftModal,
   useDrafts,
 } from "@/features/create-proposal";
+import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
 import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
@@ -294,6 +296,10 @@ export const GovernanceSection = () => {
                         router.push(`${basePath}/proposals/new?draftId=${id}`)
                       }
                       onDelete={(id) => setDraftToDelete(id)}
+                      onShare={(id) => {
+                        copyDraftShareUrl(basePath, id);
+                        showCustomToast("Share link copied", "success");
+                      }}
                     />
                   ))}
                 </div>
@@ -305,7 +311,7 @@ export const GovernanceSection = () => {
                 }}
                 onConfirm={() => {
                   if (draftToDelete !== null) {
-                    deleteDraft(draftToDelete);
+                    void deleteDraft(draftToDelete);
                     setDraftToDelete(null);
                   }
                 }}

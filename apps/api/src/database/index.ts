@@ -1,25 +1,14 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { PgliteDatabase } from "drizzle-orm/pglite";
 
+import type * as generalSchema from "./general-schema";
 import type * as offchainSchema from "./offchain-schema";
 import type * as schema from "./schema";
 
-/**
- * Full Drizzle database type with write capabilities
- * This follows Ponder's Drizzle type definition pattern from:
- * node_modules/ponder/src/types/db.ts
- *
- * Supports:
- * - NodePgDatabase: PostgreSQL via node-postgres driver
- * - PgliteDatabase: PGlite embedded PostgreSQL
- */
 export type Drizzle =
   | NodePgDatabase<typeof schema>
   | PgliteDatabase<typeof schema>;
-/**
- * Read-only Drizzle database type (used in Ponder API context)
- * Omits write operations: insert, update, delete, transaction
- */
+
 export type ReadonlyDrizzle = Omit<
   Drizzle,
   | "insert"
@@ -34,13 +23,12 @@ export type OffchainDrizzle =
   | NodePgDatabase<typeof offchainSchema>
   | PgliteDatabase<typeof offchainSchema>;
 
-/**
- * Unified Drizzle type that can query both public and snapshot schemas.
- * Used for cross-schema queries (e.g., offchain non-voters).
- */
 export type UnifiedDrizzle =
-  | NodePgDatabase<typeof schema & typeof offchainSchema>
-  | PgliteDatabase<typeof schema & typeof offchainSchema>;
+  | NodePgDatabase<typeof schema & typeof offchainSchema & typeof generalSchema>
+  | PgliteDatabase<
+      typeof schema & typeof offchainSchema & typeof generalSchema
+    >;
 
 export * from "./schema";
 export * from "./offchain-schema";
+export * from "./general-schema";

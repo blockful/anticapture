@@ -16,6 +16,7 @@ import {
   accountInteractions,
   dao,
   delegationPercentage,
+  draftProposals,
   governanceActivity,
   historicalBalances,
   historicalVotingPower,
@@ -41,6 +42,7 @@ import {
   feed,
   health,
 } from "@/controllers";
+import * as generalSchema from "@/database/general-schema";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
 import { docs } from "@/docs";
@@ -57,6 +59,7 @@ import {
   AccountInteractionsRepository,
   BalanceVariationsRepository,
   DaoMetricsDayBucketRepository,
+  DraftProposalsRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
   HistoricalBalanceRepository,
@@ -82,6 +85,7 @@ import {
   CoingeckoService,
   DaoService,
   DelegationPercentageService,
+  DraftProposalsService,
   HistoricalBalancesService,
   NFTPriceService,
   ProposalsService,
@@ -172,6 +176,11 @@ if (!daoClient) {
 
 const pgClient = drizzle(env.DATABASE_URL, {
   schema,
+  casing: "snake_case",
+});
+
+const pgUnifiedClient = drizzle(env.DATABASE_URL, {
+  schema: { ...schema, ...offchainSchema, ...generalSchema },
   casing: "snake_case",
 });
 
@@ -339,15 +348,19 @@ votes(
   ),
 );
 dao(app, daoService);
+draftProposals(
+  app,
+  wrapWithTracing(
+    new DraftProposalsService(
+      wrapWithTracing(new DraftProposalsRepository(pgUnifiedClient)),
+    ),
+  ),
+  env.DAO_ID.toLowerCase(),
+);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
 
 if (daoClient.supportOffchainData()) {
-  const pgUnifiedClient = drizzle(env.DATABASE_URL, {
-    schema: { ...schema, ...offchainSchema },
-    casing: "snake_case",
-  });
-
   const offchainProposalsRepo = wrapWithTracing(
     new OffchainProposalRepository(pgUnifiedClient),
   );
