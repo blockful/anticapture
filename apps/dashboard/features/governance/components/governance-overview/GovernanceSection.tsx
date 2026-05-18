@@ -1,10 +1,14 @@
 "use client";
 
-import { OrderDirection } from "@anticapture/graphql-client";
+import type {
+  OffchainSearchProposalsPathParams,
+  SearchProposalsPathParams,
+} from "@anticapture/client";
+import { orderDirectionEnum } from "@anticapture/client";
 import {
-  useOffchainSearchProposalsQuery,
-  useSearchProposalsQuery,
-} from "@anticapture/graphql-client/hooks";
+  useOffchainSearchProposals,
+  useSearchProposals,
+} from "@anticapture/client/hooks";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Building2, Landmark, MessageSquare, Plus, Search } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
@@ -80,58 +84,45 @@ export const GovernanceSection = () => {
     isPaginationLoading: isOnchainPaginationLoading,
   } = useProposals({
     itemsPerPage: 10,
-    orderDirection: OrderDirection.Desc,
+    orderDirection: orderDirectionEnum.desc,
     daoId: daoIdEnum,
-    fromDate: null,
-    status: null,
-    fromEndDate: null,
-    includeOptimisticProposals: null,
   });
 
   const {
-    proposals: offchainProposals,
-    loading: offchainLoading,
+    data: offchainProposals,
+    isLoading: offchainLoading,
     error: offchainError,
-    pagination: offchainPagination,
+    hasNextPage: offchainHasNextPage,
     fetchNextPage: fetchNextOffchain,
-    isPaginationLoading: isOffchainPaginationLoading,
+    isFetchingNextPage: isOffchainPaginationLoading,
   } = useOffchainProposals({
     itemsPerPage: 10,
     daoId: hasOffchain ? daoIdEnum : undefined,
   });
 
-  const authContext = useMemo(
-    () => ({
-      headers: { "anticapture-dao-id": daoIdEnum },
-    }),
-    [daoIdEnum],
+  const { data: searchData, isLoading: searchLoading } = useSearchProposals(
+    daoIdEnum.toLowerCase() as SearchProposalsPathParams["dao"],
+    { query: trimmedSearch, limit: 50 },
+    { query: { enabled: isSearchActive } },
   );
 
-  const { data: searchData, loading: searchLoading } = useSearchProposalsQuery({
-    variables: { query: trimmedSearch, limit: 50, skip: null },
-    skip: !isSearchActive,
-    context: authContext,
-  });
-
-  const { data: offchainSearchData, loading: offchainSearchLoading } =
-    useOffchainSearchProposalsQuery({
-      variables: { query: trimmedSearch, limit: 50, skip: null },
-      skip: !isSearchActive || !hasOffchain,
-      context: authContext,
-    });
+  const { data: offchainSearchData, isLoading: offchainSearchLoading } =
+    useOffchainSearchProposals(
+      daoIdEnum.toLowerCase() as OffchainSearchProposalsPathParams["dao"],
+      { query: trimmedSearch, limit: 50 },
+      { query: { enabled: isSearchActive && hasOffchain } },
+    );
 
   const searchOnchainProposals = useMemo(() => {
     if (!isSearchActive) return [];
-    return (searchData?.searchProposals?.items ?? [])
-      .filter((p) => p !== null)
-      .map((p) => transformToGovernanceProposal(p, decimals));
+    return (searchData?.items ?? []).map((p) =>
+      transformToGovernanceProposal(p, decimals),
+    );
   }, [isSearchActive, searchData, decimals]);
 
   const searchOffchainProposals = useMemo(() => {
     if (!isSearchActive) return [];
-    return (offchainSearchData?.offchainSearchProposals?.items ?? []).filter(
-      (p) => p !== null,
-    );
+    return offchainSearchData?.items ?? [];
   }, [isSearchActive, offchainSearchData]);
 
   const loadMoreOnchainRef = useRef<HTMLDivElement>(null);
@@ -148,17 +139,19 @@ export const GovernanceSection = () => {
 
   const isOnchain = activeTab === "onchain" || !hasOffchain;
   const error = isOnchain ? onchainError : offchainError;
-  const pagination = isOnchain ? onchainPagination : offchainPagination;
+  const hasNextPage = isOnchain
+    ? onchainPagination.hasNextPage
+    : offchainHasNextPage;
   const isPaginationLoading = isOnchain
     ? isOnchainPaginationLoading
     : isOffchainPaginationLoading;
   const fetchNextPage = isOnchain ? fetchNextOnchain : fetchNextOffchain;
 
   const handleLoadMore = useCallback(() => {
-    if (!isPaginationLoading && pagination.hasNextPage) {
+    if (!isPaginationLoading && hasNextPage) {
       fetchNextPage();
     }
-  }, [fetchNextPage, isPaginationLoading, pagination.hasNextPage]);
+  }, [fetchNextPage, hasNextPage, isPaginationLoading]);
 
   useEffect(() => {
     if (activeTab === "drafts" && (!isConnected || !canCreateProposal)) {
@@ -179,7 +172,7 @@ export const GovernanceSection = () => {
           handleLoadMore();
         }
       },
-      { threshold: 0.1 },
+      { rootMargin: "200px", threshold: 0.1 },
     );
 
     observer.observe(ref);

@@ -1,28 +1,39 @@
 "use client";
 
-import type { OffchainVote } from "@anticapture/graphql-client";
 import {
-  OrderDirection,
-  QueryInput_VotesOffchainByProposalId_OrderBy,
-  useGetOffchainVotesByProposalIdQuery,
-} from "@anticapture/graphql-client/hooks";
+  orderDirectionEnum,
+  type OffchainVote,
+  type VotesOffchainByProposalIdQueryParamsOrderByEnumKey,
+  votesOffchainByProposalIdQueryParamsOrderByEnum,
+} from "@anticapture/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CheckCircle2, CircleMinus, Inbox, XCircle } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { Address } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
+import { useOffchainVotes } from "@/features/governance/hooks/useOffchainVotes";
+import { useOffchainVotesParams } from "@/features/governance/hooks/useOffchainVotesParams";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
+import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-
 const LOADING_ROW = "__LOADING_ROW__";
+
+type OffchainVoteTableRow = Omit<
+  OffchainVote,
+  "voter" | "choice" | "proposalId" | "proposalTitle"
+> &
+  Partial<Pick<OffchainVote, "proposalId" | "proposalTitle">> & {
+    voter: string;
+    choice?: string[];
+    isSubRow?: boolean;
+  };
 
 const getLabelDisplay = (label: string) => {
   const lower = label.toLowerCase();
@@ -36,7 +47,7 @@ const getLabelDisplay = (label: string) => {
 };
 
 const getChoiceInfo = (choice: string[], choices: string[]) => {
-  if (choice.length === 0) return { label: "—", icon: null as React.ReactNode };
+  if (choice.length === 0) return { label: "-", icon: null as React.ReactNode };
 
   if (choice.length === 1 && choice[0] != null) {
     const idx = Number(choice[0]);
@@ -68,95 +79,61 @@ export const OffchainVotesContent = ({
   choices,
 }: OffchainVotesContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
-
-  const [orderBy, setOrderBy] =
-    useState<QueryInput_VotesOffchainByProposalId_OrderBy>(
-      QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp,
-    );
-  const [orderDirection, setOrderDirection] = useState<OrderDirection>(
-    OrderDirection.Desc,
-  );
+  const { filters, setFilters } = useOffchainVotesParams();
+  const { orderBy, orderDirection } = filters;
 
   const handleSort = useCallback(
-    (field: QueryInput_VotesOffchainByProposalId_OrderBy) => {
+    (field: VotesOffchainByProposalIdQueryParamsOrderByEnumKey) => {
       if (orderBy === field) {
-        setOrderDirection((prev) =>
-          prev === OrderDirection.Asc
-            ? OrderDirection.Desc
-            : OrderDirection.Asc,
-        );
-      } else {
-        setOrderBy(field);
-        setOrderDirection(OrderDirection.Desc);
+        setFilters({
+          ...filters,
+          orderDirection:
+            orderDirection === orderDirectionEnum.asc
+              ? orderDirectionEnum.desc
+              : orderDirectionEnum.asc,
+        });
+        return;
       }
+
+      setFilters({
+        ...filters,
+        orderBy: field,
+        orderDirection: orderDirectionEnum.desc,
+      });
     },
-    [orderBy],
+    [filters, orderBy, orderDirection, setFilters],
   );
 
-  const { data, loading, error, fetchMore } =
-    useGetOffchainVotesByProposalIdQuery({
-      variables: {
-        id: proposalId,
-        limit: 10,
-        skip: 0,
-        fromDate: null,
-        toDate: null,
-        voterAddresses: null,
-        orderBy,
-        orderDirection,
-      },
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-        },
-      },
-      skip: !proposalId,
-    });
-
-  const votes = useMemo(
-    () =>
-      (data?.votesOffchainByProposalId?.items ?? []).filter(
-        (vote): vote is OffchainVote => vote !== null,
-      ),
-    [data],
-  );
-  const totalCount = data?.votesOffchainByProposalId?.totalCount ?? 0;
-  const hasNextPage = votes.length < totalCount;
-
-  const loadMore = useCallback(() => {
-    fetchMore({
-      variables: { skip: votes.length },
-      updateQuery: (prev, { fetchMoreResult }) => {
-        if (!fetchMoreResult?.votesOffchainByProposalId?.items) return prev;
-        return {
-          ...prev,
-          votesOffchainByProposalId: {
-            ...prev.votesOffchainByProposalId!,
-            items: [
-              ...(prev.votesOffchainByProposalId?.items ?? []),
-              ...fetchMoreResult.votesOffchainByProposalId.items,
-            ],
-          },
-        };
-      },
-    });
-  }, [fetchMore, votes.length]);
+  const {
+    data: votes,
+    isLoading,
+    isFetchingNextPage,
+    error,
+    fetchNextPage,
+    hasNextPage,
+  } = useOffchainVotes({
+    daoId,
+    proposalId,
+    limit: 10,
+    orderBy,
+    orderDirection,
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting && hasNextPage && !loading) loadMore();
+        if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
       },
-      { threshold: 0.1 },
+      { rootMargin: "200px", threshold: 0.1 },
     );
     if (loadingRowRef.current) observer.observe(loadingRowRef.current);
     return () => observer.disconnect();
-  }, [hasNextPage, loading, loadMore]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const tableData = useMemo(() => {
-    const rows: (Omit<OffchainVote, "proposalId" | "proposalTitle"> & {
-      isSubRow?: boolean;
-    })[] = [];
+    const rows: OffchainVoteTableRow[] = [];
 
     votes.forEach((vote) => {
       rows.push(vote);
@@ -172,7 +149,7 @@ export const OffchainVotesContent = ({
       }
     });
 
-    if (hasNextPage || (loading && votes.length > 0)) {
+    if (hasNextPage || (isFetchingNextPage && votes.length > 0)) {
       rows.push({
         voter: LOADING_ROW,
         choice: [],
@@ -182,10 +159,10 @@ export const OffchainVotesContent = ({
       });
     }
 
-    return rows as OffchainVote[];
-  }, [votes, hasNextPage, loading]);
+    return rows;
+  }, [votes, hasNextPage, isFetchingNextPage]);
 
-  const columns: ColumnDef<OffchainVote>[] = useMemo(
+  const columns: ColumnDef<OffchainVoteTableRow>[] = useMemo(
     () => [
       {
         accessorKey: "voter",
@@ -269,7 +246,7 @@ export const OffchainVotesContent = ({
               </div>
             );
           }
-          const choice = row.getValue("choice") as string[];
+          const choice = (row.getValue("choice") as string[] | undefined) ?? [];
           const { icon, label } = getChoiceInfo(choice, choices);
           return (
             <div className="flex items-center gap-2 p-2">
@@ -288,7 +265,9 @@ export const OffchainVotesContent = ({
             size="sm"
             className="text-secondary w-full justify-start"
             onClick={() =>
-              handleSort(QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp)
+              handleSort(
+                votesOffchainByProposalIdQueryParamsOrderByEnum.timestamp,
+              )
             }
           >
             <h4 className="text-table-header whitespace-nowrap">Date</h4>
@@ -296,8 +275,8 @@ export const OffchainVotesContent = ({
               props={{ className: "size-4 ml-1" }}
               activeState={
                 orderBy ===
-                QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp
-                  ? orderDirection === OrderDirection.Asc
+                votesOffchainByProposalIdQueryParamsOrderByEnum.timestamp
+                  ? orderDirection === orderDirectionEnum.asc
                     ? ArrowState.UP
                     : ArrowState.DOWN
                   : ArrowState.DEFAULT
@@ -353,7 +332,7 @@ export const OffchainVotesContent = ({
             className="text-secondary w-full justify-start"
             onClick={() =>
               handleSort(
-                QueryInput_VotesOffchainByProposalId_OrderBy.VotingPower,
+                votesOffchainByProposalIdQueryParamsOrderByEnum.votingPower,
               )
             }
           >
@@ -364,8 +343,8 @@ export const OffchainVotesContent = ({
               props={{ className: "size-4 ml-1" }}
               activeState={
                 orderBy ===
-                QueryInput_VotesOffchainByProposalId_OrderBy.VotingPower
-                  ? orderDirection === OrderDirection.Asc
+                votesOffchainByProposalIdQueryParamsOrderByEnum.votingPower
+                  ? orderDirection === orderDirectionEnum.asc
                     ? ArrowState.UP
                     : ArrowState.DOWN
                   : ArrowState.DEFAULT
@@ -406,12 +385,21 @@ export const OffchainVotesContent = ({
 
   if (error) return <div>Error: {error.message}</div>;
 
-  if (loading && votes.length === 0) {
+  if (isLoading && votes.length === 0) {
     return (
       <div className="w-full lg:p-4">
         <VotesTable
           columns={columns}
-          data={Array.from({ length: 7 }, () => ({}) as OffchainVote)}
+          data={Array.from(
+            { length: 7 },
+            () =>
+              ({
+                voter: "",
+                vp: null,
+                reason: "",
+                created: 0,
+              }) satisfies OffchainVoteTableRow,
+          )}
         />
       </div>
     );

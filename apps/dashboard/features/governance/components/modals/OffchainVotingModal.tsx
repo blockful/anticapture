@@ -1,6 +1,6 @@
 "use client";
 
-import type { GetOffchainProposalQuery } from "@anticapture/graphql-client/hooks";
+import type { OffchainProposal } from "@anticapture/client";
 import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
@@ -20,15 +20,10 @@ import { formatNumberUserReadable } from "@/shared/utils";
 
 type VoteChoice = number | number[] | Record<string, number>;
 
-type OffchainProposalData = Extract<
-  NonNullable<GetOffchainProposalQuery["offchainProposalById"]>,
-  { __typename?: "OffchainProposal" }
->;
-
 interface OffchainVotingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  proposal: OffchainProposalData;
+  proposal: OffchainProposal;
 }
 
 export const OffchainVotingModal = ({

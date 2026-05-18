@@ -1,13 +1,5 @@
-import type {
-  GetProposalQuery,
-  GetProposalsFromDaoQuery,
-} from "@anticapture/graphql-client/hooks";
-
-type GraphqlProposalListItem = NonNullable<
-  NonNullable<
-    NonNullable<GetProposalsFromDaoQuery["proposals"]>["items"]
-  >[number]
->;
+import type { OnchainProposal } from "@anticapture/client";
+import type { GetProposalQuery } from "@anticapture/graphql-client/hooks";
 
 type GraphqlProposalDetails = Extract<
   NonNullable<GetProposalQuery["proposal"]>,
@@ -66,8 +58,8 @@ export interface Votes {
   againstPercentage: string;
 }
 
-// Use the generated GraphQL type as base and extend with computed properties
-export type ProposalListItem = GraphqlProposalListItem;
+// Use the generated Kubb type as base and extend with computed properties
+export type ProposalListItem = OnchainProposal;
 export type ProposalDetails = Omit<GraphqlProposalDetails, "status"> & {
   status: ProposalStatus;
 };
@@ -82,6 +74,8 @@ export interface Proposal extends Omit<
   | "quorum"
   | "description"
   | "calldatas"
+  | "targets"
+  | "values"
 > {
   title: string; // Add title field that's computed from description
   status: ProposalStatus;
@@ -89,6 +83,8 @@ export interface Proposal extends Omit<
   proposer: string; // Alias for proposerAccountId
   votes: Votes;
   quorum: string;
+  targets: Array<string | null>;
+  values: Array<string | null>;
   timeText?: string;
   timeRemaining?: string;
   timeAgo?: string;

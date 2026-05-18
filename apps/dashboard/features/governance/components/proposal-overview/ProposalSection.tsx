@@ -80,18 +80,13 @@ export const ProposalSection = ({
   });
 
   const {
-    proposal: rawOffchainResponse,
-    loading: offchainLoading,
+    data: rawOffchainProposal,
+    isLoading: offchainLoading,
     error: offchainError,
   } = useOffchainProposal({
     proposalId: offchainProposalId,
     daoId: daoEnum,
   });
-
-  const rawOffchainProposal =
-    rawOffchainResponse?.__typename === "OffchainProposal"
-      ? rawOffchainResponse
-      : null;
 
   const { votingPower, rawVotingPower, votes } = useVoterInfo({
     address: address ?? "",

@@ -1,8 +1,9 @@
 import {
-  OrderDirection,
-  useGetProposalsFromDaoQuery,
-} from "@anticapture/graphql-client/hooks";
-import type { ApolloError } from "@apollo/client";
+  orderDirectionEnum,
+  type ProposalsPathParams,
+  type ResponseErrorConfig,
+} from "@anticapture/client";
+import { useProposals } from "@anticapture/client/hooks";
 import { useMemo } from "react";
 
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
@@ -13,7 +14,7 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 export interface UseLastProposalsResult {
   proposals: GovernanceProposal[];
   loading: boolean;
-  error: ApolloError | undefined;
+  error: ResponseErrorConfig<Error> | null;
 }
 
 const LAST_PROPOSALS_LIMIT = 3;
@@ -25,32 +26,23 @@ const LAST_PROPOSALS_LIMIT = 3;
 export const useLastProposals = (daoId: DaoIdEnum): UseLastProposalsResult => {
   const { decimals } = daoConfig[daoId];
 
-  const { data, loading, error } = useGetProposalsFromDaoQuery({
-    variables: {
-      skip: 0,
+  const { data, isLoading, error } = useProposals(
+    daoId.toLowerCase() as ProposalsPathParams["dao"],
+    {
       limit: LAST_PROPOSALS_LIMIT,
-      orderDirection: OrderDirection.Desc,
-      status: null,
-      fromDate: null,
+      orderDirection: orderDirectionEnum.desc,
     },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
+  );
 
   const proposals = useMemo(() => {
-    const rawProposals = data?.proposals?.items || [];
-
-    return rawProposals
-      .filter((proposal) => proposal !== null)
-      .map((proposal) => transformToGovernanceProposal(proposal, decimals));
+    return (data?.items ?? []).map((proposal) =>
+      transformToGovernanceProposal(proposal, decimals),
+    );
   }, [data, decimals]);
 
   return {
     proposals,
-    loading,
-    error,
+    loading: isLoading,
+    error: error ?? null,
   };
 };

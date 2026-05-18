@@ -1,4 +1,4 @@
-import type { GetProposalsFromDaoQuery } from "@anticapture/graphql-client/hooks";
+import type { OnchainProposal } from "@anticapture/client";
 import { formatUnits } from "viem";
 
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
@@ -8,28 +8,28 @@ import {
   getProposalState,
 } from "@/features/governance/utils";
 
-type GraphQLProposal = NonNullable<
-  NonNullable<
-    NonNullable<GetProposalsFromDaoQuery["proposals"]>["items"]
-  >[number]
->;
+const toBigInt = (value: string | number | bigint | null | undefined) =>
+  BigInt(value ?? 0);
 
-// Helper function to transform GraphQL proposal data to governance component format
+const toStringArray = (values: readonly (string | bigint | null)[]) =>
+  values.map((value) => (value === null ? null : value.toString()));
+
+// Helper function to transform API proposal data to governance component format
 export const transformToGovernanceProposal = (
-  graphqlProposal: GraphQLProposal,
+  graphqlProposal: OnchainProposal,
   decimals: number,
 ): GovernanceProposal => {
   const forVotes = Number(
-    formatUnits(BigInt(graphqlProposal?.forVotes || "0"), decimals),
+    formatUnits(toBigInt(graphqlProposal?.forVotes), decimals),
   );
   const againstVotes = Number(
-    formatUnits(BigInt(graphqlProposal?.againstVotes || "0"), decimals),
+    formatUnits(toBigInt(graphqlProposal?.againstVotes), decimals),
   );
   const abstainVotes = Number(
-    formatUnits(BigInt(graphqlProposal?.abstainVotes || "0"), decimals),
+    formatUnits(toBigInt(graphqlProposal?.abstainVotes), decimals),
   );
   const quorum = Number(
-    formatUnits(BigInt(graphqlProposal?.quorum || "0"), decimals),
+    formatUnits(toBigInt(graphqlProposal?.quorum), decimals),
   );
   const total = forVotes + againstVotes + abstainVotes;
 
@@ -57,7 +57,7 @@ export const transformToGovernanceProposal = (
     },
     quorum: quorum.toFixed(2),
     timeText,
-    values: graphqlProposal.values,
-    targets: graphqlProposal.targets,
+    values: toStringArray(graphqlProposal.values),
+    targets: toStringArray(graphqlProposal.targets),
   };
 };

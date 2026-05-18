@@ -7,7 +7,8 @@ import { useMemo } from "react";
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
 
-import type { OffchainProposalItem as OffchainProposalData } from "@/features/governance/hooks/useOffchainProposals";
+import type { OffchainProposal } from "@anticapture/client";
+
 import type { Proposal } from "@/features/governance/types";
 import { ProposalStatus } from "@/features/governance/types";
 import { getTimeText } from "@/features/governance/utils/getTimeText";
@@ -29,7 +30,7 @@ type ProposalItemProps =
   | { proposal: Proposal; offchainProposal?: never; className?: string }
   | {
       proposal?: never;
-      offchainProposal: OffchainProposalData;
+      offchainProposal: OffchainProposal;
       className?: string;
     };
 
