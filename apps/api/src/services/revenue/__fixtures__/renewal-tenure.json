@@ -1,0 +1,60 @@
+{
+  "result": {
+    "rows": [
+      {
+        "expiry_month": "2025-12-01 00:00:00.000 UTC",
+        "tenure_bucket": "0 renewals (one-shot)",
+        "names": 12500,
+        "total_renewals_in_bucket": 0
+      },
+      {
+        "expiry_month": "2025-12-01 00:00:00.000 UTC",
+        "tenure_bucket": "1 renewal",
+        "names": 4800,
+        "total_renewals_in_bucket": 4800
+      },
+      {
+        "expiry_month": "2025-12-01 00:00:00.000 UTC",
+        "tenure_bucket": "2 renewals",
+        "names": 1900,
+        "total_renewals_in_bucket": 3800
+      },
+      {
+        "expiry_month": "2025-12-01 00:00:00.000 UTC",
+        "tenure_bucket": "3+ renewals",
+        "names": 720,
+        "total_renewals_in_bucket": 2880
+      },
+      {
+        "expiry_month": "2026-01-01 00:00:00.000 UTC",
+        "tenure_bucket": "0 renewals (one-shot)",
+        "names": 13100,
+        "total_renewals_in_bucket": 0
+      },
+      {
+        "expiry_month": "2026-01-01 00:00:00.000 UTC",
+        "tenure_bucket": "1 renewal",
+        "names": 5050,
+        "total_renewals_in_bucket": 5050
+      },
+      {
+        "expiry_month": "2026-01-01 00:00:00.000 UTC",
+        "tenure_bucket": "2 renewals",
+        "names": 2010,
+        "total_renewals_in_bucket": 4020
+      },
+      {
+        "expiry_month": "2026-01-01 00:00:00.000 UTC",
+        "tenure_bucket": "3+ renewals",
+        "names": 760,
+        "total_renewals_in_bucket": 3120
+      },
+      {
+        "expiry_month": "8966-07-01 00:00:00.000 UTC",
+        "tenure_bucket": "0 renewals (one-shot)",
+        "names": 3,
+        "total_renewals_in_bucket": 0
+      }
+    ]
+  }
+}
