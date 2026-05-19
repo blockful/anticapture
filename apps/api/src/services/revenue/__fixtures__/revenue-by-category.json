@@ -1,0 +1,66 @@
+{
+  "result": {
+    "rows": [
+      {
+        "month": "2025-11-01 00:00:00.000 UTC",
+        "category": "Registration",
+        "revenue_usd": 165407.35,
+        "revenue_eth": 51.3194
+      },
+      {
+        "month": "2025-11-01 00:00:00.000 UTC",
+        "category": "Renewal",
+        "revenue_usd": 226377.15,
+        "revenue_eth": 70.2359
+      },
+      {
+        "month": "2025-12-01 00:00:00.000 UTC",
+        "category": "Registration",
+        "revenue_usd": 108279.78,
+        "revenue_eth": 35.8293
+      },
+      {
+        "month": "2025-12-01 00:00:00.000 UTC",
+        "category": "Renewal",
+        "revenue_usd": 287199.51,
+        "revenue_eth": 95.033
+      },
+      {
+        "month": "2026-01-01 00:00:00.000 UTC",
+        "category": "Registration",
+        "revenue_usd": 130107.2,
+        "revenue_eth": 42.3111
+      },
+      {
+        "month": "2026-01-01 00:00:00.000 UTC",
+        "category": "Renewal",
+        "revenue_usd": 282993.03,
+        "revenue_eth": 92.0299
+      },
+      {
+        "month": "2026-02-01 00:00:00.000 UTC",
+        "category": "Registration",
+        "revenue_usd": 141511.49,
+        "revenue_eth": 69.6608
+      },
+      {
+        "month": "2026-02-01 00:00:00.000 UTC",
+        "category": "Renewal",
+        "revenue_usd": 216642.75,
+        "revenue_eth": 106.6452
+      },
+      {
+        "month": "2026-03-01 00:00:00.000 UTC",
+        "category": "Registration",
+        "revenue_usd": 76280.57,
+        "revenue_eth": 36.5249
+      },
+      {
+        "month": "2026-03-01 00:00:00.000 UTC",
+        "category": "Renewal",
+        "revenue_usd": 149068.06,
+        "revenue_eth": 71.3772
+      }
+    ]
+  }
+}
