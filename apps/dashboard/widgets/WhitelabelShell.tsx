@@ -3,6 +3,7 @@
 import {
   Bell,
   Briefcase,
+  DollarSign,
   Landmark,
   Newspaper,
   Settings,
@@ -47,6 +48,12 @@ const NAV_ITEMS = [
     page: WHITELABEL_ROUTES.serviceProviders,
     icon: Briefcase,
     enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].serviceProviders,
+  },
+  {
+    label: "Revenue",
+    page: WHITELABEL_ROUTES.revenue,
+    icon: DollarSign,
+    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].revenue,
   },
   {
     label: "Notifications",
