@@ -270,7 +270,7 @@ export const AddTransferModal = ({
 
         {tokenType === "erc20" && (
           <div className="flex flex-col gap-1.5">
-            <FormLabel isRequired>Token</FormLabel>
+            <FormLabel isRequired>ERC-20 Token</FormLabel>
             <TokenSelector
               value={tokenAddress}
               onChange={setTokenAddress}
