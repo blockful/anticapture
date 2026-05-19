@@ -33,6 +33,118 @@ import ensGovernorAbi from "@/abis/ens-governor.json";
 type Step = 1 | 2;
 type ConfigMode = "fetch" | "calldata";
 
+type AbiTypeCategory =
+  | "bool"
+  | "uint"
+  | "int"
+  | "address"
+  | "bytes_dynamic"
+  | "bytes_fixed"
+  | "array"
+  | "string"
+  | "other";
+
+function getAbiTypeCategory(abiType: string): AbiTypeCategory {
+  if (abiType === "bool") return "bool";
+  if (/^uint\d*$/.test(abiType)) return "uint";
+  if (/^int\d*$/.test(abiType)) return "int";
+  if (abiType === "address") return "address";
+  if (abiType === "bytes") return "bytes_dynamic";
+  if (/^bytes\d+$/.test(abiType)) return "bytes_fixed";
+  if (abiType.endsWith("[]") || /\[\d+\]$/.test(abiType)) return "array";
+  if (abiType === "string") return "string";
+  return "other";
+}
+
+function getArgPlaceholder(abiType: string): string {
+  const cat = getAbiTypeCategory(abiType);
+  switch (cat) {
+    case "uint":
+      return "0 or 0x1a2b…";
+    case "int":
+      return "0 or -100";
+    case "address":
+      return "0x… or ENS name";
+    case "bytes_dynamic":
+      return "0x…";
+    case "bytes_fixed": {
+      const n = parseInt(abiType.replace("bytes", ""), 10);
+      return `0x… (${n} bytes)`;
+    }
+    case "array":
+      return '["item1", "item2"]';
+    case "string":
+      return "text…";
+    default:
+      return "";
+  }
+}
+
+function validateSolidityArg(abiType: string, value: string): string | null {
+  const v = value.trim();
+  if (!v) return null;
+  const cat = getAbiTypeCategory(abiType);
+  switch (cat) {
+    case "bool":
+      return v !== "true" && v !== "false" ? "Must be true or false" : null;
+    case "uint": {
+      const isDecimal = /^\d+$/.test(v);
+      const isHexVal = /^0x[0-9a-fA-F]+$/.test(v);
+      if (!isDecimal && !isHexVal)
+        return "Must be a non-negative integer (decimal or 0x hex)";
+      const bits = parseInt(abiType.replace("uint", "") || "256", 10);
+      const max = (1n << BigInt(bits)) - 1n;
+      if (BigInt(v) > max) return `Exceeds uint${bits} max (${max})`;
+      return null;
+    }
+    case "int": {
+      const isDecimal = /^-?\d+$/.test(v);
+      const isHexVal = /^0x[0-9a-fA-F]+$/.test(v);
+      if (!isDecimal && !isHexVal)
+        return "Must be an integer (decimal or 0x hex)";
+      const bits = parseInt(abiType.replace("int", "") || "256", 10);
+      const max = (1n << BigInt(bits - 1)) - 1n;
+      const min = -(1n << BigInt(bits - 1));
+      const n = BigInt(v);
+      if (n > max || n < min)
+        return `Out of range for int${bits} (${min} to ${max})`;
+      return null;
+    }
+    case "address":
+      return !isAddress(v, { strict: false }) && !isEnsAddress(v)
+        ? "Must be a valid address or ENS name"
+        : null;
+    case "bytes_dynamic":
+      return !/^0x[0-9a-fA-F]*$/.test(v) ? "Must be 0x-prefixed hex" : null;
+    case "bytes_fixed": {
+      const n = parseInt(abiType.replace("bytes", ""), 10);
+      if (!/^0x[0-9a-fA-F]*$/.test(v)) return "Must be 0x-prefixed hex";
+      const hexLen = v.slice(2).length;
+      if (hexLen !== n * 2)
+        return `Must be exactly ${n} bytes (${n * 2} hex chars after 0x)`;
+      return null;
+    }
+    case "array": {
+      try {
+        const parsed: unknown = JSON.parse(v);
+        if (!Array.isArray(parsed))
+          return "Must be a JSON array, e.g. [1, 2, 3]";
+        const match = abiType.match(/\[(\d+)\]$/);
+        if (match) {
+          const expectedLen = parseInt(match[1], 10);
+          if (parsed.length !== expectedLen)
+            return `Must have exactly ${expectedLen} elements`;
+        }
+      } catch {
+        return 'Must be a valid JSON array, e.g. [1, 2, 3] or ["0xabc…"]';
+      }
+      return null;
+    }
+    default:
+      return null;
+  }
+}
+
 const BUNDLED_GOVERNOR_ABIS: Partial<Record<DaoIdEnum, unknown>> = {
   ENS: ensGovernorAbi,
 };
@@ -126,6 +238,7 @@ export const AddCustomActionModal = ({
     initialValue?.functionName ?? "",
   );
   const [args, setArgs] = useState<string[]>(initialValue?.args ?? []);
+  const [touchedArgs, setTouchedArgs] = useState<Set<number>>(new Set());
 
   // Re-hydrate whenever the modal opens
   useEffect(() => {
@@ -145,6 +258,7 @@ export const AddCustomActionModal = ({
       setFetchError(null);
       setIsFetchingAbi(false);
       setIsManualAbiEntry(initialValue.abi.length > 0);
+      setTouchedArgs(new Set());
     } else {
       setMode("fetch");
       setContractAddress("");
@@ -152,6 +266,7 @@ export const AddCustomActionModal = ({
       setCalldata("");
       setFunctionName("");
       setArgs([]);
+      setTouchedArgs(new Set());
       setFetchError(null);
       setIsFetchingAbi(false);
       setIsManualAbiEntry(false);
@@ -168,13 +283,26 @@ export const AddCustomActionModal = ({
     isAddress(contractAddress.trim()) ||
     isEnsAddress(contractAddress.trim());
 
-  const functions: AbiFunction[] =
-    abi?.filter((item): item is AbiFunction => item.type === "function") ?? [];
-  const selectedFn = functions.find(
-    (f) => toFunctionSignature(f) === functionName,
+  const functions = useMemo<AbiFunction[]>(() => {
+    if (!abi) return [];
+    return abi
+      .filter((item): item is AbiFunction => item.type === "function")
+      .filter(
+        (fn) => fn.stateMutability !== "view" && fn.stateMutability !== "pure",
+      );
+  }, [abi]);
+  const selectedFn = useMemo(
+    () => functions.find((f) => toFunctionSignature(f) === functionName),
+    [functions, functionName],
   );
+  const overloadCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const fn of functions)
+      counts.set(fn.name, (counts.get(fn.name) ?? 0) + 1);
+    return counts;
+  }, [functions]);
   const hasOverloads = (fn: AbiFunction) =>
-    functions.filter((f) => f.name === fn.name).length > 1;
+    (overloadCounts.get(fn.name) ?? 0) > 1;
 
   const resetAll = () => {
     setStep(1);
@@ -187,6 +315,23 @@ export const AddCustomActionModal = ({
     setCalldata("");
     setFunctionName("");
     setArgs([]);
+    setTouchedArgs(new Set());
+  };
+
+  const markTouched = (i: number) => {
+    setTouchedArgs((prev) => {
+      if (prev.has(i)) return prev;
+      const next = new Set(prev);
+      next.add(i);
+      return next;
+    });
+  };
+
+  const updateArg = (i: number, value: string) => {
+    const next = [...args];
+    next[i] = value;
+    setArgs(next);
+    markTouched(i);
   };
 
   const hasAddress = contractAddress.trim().length > 0;
@@ -195,15 +340,15 @@ export const AddCustomActionModal = ({
     if (mode !== "fetch") return;
     const v = contractAddress.trim();
     if (!v) return;
-    const isHex = isAddress(v);
+    const isRawAddress = isAddress(v, { strict: false });
     const isEns = isEnsAddress(v);
-    if (!isHex && !isEns) return;
+    if (!isRawAddress && !isEns) return;
     setIsFetchingAbi(true);
     setFetchError(null);
     setIsManualAbiEntry(false);
     setAbiText("");
     try {
-      const resolved = isHex
+      const resolved = isRawAddress
         ? v
         : await fetchAddressFromEnsName({ ensName: v as `${string}.eth` });
       if (!resolved) {
@@ -212,6 +357,9 @@ export const AddCustomActionModal = ({
         );
         setIsManualAbiEntry(true);
         return;
+      }
+      if (!isRawAddress) {
+        setContractAddress(resolved);
       }
       const found = await lookupAbi(daoId, resolved);
       if (found) {
@@ -258,9 +406,18 @@ export const AddCustomActionModal = ({
     isAddressValid &&
     (mode === "fetch" ? Boolean(abi) : isCalldataValid);
 
+  const argErrors = useMemo(() => {
+    if (!selectedFn) return [];
+    return selectedFn.inputs.map((input, i) =>
+      validateSolidityArg(input.type, args[i] ?? ""),
+    );
+  }, [selectedFn, args]);
+
   const allArgsFilled =
     selectedFn !== undefined &&
-    selectedFn.inputs.every((_, i) => (args[i] ?? "").trim().length > 0);
+    selectedFn.inputs.every(
+      (_, i) => (args[i] ?? "").trim().length > 0 && argErrors[i] === null,
+    );
 
   const step2Ready =
     mode === "fetch" ? Boolean(functionName) && allArgsFilled : isCalldataValid;
@@ -433,7 +590,7 @@ export const AddCustomActionModal = ({
                   )}
                   {abi && !isFetchingAbi && !fetchError && (
                     <span className="text-success text-xs">
-                      ABI loaded — {functions.length} function
+                      ABI loaded — {functions.length} write function
                       {functions.length === 1 ? "" : "s"}
                     </span>
                   )}
@@ -520,30 +677,64 @@ export const AddCustomActionModal = ({
                       setArgs(
                         new Array(fn?.inputs.length ?? 0).fill("") as string[],
                       );
+                      setTouchedArgs(new Set());
                     }}
                   />
                 </div>
-                {selectedFn?.inputs.map((input, i) => (
-                  <div
-                    key={`${input.name ?? "arg"}-${i}`}
-                    className="flex flex-col gap-1.5"
-                  >
-                    <FormLabel isRequired>
-                      {input.name || `arg${i}`}{" "}
-                      <span className="text-secondary font-normal">
-                        ({input.type})
-                      </span>
-                    </FormLabel>
-                    <Input
-                      value={args[i] ?? ""}
-                      onChange={(e) => {
-                        const next = [...args];
-                        next[i] = e.target.value;
-                        setArgs(next);
-                      }}
-                    />
-                  </div>
-                ))}
+                {selectedFn?.inputs.map((input, i) => {
+                  const category = getAbiTypeCategory(input.type);
+                  const fieldError = touchedArgs.has(i) ? argErrors[i] : null;
+                  return (
+                    <div
+                      key={`${input.name ?? "arg"}-${i}`}
+                      className="flex flex-col gap-1.5"
+                    >
+                      <FormLabel isRequired>
+                        {input.name || `arg${i}`}{" "}
+                        <span className="text-secondary font-normal">
+                          ({input.type})
+                        </span>
+                      </FormLabel>
+                      {category === "bool" ? (
+                        <Select
+                          items={[
+                            { label: "true", value: "true" },
+                            { label: "false", value: "false" },
+                          ]}
+                          value={args[i] ?? ""}
+                          onValueChange={(v) => updateArg(i, v)}
+                          placeholder="Select true or false…"
+                        />
+                      ) : (
+                        <Input
+                          value={args[i] ?? ""}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            if (category === "uint") {
+                              if (!/^$|^\d+$|^0x[0-9a-fA-F]*$/.test(raw))
+                                return;
+                            } else if (category === "int") {
+                              if (!/^$|^-?\d*$|^0x[0-9a-fA-F]*$/.test(raw))
+                                return;
+                            }
+                            updateArg(i, raw);
+                          }}
+                          onBlur={() => markTouched(i)}
+                          placeholder={getArgPlaceholder(input.type)}
+                          error={Boolean(fieldError)}
+                          inputMode={
+                            category === "uint" || category === "int"
+                              ? "decimal"
+                              : "text"
+                          }
+                        />
+                      )}
+                      {fieldError && (
+                        <span className="text-error text-xs">{fieldError}</span>
+                      )}
+                    </div>
+                  );
+                })}
               </>
             ) : (
               <div className="flex flex-col gap-3">

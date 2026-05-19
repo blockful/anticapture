@@ -57,6 +57,10 @@
     "clean": {
       "cache": false
     },
+    "//#changeset": {
+      "cache": false,
+      "interactive": true
+    },
     "lint": {
       "inputs": [
         "**/*.ts",

@@ -1,6 +1,7 @@
 {
   "name": "@anticapture/local-node",
   "version": "1.0.0",
+  "private": true,
   "packageManager": "pnpm@10.10.0",
   "scripts": {
     "start": "sh ./entrypoint.sh",

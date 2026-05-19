@@ -28,7 +28,9 @@ export const mapRelayerError = (
   const relayerError = error as
     | ResponseErrorConfig<ErrorResponse | RelayerErrorResponse>
     | undefined;
-  const code = relayerError?.response?.data?.error;
+  const data = relayerError?.response?.data;
+  const code =
+    data && "code" in data ? (data as RelayerErrorResponse).code : undefined;
   const status = relayerError?.status;
 
   if (code === INSUFFICIENT_VOTING_POWER) {

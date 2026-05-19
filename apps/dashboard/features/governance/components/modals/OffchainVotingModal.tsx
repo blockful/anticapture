@@ -29,12 +29,16 @@ interface OffchainVotingModalProps {
   isOpen: boolean;
   onClose: () => void;
   proposal: OffchainProposalData;
+  hasVoted?: boolean;
+  onVoteSuccess?: (voteLabel: string) => void;
 }
 
 export const OffchainVotingModal = ({
   isOpen,
   onClose,
   proposal,
+  hasVoted = false,
+  onVoteSuccess,
 }: OffchainVotingModalProps) => {
   const [value, setValue] = useState<VoteChoice | null>(null);
   const [comment, setComment] = useState<string>("");
@@ -126,6 +130,20 @@ export const OffchainVotingModal = ({
     return true;
   })();
 
+  const computeVoteLabel = (): string => {
+    if (!value) return "";
+    if (typeof value === "number") {
+      return choices[value - 1] ?? `Choice ${value}`;
+    }
+    if (Array.isArray(value)) {
+      return value.map((v) => choices[v - 1] ?? `Choice ${v}`).join(", ");
+    }
+    return Object.entries(value as Record<string, number>)
+      .filter(([, weight]) => weight > 0)
+      .map(([idx, weight]) => `${choices[Number(idx) - 1] ?? `Choice ${idx}`} (${weight}%)`)
+      .join(", ");
+  };
+
   const handleVote = async () => {
     if (!address || !value) return;
     try {
@@ -143,8 +161,8 @@ export const OffchainVotingModal = ({
         reason: comment,
       });
       showCustomToast("Vote submitted successfully!", "success");
+      onVoteSuccess?.(computeVoteLabel());
       onClose();
-      window.location.reload();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to submit vote";
@@ -233,10 +251,10 @@ export const OffchainVotingModal = ({
         <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
           <div className="flex flex-col items-start">
             <h2 className="text-primary font-inter text-[16px] font-medium not-italic leading-6">
-              Cast Your Vote
+              {hasVoted ? "Change Your Vote" : "Cast Your Vote"}
             </h2>
             <p className="text-secondary font-inter text-[14px] font-normal not-italic leading-5">
-              Once you submit your vote, you cannot change it.
+              Your vote can be updated until the proposal closes.
             </p>
           </div>
 
