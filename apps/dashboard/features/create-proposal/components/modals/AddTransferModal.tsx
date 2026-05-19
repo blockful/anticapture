@@ -9,6 +9,7 @@ import { usePublicClient } from "wagmi";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { RadioCard } from "@/shared/components/design-system/form/fields/radio-card/RadioCard";
+import { TokenSelector } from "@/features/create-proposal/components/TokenSelector";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import daoConfig from "@/shared/dao-config";
 import { isEnsAddress } from "@/shared/utils/ens";
@@ -68,7 +69,6 @@ export const AddTransferModal = ({
   const [amount, setAmount] = useState(initialValue?.amount ?? "");
   const [isResolvingDecimals, setIsResolvingDecimals] = useState(false);
   const [decimalsError, setDecimalsError] = useState<string | null>(null);
-  const [tokenAddressTouched, setTokenAddressTouched] = useState(false);
   const [recipientTouched, setRecipientTouched] = useState(false);
 
   // Re-hydrate fields whenever the modal opens with a new initialValue
@@ -147,7 +147,6 @@ export const AddTransferModal = ({
     setRecipient("");
     setTokenAddress("");
     setAmount("");
-    setTokenAddressTouched(false);
     setRecipientTouched(false);
   };
 
@@ -157,10 +156,6 @@ export const AddTransferModal = ({
     (isAddress(recipientTrimmed) || isEnsAddress(recipientTrimmed));
   const recipientError =
     recipientTouched && recipientTrimmed !== "" && !recipientIsValid;
-  const tokenAddressError =
-    tokenAddressTouched &&
-    tokenAddress.trim() !== "" &&
-    !isAddress(tokenAddress.trim());
   const recipientValid = recipientIsValid;
   const tokenAddressValid =
     tokenType === "eth" ||
@@ -275,19 +270,12 @@ export const AddTransferModal = ({
 
         {tokenType === "erc20" && (
           <div className="flex flex-col gap-1.5">
-            <FormLabel isRequired>Token Contract Address</FormLabel>
-            <Input
+            <FormLabel isRequired>Token</FormLabel>
+            <TokenSelector
               value={tokenAddress}
-              onChange={(e) => setTokenAddress(e.target.value)}
-              onBlur={() => setTokenAddressTouched(true)}
-              placeholder="0x…"
-              error={tokenAddressError}
+              onChange={setTokenAddress}
+              daoId={daoIdEnum}
             />
-            {tokenAddressError && (
-              <span className="text-error text-xs">
-                Must be a valid Ethereum address
-              </span>
-            )}
             {decimalsError && (
               <span className="text-error text-xs">{decimalsError}</span>
             )}

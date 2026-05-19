@@ -2283,6 +2283,66 @@
           }
         },
         "required": ["hasEnoughBalance", "balanceWei", "thresholdWei"]
+      },
+      "DaoTokenItem": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "ERC-20 token contract address.",
+            "example": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+          },
+          "name": {
+            "type": "string",
+            "description": "Token name.",
+            "example": "USD Coin"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol.",
+            "example": "USDC"
+          },
+          "decimals": {
+            "type": "integer",
+            "description": "Token decimal places.",
+            "example": 6
+          },
+          "logoUri": {
+            "type": "string",
+            "nullable": true,
+            "description": "Token logo URI from CoinGecko.",
+            "example": "https://assets.coingecko.com/coins/images/6319/small/usdc.png"
+          },
+          "price": {
+            "type": "number",
+            "nullable": true,
+            "description": "Current token price in USD.",
+            "example": 1.0
+          },
+          "priceChange24h": {
+            "type": "number",
+            "nullable": true,
+            "description": "24-hour price change percentage.",
+            "example": 0.01
+          }
+        },
+        "required": [
+          "address",
+          "name",
+          "symbol",
+          "decimals",
+          "logoUri",
+          "price",
+          "priceChange24h"
+        ],
+        "description": "ERC-20 token available for transfer in the DAO's governance chain."
+      },
+      "DaoTokensResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DaoTokenItem"
+        },
+        "description": "List of available ERC-20 tokens for the DAO's governance chain."
       }
     },
     "parameters": {},
@@ -2923,7 +2983,7 @@
       "get": {
         "operationId": "getDaoTokenTreasury",
         "summary": "Get DAO token treasury data",
-        "description": "Get historical DAO Token Treasury value (governance token quantity × token price)",
+        "description": "Get historical DAO Token Treasury value (governance token quantity \u00c3\u2014 token price)",
         "tags": ["treasury"],
         "parameters": [
           {
@@ -7809,6 +7869,51 @@
           "schema": {
             "type": "string",
             "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/tokens/available": {
+      "get": {
+        "operationId": "availableTokens",
+        "summary": "Get available tokens",
+        "description": "Get available ERC-20 tokens for transfer in the DAO's governance chain",
+        "tags": ["tokens"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns available ERC-20 tokens for the DAO's chain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DaoTokensResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "aave",
+              "comp",
+              "ens",
+              "fluid",
+              "gtc",
+              "lil_nouns",
+              "nouns",
+              "obol",
+              "scr",
+              "shu",
+              "uni"
+            ]
           },
           "description": "DAO identifier"
         }

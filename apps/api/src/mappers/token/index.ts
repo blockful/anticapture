@@ -115,3 +115,49 @@ export const TokenMapper = {
     };
   },
 };
+
+export const DaoTokenItemSchema = z
+  .object({
+    address: z.string().openapi({
+      description: "ERC-20 token contract address.",
+      example: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    }),
+    name: z.string().openapi({
+      description: "Token name.",
+      example: "USD Coin",
+    }),
+    symbol: z.string().openapi({
+      description: "Token symbol.",
+      example: "USDC",
+    }),
+    decimals: z.number().int().openapi({
+      description: "Token decimal places.",
+      example: 6,
+      type: "integer",
+    }),
+    logoUri: z.string().nullable().openapi({
+      description: "Token logo URI from CoinGecko.",
+      example: "https://assets.coingecko.com/coins/images/6319/small/usdc.png",
+    }),
+    price: z.number().nullable().openapi({
+      description: "Current token price in USD.",
+      example: 1.0,
+    }),
+    priceChange24h: z.number().nullable().openapi({
+      description: "24-hour price change percentage.",
+      example: 0.01,
+    }),
+  })
+  .openapi("DaoTokenItem", {
+    description:
+      "ERC-20 token available for transfer in the DAO's governance chain.",
+  });
+
+export const DaoTokensResponseSchema = z
+  .array(DaoTokenItemSchema)
+  .openapi("DaoTokensResponse", {
+    description:
+      "List of available ERC-20 tokens for the DAO's governance chain.",
+  });
+
+export type DaoTokensResponse = z.infer<typeof DaoTokensResponseSchema>;

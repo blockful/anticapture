@@ -14,6 +14,7 @@ import {
   accountBalanceVariations,
   accountBalances,
   accountInteractions,
+  availableTokens,
   dao,
   delegationPercentage,
   governanceActivity,
@@ -81,6 +82,7 @@ import {
   BalanceVariationsService,
   CoingeckoService,
   DaoService,
+  DaoTokensService,
   DelegationPercentageService,
   HistoricalBalancesService,
   NFTPriceService,
@@ -284,6 +286,15 @@ const decimals = CONTRACT_ADDRESSES[env.DAO_ID].token.decimals;
 
 treasury(app, treasuryService, decimals);
 tokenHistoricalData(app, tokenPriceClient);
+
+const daoTokensService = wrapWithTracing(
+  new DaoTokensService(
+    env.COINGECKO_API_URL,
+    env.COINGECKO_API_KEY,
+    env.DAO_ID,
+  ),
+);
+availableTokens(app, daoTokensService);
 token(
   app,
   tokenPriceClient,

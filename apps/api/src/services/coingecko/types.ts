@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { DaoIdEnum } from "@/lib/enums";
 
-enum AssetPlatformEnum {
+export enum AssetPlatformEnum {
   // From https://docs.coingecko.com/v3.0.1/reference/token-lists
   ETHEREUM = "ethereum",
   ARBITRUM = "arbitrum-one",
