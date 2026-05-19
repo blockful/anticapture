@@ -1,12 +1,12 @@
 import { and, desc, eq } from "drizzle-orm";
 
-import { type UnifiedDrizzle, proposalDrafts } from "@/database";
+import { type GeneralDrizzle, proposalDrafts } from "@/database";
 
 export type DBProposalDraft = typeof proposalDrafts.$inferSelect;
 export type NewProposalDraft = typeof proposalDrafts.$inferInsert;
 
 export class DraftProposalsRepository {
-  constructor(private readonly db: UnifiedDrizzle) {}
+  constructor(private readonly db: GeneralDrizzle) {}
 
   async findByAuthorAndDao(
     author: string,

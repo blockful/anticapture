@@ -4,11 +4,9 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import type { UnifiedDrizzle } from "@/database";
+import type { GeneralDrizzle } from "@/database";
 import * as generalSchema from "@/database/general-schema";
 import { proposalDrafts } from "@/database/general-schema";
-import * as offchainSchema from "@/database/offchain-schema";
-import * as schema from "@/database/schema";
 import { DraftProposalsRepository } from "@/repositories/draft-proposals";
 import { DraftProposalsService } from "@/services/draft-proposals";
 import { draftProposals } from ".";
@@ -34,15 +32,14 @@ const makeDraft = (overrides: Partial<DraftInsert> = {}): DraftInsert => ({
 
 describe("draftProposals controller", () => {
   let client: PGlite;
-  let db: UnifiedDrizzle;
+  let db: GeneralDrizzle;
   let app: Hono;
 
   beforeAll(async () => {
-    const combinedSchema = { ...schema, ...offchainSchema, ...generalSchema };
     client = new PGlite();
-    db = drizzle(client, { schema: combinedSchema });
+    db = drizzle(client, { schema: generalSchema });
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    const { apply } = await pushSchema(combinedSchema, db as any);
+    const { apply } = await pushSchema(generalSchema, db as any);
     await apply();
 
     const repo = new DraftProposalsRepository(db);

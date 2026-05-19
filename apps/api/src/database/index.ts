@@ -23,11 +23,13 @@ export type OffchainDrizzle =
   | NodePgDatabase<typeof offchainSchema>
   | PgliteDatabase<typeof offchainSchema>;
 
+export type GeneralDrizzle =
+  | NodePgDatabase<typeof generalSchema>
+  | PgliteDatabase<typeof generalSchema>;
+
 export type UnifiedDrizzle =
-  | NodePgDatabase<typeof schema & typeof offchainSchema & typeof generalSchema>
-  | PgliteDatabase<
-      typeof schema & typeof offchainSchema & typeof generalSchema
-    >;
+  | NodePgDatabase<typeof schema & typeof offchainSchema>
+  | PgliteDatabase<typeof schema & typeof offchainSchema>;
 
 export * from "./schema";
 export * from "./offchain-schema";

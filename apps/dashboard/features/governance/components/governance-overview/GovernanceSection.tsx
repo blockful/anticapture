@@ -68,7 +68,11 @@ export const GovernanceSection = () => {
   );
 
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
-  const { drafts, deleteDraft } = useDrafts(daoId, address);
+  const {
+    drafts,
+    deleteDraft,
+    isLoading: isDraftsLoading,
+  } = useDrafts(daoId, address);
   const [search] = useQueryState("search", parseAsString.withDefault(""));
   const trimmedSearch = search.trim();
   const isSearchActive = trimmedSearch.length > 0;
@@ -284,7 +288,13 @@ export const GovernanceSection = () => {
         <div className="flex-1">
           {activeTab === "drafts" && isConnected ? (
             <>
-              {drafts.length === 0 ? (
+              {isDraftsLoading ? (
+                <div className="flex flex-col gap-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <DraftCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : drafts.length === 0 ? (
                 <DraftEmptyState />
               ) : (
                 <div className="flex flex-col gap-2">
@@ -296,9 +306,13 @@ export const GovernanceSection = () => {
                         router.push(`${basePath}/proposals/new?draftId=${id}`)
                       }
                       onDelete={(id) => setDraftToDelete(id)}
-                      onShare={(id) => {
-                        copyDraftShareUrl(basePath, id);
-                        showCustomToast("Share link copied", "success");
+                      onShare={async (id) => {
+                        const copied = await copyDraftShareUrl(basePath, id);
+                        if (copied) {
+                          showCustomToast("Share link copied", "success");
+                        } else {
+                          showCustomToast("Could not copy link", "error");
+                        }
                       }}
                     />
                   ))}
@@ -309,10 +323,15 @@ export const GovernanceSection = () => {
                 onOpenChange={(open) => {
                   if (!open) setDraftToDelete(null);
                 }}
-                onConfirm={() => {
+                onConfirm={async () => {
                   if (draftToDelete !== null) {
-                    void deleteDraft(draftToDelete);
+                    const id = draftToDelete;
                     setDraftToDelete(null);
+                    try {
+                      await deleteDraft(id);
+                    } catch {
+                      showCustomToast("Could not delete draft", "error");
+                    }
                   }
                 }}
               />
@@ -426,6 +445,23 @@ const ProposalListSection = ({
     </>
   );
 };
+
+const DraftCardSkeleton = () => (
+  <div className="border-border-default bg-surface-default rounded-base flex flex-col gap-3 border p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-1 flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <SkeletonRow className="h-4 w-48" />
+        <SkeletonRow className="h-4 w-12" />
+      </div>
+      <SkeletonRow className="h-3 w-32" />
+    </div>
+    <div className="flex gap-2">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <SkeletonRow key={i} className="h-8 w-20" />
+      ))}
+    </div>
+  </div>
+);
 
 const ProposalItemSkeleton = () => {
   return (

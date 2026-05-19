@@ -146,7 +146,7 @@ export const ProposalCreationForm = ({
         setBodyVersion((v) => v + 1);
       })
       .catch(() => {
-        // Draft not found or fetch failed — leave form empty
+        showCustomToast("Could not load the shared draft", "error");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftId, drafts.drafts, drafts.isLoading]);
@@ -183,10 +183,14 @@ export const ProposalCreationForm = ({
     form.formState.isValid &&
     (values.body?.length ?? 0) <= 10_000;
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!currentDraftId) return;
-    copyDraftShareUrl(basePath, currentDraftId);
-    showCustomToast("Share link copied", "success");
+    const copied = await copyDraftShareUrl(basePath, currentDraftId);
+    if (copied) {
+      showCustomToast("Share link copied", "success");
+    } else {
+      showCustomToast("Could not copy link", "error");
+    }
   };
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {

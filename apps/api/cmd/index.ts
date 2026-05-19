@@ -7,6 +7,7 @@ import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
@@ -174,13 +175,20 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pgClient = drizzle(env.DATABASE_URL, {
+const pool = new Pool({ connectionString: env.DATABASE_URL });
+
+const pgClient = drizzle(pool, {
   schema,
   casing: "snake_case",
 });
 
-const pgUnifiedClient = drizzle(env.DATABASE_URL, {
-  schema: { ...schema, ...offchainSchema, ...generalSchema },
+const pgGeneralClient = drizzle(pool, {
+  schema: generalSchema,
+  casing: "snake_case",
+});
+
+const pgOffchainClient = drizzle(pool, {
+  schema: { ...schema, ...offchainSchema },
   casing: "snake_case",
 });
 
@@ -352,7 +360,7 @@ draftProposals(
   app,
   wrapWithTracing(
     new DraftProposalsService(
-      wrapWithTracing(new DraftProposalsRepository(pgUnifiedClient)),
+      wrapWithTracing(new DraftProposalsRepository(pgGeneralClient)),
     ),
   ),
   env.DAO_ID.toLowerCase(),
@@ -362,10 +370,10 @@ tokenMetrics(app, tokenMetricsService);
 
 if (daoClient.supportOffchainData()) {
   const offchainProposalsRepo = wrapWithTracing(
-    new OffchainProposalRepository(pgUnifiedClient),
+    new OffchainProposalRepository(pgOffchainClient),
   );
   const offchainVotesRepo = wrapWithTracing(
-    new OffchainVoteRepository(pgUnifiedClient),
+    new OffchainVoteRepository(pgOffchainClient),
   );
   offchainProposals(
     app,
@@ -377,7 +385,7 @@ if (daoClient.supportOffchainData()) {
   );
 
   const offchainNonVotersRepo = new OffchainNonVotersRepositoryImpl(
-    pgUnifiedClient,
+    pgOffchainClient,
   );
   offchainNonVoters(app, new OffchainNonVotersService(offchainNonVotersRepo));
 }

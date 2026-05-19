@@ -6,6 +6,14 @@ export const buildDraftShareUrl = (
   return `${window.location.origin}${basePath}/proposals/new?draftId=${draftId}`;
 };
 
-export const copyDraftShareUrl = (basePath: string, draftId: string): void => {
-  void navigator.clipboard.writeText(buildDraftShareUrl(basePath, draftId));
+export const copyDraftShareUrl = async (
+  basePath: string,
+  draftId: string,
+): Promise<boolean> => {
+  try {
+    await navigator.clipboard.writeText(buildDraftShareUrl(basePath, draftId));
+    return true;
+  } catch {
+    return false;
+  }
 };
