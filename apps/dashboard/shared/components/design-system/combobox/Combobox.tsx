@@ -50,15 +50,16 @@ export const Combobox = ({
             // Typography
             "text-sm font-normal leading-5",
             // Colors/surfaces
-            "text-primary bg-surface-contrast",
+            "text-primary bg-transparent",
             // Border
             "border-border-contrast rounded-base border",
             // Transitions
             "transition-colors duration-150",
             // Hover
-            "hover:bg-surface-hover",
+            "hover:bg-surface-contrast",
             // Disabled
-            isDisabled && "pointer-events-none opacity-50",
+            isDisabled &&
+              "bg-surface-disabled border-border-default text-secondary cursor-not-allowed opacity-50",
             // Cursor
             "cursor-pointer",
             // Min width from Figma (128px)
@@ -87,6 +88,7 @@ export const Combobox = ({
       {/* Dropdown content */}
       <PopoverPrimitive.Content
         role="listbox"
+        side="bottom"
         align="start"
         sideOffset={4}
         className={cn(
@@ -94,6 +96,8 @@ export const Combobox = ({
           "flex flex-col",
           // Sizing — min-w from Figma (128px), py-1 (4px) padding from blocks/padding-xs
           "min-w-32 py-1",
+          // Max height with scroll to keep dropdown below trigger
+          "max-h-52 overflow-y-auto",
           // Colors/surfaces
           "bg-surface-contrast",
           // Border
