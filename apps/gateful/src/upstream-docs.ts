@@ -96,7 +96,7 @@ function mergeRelayerPaths(doc: OpenAPIObject, daos: string[]): PathsObject {
 // Upstream paths the gateway re-owns through dedicated resolvers; skip them
 // during merge so the resolver's OpenAPI definition is what ends up in the
 // public spec.
-const UPSTREAM_PATH_BLOCKLIST = new Set(["/health"]);
+const UPSTREAM_PATH_BLOCKLIST = new Set(["/health", "/health/full"]);
 
 function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
   const paths: PathsObject = {};
