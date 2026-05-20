@@ -1,0 +1,51 @@
+{
+  "result": {
+    "rows": [
+      {
+        "month": "2026-01-01 00:00:00.000 UTC",
+        "category": "Registration",
+        "actions": 12345
+      },
+      {
+        "month": "2026-01-01 00:00:00.000 UTC",
+        "category": "Renewal",
+        "actions": 6789
+      },
+      {
+        "month": "2026-01-01 00:00:00.000 UTC",
+        "category": "Premium",
+        "actions": 234
+      },
+      {
+        "month": "2026-02-01 00:00:00.000 UTC",
+        "category": "Registration",
+        "actions": 15000
+      },
+      {
+        "month": "2026-02-01 00:00:00.000 UTC",
+        "category": "Renewal",
+        "actions": 8000
+      },
+      {
+        "month": "2026-02-01 00:00:00.000 UTC",
+        "category": "Premium",
+        "actions": 100
+      },
+      {
+        "month": "2026-03-01 00:00:00.000 UTC",
+        "category": "Registration",
+        "actions": 17000
+      },
+      {
+        "month": "2026-03-01 00:00:00.000 UTC",
+        "category": "Renewal",
+        "actions": 9000
+      },
+      {
+        "month": "2026-03-01 00:00:00.000 UTC",
+        "category": "Premium",
+        "actions": 150
+      }
+    ]
+  }
+}

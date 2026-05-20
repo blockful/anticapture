@@ -1,0 +1,56 @@
+{
+  "result": {
+    "rows": [
+      {
+        "month": "2023-01-01 00:00:00.000 UTC",
+        "registration_usd": 1250000.5,
+        "premium_usd": 0,
+        "renewal_usd": 320000.25,
+        "total_usd": 1570000.75,
+        "registration_eth": 825.4,
+        "premium_eth": 0,
+        "renewal_eth": 210.5
+      },
+      {
+        "month": "2023-04-01 00:00:00.000 UTC",
+        "registration_usd": 1480000.0,
+        "premium_usd": 245000.75,
+        "renewal_usd": 380000.5,
+        "total_usd": 2105001.25,
+        "registration_eth": 920.1,
+        "premium_eth": 152.3,
+        "renewal_eth": 235.8
+      },
+      {
+        "month": "2025-12-01 00:00:00.000 UTC",
+        "registration_usd": 1650000.0,
+        "premium_usd": 410000.0,
+        "renewal_usd": 525000.0,
+        "total_usd": 2585000.0,
+        "registration_eth": 730.6,
+        "premium_eth": 181.5,
+        "renewal_eth": 232.4
+      },
+      {
+        "month": "2026-01-01 00:00:00.000 UTC",
+        "registration_usd": 1720000.0,
+        "premium_usd": 388000.0,
+        "renewal_usd": 540000.0,
+        "total_usd": 2648000.0,
+        "registration_eth": 745.2,
+        "premium_eth": 168.1,
+        "renewal_eth": 233.9
+      },
+      {
+        "month": "2026-02-01 00:00:00.000 UTC",
+        "registration_usd": 1810000.0,
+        "premium_usd": 425000.0,
+        "renewal_usd": 562000.0,
+        "total_usd": 2797000.0,
+        "registration_eth": 780.4,
+        "premium_eth": 183.0,
+        "renewal_eth": 242.0
+      }
+    ]
+  }
+}
