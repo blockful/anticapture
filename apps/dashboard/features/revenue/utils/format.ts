@@ -15,7 +15,7 @@ const MONTH_ABBR = [
 
 export const formatMonthLabel = (unixSeconds: number): string => {
   const d = new Date(unixSeconds * 1000);
-  return `${MONTH_ABBR[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}`;
+  return `${MONTH_ABBR[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 };
 
 export const formatUsd = (value: number): string => {

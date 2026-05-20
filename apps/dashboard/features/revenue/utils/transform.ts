@@ -48,8 +48,8 @@ export function transformToOverview(
         name: "Registration",
         color: "#0080bc",
         amount: formatUsd(totalReg),
-        share: `${((totalReg / total) * 100).toFixed(1)}%`,
-        sharePercent: (totalReg / total) * 100,
+        share: total > 0 ? `${((totalReg / total) * 100).toFixed(1)}%` : "0.0%",
+        sharePercent: total > 0 ? (totalReg / total) * 100 : 0,
         volume: `${formatCompact(actionsMap.Registration)} registrations`,
         avgRevenue: `${actionsMap.Registration > 0 ? formatUsd(totalReg / actionsMap.Registration) : "—"} avg`,
       },
@@ -57,8 +57,9 @@ export function transformToOverview(
         name: "Renewals",
         color: "#15803d",
         amount: formatUsd(totalRenewal),
-        share: `${((totalRenewal / total) * 100).toFixed(1)}%`,
-        sharePercent: (totalRenewal / total) * 100,
+        share:
+          total > 0 ? `${((totalRenewal / total) * 100).toFixed(1)}%` : "0.0%",
+        sharePercent: total > 0 ? (totalRenewal / total) * 100 : 0,
         volume: `${formatCompact(actionsMap.Renewal)} renewals`,
         avgRevenue: `${actionsMap.Renewal > 0 ? formatUsd(totalRenewal / actionsMap.Renewal) : "—"} avg`,
       },
@@ -66,8 +67,9 @@ export function transformToOverview(
         name: "Premium",
         color: "#f472b6",
         amount: formatUsd(totalPremium),
-        share: `${((totalPremium / total) * 100).toFixed(1)}%`,
-        sharePercent: (totalPremium / total) * 100,
+        share:
+          total > 0 ? `${((totalPremium / total) * 100).toFixed(1)}%` : "0.0%",
+        sharePercent: total > 0 ? (totalPremium / total) * 100 : 0,
         volume: `${formatCompact(actionsMap.Premium)} premium sales`,
         avgRevenue: `${actionsMap.Premium > 0 ? formatUsd(totalPremium / actionsMap.Premium) : "—"} avg`,
       },
@@ -211,8 +213,9 @@ export function computeKpis(
 ): KpiCard[] {
   const lastActive = activeNames[activeNames.length - 1];
   const lastWallet = newWallets[newWallets.length - 1];
+  const prevWallet = newWallets[newWallets.length - 2];
   const lastFunnel = funnel[funnel.length - 1];
-  const prevFunnel = funnel[funnel.length - 2];
+  const prevFunnel = funnel[funnel.length - 4]; // 3 months back ≈ 1 quarter
 
   const totalReg = totals.reduce((s, i) => s + i.registrationUsd, 0);
   const totalRegActions = actions
@@ -243,14 +246,19 @@ export function computeKpis(
       subtext: lastWallet
         ? `this month (${formatCompact(lastWallet.cumulativeWallets)} all-time)`
         : "—",
-      trend: "up" as const,
+      trend:
+        lastWallet && prevWallet
+          ? lastWallet.newWallets >= prevWallet.newWallets
+            ? "up"
+            : "down"
+          : undefined,
     },
     {
       title: "Renewal Rate",
       value: lastFunnel ? `${lastFunnel.renewalRatePct.toFixed(0)}%` : "—",
       subtext:
         renewalDelta !== null
-          ? `${renewalDelta >= 0 ? "+" : ""}${renewalDelta.toFixed(0)}pp vs last month`
+          ? `${renewalDelta >= 0 ? "+" : ""}${renewalDelta.toFixed(0)}pp vs last quarter`
           : "latest",
       trend:
         renewalDelta !== null ? (renewalDelta >= 0 ? "up" : "down") : undefined,

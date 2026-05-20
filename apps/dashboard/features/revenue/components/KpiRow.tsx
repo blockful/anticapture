@@ -158,7 +158,7 @@ export const KpiRow = () => {
                 </p>
                 <p className="text-secondary mt-1 flex items-center gap-1 text-sm">
                   {kpi.trend === "up" && (
-                    <ArrowUp className="size-3.5 text-[#15803d]" />
+                    <ArrowUp className="text-success size-3.5" />
                   )}
                   {kpi.trend === "down" && (
                     <ArrowDown className="size-3.5 text-[#f87171]" />
@@ -166,7 +166,7 @@ export const KpiRow = () => {
                   <span
                     className={
                       kpi.trend === "up"
-                        ? "text-[#15803d]"
+                        ? "text-success"
                         : kpi.trend === "down"
                           ? "text-[#f87171]"
                           : "text-secondary"
