@@ -21,6 +21,7 @@ export const Combobox = ({
   onValueChange,
   isDisabled = false,
   className,
+  contentClassName,
 }: ComboboxProps) => {
   const [open, setOpen] = useState(false);
   const [hoveredValue, setHoveredValue] = useState<string | null>(null);
@@ -96,16 +97,15 @@ export const Combobox = ({
           "flex flex-col",
           // Sizing — min-w from Figma (128px), py-1 (4px) padding from blocks/padding-xs
           "min-w-32 py-1",
-          // Max height with scroll to keep dropdown below trigger
-          "max-h-52 overflow-y-auto",
           // Colors/surfaces
-          "bg-surface-contrast",
+          "bg-surface-default",
           // Border
           "border-border-contrast rounded-base border",
           // Z-index
           "z-50",
           // Animation
           "animate-[popover-slide-in_0.15s_ease-out]",
+          contentClassName,
         )}
       >
         {items.map((item) => {

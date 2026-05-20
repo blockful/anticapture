@@ -41,4 +41,5 @@ export type ComboboxProps = {
   /** Whether the combobox is disabled */
   isDisabled?: boolean;
   className?: string;
+  contentClassName?: string;
 };

@@ -76,6 +76,7 @@ export const TokenSelector = ({
       placeholder={isLoading ? "Loading tokens…" : "Select a token"}
       isDisabled={isLoading}
       className="w-full"
+      contentClassName="max-h-36 overflow-y-auto"
     />
   );
 };
