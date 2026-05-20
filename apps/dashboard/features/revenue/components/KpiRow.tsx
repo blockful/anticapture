@@ -38,7 +38,7 @@ function getQueryParams(
   const now = Math.floor(Date.now() / 1000);
   switch (timePeriod) {
     case "7d":
-      return { fromDate: monthStartUnix(now - 7 * DAY) };
+      return { fromDate: now - 7 * DAY };
     case "30d":
       return { fromDate: monthStartUnix(now - 30 * DAY) };
     case "90d":
