@@ -61,7 +61,7 @@ export const ComboChart = ({
             : "auto",
         formatter:
           xAxisLabels.length > 12
-            ? (value: string) => `20${value.split(" ")[1]}`
+            ? (value: string) => value.split(" ")[1] ?? value
             : undefined,
       },
     },

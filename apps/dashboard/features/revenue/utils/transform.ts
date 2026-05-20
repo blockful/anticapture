@@ -215,7 +215,7 @@ export function computeKpis(
   const lastWallet = newWallets[newWallets.length - 1];
   const prevWallet = newWallets[newWallets.length - 2];
   const lastFunnel = funnel[funnel.length - 1];
-  const prevFunnel = funnel[funnel.length - 2];
+  const prevFunnel = funnel[funnel.length - 4]; // 3 months back ≈ 1 quarter
 
   const totalReg = totals.reduce((s, i) => s + i.registrationUsd, 0);
   const totalRegActions = actions
@@ -258,7 +258,7 @@ export function computeKpis(
       value: lastFunnel ? `${lastFunnel.renewalRatePct.toFixed(0)}%` : "—",
       subtext:
         renewalDelta !== null
-          ? `${renewalDelta >= 0 ? "+" : ""}${renewalDelta.toFixed(0)}pp vs last month`
+          ? `${renewalDelta >= 0 ? "+" : ""}${renewalDelta.toFixed(0)}pp vs last quarter`
           : "latest",
       trend:
         renewalDelta !== null ? (renewalDelta >= 0 ? "up" : "down") : undefined,
