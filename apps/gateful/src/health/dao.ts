@@ -99,12 +99,14 @@ export function daoHealth(
 
     try {
       const upstream = await breaker.execute(async () => {
-        const url = new URL("/health", baseUrl);
+        const url = new URL("/health/full", baseUrl);
         const res = await fetch(url.toString(), {
           signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
         });
         if (res.status >= 500) {
-          throw new Error(`Upstream ${dao} /health returned ${res.status}`);
+          throw new Error(
+            `Upstream ${dao} /health/full returned ${res.status}`,
+          );
         }
         return (await res.json()) as UpstreamHealth;
       });

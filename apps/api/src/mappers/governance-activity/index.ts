@@ -93,6 +93,7 @@ export const AverageTurnoutComparisonResponseSchema = z
       description:
         "Signed bigint delta as a decimal string: currentAverageTurnout - oldAverageTurnout.",
       example: "30000000000000000",
+      format: "bigint",
     }),
   })
   .openapi("AverageTurnoutComparisonResponse", {

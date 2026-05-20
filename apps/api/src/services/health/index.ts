@@ -22,6 +22,15 @@ export class HealthService {
     private readonly daoClient: DAOClient,
   ) {}
 
+  async getLiveness(): Promise<"ok" | "error"> {
+    try {
+      await this.repo.pingDatabase();
+      return "ok";
+    } catch {
+      return "error";
+    }
+  }
+
   async getHealth(): Promise<HealthReport> {
     const [dbResult, headResult, lastTsResult] = await Promise.allSettled([
       this.repo.pingDatabase(),

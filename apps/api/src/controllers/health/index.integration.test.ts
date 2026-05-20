@@ -43,39 +43,67 @@ describe("health controller", () => {
     await client.close();
   });
 
-  it("returns 503 when there are no indexed events (database alive but indexer stale)", async () => {
-    const response = await app.request("/health");
+  describe("GET /health (liveness)", () => {
+    it("returns 200 when the database is reachable", async () => {
+      const response = await app.request("/health");
 
-    // No feedEvent rows -> lastEventTimestamp null -> fresh=false -> degraded.
-    // PGlite is reachable, so database=ok and status=degraded with 200.
-    expect(response.status).toBe(200);
-    const body = (await response.json()) as Record<string, unknown>;
-    expect(body.database).toBe("ok");
-    expect(body.status).toBe("degraded");
-    expect(body.chain).toEqual({ head: 12345 });
-    expect(body.indexer).toMatchObject({
-      lastEventTimestamp: null,
-      lagSeconds: null,
-      fresh: false,
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({ database: "ok" });
+    });
+
+    it("returns 503 when the database ping fails", async () => {
+      const failingClient = new PGlite();
+      const failingDb = drizzle(failingClient, { schema });
+      const failingApp = new Hono();
+
+      health(
+        failingApp,
+        new HealthService(new HealthRepositoryImpl(failingDb), fakeDaoClient),
+      );
+      await failingClient.close();
+
+      const response = await failingApp.request("/health");
+
+      expect(response.status).toBe(503);
+      await expect(response.json()).resolves.toEqual({ database: "error" });
     });
   });
 
-  it("returns 503 when the database ping fails", async () => {
-    const failingClient = new PGlite();
-    const failingDb = drizzle(failingClient, { schema });
-    const failingApp = new Hono();
+  describe("GET /health/full (rich snapshot)", () => {
+    it("returns 200 with status='degraded' when database is alive but indexer is stale", async () => {
+      const response = await app.request("/health/full");
 
-    health(
-      failingApp,
-      new HealthService(new HealthRepositoryImpl(failingDb), fakeDaoClient),
-    );
-    await failingClient.close();
+      // No feedEvent rows -> lastEventTimestamp null -> fresh=false -> degraded.
+      // PGlite is reachable, so database=ok and status=degraded with 200.
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as Record<string, unknown>;
+      expect(body.database).toBe("ok");
+      expect(body.status).toBe("degraded");
+      expect(body.chain).toEqual({ head: 12345 });
+      expect(body.indexer).toMatchObject({
+        lastEventTimestamp: null,
+        lagSeconds: null,
+        fresh: false,
+      });
+    });
 
-    const response = await failingApp.request("/health");
+    it("returns 503 when the database ping fails", async () => {
+      const failingClient = new PGlite();
+      const failingDb = drizzle(failingClient, { schema });
+      const failingApp = new Hono();
 
-    expect(response.status).toBe(503);
-    const body = (await response.json()) as Record<string, unknown>;
-    expect(body.database).toBe("error");
-    expect(body.status).toBe("error");
+      health(
+        failingApp,
+        new HealthService(new HealthRepositoryImpl(failingDb), fakeDaoClient),
+      );
+      await failingClient.close();
+
+      const response = await failingApp.request("/health/full");
+
+      expect(response.status).toBe(503);
+      const body = (await response.json()) as Record<string, unknown>;
+      expect(body.database).toBe("error");
+      expect(body.status).toBe("error");
+    });
   });
 });

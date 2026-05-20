@@ -82,6 +82,7 @@ export const SupplyComparisonResponseSchema = z
     previousValue: z.string().openapi({
       description:
         "Supply value at the start of the comparison window, encoded as a decimal string (raw token base units).",
+      format: "bigint",
     }),
     currentValue: z.string().openapi({
       description:
@@ -91,7 +92,6 @@ export const SupplyComparisonResponseSchema = z
     changeRate: z.number().openapi({
       description:
         "Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0.",
-      format: "bigint",
     }),
     rawDelta: z.string().openapi({
       description:

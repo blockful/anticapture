@@ -3,6 +3,14 @@ import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { setCacheControl } from "@/middlewares";
 import { HealthService } from "@/services";
 
+const LivenessResponseSchema = z
+  .object({
+    database: z.enum(["ok", "error"]).openapi({
+      description: "Database connectivity status.",
+    }),
+  })
+  .openapi("LivenessResponse");
+
 const HealthResponseSchema = z
   .object({
     status: z.enum(["ok", "degraded", "error"]).openapi({
@@ -45,11 +53,46 @@ export function health(app: Hono, service: HealthService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "health",
+      operationId: "liveness",
       path: "/health",
-      summary: "Per-DAO indexer and database health",
+      summary: "Liveness probe",
       description:
-        "Returns database connectivity, chain head, indexer freshness, and computed lag for this DAO API.",
+        "Lightweight liveness probe for orchestrators (e.g. Railway). Returns 200 when the API process is up and the database is reachable, 503 otherwise. Indexer freshness and chain head are intentionally excluded — use /health/full for diagnostics.",
+      tags: ["system"],
+      middleware: [setCacheControl(5)],
+      responses: {
+        200: {
+          description: "API process is up and database is reachable.",
+          content: {
+            "application/json": {
+              schema: LivenessResponseSchema,
+            },
+          },
+        },
+        503: {
+          description: "Database connectivity check failed.",
+          content: {
+            "application/json": {
+              schema: LivenessResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const database = await service.getLiveness();
+      return context.json({ database }, database === "error" ? 503 : 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "health",
+      path: "/health/full",
+      summary: "Full health snapshot (database, chain head, indexer freshness)",
+      description:
+        "Returns database connectivity, chain head, indexer freshness, and computed lag for this DAO API. HTTP status reflects database reachability only; degraded indexer state still returns 200 with status='degraded' in the body.",
       tags: ["system"],
       middleware: [setCacheControl(5)],
       responses: {
