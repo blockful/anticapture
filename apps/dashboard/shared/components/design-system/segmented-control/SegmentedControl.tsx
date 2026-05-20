@@ -16,7 +16,7 @@ export const SegmentedControl = ({
         // Base/layout — horizontal row with tight internal gap
         "inline-flex w-fit items-center gap-1",
         // Container surface — matches Figma: bg-surface-default + border + padding
-        "bg-surface-default border-border-default border p-1",
+        "bg-surface-default border-border-default rounded-base border p-1",
         // Allow overrides
         className,
       )}
