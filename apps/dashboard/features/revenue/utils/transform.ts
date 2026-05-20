@@ -28,8 +28,6 @@ export function transformToOverview(
   const totalRenewal = totalsItems.reduce((s, i) => s + i.renewalUsd, 0);
   const total = totalReg + totalPremium + totalRenewal;
 
-  const sharePercent = (part: number) => (total > 0 ? (part / total) * 100 : 0);
-
   const currentYear = new Date().getUTCFullYear();
   const ytd = totalsItems
     .filter((i) => new Date(i.date * 1000).getUTCFullYear() === currentYear)
@@ -50,8 +48,8 @@ export function transformToOverview(
         name: "Registration",
         color: "#0080bc",
         amount: formatUsd(totalReg),
-        share: `${sharePercent(totalReg).toFixed(1)}%`,
-        sharePercent: sharePercent(totalReg),
+        share: `${((totalReg / total) * 100).toFixed(1)}%`,
+        sharePercent: (totalReg / total) * 100,
         volume: `${formatCompact(actionsMap.Registration)} registrations`,
         avgRevenue: `${actionsMap.Registration > 0 ? formatUsd(totalReg / actionsMap.Registration) : "—"} avg`,
       },
@@ -59,8 +57,8 @@ export function transformToOverview(
         name: "Renewals",
         color: "#15803d",
         amount: formatUsd(totalRenewal),
-        share: `${sharePercent(totalRenewal).toFixed(1)}%`,
-        sharePercent: sharePercent(totalRenewal),
+        share: `${((totalRenewal / total) * 100).toFixed(1)}%`,
+        sharePercent: (totalRenewal / total) * 100,
         volume: `${formatCompact(actionsMap.Renewal)} renewals`,
         avgRevenue: `${actionsMap.Renewal > 0 ? formatUsd(totalRenewal / actionsMap.Renewal) : "—"} avg`,
       },
@@ -68,8 +66,8 @@ export function transformToOverview(
         name: "Premium",
         color: "#f472b6",
         amount: formatUsd(totalPremium),
-        share: `${sharePercent(totalPremium).toFixed(1)}%`,
-        sharePercent: sharePercent(totalPremium),
+        share: `${((totalPremium / total) * 100).toFixed(1)}%`,
+        sharePercent: (totalPremium / total) * 100,
         volume: `${formatCompact(actionsMap.Premium)} premium sales`,
         avgRevenue: `${actionsMap.Premium > 0 ? formatUsd(totalPremium / actionsMap.Premium) : "—"} avg`,
       },
@@ -187,20 +185,20 @@ export function transformToRenewalTenure(items: RevenueRenewalTenureItem[]) {
 export function transformToRenewalCohorts(
   items: RevenueRenewalFunnelItem[],
 ): Array<{ year: string; rate: number }> {
-  const yearMap = new Map<number, { renewed: number; expiring: number }>();
+  const yearMap = new Map<number, { sum: number; count: number }>();
   for (const item of items) {
     const year = new Date(item.date * 1000).getUTCFullYear();
-    const prev = yearMap.get(year) ?? { renewed: 0, expiring: 0 };
+    const prev = yearMap.get(year) ?? { sum: 0, count: 0 };
     yearMap.set(year, {
-      renewed: prev.renewed + item.renewedCount,
-      expiring: prev.expiring + item.termsExpiring,
+      sum: prev.sum + item.renewalRatePct,
+      count: prev.count + 1,
     });
   }
   return Array.from(yearMap.entries())
     .sort(([a], [b]) => a - b)
-    .map(([year, { renewed, expiring }]) => ({
+    .map(([year, { sum, count }]) => ({
       year: String(year),
-      rate: expiring > 0 ? Math.round((renewed / expiring) * 100) : 0,
+      rate: Math.round(sum / count),
     }));
 }
 
@@ -213,7 +211,6 @@ export function computeKpis(
 ): KpiCard[] {
   const lastActive = activeNames[activeNames.length - 1];
   const lastWallet = newWallets[newWallets.length - 1];
-  const prevWallet = newWallets[newWallets.length - 2];
   const lastFunnel = funnel[funnel.length - 1];
   const prevFunnel = funnel[funnel.length - 2];
 
@@ -221,11 +218,6 @@ export function computeKpis(
   const totalRegActions = actions
     .filter((i) => i.category === "Registration")
     .reduce((s, i) => s + i.actions, 0);
-
-  const walletDelta =
-    lastWallet && prevWallet
-      ? lastWallet.newWallets - prevWallet.newWallets
-      : null;
 
   const renewalDelta =
     lastFunnel && prevFunnel
@@ -251,8 +243,7 @@ export function computeKpis(
       subtext: lastWallet
         ? `this month (${formatCompact(lastWallet.cumulativeWallets)} all-time)`
         : "—",
-      trend:
-        walletDelta !== null ? (walletDelta >= 0 ? "up" : "down") : undefined,
+      trend: "up" as const,
     },
     {
       title: "Renewal Rate",
