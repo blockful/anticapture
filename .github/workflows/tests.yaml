@@ -7,6 +7,7 @@ on:
 jobs:
   changeset-path-filter:
     name: Detect changeset requirement
+    if: github.base_ref != 'main'
     runs-on: ubuntu-latest
     outputs:
       needs_changeset: ${{ steps.filter.outputs.needs_changeset }}
