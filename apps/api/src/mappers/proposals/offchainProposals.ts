@@ -27,7 +27,9 @@ export const OffchainProposalResponseSchema = z
       .string()
       .openapi({ description: "Address or ENS of the author." }),
     title: z.string().openapi({ description: "Proposal title." }),
-    body: z.string().openapi({ description: "Proposal body." }),
+    body: z.string().optional().openapi({
+      description: "Proposal body. Omitted when the request sets `lean=true`.",
+    }),
     discussion: z
       .string()
       .openapi({ description: "Discussion URL or thread reference." }),
@@ -63,40 +65,33 @@ export type OffchainProposalResponse = z.infer<
   typeof OffchainProposalResponseSchema
 >;
 
-export const OffchainProposalLeanResponseSchema =
-  OffchainProposalResponseSchema.omit({ body: true }).openapi(
-    "OffchainProposalLean",
-  );
-
-export type OffchainProposalLeanResponse = z.infer<
-  typeof OffchainProposalLeanResponseSchema
->;
-
 export const OffchainProposalMapper = {
-  toApi: (p: DBOffchainProposal): OffchainProposalResponse => ({
-    id: p.id,
-    spaceId: p.spaceId,
-    author: p.author,
-    title: p.title,
-    body: p.body,
-    discussion: p.discussion,
-    type: p.type,
-    start: p.start,
-    end: p.end,
-    state: p.state,
-    created: p.created,
-    updated: p.updated,
-    link: p.link,
-    flagged: p.flagged,
-    scores: p.scores,
-    choices: p.choices,
-    network: p.network,
-    snapshot: p.snapshot,
-    strategies: p.strategies,
-  }),
-  toLeanApi: (p: DBOffchainProposal): OffchainProposalLeanResponse => {
-    const { body: _body, ...lean } = OffchainProposalMapper.toApi(p);
-    return lean;
+  toApi: (
+    p: DBOffchainProposal,
+    options: { lean?: boolean } = {},
+  ): OffchainProposalResponse => {
+    const base: OffchainProposalResponse = {
+      id: p.id,
+      spaceId: p.spaceId,
+      author: p.author,
+      title: p.title,
+      discussion: p.discussion,
+      type: p.type,
+      start: p.start,
+      end: p.end,
+      state: p.state,
+      created: p.created,
+      updated: p.updated,
+      link: p.link,
+      flagged: p.flagged,
+      scores: p.scores,
+      choices: p.choices,
+      network: p.network,
+      snapshot: p.snapshot,
+      strategies: p.strategies,
+    };
+    if (options.lean) return base;
+    return { ...base, body: p.body };
   },
 };
 
@@ -104,9 +99,12 @@ export const OffchainProposalsResponseSchema = paginatedListResponse(
   OffchainProposalResponseSchema,
 ).openapi("OffchainProposalsResponse");
 
-export const OffchainProposalsLeanResponseSchema = paginatedListResponse(
-  OffchainProposalLeanResponseSchema,
-).openapi("OffchainProposalsLeanResponse");
+const offchainLeanQueryParam = () =>
+  z.coerce.boolean().optional().default(false).openapi({
+    description:
+      "When true, omit the proposal `body` to reduce response size. Defaults to false.",
+    example: false,
+  });
 
 export const OffchainProposalRequestSchema = z
   .object({
@@ -118,6 +116,12 @@ export const OffchainProposalRequestSchema = z
     }),
   })
   .openapi("OffchainProposalParams");
+
+export const OffchainProposalByIdQuerySchema = z
+  .object({
+    lean: offchainLeanQueryParam(),
+  })
+  .openapi("OffchainProposalByIdQuery");
 
 export const OffchainProposalsRequestSchema = z
   .object({
@@ -142,6 +146,7 @@ export const OffchainProposalsRequestSchema = z
     endDate: unixTimestampQueryParam(
       "Latest proposal creation timestamp, in Unix seconds.",
     ),
+    lean: offchainLeanQueryParam(),
   })
   .openapi("OffchainProposalsRequest");
 
@@ -161,5 +166,6 @@ export const OffchainProposalSearchRequestSchema = z
         example: "test",
       }),
     ...paginationQueryParams(),
+    lean: offchainLeanQueryParam(),
   })
   .openapi("OffchainProposalSearchRequest");

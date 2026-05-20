@@ -25,6 +25,13 @@ const OnchainProposalStatusListSchema = commaDelimitedEnumQueryParam(
   (input) => input.toUpperCase(),
 );
 
+const leanQueryParam = () =>
+  z.coerce.boolean().optional().default(false).openapi({
+    description:
+      "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false.",
+    example: false,
+  });
+
 export const ProposalsRequestSchema = z
   .object({
     ...paginationQueryParams(),
@@ -56,6 +63,7 @@ export const ProposalsRequestSchema = z
         description: "Whether optimistic proposals should be included.",
         example: false,
       }),
+    lean: leanQueryParam(),
   })
   .openapi("OnchainProposalsRequest");
 
@@ -76,8 +84,15 @@ export const ProposalSearchRequestSchema = z
         example: "test",
       }),
     ...paginationQueryParams(),
+    lean: leanQueryParam(),
   })
   .openapi("OnchainProposalSearchRequest");
+
+export const ProposalByIdQuerySchema = z
+  .object({
+    lean: leanQueryParam(),
+  })
+  .openapi("OnchainProposalByIdQuery");
 
 export type ProposalSearchRequest = z.infer<typeof ProposalSearchRequestSchema>;
 
@@ -133,16 +148,23 @@ export const ProposalResponseSchema = z
         "Transaction hash of the execute event, or null if the proposal was never executed.",
     }),
     quorum: decimalStringField("Required quorum encoded as a decimal string."),
-    calldatas: z.array(z.string()).openapi({
-      description: "Encoded calldata payloads executed by the proposal.",
+    calldatas: z.array(z.string()).optional().openapi({
+      description:
+        "Encoded calldata payloads executed by the proposal. Omitted when the request sets `lean=true`.",
     }),
-    values: z.array(z.string().openapi({ format: "bigint" })).openapi({
-      description: "ETH values attached to each call, encoded as strings.",
-    }),
+    values: z
+      .array(z.string().openapi({ format: "bigint" }))
+      .optional()
+      .openapi({
+        description:
+          "ETH values attached to each call, encoded as strings. Omitted when the request sets `lean=true`.",
+      }),
     targets: z
       .array(z.string().openapi({ format: "ethereum-address" }))
+      .optional()
       .openapi({
-        description: "Contract targets invoked by the proposal.",
+        description:
+          "Contract targets invoked by the proposal. Omitted when the request sets `lean=true`.",
       }),
     proposalType: z.number().int().nullable().openapi({
       description: "Optional proposal type discriminator.",
@@ -155,20 +177,6 @@ export const ProposalsResponseSchema = paginatedListResponse(
 ).openapi("OnchainProposalsResponse");
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
-
-export const ProposalLeanResponseSchema = ProposalResponseSchema.omit({
-  calldatas: true,
-  values: true,
-  targets: true,
-}).openapi("OnchainProposalLean");
-
-export type ProposalLeanResponse = z.infer<typeof ProposalLeanResponseSchema>;
-
-export const ProposalsLeanResponseSchema = paginatedListResponse(
-  ProposalLeanResponseSchema,
-).openapi("OnchainProposalsLeanResponse");
-
-export type ProposalsLeanResponse = z.infer<typeof ProposalsLeanResponseSchema>;
 
 export const ProposalRequestSchema = z
   .object({
@@ -190,8 +198,9 @@ export const ProposalMapper = {
     p: DBProposal,
     quorum: bigint,
     blockTime: number,
+    options: { lean?: boolean } = {},
   ): ProposalResponse => {
-    return {
+    const base: ProposalResponse = {
       id: p.id,
       daoId: p.daoId,
       txHash: p.txHash,
@@ -210,9 +219,6 @@ export const ProposalMapper = {
         Number(p.endTimestamp) - (p.endBlock - p.startBlock) * blockTime,
       ),
       quorum: quorum.toString(),
-      calldatas: p.calldatas,
-      values: p.values.map((v) => v.toString()),
-      targets: p.targets,
       proposalType: p.proposalType,
       queuedTimestamp:
         p.queuedTimestamp === null ? null : Number(p.queuedTimestamp),
@@ -221,18 +227,12 @@ export const ProposalMapper = {
       queuedTxHash: p.queuedTxHash,
       executedTxHash: p.executedTxHash,
     };
-  },
-  toLeanApi: (
-    p: DBProposal,
-    quorum: bigint,
-    blockTime: number,
-  ): ProposalLeanResponse => {
-    const {
-      calldatas: _c,
-      values: _v,
-      targets: _t,
-      ...lean
-    } = ProposalMapper.toApi(p, quorum, blockTime);
-    return lean;
+    if (options.lean) return base;
+    return {
+      ...base,
+      calldatas: p.calldatas,
+      values: p.values.map((v) => v.toString()),
+      targets: p.targets,
+    };
   },
 };

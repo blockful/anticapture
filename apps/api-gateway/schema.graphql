@@ -306,10 +306,15 @@ type Query {
     Whether optimistic proposals should be included.
     """
     includeOptimisticProposals: Boolean = true
+
+    """
+    When true, omit execution-payload fields (calldatas, values, targets).
+    """
+    lean: Boolean = false
   ): OnchainProposalsResponse
 
   """
-  Returns proposals whose title or identifier partially matches the query.
+  Returns proposals whose title or identifier partially matches the query. Pass lean=true to omit calldatas/values/targets.
   """
   searchProposals(
     """
@@ -326,16 +331,26 @@ type Query {
     Maximum number of records to return.
     """
     limit: Int
+
+    """
+    When true, omit execution-payload fields (calldatas, values, targets).
+    """
+    lean: Boolean = false
   ): OnchainProposalsResponse
 
   """
-  Returns a single proposal by its ID
+  Returns a single proposal by its ID. Pass lean=true to omit calldatas/values/targets.
   """
   proposal(
     """
     Onchain proposal identifier.
     """
     id: String!
+
+    """
+    When true, omit execution-payload fields (calldatas, values, targets).
+    """
+    lean: Boolean = false
   ): proposal_response
 
   """
@@ -964,10 +979,15 @@ type Query {
     Latest proposal creation timestamp, in Unix seconds.
     """
     endDate: Int
+
+    """
+    When true, omit the proposal `body` to reduce response size.
+    """
+    lean: Boolean = false
   ): OffchainProposalsResponse
 
   """
-  Returns offchain proposals whose title or identifier partially matches the query.
+  Returns offchain proposals whose title or identifier partially matches the query. Pass lean=true to omit the `body`.
   """
   offchainSearchProposals(
     """
@@ -984,16 +1004,26 @@ type Query {
     Maximum number of records to return.
     """
     limit: Int
+
+    """
+    When true, omit the proposal `body` to reduce response size.
+    """
+    lean: Boolean = false
   ): OffchainProposalsResponse
 
   """
-  Returns a single offchain (Snapshot) proposal by its ID
+  Returns a single offchain (Snapshot) proposal by its ID. Pass lean=true to omit the `body`.
   """
   offchainProposalById(
     """
     Snapshot proposal identifier.
     """
     id: String!
+
+    """
+    When true, omit the proposal `body` to reduce response size.
+    """
+    lean: Boolean = false
   ): offchainProposalById_response
 
   """
@@ -2019,19 +2049,19 @@ type OnchainProposal {
   quorum: String!
 
   """
-  Encoded calldata payloads executed by the proposal.
+  Encoded calldata payloads executed by the proposal. Omitted when the request sets lean=true.
   """
-  calldatas: [String]!
+  calldatas: [String]
 
   """
-  ETH values attached to each call, encoded as strings.
+  ETH values attached to each call, encoded as strings. Omitted when the request sets lean=true.
   """
-  values: [String]!
+  values: [String]
 
   """
-  Contract targets invoked by the proposal.
+  Contract targets invoked by the proposal. Omitted when the request sets lean=true.
   """
-  targets: [String]!
+  targets: [String]
 
   """
   Optional proposal type discriminator.
@@ -2736,9 +2766,9 @@ type OffchainProposal {
   title: String!
 
   """
-  Proposal body.
+  Proposal body. Omitted when the request sets lean=true.
   """
-  body: String!
+  body: String
 
   """
   Discussion URL or thread reference.

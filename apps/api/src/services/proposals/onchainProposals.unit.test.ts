@@ -10,6 +10,7 @@ const DEFAULT_REQ: ProposalsRequest = {
   orderDirection: "desc",
   status: undefined,
   includeOptimisticProposals: true,
+  lean: false,
 };
 
 const createMockProposal = (

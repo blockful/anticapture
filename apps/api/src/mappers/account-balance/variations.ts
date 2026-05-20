@@ -60,9 +60,10 @@ export const AccountBalanceVariationSchema = z
     absoluteChange: decimalStringField(
       "Absolute balance change encoded as a decimal string.",
     ),
-    percentageChange: decimalStringField(
-      "Relative balance change encoded as a decimal string.",
-    ),
+    percentageChange: z.string().openapi({
+      description:
+        'Relative balance change as a decimal string (e.g. "5.23"). Set to the sentinel "NO BASELINE" when the previous balance is zero.',
+    }),
   })
   .openapi("AccountBalanceVariation", {
     description: "Balance delta for a single account across two timestamps.",

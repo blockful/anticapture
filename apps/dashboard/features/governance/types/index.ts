@@ -20,7 +20,7 @@ export interface ProposalViewData {
   txHash: string | null;
   proposerAccountId: string;
   title: string;
-  description: string;
+  description: string | null;
   quorum: string;
   timestamp: number;
   status: string;
@@ -34,8 +34,8 @@ export interface ProposalViewData {
   queuedTxHash: string | null;
   executedTxHash: string | null;
   calldatas: Array<string | null> | null;
-  targets: Array<string | null>;
-  values: Array<string | null>;
+  targets: Array<string | null> | null;
+  values: Array<string | null> | null;
 }
 
 export enum ProposalStatus {

@@ -110,9 +110,10 @@ export const VotingPowerVariationResponseSchema = z
     absoluteChange: decimalStringField(
       "Absolute voting power change encoded as a decimal string.",
     ),
-    percentageChange: decimalStringField(
-      "Relative voting power change encoded as a decimal string.",
-    ),
+    percentageChange: z.string().openapi({
+      description:
+        'Relative voting power change as a decimal string (e.g. "5.23"). Set to the sentinel "NO BASELINE" when the previous voting power is zero.',
+    }),
   })
   .openapi("VotingPowerVariation", {
     description:
