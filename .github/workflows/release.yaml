@@ -41,7 +41,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build publishable packages
-        run: pnpm --filter @anticapture/client --filter @anticapture/observability build
+        run: pnpm turbo run build --filter=@anticapture/client --filter=@anticapture/observability
 
       - name: Publish packages and create releases
         uses: changesets/action@v1
