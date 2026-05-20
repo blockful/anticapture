@@ -3,11 +3,13 @@ import { z } from "@hono/zod-openapi";
 import { VoteFilter } from "@/repositories/";
 import {
   AddressSchema,
-  OrderDirectionSchema,
+  VoteSupportSchema,
+  addressOutputField,
+  daoIdField,
+  defaultDescOrderDirection,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
   unixTimestampQueryParam,
-  VoteSupportSchema,
 } from "../shared";
 
 export const ProposalActivityRequestSchema = z
@@ -33,7 +35,7 @@ export const ProposalActivityRequestSchema = z
         description: "Field used to sort proposal activity results.",
         example: "timestamp",
       }),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
     userVoteFilter: z.enum(VoteFilter).optional().openapi({
       description:
         "Optional vote filter. Use yes, no, abstain, or no-vote to narrow the result set.",
@@ -47,13 +49,8 @@ export const ProposalActivityRequestSchema = z
 export const ProposalActivityProposalSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),
-    daoId: z
-      .string()
-      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
-    proposerAccountId: z.string().openapi({
-      description: "Address that created the proposal.",
-      format: "ethereum-address",
-    }),
+    daoId: daoIdField(),
+    proposerAccountId: addressOutputField("Address that created the proposal."),
     title: z.string().openapi({ description: "Proposal title." }),
     description: z.string().openapi({ description: "Proposal body." }),
     startBlock: z.number().openapi({ description: "Start block number." }),
@@ -131,10 +128,7 @@ export const ProposalActivityItemSchema = z
 
 export const ProposalActivityResponseSchema = z
   .object({
-    address: z.string().openapi({
-      description: "Delegate address.",
-      format: "ethereum-address",
-    }),
+    address: addressOutputField("Delegate address."),
     totalProposals: z
       .number()
       .int()

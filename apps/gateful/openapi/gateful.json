@@ -1195,14 +1195,11 @@
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of matching day buckets.",
+            "description": "Total number of matching day buckets across the requested window (ignores skip/limit).",
             "example": 365
-          },
-          "pageInfo": {
-            "$ref": "#/components/schemas/PageInfo"
           }
         },
-        "required": ["items", "totalCount", "pageInfo"]
+        "required": ["items", "totalCount"]
       },
       "DelegationPercentageItem": {
         "type": "object",
@@ -5032,22 +5029,22 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Inclusive lower bound cursor in Unix seconds.",
+              "description": "Inclusive lower bound for the day-bucket window, in Unix seconds.",
               "example": 1700000000
             },
             "required": false,
-            "description": "Inclusive lower bound cursor in Unix seconds.",
+            "description": "Inclusive lower bound for the day-bucket window, in Unix seconds.",
             "name": "startDate",
             "in": "query"
           },
           {
             "schema": {
               "type": "integer",
-              "description": "Inclusive upper bound cursor in Unix seconds.",
+              "description": "Inclusive upper bound for the day-bucket window, in Unix seconds.",
               "example": 1700000000
             },
             "required": false,
-            "description": "Inclusive upper bound cursor in Unix seconds.",
+            "description": "Inclusive upper bound for the day-bucket window, in Unix seconds.",
             "name": "endDate",
             "in": "query"
           },
@@ -5063,34 +5060,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": "365"
+              "description": "Maximum number of day buckets to return.",
+              "example": 365
             },
             "required": false,
-            "description": "Maximum number of records to return.",
+            "description": "Maximum number of day buckets to return.",
             "name": "limit",
             "in": "query"
           },
           {
             "schema": {
               "type": "integer",
-              "description": "Return items after this cursor, exclusive, in Unix seconds.",
-              "example": 1700000000
+              "description": "Number of day buckets to skip before returning results.",
+              "example": 0
             },
             "required": false,
-            "description": "Return items after this cursor, exclusive, in Unix seconds.",
-            "name": "after",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Return items before this cursor, exclusive, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Return items before this cursor, exclusive, in Unix seconds.",
-            "name": "before",
+            "description": "Number of day buckets to skip before returning results.",
+            "name": "skip",
             "in": "query"
           }
         ],

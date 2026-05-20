@@ -20,15 +20,14 @@
  *    - Guarantees consecutive days in response, even with sparse database records
  *    - Process: generate complete date range → apply forward-fill → return consecutive days
  *
- * 4. **Cursor-Based Date Filtering**
- *    - `after`/`before` are date filters, not navigation cursors
- *    - Repository receives effective range for efficient queries
- *
+ * 4. **skip / limit Pagination**
+ *    - `startDate`/`endDate` are inclusive time-window filters.
+ *    - `skip`/`limit` paginate the post-forward-fill timeline.
+ *    - `totalCount` reflects the full filled timeline, ignoring skip/limit.
  */
 
 import { MetricTypesEnum } from "@/lib/constants";
 import { getEffectiveStartDate } from "@/lib/date-helpers";
-import { applyCursorPagination } from "@/lib/query-helpers";
 import { forwardFill, generateOrderedTimeline } from "@/lib/time-series";
 import { logger } from "@/logger";
 import {
@@ -40,15 +39,10 @@ import {
 
 /**
  * Service result type
- * Returns flat structure with pagination metadata
  */
 export interface DelegationPercentageServiceResult {
   items: DelegationPercentageItem[];
   totalCount: number;
-  hasNextPage: boolean;
-  hasPreviousPage?: boolean;
-  endDate: string | null;
-  startDate: string | null;
 }
 
 interface DateData {
@@ -77,44 +71,36 @@ export class DelegationPercentageService {
   constructor(private readonly repository: DelegationPercentageRepository) {}
 
   /**
-   * Main method to get delegation percentage data with forward-fill and pagination
+   * Main method to get delegation percentage data with forward-fill and skip/limit pagination.
    */
   async delegationPercentageByDay(
     filters: DelegationPercentageQuery,
   ): Promise<DelegationPercentageServiceResult> {
-    const {
-      after,
-      before,
-      startDate,
-      endDate,
-      orderDirection = "asc",
-      limit,
-    } = filters;
+    const { startDate, endDate, orderDirection = "asc", skip, limit } = filters;
 
     // Normalize all timestamps to midnight UTC to align with database storage
     const normalizedStartDate = startDate
       ? normalizeTimestamp(startDate)
       : undefined;
     const normalizedEndDate = endDate ? normalizeTimestamp(endDate) : undefined;
-    const normalizedAfter = after ? normalizeTimestamp(after) : undefined;
-    const normalizedBefore = before ? normalizeTimestamp(before) : undefined;
 
     // 1. Get initial values for proper forward-fill
-    const referenceDate = normalizedAfter || normalizedStartDate;
-    const initialValues = referenceDate
-      ? await this.fetchLastDelegationValues(referenceDate)
+    const initialValues = normalizedStartDate
+      ? await this.fetchLastDelegationValues(normalizedStartDate)
       : { delegated: 0n, total: 0n };
 
-    // 2. Fetch data from repository
+    // 2. Fetch data from repository.
+    // Doubled cap so we have headroom for both DELEGATED_SUPPLY and TOTAL_SUPPLY rows;
+    // +1 leaves room to detect overflow when slicing.
     const rows = await this.repository.getMetricsByDateRange({
       metricTypes: [
         MetricTypesEnum.DELEGATED_SUPPLY,
         MetricTypesEnum.TOTAL_SUPPLY,
       ],
-      startDate: referenceDate,
-      endDate: normalizedBefore || normalizedEndDate,
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
       orderDirection,
-      limit: (limit + 1) * 2, // The limit is doubled to ensure we get all delegation and total supply values
+      limit: (limit + 1) * 2,
     });
 
     // 3. Organize data by date
@@ -127,25 +113,16 @@ export class DelegationPercentageService {
       initialValues.delegated === 0n &&
       initialValues.total === 0n
     ) {
-      return {
-        items: [],
-        totalCount: 0,
-        hasNextPage: false,
-        hasPreviousPage: Boolean(normalizedAfter || normalizedBefore),
-        endDate: null,
-        startDate: null,
-      };
+      return { items: [], totalCount: 0 };
     }
 
     // 5. Adjust startDate if no previous values and startDate is before first data
     // This prevents returning 0% for dates before first real data
     const datesFromDb = Array.from(dateMap.keys()).map(Number);
     const effectiveStartDate = getEffectiveStartDate({
-      referenceDate: normalizedAfter
-        ? Number(normalizedAfter)
-        : normalizedStartDate
-          ? Number(normalizedStartDate)
-          : undefined,
+      referenceDate: normalizedStartDate
+        ? Number(normalizedStartDate)
+        : undefined,
       datesFromDb,
       hasInitialValue:
         initialValues.delegated !== 0n || initialValues.total !== 0n,
@@ -159,31 +136,18 @@ export class DelegationPercentageService {
       orderDirection,
     });
 
-    // 7. Calculate delegation percentage
+    // 7. Calculate delegation percentage across the whole filled timeline
     const allItems = this.calculateDelegationPercentage(
       allDates,
       dateMap,
       initialValues,
     );
 
-    // 8. Apply cursor-based pagination
-    // TODO(schema-fix): replace cursor pagination with skip/limit to match every
-    // other paginated endpoint. After the migration this block should slice
-    // `allItems` by `skip..skip+limit` and report `hasNextPage` from a total
-    // count (see the mapper + controller TODOs).
-    const { items, hasNextPage } = applyCursorPagination({
-      items: allItems,
-      limit,
-      endDate: normalizedEndDate ? Number(normalizedEndDate) : undefined,
-    });
-    return {
-      items,
-      totalCount: items.length,
-      hasNextPage,
-      hasPreviousPage: Boolean(normalizedAfter || normalizedBefore),
-      endDate: items[items.length - 1]?.date ?? null,
-      startDate: items[0]?.date ?? null,
-    };
+    // 8. Apply skip/limit
+    const totalCount = allItems.length;
+    const items = allItems.slice(skip, skip + limit);
+
+    return { items, totalCount };
   }
 
   /**

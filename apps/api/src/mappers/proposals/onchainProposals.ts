@@ -3,10 +3,13 @@ import { z } from "@hono/zod-openapi";
 import { proposalsOnchain } from "@/database";
 import { ProposalStatus } from "@/lib/constants";
 import {
-  normalizeQueryArray,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
+  commaDelimitedEnumQueryParam,
+  daoIdField,
+  decimalStringField,
+  defaultDescOrderDirection,
+  paginatedListResponse,
+  paginationQueryParams,
+  unixSecondsIntField,
   unixTimestampQueryParam,
 } from "../shared";
 
@@ -17,22 +20,15 @@ const OnchainProposalStatusValues = Object.values(ProposalStatus) as [
   ...ProposalStatus[],
 ];
 
-const OnchainProposalStatusListSchema = z
-  .union([z.string(), z.array(z.string())])
-  .transform((value) => {
-    const statuses = normalizeQueryArray(value);
-    return statuses
-      ? z
-          .array(z.enum(OnchainProposalStatusValues))
-          .parse(statuses.map((status) => String(status).toUpperCase()))
-      : undefined;
-  });
+const OnchainProposalStatusListSchema = commaDelimitedEnumQueryParam(
+  OnchainProposalStatusValues,
+  (input) => input.toUpperCase(),
+);
 
 export const ProposalsRequestSchema = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
-    orderDirection: OrderDirectionSchema.default("desc").optional(),
+    ...paginationQueryParams(),
+    orderDirection: defaultDescOrderDirection(),
     status: OnchainProposalStatusListSchema.optional().openapi(
       "OnchainProposalStatusList",
       {
@@ -79,8 +75,7 @@ export const ProposalSearchRequestSchema = z
         description: "Partial proposal identifier or title to search for.",
         example: "test",
       }),
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
+    ...paginationQueryParams(),
   })
   .openapi("OnchainProposalSearchRequest");
 
@@ -89,9 +84,7 @@ export type ProposalSearchRequest = z.infer<typeof ProposalSearchRequestSchema>;
 export const ProposalResponseSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),
-    daoId: z
-      .string()
-      .openapi({ description: 'DAO identifier (uppercase, e.g. "ENS").' }),
+    daoId: daoIdField(),
     txHash: z
       .string()
       .openapi({ description: "Proposal creation transaction hash." }),
@@ -106,36 +99,31 @@ export const ProposalResponseSchema = z
       .int()
       .openapi({ description: "Start block number." }),
     endBlock: z.number().int().openapi({ description: "End block number." }),
-    timestamp: z.number().int().openapi({
-      description: "Proposal creation timestamp in Unix seconds.",
-    }),
+    timestamp: unixSecondsIntField(
+      "Proposal creation timestamp in Unix seconds.",
+    ),
     status: z.string().openapi({ description: "Current proposal status." }),
-    forVotes: z.string().openapi({
-      description: "Votes cast in favor, encoded as a decimal string.",
-      format: "bigint",
-    }),
-    againstVotes: z.string().openapi({
-      description: "Votes cast against, encoded as a decimal string.",
-      format: "bigint",
-    }),
-    abstainVotes: z.string().openapi({
-      description: "Abstain votes, encoded as a decimal string.",
-      format: "bigint",
-    }),
-    startTimestamp: z.number().int().openapi({
-      description: "Proposal start timestamp in Unix seconds.",
-    }),
-    endTimestamp: z.number().int().openapi({
-      description: "Proposal end timestamp in Unix seconds.",
-    }),
-    queuedTimestamp: z.number().int().nullable().openapi({
-      description:
-        "Timestamp (Unix seconds) when the proposal was queued, or null if it never was.",
-    }),
-    executedTimestamp: z.number().int().nullable().openapi({
-      description:
-        "Timestamp (Unix seconds) when the proposal was executed, or null if it never was.",
-    }),
+    forVotes: decimalStringField(
+      "Votes cast in favor, encoded as a decimal string.",
+    ),
+    againstVotes: decimalStringField(
+      "Votes cast against, encoded as a decimal string.",
+    ),
+    abstainVotes: decimalStringField(
+      "Abstain votes, encoded as a decimal string.",
+    ),
+    startTimestamp: unixSecondsIntField(
+      "Proposal start timestamp in Unix seconds.",
+    ),
+    endTimestamp: unixSecondsIntField(
+      "Proposal end timestamp in Unix seconds.",
+    ),
+    queuedTimestamp: unixSecondsIntField(
+      "Timestamp (Unix seconds) when the proposal was queued, or null if it never was.",
+    ).nullable(),
+    executedTimestamp: unixSecondsIntField(
+      "Timestamp (Unix seconds) when the proposal was executed, or null if it never was.",
+    ).nullable(),
     queuedTxHash: z.string().nullable().openapi({
       description:
         "Transaction hash of the queue event, or null if the proposal was never queued.",
@@ -144,10 +132,7 @@ export const ProposalResponseSchema = z
       description:
         "Transaction hash of the execute event, or null if the proposal was never executed.",
     }),
-    quorum: z.string().openapi({
-      description: "Required quorum encoded as a decimal string.",
-      format: "bigint",
-    }),
+    quorum: decimalStringField("Required quorum encoded as a decimal string."),
     calldatas: z.array(z.string()).openapi({
       description: "Encoded calldata payloads executed by the proposal.",
     }),
@@ -165,12 +150,9 @@ export const ProposalResponseSchema = z
   })
   .openapi("OnchainProposal");
 
-export const ProposalsResponseSchema = z
-  .object({
-    items: z.array(ProposalResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("OnchainProposalsResponse");
+export const ProposalsResponseSchema = paginatedListResponse(
+  ProposalResponseSchema,
+).openapi("OnchainProposalsResponse");
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
@@ -182,12 +164,9 @@ export const ProposalLeanResponseSchema = ProposalResponseSchema.omit({
 
 export type ProposalLeanResponse = z.infer<typeof ProposalLeanResponseSchema>;
 
-export const ProposalsLeanResponseSchema = z
-  .object({
-    items: z.array(ProposalLeanResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("OnchainProposalsLeanResponse");
+export const ProposalsLeanResponseSchema = paginatedListResponse(
+  ProposalLeanResponseSchema,
+).openapi("OnchainProposalsLeanResponse");
 
 export type ProposalsLeanResponse = z.infer<typeof ProposalsLeanResponseSchema>;
 
