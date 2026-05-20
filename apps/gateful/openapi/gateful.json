@@ -57,6 +57,17 @@
         },
         "required": ["status", "database", "chain", "indexer", "circuit"]
       },
+      "LivenessResponse": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "type": "string",
+            "enum": ["ok", "error"],
+            "description": "Database connectivity status."
+          }
+        },
+        "required": ["database"]
+      },
       "HealthResponse": {
         "type": "object",
         "properties": {
@@ -180,8 +191,7 @@
         "type": "object",
         "properties": {
           "delegatorAddress": {
-            "type": "string",
-            "format": "ethereum-address"
+            "type": "string"
           },
           "amount": {
             "type": "string",
@@ -453,6 +463,7 @@
         "properties": {
           "previousValue": {
             "type": "string",
+            "format": "bigint",
             "description": "Supply value at the start of the comparison window, encoded as a decimal string (raw token base units)."
           },
           "currentValue": {
@@ -462,8 +473,7 @@
           },
           "changeRate": {
             "type": "number",
-            "description": "Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0.",
-            "format": "bigint"
+            "description": "Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0."
           },
           "rawDelta": {
             "type": "string",
@@ -566,6 +576,7 @@
           },
           "rawDelta": {
             "type": "string",
+            "format": "bigint",
             "description": "Signed bigint delta as a decimal string: currentAverageTurnout - oldAverageTurnout.",
             "example": "30000000000000000"
           }
@@ -1195,8 +1206,7 @@
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of matching day buckets across the requested window (ignores skip/limit).",
-            "example": 365
+            "description": "Total number of matching day buckets across the requested window (ignores skip/limit)."
           }
         },
         "required": ["items", "totalCount"]
@@ -1216,30 +1226,6 @@
           }
         },
         "required": ["date", "high"]
-      },
-      "PageInfo": {
-        "type": "object",
-        "properties": {
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Whether more items are available."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Whether earlier items are available."
-          },
-          "endDate": {
-            "type": "string",
-            "nullable": true,
-            "description": "End cursor for the current page."
-          },
-          "startDate": {
-            "type": "string",
-            "nullable": true,
-            "description": "Start cursor for the current page."
-          }
-        },
-        "required": ["hasNextPage", "hasPreviousPage", "endDate", "startDate"]
       },
       "HistoricalVotingPowersResponse": {
         "type": "object",
@@ -1413,6 +1399,7 @@
           },
           "percentageChange": {
             "type": "string",
+            "format": "bigint",
             "description": "Relative voting power change encoded as a decimal string."
           }
         },
@@ -1554,6 +1541,7 @@
           },
           "percentageChange": {
             "type": "string",
+            "format": "bigint",
             "description": "Relative balance change encoded as a decimal string."
           }
         },
@@ -1756,7 +1744,7 @@
           },
           "isTotal": {
             "type": "boolean",
-            "description": "Whether the transfer counts toward total tracked supply."
+            "description": "Whether the transfer affects total-supply accounting."
           }
         },
         "required": [
@@ -1962,6 +1950,350 @@
           }
         },
         "required": ["date", "high", "volume"]
+      },
+      "PageInfo": {
+        "type": "object",
+        "properties": {
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Whether more items are available."
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Whether earlier items are available."
+          },
+          "endDate": {
+            "type": "string",
+            "nullable": true,
+            "description": "End cursor for the current page."
+          },
+          "startDate": {
+            "type": "string",
+            "nullable": true,
+            "description": "Start cursor for the current page."
+          }
+        },
+        "required": ["hasNextPage", "hasPreviousPage", "endDate", "startDate"]
+      },
+      "RevenueActionsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueActionsItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly action counts by category (Registration, Renewal, Premium)."
+      },
+      "RevenueActionsItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "category": {
+            "$ref": "#/components/schemas/RevenueActionCategory"
+          },
+          "actions": {
+            "type": "integer",
+            "description": "Number of actions of this category in the given month."
+          }
+        },
+        "required": ["date", "category", "actions"],
+        "description": "Single revenue actions datapoint."
+      },
+      "RevenueActionCategory": {
+        "type": "string",
+        "enum": ["Registration", "Renewal", "Premium"],
+        "description": "Category of ENS revenue-generating action."
+      },
+      "RevenueActiveNamesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueActiveNamesItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly net change and cumulative count of active .eth names."
+      },
+      "RevenueActiveNamesItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "netChange": {
+            "type": "number",
+            "description": "Net change in active .eth names for the month."
+          },
+          "cumulativeActive": {
+            "type": "number",
+            "description": "Cumulative count of active .eth names as of the month."
+          }
+        },
+        "required": ["date", "netChange", "cumulativeActive"],
+        "description": "Single active-names datapoint."
+      },
+      "RevenueNewWalletsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueNewWalletsItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS."
+      },
+      "RevenueNewWalletsItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "newWallets": {
+            "type": "number",
+            "description": "New wallets that interacted with ENS in the given month."
+          },
+          "cumulativeWallets": {
+            "type": "number",
+            "description": "Cumulative count of ENS wallets as of the given month."
+          }
+        },
+        "required": ["date", "newWallets", "cumulativeWallets"],
+        "description": "Single new-wallets datapoint."
+      },
+      "RevenueRenewalFunnelResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueRenewalFunnelItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate."
+      },
+      "RevenueRenewalFunnelItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Expiry month start (Unix timestamp in seconds, UTC)."
+          },
+          "termsExpiring": {
+            "type": "number",
+            "description": "Total .eth terms expiring in the given month."
+          },
+          "renewedCount": {
+            "type": "number",
+            "description": "Number of expiring terms that were renewed."
+          },
+          "churnedCount": {
+            "type": "number",
+            "description": "Number of expiring terms that were not renewed."
+          },
+          "renewalRatePct": {
+            "type": "number",
+            "description": "Renewal rate for the month, as a percentage (0-100)."
+          }
+        },
+        "required": [
+          "date",
+          "termsExpiring",
+          "renewedCount",
+          "churnedCount",
+          "renewalRatePct"
+        ],
+        "description": "Single renewal-funnel datapoint keyed by expiry month."
+      },
+      "RevenueTotalsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueTotalsItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH."
+      },
+      "RevenueTotalsItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "registrationUsd": {
+            "type": "number",
+            "description": "USD revenue from new .eth registrations in the month."
+          },
+          "premiumUsd": {
+            "type": "number",
+            "description": "USD revenue from temporary premium auctions in the given month."
+          },
+          "renewalUsd": {
+            "type": "number",
+            "description": "USD revenue from .eth renewals in the given month."
+          },
+          "totalUsd": {
+            "type": "number",
+            "description": "Total USD revenue for the month (upstream sum; not recomputed)."
+          },
+          "registrationEth": {
+            "type": "number",
+            "description": "ETH revenue from new .eth registrations in the month."
+          },
+          "premiumEth": {
+            "type": "number",
+            "description": "ETH revenue from temporary premium auctions in the given month."
+          },
+          "renewalEth": {
+            "type": "number",
+            "description": "ETH revenue from .eth renewals in the given month."
+          }
+        },
+        "required": [
+          "date",
+          "registrationUsd",
+          "premiumUsd",
+          "renewalUsd",
+          "totalUsd",
+          "registrationEth",
+          "premiumEth",
+          "renewalEth"
+        ],
+        "description": "Single revenue-totals datapoint."
+      },
+      "RevenueByCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueByCategoryItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger."
+      },
+      "RevenueByCategoryItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "category": {
+            "$ref": "#/components/schemas/RevenueByCategoryCategory"
+          },
+          "revenueUsd": {
+            "type": "number",
+            "description": "USD revenue for the category in the given month."
+          },
+          "revenueEth": {
+            "type": "number",
+            "description": "ETH revenue for the category in the given month."
+          }
+        },
+        "required": ["date", "category", "revenueUsd", "revenueEth"],
+        "description": "Single revenue-by-category datapoint."
+      },
+      "RevenueByCategoryCategory": {
+        "type": "string",
+        "enum": ["Registration", "Renewal"],
+        "description": "Revenue category as reported by the Steakhouse accounting ledger."
+      },
+      "RevenueRenewalTenureResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueRenewalTenureItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket."
+      },
+      "RevenueRenewalTenureItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Expiry month start (Unix timestamp in seconds, UTC)."
+          },
+          "tenureBucket": {
+            "$ref": "#/components/schemas/RevenueRenewalTenureBucket"
+          },
+          "names": {
+            "type": "integer",
+            "description": "Count of names in this tenure bucket for the expiry month."
+          },
+          "totalRenewalsInBucket": {
+            "type": "integer",
+            "description": "Total renewals contributed by names in this bucket."
+          }
+        },
+        "required": ["date", "tenureBucket", "names", "totalRenewalsInBucket"],
+        "description": "Single renewal-tenure datapoint keyed by expiry month."
+      },
+      "RevenueRenewalTenureBucket": {
+        "type": "string",
+        "enum": [
+          "0 renewals (one-shot)",
+          "1 renewal",
+          "2 renewals",
+          "3+ renewals"
+        ],
+        "description": "Tenure bucket label as returned by Dune."
       },
       "OffchainProposalsResponse": {
         "type": "object",
@@ -2585,7 +2917,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Per-DAO health snapshot \u2014 database, chain head, indexer freshness, and gateway circuit-breaker state.",
+            "description": "Per-DAO health snapshot — database, chain head, indexer freshness, and gateway circuit-breaker state.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2814,6 +3146,48 @@
         }
       }
     },
+    "/{dao}/health/full": {
+      "get": {
+        "operationId": "health",
+        "summary": "Full health snapshot (database, chain head, indexer freshness)",
+        "description": "Returns database connectivity, chain head, indexer freshness, and computed lag for this DAO API. HTTP status reflects database reachability only; degraded indexer state still returns 200 with status='degraded' in the body.",
+        "tags": ["system"],
+        "responses": {
+          "200": {
+            "description": "Health snapshot (status may be ok or degraded).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database connectivity check failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
     "/{dao}/accounts/{address}/delegations/historical": {
       "get": {
         "operationId": "historicalDelegations",
@@ -2908,19 +3282,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -2962,19 +3324,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3057,19 +3407,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3120,18 +3458,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3141,7 +3468,7 @@
       "get": {
         "operationId": "getDaoTokenTreasury",
         "summary": "Get DAO token treasury data",
-        "description": "Get historical DAO Token Treasury value (governance token quantity \u00d7 token price)",
+        "description": "Get historical DAO Token Treasury value (governance token quantity × token price)",
         "tags": ["treasury"],
         "parameters": [
           {
@@ -3182,18 +3509,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3244,18 +3560,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3311,18 +3616,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3379,19 +3673,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3518,18 +3800,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3580,18 +3851,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3632,18 +3892,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3684,18 +3933,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3736,18 +3974,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3788,18 +4015,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3840,18 +4056,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3892,18 +4097,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3944,18 +4138,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -3996,18 +4179,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4048,18 +4220,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4100,18 +4261,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4152,18 +4302,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4275,18 +4414,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4395,18 +4523,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4474,18 +4591,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4594,18 +4700,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4673,18 +4768,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4738,18 +4822,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4803,18 +4876,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -4942,19 +5004,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5003,18 +5053,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5060,23 +5099,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of day buckets to return.",
-              "example": 365
-            },
-            "required": false,
-            "description": "Maximum number of day buckets to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
               "description": "Number of day buckets to skip before returning results.",
               "example": 0
             },
             "required": false,
             "description": "Number of day buckets to skip before returning results.",
             "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of day buckets to return.",
+              "example": "365"
+            },
+            "required": false,
+            "description": "Maximum number of day buckets to return.",
+            "name": "limit",
             "in": "query"
           }
         ],
@@ -5100,18 +5139,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5239,19 +5267,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5381,19 +5397,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5493,18 +5497,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5568,18 +5561,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5716,19 +5698,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5792,19 +5762,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5904,18 +5862,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -5979,18 +5926,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -6028,23 +5964,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
               "description": "Number of records to skip before collecting results.",
               "example": 0
             },
             "required": false,
             "description": "Number of records to skip before collecting results.",
             "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
             "in": "query"
           },
           {
@@ -6144,19 +6080,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -6232,19 +6156,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -6382,19 +6294,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -6420,23 +6320,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
               "description": "Number of records to skip before collecting results.",
               "example": 0
             },
             "required": false,
             "description": "Number of records to skip before collecting results.",
             "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
             "in": "query"
           },
           {
@@ -6540,19 +6440,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -6684,18 +6572,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -6817,18 +6694,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -6914,18 +6780,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -6957,19 +6812,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7036,23 +6879,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
               "description": "Number of records to skip before collecting results.",
               "example": 0
             },
             "required": false,
             "description": "Number of records to skip before collecting results.",
             "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
             "in": "query"
           }
         ],
@@ -7076,18 +6919,462 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": [
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/actions": {
+      "get": {
+        "operationId": "getRevenueActions",
+        "summary": "Get monthly ENS action counts by category",
+        "description": "Monthly action counts by category (Registration, Renewal, Premium).",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly action counts by category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActionsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/active-names": {
+      "get": {
+        "operationId": "getRevenueActiveNames",
+        "summary": "Get monthly net change and cumulative active .eth names",
+        "description": "Monthly net change and cumulative count of active .eth names.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly net change and cumulative count of active .eth names",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActiveNamesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/new-wallets": {
+      "get": {
+        "operationId": "getRevenueNewWallets",
+        "summary": "Get monthly new-wallet counts and cumulative wallet total",
+        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly new-wallet counts and the cumulative wallet total",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueNewWalletsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-funnel": {
+      "get": {
+        "operationId": "getRevenueRenewalFunnel",
+        "summary": "Get monthly renewal funnel keyed by expiry month",
+        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalFunnelResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/totals": {
+      "get": {
+        "operationId": "getRevenueTotals",
+        "summary": "Get monthly ENS revenue totals in USD and ETH",
+        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue totals in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueTotalsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/by-category": {
+      "get": {
+        "operationId": "getRevenueByCategory",
+        "summary": "Get monthly ENS revenue split by category (Steakhouse ledger)",
+        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue split by category in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueByCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-tenure": {
+      "get": {
+        "operationId": "getRevenueRenewalTenure",
+        "summary": "Get monthly renewal tenure distribution per expiry month",
+        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalTenureResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7183,7 +7470,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7251,7 +7538,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7347,7 +7634,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7415,7 +7702,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7469,7 +7756,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7523,7 +7810,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7636,7 +7923,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7759,7 +8046,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7853,7 +8140,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "enum": ["comp", "ens", "gtc", "uni"]
+            "enum": ["ens"]
           },
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
@@ -7958,22 +8245,6 @@
                 }
               }
             }
-          },
-          "502": {
-            "description": "Upstream enrichment provider failed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["error"]
-                }
-              }
-            }
           }
         }
       }
@@ -7988,10 +8259,12 @@
           {
             "schema": {
               "type": "array",
-              "description": "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
               "items": {
                 "type": "string"
               },
+              "minItems": 1,
+              "maxItems": 100,
+              "description": "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
               "example": [
                 "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
                 "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"

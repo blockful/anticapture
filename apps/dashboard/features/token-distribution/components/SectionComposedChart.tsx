@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   Area,
   AreaChart,
@@ -49,6 +49,15 @@ export const SectionComposedChart = ({
   setBrushRange: (range: { startIndex: number; endIndex: number }) => void;
 }) => {
   const brushTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (brushTimeoutRef.current) {
+        clearTimeout(brushTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleBrushChange = useCallback(
     (brushArea: { startIndex?: number; endIndex?: number }) => {
       if (brushArea && chartData) {

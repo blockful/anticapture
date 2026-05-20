@@ -36,9 +36,9 @@ function buildOnchainProposal(id: string): OnchainProposal {
     txHash: "0x0",
     values: [],
     executedTimestamp: null,
+    executedTxHash: null,
     queuedTimestamp: null,
     queuedTxHash: null,
-    executedTxHash: null,
   };
 }
 
