@@ -26,16 +26,20 @@
         "type": "object",
         "properties": {
           "delegatorAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "delegateAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "amount": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "timestamp": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "transactionHash": {
             "type": "string"
@@ -76,13 +80,16 @@
         "type": "object",
         "properties": {
           "delegatorAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "amount": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "timestamp": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         },
         "required": ["delegatorAddress", "amount", "timestamp"],
@@ -181,28 +188,36 @@
             "example": 18
           },
           "totalSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "delegatedSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "cexSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "dexSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "lendingSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "circulatingSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "nonCirculatingSupply": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "treasury": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         },
         "required": [
@@ -271,6 +286,7 @@
           },
           "value": {
             "type": "string",
+            "format": "bigint",
             "description": "Optional event value encoded as a decimal string when applicable."
           },
           "timestamp": {
@@ -324,6 +340,7 @@
         "properties": {
           "threshold": {
             "type": "string",
+            "format": "bigint",
             "description": "Threshold value encoded as a decimal string.",
             "example": "1000000000000000000"
           }
@@ -335,10 +352,12 @@
         "type": "object",
         "properties": {
           "previousValue": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "currentValue": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "changeRate": {
             "type": "number"
@@ -352,6 +371,7 @@
         "properties": {
           "activeSupply": {
             "type": "string",
+            "format": "bigint",
             "description": "Active token supply encoded as a decimal string.",
             "example": "1000000000000000000000000"
           }
@@ -438,6 +458,7 @@
         "properties": {
           "address": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Delegate address."
           },
           "totalProposals": {
@@ -509,6 +530,7 @@
           },
           "proposerAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Address that created the proposal."
           },
           "title": {
@@ -539,14 +561,17 @@
           },
           "forVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Votes cast in favor, encoded as a decimal string."
           },
           "againstVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Votes cast against, encoded as a decimal string."
           },
           "abstainVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Abstain votes, encoded as a decimal string."
           }
         },
@@ -575,6 +600,7 @@
           },
           "voterAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Address that cast the vote."
           },
           "proposalId": {
@@ -586,6 +612,7 @@
           },
           "votingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power used by the delegate, encoded as a string."
           },
           "reason": {
@@ -640,6 +667,7 @@
           },
           "proposerAccountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Address that created the proposal."
           },
           "title": {
@@ -668,14 +696,17 @@
           },
           "forVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Votes cast in favor, encoded as a decimal string."
           },
           "againstVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Votes cast against, encoded as a decimal string."
           },
           "abstainVotes": {
             "type": "string",
+            "format": "bigint",
             "description": "Abstain votes, encoded as a decimal string."
           },
           "startTimestamp": {
@@ -686,8 +717,29 @@
             "type": "integer",
             "description": "Proposal end timestamp in Unix seconds."
           },
+          "queuedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was queued, or null if it never was."
+          },
+          "executedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was executed, or null if it never was."
+          },
+          "queuedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the queue event, or null if the proposal was never queued."
+          },
+          "executedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the execute event, or null if the proposal was never executed."
+          },
           "quorum": {
             "type": "string",
+            "format": "bigint",
             "description": "Required quorum encoded as a decimal string."
           },
           "calldatas": {
@@ -700,14 +752,16 @@
           "values": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "format": "bigint"
             },
             "description": "ETH values attached to each call, encoded as strings."
           },
           "targets": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "format": "ethereum-address"
             },
             "description": "Contract targets invoked by the proposal."
           },
@@ -733,6 +787,10 @@
           "abstainVotes",
           "startTimestamp",
           "endTimestamp",
+          "queuedTimestamp",
+          "executedTimestamp",
+          "queuedTxHash",
+          "executedTxHash",
           "quorum",
           "calldatas",
           "values",
@@ -791,18 +849,22 @@
           },
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "balance": {
             "type": "string",
+            "format": "bigint",
             "description": "Account balance after the historical event."
           },
           "delta": {
             "type": "string",
+            "format": "bigint",
             "description": "Balance change introduced by the historical event."
           },
           "timestamp": {
             "type": "string",
+            "format": "bigint",
             "description": "Event timestamp in Unix seconds as a string.",
             "example": "1704067200"
           },
@@ -831,239 +893,22 @@
         "properties": {
           "value": {
             "type": "string",
+            "format": "bigint",
             "description": "Transferred amount encoded as a decimal string."
           },
           "from": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Sender address."
           },
           "to": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Recipient address."
           }
         },
         "required": ["value", "from", "to"],
         "description": "Transfer event associated with a historical balance row."
-      },
-      "TransactionsResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transaction"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "Total number of matching transactions."
-          }
-        },
-        "required": ["items", "totalCount"],
-        "description": "Paginated transactions with embedded transfer and delegation data."
-      },
-      "Transaction": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "from": {
-            "type": "string",
-            "nullable": true,
-            "description": "Resolved sender address, if known."
-          },
-          "to": {
-            "type": "string",
-            "nullable": true,
-            "description": "Resolved recipient address, if known."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the transaction counts toward total tracked supply."
-          },
-          "timestamp": {
-            "type": "string",
-            "description": "Transaction timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "transfers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transfer"
-            }
-          },
-          "delegations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TransactionDelegation"
-            }
-          }
-        },
-        "required": [
-          "transactionHash",
-          "from",
-          "to",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal",
-          "timestamp",
-          "transfers",
-          "delegations"
-        ],
-        "description": "Transaction response enriched with transfer and delegation events."
-      },
-      "Transfer": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "daoId": {
-            "type": "string",
-            "description": "DAO identifier."
-          },
-          "tokenId": {
-            "type": "string",
-            "description": "Token contract address."
-          },
-          "amount": {
-            "type": "string",
-            "description": "Transferred amount encoded as a decimal string."
-          },
-          "fromAccountId": {
-            "type": "string",
-            "description": "Sender address."
-          },
-          "toAccountId": {
-            "type": "string",
-            "description": "Recipient address."
-          },
-          "timestamp": {
-            "type": "string",
-            "description": "Transfer timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "logIndex": {
-            "type": "integer",
-            "description": "Log index within the transaction receipt."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the transfer counts toward total tracked supply."
-          }
-        },
-        "required": [
-          "transactionHash",
-          "daoId",
-          "tokenId",
-          "amount",
-          "fromAccountId",
-          "toAccountId",
-          "timestamp",
-          "logIndex",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal"
-        ]
-      },
-      "TransactionDelegation": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "daoId": {
-            "type": "string",
-            "description": "DAO identifier."
-          },
-          "delegateAccountId": {
-            "type": "string",
-            "description": "Delegate address."
-          },
-          "delegatorAccountId": {
-            "type": "string",
-            "description": "Delegator address."
-          },
-          "delegatedValue": {
-            "type": "string",
-            "description": "Delegated amount encoded as a decimal string."
-          },
-          "previousDelegate": {
-            "type": "string",
-            "nullable": true,
-            "description": "Previous delegate address, if one existed."
-          },
-          "timestamp": {
-            "type": "string",
-            "description": "Delegation timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "logIndex": {
-            "type": "integer",
-            "description": "Log index within the transaction receipt."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the delegation counts toward total tracked supply."
-          }
-        },
-        "required": [
-          "transactionHash",
-          "daoId",
-          "delegateAccountId",
-          "delegatorAccountId",
-          "delegatedValue",
-          "previousDelegate",
-          "timestamp",
-          "logIndex",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal"
-        ],
-        "description": "Delegation event embedded within a transaction response."
       },
       "LastUpdateResponse": {
         "type": "object",
@@ -1167,18 +1012,22 @@
           },
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "votingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power after the event, encoded as a decimal string."
           },
           "delta": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power change introduced by the event."
           },
           "timestamp": {
             "type": "string",
+            "format": "bigint",
             "description": "Event timestamp in Unix seconds as a string.",
             "example": "1704067200"
           },
@@ -1211,17 +1060,21 @@
         "nullable": true,
         "properties": {
           "from": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "to": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "previousDelegate": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "format": "ethereum-address"
           }
         },
         "required": ["from", "value", "to", "previousDelegate"],
@@ -1232,13 +1085,16 @@
         "nullable": true,
         "properties": {
           "value": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "from": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "to": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           }
         },
         "required": ["value", "from", "to"],
@@ -1278,18 +1134,22 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "previousVotingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power at the start of the comparison window."
           },
           "currentVotingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power at the end of the comparison window."
           },
           "absoluteChange": {
             "type": "string",
+            "format": "bigint",
             "description": "Absolute voting power change encoded as a decimal string."
           },
           "percentageChange": {
@@ -1341,10 +1201,12 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "votingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Current voting power encoded as a decimal string."
           },
           "votesCount": {
@@ -1361,6 +1223,7 @@
           },
           "balance": {
             "type": "string",
+            "format": "bigint",
             "description": "Current token balance encoded as a decimal string."
           },
           "variation": {
@@ -1381,7 +1244,8 @@
         "type": "object",
         "properties": {
           "absoluteChange": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "percentageChange": {
             "type": "string"
@@ -1411,18 +1275,22 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Account address."
           },
           "previousBalance": {
             "type": "string",
+            "format": "bigint",
             "description": "Balance at the start of the comparison window."
           },
           "currentBalance": {
             "type": "string",
+            "format": "bigint",
             "description": "Balance at the end of the comparison window."
           },
           "absoluteChange": {
             "type": "string",
+            "format": "bigint",
             "description": "Absolute balance change encoded as a decimal string."
           },
           "percentageChange": {
@@ -1474,16 +1342,20 @@
         "type": "object",
         "properties": {
           "address": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "balance": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "tokenId": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "delegate": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "variation": {
             "$ref": "#/components/schemas/AccountBalanceVariation"
@@ -1527,18 +1399,22 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "format": "ethereum-address",
             "description": "Counterparty account ID."
           },
           "amountTransferred": {
             "type": "string",
+            "format": "bigint",
             "description": "Net amount transferred between the requested account and the counterparty."
           },
           "totalVolume": {
             "type": "string",
+            "format": "bigint",
             "description": "Gross transfer volume between the requested account and the counterparty."
           },
           "transferCount": {
             "type": "string",
+            "format": "bigint",
             "description": "Number of transfers observed for the interaction pair."
           }
         },
@@ -1566,6 +1442,79 @@
         },
         "required": ["items", "totalCount"]
       },
+      "Transfer": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "description": "Transaction hash."
+          },
+          "daoId": {
+            "type": "string",
+            "description": "DAO identifier."
+          },
+          "tokenId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Token contract address."
+          },
+          "amount": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transferred amount encoded as a decimal string."
+          },
+          "fromAccountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Sender address."
+          },
+          "toAccountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Recipient address."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transfer timestamp in Unix seconds as a string.",
+            "example": "1704067200"
+          },
+          "logIndex": {
+            "type": "integer",
+            "description": "Log index within the transaction receipt."
+          },
+          "isCex": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a centralized exchange."
+          },
+          "isDex": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a decentralized exchange."
+          },
+          "isLending": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a lending protocol."
+          },
+          "isTotal": {
+            "type": "boolean",
+            "description": "Whether the transfer counts toward total tracked supply."
+          }
+        },
+        "required": [
+          "transactionHash",
+          "daoId",
+          "tokenId",
+          "amount",
+          "fromAccountId",
+          "toAccountId",
+          "timestamp",
+          "logIndex",
+          "isCex",
+          "isDex",
+          "isLending",
+          "isTotal"
+        ]
+      },
       "OnchainVotesResponse": {
         "type": "object",
         "properties": {
@@ -1585,7 +1534,8 @@
         "type": "object",
         "properties": {
           "voterAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "transactionHash": {
             "type": "string"
@@ -1598,6 +1548,7 @@
           },
           "votingPower": {
             "type": "string",
+            "format": "bigint",
             "description": "Voting power encoded as a decimal string."
           },
           "reason": {
@@ -1641,16 +1592,19 @@
         "type": "object",
         "properties": {
           "voter": {
-            "type": "string"
+            "type": "string",
+            "format": "ethereum-address"
           },
           "votingPower": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "lastVoteTimestamp": {
             "type": "number"
           },
           "votingPowerVariation": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         },
         "required": [
@@ -1671,19 +1625,24 @@
             "type": "integer"
           },
           "quorum": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "proposalThreshold": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "votingDelay": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "votingPeriod": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "timelockDelay": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "alreadySupportCalldataReview": {
             "type": "boolean"
@@ -1730,16 +1689,252 @@
           },
           "high": {
             "type": "string",
+            "format": "bigint",
             "description": "Highest observed value for the period.",
-            "example": "14.25"
+            "example": "14250000000000000000"
           },
           "volume": {
             "type": "string",
+            "format": "bigint",
             "description": "Total volume observed for the period.",
-            "example": "1200.5"
+            "example": "1200500000000000000000"
           }
         },
         "required": ["date", "high", "volume"]
+      },
+      "OffchainProposalsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainProposal"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainProposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Snapshot proposal identifier."
+          },
+          "spaceId": {
+            "type": "string",
+            "description": "Snapshot space identifier."
+          },
+          "author": {
+            "type": "string",
+            "description": "Address or ENS of the author."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          },
+          "body": {
+            "type": "string",
+            "description": "Proposal body."
+          },
+          "discussion": {
+            "type": "string",
+            "description": "Discussion URL or thread reference."
+          },
+          "type": {
+            "type": "string",
+            "description": "Snapshot proposal type."
+          },
+          "start": {
+            "type": "integer",
+            "description": "Voting start timestamp in Unix seconds."
+          },
+          "end": {
+            "type": "integer",
+            "description": "Voting end timestamp in Unix seconds."
+          },
+          "state": {
+            "type": "string",
+            "description": "Current Snapshot proposal state."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Creation timestamp in Unix seconds."
+          },
+          "updated": {
+            "type": "integer",
+            "description": "Last update timestamp in Unix seconds."
+          },
+          "link": {
+            "type": "string",
+            "description": "Canonical Snapshot proposal URL."
+          },
+          "flagged": {
+            "type": "boolean",
+            "description": "Whether the proposal was flagged by Snapshot."
+          },
+          "scores": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "network": {
+            "type": "string"
+          },
+          "snapshot": {
+            "type": "number",
+            "nullable": true
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "network": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "nullable": true
+                  }
+                }
+              },
+              "required": ["name", "network", "params"]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "spaceId",
+          "author",
+          "title",
+          "body",
+          "discussion",
+          "type",
+          "start",
+          "end",
+          "state",
+          "created",
+          "updated",
+          "link",
+          "flagged",
+          "scores",
+          "choices",
+          "network",
+          "snapshot",
+          "strategies"
+        ]
+      },
+      "OffchainProposalStatusList": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["active", "closed", "pending"]
+        },
+        "description": "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
+        "example": ["active"]
+      },
+      "OffchainVotesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainVote"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainVote": {
+        "type": "object",
+        "properties": {
+          "voter": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "proposalId": {
+            "type": "string"
+          },
+          "choice": {
+            "$ref": "#/components/schemas/SnapshotVoteChoice"
+          },
+          "vp": {
+            "type": "number",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "created": {
+            "type": "integer"
+          },
+          "proposalTitle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "voter",
+          "proposalId",
+          "vp",
+          "reason",
+          "created",
+          "proposalTitle"
+        ]
+      },
+      "SnapshotVoteChoice": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "nullable": false
+        }
+      },
+      "OffchainVotersResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainNonVoter"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainNonVoter": {
+        "type": "object",
+        "properties": {
+          "voter": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint"
+          }
+        },
+        "required": ["voter", "votingPower"]
       },
       "RevenueActionsResponse": {
         "type": "object",
@@ -2061,236 +2256,29 @@
         ],
         "description": "Tenure bucket label as returned by Dune."
       },
-      "OffchainProposalsResponse": {
+      "RelayerVoteResponse": {
         "type": "object",
         "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainProposal"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainProposal": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Snapshot proposal identifier."
-          },
-          "spaceId": {
-            "type": "string",
-            "description": "Snapshot space identifier."
-          },
-          "author": {
-            "type": "string",
-            "description": "Address or ENS of the author."
-          },
-          "title": {
-            "type": "string",
-            "description": "Proposal title."
-          },
-          "body": {
-            "type": "string",
-            "description": "Proposal body."
-          },
-          "discussion": {
-            "type": "string",
-            "description": "Discussion URL or thread reference."
-          },
-          "type": {
-            "type": "string",
-            "description": "Snapshot proposal type."
-          },
-          "start": {
-            "type": "integer",
-            "description": "Voting start timestamp in Unix seconds."
-          },
-          "end": {
-            "type": "integer",
-            "description": "Voting end timestamp in Unix seconds."
-          },
-          "state": {
-            "type": "string",
-            "description": "Current Snapshot proposal state."
-          },
-          "created": {
-            "type": "integer",
-            "description": "Creation timestamp in Unix seconds."
-          },
-          "updated": {
-            "type": "integer",
-            "description": "Last update timestamp in Unix seconds."
-          },
-          "link": {
-            "type": "string",
-            "description": "Canonical Snapshot proposal URL."
-          },
-          "flagged": {
-            "type": "boolean",
-            "description": "Whether the proposal was flagged by Snapshot."
-          },
-          "scores": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "choices": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "network": {
+          "transactionHash": {
             "type": "string"
           },
-          "snapshot": {
-            "type": "number",
-            "nullable": true
-          },
-          "strategies": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "network": {
-                  "type": "string"
-                },
-                "params": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "nullable": true
-                  }
-                }
-              },
-              "required": ["name", "network", "params"]
-            }
-          }
-        },
-        "required": [
-          "id",
-          "spaceId",
-          "author",
-          "title",
-          "body",
-          "discussion",
-          "type",
-          "start",
-          "end",
-          "state",
-          "created",
-          "updated",
-          "link",
-          "flagged",
-          "scores",
-          "choices",
-          "network",
-          "snapshot",
-          "strategies"
-        ]
-      },
-      "OffchainProposalStatusList": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": ["active", "closed", "pending"]
-        },
-        "description": "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
-        "example": ["active"]
-      },
-      "OffchainVotesResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainVote"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainVote": {
-        "type": "object",
-        "properties": {
           "voter": {
             "type": "string"
-          },
-          "proposalId": {
-            "type": "string"
-          },
-          "choice": {
-            "$ref": "#/components/schemas/SnapshotVoteChoice"
-          },
-          "vp": {
-            "type": "number",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "created": {
-            "type": "integer"
-          },
-          "proposalTitle": {
-            "type": "string",
-            "nullable": true
           }
         },
-        "required": [
-          "voter",
-          "proposalId",
-          "vp",
-          "reason",
-          "created",
-          "proposalTitle"
-        ]
+        "required": ["transactionHash", "voter"]
       },
-      "SnapshotVoteChoice": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "nullable": false
-        }
-      },
-      "OffchainVotersResponse": {
+      "RelayerErrorResponse": {
         "type": "object",
         "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainNonVoter"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainNonVoter": {
-        "type": "object",
-        "properties": {
-          "voter": {
+          "error": {
             "type": "string"
           },
-          "votingPower": {
+          "code": {
             "type": "string"
           }
         },
-        "required": ["voter", "votingPower"]
+        "required": ["error", "code"]
       },
       "RelayerVoteRequest": {
         "type": "object",
@@ -2320,29 +2308,17 @@
         },
         "required": ["proposalId", "support", "v", "r", "s"]
       },
-      "RelayerErrorResponse": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          }
-        },
-        "required": ["error", "code"]
-      },
-      "RelayerVoteResponse": {
+      "RelayerDelegateResponse": {
         "type": "object",
         "properties": {
           "transactionHash": {
             "type": "string"
           },
-          "voter": {
+          "delegator": {
             "type": "string"
           }
         },
-        "required": ["transactionHash", "voter"]
+        "required": ["transactionHash", "delegator"]
       },
       "RelayerDelegateRequest": {
         "type": "object",
@@ -2373,6 +2349,33 @@
           }
         },
         "required": ["delegatee", "nonce", "expiry", "v", "r", "s"]
+      },
+      "RelayerHealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok"]
+          }
+        },
+        "required": ["status"]
+      },
+      "RelayerConfigResponse": {
+        "type": "object",
+        "properties": {
+          "minVotingPower": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Minimum voting power required to relay, as a decimal string (uint256)."
+          },
+          "maxRelayPerAddressPerDay": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "bigint",
+            "description": "Maximum number of relays per address per UTC day, per operation."
+          }
+        },
+        "required": ["minVotingPower", "maxRelayPerAddressPerDay"]
       },
       "RelayerRateLimitResponse": {
         "type": "object",
@@ -2420,35 +2423,6 @@
           }
         },
         "required": ["address", "maxPerDay", "vote", "delegation", "resetsAt"]
-      },
-      "RelayerDelegateResponse": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string"
-          },
-          "delegator": {
-            "type": "string"
-          }
-        },
-        "required": ["transactionHash", "delegator"]
-      },
-      "RelayerConfigResponse": {
-        "type": "object",
-        "properties": {
-          "minVotingPower": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Minimum voting power required to relay, as a decimal string (uint256)."
-          },
-          "maxRelayPerAddressPerDay": {
-            "type": "integer",
-            "minimum": 0,
-            "format": "bigint",
-            "description": "Maximum number of relays per address per UTC day, per operation."
-          }
-        },
-        "required": ["minVotingPower", "maxRelayPerAddressPerDay"]
       },
       "RelayerBalanceResponse": {
         "type": "object",
@@ -3109,7 +3083,7 @@
       "get": {
         "operationId": "getDaoTokenTreasury",
         "summary": "Get DAO token treasury data",
-        "description": "Get historical DAO Token Treasury value (governance token quantity \u00c3\u2014 token price)",
+        "description": "Get historical DAO Token Treasury value (governance token quantity × token price)",
         "tags": ["treasury"],
         "parameters": [
           {
@@ -4659,153 +4633,6 @@
               "shu",
               "uni"
             ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/transactions": {
-      "get": {
-        "operationId": "transactions",
-        "summary": "Get transactions with transfers and delegations",
-        "description": "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
-        "tags": ["transactions", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of records to skip before collecting results.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of records to skip before collecting results.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for transaction timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for transaction timestamps, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for transaction timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for transaction timestamps, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "from",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "to",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "minAmount",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "maxAmount",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["CEX", "DEX", "LENDING", "TOTAL", "UNASSIGNED"]
-              },
-              "description": "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'"
-            },
-            "required": false,
-            "description": "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
-            "name": "affectedSupply",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["TRANSFER", "DELEGATION"]
-              },
-              "description": "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'"
-            },
-            "required": false,
-            "description": "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
-            "name": "includes",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns transactions with their transfers and delegations",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransactionsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["comp", "fluid", "gtc", "obol", "scr", "shu"]
           },
           "description": "DAO identifier"
         }
@@ -6945,461 +6772,6 @@
         }
       ]
     },
-    "/{dao}/revenue/actions": {
-      "get": {
-        "operationId": "getRevenueActions",
-        "summary": "Get monthly ENS action counts by category",
-        "description": "Monthly action counts by category (Registration, Renewal, Premium).",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly action counts by category",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueActionsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/revenue/active-names": {
-      "get": {
-        "operationId": "getRevenueActiveNames",
-        "summary": "Get monthly net change and cumulative active .eth names",
-        "description": "Monthly net change and cumulative count of active .eth names.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly net change and cumulative count of active .eth names",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueActiveNamesResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/revenue/new-wallets": {
-      "get": {
-        "operationId": "getRevenueNewWallets",
-        "summary": "Get monthly new-wallet counts and cumulative wallet total",
-        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly new-wallet counts and the cumulative wallet total",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueNewWalletsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/revenue/renewal-funnel": {
-      "get": {
-        "operationId": "getRevenueRenewalFunnel",
-        "summary": "Get monthly renewal funnel keyed by expiry month",
-        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueRenewalFunnelResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/revenue/totals": {
-      "get": {
-        "operationId": "getRevenueTotals",
-        "summary": "Get monthly ENS revenue totals in USD and ETH",
-        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly ENS revenue totals in USD and ETH",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueTotalsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/revenue/by-category": {
-      "get": {
-        "operationId": "getRevenueByCategory",
-        "summary": "Get monthly ENS revenue split by category (Steakhouse ledger)",
-        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly ENS revenue split by category in USD and ETH",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueByCategoryResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/revenue/renewal-tenure": {
-      "get": {
-        "operationId": "getRevenueRenewalTenure",
-        "summary": "Get monthly renewal tenure distribution per expiry month",
-        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueRenewalTenureResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
     "/{dao}/offchain/proposals": {
       "get": {
         "operationId": "offchainProposals",
@@ -7948,6 +7320,690 @@
         }
       ]
     },
+    "/{dao}/revenue/actions": {
+      "get": {
+        "operationId": "getRevenueActions",
+        "summary": "Get monthly ENS action counts by category",
+        "description": "Monthly action counts by category (Registration, Renewal, Premium).",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly action counts by category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActionsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/active-names": {
+      "get": {
+        "operationId": "getRevenueActiveNames",
+        "summary": "Get monthly net change and cumulative active .eth names",
+        "description": "Monthly net change and cumulative count of active .eth names.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly net change and cumulative count of active .eth names",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActiveNamesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/new-wallets": {
+      "get": {
+        "operationId": "getRevenueNewWallets",
+        "summary": "Get monthly new-wallet counts and cumulative wallet total",
+        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly new-wallet counts and the cumulative wallet total",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueNewWalletsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-funnel": {
+      "get": {
+        "operationId": "getRevenueRenewalFunnel",
+        "summary": "Get monthly renewal funnel keyed by expiry month",
+        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalFunnelResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/totals": {
+      "get": {
+        "operationId": "getRevenueTotals",
+        "summary": "Get monthly ENS revenue totals in USD and ETH",
+        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue totals in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueTotalsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/by-category": {
+      "get": {
+        "operationId": "getRevenueByCategory",
+        "summary": "Get monthly ENS revenue split by category (Steakhouse ledger)",
+        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue split by category in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueByCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-tenure": {
+      "get": {
+        "operationId": "getRevenueRenewalTenure",
+        "summary": "Get monthly renewal tenure distribution per expiry month",
+        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalTenureResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/address-enrichment/address/{address}": {
+      "get": {
+        "operationId": "getAddress",
+        "summary": "Get enriched data for an address",
+        "description": "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
+        "tags": ["address"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Ethereum address (checksummed or lowercase)",
+              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved address enrichment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "EIP-55 checksummed Ethereum address",
+                      "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                    },
+                    "isContract": {
+                      "type": "boolean",
+                      "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
+                      "example": false
+                    },
+                    "arkham": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "entity": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
+                          "example": "Vitalik Buterin"
+                        },
+                        "entityType": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
+                          "example": "individual"
+                        },
+                        "label": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Fine-grained label for the specific address within the entity",
+                          "example": "Vitalik Buterin: Personal Wallet"
+                        },
+                        "twitter": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Twitter/X handle associated with the entity, without '@'",
+                          "example": "VitalikButerin"
+                        }
+                      },
+                      "required": ["entity", "entityType", "label", "twitter"],
+                      "description": "Arkham Intelligence label data. null when no data is available for the address."
+                    },
+                    "ens": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Primary ENS name reverse-resolved for this address",
+                          "example": "vitalik.eth"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL of the ENS avatar image",
+                          "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
+                        },
+                        "banner": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL of the ENS profile banner image",
+                          "example": null
+                        }
+                      },
+                      "required": ["name", "avatar", "banner"],
+                      "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
+                    }
+                  },
+                  "required": ["address", "isContract", "arkham", "ens"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/address-enrichment/addresses": {
+      "get": {
+        "operationId": "getAddresses",
+        "summary": "Get enriched data for multiple addresses",
+        "description": "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
+        "tags": ["address"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "maxItems": 100,
+              "description": "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
+              "example": [
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"
+              ]
+            },
+            "required": true,
+            "name": "addresses",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved batch enrichment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "address": {
+                            "type": "string",
+                            "description": "EIP-55 checksummed Ethereum address",
+                            "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                          },
+                          "isContract": {
+                            "type": "boolean",
+                            "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
+                            "example": false
+                          },
+                          "arkham": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "entity": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
+                                "example": "Vitalik Buterin"
+                              },
+                              "entityType": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
+                                "example": "individual"
+                              },
+                              "label": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Fine-grained label for the specific address within the entity",
+                                "example": "Vitalik Buterin: Personal Wallet"
+                              },
+                              "twitter": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Twitter/X handle associated with the entity, without '@'",
+                                "example": "VitalikButerin"
+                              }
+                            },
+                            "required": [
+                              "entity",
+                              "entityType",
+                              "label",
+                              "twitter"
+                            ],
+                            "description": "Arkham Intelligence label data. null when no data is available for the address."
+                          },
+                          "ens": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Primary ENS name reverse-resolved for this address",
+                                "example": "vitalik.eth"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "URL of the ENS avatar image",
+                                "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
+                              },
+                              "banner": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "URL of the ENS profile banner image",
+                                "example": null
+                              }
+                            },
+                            "required": ["name", "avatar", "banner"],
+                            "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
+                          }
+                        },
+                        "required": ["address", "isContract", "arkham", "ens"]
+                      },
+                      "description": "Enrichment results for each successfully resolved address. Addresses that failed to resolve are omitted."
+                    }
+                  },
+                  "required": ["results"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/{dao}/relay/vote": {
       "post": {
         "operationId": "relayVote",
@@ -8225,235 +8281,6 @@
           "description": "DAO identifier"
         }
       ]
-    },
-    "/address-enrichment/address/{address}": {
-      "get": {
-        "operationId": "getAddress",
-        "summary": "Get enriched data for an address",
-        "description": "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
-        "tags": ["address"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "description": "Ethereum address (checksummed or lowercase)",
-              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-            },
-            "required": true,
-            "name": "address",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved address enrichment data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "address": {
-                      "type": "string",
-                      "description": "EIP-55 checksummed Ethereum address",
-                      "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-                    },
-                    "isContract": {
-                      "type": "boolean",
-                      "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
-                      "example": false
-                    },
-                    "arkham": {
-                      "type": "object",
-                      "nullable": true,
-                      "properties": {
-                        "entity": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
-                          "example": "Vitalik Buterin"
-                        },
-                        "entityType": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
-                          "example": "individual"
-                        },
-                        "label": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Fine-grained label for the specific address within the entity",
-                          "example": "Vitalik Buterin: Personal Wallet"
-                        },
-                        "twitter": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Twitter/X handle associated with the entity, without '@'",
-                          "example": "VitalikButerin"
-                        }
-                      },
-                      "required": ["entity", "entityType", "label", "twitter"],
-                      "description": "Arkham Intelligence label data. null when no data is available for the address."
-                    },
-                    "ens": {
-                      "type": "object",
-                      "nullable": true,
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Primary ENS name reverse-resolved for this address",
-                          "example": "vitalik.eth"
-                        },
-                        "avatar": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "URL of the ENS avatar image",
-                          "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
-                        },
-                        "banner": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "URL of the ENS profile banner image",
-                          "example": null
-                        }
-                      },
-                      "required": ["name", "avatar", "banner"],
-                      "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
-                    }
-                  },
-                  "required": ["address", "isContract", "arkham", "ens"]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/address-enrichment/addresses": {
-      "get": {
-        "operationId": "getAddresses",
-        "summary": "Get enriched data for multiple addresses",
-        "description": "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
-        "tags": ["address"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 1,
-              "maxItems": 100,
-              "description": "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
-              "example": [
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-                "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"
-              ]
-            },
-            "required": true,
-            "name": "addresses",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved batch enrichment data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "address": {
-                            "type": "string",
-                            "description": "EIP-55 checksummed Ethereum address",
-                            "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-                          },
-                          "isContract": {
-                            "type": "boolean",
-                            "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
-                            "example": false
-                          },
-                          "arkham": {
-                            "type": "object",
-                            "nullable": true,
-                            "properties": {
-                              "entity": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
-                                "example": "Vitalik Buterin"
-                              },
-                              "entityType": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
-                                "example": "individual"
-                              },
-                              "label": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Fine-grained label for the specific address within the entity",
-                                "example": "Vitalik Buterin: Personal Wallet"
-                              },
-                              "twitter": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Twitter/X handle associated with the entity, without '@'",
-                                "example": "VitalikButerin"
-                              }
-                            },
-                            "required": [
-                              "entity",
-                              "entityType",
-                              "label",
-                              "twitter"
-                            ],
-                            "description": "Arkham Intelligence label data. null when no data is available for the address."
-                          },
-                          "ens": {
-                            "type": "object",
-                            "nullable": true,
-                            "properties": {
-                              "name": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Primary ENS name reverse-resolved for this address",
-                                "example": "vitalik.eth"
-                              },
-                              "avatar": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "URL of the ENS avatar image",
-                                "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
-                              },
-                              "banner": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "URL of the ENS profile banner image",
-                                "example": null
-                              }
-                            },
-                            "required": ["name", "avatar", "banner"],
-                            "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
-                          }
-                        },
-                        "required": ["address", "isContract", "arkham", "ens"]
-                      },
-                      "description": "Enrichment results for each successfully resolved address. Addresses that failed to resolve are omitted."
-                    }
-                  },
-                  "required": ["results"]
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "webhooks": {},
