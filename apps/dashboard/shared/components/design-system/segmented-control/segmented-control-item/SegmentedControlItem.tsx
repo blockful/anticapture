@@ -30,6 +30,8 @@ export const SegmentedControlItem = ({
         "flex items-center justify-center gap-1.5",
         // Sizing — varies by size prop
         sizeStyles[size],
+        // Shape
+        "rounded-base",
         // Typography
         "whitespace-nowrap font-medium",
         // Transitions

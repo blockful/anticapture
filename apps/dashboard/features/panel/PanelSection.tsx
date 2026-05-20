@@ -27,9 +27,9 @@ export const PanelSection = () => {
         <div className="lg:hidden">
           <Carousel
             slides={[
-              <DaoProtectionLevels />,
-              <TreasuryMonitoring />,
-              <DelegatedSupplyHistory />,
+              <DaoProtectionLevels key="dao-protection-levels" />,
+              <TreasuryMonitoring key="treasury-monitoring" />,
+              <DelegatedSupplyHistory key="delegated-supply-history" />,
             ]}
           />
         </div>

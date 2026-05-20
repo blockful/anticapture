@@ -165,6 +165,7 @@ export interface DaoConfiguration extends BaseInfo {
   noStage?: boolean;
   governancePage?: boolean;
   serviceProviders?: boolean;
+  revenue?: boolean;
   offchainProposals?: boolean;
   /** When false, hides the DAO Overview page from navigation. Defaults to true. */
   overviewPage?: boolean;
