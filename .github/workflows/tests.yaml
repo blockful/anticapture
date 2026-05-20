@@ -57,14 +57,17 @@ jobs:
 
       - name: Verify changeset is present
         shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
 
-          if pnpm changeset status --since=origin/dev; then
+          if pnpm changeset status --since="$PR_BASE_SHA"; then
             exit 0
           fi
 
-          if git diff --name-only origin/dev... | grep -E '^\.changeset/[^/]+\.md$' | grep -v '^\.changeset/README\.md$'; then
+          if git diff --name-only "$PR_BASE_SHA...$PR_HEAD_SHA" | grep -E '^\.changeset/[^/]+\.md$' | grep -v '^\.changeset/README\.md$'; then
             echo "Changesets status did not find package bumps, but an empty changeset is present."
             exit 0
           fi
