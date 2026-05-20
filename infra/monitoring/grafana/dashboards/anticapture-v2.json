@@ -943,6 +943,147 @@
           ]
         }
       ]
+    },
+    {
+      "id": 140,
+      "type": "row",
+      "title": "Scrape Diagnostics",
+      "collapsed": true,
+      "gridPos": { "x": 0, "y": 113, "w": 24, "h": 1 },
+      "panels": [
+        {
+          "id": 1401,
+          "title": "up (per job) — 1 = scrape succeeded, 0 = scrape failed",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 114, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "min": 0,
+              "max": 1,
+              "color": { "mode": "palette-classic" },
+              "custom": { "fillOpacity": 10, "lineInterpolation": "stepAfter" }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "up{job=~\"anticapture-.*\"}",
+              "legendFormat": "{{job}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1402,
+          "title": "Scrape flap count (changes in up over 1h)",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 114, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "color": { "mode": "palette-classic" },
+              "custom": { "fillOpacity": 10 }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "changes(up{job=~\"anticapture-.*\"}[1h])",
+              "legendFormat": "{{job}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1403,
+          "title": "scrape_duration_seconds (threshold = scrape_timeout 12s)",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 122, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "color": { "mode": "palette-classic" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 12 }
+                ]
+              },
+              "custom": {
+                "fillOpacity": 5,
+                "thresholdsStyle": { "mode": "line" }
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "scrape_duration_seconds{job=~\"anticapture-.*\"}",
+              "legendFormat": "{{job}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1404,
+          "title": "scrape_samples_scraped (0 = empty / failed response)",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 122, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "color": { "mode": "palette-classic" },
+              "custom": { "fillOpacity": 5 }
+            },
+            "overrides": []
+          },
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "desc" },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            }
+          },
+          "targets": [
+            {
+              "expr": "scrape_samples_scraped{job=~\"anticapture-.*\"}",
+              "legendFormat": "{{job}}",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
