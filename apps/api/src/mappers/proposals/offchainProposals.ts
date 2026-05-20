@@ -2,6 +2,7 @@ import { z } from "@hono/zod-openapi";
 
 import { offchainProposals } from "@/database";
 import {
+  booleanQueryParam,
   commaDelimitedEnumQueryParam,
   defaultDescOrderDirection,
   paginatedListResponse,
@@ -100,9 +101,9 @@ export const OffchainProposalsResponseSchema = paginatedListResponse(
 ).openapi("OffchainProposalsResponse");
 
 const offchainLeanQueryParam = () =>
-  z.coerce.boolean().optional().default(false).openapi({
+  booleanQueryParam(false).openapi({
     description:
-      "When true, omit the proposal `body` to reduce response size. Defaults to false.",
+      "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
     example: false,
   });
 

@@ -58,7 +58,7 @@ export interface DelegationPercentageRepository {
     startDate?: string;
     endDate?: string;
     orderDirection: "asc" | "desc";
-    limit: number;
+    limit?: number;
   }): Promise<DBTokenMetric[]>;
 
   getLastMetricBeforeDate(
@@ -89,9 +89,10 @@ export class DelegationPercentageService {
       ? await this.fetchLastDelegationValues(normalizedStartDate)
       : { delegated: 0n, total: 0n };
 
-    // 2. Fetch data from repository.
-    // Doubled cap so we have headroom for both DELEGATED_SUPPLY and TOTAL_SUPPLY rows;
-    // +1 leaves room to detect overflow when slicing.
+    // 2. Fetch every metric row in the window — the timeline is built by
+    //    forward-filling across those rows, then paginated post-build via
+    //    skip/limit. Capping the repository read would drop later metric
+    //    changes and freeze stale values across the tail of the timeline.
     const rows = await this.repository.getMetricsByDateRange({
       metricTypes: [
         MetricTypesEnum.DELEGATED_SUPPLY,
@@ -100,7 +101,6 @@ export class DelegationPercentageService {
       startDate: normalizedStartDate,
       endDate: normalizedEndDate,
       orderDirection,
-      limit: (limit + 1) * 2,
     });
 
     // 3. Organize data by date

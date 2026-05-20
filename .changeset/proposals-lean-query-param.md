@@ -15,3 +15,7 @@ so existing clients see no behavior change.
 The `OnchainProposal.calldatas/values/targets` and `OffchainProposal.body`
 fields are now optional in the OpenAPI schema, reflecting the runtime
 contract more truthfully than before.
+
+The new `lean` param uses explicit string parsing (`true`/`false`/`1`/`0`)
+rather than `z.coerce.boolean()`, so `?lean=false` and `?lean=0` resolve to
+`false` instead of being coerced to truthy by JavaScript's `Boolean(...)`.

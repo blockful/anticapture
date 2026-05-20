@@ -4449,11 +4449,11 @@
               "type": "boolean",
               "nullable": true,
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -4541,11 +4541,11 @@
               "type": "boolean",
               "nullable": true,
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -4609,11 +4609,11 @@
               "type": "boolean",
               "nullable": true,
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -7467,11 +7467,11 @@
               "type": "boolean",
               "nullable": true,
               "default": false,
-              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false.",
+              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false.",
+            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -7548,11 +7548,11 @@
               "type": "boolean",
               "nullable": true,
               "default": false,
-              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false.",
+              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false.",
+            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -7605,11 +7605,11 @@
               "type": "boolean",
               "nullable": true,
               "default": false,
-              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false.",
+              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false.",
+            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }

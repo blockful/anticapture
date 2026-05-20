@@ -1,6 +1,8 @@
 // === TYPES ===
 
-// TEST: trigger cache
+// Upstream contract from @anticapture/api: items + a totalCount that reflects
+// the full forward-filled window (ignores skip/limit). hasNextPage is derived
+// here from `items.length < totalCount` rather than read from the API.
 export type DelegationPercentageResponse = {
   items: { date: string; high: string }[];
   totalCount: number;
@@ -11,6 +13,12 @@ export type DelegationPercentageResponse = {
     startDate: string | null;
   };
 };
+
+// Trimmed shape we actually consume from the upstream DAO API.
+export type UpstreamDelegationPercentage = Pick<
+  DelegationPercentageResponse,
+  'items' | 'totalCount'
+>;
 
 // === HELPERS ===
 
@@ -32,9 +40,9 @@ function getFirstDate(
  * Returns filtered responses where all DAOs have overlapping data
  */
 export function alignDaoResponses(
-  daoResponses: Map<string, DelegationPercentageResponse>,
+  daoResponses: Map<string, UpstreamDelegationPercentage>,
   orderDirection?: string
-): Map<string, DelegationPercentageResponse> {
+): Map<string, UpstreamDelegationPercentage> {
   // Filter out DAOs with no data
   const daoResponsesWithData = Array.from(daoResponses.entries()).filter(
     ([_, response]) => response?.items?.length > 0
@@ -77,7 +85,7 @@ export function alignDaoResponses(
  * Complexity: O(m × n) where m is number of items and n is number of DAOs
  */
 export function aggregateMeanPercentage(
-  daoResponses: Map<string, DelegationPercentageResponse>
+  daoResponses: Map<string, UpstreamDelegationPercentage>
 ): { date: string; high: string }[] {
   const daoResponsesArray = Array.from(daoResponses.values());
 
@@ -118,7 +126,7 @@ export async function fetchAndExtractDaoData(
   context: any,
   queryArgs: any,
   root: any
-): Promise<Map<string, DelegationPercentageResponse>> {
+): Promise<Map<string, UpstreamDelegationPercentage>> {
   // Extract REST clients from context
   const restClients = Object.keys(context)
     .filter((key) => key.startsWith('rest_'))
@@ -145,15 +153,11 @@ export async function fetchAndExtractDaoData(
                 date
                 high
               }
-              pageInfo {
-                hasNextPage
-                endDate
-                startDate
-              }
+              totalCount
             }
           `,
         })
-        .then((response: DelegationPercentageResponse) => ({
+        .then((response: UpstreamDelegationPercentage) => ({
           daoId,
           response,
         }))
@@ -161,8 +165,7 @@ export async function fetchAndExtractDaoData(
   );
 
   // Extract successful responses
-  const daoResponses = new Map<string,
-    DelegationPercentageResponse>();
+  const daoResponses = new Map<string, UpstreamDelegationPercentage>();
   results.forEach((result) => {
     if (result.status === 'fulfilled' && result.value.response) {
       daoResponses.set(result.value.daoId, result.value.response);
@@ -254,9 +257,11 @@ export const averageDelegationPercentageByDayResolver = {
     // Fetch data from all DAOs
     const daoResponses = await fetchAndExtractDaoData(context, args, root);
 
-    // Check if any DAO has more data (hasNextPage)
+    // Any upstream window with more rows than were returned means there is
+    // more data available. totalCount reflects the full window post forward-fill.
     const hasNextPage = Array.from(daoResponses.values()).some(
-      (response) => response?.pageInfo?.hasNextPage ?? false
+      (response) =>
+        !!response && (response.items?.length ?? 0) < (response.totalCount ?? 0)
     );
 
     // Align DAO responses to ensure all DAOs have data in the same range

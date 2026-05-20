@@ -1,7 +1,14 @@
 import type { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry.js";
 import { fanOutGet } from "../../shared/fan-out.js";
 
-// TEST: trigger cache
+// Upstream shape from @anticapture/api: items + totalCount over the full
+// forward-filled window. pageInfo is not part of the upstream contract;
+// hasNextPage is derived here from `items.length < totalCount`.
+type UpstreamDelegationPercentage = {
+  items: { date: string; high: string }[];
+  totalCount: number;
+};
+
 export type DelegationPercentageResponse = {
   items: { date: string; high: string }[];
   totalCount: number;
@@ -40,7 +47,7 @@ export class DelegationService {
     if (args.limit) params.set("limit", String(args.limit));
 
     const { data: daoResponses, cacheControl } =
-      await fanOutGet<DelegationPercentageResponse>(
+      await fanOutGet<UpstreamDelegationPercentage>(
         this.daoApis,
         this.registry,
         "/delegation-percentage",
@@ -48,7 +55,9 @@ export class DelegationService {
       );
 
     const hasNextPage = Array.from(daoResponses.values()).some(
-      (response) => response?.pageInfo?.hasNextPage ?? false,
+      (response) =>
+        !!response &&
+        (response.items?.length ?? 0) < (response.totalCount ?? 0),
     );
 
     const alignedResponses = this.alignDaoResponses(
@@ -80,9 +89,9 @@ export class DelegationService {
   }
 
   private alignDaoResponses(
-    daoResponses: Map<string, DelegationPercentageResponse>,
+    daoResponses: Map<string, UpstreamDelegationPercentage>,
     orderDirection?: string,
-  ): Map<string, DelegationPercentageResponse> {
+  ): Map<string, UpstreamDelegationPercentage> {
     const daoResponsesWithData = Array.from(daoResponses.entries()).filter(
       ([_, response]) => response?.items?.length > 0,
     );
@@ -112,7 +121,7 @@ export class DelegationService {
   }
 
   private aggregateMeanPercentage(
-    daoResponses: Map<string, DelegationPercentageResponse>,
+    daoResponses: Map<string, UpstreamDelegationPercentage>,
   ): { date: string; high: string }[] {
     const daoResponsesArray = Array.from(daoResponses.values());
 

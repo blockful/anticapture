@@ -178,6 +178,17 @@ export const paginatedListResponse = <T extends z.ZodTypeAny>(
 export const defaultDescOrderDirection = () =>
   OrderDirectionSchema.optional().default("desc");
 
+// Avoids z.coerce.boolean(), which treats any non-empty string (including
+// "false" and "0") as true. Honors HTTP-style "true"/"false"/"1"/"0".
+export const booleanQueryParam = (defaultValue: boolean) =>
+  z.preprocess((v) => {
+    if (v === undefined || v === null || v === "") return undefined;
+    if (typeof v === "boolean") return v;
+    if (v === "true" || v === "1") return true;
+    if (v === "false" || v === "0") return false;
+    return v;
+  }, z.boolean().optional().default(defaultValue));
+
 export const logIndexField = () =>
   z.number().int().openapi({
     description: "Log index within the transaction receipt.",

@@ -3,6 +3,7 @@ import { z } from "@hono/zod-openapi";
 import { proposalsOnchain } from "@/database";
 import { ProposalStatus } from "@/lib/constants";
 import {
+  booleanQueryParam,
   commaDelimitedEnumQueryParam,
   daoIdField,
   decimalStringField,
@@ -26,9 +27,9 @@ const OnchainProposalStatusListSchema = commaDelimitedEnumQueryParam(
 );
 
 const leanQueryParam = () =>
-  z.coerce.boolean().optional().default(false).openapi({
+  booleanQueryParam(false).openapi({
     description:
-      "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false.",
+      "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
     example: false,
   });
 
