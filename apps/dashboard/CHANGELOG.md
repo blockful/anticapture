@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.2.4
+
+### Patch Changes
+
+- [#1911](https://github.com/blockful/anticapture/pull/1911) [`8f42b36`](https://github.com/blockful/anticapture/commit/8f42b36e4be4b415405cdf8a00e1b3817ece5538) Thanks [@pikonha](https://github.com/pikonha)! - feat(dashboard): add home screen app icon and web manifest for PWA support
+
 ## 2.2.3
 
 ### Patch Changes
