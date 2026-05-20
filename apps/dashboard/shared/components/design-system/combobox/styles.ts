@@ -6,7 +6,7 @@ import type { ComboboxItemStatus } from "@/shared/components/design-system/combo
  * hover/active/filter use surface-hover.
  */
 export const itemStatusStyles: Record<ComboboxItemStatus, string> = {
-  default: "bg-surface-contrast",
+  default: "bg-transparent",
   hover: "bg-surface-hover",
   active: "bg-surface-hover",
   filter: "bg-surface-hover",
