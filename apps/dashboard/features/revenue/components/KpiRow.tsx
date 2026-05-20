@@ -27,11 +27,6 @@ const TIME_PERIOD_OPTIONS = [
 
 const DAY = 24 * 60 * 60;
 
-function monthStartUnix(unixSeconds: number): number {
-  const d = new Date(unixSeconds * 1000);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) / 1000;
-}
-
 function getQueryParams(
   timePeriod: string,
 ): GetRevenueTotalsQueryParams | undefined {
@@ -40,11 +35,11 @@ function getQueryParams(
     case "7d":
       return { fromDate: now - 7 * DAY };
     case "30d":
-      return { fromDate: monthStartUnix(now - 30 * DAY) };
+      return { fromDate: now - 30 * DAY };
     case "90d":
-      return { fromDate: monthStartUnix(now - 90 * DAY) };
+      return { fromDate: now - 90 * DAY };
     case "1y":
-      return { fromDate: monthStartUnix(now - 365 * DAY) };
+      return { fromDate: now - 365 * DAY };
     default:
       return undefined;
   }
