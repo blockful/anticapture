@@ -1,6 +1,8 @@
 ---
 "@anticapture/api": minor
 "@anticapture/dashboard": minor
+"@anticapture/api-gateway": patch
+"@anticapture/gateful": patch
 ---
 
 feat(draft-proposals): persist draft proposals in PostgreSQL with SIWE authentication
