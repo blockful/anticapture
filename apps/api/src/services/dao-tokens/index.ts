@@ -2,9 +2,8 @@ import axios, { AxiosInstance } from "axios";
 import { z } from "zod";
 
 import { DaoIdEnum } from "@/lib/enums";
+import type { DaoTokenItem } from "@/mappers/token";
 import { AssetPlatformEnum } from "@/services/coingecko/types";
-
-type AssetPlatform = AssetPlatformEnum;
 
 interface TokenRegistryItem {
   address: string;
@@ -14,17 +13,7 @@ interface TokenRegistryItem {
   coingeckoId: string;
 }
 
-export interface DaoTokenItem {
-  address: string;
-  name: string;
-  symbol: string;
-  decimals: number;
-  logoUri: string | null;
-  price: number | null;
-  priceChange24h: number | null;
-}
-
-const DaoIdToPlatform: Record<DaoIdEnum, AssetPlatform> = {
+const DaoIdToPlatform: Record<DaoIdEnum, AssetPlatformEnum> = {
   [DaoIdEnum.AAVE]: AssetPlatformEnum.ETHEREUM,
   [DaoIdEnum.ENS]: AssetPlatformEnum.ETHEREUM,
   [DaoIdEnum.UNI]: AssetPlatformEnum.ETHEREUM,
@@ -41,7 +30,7 @@ const DaoIdToPlatform: Record<DaoIdEnum, AssetPlatform> = {
   [DaoIdEnum.FLUID]: AssetPlatformEnum.ETHEREUM,
 };
 
-const TOKEN_REGISTRY: Record<AssetPlatform, TokenRegistryItem[]> = {
+const TOKEN_REGISTRY: Record<AssetPlatformEnum, TokenRegistryItem[]> = {
   [AssetPlatformEnum.ETHEREUM]: [
     {
       address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -287,7 +276,7 @@ const CoingeckoMarketItemSchema = z.object({
 
 export class DaoTokensService {
   private readonly client: AxiosInstance;
-  private readonly platform: AssetPlatform;
+  private readonly platform: AssetPlatformEnum;
 
   constructor(
     coingeckoApiUrl: string,
@@ -298,7 +287,7 @@ export class DaoTokensService {
       baseURL: coingeckoApiUrl,
       headers: { "x-cg-demo-api-key": coingeckoApiKey },
     });
-    this.platform = DaoIdToPlatform[daoId] ?? AssetPlatformEnum.ETHEREUM;
+    this.platform = DaoIdToPlatform[daoId];
   }
 
   async getAvailableTokens(): Promise<DaoTokenItem[]> {

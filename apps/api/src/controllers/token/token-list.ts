@@ -1,8 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { DaoTokensResponseSchema } from "@/mappers";
+import { DaoTokensResponseSchema, type DaoTokenItem } from "@/mappers";
 import { setCacheControl } from "@/middlewares";
-import type { DaoTokenItem } from "@/services/dao-tokens";
 
 export interface DaoTokensClient {
   getAvailableTokens(): Promise<DaoTokenItem[]>;

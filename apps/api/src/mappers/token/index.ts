@@ -121,6 +121,7 @@ export const DaoTokenItemSchema = z
     address: z.string().openapi({
       description: "ERC-20 token contract address.",
       example: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      format: "ethereum-address",
     }),
     name: z.string().openapi({
       description: "Token name.",
@@ -135,7 +136,7 @@ export const DaoTokenItemSchema = z
       example: 6,
       type: "integer",
     }),
-    logoUri: z.string().nullable().openapi({
+    logoUri: z.url().nullable().openapi({
       description: "Token logo URI from CoinGecko.",
       example: "https://assets.coingecko.com/coins/images/6319/small/usdc.png",
     }),
@@ -160,4 +161,5 @@ export const DaoTokensResponseSchema = z
       "List of available ERC-20 tokens for the DAO's governance chain.",
   });
 
+export type DaoTokenItem = z.infer<typeof DaoTokenItemSchema>;
 export type DaoTokensResponse = z.infer<typeof DaoTokensResponseSchema>;
