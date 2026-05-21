@@ -5,7 +5,7 @@ import type {
   HistoricalVotingPowerByAccountIdQueryResponse,
 } from "@anticapture/client";
 import { useHistoricalVotingPowerByAccountIdInfinite } from "@anticapture/client/hooks";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { formatUnits } from "viem";
 
 import type { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
@@ -155,15 +155,11 @@ export function useDelegateDelegationHistory({
       });
   }, [data, accountId, token]);
 
-  const fetchNextPageStable = useCallback(() => {
-    void fetchNextPage();
-  }, [fetchNextPage]);
-
   return {
     delegationHistory,
     loading: isLoading,
     error: error ?? null,
-    fetchNextPage: fetchNextPageStable,
+    fetchNextPage,
     hasNextPage: hasNextPage ?? false,
     hasPreviousPage: (data?.pages?.length ?? 0) > 1,
   };

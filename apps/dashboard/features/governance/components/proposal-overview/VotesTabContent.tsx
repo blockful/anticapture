@@ -1,14 +1,18 @@
 "use client";
 
+import type {
+  ProposalNonVotersPathParamsDaoEnumKey,
+  VotesByProposalIdPathParamsDaoEnumKey,
+} from "@anticapture/client";
+import {
+  useProposalNonVoters,
+  useVotesByProposalId,
+} from "@anticapture/client/hooks";
 import {
   OrderDirection,
   QueryInput_TokenMetrics_MetricType,
 } from "@anticapture/graphql-client";
-import {
-  useGetProposalNonVotersQuery,
-  useGetVotesQuery,
-  useTokenMetricsQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useTokenMetricsQuery } from "@anticapture/graphql-client/hooks";
 import { useParams } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { formatUnits } from "viem";
@@ -40,6 +44,10 @@ export const VotesTabContent = ({
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
+  const votesDaoKey =
+    daoIdEnum.toLowerCase() as VotesByProposalIdPathParamsDaoEnumKey;
+  const nonVotersDaoKey =
+    daoIdEnum.toLowerCase() as ProposalNonVotersPathParamsDaoEnumKey;
 
   const { data: delegatedSupplyData } = useTokenMetricsQuery({
     variables: {
@@ -57,33 +65,35 @@ export const VotesTabContent = ({
     },
   });
 
-  const { data } = useGetVotesQuery({
-    variables: {
-      proposalId: proposal.id,
-      limit: null,
-      skip: null,
-      support: null,
-      voterAddressIn: null,
+  const { data } = useVotesByProposalId(
+    votesDaoKey,
+    proposal.id,
+    {
+      limit: undefined,
+      skip: undefined,
+      support: undefined,
+      voterAddressIn: undefined,
     },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoIdEnum,
+    {
+      query: {
+        enabled: !!proposal.id,
       },
     },
-  });
+  );
 
-  const { data: nonVotersData } = useGetProposalNonVotersQuery({
-    variables: {
-      id: proposal.id,
+  const { data: nonVotersData } = useProposalNonVoters(
+    nonVotersDaoKey,
+    proposal.id,
+    {
       limit: 1,
-      skip: null,
+      skip: undefined,
     },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoIdEnum,
+    {
+      query: {
+        enabled: !!proposal.id,
       },
     },
-  });
+  );
 
   const totalVotesBigInt =
     BigInt(proposal.forVotes) +
@@ -129,9 +139,9 @@ export const VotesTabContent = ({
           isActive={activeTab === "voted"}
           onClick={() => setActiveTab("voted")}
           counter={
-            data?.votesByProposalId?.totalCount != null
+            data?.totalCount != null
               ? {
-                  voters: `${data.votesByProposalId.totalCount}`,
+                  voters: `${data.totalCount}`,
                   vp: `${totalVotes} VP`,
                   percentage: votedPercentage ?? "-",
                 }
@@ -144,9 +154,9 @@ export const VotesTabContent = ({
           isActive={activeTab === "didntVote"}
           onClick={() => setActiveTab("didntVote")}
           counter={
-            nonVotersData?.proposalNonVoters?.totalCount != null
+            nonVotersData?.totalCount != null
               ? {
-                  voters: `${nonVotersData.proposalNonVoters.totalCount}`,
+                  voters: `${nonVotersData.totalCount}`,
                   vp:
                     nonVoterVotingPower != null
                       ? `${nonVoterVotingPower} VP`

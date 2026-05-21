@@ -79,10 +79,10 @@ export const useDelegates = ({
 
   const [delegateActivities, setDelegateActivities] = useState<
     Map<string, ProposalsActivity>
-  >(new Map());
+  >(() => new Map());
   const [loadingActivityAddresses, setLoadingActivityAddresses] = useState<
     Set<string>
-  >(new Set());
+  >(() => new Set());
 
   const fromDate = useMemo(() => {
     return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days];

@@ -1,6 +1,7 @@
 "use client";
 
 import type {
+  ProposalActivityItem,
   ProposalActivityResponse,
   ProposalsActivityPathParamsDaoEnumKey,
   ProposalsActivityQueryParams,
@@ -21,10 +22,6 @@ interface UseProposalsActivityParams {
   userVoteFilter?: ProposalsActivityQueryParamsUserVoteFilterEnumKey | null;
   limit: number;
 }
-
-type ProposalActivityItem = NonNullable<
-  ProposalActivityResponse["proposals"][number]
->;
 
 type ProposalActivityData = {
   totalProposals: number;

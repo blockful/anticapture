@@ -1,0 +1,41 @@
+{
+  "result": {
+    "rows": [
+      {
+        "expiry_month": "2025-11-01 00:00:00.000 UTC",
+        "terms_expiring": 1000,
+        "renewed_count": 400,
+        "churned_count": 600,
+        "renewal_rate_pct": "40.000000000000000"
+      },
+      {
+        "expiry_month": "2025-12-01 00:00:00.000 UTC",
+        "terms_expiring": 1500,
+        "renewed_count": 825,
+        "churned_count": 675,
+        "renewal_rate_pct": "55.000000000000000"
+      },
+      {
+        "expiry_month": "2026-01-01 00:00:00.000 UTC",
+        "terms_expiring": 2000,
+        "renewed_count": 1234,
+        "churned_count": 766,
+        "renewal_rate_pct": "61.700000000000003"
+      },
+      {
+        "expiry_month": "2026-02-01 00:00:00.000 UTC",
+        "terms_expiring": 1800,
+        "renewed_count": 1080,
+        "churned_count": 720,
+        "renewal_rate_pct": "60.000000000000000"
+      },
+      {
+        "expiry_month": "2026-03-01 00:00:00.000 UTC",
+        "terms_expiring": 2200,
+        "renewed_count": 1430,
+        "churned_count": 770,
+        "renewal_rate_pct": "65.000000000000000"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+import { ImageResponse } from "next/og";
+
+export const size = { width: 192, height: 192 };
+export const contentType = "image/png";
+
+export default function Icon192() {
+  return new ImageResponse(
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#09090B",
+      }}
+    >
+      <svg
+        width={134}
+        height={134}
+        viewBox="0 0 36 36"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M25 30L20.9274 6H15.6969L13.0791 19.3897L11 30H15.4301L18.2794 15.0173L18.954 19.4662L19.2611 21.5567L20.5347 30H25Z"
+          fill="#EC762E"
+        />
+        <path d="M11 2H2V11" stroke="#EC762E" strokeWidth="3.5" />
+        <path d="M34 11L34 2L25 2" stroke="#EC762E" strokeWidth="3.5" />
+        <path d="M25 34L34 34L34 25" stroke="#EC762E" strokeWidth="3.5" />
+        <path d="M2 25L2 34L11 34" stroke="#EC762E" strokeWidth="3.5" />
+      </svg>
+    </div>,
+    { ...size },
+  );
+}
