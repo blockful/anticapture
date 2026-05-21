@@ -1,30 +1,24 @@
 "use client";
 
 import {
-  useGetProposalsFromDaoQuery,
-  QueryInput_Proposals_Status_Items,
-} from "@anticapture/graphql-client/hooks";
+  onchainProposalStatusListEnum,
+  type ProposalsPathParamsDaoEnumKey,
+} from "@anticapture/client";
+import { useProposals } from "@anticapture/client/hooks";
 import { Info } from "lucide-react";
 
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
 
 export const OngoingProposalBanner = ({ daoId }: { daoId: string }) => {
-  const { data, loading } = useGetProposalsFromDaoQuery({
-    variables: {
+  const { data, isLoading } = useProposals(
+    daoId.toLowerCase() as ProposalsPathParamsDaoEnumKey,
+    {
       limit: 1,
-      status: QueryInput_Proposals_Status_Items.Active,
-      skip: null,
-      fromDate: null,
+      status: [onchainProposalStatusListEnum.ACTIVE],
     },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
+  );
 
-  const hasOngoingProposal =
-    !loading && (data?.proposals?.items?.length ?? 0) > 0;
+  const hasOngoingProposal = !isLoading && (data?.items.length ?? 0) > 0;
 
   if (!hasOngoingProposal) {
     return null;
