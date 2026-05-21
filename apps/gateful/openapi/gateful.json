@@ -2792,28 +2792,24 @@
           },
           {
             "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "after",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "before",
-            "in": "query"
-          },
-          {
-            "schema": {
               "type": "string",
               "enum": ["asc", "desc"],
               "default": "asc"
             },
             "required": false,
             "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": ["integer", "null"],
+              "minimum": 0,
+              "default": 0,
+              "description": "Number of day buckets to skip before returning results."
+            },
+            "required": false,
+            "description": "Number of day buckets to skip before returning results.",
+            "name": "skip",
             "in": "query"
           },
           {
@@ -4446,8 +4442,15 @@
           },
           {
             "schema": {
-              "type": "boolean",
-              "nullable": true,
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
               "default": false,
               "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
@@ -4538,8 +4541,15 @@
           },
           {
             "schema": {
-              "type": "boolean",
-              "nullable": true,
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
               "default": false,
               "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
@@ -4606,8 +4616,15 @@
           },
           {
             "schema": {
-              "type": "boolean",
-              "nullable": true,
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
               "default": false,
               "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
@@ -7464,8 +7481,15 @@
           },
           {
             "schema": {
-              "type": "boolean",
-              "nullable": true,
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
               "default": false,
               "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
@@ -7545,8 +7569,15 @@
           },
           {
             "schema": {
-              "type": "boolean",
-              "nullable": true,
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
               "default": false,
               "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
@@ -7602,8 +7633,15 @@
           },
           {
             "schema": {
-              "type": "boolean",
-              "nullable": true,
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
               "default": false,
               "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false

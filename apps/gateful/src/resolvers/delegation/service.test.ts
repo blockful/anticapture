@@ -145,7 +145,7 @@ describe("DelegationService", () => {
 
     const result = await service.getAverageDelegationPercentage({
       startDate: "1",
-      after: "2",
+      skip: 1,
     });
 
     expect(result.pageInfo.hasPreviousPage).toBe(true);

@@ -14,9 +14,10 @@ const QuerySchema = z
       .transform(String)
       .optional()
       .openapi({ description: "End date (Unix timestamp)" }),
-    after: z.string().optional(),
-    before: z.string().optional(),
     orderDirection: z.enum(["asc", "desc"]).optional().default("asc"),
+    skip: z.coerce.number().int().nonnegative().optional().default(0).openapi({
+      description: "Number of day buckets to skip before returning results.",
+    }),
     limit: z.coerce.number().optional().default(10),
   })
   .refine(
@@ -60,15 +61,14 @@ export function averageDelegation(
   service: DelegationService,
 ) {
   app.openapi(route, async (c) => {
-    const { startDate, endDate, after, before, orderDirection, limit } =
+    const { startDate, endDate, orderDirection, skip, limit } =
       c.req.valid("query");
 
     const result = await service.getAverageDelegationPercentage({
       startDate,
       endDate,
-      after,
-      before,
       orderDirection,
+      skip,
       limit,
     });
 

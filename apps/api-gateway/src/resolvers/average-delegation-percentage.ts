@@ -176,19 +176,6 @@ export async function fetchAndExtractDaoData(
 }
 
 /**
- * Calculates hasPreviousPage based on whether user has paginated forward
- * Logic: hasPreviousPage = true when 'after' is used AND after !== startDate
- */
-function calculateHasPreviousPage(
-  args: {
-    startDate?: string;
-    after?: string;
-  }
-): boolean {
-  return !!(args.after && args.startDate && args.after !== args.startDate);
-}
-
-/**
  * Applies pagination and builds complete response
  * Handles empty items case
  */
@@ -196,8 +183,7 @@ export function buildPaginatedResponse(
   items: { date: string; high: string }[],
   args: {
     limit?: number;
-    after?: string;
-    before?: string;
+    skip?: number;
     orderDirection?: string;
     startDate?: string;
   },
@@ -226,10 +212,7 @@ export function buildPaginatedResponse(
     totalCount: finalItems.length,
     pageInfo: {
       hasNextPage: hasNextPageFromDaos,
-      hasPreviousPage: calculateHasPreviousPage({
-        startDate: args.startDate,
-        after: args.after,
-      }),
+      hasPreviousPage: (args.skip ?? 0) > 0,
       endDate:
         finalItems.length > 0 ? finalItems[finalItems.length - 1].date : null,
       startDate: finalItems.length > 0 ? finalItems[0].date : null,

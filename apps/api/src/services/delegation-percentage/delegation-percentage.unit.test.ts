@@ -285,7 +285,6 @@ describe("DelegationPercentageService", () => {
         startDate: undefined,
         endDate: undefined,
         orderDirection: "asc",
-        limit: 732,
       });
       expect(result).toEqual({
         items: [],
@@ -682,7 +681,6 @@ describe("DelegationPercentageService", () => {
         startDate: day50.toString(),
         endDate: undefined,
         orderDirection: "asc",
-        limit: 732,
       });
 
       // Verify previous values were fetched
@@ -748,7 +746,6 @@ describe("DelegationPercentageService", () => {
         startDate: undefined,
         endDate: day50.toString(),
         orderDirection: "asc",
-        limit: 732,
       });
 
       // Should not fetch previous values (no startDate or after)

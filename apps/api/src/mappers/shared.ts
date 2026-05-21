@@ -181,13 +181,11 @@ export const defaultDescOrderDirection = () =>
 // Avoids z.coerce.boolean(), which treats any non-empty string (including
 // "false" and "0") as true. Honors HTTP-style "true"/"false"/"1"/"0".
 export const booleanQueryParam = (defaultValue: boolean) =>
-  z.preprocess((v) => {
-    if (v === undefined || v === null || v === "") return undefined;
-    if (typeof v === "boolean") return v;
-    if (v === "true" || v === "1") return true;
-    if (v === "false" || v === "0") return false;
-    return v;
-  }, z.boolean().optional().default(defaultValue));
+  z
+    .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
+    .optional()
+    .default(defaultValue)
+    .transform((v) => v === true || v === "true" || v === "1");
 
 export const logIndexField = () =>
   z.number().int().openapi({

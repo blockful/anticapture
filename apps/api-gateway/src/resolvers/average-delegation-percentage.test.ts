@@ -185,24 +185,23 @@ describe('buildPaginatedResponse', () => {
       { date: '3', high: '30' },
     ];
 
-    // No pagination - hasPreviousPage should be false
+    // No skip - hasPreviousPage should be false
     const result1 = buildPaginatedResponse(items, {
       startDate: '1',
-      after: undefined,
     }, false);
     expect(result1.pageInfo.hasPreviousPage).toBe(false);
 
-    // Paginated forward but after === startDate - hasPreviousPage should be false
+    // skip=0 - hasPreviousPage should be false
     const result2 = buildPaginatedResponse(items, {
       startDate: '1',
-      after: '1',
+      skip: 0,
     }, false);
     expect(result2.pageInfo.hasPreviousPage).toBe(false);
 
-    // Paginated forward and after !== startDate - hasPreviousPage should be true
+    // skip>0 - hasPreviousPage should be true
     const result3 = buildPaginatedResponse(items, {
       startDate: '1',
-      after: '2',
+      skip: 2,
     }, false);
     expect(result3.pageInfo.hasPreviousPage).toBe(true);
   });

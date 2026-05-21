@@ -33,17 +33,15 @@ export class DelegationService {
   async getAverageDelegationPercentage(args: {
     startDate: string;
     endDate?: string;
-    after?: string;
-    before?: string;
     orderDirection?: string;
+    skip?: number;
     limit?: number;
   }): Promise<DelegationResult> {
     const params = new URLSearchParams();
     params.set("startDate", args.startDate);
     if (args.endDate) params.set("endDate", args.endDate);
-    if (args.after) params.set("after", args.after);
-    if (args.before) params.set("before", args.before);
     if (args.orderDirection) params.set("orderDirection", args.orderDirection);
+    if (args.skip !== undefined) params.set("skip", String(args.skip));
     if (args.limit) params.set("limit", String(args.limit));
 
     const { data: daoResponses, cacheControl } =
@@ -145,19 +143,11 @@ export class DelegationService {
     });
   }
 
-  private calculateHasPreviousPage(args: {
-    startDate?: string;
-    after?: string;
-  }): boolean {
-    return !!(args.after && args.startDate && args.after !== args.startDate);
-  }
-
   private buildPaginatedResponse(
     items: { date: string; high: string }[],
     args: {
       limit?: number;
-      after?: string;
-      before?: string;
+      skip?: number;
       orderDirection?: string;
       startDate?: string;
     },
@@ -184,10 +174,7 @@ export class DelegationService {
       totalCount: finalItems.length,
       pageInfo: {
         hasNextPage: hasNextPageFromDaos || items.length > userLimit,
-        hasPreviousPage: this.calculateHasPreviousPage({
-          startDate: args.startDate,
-          after: args.after,
-        }),
+        hasPreviousPage: (args.skip ?? 0) > 0,
         endDate:
           finalItems.length > 0 ? finalItems[finalItems.length - 1].date : null,
         startDate: finalItems.length > 0 ? finalItems[0].date : null,
