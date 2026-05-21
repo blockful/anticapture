@@ -92,11 +92,12 @@ export const Combobox = ({
         side="bottom"
         align="start"
         sideOffset={4}
+        style={{ width: "var(--radix-popover-trigger-width)" }}
         className={cn(
           // Base/layout
           "flex flex-col",
-          // Sizing — match trigger width, py-1 (4px) padding from blocks/padding-xs
-          "w-[--radix-popover-trigger-width] min-w-32 py-1",
+          // Sizing — py-1 (4px) padding from blocks/padding-xs
+          "min-w-32 py-1",
           // Max height with scroll
           "max-h-52 overflow-y-auto",
           // Colors/surfaces
