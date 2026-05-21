@@ -1,6 +1,6 @@
 "use client";
 
-import type { GetAccountPowerQuery } from "@anticapture/graphql-client";
+import type { VotesByProposalIdQueryResponse } from "@anticapture/client";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,11 +19,13 @@ interface ProposalHeaderProps {
   setIsQueueModalOpen: (isOpen: boolean) => void;
   setIsExecuteModalOpen: (isOpen: boolean) => void;
   votingPower: string;
-  votes: GetAccountPowerQuery["votesByProposalId"] | null;
+  votes: VotesByProposalIdQueryResponse | null;
   address: string | undefined;
   proposalStatus: string;
   snapshotLink?: string | null;
   isWhitelabel?: boolean;
+  offchainHasVoted?: boolean;
+  offchainVoteLabel?: string | null;
 }
 
 const ProposalHeaderAction = ({
@@ -32,6 +34,8 @@ const ProposalHeaderAction = ({
   proposalStatus,
   setIsVotingModalOpen,
   isWhitelabel,
+  offchainHasVoted,
+  offchainVoteLabel,
   daoId,
 }: {
   address: string | undefined;
@@ -39,6 +43,8 @@ const ProposalHeaderAction = ({
   proposalStatus: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
   isWhitelabel: boolean;
+  offchainHasVoted?: boolean;
+  offchainVoteLabel?: string | null;
   daoId: string;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
@@ -50,6 +56,38 @@ const ProposalHeaderAction = ({
   );
 
   if (address) {
+    if (offchainHasVoted !== undefined) {
+      if (offchainHasVoted) {
+        return (
+          <div className="hidden items-center gap-4 lg:flex">
+            <div className="bg-secondary ml-4 h-7 w-px shrink-0" />
+            <OffchainVotedBadge label={offchainVoteLabel ?? null} />
+            {isOngoing && (
+              <Button
+                className="hidden lg:flex"
+                onClick={() => setIsVotingModalOpen(true)}
+              >
+                Change your vote
+                <ArrowRight className="size-3.5" />
+              </Button>
+            )}
+          </div>
+        );
+      }
+      if (isOngoing) {
+        return (
+          <Button
+            className="hidden lg:flex"
+            onClick={() => setIsVotingModalOpen(true)}
+          >
+            Cast your vote
+            <ArrowRight className="size-3.5" />
+          </Button>
+        );
+      }
+      return null;
+    }
+
     if (supportValue === undefined) {
       if (isOngoing) {
         return (
@@ -103,6 +141,8 @@ export const ProposalHeader = ({
   proposalStatus,
   snapshotLink,
   isWhitelabel = false,
+  offchainHasVoted,
+  offchainVoteLabel,
 }: ProposalHeaderProps) => {
   const pathname = usePathname();
   const supportValue =
@@ -168,10 +208,16 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                offchainHasVoted={
+                  snapshotLink !== undefined ? offchainHasVoted : undefined
+                }
+                offchainVoteLabel={
+                  snapshotLink !== undefined ? offchainVoteLabel : undefined
+                }
                 daoId={daoId}
               />
             </>
-          ) : snapshotLink ? (
+          ) : snapshotLink !== undefined ? (
             <>
               {address && (
                 <div className="hidden flex-col items-end lg:flex">
@@ -189,6 +235,8 @@ export const ProposalHeader = ({
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
                 isWhitelabel={isWhitelabel}
+                offchainHasVoted={offchainHasVoted}
+                offchainVoteLabel={offchainVoteLabel}
                 daoId={daoId}
               />
             </>
@@ -254,6 +302,21 @@ const VotedBadge = ({ vote }: { vote: number }) => {
         You voted
       </p>
       {getVoteText(vote)}
+    </div>
+  );
+};
+
+const OffchainVotedBadge = ({ label }: { label: string | null }) => {
+  return (
+    <div className="flex flex-col items-end">
+      <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+        You voted
+      </p>
+      {label && (
+        <span className="text-primary bg-surface-default font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
+          {label}
+        </span>
+      )}
     </div>
   );
 };

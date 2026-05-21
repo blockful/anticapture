@@ -1,8 +1,14 @@
 "use client";
 
+import {
+  OrderDirection,
+  QueryInput_VotesOffchainByProposalId_OrderBy,
+  useGetOffchainVotesByProposalIdQuery,
+} from "@anticapture/graphql-client/hooks";
+import { useApolloClient } from "@apollo/client";
 import { ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { useAccount } from "wagmi";
 
 import { GovernanceActionModal } from "@/features/governance/components/modals/GovernanceActionModal";
@@ -17,7 +23,7 @@ import { ProposalSectionSkeleton } from "@/features/governance/components/propos
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
 import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
 import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
-import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
+import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import { useOffchainProposal } from "@/features/governance/hooks/useOffchainProposal";
 import { useProposal } from "@/features/governance/hooks/useProposal";
 import type {
@@ -56,11 +62,22 @@ export const ProposalSection = ({
 
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const [localOffchainVoteLabel, setLocalOffchainVoteLabel] = useState<
+    string | null
+  >(null);
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
   const daoEnum = (daoId as string).toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
+
+  // Clear optimistic vote state when the viewer or proposal changes to prevent
+  // a previous session's label from bleeding into a new wallet or proposal.
+  const prevVoteKeyRef = useRef(`${address ?? ""}:${offchainProposalId}`);
+  if (prevVoteKeyRef.current !== `${address ?? ""}:${offchainProposalId}`) {
+    prevVoteKeyRef.current = `${address ?? ""}:${offchainProposalId}`;
+    if (localOffchainVoteLabel !== null) setLocalOffchainVoteLabel(null);
+  }
 
   const handleAddressClick = useCallback((addr: string) => {
     setDrawerAddress(addr);
@@ -71,8 +88,8 @@ export const ProposalSection = ({
   }, []);
 
   const {
-    proposal: onchainProposal,
-    loading: onchainLoading,
+    data: onchainProposal,
+    isLoading: onchainLoading,
     error: onchainError,
   } = useProposal({
     proposalId: isOffchain ? "" : proposalId,
@@ -93,12 +110,13 @@ export const ProposalSection = ({
       ? rawOffchainResponse
       : null;
 
-  const { votingPower, rawVotingPower, votes } = useVoterInfo({
+  const { data: accountPower } = useAccountPower({
     address: address ?? "",
     daoId: daoEnum,
     proposalId: isOffchain ? "" : proposalId,
     decimals,
   });
+  const { votingPower, rawVotingPower, votes } = accountPower;
 
   const loading = isOffchain ? offchainLoading : onchainLoading;
   const error = isOffchain ? offchainError : onchainError;
@@ -112,12 +130,52 @@ export const ProposalSection = ({
     [rawOffchainProposal?.choices],
   );
 
+  const { data: userOffchainVoteData } = useGetOffchainVotesByProposalIdQuery({
+    variables: {
+      id: offchainProposalId,
+      voterAddresses: address ? [address] : [],
+      limit: 1,
+      skip: 0,
+      fromDate: null,
+      toDate: null,
+      orderBy: QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp,
+      orderDirection: OrderDirection.Desc,
+    },
+    context: { headers: { "anticapture-dao-id": daoEnum } },
+    skip: !isOffchain || !offchainProposalId || !address,
+  });
+
+  const apiOffchainVoteChoice =
+    userOffchainVoteData?.votesOffchainByProposalId?.items?.[0]?.choice?.[0] ??
+    null;
+  const apiOffchainVoteLabel =
+    apiOffchainVoteChoice != null
+      ? (offchainChoices[Number(apiOffchainVoteChoice) - 1] ?? null)
+      : null;
+
+  const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
+  const offchainVoteLabel = localOffchainVoteLabel ?? apiOffchainVoteLabel;
+
+  const apolloClient = useApolloClient();
+
+  const handleOffchainVoteSuccess = useCallback(
+    (voteLabel: string) => {
+      setLocalOffchainVoteLabel(voteLabel);
+      // Refetch votes (badge + table) and proposal scores so the UI reflects
+      // the new vote without requiring a manual page reload.
+      apolloClient.refetchQueries({
+        include: ["GetOffchainVotesByProposalId", "GetOffchainProposal"],
+      });
+    },
+    [apolloClient],
+  );
+
   const adaptedOffchainProposal: ProposalViewData | null = rawOffchainProposal
     ? {
         id: rawOffchainProposal.id,
         daoId: daoId as string,
         txHash: null,
-        proposerAccountId: rawOffchainProposal.author,
+        proposerAccountId: rawOffchainProposal.author as `0x${string}`,
         title: rawOffchainProposal.title,
         description: rawOffchainProposal.body,
         quorum: "0",
@@ -132,13 +190,16 @@ export const ProposalSection = ({
         abstainVotes: "0",
         startTimestamp: rawOffchainProposal.start,
         endTimestamp: rawOffchainProposal.end,
+        startBlock: 0,
+        endBlock: 0,
         queuedTimestamp: null,
         executedTimestamp: null,
         queuedTxHash: null,
         executedTxHash: null,
-        calldatas: null,
+        calldatas: [],
         targets: [],
         values: [],
+        proposalType: null,
       }
     : null;
 
@@ -189,6 +250,8 @@ export const ProposalSection = ({
           proposalStatus={proposal.status}
           snapshotLink={snapshotLink}
           isWhitelabel={isWhitelabel}
+          offchainHasVoted={isOffchain ? offchainHasVoted : undefined}
+          offchainVoteLabel={isOffchain ? offchainVoteLabel : undefined}
         />
         <div className="mx-auto w-full">
           <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
@@ -270,6 +333,8 @@ export const ProposalSection = ({
               isOpen={isVotingModalOpen}
               onClose={() => setIsVotingModalOpen(false)}
               proposal={rawOffchainProposal}
+              hasVoted={offchainHasVoted}
+              onVoteSuccess={handleOffchainVoteSuccess}
             />
           )}
         </div>
@@ -283,6 +348,8 @@ export const ProposalSection = ({
           onVoteClick={() => setIsVotingModalOpen(true)}
           onQueueClick={() => setIsQueueModalOpen(true)}
           onExecuteClick={() => setIsExecuteModalOpen(true)}
+          offchainHasVoted={offchainHasVoted}
+          offchainVoteLabel={offchainVoteLabel}
         />
       </div>
     </ProposalHeaderProvider>
@@ -298,6 +365,8 @@ const MobileBottomBar = ({
   onVoteClick,
   onQueueClick,
   onExecuteClick,
+  offchainHasVoted,
+  offchainVoteLabel,
 }: {
   isOffchain: boolean;
   address: string | undefined;
@@ -307,19 +376,35 @@ const MobileBottomBar = ({
   onVoteClick: () => void;
   onQueueClick: () => void;
   onExecuteClick: () => void;
+  offchainHasVoted?: boolean;
+  offchainVoteLabel?: string | null;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
 
   let content: React.ReactNode = null;
 
   if (isOffchain) {
-    if (address && isOngoing) {
-      content = (
-        <Button className="flex w-full" onClick={onVoteClick}>
-          Cast your vote
-          <ArrowRight className="size-3.5" />
-        </Button>
-      );
+    if (address) {
+      if (offchainHasVoted) {
+        content = (
+          <div className="flex w-full flex-col items-center gap-2">
+            <MobileOffchainVotedBadge label={offchainVoteLabel ?? null} />
+            {isOngoing && (
+              <Button className="flex w-full" onClick={onVoteClick}>
+                Change your vote
+                <ArrowRight className="size-3.5" />
+              </Button>
+            )}
+          </div>
+        );
+      } else if (isOngoing) {
+        content = (
+          <Button className="flex w-full" onClick={onVoteClick}>
+            Cast your vote
+            <ArrowRight className="size-3.5" />
+          </Button>
+        );
+      }
     }
   } else if (address) {
     if (
@@ -371,6 +456,21 @@ const MobileVotedBadge = ({ vote }: { vote: number }) => {
         You voted
       </p>
       {getVoteText(vote)}
+    </div>
+  );
+};
+
+const MobileOffchainVotedBadge = ({ label }: { label: string | null }) => {
+  return (
+    <div className="flex w-full items-center justify-center gap-2">
+      <p className="text-secondary text-[12px] font-medium leading-4">
+        You voted
+      </p>
+      {label && (
+        <span className="text-primary bg-surface-default font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
+          {label}
+        </span>
+      )}
     </div>
   );
 };

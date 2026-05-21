@@ -8,6 +8,7 @@ export * from "./event-relevance";
 export * from "./governance-activity";
 export * from "./last-update";
 export * from "./proposals";
+export * from "./revenue";
 export * from "./shared";
 export * from "./transfers";
 export * from "./treasury";

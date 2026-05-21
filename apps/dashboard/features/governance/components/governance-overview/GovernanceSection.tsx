@@ -1,10 +1,15 @@
 "use client";
 
-import { OrderDirection } from "@anticapture/graphql-client";
 import {
-  useOffchainSearchProposalsQuery,
-  useSearchProposalsQuery,
-} from "@anticapture/graphql-client/hooks";
+  orderDirectionEnum,
+  type OffchainSearchProposalsPathParamsDaoEnumKey,
+  type ProposalsQueryResponse,
+  type SearchProposalsPathParamsDaoEnumKey,
+} from "@anticapture/client";
+import {
+  useOffchainSearchProposals,
+  useSearchProposals,
+} from "@anticapture/client/hooks";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Building2, Landmark, MessageSquare, Plus, Search } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
@@ -17,6 +22,7 @@ import {
   useState,
   type RefObject,
 } from "react";
+import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import {
@@ -31,7 +37,12 @@ import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
 import { useProposals } from "@/features/governance/hooks/useProposals";
-import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
+import type { Proposal as GovernanceProposal } from "@/features/governance/types";
+import {
+  getProposalState,
+  getProposalStatus,
+  getTimeText,
+} from "@/features/governance/utils";
 import { TheSectionLayout } from "@/shared/components";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -44,6 +55,41 @@ import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 
 const ONCHAIN_TAB = { label: "Onchain", value: "onchain" };
 const OFFCHAIN_TAB = { label: "Offchain", value: "offchain" };
+
+const toGovernanceProposal = (
+  proposal: ProposalsQueryResponse["items"][number],
+  decimals: number,
+): GovernanceProposal => {
+  const forVotes = Number(formatUnits(proposal.forVotes, decimals));
+  const againstVotes = Number(formatUnits(proposal.againstVotes, decimals));
+  const abstainVotes = Number(formatUnits(proposal.abstainVotes, decimals));
+  const quorum = Number(formatUnits(proposal.quorum, decimals));
+  const total = forVotes + againstVotes + abstainVotes;
+  const forPercentage = total > 0 ? (forVotes / total) * 100 : 0;
+  const againstPercentage = total > 0 ? (againstVotes / total) * 100 : 0;
+
+  return {
+    ...proposal,
+    title: proposal.title || "Untitled Proposal",
+    status: getProposalStatus(proposal.status),
+    state: getProposalState(proposal.status),
+    proposer: proposal.proposerAccountId,
+    votes: {
+      for: forVotes.toFixed(2),
+      against: againstVotes.toFixed(2),
+      total: total.toFixed(2),
+      forPercentage: forPercentage.toFixed(0),
+      againstPercentage: againstPercentage.toFixed(0),
+    },
+    quorum: quorum.toFixed(2),
+    timeText: getTimeText(
+      proposal.startTimestamp.toString(),
+      proposal.endTimestamp.toString(),
+    ),
+    values: proposal.values.map((value) => value.toString()),
+    targets: proposal.targets,
+  };
+};
 
 export const GovernanceSection = () => {
   const { daoId }: { daoId: string } = useParams();
@@ -78,20 +124,20 @@ export const GovernanceSection = () => {
   const isSearchActive = trimmedSearch.length > 0;
 
   const {
-    proposals,
-    loading: onchainLoading,
+    data: proposals,
+    isLoading: onchainLoading,
     error: onchainError,
-    pagination: onchainPagination,
     fetchNextPage: fetchNextOnchain,
-    isPaginationLoading: isOnchainPaginationLoading,
+    isFetchingNextPage: isOnchainPaginationLoading,
+    hasNextPage: hasNextOnchainPage,
   } = useProposals({
     itemsPerPage: 10,
-    orderDirection: OrderDirection.Desc,
+    orderDirection: orderDirectionEnum.desc,
     daoId: daoIdEnum,
-    fromDate: null,
-    status: null,
-    fromEndDate: null,
-    includeOptimisticProposals: null,
+    fromDate: undefined,
+    status: undefined,
+    fromEndDate: undefined,
+    includeOptimisticProposals: undefined,
   });
 
   const {
@@ -106,38 +152,29 @@ export const GovernanceSection = () => {
     daoId: hasOffchain ? daoIdEnum : undefined,
   });
 
-  const authContext = useMemo(
-    () => ({
-      headers: { "anticapture-dao-id": daoIdEnum },
-    }),
-    [daoIdEnum],
+  const { data: searchData, isLoading: searchLoading } = useSearchProposals(
+    daoIdEnum.toLowerCase() as SearchProposalsPathParamsDaoEnumKey,
+    { query: trimmedSearch || " ", limit: 50 },
+    { query: { enabled: isSearchActive } },
   );
 
-  const { data: searchData, loading: searchLoading } = useSearchProposalsQuery({
-    variables: { query: trimmedSearch, limit: 50, skip: null },
-    skip: !isSearchActive,
-    context: authContext,
-  });
-
-  const { data: offchainSearchData, loading: offchainSearchLoading } =
-    useOffchainSearchProposalsQuery({
-      variables: { query: trimmedSearch, limit: 50, skip: null },
-      skip: !isSearchActive || !hasOffchain,
-      context: authContext,
-    });
+  const { data: offchainSearchData, isLoading: offchainSearchLoading } =
+    useOffchainSearchProposals(
+      daoIdEnum.toLowerCase() as OffchainSearchProposalsPathParamsDaoEnumKey,
+      { query: trimmedSearch || " ", limit: 50 },
+      { query: { enabled: isSearchActive && hasOffchain } },
+    );
 
   const searchOnchainProposals = useMemo(() => {
     if (!isSearchActive) return [];
-    return (searchData?.searchProposals?.items ?? [])
-      .filter((p) => p !== null)
-      .map((p) => transformToGovernanceProposal(p, decimals));
+    return (searchData?.items ?? []).map((p) =>
+      toGovernanceProposal(p, decimals),
+    );
   }, [isSearchActive, searchData, decimals]);
 
   const searchOffchainProposals = useMemo(() => {
     if (!isSearchActive) return [];
-    return (offchainSearchData?.offchainSearchProposals?.items ?? []).filter(
-      (p) => p !== null,
-    );
+    return offchainSearchData?.items ?? [];
   }, [isSearchActive, offchainSearchData]);
 
   const loadMoreOnchainRef = useRef<HTMLDivElement>(null);
@@ -154,17 +191,19 @@ export const GovernanceSection = () => {
 
   const isOnchain = activeTab === "onchain" || !hasOffchain;
   const error = isOnchain ? onchainError : offchainError;
-  const pagination = isOnchain ? onchainPagination : offchainPagination;
+  const hasNextPage = isOnchain
+    ? hasNextOnchainPage
+    : offchainPagination.hasNextPage;
   const isPaginationLoading = isOnchain
     ? isOnchainPaginationLoading
     : isOffchainPaginationLoading;
   const fetchNextPage = isOnchain ? fetchNextOnchain : fetchNextOffchain;
 
   const handleLoadMore = useCallback(() => {
-    if (!isPaginationLoading && pagination.hasNextPage) {
+    if (!isPaginationLoading && hasNextPage) {
       fetchNextPage();
     }
-  }, [fetchNextPage, isPaginationLoading, pagination.hasNextPage]);
+  }, [fetchNextPage, hasNextPage, isPaginationLoading]);
 
   useEffect(() => {
     if (activeTab === "drafts" && (!isConnected || !canCreateProposal)) {

@@ -226,7 +226,9 @@ type Query {
     toValue: String
   ): HistoricalBalancesResponse
 
-  "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/last-update`\nGet the last update time\n"
+  """
+  Get the last update time
+  """
   lastUpdate(chart: queryInput_lastUpdate_chart!): LastUpdateResponse
 
   "\n>**Method**: `GET`\n>**Base URL**: `http://localhost:42069`\n>**Path**: `/delegation-percentage`\nGet delegation percentage day buckets with forward-fill\n"
@@ -703,6 +705,118 @@ type Query {
     orderDirection: OrderDirection = desc
     addresses: [String]
   ): offchainProposalNonVoters_response
+
+  """
+  Monthly action counts by category (Registration, Renewal, Premium).
+  """
+  getRevenueActions(
+    """
+    Inclusive lower bound for the data range, as a Unix timestamp in seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for the data range, as a Unix timestamp in seconds.
+    """
+    toDate: Int
+    orderDirection: OrderDirection = desc
+  ): RevenueActionsResponse
+
+  """
+  Monthly net change and cumulative count of active .eth names.
+  """
+  getRevenueActiveNames(
+    """
+    Inclusive lower bound for the data range, as a Unix timestamp in seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for the data range, as a Unix timestamp in seconds.
+    """
+    toDate: Int
+    orderDirection: OrderDirection = desc
+  ): RevenueActiveNamesResponse
+
+  """
+  Monthly new-wallet counts and the cumulative wallet total for ENS.
+  """
+  getRevenueNewWallets(
+    """
+    Inclusive lower bound for the data range, as a Unix timestamp in seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for the data range, as a Unix timestamp in seconds.
+    """
+    toDate: Int
+    orderDirection: OrderDirection = desc
+  ): RevenueNewWalletsResponse
+
+  """
+  Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.
+  """
+  getRevenueRenewalFunnel(
+    """
+    Inclusive lower bound for the data range, as a Unix timestamp in seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for the data range, as a Unix timestamp in seconds.
+    """
+    toDate: Int
+    orderDirection: OrderDirection = desc
+  ): RevenueRenewalFunnelResponse
+
+  """
+  Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.
+  """
+  getRevenueTotals(
+    """
+    Inclusive lower bound for the data range, as a Unix timestamp in seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for the data range, as a Unix timestamp in seconds.
+    """
+    toDate: Int
+    orderDirection: OrderDirection = desc
+  ): RevenueTotalsResponse
+
+  """
+  Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.
+  """
+  getRevenueByCategory(
+    """
+    Inclusive lower bound for the data range, as a Unix timestamp in seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for the data range, as a Unix timestamp in seconds.
+    """
+    toDate: Int
+    orderDirection: OrderDirection = desc
+  ): RevenueByCategoryResponse
+
+  """
+  Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.
+  """
+  getRevenueRenewalTenure(
+    """
+    Inclusive lower bound for the data range, as a Unix timestamp in seconds.
+    """
+    fromDate: Int
+
+    """
+    Inclusive upper bound for the data range, as a Unix timestamp in seconds.
+    """
+    toDate: Int
+    orderDirection: OrderDirection = desc
+  ): RevenueRenewalTenureResponse
 
   """
   Average delegation percentage across all supported DAOs by day.
@@ -1982,6 +2096,290 @@ type Void_container {
 
 """Represents empty values"""
 scalar Void
+
+"""
+Monthly action counts by category (Registration, Renewal, Premium).
+"""
+type RevenueActionsResponse {
+  items: [RevenueActionsItem]!
+
+  """
+  Total number of items returned.
+  """
+  totalCount: Int!
+}
+
+"""
+Single revenue actions datapoint.
+"""
+type RevenueActionsItem {
+  """
+  Month start (Unix timestamp in seconds, UTC).
+  """
+  date: Int!
+  category: RevenueActionCategory!
+
+  """
+  Number of actions of this category in the given month.
+  """
+  actions: Int!
+}
+
+"""
+Category of ENS revenue-generating action.
+"""
+enum RevenueActionCategory {
+  Registration
+  Renewal
+  Premium
+}
+
+"""
+Monthly net change and cumulative count of active .eth names.
+"""
+type RevenueActiveNamesResponse {
+  items: [RevenueActiveNamesItem]!
+
+  """
+  Total number of items returned.
+  """
+  totalCount: Int!
+}
+
+"""
+Single active-names datapoint.
+"""
+type RevenueActiveNamesItem {
+  """
+  Month start (Unix timestamp in seconds, UTC).
+  """
+  date: Int!
+
+  """
+  Net change in active .eth names for the month.
+  """
+  netChange: Float!
+
+  """
+  Cumulative count of active .eth names as of the month.
+  """
+  cumulativeActive: Float!
+}
+
+"""
+Monthly new-wallet counts and the cumulative wallet total for ENS.
+"""
+type RevenueNewWalletsResponse {
+  items: [RevenueNewWalletsItem]!
+
+  """
+  Total number of items returned.
+  """
+  totalCount: Int!
+}
+
+"""
+Single new-wallets datapoint.
+"""
+type RevenueNewWalletsItem {
+  """
+  Month start (Unix timestamp in seconds, UTC).
+  """
+  date: Int!
+
+  """
+  New wallets that interacted with ENS in the given month.
+  """
+  newWallets: Float!
+
+  """
+  Cumulative count of ENS wallets as of the given month.
+  """
+  cumulativeWallets: Float!
+}
+
+"""
+Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.
+"""
+type RevenueRenewalFunnelResponse {
+  items: [RevenueRenewalFunnelItem]!
+
+  """
+  Total number of items returned.
+  """
+  totalCount: Int!
+}
+
+"""
+Single renewal-funnel datapoint keyed by expiry month.
+"""
+type RevenueRenewalFunnelItem {
+  """
+  Expiry month start (Unix timestamp in seconds, UTC).
+  """
+  date: Int!
+
+  """
+  Total .eth terms expiring in the given month.
+  """
+  termsExpiring: Float!
+
+  """
+  Number of expiring terms that were renewed.
+  """
+  renewedCount: Float!
+
+  """
+  Number of expiring terms that were not renewed.
+  """
+  churnedCount: Float!
+
+  """
+  Renewal rate for the month, as a percentage (0-100).
+  """
+  renewalRatePct: Float!
+}
+
+"""
+Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.
+"""
+type RevenueTotalsResponse {
+  items: [RevenueTotalsItem]!
+
+  """
+  Total number of items returned.
+  """
+  totalCount: Int!
+}
+
+"""
+Single revenue-totals datapoint.
+"""
+type RevenueTotalsItem {
+  """
+  Month start (Unix timestamp in seconds, UTC).
+  """
+  date: Int!
+
+  """
+  USD revenue from new .eth registrations in the month.
+  """
+  registrationUsd: Float!
+
+  """
+  USD revenue from temporary premium auctions in the given month.
+  """
+  premiumUsd: Float!
+
+  """
+  USD revenue from .eth renewals in the given month.
+  """
+  renewalUsd: Float!
+
+  """
+  Total USD revenue for the month (upstream sum; not recomputed).
+  """
+  totalUsd: Float!
+
+  """
+  ETH revenue from new .eth registrations in the month.
+  """
+  registrationEth: Float!
+
+  """
+  ETH revenue from temporary premium auctions in the given month.
+  """
+  premiumEth: Float!
+
+  """
+  ETH revenue from .eth renewals in the given month.
+  """
+  renewalEth: Float!
+}
+
+"""
+Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.
+"""
+type RevenueByCategoryResponse {
+  items: [RevenueByCategoryItem]!
+
+  """
+  Total number of items returned.
+  """
+  totalCount: Int!
+}
+
+"""
+Single revenue-by-category datapoint.
+"""
+type RevenueByCategoryItem {
+  """
+  Month start (Unix timestamp in seconds, UTC).
+  """
+  date: Int!
+  category: RevenueByCategoryCategory!
+
+  """
+  USD revenue for the category in the given month.
+  """
+  revenueUsd: Float!
+
+  """
+  ETH revenue for the category in the given month.
+  """
+  revenueEth: Float!
+}
+
+"""
+Revenue category as reported by the Steakhouse accounting ledger.
+"""
+enum RevenueByCategoryCategory {
+  Registration
+  Renewal
+}
+
+"""
+Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.
+"""
+type RevenueRenewalTenureResponse {
+  items: [RevenueRenewalTenureItem]!
+
+  """
+  Total number of items returned.
+  """
+  totalCount: Int!
+}
+
+"""
+Single renewal-tenure datapoint keyed by expiry month.
+"""
+type RevenueRenewalTenureItem {
+  """
+  Expiry month start (Unix timestamp in seconds, UTC).
+  """
+  date: Int!
+  tenureBucket: RevenueRenewalTenureBucket!
+
+  """
+  Count of names in this tenure bucket for the expiry month.
+  """
+  names: Int!
+
+  """
+  Total renewals contributed by names in this bucket.
+  """
+  totalRenewalsInBucket: Int!
+}
+
+"""
+Tenure bucket label as returned by Dune.
+"""
+enum RevenueRenewalTenureBucket {
+  _0_renewals_one_shot
+  _1_renewal
+  _2_renewals
+  _3_PLUS__renewals
+}
 
 type AverageDelegationPercentageItem {
   date: String!
