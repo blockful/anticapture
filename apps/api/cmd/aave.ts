@@ -13,6 +13,7 @@ import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalances,
+  availableTokens,
   dao,
   historicalBalances,
   historicalVotingPower,
@@ -46,6 +47,7 @@ import { AAVEVotingPowerRepository } from "@/repositories/voting-power/aave";
 import {
   AccountBalanceService,
   DaoService,
+  DaoTokensService,
   HistoricalBalancesService,
   TransfersService,
   HistoricalDelegationsService,
@@ -207,6 +209,16 @@ transfers(
   app,
   wrapWithTracing(
     new TransfersService(wrapWithTracing(new TransfersRepository(pgClient))),
+  ),
+);
+availableTokens(
+  app,
+  wrapWithTracing(
+    new DaoTokensService(
+      env.COINGECKO_API_URL,
+      env.COINGECKO_API_KEY,
+      env.DAO_ID,
+    ),
   ),
 );
 dao(app, daoService);
