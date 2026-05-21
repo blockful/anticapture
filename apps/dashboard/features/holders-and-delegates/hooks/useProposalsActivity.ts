@@ -48,11 +48,12 @@ interface UseProposalsActivityResult {
 }
 
 const getProposalsNextPage = (
-  lastPage: ProposalActivityResponse,
+  _lastPage: ProposalActivityResponse,
   allPages: ProposalActivityResponse[],
 ): number | undefined => {
   const loaded = allPages.reduce((s, p) => s + p.proposals.length, 0);
-  return loaded >= lastPage.totalProposals ? undefined : loaded;
+  const total = allPages[0]?.totalProposals ?? 0;
+  return loaded >= total ? undefined : loaded;
 };
 
 export const useProposalsActivity = ({
@@ -91,15 +92,15 @@ export const useProposalsActivity = ({
 
   const processedData = useMemo((): ProposalActivityData | null => {
     if (!data?.pages?.length) return null;
-    const lastPage = data.pages[data.pages.length - 1];
+    const firstPage = data.pages[0];
     const proposals = data.pages.flatMap((p) => p.proposals);
     return {
-      totalProposals: lastPage.totalProposals,
-      votedProposals: lastPage.votedProposals,
-      neverVoted: lastPage.neverVoted ? 1 : 0,
-      winRate: lastPage.winRate,
-      yesRate: lastPage.yesRate,
-      avgTimeBeforeEnd: lastPage.avgTimeBeforeEnd,
+      totalProposals: firstPage.totalProposals,
+      votedProposals: firstPage.votedProposals,
+      neverVoted: firstPage.neverVoted ? 1 : 0,
+      winRate: firstPage.winRate,
+      yesRate: firstPage.yesRate,
+      avgTimeBeforeEnd: firstPage.avgTimeBeforeEnd,
       proposals,
     };
   }, [data]);
