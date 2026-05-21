@@ -1,3 +1,4 @@
+import type { VotingPowerVariation } from "@anticapture/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircle2,
@@ -11,13 +12,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 import type { ProposalDetails } from "@/features/governance/types";
 import type { VoteWithHistoricalPower } from "@/features/governance/hooks/useVotes";
 import { useVotes } from "@/features/governance/hooks/useVotes";
+import { useVotesParams } from "@/features/governance/hooks/useVotesParams";
 import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -51,52 +53,57 @@ export const TabsVotedContent = ({
 }: TabsVotedContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
   const { daoId } = useParams();
-
-  // State for managing sort order
-  const [sortBy, setSortBy] = useState<string>("votingPower");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-
-  // State for filters
-  const [choiceFilter, setChoiceFilter] = useState<string>("all");
-  const [voterFilter, setVoterFilter] = useState<string | undefined>(undefined);
-
-  const supportValue = choiceFilter === "all" ? null : Number(choiceFilter);
+  const { filters, setFilters } = useVotesParams();
+  const sortBy = filters.orderBy;
+  const sortDirection = filters.orderDirection;
+  const choiceFilter = filters.support ?? "all";
+  const voterFilter = filters.voter;
 
   // Handle sorting
   const handleSort = useCallback(
     (field: string) => {
       if (sortBy === field) {
-        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        setFilters({
+          orderDirection: sortDirection === "asc" ? "desc" : "asc",
+        });
       } else {
-        setSortBy(field);
-        setSortDirection("desc");
+        setFilters({
+          orderBy: field as typeof sortBy,
+          orderDirection: "desc",
+        });
       }
     },
-    [sortBy, sortDirection],
+    [setFilters, sortBy, sortDirection],
   );
 
   // Get votes for this proposal
-  const { votes, loading, error, loadMore, hasNextPage, isLoadingMore } =
-    useVotes({
-      proposalId: proposal.id,
-      daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
-      limit: 10,
-      proposalStartTimestamp: proposal.startTimestamp
-        ? Number(proposal.startTimestamp) * 1000
-        : undefined,
-      orderBy: sortBy,
-      orderDirection: sortDirection,
-      support: supportValue,
-      voterAddress: voterFilter ?? null,
-    });
+  const {
+    data: votes,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useVotes({
+    proposalId: proposal.id,
+    daoId: (daoId as string)?.toUpperCase() as DaoIdEnum,
+    limit: 10,
+    proposalStartTimestamp: proposal.startTimestamp
+      ? Number(proposal.startTimestamp) * 1000
+      : undefined,
+    orderBy: sortBy,
+    orderDirection: sortDirection,
+    support: filters.support ?? null,
+    voterAddress: voterFilter ?? null,
+  });
 
   // Intersection observer on the loading row
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && hasNextPage && !isLoadingMore) {
-          loadMore();
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       { threshold: 0.1 },
@@ -107,7 +114,7 @@ export const TabsVotedContent = ({
     }
 
     return () => observer.disconnect();
-  }, [hasNextPage, isLoadingMore, loadMore]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const columns: ColumnDef<VoteWithHistoricalPower>[] = useMemo(
     () => [
@@ -184,7 +191,7 @@ export const TabsVotedContent = ({
           <div className="text-table-header flex h-8 w-full items-center justify-start gap-1 px-2">
             <p>Voter</p>
             <AddressFilter
-              onApply={(addr) => setVoterFilter(addr)}
+              onApply={(addr) => setFilters({ voter: addr ?? undefined })}
               currentFilter={voterFilter}
             />
           </div>
@@ -269,7 +276,12 @@ export const TabsVotedContent = ({
             <CategoriesFilter
               options={choiceFilterOptions}
               selectedValue={choiceFilter}
-              onValueChange={setChoiceFilter}
+              onValueChange={(value) =>
+                setFilters({
+                  support:
+                    value === "all" ? undefined : (value as "0" | "1" | "2"),
+                })
+              }
             />
           </div>
         ),
@@ -458,12 +470,9 @@ export const TabsVotedContent = ({
         size: 160,
         cell: ({ row }) => {
           const voterAddress = row.getValue("voterAddress") as string;
-          const votingPowerVariation = row.getValue("votingPowerVariation") as {
-            previousVotingPower: string;
-            currentVotingPower: string;
-            absoluteChange: string;
-            percentageChange: string;
-          };
+          const votingPowerVariation = row.getValue("votingPowerVariation") as
+            | VotingPowerVariation
+            | undefined;
           const vote = row.original;
 
           // Handle loading row
@@ -621,6 +630,7 @@ export const TabsVotedContent = ({
       onAddressClick,
       voterFilter,
       choiceFilter,
+      setFilters,
     ],
   );
 
@@ -644,12 +654,12 @@ export const TabsVotedContent = ({
           reason: vote.reason,
           timestamp: 0,
           isSubRow: true,
-        } as VoteWithHistoricalPower);
+        } as unknown as VoteWithHistoricalPower);
       }
     });
 
     // Add loading row if there are more pages or currently loading
-    if (hasNextPage || isLoadingMore) {
+    if (hasNextPage || isFetchingNextPage) {
       data.push({
         voterAddress: "__LOADING_ROW__",
         transactionHash: "",
@@ -659,31 +669,33 @@ export const TabsVotedContent = ({
         reason: "",
         timestamp: 0,
         isSubRow: false,
-      } as VoteWithHistoricalPower);
+      } as unknown as VoteWithHistoricalPower);
     }
 
     return data;
-  }, [votes, hasNextPage, isLoadingMore]);
+  }, [votes, hasNextPage, isFetchingNextPage]);
 
   // Show skeleton table on initial load or when we have no valid data
   const hasValidData =
     votes.length > 0 &&
     votes.some(
-      (vote) => vote.voterAddress && vote.voterAddress !== "__LOADING_ROW__",
+      (vote) =>
+        vote.voterAddress &&
+        (vote.voterAddress as string) !== "__LOADING_ROW__",
     );
 
   if (error) {
     return <div>Error: {error.message}</div>;
   }
 
-  if (loading && !hasValidData) {
+  if (isLoading && !hasValidData) {
     return (
       <div className="w-full">
         <VotesTable
           columns={columns}
           data={Array.from(
             { length: 7 },
-            () => ({}) as VoteWithHistoricalPower,
+            () => ({}) as unknown as VoteWithHistoricalPower,
           )}
         />
       </div>
