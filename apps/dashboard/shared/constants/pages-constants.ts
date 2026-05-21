@@ -94,4 +94,10 @@ export const PAGES_CONSTANTS = {
     description:
       "Monitor the publication status of quarterly reports from DAO-funded service providers.",
   },
+  revenue: {
+    title: "Revenue",
+    page: "revenue",
+    description:
+      "Protocol financial health: revenue, registrations, and name retention.",
+  },
 };
