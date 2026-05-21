@@ -62,7 +62,7 @@ export const TokenSelector = ({
     tokens.some((t) => t.address.toLowerCase() === value.toLowerCase());
   if (value && isAddress(value) && !isCurated) {
     comboboxItems.unshift({
-      value,
+      value: value.toLowerCase(),
       label: `${value.slice(0, 6)}…${value.slice(-4)}`,
       icon: undefined,
     });
@@ -71,7 +71,7 @@ export const TokenSelector = ({
   return (
     <Combobox
       items={comboboxItems}
-      value={value || undefined}
+      value={value ? value.toLowerCase() : undefined}
       onValueChange={onChange}
       placeholder={isLoading ? "Loading tokens…" : "Select a token"}
       isDisabled={isLoading}

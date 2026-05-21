@@ -116,6 +116,20 @@ const TOKEN_REGISTRY: Record<AssetPlatformEnum, TokenRegistryItem[]> = {
       decimals: 18,
       coingeckoId: "obol-2",
     },
+    {
+      address: "0xe485e2f1bab389c08721b291f6b59780fec83fd7",
+      symbol: "SHU",
+      name: "Shutter Network",
+      decimals: 18,
+      coingeckoId: "shutter",
+    },
+    {
+      address: "0x6f40d4a6237c257fff2db00fa0510deeecd303eb",
+      symbol: "FLUID",
+      name: "Fluid",
+      decimals: 18,
+      coingeckoId: "fluid",
+    },
   ],
   [AssetPlatformEnum.ARBITRUM]: [
     {
