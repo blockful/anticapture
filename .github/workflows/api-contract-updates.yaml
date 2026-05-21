@@ -3,6 +3,8 @@ name: API Contract Updates
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    branches-ignore:
+      - main
 
 jobs:
   detect-contract-updates:
@@ -38,6 +40,7 @@ jobs:
           api_implementation_changed=false
           gateway_schema_changed=false
           gateful_openapi_changed=false
+          api_contract_changed=false
 
           for file in "${changed_files[@]}"; do
             case "$file" in
@@ -49,11 +52,45 @@ jobs:
               apps/api-gateway/schema.graphql)
                 gateway_schema_changed=true
                 ;;
+              apps/api/openapi/* | apps/gateful/openapi/*)
+                api_contract_changed=true
+                ;;
+            esac
+
+            case "$file" in
               apps/gateful/openapi/gateful.json)
                 gateful_openapi_changed=true
                 ;;
             esac
           done
+
+          if [[ "$api_contract_changed" == "true" ]]; then
+            api_gateway_changeset_found=false
+            gateful_changeset_found=false
+
+            for file in "${changed_files[@]}"; do
+              case "$file" in
+                .changeset/*.md)
+                  if [[ "$file" != ".changeset/README.md" ]] && [[ -f "$file" ]] && grep -q '"@anticapture/api-gateway"' "$file"; then
+                    api_gateway_changeset_found=true
+                  fi
+                  if [[ "$file" != ".changeset/README.md" ]] && [[ -f "$file" ]] && grep -q '"@anticapture/gateful"' "$file"; then
+                    gateful_changeset_found=true
+                  fi
+                  ;;
+              esac
+            done
+
+            if [[ "$api_gateway_changeset_found" != "true" ]]; then
+              echo "::error::API OpenAPI contract changes must include a changeset for @anticapture/api-gateway."
+              exit 1
+            fi
+
+            if [[ "$gateful_changeset_found" != "true" ]]; then
+              echo "::error::API OpenAPI contract changes must include a changeset for @anticapture/gateful."
+              exit 1
+            fi
+          fi
 
           if [[ "$api_implementation_changed" != "true" ]]; then
             echo "No API controller or mapper changes detected."
