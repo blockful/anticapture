@@ -50,6 +50,11 @@ export function useBalanceHistory({
   const restOrderBy: HistoricalBalancesQueryParamsOrderByEnumKey =
     orderBy === "amount" ? "delta" : "timestamp";
 
+  const fromFilter =
+    customFromFilter ?? (transactionType === "sell" ? accountId : undefined);
+  const toFilter =
+    customToFilter ?? (transactionType === "buy" ? accountId : undefined);
+
   const params = useMemo(
     () => ({
       orderBy: restOrderBy,
@@ -60,6 +65,8 @@ export function useBalanceHistory({
       ...(filterVariables?.toValue ? { toValue: filterVariables.toValue } : {}),
       ...(fromTimestamp ? { fromDate: fromTimestamp } : {}),
       ...(toTimestamp ? { toDate: toTimestamp } : {}),
+      ...(fromFilter ? { from: fromFilter } : {}),
+      ...(toFilter ? { to: toFilter } : {}),
       limit,
     }),
     [
@@ -68,6 +75,8 @@ export function useBalanceHistory({
       filterVariables,
       fromTimestamp,
       toTimestamp,
+      fromFilter,
+      toFilter,
       limit,
     ],
   );
@@ -90,16 +99,6 @@ export function useBalanceHistory({
     if (!data?.pages) return [];
     return data.pages
       .flatMap((p) => p.items)
-      .filter((item) => {
-        if (transactionType === "buy" && item.transfer.to !== accountId)
-          return false;
-        if (transactionType === "sell" && item.transfer.from !== accountId)
-          return false;
-        if (customFromFilter && item.transfer.from !== customFromFilter)
-          return false;
-        if (customToFilter && item.transfer.to !== customToFilter) return false;
-        return true;
-      })
       .map((item) => ({
         timestamp: item.timestamp.toString(),
         amount: Number(formatUnits(BigInt(item.transfer.value), decimals)),
@@ -110,14 +109,7 @@ export function useBalanceHistory({
           | "in"
           | "out",
       }));
-  }, [
-    data,
-    accountId,
-    transactionType,
-    customFromFilter,
-    customToFilter,
-    decimals,
-  ]);
+  }, [data, accountId, decimals]);
 
   return {
     data: transformedData,

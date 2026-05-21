@@ -320,6 +320,66 @@ describe("Historical Balances Controller", () => {
       });
     });
 
+    it("should filter by transfer.from address", async () => {
+      const OTHER_FROM = getAddress(
+        "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      );
+      await db
+        .insert(balanceHistory)
+        .values([
+          createHistoryRow({ transactionHash: TX_1, logIndex: 0 }),
+          createHistoryRow({ transactionHash: TX_2, logIndex: 0 }),
+        ]);
+      await db.insert(transfer).values([
+        createTransferRow({ transactionHash: TX_1, logIndex: 0 }),
+        createTransferRow({
+          transactionHash: TX_2,
+          logIndex: 0,
+          fromAccountId: OTHER_FROM,
+        }),
+      ]);
+
+      const res = await app.request(
+        `/accounts/${VALID_ADDRESS}/balances/historical?from=${FROM_ADDRESS}`,
+      );
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [{ ...BALANCE_HISTORY_ITEM, transactionHash: TX_1 }],
+      });
+    });
+
+    it("should filter by transfer.to address", async () => {
+      const OTHER_TO = getAddress("0xcccccccccccccccccccccccccccccccccccccccc");
+      await db
+        .insert(balanceHistory)
+        .values([
+          createHistoryRow({ transactionHash: TX_1, logIndex: 0 }),
+          createHistoryRow({ transactionHash: TX_2, logIndex: 0 }),
+        ]);
+      await db.insert(transfer).values([
+        createTransferRow({ transactionHash: TX_1, logIndex: 0 }),
+        createTransferRow({
+          transactionHash: TX_2,
+          logIndex: 0,
+          toAccountId: OTHER_TO,
+        }),
+      ]);
+
+      const res = await app.request(
+        `/accounts/${VALID_ADDRESS}/balances/historical?to=${VALID_ADDRESS}`,
+      );
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [{ ...BALANCE_HISTORY_ITEM, transactionHash: TX_1 }],
+      });
+    });
+
     it("should return 400 for invalid address", async () => {
       const res = await app.request("/accounts/not-valid/balances/historical");
 

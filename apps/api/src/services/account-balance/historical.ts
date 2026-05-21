@@ -13,6 +13,8 @@ export interface historicalBalanceRepositoryInterface {
     maxDelta?: string,
     fromDate?: number,
     toDate?: number,
+    fromAddress?: Address,
+    toAddress?: Address,
   ): Promise<DBHistoricalBalanceWithRelations[]>;
 
   getHistoricalBalanceCount(
@@ -21,6 +23,8 @@ export interface historicalBalanceRepositoryInterface {
     maxDelta?: string,
     fromDate?: number,
     toDate?: number,
+    fromAddress?: Address,
+    toAddress?: Address,
   ): Promise<number>;
 }
 
@@ -39,6 +43,8 @@ export class HistoricalBalancesService {
     maxDelta?: string,
     fromDate?: number,
     toDate?: number,
+    fromAddress?: Address,
+    toAddress?: Address,
   ): Promise<{
     items: DBHistoricalBalanceWithRelations[];
     totalCount: number;
@@ -53,6 +59,8 @@ export class HistoricalBalancesService {
       maxDelta,
       fromDate,
       toDate,
+      fromAddress,
+      toAddress,
     );
 
     const totalCount = await this.repository.getHistoricalBalanceCount(
@@ -61,6 +69,8 @@ export class HistoricalBalancesService {
       maxDelta,
       fromDate,
       toDate,
+      fromAddress,
+      toAddress,
     );
     return { items, totalCount };
   }
