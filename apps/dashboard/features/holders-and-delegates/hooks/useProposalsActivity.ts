@@ -93,7 +93,15 @@ export const useProposalsActivity = ({
   const processedData = useMemo((): ProposalActivityData | null => {
     if (!data?.pages?.length) return null;
     const firstPage = data.pages[0];
-    const proposals = data.pages.flatMap((p) => p.proposals);
+    const seen = new Set<string>();
+    const proposals = data.pages
+      .flatMap((p) => p.proposals)
+      .filter((item) => {
+        const id = item.proposal.id;
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
     return {
       totalProposals: firstPage.totalProposals,
       votedProposals: firstPage.votedProposals,

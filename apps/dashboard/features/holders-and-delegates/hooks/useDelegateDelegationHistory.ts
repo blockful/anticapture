@@ -2,6 +2,7 @@
 
 import type {
   HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
+  HistoricalVotingPowerByAccountIdQueryParamsOrderByEnumKey,
   HistoricalVotingPowerByAccountIdQueryResponse,
 } from "@anticapture/client";
 import { useHistoricalVotingPowerByAccountIdInfinite } from "@anticapture/client/hooks";
@@ -45,6 +46,7 @@ export interface UseDelegateDelegationHistoryResult {
 interface UseDelegateDelegationHistoryParams {
   accountId: string;
   daoId: DaoIdEnum;
+  orderBy?: HistoricalVotingPowerByAccountIdQueryParamsOrderByEnumKey;
   orderDirection?: "asc" | "desc";
   filterVariables?: AmountFilterVariables;
   fromTimestamp?: number;
@@ -63,6 +65,7 @@ const getNextPageParam = (
 export function useDelegateDelegationHistory({
   accountId,
   daoId,
+  orderBy = "timestamp",
   orderDirection = "desc",
   filterVariables,
   fromTimestamp: fromDate,
@@ -76,6 +79,7 @@ export function useDelegateDelegationHistory({
   const params = useMemo(
     () => ({
       limit,
+      orderBy,
       orderDirection,
       ...(filterVariables?.fromValue
         ? { fromValue: filterVariables.fromValue }
@@ -84,7 +88,7 @@ export function useDelegateDelegationHistory({
       ...(fromDate ? { fromDate } : {}),
       ...(toDate ? { toDate } : {}),
     }),
-    [limit, orderDirection, filterVariables, fromDate, toDate],
+    [limit, orderBy, orderDirection, filterVariables, fromDate, toDate],
   );
 
   const { data, isLoading, error, fetchNextPage, hasNextPage } =
