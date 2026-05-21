@@ -166,9 +166,13 @@ const TENURE_ORDER: RevenueRenewalTenureBucket[] = [
   "3+ renewals",
 ];
 
+const EXPIRATION_HORIZON_YEARS = 10;
+
 export function transformToRenewalTenure(items: RevenueRenewalTenureItem[]) {
+  const maxYear = new Date().getUTCFullYear() + EXPIRATION_HORIZON_YEARS;
   const dataMap = new Map<number, Map<RevenueRenewalTenureBucket, number>>();
   for (const item of items) {
+    if (new Date(item.date * 1000).getUTCFullYear() > maxYear) continue;
     if (!dataMap.has(item.date)) dataMap.set(item.date, new Map());
     dataMap.get(item.date)!.set(item.tenureBucket, item.names);
   }
