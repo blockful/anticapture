@@ -1,15 +1,16 @@
 import { parseEther } from "viem";
 import { describe, it, expect, beforeEach } from "vitest";
+import { z } from "zod";
 
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
-import { DBFeedEvent, FeedRequest } from "@/mappers";
+import { DBFeedEvent, FeedMetadataSchema, FeedRequest } from "@/mappers";
 
 import { FeedService } from ".";
 
 type FeedEventWithMetadata = DBFeedEvent & {
-  metadata: Record<string, unknown> | null;
+  metadata: z.infer<typeof FeedMetadataSchema> | null;
 };
 
 const createFeedEvent = (
@@ -82,13 +83,19 @@ describe("FeedService", () => {
     });
 
     it("should preserve item fields from repository", async () => {
+      const delegationMetadata = {
+        delegator: "0x1",
+        delegate: "0x2",
+        previousDelegate: null,
+        amount: "100",
+      };
       const event = createFeedEvent({
         txHash: "0xdef456",
         logIndex: 5,
         type: "DELEGATION",
         value: ensThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM],
         timestamp: 1700001000,
-        metadata: { from: "0x1", to: "0x2" },
+        metadata: delegationMetadata,
       });
       simpleRepo.items = [event];
 
@@ -101,7 +108,7 @@ describe("FeedService", () => {
         value: event.value.toString(),
         timestamp: 1700001000,
         proposalId: null,
-        metadata: { from: "0x1", to: "0x2" },
+        metadata: delegationMetadata,
         relevance: FeedRelevance.MEDIUM,
       });
     });

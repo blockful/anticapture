@@ -70,6 +70,106 @@ export const FeedRequestSchema = z
     description: "Query params used to page and filter feed events.",
   });
 
+export const FeedVoteMetadataSchema = z
+  .object({
+    voter: z.string().openapi({ description: "Voter address." }),
+    reason: z
+      .string()
+      .nullable()
+      .openapi({ description: "Vote reason, when provided." }),
+    support: z.number().int().openapi({
+      description: "Vote support: 0 = against, 1 = for, 2 = abstain.",
+    }),
+    votingPower: z.string().openapi({
+      description: "Voter voting power, as a decimal string.",
+      format: "bigint",
+    }),
+    proposalId: z.string().openapi({ description: "Proposal voted on." }),
+    title: z
+      .string()
+      .optional()
+      .openapi({ description: "Proposal title, when known." }),
+  })
+  .openapi("FeedVoteMetadata", {
+    description: "Metadata payload for a VOTE feed event.",
+  });
+
+export const FeedProposalMetadataSchema = z
+  .object({
+    id: z.string().openapi({ description: "Proposal ID." }),
+    proposer: z.string().openapi({ description: "Proposer address." }),
+    votingPower: z.string().openapi({
+      description:
+        "Proposer voting power at proposal creation, as a decimal string.",
+      format: "bigint",
+    }),
+    title: z.string().openapi({ description: "Proposal title." }),
+  })
+  .openapi("FeedProposalMetadata", {
+    description: "Metadata payload for a PROPOSAL feed event.",
+  });
+
+export const FeedProposalExtendedMetadataSchema = z
+  .object({
+    id: z.string().openapi({ description: "Proposal ID." }),
+    title: z.string().openapi({ description: "Proposal title." }),
+    endBlock: z.number().int().openapi({
+      description: "New end block after the extension.",
+    }),
+    endTimestamp: z.string().openapi({
+      description:
+        "New proposal end timestamp in Unix seconds, as a decimal string.",
+      format: "bigint",
+    }),
+    proposer: z.string().openapi({ description: "Proposer address." }),
+  })
+  .openapi("FeedProposalExtendedMetadata", {
+    description: "Metadata payload for a PROPOSAL_EXTENDED feed event.",
+  });
+
+export const FeedTransferMetadataSchema = z
+  .object({
+    from: z.string().openapi({ description: "Sender address." }),
+    to: z.string().openapi({ description: "Recipient address." }),
+    amount: z.string().openapi({
+      description: "Transferred amount, as a decimal string.",
+      format: "bigint",
+    }),
+  })
+  .openapi("FeedTransferMetadata", {
+    description: "Metadata payload for a TRANSFER feed event.",
+  });
+
+export const FeedDelegationMetadataSchema = z
+  .object({
+    delegator: z.string().openapi({ description: "Delegator address." }),
+    delegate: z.string().openapi({ description: "New delegate address." }),
+    previousDelegate: z
+      .string()
+      .nullable()
+      .openapi({ description: "Previous delegate address, when known." }),
+    amount: z.string().openapi({
+      description: "Delegated voting power, as a decimal string.",
+      format: "bigint",
+    }),
+  })
+  .openapi("FeedDelegationMetadata", {
+    description: "Metadata payload for a DELEGATION feed event.",
+  });
+
+export const FeedMetadataSchema = z
+  .union([
+    FeedVoteMetadataSchema,
+    FeedProposalMetadataSchema,
+    FeedProposalExtendedMetadataSchema,
+    FeedTransferMetadataSchema,
+    FeedDelegationMetadataSchema,
+  ])
+  .openapi("FeedMetadata", {
+    description:
+      "Type-specific metadata for the feed event. Narrow by the FeedItem.type field.",
+  });
+
 export const FeedItemSchema = z
   .object({
     txHash: z.string().openapi({ description: "Transaction hash." }),
@@ -87,9 +187,7 @@ export const FeedItemSchema = z
       example: 1704067200,
     }),
     relevance: FeedRelevanceSchema,
-    metadata: z.record(z.string(), z.any()).nullable().openapi("FeedMetadata", {
-      description: "Type-specific metadata for the feed event.",
-    }),
+    metadata: FeedMetadataSchema.nullable(),
   })
   .openapi("FeedItem", {
     description: "Single event in the governance activity feed.",

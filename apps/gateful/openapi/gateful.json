@@ -298,7 +298,10 @@
             "$ref": "#/components/schemas/FeedRelevance"
           },
           "metadata": {
-            "$ref": "#/components/schemas/FeedMetadata"
+            "oneOf": [
+              { "$ref": "#/components/schemas/FeedMetadata" },
+              { "type": "null" }
+            ]
           }
         },
         "required": [
@@ -327,13 +330,118 @@
         "enum": ["HIGH", "MEDIUM", "LOW"],
         "description": "Filter events by relevance tier."
       },
-      "FeedMetadata": {
+      "FeedVoteMetadata": {
         "type": "object",
-        "nullable": true,
-        "additionalProperties": {
-          "nullable": true
+        "properties": {
+          "voter": { "type": "string", "description": "Voter address." },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Vote reason, when provided."
+          },
+          "support": {
+            "type": "integer",
+            "description": "Vote support: 0 = against, 1 = for, 2 = abstain."
+          },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Voter voting power, as a decimal string."
+          },
+          "proposalId": {
+            "type": "string",
+            "description": "Proposal voted on."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title, when known."
+          }
         },
-        "description": "Type-specific metadata for the feed event."
+        "required": ["voter", "reason", "support", "votingPower", "proposalId"],
+        "description": "Metadata payload for a VOTE feed event."
+      },
+      "FeedProposalMetadata": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Proposal ID." },
+          "proposer": { "type": "string", "description": "Proposer address." },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Proposer voting power at proposal creation, as a decimal string."
+          },
+          "title": { "type": "string", "description": "Proposal title." }
+        },
+        "required": ["id", "proposer", "votingPower", "title"],
+        "description": "Metadata payload for a PROPOSAL feed event."
+      },
+      "FeedProposalExtendedMetadata": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Proposal ID." },
+          "title": { "type": "string", "description": "Proposal title." },
+          "endBlock": {
+            "type": "integer",
+            "description": "New end block after the extension."
+          },
+          "endTimestamp": {
+            "type": "string",
+            "format": "bigint",
+            "description": "New proposal end timestamp in Unix seconds, as a decimal string."
+          },
+          "proposer": { "type": "string", "description": "Proposer address." }
+        },
+        "required": ["id", "title", "endBlock", "endTimestamp", "proposer"],
+        "description": "Metadata payload for a PROPOSAL_EXTENDED feed event."
+      },
+      "FeedTransferMetadata": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "description": "Sender address." },
+          "to": { "type": "string", "description": "Recipient address." },
+          "amount": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transferred amount, as a decimal string."
+          }
+        },
+        "required": ["from", "to", "amount"],
+        "description": "Metadata payload for a TRANSFER feed event."
+      },
+      "FeedDelegationMetadata": {
+        "type": "object",
+        "properties": {
+          "delegator": {
+            "type": "string",
+            "description": "Delegator address."
+          },
+          "delegate": {
+            "type": "string",
+            "description": "New delegate address."
+          },
+          "previousDelegate": {
+            "type": "string",
+            "nullable": true,
+            "description": "Previous delegate address, when known."
+          },
+          "amount": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Delegated voting power, as a decimal string."
+          }
+        },
+        "required": ["delegator", "delegate", "previousDelegate", "amount"],
+        "description": "Metadata payload for a DELEGATION feed event."
+      },
+      "FeedMetadata": {
+        "anyOf": [
+          { "$ref": "#/components/schemas/FeedVoteMetadata" },
+          { "$ref": "#/components/schemas/FeedProposalMetadata" },
+          { "$ref": "#/components/schemas/FeedProposalExtendedMetadata" },
+          { "$ref": "#/components/schemas/FeedTransferMetadata" },
+          { "$ref": "#/components/schemas/FeedDelegationMetadata" }
+        ],
+        "description": "Type-specific metadata for the feed event. Narrow by the FeedItem.type field."
       },
       "EventRelevanceThresholdResponse": {
         "type": "object",

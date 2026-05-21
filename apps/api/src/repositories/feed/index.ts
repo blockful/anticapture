@@ -11,6 +11,7 @@ import {
   sql,
 } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { z } from "zod";
 
 import {
   delegation,
@@ -21,39 +22,31 @@ import {
   votesOnchain,
 } from "@/database";
 import { FeedEventType } from "@/lib/constants";
-import { DBFeedEvent, FeedRequest } from "@/mappers";
+import {
+  DBFeedEvent,
+  FeedDelegationMetadataSchema,
+  FeedProposalExtendedMetadataSchema,
+  FeedProposalMetadataSchema,
+  FeedRequest,
+  FeedTransferMetadataSchema,
+  FeedVoteMetadataSchema,
+} from "@/mappers";
 
-type DelegationMeta = {
-  delegator: string;
-  delegate: string;
-  previousDelegate: string | null;
-  amount: string;
-};
-type TransferMeta = { from: string; to: string; amount: string };
-type VoteMeta = {
-  voter: string;
-  reason: string | null;
-  support: number;
-  votingPower: string;
-  proposalId: string;
-  title: string | undefined;
-};
-type ProposalMeta = {
-  id: string;
-  proposer: string;
-  votingPower: string;
-  title: string;
-};
-type ProposalExtendedMeta = {
-  id: string;
-  title: string;
-  endBlock: number;
-  endTimestamp: string;
-  proposer: string;
-};
+type DelegationMeta = z.infer<typeof FeedDelegationMetadataSchema>;
+type TransferMeta = z.infer<typeof FeedTransferMetadataSchema>;
+type VoteMeta = z.infer<typeof FeedVoteMetadataSchema>;
+type ProposalMeta = z.infer<typeof FeedProposalMetadataSchema>;
+type ProposalExtendedMeta = z.infer<typeof FeedProposalExtendedMetadataSchema>;
+
+type FeedMetadata =
+  | DelegationMeta
+  | TransferMeta
+  | VoteMeta
+  | ProposalMeta
+  | ProposalExtendedMeta;
 
 type EnrichedFeedEvent = DBFeedEvent & {
-  metadata: Record<string, unknown> | null;
+  metadata: FeedMetadata | null;
 };
 
 export class FeedRepository {
@@ -161,7 +154,7 @@ export class FeedRepository {
       voteByKey: Map<string, VoteRow>;
       proposalById: Map<string, ProposalRow>;
     },
-  ): Record<string, unknown> | null {
+  ): FeedMetadata | null {
     const key = `${row.txHash}:${row.logIndex}`;
     switch (row.type) {
       case FeedEventType.DELEGATION: {
