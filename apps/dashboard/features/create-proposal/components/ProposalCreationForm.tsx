@@ -107,11 +107,11 @@ export const ProposalCreationForm = ({
     defaultValues: DEFAULTS,
     mode: "onChange",
   });
-  const hasHydratedDraftRef = useRef(false);
+  const hydratedDraftIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!draftId) return;
-    if (hasHydratedDraftRef.current) return;
+    if (hydratedDraftIdRef.current === draftId) return;
 
     const d = drafts.getDraft(draftId);
     if (d) {
@@ -123,13 +123,13 @@ export const ProposalCreationForm = ({
       });
       setCurrentDraftId(draftId);
       setBodyVersion((v) => v + 1);
-      hasHydratedDraftRef.current = true;
+      hydratedDraftIdRef.current = draftId;
       return;
     }
 
     if (drafts.isLoading) return;
 
-    hasHydratedDraftRef.current = true;
+    hydratedDraftIdRef.current = draftId;
     void getDraftProposal(
       daoId as GetDraftProposalPathParamsDaoEnumKey,
       draftId,
