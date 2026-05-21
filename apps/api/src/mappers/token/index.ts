@@ -134,7 +134,6 @@ export const DaoTokenItemSchema = z
     decimals: z.number().int().openapi({
       description: "Token decimal places.",
       example: 6,
-      type: "integer",
     }),
     logoUri: z.url().nullable().openapi({
       description: "Token logo URI from CoinGecko.",

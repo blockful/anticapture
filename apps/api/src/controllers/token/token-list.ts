@@ -17,7 +17,7 @@ export function availableTokens(app: Hono, service: DaoTokensClient) {
       description:
         "Get available ERC-20 tokens for transfer in the DAO's governance chain",
       tags: ["tokens"],
-      middleware: [setCacheControl(300)],
+      middleware: [setCacheControl(3600)],
       responses: {
         200: {
           description: "Returns available ERC-20 tokens for the DAO's chain",

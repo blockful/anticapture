@@ -110,7 +110,7 @@ const TOKEN_REGISTRY: Record<AssetPlatformEnum, TokenRegistryItem[]> = {
       coingeckoId: "gitcoin",
     },
     {
-      address: "0x0001a500a6b18995b03f44bb040a5ffc28e45cb0",
+      address: "0x0b010000b7624eb9b3dfbc279673c76e9d29d5f7",
       symbol: "OBOL",
       name: "Obol",
       decimals: 18,
