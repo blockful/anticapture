@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Image from "next/image";
 import { isAddress } from "viem";
 
@@ -21,7 +22,25 @@ export const TokenSelector = ({
 }: TokenSelectorProps) => {
   const { tokens, isLoading, isError } = useTokenList(daoId);
 
-  // P1: fall back to manual address input when the token list cannot load or is empty
+  const baseItems = useMemo(
+    () =>
+      tokens.map((token) => ({
+        value: token.address,
+        label: `${token.symbol} — ${token.name}`,
+        icon: token.logoUri ? (
+          <Image
+            src={token.logoUri}
+            alt=""
+            aria-hidden
+            width={16}
+            height={16}
+            className="shrink-0 rounded-full object-cover"
+          />
+        ) : undefined,
+      })),
+    [tokens],
+  );
+
   if (!isLoading && (isError || tokens.length === 0)) {
     return (
       <>
@@ -40,38 +59,25 @@ export const TokenSelector = ({
     );
   }
 
-  const comboboxItems = tokens.map((token) => ({
-    value: token.address,
-    label: `${token.symbol} — ${token.name}`,
-    icon: token.logoUri ? (
-      <Image
-        src={token.logoUri}
-        alt=""
-        aria-hidden
-        width={16}
-        height={16}
-        className="shrink-0 rounded-full object-cover"
-      />
-    ) : undefined,
-  }));
-
-  // P2: when editing with a non-curated address, add a synthetic item so the
-  // combobox shows the stored value rather than falling back to the placeholder
-  const isCurated =
-    value !== "" &&
-    tokens.some((t) => t.address.toLowerCase() === value.toLowerCase());
-  if (value && isAddress(value) && !isCurated) {
-    comboboxItems.unshift({
-      value: value.toLowerCase(),
-      label: `${value.slice(0, 6)}…${value.slice(-4)}`,
-      icon: undefined,
-    });
-  }
+  const normalizedValue = value ? value.toLowerCase() : undefined;
+  const isInList =
+    !!normalizedValue && tokens.some((t) => t.address === normalizedValue);
+  const comboboxItems =
+    normalizedValue && isAddress(value) && !isInList
+      ? [
+          {
+            value: normalizedValue,
+            label: `${value.slice(0, 6)}…${value.slice(-4)}`,
+            icon: undefined,
+          },
+          ...baseItems,
+        ]
+      : baseItems;
 
   return (
     <Combobox
       items={comboboxItems}
-      value={value ? value.toLowerCase() : undefined}
+      value={normalizedValue}
       onValueChange={onChange}
       placeholder={isLoading ? "Loading tokens…" : "Select a token"}
       isDisabled={isLoading}

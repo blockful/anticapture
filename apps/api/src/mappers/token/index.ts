@@ -139,14 +139,6 @@ export const DaoTokenItemSchema = z
       description: "Token logo URI from CoinGecko.",
       example: "https://assets.coingecko.com/coins/images/6319/small/usdc.png",
     }),
-    price: z.number().nullable().openapi({
-      description: "Current token price in USD.",
-      example: 1.0,
-    }),
-    priceChange24h: z.number().nullable().openapi({
-      description: "24-hour price change percentage.",
-      example: 0.01,
-    }),
   })
   .openapi("DaoTokenItem", {
     description:

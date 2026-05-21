@@ -1,42 +1,22 @@
 import axios, { AxiosInstance } from "axios";
-import { z } from "zod";
 
 import { DaoIdEnum } from "@/lib/enums";
+import { logger } from "@/logger";
 import type { DaoTokenItem } from "@/mappers/token";
-import { AssetPlatformEnum } from "@/services/coingecko/types";
+import {
+  AssetPlatformEnum,
+  CoingeckoIdToAssetPlatformId,
+  CoingeckoTokenIdEnum,
+  CoingeckoTokenListSchema,
+} from "@/services/coingecko/types";
 
-const DaoIdToPlatform: Record<DaoIdEnum, AssetPlatformEnum> = {
-  [DaoIdEnum.AAVE]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.ENS]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.UNI]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.ARB]: AssetPlatformEnum.ARBITRUM,
-  [DaoIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
-  [DaoIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.LIL_NOUNS]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.NOUNS]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.SCR]: AssetPlatformEnum.SCROLL,
-  [DaoIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.OBOL]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.ZK]: AssetPlatformEnum.ZKSYNC,
-  [DaoIdEnum.SHU]: AssetPlatformEnum.ETHEREUM,
-  [DaoIdEnum.FLUID]: AssetPlatformEnum.ETHEREUM,
-};
-
-const CoingeckoTokenListSchema = z.object({
-  tokens: z.array(
-    z.object({
-      address: z.string(),
-      name: z.string(),
-      symbol: z.string(),
-      decimals: z.number().int(),
-      logoURI: z.string().nullable().optional(),
-    }),
-  ),
-});
+const CACHE_TTL_MS = 60 * 60 * 1000;
 
 export class DaoTokensService {
   private readonly client: AxiosInstance;
   private readonly platform: AssetPlatformEnum;
+  private cache: DaoTokenItem[] | null = null;
+  private cacheExpiresAt = 0;
 
   constructor(
     coingeckoApiUrl: string,
@@ -47,10 +27,12 @@ export class DaoTokensService {
       baseURL: coingeckoApiUrl,
       headers: { "x-cg-demo-api-key": coingeckoApiKey },
     });
-    this.platform = DaoIdToPlatform[daoId];
+    this.platform = CoingeckoIdToAssetPlatformId[CoingeckoTokenIdEnum[daoId]]!;
   }
 
   async getAvailableTokens(): Promise<DaoTokenItem[]> {
+    if (this.cache && Date.now() < this.cacheExpiresAt) return this.cache;
+
     try {
       const response = await this.client.get(
         `/token_lists/${this.platform}/all.json`,
@@ -58,17 +40,20 @@ export class DaoTokensService {
 
       const { tokens } = CoingeckoTokenListSchema.parse(response.data);
 
-      return tokens.map((token) => ({
+      const result = tokens.map((token) => ({
         address: token.address.toLowerCase(),
         name: token.name,
         symbol: token.symbol,
         decimals: token.decimals,
         logoUri: token.logoURI ?? null,
-        price: null,
-        priceChange24h: null,
       }));
-    } catch {
-      return [];
+
+      this.cache = result;
+      this.cacheExpiresAt = Date.now() + CACHE_TTL_MS;
+      return result;
+    } catch (error) {
+      logger.error({ err: error }, "failed to fetch token list from CoinGecko");
+      return this.cache ?? [];
     }
   }
 }

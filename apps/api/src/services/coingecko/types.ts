@@ -2,6 +2,18 @@ import { z } from "zod";
 
 import { DaoIdEnum } from "@/lib/enums";
 
+export const CoingeckoTokenListSchema = z.object({
+  tokens: z.array(
+    z.object({
+      address: z.string(),
+      name: z.string(),
+      symbol: z.string(),
+      decimals: z.number().int(),
+      logoURI: z.string().nullable().optional(),
+    }),
+  ),
+});
+
 export enum AssetPlatformEnum {
   // From https://docs.coingecko.com/v3.0.1/reference/token-lists
   ETHEREUM = "ethereum",
@@ -35,6 +47,8 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.ARB]: AssetPlatformEnum.ARBITRUM,
   [CoingeckoTokenIdEnum.OP]: AssetPlatformEnum.OPTIMISM,
   [CoingeckoTokenIdEnum.GTC]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.LIL_NOUNS]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.NOUNS]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.SCR]: AssetPlatformEnum.SCROLL,
   [CoingeckoTokenIdEnum.COMP]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.OBOL]: AssetPlatformEnum.ETHEREUM,
