@@ -3,6 +3,8 @@ name: API Contract Updates
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    branches-ignore:
+      - main
 
 jobs:
   detect-contract-updates:

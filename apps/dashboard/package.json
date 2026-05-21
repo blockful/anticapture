@@ -1,6 +1,6 @@
 {
   "name": "@anticapture/dashboard",
-  "version": "2.2.1",
+  "version": "2.2.4",
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
@@ -48,6 +48,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.6",
     "ethers": "^6.13.5",
     "graphql": "^16.11.0",
     "lottie-react": "^2.4.1",

@@ -1018,239 +1018,6 @@
         "required": ["value", "from", "to"],
         "description": "Transfer event associated with a historical balance row."
       },
-      "TransactionsResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transaction"
-            }
-          },
-          "totalCount": {
-            "type": "integer",
-            "description": "Total number of matching transactions."
-          }
-        },
-        "required": ["items", "totalCount"],
-        "description": "Paginated transactions with embedded transfer and delegation data."
-      },
-      "Transaction": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "from": {
-            "type": "string",
-            "nullable": true,
-            "format": "ethereum-address",
-            "description": "Resolved sender address, if known."
-          },
-          "to": {
-            "type": "string",
-            "nullable": true,
-            "format": "ethereum-address",
-            "description": "Resolved recipient address, if known."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the transaction touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the transaction counts toward total tracked supply."
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Transaction timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "transfers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transfer"
-            }
-          },
-          "delegations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TransactionDelegation"
-            }
-          }
-        },
-        "required": [
-          "transactionHash",
-          "from",
-          "to",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal",
-          "timestamp",
-          "transfers",
-          "delegations"
-        ],
-        "description": "Transaction response enriched with transfer and delegation events."
-      },
-      "Transfer": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "daoId": {
-            "type": "string",
-            "description": "DAO identifier."
-          },
-          "tokenId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Token contract address."
-          },
-          "amount": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Transferred amount encoded as a decimal string."
-          },
-          "fromAccountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Sender address."
-          },
-          "toAccountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Recipient address."
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Transfer timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "logIndex": {
-            "type": "integer",
-            "description": "Log index within the transaction receipt."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the transfer touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the transfer counts toward total tracked supply."
-          }
-        },
-        "required": [
-          "transactionHash",
-          "daoId",
-          "tokenId",
-          "amount",
-          "fromAccountId",
-          "toAccountId",
-          "timestamp",
-          "logIndex",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal"
-        ]
-      },
-      "TransactionDelegation": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "description": "Transaction hash."
-          },
-          "daoId": {
-            "type": "string",
-            "description": "DAO identifier."
-          },
-          "delegateAccountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Delegate address."
-          },
-          "delegatorAccountId": {
-            "type": "string",
-            "format": "ethereum-address",
-            "description": "Delegator address."
-          },
-          "delegatedValue": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Delegated amount encoded as a decimal string."
-          },
-          "previousDelegate": {
-            "type": "string",
-            "nullable": true,
-            "format": "ethereum-address",
-            "description": "Previous delegate address, if one existed."
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "bigint",
-            "description": "Delegation timestamp in Unix seconds as a string.",
-            "example": "1704067200"
-          },
-          "logIndex": {
-            "type": "integer",
-            "description": "Log index within the transaction receipt."
-          },
-          "isCex": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a centralized exchange."
-          },
-          "isDex": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a decentralized exchange."
-          },
-          "isLending": {
-            "type": "boolean",
-            "description": "Whether the delegation touched a lending protocol."
-          },
-          "isTotal": {
-            "type": "boolean",
-            "description": "Whether the delegation counts toward total tracked supply."
-          }
-        },
-        "required": [
-          "transactionHash",
-          "daoId",
-          "delegateAccountId",
-          "delegatorAccountId",
-          "delegatedValue",
-          "previousDelegate",
-          "timestamp",
-          "logIndex",
-          "isCex",
-          "isDex",
-          "isLending",
-          "isTotal"
-        ],
-        "description": "Delegation event embedded within a transaction response."
-      },
       "LastUpdateResponse": {
         "type": "object",
         "properties": {
@@ -1783,6 +1550,79 @@
         },
         "required": ["items", "totalCount"]
       },
+      "Transfer": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "description": "Transaction hash."
+          },
+          "daoId": {
+            "type": "string",
+            "description": "DAO identifier."
+          },
+          "tokenId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Token contract address."
+          },
+          "amount": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transferred amount encoded as a decimal string."
+          },
+          "fromAccountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Sender address."
+          },
+          "toAccountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Recipient address."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transfer timestamp in Unix seconds as a string.",
+            "example": "1704067200"
+          },
+          "logIndex": {
+            "type": "integer",
+            "description": "Log index within the transaction receipt."
+          },
+          "isCex": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a centralized exchange."
+          },
+          "isDex": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a decentralized exchange."
+          },
+          "isLending": {
+            "type": "boolean",
+            "description": "Whether the transfer touched a lending protocol."
+          },
+          "isTotal": {
+            "type": "boolean",
+            "description": "Whether the transfer counts toward total tracked supply."
+          }
+        },
+        "required": [
+          "transactionHash",
+          "daoId",
+          "tokenId",
+          "amount",
+          "fromAccountId",
+          "toAccountId",
+          "timestamp",
+          "logIndex",
+          "isCex",
+          "isDex",
+          "isLending",
+          "isTotal"
+        ]
+      },
       "OnchainVotesResponse": {
         "type": "object",
         "properties": {
@@ -2203,6 +2043,326 @@
           }
         },
         "required": ["voter", "votingPower"]
+      },
+      "RevenueActionsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueActionsItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly action counts by category (Registration, Renewal, Premium)."
+      },
+      "RevenueActionsItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "category": {
+            "$ref": "#/components/schemas/RevenueActionCategory"
+          },
+          "actions": {
+            "type": "integer",
+            "description": "Number of actions of this category in the given month."
+          }
+        },
+        "required": ["date", "category", "actions"],
+        "description": "Single revenue actions datapoint."
+      },
+      "RevenueActionCategory": {
+        "type": "string",
+        "enum": ["Registration", "Renewal", "Premium"],
+        "description": "Category of ENS revenue-generating action."
+      },
+      "RevenueActiveNamesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueActiveNamesItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly net change and cumulative count of active .eth names."
+      },
+      "RevenueActiveNamesItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "netChange": {
+            "type": "number",
+            "description": "Net change in active .eth names for the month."
+          },
+          "cumulativeActive": {
+            "type": "number",
+            "description": "Cumulative count of active .eth names as of the month."
+          }
+        },
+        "required": ["date", "netChange", "cumulativeActive"],
+        "description": "Single active-names datapoint."
+      },
+      "RevenueNewWalletsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueNewWalletsItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS."
+      },
+      "RevenueNewWalletsItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "newWallets": {
+            "type": "number",
+            "description": "New wallets that interacted with ENS in the given month."
+          },
+          "cumulativeWallets": {
+            "type": "number",
+            "description": "Cumulative count of ENS wallets as of the given month."
+          }
+        },
+        "required": ["date", "newWallets", "cumulativeWallets"],
+        "description": "Single new-wallets datapoint."
+      },
+      "RevenueRenewalFunnelResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueRenewalFunnelItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate."
+      },
+      "RevenueRenewalFunnelItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Expiry month start (Unix timestamp in seconds, UTC)."
+          },
+          "termsExpiring": {
+            "type": "number",
+            "description": "Total .eth terms expiring in the given month."
+          },
+          "renewedCount": {
+            "type": "number",
+            "description": "Number of expiring terms that were renewed."
+          },
+          "churnedCount": {
+            "type": "number",
+            "description": "Number of expiring terms that were not renewed."
+          },
+          "renewalRatePct": {
+            "type": "number",
+            "description": "Renewal rate for the month, as a percentage (0-100)."
+          }
+        },
+        "required": [
+          "date",
+          "termsExpiring",
+          "renewedCount",
+          "churnedCount",
+          "renewalRatePct"
+        ],
+        "description": "Single renewal-funnel datapoint keyed by expiry month."
+      },
+      "RevenueTotalsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueTotalsItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH."
+      },
+      "RevenueTotalsItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "registrationUsd": {
+            "type": "number",
+            "description": "USD revenue from new .eth registrations in the month."
+          },
+          "premiumUsd": {
+            "type": "number",
+            "description": "USD revenue from temporary premium auctions in the given month."
+          },
+          "renewalUsd": {
+            "type": "number",
+            "description": "USD revenue from .eth renewals in the given month."
+          },
+          "totalUsd": {
+            "type": "number",
+            "description": "Total USD revenue for the month (upstream sum; not recomputed)."
+          },
+          "registrationEth": {
+            "type": "number",
+            "description": "ETH revenue from new .eth registrations in the month."
+          },
+          "premiumEth": {
+            "type": "number",
+            "description": "ETH revenue from temporary premium auctions in the given month."
+          },
+          "renewalEth": {
+            "type": "number",
+            "description": "ETH revenue from .eth renewals in the given month."
+          }
+        },
+        "required": [
+          "date",
+          "registrationUsd",
+          "premiumUsd",
+          "renewalUsd",
+          "totalUsd",
+          "registrationEth",
+          "premiumEth",
+          "renewalEth"
+        ],
+        "description": "Single revenue-totals datapoint."
+      },
+      "RevenueByCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueByCategoryItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger."
+      },
+      "RevenueByCategoryItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Month start (Unix timestamp in seconds, UTC)."
+          },
+          "category": {
+            "$ref": "#/components/schemas/RevenueByCategoryCategory"
+          },
+          "revenueUsd": {
+            "type": "number",
+            "description": "USD revenue for the category in the given month."
+          },
+          "revenueEth": {
+            "type": "number",
+            "description": "ETH revenue for the category in the given month."
+          }
+        },
+        "required": ["date", "category", "revenueUsd", "revenueEth"],
+        "description": "Single revenue-by-category datapoint."
+      },
+      "RevenueByCategoryCategory": {
+        "type": "string",
+        "enum": ["Registration", "Renewal"],
+        "description": "Revenue category as reported by the Steakhouse accounting ledger."
+      },
+      "RevenueRenewalTenureResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueRenewalTenureItem"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of items returned."
+          }
+        },
+        "required": ["items", "totalCount"],
+        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket."
+      },
+      "RevenueRenewalTenureItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "integer",
+            "description": "Expiry month start (Unix timestamp in seconds, UTC)."
+          },
+          "tenureBucket": {
+            "$ref": "#/components/schemas/RevenueRenewalTenureBucket"
+          },
+          "names": {
+            "type": "integer",
+            "description": "Count of names in this tenure bucket for the expiry month."
+          },
+          "totalRenewalsInBucket": {
+            "type": "integer",
+            "description": "Total renewals contributed by names in this bucket."
+          }
+        },
+        "required": ["date", "tenureBucket", "names", "totalRenewalsInBucket"],
+        "description": "Single renewal-tenure datapoint keyed by expiry month."
+      },
+      "RevenueRenewalTenureBucket": {
+        "type": "string",
+        "enum": [
+          "0 renewals (one-shot)",
+          "1 renewal",
+          "2 renewals",
+          "3+ renewals"
+        ],
+        "description": "Tenure bucket label as returned by Dune."
       },
       "RelayerVoteResponse": {
         "type": "object",
@@ -4585,153 +4745,6 @@
               "shu",
               "uni"
             ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/transactions": {
-      "get": {
-        "operationId": "transactions",
-        "summary": "Get transactions with transfers and delegations",
-        "description": "Get transactions with their associated transfers and delegations, with optional filtering and sorting",
-        "tags": ["transactions", "skip-pagination"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Number of records to skip before collecting results.",
-              "example": 0
-            },
-            "required": false,
-            "description": "Number of records to skip before collecting results.",
-            "name": "skip",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for transaction timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for transaction timestamps, in Unix seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for transaction timestamps, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for transaction timestamps, in Unix seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "from",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "to",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "minAmount",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "maxAmount",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["CEX", "DEX", "LENDING", "TOTAL", "UNASSIGNED"]
-              },
-              "description": "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'"
-            },
-            "required": false,
-            "description": "Filter transactions by affected supply type. Can be: 'CEX', 'DEX', 'LENDING', or 'TOTAL'",
-            "name": "affectedSupply",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["TRANSFER", "DELEGATION"]
-              },
-              "description": "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'"
-            },
-            "required": false,
-            "description": "Filter by transaction type. Can be one of: 'TRANSFER', 'DELEGATION'",
-            "name": "includes",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns transactions with their transfers and delegations",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransactionsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["comp", "fluid", "gtc", "obol", "scr", "shu"]
           },
           "description": "DAO identifier"
         }
@@ -7414,6 +7427,461 @@
           "schema": {
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/actions": {
+      "get": {
+        "operationId": "getRevenueActions",
+        "summary": "Get monthly ENS action counts by category",
+        "description": "Monthly action counts by category (Registration, Renewal, Premium).",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly action counts by category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActionsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/active-names": {
+      "get": {
+        "operationId": "getRevenueActiveNames",
+        "summary": "Get monthly net change and cumulative active .eth names",
+        "description": "Monthly net change and cumulative count of active .eth names.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly net change and cumulative count of active .eth names",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActiveNamesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/new-wallets": {
+      "get": {
+        "operationId": "getRevenueNewWallets",
+        "summary": "Get monthly new-wallet counts and cumulative wallet total",
+        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly new-wallet counts and the cumulative wallet total",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueNewWalletsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-funnel": {
+      "get": {
+        "operationId": "getRevenueRenewalFunnel",
+        "summary": "Get monthly renewal funnel keyed by expiry month",
+        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalFunnelResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/totals": {
+      "get": {
+        "operationId": "getRevenueTotals",
+        "summary": "Get monthly ENS revenue totals in USD and ETH",
+        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue totals in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueTotalsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/by-category": {
+      "get": {
+        "operationId": "getRevenueByCategory",
+        "summary": "Get monthly ENS revenue split by category (Steakhouse ledger)",
+        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue split by category in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueByCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier"
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-tenure": {
+      "get": {
+        "operationId": "getRevenueRenewalTenure",
+        "summary": "Get monthly renewal tenure distribution per expiry month",
+        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalTenureResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
           },
           "description": "DAO identifier"
         }
