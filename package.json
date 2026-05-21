@@ -63,9 +63,5 @@
       "eslint-plugin-react-hooks>zod-validation-error": "^4.0.0"
     }
   },
-  "private": true,
-  "workspaces": [
-    "apps/dashboard",
-    "apps/graphql-client"
-  ]
+  "private": true
 }

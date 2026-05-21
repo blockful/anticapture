@@ -8,6 +8,7 @@ import type {
   AccountBalancesQueryParams,
 } from "@anticapture/client";
 import { formatUnits } from "viem";
+import type { Address } from "viem";
 import type { TimeInterval } from "@/shared/types/enums";
 import { useMemo } from "react";
 
@@ -95,17 +96,19 @@ export const useTokenHolders = (
     data: data?.pages.flatMap((page) =>
       page.items.map((item) => ({
         ...item,
-        balance: Number(formatUnits(item.balance, decimals)),
+        address: item.address as Address,
+        delegate: item.delegate as Address,
+        balance: Number(formatUnits(BigInt(item.balance), decimals)),
         variation: {
           accountId: item.variation.accountId,
           absoluteChange: Number(
-            formatUnits(item.variation.absoluteChange, decimals),
+            formatUnits(BigInt(item.variation.absoluteChange), decimals),
           ),
           previousBalance: Number(
-            formatUnits(item.variation.previousBalance, decimals),
+            formatUnits(BigInt(item.variation.previousBalance), decimals),
           ),
           currentBalance: Number(
-            formatUnits(item.variation.currentBalance, decimals),
+            formatUnits(BigInt(item.variation.currentBalance), decimals),
           ),
           percentageChange:
             item.variation.percentageChange === PERCENTAGE_NO_BASELINE

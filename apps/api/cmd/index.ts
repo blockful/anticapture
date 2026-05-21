@@ -41,6 +41,7 @@ import {
   eventRelevance,
   feed,
   health,
+  revenue,
 } from "@/controllers";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
@@ -102,6 +103,8 @@ import {
   OffchainVotesService,
   OffchainNonVotersService,
   EventRelevanceService,
+  RevenueDuneClient,
+  RevenueDuneUrls,
 } from "@/services";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
 
@@ -352,6 +355,30 @@ votes(
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
+
+let revenueDuneClient: RevenueDuneClient | undefined;
+if (env.DAO_ID === DaoIdEnum.ENS) {
+  if (env.REVENUE_DUNE_API_KEY) {
+    const revenueUrls: RevenueDuneUrls = {
+      actions: env.REVENUE_DUNE_ACTIONS_URL ?? "",
+      activeNames: env.REVENUE_DUNE_ACTIVE_NAMES_URL ?? "",
+      newWallets: env.REVENUE_DUNE_NEW_WALLETS_URL ?? "",
+      renewalFunnel: env.REVENUE_DUNE_RENEWAL_FUNNEL_URL ?? "",
+      revenueTotals: env.REVENUE_DUNE_REVENUE_TOTALS_URL ?? "",
+      revenueByCategory: env.REVENUE_DUNE_REVENUE_BY_CATEGORY_URL ?? "",
+      renewalTenure: env.REVENUE_DUNE_RENEWAL_TENURE_URL ?? "",
+    };
+    revenueDuneClient = new RevenueDuneClient(
+      env.REVENUE_DUNE_API_KEY,
+      revenueUrls,
+    );
+  } else {
+    logger.warn(
+      "DAO_ID=ENS but REVENUE_DUNE_API_KEY is not set; /revenue/* endpoints will return empty data",
+    );
+  }
+  revenue(app, revenueDuneClient);
+}
 
 if (daoClient.supportOffchainData()) {
   const pgUnifiedClient = drizzle(env.DATABASE_URL, {
