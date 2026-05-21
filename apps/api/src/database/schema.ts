@@ -282,6 +282,7 @@ export const evenTypeEnum = pgEnum("event_type", [
   "VOTE",
   "PROPOSAL",
   "DELEGATION",
+  "DELEGATION_VOTES_CHANGED",
   "TRANSFER",
   "PROPOSAL_EXTENDED",
 ]);

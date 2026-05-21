@@ -417,6 +417,7 @@ export const eventTypeEnum = onchainEnum("event_type", [
   "PROPOSAL",
   "PROPOSAL_EXTENDED",
   "DELEGATION",
+  "DELEGATION_VOTES_CHANGED",
   "TRANSFER",
 ]);
 

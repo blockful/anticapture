@@ -43,7 +43,7 @@ class SimpleFeedRepository {
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ) {
     const filtered = this.items.filter((e) => {
-      const threshold = valueThresholds[e.type];
+      const threshold = valueThresholds[e.type as FeedEventType];
       return threshold === undefined || e.value >= threshold;
     });
 

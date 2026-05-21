@@ -290,17 +290,18 @@ export class FeedRepository {
         endTimestamp: proposalsOnchain.endTimestamp,
         // Proposer voting power at the moment the proposal was created — the
         // latest voting_power_history row for the proposer at or before the
-        // proposal's timestamp. Cast to text so the value is a string in both
-        // node-postgres and PGlite. Inline raw column references with
-        // explicit aliases — Drizzle's sql`` template strips table prefixes
-        // for column refs, which makes `timestamp <= timestamp` resolve as
-        // self-comparison inside a correlated subquery.
+        // proposal's timestamp. Tie-break by log_index DESC so same-block
+        // VPH updates resolve deterministically. Cast to text so the value
+        // is a string in both node-postgres and PGlite. Inline raw column
+        // references with explicit aliases — Drizzle's sql`` template strips
+        // table prefixes for column refs, which makes `timestamp <= timestamp`
+        // resolve as self-comparison inside a correlated subquery.
         proposerVotingPower: sql<string | null>`(
           SELECT vph.voting_power::text
           FROM voting_power_history AS vph
           WHERE vph.account_id = proposals_onchain.proposer_account_id
             AND vph.timestamp <= proposals_onchain.timestamp
-          ORDER BY vph.timestamp DESC
+          ORDER BY vph.timestamp DESC, vph.log_index DESC
           LIMIT 1
         )`,
       })

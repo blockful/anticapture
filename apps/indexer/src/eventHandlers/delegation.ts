@@ -220,4 +220,12 @@ export const delegatedVotesChanged = async (
     .onConflictDoUpdate(() => ({
       votingPower: newBalance,
     }));
+
+  await context.db.insert(feedEvent).values({
+    txHash,
+    logIndex,
+    type: "DELEGATION_VOTES_CHANGED",
+    value: deltaMod,
+    timestamp,
+  });
 };
