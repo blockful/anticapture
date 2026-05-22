@@ -84,8 +84,8 @@ const toGovernanceProposal = (
       proposal.startTimestamp.toString(),
       proposal.endTimestamp.toString(),
     ),
-    values: proposal.values.map((value) => value.toString()),
-    targets: proposal.targets,
+    values: proposal.values?.map((value) => value.toString()) ?? [],
+    targets: proposal.targets ?? [],
   };
 };
 
