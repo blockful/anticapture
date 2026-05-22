@@ -4,7 +4,7 @@ query GetFeedEvents(
   $orderBy: queryInput_feedEvents_orderBy = timestamp
   $orderDirection: OrderDirection = desc
   $relevance: queryInput_feedEvents_relevance = MEDIUM
-  $type: queryInput_feedEvents_type
+  $type: [queryInput_feedEvents_type_items]
   $fromDate: Int
   $toDate: Int
 ) {
@@ -25,7 +25,24 @@ query GetFeedEvents(
       value
       timestamp
       relevance
-      metadata
+      metadata {
+        voter
+        reason
+        support
+        votingPower
+        proposalId
+        title
+        id
+        proposer
+        endBlock
+        endTimestamp
+        from
+        to
+        amount
+        delegator
+        delegate
+        previousDelegate
+      }
     }
     totalCount
   }
