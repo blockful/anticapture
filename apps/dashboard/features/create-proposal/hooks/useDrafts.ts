@@ -56,28 +56,11 @@ export const useDrafts = (
 
   const dao = daoId as GetDraftProposalsPathParamsDaoEnumKey;
 
-  const fetchDrafts = useCallback(async () => {
-    if (!address) {
-      setDrafts([]);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const result = await getDraftProposals(dao, { address });
-      setDrafts(result.items.map(toDraft));
-    } catch {
-      setDrafts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [dao, address]);
-
   // Migrate localStorage drafts to API on first connect
   useEffect(() => {
     if (!address) return;
     const key = `${daoId}:${address}`;
     if (migratedRef.current.has(key)) return;
-    migratedRef.current.add(key);
 
     const storage = getStorage();
     const localDrafts = storage
@@ -85,7 +68,20 @@ export const useDrafts = (
       : [];
 
     if (localDrafts.length === 0) {
-      void fetchDrafts();
+      (async () => {
+        if (!address) return;
+        setIsLoading(true);
+        try {
+          const result = await getDraftProposals(dao, { address });
+          setDrafts(result.items.map(toDraft));
+          // Only lock once the fetch has succeeded so transient failures can retry.
+          migratedRef.current.add(key);
+        } catch {
+          setDrafts([]);
+        } finally {
+          setIsLoading(false);
+        }
+      })();
       return;
     }
 
@@ -115,8 +111,12 @@ export const useDrafts = (
         if (storage) {
           storage.removeItem(draftKey(daoId, address));
         }
+        // Only lock the migration once it actually succeeded; otherwise a
+        // transient API outage would strand the user until full remount.
+        migratedRef.current.add(key);
       } catch {
-        // Migration failed — fall back to showing local drafts
+        // Migration failed — fall back to showing local drafts and leave the
+        // migration lock unset so a later effect run can retry.
         setDrafts(localDrafts);
       } finally {
         setIsLoading(false);

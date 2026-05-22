@@ -165,6 +165,10 @@ export const ProposalCreationForm = ({
   const [submittedOpen, setSubmittedOpen] = useState(false);
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  // Mirror in a ref so repeated synchronous clicks (before React commits the
+  // state update) can still see an in-flight save and short-circuit early.
+  const isSavingDraftRef = useRef(false);
 
   const values = form.watch();
   const hasTitle = Boolean(values.title);
@@ -198,6 +202,12 @@ export const ProposalCreationForm = ({
       showCustomToast("Connect a wallet to save drafts", "error");
       return;
     }
+    // Guard against duplicate creates: while a save is in flight,
+    // `currentDraftId` hasn't been set yet, so a second click would create
+    // another draft. Short-circuit until the first save settles.
+    if (isSavingDraftRef.current) return;
+    isSavingDraftRef.current = true;
+    setIsSavingDraft(true);
     try {
       const id = await drafts.saveDraft(
         {
@@ -221,6 +231,9 @@ export const ProposalCreationForm = ({
       }
     } catch {
       showCustomToast("Could not save draft", "error");
+    } finally {
+      isSavingDraftRef.current = false;
+      setIsSavingDraft(false);
     }
   };
 
@@ -450,6 +463,7 @@ export const ProposalCreationForm = ({
         onSaveDraft={handleSaveDraft}
         onPublish={handlePublishClick}
         onShare={currentDraftId ? handleShare : undefined}
+        isSavingDraft={isSavingDraft}
       />
 
       <AddTransferModal
