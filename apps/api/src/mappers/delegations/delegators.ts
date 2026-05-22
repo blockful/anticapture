@@ -3,9 +3,11 @@ import { Address } from "viem";
 
 import {
   AddressSchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
+  addressPathParams,
+  bigintAsStringField,
+  defaultDescOrderDirection,
+  paginatedListResponse,
+  paginationQueryParams,
 } from "../shared";
 
 export type AggregatedDelegator = {
@@ -14,20 +16,16 @@ export type AggregatedDelegator = {
   timestamp: bigint;
 };
 
-export const DelegatorsRequestParamsSchema = z
-  .object({
-    address: AddressSchema,
-  })
-  .openapi("DelegatorsRequestParams", {
-    description: "Path params for fetching delegators of a delegate address.",
-  });
+export const DelegatorsRequestParamsSchema = addressPathParams(
+  "DelegatorsRequestParams",
+  "Path params for fetching delegators of a delegate address.",
+);
 
 export const DelegatorsRequestQuerySchema = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
+    ...paginationQueryParams(),
     orderBy: z.enum(["amount", "timestamp"]).optional().default("amount"),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
   })
   .openapi("DelegatorsRequestQuery", {
     description:
@@ -40,27 +38,20 @@ export type DelegatorsRequestQuery = z.infer<
 
 export const DelegatorItemSchema = z
   .object({
-    delegatorAddress: AddressSchema.openapi({ format: "ethereum-address" }),
-    amount: z
-      .union([z.bigint().transform((val) => val.toString()), z.string()])
-      .openapi({ type: "string", format: "bigint" }),
-    timestamp: z
-      .union([z.bigint().transform((val) => val.toString()), z.string()])
-      .openapi({ type: "string", format: "bigint" }),
+    delegatorAddress: AddressSchema,
+    amount: bigintAsStringField(),
+    timestamp: bigintAsStringField(),
   })
   .openapi("DelegatorItem", {
     description:
       "Aggregated delegation amount and latest timestamp for one delegator.",
   });
 
-export const DelegatorsResponseSchema = z
-  .object({
-    items: z.array(DelegatorItemSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("DelegatorsResponse", {
-    description: "Paginated delegators for a delegate address.",
-  });
+export const DelegatorsResponseSchema = paginatedListResponse(
+  DelegatorItemSchema,
+).openapi("DelegatorsResponse", {
+  description: "Paginated delegators for a delegate address.",
+});
 
 export type DelegatorItem = z.infer<typeof DelegatorItemSchema>;
 export type DelegatorsResponse = z.infer<typeof DelegatorsResponseSchema>;
