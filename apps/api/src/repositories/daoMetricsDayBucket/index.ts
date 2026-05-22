@@ -15,7 +15,7 @@ export class DaoMetricsDayBucketRepository {
     startDate?: string;
     endDate?: string;
     orderDirection: "asc" | "desc";
-    limit: number;
+    limit?: number;
   }) {
     const { metricTypes, startDate, endDate, orderDirection, limit } = filters;
 
@@ -30,7 +30,7 @@ export class DaoMetricsDayBucketRepository {
 
     return this.db.query.daoMetricsDayBucket.findMany({
       where: and(...conditions),
-      limit,
+      ...(limit !== undefined ? { limit } : {}),
       orderBy:
         orderDirection === "desc"
           ? desc(daoMetricsDayBucket.date)

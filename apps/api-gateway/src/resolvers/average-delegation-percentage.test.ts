@@ -1,12 +1,12 @@
 import {
   aggregateMeanPercentage,
   buildPaginatedResponse,
-  DelegationPercentageResponse,
+  UpstreamDelegationPercentage,
 } from './average-delegation-percentage';
 
 describe('aggregateMeanPercentage', () => {
   it('should calculate mean percentage when DAOs have same dates', () => {
-    const daoResponses = new Map<string, DelegationPercentageResponse>([
+    const daoResponses = new Map<string, UpstreamDelegationPercentage>([
       [
         'ENS',
         {
@@ -15,12 +15,6 @@ describe('aggregateMeanPercentage', () => {
             { date: '1600128000', high: '60.00' }, // 60%
           ],
           totalCount: 2,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endDate: null,
-            startDate: null,
-          },
         },
       ],
       [
@@ -31,12 +25,6 @@ describe('aggregateMeanPercentage', () => {
             { date: '1600128000', high: '50.00' }, // 50%
           ],
           totalCount: 2,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endDate: null,
-            startDate: null,
-          },
         },
       ],
     ]);
@@ -55,7 +43,7 @@ describe('aggregateMeanPercentage', () => {
   });
 
   it('should return empty when no DAOs have data', () => {
-    const daoResponses = new Map<string, DelegationPercentageResponse>();
+    const daoResponses = new Map<string, UpstreamDelegationPercentage>();
 
     const result = aggregateMeanPercentage(daoResponses);
 
@@ -63,7 +51,7 @@ describe('aggregateMeanPercentage', () => {
   });
 
   it('should correctly calculate mean with decimal precision', () => {
-    const daoResponses = new Map<string, DelegationPercentageResponse>([
+    const daoResponses = new Map<string, UpstreamDelegationPercentage>([
       [
         'ENS',
         {
@@ -71,12 +59,6 @@ describe('aggregateMeanPercentage', () => {
             { date: '1600041600', high: '12.35' }, // 12.35%
           ],
           totalCount: 1,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endDate: null,
-            startDate: null,
-          },
         },
       ],
       [
@@ -86,12 +68,6 @@ describe('aggregateMeanPercentage', () => {
             { date: '1600041600', high: '23.46' }, // 23.46%
           ],
           totalCount: 1,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endDate: null,
-            startDate: null,
-          },
         },
       ],
     ]);
@@ -103,7 +79,7 @@ describe('aggregateMeanPercentage', () => {
   });
 
   it('should preserve order from input (no sorting)', () => {
-    const daoResponses = new Map<string, DelegationPercentageResponse>([
+    const daoResponses = new Map<string, UpstreamDelegationPercentage>([
       [
         'ENS',
         {
@@ -113,12 +89,6 @@ describe('aggregateMeanPercentage', () => {
             { date: '1600214400', high: '30.00' },
           ],
           totalCount: 3,
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            endDate: null,
-            startDate: null,
-          },
         },
       ],
     ]);
@@ -215,24 +185,23 @@ describe('buildPaginatedResponse', () => {
       { date: '3', high: '30' },
     ];
 
-    // No pagination - hasPreviousPage should be false
+    // No skip - hasPreviousPage should be false
     const result1 = buildPaginatedResponse(items, {
       startDate: '1',
-      after: undefined,
     }, false);
     expect(result1.pageInfo.hasPreviousPage).toBe(false);
 
-    // Paginated forward but after === startDate - hasPreviousPage should be false
+    // skip=0 - hasPreviousPage should be false
     const result2 = buildPaginatedResponse(items, {
       startDate: '1',
-      after: '1',
+      skip: 0,
     }, false);
     expect(result2.pageInfo.hasPreviousPage).toBe(false);
 
-    // Paginated forward and after !== startDate - hasPreviousPage should be true
+    // skip>0 - hasPreviousPage should be true
     const result3 = buildPaginatedResponse(items, {
       startDate: '1',
-      after: '2',
+      skip: 2,
     }, false);
     expect(result3.pageInfo.hasPreviousPage).toBe(true);
   });

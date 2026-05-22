@@ -1,3 +1,5 @@
+directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
+
 directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
 
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
@@ -8,8 +10,6 @@ directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
 directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
-directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
-
 directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
 type Query {
@@ -19,7 +19,7 @@ type Query {
   getAddress(
     """Ethereum address (checksummed or lowercase)"""
     address: String!
-  ): getAddress_200_response
+  ): getAddress_response
 
   """
   Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
@@ -31,8 +31,15 @@ type Query {
     addresses: [String]!
   ): getAddresses_200_response
 
-  """Check API and database health"""
-  health: health_response
+  """
+  Lightweight liveness probe for orchestrators (e.g. Railway). Returns 200 when the API process is up and the database is reachable, 503 otherwise. Indexer freshness and chain head are intentionally excluded — use /health/full for diagnostics.
+  """
+  liveness: LivenessResponse
+
+  """
+  Returns database connectivity, chain head, indexer freshness, and computed lag for this DAO API. HTTP status reflects database reachability only; degraded indexer state still returns 200 with status='degraded' in the body.
+  """
+  health: HealthResponse
 
   """
   Get historical delegations for an account, with optional filtering and sorting
@@ -171,7 +178,9 @@ type Query {
     userVoteFilter: queryInput_proposalsActivity_userVoteFilter
   ): ProposalActivityResponse
 
-  """Returns a list of proposal"""
+  """
+  Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and reduce payload size.
+  """
   proposals(
     """Number of records to skip before collecting results."""
     skip: Int
@@ -193,10 +202,15 @@ type Query {
 
     """Whether optimistic proposals should be included."""
     includeOptimisticProposals: Boolean = true
+
+    """
+    When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
   ): OnchainProposalsResponse
 
   """
-  Returns proposals whose title or identifier partially matches the query.
+  Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets.
   """
   searchProposals(
     """Partial proposal identifier or title to search for."""
@@ -207,12 +221,24 @@ type Query {
 
     """Maximum number of records to return."""
     limit: Int
+
+    """
+    When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
   ): OnchainProposalsResponse
 
-  """Returns a single proposal by its ID"""
+  """
+  Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets.
+  """
   proposal(
     """Onchain proposal identifier."""
     id: String!
+
+    """
+    When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
   ): proposal_response
 
   """
@@ -251,21 +277,18 @@ type Query {
 
   """Get delegation percentage day buckets with forward-fill"""
   delegationPercentageByDay(
-    """Inclusive lower bound cursor in Unix seconds."""
+    """Inclusive lower bound for the day-bucket window, in Unix seconds."""
     startDate: Int
 
-    """Inclusive upper bound cursor in Unix seconds."""
+    """Inclusive upper bound for the day-bucket window, in Unix seconds."""
     endDate: Int
     orderDirection: OrderDirection = desc
 
-    """Maximum number of records to return."""
+    """Number of day buckets to skip before returning results."""
+    skip: Int
+
+    """Maximum number of day buckets to return."""
     limit: Int
-
-    """Return items after this cursor, exclusive, in Unix seconds."""
-    after: Int
-
-    """Return items before this cursor, exclusive, in Unix seconds."""
-    before: Int
   ): DelegationPercentageResponse
 
   """Returns a list of voting power changes for a specific account"""
@@ -385,7 +408,7 @@ type Query {
 
   """Returns voting power information for a specific address (account)"""
   votingPowerByAccountId(
-    accountId: String!
+    address: String!
 
     """Inclusive lower bound for variation enrichment, in Unix seconds."""
     fromDate: Int
@@ -436,11 +459,11 @@ type Query {
     """Inclusive upper bound for balance history filters, in Unix seconds."""
     toDate: Int
 
-    """Maximum number of records to return."""
-    limit: Int
-
     """Number of records to skip before collecting results."""
     skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
     orderDirection: OrderDirection = desc
     orderBy: queryInput_accountBalances_orderBy = balance
 
@@ -474,7 +497,7 @@ type Query {
     Inclusive upper bound for the returned balance period, in Unix seconds.
     """
     toDate: Int
-  ): AccountBalanceWithVariationResponse
+  ): accountBalanceByAccountId_response
 
   """
   Returns a mapping of the largest interactions between accounts. 
@@ -512,11 +535,11 @@ type Query {
     """Wallet address whose transfers are being queried."""
     address: String!
 
-    """Maximum number of records to return."""
-    limit: Int
-
     """Number of records to skip before collecting results."""
     skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
     orderBy: queryInput_transfers_orderBy = timestamp
     orderDirection: OrderDirection = desc
     from: String
@@ -616,11 +639,11 @@ type Query {
     endDate: Int
     orderDirection: OrderDirection = desc
 
-    """Maximum number of records to return."""
-    limit: Int
-
     """Number of records to skip before collecting results."""
     skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
   ): TokenMetricsResponse
 
   """Monthly action counts by category (Registration, Renewal, Premium)."""
@@ -729,7 +752,9 @@ type Query {
     orderDirection: OrderDirection = desc
   ): RevenueRenewalTenureResponse
 
-  """Returns a list of offchain (Snapshot) proposals"""
+  """
+  Returns a list of offchain (Snapshot) proposals. Pass `lean=true` to omit the markdown `body` and reduce payload size.
+  """
   offchainProposals(
     """Number of records to skip before collecting results."""
     skip: Int
@@ -748,10 +773,15 @@ type Query {
 
     """Latest proposal creation timestamp, in Unix seconds."""
     endDate: Int
+
+    """
+    When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
   ): OffchainProposalsResponse
 
   """
-  Returns offchain proposals whose title or identifier partially matches the query.
+  Returns offchain proposals whose title or identifier partially matches the query. Pass `lean=true` to omit the `body`.
   """
   offchainSearchProposals(
     """Partial Snapshot proposal identifier or title to search for."""
@@ -762,12 +792,24 @@ type Query {
 
     """Maximum number of records to return."""
     limit: Int
+
+    """
+    When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
   ): OffchainProposalsResponse
 
-  """Returns a single offchain (Snapshot) proposal by its ID"""
+  """
+  Returns a single offchain (Snapshot) proposal by its ID. Pass `lean=true` to omit the `body`.
+  """
   offchainProposalById(
     """Snapshot proposal identifier."""
     id: String!
+
+    """
+    When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
   ): offchainProposalById_response
 
   """Returns a list of offchain (Snapshot) votes"""
@@ -853,11 +895,8 @@ type Query {
     """
     endDate: String
 
-    """Cursor for pagination. Returns items after this date."""
-    after: String
-
-    """Cursor for pagination. Returns items before this date."""
-    before: String
+    """Number of day buckets to skip before returning results."""
+    skip: Int
 
     """
     Sort direction: "asc" or "desc". Default: "asc"
@@ -872,6 +911,8 @@ type Query {
   daos: DAOList!
 }
 
+union getAddress_response = getAddress_200_response | getAddress_502_response
+
 type getAddress_200_response {
   """EIP-55 checksummed Ethereum address"""
   address: String!
@@ -880,14 +921,14 @@ type getAddress_200_response {
   Whether the address is a smart contract (true) or an externally-owned account (false)
   """
   isContract: Boolean!
-  arkham: query_getAddress_arkham
-  ens: query_getAddress_ens
+  arkham: query_getAddress_oneOf_0_arkham
+  ens: query_getAddress_oneOf_0_ens
 }
 
 """
 Arkham Intelligence label data. null when no data is available for the address.
 """
-type query_getAddress_arkham {
+type query_getAddress_oneOf_0_arkham {
   """
   Human-readable name of the entity that owns the address according to Arkham Intelligence
   """
@@ -908,7 +949,7 @@ type query_getAddress_arkham {
 """
 ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL.
 """
-type query_getAddress_ens {
+type query_getAddress_oneOf_0_ens {
   """Primary ENS name reverse-resolved for this address"""
   name: String
 
@@ -923,6 +964,10 @@ type query_getAddress_ens {
 A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt.
 """
 scalar URL
+
+type getAddress_502_response {
+  error: String!
+}
 
 type getAddresses_200_response {
   """
@@ -992,25 +1037,60 @@ enum HTTPMethod {
 
 scalar ObjMap
 
-union health_response = health_200_response | health_503_response
-
-type health_200_response {
-  status: ok_const!
-  database: ok_const!
+type LivenessResponse {
+  database: query_liveness_oneOf_0_database!
 }
 
-enum ok_const {
+"""Database connectivity status."""
+enum query_liveness_oneOf_0_database {
   ok
-}
-
-type health_503_response {
-  status: error_const!
-  database: error_const!
-  message: String!
-}
-
-enum error_const {
   error
+}
+
+type HealthResponse {
+  status: query_health_oneOf_0_status!
+  database: query_health_oneOf_0_database!
+  chain: query_health_oneOf_0_chain!
+  indexer: query_health_oneOf_0_indexer!
+}
+
+"""
+Overall health: ok when fresh, degraded when indexer is lagging, error when the database is unreachable.
+"""
+enum query_health_oneOf_0_status {
+  ok
+  degraded
+  error
+}
+
+"""Database connectivity status."""
+enum query_health_oneOf_0_database {
+  ok
+  error
+}
+
+"""On-chain state observed by this DAO API."""
+type query_health_oneOf_0_chain {
+  """
+  Latest block number reported by the RPC, or null if the RPC call failed.
+  """
+  head: Int
+}
+
+"""Indexer freshness signals derived from app tables."""
+type query_health_oneOf_0_indexer {
+  """
+  Unix timestamp (seconds) of the most recent indexed event, or null if no events have been recorded.
+  """
+  lastEventTimestamp: Int
+
+  """
+  Seconds between now and lastEventTimestamp, or null if the indexer hasn't produced any events.
+  """
+  lagSeconds: Int
+
+  """True when lagSeconds is within the freshness threshold (300s)."""
+  fresh: Boolean!
 }
 
 """Paginated historical delegations response."""
@@ -1316,9 +1396,23 @@ type EventRelevanceThresholdResponse {
 
 """Supply metric comparison between current and previous periods."""
 type SupplyComparisonResponse {
+  """
+  Supply value at the start of the comparison window, encoded as a decimal string (raw token base units).
+  """
   previousValue: String!
+
+  """
+  Supply value at the end of the comparison window, encoded as a decimal string (raw token base units).
+  """
   currentValue: String!
+
+  """
+  Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0.
+  """
   changeRate: Float!
+
+  """Signed bigint delta as a decimal string: currentValue - previousValue."""
+  rawDelta: String!
 }
 
 """Active token supply for the selected comparison window."""
@@ -1335,8 +1429,13 @@ type ProposalsComparisonResponse {
   """Number of proposals launched in the comparison period."""
   oldProposalsLaunched: Int!
 
-  """Relative change between current and previous periods."""
+  """
+  Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.
+  """
   changeRate: Float!
+
+  """Signed integer delta: currentProposalsLaunched - oldProposalsLaunched."""
+  rawDelta: Int!
 }
 
 """Vote-count comparison between two adjacent time windows."""
@@ -1347,8 +1446,13 @@ type VotesComparisonResponse {
   """Number of votes cast in the comparison period."""
   oldVotes: Int!
 
-  """Relative change between current and previous periods."""
+  """
+  Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.
+  """
   changeRate: Float!
+
+  """Signed integer delta: currentVotes - oldVotes."""
+  rawDelta: Int!
 }
 
 """Average turnout comparison between two adjacent time windows."""
@@ -1359,8 +1463,15 @@ type AverageTurnoutComparisonResponse {
   """Average turnout for the previous period encoded as a string."""
   oldAverageTurnout: String!
 
-  """Relative change between current and previous periods."""
+  """
+  Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.
+  """
   changeRate: Float!
+
+  """
+  Signed bigint delta as a decimal string: currentAverageTurnout - oldAverageTurnout.
+  """
+  rawDelta: String!
 }
 
 """Delegate proposal activity metrics and proposal-by-proposal history."""
@@ -1399,7 +1510,7 @@ type ProposalActivityProposal {
   """Onchain proposal identifier."""
   id: String!
 
-  """DAO identifier."""
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
   """Address that created the proposal."""
@@ -1483,7 +1594,7 @@ type OnchainProposal {
   """Onchain proposal identifier."""
   id: String!
 
-  """DAO identifier."""
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
   """Proposal creation transaction hash."""
@@ -1548,14 +1659,20 @@ type OnchainProposal {
   """Required quorum encoded as a decimal string."""
   quorum: String!
 
-  """Encoded calldata payloads executed by the proposal."""
-  calldatas: [String]!
+  """
+  Encoded calldata payloads executed by the proposal. Omitted when the request sets `lean=true`.
+  """
+  calldatas: [String]
 
-  """ETH values attached to each call, encoded as strings."""
-  values: [String]!
+  """
+  ETH values attached to each call, encoded as strings. Omitted when the request sets `lean=true`.
+  """
+  values: [String]
 
-  """Contract targets invoked by the proposal."""
-  targets: [String]!
+  """
+  Contract targets invoked by the proposal. Omitted when the request sets `lean=true`.
+  """
+  targets: [String]
 
   """Optional proposal type discriminator."""
   proposalType: Int
@@ -1593,7 +1710,7 @@ type HistoricalBalance {
   """Transaction hash."""
   transactionHash: String!
 
-  """DAO identifier."""
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
   """Account address."""
@@ -1652,9 +1769,10 @@ enum queryInput_lastUpdate_chart {
 type DelegationPercentageResponse {
   items: [DelegationPercentageItem]!
 
-  """Total number of matching day buckets."""
+  """
+  Total number of matching day buckets across the requested window (ignores skip/limit).
+  """
   totalCount: Int!
-  pageInfo: PageInfo!
 }
 
 type DelegationPercentageItem {
@@ -1663,13 +1781,6 @@ type DelegationPercentageItem {
 
   """Delegation percentage value for the day bucket."""
   high: String!
-}
-
-type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  endDate: String
-  startDate: String
 }
 
 """Paginated historical voting power records."""
@@ -1687,7 +1798,7 @@ type HistoricalVotingPower {
   """Transaction hash."""
   transactionHash: String!
 
-  """DAO identifier."""
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
   """Account address."""
@@ -1763,7 +1874,9 @@ type VotingPowerVariation {
   """Absolute voting power change encoded as a decimal string."""
   absoluteChange: String!
 
-  """Relative voting power change encoded as a decimal string."""
+  """
+  Relative voting power change as a decimal string (e.g. "5.23"). Set to the sentinel "NO BASELINE" when the previous voting power is zero.
+  """
   percentageChange: String!
 }
 
@@ -1840,7 +1953,9 @@ type AccountBalanceVariation {
   """Absolute balance change encoded as a decimal string."""
   absoluteChange: String!
 
-  """Relative balance change encoded as a decimal string."""
+  """
+  Relative balance change as a decimal string (e.g. "5.23"). Set to the sentinel "NO BASELINE" when the previous balance is zero.
+  """
   percentageChange: String!
 }
 
@@ -1869,6 +1984,8 @@ enum queryInput_accountBalances_orderBy {
   variation
   signedVariation
 }
+
+union accountBalanceByAccountId_response = AccountBalanceWithVariationResponse | ErrorResponse
 
 type AccountBalanceWithVariationResponse {
   data: AccountBalanceWithVariation!
@@ -1920,7 +2037,7 @@ type Transfer {
   """Transaction hash."""
   transactionHash: String!
 
-  """DAO identifier."""
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
   """Token contract address."""
@@ -1950,7 +2067,7 @@ type Transfer {
   """Whether the transfer touched a lending protocol."""
   isLending: Boolean!
 
-  """Whether the transfer counts toward total tracked supply."""
+  """Whether the transfer affects total-supply accounting."""
   isTotal: Boolean!
 }
 
@@ -2010,6 +2127,7 @@ type Voter {
 
 """Current governance parameters and feature flags for the active DAO."""
 type DaoResponse {
+  """DAO identifier (uppercase, e.g. "ENS")."""
   id: String!
   chainId: Int!
   quorum: String!
@@ -2017,8 +2135,8 @@ type DaoResponse {
   votingDelay: String!
   votingPeriod: String!
   timelockDelay: String!
-  alreadySupportCalldataReview: Boolean!
-  supportOffchainData: Boolean!
+  supportsCalldataReview: Boolean!
+  supportsOffchainData: Boolean!
 }
 
 type TokenMetricsResponse {
@@ -2035,6 +2153,13 @@ type TokenMetricItem {
 
   """Total volume observed for the period."""
   volume: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  endDate: String
+  startDate: String
 }
 
 """Metric family to query."""
@@ -2256,8 +2381,8 @@ type OffchainProposal {
   """Proposal title."""
   title: String!
 
-  """Proposal body."""
-  body: String!
+  """Proposal body. Omitted when the request sets `lean=true`."""
+  body: String
 
   """Discussion URL or thread reference."""
   discussion: String!

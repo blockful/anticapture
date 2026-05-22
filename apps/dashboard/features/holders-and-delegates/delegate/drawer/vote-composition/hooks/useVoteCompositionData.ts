@@ -106,9 +106,12 @@ export const useVoteCompositionData = (
     othersPercentage: 0,
   };
 
-  const actualSelfBalance = isAave
-    ? BigInt(balanceData?.accountBalanceByAccountId?.data?.balance ?? "0")
-    : 0n;
+  const balanceResult = balanceData?.accountBalanceByAccountId;
+  const selfBalanceString =
+    balanceResult?.__typename === "AccountBalanceWithVariationResponse"
+      ? balanceResult.data?.balance
+      : undefined;
+  const actualSelfBalance = isAave ? BigInt(selfBalanceString ?? "0") : 0n;
 
   const selfBalance = isAave && includeBalance ? actualSelfBalance : 0n;
 

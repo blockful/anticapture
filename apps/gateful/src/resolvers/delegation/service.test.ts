@@ -3,26 +3,25 @@ import { vi } from "vitest";
 import { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry";
 
 import { DelegationService } from "./service";
-import type { DelegationPercentageResponse } from "./service";
+
+// Mirrors the upstream API contract (items + totalCount). pageInfo is the
+// gateful output and is derived, not consumed.
+type UpstreamFixture = {
+  items: { date: string; high: string }[];
+  totalCount: number;
+};
 
 function createDelegationResponse(
   items: { date: string; high: string }[],
-  pageInfo?: Partial<DelegationPercentageResponse["pageInfo"]>,
-): DelegationPercentageResponse {
+  options: { totalCount?: number } = {},
+): UpstreamFixture {
   return {
     items,
-    totalCount: items.length,
-    pageInfo: {
-      hasNextPage: false,
-      hasPreviousPage: false,
-      endDate: null,
-      startDate: null,
-      ...pageInfo,
-    },
+    totalCount: options.totalCount ?? items.length,
   };
 }
 
-function stubFetch(responses: Record<string, DelegationPercentageResponse>) {
+function stubFetch(responses: Record<string, UpstreamFixture>) {
   vi.spyOn(global, "fetch").mockImplementation(((url: unknown) => {
     const urlStr = String(url);
     for (const [key, response] of Object.entries(responses)) {
@@ -126,7 +125,7 @@ describe("DelegationService", () => {
   it("should propagate hasNextPage from DAOs", async () => {
     stubFetch({
       "ens-api": createDelegationResponse([{ date: "1", high: "10" }], {
-        hasNextPage: true,
+        totalCount: 5, // upstream window has more rows than items returned
       }),
       "uni-api": createDelegationResponse([{ date: "1", high: "20" }]),
     });
@@ -146,7 +145,7 @@ describe("DelegationService", () => {
 
     const result = await service.getAverageDelegationPercentage({
       startDate: "1",
-      after: "2",
+      skip: 1,
     });
 
     expect(result.pageInfo.hasPreviousPage).toBe(true);
