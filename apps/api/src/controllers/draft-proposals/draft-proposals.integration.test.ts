@@ -106,6 +106,14 @@ describe("draftProposals controller", () => {
       const res = await app.request(`/proposal-drafts/${crypto.randomUUID()}`);
       expect(res.status).toBe(404);
     });
+
+    it("returns 404 when fetching a draft that belongs to a different dao", async () => {
+      const draft = makeDraft({ daoId: "other-dao" });
+      await db.insert(proposalDrafts).values(draft);
+
+      const res = await app.request(`/proposal-drafts/${draft.id}`);
+      expect(res.status).toBe(404);
+    });
   });
 
   describe("POST /proposal-drafts", () => {
@@ -230,6 +238,27 @@ describe("draftProposals controller", () => {
       });
       expect(res.status).toBe(400);
     });
+
+    it("returns 404 when updating a draft that belongs to a different dao", async () => {
+      const draft = makeDraft({ daoId: "other-dao" });
+      await db.insert(proposalDrafts).values(draft);
+
+      const res = await app.request(`/proposal-drafts/${draft.id}`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          address: ADDRESS_A,
+          title: "Cross-DAO hijack",
+        }),
+      });
+
+      expect(res.status).toBe(404);
+
+      const stored = await db.query.proposalDrafts.findFirst({
+        where: (table, { eq: eqOp }) => eqOp(table.id, draft.id),
+      });
+      expect(stored?.title).toBe(draft.title);
+    });
   });
 
   describe("DELETE /proposal-drafts/:id", () => {
@@ -274,6 +303,23 @@ describe("draftProposals controller", () => {
         method: "DELETE",
       });
       expect(res.status).toBe(400);
+    });
+
+    it("returns 404 when deleting a draft that belongs to a different dao", async () => {
+      const draft = makeDraft({ daoId: "other-dao" });
+      await db.insert(proposalDrafts).values(draft);
+
+      const res = await app.request(
+        `/proposal-drafts/${draft.id}?address=${ADDRESS_A}`,
+        { method: "DELETE" },
+      );
+
+      expect(res.status).toBe(404);
+
+      const stored = await db.query.proposalDrafts.findFirst({
+        where: (table, { eq: eqOp }) => eqOp(table.id, draft.id),
+      });
+      expect(stored).toBeDefined();
     });
   });
 });

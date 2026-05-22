@@ -24,9 +24,12 @@ export class DraftProposalsRepository {
       .orderBy(desc(proposalDrafts.updatedAt));
   }
 
-  async findById(id: string): Promise<DBProposalDraft | undefined> {
+  async findById(
+    id: string,
+    daoId: string,
+  ): Promise<DBProposalDraft | undefined> {
     return this.db.query.proposalDrafts.findFirst({
-      where: eq(proposalDrafts.id, id),
+      where: and(eq(proposalDrafts.id, id), eq(proposalDrafts.daoId, daoId)),
     });
   }
 
@@ -41,6 +44,7 @@ export class DraftProposalsRepository {
   async update(
     id: string,
     author: string,
+    daoId: string,
     data: Partial<
       Pick<
         NewProposalDraft,
@@ -55,19 +59,21 @@ export class DraftProposalsRepository {
         and(
           eq(proposalDrafts.id, id),
           eq(proposalDrafts.author, author.toLowerCase()),
+          eq(proposalDrafts.daoId, daoId),
         ),
       )
       .returning();
     return updated;
   }
 
-  async delete(id: string, author: string): Promise<boolean> {
+  async delete(id: string, author: string, daoId: string): Promise<boolean> {
     const result = await this.db
       .delete(proposalDrafts)
       .where(
         and(
           eq(proposalDrafts.id, id),
           eq(proposalDrafts.author, author.toLowerCase()),
+          eq(proposalDrafts.daoId, daoId),
         ),
       )
       .returning();

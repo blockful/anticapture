@@ -27,8 +27,11 @@ export class DraftProposalsService {
     return this.repo.findByAuthorAndDao(author, daoId);
   }
 
-  async getDraftById(id: string): Promise<DBProposalDraft | undefined> {
-    return this.repo.findById(id);
+  async getDraftById(
+    id: string,
+    daoId: string,
+  ): Promise<DBProposalDraft | undefined> {
+    return this.repo.findById(id, daoId);
   }
 
   async createDraft(input: CreateDraftInput): Promise<DBProposalDraft> {
@@ -49,15 +52,20 @@ export class DraftProposalsService {
   async updateDraft(
     id: string,
     author: string,
+    daoId: string,
     input: UpdateDraftInput,
   ): Promise<DBProposalDraft | undefined> {
-    return this.repo.update(id, author, {
+    return this.repo.update(id, author, daoId, {
       ...input,
       updatedAt: BigInt(Date.now()),
     });
   }
 
-  async deleteDraft(id: string, author: string): Promise<boolean> {
-    return this.repo.delete(id, author);
+  async deleteDraft(
+    id: string,
+    author: string,
+    daoId: string,
+  ): Promise<boolean> {
+    return this.repo.delete(id, author, daoId);
   }
 }

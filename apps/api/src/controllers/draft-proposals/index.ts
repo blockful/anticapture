@@ -62,7 +62,7 @@ export function draftProposals(
     }),
     async (c) => {
       const { id } = c.req.valid("param");
-      const draft = await service.getDraftById(id);
+      const draft = await service.getDraftById(id, daoId);
       if (!draft) return c.json({ error: "Draft not found" }, 404);
       return c.json(DraftResponseSchema.parse(draft), 200);
     },
@@ -131,7 +131,7 @@ export function draftProposals(
     async (c) => {
       const { id } = c.req.valid("param");
       const { address, ...patch } = c.req.valid("json");
-      const draft = await service.updateDraft(id, address, patch);
+      const draft = await service.updateDraft(id, address, daoId, patch);
       if (!draft) return c.json({ error: "Draft not found" }, 404);
       return c.json(DraftResponseSchema.parse(draft), 200);
     },
@@ -161,7 +161,7 @@ export function draftProposals(
     async (c) => {
       const { id } = c.req.valid("param");
       const { address } = c.req.valid("query");
-      const deleted = await service.deleteDraft(id, address);
+      const deleted = await service.deleteDraft(id, address, daoId);
       if (!deleted) return c.json({ error: "Draft not found" }, 404);
       return c.body(null, 204);
     },
