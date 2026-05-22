@@ -67,48 +67,43 @@ export const useDrafts = (
   // Migrate localStorage drafts to API on first connect
   useEffect(() => {
     if (!address) return;
-    const key = `${daoId}:${address}`;
+    // Capture address so stale in-flight responses from a previous address
+    // cannot overwrite state after the user switches wallets.
+    const capturedAddress = address;
+    const key = `${daoId}:${capturedAddress}`;
     if (migratedRef.current.has(key)) return;
+
+    let cancelled = false;
 
     const storage = getStorage();
     const localDrafts = storage
-      ? readDrafts(storage, draftKey(daoId, address))
+      ? readDrafts(storage, draftKey(daoId, capturedAddress))
       : [];
 
-    if (localDrafts.length === 0) {
-      (async () => {
-        if (!address) return;
-        setIsLoading(true);
-        setError(false);
-        try {
-          const result = await getDraftProposals(dao, { address });
-          setDrafts(result.items.map(toDraft));
-          // Only lock once the fetch has succeeded so transient failures can retry.
-          migratedRef.current.add(key);
-        } catch {
-          setDrafts([]);
-          setError(true);
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-      return;
-    }
-
-    (async () => {
+    const run = async () => {
       setIsLoading(true);
       setError(false);
       try {
-        const result = await getDraftProposals(dao, { address });
-        const remoteIds = new Set(result.items.map((d) => d.id));
+        const result = await getDraftProposals(dao, {
+          address: capturedAddress,
+        });
+        if (cancelled) return;
 
+        if (localDrafts.length === 0) {
+          setDrafts(result.items.map(toDraft));
+          // Only lock once the fetch has succeeded so transient failures can retry.
+          migratedRef.current.add(key);
+          return;
+        }
+
+        const remoteIds = new Set(result.items.map((d) => d.id));
         const newlyCreated = await Promise.all(
           localDrafts
             .filter((d) => !remoteIds.has(d.id))
             .map((d) =>
               createDraftProposal(dao, {
                 id: d.id,
-                address,
+                address: capturedAddress,
                 title: d.title,
                 discussionUrl: d.discussionUrl,
                 body: d.body,
@@ -117,24 +112,32 @@ export const useDrafts = (
             ),
         );
 
+        if (cancelled) return;
         setDrafts([...result.items, ...newlyCreated].map(toDraft));
 
         if (storage) {
-          storage.removeItem(draftKey(daoId, address));
+          storage.removeItem(draftKey(daoId, capturedAddress));
         }
         // Only lock the migration once it actually succeeded; otherwise a
         // transient API outage would strand the user until full remount.
         migratedRef.current.add(key);
       } catch {
+        if (cancelled) return;
         // Migration failed — fall back to local drafts and surface an error so
         // the UI can offer a manual retry. The lock stays unset so a later
         // retry (via the `retry()` callback) can replay the migration.
         setDrafts(localDrafts);
         setError(true);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
-    })();
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [daoId, dao, address, retryToken]);
 
   const saveDraft = useCallback(
