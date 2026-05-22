@@ -187,6 +187,7 @@ import {
   votingPowersQueryParamsSchema,
   votingPowersQueryResponseSchema,
 } from "../generated/zod.ts";
+import type { Address } from "../generated/models.ts";
 
 const DAO_ALL = [
   "aave",
@@ -1068,7 +1069,10 @@ export function createMcpServer(): McpServer {
       outputSchema: { data: getAddressesQueryResponseSchema },
       inputSchema: { params: getAddressesQueryParamsSchema },
     },
-    async ({ params }) => getAddressesHandler({ params }),
+    async ({ params }) =>
+      getAddressesHandler({
+        params: { ...params, addresses: params.addresses as Address[] },
+      }),
   );
 
   server.registerTool(

@@ -1,5 +1,10 @@
 import { useCallback } from "react";
-import { useQueryState, parseAsStringEnum, parseAsInteger } from "nuqs";
+import {
+  useQueryState,
+  parseAsStringEnum,
+  parseAsInteger,
+  parseAsArrayOf,
+} from "nuqs";
 
 import {
   type FeedEventsQueryParams,
@@ -28,9 +33,11 @@ export function useActivityFeedParams() {
   );
   const [fromDate, setFromDate] = useQueryState("from", parseAsInteger);
   const [toDate, setToDate] = useQueryState("to", parseAsInteger);
-  const [eventType, setEventType] = useQueryState(
+  const [eventTypes, setEventTypes] = useQueryState(
     "type",
-    parseAsStringEnum<FeedEventType>(Object.values(feedEventTypeEnum)),
+    parseAsArrayOf(
+      parseAsStringEnum<FeedEventType>(Object.values(feedEventTypeEnum)),
+    ),
   );
 
   const filters: FeedEventsQueryParams = {
@@ -38,7 +45,7 @@ export function useActivityFeedParams() {
     relevance,
     fromDate: fromDate ?? undefined,
     toDate: toDate ?? undefined,
-    type: eventType ?? undefined,
+    type: eventTypes ?? undefined,
   };
 
   const setFilters = useCallback(
@@ -47,9 +54,11 @@ export function useActivityFeedParams() {
       setRelevance(newFilters.relevance ?? null);
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
-      setEventType(newFilters.type ?? null);
+      setEventTypes(
+        newFilters.type && newFilters.type.length > 0 ? newFilters.type : null,
+      );
     },
-    [setOrderDirection, setRelevance, setFromDate, setToDate, setEventType],
+    [setOrderDirection, setRelevance, setFromDate, setToDate, setEventTypes],
   );
 
   const clearFilters = useCallback(() => {
@@ -57,8 +66,8 @@ export function useActivityFeedParams() {
     setRelevance(null);
     setFromDate(null);
     setToDate(null);
-    setEventType(null);
-  }, [setOrderDirection, setRelevance, setFromDate, setToDate, setEventType]);
+    setEventTypes(null);
+  }, [setOrderDirection, setRelevance, setFromDate, setToDate, setEventTypes]);
 
   const activeFiltersCount = getActiveActivityFeedFiltersCount(filters);
 

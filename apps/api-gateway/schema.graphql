@@ -1,50 +1,25 @@
-directive @httpOperation(
-  subgraph: String
-  path: String
-  operationSpecificHeaders: [[String]]
-  httpMethod: HTTPMethod
-  isBinary: Boolean
-  requestBaseBody: ObjMap
-  queryParamArgMap: ObjMap
-  queryStringOptionsByParam: ObjMap
-  jsonApiFields: Boolean
-  queryStringOptions: ObjMap
-) on FIELD_DEFINITION
+directive @statusCodeTypeName(subgraph: String, typeName: String, statusCode: String) repeatable on UNION
 
-directive @transport(
-  subgraph: String
-  kind: String
-  location: String
-  headers: [[String]]
-  queryStringOptions: ObjMap
-  queryParams: [[String]]
-) repeatable on SCHEMA
+directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
+
+directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 directive @enum(subgraph: String, value: String) on ENUM_VALUE
 
 directive @typescript(subgraph: String, type: String) on SCALAR | ENUM
 
-directive @example(
-  subgraph: String
-  value: ObjMap
-) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
+directive @example(subgraph: String, value: ObjMap) repeatable on FIELD_DEFINITION | OBJECT | INPUT_OBJECT | ENUM | SCALAR
 
-directive @statusCodeTypeName(
-  subgraph: String
-  typeName: String
-  statusCode: String
-) repeatable on UNION
+directive @resolveRoot(subgraph: String) on FIELD_DEFINITION
 
 type Query {
   """
   Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
   """
   getAddress(
-    """
-    Ethereum address (checksummed or lowercase)
-    """
+    """Ethereum address (checksummed or lowercase)"""
     address: String!
-  ): getAddress_200_response
+  ): getAddress_response
 
   """
   Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.
@@ -57,9 +32,14 @@ type Query {
   ): getAddresses_200_response
 
   """
-  Check API and database health
+  Lightweight liveness probe for orchestrators (e.g. Railway). Returns 200 when the API process is up and the database is reachable, 503 otherwise. Indexer freshness and chain head are intentionally excluded — use /health/full for diagnostics.
   """
-  health: health_response
+  liveness: LivenessResponse
+
+  """
+  Returns database connectivity, chain head, indexer freshness, and computed lag for this DAO API. HTTP status reflects database reachability only; degraded indexer state still returns 200 with status='degraded' in the body.
+  """
+  health: HealthResponse
 
   """
   Get historical delegations for an account, with optional filtering and sorting
@@ -68,39 +48,27 @@ type Query {
     address: String!
     delegateAddressIn: [String]
 
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of records to return.
-    """
+    """Maximum number of records to return."""
     limit: Int
     fromValue: String
     toValue: String
     orderDirection: OrderDirection = desc
   ): DelegationsResponse
 
-  """
-  Get current delegations for an account
-  """
+  """Get current delegations for an account"""
   delegations(address: String!): DelegationsResponse
 
-  """
-  Get current delegators of an account with voting power
-  """
+  """Get current delegators of an account with voting power"""
   delegators(
     address: String!
 
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of records to return.
-    """
+    """Maximum number of records to return."""
     limit: Int
     orderBy: queryInput_delegators_orderBy = amount
     orderDirection: OrderDirection = desc
@@ -109,163 +77,101 @@ type Query {
   """
   Get historical Liquid Treasury (treasury without DAO tokens) from external providers (DefiLlama/Dune)
   """
-  getLiquidTreasury(
-    days: DaysWindow = _365d
-    orderDirection: OrderDirection = desc
-  ): TreasuryResponse
+  getLiquidTreasury(days: DaysWindow = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
   """
   Get historical DAO Token Treasury value (governance token quantity × token price)
   """
-  getDaoTokenTreasury(
-    days: DaysWindow = _365d
-    orderDirection: OrderDirection = desc
-  ): TreasuryResponse
+  getDaoTokenTreasury(days: DaysWindow = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
-  """
-  Get historical Total Treasury (liquid treasury + DAO token treasury)
-  """
-  getTotalTreasury(
-    days: DaysWindow = _365d
-    orderDirection: OrderDirection = desc
-  ): TreasuryResponse
+  """Get historical Total Treasury (liquid treasury + DAO token treasury)"""
+  getTotalTreasury(days: DaysWindow = _365d, orderDirection: OrderDirection = desc): TreasuryResponse
 
-  """
-  Get historical market data for a specific token
-  """
+  """Get historical market data for a specific token"""
   historicalTokenData(
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of records to return.
-    """
+    """Maximum number of records to return."""
     limit: Int
   ): [TokenHistoricalPriceItem]
 
-  """
-  Get property data for a specific token
-  """
+  """Get property data for a specific token"""
   token(currency: queryInput_token_currency = usd): token_response
 
-  """
-  Get feed events
-  """
+  """Get feed events"""
   feedEvents(
-    """
-    Number of feed events to skip before collecting results.
-    """
+    """Number of feed events to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of feed events to return.
-    """
+    """Maximum number of feed events to return."""
     limit: Int
     orderBy: queryInput_feedEvents_orderBy = timestamp
     orderDirection: OrderDirection = desc
     relevance: queryInput_feedEvents_relevance
-    type: queryInput_feedEvents_type
 
     """
-    Earliest event timestamp, in Unix seconds.
+    Filter events by governance activity type. Pass repeated query params or a comma-delimited list.
     """
+    type: [queryInput_feedEvents_type_items]
+
+    """Earliest event timestamp, in Unix seconds."""
     fromDate: Int
 
-    """
-    Latest event timestamp, in Unix seconds.
-    """
+    """Latest event timestamp, in Unix seconds."""
     toDate: Int
   ): FeedResponse
 
-  """
-  Get event relevance threshold
-  """
-  getEventRelevanceThreshold(
-    type: FeedEventType!
-    relevance: FeedRelevance!
-  ): EventRelevanceThresholdResponse
+  """Get event relevance threshold"""
+  getEventRelevanceThreshold(type: FeedEventType!, relevance: FeedRelevance!): EventRelevanceThresholdResponse
 
-  """
-  Compare total supply between periods
-  """
+  """Compare total supply between periods"""
   compareTotalSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """
-  Compare delegated supply between periods
-  """
+  """Compare delegated supply between periods"""
   compareDelegatedSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """
-  Compare circulating supply between periods
-  """
+  """Compare circulating supply between periods"""
   compareCirculatingSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """
-  Compare treasury between periods
-  """
+  """Compare treasury between periods"""
   compareTreasury(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """
-  Compare cex supply between periods
-  """
+  """Compare cex supply between periods"""
   compareCexSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """
-  Compare dex supply between periods
-  """
+  """Compare dex supply between periods"""
   compareDexSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """
-  Compare lending supply between periods
-  """
+  """Compare lending supply between periods"""
   compareLendingSupply(days: DaysWindow = _365d): SupplyComparisonResponse
 
-  """
-  Get active token supply for DAO
-  """
+  """Get active token supply for DAO"""
   compareActiveSupply(days: DaysWindow = _365d): ActiveSupplyResponse
 
-  """
-  Compare number of proposals between time periods
-  """
+  """Compare number of proposals between time periods"""
   compareProposals(days: DaysWindow = _365d): ProposalsComparisonResponse
 
-  """
-  Compare number of votes between time periods
-  """
+  """Compare number of votes between time periods"""
   compareVotes(days: DaysWindow = _365d): VotesComparisonResponse
 
-  """
-  Compare average turnout between time periods
-  """
-  compareAverageTurnout(
-    days: DaysWindow = _365d
-  ): AverageTurnoutComparisonResponse
+  """Compare average turnout between time periods"""
+  compareAverageTurnout(days: DaysWindow = _365d): AverageTurnoutComparisonResponse
 
   """
   Returns proposal activity data including voting history, win rates, and detailed proposal information for the specified delegate within the given time window
   """
   proposalsActivity(
-    """
-    Delegate address whose proposal activity is being queried.
-    """
+    """Delegate address whose proposal activity is being queried."""
     address: String!
 
-    """
-    Lower bound for proposal timestamps, in Unix seconds.
-    """
+    """Lower bound for proposal timestamps, in Unix seconds."""
     fromDate: Int
 
-    """
-    Number of proposal activity records to skip.
-    """
+    """Number of proposal activity records to skip."""
     skip: Int
 
-    """
-    Maximum number of proposal activity records to return.
-    """
+    """Maximum number of proposal activity records to return."""
     limit: Int
     orderBy: queryInput_proposalsActivity_orderBy = timestamp
     orderDirection: OrderDirection = desc
@@ -273,17 +179,13 @@ type Query {
   ): ProposalActivityResponse
 
   """
-  Returns a list of proposal
+  Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and reduce payload size.
   """
   proposals(
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of records to return.
-    """
+    """Maximum number of records to return."""
     limit: Int
     orderDirection: OrderDirection = desc
 
@@ -292,65 +194,51 @@ type Query {
     """
     status: [queryInput_proposals_status_items]
 
-    """
-    Earliest proposal timestamp, in Unix seconds.
-    """
+    """Earliest proposal timestamp, in Unix seconds."""
     fromDate: Int
 
-    """
-    Latest proposal end timestamp, in Unix seconds.
-    """
+    """Latest proposal end timestamp, in Unix seconds."""
     fromEndDate: Int
 
-    """
-    Whether optimistic proposals should be included.
-    """
+    """Whether optimistic proposals should be included."""
     includeOptimisticProposals: Boolean = true
 
     """
-    When true, omit execution-payload fields (calldatas, values, targets).
+    When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.
     """
-    lean: Boolean = false
+    lean: JSON
   ): OnchainProposalsResponse
 
   """
-  Returns proposals whose title or identifier partially matches the query. Pass lean=true to omit calldatas/values/targets.
+  Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets.
   """
   searchProposals(
-    """
-    Partial proposal identifier or title to search for.
-    """
+    """Partial proposal identifier or title to search for."""
     query: NonEmptyString!
 
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of records to return.
-    """
+    """Maximum number of records to return."""
     limit: Int
 
     """
-    When true, omit execution-payload fields (calldatas, values, targets).
+    When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.
     """
-    lean: Boolean = false
+    lean: JSON
   ): OnchainProposalsResponse
 
   """
-  Returns a single proposal by its ID. Pass lean=true to omit calldatas/values/targets.
+  Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets.
   """
   proposal(
-    """
-    Onchain proposal identifier.
-    """
+    """Onchain proposal identifier."""
     id: String!
 
     """
-    When true, omit execution-payload fields (calldatas, values, targets).
+    When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.
     """
-    lean: Boolean = false
+    lean: JSON
   ): proposal_response
 
   """
@@ -359,14 +247,10 @@ type Query {
   historicalBalances(
     address: String!
 
-    """
-    Number of historical balance rows to skip.
-    """
+    """Number of historical balance rows to skip."""
     skip: Int
 
-    """
-    Maximum number of historical balance rows to return.
-    """
+    """Maximum number of historical balance rows to return."""
     limit: Int
     orderBy: queryInput_historicalBalances_orderBy = timestamp
     orderDirection: OrderDirection = desc
@@ -381,121 +265,77 @@ type Query {
     """
     toDate: Int
 
-    """
-    Minimum balance delta encoded as a decimal string.
-    """
+    """Minimum balance delta encoded as a decimal string."""
     fromValue: String
 
-    """
-    Maximum balance delta encoded as a decimal string.
-    """
+    """Maximum balance delta encoded as a decimal string."""
     toValue: String
   ): HistoricalBalancesResponse
 
-  """
-  Get the last update time
-  """
+  """Get the last update time"""
   lastUpdate(chart: queryInput_lastUpdate_chart!): LastUpdateResponse
 
-  """
-  Get delegation percentage day buckets with forward-fill
-  """
+  """Get delegation percentage day buckets with forward-fill"""
   delegationPercentageByDay(
-    """
-    Inclusive lower bound for the day-bucket window, in Unix seconds.
-    """
+    """Inclusive lower bound for the day-bucket window, in Unix seconds."""
     startDate: Int
 
-    """
-    Inclusive upper bound for the day-bucket window, in Unix seconds.
-    """
+    """Inclusive upper bound for the day-bucket window, in Unix seconds."""
     endDate: Int
     orderDirection: OrderDirection = desc
 
-    """
-    Maximum number of day buckets to return.
-    """
-    limit: Int
-
-    """
-    Number of day buckets to skip before returning results.
-    """
+    """Number of day buckets to skip before returning results."""
     skip: Int
+
+    """Maximum number of day buckets to return."""
+    limit: Int
   ): DelegationPercentageResponse
 
-  """
-  Returns a list of voting power changes for a specific account
-  """
+  """Returns a list of voting power changes for a specific account"""
   historicalVotingPowerByAccountId(
     address: String!
 
-    """
-    Number of historical voting power rows to skip.
-    """
+    """Number of historical voting power rows to skip."""
     skip: Int
 
-    """
-    Maximum number of historical voting power rows to return.
-    """
+    """Maximum number of historical voting power rows to return."""
     limit: Int
     orderBy: queryInput_historicalVotingPowerByAccountId_orderBy = timestamp
     orderDirection: OrderDirection = desc
 
-    """
-    Inclusive lower bound for voting power timestamps, in Unix seconds.
-    """
+    """Inclusive lower bound for voting power timestamps, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for voting power timestamps, in Unix seconds.
-    """
+    """Inclusive upper bound for voting power timestamps, in Unix seconds."""
     toDate: Int
 
-    """
-    Minimum voting power delta encoded as a decimal string.
-    """
+    """Minimum voting power delta encoded as a decimal string."""
     fromValue: String
 
-    """
-    Maximum voting power delta encoded as a decimal string.
-    """
+    """Maximum voting power delta encoded as a decimal string."""
     toValue: String
   ): HistoricalVotingPowersResponse
 
-  """
-  Returns a list of voting power changes.
-  """
+  """Returns a list of voting power changes."""
   historicalVotingPower(
-    """
-    Number of historical voting power rows to skip.
-    """
+    """Number of historical voting power rows to skip."""
     skip: Int
 
-    """
-    Maximum number of historical voting power rows to return.
-    """
+    """Maximum number of historical voting power rows to return."""
     limit: Int
     orderBy: queryInput_historicalVotingPower_orderBy = timestamp
     orderDirection: OrderDirection = desc
 
-    """
-    Inclusive lower bound for voting power timestamps, in Unix seconds.
-    """
+    """Inclusive lower bound for voting power timestamps, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for voting power timestamps, in Unix seconds.
-    """
+    """Inclusive upper bound for voting power timestamps, in Unix seconds."""
     toDate: Int
 
-    """
-    Minimum voting power delta encoded as a decimal string.
-    """
+    """Minimum voting power delta encoded as a decimal string."""
     fromValue: String
 
-    """
-    Maximum voting power delta encoded as a decimal string.
-    """
+    """Maximum voting power delta encoded as a decimal string."""
     toValue: String
 
     """
@@ -508,14 +348,10 @@ type Query {
   Returns a mapping of the voting power changes within a time frame for the given addresses
   """
   votingPowerVariations(
-    """
-    Maximum number of voting power variation rows to return.
-    """
+    """Maximum number of voting power variation rows to return."""
     limit: Int
 
-    """
-    Number of voting power variation rows to skip.
-    """
+    """Number of voting power variation rows to skip."""
     skip: Int
     orderDirection: OrderDirection = desc
 
@@ -524,46 +360,30 @@ type Query {
     """
     addresses: [String]
 
-    """
-    Inclusive lower bound for the comparison window, in Unix seconds.
-    """
+    """Inclusive lower bound for the comparison window, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for the comparison window, in Unix seconds.
-    """
+    """Inclusive upper bound for the comparison window, in Unix seconds."""
     toDate: Int
   ): VotingPowerVariationsResponse
 
-  """
-  Returns a the changes to voting power by period and accountId
-  """
+  """Returns a the changes to voting power by period and accountId"""
   votingPowerVariationsByAccountId(
     address: String!
 
-    """
-    Inclusive lower bound for the comparison window, in Unix seconds.
-    """
+    """Inclusive lower bound for the comparison window, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for the comparison window, in Unix seconds.
-    """
+    """Inclusive upper bound for the comparison window, in Unix seconds."""
     toDate: Int
   ): VotingPowerVariationsByAccountIdResponse
 
-  """
-  Returns sorted and paginated account voting power records
-  """
+  """Returns sorted and paginated account voting power records"""
   votingPowers(
-    """
-    Maximum number of current voting power rows to return.
-    """
+    """Maximum number of current voting power rows to return."""
     limit: Int
 
-    """
-    Number of current voting power rows to skip.
-    """
+    """Number of current voting power rows to skip."""
     skip: Int
     orderDirection: OrderDirection = desc
     orderBy: queryInput_votingPowers_orderBy = votingPower
@@ -573,41 +393,27 @@ type Query {
     """
     addresses: [String]
 
-    """
-    Minimum voting power encoded as a decimal string.
-    """
+    """Minimum voting power encoded as a decimal string."""
     fromValue: String
 
-    """
-    Maximum voting power encoded as a decimal string.
-    """
+    """Maximum voting power encoded as a decimal string."""
     toValue: String
 
-    """
-    Inclusive lower bound for variation enrichment, in Unix seconds.
-    """
+    """Inclusive lower bound for variation enrichment, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for variation enrichment, in Unix seconds.
-    """
+    """Inclusive upper bound for variation enrichment, in Unix seconds."""
     toDate: Int
   ): VotingPowersResponse
 
-  """
-  Returns voting power information for a specific address (account)
-  """
+  """Returns voting power information for a specific address (account)"""
   votingPowerByAccountId(
-    accountId: String!
+    address: String!
 
-    """
-    Inclusive lower bound for variation enrichment, in Unix seconds.
-    """
+    """Inclusive lower bound for variation enrichment, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for variation enrichment, in Unix seconds.
-    """
+    """Inclusive upper bound for variation enrichment, in Unix seconds."""
     toDate: Int
   ): VotingPower
 
@@ -615,24 +421,16 @@ type Query {
   Returns a mapping of the biggest variations to account balances associated by account address
   """
   accountBalanceVariations(
-    """
-    Inclusive lower bound for the comparison window, in Unix seconds.
-    """
+    """Inclusive lower bound for the comparison window, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for the comparison window, in Unix seconds.
-    """
+    """Inclusive upper bound for the comparison window, in Unix seconds."""
     toDate: Int
 
-    """
-    Maximum number of account balance variations to return.
-    """
+    """Maximum number of account balance variations to return."""
     limit: Int
 
-    """
-    Number of account balance variations to skip.
-    """
+    """Number of account balance variations to skip."""
     skip: Int
     orderDirection: OrderDirection = desc
 
@@ -642,52 +440,34 @@ type Query {
     addresses: [String]
   ): AccountBalanceVariationsResponse
 
-  """
-  Returns a the changes to balance by period and accountId
-  """
+  """Returns a the changes to balance by period and accountId"""
   accountBalanceVariationsByAccountId(
     address: String!
 
-    """
-    Inclusive lower bound for the comparison window, in Unix seconds.
-    """
+    """Inclusive lower bound for the comparison window, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for the comparison window, in Unix seconds.
-    """
+    """Inclusive upper bound for the comparison window, in Unix seconds."""
     toDate: Int
   ): AccountBalanceVariationsByAccountIdResponse
 
-  """
-  Returns sorted and paginated account balance records
-  """
+  """Returns sorted and paginated account balance records"""
   accountBalances(
-    """
-    Inclusive lower bound for balance history filters, in Unix seconds.
-    """
+    """Inclusive lower bound for balance history filters, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for balance history filters, in Unix seconds.
-    """
+    """Inclusive upper bound for balance history filters, in Unix seconds."""
     toDate: Int
 
-    """
-    Maximum number of records to return.
-    """
-    limit: Int
-
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
     orderDirection: OrderDirection = desc
     orderBy: queryInput_accountBalances_orderBy = balance
 
-    """
-    Whether DAO-owned addresses should be excluded from the results.
-    """
+    """Whether DAO-owned addresses should be excluded from the results."""
     excludeDaoAddresses: Boolean
     addresses: [String]
 
@@ -696,24 +476,16 @@ type Query {
     """
     delegates: [String]
 
-    """
-    Minimum balance encoded as a decimal string.
-    """
+    """Minimum balance encoded as a decimal string."""
     fromValue: String
 
-    """
-    Maximum balance encoded as a decimal string.
-    """
+    """Maximum balance encoded as a decimal string."""
     toValue: String
   ): AccountBalancesWithVariationResponse
 
-  """
-  Returns account balance information for a specific address
-  """
+  """Returns account balance information for a specific address"""
   accountBalanceByAccountId(
-    """
-    Wallet address whose balance is being queried.
-    """
+    """Wallet address whose balance is being queried."""
     address: String!
 
     """
@@ -728,111 +500,73 @@ type Query {
   ): accountBalanceByAccountId_response
 
   """
-  Returns a mapping of the largest interactions between accounts.
+  Returns a mapping of the largest interactions between accounts. 
   Positive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>
   """
   accountInteractions(
     address: String!
 
-    """
-    Inclusive lower bound for transfer timestamps, in Unix seconds.
-    """
+    """Inclusive lower bound for transfer timestamps, in Unix seconds."""
     fromDate: Int
 
-    """
-    Inclusive upper bound for transfer timestamps, in Unix seconds.
-    """
+    """Inclusive upper bound for transfer timestamps, in Unix seconds."""
     toDate: Int
 
-    """
-    Maximum number of interaction rows to return.
-    """
+    """Maximum number of interaction rows to return."""
     limit: Int
 
-    """
-    Number of interaction rows to skip.
-    """
+    """Number of interaction rows to skip."""
     skip: Int
     orderDirection: OrderDirection = desc
 
-    """
-    Minimum net amount transferred, encoded as a decimal string.
-    """
+    """Minimum net amount transferred, encoded as a decimal string."""
     minAmount: String
 
-    """
-    Maximum net amount transferred, encoded as a decimal string.
-    """
+    """Maximum net amount transferred, encoded as a decimal string."""
     maxAmount: String
     orderBy: queryInput_accountInteractions_orderBy = count
 
-    """
-    Optional counterparty address used to narrow the results.
-    """
+    """Optional counterparty address used to narrow the results."""
     filterAddress: String
   ): AccountInteractionsResponse
 
-  """
-  Get transfers of a given address
-  """
+  """Get transfers of a given address"""
   transfers(
-    """
-    Wallet address whose transfers are being queried.
-    """
+    """Wallet address whose transfers are being queried."""
     address: String!
 
-    """
-    Maximum number of records to return.
-    """
-    limit: Int
-
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
     orderBy: queryInput_transfers_orderBy = timestamp
     orderDirection: OrderDirection = desc
     from: String
     to: String
 
-    """
-    Earliest transfer timestamp, in Unix seconds.
-    """
+    """Earliest transfer timestamp, in Unix seconds."""
     fromDate: Int
 
-    """
-    Latest transfer timestamp, in Unix seconds.
-    """
+    """Latest transfer timestamp, in Unix seconds."""
     toDate: Int
 
-    """
-    Minimum transfer amount encoded as a decimal string.
-    """
+    """Minimum transfer amount encoded as a decimal string."""
     fromValue: String
 
-    """
-    Maximum transfer amount encoded as a decimal string.
-    """
+    """Maximum transfer amount encoded as a decimal string."""
     toValue: String
   ): TransfersResponse
 
-  """
-  Returns a paginated list of votes cast on a specific proposal
-  """
+  """Returns a paginated list of votes cast on a specific proposal"""
   votesByProposalId(
-    """
-    Onchain proposal identifier.
-    """
+    """Onchain proposal identifier."""
     id: String!
 
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of records to return.
-    """
+    """Maximum number of records to return."""
     limit: Int
 
     """
@@ -842,34 +576,22 @@ type Query {
     orderBy: queryInput_votesByProposalId_orderBy = timestamp
     orderDirection: OrderDirection = desc
 
-    """
-    Governance vote direction.
-    """
+    """Governance vote direction."""
     support: String
 
-    """
-    Earliest vote timestamp, in Unix seconds.
-    """
+    """Earliest vote timestamp, in Unix seconds."""
     fromDate: Int
 
-    """
-    Latest vote timestamp, in Unix seconds.
-    """
+    """Latest vote timestamp, in Unix seconds."""
     toDate: Int
   ): OnchainVotesResponse
 
-  """
-  Get all votes ordered by timestamp or voting power
-  """
+  """Get all votes ordered by timestamp or voting power"""
   votes(
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of records to return.
-    """
+    """Maximum number of records to return."""
     limit: Int
 
     """
@@ -879,244 +601,52 @@ type Query {
     orderBy: queryInput_votes_orderBy = timestamp
     orderDirection: OrderDirection = desc
 
-    """
-    Governance vote direction.
-    """
+    """Governance vote direction."""
     support: String
 
-    """
-    Earliest vote timestamp, in Unix seconds.
-    """
+    """Earliest vote timestamp, in Unix seconds."""
     fromDate: Int
 
-    """
-    Latest vote timestamp, in Unix seconds.
-    """
+    """Latest vote timestamp, in Unix seconds."""
     toDate: Int
   ): OnchainVotesResponse
 
-  """
-  Returns the active delegates that did not vote on a given proposal
-  """
+  """Returns the active delegates that did not vote on a given proposal"""
   proposalNonVoters(
-    """
-    Onchain proposal identifier.
-    """
+    """Onchain proposal identifier."""
     id: String!
 
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
 
-    """
-    Maximum number of records to return.
-    """
+    """Maximum number of records to return."""
     limit: Int
     orderDirection: OrderDirection = desc
     addresses: [String]
   ): VotersResponse
 
-  """
-  Returns current governance parameters for this DAO
-  """
+  """Returns current governance parameters for this DAO"""
   dao: DaoResponse
 
-  """
-  Returns token related metrics for a single metric type.
-  """
+  """Returns token related metrics for a single metric type."""
   tokenMetrics(
     metricType: queryInput_tokenMetrics_metricType!
 
-    """
-    Inclusive lower bound as a Unix timestamp in seconds.
-    """
+    """Inclusive lower bound as a Unix timestamp in seconds."""
     startDate: Int
 
-    """
-    Inclusive upper bound as a Unix timestamp in seconds.
-    """
+    """Inclusive upper bound as a Unix timestamp in seconds."""
     endDate: Int
     orderDirection: OrderDirection = desc
 
-    """
-    Maximum number of records to return.
-    """
-    limit: Int
-
-    """
-    Number of records to skip before collecting results.
-    """
+    """Number of records to skip before collecting results."""
     skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
   ): TokenMetricsResponse
 
-  """
-  Returns a list of offchain (Snapshot) proposals
-  """
-  offchainProposals(
-    """
-    Number of records to skip before collecting results.
-    """
-    skip: Int
-
-    """
-    Maximum number of records to return.
-    """
-    limit: Int
-    orderDirection: OrderDirection = desc
-
-    """
-    Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.
-    """
-    status: [queryInput_offchainProposals_status_items]
-
-    """
-    Earliest proposal creation timestamp, in Unix seconds.
-    """
-    fromDate: Int
-
-    """
-    Latest proposal creation timestamp, in Unix seconds.
-    """
-    endDate: Int
-
-    """
-    When true, omit the proposal `body` to reduce response size.
-    """
-    lean: Boolean = false
-  ): OffchainProposalsResponse
-
-  """
-  Returns offchain proposals whose title or identifier partially matches the query. Pass lean=true to omit the `body`.
-  """
-  offchainSearchProposals(
-    """
-    Partial Snapshot proposal identifier or title to search for.
-    """
-    query: NonEmptyString!
-
-    """
-    Number of records to skip before collecting results.
-    """
-    skip: Int
-
-    """
-    Maximum number of records to return.
-    """
-    limit: Int
-
-    """
-    When true, omit the proposal `body` to reduce response size.
-    """
-    lean: Boolean = false
-  ): OffchainProposalsResponse
-
-  """
-  Returns a single offchain (Snapshot) proposal by its ID. Pass lean=true to omit the `body`.
-  """
-  offchainProposalById(
-    """
-    Snapshot proposal identifier.
-    """
-    id: String!
-
-    """
-    When true, omit the proposal `body` to reduce response size.
-    """
-    lean: Boolean = false
-  ): offchainProposalById_response
-
-  """
-  Returns a list of offchain (Snapshot) votes
-  """
-  votesOffchain(
-    """
-    Number of records to skip before collecting results.
-    """
-    skip: Int
-
-    """
-    Maximum number of records to return.
-    """
-    limit: Int
-    orderBy: queryInput_votesOffchain_orderBy = timestamp
-    orderDirection: OrderDirection = desc
-
-    """
-    Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
-    """
-    voterAddresses: [String]
-
-    """
-    Earliest vote timestamp, in Unix seconds.
-    """
-    fromDate: Int
-
-    """
-    Latest vote timestamp, in Unix seconds.
-    """
-    toDate: Int
-  ): OffchainVotesResponse
-
-  """
-  Returns a paginated list of offchain (Snapshot) votes for a specific proposal
-  """
-  votesOffchainByProposalId(
-    """
-    Snapshot proposal identifier.
-    """
-    id: String!
-
-    """
-    Number of records to skip before collecting results.
-    """
-    skip: Int
-
-    """
-    Maximum number of records to return.
-    """
-    limit: Int
-    orderBy: queryInput_votesOffchainByProposalId_orderBy = timestamp
-    orderDirection: OrderDirection = desc
-
-    """
-    Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
-    """
-    voterAddresses: [String]
-
-    """
-    Earliest vote timestamp, in Unix seconds.
-    """
-    fromDate: Int
-
-    """
-    Latest vote timestamp, in Unix seconds.
-    """
-    toDate: Int
-  ): OffchainVotesResponse
-
-  """
-  Returns the active delegates that did not vote on a given offchain proposal
-  """
-  offchainProposalNonVoters(
-    id: String!
-
-    """
-    Number of records to skip before collecting results.
-    """
-    skip: Int
-
-    """
-    Maximum number of records to return.
-    """
-    limit: Int
-    orderDirection: OrderDirection = desc
-    addresses: [String]
-  ): offchainProposalNonVoters_response
-
-  """
-  Monthly action counts by category (Registration, Renewal, Premium).
-  """
+  """Monthly action counts by category (Registration, Renewal, Premium)."""
   getRevenueActions(
     """
     Inclusive lower bound for the data range, as a Unix timestamp in seconds.
@@ -1130,9 +660,7 @@ type Query {
     orderDirection: OrderDirection = desc
   ): RevenueActionsResponse
 
-  """
-  Monthly net change and cumulative count of active .eth names.
-  """
+  """Monthly net change and cumulative count of active .eth names."""
   getRevenueActiveNames(
     """
     Inclusive lower bound for the data range, as a Unix timestamp in seconds.
@@ -1146,9 +674,7 @@ type Query {
     orderDirection: OrderDirection = desc
   ): RevenueActiveNamesResponse
 
-  """
-  Monthly new-wallet counts and the cumulative wallet total for ENS.
-  """
+  """Monthly new-wallet counts and the cumulative wallet total for ENS."""
   getRevenueNewWallets(
     """
     Inclusive lower bound for the data range, as a Unix timestamp in seconds.
@@ -1227,6 +753,130 @@ type Query {
   ): RevenueRenewalTenureResponse
 
   """
+  Returns a list of offchain (Snapshot) proposals. Pass `lean=true` to omit the markdown `body` and reduce payload size.
+  """
+  offchainProposals(
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    orderDirection: OrderDirection = desc
+
+    """
+    Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.
+    """
+    status: [queryInput_offchainProposals_status_items]
+
+    """Earliest proposal creation timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest proposal creation timestamp, in Unix seconds."""
+    endDate: Int
+
+    """
+    When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
+  ): OffchainProposalsResponse
+
+  """
+  Returns offchain proposals whose title or identifier partially matches the query. Pass `lean=true` to omit the `body`.
+  """
+  offchainSearchProposals(
+    """Partial Snapshot proposal identifier or title to search for."""
+    query: NonEmptyString!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+
+    """
+    When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
+  ): OffchainProposalsResponse
+
+  """
+  Returns a single offchain (Snapshot) proposal by its ID. Pass `lean=true` to omit the `body`.
+  """
+  offchainProposalById(
+    """Snapshot proposal identifier."""
+    id: String!
+
+    """
+    When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.
+    """
+    lean: JSON
+  ): offchainProposalById_response
+
+  """Returns a list of offchain (Snapshot) votes"""
+  votesOffchain(
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    orderBy: queryInput_votesOffchain_orderBy = timestamp
+    orderDirection: OrderDirection = desc
+
+    """
+    Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
+    """
+    voterAddresses: [String]
+
+    """Earliest vote timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest vote timestamp, in Unix seconds."""
+    toDate: Int
+  ): OffchainVotesResponse
+
+  """
+  Returns a paginated list of offchain (Snapshot) votes for a specific proposal
+  """
+  votesOffchainByProposalId(
+    """Snapshot proposal identifier."""
+    id: String!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    orderBy: queryInput_votesOffchainByProposalId_orderBy = timestamp
+    orderDirection: OrderDirection = desc
+
+    """
+    Filter by one or more voter addresses. Pass repeated query params or a comma-delimited list.
+    """
+    voterAddresses: [String]
+
+    """Earliest vote timestamp, in Unix seconds."""
+    fromDate: Int
+
+    """Latest vote timestamp, in Unix seconds."""
+    toDate: Int
+  ): OffchainVotesResponse
+
+  """
+  Returns the active delegates that did not vote on a given offchain proposal
+  """
+  offchainProposalNonVoters(
+    id: String!
+
+    """Number of records to skip before collecting results."""
+    skip: Int
+
+    """Maximum number of records to return."""
+    limit: Int
+    orderDirection: OrderDirection = desc
+    addresses: [String]
+  ): offchainProposalNonVoters_response
+
+  """
   Average delegation percentage across all supported DAOs by day.
   Returns the mean delegation percentage for each day in the specified range.
   Only includes dates where ALL DAOs have data available.
@@ -1245,9 +895,7 @@ type Query {
     """
     endDate: String
 
-    """
-    Number of day buckets to skip before returning results.
-    """
+    """Number of day buckets to skip before returning results."""
     skip: Int
 
     """
@@ -1255,36 +903,32 @@ type Query {
     """
     orderDirection: String
 
-    """
-    Maximum number of items to return. Default: 100
-    """
+    """Maximum number of items to return. Default: 100"""
     limit: Int
   ): AverageDelegationPercentagePage!
 
-  """
-  Get all DAOs
-  """
+  """Get all DAOs"""
   daos: DAOList!
 }
 
+union getAddress_response = getAddress_200_response | getAddress_502_response
+
 type getAddress_200_response {
-  """
-  EIP-55 checksummed Ethereum address
-  """
+  """EIP-55 checksummed Ethereum address"""
   address: String!
 
   """
   Whether the address is a smart contract (true) or an externally-owned account (false)
   """
   isContract: Boolean!
-  arkham: query_getAddress_arkham
-  ens: query_getAddress_ens
+  arkham: query_getAddress_oneOf_0_arkham
+  ens: query_getAddress_oneOf_0_ens
 }
 
 """
 Arkham Intelligence label data. null when no data is available for the address.
 """
-type query_getAddress_arkham {
+type query_getAddress_oneOf_0_arkham {
   """
   Human-readable name of the entity that owns the address according to Arkham Intelligence
   """
@@ -1295,34 +939,24 @@ type query_getAddress_arkham {
   """
   entityType: String
 
-  """
-  Fine-grained label for the specific address within the entity
-  """
+  """Fine-grained label for the specific address within the entity"""
   label: String
 
-  """
-  Twitter/X handle associated with the entity, without '@'
-  """
+  """Twitter/X handle associated with the entity, without '@'"""
   twitter: String
 }
 
 """
 ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL.
 """
-type query_getAddress_ens {
-  """
-  Primary ENS name reverse-resolved for this address
-  """
+type query_getAddress_oneOf_0_ens {
+  """Primary ENS name reverse-resolved for this address"""
   name: String
 
-  """
-  URL of the ENS avatar image
-  """
+  """URL of the ENS avatar image"""
   avatar: URL
 
-  """
-  URL of the ENS profile banner image
-  """
+  """URL of the ENS profile banner image"""
   banner: String
 }
 
@@ -1330,6 +964,10 @@ type query_getAddress_ens {
 A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt.
 """
 scalar URL
+
+type getAddress_502_response {
+  error: String!
+}
 
 type getAddresses_200_response {
   """
@@ -1339,9 +977,7 @@ type getAddresses_200_response {
 }
 
 type query_getAddresses_results_items {
-  """
-  EIP-55 checksummed Ethereum address
-  """
+  """EIP-55 checksummed Ethereum address"""
   address: String!
 
   """
@@ -1366,14 +1002,10 @@ type query_getAddresses_results_items_arkham {
   """
   entityType: String
 
-  """
-  Fine-grained label for the specific address within the entity
-  """
+  """Fine-grained label for the specific address within the entity"""
   label: String
 
-  """
-  Twitter/X handle associated with the entity, without '@'
-  """
+  """Twitter/X handle associated with the entity, without '@'"""
   twitter: String
 }
 
@@ -1381,19 +1013,13 @@ type query_getAddresses_results_items_arkham {
 ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL.
 """
 type query_getAddresses_results_items_ens {
-  """
-  Primary ENS name reverse-resolved for this address
-  """
+  """Primary ENS name reverse-resolved for this address"""
   name: String
 
-  """
-  URL of the ENS avatar image
-  """
+  """URL of the ENS avatar image"""
   avatar: URL
 
-  """
-  URL of the ENS profile banner image
-  """
+  """URL of the ENS profile banner image"""
   banner: String
 }
 
@@ -1411,38 +1037,69 @@ enum HTTPMethod {
 
 scalar ObjMap
 
-union health_response = health_200_response | health_503_response
-
-type health_200_response {
-  status: ok_const!
-  database: ok_const!
+type LivenessResponse {
+  database: query_liveness_oneOf_0_database!
 }
 
-enum ok_const {
+"""Database connectivity status."""
+enum query_liveness_oneOf_0_database {
   ok
-}
-
-type health_503_response {
-  status: error_const!
-  database: error_const!
-  message: String!
-}
-
-enum error_const {
   error
 }
 
+type HealthResponse {
+  status: query_health_oneOf_0_status!
+  database: query_health_oneOf_0_database!
+  chain: query_health_oneOf_0_chain!
+  indexer: query_health_oneOf_0_indexer!
+}
+
 """
-Paginated historical delegations response.
+Overall health: ok when fresh, degraded when indexer is lagging, error when the database is unreachable.
 """
+enum query_health_oneOf_0_status {
+  ok
+  degraded
+  error
+}
+
+"""Database connectivity status."""
+enum query_health_oneOf_0_database {
+  ok
+  error
+}
+
+"""On-chain state observed by this DAO API."""
+type query_health_oneOf_0_chain {
+  """
+  Latest block number reported by the RPC, or null if the RPC call failed.
+  """
+  head: Int
+}
+
+"""Indexer freshness signals derived from app tables."""
+type query_health_oneOf_0_indexer {
+  """
+  Unix timestamp (seconds) of the most recent indexed event, or null if no events have been recorded.
+  """
+  lastEventTimestamp: Int
+
+  """
+  Seconds between now and lastEventTimestamp, or null if the indexer hasn't produced any events.
+  """
+  lagSeconds: Int
+
+  """True when lagSeconds is within the freshness threshold (300s)."""
+  fresh: Boolean!
+}
+
+"""Paginated historical delegations response."""
 type DelegationsResponse {
   items: [DelegationItem]!
   totalCount: Int!
 }
 
-"""
-Single delegation transfer event in the historical delegation feed.
-"""
+"""Single delegation transfer event in the historical delegation feed."""
 type DelegationItem {
   delegatorAddress: String!
   delegateAddress: String!
@@ -1451,25 +1108,19 @@ type DelegationItem {
   transactionHash: String!
 }
 
-"""
-Sort direction for ordered query results.
-"""
+"""Sort direction for ordered query results."""
 enum OrderDirection {
   asc
   desc
 }
 
-"""
-Paginated delegators for a delegate address.
-"""
+"""Paginated delegators for a delegate address."""
 type DelegatorsResponse {
   items: [DelegatorItem]!
   totalCount: Int!
 }
 
-"""
-Aggregated delegation amount and latest timestamp for one delegator.
-"""
+"""Aggregated delegation amount and latest timestamp for one delegator."""
 type DelegatorItem {
   delegatorAddress: String!
   amount: String!
@@ -1481,30 +1132,20 @@ enum queryInput_delegators_orderBy {
   timestamp
 }
 
-"""
-Paginated treasury time-series response.
-"""
+"""Paginated treasury time-series response."""
 type TreasuryResponse {
   items: [TreasuryItem]!
 
-  """
-  Total number of items
-  """
+  """Total number of items"""
   totalCount: Int!
 }
 
-"""
-Single treasury time-series datapoint.
-"""
+"""Single treasury time-series datapoint."""
 type TreasuryItem {
-  """
-  Treasury value in USD
-  """
+  """Treasury value in USD"""
   value: Float!
 
-  """
-  Unix timestamp in milliseconds
-  """
+  """Unix timestamp in milliseconds"""
   date: Float!
 }
 
@@ -1517,29 +1158,21 @@ enum DaysWindow {
 }
 
 type TokenHistoricalPriceItem {
-  """
-  Historical price value as a decimal string.
-  """
+  """Historical price value as a decimal string."""
   price: String!
 
-  """
-  Unix timestamp in seconds.
-  """
+  """Unix timestamp in seconds."""
   timestamp: Int!
 }
 
 union token_response = TokenPropertiesResponse | ErrorResponse
 
-"""
-Token properties enriched with the current token price.
-"""
+"""Token properties enriched with the current token price."""
 type TokenPropertiesResponse {
   id: String!
   name: String
 
-  """
-  Token decimals.
-  """
+  """Token decimals."""
   decimals: Int!
   totalSupply: String!
   delegatedSupply: String!
@@ -1552,76 +1185,48 @@ type TokenPropertiesResponse {
   price: String!
 }
 
-"""
-Generic error payload returned by the API.
-"""
+"""Generic error payload returned by the API."""
 type ErrorResponse {
-  """
-  Human-readable error message
-  """
+  """Human-readable error message"""
   error: String!
 
-  """
-  Optional implementation detail or validation context for the error.
-  """
+  """Optional implementation detail or validation context for the error."""
   message: String
 }
 
-"""
-Currency to use when fetching token price data.
-"""
+"""Currency to use when fetching token price data."""
 enum queryInput_token_currency {
   eth
   usd
 }
 
-"""
-Paginated governance activity feed response.
-"""
+"""Paginated governance activity feed response."""
 type FeedResponse {
   items: [FeedItem]!
 
-  """
-  Total number of matching feed events.
-  """
+  """Total number of matching feed events."""
   totalCount: Int!
 }
 
-"""
-Single event in the governance activity feed.
-"""
+"""Single event in the governance activity feed."""
 type FeedItem {
-  """
-  Transaction hash.
-  """
+  """Transaction hash."""
   txHash: String!
 
-  """
-  Log index within the transaction receipt.
-  """
+  """Log index within the transaction receipt."""
   logIndex: Int!
   type: FeedEventType!
 
-  """
-  Optional event value encoded as a decimal string when applicable.
-  """
+  """Optional event value encoded as a decimal string when applicable."""
   value: String
 
-  """
-  Event timestamp in Unix seconds.
-  """
+  """Event timestamp in Unix seconds."""
   timestamp: Int!
   relevance: FeedRelevance!
-
-  """
-  Type-specific metadata for the feed event.
-  """
-  metadata: JSON
+  metadata: FeedMetadata!
 }
 
-"""
-Filter events by governance activity type.
-"""
+"""Filter events by governance activity type."""
 enum FeedEventType {
   VOTE
   PROPOSAL
@@ -1630,9 +1235,7 @@ enum FeedEventType {
   PROPOSAL_EXTENDED
 }
 
-"""
-Filter events by relevance tier.
-"""
+"""Filter events by relevance tier."""
 enum FeedRelevance {
   HIGH
   MEDIUM
@@ -1640,34 +1243,144 @@ enum FeedRelevance {
 }
 
 """
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+Type-specific metadata for the feed event. Narrow by the `kind` discriminator.
 """
-scalar JSON
-  @specifiedBy(
-    url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf"
-  )
+union FeedMetadata = FeedVoteMetadata | FeedProposalMetadata | FeedProposalExtendedMetadata | FeedTransferMetadata | FeedDelegationMetadata | JSON_container
+
+"""Metadata payload for a VOTE feed event."""
+type FeedVoteMetadata {
+  kind: VOTE_const!
+
+  """Voter address."""
+  voter: String!
+
+  """Vote reason, when provided."""
+  reason: String
+
+  """Vote support: 0 = against, 1 = for, 2 = abstain."""
+  support: Int!
+
+  """Voter voting power, as a decimal string."""
+  votingPower: String!
+
+  """Proposal voted on."""
+  proposalId: String!
+
+  """Proposal title, when known."""
+  title: String
+}
+
+enum VOTE_const {
+  VOTE
+}
+
+"""Metadata payload for a PROPOSAL feed event."""
+type FeedProposalMetadata {
+  kind: PROPOSAL_const!
+
+  """Proposal ID."""
+  id: String!
+
+  """Proposer address."""
+  proposer: String!
+
+  """Proposer voting power at proposal creation, as a decimal string."""
+  votingPower: String!
+
+  """Proposal title."""
+  title: String!
+}
+
+enum PROPOSAL_const {
+  PROPOSAL
+}
+
+"""Metadata payload for a PROPOSAL_EXTENDED feed event."""
+type FeedProposalExtendedMetadata {
+  kind: PROPOSAL_EXTENDED_const!
+
+  """Proposal ID."""
+  id: String!
+
+  """Proposal title."""
+  title: String!
+
+  """New end block after the extension."""
+  endBlock: Int!
+
+  """New proposal end timestamp in Unix seconds, as a decimal string."""
+  endTimestamp: String!
+
+  """Proposer address."""
+  proposer: String!
+}
+
+enum PROPOSAL_EXTENDED_const {
+  PROPOSAL_EXTENDED
+}
+
+"""Metadata payload for a TRANSFER feed event."""
+type FeedTransferMetadata {
+  kind: TRANSFER_const!
+
+  """Sender address."""
+  from: String!
+
+  """Recipient address."""
+  to: String!
+
+  """Transferred amount, as a decimal string."""
+  amount: String!
+}
+
+enum TRANSFER_const {
+  TRANSFER
+}
+
+"""Metadata payload for a DELEGATION feed event."""
+type FeedDelegationMetadata {
+  kind: DELEGATION_const!
+
+  """Delegator address."""
+  delegator: String!
+
+  """New delegate address."""
+  delegate: String!
+
+  """Previous delegate address, when known."""
+  previousDelegate: String
+
+  """Delegated voting power, as a decimal string."""
+  amount: String!
+}
+
+enum DELEGATION_const {
+  DELEGATION
+}
+
+type JSON_container {
+  JSON: JSON
+}
 
 """
-Field used to sort feed events.
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+"""Field used to sort feed events."""
 enum queryInput_feedEvents_orderBy {
   timestamp
   value
 }
 
-"""
-Filter events by relevance tier.
-"""
+"""Filter events by relevance tier."""
 enum queryInput_feedEvents_relevance {
   HIGH
   MEDIUM
   LOW
 }
 
-"""
-Filter events by governance activity type.
-"""
-enum queryInput_feedEvents_type {
+enum queryInput_feedEvents_type_items {
   VOTE
   PROPOSAL
   DELEGATION
@@ -1675,252 +1388,187 @@ enum queryInput_feedEvents_type {
   PROPOSAL_EXTENDED
 }
 
-"""
-Resolved threshold for a feed event type and relevance level.
-"""
+"""Resolved threshold for a feed event type and relevance level."""
 type EventRelevanceThresholdResponse {
-  """
-  Threshold value encoded as a decimal string.
-  """
+  """Threshold value encoded as a decimal string."""
   threshold: String!
 }
 
-"""
-Supply metric comparison between current and previous periods.
-"""
+"""Supply metric comparison between current and previous periods."""
 type SupplyComparisonResponse {
+  """
+  Supply value at the start of the comparison window, encoded as a decimal string (raw token base units).
+  """
   previousValue: String!
+
+  """
+  Supply value at the end of the comparison window, encoded as a decimal string (raw token base units).
+  """
   currentValue: String!
+
+  """
+  Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0.
+  """
   changeRate: Float!
+
+  """Signed bigint delta as a decimal string: currentValue - previousValue."""
+  rawDelta: String!
 }
 
-"""
-Active token supply for the selected comparison window.
-"""
+"""Active token supply for the selected comparison window."""
 type ActiveSupplyResponse {
-  """
-  Active token supply encoded as a decimal string.
-  """
+  """Active token supply encoded as a decimal string."""
   activeSupply: String!
 }
 
-"""
-Proposal launch comparison between two adjacent time windows.
-"""
+"""Proposal launch comparison between two adjacent time windows."""
 type ProposalsComparisonResponse {
-  """
-  Number of proposals launched in the current period.
-  """
+  """Number of proposals launched in the current period."""
   currentProposalsLaunched: Int!
 
-  """
-  Number of proposals launched in the comparison period.
-  """
+  """Number of proposals launched in the comparison period."""
   oldProposalsLaunched: Int!
 
   """
-  Relative change between current and previous periods.
+  Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.
   """
   changeRate: Float!
+
+  """Signed integer delta: currentProposalsLaunched - oldProposalsLaunched."""
+  rawDelta: Int!
 }
 
-"""
-Vote-count comparison between two adjacent time windows.
-"""
+"""Vote-count comparison between two adjacent time windows."""
 type VotesComparisonResponse {
-  """
-  Number of votes cast in the current period.
-  """
+  """Number of votes cast in the current period."""
   currentVotes: Int!
 
-  """
-  Number of votes cast in the comparison period.
-  """
+  """Number of votes cast in the comparison period."""
   oldVotes: Int!
 
   """
-  Relative change between current and previous periods.
+  Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.
   """
   changeRate: Float!
+
+  """Signed integer delta: currentVotes - oldVotes."""
+  rawDelta: Int!
 }
 
-"""
-Average turnout comparison between two adjacent time windows.
-"""
+"""Average turnout comparison between two adjacent time windows."""
 type AverageTurnoutComparisonResponse {
-  """
-  Average turnout for the current period encoded as a string.
-  """
+  """Average turnout for the current period encoded as a string."""
   currentAverageTurnout: String!
 
-  """
-  Average turnout for the previous period encoded as a string.
-  """
+  """Average turnout for the previous period encoded as a string."""
   oldAverageTurnout: String!
 
   """
-  Relative change between current and previous periods.
+  Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.
   """
   changeRate: Float!
+
+  """
+  Signed bigint delta as a decimal string: currentAverageTurnout - oldAverageTurnout.
+  """
+  rawDelta: String!
 }
 
-"""
-Delegate proposal activity metrics and proposal-by-proposal history.
-"""
+"""Delegate proposal activity metrics and proposal-by-proposal history."""
 type ProposalActivityResponse {
-  """
-  Delegate address.
-  """
+  """Delegate address."""
   address: String!
 
-  """
-  Total proposals reviewed in the dataset.
-  """
+  """Total proposals reviewed in the dataset."""
   totalProposals: Int!
 
-  """
-  Number of proposals the delegate voted on.
-  """
+  """Number of proposals the delegate voted on."""
   votedProposals: Int!
 
-  """
-  Whether the delegate never cast a vote.
-  """
+  """Whether the delegate never cast a vote."""
   neverVoted: Boolean!
 
-  """
-  Share of proposals where the delegate sided with outcome.
-  """
+  """Share of proposals where the delegate sided with outcome."""
   winRate: Float!
 
-  """
-  Share of delegate votes cast in support.
-  """
+  """Share of delegate votes cast in support."""
   yesRate: Float!
 
-  """
-  Average seconds between the delegate vote and proposal end time.
-  """
+  """Average seconds between the delegate vote and proposal end time."""
   avgTimeBeforeEnd: Float!
   proposals: [ProposalActivityItem]!
 }
 
-"""
-Combined proposal and delegate vote context for one activity row.
-"""
+"""Combined proposal and delegate vote context for one activity row."""
 type ProposalActivityItem {
   proposal: ProposalActivityProposal!
   userVote: ProposalActivityUserVote
 }
 
-"""
-Proposal snapshot included in the delegate activity response.
-"""
+"""Proposal snapshot included in the delegate activity response."""
 type ProposalActivityProposal {
-  """
-  Onchain proposal identifier.
-  """
+  """Onchain proposal identifier."""
   id: String!
 
-  """
-  DAO identifier.
-  """
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
-  """
-  Address that created the proposal.
-  """
+  """Address that created the proposal."""
   proposerAccountId: String!
 
-  """
-  Proposal title.
-  """
+  """Proposal title."""
   title: String!
 
-  """
-  Proposal body.
-  """
+  """Proposal body."""
   description: String!
 
-  """
-  Start block number.
-  """
+  """Start block number."""
   startBlock: Float!
 
-  """
-  End block number.
-  """
+  """End block number."""
   endBlock: Float!
 
-  """
-  Proposal creation timestamp in Unix seconds as a string.
-  """
+  """Proposal creation timestamp in Unix seconds as a string."""
   timestamp: String
 
-  """
-  Current proposal status.
-  """
+  """Current proposal status."""
   status: String!
 
-  """
-  Votes cast in favor, encoded as a decimal string.
-  """
+  """Votes cast in favor, encoded as a decimal string."""
   forVotes: String!
 
-  """
-  Votes cast against, encoded as a decimal string.
-  """
+  """Votes cast against, encoded as a decimal string."""
   againstVotes: String!
 
-  """
-  Abstain votes, encoded as a decimal string.
-  """
+  """Abstain votes, encoded as a decimal string."""
   abstainVotes: String!
 }
 
-"""
-Vote cast by the requested delegate for a given proposal.
-"""
+"""Vote cast by the requested delegate for a given proposal."""
 type ProposalActivityUserVote {
-  """
-  Vote identifier.
-  """
+  """Vote identifier."""
   id: String!
 
-  """
-  Address that cast the vote.
-  """
+  """Address that cast the vote."""
   voterAccountId: String!
 
-  """
-  Related proposal ID.
-  """
+  """Related proposal ID."""
   proposalId: String!
 
-  """
-  Governance vote direction.
-  """
+  """Governance vote direction."""
   support: String!
 
-  """
-  Voting power used by the delegate, encoded as a string.
-  """
+  """Voting power used by the delegate, encoded as a string."""
   votingPower: String
 
-  """
-  Optional vote rationale.
-  """
+  """Optional vote rationale."""
   reason: String
 
-  """
-  Vote timestamp in Unix seconds as a string.
-  """
+  """Vote timestamp in Unix seconds as a string."""
   timestamp: String
 }
 
-"""
-Field used to sort proposal activity results.
-"""
+"""Field used to sort proposal activity results."""
 enum queryInput_proposalsActivity_orderBy {
   timestamp
   votingPower
@@ -1943,79 +1591,49 @@ type OnchainProposalsResponse {
 }
 
 type OnchainProposal {
-  """
-  Onchain proposal identifier.
-  """
+  """Onchain proposal identifier."""
   id: String!
 
-  """
-  DAO identifier.
-  """
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
-  """
-  Proposal creation transaction hash.
-  """
+  """Proposal creation transaction hash."""
   txHash: String!
 
-  """
-  Address that created the proposal.
-  """
+  """Address that created the proposal."""
   proposerAccountId: String!
 
-  """
-  Proposal title.
-  """
+  """Proposal title."""
   title: String!
 
-  """
-  Proposal body.
-  """
+  """Proposal body."""
   description: String!
 
-  """
-  Start block number.
-  """
+  """Start block number."""
   startBlock: Int!
 
-  """
-  End block number.
-  """
+  """End block number."""
   endBlock: Int!
 
-  """
-  Proposal creation timestamp in Unix seconds.
-  """
+  """Proposal creation timestamp in Unix seconds."""
   timestamp: Int!
 
-  """
-  Current proposal status.
-  """
+  """Current proposal status."""
   status: String!
 
-  """
-  Votes cast in favor, encoded as a decimal string.
-  """
+  """Votes cast in favor, encoded as a decimal string."""
   forVotes: String!
 
-  """
-  Votes cast against, encoded as a decimal string.
-  """
+  """Votes cast against, encoded as a decimal string."""
   againstVotes: String!
 
-  """
-  Abstain votes, encoded as a decimal string.
-  """
+  """Abstain votes, encoded as a decimal string."""
   abstainVotes: String!
 
-  """
-  Proposal start timestamp in Unix seconds.
-  """
+  """Proposal start timestamp in Unix seconds."""
   startTimestamp: Int!
 
-  """
-  Proposal end timestamp in Unix seconds.
-  """
+  """Proposal end timestamp in Unix seconds."""
   endTimestamp: Int!
 
   """
@@ -2038,29 +1656,25 @@ type OnchainProposal {
   """
   executedTxHash: String
 
-  """
-  Required quorum encoded as a decimal string.
-  """
+  """Required quorum encoded as a decimal string."""
   quorum: String!
 
   """
-  Encoded calldata payloads executed by the proposal. Omitted when the request sets lean=true.
+  Encoded calldata payloads executed by the proposal. Omitted when the request sets `lean=true`.
   """
   calldatas: [String]
 
   """
-  ETH values attached to each call, encoded as strings. Omitted when the request sets lean=true.
+  ETH values attached to each call, encoded as strings. Omitted when the request sets `lean=true`.
   """
   values: [String]
 
   """
-  Contract targets invoked by the proposal. Omitted when the request sets lean=true.
+  Contract targets invoked by the proposal. Omitted when the request sets `lean=true`.
   """
   targets: [String]
 
-  """
-  Optional proposal type discriminator.
-  """
+  """Optional proposal type discriminator."""
   proposalType: Int
 }
 
@@ -2078,105 +1692,65 @@ enum queryInput_proposals_status_items {
   NO_QUORUM
 }
 
-"""
-A string that cannot be passed as an empty value
-"""
+"""A string that cannot be passed as an empty value"""
 scalar NonEmptyString
 
 union proposal_response = OnchainProposal | ErrorResponse
 
-union accountBalanceByAccountId_response =
-    AccountBalanceWithVariationResponse
-  | ErrorResponse
-
-"""
-Paginated historical balance records for one account.
-"""
+"""Paginated historical balance records for one account."""
 type HistoricalBalancesResponse {
   items: [HistoricalBalance]!
 
-  """
-  Total number of matching historical balance rows.
-  """
+  """Total number of matching historical balance rows."""
   totalCount: Int!
 }
 
-"""
-Single historical balance record enriched with transfer context.
-"""
+"""Single historical balance record enriched with transfer context."""
 type HistoricalBalance {
-  """
-  Transaction hash.
-  """
+  """Transaction hash."""
   transactionHash: String!
 
-  """
-  DAO identifier.
-  """
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
-  """
-  Account address.
-  """
+  """Account address."""
   accountId: String!
 
-  """
-  Account balance after the historical event.
-  """
+  """Account balance after the historical event."""
   balance: String!
 
-  """
-  Balance change introduced by the historical event.
-  """
+  """Balance change introduced by the historical event."""
   delta: String!
 
-  """
-  Event timestamp in Unix seconds as a string.
-  """
+  """Event timestamp in Unix seconds as a string."""
   timestamp: String!
 
-  """
-  Log index within the transaction receipt.
-  """
+  """Log index within the transaction receipt."""
   logIndex: Int!
   transfer: HistoricalBalanceTransfer!
 }
 
-"""
-Transfer event associated with a historical balance row.
-"""
+"""Transfer event associated with a historical balance row."""
 type HistoricalBalanceTransfer {
-  """
-  Transferred amount encoded as a decimal string.
-  """
+  """Transferred amount encoded as a decimal string."""
   value: String!
 
-  """
-  Sender address.
-  """
+  """Sender address."""
   from: String!
 
-  """
-  Recipient address.
-  """
+  """Recipient address."""
   to: String!
 }
 
-"""
-Field used to sort historical balance rows.
-"""
+"""Field used to sort historical balance rows."""
 enum queryInput_historicalBalances_orderBy {
   timestamp
   delta
 }
 
-"""
-Response payload describing the latest update time for a chart.
-"""
+"""Response payload describing the latest update time for a chart."""
 type LastUpdateResponse {
-  """
-  Latest refresh time in ISO-8601 format.
-  """
+  """Latest refresh time in ISO-8601 format."""
   lastUpdate: DateTime!
 }
 
@@ -2185,9 +1759,7 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-"""
-Chart identifier whose freshness timestamp should be returned.
-"""
+"""Chart identifier whose freshness timestamp should be returned."""
 enum queryInput_lastUpdate_chart {
   cost_comparison
   attack_profitability
@@ -2204,33 +1776,18 @@ type DelegationPercentageResponse {
 }
 
 type DelegationPercentageItem {
-  """
-  Unix day bucket represented as a timestamp string.
-  """
+  """Unix day bucket represented as a timestamp string."""
   date: String!
 
-  """
-  Delegation percentage value for the day bucket.
-  """
+  """Delegation percentage value for the day bucket."""
   high: String!
 }
 
-type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  endDate: String
-  startDate: String
-}
-
-"""
-Paginated historical voting power records.
-"""
+"""Paginated historical voting power records."""
 type HistoricalVotingPowersResponse {
   items: [HistoricalVotingPower]!
 
-  """
-  Total number of matching historical voting power rows.
-  """
+  """Total number of matching historical voting power rows."""
   totalCount: Int!
 }
 
@@ -2238,47 +1795,31 @@ type HistoricalVotingPowersResponse {
 Single historical voting power record enriched with delegation and transfer context.
 """
 type HistoricalVotingPower {
-  """
-  Transaction hash.
-  """
+  """Transaction hash."""
   transactionHash: String!
 
-  """
-  DAO identifier.
-  """
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
-  """
-  Account address.
-  """
+  """Account address."""
   accountId: String!
 
-  """
-  Voting power after the event, encoded as a decimal string.
-  """
+  """Voting power after the event, encoded as a decimal string."""
   votingPower: String!
 
-  """
-  Voting power change introduced by the event.
-  """
+  """Voting power change introduced by the event."""
   delta: String!
 
-  """
-  Event timestamp in Unix seconds as a string.
-  """
+  """Event timestamp in Unix seconds as a string."""
   timestamp: String!
 
-  """
-  Log index within the transaction receipt.
-  """
+  """Log index within the transaction receipt."""
   logIndex: Int!
   delegation: HistoricalVotingPowerDelegation
   transfer: HistoricalVotingPowerTransfer
 }
 
-"""
-Delegation event associated with a historical voting power row.
-"""
+"""Delegation event associated with a historical voting power row."""
 type HistoricalVotingPowerDelegation {
   from: String!
   value: String!
@@ -2286,26 +1827,20 @@ type HistoricalVotingPowerDelegation {
   previousDelegate: String
 }
 
-"""
-Transfer event associated with a historical voting power row.
-"""
+"""Transfer event associated with a historical voting power row."""
 type HistoricalVotingPowerTransfer {
   value: String!
   from: String!
   to: String!
 }
 
-"""
-Field used to sort historical voting power rows.
-"""
+"""Field used to sort historical voting power rows."""
 enum queryInput_historicalVotingPowerByAccountId_orderBy {
   timestamp
   delta
 }
 
-"""
-Field used to sort historical voting power rows.
-"""
+"""Field used to sort historical voting power rows."""
 enum queryInput_historicalVotingPower_orderBy {
   timestamp
   delta
@@ -2319,103 +1854,69 @@ type VotingPowerVariationsResponse {
   items: [VotingPowerVariation]!
 }
 
-"""
-Inclusive time period represented as ISO-8601 timestamps.
-"""
+"""Inclusive time period represented as ISO-8601 timestamps."""
 type PeriodResponse {
   startTimestamp: String!
   endTimestamp: String!
 }
 
-"""
-Voting power delta for a single account across two timestamps.
-"""
+"""Voting power delta for a single account across two timestamps."""
 type VotingPowerVariation {
-  """
-  Account address.
-  """
+  """Account address."""
   accountId: String!
 
-  """
-  Voting power at the start of the comparison window.
-  """
+  """Voting power at the start of the comparison window."""
   previousVotingPower: String!
 
-  """
-  Voting power at the end of the comparison window.
-  """
+  """Voting power at the end of the comparison window."""
   currentVotingPower: String!
 
-  """
-  Absolute voting power change encoded as a decimal string.
-  """
+  """Absolute voting power change encoded as a decimal string."""
   absoluteChange: String!
 
   """
-  Relative voting power change encoded as a decimal string.
+  Relative voting power change as a decimal string (e.g. "5.23"). Set to the sentinel "NO BASELINE" when the previous voting power is zero.
   """
   percentageChange: String!
 }
 
-"""
-Voting power variation response for a single account.
-"""
+"""Voting power variation response for a single account."""
 type VotingPowerVariationsByAccountIdResponse {
   period: PeriodResponse!
   data: VotingPowerVariation!
 }
 
-"""
-Paginated current voting power records.
-"""
+"""Paginated current voting power records."""
 type VotingPowersResponse {
   items: [VotingPower]!
 
-  """
-  Total number of matching voting power rows.
-  """
+  """Total number of matching voting power rows."""
   totalCount: Int!
 }
 
-"""
-Current voting power snapshot for one account.
-"""
+"""Current voting power snapshot for one account."""
 type VotingPower {
-  """
-  Account address.
-  """
+  """Account address."""
   accountId: String!
 
-  """
-  Current voting power encoded as a decimal string.
-  """
+  """Current voting power encoded as a decimal string."""
   votingPower: String!
 
-  """
-  Total votes cast by the account.
-  """
+  """Total votes cast by the account."""
   votesCount: Int!
 
-  """
-  Total proposals created by the account.
-  """
+  """Total proposals created by the account."""
   proposalsCount: Int!
 
-  """
-  Total delegations associated with the account.
-  """
+  """Total delegations associated with the account."""
   delegationsCount: Int!
 
-  """
-  Current token balance encoded as a decimal string.
-  """
+  """Current token balance encoded as a decimal string."""
   balance: String
   variation: VotingPowerVariationField!
 }
 
-"""
-Embedded voting power delta metadata for a current voting power row.
-"""
+"""Embedded voting power delta metadata for a current voting power row."""
 type VotingPowerVariationField {
   absoluteChange: String!
   percentageChange: String!
@@ -2438,39 +1939,27 @@ type AccountBalanceVariationsResponse {
   items: [AccountBalanceVariation]!
 }
 
-"""
-Balance delta for a single account across two timestamps.
-"""
+"""Balance delta for a single account across two timestamps."""
 type AccountBalanceVariation {
-  """
-  Account address.
-  """
+  """Account address."""
   accountId: String!
 
-  """
-  Balance at the start of the comparison window.
-  """
+  """Balance at the start of the comparison window."""
   previousBalance: String!
 
-  """
-  Balance at the end of the comparison window.
-  """
+  """Balance at the end of the comparison window."""
   currentBalance: String!
 
-  """
-  Absolute balance change encoded as a decimal string.
-  """
+  """Absolute balance change encoded as a decimal string."""
   absoluteChange: String!
 
   """
-  Relative balance change encoded as a decimal string.
+  Relative balance change as a decimal string (e.g. "5.23"). Set to the sentinel "NO BASELINE" when the previous balance is zero.
   """
   percentageChange: String!
 }
 
-"""
-Balance variation response for a single account.
-"""
+"""Balance variation response for a single account."""
 type AccountBalanceVariationsByAccountIdResponse {
   period: PeriodResponse!
   data: AccountBalanceVariation!
@@ -2496,14 +1985,14 @@ enum queryInput_accountBalances_orderBy {
   signedVariation
 }
 
+union accountBalanceByAccountId_response = AccountBalanceWithVariationResponse | ErrorResponse
+
 type AccountBalanceWithVariationResponse {
   data: AccountBalanceWithVariation!
   period: PeriodResponse!
 }
 
-"""
-Paginated list of account interaction aggregates.
-"""
+"""Paginated list of account interaction aggregates."""
 type AccountInteractionsResponse {
   period: PeriodResponse!
   totalCount: Int!
@@ -2514,9 +2003,7 @@ type AccountInteractionsResponse {
 Aggregated interaction metrics between the requested account and another account.
 """
 type AccountInteraction {
-  """
-  Counterparty account ID.
-  """
+  """Counterparty account ID."""
   accountId: String!
 
   """
@@ -2529,15 +2016,11 @@ type AccountInteraction {
   """
   totalVolume: String!
 
-  """
-  Number of transfers observed for the interaction pair.
-  """
+  """Number of transfers observed for the interaction pair."""
   transferCount: String!
 }
 
-"""
-Field used to sort interaction rows.
-"""
+"""Field used to sort interaction rows."""
 enum queryInput_accountInteractions_orderBy {
   volume
   count
@@ -2546,77 +2029,49 @@ enum queryInput_accountInteractions_orderBy {
 type TransfersResponse {
   items: [Transfer]!
 
-  """
-  Total number of matching transfers.
-  """
+  """Total number of matching transfers."""
   totalCount: Int!
 }
 
 type Transfer {
-  """
-  Transaction hash.
-  """
+  """Transaction hash."""
   transactionHash: String!
 
-  """
-  DAO identifier.
-  """
+  """DAO identifier (uppercase, e.g. "ENS")."""
   daoId: String!
 
-  """
-  Token contract address.
-  """
+  """Token contract address."""
   tokenId: String!
 
-  """
-  Transferred amount encoded as a decimal string.
-  """
+  """Transferred amount encoded as a decimal string."""
   amount: String!
 
-  """
-  Sender address.
-  """
+  """Sender address."""
   fromAccountId: String!
 
-  """
-  Recipient address.
-  """
+  """Recipient address."""
   toAccountId: String!
 
-  """
-  Transfer timestamp in Unix seconds as a string.
-  """
+  """Transfer timestamp in Unix seconds as a string."""
   timestamp: String!
 
-  """
-  Log index within the transaction receipt.
-  """
+  """Log index within the transaction receipt."""
   logIndex: Int!
 
-  """
-  Whether the transfer touched a centralized exchange.
-  """
+  """Whether the transfer touched a centralized exchange."""
   isCex: Boolean!
 
-  """
-  Whether the transfer touched a decentralized exchange.
-  """
+  """Whether the transfer touched a decentralized exchange."""
   isDex: Boolean!
 
-  """
-  Whether the transfer touched a lending protocol.
-  """
+  """Whether the transfer touched a lending protocol."""
   isLending: Boolean!
 
-  """
-  Whether the transfer counts toward total tracked supply.
-  """
+  """Whether the transfer affects total-supply accounting."""
   isTotal: Boolean!
 }
 
-"""
-Field used to sort transfers.
-"""
+"""Field used to sort transfers."""
 enum queryInput_transfers_orderBy {
   timestamp
   amount
@@ -2632,51 +2087,37 @@ type OnchainVote {
   transactionHash: String!
   proposalId: String!
 
-  """
-  Governance vote direction.
-  """
+  """Governance vote direction."""
   support: String
 
-  """
-  Voting power encoded as a decimal string.
-  """
+  """Voting power encoded as a decimal string."""
   votingPower: String!
   reason: String
 
-  """
-  Vote timestamp in Unix seconds.
-  """
+  """Vote timestamp in Unix seconds."""
   timestamp: Int!
   proposalTitle: String
 }
 
-"""
-Sort votes by timestamp or voting power.
-"""
+"""Sort votes by timestamp or voting power."""
 enum queryInput_votesByProposalId_orderBy {
   timestamp
   votingPower
 }
 
-"""
-Sort votes by timestamp or voting power.
-"""
+"""Sort votes by timestamp or voting power."""
 enum queryInput_votes_orderBy {
   timestamp
   votingPower
 }
 
-"""
-Paginated voter or non-voter records for a proposal.
-"""
+"""Paginated voter or non-voter records for a proposal."""
 type VotersResponse {
   items: [Voter]!
   totalCount: Int!
 }
 
-"""
-Voter or non-voter record associated with a proposal.
-"""
+"""Voter or non-voter record associated with a proposal."""
 type Voter {
   voter: String!
   votingPower: String!
@@ -2684,10 +2125,9 @@ type Voter {
   votingPowerVariation: String!
 }
 
-"""
-Current governance parameters and feature flags for the active DAO.
-"""
+"""Current governance parameters and feature flags for the active DAO."""
 type DaoResponse {
+  """DAO identifier (uppercase, e.g. "ENS")."""
   id: String!
   chainId: Int!
   quorum: String!
@@ -2705,25 +2145,24 @@ type TokenMetricsResponse {
 }
 
 type TokenMetricItem {
-  """
-  Unix day bucket represented as a timestamp string.
-  """
+  """Unix day bucket represented as a timestamp string."""
   date: String!
 
-  """
-  Highest observed value for the period.
-  """
+  """Highest observed value for the period."""
   high: String!
 
-  """
-  Total volume observed for the period.
-  """
+  """Total volume observed for the period."""
   volume: String!
 }
 
-"""
-Metric family to query.
-"""
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  endDate: String
+  startDate: String
+}
+
+"""Metric family to query."""
 enum queryInput_tokenMetrics_metricType {
   TOTAL_SUPPLY
   DELEGATED_SUPPLY
@@ -2734,80 +2173,242 @@ enum queryInput_tokenMetrics_metricType {
   TREASURY
 }
 
+"""Monthly action counts by category (Registration, Renewal, Premium)."""
+type RevenueActionsResponse {
+  items: [RevenueActionsItem]!
+
+  """Total number of items returned."""
+  totalCount: Int!
+}
+
+"""Single revenue actions datapoint."""
+type RevenueActionsItem {
+  """Month start (Unix timestamp in seconds, UTC)."""
+  date: Int!
+  category: RevenueActionCategory!
+
+  """Number of actions of this category in the given month."""
+  actions: Int!
+}
+
+"""Category of ENS revenue-generating action."""
+enum RevenueActionCategory {
+  Registration
+  Renewal
+  Premium
+}
+
+"""Monthly net change and cumulative count of active .eth names."""
+type RevenueActiveNamesResponse {
+  items: [RevenueActiveNamesItem]!
+
+  """Total number of items returned."""
+  totalCount: Int!
+}
+
+"""Single active-names datapoint."""
+type RevenueActiveNamesItem {
+  """Month start (Unix timestamp in seconds, UTC)."""
+  date: Int!
+
+  """Net change in active .eth names for the month."""
+  netChange: Float!
+
+  """Cumulative count of active .eth names as of the month."""
+  cumulativeActive: Float!
+}
+
+"""Monthly new-wallet counts and the cumulative wallet total for ENS."""
+type RevenueNewWalletsResponse {
+  items: [RevenueNewWalletsItem]!
+
+  """Total number of items returned."""
+  totalCount: Int!
+}
+
+"""Single new-wallets datapoint."""
+type RevenueNewWalletsItem {
+  """Month start (Unix timestamp in seconds, UTC)."""
+  date: Int!
+
+  """New wallets that interacted with ENS in the given month."""
+  newWallets: Float!
+
+  """Cumulative count of ENS wallets as of the given month."""
+  cumulativeWallets: Float!
+}
+
+"""
+Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.
+"""
+type RevenueRenewalFunnelResponse {
+  items: [RevenueRenewalFunnelItem]!
+
+  """Total number of items returned."""
+  totalCount: Int!
+}
+
+"""Single renewal-funnel datapoint keyed by expiry month."""
+type RevenueRenewalFunnelItem {
+  """Expiry month start (Unix timestamp in seconds, UTC)."""
+  date: Int!
+
+  """Total .eth terms expiring in the given month."""
+  termsExpiring: Float!
+
+  """Number of expiring terms that were renewed."""
+  renewedCount: Float!
+
+  """Number of expiring terms that were not renewed."""
+  churnedCount: Float!
+
+  """Renewal rate for the month, as a percentage (0-100)."""
+  renewalRatePct: Float!
+}
+
+"""
+Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.
+"""
+type RevenueTotalsResponse {
+  items: [RevenueTotalsItem]!
+
+  """Total number of items returned."""
+  totalCount: Int!
+}
+
+"""Single revenue-totals datapoint."""
+type RevenueTotalsItem {
+  """Month start (Unix timestamp in seconds, UTC)."""
+  date: Int!
+
+  """USD revenue from new .eth registrations in the month."""
+  registrationUsd: Float!
+
+  """USD revenue from temporary premium auctions in the given month."""
+  premiumUsd: Float!
+
+  """USD revenue from .eth renewals in the given month."""
+  renewalUsd: Float!
+
+  """Total USD revenue for the month (upstream sum; not recomputed)."""
+  totalUsd: Float!
+
+  """ETH revenue from new .eth registrations in the month."""
+  registrationEth: Float!
+
+  """ETH revenue from temporary premium auctions in the given month."""
+  premiumEth: Float!
+
+  """ETH revenue from .eth renewals in the given month."""
+  renewalEth: Float!
+}
+
+"""
+Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.
+"""
+type RevenueByCategoryResponse {
+  items: [RevenueByCategoryItem]!
+
+  """Total number of items returned."""
+  totalCount: Int!
+}
+
+"""Single revenue-by-category datapoint."""
+type RevenueByCategoryItem {
+  """Month start (Unix timestamp in seconds, UTC)."""
+  date: Int!
+  category: RevenueByCategoryCategory!
+
+  """USD revenue for the category in the given month."""
+  revenueUsd: Float!
+
+  """ETH revenue for the category in the given month."""
+  revenueEth: Float!
+}
+
+"""Revenue category as reported by the Steakhouse accounting ledger."""
+enum RevenueByCategoryCategory {
+  Registration
+  Renewal
+}
+
+"""
+Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.
+"""
+type RevenueRenewalTenureResponse {
+  items: [RevenueRenewalTenureItem]!
+
+  """Total number of items returned."""
+  totalCount: Int!
+}
+
+"""Single renewal-tenure datapoint keyed by expiry month."""
+type RevenueRenewalTenureItem {
+  """Expiry month start (Unix timestamp in seconds, UTC)."""
+  date: Int!
+  tenureBucket: RevenueRenewalTenureBucket!
+
+  """Count of names in this tenure bucket for the expiry month."""
+  names: Int!
+
+  """Total renewals contributed by names in this bucket."""
+  totalRenewalsInBucket: Int!
+}
+
+"""Tenure bucket label as returned by Dune."""
+enum RevenueRenewalTenureBucket {
+  _0_renewals_one_shot
+  _1_renewal
+  _2_renewals
+  _3_PLUS__renewals
+}
+
 type OffchainProposalsResponse {
   items: [OffchainProposal]!
   totalCount: Int!
 }
 
 type OffchainProposal {
-  """
-  Snapshot proposal identifier.
-  """
+  """Snapshot proposal identifier."""
   id: String!
 
-  """
-  Snapshot space identifier.
-  """
+  """Snapshot space identifier."""
   spaceId: String!
 
-  """
-  Address or ENS of the author.
-  """
+  """Address or ENS of the author."""
   author: String!
 
-  """
-  Proposal title.
-  """
+  """Proposal title."""
   title: String!
 
-  """
-  Proposal body. Omitted when the request sets lean=true.
-  """
+  """Proposal body. Omitted when the request sets `lean=true`."""
   body: String
 
-  """
-  Discussion URL or thread reference.
-  """
+  """Discussion URL or thread reference."""
   discussion: String!
 
-  """
-  Snapshot proposal type.
-  """
+  """Snapshot proposal type."""
   type: String!
 
-  """
-  Voting start timestamp in Unix seconds.
-  """
+  """Voting start timestamp in Unix seconds."""
   start: Int!
 
-  """
-  Voting end timestamp in Unix seconds.
-  """
+  """Voting end timestamp in Unix seconds."""
   end: Int!
 
-  """
-  Current Snapshot proposal state.
-  """
+  """Current Snapshot proposal state."""
   state: String!
 
-  """
-  Creation timestamp in Unix seconds.
-  """
+  """Creation timestamp in Unix seconds."""
   created: Int!
 
-  """
-  Last update timestamp in Unix seconds.
-  """
+  """Last update timestamp in Unix seconds."""
   updated: Int!
 
-  """
-  Canonical Snapshot proposal URL.
-  """
+  """Canonical Snapshot proposal URL."""
   link: String!
 
-  """
-  Whether the proposal was flagged by Snapshot.
-  """
+  """Whether the proposal was flagged by Snapshot."""
   flagged: Boolean!
   scores: [Float]!
   choices: [String]!
@@ -2845,25 +2446,19 @@ type OffchainVote {
   proposalTitle: String
 }
 
-"""
-Sort votes by timestamp or voting power.
-"""
+"""Sort votes by timestamp or voting power."""
 enum queryInput_votesOffchain_orderBy {
   timestamp
   votingPower
 }
 
-"""
-Sort votes by timestamp or voting power.
-"""
+"""Sort votes by timestamp or voting power."""
 enum queryInput_votesOffchainByProposalId_orderBy {
   timestamp
   votingPower
 }
 
-union offchainProposalNonVoters_response =
-  | OffchainVotersResponse
-  | ErrorResponse
+union offchainProposalNonVoters_response = OffchainVotersResponse | ErrorResponse
 
 type OffchainVotersResponse {
   items: [OffchainNonVoter]!
@@ -2873,290 +2468,6 @@ type OffchainVotersResponse {
 type OffchainNonVoter {
   voter: String!
   votingPower: String!
-}
-
-"""
-Monthly action counts by category (Registration, Renewal, Premium).
-"""
-type RevenueActionsResponse {
-  items: [RevenueActionsItem]!
-
-  """
-  Total number of items returned.
-  """
-  totalCount: Int!
-}
-
-"""
-Single revenue actions datapoint.
-"""
-type RevenueActionsItem {
-  """
-  Month start (Unix timestamp in seconds, UTC).
-  """
-  date: Int!
-  category: RevenueActionCategory!
-
-  """
-  Number of actions of this category in the given month.
-  """
-  actions: Int!
-}
-
-"""
-Category of ENS revenue-generating action.
-"""
-enum RevenueActionCategory {
-  Registration
-  Renewal
-  Premium
-}
-
-"""
-Monthly net change and cumulative count of active .eth names.
-"""
-type RevenueActiveNamesResponse {
-  items: [RevenueActiveNamesItem]!
-
-  """
-  Total number of items returned.
-  """
-  totalCount: Int!
-}
-
-"""
-Single active-names datapoint.
-"""
-type RevenueActiveNamesItem {
-  """
-  Month start (Unix timestamp in seconds, UTC).
-  """
-  date: Int!
-
-  """
-  Net change in active .eth names for the month.
-  """
-  netChange: Float!
-
-  """
-  Cumulative count of active .eth names as of the month.
-  """
-  cumulativeActive: Float!
-}
-
-"""
-Monthly new-wallet counts and the cumulative wallet total for ENS.
-"""
-type RevenueNewWalletsResponse {
-  items: [RevenueNewWalletsItem]!
-
-  """
-  Total number of items returned.
-  """
-  totalCount: Int!
-}
-
-"""
-Single new-wallets datapoint.
-"""
-type RevenueNewWalletsItem {
-  """
-  Month start (Unix timestamp in seconds, UTC).
-  """
-  date: Int!
-
-  """
-  New wallets that interacted with ENS in the given month.
-  """
-  newWallets: Float!
-
-  """
-  Cumulative count of ENS wallets as of the given month.
-  """
-  cumulativeWallets: Float!
-}
-
-"""
-Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.
-"""
-type RevenueRenewalFunnelResponse {
-  items: [RevenueRenewalFunnelItem]!
-
-  """
-  Total number of items returned.
-  """
-  totalCount: Int!
-}
-
-"""
-Single renewal-funnel datapoint keyed by expiry month.
-"""
-type RevenueRenewalFunnelItem {
-  """
-  Expiry month start (Unix timestamp in seconds, UTC).
-  """
-  date: Int!
-
-  """
-  Total .eth terms expiring in the given month.
-  """
-  termsExpiring: Float!
-
-  """
-  Number of expiring terms that were renewed.
-  """
-  renewedCount: Float!
-
-  """
-  Number of expiring terms that were not renewed.
-  """
-  churnedCount: Float!
-
-  """
-  Renewal rate for the month, as a percentage (0-100).
-  """
-  renewalRatePct: Float!
-}
-
-"""
-Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.
-"""
-type RevenueTotalsResponse {
-  items: [RevenueTotalsItem]!
-
-  """
-  Total number of items returned.
-  """
-  totalCount: Int!
-}
-
-"""
-Single revenue-totals datapoint.
-"""
-type RevenueTotalsItem {
-  """
-  Month start (Unix timestamp in seconds, UTC).
-  """
-  date: Int!
-
-  """
-  USD revenue from new .eth registrations in the month.
-  """
-  registrationUsd: Float!
-
-  """
-  USD revenue from temporary premium auctions in the given month.
-  """
-  premiumUsd: Float!
-
-  """
-  USD revenue from .eth renewals in the given month.
-  """
-  renewalUsd: Float!
-
-  """
-  Total USD revenue for the month (upstream sum; not recomputed).
-  """
-  totalUsd: Float!
-
-  """
-  ETH revenue from new .eth registrations in the month.
-  """
-  registrationEth: Float!
-
-  """
-  ETH revenue from temporary premium auctions in the given month.
-  """
-  premiumEth: Float!
-
-  """
-  ETH revenue from .eth renewals in the given month.
-  """
-  renewalEth: Float!
-}
-
-"""
-Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.
-"""
-type RevenueByCategoryResponse {
-  items: [RevenueByCategoryItem]!
-
-  """
-  Total number of items returned.
-  """
-  totalCount: Int!
-}
-
-"""
-Single revenue-by-category datapoint.
-"""
-type RevenueByCategoryItem {
-  """
-  Month start (Unix timestamp in seconds, UTC).
-  """
-  date: Int!
-  category: RevenueByCategoryCategory!
-
-  """
-  USD revenue for the category in the given month.
-  """
-  revenueUsd: Float!
-
-  """
-  ETH revenue for the category in the given month.
-  """
-  revenueEth: Float!
-}
-
-"""
-Revenue category as reported by the Steakhouse accounting ledger.
-"""
-enum RevenueByCategoryCategory {
-  Registration
-  Renewal
-}
-
-"""
-Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.
-"""
-type RevenueRenewalTenureResponse {
-  items: [RevenueRenewalTenureItem]!
-
-  """
-  Total number of items returned.
-  """
-  totalCount: Int!
-}
-
-"""
-Single renewal-tenure datapoint keyed by expiry month.
-"""
-type RevenueRenewalTenureItem {
-  """
-  Expiry month start (Unix timestamp in seconds, UTC).
-  """
-  date: Int!
-  tenureBucket: RevenueRenewalTenureBucket!
-
-  """
-  Count of names in this tenure bucket for the expiry month.
-  """
-  names: Int!
-
-  """
-  Total renewals contributed by names in this bucket.
-  """
-  totalRenewalsInBucket: Int!
-}
-
-"""
-Tenure bucket label as returned by Dune.
-"""
-enum RevenueRenewalTenureBucket {
-  _0_renewals_one_shot
-  _1_renewal
-  _2_renewals
-  _3_PLUS__renewals
 }
 
 type AverageDelegationPercentageItem {
