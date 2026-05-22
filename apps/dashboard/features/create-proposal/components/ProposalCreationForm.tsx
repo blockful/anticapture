@@ -129,12 +129,15 @@ export const ProposalCreationForm = ({
 
     if (drafts.isLoading) return;
 
-    hydratedDraftIdRef.current = draftId;
+    // Mark the guard inside the success/explicit-miss branches so a transient
+    // fetch failure does not permanently suppress later effect runs (e.g.
+    // when `drafts.drafts` or `drafts.isLoading` change after a retry).
     void getDraftProposal(
       daoId as GetDraftProposalPathParamsDaoEnumKey,
       draftId,
     )
       .then((shared) => {
+        hydratedDraftIdRef.current = draftId;
         if (!shared) return;
         form.reset({
           title: shared.title,
