@@ -29,6 +29,8 @@ export type UseDraftsReturn = {
   deleteDraft: (id: string) => Promise<void>;
   getDraft: (id: string) => ProposalDraft | undefined;
   isLoading: boolean;
+  error: boolean;
+  retry: () => void;
 };
 
 const getStorage = (): Storage | undefined =>
@@ -52,9 +54,15 @@ export const useDrafts = (
 ): UseDraftsReturn => {
   const [drafts, setDrafts] = useState<ProposalDraft[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
   const migratedRef = useRef<Set<string>>(new Set());
 
   const dao = daoId as GetDraftProposalsPathParamsDaoEnumKey;
+
+  const retry = useCallback(() => {
+    setRetryToken((n) => n + 1);
+  }, []);
 
   // Migrate localStorage drafts to API on first connect
   useEffect(() => {
@@ -71,6 +79,7 @@ export const useDrafts = (
       (async () => {
         if (!address) return;
         setIsLoading(true);
+        setError(false);
         try {
           const result = await getDraftProposals(dao, { address });
           setDrafts(result.items.map(toDraft));
@@ -78,6 +87,7 @@ export const useDrafts = (
           migratedRef.current.add(key);
         } catch {
           setDrafts([]);
+          setError(true);
         } finally {
           setIsLoading(false);
         }
@@ -87,6 +97,7 @@ export const useDrafts = (
 
     (async () => {
       setIsLoading(true);
+      setError(false);
       try {
         const result = await getDraftProposals(dao, { address });
         const remoteIds = new Set(result.items.map((d) => d.id));
@@ -115,14 +126,16 @@ export const useDrafts = (
         // transient API outage would strand the user until full remount.
         migratedRef.current.add(key);
       } catch {
-        // Migration failed — fall back to showing local drafts and leave the
-        // migration lock unset so a later effect run can retry.
+        // Migration failed — fall back to local drafts and surface an error so
+        // the UI can offer a manual retry. The lock stays unset so a later
+        // retry (via the `retry()` callback) can replay the migration.
         setDrafts(localDrafts);
+        setError(true);
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [daoId, dao, address]);
+  }, [daoId, dao, address, retryToken]);
 
   const saveDraft = useCallback(
     async (draft: NewDraftInput, id?: string): Promise<string> => {
@@ -171,5 +184,5 @@ export const useDrafts = (
     [drafts],
   );
 
-  return { drafts, saveDraft, deleteDraft, getDraft, isLoading };
+  return { drafts, saveDraft, deleteDraft, getDraft, isLoading, error, retry };
 };

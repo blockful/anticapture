@@ -118,6 +118,8 @@ export const GovernanceSection = () => {
     drafts,
     deleteDraft,
     isLoading: isDraftsLoading,
+    error: draftsError,
+    retry: retryDrafts,
   } = useDrafts(daoId, address);
   const [search] = useQueryState("search", parseAsString.withDefault(""));
   const trimmedSearch = search.trim();
@@ -333,10 +335,31 @@ export const GovernanceSection = () => {
                     <DraftCardSkeleton key={i} />
                   ))}
                 </div>
+              ) : draftsError && drafts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-12">
+                  <EmptyState
+                    title="Failed to load drafts"
+                    description="Something went wrong while fetching your drafts."
+                  />
+                  <Button variant="outline" size="md" onClick={retryDrafts}>
+                    Retry
+                  </Button>
+                </div>
               ) : drafts.length === 0 ? (
                 <DraftEmptyState />
               ) : (
                 <div className="flex flex-col gap-2">
+                  {draftsError && (
+                    <div className="border-warning/30 bg-warning/10 flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                      <span className="text-secondary">
+                        Couldn&apos;t sync drafts with the server. Showing local
+                        copies.
+                      </span>
+                      <Button variant="outline" size="sm" onClick={retryDrafts}>
+                        Retry
+                      </Button>
+                    </div>
+                  )}
                   {drafts.map((draft) => (
                     <DraftCard
                       key={draft.id}
