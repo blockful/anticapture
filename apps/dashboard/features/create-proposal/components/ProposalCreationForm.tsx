@@ -145,7 +145,12 @@ export const ProposalCreationForm = ({
           body: shared.body,
           actions: shared.actions.map((a) => toFormAction(a as ProposalAction)),
         });
-        setCurrentDraftId(draftId);
+        // Only set currentDraftId when the viewer owns this draft; if the
+        // draft belongs to another address, leave it unset so Save creates a
+        // fresh copy instead of trying to update the original (which would 404).
+        if (address && shared.author.toLowerCase() === address.toLowerCase()) {
+          setCurrentDraftId(draftId);
+        }
         setBodyVersion((v) => v + 1);
       })
       .catch(() => {
