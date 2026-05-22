@@ -5,35 +5,6 @@ import type {
 
 type ClientProposalListItem = ProposalsQueryResponse["items"][number];
 
-type GraphqlProposalDetails = Extract<
-  NonNullable<GetProposalQuery["proposal"]>,
-  { __typename?: "OnchainProposal" }
->;
-
-export interface ProposalViewData {
-  id: string;
-  daoId: string;
-  txHash: string | null;
-  proposerAccountId: string;
-  title: string;
-  description: string | null;
-  quorum: string;
-  timestamp: number;
-  status: string;
-  forVotes: string;
-  againstVotes: string;
-  abstainVotes: string;
-  startTimestamp: number;
-  endTimestamp: number;
-  queuedTimestamp: number | null;
-  executedTimestamp: number | null;
-  queuedTxHash: string | null;
-  executedTxHash: string | null;
-  calldatas: Array<string | null> | null;
-  targets: Array<string | null> | null;
-  values: Array<string | null> | null;
-}
-
 type ClientProposalDetails = ProposalQueryResponse;
 
 export enum ProposalStatus {
