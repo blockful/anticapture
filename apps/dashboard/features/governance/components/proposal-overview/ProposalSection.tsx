@@ -23,7 +23,7 @@ import { ProposalSectionSkeleton } from "@/features/governance/components/propos
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
 import { TabsSection } from "@/features/governance/components/proposal-overview/TabsSection";
 import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
-import { useVoterInfo } from "@/features/governance/hooks/useAccountPower";
+import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import { useOffchainProposal } from "@/features/governance/hooks/useOffchainProposal";
 import { useProposal } from "@/features/governance/hooks/useProposal";
 import type {
@@ -88,8 +88,8 @@ export const ProposalSection = ({
   }, []);
 
   const {
-    proposal: onchainProposal,
-    loading: onchainLoading,
+    data: onchainProposal,
+    isLoading: onchainLoading,
     error: onchainError,
   } = useProposal({
     proposalId: isOffchain ? "" : proposalId,
@@ -110,12 +110,13 @@ export const ProposalSection = ({
       ? rawOffchainResponse
       : null;
 
-  const { votingPower, rawVotingPower, votes } = useVoterInfo({
+  const { data: accountPower } = useAccountPower({
     address: address ?? "",
     daoId: daoEnum,
     proposalId: isOffchain ? "" : proposalId,
     decimals,
   });
+  const { votingPower, rawVotingPower, votes } = accountPower;
 
   const loading = isOffchain ? offchainLoading : onchainLoading;
   const error = isOffchain ? offchainError : onchainError;
@@ -174,7 +175,7 @@ export const ProposalSection = ({
         id: rawOffchainProposal.id,
         daoId: daoId as string,
         txHash: null,
-        proposerAccountId: rawOffchainProposal.author,
+        proposerAccountId: rawOffchainProposal.author as `0x${string}`,
         title: rawOffchainProposal.title,
         description: rawOffchainProposal.body,
         quorum: "0",
@@ -189,13 +190,16 @@ export const ProposalSection = ({
         abstainVotes: "0",
         startTimestamp: rawOffchainProposal.start,
         endTimestamp: rawOffchainProposal.end,
+        startBlock: 0,
+        endBlock: 0,
         queuedTimestamp: null,
         executedTimestamp: null,
         queuedTxHash: null,
         executedTxHash: null,
-        calldatas: null,
+        calldatas: [],
         targets: [],
         values: [],
+        proposalType: null,
       }
     : null;
 

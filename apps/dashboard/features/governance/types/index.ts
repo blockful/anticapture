@@ -1,13 +1,9 @@
 import type {
-  GetProposalQuery,
-  GetProposalsFromDaoQuery,
-} from "@anticapture/graphql-client/hooks";
+  ProposalQueryResponse,
+  ProposalsQueryResponse,
+} from "@anticapture/client";
 
-type GraphqlProposalListItem = NonNullable<
-  NonNullable<
-    NonNullable<GetProposalsFromDaoQuery["proposals"]>["items"]
-  >[number]
->;
+type ClientProposalListItem = ProposalsQueryResponse["items"][number];
 
 type GraphqlProposalDetails = Extract<
   NonNullable<GetProposalQuery["proposal"]>,
@@ -38,6 +34,8 @@ export interface ProposalViewData {
   values: Array<string | null> | null;
 }
 
+type ClientProposalDetails = ProposalQueryResponse;
+
 export enum ProposalStatus {
   PENDING = "pending",
   ONGOING = "ongoing",
@@ -66,10 +64,30 @@ export interface Votes {
   againstPercentage: string;
 }
 
-// Use the generated GraphQL type as base and extend with computed properties
-export type ProposalListItem = GraphqlProposalListItem;
-export type ProposalDetails = Omit<GraphqlProposalDetails, "status"> & {
+export type ProposalListItem = ClientProposalListItem;
+export type ProposalDetails = Omit<
+  ClientProposalDetails,
+  | "status"
+  | "values"
+  | "targets"
+  | "calldatas"
+  | "quorum"
+  | "forVotes"
+  | "againstVotes"
+  | "abstainVotes"
+> & {
   status: ProposalStatus;
+  quorum: string;
+  forVotes: string;
+  againstVotes: string;
+  abstainVotes: string;
+  values: Array<string | null>;
+  targets: Array<string | null>;
+  calldatas: Array<string | null>;
+};
+
+export type ProposalViewData = Omit<ProposalDetails, "txHash"> & {
+  txHash: string | null;
 };
 
 export interface Proposal extends Omit<
@@ -82,6 +100,8 @@ export interface Proposal extends Omit<
   | "quorum"
   | "description"
   | "calldatas"
+  | "targets"
+  | "values"
 > {
   title: string; // Add title field that's computed from description
   status: ProposalStatus;
@@ -93,9 +113,6 @@ export interface Proposal extends Omit<
   timeRemaining?: string;
   timeAgo?: string;
   hasCheckmark?: boolean;
-}
-
-export interface GovernanceData {
-  proposals: Proposal[];
-  totalProposals: number;
+  targets: Array<string | null>;
+  values: Array<string | null>;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import type { GetAccountPowerQuery } from "@anticapture/graphql-client";
+import type { VotesByProposalIdQueryResponse } from "@anticapture/client";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,7 +19,7 @@ interface ProposalHeaderProps {
   setIsQueueModalOpen: (isOpen: boolean) => void;
   setIsExecuteModalOpen: (isOpen: boolean) => void;
   votingPower: string;
-  votes: GetAccountPowerQuery["votesByProposalId"] | null;
+  votes: VotesByProposalIdQueryResponse | null;
   address: string | undefined;
   proposalStatus: string;
   snapshotLink?: string | null;
