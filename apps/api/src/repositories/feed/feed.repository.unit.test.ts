@@ -403,6 +403,7 @@ describe("FeedRepository", () => {
       );
 
       expect(result.items[0]?.metadata).toEqual({
+        kind: FeedEventType.PROPOSAL,
         id: "42",
         proposer: proposerAccountId,
         votingPower: "12345",
@@ -474,6 +475,7 @@ describe("FeedRepository", () => {
       );
 
       expect(result.items[0]?.metadata).toEqual({
+        kind: FeedEventType.DELEGATION,
         delegator,
         delegate,
         previousDelegate: zeroAddress,
@@ -508,6 +510,7 @@ describe("FeedRepository", () => {
       );
 
       expect(result.items[0]?.metadata).toEqual({
+        kind: FeedEventType.TRANSFER,
         from: fromAddr,
         to: toAddr,
         amount: "4242",
@@ -559,6 +562,7 @@ describe("FeedRepository", () => {
       );
 
       expect(result.items[0]?.metadata).toEqual({
+        kind: FeedEventType.VOTE,
         voter,
         reason: "Because",
         support: 1,

@@ -26,22 +26,39 @@ query GetFeedEvents(
       timestamp
       relevance
       metadata {
-        voter
-        reason
-        support
-        votingPower
-        proposalId
-        title
-        id
-        proposer
-        endBlock
-        endTimestamp
-        from
-        to
-        amount
-        delegator
-        delegate
-        previousDelegate
+        __typename
+        ... on FeedVoteMetadata {
+          voter
+          reason
+          support
+          votingPower
+          proposalId
+          voteTitle: title
+        }
+        ... on FeedProposalMetadata {
+          id
+          proposer
+          votingPower
+          proposalTitle: title
+        }
+        ... on FeedProposalExtendedMetadata {
+          id
+          proposalExtendedTitle: title
+          endBlock
+          endTimestamp
+          proposer
+        }
+        ... on FeedTransferMetadata {
+          from
+          to
+          amount
+        }
+        ... on FeedDelegationMetadata {
+          delegator
+          delegate
+          previousDelegate
+          amount
+        }
       }
     }
     totalCount

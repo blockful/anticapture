@@ -5,7 +5,12 @@ import { z } from "zod";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
-import { DBFeedEvent, FeedMetadataSchema, FeedRequest } from "@/mappers";
+import {
+  DBFeedEvent,
+  FeedDelegationMetadataSchema,
+  FeedMetadataSchema,
+  FeedRequest,
+} from "@/mappers";
 
 import { FeedService } from ".";
 
@@ -83,7 +88,8 @@ describe("FeedService", () => {
     });
 
     it("should preserve item fields from repository", async () => {
-      const delegationMetadata = {
+      const delegationMetadata: z.infer<typeof FeedDelegationMetadataSchema> = {
+        kind: FeedEventType.DELEGATION,
         delegator: "0x1",
         delegate: "0x2",
         previousDelegate: null,

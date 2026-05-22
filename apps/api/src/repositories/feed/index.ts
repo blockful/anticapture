@@ -161,6 +161,7 @@ export class FeedRepository {
         const d = lookups.delegationByKey.get(key);
         if (!d) return null;
         const meta: DelegationMeta = {
+          kind: FeedEventType.DELEGATION,
           delegator: d.delegatorAccountId,
           delegate: d.delegateAccountId,
           previousDelegate: d.previousDelegate,
@@ -172,6 +173,7 @@ export class FeedRepository {
         const t = lookups.transferByKey.get(key);
         if (!t) return null;
         const meta: TransferMeta = {
+          kind: FeedEventType.TRANSFER,
           from: t.fromAccountId,
           to: t.toAccountId,
           amount: t.amount.toString(),
@@ -182,6 +184,7 @@ export class FeedRepository {
         const v = lookups.voteByKey.get(key);
         if (!v) return null;
         const meta: VoteMeta = {
+          kind: FeedEventType.VOTE,
           voter: v.voterAccountId,
           reason: v.reason,
           support: Number(v.support),
@@ -196,6 +199,7 @@ export class FeedRepository {
         const p = lookups.proposalById.get(row.proposalId);
         if (!p) return null;
         const meta: ProposalMeta = {
+          kind: FeedEventType.PROPOSAL,
           id: p.id,
           proposer: p.proposerAccountId,
           votingPower: p.proposerVotingPower ?? "0",
@@ -208,6 +212,7 @@ export class FeedRepository {
         const p = lookups.proposalById.get(row.proposalId);
         if (!p) return null;
         const meta: ProposalExtendedMeta = {
+          kind: FeedEventType.PROPOSAL_EXTENDED,
           id: p.id,
           title: p.title,
           endBlock: p.endBlock,

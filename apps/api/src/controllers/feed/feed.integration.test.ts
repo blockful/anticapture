@@ -403,6 +403,7 @@ describe("Feed Controller (integration)", () => {
             type: "PROPOSAL",
             relevance: FeedRelevance.HIGH,
             metadata: {
+              kind: "PROPOSAL",
               id: "1",
               proposer,
               votingPower: "99",
@@ -473,6 +474,7 @@ describe("Feed Controller (integration)", () => {
             value: String(voteValue),
             relevance: FeedRelevance.MEDIUM,
             metadata: {
+              kind: "VOTE",
               voter,
               reason: "I support this proposal",
               support: 1,
@@ -515,6 +517,7 @@ describe("Feed Controller (integration)", () => {
             value: String(delegationValue),
             relevance: FeedRelevance.MEDIUM,
             metadata: {
+              kind: "DELEGATION",
               delegator,
               delegate,
               previousDelegate: zeroAddress,
@@ -555,6 +558,7 @@ describe("Feed Controller (integration)", () => {
             value: String(transferValue),
             relevance: FeedRelevance.MEDIUM,
             metadata: {
+              kind: "TRANSFER",
               from: fromAddr,
               to: toAddr,
               amount: transferValue.toString(),
@@ -636,6 +640,7 @@ describe("Feed Controller (integration)", () => {
             timestamp: 1700000003,
             relevance: FeedRelevance.HIGH,
             metadata: {
+              kind: "PROPOSAL",
               id: "1",
               proposer,
               votingPower: "0",
@@ -649,6 +654,7 @@ describe("Feed Controller (integration)", () => {
             value: String(transferValue),
             relevance: FeedRelevance.MEDIUM,
             metadata: {
+              kind: "TRANSFER",
               from: fromAddr,
               to: toAddr,
               amount: transferValue.toString(),

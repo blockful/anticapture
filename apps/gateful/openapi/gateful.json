@@ -328,7 +328,7 @@
         "description": "Filter events by relevance tier."
       },
       "FeedMetadata": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/components/schemas/FeedVoteMetadata"
           },
@@ -348,11 +348,16 @@
             "nullable": true
           }
         ],
-        "description": "Type-specific metadata for the feed event. Narrow by the FeedItem.type field."
+        "description": "Type-specific metadata for the feed event. Narrow by the `kind` discriminator."
       },
       "FeedVoteMetadata": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["VOTE"],
+            "description": "Discriminator identifying the metadata variant."
+          },
           "voter": {
             "type": "string",
             "description": "Voter address."
@@ -380,12 +385,24 @@
             "description": "Proposal title, when known."
           }
         },
-        "required": ["voter", "reason", "support", "votingPower", "proposalId"],
+        "required": [
+          "kind",
+          "voter",
+          "reason",
+          "support",
+          "votingPower",
+          "proposalId"
+        ],
         "description": "Metadata payload for a VOTE feed event."
       },
       "FeedProposalMetadata": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["PROPOSAL"],
+            "description": "Discriminator identifying the metadata variant."
+          },
           "id": {
             "type": "string",
             "description": "Proposal ID."
@@ -404,12 +421,17 @@
             "description": "Proposal title."
           }
         },
-        "required": ["id", "proposer", "votingPower", "title"],
+        "required": ["kind", "id", "proposer", "votingPower", "title"],
         "description": "Metadata payload for a PROPOSAL feed event."
       },
       "FeedProposalExtendedMetadata": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["PROPOSAL_EXTENDED"],
+            "description": "Discriminator identifying the metadata variant."
+          },
           "id": {
             "type": "string",
             "description": "Proposal ID."
@@ -432,12 +454,24 @@
             "description": "Proposer address."
           }
         },
-        "required": ["id", "title", "endBlock", "endTimestamp", "proposer"],
+        "required": [
+          "kind",
+          "id",
+          "title",
+          "endBlock",
+          "endTimestamp",
+          "proposer"
+        ],
         "description": "Metadata payload for a PROPOSAL_EXTENDED feed event."
       },
       "FeedTransferMetadata": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["TRANSFER"],
+            "description": "Discriminator identifying the metadata variant."
+          },
           "from": {
             "type": "string",
             "description": "Sender address."
@@ -452,12 +486,17 @@
             "description": "Transferred amount, as a decimal string."
           }
         },
-        "required": ["from", "to", "amount"],
+        "required": ["kind", "from", "to", "amount"],
         "description": "Metadata payload for a TRANSFER feed event."
       },
       "FeedDelegationMetadata": {
         "type": "object",
         "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["DELEGATION"],
+            "description": "Discriminator identifying the metadata variant."
+          },
           "delegator": {
             "type": "string",
             "description": "Delegator address."
@@ -477,7 +516,13 @@
             "description": "Delegated voting power, as a decimal string."
           }
         },
-        "required": ["delegator", "delegate", "previousDelegate", "amount"],
+        "required": [
+          "kind",
+          "delegator",
+          "delegate",
+          "previousDelegate",
+          "amount"
+        ],
         "description": "Metadata payload for a DELEGATION feed event."
       },
       "FeedEventTypeList": {

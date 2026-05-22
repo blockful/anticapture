@@ -72,6 +72,9 @@ export const FeedRequestSchema = z
 
 export const FeedVoteMetadataSchema = z
   .object({
+    kind: z.literal(FeedEventType.VOTE).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
     voter: z.string().openapi({ description: "Voter address." }),
     reason: z
       .string()
@@ -96,6 +99,9 @@ export const FeedVoteMetadataSchema = z
 
 export const FeedProposalMetadataSchema = z
   .object({
+    kind: z.literal(FeedEventType.PROPOSAL).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
     id: z.string().openapi({ description: "Proposal ID." }),
     proposer: z.string().openapi({ description: "Proposer address." }),
     votingPower: z.string().openapi({
@@ -111,6 +117,9 @@ export const FeedProposalMetadataSchema = z
 
 export const FeedProposalExtendedMetadataSchema = z
   .object({
+    kind: z.literal(FeedEventType.PROPOSAL_EXTENDED).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
     id: z.string().openapi({ description: "Proposal ID." }),
     title: z.string().openapi({ description: "Proposal title." }),
     endBlock: z.number().int().openapi({
@@ -129,6 +138,9 @@ export const FeedProposalExtendedMetadataSchema = z
 
 export const FeedTransferMetadataSchema = z
   .object({
+    kind: z.literal(FeedEventType.TRANSFER).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
     from: z.string().openapi({ description: "Sender address." }),
     to: z.string().openapi({ description: "Recipient address." }),
     amount: z.string().openapi({
@@ -142,6 +154,9 @@ export const FeedTransferMetadataSchema = z
 
 export const FeedDelegationMetadataSchema = z
   .object({
+    kind: z.literal(FeedEventType.DELEGATION).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
     delegator: z.string().openapi({ description: "Delegator address." }),
     delegate: z.string().openapi({ description: "New delegate address." }),
     previousDelegate: z
@@ -158,7 +173,7 @@ export const FeedDelegationMetadataSchema = z
   });
 
 export const FeedMetadataSchema = z
-  .union([
+  .discriminatedUnion("kind", [
     FeedVoteMetadataSchema,
     FeedProposalMetadataSchema,
     FeedProposalExtendedMetadataSchema,
@@ -167,7 +182,7 @@ export const FeedMetadataSchema = z
   ])
   .openapi("FeedMetadata", {
     description:
-      "Type-specific metadata for the feed event. Narrow by the FeedItem.type field.",
+      "Type-specific metadata for the feed event. Narrow by the `kind` discriminator.",
   });
 
 export const FeedItemSchema = z

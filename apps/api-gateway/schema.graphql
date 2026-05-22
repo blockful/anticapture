@@ -1143,10 +1143,6 @@ type FeedItem {
   """Event timestamp in Unix seconds."""
   timestamp: Int!
   relevance: FeedRelevance!
-
-  """
-  Type-specific metadata for the feed event. Narrow by the FeedItem.type field.
-  """
   metadata: FeedMetadata!
 }
 
@@ -1167,9 +1163,14 @@ enum FeedRelevance {
 }
 
 """
-Type-specific metadata for the feed event. Narrow by the FeedItem.type field.
+Type-specific metadata for the feed event. Narrow by the `kind` discriminator.
 """
-type FeedMetadata {
+union FeedMetadata = FeedVoteMetadata | FeedProposalMetadata | FeedProposalExtendedMetadata | FeedTransferMetadata | FeedDelegationMetadata | JSON_container
+
+"""Metadata payload for a VOTE feed event."""
+type FeedVoteMetadata {
+  kind: VOTE_const!
+
   """Voter address."""
   voter: String!
 
@@ -1179,14 +1180,23 @@ type FeedMetadata {
   """Vote support: 0 = against, 1 = for, 2 = abstain."""
   support: Int!
 
-  """Proposer voting power at proposal creation, as a decimal string."""
+  """Voter voting power, as a decimal string."""
   votingPower: String!
 
   """Proposal voted on."""
   proposalId: String!
 
-  """Proposal title."""
-  title: String!
+  """Proposal title, when known."""
+  title: String
+}
+
+enum VOTE_const {
+  VOTE
+}
+
+"""Metadata payload for a PROPOSAL feed event."""
+type FeedProposalMetadata {
+  kind: PROPOSAL_const!
 
   """Proposal ID."""
   id: String!
@@ -1194,11 +1204,44 @@ type FeedMetadata {
   """Proposer address."""
   proposer: String!
 
+  """Proposer voting power at proposal creation, as a decimal string."""
+  votingPower: String!
+
+  """Proposal title."""
+  title: String!
+}
+
+enum PROPOSAL_const {
+  PROPOSAL
+}
+
+"""Metadata payload for a PROPOSAL_EXTENDED feed event."""
+type FeedProposalExtendedMetadata {
+  kind: PROPOSAL_EXTENDED_const!
+
+  """Proposal ID."""
+  id: String!
+
+  """Proposal title."""
+  title: String!
+
   """New end block after the extension."""
   endBlock: Int!
 
   """New proposal end timestamp in Unix seconds, as a decimal string."""
   endTimestamp: String!
+
+  """Proposer address."""
+  proposer: String!
+}
+
+enum PROPOSAL_EXTENDED_const {
+  PROPOSAL_EXTENDED
+}
+
+"""Metadata payload for a TRANSFER feed event."""
+type FeedTransferMetadata {
+  kind: TRANSFER_const!
 
   """Sender address."""
   from: String!
@@ -1206,8 +1249,17 @@ type FeedMetadata {
   """Recipient address."""
   to: String!
 
-  """Delegated voting power, as a decimal string."""
+  """Transferred amount, as a decimal string."""
   amount: String!
+}
+
+enum TRANSFER_const {
+  TRANSFER
+}
+
+"""Metadata payload for a DELEGATION feed event."""
+type FeedDelegationMetadata {
+  kind: DELEGATION_const!
 
   """Delegator address."""
   delegator: String!
@@ -1217,6 +1269,16 @@ type FeedMetadata {
 
   """Previous delegate address, when known."""
   previousDelegate: String
+
+  """Delegated voting power, as a decimal string."""
+  amount: String!
+}
+
+enum DELEGATION_const {
+  DELEGATION
+}
+
+type JSON_container {
   JSON: JSON
 }
 
