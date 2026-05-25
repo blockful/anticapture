@@ -33,8 +33,14 @@ export const ProposalsComparisonResponseSchema = z
       example: 5,
     }),
     changeRate: z.number().openapi({
-      description: "Relative change between current and previous periods.",
+      description:
+        "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
       example: 0.6,
+    }),
+    rawDelta: z.number().int().openapi({
+      description:
+        "Signed integer delta: currentProposalsLaunched - oldProposalsLaunched.",
+      example: 3,
     }),
   })
   .openapi("ProposalsComparisonResponse", {
@@ -53,8 +59,13 @@ export const VotesComparisonResponseSchema = z
       example: 96,
     }),
     changeRate: z.number().openapi({
-      description: "Relative change between current and previous periods.",
+      description:
+        "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
       example: 0.33,
+    }),
+    rawDelta: z.number().int().openapi({
+      description: "Signed integer delta: currentVotes - oldVotes.",
+      example: 32,
     }),
   })
   .openapi("VotesComparisonResponse", {
@@ -74,8 +85,15 @@ export const AverageTurnoutComparisonResponseSchema = z
       example: "90000000000000000",
     }),
     changeRate: z.number().openapi({
-      description: "Relative change between current and previous periods.",
-      example: 0.33,
+      description:
+        "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
+      example: 0.333333,
+    }),
+    rawDelta: z.string().openapi({
+      description:
+        "Signed bigint delta as a decimal string: currentAverageTurnout - oldAverageTurnout.",
+      example: "30000000000000000",
+      format: "bigint",
     }),
   })
   .openapi("AverageTurnoutComparisonResponse", {

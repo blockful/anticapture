@@ -39,8 +39,8 @@ describe("DaoService", () => {
       votingDelay: "2",
       votingPeriod: "40320",
       timelockDelay: "172800",
-      alreadySupportCalldataReview: false,
-      supportOffchainData: false,
+      supportsCalldataReview: false,
+      supportsOffchainData: false,
     });
   });
 

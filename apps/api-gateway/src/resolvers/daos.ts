@@ -31,8 +31,8 @@ export const daosResolver = {
               votingDelay
               votingPeriod
               timelockDelay
-              alreadySupportCalldataReview
-              supportOffchainData
+              supportsCalldataReview
+              supportsOffchainData
             }
           `,
         })

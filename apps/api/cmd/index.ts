@@ -60,6 +60,7 @@ import {
   DaoMetricsDayBucketRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
+  HealthRepositoryImpl,
   HistoricalBalanceRepository,
   NFTPriceRepository,
   NounsVotingPowerRepository,
@@ -83,6 +84,7 @@ import {
   CoingeckoService,
   DaoService,
   DelegationPercentageService,
+  HealthService,
   HistoricalBalancesService,
   NFTPriceService,
   ProposalsService,
@@ -178,7 +180,7 @@ const pgClient = drizzle(env.DATABASE_URL, {
   casing: "snake_case",
 });
 
-health(app, pgClient);
+health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
