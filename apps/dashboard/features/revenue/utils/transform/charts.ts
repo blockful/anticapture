@@ -56,26 +56,34 @@ function computeYtdDelta(
   const currentMonth = now.getUTCMonth();
   const prevYear = currentYear - 1;
 
-  // Compare only fully-completed months. Cap both filters at < currentMonth so
-  // a partial-March 2026 isn't compared against a full-March 2025.
-  // In January (currentMonth === 0) no months pass either filter, yielding
-  // undefined — correct, since we have no completed current-year month yet.
-  const inYearThroughLastCompleted =
-    (target: number) => (i: RevenueTotalsItem) => {
-      const d = new Date(i.date * 1000);
-      return d.getUTCFullYear() === target && d.getUTCMonth() < currentMonth;
-    };
+  const currentMonths = new Set<number>();
+  const prevMonths = new Set<number>();
+  for (const item of totalsItems) {
+    const d = new Date(item.date * 1000);
+    const m = d.getUTCMonth();
+    if (m >= currentMonth) continue;
+    if (d.getUTCFullYear() === currentYear) currentMonths.add(m);
+    else if (d.getUTCFullYear() === prevYear) prevMonths.add(m);
+  }
+  const comparableMonths = new Set(
+    [...currentMonths].filter((m) => prevMonths.has(m)),
+  );
 
-  const ytd = totalsItems
-    .filter(inYearThroughLastCompleted(currentYear))
-    .reduce((s, i) => s + i.totalUsd, 0);
+  if (comparableMonths.size === 0) return undefined;
 
-  const prevYearYtd = totalsItems
-    .filter(inYearThroughLastCompleted(prevYear))
-    .reduce((s, i) => s + i.totalUsd, 0);
+  const sumForYear = (target: number) =>
+    totalsItems
+      .filter((i) => {
+        const d = new Date(i.date * 1000);
+        return (
+          d.getUTCFullYear() === target && comparableMonths.has(d.getUTCMonth())
+        );
+      })
+      .reduce((s, i) => s + i.totalUsd, 0);
 
-  // Skip the delta when we have no current-year data yet (indexer lag in
-  // early January, or before the first completed month rolls in).
+  const ytd = sumForYear(currentYear);
+  const prevYearYtd = sumForYear(prevYear);
+
   if (prevYearYtd <= 0 || ytd === 0) return undefined;
 
   const pct = ((ytd - prevYearYtd) / prevYearYtd) * 100;
