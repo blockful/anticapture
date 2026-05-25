@@ -1,5 +1,3 @@
-import { formatCompact } from "@/features/revenue/utils/format";
-
 /**
  * The time window a KPI card aggregates over. `months: null` means "MAX" —
  * no slicing, and no previous-period comparison can be drawn.
@@ -46,10 +44,6 @@ export function avgBy<T>(items: T[], extract: (i: T) => number): number {
 export function pctDelta(curr: number, prev: number): number | null {
   if (prev === 0) return null;
   return ((curr - prev) / prev) * 100;
-}
-
-export function formatCountDelta(n: number): string {
-  return `${n >= 0 ? "+" : ""}${formatCompact(n)}`;
 }
 
 export type DeltaPresentation = {

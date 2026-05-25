@@ -15,7 +15,7 @@ export const RevenueSection = () => {
       description="Protocol financial health: revenue, registrations, and name retention."
       hideDivider
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 pb-8">
         {/* Section 1 — Revenue Overview */}
         <RevenueOverviewCard />
 

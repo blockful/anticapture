@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, Info } from "lucide-react";
 import {
-  useGetRevenueActiveNames,
   useGetRevenueNewWallets,
   useGetRevenueRenewalFunnel,
   useGetRevenueTotals,
@@ -33,6 +32,8 @@ const WINDOW_BY_PERIOD: Record<string, KpiWindow> = {
   max: { months: null, label: "MAX" },
 };
 
+const KPI_COUNT = 3;
+
 export const KpiRow = () => {
   const [timePeriod, setTimePeriod] = useState("1y");
 
@@ -41,8 +42,6 @@ export const KpiRow = () => {
     [timePeriod],
   );
 
-  const { data: activeNamesData, isLoading: activeNamesLoading } =
-    useGetRevenueActiveNames("ens");
   const { data: newWalletsData, isLoading: newWalletsLoading } =
     useGetRevenueNewWallets("ens");
   const { data: funnelData, isLoading: funnelLoading } =
@@ -50,20 +49,17 @@ export const KpiRow = () => {
   const { data: totalsData, isLoading: totalsLoading } =
     useGetRevenueTotals("ens");
 
-  const isLoading =
-    activeNamesLoading || newWalletsLoading || funnelLoading || totalsLoading;
+  const isLoading = newWalletsLoading || funnelLoading || totalsLoading;
 
   const kpis = useMemo(() => {
-    if (!activeNamesData || !newWalletsData || !funnelData || !totalsData)
-      return null;
+    if (!newWalletsData || !funnelData || !totalsData) return null;
     return computeKpis(
-      activeNamesData.items,
       newWalletsData.items,
       funnelData.items,
       totalsData.items,
       activeWindow,
     );
-  }, [activeNamesData, newWalletsData, funnelData, totalsData, activeWindow]);
+  }, [newWalletsData, funnelData, totalsData, activeWindow]);
 
   return (
     <Card>
@@ -94,18 +90,16 @@ export const KpiRow = () => {
         </select>
       </div>
 
-      {/* KPI columns — 2x2 mobile, 4col desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4">
+      {/* KPI columns — stacked on mobile, 3 columns on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-3">
         {isLoading || !kpis
-          ? Array.from({ length: 4 }).map((_, index) => (
+          ? Array.from({ length: KPI_COUNT }).map((_, index) => (
               <div
                 key={index}
                 className={cn(
                   "p-4",
-                  index < 3 && "lg:border-border-default lg:border-r",
-                  index % 2 === 0 &&
-                    "border-border-default border-r lg:border-r",
-                  index < 2 && "border-border-default border-b lg:border-b-0",
+                  index < KPI_COUNT - 1 &&
+                    "border-border-default border-b lg:border-b-0 lg:border-r",
                 )}
               >
                 <div className="bg-surface-raised h-4 w-24 animate-pulse rounded" />
@@ -119,10 +113,7 @@ export const KpiRow = () => {
                 className={cn(
                   "p-4",
                   index < kpis.length - 1 &&
-                    "lg:border-border-default lg:border-r",
-                  index % 2 === 0 &&
-                    "border-border-default border-r lg:border-r",
-                  index < 2 && "border-border-default border-b lg:border-b-0",
+                    "border-border-default border-b lg:border-b-0 lg:border-r",
                 )}
               >
                 <div className="flex items-center gap-1.5">
