@@ -28,6 +28,7 @@ export const MonthlyRevenueChart = () => {
           series={series.series}
           xAxisLabels={series.xAxisLabels}
           yAxisFormatter={formatMillions}
+          tooltipTotalLabel="Total"
           height={300}
         />
       ) : null}

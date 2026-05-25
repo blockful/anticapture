@@ -301,19 +301,19 @@ export function transformToRenewalTenure(items: RevenueRenewalTenureItem[]) {
 export function transformToRenewalCohorts(
   items: RevenueRenewalFunnelItem[],
 ): Array<{ year: string; rate: number }> {
-  const ratesByYear = new Map<number, { sum: number; count: number }>();
+  const totalsByYear = new Map<number, { renewed: number; expiring: number }>();
   for (const item of items) {
     const year = new Date(item.date * 1000).getUTCFullYear();
-    const prev = ratesByYear.get(year) ?? { sum: 0, count: 0 };
-    ratesByYear.set(year, {
-      sum: prev.sum + item.renewalRatePct,
-      count: prev.count + 1,
+    const prev = totalsByYear.get(year) ?? { renewed: 0, expiring: 0 };
+    totalsByYear.set(year, {
+      renewed: prev.renewed + item.renewedCount,
+      expiring: prev.expiring + item.termsExpiring,
     });
   }
-  return Array.from(ratesByYear.entries())
+  return Array.from(totalsByYear.entries())
     .sort(([a], [b]) => a - b)
-    .map(([year, { sum, count }]) => ({
+    .map(([year, { renewed, expiring }]) => ({
       year: String(year),
-      rate: Math.round(sum / count),
+      rate: expiring > 0 ? Math.round((renewed / expiring) * 100) : 0,
     }));
 }

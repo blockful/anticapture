@@ -23,7 +23,7 @@ export const RenewalRateCohort = () => {
         Renewal Rate by Expiry Year
       </p>
       <p className="text-secondary mt-0.5 text-sm">
-        Average renewal rate for names expiring each year
+        Percentage of names that renewed, by expiry year
       </p>
 
       <div className="mt-4 flex flex-1 flex-col justify-between gap-4 lg:gap-0">
