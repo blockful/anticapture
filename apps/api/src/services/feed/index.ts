@@ -1,14 +1,25 @@
+import { z } from "zod";
+
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
-import { DBFeedEvent, FeedRequest, FeedResponse } from "@/mappers";
+import {
+  DBFeedEvent,
+  FeedMetadataSchema,
+  FeedRequest,
+  FeedResponse,
+} from "@/mappers";
+
+type FeedEventWithMetadata = DBFeedEvent & {
+  metadata: z.infer<typeof FeedMetadataSchema> | null;
+};
 
 interface FeedRepository {
   getFeedEvents(
     req: FeedRequest,
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ): Promise<{
-    items: DBFeedEvent[];
+    items: FeedEventWithMetadata[];
     totalCount: number;
   }>;
 }

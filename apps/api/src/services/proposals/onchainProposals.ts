@@ -108,7 +108,7 @@ export class ProposalsService {
     fromDate,
     fromEndDate,
     includeOptimisticProposals = true,
-  }: ProposalsRequest): Promise<DBProposal[]> {
+  }: Omit<ProposalsRequest, "lean">): Promise<DBProposal[]> {
     // 1. Prepare status for database query
     const dbStatuses = status
       ? this.prepareStatusForDatabase(status)
@@ -142,7 +142,7 @@ export class ProposalsService {
     query,
     skip = 0,
     limit = 10,
-  }: ProposalSearchRequest): Promise<DBProposal[]> {
+  }: Omit<ProposalSearchRequest, "lean">): Promise<DBProposal[]> {
     const proposals = await this.proposalsRepo.searchProposals(
       query,
       skip,

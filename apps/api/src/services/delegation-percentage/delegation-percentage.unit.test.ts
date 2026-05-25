@@ -64,6 +64,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         limit: 365,
         orderDirection: "asc" as const,
       });
@@ -71,10 +72,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: [],
         totalCount: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: null,
-        endDate: null,
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -95,6 +92,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: 1600041600,
         endDate: 1600041600,
         limit: 365,
@@ -104,10 +102,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: [{ date: "1600041600", high: "50.00" }],
         totalCount: 1,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: "1600041600",
-        endDate: "1600041600",
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -145,6 +139,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: day1,
         endDate: day3,
         limit: 365,
@@ -158,10 +153,6 @@ describe("DelegationPercentageService", () => {
           { date: day3.toString(), high: "60.00" },
         ],
         totalCount: 3,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: day1.toString(),
-        endDate: day3.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -182,6 +173,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: 1600041600,
         endDate: 1600041600,
         limit: 365,
@@ -191,10 +183,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: [{ date: "1600041600", high: "0.00" }],
         totalCount: 1,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: "1600041600",
-        endDate: "1600041600",
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -222,6 +210,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: 1600041600,
         endDate: 1600387200, // 5 days
         limit: 3,
@@ -234,11 +223,7 @@ describe("DelegationPercentageService", () => {
           { date: "1600128000", high: "50.00" },
           { date: "1600214400", high: "50.00" },
         ],
-        totalCount: 3,
-        hasNextPage: true,
-        hasPreviousPage: false,
-        startDate: "1600041600",
-        endDate: "1600214400",
+        totalCount: 5,
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -266,6 +251,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: 1600041600,
         endDate: 1600214400,
         orderDirection: "desc",
@@ -279,10 +265,6 @@ describe("DelegationPercentageService", () => {
           { date: "1600041600", high: "30.00" },
         ],
         totalCount: 3,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: "1600214400",
-        endDate: "1600041600",
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -290,6 +272,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         limit: 365,
         orderDirection: "asc" as const,
       });
@@ -302,15 +285,10 @@ describe("DelegationPercentageService", () => {
         startDate: undefined,
         endDate: undefined,
         orderDirection: "asc",
-        limit: 732,
       });
       expect(result).toEqual({
         items: [],
         totalCount: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: null,
-        endDate: null,
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -351,6 +329,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: day1,
         endDate: day4,
         limit: 365,
@@ -365,10 +344,6 @@ describe("DelegationPercentageService", () => {
           { date: day4.toString(), high: "25.00" },
         ],
         totalCount: 4,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: day1.toString(),
-        endDate: day4.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -408,6 +383,7 @@ describe("DelegationPercentageService", () => {
       ]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: day100,
         endDate: day105,
         limit: 365,
@@ -426,10 +402,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: expectedItems,
         totalCount: 6,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: day100.toString(),
-        endDate: day105.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -459,6 +431,7 @@ describe("DelegationPercentageService", () => {
       ]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: day100,
         endDate: day100,
         limit: 365,
@@ -468,10 +441,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: [{ date: day100.toString(), high: "30.00" }],
         totalCount: 1,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: day100.toString(),
-        endDate: day100.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -498,6 +467,7 @@ describe("DelegationPercentageService", () => {
       ]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: day100,
         endDate: day100,
         limit: 365,
@@ -507,17 +477,14 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: [{ date: day100.toString(), high: "50.00" }],
         totalCount: 1,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: day100.toString(),
-        endDate: day100.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
-    it("should not fetch previous values when neither startDate nor after is provided", async () => {
+    it("should not fetch previous values when startDate is not provided", async () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         limit: 365,
         orderDirection: "asc" as const,
       });
@@ -525,10 +492,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: [],
         totalCount: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: null,
-        endDate: null,
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -560,6 +523,7 @@ describe("DelegationPercentageService", () => {
       ]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: day100,
         endDate: day100,
         limit: 365,
@@ -569,10 +533,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: [{ date: day100.toString(), high: "50.00" }],
         totalCount: 1,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: day100.toString(),
-        endDate: day100.toString(),
       } satisfies DelegationPercentageServiceResult);
 
       // Verify error was logged
@@ -620,6 +580,7 @@ describe("DelegationPercentageService", () => {
       ]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: day5,
         endDate: day15,
         limit: 365,
@@ -639,10 +600,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: expectedItems,
         totalCount: 6,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: day10.toString(),
-        endDate: day15.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -659,6 +616,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue([]);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: day100,
         limit: 365,
         orderDirection: "asc" as const,
@@ -667,14 +625,10 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: [],
         totalCount: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: null,
-        endDate: null,
       } satisfies DelegationPercentageServiceResult);
     });
 
-    it("should fetch previous values and optimize query when only after is provided", async () => {
+    it("should fetch previous values and optimize the repository query for a forward-looking window", async () => {
       const ONE_DAY = 86400;
       const day1 = 1599955200;
       const day50 = day1 + ONE_DAY * 50;
@@ -712,7 +666,8 @@ describe("DelegationPercentageService", () => {
       ]);
 
       const result = await service.delegationPercentageByDay({
-        after: day50,
+        skip: 0,
+        startDate: day50,
         limit: 365,
         orderDirection: "asc" as const,
       });
@@ -726,7 +681,6 @@ describe("DelegationPercentageService", () => {
         startDate: day50.toString(),
         endDate: undefined,
         orderDirection: "asc",
-        limit: 732,
       });
 
       // Verify previous values were fetched
@@ -752,19 +706,14 @@ describe("DelegationPercentageService", () => {
 
       // Only first 365 items due to limit
       const limitedItems = expectedItems.slice(0, 365);
-      const hasNextPage = expectedItems.length > 365;
 
       expect(result).toEqual({
         items: limitedItems,
-        totalCount: limitedItems.length,
-        hasNextPage,
-        hasPreviousPage: true,
-        startDate: limitedItems[0]?.date ?? null,
-        endDate: limitedItems[limitedItems.length - 1]?.date ?? null,
+        totalCount: expectedItems.length,
       } satisfies DelegationPercentageServiceResult);
     });
 
-    it("should optimize query when only before is provided", async () => {
+    it("should optimize the repository query for a backward-looking window when only endDate is provided", async () => {
       const day1 = 1599955200;
       const day50 = day1 + 86400 * 50;
 
@@ -782,7 +731,7 @@ describe("DelegationPercentageService", () => {
       ]);
 
       const result = await service.delegationPercentageByDay({
-        before: day50,
+        skip: 0,
         endDate: day50, // Add explicit endDate to prevent forward-fill to today
         limit: 365,
         orderDirection: "asc" as const,
@@ -797,7 +746,6 @@ describe("DelegationPercentageService", () => {
         startDate: undefined,
         endDate: day50.toString(),
         orderDirection: "asc",
-        limit: 732,
       });
 
       // Should not fetch previous values (no startDate or after)
@@ -813,10 +761,6 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: expectedItems,
         totalCount: expectedItems.length,
-        hasNextPage: false,
-        hasPreviousPage: true,
-        startDate: day1.toString(),
-        endDate: day50.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
@@ -841,6 +785,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: threeDaysAgoMidnight,
         // No endDate - should forward-fill to today
         limit: 10,
@@ -859,14 +804,10 @@ describe("DelegationPercentageService", () => {
       expect(result).toEqual({
         items: expectedItems,
         totalCount: 4,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: threeDaysAgoMidnight.toString(),
-        endDate: FIXED_TIMESTAMP.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
-    it("should set hasNextPage to false when reaching today without endDate", async () => {
+    it("should forward-fill exactly to today when endDate is omitted and the limit covers the window", async () => {
       const ONE_DAY = 86400;
       const twoDaysAgoMidnight = FIXED_TIMESTAMP - 2 * ONE_DAY;
 
@@ -886,6 +827,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: twoDaysAgoMidnight,
         // No endDate, limit covers all days to today
         limit: 10,
@@ -900,14 +842,10 @@ describe("DelegationPercentageService", () => {
           { date: FIXED_TIMESTAMP.toString(), high: "50.00" },
         ],
         totalCount: 3,
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startDate: twoDaysAgoMidnight.toString(),
-        endDate: FIXED_TIMESTAMP.toString(),
       } satisfies DelegationPercentageServiceResult);
     });
 
-    it("should set hasNextPage to true when limit cuts before today without endDate", async () => {
+    it("should slice the forward-filled timeline by limit when the window extends past it", async () => {
       const ONE_DAY = 86400;
       const tenDaysAgoMidnight = FIXED_TIMESTAMP - 10 * ONE_DAY;
 
@@ -927,6 +865,7 @@ describe("DelegationPercentageService", () => {
       mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
 
       const result = await service.delegationPercentageByDay({
+        skip: 0,
         startDate: tenDaysAgoMidnight,
         // No endDate, but limit only returns 3 items (not reaching today)
         limit: 3,
@@ -942,11 +881,51 @@ describe("DelegationPercentageService", () => {
             high: "50.00",
           },
         ],
-        totalCount: 3,
-        hasNextPage: true,
-        hasPreviousPage: false,
-        startDate: tenDaysAgoMidnight.toString(),
-        endDate: (tenDaysAgoMidnight + 2 * ONE_DAY).toString(),
+        // The forward-filled timeline runs from `tenDaysAgoMidnight` to today
+        // (FIXED_TIMESTAMP), i.e. 11 day buckets. `limit: 3` only slices the
+        // first three; totalCount reflects the full count.
+        totalCount: 11,
+      } satisfies DelegationPercentageServiceResult);
+    });
+
+    it("should offset the slice by skip and keep totalCount equal to the full timeline", async () => {
+      const ONE_DAY = 86400;
+      const day0 = 1600041600;
+
+      // Create 5 day buckets of 50% delegation.
+      const mockRows = [];
+      for (let i = 0; i < 5; i++) {
+        const date = BigInt(day0 + i * ONE_DAY);
+        mockRows.push(
+          createMockRow({
+            date,
+            metricType: MetricTypesEnum.DELEGATED_SUPPLY,
+            high: 50000000000000000000n,
+          }),
+          createMockRow({
+            date,
+            metricType: MetricTypesEnum.TOTAL_SUPPLY,
+            high: 100000000000000000000n,
+          }),
+        );
+      }
+      mockRepository.getMetricsByDateRange.mockResolvedValue(mockRows);
+
+      const result = await service.delegationPercentageByDay({
+        startDate: day0,
+        endDate: day0 + 4 * ONE_DAY,
+        skip: 2,
+        limit: 2,
+        orderDirection: "asc" as const,
+      });
+
+      // Five-day timeline, skip 2, take 2 → days 3 and 4 (zero-indexed).
+      expect(result).toEqual({
+        items: [
+          { date: (day0 + 2 * ONE_DAY).toString(), high: "50.00" },
+          { date: (day0 + 3 * ONE_DAY).toString(), high: "50.00" },
+        ],
+        totalCount: 5,
       } satisfies DelegationPercentageServiceResult);
     });
   });

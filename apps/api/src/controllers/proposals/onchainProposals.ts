@@ -3,6 +3,7 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { DAOClient } from "@/clients";
 import {
   ErrorResponseSchema,
+  ProposalByIdQuerySchema,
   ProposalSearchRequestSchema,
   ProposalsResponseSchema,
   ProposalsRequestSchema,
@@ -25,7 +26,8 @@ export function proposals(
       operationId: "proposals",
       path: "/proposals",
       summary: "Get proposals",
-      description: "Returns a list of proposal",
+      description:
+        "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and reduce payload size.",
       tags: ["proposals", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {
@@ -51,6 +53,7 @@ export function proposals(
         fromDate,
         fromEndDate,
         includeOptimisticProposals,
+        lean,
       } = context.req.valid("query");
 
       const result = await service.getProposals({
@@ -71,7 +74,7 @@ export function proposals(
       return context.json(
         {
           items: result.map((p, index) =>
-            ProposalMapper.toApi(p, quorums[index]!, blockTime),
+            ProposalMapper.toApi(p, quorums[index]!, blockTime, { lean }),
           ),
           totalCount: await service.getProposalsCount(),
         },
@@ -87,7 +90,7 @@ export function proposals(
       path: "/proposals/search",
       summary: "Search proposals",
       description:
-        "Returns proposals whose title or identifier partially matches the query.",
+        "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets.",
       tags: ["proposals", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {
@@ -105,7 +108,7 @@ export function proposals(
       },
     }),
     async (context) => {
-      const { query, skip, limit } = context.req.valid("query");
+      const { query, skip, limit, lean } = context.req.valid("query");
 
       const result = await service.searchProposals({
         query,
@@ -120,7 +123,7 @@ export function proposals(
       return context.json(
         {
           items: result.map((p, index) =>
-            ProposalMapper.toApi(p, quorums[index]!, blockTime),
+            ProposalMapper.toApi(p, quorums[index]!, blockTime, { lean }),
           ),
           totalCount: await service.getSearchProposalsCount(query),
         },
@@ -135,11 +138,13 @@ export function proposals(
       operationId: "proposal",
       path: "/proposals/{id}",
       summary: "Get a proposal by ID",
-      description: "Returns a single proposal by its ID",
+      description:
+        "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets.",
       tags: ["proposals"],
       middleware: [setCacheControl(60)],
       request: {
         params: ProposalRequestSchema,
+        query: ProposalByIdQuerySchema,
       },
       responses: {
         200: {
@@ -162,6 +167,7 @@ export function proposals(
     }),
     async (context) => {
       const { id } = context.req.valid("param");
+      const { lean } = context.req.valid("query");
 
       const proposal = await service.getProposalById(id);
 
@@ -178,7 +184,7 @@ export function proposals(
       ]);
 
       return context.json(
-        ProposalMapper.toApi(proposal, quorum, blockTime),
+        ProposalMapper.toApi(proposal, quorum, blockTime, { lean }),
         200,
       );
     },

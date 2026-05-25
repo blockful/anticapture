@@ -58,11 +58,13 @@ export const GovernanceActionModal = ({
 
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
+      const targets = proposal.targets ?? [];
+      const values = proposal.values ?? [];
       const calldatas = proposal.calldatas ?? [];
-      const validIndices = proposal.targets.reduce<number[]>((acc, t, i) => {
+      const validIndices = targets.reduce<number[]>((acc, t, i) => {
         if (
           t !== null &&
-          proposal.values[i] !== null &&
+          values[i] !== null &&
           (calldatas[i] ?? null) !== null
         ) {
           acc.push(i);
@@ -70,10 +72,10 @@ export const GovernanceActionModal = ({
         return acc;
       }, []);
       await handler(
-        validIndices.map((i) => proposal.targets[i] as Address),
-        validIndices.map((i) => proposal.values[i] as string),
+        validIndices.map((i) => targets[i] as Address),
+        validIndices.map((i) => values[i] as string),
         validIndices.map((i) => calldatas[i] as Address),
-        proposal.description,
+        proposal.description ?? "",
         address,
         daoId,
         walletClient,

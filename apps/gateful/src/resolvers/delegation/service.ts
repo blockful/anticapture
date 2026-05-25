@@ -1,7 +1,14 @@
 import type { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry.js";
 import { fanOutGet } from "../../shared/fan-out.js";
 
-// TEST: trigger cache
+// Upstream shape from @anticapture/api: items + totalCount over the full
+// forward-filled window. pageInfo is not part of the upstream contract;
+// hasNextPage is derived here from `items.length < totalCount`.
+type UpstreamDelegationPercentage = {
+  items: { date: string; high: string }[];
+  totalCount: number;
+};
+
 export type DelegationPercentageResponse = {
   items: { date: string; high: string }[];
   totalCount: number;
@@ -26,21 +33,19 @@ export class DelegationService {
   async getAverageDelegationPercentage(args: {
     startDate: string;
     endDate?: string;
-    after?: string;
-    before?: string;
     orderDirection?: string;
+    skip?: number;
     limit?: number;
   }): Promise<DelegationResult> {
     const params = new URLSearchParams();
     params.set("startDate", args.startDate);
     if (args.endDate) params.set("endDate", args.endDate);
-    if (args.after) params.set("after", args.after);
-    if (args.before) params.set("before", args.before);
     if (args.orderDirection) params.set("orderDirection", args.orderDirection);
+    if (args.skip !== undefined) params.set("skip", String(args.skip));
     if (args.limit) params.set("limit", String(args.limit));
 
     const { data: daoResponses, cacheControl } =
-      await fanOutGet<DelegationPercentageResponse>(
+      await fanOutGet<UpstreamDelegationPercentage>(
         this.daoApis,
         this.registry,
         "/delegation-percentage",
@@ -48,7 +53,9 @@ export class DelegationService {
       );
 
     const hasNextPage = Array.from(daoResponses.values()).some(
-      (response) => response?.pageInfo?.hasNextPage ?? false,
+      (response) =>
+        !!response &&
+        (response.items?.length ?? 0) < (response.totalCount ?? 0),
     );
 
     const alignedResponses = this.alignDaoResponses(
@@ -80,9 +87,9 @@ export class DelegationService {
   }
 
   private alignDaoResponses(
-    daoResponses: Map<string, DelegationPercentageResponse>,
+    daoResponses: Map<string, UpstreamDelegationPercentage>,
     orderDirection?: string,
-  ): Map<string, DelegationPercentageResponse> {
+  ): Map<string, UpstreamDelegationPercentage> {
     const daoResponsesWithData = Array.from(daoResponses.entries()).filter(
       ([_, response]) => response?.items?.length > 0,
     );
@@ -112,7 +119,7 @@ export class DelegationService {
   }
 
   private aggregateMeanPercentage(
-    daoResponses: Map<string, DelegationPercentageResponse>,
+    daoResponses: Map<string, UpstreamDelegationPercentage>,
   ): { date: string; high: string }[] {
     const daoResponsesArray = Array.from(daoResponses.values());
 
@@ -136,19 +143,11 @@ export class DelegationService {
     });
   }
 
-  private calculateHasPreviousPage(args: {
-    startDate?: string;
-    after?: string;
-  }): boolean {
-    return !!(args.after && args.startDate && args.after !== args.startDate);
-  }
-
   private buildPaginatedResponse(
     items: { date: string; high: string }[],
     args: {
       limit?: number;
-      after?: string;
-      before?: string;
+      skip?: number;
       orderDirection?: string;
       startDate?: string;
     },
@@ -175,10 +174,7 @@ export class DelegationService {
       totalCount: finalItems.length,
       pageInfo: {
         hasNextPage: hasNextPageFromDaos || items.length > userLimit,
-        hasPreviousPage: this.calculateHasPreviousPage({
-          startDate: args.startDate,
-          after: args.after,
-        }),
+        hasPreviousPage: (args.skip ?? 0) > 0,
         endDate:
           finalItems.length > 0 ? finalItems[finalItems.length - 1].date : null,
         startDate: finalItems.length > 0 ? finalItems[0].date : null,

@@ -85,6 +85,10 @@ export const votingPowerHistory = onchainTable(
     pk: primaryKey({
       columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
+    votingPowerHistoryAccountTimestampIdx: index().on(
+      table.accountId,
+      table.timestamp,
+    ),
   }),
 );
 
@@ -185,11 +189,13 @@ export const votesOnchain = onchainTable(
     votingPower: drizzle.bigint().notNull(),
     reason: drizzle.text(),
     timestamp: drizzle.bigint().notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
   }),
   (table) => ({
     pk: primaryKey({
       columns: [table.voterAccountId, table.proposalId],
     }),
+    votesOnchainTxHashLogIndexIdx: index().on(table.txHash, table.logIndex),
   }),
 );
 
@@ -423,7 +429,7 @@ export const feedEvent = onchainTable(
     type: eventTypeEnum("type").notNull(),
     value: drizzle.bigint().notNull().default(0n),
     timestamp: drizzle.bigint().notNull(),
-    metadata: drizzle.json().$type<Record<string, unknown>>(),
+    proposalId: drizzle.text("proposal_id"),
   }),
   (table) => ({
     pk: primaryKey({

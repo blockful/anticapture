@@ -145,6 +145,7 @@ describe("GovernanceActivity Controller", () => {
         currentProposalsLaunched: 0,
         oldProposalsLaunched: 0,
         changeRate: 0,
+        rawDelta: 0,
       });
     });
 
@@ -171,6 +172,7 @@ describe("GovernanceActivity Controller", () => {
         currentProposalsLaunched: 15,
         oldProposalsLaunched: 5,
         changeRate: 2,
+        rawDelta: 10,
       });
     });
 
@@ -187,6 +189,7 @@ describe("GovernanceActivity Controller", () => {
         currentProposalsLaunched: 1,
         oldProposalsLaunched: 0,
         changeRate: 0,
+        rawDelta: 1,
       });
     });
   });
@@ -197,7 +200,12 @@ describe("GovernanceActivity Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body).toEqual({ currentVotes: 0, oldVotes: 0, changeRate: 0 });
+      expect(body).toEqual({
+        currentVotes: 0,
+        oldVotes: 0,
+        changeRate: 0,
+        rawDelta: 0,
+      });
     });
 
     it("should return 200 with data and calculated changeRate", async () => {
@@ -210,6 +218,7 @@ describe("GovernanceActivity Controller", () => {
           support: "FOR",
           votingPower: 1000n,
           timestamp: RECENT_TS,
+          logIndex: 0,
         },
         {
           txHash: "0xv2",
@@ -219,6 +228,7 @@ describe("GovernanceActivity Controller", () => {
           support: "AGAINST",
           votingPower: 500n,
           timestamp: RECENT_TS,
+          logIndex: 0,
         },
         {
           txHash: "0xv3",
@@ -228,6 +238,7 @@ describe("GovernanceActivity Controller", () => {
           support: "FOR",
           votingPower: 300n,
           timestamp: OLD_TS,
+          logIndex: 0,
         },
       ]);
 
@@ -237,7 +248,12 @@ describe("GovernanceActivity Controller", () => {
       const body = await res.json();
       // currentVotes = 3 (all), oldVotes = 1
       // changeRate = 3/1 - 1 = 2
-      expect(body).toEqual({ currentVotes: 3, oldVotes: 1, changeRate: 2 });
+      expect(body).toEqual({
+        currentVotes: 3,
+        oldVotes: 1,
+        changeRate: 2,
+        rawDelta: 2,
+      });
     });
   });
 
@@ -251,6 +267,7 @@ describe("GovernanceActivity Controller", () => {
         currentAverageTurnout: expect.anything(),
         oldAverageTurnout: expect.anything(),
         changeRate: 0,
+        rawDelta: expect.any(String),
       });
     });
 
@@ -285,6 +302,7 @@ describe("GovernanceActivity Controller", () => {
         currentAverageTurnout: "3500000000000000000",
         oldAverageTurnout: "1750000000000000000",
         changeRate: 1,
+        rawDelta: "1750000000000000000",
       });
     });
 
@@ -317,6 +335,7 @@ describe("GovernanceActivity Controller", () => {
         currentAverageTurnout: "175.0000000000000000",
         oldAverageTurnout: "0",
         changeRate: 0,
+        rawDelta: "175",
       });
     });
   });
@@ -351,7 +370,8 @@ describe("GovernanceActivity Controller", () => {
       expect(body).toEqual({
         currentAverageTurnout: "45",
         oldAverageTurnout: "22",
-        changeRate: 45 / 22 - 1,
+        changeRate: Number((45 / 22 - 1).toFixed(6)),
+        rawDelta: "23",
       });
     });
   });
