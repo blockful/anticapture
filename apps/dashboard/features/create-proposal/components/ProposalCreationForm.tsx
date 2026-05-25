@@ -129,6 +129,11 @@ export const ProposalCreationForm = ({
 
     if (drafts.isLoading) return;
 
+    // Cancellation flag so a stale shared-draft response from a previous
+    // draftId cannot overwrite the form after in-app navigation between
+    // shared links resolves out of order.
+    let cancelled = false;
+
     // Mark the guard inside the success/explicit-miss branches so a transient
     // fetch failure does not permanently suppress later effect runs (e.g.
     // when `drafts.drafts` or `drafts.isLoading` change after a retry).
@@ -137,6 +142,7 @@ export const ProposalCreationForm = ({
       draftId,
     )
       .then((shared) => {
+        if (cancelled) return;
         hydratedDraftIdRef.current = draftId;
         if (!shared) return;
         form.reset({
@@ -154,8 +160,13 @@ export const ProposalCreationForm = ({
         setBodyVersion((v) => v + 1);
       })
       .catch(() => {
+        if (cancelled) return;
         showCustomToast("Could not load the shared draft", "error");
       });
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftId, drafts.drafts, drafts.isLoading]);
 
