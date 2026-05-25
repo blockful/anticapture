@@ -11,6 +11,10 @@ export type RevenueStream = {
 export type RevenueOverview = {
   totalAmount: string;
   totalContext: string;
+  ytdDelta?: {
+    text: string;
+    trend: "up" | "down";
+  };
   streams: RevenueStream[];
 };
 
@@ -19,4 +23,5 @@ export type KpiCard = {
   value: string;
   subtext: string;
   trend?: "up" | "down";
+  tooltip?: string;
 };

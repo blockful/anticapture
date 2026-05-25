@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import {
   useGetRevenueActions,
   useGetRevenueTotals,
@@ -18,10 +20,13 @@ export const RevenueOverviewCard = () => {
     useGetRevenueActions("ens");
 
   const isLoading = totalsLoading || actionsLoading;
-  const overview =
-    totalsData && actionsData
-      ? transformToOverview(totalsData.items, actionsData.items)
-      : null;
+  const overview = useMemo(
+    () =>
+      totalsData && actionsData
+        ? transformToOverview(totalsData.items, actionsData.items)
+        : null,
+    [totalsData, actionsData],
+  );
 
   return (
     <Card>
@@ -30,7 +35,7 @@ export const RevenueOverviewCard = () => {
         <p className="text-secondary text-sm font-medium">
           Total Protocol Revenue
         </p>
-        <div className="mt-1 flex items-baseline gap-2">
+        <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
           {isLoading ? (
             <div className="bg-surface-raised h-9 w-32 animate-pulse rounded" />
           ) : (
@@ -41,6 +46,23 @@ export const RevenueOverviewCard = () => {
               <span className="text-secondary text-sm">
                 {overview?.totalContext}
               </span>
+              {overview?.ytdDelta && (
+                <span
+                  className={cn(
+                    "flex items-center gap-0.5 text-sm font-medium",
+                    overview.ytdDelta.trend === "up"
+                      ? "text-success"
+                      : "text-[#f87171]",
+                  )}
+                >
+                  {overview.ytdDelta.trend === "up" ? (
+                    <ArrowUp className="size-3.5" />
+                  ) : (
+                    <ArrowDown className="size-3.5" />
+                  )}
+                  {overview.ytdDelta.text}
+                </span>
+              )}
             </>
           )}
         </div>
