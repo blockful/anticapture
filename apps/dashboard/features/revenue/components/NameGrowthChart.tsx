@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useGetRevenueActiveNames } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
@@ -10,7 +11,10 @@ import { transformToNameGrowth } from "@/features/revenue/utils/transform";
 
 export const NameGrowthChart = () => {
   const { data, isLoading } = useGetRevenueActiveNames("ens");
-  const series = data ? transformToNameGrowth(data.items) : null;
+  const series = useMemo(
+    () => (data ? transformToNameGrowth(data.items) : null),
+    [data],
+  );
 
   return (
     <Card className="p-4">

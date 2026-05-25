@@ -18,6 +18,7 @@ export type ComboChartBarSeries = {
   name: string;
   data: number[];
   color: string;
+  stack?: string;
 };
 
 export type ComboChartLineSeries = {

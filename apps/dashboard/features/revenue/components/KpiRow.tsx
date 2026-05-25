@@ -1,94 +1,69 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Info } from "lucide-react";
 import {
-  useGetRevenueActions,
   useGetRevenueActiveNames,
   useGetRevenueNewWallets,
   useGetRevenueRenewalFunnel,
   useGetRevenueTotals,
 } from "@anticapture/client/hooks";
-import type { GetRevenueTotalsQueryParams } from "@anticapture/client";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { cn } from "@/shared/utils/cn";
 
 import { computeKpis } from "@/features/revenue/utils/transform";
+import type { KpiWindow } from "@/features/revenue/utils/window";
 
 const TIME_PERIOD_OPTIONS = [
-  { label: "7D", value: "7d" },
-  { label: "30D", value: "30d" },
-  { label: "90D", value: "90d" },
+  { label: "3M", value: "3m" },
+  { label: "6M", value: "6m" },
   { label: "1Y", value: "1y" },
+  { label: "3Y", value: "3y" },
   { label: "MAX", value: "max" },
 ];
 
-const DAY = 24 * 60 * 60;
-
-function getQueryParams(
-  timePeriod: string,
-): GetRevenueTotalsQueryParams | undefined {
-  const now = Math.floor(Date.now() / 1000);
-  switch (timePeriod) {
-    case "7d":
-      return { fromDate: now - 7 * DAY };
-    case "30d":
-      return { fromDate: now - 30 * DAY };
-    case "90d":
-      return { fromDate: now - 90 * DAY };
-    case "1y":
-      return { fromDate: now - 365 * DAY };
-    default:
-      return undefined;
-  }
-}
+const WINDOW_BY_PERIOD: Record<string, KpiWindow> = {
+  "3m": { months: 3, label: "3M" },
+  "6m": { months: 6, label: "6M" },
+  "1y": { months: 12, label: "1Y" },
+  "3y": { months: 36, label: "3Y" },
+  max: { months: null, label: "MAX" },
+};
 
 export const KpiRow = () => {
-  const [timePeriod, setTimePeriod] = useState("max");
+  const [timePeriod, setTimePeriod] = useState("1y");
 
-  const params = useMemo(() => getQueryParams(timePeriod), [timePeriod]);
+  const activeWindow = useMemo(
+    () => WINDOW_BY_PERIOD[timePeriod] ?? WINDOW_BY_PERIOD.max,
+    [timePeriod],
+  );
 
   const { data: activeNamesData, isLoading: activeNamesLoading } =
-    useGetRevenueActiveNames("ens", params);
+    useGetRevenueActiveNames("ens");
   const { data: newWalletsData, isLoading: newWalletsLoading } =
-    useGetRevenueNewWallets("ens", params);
+    useGetRevenueNewWallets("ens");
   const { data: funnelData, isLoading: funnelLoading } =
-    useGetRevenueRenewalFunnel("ens", params);
-  const { data: totalsData, isLoading: totalsLoading } = useGetRevenueTotals(
-    "ens",
-    params,
-  );
-  const { data: actionsData, isLoading: actionsLoading } = useGetRevenueActions(
-    "ens",
-    params,
-  );
+    useGetRevenueRenewalFunnel("ens");
+  const { data: totalsData, isLoading: totalsLoading } =
+    useGetRevenueTotals("ens");
 
   const isLoading =
-    activeNamesLoading ||
-    newWalletsLoading ||
-    funnelLoading ||
-    totalsLoading ||
-    actionsLoading;
+    activeNamesLoading || newWalletsLoading || funnelLoading || totalsLoading;
 
   const kpis = useMemo(() => {
-    if (
-      !activeNamesData ||
-      !newWalletsData ||
-      !funnelData ||
-      !totalsData ||
-      !actionsData
-    )
+    if (!activeNamesData || !newWalletsData || !funnelData || !totalsData)
       return null;
     return computeKpis(
       activeNamesData.items,
       newWalletsData.items,
       funnelData.items,
       totalsData.items,
-      actionsData.items,
+      activeWindow,
     );
-  }, [activeNamesData, newWalletsData, funnelData, totalsData, actionsData]);
+  }, [activeNamesData, newWalletsData, funnelData, totalsData, activeWindow]);
 
   return (
     <Card>
@@ -150,9 +125,23 @@ export const KpiRow = () => {
                   index < 2 && "border-border-default border-b lg:border-b-0",
                 )}
               >
-                <p className="text-secondary text-sm font-medium">
-                  {kpi.title}
-                </p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-secondary text-sm font-medium">
+                    {kpi.title}
+                  </p>
+                  {kpi.tooltip && (
+                    <Tooltip
+                      tooltipContent={
+                        <p className="text-secondary text-sm font-normal leading-5">
+                          {kpi.tooltip}
+                        </p>
+                      }
+                      triggerClassName="inline-flex cursor-help items-center border-0 bg-transparent p-0"
+                    >
+                      <Info className="text-secondary size-3.5" />
+                    </Tooltip>
+                  )}
+                </div>
                 <p className="text-primary mt-1 font-mono text-[30px] font-medium leading-9">
                   {kpi.value}
                 </p>

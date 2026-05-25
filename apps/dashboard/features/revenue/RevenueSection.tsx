@@ -1,6 +1,5 @@
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 
-import { DataProvenance } from "@/features/revenue/components/DataProvenance";
 import { KpiRow } from "@/features/revenue/components/KpiRow";
 import { MonthlyRevenueChart } from "@/features/revenue/components/MonthlyRevenueChart";
 import { NameGrowthChart } from "@/features/revenue/components/NameGrowthChart";
@@ -37,9 +36,6 @@ export const RevenueSection = () => {
           <UpcomingExpirationsChart />
           <RenewalRateCohort />
         </div>
-
-        {/* Section 7 — Data Provenance */}
-        <DataProvenance />
       </div>
     </TheSectionLayout>
   );

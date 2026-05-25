@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useGetRevenueRenewalTenure } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
@@ -10,26 +11,25 @@ import { transformToRenewalTenure } from "@/features/revenue/utils/transform";
 
 export const UpcomingExpirationsChart = () => {
   const { data, isLoading } = useGetRevenueRenewalTenure("ens");
-  const series = data ? transformToRenewalTenure(data.items) : null;
+  const series = useMemo(
+    () => (data ? transformToRenewalTenure(data.items) : null),
+    [data],
+  );
 
   // Target ~7 visible year labels regardless of how many months of data exist
   const xAxisInterval = series
     ? Math.max(11, Math.round(series.xAxisLabels.length / 7) - 1)
     : 11;
 
-  const neverRenewedTotal = series
-    ? series.series[0].data.reduce((s, v) => s + v, 0)
-    : null;
-
   return (
     <Card className="p-4">
       <p className="text-secondary text-sm font-medium">Upcoming Expirations</p>
-      {!isLoading && neverRenewedTotal !== null && (
+      {!isLoading && series && (
         <p className="text-secondary mt-0.5 text-sm">
-          <span className="font-medium" style={{ color: "#0080bc" }}>
-            {formatCompact(neverRenewedTotal)}
+          <span className="font-medium" style={{ color: "#f87171" }}>
+            {formatCompact(series.neverRenewedNext12mo)}
           </span>{" "}
-          names with no prior renewals expiring
+          names with no prior renewals expiring in next 12 months
         </p>
       )}
       {isLoading ? (

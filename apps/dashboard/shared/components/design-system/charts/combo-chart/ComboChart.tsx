@@ -113,6 +113,7 @@ export const ComboChart = ({
         type: "bar" as const,
         yAxisIndex: 0,
         data: s.data,
+        ...(s.stack ? { stack: s.stack } : {}),
         itemStyle: { color: s.color, borderRadius: 0 },
         emphasis: { focus: "series" as const },
         barMaxWidth: 40,
