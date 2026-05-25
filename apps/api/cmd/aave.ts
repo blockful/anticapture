@@ -41,11 +41,13 @@ import {
   AccountBalanceQueryFragments,
   AAVEAccountBalanceRepository,
   TokenRepository,
+  HealthRepositoryImpl,
 } from "@/repositories";
 import { AAVEVotingPowerRepository } from "@/repositories/voting-power/aave";
 import {
   AccountBalanceService,
   DaoService,
+  HealthService,
   HistoricalBalancesService,
   TransfersService,
   HistoricalDelegationsService,
@@ -130,7 +132,7 @@ const pgClient = drizzle(env.DATABASE_URL, {
   casing: "snake_case",
 });
 
-health(app, pgClient);
+health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
 
 const daoCache = new DaoCache();
 

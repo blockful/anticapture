@@ -177,7 +177,7 @@ export const ProposalSection = ({
         txHash: null,
         proposerAccountId: rawOffchainProposal.author as `0x${string}`,
         title: rawOffchainProposal.title,
-        description: rawOffchainProposal.body,
+        description: rawOffchainProposal.body ?? "",
         quorum: "0",
         timestamp: rawOffchainProposal.created,
         status: getOffchainProposalStatus(

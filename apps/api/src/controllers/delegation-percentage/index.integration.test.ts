@@ -66,12 +66,6 @@ describe("DelegationPercentage Controller", () => {
       expect(body).toEqual({
         items: [],
         totalCount: 0,
-        pageInfo: {
-          hasNextPage: false,
-          hasPreviousPage: false,
-          startDate: null,
-          endDate: null,
-        },
       });
     });
 
@@ -97,29 +91,6 @@ describe("DelegationPercentage Controller", () => {
       expect(body).toEqual({
         items: [{ date: "1699920000", high: "50.00" }],
         totalCount: 1,
-        pageInfo: {
-          hasNextPage: false,
-          hasPreviousPage: false,
-          startDate: "1699920000",
-          endDate: "1699920000",
-        },
-      });
-    });
-
-    it("should have pageInfo shape in response", async () => {
-      const res = await app.request("/delegation-percentage");
-
-      expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body).toEqual({
-        items: [],
-        totalCount: 0,
-        pageInfo: {
-          hasNextPage: false,
-          hasPreviousPage: false,
-          startDate: null,
-          endDate: null,
-        },
       });
     });
 
@@ -155,16 +126,11 @@ describe("DelegationPercentage Controller", () => {
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      // DATE_2 is newer so desc order returns it first; limit=1 from 2 total dates
+      // DATE_2 is newer so desc order returns it first; limit=1 from 2-day window.
+      // totalCount reflects the full forward-filled window, not the page.
       expect(body).toEqual({
         items: [{ date: String(DATE_2), high: "30.00" }],
-        totalCount: 1,
-        pageInfo: {
-          hasNextPage: true,
-          hasPreviousPage: false,
-          startDate: String(DATE_2),
-          endDate: String(DATE_2),
-        },
+        totalCount: 2,
       });
     });
   });

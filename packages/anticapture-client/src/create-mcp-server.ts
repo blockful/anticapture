@@ -1,10 +1,13 @@
 /**
- * Factory for the Anticapture MCP server.
+ * Factory for the Anticapture MCP server, used by both the stdio and HTTP
+ * entrypoints. McpServer only supports one active transport at a time, so the
+ * HTTP server needs a fresh instance per session.
  *
- * Keep in sync with generated/mcp/server.ts — when kubb codegen adds or
- * removes tools, mirror those changes here. The generated file remains the
- * reference; this file exists solely because McpServer only supports one
- * active transport at a time, requiring a fresh instance per HTTP session.
+ * This is a curated tool set: proposal-related tools call the regular
+ * endpoints with `lean=true` to drop heavy execution-payload fields and keep
+ * payloads small for LLM clients. The generated kubb server (generated/mcp/
+ * server.ts) exposes every endpoint one-to-one and is no longer used; it
+ * remains as a reference for the available handlers and schemas.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
@@ -45,7 +48,7 @@ import { searchProposalsHandler } from "../generated/mcp/proposalsHandlers/searc
 import { votesByProposalIdHandler } from "../generated/mcp/proposalsHandlers/votesByProposalId.ts";
 import { relayDelegateHandler } from "../generated/mcp/relayHandlers/relayDelegate.ts";
 import { relayVoteHandler } from "../generated/mcp/relayHandlers/relayVote.ts";
-import { healthHandler } from "../generated/mcp/systemHandlers/health.ts";
+import { getDaoHealthHandler } from "../generated/mcp/undefinedHandlers/getDaoHealth.ts";
 import { compareCexSupplyHandler } from "../generated/mcp/tokensHandlers/compareCexSupply.ts";
 import { compareCirculatingSupplyHandler } from "../generated/mcp/tokensHandlers/compareCirculatingSupply.ts";
 import { compareDelegatedSupplyHandler } from "../generated/mcp/tokensHandlers/compareDelegatedSupply.ts";
@@ -59,9 +62,9 @@ import { transfersHandler } from "../generated/mcp/transfersHandlers/transfers.t
 import { getDaoTokenTreasuryHandler } from "../generated/mcp/treasuryHandlers/getDaoTokenTreasury.ts";
 import { getLiquidTreasuryHandler } from "../generated/mcp/treasuryHandlers/getLiquidTreasury.ts";
 import { getTotalTreasuryHandler } from "../generated/mcp/treasuryHandlers/getTotalTreasury.ts";
-import { getAggregationsAverageDelegationPercentageHandler } from "../generated/mcp/undefinedHandlers/getAggregationsAverageDelegationPercentage.ts";
-import { getDaosHandler } from "../generated/mcp/undefinedHandlers/getDaos.ts";
-import { getHealthHandler } from "../generated/mcp/undefinedHandlers/getHealth.ts";
+import { averageDelegationPercentageHandler } from "../generated/mcp/governanceHandlers/averageDelegationPercentage.ts";
+import { daosHandler } from "../generated/mcp/governanceHandlers/daos.ts";
+import { gatewayHealthHandler } from "../generated/mcp/systemHandlers/gatewayHealth.ts";
 import { votesHandler } from "../generated/mcp/votesHandlers/votes.ts";
 import { historicalVotingPowerHandler } from "../generated/mcp/voting-powerHandlers/historicalVotingPower.ts";
 import { historicalVotingPowerByAccountIdHandler } from "../generated/mcp/voting-powerHandlers/historicalVotingPowerByAccountId.ts";
@@ -114,19 +117,19 @@ import {
   getAddressQueryResponseSchema,
   getAddressesQueryParamsSchema,
   getAddressesQueryResponseSchema,
-  getAggregationsAverageDelegationPercentageQueryParamsSchema,
-  getAggregationsAverageDelegationPercentageQueryResponseSchema,
+  averageDelegationPercentageQueryParamsSchema,
+  averageDelegationPercentageQueryResponseSchema,
+  daosQueryResponseSchema,
+  gatewayHealthQueryResponseSchema,
   getDaoTokenTreasuryQueryParamsSchema,
   getDaoTokenTreasuryQueryResponseSchema,
-  getDaosQueryResponseSchema,
   getEventRelevanceThresholdQueryParamsSchema,
   getEventRelevanceThresholdQueryResponseSchema,
-  getHealthQueryResponseSchema,
   getLiquidTreasuryQueryParamsSchema,
   getLiquidTreasuryQueryResponseSchema,
   getTotalTreasuryQueryParamsSchema,
   getTotalTreasuryQueryResponseSchema,
-  healthQueryResponseSchema,
+  healthResponseSchema,
   historicalBalancesQueryParamsSchema,
   historicalBalancesQueryResponseSchema,
   historicalDelegationsQueryParamsSchema,
@@ -139,6 +142,7 @@ import {
   historicalVotingPowerQueryResponseSchema,
   lastUpdateQueryParamsSchema,
   lastUpdateQueryResponseSchema,
+  offchainProposalByIdQueryParamsSchema,
   offchainProposalByIdQueryResponseSchema,
   offchainProposalNonVotersQueryParamsSchema,
   offchainProposalNonVotersQueryResponseSchema,
@@ -146,9 +150,10 @@ import {
   offchainProposalsQueryResponseSchema,
   offchainSearchProposalsQueryParamsSchema,
   offchainSearchProposalsQueryResponseSchema,
+  proposalQueryParamsSchema,
+  proposalQueryResponseSchema,
   proposalNonVotersQueryParamsSchema,
   proposalNonVotersQueryResponseSchema,
-  proposalQueryResponseSchema,
   proposalsActivityQueryParamsSchema,
   proposalsActivityQueryResponseSchema,
   proposalsQueryParamsSchema,
@@ -182,6 +187,7 @@ import {
   votingPowersQueryParamsSchema,
   votingPowersQueryResponseSchema,
 } from "../generated/zod.ts";
+import type { Address } from "../generated/models.ts";
 
 const DAO_ALL = [
   "aave",
@@ -217,37 +223,41 @@ export function createMcpServer(): McpServer {
   });
 
   server.registerTool(
-    "get_health",
+    "gatewayHealth",
     {
-      description: "Make a GET request to /health",
-      outputSchema: { data: getHealthQueryResponseSchema },
-    },
-    async () => getHealthHandler(),
-  );
-
-  server.registerTool(
-    "get_daos",
-    {
-      description: "Make a GET request to /daos",
-      outputSchema: { data: getDaosQueryResponseSchema },
-    },
-    async () => getDaosHandler(),
-  );
-
-  server.registerTool(
-    "get_aggregations-average-delegation-percentage",
-    {
+      title: "Gateway health and per-DAO circuit breaker states",
       description:
-        "Make a GET request to /aggregations/average-delegation-percentage",
+        "Returns gateway readiness and the current circuit-breaker state of every configured DAO API.",
+      outputSchema: { data: gatewayHealthQueryResponseSchema },
+    },
+    async () => gatewayHealthHandler(),
+  );
+
+  server.registerTool(
+    "daos",
+    {
+      title: "List of all configured DAOs",
+      description:
+        "Returns governance parameters and feature flags for every configured DAO.",
+      outputSchema: { data: daosQueryResponseSchema },
+    },
+    async () => daosHandler(),
+  );
+
+  server.registerTool(
+    "averageDelegationPercentage",
+    {
+      title: "Average delegation percentage across all DAOs",
+      description:
+        "Returns the average delegation percentage across all configured DAOs for a given time window.",
       outputSchema: {
-        data: getAggregationsAverageDelegationPercentageQueryResponseSchema,
+        data: averageDelegationPercentageQueryResponseSchema,
       },
       inputSchema: {
-        params: getAggregationsAverageDelegationPercentageQueryParamsSchema,
+        params: averageDelegationPercentageQueryParamsSchema,
       },
     },
-    async ({ params }) =>
-      getAggregationsAverageDelegationPercentageHandler({ params }),
+    async ({ params }) => averageDelegationPercentageHandler({ params }),
   );
 
   server.registerTool(
@@ -255,10 +265,10 @@ export function createMcpServer(): McpServer {
     {
       title: "Check API and database health",
       description: "Make a GET request to /{dao}/health",
-      outputSchema: { data: healthQueryResponseSchema },
+      outputSchema: { data: healthResponseSchema },
       inputSchema: { dao: z.enum(DAO_ALL) },
     },
-    async ({ dao }) => healthHandler({ dao }),
+    async ({ dao }) => getDaoHealthHandler({ dao }),
   );
 
   server.registerTool(
@@ -576,41 +586,50 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     "proposals",
     {
-      title: "Get proposals",
-      description: "Returns a list of proposal",
+      title: "Get proposals (lean)",
+      description:
+        "Returns a list of proposals without execution-payload fields (calldatas/values/targets) to keep payloads small for LLM clients. Call the REST endpoint /{dao}/proposals with lean=false if you need the full payload.",
       outputSchema: { data: proposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
         params: proposalsQueryParamsSchema,
       },
     },
-    async ({ dao, params }) => proposalsHandler({ dao, params }),
+    async ({ dao, params }) =>
+      proposalsHandler({ dao, params: { ...params, lean: true } }),
   );
 
   server.registerTool(
     "searchProposals",
     {
-      title: "Search proposals",
+      title: "Search proposals (lean)",
       description:
-        "Returns proposals whose title or identifier partially matches the query.",
+        "Returns proposals whose title or identifier partially matches the query, without execution-payload fields (calldatas/values/targets).",
       outputSchema: { data: searchProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
         params: searchProposalsQueryParamsSchema,
       },
     },
-    async ({ dao, params }) => searchProposalsHandler({ dao, params }),
+    async ({ dao, params }) =>
+      searchProposalsHandler({ dao, params: { ...params, lean: true } }),
   );
 
   server.registerTool(
     "proposal",
     {
-      title: "Get a proposal by ID",
-      description: "Returns a single proposal by its ID",
+      title: "Get a proposal by ID (lean)",
+      description:
+        "Returns a single proposal by its ID without execution-payload fields (calldatas/values/targets). Call the REST endpoint /{dao}/proposals/{id} with lean=false if you need the full payload.",
       outputSchema: { data: proposalQueryResponseSchema },
-      inputSchema: { dao: z.enum(DAO_NO_AAVE), id: z.string() },
+      inputSchema: {
+        dao: z.enum(DAO_NO_AAVE),
+        id: z.string(),
+        params: proposalQueryParamsSchema.optional(),
+      },
     },
-    async ({ dao, id }) => proposalHandler({ dao, id }),
+    async ({ dao, id, params }) =>
+      proposalHandler({ dao, id, params: { ...params, lean: true } }),
   );
 
   server.registerTool(
@@ -751,12 +770,12 @@ export function createMcpServer(): McpServer {
       outputSchema: { data: votingPowerByAccountIdQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_ALL),
-        accountId: z.string(),
+        address: z.string(),
         params: votingPowerByAccountIdQueryParamsSchema,
       },
     },
-    async ({ dao, accountId, params }) =>
-      votingPowerByAccountIdHandler({ dao, accountId, params }),
+    async ({ dao, address, params }) =>
+      votingPowerByAccountIdHandler({ dao, address, params }),
   );
 
   server.registerTool(
@@ -928,41 +947,57 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     "offchainProposals",
     {
-      title: "Get offchain proposals",
-      description: "Returns a list of offchain (Snapshot) proposals",
+      title: "Get offchain proposals (lean)",
+      description:
+        "Returns a list of offchain (Snapshot) proposals without the markdown body to keep payloads small for LLM clients. Call the REST endpoint /{dao}/offchain/proposals with lean=false if you need the body.",
       outputSchema: { data: offchainProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
         params: offchainProposalsQueryParamsSchema,
       },
     },
-    async ({ dao, params }) => offchainProposalsHandler({ dao, params }),
+    async ({ dao, params }) =>
+      offchainProposalsHandler({ dao, params: { ...params, lean: true } }),
   );
 
   server.registerTool(
     "offchainSearchProposals",
     {
-      title: "Search offchain proposals",
+      title: "Search offchain proposals (lean)",
       description:
-        "Returns offchain proposals whose title or identifier partially matches the query.",
+        "Returns offchain proposals whose title or identifier partially matches the query, without the markdown body.",
       outputSchema: { data: offchainSearchProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
         params: offchainSearchProposalsQueryParamsSchema,
       },
     },
-    async ({ dao, params }) => offchainSearchProposalsHandler({ dao, params }),
+    async ({ dao, params }) =>
+      offchainSearchProposalsHandler({
+        dao,
+        params: { ...params, lean: true },
+      }),
   );
 
   server.registerTool(
     "offchainProposalById",
     {
-      title: "Get an offchain proposal by ID",
-      description: "Returns a single offchain (Snapshot) proposal by its ID",
+      title: "Get an offchain proposal by ID (lean)",
+      description:
+        "Returns a single offchain (Snapshot) proposal by its ID without the markdown body. Call the REST endpoint /{dao}/offchain/proposals/{id} with lean=false if you need the body.",
       outputSchema: { data: offchainProposalByIdQueryResponseSchema },
-      inputSchema: { dao: z.enum(DAO_OFFCHAIN), id: z.string() },
+      inputSchema: {
+        dao: z.enum(DAO_OFFCHAIN),
+        id: z.string(),
+        params: offchainProposalByIdQueryParamsSchema.optional(),
+      },
     },
-    async ({ dao, id }) => offchainProposalByIdHandler({ dao, id }),
+    async ({ dao, id, params }) =>
+      offchainProposalByIdHandler({
+        dao,
+        id,
+        params: { ...params, lean: true },
+      }),
   );
 
   server.registerTool(
@@ -1034,7 +1069,10 @@ export function createMcpServer(): McpServer {
       outputSchema: { data: getAddressesQueryResponseSchema },
       inputSchema: { params: getAddressesQueryParamsSchema },
     },
-    async ({ params }) => getAddressesHandler({ params }),
+    async ({ params }) =>
+      getAddressesHandler({
+        params: { ...params, addresses: params.addresses as Address[] },
+      }),
   );
 
   server.registerTool(

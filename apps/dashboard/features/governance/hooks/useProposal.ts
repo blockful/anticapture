@@ -32,9 +32,9 @@ export const useProposal = ({
           forVotes: data.forVotes.toString(),
           againstVotes: data.againstVotes.toString(),
           abstainVotes: data.abstainVotes.toString(),
-          calldatas: data.calldatas,
-          targets: data.targets,
-          values: data.values.map((value) => value.toString()),
+          calldatas: data.calldatas ?? [],
+          targets: data.targets ?? [],
+          values: data.values?.map((value) => value.toString()) ?? [],
         }
       : null,
     isLoading,
