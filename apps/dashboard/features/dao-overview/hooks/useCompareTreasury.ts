@@ -1,7 +1,5 @@
-import {
-  DaysWindow,
-  useCompareTreasuryQuery,
-} from "@anticapture/graphql-client/hooks";
+import type { CompareTreasuryPathParamsDaoEnumKey } from "@anticapture/client";
+import { useCompareTreasury as useCompareTreasuryHook } from "@anticapture/client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums";
@@ -23,21 +21,20 @@ export const useCompareTreasury = (
   daoId: DaoIdEnum,
   days: TimeInterval,
 ): UseCompareTreasuryResult => {
-  const { data, loading, error, refetch } = useCompareTreasuryQuery({
-    variables: {
-      days: DaysWindow[days],
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+  } = useCompareTreasuryHook(
+    daoId.toLowerCase() as CompareTreasuryPathParamsDaoEnumKey,
+    { days },
+  );
 
   return {
-    data: data?.compareTreasury as CompareTreasury | null,
-    loading,
-    error: error || null,
+    data: data as CompareTreasury | null,
+    loading: isLoading,
+    error: error instanceof Error ? error : error ? new Error(String(error)) : null,
     refetch: () => refetch(),
   };
 };

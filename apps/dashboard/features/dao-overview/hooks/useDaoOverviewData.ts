@@ -1,18 +1,22 @@
+import type {
+  CompareActiveSupplyPathParamsDaoEnumKey,
+  CompareAverageTurnoutPathParamsDaoEnumKey,
+  DaoPathParamsDaoEnumKey,
+  TokenPathParamsDaoEnumKey,
+  VotingPowersPathParamsDaoEnumKey,
+} from "@anticapture/client";
 import {
-  OrderDirection,
-  useGetDelegatesQuery,
-} from "@anticapture/graphql-client/hooks";
+  useCompareActiveSupply,
+  useCompareAverageTurnout,
+  useDao,
+  useToken,
+  useVotingPowers,
+} from "@anticapture/client/hooks";
 import { formatUnits } from "viem";
 
 import { useDaoTreasuryStats } from "@/features/dao-overview/hooks/useDaoTreasuryStats";
 import { useTopDelegatesToPass } from "@/features/dao-overview/hooks/useTopDelegatesToPass";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
-import {
-  useDaoData,
-  useActiveSupply,
-  useAverageTurnout,
-  useTokenData,
-} from "@/shared/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils";
@@ -25,58 +29,60 @@ export const useDaoOverviewData = ({
   daoConfig: DaoConfiguration;
 }) => {
   const { decimals } = daoConfig;
+  const daoKey = daoId.toLowerCase();
 
-  const daoData = useDaoData(daoId);
-  const activeSupply = useActiveSupply(daoId, TimeInterval.NINETY_DAYS);
-  const averageTurnout = useAverageTurnout(daoId, TimeInterval.NINETY_DAYS);
-  const tokenData = useTokenData(daoId);
-
-  const delegates = useGetDelegatesQuery({
-    variables: {
-      orderDirection: OrderDirection.Desc,
+  const { data: daoData, isLoading: daoLoading } = useDao(
+    daoKey as DaoPathParamsDaoEnumKey,
+  );
+  const { data: activeSupplyData, isLoading: activeSupplyLoading } =
+    useCompareActiveSupply(
+      daoKey as CompareActiveSupplyPathParamsDaoEnumKey,
+      { days: TimeInterval.NINETY_DAYS },
+    );
+  const { data: averageTurnoutData, isLoading: averageTurnoutLoading } =
+    useCompareAverageTurnout(
+      daoKey as CompareAverageTurnoutPathParamsDaoEnumKey,
+      { days: TimeInterval.NINETY_DAYS },
+    );
+  const { data: tokenData, isLoading: tokenLoading } = useToken(
+    daoKey as TokenPathParamsDaoEnumKey,
+    { currency: "usd" },
+  );
+  const { data: votingPowersData, isLoading: delegatesLoading } =
+    useVotingPowers(daoKey as VotingPowersPathParamsDaoEnumKey, {
       limit: 20,
-      addresses: null,
-      fromDate: null,
-      toDate: null,
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network", // Always check network for fresh data
-  });
+      orderDirection: "desc",
+    });
 
-  const totalSupply = tokenData.data?.totalSupply;
+  const totalSupply = tokenData?.totalSupply;
 
   const proposalThresholdPercentage =
-    daoData?.data?.proposalThreshold && totalSupply
+    daoData?.proposalThreshold && totalSupply
       ? (
           (Number(
-            formatUnits(BigInt(daoData.data.proposalThreshold), decimals),
+            formatUnits(BigInt(daoData.proposalThreshold), decimals),
           ) /
             Number(formatUnits(BigInt(totalSupply), decimals))) *
           100
         ).toString()
       : "0";
 
-  const proposalThresholdValue = daoData?.data?.proposalThreshold
-    ? `${formatNumberUserReadable(Number(formatUnits(BigInt(daoData.data.proposalThreshold), decimals)))}`
+  const proposalThresholdValue = daoData?.proposalThreshold
+    ? `${formatNumberUserReadable(Number(formatUnits(BigInt(daoData.proposalThreshold), decimals)))}`
     : "No Threshold";
 
   const quorumValue = Number(
-    formatUnits(BigInt(daoData.data?.quorum || 0), decimals),
+    formatUnits(BigInt(daoData?.quorum || 0), decimals),
   );
 
   const treasuryStats = useDaoTreasuryStats({
     daoId,
-    tokenData,
+    tokenData: { data: tokenData ?? null },
   });
 
   const topDelegatesToPass = useTopDelegatesToPass({
     topDelegates:
-      delegates.data?.votingPowers?.items.filter(
+      votingPowersData?.items.filter(
         (item) => item !== null && item !== undefined,
       ) || [],
     quorumValue,
@@ -84,16 +90,16 @@ export const useDaoOverviewData = ({
   });
 
   return {
-    daoData: daoData.data,
+    daoData: daoData ?? null,
     activeSupply: Number(
-      formatUnits(BigInt(activeSupply.data?.activeSupply || 0), decimals),
+      formatUnits(BigInt(activeSupplyData?.activeSupply || 0), decimals),
     ),
     delegatedSupply: Number(
-      formatUnits(BigInt(tokenData.data?.delegatedSupply || 0), decimals),
+      formatUnits(BigInt(tokenData?.delegatedSupply || 0), decimals),
     ),
     averageTurnout: Number(
       formatUnits(
-        BigInt(averageTurnout.data?.currentAverageTurnout || 0),
+        BigInt(averageTurnoutData?.currentAverageTurnout || 0),
         decimals,
       ),
     ),
@@ -103,14 +109,14 @@ export const useDaoOverviewData = ({
     proposalThresholdValue,
     proposalThresholdPercentage,
     quorumValueFormatted: quorumValue,
-    votingPeriod: Number(daoData.data?.votingPeriod ?? 0),
-    votingDelay: Number(daoData.data?.votingDelay ?? 0),
-    timelockDelay: Number(daoData.data?.timelockDelay ?? 0),
+    votingPeriod: Number(daoData?.votingPeriod ?? 0),
+    votingDelay: Number(daoData?.votingDelay ?? 0),
+    timelockDelay: Number(daoData?.timelockDelay ?? 0),
     isLoading:
-      daoData.loading ||
-      activeSupply.isLoading ||
-      averageTurnout.isLoading ||
-      tokenData.isLoading ||
-      delegates.loading,
+      daoLoading ||
+      activeSupplyLoading ||
+      averageTurnoutLoading ||
+      tokenLoading ||
+      delegatesLoading,
   };
 };
