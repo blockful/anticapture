@@ -1,5 +1,15 @@
 # @anticapture/dashboard
 
+## 2.3.0
+
+### Minor Changes
+
+- [#1875](https://github.com/blockful/anticapture/pull/1875) [`cb90c89`](https://github.com/blockful/anticapture/commit/cb90c8941e32c352ef84eb3b3e45298c1233f4ff) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Migrate feed event metadata from a denormalized `feed_event.metadata` JSON column to query-time synthesis against `proposals_onchain`, `votes_onchain`, `delegations`, `transfers`, and `voting_power_history`. Adds discriminated metadata schemas to the OpenAPI contract, supports multi-type filtering on `/feed/events`, and wires the dashboard event-type filter as a multi-select.
+
+- [#1912](https://github.com/blockful/anticapture/pull/1912) [`22b4602`](https://github.com/blockful/anticapture/commit/22b46024206d8b9986a44f37b2caad920f0692dc) Thanks [@pikonha](https://github.com/pikonha)! - governance using kubb sdk
+
+- [#1931](https://github.com/blockful/anticapture/pull/1931) [`1dc424a`](https://github.com/blockful/anticapture/commit/1dc424a4d7a91d33edff5ecdfdfd7642ad2d0292) Thanks [@brunod-e](https://github.com/brunod-e)! - Add suggested token chips to AddTransferModal, dual y-axis on revenue ComboChart, 7-year horizon on renewal tenure, and refine revenue metrics: window-based KpiRow (3M/6M/1Y/3Y/MAX) with previous-period deltas, single-bar Name Growth chart with sign-based color, YTD comparison in hero, 12-month horizon on Upcoming Expirations subtitle, and definition tooltip on New Wallets chart
+
 ## 2.2.4
 
 ### Patch Changes
