@@ -2,6 +2,7 @@
 
 import type {
   ProposalsActivityPathParamsDaoEnumKey,
+  VotingPower,
   VotingPowersPathParamsDaoEnumKey,
   VotingPowersQueryParamsOrderByEnumKey,
   VotingPowersQueryResponse,
@@ -17,7 +18,7 @@ import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums";
 
-interface ProposalsActivity {
+export interface ProposalsActivity {
   totalProposals: number;
   votedProposals: number;
   neverVoted: boolean;
@@ -29,10 +30,11 @@ export interface DelegateVariation {
   percentageChange: string;
 }
 
-export interface Delegate {
+export interface Delegate extends Pick<
+  VotingPower,
+  "accountId" | "delegationsCount"
+> {
   votingPower: string;
-  delegationsCount: number;
-  accountId: string;
   proposalsActivity?: ProposalsActivity;
   variation: DelegateVariation;
   balance?: string;

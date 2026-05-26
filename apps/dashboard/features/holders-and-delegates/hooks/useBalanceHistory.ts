@@ -51,9 +51,9 @@ export function useBalanceHistory({
     orderBy === "amount" ? "delta" : "timestamp";
 
   const fromFilter =
-    customFromFilter ?? (transactionType === "sell" ? accountId : undefined);
+    transactionType === "sell" ? accountId : (customFromFilter ?? undefined);
   const toFilter =
-    customToFilter ?? (transactionType === "buy" ? accountId : undefined);
+    transactionType === "buy" ? accountId : (customToFilter ?? undefined);
 
   const params = useMemo(
     () => ({

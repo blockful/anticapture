@@ -1,9 +1,6 @@
 "use client";
 
-import type {
-  OrderDirection,
-  QueryInput_Delegators_OrderBy,
-} from "@/shared/hooks/graphql-client/types";
+import type { DelegatorsQueryParamsOrderByEnumKey } from "@anticapture/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
@@ -51,8 +48,8 @@ export const VoteCompositionTable = ({
   } = useDelegators({
     daoId: daoId as DaoIdEnum,
     address: address,
-    orderBy: sortBy as QueryInput_Delegators_OrderBy,
-    orderDirection: sortOrder as OrderDirection,
+    orderBy: sortBy as DelegatorsQueryParamsOrderByEnumKey,
+    orderDirection: sortOrder,
     limit,
   });
 

@@ -1,7 +1,6 @@
 "use client";
 
 import type {
-  ProposalActivityItem,
   ProposalActivityResponse,
   ProposalsActivityPathParamsDaoEnumKey,
   ProposalsActivityQueryParams,
@@ -23,14 +22,16 @@ interface UseProposalsActivityParams {
   limit: number;
 }
 
-type ProposalActivityData = {
-  totalProposals: number;
-  votedProposals: number;
+type ProposalActivityData = Pick<
+  ProposalActivityResponse,
+  | "totalProposals"
+  | "votedProposals"
+  | "winRate"
+  | "yesRate"
+  | "avgTimeBeforeEnd"
+  | "proposals"
+> & {
   neverVoted: number;
-  winRate: number;
-  yesRate: number;
-  avgTimeBeforeEnd: number;
-  proposals: ProposalActivityItem[];
 };
 
 interface UseProposalsActivityResult {

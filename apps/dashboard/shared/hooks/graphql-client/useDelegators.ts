@@ -1,10 +1,12 @@
-import {
+import type {
+  DelegatorItem as RestDelegatorItem,
+  DelegatorsPathParamsDaoEnumKey,
+  DelegatorsQueryParamsOrderByEnumKey,
+  DelegatorsQueryResponse,
   OrderDirection,
-  QueryInput_Delegators_OrderBy,
-} from "@anticapture/graphql-client";
-import type { GetDelegatorsQuery } from "@anticapture/graphql-client/hooks";
-import { useGetDelegatorsQuery } from "@anticapture/graphql-client/hooks";
-import { useState, useCallback, useMemo, useEffect } from "react";
+} from "@anticapture/client";
+import { useDelegatorsInfinite } from "@anticapture/client/hooks";
+import { useCallback, useMemo } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
@@ -17,9 +19,7 @@ interface PaginationInfo {
   currentItemsCount: number;
 }
 
-export type DelegatorItem = NonNullable<
-  NonNullable<GetDelegatorsQuery["delegators"]>["items"][number]
->;
+export type DelegatorItem = RestDelegatorItem;
 
 interface UseDelegatorsResult {
   delegators: DelegatorItem[];
@@ -35,147 +35,87 @@ interface UseDelegatorsResult {
 interface UseVotingPowerParams {
   daoId: DaoIdEnum;
   address: string;
-  orderBy?: QueryInput_Delegators_OrderBy;
+  orderBy?: DelegatorsQueryParamsOrderByEnumKey;
   orderDirection?: OrderDirection;
   limit?: number;
 }
 
+const getNextPageParam = (
+  lastPage: DelegatorsQueryResponse,
+  allPages: DelegatorsQueryResponse[],
+): number | undefined => {
+  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
+  return loaded >= lastPage.totalCount ? undefined : loaded;
+};
+
 export const useDelegators = ({
   daoId,
   address,
-  orderBy = QueryInput_Delegators_OrderBy.Amount,
-  orderDirection = OrderDirection.Desc,
+  orderBy = "amount",
+  orderDirection = "desc",
   limit = 15,
 }: UseVotingPowerParams): UseDelegatorsResult => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isPaginationLoading, setIsPaginationLoading] =
-    useState<boolean>(false);
-
-  const [delegators, delegatorsSet] = useState<DelegatorItem[]>([]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [orderBy, orderDirection]);
-
   const {
     data,
+    isLoading,
     error,
     refetch: refetchDelegators,
-    fetchMore,
-    loading,
-  } = useGetDelegatorsQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    variables: {
-      address,
+    fetchNextPage: fetchNextDelegatorsPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useDelegatorsInfinite(
+    daoId.toLowerCase() as DelegatorsPathParamsDaoEnumKey,
+    address,
+    {
       orderBy,
       orderDirection,
       limit,
-      skip: 0,
     },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network",
-  });
-
-  useEffect(() => {
-    delegatorsSet(() => data?.delegators?.items.filter((item) => !!item) ?? []);
-  }, [data?.delegators?.items]);
+    { query: { getNextPageParam } },
+  );
 
   const pagination = useMemo<PaginationInfo>(() => {
-    const totalCount = data?.delegators?.totalCount || 0;
-    const currentItemsCount = data?.delegators?.items?.length || 0;
+    const totalCount = data?.pages[0]?.totalCount || 0;
+    const currentItemsCount =
+      data?.pages.reduce((s, p) => s + p.items.length, 0) || 0;
+    const currentPage = data?.pages.length || 1;
     const totalPages = Math.ceil(totalCount / limit);
 
     return {
-      hasNextPage: currentPage < totalPages,
+      hasNextPage: hasNextPage ?? false,
       totalCount,
       currentPage,
       totalPages,
       limit,
       currentItemsCount,
     };
-  }, [
-    data?.delegators?.totalCount,
-    data?.delegators?.items?.length,
-    currentPage,
-    limit,
-  ]);
+  }, [data?.pages, hasNextPage, limit]);
+
+  const delegators = useMemo(
+    () => data?.pages.flatMap((p) => p.items) ?? [],
+    [data],
+  );
 
   const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || isPaginationLoading) {
+    if (!pagination.hasNextPage || isFetchingNextPage) {
       return;
     }
 
-    setIsPaginationLoading(true);
-
-    try {
-      const currentItemsCount = data?.delegators?.items?.length || 0;
-      const skip = currentItemsCount;
-
-      await fetchMore({
-        variables: {
-          skip,
-          orderBy,
-          orderDirection,
-          limit,
-        },
-        updateQuery: (previousResult, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.delegators) return previousResult;
-          const prevItems = previousResult.delegators?.items ?? [];
-          const newItems = fetchMoreResult.delegators.items ?? [];
-          const merged = [
-            ...prevItems,
-            ...newItems.filter(
-              (n) =>
-                n &&
-                !prevItems.some(
-                  (p) => p?.delegatorAddress === n.delegatorAddress,
-                ),
-            ),
-          ];
-
-          return {
-            ...fetchMoreResult,
-            delegators: {
-              ...fetchMoreResult.delegators,
-              items: merged,
-            },
-          };
-        },
-      });
-
-      setCurrentPage((prev) => prev + 1);
-    } catch (err) {
-      console.error("Error fetching next page:", err);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    pagination.hasNextPage,
-    orderBy,
-    orderDirection,
-    isPaginationLoading,
-    limit,
-    data?.delegators?.items?.length,
-  ]);
+    await fetchNextDelegatorsPage();
+  }, [fetchNextDelegatorsPage, pagination.hasNextPage, isFetchingNextPage]);
 
   const handleRefetch = useCallback(() => {
-    setCurrentPage(1);
-    refetchDelegators();
+    void refetchDelegators();
   }, [refetchDelegators]);
 
   return {
     delegators,
-    loading,
+    loading: isLoading,
     error: error || null,
     refetch: handleRefetch,
     pagination,
     fetchNextPage,
-    fetchingMore: isPaginationLoading,
-    totalCount: data?.delegators?.totalCount || 0,
+    fetchingMore: isFetchingNextPage,
+    totalCount: data?.pages[0]?.totalCount || 0,
   };
 };

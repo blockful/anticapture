@@ -1,8 +1,13 @@
 "use client";
 
 import type {
+  BigInt as RestBigInt,
+  HistoricalVotingPower,
   HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
+  HistoricalVotingPowerByAccountIdQueryParamsOrderByEnumKey,
   HistoricalVotingPowerByAccountIdQueryResponse,
+  HistoricalVotingPowerDelegation,
+  HistoricalVotingPowerTransfer,
 } from "@anticapture/client";
 import { useHistoricalVotingPowerByAccountIdInfinite } from "@anticapture/client/hooks";
 import { useMemo } from "react";
@@ -12,21 +17,18 @@ import type { AmountFilterVariables } from "@/features/holders-and-delegates/hoo
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
+type StringifyBigInt<T> = {
+  [K in keyof T]: T[K] extends RestBigInt ? string : T[K];
+};
+
 export interface DelegationHistoryItem {
   timestamp: string;
-  transactionHash: string;
+  transactionHash: HistoricalVotingPower["transactionHash"];
   delta: string;
-  delegation?: {
-    from: string;
-    value: string;
-    to: string;
-    previousDelegate?: string | null;
-  } | null;
-  transfer?: {
-    value: string;
-    from: string;
-    to: string;
-  } | null;
+  delegation: StringifyBigInt<
+    NonNullable<HistoricalVotingPowerDelegation>
+  > | null;
+  transfer: StringifyBigInt<NonNullable<HistoricalVotingPowerTransfer>> | null;
   votingPower: string;
   type: "delegation" | "transfer";
   action: string;
@@ -45,6 +47,7 @@ export interface UseDelegateDelegationHistoryResult {
 interface UseDelegateDelegationHistoryParams {
   accountId: string;
   daoId: DaoIdEnum;
+  orderBy?: HistoricalVotingPowerByAccountIdQueryParamsOrderByEnumKey;
   orderDirection?: "asc" | "desc";
   filterVariables?: AmountFilterVariables;
   fromTimestamp?: number;
@@ -63,6 +66,7 @@ const getNextPageParam = (
 export function useDelegateDelegationHistory({
   accountId,
   daoId,
+  orderBy,
   orderDirection = "desc",
   filterVariables,
   fromTimestamp: fromDate,
@@ -76,6 +80,7 @@ export function useDelegateDelegationHistory({
   const params = useMemo(
     () => ({
       limit,
+      ...(orderBy ? { orderBy } : {}),
       orderDirection,
       ...(filterVariables?.fromValue
         ? { fromValue: filterVariables.fromValue }
@@ -84,7 +89,7 @@ export function useDelegateDelegationHistory({
       ...(fromDate ? { fromDate } : {}),
       ...(toDate ? { toDate } : {}),
     }),
-    [limit, orderDirection, filterVariables, fromDate, toDate],
+    [limit, orderBy, orderDirection, filterVariables, fromDate, toDate],
   );
 
   const { data, isLoading, error, fetchNextPage, hasNextPage } =
