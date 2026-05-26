@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.3.1
+
+### Patch Changes
+
+- [#1936](https://github.com/blockful/anticapture/pull/1936) [`bc7fc0a`](https://github.com/blockful/anticapture/commit/bc7fc0aea4aca97869a62d08423c41e61790a6ab) Thanks [@pikonha](https://github.com/pikonha)! - Footer now shows the latest dashboard release version instead of the most recent repo release (which could belong to another package like gateful).
+
 ## 2.3.0
 
 ### Minor Changes
