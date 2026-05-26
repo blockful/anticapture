@@ -214,6 +214,8 @@ export const WhitelabelSidebar = ({
               }
               target="_blank"
               rel="noopener noreferrer"
+              data-umami-event="feature_request_click"
+              data-umami-event-source="whitelabel_sidebar"
             >
               <Sparkles className="size-4" />
               {!isCollapsed && "Request feature"}
