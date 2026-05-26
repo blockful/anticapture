@@ -18,16 +18,16 @@ export default processConfig(
       // Address Enrichment Service (Arkham integration)
       ...(process.env.ADDRESS_ENRICHMENT_API_URL
         ? [
-          {
-            name: "address_enrichment",
-            handler: {
-              openapi: {
-                source: `${process.env.ADDRESS_ENRICHMENT_API_URL}/docs/json`,
-                endpoint: process.env.ADDRESS_ENRICHMENT_API_URL,
+            {
+              name: "address_enrichment",
+              handler: {
+                openapi: {
+                  source: `${process.env.ADDRESS_ENRICHMENT_API_URL}/docs/json`,
+                  endpoint: process.env.ADDRESS_ENRICHMENT_API_URL,
+                },
               },
             },
-          },
-        ]
+          ]
         : []),
       // DAO-specific APIs
       ...Object.entries(process.env)
@@ -41,8 +41,8 @@ export default processConfig(
               name: `rest_${daoName}`,
               handler: {
                 openapi: {
-                  source: `${value}/docs`,
                   endpoint: value,
+                  source: `${value}/docs`,
                 },
               },
             },

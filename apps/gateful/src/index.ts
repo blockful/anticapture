@@ -1,4 +1,4 @@
-import "./instrumentation.js";
+import "./instrumentation";
 
 import dns from "node:dns";
 
@@ -11,25 +11,25 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
 
-import { config } from "./config.js";
-import { CircuitOpenError } from "./shared/circuit-breaker.js";
-import { createRedisClient } from "./cache/redis.js";
-import { exporter } from "./instrumentation.js";
-import { logger } from "./logger.js";
-import { cacheMiddleware } from "./middlewares/cache.js";
-import { requestLogger } from "./middlewares/logger.js";
-import { daoHealth } from "./health/dao.js";
-import { metricsMiddleware } from "./middlewares/metrics.js";
-import { health } from "./health/route.js";
-import { proxy } from "./proxy/route.js";
-import { relayerProxy } from "./proxy/relayer.js";
-import { addressEnrichment } from "./resolvers/address-enrichment/route.js";
-import { daos } from "./resolvers/daos/route.js";
-import { DaosService } from "./resolvers/daos/service.js";
-import { averageDelegation } from "./resolvers/delegation/route.js";
-import { DelegationService } from "./resolvers/delegation/service.js";
-import { CircuitBreakerRegistry } from "./shared/circuit-breaker-registry.js";
-import { storeOpenApiSpec } from "./upstream-docs.js";
+import { config } from "./config";
+import { CircuitOpenError } from "./shared/circuit-breaker";
+import { createRedisClient } from "./cache/redis";
+import { exporter } from "./instrumentation";
+import { logger } from "./logger";
+import { cacheMiddleware } from "./middlewares/cache";
+import { requestLogger } from "./middlewares/logger";
+import { daoHealth } from "./health/dao";
+import { metricsMiddleware } from "./middlewares/metrics";
+import { health } from "./health/route";
+import { proxy } from "./proxy/route";
+import { relayerProxy } from "./proxy/relayer";
+import { addressEnrichment } from "./resolvers/address-enrichment/route";
+import { daos } from "./resolvers/daos/route";
+import { DaosService } from "./resolvers/daos/service";
+import { averageDelegation } from "./resolvers/delegation/route";
+import { DelegationService } from "./resolvers/delegation/service";
+import { CircuitBreakerRegistry } from "./shared/circuit-breaker-registry";
+import { storeOpenApiSpec } from "./upstream-docs";
 
 // "verbatim" preserves the DNS response order so AAAA records
 // are used directly, allowing fetch() to resolve *.railway.internal correctly.
