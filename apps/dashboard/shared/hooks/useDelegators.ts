@@ -42,8 +42,18 @@ export const useDelegators = ({
     { query: { getNextPageParam } },
   );
 
+  const seen = new Set<string>();
+  const delegators =
+    data?.pages
+      .flatMap((p) => p.items)
+      .filter((item) => {
+        if (seen.has(item.delegatorAddress)) return false;
+        seen.add(item.delegatorAddress);
+        return true;
+      }) ?? [];
+
   return {
-    delegators: data?.pages.flatMap((p) => p.items) ?? [],
+    delegators,
     loading: isLoading,
     error: error || null,
     refetch,

@@ -22,7 +22,6 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
-import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { Table } from "@/shared/components/design-system/table/Table";
@@ -51,10 +50,6 @@ export const DelegationHistoryTable = ({
   const { decimals } = daoConfigByDaoId[daoId];
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
-  const [sortBy, setSortBy] = useQueryState(
-    "orderBy",
-    parseAsStringEnum(["timestamp", "amount"]).withDefault("timestamp"),
-  );
   const [sortOrder, setSortOrder] = useQueryState(
     "orderDirection",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
@@ -68,11 +63,6 @@ export const DelegationHistoryTable = ({
     parseAsBoolean.withDefault(false),
   );
   const [addressFilter, setAddressFilter] = useQueryState("tabAddress");
-
-  const sortOptions: SortOption[] = [
-    { value: "largest-first", label: "Largest first" },
-    { value: "smallest-first", label: "Smallest first" },
-  ];
 
   const {
     data: delegationHistory,
@@ -190,16 +180,6 @@ export const DelegationHistoryTable = ({
           <AmountFilter
             filterId="delegation-amount-filter"
             onApply={(filterState: AmountFilterState) => {
-              if (filterState.sortOrder) {
-                setSortOrder(
-                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
-                );
-                setSortBy("amount");
-              } else {
-                setSortBy("timestamp");
-                setSortOrder("desc");
-              }
-
               setFilterVariables(() => ({
                 fromValue: filterState.minAmount
                   ? parseUnits(filterState.minAmount, decimals).toString()
@@ -210,23 +190,17 @@ export const DelegationHistoryTable = ({
               }));
 
               setIsFilterActive(
-                !!(
-                  filterState.minAmount ||
-                  filterState.maxAmount ||
-                  filterState.sortOrder
-                ),
+                !!(filterState.minAmount || filterState.maxAmount),
               );
             }}
             onReset={() => {
               setIsFilterActive(false);
-              setSortBy("timestamp");
               setFilterVariables(() => ({
                 fromValue: "",
                 toValue: "",
               }));
             }}
             isActive={isFilterActive}
-            sortOptions={sortOptions}
           />
         </div>
       ),
@@ -259,7 +233,6 @@ export const DelegationHistoryTable = ({
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-          setSortBy("timestamp");
           setSortOrder(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
 
@@ -278,11 +251,7 @@ export const DelegationHistoryTable = ({
               <ArrowUpDown
                 props={{ className: "ml-2 size-4" }}
                 activeState={
-                  sortBy === "timestamp"
-                    ? sortOrder === "asc"
-                      ? ArrowState.UP
-                      : ArrowState.DOWN
-                    : ArrowState.DEFAULT
+                  sortOrder === "asc" ? ArrowState.UP : ArrowState.DOWN
                 }
               />
             </Button>

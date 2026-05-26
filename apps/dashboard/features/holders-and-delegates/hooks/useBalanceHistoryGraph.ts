@@ -1,3 +1,5 @@
+"use client";
+
 import { formatUnits } from "viem";
 import type { HistoricalBalancesPathParamsDaoEnumKey } from "@anticapture/client";
 import { useHistoricalBalances } from "@anticapture/client/hooks";

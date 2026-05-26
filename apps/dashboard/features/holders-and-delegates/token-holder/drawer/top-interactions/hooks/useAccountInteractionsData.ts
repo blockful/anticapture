@@ -7,7 +7,7 @@ import {
   useGetAddresses,
   useAccountInteractionsInfinite,
 } from "@anticapture/client/hooks";
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 
@@ -41,7 +41,7 @@ interface InteractionResponse {
   totalCount: number;
   totalTransfers: number;
   error?: Error;
-  fetchNextPage: () => Promise<void>;
+  fetchNextPage: () => Promise<unknown>;
   fetchingMore: boolean;
   hasNextPage: boolean;
 }
@@ -76,8 +76,6 @@ export const useAccountInteractionsData = ({
 }): InteractionResponse => {
   const { decimals } = daoConfig[daoId];
 
-  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
-
   const {
     data,
     isLoading,
@@ -99,24 +97,20 @@ export const useAccountInteractionsData = ({
     { query: { getNextPageParam } },
   );
 
-  const interactionsData = useMemo(
-    () => data?.pages.flatMap((p) => p.items) ?? [],
-    [data],
-  );
+  const interactionsData = useMemo(() => {
+    const seen = new Set<string>();
+    return (
+      data?.pages
+        .flatMap((p) => p.items)
+        .filter((item) => {
+          if (!item.accountId || seen.has(item.accountId)) return false;
+          seen.add(item.accountId);
+          return true;
+        }) ?? []
+    );
+  }, [data]);
   const totalCount = data?.pages[data.pages.length - 1]?.totalCount ?? 0;
   const computedHasNextPage = hasNextPage ?? false;
-
-  const fetchNextPageFn = useCallback(async () => {
-    if (!computedHasNextPage || isPaginationLoading) return;
-    setIsPaginationLoading(true);
-    try {
-      await fetchNextPage();
-    } catch (err) {
-      console.error("Error fetching next page:", err);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [computedHasNextPage, isPaginationLoading, fetchNextPage]);
 
   const topFive =
     interactionsData.length > 0 ? interactionsData.slice(0, 5) : [];
@@ -150,8 +144,8 @@ export const useAccountInteractionsData = ({
     totalCount: 0,
     totalTransfers: 0,
     error: error as Error | undefined,
-    fetchNextPage: fetchNextPageFn,
-    fetchingMore: isFetchingNextPage || isPaginationLoading,
+    fetchNextPage,
+    fetchingMore: isFetchingNextPage,
     hasNextPage: computedHasNextPage,
   };
 
@@ -260,8 +254,8 @@ export const useAccountInteractionsData = ({
     legendItems,
     totalIndividualInteractions,
     error: error as Error | undefined,
-    fetchNextPage: fetchNextPageFn,
-    fetchingMore: isFetchingNextPage || isPaginationLoading,
+    fetchNextPage,
+    fetchingMore: isFetchingNextPage,
     hasNextPage: computedHasNextPage,
   };
 };
