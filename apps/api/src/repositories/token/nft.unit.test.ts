@@ -17,7 +17,6 @@ const createTokenPrice = (
 ): TokenPriceInsert => {
   const n = counter++;
   return {
-    id: `price-${n}`,
     price: 1000000000000000000n,
     timestamp: BigInt(1700000000 + n),
     ...overrides,

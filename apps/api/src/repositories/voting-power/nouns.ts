@@ -100,7 +100,7 @@ export class NounsVotingPowerRepository {
       .offset(skip);
 
     return result.map((row) => ({
-      ...row.VotingPowerHistory,
+      ...row.voting_power_history,
       delegations:
         row.Transfer && row.Transfer?.logIndex < (row.Delegation?.logIndex || 0)
           ? null

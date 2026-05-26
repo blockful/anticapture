@@ -14,6 +14,7 @@ type FeedEventInsert = typeof feedEvent.$inferInsert;
 const createEvent = (
   overrides: Partial<FeedEventInsert> = {},
 ): FeedEventInsert => ({
+  id: "test-id",
   txHash: "0xabc",
   logIndex: 0,
   type: FeedEventType.TRANSFER,

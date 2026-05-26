@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm";
-import { pgTable, index, bigint } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  index,
+  bigint,
+  primaryKey,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import { Address, zeroAddress } from "viem";
 
 import { FeedEventType } from "@/lib/constants";

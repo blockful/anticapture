@@ -48,7 +48,7 @@ const createFeedEvent = (
   id: "test-id",
   txHash: "0xabc123",
   logIndex: 0,
-  type: "VOTE",
+  type: FeedEventType.VOTE,
   value: 1000n,
   timestamp: 1700000000,
   proposalId: null,
@@ -176,13 +176,23 @@ describe("FeedRepository", () => {
     });
 
     it("should filter by specific type with value threshold", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, type: "VOTE", value: 500n }),
-          createFeedEvent({ logIndex: 1, type: "VOTE", value: 1500n }),
-          createFeedEvent({ logIndex: 2, type: "DELEGATION", value: 2000n }),
-        ]);
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 0,
+          type: FeedEventType.VOTE,
+          value: 500n,
+        }),
+        createFeedEvent({
+          logIndex: 1,
+          type: FeedEventType.VOTE,
+          value: 1500n,
+        }),
+        createFeedEvent({
+          logIndex: 2,
+          type: FeedEventType.DELEGATION,
+          value: 2000n,
+        }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({ type: [FeedEventType.VOTE] }),
@@ -197,12 +207,12 @@ describe("FeedRepository", () => {
       await db.insert(feedEvent).values([
         createFeedEvent({
           logIndex: 0,
-          type: "PROPOSAL",
+          type: FeedEventType.PROPOSAL,
           value: 0n,
         }),
         createFeedEvent({
           logIndex: 1,
-          type: "PROPOSAL",
+          type: FeedEventType.PROPOSAL,
           value: 1n,
         }),
       ]);
@@ -216,15 +226,33 @@ describe("FeedRepository", () => {
     });
 
     it("should apply per-type value thresholds when no type filter", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, type: "VOTE", value: 500n }),
-          createFeedEvent({ logIndex: 1, type: "VOTE", value: 2000n }),
-          createFeedEvent({ logIndex: 2, type: "DELEGATION", value: 100n }),
-          createFeedEvent({ logIndex: 3, type: "DELEGATION", value: 600n }),
-          createFeedEvent({ logIndex: 4, type: "PROPOSAL", value: 0n }),
-        ]);
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 0,
+          type: FeedEventType.VOTE,
+          value: 500n,
+        }),
+        createFeedEvent({
+          logIndex: 1,
+          type: FeedEventType.VOTE,
+          value: 2000n,
+        }),
+        createFeedEvent({
+          logIndex: 2,
+          type: FeedEventType.DELEGATION,
+          value: 100n,
+        }),
+        createFeedEvent({
+          logIndex: 3,
+          type: FeedEventType.DELEGATION,
+          value: 600n,
+        }),
+        createFeedEvent({
+          logIndex: 4,
+          type: FeedEventType.PROPOSAL,
+          value: 0n,
+        }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams(),
@@ -353,6 +381,7 @@ describe("FeedRepository", () => {
       // picked), one after (must be ignored).
       await db.insert(votingPowerHistory).values([
         {
+          id: "vph-prior",
           transactionHash: "0xprior",
           daoId: "ENS",
           accountId: proposerAccountId,
@@ -363,6 +392,7 @@ describe("FeedRepository", () => {
           logIndex: 0,
         },
         {
+          id: "vph-later",
           transactionHash: "0xlater",
           daoId: "ENS",
           accountId: proposerAccountId,
@@ -393,7 +423,7 @@ describe("FeedRepository", () => {
       await db.insert(feedEvent).values([
         createFeedEvent({
           logIndex: 0,
-          type: "PROPOSAL",
+          type: FeedEventType.PROPOSAL,
           proposalId: "42",
         }),
       ]);
@@ -434,7 +464,7 @@ describe("FeedRepository", () => {
       await db.insert(feedEvent).values([
         createFeedEvent({
           logIndex: 0,
-          type: "PROPOSAL",
+          type: FeedEventType.PROPOSAL,
           proposalId: "43",
         }),
       ]);
@@ -453,6 +483,7 @@ describe("FeedRepository", () => {
       const delegator = "0x1111111111111111111111111111111111111111";
       const delegate = "0x2222222222222222222222222222222222222222";
       await db.insert(delegation).values({
+        id: "delegation-1",
         transactionHash: "0xabc123",
         daoId: "ENS",
         delegatorAccountId: delegator,
@@ -465,7 +496,7 @@ describe("FeedRepository", () => {
       await db.insert(feedEvent).values([
         createFeedEvent({
           logIndex: 7,
-          type: "DELEGATION",
+          type: FeedEventType.DELEGATION,
           value: 9999n,
         }),
       ]);
@@ -488,6 +519,7 @@ describe("FeedRepository", () => {
       const fromAddr = "0x3333333333333333333333333333333333333333";
       const toAddr = "0x4444444444444444444444444444444444444444";
       await db.insert(transfer).values({
+        id: "transfer-1",
         transactionHash: "0xabc123",
         daoId: "ENS",
         tokenId: zeroAddress,
@@ -500,7 +532,7 @@ describe("FeedRepository", () => {
       await db.insert(feedEvent).values([
         createFeedEvent({
           logIndex: 3,
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           value: 4242n,
         }),
       ]);
@@ -538,6 +570,7 @@ describe("FeedRepository", () => {
         status: "ACTIVE",
       });
       await db.insert(votesOnchain).values({
+        id: "vote-1",
         txHash: "0xabc123",
         daoId: "ENS",
         voterAccountId: voter,
@@ -551,7 +584,7 @@ describe("FeedRepository", () => {
       await db.insert(feedEvent).values([
         createFeedEvent({
           logIndex: 4,
-          type: "VOTE",
+          type: FeedEventType.VOTE,
           value: 7777n,
           proposalId: "99",
         }),
@@ -574,13 +607,23 @@ describe("FeedRepository", () => {
     });
 
     it("should support filtering by multiple types in one request", async () => {
-      await db
-        .insert(feedEvent)
-        .values([
-          createFeedEvent({ logIndex: 0, type: "VOTE", value: 1500n }),
-          createFeedEvent({ logIndex: 1, type: "DELEGATION", value: 600n }),
-          createFeedEvent({ logIndex: 2, type: "TRANSFER", value: 5000n }),
-        ]);
+      await db.insert(feedEvent).values([
+        createFeedEvent({
+          logIndex: 0,
+          type: FeedEventType.VOTE,
+          value: 1500n,
+        }),
+        createFeedEvent({
+          logIndex: 1,
+          type: FeedEventType.DELEGATION,
+          value: 600n,
+        }),
+        createFeedEvent({
+          logIndex: 2,
+          type: FeedEventType.TRANSFER,
+          value: 5000n,
+        }),
+      ]);
 
       const result = await repository.getFeedEvents(
         defaultFeedParams({

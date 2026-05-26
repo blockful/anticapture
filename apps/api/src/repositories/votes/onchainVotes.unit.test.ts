@@ -51,8 +51,8 @@ const createProposal = (
 const createVote = (
   overrides: Partial<VotesOnchainInsert> = {},
 ): VotesOnchainInsert => ({
-  id: `vote-${n}`,
-  txHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
+  id: `vote-${txCounter++}`,
+  txHash: `0x${txCounter.toString(16).padStart(64, "0")}`,
   daoId: TEST_DAO,
   voterAccountId: VOTER_A,
   proposalId: "proposal-1",

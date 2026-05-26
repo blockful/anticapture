@@ -24,7 +24,7 @@ const createFeedEvent = (
   id: "test-id",
   txHash: "0xabc123",
   logIndex: 0,
-  type: "VOTE",
+  type: FeedEventType.VOTE,
   value: parseEther("100000"),
   timestamp: 1700000000,
   proposalId: null,
@@ -99,7 +99,7 @@ describe("FeedService", () => {
       const event = createFeedEvent({
         txHash: "0xdef456",
         logIndex: 5,
-        type: "DELEGATION",
+        type: FeedEventType.DELEGATION,
         value: ensThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM],
         timestamp: 1700001000,
         metadata: delegationMetadata,
@@ -111,7 +111,7 @@ describe("FeedService", () => {
       expect(result.items[0]).toEqual({
         txHash: "0xdef456",
         logIndex: 5,
-        type: "DELEGATION",
+        type: FeedEventType.DELEGATION,
         value: event.value.toString(),
         timestamp: 1700001000,
         proposalId: null,
@@ -121,7 +121,9 @@ describe("FeedService", () => {
     });
 
     it("should assign HIGH relevance for PROPOSAL type", async () => {
-      simpleRepo.items = [createFeedEvent({ type: "PROPOSAL", value: 0n })];
+      simpleRepo.items = [
+        createFeedEvent({ type: FeedEventType.PROPOSAL, value: 0n }),
+      ];
 
       const result = await service.getFeedEvents(createRequest());
 
@@ -132,7 +134,7 @@ describe("FeedService", () => {
       const highThreshold =
         ensThresholds[FeedEventType.VOTE][FeedRelevance.HIGH];
       simpleRepo.items = [
-        createFeedEvent({ type: "VOTE", value: highThreshold }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: highThreshold }),
       ];
 
       const result = await service.getFeedEvents(createRequest());
@@ -144,7 +146,7 @@ describe("FeedService", () => {
       const mediumThreshold =
         ensThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM];
       simpleRepo.items = [
-        createFeedEvent({ type: "VOTE", value: mediumThreshold }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: mediumThreshold }),
       ];
 
       const result = await service.getFeedEvents(createRequest());
@@ -155,7 +157,7 @@ describe("FeedService", () => {
     it("should assign LOW relevance when value is below MEDIUM threshold", async () => {
       const lowThreshold = ensThresholds[FeedEventType.VOTE][FeedRelevance.LOW];
       simpleRepo.items = [
-        createFeedEvent({ type: "VOTE", value: lowThreshold }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: lowThreshold }),
       ];
 
       const result = await service.getFeedEvents(
@@ -169,17 +171,17 @@ describe("FeedService", () => {
       const t = ensThresholds[FeedEventType.TRANSFER];
       simpleRepo.items = [
         createFeedEvent({
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           value: t[FeedRelevance.HIGH],
           logIndex: 0,
         }),
         createFeedEvent({
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           value: t[FeedRelevance.MEDIUM],
           logIndex: 1,
         }),
         createFeedEvent({
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           value: t[FeedRelevance.LOW],
           logIndex: 2,
         }),
@@ -197,12 +199,12 @@ describe("FeedService", () => {
     it("should filter out events below the relevance threshold", async () => {
       simpleRepo.items = [
         createFeedEvent({
-          type: "VOTE",
+          type: FeedEventType.VOTE,
           value: parseEther("500"),
           logIndex: 0,
         }),
         createFeedEvent({
-          type: "VOTE",
+          type: FeedEventType.VOTE,
           value: ensThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
           logIndex: 1,
         }),
@@ -219,8 +221,8 @@ describe("FeedService", () => {
     it("should use NOUNS thresholds for NOUNS dao", async () => {
       const nounsService = new FeedService(DaoIdEnum.NOUNS, simpleRepo);
       simpleRepo.items = [
-        createFeedEvent({ type: "VOTE", value: 5n, logIndex: 0 }),
-        createFeedEvent({ type: "VOTE", value: 20n, logIndex: 1 }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: 5n, logIndex: 0 }),
+        createFeedEvent({ type: FeedEventType.VOTE, value: 20n, logIndex: 1 }),
       ];
 
       const result = await nounsService.getFeedEvents(

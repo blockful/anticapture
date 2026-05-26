@@ -30,7 +30,7 @@ const createEvent = (
   id: "test-id",
   txHash: "0xabc123def456abc1",
   logIndex: 0,
-  type: "VOTE" as const,
+  type: FeedEventType.VOTE,
   value: nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
   timestamp: 1700000000,
   proposalId: null,
@@ -82,7 +82,7 @@ describe("Feed Controller (integration)", () => {
       const item: Record<string, unknown> = {
         txHash: "0xabc123def456abc1",
         logIndex: 0,
-        type: "VOTE",
+        type: FeedEventType.VOTE,
         value: String(
           nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
         ),
@@ -121,7 +121,7 @@ describe("Feed Controller (integration)", () => {
     it("should include relevance in each item", async () => {
       await db
         .insert(feedEvent)
-        .values(createEvent({ type: "PROPOSAL", value: 0n }));
+        .values(createEvent({ type: FeedEventType.PROPOSAL, value: 0n }));
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -129,7 +129,7 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "PROPOSAL",
+            type: FeedEventType.PROPOSAL,
             relevance: FeedRelevance.HIGH,
           }),
         ],
@@ -146,13 +146,21 @@ describe("Feed Controller (integration)", () => {
         nounsThresholds[FeedEventType.TRANSFER][FeedRelevance.MEDIUM];
 
       await db.insert(feedEvent).values([
-        createEvent({ type: "VOTE", logIndex: 0, value: voteValue }),
         createEvent({
-          type: "DELEGATION",
+          type: FeedEventType.VOTE,
+          logIndex: 0,
+          value: voteValue,
+        }),
+        createEvent({
+          type: FeedEventType.DELEGATION,
           logIndex: 1,
           value: delegationValue,
         }),
-        createEvent({ type: "TRANSFER", logIndex: 2, value: transferValue }),
+        createEvent({
+          type: FeedEventType.TRANSFER,
+          logIndex: 2,
+          value: transferValue,
+        }),
       ]);
 
       const res = await app.request("/feed/events?type=DELEGATION");
@@ -162,7 +170,7 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "DELEGATION",
+            type: FeedEventType.DELEGATION,
             logIndex: 1,
             value: String(delegationValue),
             relevance: FeedRelevance.MEDIUM,
@@ -178,13 +186,13 @@ describe("Feed Controller (integration)", () => {
 
       await db.insert(feedEvent).values([
         createEvent({
-          type: "PROPOSAL_EXTENDED",
+          type: FeedEventType.PROPOSAL_EXTENDED,
           value: 0n,
           logIndex: 0,
           timestamp: 1700000000,
         }),
         createEvent({
-          type: "VOTE",
+          type: FeedEventType.VOTE,
           logIndex: 1,
           value: voteValue,
           timestamp: 1700000001,
@@ -198,14 +206,14 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "VOTE",
+            type: FeedEventType.VOTE,
             logIndex: 1,
             value: String(voteValue),
             timestamp: 1700000001,
             relevance: FeedRelevance.MEDIUM,
           }),
           buildExpectedItem({
-            type: "PROPOSAL_EXTENDED",
+            type: FeedEventType.PROPOSAL_EXTENDED,
             logIndex: 0,
             timestamp: 1700000000,
             relevance: FeedRelevance.HIGH,
@@ -221,12 +229,16 @@ describe("Feed Controller (integration)", () => {
 
       await db.insert(feedEvent).values([
         createEvent({
-          type: "PROPOSAL_EXTENDED",
+          type: FeedEventType.PROPOSAL_EXTENDED,
           value: 0n,
           logIndex: 0,
         }),
-        createEvent({ type: "VOTE", logIndex: 1, value: voteValue }),
-        createEvent({ type: "PROPOSAL", value: 0n, logIndex: 2 }),
+        createEvent({
+          type: FeedEventType.VOTE,
+          logIndex: 1,
+          value: voteValue,
+        }),
+        createEvent({ type: FeedEventType.PROPOSAL, value: 0n, logIndex: 2 }),
       ]);
 
       const res = await app.request("/feed/events?type=PROPOSAL_EXTENDED");
@@ -236,7 +248,7 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "PROPOSAL_EXTENDED",
+            type: FeedEventType.PROPOSAL_EXTENDED,
             logIndex: 0,
             relevance: FeedRelevance.HIGH,
           }),
@@ -271,12 +283,14 @@ describe("Feed Controller (integration)", () => {
       const voteValue =
         nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM];
       // PROPOSAL has value=0, VOTE has value=voteValue (higher)
-      await db
-        .insert(feedEvent)
-        .values([
-          createEvent({ type: "PROPOSAL", value: 0n, logIndex: 0 }),
-          createEvent({ type: "VOTE", value: voteValue, logIndex: 1 }),
-        ]);
+      await db.insert(feedEvent).values([
+        createEvent({ type: FeedEventType.PROPOSAL, value: 0n, logIndex: 0 }),
+        createEvent({
+          type: FeedEventType.VOTE,
+          value: voteValue,
+          logIndex: 1,
+        }),
+      ]);
 
       const res = await app.request(
         "/feed/events?orderBy=value&orderDirection=asc",
@@ -288,12 +302,12 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "PROPOSAL",
+            type: FeedEventType.PROPOSAL,
             logIndex: 0,
             relevance: FeedRelevance.HIGH,
           }),
           buildExpectedItem({
-            type: "VOTE",
+            type: FeedEventType.VOTE,
             logIndex: 1,
             value: String(voteValue),
             relevance: FeedRelevance.MEDIUM,
@@ -307,12 +321,14 @@ describe("Feed Controller (integration)", () => {
       const voteValue =
         nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM];
       // PROPOSAL has HIGH relevance, VOTE (medium threshold) has MEDIUM relevance
-      await db
-        .insert(feedEvent)
-        .values([
-          createEvent({ type: "PROPOSAL", value: 0n, logIndex: 0 }),
-          createEvent({ type: "VOTE", value: voteValue, logIndex: 1 }),
-        ]);
+      await db.insert(feedEvent).values([
+        createEvent({ type: FeedEventType.PROPOSAL, value: 0n, logIndex: 0 }),
+        createEvent({
+          type: FeedEventType.VOTE,
+          value: voteValue,
+          logIndex: 1,
+        }),
+      ]);
 
       const res = await app.request("/feed/events?relevance=HIGH");
 
@@ -322,7 +338,7 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "PROPOSAL",
+            type: FeedEventType.PROPOSAL,
             logIndex: 0,
             relevance: FeedRelevance.HIGH,
           }),
@@ -365,6 +381,7 @@ describe("Feed Controller (integration)", () => {
     it("should synthesize PROPOSAL metadata using historical proposer voting power", async () => {
       const proposer = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
       await db.insert(votingPowerHistory).values({
+        id: "vph-1",
         transactionHash: "0xvph",
         daoId: "NOUNS",
         accountId: proposer,
@@ -391,9 +408,13 @@ describe("Feed Controller (integration)", () => {
         endTimestamp: 1700001000n,
         status: "ACTIVE",
       });
-      await db
-        .insert(feedEvent)
-        .values(createEvent({ type: "PROPOSAL", value: 0n, proposalId: "1" }));
+      await db.insert(feedEvent).values(
+        createEvent({
+          type: FeedEventType.PROPOSAL,
+          value: 0n,
+          proposalId: "1",
+        }),
+      );
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -401,7 +422,7 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "PROPOSAL",
+            type: FeedEventType.PROPOSAL,
             relevance: FeedRelevance.HIGH,
             metadata: {
               kind: "PROPOSAL",
@@ -450,6 +471,7 @@ describe("Feed Controller (integration)", () => {
         status: "ACTIVE",
       });
       await db.insert(votesOnchain).values({
+        id: "vote-1",
         txHash: "0xabc123def456abc1",
         daoId: "NOUNS",
         voterAccountId: voter,
@@ -460,11 +482,13 @@ describe("Feed Controller (integration)", () => {
         timestamp: 1700000000n,
         logIndex: 0,
       });
-      await db
-        .insert(feedEvent)
-        .values(
-          createEvent({ type: "VOTE", value: voteValue, proposalId: "42" }),
-        );
+      await db.insert(feedEvent).values(
+        createEvent({
+          type: FeedEventType.VOTE,
+          value: voteValue,
+          proposalId: "42",
+        }),
+      );
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -495,6 +519,7 @@ describe("Feed Controller (integration)", () => {
       const delegationValue =
         nounsThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM];
       await db.insert(delegation).values({
+        id: "delegation-1",
         transactionHash: "0xabc123def456abc1",
         daoId: "NOUNS",
         delegatorAccountId: delegator,
@@ -504,9 +529,12 @@ describe("Feed Controller (integration)", () => {
         timestamp: 1700000000n,
         logIndex: 0,
       });
-      await db
-        .insert(feedEvent)
-        .values(createEvent({ type: "DELEGATION", value: delegationValue }));
+      await db.insert(feedEvent).values(
+        createEvent({
+          type: FeedEventType.DELEGATION,
+          value: delegationValue,
+        }),
+      );
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -514,7 +542,7 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "DELEGATION",
+            type: FeedEventType.DELEGATION,
             value: String(delegationValue),
             relevance: FeedRelevance.MEDIUM,
             metadata: {
@@ -536,6 +564,7 @@ describe("Feed Controller (integration)", () => {
       const transferValue =
         nounsThresholds[FeedEventType.TRANSFER][FeedRelevance.MEDIUM];
       await db.insert(transfer).values({
+        id: "transfer-1",
         transactionHash: "0xabc123def456abc1",
         daoId: "NOUNS",
         tokenId: zeroAddress,
@@ -547,7 +576,9 @@ describe("Feed Controller (integration)", () => {
       });
       await db
         .insert(feedEvent)
-        .values(createEvent({ type: "TRANSFER", value: transferValue }));
+        .values(
+          createEvent({ type: FeedEventType.TRANSFER, value: transferValue }),
+        );
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -555,7 +586,7 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "TRANSFER",
+            type: FeedEventType.TRANSFER,
             value: String(transferValue),
             relevance: FeedRelevance.MEDIUM,
             metadata: {
@@ -597,6 +628,7 @@ describe("Feed Controller (integration)", () => {
         status: "ACTIVE",
       });
       await db.insert(transfer).values({
+        id: "transfer-2",
         transactionHash: "0xabc123def456abc1",
         daoId: "NOUNS",
         tokenId: zeroAddress,
@@ -608,7 +640,7 @@ describe("Feed Controller (integration)", () => {
       });
       await db.insert(feedEvent).values([
         createEvent({
-          type: "PROPOSAL",
+          type: FeedEventType.PROPOSAL,
           value: 0n,
           logIndex: 0,
           timestamp: 1700000003,
@@ -616,13 +648,13 @@ describe("Feed Controller (integration)", () => {
           txHash: "0xprop",
         }),
         createEvent({
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           logIndex: 1,
           timestamp: 1700000002,
           value: transferValue,
         }),
         createEvent({
-          type: "VOTE",
+          type: FeedEventType.VOTE,
           logIndex: 2,
           timestamp: 1700000001,
           value: voteValue,
@@ -635,7 +667,7 @@ describe("Feed Controller (integration)", () => {
       expect(body).toEqual({
         items: [
           buildExpectedItem({
-            type: "PROPOSAL",
+            type: FeedEventType.PROPOSAL,
             txHash: "0xprop",
             logIndex: 0,
             timestamp: 1700000003,
@@ -649,7 +681,7 @@ describe("Feed Controller (integration)", () => {
             },
           }),
           buildExpectedItem({
-            type: "TRANSFER",
+            type: FeedEventType.TRANSFER,
             logIndex: 1,
             timestamp: 1700000002,
             value: String(transferValue),
@@ -662,7 +694,7 @@ describe("Feed Controller (integration)", () => {
             },
           }),
           buildExpectedItem({
-            type: "VOTE",
+            type: FeedEventType.VOTE,
             logIndex: 2,
             timestamp: 1700000001,
             value: String(voteValue),
@@ -684,19 +716,19 @@ describe("Feed Controller (integration)", () => {
 
       await db.insert(feedEvent).values([
         createEvent({
-          type: "VOTE",
+          type: FeedEventType.VOTE,
           logIndex: 0,
           value: voteValue,
           timestamp: 1700000003,
         }),
         createEvent({
-          type: "DELEGATION",
+          type: FeedEventType.DELEGATION,
           logIndex: 1,
           value: delegationValue,
           timestamp: 1700000002,
         }),
         createEvent({
-          type: "TRANSFER",
+          type: FeedEventType.TRANSFER,
           logIndex: 2,
           value: transferValue,
           timestamp: 1700000001,
