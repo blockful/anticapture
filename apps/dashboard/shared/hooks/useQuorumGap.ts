@@ -1,10 +1,11 @@
 import { formatUnits } from "viem";
 
+import type { ProposalsPathParamsDaoEnumKey } from "@anticapture/client";
+import { useProposals } from "@anticapture/client/hooks";
 import {
   DaysWindow,
   useCompareAverageTurnoutQuery,
   useGetDaoDataQuery,
-  useGetProposalsFromDaoQuery,
 } from "@anticapture/graphql-client/hooks";
 
 import daoConfig from "@/shared/dao-config";
@@ -33,17 +34,11 @@ export const useQuorumGap = (daoId: DaoIdEnum) => {
 
   const {
     data: proposalsData,
-    loading: proposalsLoading,
+    isLoading: proposalsLoading,
     error: proposalsError,
-  } = useGetProposalsFromDaoQuery({
-    variables: {
-      skip: 0,
-      limit: 1,
-      fromDate: cutoffDate,
-      status: null,
-    },
-    context,
-    skip: !daoId,
+  } = useProposals(daoId.toLowerCase() as ProposalsPathParamsDaoEnumKey, {
+    limit: 1,
+    fromDate: cutoffDate,
   });
 
   const {
@@ -66,7 +61,7 @@ export const useQuorumGap = (daoId: DaoIdEnum) => {
   if (!isLoading && !error && daoData && proposalsData && turnoutData) {
     const { decimals } = daoConfig[daoId];
 
-    const isGapEligible = (proposalsData.proposals?.items?.length ?? 0) > 0;
+    const isGapEligible = proposalsData.items.length > 0;
     const quorum = daoData.dao?.quorum
       ? Number(formatUnits(BigInt(daoData.dao.quorum), decimals))
       : null;

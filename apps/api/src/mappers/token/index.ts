@@ -1,16 +1,11 @@
 import { z } from "@hono/zod-openapi";
 
 import { token } from "@/database";
-import {
-  DaysWindow,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
-} from "../shared";
+import { DaysWindow, paginationQueryParams } from "../shared";
 
 export const TokenHistoricalPriceRequest = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
+    ...paginationQueryParams(),
   })
   .openapi("TokenHistoricalPriceRequest", {
     description: "Pagination query for historical token market data.",
@@ -84,9 +79,25 @@ export const TokenDistributionComparisonQuerySchema = z
 
 export const SupplyComparisonResponseSchema = z
   .object({
-    previousValue: z.string().openapi({ format: "bigint" }),
-    currentValue: z.string().openapi({ format: "bigint" }),
-    changeRate: z.number(),
+    previousValue: z.string().openapi({
+      description:
+        "Supply value at the start of the comparison window, encoded as a decimal string (raw token base units).",
+      format: "bigint",
+    }),
+    currentValue: z.string().openapi({
+      description:
+        "Supply value at the end of the comparison window, encoded as a decimal string (raw token base units).",
+      format: "bigint",
+    }),
+    changeRate: z.number().openapi({
+      description:
+        "Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0.",
+    }),
+    rawDelta: z.string().openapi({
+      description:
+        "Signed bigint delta as a decimal string: currentValue - previousValue.",
+      format: "bigint",
+    }),
   })
   .openapi("SupplyComparisonResponse", {
     description:

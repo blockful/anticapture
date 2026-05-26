@@ -8,20 +8,22 @@ query AccountBalanceByAddress(
     fromDate: $fromDate
     toDate: $toDate
   ) {
-    data {
-      address
-      balance
-      delegate
-      tokenId
-      variation {
-        absoluteChange
-        percentageChange
-        previousBalance
+    ... on AccountBalanceWithVariationResponse {
+      data {
+        address
+        balance
+        delegate
+        tokenId
+        variation {
+          absoluteChange
+          percentageChange
+          previousBalance
+        }
       }
-    }
-    period {
-      endTimestamp
-      startTimestamp
+      period {
+        endTimestamp
+        startTimestamp
+      }
     }
   }
 }

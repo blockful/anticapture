@@ -1,13 +1,14 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { formatUnits } from "viem";
 
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
 import type { NonVoter } from "@/features/governance/hooks/useNonVoters";
 import type { ProposalDetails } from "@/features/governance/types";
 import { useNonVoters } from "@/features/governance/hooks/useNonVoters";
+import { useNonVotersParams } from "@/features/governance/hooks/useNonVotersParams";
 import { SkeletonRow, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -30,23 +31,24 @@ export const TabsDidntVoteContent = ({
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoIdEnum];
-
-  // State for managing sort order
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const { filters, setFilters } = useNonVotersParams();
+  const sortDirection = filters.orderDirection;
 
   // Handle sorting - for non-voters we only sort by voting power
   const handleSort = useCallback(() => {
-    setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-  }, [sortDirection]);
+    setFilters({
+      orderDirection: sortDirection === "asc" ? "desc" : "asc",
+    });
+  }, [setFilters, sortDirection]);
 
   // Get non-voters for this proposal
   const {
-    nonVoters,
-    loading,
+    data: nonVoters,
+    isLoading,
     error,
-    loadMore,
+    fetchNextPage,
     hasNextPage,
-    isLoadingMore,
+    isFetchingNextPage,
     totalCount,
   } = useNonVoters({
     proposalId: proposal.id,
@@ -60,8 +62,8 @@ export const TabsDidntVoteContent = ({
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && hasNextPage && !isLoadingMore) {
-          loadMore();
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       { threshold: 0.1 },
@@ -72,7 +74,7 @@ export const TabsDidntVoteContent = ({
     }
 
     return () => observer.disconnect();
-  }, [hasNextPage, isLoadingMore, loadMore]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const columns: ColumnDef<NonVoter>[] = useMemo(
     () => [
@@ -372,43 +374,44 @@ export const TabsDidntVoteContent = ({
     const data: NonVoter[] = [...nonVoters];
 
     // Add loading row if there are more pages or currently loading
-    if (hasNextPage || isLoadingMore) {
+    if (hasNextPage || isFetchingNextPage) {
       data.push({
         voter: "__LOADING_ROW__",
         lastVoteTimestamp: 0,
         votingPower: "",
         votingPowerVariation: "",
         isSubRow: false,
-      } as NonVoter);
+      } as unknown as NonVoter);
     }
 
     return data;
-  }, [nonVoters, hasNextPage, isLoadingMore]);
+  }, [nonVoters, hasNextPage, isFetchingNextPage]);
 
   // Show skeleton table on initial load or when we have no valid data
   const hasValidData =
     nonVoters.length > 0 &&
     nonVoters.some(
-      (nonVoter) => nonVoter.voter && nonVoter.voter !== "__LOADING_ROW__",
+      (nonVoter) =>
+        nonVoter.voter && (nonVoter.voter as string) !== "__LOADING_ROW__",
     );
 
   if (error) {
     return <div>Error: {error.message}</div>;
   }
 
-  if (loading && !hasValidData) {
+  if (isLoading && !hasValidData) {
     return (
       <div className="w-full">
         <VotesTable
           columns={columns}
-          data={Array.from({ length: 7 }, () => ({}) as NonVoter)}
+          data={Array.from({ length: 7 }, () => ({}) as unknown as NonVoter)}
         />
       </div>
     );
   }
 
   // Show message if no non-voters
-  if (!loading && totalCount === 0) {
+  if (!isLoading && totalCount === 0) {
     return (
       <div className="flex h-40 w-full items-center justify-center">
         <p className="text-secondary text-sm">

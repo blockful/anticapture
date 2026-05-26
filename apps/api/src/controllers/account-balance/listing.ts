@@ -9,6 +9,7 @@ import {
   AccountBalancesWithVariationResponseSchema,
   AccountBalanceWithVariationResponseMapper,
   AccountBalanceWithVariationResponseSchema,
+  ErrorResponseSchema,
 } from "@/mappers";
 import { setCacheControl } from "@/middlewares";
 import { AccountBalanceService } from "@/services";
@@ -110,6 +111,14 @@ export function accountBalances(
             },
           },
         },
+        404: {
+          description: "Account not found",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
       },
     }),
     async (context) => {
@@ -124,6 +133,13 @@ export function accountBalances(
         fromTimestamp,
         toTimestamp,
       );
+
+      if (!result) {
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Account not found" }),
+          404,
+        );
+      }
 
       return context.json(
         AccountBalanceWithVariationResponseMapper(

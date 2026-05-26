@@ -21,11 +21,23 @@ describe("getActiveActivityFeedFiltersCount", () => {
       toDate: 1_705_449_599,
       orderDirection: "asc",
       relevance: feedRelevanceEnum.HIGH,
-      type: feedEventTypeEnum.VOTE,
+      type: [feedEventTypeEnum.VOTE, feedEventTypeEnum.PROPOSAL],
     };
 
     const result = getActiveActivityFeedFiltersCount(filters);
 
     expect(result).toBe(5);
+  });
+
+  test("does not count an empty type array", () => {
+    const filters: FeedEventsQueryParams = {
+      orderDirection: "desc",
+      relevance: feedRelevanceEnum.MEDIUM,
+      type: [],
+    };
+
+    const result = getActiveActivityFeedFiltersCount(filters);
+
+    expect(result).toBe(0);
   });
 });

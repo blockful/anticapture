@@ -98,14 +98,9 @@ export default processConfig(
           endDate: String
 
           """
-          Cursor for pagination. Returns items after this date.
+          Number of day buckets to skip before returning results.
           """
-          after: String
-
-          """
-          Cursor for pagination. Returns items before this date.
-          """
-          before: String
+          skip: Int
 
           """
           Sort direction: "asc" or "desc". Default: "asc"

@@ -57,6 +57,7 @@ const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => ({
   votingPower: 1000000000000000000n,
   reason: null,
   timestamp: 1700000000n,
+  logIndex: 0,
   ...overrides,
 });
 

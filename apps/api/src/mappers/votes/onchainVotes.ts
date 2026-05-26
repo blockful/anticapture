@@ -3,19 +3,18 @@ import { z } from "@hono/zod-openapi";
 import { votesOnchain } from "@/database";
 import {
   AddressQueryArraySchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
-  unixTimestampQueryParam,
   VoteSupportSchema,
+  defaultDescOrderDirection,
+  earliestLatestDateRangeQueryParams,
+  paginatedListResponse,
+  paginationQueryParams,
 } from "../shared";
 
 export type DBVote = typeof votesOnchain.$inferSelect;
 
 export const VotesRequestSchema = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
+    ...paginationQueryParams(),
     voterAddressIn: AddressQueryArraySchema.optional().openapi({
       type: "array",
       items: { type: "string" },
@@ -30,12 +29,9 @@ export const VotesRequestSchema = z
         description: "Sort votes by timestamp or voting power.",
         example: "timestamp",
       }),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
     support: VoteSupportSchema.optional(),
-    fromDate: unixTimestampQueryParam(
-      "Earliest vote timestamp, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam("Latest vote timestamp, in Unix seconds."),
+    ...earliestLatestDateRangeQueryParams("vote"),
   })
   .openapi("OnchainVotesRequest");
 
@@ -69,11 +65,8 @@ export const VoteResponseSchema = z
 
 export type VoteResponse = z.infer<typeof VoteResponseSchema>;
 
-export const VotesResponseSchema = z
-  .object({
-    items: z.array(VoteResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("OnchainVotesResponse");
+export const VotesResponseSchema = paginatedListResponse(
+  VoteResponseSchema,
+).openapi("OnchainVotesResponse");
 
 export type VotesResponse = z.infer<typeof VotesResponseSchema>;

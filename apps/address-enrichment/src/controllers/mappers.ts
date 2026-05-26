@@ -78,10 +78,18 @@ export const AddressResponseSchema = z.object({
 
 export const AddressesRequestSchema = z.object({
   addresses: z
-    .array(AddressSchema)
-    .min(1, "At least one address is required")
-    .max(100, "Maximum 100 addresses per request")
+    .preprocess(
+      (val) => {
+        if (val === undefined || val === null) return [];
+        return Array.isArray(val) ? val : [val];
+      },
+      z
+        .array(AddressSchema)
+        .min(1, "At least one address is required")
+        .max(100, "Maximum 100 addresses per request"),
+    )
     .openapi({
+      items: { type: "string", format: "ethereum-address" },
       description:
         "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
       example: [

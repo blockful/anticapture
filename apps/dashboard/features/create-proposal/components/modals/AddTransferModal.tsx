@@ -1,6 +1,7 @@
 "use client";
 
 import { Coins } from "lucide-react";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { erc20Abi, isAddress } from "viem";
@@ -14,7 +15,9 @@ import daoConfig from "@/shared/dao-config";
 import { isEnsAddress } from "@/shared/utils/ens";
 import { useEthPrice } from "@/shared/hooks/useEthPrice";
 import { useTokenData } from "@/shared/hooks/useTokenData";
+import { cn } from "@/shared/utils/cn";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { SUGGESTED_TRANSFER_TOKENS } from "@/features/create-proposal/constants";
 import type {
   ERC20TransferAction,
   EthTransferAction,
@@ -97,6 +100,8 @@ export const AddTransferModal = ({
   const publicClient = usePublicClient(
     governanceChainId ? { chainId: governanceChainId } : undefined,
   );
+
+  const suggestedTokens = SUGGESTED_TRANSFER_TOKENS[daoIdEnum] ?? [];
 
   const usd = useMemo(() => {
     const n = Number(amount);
@@ -283,6 +288,43 @@ export const AddTransferModal = ({
               placeholder="0x…"
               error={tokenAddressError}
             />
+            {suggestedTokens.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                {suggestedTokens.map((token) => {
+                  const isActive =
+                    tokenAddress.trim().toLowerCase() ===
+                    token.address.toLowerCase();
+                  return (
+                    <button
+                      key={token.address}
+                      type="button"
+                      onClick={() => {
+                        setTokenAddress(token.address);
+                        setTokenAddressTouched(true);
+                        setDecimalsError(null);
+                      }}
+                      className={cn(
+                        "border-border-contrast hover:bg-surface-contrast flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium transition-colors",
+                        isActive
+                          ? "border-border-action text-primary"
+                          : "text-secondary",
+                      )}
+                      aria-pressed={isActive}
+                    >
+                      <Image
+                        src={token.logoUri}
+                        alt=""
+                        aria-hidden
+                        width={16}
+                        height={16}
+                        className="shrink-0 rounded-full object-cover"
+                      />
+                      {token.symbol}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             {tokenAddressError && (
               <span className="text-error text-xs">
                 Must be a valid Ethereum address

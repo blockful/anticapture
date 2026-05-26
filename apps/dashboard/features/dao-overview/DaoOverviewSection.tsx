@@ -15,7 +15,11 @@ import { SecurityCouncilCard } from "@/features/dao-overview/components/Security
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
-import { RiskAreaCardEnum, RiskAreaCardWrapper, SkeletonRow } from "@/shared/components";
+import {
+  RiskAreaCardEnum,
+  RiskAreaCardWrapper,
+  SkeletonRow,
+} from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";

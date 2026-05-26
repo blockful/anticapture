@@ -159,12 +159,6 @@ export const delegateChanged = async (
     type: "DELEGATION",
     value: delegatorBalance?.balance ?? 0n,
     timestamp,
-    metadata: {
-      delegator: normalizedDelegator,
-      delegate: normalizedDelegate,
-      previousDelegate: getAddress(previousDelegate),
-      amount: delegatorBalance?.balance ?? 0n,
-    },
   });
 };
 
@@ -233,10 +227,5 @@ export const delegatedVotesChanged = async (
     type: "DELEGATION_VOTES_CHANGED",
     value: deltaMod,
     timestamp,
-    metadata: {
-      delta,
-      deltaMod,
-      delegate: normalizedDelegate,
-    },
   });
 };

@@ -48,22 +48,26 @@ export const ActionsTabContent = ({
     daoConfigByDaoId[daoIdKey]?.daoOverview?.chain?.blockExplorers?.default
       ?.url ?? "https://etherscan.io";
 
+  const targets = proposal.targets ?? [];
+  const values = proposal.values ?? [];
+  const calldatas = proposal.calldatas ?? [];
+
   return (
     <div className="text-primary flex flex-col gap-3 py-4 lg:p-4">
-      {proposal.targets.length === 0 ? (
+      {targets.length === 0 ? (
         <BlankSlate
           variant="default"
           icon={Inbox}
           description="No actions found"
         />
       ) : (
-        proposal.targets.map((_, index) => (
+        targets.map((_, index) => (
           <ActionItem
             key={index}
             index={index}
-            target={proposal.targets[index]}
-            value={proposal.values[index]}
-            calldata={proposal.calldatas[index]}
+            target={targets[index] ?? null}
+            value={values[index] ?? null}
+            calldata={calldatas[index] ?? null}
             blockExplorerUrl={blockExplorerUrl}
           />
         ))

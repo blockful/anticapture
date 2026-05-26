@@ -1,5 +1,58 @@
 # @anticapture/api
 
+## 1.2.0
+
+### Minor Changes
+
+- [#1888](https://github.com/blockful/anticapture/pull/1888) [`ab313ce`](https://github.com/blockful/anticapture/commit/ab313ceba1e1eed357d9548003819b225d45a7c2) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Split `/health` into a Railway-friendly liveness probe and a richer diagnostic
+  endpoint.
+
+  `GET /health` now returns only `{database: "ok" | "error"}` with HTTP `200` when
+  the database is reachable and `503` otherwise — designed for orchestrators
+  (Railway, k8s) that act on status codes alone. The full snapshot, including
+  chain head and indexer freshness (`status`, `chain.head`, `indexer.*`), moved
+  to `GET /health/full`. HTTP status on `/health/full` still tracks database
+  reachability only; a stale indexer surfaces as `status: "degraded"` with `200`.
+
+  Also locks in the existing `Number(raw)` coercion in
+  `HealthRepositoryImpl.getLastEventTimestamp` with a regression test, so the
+  indexer timestamp can never leak as a bigint-stringified value into the
+  response and break downstream schema validation.
+
+- [#1875](https://github.com/blockful/anticapture/pull/1875) [`cb90c89`](https://github.com/blockful/anticapture/commit/cb90c8941e32c352ef84eb3b3e45298c1233f4ff) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Migrate feed event metadata from a denormalized `feed_event.metadata` JSON column to query-time synthesis against `proposals_onchain`, `votes_onchain`, `delegations`, `transfers`, and `voting_power_history`. Adds discriminated metadata schemas to the OpenAPI contract, supports multi-type filtering on `/feed/events`, and wires the dashboard event-type filter as a multi-select.
+
+- [#1888](https://github.com/blockful/anticapture/pull/1888) [`ac56ee9`](https://github.com/blockful/anticapture/commit/ac56ee949df21ebd7bb0789f2571468b2452ab96) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Replace the dedicated lean proposal endpoints with a `lean` query param.
+
+  The six `/proposals/lean*` and `/offchain/proposals/lean*` routes are removed.
+  Pass `lean=true` on the existing routes instead — `GET /{dao}/proposals`,
+  `/proposals/search`, `/proposals/{id}`, `/offchain/proposals`,
+  `/offchain/proposals/search`, and `/offchain/proposals/{id}` all now accept
+  the flag and drop the heavy fields (`calldatas`/`values`/`targets` on
+  onchain, `body` on offchain) when set. The default remains the full payload
+  so existing clients see no behavior change.
+
+  The `OnchainProposal.calldatas/values/targets` and `OffchainProposal.body`
+  fields are now optional in the OpenAPI schema, reflecting the runtime
+  contract more truthfully than before.
+
+  The new `lean` param uses explicit string parsing (`true`/`false`/`1`/`0`)
+  rather than `z.coerce.boolean()`, so `?lean=false` and `?lean=0` resolve to
+  `false` instead of being coerced to truthy by JavaScript's `Boolean(...)`.
+
+### Patch Changes
+
+- [#1888](https://github.com/blockful/anticapture/pull/1888) [`298cc75`](https://github.com/blockful/anticapture/commit/298cc755cd5d62658d5f97294a61c3c66d886362) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Stop capping the delegation-percentage repository read at `(limit + 1) * 2`.
+  The service builds a forward-filled timeline across the full requested date
+  window and only then paginates with `skip`/`limit`. Capping the upstream
+  read would drop later metric changes, freezing stale values across the tail
+  of the timeline and returning incorrect data on later `skip` pages.
+
+- [#1888](https://github.com/blockful/anticapture/pull/1888) [`298cc75`](https://github.com/blockful/anticapture/commit/298cc755cd5d62658d5f97294a61c3c66d886362) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Drop the `format: "bigint"` annotation from `percentageChange` on
+  `AccountBalanceVariation` and `VotingPowerVariation`. The field carries a
+  decimal-string percentage (or the `"NO BASELINE"` sentinel when the previous
+  period is zero) — it was never a bigint, and the wrong tag made generated
+  TS clients type it as `bigint`, which broke sentinel comparisons downstream.
+
 ## 1.1.0
 
 ### Minor Changes

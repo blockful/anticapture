@@ -5,8 +5,9 @@ import { SECONDS_IN_DAY } from "@/lib/enums";
 
 import {
   OrderDirectionSchema,
-  PageInfoSchema,
+  paginatedListResponse,
   paginationLimitQueryParam,
+  paginationSkipQueryParam,
   unixTimestampQueryParam,
 } from "../shared";
 
@@ -14,41 +15,36 @@ export type DBTokenMetric = typeof daoMetricsDayBucket.$inferSelect;
 
 // === ZOD SCHEMAS ===
 
-// Base schema for filters
-const BaseFiltersSchema = z.object({
+// Repository filters: time window + ordering + size cap.
+export const RepositoryFiltersSchema = z.object({
   startDate: unixTimestampQueryParam(
-    "Inclusive lower bound cursor in Unix seconds.",
+    "Inclusive lower bound for the day-bucket window, in Unix seconds.",
   ),
   endDate: unixTimestampQueryParam(
-    "Inclusive upper bound cursor in Unix seconds.",
+    "Inclusive upper bound for the day-bucket window, in Unix seconds.",
   ),
   orderDirection: OrderDirectionSchema.optional(),
-  limit: z.number().optional().openapi({
-    description: "Optional limit used by internal filters.",
-    example: 365,
-    type: "integer",
-  }),
+  limit: z.number().int(),
 });
 
-// Repository filters schema
-export const RepositoryFiltersSchema = BaseFiltersSchema.extend({
-  orderDirection: OrderDirectionSchema.optional(),
-  limit: z.number().int(), // Required in repository layer
-});
-
-// HTTP query schema (extends base with pagination cursors and HTTP validations)
-export const DelegationPercentageRequestSchema = BaseFiltersSchema.extend({
-  // Cursor for pagination - returns items after this date (exclusive)
-  after: unixTimestampQueryParam(
-    "Return items after this cursor, exclusive, in Unix seconds.",
-  ),
-  // Cursor for pagination - returns items before this date (exclusive)
-  before: unixTimestampQueryParam(
-    "Return items before this cursor, exclusive, in Unix seconds.",
-  ),
-  orderDirection: OrderDirectionSchema.optional().default("asc"),
-  limit: paginationLimitQueryParam().openapi({ example: "365" }),
-}).openapi("DelegationPercentageRequest");
+export const DelegationPercentageRequestSchema = z
+  .object({
+    startDate: unixTimestampQueryParam(
+      "Inclusive lower bound for the day-bucket window, in Unix seconds.",
+    ),
+    endDate: unixTimestampQueryParam(
+      "Inclusive upper bound for the day-bucket window, in Unix seconds.",
+    ),
+    orderDirection: OrderDirectionSchema.optional().default("asc"),
+    skip: paginationSkipQueryParam(
+      "Number of day buckets to skip before returning results.",
+    ),
+    limit: paginationLimitQueryParam(
+      "Maximum number of day buckets to return.",
+      365,
+    ).openapi({ example: "365" }),
+  })
+  .openapi("DelegationPercentageRequest");
 
 export const DelegationPercentageItemSchema = z
   .object({
@@ -63,16 +59,10 @@ export const DelegationPercentageItemSchema = z
   })
   .openapi("DelegationPercentageItem");
 
-export const DelegationPercentageResponseSchema = z
-  .object({
-    items: z.array(DelegationPercentageItemSchema),
-    totalCount: z.number().int().openapi({
-      description: "Total number of matching day buckets.",
-      example: 365,
-    }),
-    pageInfo: PageInfoSchema,
-  })
-  .openapi("DelegationPercentageResponse");
+export const DelegationPercentageResponseSchema = paginatedListResponse(
+  DelegationPercentageItemSchema,
+  "Total number of matching day buckets across the requested window (ignores skip/limit).",
+).openapi("DelegationPercentageResponse");
 
 // === INFERRED TYPES ===
 
@@ -107,19 +97,9 @@ export function normalizeTimestamp(timestamp: string | number): string {
 export function toApi(serviceResult: {
   items: DelegationPercentageItem[];
   totalCount: number;
-  hasNextPage: boolean;
-  hasPreviousPage?: boolean;
-  endDate: string | null;
-  startDate: string | null;
 }): DelegationPercentageResponse {
   return {
     items: serviceResult.items,
     totalCount: serviceResult.totalCount,
-    pageInfo: {
-      hasNextPage: serviceResult.hasNextPage,
-      hasPreviousPage: serviceResult.hasPreviousPage ?? false,
-      endDate: serviceResult.endDate,
-      startDate: serviceResult.startDate,
-    },
   };
 }
