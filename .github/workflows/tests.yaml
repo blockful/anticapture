@@ -148,6 +148,24 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
 
+      - name: Diagnose E2E auth wiring
+        env:
+          BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
+          NEXT_PUBLIC_GATEFUL_URL: ${{ secrets.E2E_NEXT_PUBLIC_GATEFUL_URL }}
+        run: |
+          if [ -n "$BLOCKFUL_API_TOKEN" ]; then
+            echo "BLOCKFUL_API_TOKEN: set (length ${#BLOCKFUL_API_TOKEN})"
+          else
+            echo "BLOCKFUL_API_TOKEN: EMPTY"
+          fi
+          echo "Probing upstream voting-powers with token..."
+          curl -sS -o /dev/null -w "with-token=%{http_code}\n" \
+            -H "Authorization: Bearer $BLOCKFUL_API_TOKEN" \
+            "$NEXT_PUBLIC_GATEFUL_URL/ens/voting-powers?limit=1"
+          echo "Probing upstream voting-powers without token..."
+          curl -sS -o /dev/null -w "no-token=%{http_code}\n" \
+            "$NEXT_PUBLIC_GATEFUL_URL/ens/voting-powers?limit=1"
+
       - name: Run dashboard E2E tests
         run: pnpm dashboard test:e2e
         env:
