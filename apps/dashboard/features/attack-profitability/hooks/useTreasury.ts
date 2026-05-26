@@ -1,13 +1,12 @@
 import {
-  DaysWindow,
-  OrderDirection,
-  type DaoTokenTreasuryQuery,
-  type LiquidTreasuryQuery,
-  type TotalTreasuryQuery,
-  useDaoTokenTreasuryQuery,
-  useLiquidTreasuryQuery,
-  useTotalTreasuryQuery,
-} from "@anticapture/graphql-client/hooks";
+  useGetDaoTokenTreasury,
+  useGetLiquidTreasury,
+  useGetTotalTreasury,
+} from "@anticapture/client/hooks";
+import type {
+  GetLiquidTreasuryPathParamsDaoEnumKey,
+  TreasuryItem,
+} from "@anticapture/client";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -19,67 +18,11 @@ export interface TreasuryDataPoint {
   date: number;
 }
 
-type TreasuryQueryResult =
-  | LiquidTreasuryQuery["getLiquidTreasury"]
-  | DaoTokenTreasuryQuery["getDaoTokenTreasury"]
-  | TotalTreasuryQuery["getTotalTreasury"];
-
-const useQueryByType = (
-  type: TreasuryType,
-  daoId: DaoIdEnum,
-  days: TimeInterval,
-  order: "asc" | "desc",
-) => {
-  const daysKey = days as keyof typeof DaysWindow;
-  const commonOptions = {
-    variables: {
-      days: DaysWindow[daysKey],
-      orderDirection:
-        order === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  };
-
-  const liquid = useLiquidTreasuryQuery({
-    ...commonOptions,
-    skip: type !== "liquid",
-    fetchPolicy: "no-cache",
-  });
-
-  const daoToken = useDaoTokenTreasuryQuery({
-    ...commonOptions,
-    skip: type !== "dao-token",
-    fetchPolicy: "no-cache",
-  });
-
-  const total = useTotalTreasuryQuery({
-    ...commonOptions,
-    skip: type !== "total",
-    fetchPolicy: "no-cache",
-  });
-
-  if (type === "liquid") return liquid;
-  if (type === "dao-token") return daoToken;
-  return total;
-};
-
-const extractTreasuryData = (
-  type: TreasuryType,
-  data: ReturnType<typeof useQueryByType>["data"],
-): TreasuryQueryResult | null => {
-  if (!data) return null;
-  if (type === "liquid" && "getLiquidTreasury" in data)
-    return (data as LiquidTreasuryQuery).getLiquidTreasury;
-  if (type === "dao-token" && "getDaoTokenTreasury" in data)
-    return (data as DaoTokenTreasuryQuery).getDaoTokenTreasury;
-  if (type === "total" && "getTotalTreasury" in data)
-    return (data as TotalTreasuryQuery).getTotalTreasury;
-  return null;
-};
+const NO_CACHE_QUERY_OPTIONS = {
+  staleTime: 0,
+  gcTime: 0,
+  refetchOnMount: "always",
+} as const;
 
 export const useTreasury = (
   daoId: DaoIdEnum,
@@ -87,13 +30,26 @@ export const useTreasury = (
   days: TimeInterval = "365d" as TimeInterval,
   order: "asc" | "desc" = "asc",
 ) => {
-  const { data, loading, error } = useQueryByType(type, daoId, days, order);
-  const treasury = extractTreasuryData(type, data);
+  const dao = daoId.toLowerCase() as GetLiquidTreasuryPathParamsDaoEnumKey;
+  const params = { days, orderDirection: order };
+
+  const liquid = useGetLiquidTreasury(dao, params, {
+    query: { ...NO_CACHE_QUERY_OPTIONS, enabled: type === "liquid" },
+  });
+  const daoToken = useGetDaoTokenTreasury(dao, params, {
+    query: { ...NO_CACHE_QUERY_OPTIONS, enabled: type === "dao-token" },
+  });
+  const total = useGetTotalTreasury(dao, params, {
+    query: { ...NO_CACHE_QUERY_OPTIONS, enabled: type === "total" },
+  });
+
+  const active =
+    type === "liquid" ? liquid : type === "dao-token" ? daoToken : total;
 
   return {
-    data: treasury?.items ?? [],
-    totalCount: treasury?.totalCount ?? 0,
-    loading,
-    error,
+    data: (active.data?.items ?? []) as TreasuryItem[],
+    totalCount: active.data?.totalCount ?? 0,
+    loading: active.isLoading,
+    error: active.error,
   };
 };
