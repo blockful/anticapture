@@ -1,20 +1,24 @@
-import {
-  type HistoricalTokenDataQuery,
-  useHistoricalTokenDataQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useHistoricalTokenData } from "@anticapture/client/hooks";
+import type {
+  HistoricalTokenDataPathParamsDaoEnumKey,
+  TokenHistoricalPriceItem,
+} from "@anticapture/client";
 
 import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
 import type { PriceEntry } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-type HistoricalTokenDataItem = NonNullable<
-  NonNullable<HistoricalTokenDataQuery["historicalTokenData"]>[number]
->;
-
-const toPriceEntry = (item: HistoricalTokenDataItem): PriceEntry => ({
+const toPriceEntry = (item: TokenHistoricalPriceItem): PriceEntry => ({
   price: item.price,
   timestamp: item.timestamp,
 });
+
+// Mirrors Apollo's fetchPolicy: "no-cache".
+const NO_CACHE_QUERY_OPTIONS = {
+  staleTime: 0,
+  gcTime: 0,
+  refetchOnMount: "always",
+} as const;
 
 export const useDaoTokenHistoricalData = ({
   daoId,
@@ -25,26 +29,20 @@ export const useDaoTokenHistoricalData = ({
   limit?: number;
   closedDataOnly?: boolean;
 }) => {
-  const { data, loading, error, refetch } = useHistoricalTokenDataQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    variables: { limit: limit ?? null, skip: null },
-    fetchPolicy: "no-cache",
-  });
+  const dao = daoId.toLowerCase() as HistoricalTokenDataPathParamsDaoEnumKey;
 
-  const items =
-    data?.historicalTokenData
-      ?.filter((item): item is HistoricalTokenDataItem => item !== null)
-      .map(toPriceEntry) ?? [];
+  const { data, isLoading, error, refetch } = useHistoricalTokenData(
+    dao,
+    { limit },
+    { query: NO_CACHE_QUERY_OPTIONS },
+  );
 
+  const items = (data ?? []).map(toPriceEntry);
   const result = closedDataOnly ? getOnlyClosedData(items) : items;
 
   return {
     data: result,
-    loading,
+    loading: isLoading,
     error,
     refetch,
   };
