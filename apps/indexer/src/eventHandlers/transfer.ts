@@ -155,17 +155,11 @@ export const tokenTransfer = async (
       amount: current.amount + value,
     }));
 
-  // Insert feed event for activity feed
   await context.db.insert(feedEvent).values({
     txHash: transactionHash,
     logIndex,
     type: "TRANSFER",
     value,
     timestamp,
-    metadata: {
-      from: normalizedFrom,
-      to: normalizedTo,
-      amount: value,
-    },
   });
 };

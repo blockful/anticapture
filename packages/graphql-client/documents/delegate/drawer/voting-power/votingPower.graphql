@@ -1,5 +1,5 @@
 query GetVotingPower($address: String!) {
-  votingPowerByAccountId(accountId: $address) {
+  votingPowerByAccountId(address: $address) {
     accountId
     votingPower
   }

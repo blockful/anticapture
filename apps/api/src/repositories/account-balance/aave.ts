@@ -169,7 +169,7 @@ export class AAVEAccountBalanceRepository {
           percentageChange: calculatePercentage(currentBalance, absoluteChange),
         }),
       ),
-      totalCount: totalCount?.count ?? 0,
+      totalCount: Number(totalCount?.count ?? 0),
     };
   }
 

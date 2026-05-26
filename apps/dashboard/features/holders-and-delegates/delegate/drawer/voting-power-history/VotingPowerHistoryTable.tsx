@@ -68,17 +68,23 @@ export const VotingPowerHistoryTable = ({
     { value: "smallest-first", label: "Smallest first" },
   ];
 
-  const { delegationHistory, loading, fetchNextPage, error, hasNextPage } =
-    useDelegateDelegationHistory({
-      accountId,
-      daoId,
-      orderBy: sortBy,
-      orderDirection: sortDirection,
-      filterVariables,
-      fromTimestamp,
-      toTimestamp,
-      limit,
-    });
+  const {
+    delegationHistory,
+    loading,
+    fetchNextPage,
+    error,
+    hasNextPage,
+    fetchingMore,
+  } = useDelegateDelegationHistory({
+    accountId,
+    daoId,
+    orderBy: sortBy,
+    orderDirection: sortDirection,
+    filterVariables,
+    fromTimestamp,
+    toTimestamp,
+    limit,
+  });
 
   const isInitialLoading =
     loading && (!delegationHistory || delegationHistory.length === 0);
@@ -97,9 +103,9 @@ export const VotingPowerHistoryTable = ({
       const delegator = item.delegation?.from;
       const isRedelegation =
         previousDelegate != null &&
-        !isAddressEqual(previousDelegate as Address, zeroAddress) &&
+        !isAddressEqual(previousDelegate, zeroAddress) &&
         delegator != null &&
-        !isAddressEqual(previousDelegate as Address, delegator as Address);
+        !isAddressEqual(previousDelegate, delegator);
       statusText = isRedelegation ? "Redelegation" : "Delegation";
     }
 
@@ -153,7 +159,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       cell: ({ row }) => {
-        const timestamp = row.getValue("timestamp") as string;
+        const timestamp = row.original.timestamp;
 
         if (isInitialLoading) {
           return (
@@ -318,13 +324,13 @@ export const VotingPowerHistoryTable = ({
         // Get delegator address based on the transaction type and direction
         let delegatorAddress: Address = zeroAddress;
         if (item.delegation) {
-          delegatorAddress = item.delegation.from as Address;
+          delegatorAddress = item.delegation.from;
         } else if (item.transfer) {
           // For transfers: if delta is negative, fromAccountId is delegator
           // If delta is positive, toAccountId is delegator
           delegatorAddress = item.isGain
-            ? (item.transfer.to as Address)
-            : (item.transfer.from as Address);
+            ? item.transfer.to
+            : item.transfer.from;
         } else if (Number(item.delta) < 0) {
           delegatorAddress = accountId as Address;
         }
@@ -333,7 +339,7 @@ export const VotingPowerHistoryTable = ({
           <div className="group flex items-center gap-3">
             <div className="overflow-truncate flex max-w-24 items-center gap-2">
               <EnsAvatar
-                address={delegatorAddress as `0x${string}`}
+                address={delegatorAddress}
                 size="sm"
                 variant="rounded"
                 showName={true}
@@ -346,7 +352,7 @@ export const VotingPowerHistoryTable = ({
               />
               <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
                 <CopyAndPasteButton
-                  textToCopy={delegatorAddress as `0x${string}`}
+                  textToCopy={delegatorAddress}
                   customTooltipText={{
                     default: "Copy address",
                     copied: "Address copied!",
@@ -386,25 +392,6 @@ export const VotingPowerHistoryTable = ({
       header: () => (
         <div className="text-table-header flex w-full items-center justify-start gap-2">
           <span>Delegate</span>
-          {/* <AddressFilter
-            onApply={async (addr) => {
-              if (!addr) {
-                setToFilter(null);
-                return;
-              }
-              if (addr.indexOf(".eth") > 0) {
-                const address = await fetchAddressFromEnsName({
-                  ensName: addr as `${string}.eth`,
-                });
-                setToFilter(address);
-                return;
-              }
-              if (isAddress(addr)) {
-                setToFilter(addr);
-              }
-            }}
-            currentFilter={toFilter ?? ""}
-          /> */}
         </div>
       ),
       cell: ({ row }) => {
@@ -429,7 +416,7 @@ export const VotingPowerHistoryTable = ({
         let delegateAddress: Address = zeroAddress;
         if (item.delegation) {
           // For delegation, delegate is the one receiving the delegation
-          delegateAddress = item.delegation.to as Address;
+          delegateAddress = item.delegation.to;
         } else if (item.transfer) {
           // For transfers, the selected address should always be at the delegates column
           delegateAddress = accountId as Address;
@@ -441,7 +428,7 @@ export const VotingPowerHistoryTable = ({
           <div className="group flex items-center justify-between gap-3">
             <div className="max-w-35 flex items-center gap-2 overflow-hidden">
               <EnsAvatar
-                address={delegateAddress as `0x${string}`}
+                address={delegateAddress}
                 size="sm"
                 variant="rounded"
                 showName={true}
@@ -454,7 +441,7 @@ export const VotingPowerHistoryTable = ({
               />
               <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
                 <CopyAndPasteButton
-                  textToCopy={delegateAddress as `0x${string}`}
+                  textToCopy={delegateAddress}
                   customTooltipText={{
                     default: "Copy address",
                     copied: "Address copied!",
@@ -493,7 +480,7 @@ export const VotingPowerHistoryTable = ({
         size="sm"
         mobileTableFixed={true}
         hasMore={hasNextPage}
-        isLoadingMore={loading}
+        isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         csvFilename="voting-power-history.csv"

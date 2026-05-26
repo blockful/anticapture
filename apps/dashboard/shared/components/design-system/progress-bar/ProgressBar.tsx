@@ -24,6 +24,8 @@ export const ProgressBar = ({
   labelPosition = "top",
   size = "default",
   marker,
+  color,
+  rounded = false,
   className,
 }: ProgressBarProps) => {
   const isRow = labelPosition === "left" || labelPosition === "right";
@@ -43,6 +45,7 @@ export const ProgressBar = ({
         className={cn(
           "bg-surface-hover w-full overflow-hidden",
           trackHeightStyles[size],
+          rounded && "rounded-full",
         )}
       >
         {segments ? (
@@ -62,9 +65,12 @@ export const ProgressBar = ({
           <div
             className={cn(
               "h-full transition-all duration-300 ease-in-out",
-              segmentColorStyles.default,
+              !color && segmentColorStyles.default,
             )}
-            style={{ width: `${clampedValue}%` }}
+            style={{
+              width: `${clampedValue}%`,
+              ...(color ? { backgroundColor: color } : {}),
+            }}
           />
         )}
       </div>

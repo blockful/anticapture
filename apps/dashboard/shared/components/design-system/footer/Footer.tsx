@@ -29,7 +29,7 @@ export type FooterProps = VariantProps<typeof footerVariant> & {
 
 export const Footer = ({ variant, className }: FooterProps) => {
   const { data: release } = useGitHubRelease();
-  const version = release?.tag_name || "v1.1.0";
+  const version = release?.version || "v1.1.0";
   const releaseUrl =
     release?.html_url || "https://github.com/blockful/anticapture/releases";
 

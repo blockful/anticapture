@@ -106,6 +106,7 @@ export const Select = ({
             maxHeight:
               "min(320px, var(--radix-popover-content-available-height))",
           }}
+          onWheel={(e) => e.stopPropagation()}
           className={cn(
             // Base/layout
             "flex flex-col overflow-y-auto",

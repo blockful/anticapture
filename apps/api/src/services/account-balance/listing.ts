@@ -68,17 +68,11 @@ export class AccountBalanceService {
     accountId: Address,
     variationFromTimestamp: number,
     variationToTimestamp: number,
-  ): Promise<DBAccountBalanceWithVariation> {
-    const result = await this.repo.getAccountBalanceWithVariation(
+  ): Promise<DBAccountBalanceWithVariation | undefined> {
+    return await this.repo.getAccountBalanceWithVariation(
       accountId,
       variationFromTimestamp,
       variationToTimestamp,
     );
-
-    if (!result) {
-      throw new Error("Account not found");
-    }
-
-    return result;
   }
 }

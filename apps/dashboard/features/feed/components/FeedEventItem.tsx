@@ -18,6 +18,11 @@ import {
   type FeedItem,
   type FeedRelevance,
   type FeedEventType,
+  type FeedVoteMetadata,
+  type FeedProposalMetadata,
+  type FeedProposalExtendedMetadata,
+  type FeedTransferMetadata,
+  type FeedDelegationMetadata,
 } from "@anticapture/client";
 import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
@@ -30,13 +35,6 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getDaoProposalPath } from "@/shared/utils/whitelabel";
-import type {
-  DelegationDetail,
-  ProposalDetail,
-  ProposalExtendedDetail,
-  TransferDetail,
-  VoteDetail,
-} from "@/features/feed/types";
 
 interface FeedEventItemProps {
   event: FeedItem;
@@ -160,8 +158,9 @@ export const FeedEventItem = ({
   const BadgeIcon = getBadgeIcon(event.type);
   const badgeVariant = getBadgeVariant(event.relevance);
 
-  const formatAmount = (amount: string) => {
-    const value = formatUnits(BigInt(amount), config.decimals);
+  const formatAmount = (amount: bigint | string) => {
+    const asBigint = typeof amount === "bigint" ? amount : BigInt(amount);
+    const value = formatUnits(asBigint, config.decimals);
     return formatNumberUserReadable(Number(value));
   };
 
@@ -175,17 +174,18 @@ export const FeedEventItem = ({
   const renderEventContent = () => {
     switch (event.type) {
       case "VOTE": {
-        const voteMetadata = event.metadata as VoteDetail | undefined;
+        const voteMetadata = event.metadata as FeedVoteMetadata | null;
         if (!voteMetadata) return null;
+        const voterAddress = voteMetadata.voter as Address;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={voteMetadata.voter}
+              address={voterAddress}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={voteMetadata.voter}
+              textToCopy={voterAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -248,17 +248,18 @@ export const FeedEventItem = ({
       }
 
       case "PROPOSAL": {
-        const proposalMetadata = event.metadata as ProposalDetail | undefined;
+        const proposalMetadata = event.metadata as FeedProposalMetadata | null;
         if (!proposalMetadata) return null;
+        const proposerAddress = proposalMetadata.proposer as Address;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={proposalMetadata.proposer}
+              address={proposerAddress}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={proposalMetadata.proposer}
+              textToCopy={proposerAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -299,9 +300,8 @@ export const FeedEventItem = ({
       }
 
       case "PROPOSAL_EXTENDED": {
-        const proposalExtendedMetadata = event.metadata as
-          | ProposalExtendedDetail
-          | undefined;
+        const proposalExtendedMetadata =
+          event.metadata as FeedProposalExtendedMetadata | null;
         if (!proposalExtendedMetadata) return null;
         return (
           <div className="leading-relaxed">
@@ -339,17 +339,19 @@ export const FeedEventItem = ({
       }
 
       case "TRANSFER": {
-        const transferMetadata = event.metadata as TransferDetail | undefined;
+        const transferMetadata = event.metadata as FeedTransferMetadata | null;
         if (!transferMetadata) return null;
+        const fromAddress = transferMetadata.from as Address;
+        const toAddress = transferMetadata.to as Address;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={transferMetadata.from}
+              address={fromAddress}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={transferMetadata.from}
+              textToCopy={fromAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -359,12 +361,12 @@ export const FeedEventItem = ({
             </span>{" "}
             <span className="text-secondary">to</span>{" "}
             <AddressButton
-              address={transferMetadata.to}
+              address={toAddress}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={transferMetadata.to}
+              textToCopy={toAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />
@@ -381,25 +383,27 @@ export const FeedEventItem = ({
       }
 
       case "DELEGATION": {
-        const delegationMetadata = event.metadata as DelegationDetail | null;
+        const delegationMetadata =
+          event.metadata as FeedDelegationMetadata | null;
         if (!delegationMetadata) return null;
+        const delegatorAddress = delegationMetadata.delegator as Address;
+        const delegateAddress = delegationMetadata.delegate as Address;
+        const previousDelegateAddress =
+          delegationMetadata.previousDelegate as Address | null;
         const hasRedelegation =
-          delegationMetadata.previousDelegate !== null &&
-          !isAddressEqual(delegationMetadata.previousDelegate, zeroAddress) &&
-          !isAddressEqual(
-            delegationMetadata.previousDelegate,
-            delegationMetadata.delegator,
-          );
+          previousDelegateAddress !== null &&
+          !isAddressEqual(previousDelegateAddress, zeroAddress) &&
+          !isAddressEqual(previousDelegateAddress, delegatorAddress);
 
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={delegationMetadata.delegator}
+              address={delegatorAddress}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={delegationMetadata.delegator}
+              textToCopy={delegatorAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -413,12 +417,12 @@ export const FeedEventItem = ({
               <>
                 <span className="text-secondary">from</span>{" "}
                 <AddressButton
-                  address={delegationMetadata.previousDelegate!}
+                  address={previousDelegateAddress!}
                   entityType="delegate"
                   onRowClick={onRowClick}
                 />{" "}
                 <CopyAndPasteButton
-                  textToCopy={delegationMetadata.previousDelegate!}
+                  textToCopy={previousDelegateAddress!}
                   className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
                   iconSize="md"
                 />{" "}
@@ -426,12 +430,12 @@ export const FeedEventItem = ({
             )}
             <span className="text-secondary">to</span>{" "}
             <AddressButton
-              address={delegationMetadata.delegate}
+              address={delegateAddress}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={delegationMetadata.delegate}
+              textToCopy={delegateAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}

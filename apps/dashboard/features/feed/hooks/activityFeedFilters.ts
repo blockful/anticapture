@@ -11,5 +11,5 @@ export const getActiveActivityFeedFiltersCount = (
     filters.toDate,
     filters.orderDirection !== "desc",
     filters.relevance !== feedRelevanceEnum.MEDIUM,
-    filters.type,
+    filters.type && filters.type.length > 0,
   ].filter(Boolean).length;

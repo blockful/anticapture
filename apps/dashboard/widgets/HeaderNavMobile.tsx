@@ -64,6 +64,11 @@ export const HeaderNavMobile = () => {
       title: PAGES_CONSTANTS.serviceProviders.title,
       enabled: !!daoConfig.serviceProviders,
     },
+    {
+      page: PAGES_CONSTANTS.revenue.page,
+      title: PAGES_CONSTANTS.revenue.title,
+      enabled: !!daoConfig.revenue,
+    },
   ];
 
   const enabledOptions = options.filter((o) => o.enabled);
