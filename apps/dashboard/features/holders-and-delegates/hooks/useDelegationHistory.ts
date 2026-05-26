@@ -62,10 +62,19 @@ export const useDelegationHistory = ({
     { query: { getNextPageParam } },
   );
 
-  const items = useMemo(
-    () => data?.pages.flatMap((p) => p.items) ?? [],
-    [data],
-  );
+  const items = useMemo(() => {
+    const seen = new Set<string>();
+    return (
+      data?.pages
+        .flatMap((p) => p.items)
+        .filter((item) => {
+          const key = `${item.transactionHash}-${item.delegateAddress}-${item.amount}-${item.timestamp}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }) ?? []
+    );
+  }, [data]);
 
   return {
     data: items,
