@@ -158,3 +158,6 @@ dist
 .claude/settings.local.json
 **/.claude/settings.local.json
 .mcp.json
+
+apps/gateful/openapi/gateful.json
+apps/api-gateway/schema.graphql

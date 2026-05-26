@@ -1,8 +1,26 @@
 // codegen.ts
 import type { CodegenConfig } from "@graphql-codegen/cli";
 
+const PERMANENT_BRANCHES = ["dev", "main"];
+
+const resolveSchema = () => {
+  const prId = process.env.VERCEL_GIT_PULL_REQUEST_ID;
+  const vercelEnv = process.env.VERCEL_ENV;
+  const branch = process.env.VERCEL_GIT_COMMIT_REF;
+
+  if (
+    vercelEnv === "preview" &&
+    prId &&
+    !PERMANENT_BRANCHES.includes(branch ?? "")
+  ) {
+    return `https://api-gateway-anticapture-pr-${prId}.up.railway.app/graphql`;
+  }
+
+  return process.env.NEXT_PUBLIC_BASE_URL ?? "";
+};
+
 const config: CodegenConfig = {
-  schema: "../../apps/api-gateway/schema.graphql",
+  schema: resolveSchema(),
   documents: "./documents/**/*.graphql",
   ignoreNoDocuments: true,
   generates: {

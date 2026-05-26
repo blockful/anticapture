@@ -1,5 +1,3 @@
-import { fileURLToPath } from "node:url";
-
 import { defineConfig } from "@kubb/core";
 import { pluginClient } from "@kubb/plugin-client";
 import { pluginFaker } from "@kubb/plugin-faker";
@@ -27,9 +25,25 @@ type PluginTsOptionsWithSchemaTransformer = Omit<
   };
 };
 
-const gatefulOpenApiSpecPath = fileURLToPath(
-  new URL("../../apps/gateful/openapi/gateful.json", import.meta.url),
-);
+const PERMANENT_BRANCHES = ["dev", "main"];
+
+const resolveGatefulOpenApiSpec = () => {
+  const prId = process.env.VERCEL_GIT_PULL_REQUEST_ID;
+  const vercelEnv = process.env.VERCEL_ENV;
+  const branch = process.env.VERCEL_GIT_COMMIT_REF;
+
+  if (
+    vercelEnv === "preview" &&
+    prId &&
+    !PERMANENT_BRANCHES.includes(branch ?? "")
+  ) {
+    return `https://gateful-anticapture-pr-${prId}.up.railway.app/docs/json`;
+  }
+
+  return `${process.env.NEXT_PUBLIC_GATEFUL_URL}/docs/json`;
+};
+
+const gatefulOpenApiSpecPath = resolveGatefulOpenApiSpec();
 
 // The `GET /{dao}/dao` route has `operationId: "dao"` and a path parameter
 // also named `dao`. Without this rename, Kubb emits `function dao(dao: ...)`,
