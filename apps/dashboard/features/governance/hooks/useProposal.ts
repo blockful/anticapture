@@ -21,7 +21,12 @@ export const useProposal = ({
   daoId,
 }: UseProposalParams): UseProposalResult => {
   const daoKey = daoId.toLowerCase() as ProposalPathParamsDaoEnumKey;
-  const { data, isLoading, error } = useProposalSDK(daoKey, proposalId, {});
+  const { data, isLoading, error } = useProposalSDK(
+    daoKey,
+    proposalId,
+    {},
+    { query: { enabled: !!proposalId } },
+  );
 
   return {
     data: data
