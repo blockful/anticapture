@@ -1,7 +1,6 @@
 "use client";
 
 import type {
-  ProposalActivityItem,
   ProposalActivityResponse,
   ProposalsActivityPathParamsDaoEnumKey,
   ProposalsActivityQueryParams,
@@ -23,30 +22,6 @@ interface UseProposalsActivityParams {
   limit: number;
 }
 
-type ProposalActivityData = {
-  totalProposals: number;
-  votedProposals: number;
-  neverVoted: number;
-  winRate: number;
-  yesRate: number;
-  avgTimeBeforeEnd: number;
-  proposals: ProposalActivityItem[];
-};
-
-interface UseProposalsActivityResult {
-  data: ProposalActivityData | null;
-  loading: boolean;
-  error: Error | null;
-  pagination: {
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-    currentPage: number;
-  };
-  fetchNextPage: () => void;
-  fetchingMore: boolean;
-}
-
 const getProposalsNextPage = (
   _lastPage: ProposalActivityResponse,
   allPages: ProposalActivityResponse[],
@@ -64,7 +39,7 @@ export const useProposalsActivity = ({
   orderDirection,
   userVoteFilter,
   limit,
-}: UseProposalsActivityParams): UseProposalsActivityResult => {
+}: UseProposalsActivityParams) => {
   const params = useMemo<ProposalsActivityQueryParams>(
     () => ({
       address,
@@ -90,7 +65,7 @@ export const useProposalsActivity = ({
     { query: { getNextPageParam: getProposalsNextPage } },
   );
 
-  const processedData = useMemo((): ProposalActivityData | null => {
+  const processedData = useMemo((): ProposalActivityResponse | null => {
     if (!data?.pages?.length) return null;
     const firstPage = data.pages[0];
     const seen = new Set<string>();
@@ -102,36 +77,14 @@ export const useProposalsActivity = ({
         seen.add(id);
         return true;
       });
-    return {
-      totalProposals: firstPage.totalProposals,
-      votedProposals: firstPage.votedProposals,
-      neverVoted: firstPage.neverVoted ? 1 : 0,
-      winRate: firstPage.winRate,
-      yesRate: firstPage.yesRate,
-      avgTimeBeforeEnd: firstPage.avgTimeBeforeEnd,
-      proposals,
-    };
+    return { ...firstPage, proposals };
   }, [data]);
-
-  const totalProposals = processedData?.totalProposals ?? 0;
-  const currentPage = data?.pages?.length ?? 0;
-  const totalPages = totalProposals ? Math.ceil(totalProposals / limit) : 1;
-
-  const pagination = useMemo(
-    () => ({
-      totalPages,
-      hasNextPage: hasNextPage ?? false,
-      hasPreviousPage: currentPage > 1,
-      currentPage,
-    }),
-    [totalPages, hasNextPage, currentPage],
-  );
 
   return {
     data: processedData,
     loading: isLoading,
     error: error ?? null,
-    pagination,
+    hasNextPage,
     fetchNextPage,
     fetchingMore: isFetchingNextPage,
   };

@@ -1,5 +1,6 @@
 import type {
   AccountBalanceByAccountIdPathParamsDaoEnumKey,
+  DelegatorItem,
   VotingPowerByAccountIdPathParamsDaoEnumKey,
 } from "@anticapture/client";
 import {
@@ -7,18 +8,13 @@ import {
   useVotingPowerByAccountId,
   useAccountBalanceByAccountId,
 } from "@anticapture/client/hooks";
-import {
-  OrderDirection,
-  QueryInput_Delegators_OrderBy,
-} from "@/shared/hooks/graphql-client/types";
 import { useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import daoConfig from "@/shared/dao-config";
-import type { DelegatorItem } from "@/shared/hooks/graphql-client/useDelegators";
-import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
+import { useDelegators } from "@/shared/hooks/useDelegators";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
@@ -49,8 +45,8 @@ export const useVoteCompositionData = (
   const { delegators, loading } = useDelegators({
     daoId,
     address,
-    orderBy: QueryInput_Delegators_OrderBy.Amount,
-    orderDirection: OrderDirection.Desc,
+    orderBy: "amount",
+    orderDirection: "desc",
     limit: 5,
   });
 

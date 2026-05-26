@@ -1,9 +1,13 @@
 "use client";
 
 import type {
+  BigInt as RestBigInt,
+  HistoricalVotingPower,
   HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
   HistoricalVotingPowerByAccountIdQueryParamsOrderByEnumKey,
   HistoricalVotingPowerByAccountIdQueryResponse,
+  HistoricalVotingPowerDelegation,
+  HistoricalVotingPowerTransfer,
 } from "@anticapture/client";
 import { useHistoricalVotingPowerByAccountIdInfinite } from "@anticapture/client/hooks";
 import { useMemo } from "react";
@@ -13,21 +17,18 @@ import type { AmountFilterVariables } from "@/features/holders-and-delegates/hoo
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
+type StringifyBigInt<T> = {
+  [K in keyof T]: T[K] extends RestBigInt ? string : T[K];
+};
+
 export interface DelegationHistoryItem {
   timestamp: string;
-  transactionHash: string;
+  transactionHash: HistoricalVotingPower["transactionHash"];
   delta: string;
-  delegation?: {
-    from: string;
-    value: string;
-    to: string;
-    previousDelegate?: string | null;
-  } | null;
-  transfer?: {
-    value: string;
-    from: string;
-    to: string;
-  } | null;
+  delegation: StringifyBigInt<
+    NonNullable<HistoricalVotingPowerDelegation>
+  > | null;
+  transfer: StringifyBigInt<NonNullable<HistoricalVotingPowerTransfer>> | null;
   votingPower: string;
   type: "delegation" | "transfer";
   action: string;

@@ -71,7 +71,7 @@ export const DelegateProposalsActivity = ({
     setOrderDirection(direction);
   };
 
-  const { data, loading, error, pagination, fetchingMore, fetchNextPage } =
+  const { data, loading, error, hasNextPage, fetchingMore, fetchNextPage } =
     useProposalsActivity({
       address,
       daoId,
@@ -146,7 +146,7 @@ export const DelegateProposalsActivity = ({
             orderDirection={orderDirection}
             onSortChange={handleSortChange}
             daoIdEnum={daoId}
-            pagination={pagination}
+            hasNextPage={hasNextPage}
             fetchingMore={fetchingMore}
             fetchNextPage={fetchNextPage}
           />

@@ -1,10 +1,11 @@
 "use client";
 
-import type {
-  ProposalsActivityPathParamsDaoEnumKey,
-  VotingPowersPathParamsDaoEnumKey,
-  VotingPowersQueryParamsOrderByEnumKey,
-  VotingPowersQueryResponse,
+import {
+  getNextPageParam,
+  type ProposalsActivityPathParamsDaoEnumKey,
+  type VotingPower,
+  type VotingPowersPathParamsDaoEnumKey,
+  type VotingPowersQueryParamsOrderByEnumKey,
 } from "@anticapture/client";
 import {
   proposalsActivityQueryOptions,
@@ -17,7 +18,7 @@ import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums";
 
-interface ProposalsActivity {
+export interface ProposalsActivity {
   totalProposals: number;
   votedProposals: number;
   neverVoted: boolean;
@@ -29,10 +30,11 @@ export interface DelegateVariation {
   percentageChange: string;
 }
 
-export interface Delegate {
+export interface Delegate extends Pick<
+  VotingPower,
+  "accountId" | "delegationsCount"
+> {
   votingPower: string;
-  delegationsCount: number;
-  accountId: string;
   proposalsActivity?: ProposalsActivity;
   variation: DelegateVariation;
   balance?: string;
@@ -57,14 +59,6 @@ interface UseDelegatesParams {
   limit?: number;
   skipActivity?: boolean;
 }
-
-const getNextPageParam = (
-  lastPage: VotingPowersQueryResponse,
-  allPages: VotingPowersQueryResponse[],
-): number | undefined => {
-  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
-  return loaded >= lastPage.totalCount ? undefined : loaded;
-};
 
 export const useDelegates = ({
   daoId,

@@ -1,9 +1,6 @@
-"use client";
-
+import { formatUnits } from "viem";
 import type { HistoricalBalancesPathParamsDaoEnumKey } from "@anticapture/client";
 import { useHistoricalBalances } from "@anticapture/client/hooks";
-import { useMemo } from "react";
-import { formatUnits } from "viem";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -38,28 +35,24 @@ export function useBalanceHistoryGraph(
       fromValue: "1",
       limit: 1000,
       orderBy: "timestamp",
-      orderDirection: "asc",
+      orderDirection: "desc",
     },
   );
 
-  const balanceHistory = useMemo(() => {
-    if (!data?.items) return [];
-
-    return data.items
-      .filter((item) => !!item)
-      .map((item) => ({
-        ...item,
-        timestamp: Number(item.timestamp) * 1000,
-        balance: Number(formatUnits(BigInt(item.balance), decimals)),
-        direction: item.transfer.from === accountId ? "out" : "in",
-        from: item.transfer.from,
-        to: item.transfer.to,
-        amount: Number(formatUnits(BigInt(item.transfer.value), decimals)),
-      }));
-  }, [data, accountId, decimals]);
-
   return {
-    data: balanceHistory,
+    data: data?.items
+      ? data.items
+          .map((item) => ({
+            ...item,
+            timestamp: Number(item.timestamp) * 1000,
+            balance: Number(formatUnits(item.balance, decimals)),
+            direction: item.transfer.from === accountId ? "out" : "in",
+            from: item.transfer.from,
+            to: item.transfer.to,
+            amount: Number(formatUnits(item.transfer.value, decimals)),
+          }))
+          .sort((a, b) => a.timestamp - b.timestamp)
+      : [],
     isLoading,
     error: !isLoading && Boolean(error),
   };
