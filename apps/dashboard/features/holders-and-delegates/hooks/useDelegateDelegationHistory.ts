@@ -42,6 +42,7 @@ export interface UseDelegateDelegationHistoryResult {
   fetchNextPage: () => void;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+  fetchingMore: boolean;
 }
 
 interface UseDelegateDelegationHistoryParams {
@@ -92,13 +93,19 @@ export function useDelegateDelegationHistory({
     [limit, orderBy, orderDirection, filterVariables, fromDate, toDate],
   );
 
-  const { data, isLoading, error, fetchNextPage, hasNextPage } =
-    useHistoricalVotingPowerByAccountIdInfinite(
-      daoId.toLowerCase() as HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
-      accountId,
-      params,
-      { query: { getNextPageParam } },
-    );
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useHistoricalVotingPowerByAccountIdInfinite(
+    daoId.toLowerCase() as HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
+    accountId,
+    params,
+    { query: { getNextPageParam } },
+  );
 
   const delegationHistory = useMemo(() => {
     if (!data?.pages) return [];
@@ -167,5 +174,6 @@ export function useDelegateDelegationHistory({
     fetchNextPage,
     hasNextPage: hasNextPage ?? false,
     hasPreviousPage: (data?.pages?.length ?? 0) > 1,
+    fetchingMore: isFetchingNextPage,
   };
 }

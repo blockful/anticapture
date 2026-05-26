@@ -103,6 +103,7 @@ export const BalanceHistoryTable = ({
     fetchNextPage,
     error,
     hasNextPage,
+    fetchingMore,
   } = useBalanceHistory({
     decimals,
     accountId,
@@ -474,7 +475,7 @@ export const BalanceHistoryTable = ({
         }
         size="sm"
         hasMore={hasNextPage}
-        isLoadingMore={loading}
+        isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         csvFilename="balance-history.csv"

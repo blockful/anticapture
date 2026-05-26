@@ -68,17 +68,23 @@ export const VotingPowerHistoryTable = ({
     { value: "smallest-first", label: "Smallest first" },
   ];
 
-  const { delegationHistory, loading, fetchNextPage, error, hasNextPage } =
-    useDelegateDelegationHistory({
-      accountId,
-      daoId,
-      orderBy: sortBy,
-      orderDirection: sortDirection,
-      filterVariables,
-      fromTimestamp,
-      toTimestamp,
-      limit,
-    });
+  const {
+    delegationHistory,
+    loading,
+    fetchNextPage,
+    error,
+    hasNextPage,
+    fetchingMore,
+  } = useDelegateDelegationHistory({
+    accountId,
+    daoId,
+    orderBy: sortBy,
+    orderDirection: sortDirection,
+    filterVariables,
+    fromTimestamp,
+    toTimestamp,
+    limit,
+  });
 
   const isInitialLoading =
     loading && (!delegationHistory || delegationHistory.length === 0);
@@ -474,7 +480,7 @@ export const VotingPowerHistoryTable = ({
         size="sm"
         mobileTableFixed={true}
         hasMore={hasNextPage}
-        isLoadingMore={loading}
+        isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         csvFilename="voting-power-history.csv"
