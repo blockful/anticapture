@@ -1,7 +1,6 @@
 "use client";
 
-import type { OrderDirection } from "@anticapture/graphql-client";
-import { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
+import type { VotingPowersQueryParamsOrderByEnumKey } from "@anticapture/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -76,19 +75,22 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
     | "total"
     | "balance";
 
-  const orderByMap: Record<DelegateSortKey, QueryInput_VotingPowers_OrderBy> = {
-    delegationsCount: QueryInput_VotingPowers_OrderBy.DelegationsCount,
-    votingPower: QueryInput_VotingPowers_OrderBy.VotingPower,
-    signedVariation: QueryInput_VotingPowers_OrderBy.SignedVariation,
-    variation: QueryInput_VotingPowers_OrderBy.Variation,
-    total: QueryInput_VotingPowers_OrderBy.Total,
-    balance: QueryInput_VotingPowers_OrderBy.Balance,
+  const orderByMap: Record<
+    DelegateSortKey,
+    VotingPowersQueryParamsOrderByEnumKey
+  > = {
+    delegationsCount: "delegationsCount",
+    votingPower: "votingPower",
+    signedVariation: "signedVariation",
+    variation: "variation",
+    total: "total",
+    balance: "balance",
   };
 
-  const { data, loading, error, pagination, fetchNextPage, fetchingMore } =
+  const { data, loading, error, hasNextPage, fetchNextPage, fetchingMore } =
     useDelegates({
       orderBy: orderByMap[sortBy as DelegateSortKey],
-      orderDirection: sortOrder as OrderDirection,
+      orderDirection: sortOrder,
       daoId,
       days,
       address: currentAddressFilter || undefined,
@@ -476,7 +478,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
-          hasMore={pagination.hasNextPage}
+          hasMore={hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}

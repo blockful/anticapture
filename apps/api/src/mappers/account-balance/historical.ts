@@ -5,6 +5,7 @@ import { balanceHistory } from "@/database";
 import {
   addressOutputField,
   addressPathParams,
+  AddressSchema,
   daoIdField,
   decimalStringField,
   defaultDescOrderDirection,
@@ -53,6 +54,14 @@ export const HistoricalBalanceRequestQuerySchema = z
     }),
     toValue: z.string().optional().openapi({
       description: "Maximum balance delta encoded as a decimal string.",
+    }),
+    from: AddressSchema.optional().openapi({
+      description:
+        "Filter to transfers sent from this address (matches the sender of the transfer that caused the balance change).",
+    }),
+    to: AddressSchema.optional().openapi({
+      description:
+        "Filter to transfers received by this address (matches the recipient of the transfer that caused the balance change).",
     }),
   })
   .openapi("HistoricalBalanceRequestQuery", {

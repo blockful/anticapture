@@ -270,6 +270,16 @@ type Query {
 
     """Maximum balance delta encoded as a decimal string."""
     toValue: String
+
+    """
+    Filter to transfers sent from this address (matches the sender of the transfer that caused the balance change).
+    """
+    from: String
+
+    """
+    Filter to transfers received by this address (matches the recipient of the transfer that caused the balance change).
+    """
+    to: String
   ): HistoricalBalancesResponse
 
   """Get the last update time"""

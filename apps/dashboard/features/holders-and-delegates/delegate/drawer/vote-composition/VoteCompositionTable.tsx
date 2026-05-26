@@ -1,9 +1,5 @@
 "use client";
 
-import type {
-  OrderDirection,
-  QueryInput_Delegators_OrderBy,
-} from "@anticapture/graphql-client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
@@ -18,7 +14,7 @@ import { DateCell } from "@/shared/components/design-system/table/cells/DateCell
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import daoConfig from "@/shared/dao-config";
-import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
+import { useDelegators } from "@/shared/hooks/useDelegators";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 
@@ -45,14 +41,14 @@ export const VoteCompositionTable = ({
     delegators,
     loading,
     error,
-    pagination,
+    hasNextPage,
     fetchNextPage,
     fetchingMore,
   } = useDelegators({
     daoId: daoId as DaoIdEnum,
     address: address,
-    orderBy: sortBy as QueryInput_Delegators_OrderBy,
-    orderDirection: sortOrder as OrderDirection,
+    orderBy: sortBy,
+    orderDirection: sortOrder,
     limit,
   });
 
@@ -62,14 +58,14 @@ export const VoteCompositionTable = ({
 
   const tableData = delegators.map((delegator) => ({
     address: delegator.delegatorAddress,
-    amount: Number(formatUnits(BigInt(delegator.amount), decimals)),
-    timestamp: delegator.timestamp,
+    amount: Number(formatUnits(delegator.amount, decimals)),
+    timestamp: Number(delegator.timestamp),
   }));
 
   const columns: ColumnDef<{
-    address: string;
+    address: Address;
     amount: number;
-    timestamp: string;
+    timestamp: number;
   }>[] = [
     {
       accessorKey: "address",
@@ -93,7 +89,7 @@ export const VoteCompositionTable = ({
             </div>
           );
         }
-        const addressValue: string = row.getValue("address");
+        const addressValue: string = row.original.address;
         return (
           <div className="flex w-full items-center gap-2">
             <EnsAvatar
@@ -160,7 +156,7 @@ export const VoteCompositionTable = ({
             </div>
           );
         }
-        const amount: number = row.getValue("amount");
+        const amount: number = row.original.amount;
         return (
           <div className="flex w-full items-center justify-end text-sm">
             {formatNumberUserReadable(amount)}
@@ -202,7 +198,7 @@ export const VoteCompositionTable = ({
         );
       },
       cell: ({ row }) => {
-        const timestamp: string = row.getValue("timestamp");
+        const timestamp = row.original.timestamp;
 
         if (!isMounted || loading) {
           return (
@@ -231,7 +227,7 @@ export const VoteCompositionTable = ({
         data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         filterColumn="address"
         size="sm"
-        hasMore={pagination.hasNextPage}
+        hasMore={hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}

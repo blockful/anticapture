@@ -49,6 +49,8 @@ export function historicalBalances(
         toValue,
         fromDate,
         toDate,
+        from,
+        to,
       } = context.req.valid("query");
 
       const { items, totalCount } = await service.getHistoricalBalances(
@@ -61,6 +63,8 @@ export function historicalBalances(
         toValue,
         fromDate,
         toDate,
+        from,
+        to,
       );
 
       return context.json(
