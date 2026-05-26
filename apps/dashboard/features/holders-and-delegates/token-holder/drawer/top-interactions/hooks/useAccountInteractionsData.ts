@@ -1,7 +1,7 @@
-import type {
-  AccountInteraction,
-  AccountInteractionsPathParamsDaoEnumKey,
-  AccountInteractionsQueryResponse,
+import {
+  getNextPageParam,
+  type AccountInteraction,
+  type AccountInteractionsPathParamsDaoEnumKey,
 } from "@anticapture/client";
 import {
   useGetAddresses,
@@ -45,15 +45,6 @@ interface InteractionResponse {
   fetchingMore: boolean;
   hasNextPage: boolean;
 }
-
-const getNextPageParam = (
-  lastPage: AccountInteractionsQueryResponse,
-  allPages: AccountInteractionsQueryResponse[],
-): number | undefined => {
-  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
-  return loaded >= lastPage.totalCount ? undefined : loaded;
-};
-
 export const useAccountInteractionsData = ({
   daoId,
   address,
