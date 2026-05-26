@@ -19,7 +19,7 @@ import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
+
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 const LOADING_ROW = "__LOADING_ROW__";
@@ -108,7 +108,6 @@ export const OffchainVotesContent = ({
       context: {
         headers: {
           "anticapture-dao-id": daoId,
-          ...getAuthHeaders(),
         },
       },
       skip: !proposalId,

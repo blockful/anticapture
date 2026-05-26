@@ -7,6 +7,8 @@ export type ModalHeaderProps = {
   className?: string;
 };
 
+export type ModalConfirmVariant = "primary" | "destructive";
+
 export type ModalFooterProps = {
   /** Label for the cancel button. When provided, the cancel button is shown. */
   cancelLabel?: string;
@@ -20,6 +22,10 @@ export type ModalFooterProps = {
   isConfirmLoading?: boolean;
   /** Whether the confirm button is disabled. */
   isConfirmDisabled?: boolean;
+  /** Visual variant of the confirm button. Defaults to "primary". */
+  confirmVariant?: ModalConfirmVariant;
+  /** Extra content rendered before the cancel/confirm buttons (e.g. a progress indicator). */
+  leading?: React.ReactNode;
   /** Additional CSS classes. */
   className?: string;
 };
@@ -47,6 +53,10 @@ export type ModalProps = {
   isConfirmLoading?: boolean;
   /** Whether the confirm button is disabled. */
   isConfirmDisabled?: boolean;
+  /** Visual variant of the confirm button. Defaults to "primary". */
+  confirmVariant?: ModalConfirmVariant;
+  /** Extra content rendered in the footer before the cancel/confirm buttons. */
+  footerLeading?: React.ReactNode;
   /** Additional CSS classes for the dialog content panel. */
   className?: string;
 };

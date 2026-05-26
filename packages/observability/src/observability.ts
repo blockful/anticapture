@@ -20,11 +20,24 @@ export { PrometheusExporter, PrometheusSerializer };
 
 export const PROMETHEUS_MIME_TYPE = "text/plain; version=0.0.4; charset=utf-8";
 
+const prometheusSerializer = new PrometheusSerializer();
+
 export interface ObservabilityProvider {
   meterProvider: MeterProvider;
   tracerProvider: NodeTracerProvider;
   exporter: PrometheusExporter;
   shutdown: () => Promise<void>;
+}
+
+export async function collectPrometheusMetrics(
+  exporter: PrometheusExporter,
+): Promise<{ body: string; contentType: string }> {
+  const result = await exporter.collect();
+
+  return {
+    body: prometheusSerializer.serialize(result.resourceMetrics),
+    contentType: PROMETHEUS_MIME_TYPE,
+  };
 }
 
 export function createObservabilityProvider(
@@ -75,8 +88,22 @@ export function createObservabilityProvider(
     await tracerProvider.shutdown();
   };
 
-  process.once("SIGTERM", shutdown);
-  process.once("SIGINT", shutdown);
+  let isShuttingDown = false;
+  const shutdownAndExit = async () => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+
+    try {
+      await shutdown();
+      process.exit(0);
+    } catch (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  };
+
+  process.once("SIGTERM", shutdownAndExit);
+  process.once("SIGINT", shutdownAndExit);
 
   return {
     meterProvider,

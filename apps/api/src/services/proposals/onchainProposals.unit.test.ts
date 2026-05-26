@@ -7,8 +7,10 @@ import { ProposalsRepository, ProposalsService } from "./onchainProposals";
 const DEFAULT_REQ: ProposalsRequest = {
   skip: 0,
   limit: 10,
+  orderDirection: "desc",
   status: undefined,
   includeOptimisticProposals: true,
+  lean: false,
 };
 
 const createMockProposal = (
@@ -28,6 +30,10 @@ const createMockProposal = (
   endBlock: 200,
   timestamp: 1700000000n,
   endTimestamp: 1700001000n,
+  queuedTimestamp: null,
+  executedTimestamp: null,
+  queuedTxHash: null,
+  executedTxHash: null,
   status: ProposalStatus.PENDING,
   forVotes: 1000n,
   againstVotes: 0n,

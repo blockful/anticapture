@@ -3,7 +3,6 @@ import { useGetOffchainProposalQuery } from "@anticapture/graphql-client/hooks";
 import type { ApolloError } from "@apollo/client";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface UseOffchainProposalResult {
   proposal: GetOffchainProposalQuery["offchainProposalById"] | null;
@@ -25,7 +24,6 @@ export const useOffchainProposal = ({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     skip: !proposalId,

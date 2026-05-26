@@ -1,6 +1,30 @@
 /** @type {import('next').NextConfig} */
+
+const PERMANENT_BRANCHES = ["dev", "main"];
+
+const resolveApiUrls = () => {
+  const prId = process.env.VERCEL_GIT_PULL_REQUEST_ID;
+  const vercelEnv = process.env.VERCEL_ENV; // 'production' | 'preview' | 'development'
+  const branch = process.env.VERCEL_GIT_COMMIT_REF;
+
+  if (
+    vercelEnv === "preview" &&
+    prId &&
+    !PERMANENT_BRANCHES.includes(branch ?? "")
+  ) {
+    return {
+      NEXT_PUBLIC_BASE_URL: `https://api-gateway-anticapture-pr-${prId}.up.railway.app/graphql`,
+      NEXT_PUBLIC_GATEFUL_URL: `https://gateful-anticapture-pr-${prId}.up.railway.app`,
+    };
+  }
+
+  // Production, long-lived branches, and local dev: fall through to values already set in Vercel / .env
+  return {};
+};
+
 const nextConfig = {
-  transpilePackages: ["@anticapture/graphql-client"],
+  env: resolveApiUrls(),
+  transpilePackages: ["@anticapture/graphql-client", "@anticapture/client"],
   images: {
     remotePatterns: [
       {
@@ -34,6 +58,20 @@ const nextConfig = {
         permanent: false,
       });
     }
+
+    // Permanent redirects: governance → proposals
+    redirects.push(
+      {
+        source: "/:daoId/governance",
+        destination: "/:daoId/proposals",
+        permanent: true,
+      },
+      {
+        source: "/:daoId/governance/proposal/:proposalId",
+        destination: "/:daoId/proposals/:proposalId",
+        permanent: true,
+      },
+    );
 
     return redirects;
   },

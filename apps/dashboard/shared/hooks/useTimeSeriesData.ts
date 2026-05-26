@@ -12,7 +12,6 @@ import type { TokenMetricItem } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -36,7 +35,6 @@ export const useTimeSeriesData = (
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     fetchPolicy: "network-only",

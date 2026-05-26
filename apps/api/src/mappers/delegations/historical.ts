@@ -3,24 +3,21 @@ import { z } from "@hono/zod-openapi";
 import {
   AddressQueryArraySchema,
   AddressSchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
+  addressPathParams,
+  defaultDescOrderDirection,
+  paginatedListResponse,
+  paginationQueryParams,
 } from "../shared";
 
-export const HistoricalDelegationsRequestParamsSchema = z
-  .object({
-    address: AddressSchema,
-  })
-  .openapi("HistoricalDelegationsRequestParams", {
-    description: "Path params for historical delegations queries.",
-  });
+export const HistoricalDelegationsRequestParamsSchema = addressPathParams(
+  "HistoricalDelegationsRequestParams",
+  "Path params for historical delegations queries.",
+);
 
 export const HistoricalDelegationsRequestQuerySchema = z
   .object({
     delegateAddressIn: AddressQueryArraySchema.optional(),
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
+    ...paginationQueryParams(),
     fromValue: z
       .string()
       .transform((val) => BigInt(val))
@@ -29,7 +26,7 @@ export const HistoricalDelegationsRequestQuerySchema = z
       .string()
       .transform((val) => BigInt(val))
       .optional(),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
   })
   .openapi("HistoricalDelegationsRequestQuery", {
     description: "Query params used to page and filter historical delegations.",
@@ -41,10 +38,10 @@ export type HistoricalDelegationsRequestQuery = z.infer<
 
 export const DelegationItemSchema = z
   .object({
-    delegatorAddress: AddressSchema,
-    delegateAddress: AddressSchema,
-    amount: z.string(),
-    timestamp: z.string(),
+    delegatorAddress: AddressSchema.openapi({ format: "ethereum-address" }),
+    delegateAddress: AddressSchema.openapi({ format: "ethereum-address" }),
+    amount: z.string().openapi({ format: "bigint" }),
+    timestamp: z.string().openapi({ format: "bigint" }),
     transactionHash: z.string(),
   })
   .openapi("DelegationItem", {
@@ -52,14 +49,11 @@ export const DelegationItemSchema = z
       "Single delegation transfer event in the historical delegation feed.",
   });
 
-export const DelegationsResponseSchema = z
-  .object({
-    items: z.array(DelegationItemSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("DelegationsResponse", {
-    description: "Paginated historical delegations response.",
-  });
+export const DelegationsResponseSchema = paginatedListResponse(
+  DelegationItemSchema,
+).openapi("DelegationsResponse", {
+  description: "Paginated historical delegations response.",
+});
 
 export type DelegationsResponse = z.infer<typeof DelegationsResponseSchema>;
 export type DelegationItem = z.infer<typeof DelegationItemSchema>;

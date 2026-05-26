@@ -10,19 +10,20 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import type { Address } from "viem";
-import { formatUnits, zeroAddress } from "viem";
+import { formatUnits, isAddressEqual, zeroAddress } from "viem";
 
-import type {
-  DelegationDetail,
-  FeedEvent,
-  ProposalDetail,
-  ProposalExtendedDetail,
-  TransferDetail,
-  VoteDetail,
-} from "@/features/feed/types";
-import { FeedEventRelevance, FeedEventType } from "@/features/feed/types";
+import {
+  type FeedItem,
+  type FeedRelevance,
+  type FeedEventType,
+  type FeedVoteMetadata,
+  type FeedProposalMetadata,
+  type FeedProposalExtendedMetadata,
+  type FeedTransferMetadata,
+  type FeedDelegationMetadata,
+} from "@anticapture/client";
 import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -31,10 +32,12 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { cn, formatNumberUserReadable } from "@/shared/utils";
+import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { getDaoProposalPath } from "@/shared/utils/whitelabel";
 
 interface FeedEventItemProps {
-  event: FeedEvent;
+  event: FeedItem;
   className?: string;
   isLast?: boolean;
   onRowClick?: (address: string, entityType: EntityType) => void;
@@ -42,52 +45,52 @@ interface FeedEventItemProps {
 
 const getBadgeIcon = (type: FeedEventType) => {
   switch (type) {
-    case FeedEventType.Vote:
+    case "VOTE":
       return Inbox;
-    case FeedEventType.Proposal:
+    case "PROPOSAL":
       return FileText;
-    case FeedEventType.Transfer:
+    case "TRANSFER":
       return ArrowLeftRight;
-    case FeedEventType.Delegation:
+    case "DELEGATION":
       return HeartHandshake;
-    case FeedEventType.ProposalExtended:
+    case "PROPOSAL_EXTENDED":
       return Clock;
   }
 };
 
-const getBadgeVariant = (relevance: FeedEventRelevance) => {
+const getBadgeVariant = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case FeedEventRelevance.High:
+    case "HIGH":
       return "error";
-    case FeedEventRelevance.Medium:
+    case "MEDIUM":
       return "warning";
-    case FeedEventRelevance.Low:
+    case "LOW":
       return "success";
     default:
       return "secondary";
   }
 };
 
-const getRelevanceLabel = (relevance: FeedEventRelevance) => {
+const getRelevanceLabel = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case FeedEventRelevance.High:
+    case "HIGH":
       return "High Relevance";
-    case FeedEventRelevance.Medium:
+    case "MEDIUM":
       return "Medium Relevance";
-    case FeedEventRelevance.Low:
+    case "LOW":
       return "Low Relevance";
     default:
       return "No Relevance";
   }
 };
 
-const getRelevanceColor = (relevance: FeedEventRelevance) => {
+const getRelevanceColor = (relevance: FeedRelevance) => {
   switch (relevance) {
-    case FeedEventRelevance.High:
+    case "HIGH":
       return "text-error";
-    case FeedEventRelevance.Medium:
+    case "MEDIUM":
       return "text-warning";
-    case FeedEventRelevance.Low:
+    case "LOW":
       return "text-success";
     default:
       return "text-secondary";
@@ -96,15 +99,15 @@ const getRelevanceColor = (relevance: FeedEventRelevance) => {
 
 const getEventTypeLabel = (type: FeedEventType) => {
   switch (type) {
-    case FeedEventType.Vote:
+    case "VOTE":
       return "Vote";
-    case FeedEventType.Proposal:
+    case "PROPOSAL":
       return "Proposal Creation";
-    case FeedEventType.Transfer:
+    case "TRANSFER":
       return "Transfer";
-    case FeedEventType.Delegation:
+    case "DELEGATION":
       return "Delegation";
-    case FeedEventType.ProposalExtended:
+    case "PROPOSAL_EXTENDED":
       return "Proposal Extended";
   }
 };
@@ -128,6 +131,7 @@ const AddressButton = ({
   onRowClick?: (address: string, entityType: EntityType) => void;
 }) => (
   <button
+    data-testid="feed-address-button"
     className="group inline-flex cursor-pointer items-center gap-1.5 align-middle"
     onClick={() => onRowClick?.(address, entityType)}
   >
@@ -148,13 +152,15 @@ export const FeedEventItem = ({
   onRowClick,
 }: FeedEventItemProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
+  const pathname = usePathname();
   const config = daoConfig[daoId.toUpperCase() as DaoIdEnum];
 
   const BadgeIcon = getBadgeIcon(event.type);
   const badgeVariant = getBadgeVariant(event.relevance);
 
-  const formatAmount = (amount: string) => {
-    const value = formatUnits(BigInt(amount), config.decimals);
+  const formatAmount = (amount: bigint | string) => {
+    const asBigint = typeof amount === "bigint" ? amount : BigInt(amount);
+    const value = formatUnits(asBigint, config.decimals);
     return formatNumberUserReadable(Number(value));
   };
 
@@ -167,18 +173,19 @@ export const FeedEventItem = ({
 
   const renderEventContent = () => {
     switch (event.type) {
-      case FeedEventType.Vote: {
-        const voteMetadata = event.metadata as VoteDetail | undefined;
+      case "VOTE": {
+        const voteMetadata = event.metadata as FeedVoteMetadata | null;
         if (!voteMetadata) return null;
+        const voterAddress = voteMetadata.voter as Address;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={voteMetadata.voter}
+              address={voterAddress}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={voteMetadata.voter}
+              textToCopy={voterAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -212,7 +219,11 @@ export const FeedEventItem = ({
             <Link
               href={
                 config?.governancePage
-                  ? `/${daoId}/governance/proposal/${voteMetadata.proposalId}`
+                  ? getDaoProposalPath({
+                      daoId: daoId.toUpperCase() as DaoIdEnum,
+                      pathname,
+                      proposalId: voteMetadata.proposalId,
+                    })
                   : `${config?.daoOverview?.govPlatform?.url ?? ""}${voteMetadata.proposalId}`
               }
               target="_blank"
@@ -236,18 +247,19 @@ export const FeedEventItem = ({
         );
       }
 
-      case FeedEventType.Proposal: {
-        const proposalMetadata = event.metadata as ProposalDetail | undefined;
+      case "PROPOSAL": {
+        const proposalMetadata = event.metadata as FeedProposalMetadata | null;
         if (!proposalMetadata) return null;
+        const proposerAddress = proposalMetadata.proposer as Address;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={proposalMetadata.proposer}
+              address={proposerAddress}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={proposalMetadata.proposer}
+              textToCopy={proposerAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -262,7 +274,11 @@ export const FeedEventItem = ({
             <Link
               href={
                 config?.governancePage
-                  ? `/${daoId}/governance/proposal/${proposalMetadata.id}`
+                  ? getDaoProposalPath({
+                      daoId: daoId.toUpperCase() as DaoIdEnum,
+                      pathname,
+                      proposalId: proposalMetadata.id,
+                    })
                   : `${config?.daoOverview?.govPlatform?.url ?? ""}${proposalMetadata.id}`
               }
               target="_blank"
@@ -283,10 +299,9 @@ export const FeedEventItem = ({
         );
       }
 
-      case FeedEventType.ProposalExtended: {
-        const proposalExtendedMetadata = event.metadata as
-          | ProposalExtendedDetail
-          | undefined;
+      case "PROPOSAL_EXTENDED": {
+        const proposalExtendedMetadata =
+          event.metadata as FeedProposalExtendedMetadata | null;
         if (!proposalExtendedMetadata) return null;
         return (
           <div className="leading-relaxed">
@@ -295,7 +310,11 @@ export const FeedEventItem = ({
               <Link
                 href={
                   config?.governancePage
-                    ? `/${daoId}/governance/proposal/${proposalExtendedMetadata.id}`
+                    ? getDaoProposalPath({
+                        daoId: daoId.toUpperCase() as DaoIdEnum,
+                        pathname,
+                        proposalId: proposalExtendedMetadata.id,
+                      })
                     : `${config?.daoOverview?.govPlatform?.url ?? ""}${proposalExtendedMetadata.id}`
                 }
                 target="_blank"
@@ -319,18 +338,20 @@ export const FeedEventItem = ({
         );
       }
 
-      case FeedEventType.Transfer: {
-        const transferMetadata = event.metadata as TransferDetail | undefined;
+      case "TRANSFER": {
+        const transferMetadata = event.metadata as FeedTransferMetadata | null;
         if (!transferMetadata) return null;
+        const fromAddress = transferMetadata.from as Address;
+        const toAddress = transferMetadata.to as Address;
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={transferMetadata.from}
+              address={fromAddress}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={transferMetadata.from}
+              textToCopy={fromAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -340,12 +361,12 @@ export const FeedEventItem = ({
             </span>{" "}
             <span className="text-secondary">to</span>{" "}
             <AddressButton
-              address={transferMetadata.to}
+              address={toAddress}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={transferMetadata.to}
+              textToCopy={toAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />
@@ -361,24 +382,28 @@ export const FeedEventItem = ({
         );
       }
 
-      case FeedEventType.Delegation: {
-        const delegationMetadata = event.metadata as
-          | DelegationDetail
-          | undefined;
+      case "DELEGATION": {
+        const delegationMetadata =
+          event.metadata as FeedDelegationMetadata | null;
         if (!delegationMetadata) return null;
+        const delegatorAddress = delegationMetadata.delegator as Address;
+        const delegateAddress = delegationMetadata.delegate as Address;
+        const previousDelegateAddress =
+          delegationMetadata.previousDelegate as Address | null;
         const hasRedelegation =
-          delegationMetadata.previousDelegate !== null &&
-          delegationMetadata.previousDelegate !== zeroAddress;
+          previousDelegateAddress !== null &&
+          !isAddressEqual(previousDelegateAddress, zeroAddress) &&
+          !isAddressEqual(previousDelegateAddress, delegatorAddress);
 
         return (
           <div className="leading-relaxed">
             <AddressButton
-              address={delegationMetadata.delegator}
+              address={delegatorAddress}
               entityType="tokenHolder"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={delegationMetadata.delegator}
+              textToCopy={delegatorAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -392,12 +417,12 @@ export const FeedEventItem = ({
               <>
                 <span className="text-secondary">from</span>{" "}
                 <AddressButton
-                  address={delegationMetadata.previousDelegate!}
+                  address={previousDelegateAddress!}
                   entityType="delegate"
                   onRowClick={onRowClick}
                 />{" "}
                 <CopyAndPasteButton
-                  textToCopy={delegationMetadata.previousDelegate!}
+                  textToCopy={previousDelegateAddress!}
                   className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
                   iconSize="md"
                 />{" "}
@@ -405,12 +430,12 @@ export const FeedEventItem = ({
             )}
             <span className="text-secondary">to</span>{" "}
             <AddressButton
-              address={delegationMetadata.delegate}
+              address={delegateAddress}
               entityType="delegate"
               onRowClick={onRowClick}
             />{" "}
             <CopyAndPasteButton
-              textToCopy={delegationMetadata.delegate}
+              textToCopy={delegateAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
               iconSize="md"
             />{" "}
@@ -435,7 +460,7 @@ export const FeedEventItem = ({
   };
 
   return (
-    <div className={cn("flex items-stretch gap-4", className)}>
+    <div className={cn("ml-5 flex items-stretch gap-4", className)}>
       {/* Badge and Connector */}
       <div className="flex flex-col items-center">
         <BadgeStatus

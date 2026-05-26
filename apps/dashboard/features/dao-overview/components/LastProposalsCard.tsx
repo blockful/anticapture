@@ -77,7 +77,7 @@ export const LastProposalsCard = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="flex items-center gap-2">
             <Link
               prefetch={true}
-              href={`/${daoId.toLowerCase()}/governance`}
+              href={`/${daoId.toLowerCase()}/proposals`}
               className="border-border-contrast text-secondary hover:text-primary flex items-center gap-1 border-b border-dashed font-mono text-[13px] font-medium uppercase tracking-wider transition-colors"
             >
               Last proposals

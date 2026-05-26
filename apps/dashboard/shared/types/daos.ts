@@ -13,14 +13,13 @@ export enum DaoIdEnum {
   GITCOIN = "GTC",
 }
 
-export interface DAO {
-  id: DaoIdEnum;
-  quorum: number;
-  proposalThreshold: number;
-  votingDelay: number;
-  votingPeriod: number;
-  timelockDelay: number;
-  totalSupply?: number;
-}
-
 export const ALL_DAOS = Object.values(DaoIdEnum);
+
+export const isDaoIdEnum = (daoId: string): daoId is DaoIdEnum =>
+  (ALL_DAOS as readonly string[]).includes(daoId);
+
+export const toDaoIdEnum = (daoId: string): DaoIdEnum | null => {
+  const normalizedDaoId = daoId.toUpperCase();
+
+  return isDaoIdEnum(normalizedDaoId) ? normalizedDaoId : null;
+};

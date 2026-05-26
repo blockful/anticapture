@@ -9,7 +9,6 @@ import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
-
 import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalanceVariations,
@@ -26,7 +25,6 @@ import {
   token,
   tokenDistribution,
   tokenHistoricalData,
-  transactions,
   transfers,
   tokenMetrics,
   treasury,
@@ -42,6 +40,7 @@ import {
   eventRelevance,
   feed,
   health,
+  revenue,
 } from "@/controllers";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
@@ -61,11 +60,11 @@ import {
   DaoMetricsDayBucketRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
+  HealthRepositoryImpl,
   HistoricalBalanceRepository,
   NFTPriceRepository,
   NounsVotingPowerRepository,
   TokenRepository,
-  TransactionsRepository,
   TransfersRepository,
   TreasuryRepository,
   VotingPowerRepository,
@@ -85,11 +84,11 @@ import {
   CoingeckoService,
   DaoService,
   DelegationPercentageService,
+  HealthService,
   HistoricalBalancesService,
   NFTPriceService,
   ProposalsService,
   TokenService,
-  TransactionsService,
   TransfersService,
   TokenMetricsService,
   VotingPowerService,
@@ -104,6 +103,8 @@ import {
   OffchainVotesService,
   OffchainNonVotersService,
   EventRelevanceService,
+  RevenueDuneClient,
+  RevenueDuneUrls,
 } from "@/services";
 import { AccountInteractionsService } from "@/services/account-balance/interactions";
 
@@ -174,9 +175,12 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pgClient = drizzle(env.DATABASE_URL, { schema });
+const pgClient = drizzle(env.DATABASE_URL, {
+  schema,
+  casing: "snake_case",
+});
 
-health(app, pgClient);
+health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
@@ -191,7 +195,6 @@ const votingPowerRepo = wrapWithTracing(new VotingPowerRepository(pgClient));
 const proposalsRepo = wrapWithTracing(
   new DrizzleProposalsActivityRepository(pgClient),
 );
-const transactionsRepo = wrapWithTracing(new TransactionsRepository(pgClient));
 const daoMetricsDayBucketRepo = wrapWithTracing(
   new DaoMetricsDayBucketRepository(pgClient),
 );
@@ -212,9 +215,6 @@ const accountBalanceRepo = wrapWithTracing(
 );
 const accountInteractionRepo = wrapWithTracing(
   new AccountInteractionsRepository(pgClient),
-);
-const transactionsService = wrapWithTracing(
-  new TransactionsService(transactionsRepo),
 );
 const votingPowerService = wrapWithTracing(
   new VotingPowerService(
@@ -238,15 +238,15 @@ const accountBalanceService = wrapWithTracing(
 const tokenPriceClient = wrapWithTracing(
   env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
     ? new NFTPriceService(
-        wrapWithTracing(new NFTPriceRepository(pgClient)),
-        env.COINGECKO_API_URL,
-        env.COINGECKO_API_KEY,
-      )
+      wrapWithTracing(new NFTPriceRepository(pgClient)),
+      env.COINGECKO_API_URL,
+      env.COINGECKO_API_KEY,
+    )
     : new CoingeckoService(
-        env.COINGECKO_API_URL,
-        env.COINGECKO_API_KEY,
-        env.DAO_ID,
-      ),
+      env.COINGECKO_API_URL,
+      env.COINGECKO_API_KEY,
+      env.DAO_ID,
+    ),
 );
 
 historicalDelegations(
@@ -320,7 +320,6 @@ historicalBalances(
   app,
   wrapWithTracing(new HistoricalBalancesService(historicalBalancesRepo)),
 );
-transactions(app, transactionsService);
 lastUpdate(app, pgClient);
 delegationPercentage(app, delegationPercentageService);
 historicalVotingPower(app, votingPowerService);
@@ -347,6 +346,30 @@ votes(
 dao(app, daoService);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
+
+let revenueDuneClient: RevenueDuneClient | undefined;
+if (env.DAO_ID === DaoIdEnum.ENS) {
+  if (env.REVENUE_DUNE_API_KEY) {
+    const revenueUrls: RevenueDuneUrls = {
+      actions: env.REVENUE_DUNE_ACTIONS_URL ?? "",
+      activeNames: env.REVENUE_DUNE_ACTIVE_NAMES_URL ?? "",
+      newWallets: env.REVENUE_DUNE_NEW_WALLETS_URL ?? "",
+      renewalFunnel: env.REVENUE_DUNE_RENEWAL_FUNNEL_URL ?? "",
+      revenueTotals: env.REVENUE_DUNE_REVENUE_TOTALS_URL ?? "",
+      revenueByCategory: env.REVENUE_DUNE_REVENUE_BY_CATEGORY_URL ?? "",
+      renewalTenure: env.REVENUE_DUNE_RENEWAL_TENURE_URL ?? "",
+    };
+    revenueDuneClient = new RevenueDuneClient(
+      env.REVENUE_DUNE_API_KEY,
+      revenueUrls,
+    );
+  } else {
+    logger.warn(
+      "DAO_ID=ENS but REVENUE_DUNE_API_KEY is not set; /revenue/* endpoints will return empty data",
+    );
+  }
+  revenue(app, revenueDuneClient);
+}
 
 if (daoClient.supportOffchainData()) {
   const pgUnifiedClient = drizzle(env.DATABASE_URL, {

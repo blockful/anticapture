@@ -1,3 +1,4 @@
+import { useGetAddresses } from "@anticapture/client/hooks";
 import {
   OrderDirection,
   QueryInput_Delegators_OrderBy,
@@ -6,6 +7,7 @@ import {
   useAccountBalanceByAddressQuery,
   useGetVotingPowerQuery,
 } from "@anticapture/graphql-client/hooks";
+import { useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 
@@ -13,10 +15,8 @@ import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import daoConfig from "@/shared/dao-config";
 import type { DelegatorItem } from "@/shared/hooks/graphql-client/useDelegators";
 import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface VoteCompositionData {
   topDelegators: DelegatorItem[];
@@ -54,7 +54,6 @@ export const useVoteCompositionData = (
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     variables: {
@@ -68,7 +67,6 @@ export const useVoteCompositionData = (
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     variables: {
@@ -83,7 +81,18 @@ export const useVoteCompositionData = (
     (delegator) => delegator.delegatorAddress as Address,
   );
 
-  const { data: ensData } = useMultipleEnsData(delegatorAddresses);
+  const { data: enrichmentData } = useGetAddresses(
+    { addresses: delegatorAddresses },
+    { query: { enabled: delegatorAddresses.length > 0 } },
+  );
+
+  const ensNameByAddress = useMemo(() => {
+    const map: Record<string, string | null | undefined> = {};
+    enrichmentData?.results?.forEach((result) => {
+      map[result.address.toLowerCase()] = result.ens?.name;
+    });
+    return map;
+  }, [enrichmentData]);
 
   const defaultData: VoteCompositionData = {
     topDelegators: [],
@@ -97,9 +106,12 @@ export const useVoteCompositionData = (
     othersPercentage: 0,
   };
 
-  const actualSelfBalance = isAave
-    ? BigInt(balanceData?.accountBalanceByAccountId?.data?.balance ?? "0")
-    : 0n;
+  const balanceResult = balanceData?.accountBalanceByAccountId;
+  const selfBalanceString =
+    balanceResult?.__typename === "AccountBalanceWithVariationResponse"
+      ? balanceResult.data?.balance
+      : undefined;
+  const actualSelfBalance = isAave ? BigInt(selfBalanceString ?? "0") : 0n;
 
   const selfBalance = isAave && includeBalance ? actualSelfBalance : 0n;
 
@@ -178,7 +190,9 @@ export const useVoteCompositionData = (
     const percentageStr =
       percentage > 0 && percentage < 0.01 ? "<0.01" : percentage.toFixed(2);
 
-    const ensName = ensData?.[delegator.delegatorAddress as Address]?.ens;
+    const ensName =
+      ensNameByAddress[(delegator.delegatorAddress as Address).toLowerCase()] ??
+      undefined;
     const displayLabel =
       ensName || formatAddress(delegator.delegatorAddress) || "";
 

@@ -251,17 +251,22 @@ describe("AccountBalanceService", () => {
         1700000000,
       );
 
-      expect(result.accountId).toBe(MOCK_ADDRESS);
-      expect(result.currentBalance).toBe(1000n);
-      expect(result.absoluteChange).toBe(100n);
+      expect(result).toBeDefined();
+      expect(result?.accountId).toBe(MOCK_ADDRESS);
+      expect(result?.currentBalance).toBe(1000n);
+      expect(result?.absoluteChange).toBe(100n);
     });
 
-    it("should throw when account is not found", async () => {
+    it("should return undefined when account is not found", async () => {
       mockRepo.getAccountBalanceWithVariation.mockResolvedValue(undefined);
 
-      await expect(
-        service.getAccountBalanceWithVariation(MOCK_ADDRESS, 0, 1700000000),
-      ).rejects.toThrow("Account not found");
+      const result = await service.getAccountBalanceWithVariation(
+        MOCK_ADDRESS,
+        0,
+        1700000000,
+      );
+
+      expect(result).toBeUndefined();
     });
 
     it("should pass correct params to repository", async () => {
@@ -296,9 +301,10 @@ describe("AccountBalanceService", () => {
         1700000000,
       );
 
-      expect(result.currentBalance).toBe(0n);
-      expect(result.absoluteChange).toBe(0n);
-      expect(result.percentageChange).toBe("0");
+      expect(result).toBeDefined();
+      expect(result?.currentBalance).toBe(0n);
+      expect(result?.absoluteChange).toBe(0n);
+      expect(result?.percentageChange).toBe("0");
     });
   });
 });

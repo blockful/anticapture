@@ -4,10 +4,18 @@ import { delegation, votingPowerHistory } from "@/database";
 
 import {
   AddressSchema,
-  OrderDirectionSchema,
+  addressOutputField,
+  addressPathParams,
+  daoIdField,
+  decimalStringField,
+  defaultDescOrderDirection,
+  inclusiveDateRangeQueryParams,
+  logIndexField,
+  paginatedListResponse,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
-  unixTimestampQueryParam,
+  txHashField,
+  unixSecondsStringField,
 } from "../shared";
 import { DBTransfer } from "../transfers";
 
@@ -19,13 +27,10 @@ export type DBHistoricalVotingPowerWithRelations = DBHistoricalVotingPower & {
   transfers: DBTransfer | null;
 };
 
-export const HistoricalVotingPowerRequestParamsSchema = z
-  .object({
-    address: AddressSchema,
-  })
-  .openapi("HistoricalVotingPowerRequestParams", {
-    description: "Path params for historical voting power queries.",
-  });
+export const HistoricalVotingPowerRequestParamsSchema = addressPathParams(
+  "HistoricalVotingPowerRequestParams",
+  "Path params for historical voting power queries.",
+);
 
 export const HistoricalVotingPowerRequestQuerySchema = z
   .object({
@@ -45,13 +50,8 @@ export const HistoricalVotingPowerRequestQuerySchema = z
         description: "Field used to sort historical voting power rows.",
         example: "timestamp",
       }),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for voting power timestamps, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for voting power timestamps, in Unix seconds.",
-    ),
+    orderDirection: defaultDescOrderDirection(),
+    ...inclusiveDateRangeQueryParams("voting power timestamps"),
     fromValue: z.string().optional().openapi({
       description: "Minimum voting power delta encoded as a decimal string.",
     }),
@@ -70,10 +70,13 @@ export type HistoricalVotingPowerRequest = z.infer<
 
 export const HistoricalVotingPowerDelegationSchema = z
   .object({
-    from: z.string(),
-    value: z.string(),
-    to: z.string(),
-    previousDelegate: z.string().nullable(),
+    from: z.string().openapi({ format: "ethereum-address" }),
+    value: z.string().openapi({ format: "bigint" }),
+    to: z.string().openapi({ format: "ethereum-address" }),
+    previousDelegate: z
+      .string()
+      .nullable()
+      .openapi({ format: "ethereum-address" }),
   })
   .openapi("HistoricalVotingPowerDelegation", {
     description:
@@ -82,9 +85,9 @@ export const HistoricalVotingPowerDelegationSchema = z
 
 export const HistoricalVotingPowerTransferSchema = z
   .object({
-    value: z.string(),
-    from: z.string(),
-    to: z.string(),
+    value: z.string().openapi({ format: "bigint" }),
+    from: z.string().openapi({ format: "ethereum-address" }),
+    to: z.string().openapi({ format: "ethereum-address" }),
   })
   .openapi("HistoricalVotingPowerTransfer", {
     description:
@@ -93,22 +96,18 @@ export const HistoricalVotingPowerTransferSchema = z
 
 export const HistoricalVotingPowerResponseSchema = z
   .object({
-    transactionHash: z.string().openapi({ description: "Transaction hash." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
-    accountId: z.string().openapi({ description: "Account address." }),
-    votingPower: z.string().openapi({
-      description: "Voting power after the event, encoded as a decimal string.",
-    }),
+    transactionHash: txHashField(),
+    daoId: daoIdField(),
+    accountId: addressOutputField("Account address."),
+    votingPower: decimalStringField(
+      "Voting power after the event, encoded as a decimal string.",
+    ),
     delta: z.string().openapi({
       description: "Voting power change introduced by the event.",
+      format: "bigint",
     }),
-    timestamp: z.string().openapi({
-      description: "Event timestamp in Unix seconds as a string.",
-      example: "1704067200",
-    }),
-    logIndex: z.number().int().openapi({
-      description: "Log index within the transaction receipt.",
-    }),
+    timestamp: unixSecondsStringField("Event"),
+    logIndex: logIndexField(),
     delegation: HistoricalVotingPowerDelegationSchema.nullable(),
     transfer: HistoricalVotingPowerTransferSchema.nullable(),
   })
@@ -117,16 +116,12 @@ export const HistoricalVotingPowerResponseSchema = z
       "Single historical voting power record enriched with delegation and transfer context.",
   });
 
-export const HistoricalVotingPowersResponseSchema = z
-  .object({
-    items: z.array(HistoricalVotingPowerResponseSchema),
-    totalCount: z.number().int().openapi({
-      description: "Total number of matching historical voting power rows.",
-    }),
-  })
-  .openapi("HistoricalVotingPowersResponse", {
-    description: "Paginated historical voting power records.",
-  });
+export const HistoricalVotingPowersResponseSchema = paginatedListResponse(
+  HistoricalVotingPowerResponseSchema,
+  "Total number of matching historical voting power rows.",
+).openapi("HistoricalVotingPowersResponse", {
+  description: "Paginated historical voting power records.",
+});
 
 export type HistoricalVotingPowerResponse = z.infer<
   typeof HistoricalVotingPowerResponseSchema

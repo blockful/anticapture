@@ -3,11 +3,13 @@ import { z } from "@hono/zod-openapi";
 import { VoteFilter } from "@/repositories/";
 import {
   AddressSchema,
-  OrderDirectionSchema,
+  VoteSupportSchema,
+  addressOutputField,
+  daoIdField,
+  defaultDescOrderDirection,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
   unixTimestampQueryParam,
-  VoteSupportSchema,
 } from "../shared";
 
 export const ProposalActivityRequestSchema = z
@@ -33,7 +35,7 @@ export const ProposalActivityRequestSchema = z
         description: "Field used to sort proposal activity results.",
         example: "timestamp",
       }),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
     userVoteFilter: z.enum(VoteFilter).optional().openapi({
       description:
         "Optional vote filter. Use yes, no, abstain, or no-vote to narrow the result set.",
@@ -47,10 +49,8 @@ export const ProposalActivityRequestSchema = z
 export const ProposalActivityProposalSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
-    proposerAccountId: z
-      .string()
-      .openapi({ description: "Address that created the proposal." }),
+    daoId: daoIdField(),
+    proposerAccountId: addressOutputField("Address that created the proposal."),
     title: z.string().openapi({ description: "Proposal title." }),
     description: z.string().openapi({ description: "Proposal body." }),
     startBlock: z.number().openapi({ description: "Start block number." }),
@@ -65,6 +65,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Votes cast in favor, encoded as a decimal string.",
       }),
     againstVotes: z
@@ -72,6 +73,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Votes cast against, encoded as a decimal string.",
       }),
     abstainVotes: z
@@ -79,6 +81,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
+        format: "bigint",
         description: "Abstain votes, encoded as a decimal string.",
       }),
   })
@@ -90,13 +93,15 @@ export const ProposalActivityProposalSchema = z
 export const ProposalActivityUserVoteSchema = z
   .object({
     id: z.string().openapi({ description: "Vote identifier." }),
-    voterAccountId: z
-      .string()
-      .openapi({ description: "Address that cast the vote." }),
+    voterAccountId: z.string().openapi({
+      description: "Address that cast the vote.",
+      format: "ethereum-address",
+    }),
     proposalId: z.string().openapi({ description: "Related proposal ID." }),
     support: VoteSupportSchema,
     votingPower: z.coerce.string().openapi({
       type: "string",
+      format: "bigint",
       description: "Voting power used by the delegate, encoded as a string.",
     }),
     reason: z.string().nullable().openapi({
@@ -123,7 +128,7 @@ export const ProposalActivityItemSchema = z
 
 export const ProposalActivityResponseSchema = z
   .object({
-    address: z.string().openapi({ description: "Delegate address." }),
+    address: addressOutputField("Delegate address."),
     totalProposals: z
       .number()
       .int()

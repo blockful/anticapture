@@ -18,7 +18,7 @@ const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => {
   const txHash = overrides.txHash ?? "0xvote1";
   return {
     id: txHash,
-    txHash,
+    txHash: "0xvote1",
     daoId: "UNI",
     voterAccountId: VOTER,
     proposalId: "proposal-1",
@@ -26,6 +26,7 @@ const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => {
     votingPower: 1000n,
     reason: "",
     timestamp: 1700000000n,
+    logIndex: 0,
     ...overrides,
   };
 };

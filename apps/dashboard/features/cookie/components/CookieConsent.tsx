@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
@@ -10,11 +11,17 @@ import { cn } from "@/shared/utils";
 
 interface CookieConsentProps {
   className?: string;
+  isWhitelabel?: boolean;
 }
 
 const SIX_MONTHS_IN_MILLISECONDS = 6 * 30 * 24 * 60 * 60 * 1000;
 
-export const CookieConsent = ({ className }: CookieConsentProps) => {
+export const CookieConsent = ({
+  className,
+  isWhitelabel,
+}: CookieConsentProps) => {
+  const pathname = usePathname();
+  const isWhitelabelMode = isWhitelabel || pathname.startsWith("/whitelabel/");
   const [isVisible, setIsVisible] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -88,25 +95,33 @@ export const CookieConsent = ({ className }: CookieConsentProps) => {
       )}
     >
       <div className="border-border-default bg-surface-default relative z-50 flex w-full flex-col items-start gap-4 overflow-hidden rounded-lg border p-4 shadow-lg lg:flex-row lg:items-center lg:gap-6">
-        <Image
-          className="absolute right-0 top-0 h-full w-[330px] object-cover opacity-50"
-          src="/images/cookie.svg"
-          alt="Cookie"
-          width={330}
-          height={116}
-        />
+        {!isWhitelabelMode && (
+          <Image
+            className="absolute right-0 top-0 h-full w-[330px] object-cover opacity-50"
+            src="/images/cookie.svg"
+            alt="Cookie"
+            width={330}
+            height={116}
+          />
+        )}
         <div className="z-40 flex w-full items-start gap-6 lg:items-center">
-          <div className="relative hidden size-[116px] flex-shrink-0 items-center justify-center lg:flex">
-            <CookieBackground className="text-brand size-[116px]" />
-            <CookieIcon className="text-brand absolute inset-0 left-1/2 top-1/2 size-[56px] -translate-x-1/2 -translate-y-1/2" />
-          </div>
+          {!isWhitelabelMode && (
+            <div className="relative hidden size-[116px] flex-shrink-0 items-center justify-center lg:flex">
+              <CookieBackground className="text-brand size-[116px]" />
+              <CookieIcon className="text-brand absolute inset-0 left-1/2 top-1/2 size-[56px] -translate-x-1/2 -translate-y-1/2" />
+            </div>
+          )}
           <div className="flex flex-1 flex-col gap-1">
-            <div className="text-tangerine font-mono text-xs uppercase tracking-wider">
-              [mission_control]
-            </div>
-            <div className="text-primary font-mono text-lg font-medium uppercase tracking-wider">
-              Want_a_cookie?<span className="text-tangerine">_</span>
-            </div>
+            {!isWhitelabelMode && (
+              <>
+                <div className="text-tangerine font-mono text-xs uppercase tracking-wider">
+                  [mission_control]
+                </div>
+                <div className="text-primary font-mono text-lg font-medium uppercase tracking-wider">
+                  Want_a_cookie?<span className="text-tangerine">_</span>
+                </div>
+              </>
+            )}
             <div className="text-secondary text-sm">
               We use cookies to run the site, improve insights, and personalize
               your experience. You can manage your preferences anytime.

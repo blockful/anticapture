@@ -35,13 +35,11 @@ type DelegationAddressSets = {
  * - New `Delegation` record with calculated delegated value and flags
  * - New `AccountBalance` record (if delegator doesn't have one for this token)
  * - New `AccountPower` record (if delegate doesn't have one for this DAO)
- * - New `Transaction` record (if this transaction hasn't been processed)
  *
  * ### Updates:
  * - `Delegation`: Adds to existing delegated value if record already exists
  * - `AccountBalance`: Changes the delegate assignment for the delegator
  * - `AccountPower`: Increments the delegate's delegation count
- * - `Transaction`: Updates transaction flags if record already exists
  */
 export const delegateChanged = async (
   context: Context,
@@ -161,12 +159,6 @@ export const delegateChanged = async (
     type: "DELEGATION",
     value: delegatorBalance?.balance ?? 0n,
     timestamp,
-    metadata: {
-      delegator: normalizedDelegator,
-      delegate: normalizedDelegate,
-      previousDelegate: getAddress(previousDelegate),
-      amount: delegatorBalance?.balance ?? 0n,
-    },
   });
 };
 
@@ -235,10 +227,5 @@ export const delegatedVotesChanged = async (
     type: "DELEGATION_VOTES_CHANGED",
     value: deltaMod,
     timestamp,
-    metadata: {
-      delta,
-      deltaMod,
-      delegate: normalizedDelegate,
-    },
   });
 };

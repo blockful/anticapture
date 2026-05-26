@@ -1,26 +1,36 @@
 import { parseEther } from "viem";
 import { describe, it, expect, beforeEach } from "vitest";
+import { z } from "zod";
 
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
-import { DBFeedEvent, FeedRequest } from "@/mappers";
+import {
+  DBFeedEvent,
+  FeedDelegationMetadataSchema,
+  FeedMetadataSchema,
+  FeedRequest,
+} from "@/mappers";
 
 import { FeedService } from ".";
 
+type FeedEventWithMetadata = DBFeedEvent & {
+  metadata: z.infer<typeof FeedMetadataSchema> | null;
+};
+
 const createFeedEvent = (
-  overrides: Partial<Omit<DBFeedEvent, "type"> & { type: string }> = {},
-): DBFeedEvent =>
-  ({
-    id: "test-id",
-    txHash: "0xabc123",
-    logIndex: 0,
-    type: "VOTE",
-    value: parseEther("100000"),
-    timestamp: 1700000000,
-    metadata: null,
-    ...overrides,
-  }) as DBFeedEvent;
+  overrides: Partial<FeedEventWithMetadata> = {},
+): FeedEventWithMetadata => ({
+  id: "test-id",
+  txHash: "0xabc123",
+  logIndex: 0,
+  type: "VOTE",
+  value: parseEther("100000"),
+  timestamp: 1700000000,
+  proposalId: null,
+  metadata: null,
+  ...overrides,
+});
 
 const createRequest = (overrides: Partial<FeedRequest> = {}): FeedRequest => ({
   skip: 0,
@@ -32,15 +42,14 @@ const createRequest = (overrides: Partial<FeedRequest> = {}): FeedRequest => ({
 });
 
 class SimpleFeedRepository {
-  items: DBFeedEvent[] = [];
+  items: FeedEventWithMetadata[] = [];
 
   async getFeedEvents(
     _req: FeedRequest,
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ) {
     const filtered = this.items.filter((e) => {
-      if ((e.type as string) === "DELEGATION_VOTES_CHANGED") return false;
-      const threshold = valueThresholds[e.type];
+      const threshold = valueThresholds[e.type as FeedEventType];
       return threshold === undefined || e.value >= threshold;
     });
 
@@ -80,13 +89,20 @@ describe("FeedService", () => {
     });
 
     it("should preserve item fields from repository", async () => {
+      const delegationMetadata: z.infer<typeof FeedDelegationMetadataSchema> = {
+        kind: FeedEventType.DELEGATION,
+        delegator: "0x1",
+        delegate: "0x2",
+        previousDelegate: null,
+        amount: "100",
+      };
       const event = createFeedEvent({
         txHash: "0xdef456",
         logIndex: 5,
         type: "DELEGATION",
         value: ensThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM],
         timestamp: 1700001000,
-        metadata: { from: "0x1", to: "0x2" },
+        metadata: delegationMetadata,
       });
       simpleRepo.items = [event];
 
@@ -98,7 +114,8 @@ describe("FeedService", () => {
         type: "DELEGATION",
         value: event.value.toString(),
         timestamp: 1700001000,
-        metadata: { from: "0x1", to: "0x2" },
+        proposalId: null,
+        metadata: delegationMetadata,
         relevance: FeedRelevance.MEDIUM,
       });
     });

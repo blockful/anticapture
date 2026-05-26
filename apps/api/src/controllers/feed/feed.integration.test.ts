@@ -3,8 +3,16 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { zeroAddress } from "viem";
 import * as schema from "@/database/schema";
-import { feedEvent } from "@/database/schema";
+import {
+  delegation,
+  feedEvent,
+  proposalsOnchain,
+  transfer,
+  votesOnchain,
+  votingPowerHistory,
+} from "@/database/schema";
 import type { Drizzle } from "@/database";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
@@ -17,18 +25,17 @@ type FeedEventInsert = typeof feedEvent.$inferInsert;
 const nounsThresholds = getDaoRelevanceThreshold(DaoIdEnum.NOUNS);
 
 const createEvent = (
-  overrides: Partial<Omit<FeedEventInsert, "type"> & { type: string }> = {},
-): FeedEventInsert =>
-  ({
-    id: "test-id",
-    txHash: "0xabc123def456abc1",
-    logIndex: 0,
-    type: "VOTE",
-    value: nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
-    timestamp: 1700000000,
-    metadata: null,
-    ...overrides,
-  }) as FeedEventInsert;
+  overrides: Partial<FeedEventInsert> = {},
+): FeedEventInsert => ({
+  id: "test-id",
+  txHash: "0xabc123def456abc1",
+  logIndex: 0,
+  type: "VOTE" as const,
+  value: nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM],
+  timestamp: 1700000000,
+  proposalId: null,
+  ...overrides,
+});
 
 let client: PGlite;
 let db: Drizzle;
@@ -48,6 +55,11 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await db.delete(feedEvent);
+  await db.delete(votesOnchain);
+  await db.delete(proposalsOnchain);
+  await db.delete(delegation);
+  await db.delete(transfer);
+  await db.delete(votingPowerHistory);
   const repo = new FeedRepository(db);
   const service = new FeedService(DaoIdEnum.NOUNS, repo);
   app = new Hono();
@@ -350,11 +362,38 @@ describe("Feed Controller (integration)", () => {
       });
     });
 
-    it("should include metadata in response", async () => {
-      const metadata = { proposalId: "1", title: "Test" };
+    it("should synthesize PROPOSAL metadata using historical proposer voting power", async () => {
+      const proposer = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
+      await db.insert(votingPowerHistory).values({
+        transactionHash: "0xvph",
+        daoId: "NOUNS",
+        accountId: proposer,
+        votingPower: 99n,
+        delta: 99n,
+        deltaMod: 99n,
+        timestamp: 1699999900n,
+        logIndex: 0,
+      });
+      await db.insert(proposalsOnchain).values({
+        id: "1",
+        txHash: "0xabc123def456abc1",
+        daoId: "NOUNS",
+        proposerAccountId: proposer,
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
+        startBlock: 0,
+        endBlock: 100,
+        title: "Test",
+        description: "desc",
+        timestamp: 1700000000n,
+        endTimestamp: 1700001000n,
+        status: "ACTIVE",
+      });
       await db
         .insert(feedEvent)
-        .values(createEvent({ type: "PROPOSAL", value: 0n, metadata }));
+        .values(createEvent({ type: "PROPOSAL", value: 0n, proposalId: "1" }));
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -364,15 +403,21 @@ describe("Feed Controller (integration)", () => {
           buildExpectedItem({
             type: "PROPOSAL",
             relevance: FeedRelevance.HIGH,
-            metadata,
+            metadata: {
+              kind: "PROPOSAL",
+              id: "1",
+              proposer,
+              votingPower: "99",
+              title: "Test",
+            },
           }),
         ],
         totalCount: 1,
       });
     });
 
-    it("should handle null metadata", async () => {
-      await db.insert(feedEvent).values(createEvent({ metadata: null }));
+    it("should return null metadata when no related row exists", async () => {
+      await db.insert(feedEvent).values(createEvent());
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -383,32 +428,43 @@ describe("Feed Controller (integration)", () => {
       });
     });
 
-    it("should handle empty metadata object", async () => {
-      await db
-        .insert(feedEvent)
-        .values(createEvent({ metadata: {} as Record<string, unknown> }));
-
-      const res = await app.request("/feed/events");
-      const body = await res.json();
-
-      expect(body).toEqual({
-        items: [buildExpectedItem({ metadata: {} })],
-        totalCount: 1,
-      });
-    });
-
-    it("should preserve VOTE metadata shape", async () => {
+    it("should synthesize VOTE metadata with proposal title", async () => {
+      const voter = "0x1234567890abcdef1234567890abcdef12345678";
       const voteValue =
         nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM];
-      const metadata = {
-        reason: "I support this proposal",
-        support: 1,
-        votingPower: "50000000000000000000000",
+      await db.insert(proposalsOnchain).values({
+        id: "42",
+        txHash: "0xprop",
+        daoId: "NOUNS",
+        proposerAccountId: zeroAddress,
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
+        startBlock: 0,
+        endBlock: 100,
+        title: "Voted Proposal",
+        description: "desc",
+        timestamp: 1700000000n,
+        endTimestamp: 1700001000n,
+        status: "ACTIVE",
+      });
+      await db.insert(votesOnchain).values({
+        txHash: "0xabc123def456abc1",
+        daoId: "NOUNS",
+        voterAccountId: voter,
         proposalId: "42",
-      };
+        support: "1",
+        votingPower: voteValue,
+        reason: "I support this proposal",
+        timestamp: 1700000000n,
+        logIndex: 0,
+      });
       await db
         .insert(feedEvent)
-        .values(createEvent({ type: "VOTE", value: voteValue, metadata }));
+        .values(
+          createEvent({ type: "VOTE", value: voteValue, proposalId: "42" }),
+        );
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -418,26 +474,39 @@ describe("Feed Controller (integration)", () => {
           buildExpectedItem({
             value: String(voteValue),
             relevance: FeedRelevance.MEDIUM,
-            metadata,
+            metadata: {
+              kind: "VOTE",
+              voter,
+              reason: "I support this proposal",
+              support: 1,
+              votingPower: voteValue.toString(),
+              proposalId: "42",
+              title: "Voted Proposal",
+            },
           }),
         ],
         totalCount: 1,
       });
     });
 
-    it("should preserve DELEGATION metadata shape", async () => {
+    it("should synthesize DELEGATION metadata from delegations table", async () => {
+      const delegator = "0x1234567890abcdef1234567890abcdef12345678";
+      const delegate = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
       const delegationValue =
         nounsThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM];
-      const metadata = {
-        delegator: "0x1234567890abcdef1234567890abcdef12345678",
-        delegate: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-        previousDelegate: "0x0000000000000000000000000000000000000000",
-      };
+      await db.insert(delegation).values({
+        transactionHash: "0xabc123def456abc1",
+        daoId: "NOUNS",
+        delegatorAccountId: delegator,
+        delegateAccountId: delegate,
+        delegatedValue: delegationValue,
+        previousDelegate: zeroAddress,
+        timestamp: 1700000000n,
+        logIndex: 0,
+      });
       await db
         .insert(feedEvent)
-        .values(
-          createEvent({ type: "DELEGATION", value: delegationValue, metadata }),
-        );
+        .values(createEvent({ type: "DELEGATION", value: delegationValue }));
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -448,25 +517,37 @@ describe("Feed Controller (integration)", () => {
             type: "DELEGATION",
             value: String(delegationValue),
             relevance: FeedRelevance.MEDIUM,
-            metadata,
+            metadata: {
+              kind: "DELEGATION",
+              delegator,
+              delegate,
+              previousDelegate: zeroAddress,
+              amount: delegationValue.toString(),
+            },
           }),
         ],
         totalCount: 1,
       });
     });
 
-    it("should preserve TRANSFER metadata shape", async () => {
+    it("should synthesize TRANSFER metadata from transfers table", async () => {
+      const fromAddr = "0x1234567890abcdef1234567890abcdef12345678";
+      const toAddr = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
       const transferValue =
         nounsThresholds[FeedEventType.TRANSFER][FeedRelevance.MEDIUM];
-      const metadata = {
-        from: "0x1234567890abcdef1234567890abcdef12345678",
-        to: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-      };
+      await db.insert(transfer).values({
+        transactionHash: "0xabc123def456abc1",
+        daoId: "NOUNS",
+        tokenId: zeroAddress,
+        amount: transferValue,
+        fromAccountId: fromAddr,
+        toAccountId: toAddr,
+        timestamp: 1700000000n,
+        logIndex: 0,
+      });
       await db
         .insert(feedEvent)
-        .values(
-          createEvent({ type: "TRANSFER", value: transferValue, metadata }),
-        );
+        .values(createEvent({ type: "TRANSFER", value: transferValue }));
 
       const res = await app.request("/feed/events");
       const body = await res.json();
@@ -477,74 +558,74 @@ describe("Feed Controller (integration)", () => {
             type: "TRANSFER",
             value: String(transferValue),
             relevance: FeedRelevance.MEDIUM,
-            metadata,
+            metadata: {
+              kind: "TRANSFER",
+              from: fromAddr,
+              to: toAddr,
+              amount: transferValue.toString(),
+            },
           }),
         ],
         totalCount: 1,
       });
     });
 
-    it("should preserve metadata with numeric values", async () => {
-      const delegationValue =
-        nounsThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM];
-      const metadata = {
-        delta: 1000,
-        deltaMod: 1000,
-        delegate: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-      };
-      await db
-        .insert(feedEvent)
-        .values(
-          createEvent({ type: "DELEGATION", value: delegationValue, metadata }),
-        );
-
-      const res = await app.request("/feed/events");
-      const body = await res.json();
-
-      expect(body).toEqual({
-        items: [
-          buildExpectedItem({
-            type: "DELEGATION",
-            value: String(delegationValue),
-            relevance: FeedRelevance.MEDIUM,
-            metadata,
-          }),
-        ],
-        totalCount: 1,
-      });
-    });
-
-    it("should preserve different metadata per item in a mixed list", async () => {
+    it("should synthesize different metadata per item in a mixed list", async () => {
       const voteValue =
         nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM];
       const transferValue =
         nounsThresholds[FeedEventType.TRANSFER][FeedRelevance.MEDIUM];
+      const proposer = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
+      const fromAddr = "0x1111111111111111111111111111111111111111";
+      const toAddr = "0x2222222222222222222222222222222222222222";
 
-      const proposalMeta = { id: "1", proposer: "0xabc", title: "Test" };
-      const transferMeta = { from: "0x111", to: "0x222" };
-
-      // Insert with different timestamps so desc ordering returns proposal first
+      await db.insert(proposalsOnchain).values({
+        id: "1",
+        txHash: "0xprop",
+        daoId: "NOUNS",
+        proposerAccountId: proposer,
+        targets: [],
+        values: [],
+        signatures: [],
+        calldatas: [],
+        startBlock: 0,
+        endBlock: 100,
+        title: "Test",
+        description: "desc",
+        timestamp: 1700000000n,
+        endTimestamp: 1700001000n,
+        status: "ACTIVE",
+      });
+      await db.insert(transfer).values({
+        transactionHash: "0xabc123def456abc1",
+        daoId: "NOUNS",
+        tokenId: zeroAddress,
+        amount: transferValue,
+        fromAccountId: fromAddr,
+        toAccountId: toAddr,
+        timestamp: 1700000002n,
+        logIndex: 1,
+      });
       await db.insert(feedEvent).values([
         createEvent({
           type: "PROPOSAL",
           value: 0n,
           logIndex: 0,
           timestamp: 1700000003,
-          metadata: proposalMeta,
+          proposalId: "1",
+          txHash: "0xprop",
         }),
         createEvent({
           type: "TRANSFER",
           logIndex: 1,
           timestamp: 1700000002,
           value: transferValue,
-          metadata: transferMeta,
         }),
         createEvent({
           type: "VOTE",
           logIndex: 2,
           timestamp: 1700000001,
           value: voteValue,
-          metadata: null,
         }),
       ]);
 
@@ -555,10 +636,17 @@ describe("Feed Controller (integration)", () => {
         items: [
           buildExpectedItem({
             type: "PROPOSAL",
+            txHash: "0xprop",
             logIndex: 0,
             timestamp: 1700000003,
             relevance: FeedRelevance.HIGH,
-            metadata: proposalMeta,
+            metadata: {
+              kind: "PROPOSAL",
+              id: "1",
+              proposer,
+              votingPower: "0",
+              title: "Test",
+            },
           }),
           buildExpectedItem({
             type: "TRANSFER",
@@ -566,7 +654,12 @@ describe("Feed Controller (integration)", () => {
             timestamp: 1700000002,
             value: String(transferValue),
             relevance: FeedRelevance.MEDIUM,
-            metadata: transferMeta,
+            metadata: {
+              kind: "TRANSFER",
+              from: fromAddr,
+              to: toAddr,
+              amount: transferValue.toString(),
+            },
           }),
           buildExpectedItem({
             type: "VOTE",
@@ -579,6 +672,44 @@ describe("Feed Controller (integration)", () => {
         ],
         totalCount: 3,
       });
+    });
+
+    it("should accept multiple type filters in a single request", async () => {
+      const voteValue =
+        nounsThresholds[FeedEventType.VOTE][FeedRelevance.MEDIUM];
+      const delegationValue =
+        nounsThresholds[FeedEventType.DELEGATION][FeedRelevance.MEDIUM];
+      const transferValue =
+        nounsThresholds[FeedEventType.TRANSFER][FeedRelevance.MEDIUM];
+
+      await db.insert(feedEvent).values([
+        createEvent({
+          type: "VOTE",
+          logIndex: 0,
+          value: voteValue,
+          timestamp: 1700000003,
+        }),
+        createEvent({
+          type: "DELEGATION",
+          logIndex: 1,
+          value: delegationValue,
+          timestamp: 1700000002,
+        }),
+        createEvent({
+          type: "TRANSFER",
+          logIndex: 2,
+          value: transferValue,
+          timestamp: 1700000001,
+        }),
+      ]);
+
+      const res = await app.request("/feed/events?type=VOTE&type=DELEGATION");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.totalCount).toBe(2);
+      const types = body.items.map((i: { type: string }) => i.type).sort();
+      expect(types).toEqual(["DELEGATION", "VOTE"]);
     });
   });
 });

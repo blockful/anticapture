@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import type { Data } from "react-csv/lib/core";
 import type { LabelProps } from "recharts";
@@ -30,9 +29,9 @@ import {
   useDelegatedSupply,
   useScreenSize,
 } from "@/shared/hooks";
-import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/";
+import { useDaoId } from "@/shared/providers/DaoIdProvider";
 
 interface StackedValue {
   value: number;
@@ -66,30 +65,29 @@ export const AttackCostBarChart = ({
   setCsvData,
   valueMode,
 }: AttackCostBarChartProps) => {
-  const { daoId }: { daoId: string } = useParams();
-  const selectedDaoId = daoId.toUpperCase() as DaoIdEnum;
+  const daoId = useDaoId();
   const timeInterval = TimeInterval.NINETY_DAYS;
 
   const { data: liquidTreasuryData, loading: liquidTreasuryLoading } =
-    useTreasury(selectedDaoId, "liquid", TimeInterval.SEVEN_DAYS);
-  const delegatedSupply = useDelegatedSupply(selectedDaoId, timeInterval);
-  const activeSupply = useActiveSupply(selectedDaoId, timeInterval);
-  const averageTurnout = useAverageTurnout(selectedDaoId, timeInterval);
+    useTreasury(daoId, "liquid", TimeInterval.SEVEN_DAYS);
+  const delegatedSupply = useDelegatedSupply(daoId, timeInterval);
+  const activeSupply = useActiveSupply(daoId, timeInterval);
+  const averageTurnout = useAverageTurnout(daoId, timeInterval);
 
   const {
     data: daoTokenPriceHistoricalData,
     loading: daoTokenPriceHistoricalDataLoading,
   } = useDaoTokenHistoricalData({
-    daoId: selectedDaoId,
+    daoId,
     limit: 1,
   });
 
-  const daoConfig = daoConfigByDaoId[selectedDaoId];
+  const daoConfig = daoConfigByDaoId[daoId];
 
   const {
     data: daoTopTokenHolderExcludingTheDao,
     loading: daoTopTokenHolderExcludingTheDaoLoading,
-  } = useTopTokenHolderNonDao(selectedDaoId);
+  } = useTopTokenHolderNonDao(daoId);
 
   const { isMobile } = useScreenSize();
 
@@ -101,19 +99,11 @@ export const AttackCostBarChart = ({
     daoTokenPriceHistoricalDataLoading ||
     daoTopTokenHolderExcludingTheDaoLoading;
 
-  const mocked = useMemo(() => {
-    return (
-      delegatedSupply.data?.currentValue === undefined &&
-      activeSupply.data?.activeSupply === undefined &&
-      averageTurnout.data?.currentAverageTurnout === undefined &&
-      daoTopTokenHolderExcludingTheDao?.balance === undefined
-    );
-  }, [
-    delegatedSupply.data?.currentValue,
-    activeSupply.data?.activeSupply,
-    averageTurnout.data?.currentAverageTurnout,
-    daoTopTokenHolderExcludingTheDao?.balance,
-  ]);
+  const mocked =
+    delegatedSupply.data?.currentValue === undefined &&
+    activeSupply.data?.activeSupply === undefined &&
+    averageTurnout.data?.currentAverageTurnout === undefined &&
+    daoTopTokenHolderExcludingTheDao?.balance === undefined;
 
   const chartData: ChartDataItem[] = useMemo(() => {
     if (isLoading) return [];

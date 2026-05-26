@@ -1,78 +1,75 @@
-"use client";
-
-import { useQueryState, parseAsStringEnum, parseAsString } from "nuqs";
-import { useCallback, useMemo } from "react";
-
-import type {
-  ActivityFeedFilterState,
-  FeedEventRelevance,
-} from "@/features/feed/types";
+import { useCallback } from "react";
 import {
-  FeedEventRelevance as FeedRelevance,
-  FeedEventType,
-} from "@/features/feed/types";
+  useQueryState,
+  parseAsStringEnum,
+  parseAsInteger,
+  parseAsArrayOf,
+} from "nuqs";
 
-export interface UseActivityFeedParamsReturn {
-  filters: ActivityFeedFilterState;
-  setFilters: (filters: ActivityFeedFilterState) => void;
-  clearFilters: () => void;
-}
+import {
+  type FeedEventsQueryParams,
+  type OrderDirection,
+  type FeedRelevance,
+  type FeedEventType,
+  feedRelevanceEnum,
+  feedEventTypeEnum,
+  orderDirectionEnum,
+} from "@anticapture/client";
 
-export function useActivityFeedParams(): UseActivityFeedParamsReturn {
-  const [sortOrder, setSortOrder] = useQueryState(
+import { getActiveActivityFeedFiltersCount } from "@/features/feed/hooks/activityFeedFilters";
+
+export function useActivityFeedParams() {
+  const [orderDirection, setOrderDirection] = useQueryState(
     "sort",
-    parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
+    parseAsStringEnum<OrderDirection>(
+      Object.values(orderDirectionEnum),
+    ).withDefault("desc"),
   );
   const [relevance, setRelevance] = useQueryState(
     "relevance",
-    parseAsStringEnum([
-      FeedRelevance.Low,
-      FeedRelevance.Medium,
-      FeedRelevance.High,
-    ]).withDefault(FeedRelevance.Medium),
+    parseAsStringEnum<FeedRelevance>(
+      Object.values(feedRelevanceEnum),
+    ).withDefault("MEDIUM"),
   );
-  const [fromDate, setFromDate] = useQueryState("from", parseAsString);
-  const [toDate, setToDate] = useQueryState("to", parseAsString);
-  const [eventType, setEventType] = useQueryState(
+  const [fromDate, setFromDate] = useQueryState("from", parseAsInteger);
+  const [toDate, setToDate] = useQueryState("to", parseAsInteger);
+  const [eventTypes, setEventTypes] = useQueryState(
     "type",
-    parseAsStringEnum([
-      FeedEventType.Vote,
-      FeedEventType.Proposal,
-      FeedEventType.ProposalExtended,
-      FeedEventType.Transfer,
-      FeedEventType.Delegation,
-    ]),
+    parseAsArrayOf(
+      parseAsStringEnum<FeedEventType>(Object.values(feedEventTypeEnum)),
+    ),
   );
 
-  const filters: ActivityFeedFilterState = useMemo(
-    () => ({
-      sortOrder: sortOrder as "asc" | "desc",
-      relevance: relevance as FeedEventRelevance,
-      fromDate: fromDate ?? "",
-      toDate: toDate ?? "",
-      type: (eventType as FeedEventType) ?? undefined,
-    }),
-    [sortOrder, relevance, fromDate, toDate, eventType],
-  );
+  const filters: FeedEventsQueryParams = {
+    orderDirection,
+    relevance,
+    fromDate: fromDate ?? undefined,
+    toDate: toDate ?? undefined,
+    type: eventTypes ?? undefined,
+  };
 
   const setFilters = useCallback(
-    (newFilters: ActivityFeedFilterState) => {
-      setSortOrder(newFilters.sortOrder);
+    (newFilters: FeedEventsQueryParams) => {
+      setOrderDirection(newFilters.orderDirection ?? "desc");
       setRelevance(newFilters.relevance ?? null);
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
-      setEventType(newFilters.type ?? null);
+      setEventTypes(
+        newFilters.type && newFilters.type.length > 0 ? newFilters.type : null,
+      );
     },
-    [setSortOrder, setRelevance, setFromDate, setToDate, setEventType],
+    [setOrderDirection, setRelevance, setFromDate, setToDate, setEventTypes],
   );
 
   const clearFilters = useCallback(() => {
-    setSortOrder("desc");
-    setRelevance(FeedRelevance.Medium);
+    setOrderDirection(null);
+    setRelevance(null);
     setFromDate(null);
     setToDate(null);
-    setEventType(null);
-  }, [setSortOrder, setRelevance, setFromDate, setToDate, setEventType]);
+    setEventTypes(null);
+  }, [setOrderDirection, setRelevance, setFromDate, setToDate, setEventTypes]);
 
-  return { filters, setFilters, clearFilters };
+  const activeFiltersCount = getActiveActivityFeedFiltersCount(filters);
+
+  return { filters, setFilters, clearFilters, activeFiltersCount };
 }

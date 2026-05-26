@@ -14,9 +14,12 @@ import { OngoingProposalBanner } from "@/features/dao-overview/components/Ongoin
 import { SecurityCouncilCard } from "@/features/dao-overview/components/SecurityCouncilCard";
 import { TokenDistributionChartCard } from "@/features/dao-overview/components/TokenDistributionChartCard";
 import { VotingPowerChartCard } from "@/features/dao-overview/components/VotingPowerChartCard";
-import { DaoOverviewSkeleton } from "@/features/dao-overview/skeleton/DaoOverviewSkeleton";
 import { StagesContainer } from "@/features/resilience-stages/components/StagesContainer";
-import { RiskAreaCardEnum, RiskAreaCardWrapper } from "@/shared/components";
+import {
+  RiskAreaCardEnum,
+  RiskAreaCardWrapper,
+  SkeletonRow,
+} from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -49,63 +52,69 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   };
 
   return (
-    <Suspense fallback={<DaoOverviewSkeleton />}>
-      <div className="relative flex flex-col gap-5 lg:gap-2">
-        <DaoOverviewHeaderBackground
-          color={daoConfig.color.svgColor}
-          bgColor={daoConfig.color.svgBgColor}
-        />
-        <div className="relative z-10 mx-5 flex flex-col gap-4 pt-5">
-          <div className="border-inverted lg:bg-inverted flex flex-col gap-1 lg:flex-row lg:border-2">
-            <DaoAvatarIcon
-              daoId={daoId}
-              className="border-inverted size-32 shrink-0 rounded-none border-2 lg:border-none"
-            />
+    <div className="relative flex flex-col gap-5 lg:gap-2">
+      <DaoOverviewHeaderBackground
+        color={daoConfig.color.svgColor}
+        bgColor={daoConfig.color.svgBgColor}
+      />
+      <div className="relative z-10 mx-5 flex flex-col gap-4 pt-5">
+        <div className="border-inverted lg:bg-inverted flex flex-col gap-1 lg:flex-row lg:border-2">
+          <DaoAvatarIcon
+            daoId={daoId}
+            className="border-inverted size-32 shrink-0 rounded-none border-2 lg:border-none"
+          />
 
+          <Suspense fallback={<SkeletonRow className="h-32 w-full" />}>
             <DaoOverviewHeaderMetrics
               daoId={daoId}
               daoConfig={daoConfig}
               reviewStage={currentDaoStage === Stage.UNKNOWN}
             />
-          </div>
+          </Suspense>
         </div>
-        <div className="block lg:hidden">
-          <DividerDefault isHorizontal />
-        </div>
+      </div>
+      <div className="block lg:hidden">
+        <DividerDefault isHorizontal />
+      </div>
 
-        {daoConfig.governancePage && (
-          <div className="mx-5">
+      {daoConfig.governancePage && (
+        <div className="mx-5">
+          <Suspense fallback={null}>
             <OngoingProposalBanner daoId={daoId} />
-          </div>
-        )}
+          </Suspense>
+        </div>
+      )}
 
-        {currentDaoStage === Stage.UNKNOWN && (
-          <div className="mx-5">
-            <BannerAlert
-              icon={<Info className="size-4" />}
-              text="This DAO is needing review. Enable monitoring for faster governance risk signals."
-              storageKey={`donate-banner-dismissed-${daoId}`}
-              links={{
-                url: `/donate`,
-                text: "Donate",
-                openInNewTab: true,
-              }}
-            />
-          </div>
-        )}
+      {currentDaoStage === Stage.UNKNOWN && (
+        <div className="mx-5">
+          <BannerAlert
+            icon={<Info className="size-4" />}
+            text="This DAO is needing review. Enable monitoring for faster governance risk signals."
+            storageKey={`donate-banner-dismissed-${daoId}`}
+            links={{
+              url: `/donate`,
+              text: "Donate",
+              openInNewTab: true,
+            }}
+          />
+        </div>
+      )}
 
-        <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
-          <div className="w-full px-5 lg:px-0">
+      <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
+        <div className="w-full px-5 lg:px-0">
+          <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
             <StagesContainer
               daoId={daoId}
               currentDaoStage={currentDaoStage}
               daoConfig={daoConfig}
               context="overview"
             />
-          </div>
-          <div className="block lg:hidden">
-            <DividerDefault isHorizontal />
-          </div>
+          </Suspense>
+        </div>
+        <div className="block lg:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
           <RiskAreaCardWrapper
             daoId={daoId}
             title={riskAreas.title}
@@ -117,48 +126,64 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
             className="grid h-full grid-cols-2 gap-2 px-5 lg:px-0"
             currentDaoStage={currentDaoStage}
           />
-          <div className="block lg:hidden">
-            <DividerDefault isHorizontal />
-          </div>
-        </div>
-        {currentDaoStage !== Stage.UNKNOWN && (
-          <div className="border-inverted mx-5 border-x">
-            <MetricsCard daoId={daoId} daoConfig={daoConfig} />
-          </div>
-        )}
+        </Suspense>
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
+      </div>
+      {currentDaoStage !== Stage.UNKNOWN && (
+        <div className="border-inverted mx-5 border-x">
+          <Suspense fallback={<SkeletonRow className="h-[90px] w-full" />}>
+            <MetricsCard daoId={daoId} daoConfig={daoConfig} />
+          </Suspense>
+        </div>
+      )}
+      <div className="block lg:hidden">
+        <DividerDefault isHorizontal />
+      </div>
+      <Suspense fallback={null}>
         <SecurityCouncilCard daoOverview={daoOverview} />
-        <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
+      </Suspense>
+      <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
+        <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
           <AttackProfitabilityChartCard
             daoId={daoId}
             currentDaoStage={currentDaoStage}
           />
-          <div className="block lg:hidden">
-            <DividerDefault isHorizontal />
-          </div>
+        </Suspense>
+        <div className="block lg:hidden">
+          <DividerDefault isHorizontal />
+        </div>
+        <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
           <TokenDistributionChartCard
             daoId={daoId}
             currentDaoStage={currentDaoStage}
           />
+        </Suspense>
+      </div>
+      <div className="block lg:hidden">
+        <DividerDefault isHorizontal />
+      </div>
+      <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
+        <div className="w-full">
+          <Suspense fallback={<SkeletonRow className="h-52 w-full" />}>
+            <AccountBalanceChartCard daoId={daoId} />
+          </Suspense>
         </div>
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
-          <div className="w-full">
-            <AccountBalanceChartCard daoId={daoId} />
-          </div>
-          <div className="block lg:hidden">
-            <DividerDefault isHorizontal />
-          </div>
-          <div className="w-full">
+        <div className="w-full">
+          <Suspense fallback={<SkeletonRow className="h-52 w-full" />}>
             <VotingPowerChartCard daoId={daoId} />
-          </div>
+          </Suspense>
         </div>
-        {daoConfig.governancePage && <LastProposalsCard daoId={daoId} />}
       </div>
-    </Suspense>
+      {daoConfig.governancePage && (
+        <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
+          <LastProposalsCard daoId={daoId} />
+        </Suspense>
+      )}
+    </div>
   );
 };

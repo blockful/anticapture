@@ -110,11 +110,36 @@ wait_for_port() {
   log "$name is ready on port $port"
 }
 
+wait_for_optional_port() {
+  local port=$1 name=$2 timeout=${3:-20} elapsed=0
+  log "Waiting for optional $name on port $port..."
+  while ! (lsof -i ":$port" -sTCP:LISTEN >/dev/null 2>&1 || ss -tlnH "sport = :$port" 2>/dev/null | grep -q LISTEN); do
+    sleep 1
+    elapsed=$((elapsed + 1))
+    if [ "$elapsed" -ge "$timeout" ]; then
+      log "Optional $name did not become ready; continuing without it"
+      return 1
+    fi
+  done
+  log "$name is ready on port $port"
+  return 0
+}
+
+start_gateful() {
+  log "Starting Gateful..."
+  run_with_prefix "$C_GATEFUL" "🚪 gateful" "" "" railway_run gateful pnpm gateful dev &
+  wait_for_port "$PORT_GATEFUL" "Gateful" 120
+}
+
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+  return 0
+fi
+
 cleanup() {
   echo ""
   log "Shutting down..."
   trap - INT TERM EXIT
-  rm -f "${GATEWAY_READY:-}" "${GATEFUL_READY:-}" 2>/dev/null
+  rm -f "${GATEWAY_READY:-}" 2>/dev/null
   kill 0 2>/dev/null || true
   wait 2>/dev/null
 }
@@ -131,8 +156,8 @@ railway_run() {
   local service=$1
   shift
   if [ "$USE_RAILWAY" = true ]; then
-    log "railway_run: pnpm railway run -e dev -s $service $*"
-    pnpm railway run -e dev -s "$service" "$@"
+    log "railway_run: railway run -e dev -s $service $*"
+    railway run -e dev -s "$service" "$@"
   else
     log "railway_run (no --rw): $*"
     "$@"
@@ -143,13 +168,18 @@ railway_run() {
 railway_run_api() {
   local service=$1
   shift
-  if pnpm railway run -e dev -s "$service" true >/dev/null 2>&1; then
-    log "railway_run_api: pnpm railway run -e dev -s $service $*"
-    pnpm railway run -e dev -s "$service" "$@"
+  if railway run -e dev -s "$service" true >/dev/null 2>&1; then
+    log "railway_run_api: railway run -e dev -s $service $*"
+    railway run -e dev -s "$service" "$@"
   else
     log "railway_run_api: Railway service '$service' not found, falling back to: $*"
     "$@"
   fi
+}
+
+railway_service_available() {
+  local service=$1
+  railway run -e dev -s "$service" true >/dev/null 2>&1
 }
 
 # Kill anything already running on our ports
@@ -190,11 +220,18 @@ else
   log "Skipping API (no DAO_NAME provided, using DAO_API_* from .env)"
 fi
 
-# 3. Address Enrichment (always runs with railway env injection)
-log "Starting Address Enrichment..."
-run_with_prefix "$C_ADDRESS_ENRICHMENT" "💰 enrichment" "" "" pnpm railway run -e dev -s address-enrichment pnpm address dev &
-wait_for_port "$PORT_ADDRESS_ENRICHMENT" "Address Enrichment"
-export ADDRESS_ENRICHMENT_API_URL="http://localhost:${PORT_ADDRESS_ENRICHMENT}"
+# 3. Address Enrichment (optional; do not block the rest of the stack)
+ADDRESS_ENRICHMENT_AVAILABLE=false
+if railway_service_available "address-enrichment"; then
+  log "Starting optional Address Enrichment..."
+  run_with_prefix "$C_ADDRESS_ENRICHMENT" "💰 enrichment" "" "" railway run -e dev -s address-enrichment pnpm address dev &
+  if wait_for_optional_port "$PORT_ADDRESS_ENRICHMENT" "Address Enrichment"; then
+    ADDRESS_ENRICHMENT_AVAILABLE=true
+    export ADDRESS_ENRICHMENT_API_URL="http://localhost:${PORT_ADDRESS_ENRICHMENT}"
+  fi
+else
+  log "Skipping optional Address Enrichment (Railway CLI/service unavailable)"
+fi
 
 # 4. Gateway
 GATEWAY_READY=$(mktemp)
@@ -215,8 +252,9 @@ if [ "$RUN_API" = true ]; then
       sleep 3
       if lsof -i ":$PORT_API" -sTCP:LISTEN >/dev/null 2>&1; then
         if [ "$api_was_up" = false ]; then
-          log "API recovered — reloading Gateway..."
+          log "API recovered — reloading Gateway and Gateful..."
           touch "$(dirname "$0")/../apps/api-gateway/src/_dev-reload.ts"
+          touch "$(dirname "$0")/../apps/gateful/src/_dev-reload.ts"
           api_was_up=true
         fi
       else
@@ -227,19 +265,18 @@ if [ "$RUN_API" = true ]; then
 fi
 
 # 5. Gateful
-GATEFUL_READY=$(mktemp)
-rm -f "$GATEFUL_READY"
-log "Starting Gateful..."
-run_with_prefix "$C_GATEFUL" "🚪 gateful" "$GATEFUL_READY" "🚀 REST Gateway running" railway_run gateful pnpm gateful dev &
-wait_for_ready "$GATEFUL_READY" "Gateful"
+start_gateful
 
-# 6. Client — codegen + build watch
+# 6. Clients — codegen + build watch
 export ANTICAPTURE_GRAPHQL_ENDPOINT="http://localhost:${PORT_GATEWAY}/graphql"
-log "Starting Client (silent, errors only)..."
+log "Starting GraphQL Client (silent, errors only)..."
+run_errors_only "$C_CODEGEN" "🤝 gql-client" pnpm gql-client dev &
+log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
 # 7. Dashboard
 export NEXT_PUBLIC_BASE_URL="http://localhost:${PORT_GATEWAY}/graphql"
+export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 
@@ -251,10 +288,15 @@ fi
 if [ "$RUN_API" = true ]; then
   printf "  ${C_API}🐙 API${C_RESET}       http://localhost:${PORT_API}  ($DAO_NAME)\n"
 fi
-printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} http://localhost:${PORT_ADDRESS_ENRICHMENT}\n"
+if [ "$ADDRESS_ENRICHMENT_AVAILABLE" = true ]; then
+  printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} http://localhost:${PORT_ADDRESS_ENRICHMENT}\n"
+else
+  printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
+fi
 printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:${PORT_GATEWAY}\n"
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
-printf "  ${C_CODEGEN}🤝 Client${C_RESET}    codegen + build watch\n"
+printf "  ${C_CODEGEN}🤝 GraphQL Client${C_RESET} codegen + build watch\n"
+printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""
 log "Press Ctrl+C to stop all services."

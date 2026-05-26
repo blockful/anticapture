@@ -50,21 +50,19 @@ const createProposal = (
 
 const createVote = (
   overrides: Partial<VotesOnchainInsert> = {},
-): VotesOnchainInsert => {
-  const n = txCounter++;
-  return {
-    id: `vote-${n}`,
-    txHash: `0x${n.toString(16).padStart(64, "0")}`,
-    daoId: TEST_DAO,
-    voterAccountId: VOTER_A,
-    proposalId: "proposal-1",
-    support: "1",
-    votingPower: 1000n,
-    reason: null,
-    timestamp: 1700000000n,
-    ...overrides,
-  };
-};
+): VotesOnchainInsert => ({
+  id: `vote-${n}`,
+  txHash: `0x${(txCounter++).toString(16).padStart(64, "0")}`,
+  daoId: TEST_DAO,
+  voterAccountId: VOTER_A,
+  proposalId: "proposal-1",
+  support: "1",
+  votingPower: 1000n,
+  reason: null,
+  timestamp: 1700000000n,
+  logIndex: 0,
+  ...overrides,
+});
 
 const createAccountPowerRow = (
   overrides: Partial<AccountPowerInsert> = {},

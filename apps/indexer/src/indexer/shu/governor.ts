@@ -83,7 +83,7 @@ export function SHUGovernorIndexer(blockTime: number) {
         logIndex: event.log.logIndex,
       });
 
-    const { votingPower: proposerVotingPower } = await context.db
+    await context.db
       .insert(accountPower)
       .values({
         accountId: getAddress(proposer),
@@ -100,12 +100,7 @@ export function SHUGovernorIndexer(blockTime: number) {
       logIndex: event.log.logIndex,
       type: "PROPOSAL",
       timestamp: event.block.timestamp,
-      metadata: {
-        id: proposalIdStr,
-        proposer: getAddress(proposer),
-        votingPower: proposerVotingPower,
-        title,
-      },
+      proposalId: proposalIdStr,
     });
   });
 
@@ -179,6 +174,8 @@ export function SHUGovernorIndexer(blockTime: number) {
       context,
       event.args.proposalId.toString(),
       ProposalStatus.EXECUTED,
+      event.block.timestamp,
+      event.transaction.hash,
     );
   });
 }

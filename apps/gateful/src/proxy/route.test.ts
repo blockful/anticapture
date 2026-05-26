@@ -1,6 +1,8 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
 
+import { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry";
+
 import { proxy } from "./route";
 
 describe("proxy route", () => {
@@ -13,7 +15,7 @@ describe("proxy route", () => {
 
   beforeEach(() => {
     app = new OpenAPIHono();
-    proxy(app, daoApis);
+    proxy(app, daoApis, new CircuitBreakerRegistry());
   });
 
   afterEach(() => {

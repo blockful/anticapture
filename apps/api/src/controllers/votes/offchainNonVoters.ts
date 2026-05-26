@@ -19,7 +19,7 @@ export function offchainNonVoters(
       summary: "Get offchain proposal non-voters",
       description:
         "Returns the active delegates that did not vote on a given offchain proposal",
-      tags: ["offchain"],
+      tags: ["offchain", "skip-pagination"],
       request: {
         params: z.object({
           id: z.string(),

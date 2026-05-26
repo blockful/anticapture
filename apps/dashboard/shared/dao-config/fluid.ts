@@ -32,7 +32,7 @@ export const FLUID: DaoConfiguration = {
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
     },
   },
-  initialPage: "governance",
+  initialPage: "proposals",
   overviewPage: false,
   tokenDistribution: true,
   dataTables: true,

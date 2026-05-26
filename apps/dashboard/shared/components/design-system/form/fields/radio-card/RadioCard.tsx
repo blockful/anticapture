@@ -30,7 +30,7 @@ export const RadioCard = ({
         // Base layout
         "group flex w-full items-center gap-2 px-2.5 py-2",
         // Border
-        "border",
+        "rounded-base border",
         // Colors
         !isActive && "bg-surface-default border-border-contrast",
         isActive && "bg-surface-default border-highlight",

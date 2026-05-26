@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "setup": "export TERM_PROGRAM=conductor\npnpm i\ncp ./apps/api/.env.example ./apps/api/.env\nrailway link -p anticapture-infra -e dev -s ens-api\npnpm codegen\npnpm client build --force",
+    "run": "pnpm dev ens",
+    "archive": "pnpm clean"
+  }
+}

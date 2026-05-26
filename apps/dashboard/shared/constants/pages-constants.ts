@@ -39,10 +39,10 @@ export const PAGES_CONSTANTS = {
     description:
       "Token distribution metrics are based on Blockful's Governance Indexer and are updated daily based on the events and interactions with relevant contracts.",
   },
-  governanceImplementation: {
+  proposals: {
     title: "",
     titleAbbreviation: "Governance",
-    page: "governance",
+    page: "proposals",
     description: undefined,
     subTitle: "Governance Implementation",
     subDescription:
@@ -93,5 +93,11 @@ export const PAGES_CONSTANTS = {
     page: "service-providers",
     description:
       "Monitor the publication status of quarterly reports from DAO-funded service providers.",
+  },
+  revenue: {
+    title: "Revenue",
+    page: "revenue",
+    description:
+      "Protocol financial health: revenue, registrations, and name retention.",
   },
 };

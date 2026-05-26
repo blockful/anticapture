@@ -3,11 +3,18 @@ import { z } from "@hono/zod-openapi";
 import { balanceHistory } from "@/database";
 
 import {
-  AddressSchema,
-  OrderDirectionSchema,
+  addressOutputField,
+  addressPathParams,
+  daoIdField,
+  decimalStringField,
+  defaultDescOrderDirection,
+  inclusiveDateRangeQueryParams,
+  logIndexField,
+  paginatedListResponse,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
-  unixTimestampQueryParam,
+  txHashField,
+  unixSecondsStringField,
 } from "../shared";
 import { DBTransfer } from "../transfers";
 
@@ -16,13 +23,10 @@ export type DBHistoricalBalanceWithRelations = DBHistoricalBalance & {
   transfer: DBTransfer;
 };
 
-export const HistoricalBalanceRequestParamsSchema = z
-  .object({
-    address: AddressSchema,
-  })
-  .openapi("HistoricalBalanceRequestParams", {
-    description: "Path params for historical balance queries.",
-  });
+export const HistoricalBalanceRequestParamsSchema = addressPathParams(
+  "HistoricalBalanceRequestParams",
+  "Path params for historical balance queries.",
+);
 
 export const HistoricalBalanceRequestQuerySchema = z
   .object({
@@ -42,13 +46,8 @@ export const HistoricalBalanceRequestQuerySchema = z
         description: "Field used to sort historical balance rows.",
         example: "timestamp",
       }),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for historical balance timestamps, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for historical balance timestamps, in Unix seconds.",
-    ),
+    orderDirection: defaultDescOrderDirection(),
+    ...inclusiveDateRangeQueryParams("historical balance timestamps"),
     fromValue: z.string().optional().openapi({
       description: "Minimum balance delta encoded as a decimal string.",
     }),
@@ -67,11 +66,11 @@ export type HistoricalBalanceRequest = z.infer<
 
 export const HistoricalBalanceTransferSchema = z
   .object({
-    value: z.string().openapi({
-      description: "Transferred amount encoded as a decimal string.",
-    }),
-    from: z.string().openapi({ description: "Sender address." }),
-    to: z.string().openapi({ description: "Recipient address." }),
+    value: decimalStringField(
+      "Transferred amount encoded as a decimal string.",
+    ),
+    from: addressOutputField("Sender address."),
+    to: addressOutputField("Recipient address."),
   })
   .openapi("HistoricalBalanceTransfer", {
     description: "Transfer event associated with a historical balance row.",
@@ -79,22 +78,19 @@ export const HistoricalBalanceTransferSchema = z
 
 export const HistoricalBalanceResponseSchema = z
   .object({
-    transactionHash: z.string().openapi({ description: "Transaction hash." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
-    accountId: z.string().openapi({ description: "Account address." }),
+    transactionHash: txHashField(),
+    daoId: daoIdField(),
+    accountId: addressOutputField("Account address."),
     balance: z.string().openapi({
       description: "Account balance after the historical event.",
+      format: "bigint",
     }),
     delta: z.string().openapi({
       description: "Balance change introduced by the historical event.",
+      format: "bigint",
     }),
-    timestamp: z.string().openapi({
-      description: "Event timestamp in Unix seconds as a string.",
-      example: "1704067200",
-    }),
-    logIndex: z.number().int().openapi({
-      description: "Log index within the transaction receipt.",
-    }),
+    timestamp: unixSecondsStringField("Event"),
+    logIndex: logIndexField(),
     transfer: HistoricalBalanceTransferSchema,
   })
   .openapi("HistoricalBalance", {
@@ -102,16 +98,12 @@ export const HistoricalBalanceResponseSchema = z
       "Single historical balance record enriched with transfer context.",
   });
 
-export const HistoricalBalancesResponseSchema = z
-  .object({
-    items: z.array(HistoricalBalanceResponseSchema),
-    totalCount: z.number().int().openapi({
-      description: "Total number of matching historical balance rows.",
-    }),
-  })
-  .openapi("HistoricalBalancesResponse", {
-    description: "Paginated historical balance records for one account.",
-  });
+export const HistoricalBalancesResponseSchema = paginatedListResponse(
+  HistoricalBalanceResponseSchema,
+  "Total number of matching historical balance rows.",
+).openapi("HistoricalBalancesResponse", {
+  description: "Paginated historical balance records for one account.",
+});
 
 export type HistoricalBalanceResponse = z.infer<
   typeof HistoricalBalanceResponseSchema

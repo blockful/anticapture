@@ -11,7 +11,7 @@ export function feed(app: Hono, service: FeedService) {
       operationId: "feedEvents",
       path: "/feed/events",
       summary: "Get feed events",
-      tags: ["feed"],
+      tags: ["feed", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {
         query: FeedRequestSchema,

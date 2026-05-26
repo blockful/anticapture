@@ -1,0 +1,27 @@
+{{ define "slack.anticapture.color" -}}
+  {{- if eq .Status "firing" -}}
+    {{- if eq (index .Alerts 0).Labels.severity "critical" -}}danger{{- else -}}warning{{- end -}}
+  {{- else -}}good{{- end -}}
+{{- end }}
+
+{{ define "slack.anticapture.icon" -}}
+  {{- if eq .Status "firing" -}}
+    {{- if eq (index .Alerts 0).Labels.severity "critical" -}}:red_circle:{{- else -}}:large_yellow_circle:{{- end -}}
+  {{- else -}}:large_green_circle:{{- end -}}
+{{- end }}
+
+{{ define "slack.anticapture.title" -}}
+  {{ template "slack.anticapture.icon" . }} *{{ if eq .Status "firing" }}{{ (index .Alerts 0).Labels.severity | toUpper }}{{ else }}RESOLVED{{ end }}* — {{ .CommonAnnotations.summary }}
+{{- end }}
+
+{{ define "slack.anticapture.text" -}}
+  {{- range .Alerts }}
+*Description:* {{ .Annotations.description }}
+
+*Details:*
+• *Alert:* `{{ .Labels.alertname }}`
+• *Job:* `{{ .Labels.job }}`{{ if .Labels.instance }}
+• *Instance:* `{{ .Labels.instance }}`{{ end }}
+• *Since:* {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+  {{- end }}
+{{- end }}

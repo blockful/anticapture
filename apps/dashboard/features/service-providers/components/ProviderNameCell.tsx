@@ -25,7 +25,7 @@ export const ProviderNameCell = ({
 
   return (
     <div className="flex min-w-0 items-center gap-3 overflow-hidden">
-      <div className="bg-surface-contrast border-border-contrast flex size-6 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold text-white">
+      <div className="bg-surface-contrast border-border-contrast text-secondary flex size-6 shrink-0 items-center justify-center rounded-full border text-[9px] font-bold">
         {avatarUrl ? (
           <Image
             src={avatarUrl}

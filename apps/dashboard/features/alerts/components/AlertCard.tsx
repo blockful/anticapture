@@ -17,7 +17,7 @@ export const AlertCard = ({
   const cardContent = (
     <Card
       className={cn(
-        "bg-surface-default border-border-default hover:bg-surface-contrast w-full rounded-none border transition-colors duration-300",
+        "bg-surface-default border-border-default hover:bg-surface-contrast rounded-base w-full border transition-colors duration-300",
         !active && "pointer-events-none opacity-65",
       )}
     >

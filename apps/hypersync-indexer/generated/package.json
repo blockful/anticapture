@@ -13,7 +13,7 @@
     "db-down": "node -e 'require(`./src/db/Migrations.res.js`).runDownMigrations(true)'",
     "db-setup": "node -e 'require(`./src/db/Migrations.res.js`).runUpMigrations(true, true)'",
     "print-benchmark-summary": "node -e 'require(`./src/Benchmark.res.js`).Summary.printSummary()'",
-    "start": "node_modules/.bin/ts-node src/Index.res.js"
+    "start": "ts-node src/Index.res.js"
   },
   "keywords": [
     "ReScript"

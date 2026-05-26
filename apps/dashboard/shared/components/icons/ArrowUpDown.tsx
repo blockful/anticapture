@@ -26,7 +26,7 @@ export const ArrowUpDown = ({
     >
       <g
         id="arrow-down"
-        stroke={`${activeState === ArrowState.DOWN || activeState === ArrowState.BOTH ? "#F4F4F4" : "#A1A1AA"}`}
+        stroke={`${activeState === ArrowState.DOWN || activeState === ArrowState.BOTH ? "var(--color-link)" : "#A1A1AA"}`}
       >
         <path
           id="Vector"
@@ -45,7 +45,7 @@ export const ArrowUpDown = ({
       </g>
       <g
         id="arrow-up"
-        stroke={`${activeState === ArrowState.UP || activeState === ArrowState.BOTH ? "#F4F4F4" : "#A1A1AA"}`}
+        stroke={`${activeState === ArrowState.UP || activeState === ArrowState.BOTH ? "var(--color-link)" : "#A1A1AA"}`}
       >
         <path
           id="Vector_3"

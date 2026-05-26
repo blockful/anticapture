@@ -8,5 +8,5 @@ export const variantStyles: Record<ButtonVariant, string> = {
   ghost:
     "bg-transparent text-primary border border-transparent hover:bg-surface-contrast disabled:text-dimmed disabled:bg-transparent disabled:border-transparent",
   destructive:
-    "border border-transparent bg-surface-destructive text-primary hover:bg-surface-destructive-hover",
+    "border border-transparent bg-surface-destructive text-inverted hover:bg-surface-destructive-hover",
 };

@@ -1,24 +1,23 @@
 import { z } from "@hono/zod-openapi";
 import { getAddress, isAddress } from "viem";
 
+import { paginatedListResponse } from "../shared";
 export const OffchainVoterResponseSchema = z
   .object({
     voter: z
       .string()
       .refine((val) => isAddress(val, { strict: false }))
-      .transform((val) => getAddress(val)),
-    votingPower: z.string(),
+      .transform((val) => getAddress(val))
+      .openapi({ format: "ethereum-address" }),
+    votingPower: z.string().openapi({ format: "bigint" }),
   })
   .openapi("OffchainNonVoter");
 
 export type OffchainVoterResponse = z.infer<typeof OffchainVoterResponseSchema>;
 
-export const OffchainVotersResponseSchema = z
-  .object({
-    items: z.array(OffchainVoterResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("OffchainVotersResponse");
+export const OffchainVotersResponseSchema = paginatedListResponse(
+  OffchainVoterResponseSchema,
+).openapi("OffchainVotersResponse");
 
 export type OffchainVotersResponse = z.infer<
   typeof OffchainVotersResponseSchema

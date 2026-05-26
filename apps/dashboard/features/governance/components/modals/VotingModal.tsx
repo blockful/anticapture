@@ -7,9 +7,9 @@ import { formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
+import { VoteSuccessContent } from "@/features/governance/components/modals/VoteSuccessContent";
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
 import type { ProposalDetails } from "@/features/governance/types";
-import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -18,6 +18,10 @@ import {
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
 import { useScreenSize } from "@/shared/hooks";
+import {
+  useGaslessEligibility,
+  useRelayerConfig,
+} from "@/shared/hooks/useGaslessRelayer";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
@@ -44,6 +48,7 @@ export const VotingModal = ({
   const [comment, setComment] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactionhash, setTransactionhash] = useState<string>("");
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
   const { isMobile } = useScreenSize();
 
@@ -101,6 +106,10 @@ export const VotingModal = ({
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
 
+  const { minVotingPower } = useRelayerConfig(daoId);
+  const { isEligible: isGaslessEligible, remaining: voteRemaining } =
+    useGaslessEligibility(daoId, address, "vote");
+
   // Reset state when modal opens to prevent stale data from previous sessions
   useEffect(() => {
     if (isOpen) {
@@ -108,6 +117,7 @@ export const VotingModal = ({
       setComment("");
       setIsLoading(false);
       setTransactionhash("");
+      setIsSuccess(false);
     }
   }, [isOpen]);
 
@@ -153,12 +163,12 @@ export const VotingModal = ({
       walletClient,
       setTransactionhash,
       comment,
+      minVotingPower,
+      isGaslessEligible,
     );
     setIsLoading(false);
     if (hash) {
-      onClose();
-      window.location.reload();
-      showCustomToast("Vote submitted successfully!", "success");
+      setIsSuccess(true);
     }
   };
 
@@ -185,7 +195,10 @@ export const VotingModal = ({
         </div>
 
         <button
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+            if (isSuccess) window.location.reload();
+          }}
           className="text-secondary hover:text-primary cursor-pointer rounded-sm p-1 transition-colors"
           aria-label="Close"
         >
@@ -194,13 +207,17 @@ export const VotingModal = ({
       </div>
 
       {/* Content */}
-      {isLoading ? (
+      {isSuccess ? (
+        <VoteSuccessContent onClose={onClose} />
+      ) : isLoading ? (
         <LoadingComponent
           transactionhash={transactionhash}
           proposalId={proposal?.id as string}
           proposalTitle={proposal?.title as string}
           votingPower={votingPower}
           vote={vote as "for" | "against" | "abstain"}
+          isGaslessEligible={isGaslessEligible}
+          voteRemaining={voteRemaining}
         />
       ) : (
         <>
@@ -273,25 +290,33 @@ export const VotingModal = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
+            {isGaslessEligible && comment.trim().length > 0 && (
+              <p className="text-warning text-xs">
+                Adding a comment requires a wallet transaction (gas fee). Votes
+                without comments are gasless.
+              </p>
+            )}
           </div>
         </>
       )}
 
-      <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
-        <Button variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          data-ph-event="vote_submit"
-          data-ph-source="gov_fe"
-          data-umami-event="vote_submit"
-          disabled={submitDisabled}
-          loading={isLoading}
-          onClick={handleSubmit}
-        >
-          Submit
-        </Button>
-      </div>
+      {!isSuccess && (
+        <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            data-ph-event="vote_submit"
+            data-ph-source="gov_fe"
+            data-umami-event="vote_submit"
+            disabled={submitDisabled}
+            loading={isLoading}
+            onClick={handleSubmit}
+          >
+            Submit
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -314,7 +339,10 @@ export const VotingModal = ({
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={() => {
+          onClose();
+          if (isSuccess) window.location.reload();
+        }}
         aria-hidden="true"
       />
 

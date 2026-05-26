@@ -1,20 +1,30 @@
-import type { GetAccountPowerQuery } from "@anticapture/graphql-client/hooks";
-import { useGetAccountPowerQuery } from "@anticapture/graphql-client/hooks";
-import type { ApolloError } from "@apollo/client";
+import type {
+  VotingPower,
+  VotingPowerByAccountIdPathParamsDaoEnumKey,
+  VotesByProposalIdPathParamsDaoEnumKey,
+  VotesByProposalIdQueryResponse,
+} from "@anticapture/client";
+import {
+  useVotingPowerByAccountId,
+  useVotesByProposalId,
+} from "@anticapture/client/hooks";
 import { formatUnits } from "viem";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-export interface UseAccountPowerResult {
-  accountPower: GetAccountPowerQuery["votingPowerByAccountId"] | null;
+export interface AccountPowerData {
+  accountPower: VotingPower | null;
   votingPower: string;
   rawVotingPower: string;
-  votes: GetAccountPowerQuery["votesByProposalId"] | null;
+  votes: VotesByProposalIdQueryResponse | null;
   hasVoted: boolean;
-  loading: boolean;
-  error: ApolloError | undefined;
+}
+
+export interface UseAccountPowerResult {
+  data: AccountPowerData;
+  isLoading: boolean;
+  error: Error | null;
   refetch: () => void;
 }
 
@@ -25,53 +35,88 @@ export interface UseAccountPowerParams {
   decimals: number;
 }
 
-export const useVoterInfo = ({
+const EMPTY_ACCOUNT_POWER_DATA: AccountPowerData = {
+  accountPower: null,
+  votingPower: "0",
+  rawVotingPower: "0",
+  votes: null,
+  hasVoted: false,
+};
+
+export const useAccountPower = ({
   address,
   daoId,
   proposalId,
   decimals,
 }: UseAccountPowerParams): UseAccountPowerResult => {
-  // Main account power query
-  const { data, loading, error, refetch } = useGetAccountPowerQuery({
-    variables: {
-      address,
-      addresses: [address],
-      proposalId,
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
+  const votingPowerDaoKey =
+    daoId.toLowerCase() as VotingPowerByAccountIdPathParamsDaoEnumKey;
+  const votesDaoKey =
+    daoId.toLowerCase() as VotesByProposalIdPathParamsDaoEnumKey;
+
+  const votingPowerQuery = useVotingPowerByAccountId(
+    votingPowerDaoKey,
+    address,
+    undefined,
+    {
+      query: {
+        enabled: !!address,
       },
     },
-    skip: !address || !proposalId, // Skip query if no address or proposalId provided
-  });
+  );
 
-  if (!data?.votingPowerByAccountId) {
+  const votesQuery = useVotesByProposalId(
+    votesDaoKey,
+    proposalId,
+    {
+      limit: 1,
+      voterAddressIn: address ? [address] : undefined,
+    },
+    {
+      query: {
+        enabled: !!address && !!proposalId,
+      },
+    },
+  );
+
+  const refetch = () => {
+    void votingPowerQuery.refetch();
+    void votesQuery.refetch();
+  };
+
+  if (!votingPowerQuery.data) {
     return {
-      accountPower: null,
-      votingPower: "0",
-      rawVotingPower: "0",
-      votes: null,
-      hasVoted: false,
-      loading,
-      error,
+      data: EMPTY_ACCOUNT_POWER_DATA,
+      isLoading: votingPowerQuery.isLoading || votesQuery.isLoading,
+      error:
+        votingPowerQuery.error instanceof Error
+          ? votingPowerQuery.error
+          : votesQuery.error instanceof Error
+            ? votesQuery.error
+            : null,
       refetch,
     };
   }
 
-  const rawVotingPower = data.votingPowerByAccountId.votingPower;
+  const rawVotingPower = votingPowerQuery.data.votingPower.toString();
 
   return {
-    accountPower: data.votingPowerByAccountId,
-    votingPower: formatNumberUserReadable(
-      Number(formatUnits(BigInt(rawVotingPower), decimals)),
-    ),
-    rawVotingPower,
-    votes: data.votesByProposalId || null,
-    hasVoted: !!data.votesByProposalId,
-    loading,
-    error,
+    data: {
+      accountPower: votingPowerQuery.data,
+      votingPower: formatNumberUserReadable(
+        Number(formatUnits(votingPowerQuery.data.votingPower, decimals)),
+      ),
+      rawVotingPower,
+      votes: votesQuery.data ?? null,
+      hasVoted: (votesQuery.data?.items.length ?? 0) > 0,
+    },
+    isLoading: votingPowerQuery.isLoading || votesQuery.isLoading,
+    error:
+      votingPowerQuery.error instanceof Error
+        ? votingPowerQuery.error
+        : votesQuery.error instanceof Error
+          ? votesQuery.error
+          : null,
     refetch,
   };
 };

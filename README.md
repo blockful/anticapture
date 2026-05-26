@@ -25,6 +25,7 @@ Anticapture is a data-driven platform that helps DAO communities identify, asses
 | ---------------------------------------- | -------------------------------------------------------- | ----------------------------- |
 | [**Dashboard**](./apps/dashboard)        | Frontend interface with DAO analytics and visualizations | Next.js, TypeScript, Tailwind |
 | [**API Gateway**](./apps/api-gateway)    | Unified GraphQL API aggregating multiple data sources    | GraphQL Mesh                  |
+| [**Gateful**](./apps/gateful)            | REST API aggregator for DAO API routes                   | Hono, OpenAPI                 |
 | [**Indexer**](./apps/indexer)            | Blockchain event indexer for real-time governance data   | Ponder, PostgreSQL            |
 | [**Monitoring**](./apps/indexer-metrics) | Performance monitoring and metrics                       | Grafana, Prometheus           |
 
@@ -50,6 +51,7 @@ docker-compose up -d
 # Run development environment
 pnpm dashboard dev    # Frontend at http://localhost:3000
 pnpm gateway dev      # API Gateway at http://localhost:4000
+pnpm gateful dev      # Gateful REST API at http://localhost:4001
 pnpm indexer dev      # Indexer API at http://localhost:42069
 ```
 
@@ -65,9 +67,30 @@ pnpm <app-name> <command>
 pnpm dashboard build
 pnpm indexer start
 pnpm gateway test
+pnpm gateful test
 ```
 
 See individual application READMEs for detailed setup and development instructions.
+
+## Anticapture MCP
+
+Anticapture offers MCP tooling for LLM consumption of the API resources; in order to connect to it, use the following configuration snippet (contact the Anticapture team for an API key):
+
+```json
+{
+  "mcpServers": {
+    "anticapture": {
+      "type": "http",
+      "url": "https://anticapture-mcp-server.up.railway.app/",
+      "headers": {
+        "Authorization": "Bearer <ANTICAPTURE_MCP_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+More information on developing and running the MCP locally in the [`anticapture-client` package](./packages/anticapture-client/README.md#) documentation section "MCP Server".
 
 ## Contributing
 

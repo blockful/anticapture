@@ -10,10 +10,9 @@ import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButt
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
-import { useArkhamData } from "@/shared/hooks/graphql-client/useArkhamData";
-import { useEnsData } from "@/shared/hooks/useEnsData";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
+import { useGetAddress } from "@anticapture/client/hooks";
 
 const TRUNCATE_ADDRESS_LENGTH = 30;
 
@@ -87,31 +86,33 @@ export const EnsAvatar = ({
   maxVisibleTags,
   ...imageProps
 }: EnsAvatarProps) => {
-  // Only fetch ENS data if we have an address and either we need imageUrl or fetchEnsName is true
-  const shouldFetchEns = address && !imageUrl;
-  const { data: ensData, isLoading: isEnsLoading } = useEnsData(
-    shouldFetchEns ? address : null,
-  );
-  const {
-    arkhamData,
-    isContract,
-    isLoading: isArkhamDataLoading,
-  } = useArkhamData(address);
+  const { data, isLoading } = useGetAddress(address ?? "0x", {
+    query: { enabled: !!address },
+  });
+  const arkham = data?.arkham ?? null;
+  const ens = data?.ens ?? null;
+  const isContract = data?.isContract ?? null;
 
   const [imageError, setImageError] = useState(false);
   const [tagsExpanded, setTagsExpanded] = useState(false);
+  const [brandColor, setBrandColor] = useState("#ec762e");
 
-  // Determine the final image URL to use
-  const finalImageUrl = imageUrl || ensData?.avatarUrl;
+  const blockiesRef = (node: HTMLDivElement | null) => {
+    if (!node) return;
+    const value = getComputedStyle(node)
+      .getPropertyValue("--base-brand")
+      .trim();
+    if (value && value !== brandColor) setBrandColor(value);
+  };
+
+  const finalImageUrl = imageUrl || ens?.avatar;
 
   const handleImageError = () => {
     setImageError(true);
   };
 
-  // Determine alt text
-  const finalAlt = alt || ensData?.ens || address || "Avatar";
+  const finalAlt = alt || ens?.name || address || "Avatar";
 
-  // Determine what to display as the name
   const getDisplayName = () => {
     const truncate = (name: string) => {
       if (showFullAddress || name.length <= TRUNCATE_ADDRESS_LENGTH)
@@ -119,10 +120,10 @@ export const EnsAvatar = ({
       return `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`;
     };
 
-    if (ensData?.ens) return ensData.ens;
+    if (ens?.name) return ens.name;
 
-    const entity = arkhamData?.entity;
-    const label = arkhamData?.label;
+    const entity = arkham?.entity;
+    const label = arkham?.label;
 
     if (entity && label) return truncate(`${entity} · ${label}`);
     if (entity) return truncate(entity);
@@ -132,8 +133,8 @@ export const EnsAvatar = ({
   };
 
   const displayName = getDisplayName();
-  const isLoadingName = loading || (isEnsLoading && !address);
-  const isResolvingData = !!address && (isEnsLoading || isArkhamDataLoading);
+  const isLoadingName = loading || (isLoading && !address);
+  const isResolvingData = !!address && isLoading;
 
   const baseClasses = cn(
     sizeClasses[size],
@@ -143,7 +144,7 @@ export const EnsAvatar = ({
   );
 
   const avatarElement = () => {
-    if (loading || (isEnsLoading && !address)) {
+    if (loading || (isLoading && !address)) {
       return (
         <SkeletonRow
           parentClassName="flex animate-pulse"
@@ -152,7 +153,6 @@ export const EnsAvatar = ({
       );
     }
 
-    // Show image if available and not previously failed
     if (finalImageUrl && !imageError) {
       return (
         <div className={baseClasses}>
@@ -170,20 +170,19 @@ export const EnsAvatar = ({
     }
 
     return (
-      <div className={baseClasses}>
+      <div ref={blockiesRef} className={baseClasses}>
         <Blockies
-          seed={address as string}
+          seed={address ?? ""}
           size={iconSizes[size]}
           scale={3}
           color="#18181b"
-          bgColor="#ec762e"
+          bgColor={brandColor}
           spotColor="#ffffff"
         />
       </div>
     );
   };
 
-  // If showName is false, return just the avatar
   if (!showName) {
     return avatarElement();
   }
@@ -203,13 +202,13 @@ export const EnsAvatar = ({
 
   const allTags = showTags
     ? [
-        arkhamData?.twitter && `@${arkhamData.twitter}`,
-        ensData?.ens,
+        arkham?.twitter && `@${arkham.twitter}`,
+        ens?.name,
         address && formatAddress(address),
-        arkhamData?.entityType &&
-          (["cex", "dex"].includes(arkhamData.entityType.toLowerCase())
-            ? arkhamData.entityType.toUpperCase()
-            : arkhamData.entityType),
+        arkham?.entityType &&
+          (["cex", "dex"].includes(arkham.entityType.toLowerCase())
+            ? arkham.entityType.toUpperCase()
+            : arkham.entityType),
         getContractLabel(),
       ].filter(Boolean)
     : [];
@@ -223,7 +222,6 @@ export const EnsAvatar = ({
       ? Math.max(0, allTags.length - maxVisibleTags)
       : 0;
 
-  // Return avatar with name
   const avatarWithName = (
     <div className={cn("flex min-w-0 items-center gap-2", containerClassName)}>
       {avatarElement()}
@@ -263,7 +261,7 @@ export const EnsAvatar = ({
 
         {showTags && (
           <div className="flex flex-wrap items-center gap-1">
-            {isArkhamDataLoading || isEnsLoading ? (
+            {isLoading ? (
               <>
                 <SkeletonRow
                   parentClassName="flex animate-pulse"
@@ -307,14 +305,10 @@ export const EnsAvatar = ({
         <span className="hidden md:contents">
           <AddressDetailsTooltip
             address={address}
-            arkhamData={arkhamData}
-            ens={
-              ensData
-                ? { name: ensData.ens ?? null, avatar: null, banner: null }
-                : null
-            }
+            arkhamData={arkham}
+            ens={ens}
             isContract={isContract}
-            isLoading={isEnsLoading || isArkhamDataLoading}
+            isLoading={isLoading}
           >
             {avatarWithName}
           </AddressDetailsTooltip>

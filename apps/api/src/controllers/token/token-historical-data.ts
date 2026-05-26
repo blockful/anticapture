@@ -24,7 +24,7 @@ export function tokenHistoricalData(
       path: "/token/historical-data",
       summary: "Get historical token data",
       description: "Get historical market data for a specific token",
-      tags: ["tokens"],
+      tags: ["tokens", "skip-pagination"],
       middleware: [setCacheControl(3600)],
       request: {
         query: TokenHistoricalPriceRequest,

@@ -1,56 +1,54 @@
 "use client";
 
-import { useMemo } from "react";
-import type { Address } from "viem";
-import { zeroAddress } from "viem";
+import { zeroAddress, type Address } from "viem";
+
+import { useGetAddresses } from "@anticapture/client/hooks";
 
 import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
-import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface UseTopAccountsChartDataParams {
   chartData: TopAccountChartData[];
-  daoId: DaoIdEnum;
 }
 
 export function useTopAccountsChartData({
   chartData,
 }: UseTopAccountsChartDataParams) {
-  const addresses = useMemo(
-    () => chartData.map((item) => item.address as Address),
-    [chartData],
+  const addresses = chartData.map((item) => item.address);
+
+  const delegateAddresses = chartData
+    .map((item) => item.delegate)
+    .filter(
+      (address): address is Address => !!address && address !== zeroAddress,
+    );
+
+  const lookupAddresses = Array.from(
+    new Set([...addresses, ...delegateAddresses]),
   );
 
-  const delegateAddresses = useMemo(() => {
-    return chartData
-      .map((item) => item.delegate as Address | undefined)
-      .filter(
-        (address): address is Address => !!address && address !== zeroAddress,
-      );
-  }, [chartData]);
+  const { data } = useGetAddresses(
+    { addresses: lookupAddresses },
+    { query: { enabled: lookupAddresses.length > 0 } },
+  );
 
-  const { data: ensData } = useMultipleEnsData([
-    ...addresses,
-    ...delegateAddresses,
-  ]);
+  const ensNameByAddress: Record<string, string | null | undefined> = {};
+  data?.results?.forEach((result) => {
+    ensNameByAddress[result.address.toLowerCase()] = result.ens?.name;
+  });
 
-  const processedData = useMemo(() => {
-    return chartData.map((item) => {
-      const delegateAddress =
+  const lookupEnsName = (address: string | undefined) =>
+    address ? ensNameByAddress[address.toLowerCase()] : undefined;
+
+  const processedData = chartData.map((item) => {
+    return {
+      ...item,
+      name: lookupEnsName(item.address),
+      latestDelegate:
         item.delegate && item.delegate !== zeroAddress
-          ? (item.delegate as Address)
-          : undefined;
-
-      return {
-        ...item,
-        name: ensData?.[item.address as Address]?.ens,
-        latestDelegate: delegateAddress
-          ? ensData?.[delegateAddress]?.ens || delegateAddress
+          ? lookupEnsName(item.delegate) || item.delegate
           : undefined,
-        totalDelegators: item.delegationsCount ?? 0,
-      };
-    });
-  }, [chartData, ensData]);
+      totalDelegators: item.delegationsCount ?? 0,
+    };
+  });
 
   return {
     data: processedData,

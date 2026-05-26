@@ -9,8 +9,10 @@ import type { ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 
+import { setClientConfig } from "@anticapture/client";
+
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 
 const queryClient = new QueryClient();
 
@@ -18,11 +20,24 @@ const queryClient = new QueryClient();
 export const apolloClient = new ApolloClient({
   uri: BACKEND_ENDPOINT,
   cache: new InMemoryCache(),
-  headers: getAuthHeaders(),
   queryDeduplication: false,
 });
 
-export const GlobalProviders = ({ children }: { children: ReactNode }) => {
+export const GlobalProviders = ({
+  children,
+  isWhitelabel = false,
+}: {
+  children: ReactNode;
+  isWhitelabel?: boolean;
+}) => {
+  setClientConfig({
+    defaultHeaders: {
+      "x-client-source": isWhitelabel
+        ? "anticapture-whitelabel"
+        : "anticapture-dashboard",
+    },
+  });
+
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>

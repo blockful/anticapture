@@ -1,6 +1,7 @@
 {
   "name": "@anticapture/api",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "private": true,
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -15,8 +16,7 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "tsx watch cmd/index.ts",
-    "dev:rw": "sh -c 'dao_id=\"$1\"; exec railway run -e dev -s \"${dao_id}-api\" -- pnpm dev' --"
+    "dev": "tsx watch cmd/index.ts"
   },
   "keywords": [],
   "author": "",

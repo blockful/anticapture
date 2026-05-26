@@ -3,10 +3,14 @@ import { z } from "@hono/zod-openapi";
 import { proposalsOnchain } from "@/database";
 import { ProposalStatus } from "@/lib/constants";
 import {
-  normalizeQueryArray,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
+  booleanQueryParam,
+  commaDelimitedEnumQueryParam,
+  daoIdField,
+  decimalStringField,
+  defaultDescOrderDirection,
+  paginatedListResponse,
+  paginationQueryParams,
+  unixSecondsIntField,
   unixTimestampQueryParam,
 } from "../shared";
 
@@ -17,22 +21,22 @@ const OnchainProposalStatusValues = Object.values(ProposalStatus) as [
   ...ProposalStatus[],
 ];
 
-const OnchainProposalStatusListSchema = z
-  .union([z.string(), z.array(z.string())])
-  .transform((value) => {
-    const statuses = normalizeQueryArray(value);
-    return statuses
-      ? z
-          .array(z.enum(OnchainProposalStatusValues))
-          .parse(statuses.map((status) => String(status).toUpperCase()))
-      : undefined;
+const OnchainProposalStatusListSchema = commaDelimitedEnumQueryParam(
+  OnchainProposalStatusValues,
+  (input) => input.toUpperCase(),
+);
+
+const leanQueryParam = () =>
+  booleanQueryParam(false).openapi({
+    description:
+      "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+    example: false,
   });
 
 export const ProposalsRequestSchema = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
-    orderDirection: OrderDirectionSchema.default("desc").optional(),
+    ...paginationQueryParams(),
+    orderDirection: defaultDescOrderDirection(),
     status: OnchainProposalStatusListSchema.optional().openapi(
       "OnchainProposalStatusList",
       {
@@ -60,6 +64,7 @@ export const ProposalsRequestSchema = z
         description: "Whether optimistic proposals should be included.",
         example: false,
       }),
+    lean: leanQueryParam(),
   })
   .openapi("OnchainProposalsRequest");
 
@@ -79,23 +84,30 @@ export const ProposalSearchRequestSchema = z
         description: "Partial proposal identifier or title to search for.",
         example: "test",
       }),
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
+    ...paginationQueryParams(),
+    lean: leanQueryParam(),
   })
   .openapi("OnchainProposalSearchRequest");
+
+export const ProposalByIdQuerySchema = z
+  .object({
+    lean: leanQueryParam(),
+  })
+  .openapi("OnchainProposalByIdQuery");
 
 export type ProposalSearchRequest = z.infer<typeof ProposalSearchRequestSchema>;
 
 export const ProposalResponseSchema = z
   .object({
     id: z.string().openapi({ description: "Onchain proposal identifier." }),
-    daoId: z.string().openapi({ description: "DAO identifier." }),
+    daoId: daoIdField(),
     txHash: z
       .string()
       .openapi({ description: "Proposal creation transaction hash." }),
-    proposerAccountId: z
-      .string()
-      .openapi({ description: "Address that created the proposal." }),
+    proposerAccountId: z.string().openapi({
+      description: "Address that created the proposal.",
+      format: "ethereum-address",
+    }),
     title: z.string().openapi({ description: "Proposal title." }),
     description: z.string().openapi({ description: "Proposal body." }),
     startBlock: z
@@ -103,49 +115,67 @@ export const ProposalResponseSchema = z
       .int()
       .openapi({ description: "Start block number." }),
     endBlock: z.number().int().openapi({ description: "End block number." }),
-    timestamp: z.number().int().openapi({
-      description: "Proposal creation timestamp in Unix seconds.",
-    }),
+    timestamp: unixSecondsIntField(
+      "Proposal creation timestamp in Unix seconds.",
+    ),
     status: z.string().openapi({ description: "Current proposal status." }),
-    forVotes: z.string().openapi({
-      description: "Votes cast in favor, encoded as a decimal string.",
+    forVotes: decimalStringField(
+      "Votes cast in favor, encoded as a decimal string.",
+    ),
+    againstVotes: decimalStringField(
+      "Votes cast against, encoded as a decimal string.",
+    ),
+    abstainVotes: decimalStringField(
+      "Abstain votes, encoded as a decimal string.",
+    ),
+    startTimestamp: unixSecondsIntField(
+      "Proposal start timestamp in Unix seconds.",
+    ),
+    endTimestamp: unixSecondsIntField(
+      "Proposal end timestamp in Unix seconds.",
+    ),
+    queuedTimestamp: unixSecondsIntField(
+      "Timestamp (Unix seconds) when the proposal was queued, or null if it never was.",
+    ).nullable(),
+    executedTimestamp: unixSecondsIntField(
+      "Timestamp (Unix seconds) when the proposal was executed, or null if it never was.",
+    ).nullable(),
+    queuedTxHash: z.string().nullable().openapi({
+      description:
+        "Transaction hash of the queue event, or null if the proposal was never queued.",
     }),
-    againstVotes: z.string().openapi({
-      description: "Votes cast against, encoded as a decimal string.",
+    executedTxHash: z.string().nullable().openapi({
+      description:
+        "Transaction hash of the execute event, or null if the proposal was never executed.",
     }),
-    abstainVotes: z.string().openapi({
-      description: "Abstain votes, encoded as a decimal string.",
+    quorum: decimalStringField("Required quorum encoded as a decimal string."),
+    calldatas: z.array(z.string()).optional().openapi({
+      description:
+        "Encoded calldata payloads executed by the proposal. Omitted when the request sets `lean=true`.",
     }),
-    startTimestamp: z.number().int().openapi({
-      description: "Proposal start timestamp in Unix seconds.",
-    }),
-    endTimestamp: z.number().int().openapi({
-      description: "Proposal end timestamp in Unix seconds.",
-    }),
-    quorum: z.string().openapi({
-      description: "Required quorum encoded as a decimal string.",
-    }),
-    calldatas: z.array(z.string()).openapi({
-      description: "Encoded calldata payloads executed by the proposal.",
-    }),
-    values: z.array(z.string()).openapi({
-      description: "ETH values attached to each call, encoded as strings.",
-    }),
-    targets: z.array(z.string()).openapi({
-      description: "Contract targets invoked by the proposal.",
-    }),
+    values: z
+      .array(z.string().openapi({ format: "bigint" }))
+      .optional()
+      .openapi({
+        description:
+          "ETH values attached to each call, encoded as strings. Omitted when the request sets `lean=true`.",
+      }),
+    targets: z
+      .array(z.string().openapi({ format: "ethereum-address" }))
+      .optional()
+      .openapi({
+        description:
+          "Contract targets invoked by the proposal. Omitted when the request sets `lean=true`.",
+      }),
     proposalType: z.number().int().nullable().openapi({
       description: "Optional proposal type discriminator.",
     }),
   })
   .openapi("OnchainProposal");
 
-export const ProposalsResponseSchema = z
-  .object({
-    items: z.array(ProposalResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("OnchainProposalsResponse");
+export const ProposalsResponseSchema = paginatedListResponse(
+  ProposalResponseSchema,
+).openapi("OnchainProposalsResponse");
 
 export type ProposalsResponse = z.infer<typeof ProposalsResponseSchema>;
 
@@ -169,8 +199,9 @@ export const ProposalMapper = {
     p: DBProposal,
     quorum: bigint,
     blockTime: number,
+    options: { lean?: boolean } = {},
   ): ProposalResponse => {
-    return {
+    const base: ProposalResponse = {
       id: p.id,
       daoId: p.daoId,
       txHash: p.txHash,
@@ -189,10 +220,20 @@ export const ProposalMapper = {
         Number(p.endTimestamp) - (p.endBlock - p.startBlock) * blockTime,
       ),
       quorum: quorum.toString(),
+      proposalType: p.proposalType,
+      queuedTimestamp:
+        p.queuedTimestamp === null ? null : Number(p.queuedTimestamp),
+      executedTimestamp:
+        p.executedTimestamp === null ? null : Number(p.executedTimestamp),
+      queuedTxHash: p.queuedTxHash,
+      executedTxHash: p.executedTxHash,
+    };
+    if (options.lean) return base;
+    return {
+      ...base,
       calldatas: p.calldatas,
       values: p.values.map((v) => v.toString()),
       targets: p.targets,
-      proposalType: p.proposalType,
     };
   },
 };

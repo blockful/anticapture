@@ -85,6 +85,10 @@ export const votingPowerHistory = onchainTable(
     pk: primaryKey({
       columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
+    votingPowerHistoryAccountTimestampIdx: index().on(
+      table.accountId,
+      table.timestamp,
+    ),
   }),
 );
 
@@ -185,11 +189,13 @@ export const votesOnchain = onchainTable(
     votingPower: drizzle.bigint().notNull(),
     reason: drizzle.text(),
     timestamp: drizzle.bigint().notNull(),
+    logIndex: drizzle.integer("log_index").notNull(),
   }),
   (table) => ({
     pk: primaryKey({
       columns: [table.voterAccountId, table.proposalId],
     }),
+    votesOnchainTxHashLogIndexIdx: index().on(table.txHash, table.logIndex),
   }),
 );
 
@@ -211,6 +217,10 @@ export const proposalsOnchain = onchainTable(
     timestamp: drizzle.bigint().notNull(),
     logIndex: drizzle.integer().notNull(),
     endTimestamp: drizzle.bigint().notNull(),
+    queuedTimestamp: drizzle.bigint("queued_timestamp"),
+    executedTimestamp: drizzle.bigint("executed_timestamp"),
+    queuedTxHash: drizzle.text("queued_tx_hash"),
+    executedTxHash: drizzle.text("executed_tx_hash"),
     status: drizzle.text().notNull(),
     forVotes: drizzle.bigint().default(0n).notNull(),
     againstVotes: drizzle.bigint().default(0n).notNull(),
@@ -249,17 +259,6 @@ export const daoMetricsDayBucket = onchainTable(
     }),
   }),
 );
-
-export const transaction = onchainTable("transaction", (drizzle) => ({
-  transactionHash: drizzle.text("transaction_hash").primaryKey(),
-  fromAddress: drizzle.text("from_address"),
-  toAddress: drizzle.text("to_address"),
-  isCex: drizzle.boolean().notNull().default(false),
-  isDex: drizzle.boolean().notNull().default(false),
-  isLending: drizzle.boolean().notNull().default(false),
-  isTotal: drizzle.boolean().notNull().default(false),
-  timestamp: drizzle.bigint().notNull(),
-}));
 
 export const tokenPrice = onchainTable("token_price", (drizzle) => ({
   price: drizzle.bigint().notNull(), // price in ETH
@@ -312,11 +311,6 @@ export const transferRelations = relations(transfer, ({ one }) => ({
     references: [token.id],
     relationName: "token",
   }),
-  transaction: one(transaction, {
-    fields: [transfer.transactionHash],
-    references: [transaction.transactionHash],
-    relationName: "transactionTransfers",
-  }),
 }));
 
 export const accountPowerRelations = relations(accountPower, ({ one }) => ({
@@ -366,11 +360,6 @@ export const delegationsRelations = relations(delegation, ({ one }) => ({
     references: [account.id],
     relationName: "delegator",
   }),
-  transaction: one(transaction, {
-    fields: [delegation.transactionHash],
-    references: [transaction.transactionHash],
-    relationName: "transactionDelegations",
-  }),
 }));
 
 export const votingPowerHistoryRelations = relations(
@@ -392,15 +381,6 @@ export const votingPowerHistoryRelations = relations(
     }),
   }),
 );
-
-export const transactionRelations = relations(transaction, ({ many }) => ({
-  transfers: many(transfer, {
-    relationName: "transactionTransfers",
-  }),
-  delegations: many(delegation, {
-    relationName: "transactionDelegations",
-  }),
-}));
 
 export const accountRelations = relations(account, ({ many }) => ({
   balances: many(accountBalance, {
@@ -449,7 +429,7 @@ export const feedEvent = onchainTable(
     type: eventTypeEnum("type").notNull(),
     value: drizzle.bigint().notNull().default(0n),
     timestamp: drizzle.bigint().notNull(),
-    metadata: drizzle.json().$type<Record<string, unknown>>(),
+    proposalId: drizzle.text("proposal_id"),
   }),
   (table) => ({
     pk: primaryKey({

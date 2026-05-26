@@ -1,3 +1,9 @@
+templates:
+  - /etc/alertmanager/slack.tmpl
+
+global:
+  resolve_timeout: 5m
+
 route:
   receiver: default
   group_by: [alertname, job]
@@ -10,5 +16,7 @@ receivers:
     slack_configs:
       - api_url: "${SLACK_WEBHOOK_URL}"
         channel: "${SLACK_CHANNEL}"
-        title: "[{{ .Status | toUpper }}] {{ .CommonAnnotations.summary }}"
-        text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+        color: '{{ template "slack.anticapture.color" . }}'
+        title: '{{ template "slack.anticapture.title" . }}'
+        text: '{{ template "slack.anticapture.text" . }}'
+        send_resolved: true

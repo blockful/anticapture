@@ -63,25 +63,39 @@ export function tokenDistribution(
 
         if (!result) {
           return ctx.json(
-            { previousValue: "0", currentValue: "0", changeRate: 0 },
+            {
+              previousValue: "0",
+              currentValue: "0",
+              changeRate: 0,
+              rawDelta: "0",
+            },
             200,
           );
         }
 
         const { oldValue, currentValue } = result;
+        const oldBig = BigInt(oldValue || "0");
+        const currentBig = BigInt(currentValue || "0");
+        const rawDelta = (currentBig - oldBig).toString();
 
         const changeRate =
-          parseInt(oldValue) &&
-          (BigInt(currentValue) * parseEther("1")) / BigInt(oldValue) -
-            parseEther("1");
+          oldBig === 0n
+            ? 0
+            : Number(
+                Number(
+                  formatUnits(
+                    (currentBig * parseEther("1")) / oldBig - parseEther("1"),
+                    18,
+                  ),
+                ).toFixed(6),
+              );
 
         return ctx.json(
           {
             previousValue: oldValue || "0",
             currentValue: currentValue || "0",
-            changeRate: changeRate
-              ? Number(Number(formatUnits(changeRate, 18)).toFixed(2))
-              : 0,
+            changeRate,
+            rawDelta,
           },
           200,
         );

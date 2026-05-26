@@ -139,8 +139,16 @@ export const TokenDistributionMetrics = ({
                         //   return null;
                         // }
 
-                        let currentValue: number | string | undefined;
-                        let previousValue: number | string | undefined;
+                        let currentValue:
+                          | number
+                          | string
+                          | string[]
+                          | undefined;
+                        let previousValue:
+                          | number
+                          | string
+                          | string[]
+                          | undefined;
 
                         if (metricData.length === 0) {
                           // No data available - show as undefined

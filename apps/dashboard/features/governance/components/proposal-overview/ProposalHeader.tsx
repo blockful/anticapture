@@ -1,13 +1,17 @@
 "use client";
 
-import type { GetAccountPowerQuery } from "@anticapture/graphql-client";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import type { VotesByProposalIdQueryResponse } from "@anticapture/client";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { Address } from "viem";
 
-import { Button, IconButton } from "@/shared/components";
-import { DaoAvatarIcon } from "@/shared/components/icons";
+import { BadgeStatus, Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
+import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
+import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
 import { DaoIdEnum } from "@/shared/types/daos";
+import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -15,10 +19,13 @@ interface ProposalHeaderProps {
   setIsQueueModalOpen: (isOpen: boolean) => void;
   setIsExecuteModalOpen: (isOpen: boolean) => void;
   votingPower: string;
-  votes: GetAccountPowerQuery["votesByProposalId"] | null;
+  votes: VotesByProposalIdQueryResponse | null;
   address: string | undefined;
   proposalStatus: string;
   snapshotLink?: string | null;
+  isWhitelabel?: boolean;
+  offchainHasVoted?: boolean;
+  offchainVoteLabel?: string | null;
 }
 
 const ProposalHeaderAction = ({
@@ -26,15 +33,61 @@ const ProposalHeaderAction = ({
   supportValue,
   proposalStatus,
   setIsVotingModalOpen,
+  isWhitelabel,
+  offchainHasVoted,
+  offchainVoteLabel,
+  daoId,
 }: {
   address: string | undefined;
   supportValue: number | undefined;
   proposalStatus: string;
   setIsVotingModalOpen: (isOpen: boolean) => void;
+  isWhitelabel: boolean;
+  offchainHasVoted?: boolean;
+  offchainVoteLabel?: string | null;
+  daoId: string;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { isEligible: isGaslessEligible } = useGaslessEligibility(
+    daoIdEnum,
+    address as Address | undefined,
+    "vote",
+  );
 
   if (address) {
+    if (offchainHasVoted !== undefined) {
+      if (offchainHasVoted) {
+        return (
+          <div className="hidden items-center gap-4 lg:flex">
+            <div className="bg-secondary ml-4 h-7 w-px shrink-0" />
+            <OffchainVotedBadge label={offchainVoteLabel ?? null} />
+            {isOngoing && (
+              <Button
+                className="hidden lg:flex"
+                onClick={() => setIsVotingModalOpen(true)}
+              >
+                Change your vote
+                <ArrowRight className="size-3.5" />
+              </Button>
+            )}
+          </div>
+        );
+      }
+      if (isOngoing) {
+        return (
+          <Button
+            className="hidden lg:flex"
+            onClick={() => setIsVotingModalOpen(true)}
+          >
+            Cast your vote
+            <ArrowRight className="size-3.5" />
+          </Button>
+        );
+      }
+      return null;
+    }
+
     if (supportValue === undefined) {
       if (isOngoing) {
         return (
@@ -44,6 +97,14 @@ const ProposalHeaderAction = ({
           >
             Cast your vote
             <ArrowRight className="size-3.5" />
+            {isGaslessEligible && (
+              <BadgeStatus
+                variant="success"
+                className="bg-success/80 text-inverted"
+              >
+                Free
+              </BadgeStatus>
+            )}
           </Button>
         );
       }
@@ -60,7 +121,11 @@ const ProposalHeaderAction = ({
 
   return (
     <div className="hidden lg:flex">
-      <ConnectWalletCustom label={isOngoing ? undefined : "Connect wallet"} />
+      {isWhitelabel ? (
+        <WhitelabelConnectWallet />
+      ) : (
+        <ConnectWalletCustom label={isOngoing ? undefined : "Connect wallet"} />
+      )}
     </div>
   );
 };
@@ -75,42 +140,84 @@ export const ProposalHeader = ({
   address,
   proposalStatus,
   snapshotLink,
+  isWhitelabel = false,
+  offchainHasVoted,
+  offchainVoteLabel,
 }: ProposalHeaderProps) => {
+  const pathname = usePathname();
   const supportValue =
     votes?.items[0]?.support != null
       ? Number(votes.items[0].support)
       : undefined;
+  const proposalListHref = getDaoGovernanceListPath({
+    daoId: daoId.toUpperCase() as DaoIdEnum,
+    pathname,
+    isOffchain: snapshotLink !== undefined,
+  });
 
   return (
-    <div className="text-primary bg-surface-background border-border-default top-13.75 sticky z-20 flex h-16 w-full shrink-0 items-center justify-between gap-6 border-b py-2 lg:top-0">
-      <div className="mx-auto flex w-full flex-1 items-center justify-between px-5">
+    <div className="text-primary bg-surface-background border-border-default sticky z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:top-0">
+      <div className="mx-auto flex w-full flex-1 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link
-            href={`/${daoId}/governance${snapshotLink !== undefined ? "?tab=offchain" : ""}`}
-          >
-            <IconButton
-              icon={ArrowLeft}
-              size="lg"
-              variant="ghost"
-              className="size-[14px]"
-            />
-          </Link>
-
-          <DaoAvatarIcon
-            daoId={daoId.toUpperCase() as DaoIdEnum}
-            className="size-icon-sm"
-            isRounded
-          />
-          <p className="text-secondary text-[14px] font-normal leading-[20px]">
-            {daoId.toUpperCase()}&apos;s{" "}
-            {snapshotLink !== undefined
-              ? "off-chain proposal"
-              : "proposal details"}
-          </p>
+          {isWhitelabel ? (
+            <nav className="text-body-md flex items-center gap-1.5">
+              <Link
+                href={proposalListHref}
+                className="text-link font-medium hover:underline"
+              >
+                Proposals
+              </Link>
+              <span className="text-dimmed">/</span>
+              <span className="text-secondary">
+                {snapshotLink !== undefined
+                  ? "Offchain proposal"
+                  : "Proposal details"}
+              </span>
+            </nav>
+          ) : (
+            <Link
+              href={proposalListHref}
+              className="text-secondary hover:text-primary inline-flex items-center gap-2 text-[14px] font-normal leading-[20px] transition-colors"
+            >
+              <span>Proposals</span>
+              <ChevronRight className="size-4" />
+            </Link>
+          )}
+          {!isWhitelabel && (
+            <p className="text-primary text-[14px] font-medium leading-[20px]">
+              {snapshotLink !== undefined
+                ? "Offchain proposal"
+                : "Proposal details"}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
-          {snapshotLink ? (
+          {isWhitelabel ? (
+            <>
+              {address && (
+                <div className="hidden lg:flex">
+                  <WhitelabelConnectWallet />
+                </div>
+              )}
+              <ProposalHeaderAction
+                address={address}
+                supportValue={
+                  snapshotLink ? undefined : (supportValue ?? undefined)
+                }
+                proposalStatus={proposalStatus}
+                setIsVotingModalOpen={setIsVotingModalOpen}
+                isWhitelabel={isWhitelabel}
+                offchainHasVoted={
+                  snapshotLink !== undefined ? offchainHasVoted : undefined
+                }
+                offchainVoteLabel={
+                  snapshotLink !== undefined ? offchainVoteLabel : undefined
+                }
+                daoId={daoId}
+              />
+            </>
+          ) : snapshotLink !== undefined ? (
             <>
               {address && (
                 <div className="hidden flex-col items-end lg:flex">
@@ -127,6 +234,10 @@ export const ProposalHeader = ({
                 supportValue={undefined}
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
+                isWhitelabel={isWhitelabel}
+                offchainHasVoted={offchainHasVoted}
+                offchainVoteLabel={offchainVoteLabel}
+                daoId={daoId}
               />
             </>
           ) : (
@@ -151,6 +262,8 @@ export const ProposalHeader = ({
                 supportValue={supportValue ?? undefined}
                 proposalStatus={proposalStatus}
                 setIsVotingModalOpen={setIsVotingModalOpen}
+                isWhitelabel={isWhitelabel}
+                daoId={daoId}
               />
               {address &&
                 proposalStatus === "succeeded" &&
@@ -189,6 +302,21 @@ const VotedBadge = ({ vote }: { vote: number }) => {
         You voted
       </p>
       {getVoteText(vote)}
+    </div>
+  );
+};
+
+const OffchainVotedBadge = ({ label }: { label: string | null }) => {
+  return (
+    <div className="flex flex-col items-end">
+      <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+        You voted
+      </p>
+      {label && (
+        <span className="text-primary bg-surface-default font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
+          {label}
+        </span>
+      )}
     </div>
   );
 };

@@ -1,3 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+
 import type {
   ComponentsObject,
   OpenAPIObject,
@@ -6,18 +9,25 @@ import type {
   PathsObject,
 } from "openapi3-ts/oas31";
 
+import { logger } from "./logger.js";
+
 type Schemas = NonNullable<ComponentsObject["schemas"]>;
 
 async function fetchDoc(
   name: string,
   baseUrl: string,
+  docsPath = "/docs",
 ): Promise<OpenAPIObject | null> {
   try {
-    const res = await fetch(`${baseUrl}/docs`);
+    const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+    const normalizedDocsPath = docsPath.startsWith("/")
+      ? docsPath
+      : `/${docsPath}`;
+    const res = await fetch(`${normalizedBaseUrl}${normalizedDocsPath}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return (await res.json()) as OpenAPIObject;
   } catch (err) {
-    console.warn(`[upstream-docs] Failed to fetch ${name}:`, err);
+    logger.warn({ err, name }, "failed to fetch upstream OpenAPI spec");
     return null;
   }
 }
@@ -32,6 +42,62 @@ function mergeSchemas(docs: OpenAPIObject[]): Schemas {
   return schemas;
 }
 
+function mergeAddressEnrichmentPaths(doc: OpenAPIObject): PathsObject {
+  const paths: PathsObject = {};
+
+  if (!doc.paths) return paths;
+
+  for (const [path, pathItem] of Object.entries(doc.paths)) {
+    const prefixedPath =
+      path === "/"
+        ? "/address-enrichment"
+        : `/address-enrichment${path.startsWith("/") ? path : `/${path}`}`;
+    paths[prefixedPath] = { ...pathItem };
+  }
+
+  return paths;
+}
+
+/**
+ * Relayers across DAOs share a single contract, so one fetched spec
+ * is enough — the dao enum comes straight from the configured map.
+ */
+function mergeRelayerPaths(doc: OpenAPIObject, daos: string[]): PathsObject {
+  if (!doc.paths) return {};
+
+  const daoParam: ParameterObject = {
+    name: "dao",
+    in: "path",
+    required: true,
+    schema: { type: "string", enum: [...daos].sort() },
+    description:
+      'DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. "ens").',
+  };
+
+  const isRelayerPath = (path: string) =>
+    path === "/relay" ||
+    path.startsWith("/relay/") ||
+    path === "/config" ||
+    path === "/rate-limit" ||
+    path.startsWith("/rate-limit/");
+
+  const paths: PathsObject = {};
+  for (const [path, pathItem] of Object.entries(doc.paths)) {
+    if (!isRelayerPath(path)) {
+      continue;
+    }
+    const item: PathItemObject = { ...pathItem };
+    item.parameters = [daoParam, ...(item.parameters ?? [])];
+    paths[`/{dao}${path}`] = item;
+  }
+  return paths;
+}
+
+// Upstream paths the gateway re-owns through dedicated resolvers; skip them
+// during merge so the resolver's OpenAPI definition is what ends up in the
+// public spec.
+const UPSTREAM_PATH_BLOCKLIST = new Set(["/health", "/health/full"]);
+
 function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
   const paths: PathsObject = {};
 
@@ -45,6 +111,7 @@ function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
     if (!doc.paths) continue;
 
     for (const [path, pathItem] of Object.entries(doc.paths)) {
+      if (UPSTREAM_PATH_BLOCKLIST.has(path)) continue;
       if (!pathDaoMap.has(path)) {
         pathDaoMap.set(path, new Set());
         pathItems.set(path, { ...pathItem });
@@ -60,7 +127,8 @@ function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
       in: "path",
       required: true,
       schema: { type: "string", enum: [...supportedDaos].sort() },
-      description: "DAO identifier",
+      description:
+        'DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. "ens").',
     };
 
     const item = pathItems.get(path)!;
@@ -77,11 +145,18 @@ function mergePaths(docs: OpenAPIObject[], daoNames: string[]): PathsObject {
 export async function mergeUpstreamDocs(
   ownSpec: OpenAPIObject,
   daoApis: Map<string, string>,
+  addressEnrichmentUrl?: string,
+  daoRelayers?: Map<string, string>,
 ): Promise<OpenAPIObject> {
   const entries = Array.from(daoApis.entries());
-  const results = await Promise.all(
-    entries.map(([name, url]) => fetchDoc(name, url)),
-  );
+  const relayerEntries = Array.from(daoRelayers?.entries() ?? []);
+  const [results, addressEnrichmentDoc, relayerResults] = await Promise.all([
+    Promise.all(entries.map(([name, url]) => fetchDoc(name, url))),
+    addressEnrichmentUrl
+      ? fetchDoc("address-enrichment", addressEnrichmentUrl, "/docs/json")
+      : Promise.resolve(null),
+    Promise.all(relayerEntries.map(([name, url]) => fetchDoc(name, url))),
+  ]);
 
   // Keep only successful fetches, with matching names
   const docs: OpenAPIObject[] = [];
@@ -94,15 +169,62 @@ export async function mergeUpstreamDocs(
     }
   }
 
+  // All relayers share one schema — first reachable spec wins; enum
+  // is the configured DAO set.
+  const relayerDoc = relayerResults.find((r) => r !== null) ?? null;
+  const relayerDaoNames = relayerEntries.map(([name]) => name);
+
+  const schemaDocs = [
+    ...docs,
+    ...(addressEnrichmentDoc ? [addressEnrichmentDoc] : []),
+    ...(relayerDoc ? [relayerDoc] : []),
+  ];
+
   return {
     ...ownSpec,
-    paths: { ...ownSpec.paths, ...mergePaths(docs, daoNames) },
+    paths: {
+      ...ownSpec.paths,
+      ...mergePaths(docs, daoNames),
+      ...(addressEnrichmentDoc
+        ? mergeAddressEnrichmentPaths(addressEnrichmentDoc)
+        : {}),
+      ...(relayerDoc ? mergeRelayerPaths(relayerDoc, relayerDaoNames) : {}),
+    },
     components: {
       ...ownSpec.components,
       schemas: {
         ...ownSpec.components?.schemas,
-        ...mergeSchemas(docs),
+        ...mergeSchemas(schemaDocs),
       },
     },
+  };
+}
+
+/**
+ * Stores the merged OpenAPI spec locally.
+ */
+export function storeOpenApiSpec(
+  ownSpec: OpenAPIObject,
+  daoApis: Map<string, string>,
+  addressEnrichmentUrl?: string,
+  outputPath = join(process.cwd(), "openapi", "gateful.json"),
+  daoRelayers?: Map<string, string>,
+): () => Promise<OpenAPIObject> {
+  return async () => {
+    const spec = await mergeUpstreamDocs(
+      ownSpec,
+      daoApis,
+      addressEnrichmentUrl,
+      daoRelayers,
+    );
+
+    try {
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, `${JSON.stringify(spec, null, 2)}\n`);
+    } catch (err) {
+      logger.warn({ err }, "failed to store OpenAPI spec");
+    }
+
+    return spec;
   };
 }

@@ -1,0 +1,92 @@
+name: Release Packages
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release-packages-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    env:
+      NPM_CONFIG_PROVENANCE: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build publishable packages
+        run: pnpm turbo run build --filter=@anticapture/client --filter=@anticapture/observability
+
+      - name: Publish packages and create releases
+        uses: changesets/action@v1
+        with:
+          publish: pnpm changeset publish
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Backfill GitHub Releases for every app CHANGELOG version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          for pkg in apps/*/package.json; do
+            app_dir=$(dirname "$pkg")
+            app_slug=$(basename "$app_dir")
+            changelog="${app_dir}/CHANGELOG.md"
+
+            [ -f "$changelog" ] || { echo "No CHANGELOG for ${app_slug}, skipping."; continue; }
+
+            # Collect every "## <version>" heading from the CHANGELOG, oldest first.
+            mapfile -t versions < <(grep -E '^## [0-9]+\.[0-9]+\.[0-9]+' "$changelog" | sed -E 's/^## //' | tac)
+
+            for version in "${versions[@]}"; do
+              tag="${app_slug}@${version}"
+
+              if gh release view "$tag" >/dev/null 2>&1; then
+                continue
+              fi
+
+              notes_file=$(mktemp)
+              awk -v ver="$version" '
+                $0 ~ "^## " ver "$" { capture=1; next }
+                capture && /^## / { exit }
+                capture { print }
+              ' "$changelog" > "$notes_file"
+              [ -s "$notes_file" ] || echo "Release ${tag}" > "$notes_file"
+
+              echo "Creating release ${tag}"
+              gh release create "$tag" \
+                --target "${GITHUB_SHA}" \
+                --title "$tag" \
+                --notes-file "$notes_file"
+            done
+          done

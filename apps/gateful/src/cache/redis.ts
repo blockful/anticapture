@@ -1,5 +1,7 @@
 import { createClient } from "redis";
 
+import { logger } from "../logger.js";
+
 /**
  * Creates a Redis client for the given URL.
  * Connects asynchronously — errors are logged but do not block startup.
@@ -8,20 +10,20 @@ export function createRedisClient(url: string) {
   const client = createClient({ url });
 
   client.on("connect", () => {
-    console.log("[redis] connected");
+    logger.info("redis connected");
   });
 
   client.on("reconnecting", () => {
-    console.log("[redis] reconnecting");
+    logger.info("redis reconnecting");
   });
 
   client.on("error", (err: Error) => {
-    console.error(`[redis] error: ${err.message}`);
+    logger.error({ err }, "redis error");
   });
 
   // Connect in the background — startup is not blocked.
   client.connect().catch((err: Error) => {
-    console.error(`[redis] initial connection failed: ${err.message}`);
+    logger.error({ err }, "redis initial connection failed");
   });
 
   return client;

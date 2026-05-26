@@ -87,6 +87,7 @@ const createVote = (overrides: Partial<VoteInsert> = {}): VoteInsert => ({
   id: "0xvote123",
   txHash: "0xvote123",
   daoId: "ENS",
+  logIndex: 0,
   voterAccountId: VALID_ADDRESS,
   proposalId: "1",
   support: "1",

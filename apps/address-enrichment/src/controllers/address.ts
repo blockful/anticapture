@@ -1,6 +1,7 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 import { getAddress } from "viem";
 
+import { logger } from "@/logger";
 import { EnrichmentService } from "@/services/enrichment";
 
 import {
@@ -9,6 +10,10 @@ import {
   AddressesRequestSchema,
   AddressesResponseSchema,
 } from "./mappers";
+
+const ErrorResponseSchema = z.object({
+  error: z.string(),
+});
 
 export function addressController(app: Hono, service: EnrichmentService) {
   app.openapi(
@@ -32,13 +37,25 @@ export function addressController(app: Hono, service: EnrichmentService) {
             },
           },
         },
+        502: {
+          description: "Upstream enrichment provider failed",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
       },
     }),
     async (context) => {
       const { address } = context.req.valid("param");
-      const result = await service.getAddressEnrichment(address);
-      const response = AddressResponseSchema.safeParse(result);
-      return context.json(response.data);
+      try {
+        const result = await service.getAddressEnrichment(address);
+        return context.json(AddressResponseSchema.parse(result), 200);
+      } catch (err) {
+        logger.error({ err, address }, "address enrichment failed");
+        return context.json({ error: "Failed to enrich address" }, 502);
+      }
     },
   );
 

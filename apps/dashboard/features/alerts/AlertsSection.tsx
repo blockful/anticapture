@@ -13,7 +13,7 @@ export const AlertsSection = () => {
       description={
         "With one click, get real-time governance alerts. Stay ahead of governance updates and take the path to being an active delegate without checking manually."
       }
-      className="bg-surface-background! lg:mt-0! border-b-0! mt-14"
+      className="bg-surface-background! lg:mt-0! border-b-0!"
     >
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-1 gap-3 py-5 lg:grid-cols-3">

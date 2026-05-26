@@ -1,19 +1,21 @@
-import type {
-  GetProposalsFromDaoQuery,
-  QueryProposalsArgs,
-} from "@anticapture/graphql-client/hooks";
 import {
-  OrderDirection,
-  useGetProposalsFromDaoQuery,
-} from "@anticapture/graphql-client/hooks";
-import type { ApolloError } from "@apollo/client";
-import { useCallback, useMemo, useState, useEffect } from "react";
+  getNextPageParam,
+  orderDirectionEnum,
+  type ProposalsPathParamsDaoEnumKey,
+  type ProposalsQueryParams,
+} from "@anticapture/client";
+import { useProposalsInfinite } from "@anticapture/client/hooks";
+import { useMemo } from "react";
+import { formatUnits } from "viem";
 
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
-import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
+import {
+  getProposalState,
+  getProposalStatus,
+  getTimeText,
+} from "@/features/governance/utils";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface PaginationInfo {
   hasNextPage: boolean;
@@ -25,17 +27,16 @@ export interface PaginationInfo {
 }
 
 export interface UseProposalsResult {
-  proposals: GovernanceProposal[];
-  loading: boolean;
-  error: ApolloError | undefined;
-  pagination: PaginationInfo;
+  data: GovernanceProposal[];
+  isLoading: boolean;
+  error: Error | null;
   fetchNextPage: () => Promise<void>;
-  isPaginationLoading: boolean;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
 }
 
-// Use the generated GraphQL arguments type and extend with pagination
 export interface UseProposalsParams extends Omit<
-  QueryProposalsArgs,
+  ProposalsQueryParams,
   "skip" | "limit"
 > {
   itemsPerPage?: number;
@@ -44,154 +45,97 @@ export interface UseProposalsParams extends Omit<
 
 export const useProposals = (
   {
-    fromDate = null,
-    orderDirection = OrderDirection.Desc,
-    status = null,
-    fromEndDate: _fromEndDate = null,
-    includeOptimisticProposals: _includeOptimisticProposals = null,
+    fromDate,
+    orderDirection = orderDirectionEnum.desc,
+    status,
+    fromEndDate,
+    includeOptimisticProposals,
     itemsPerPage = 10,
     daoId,
   }: UseProposalsParams = {
-    fromDate: null,
-    status: null,
-    fromEndDate: null,
-    includeOptimisticProposals: null,
+    fromDate: undefined,
+    status: undefined,
+    fromEndDate: undefined,
+    includeOptimisticProposals: undefined,
   },
 ): UseProposalsResult => {
-  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
-  const [allProposals, setAllProposals] = useState<GovernanceProposal[]>([]);
   const { decimals } = daoConfig[daoId as DaoIdEnum];
+  const daoKey = daoId?.toLowerCase() as ProposalsPathParamsDaoEnumKey;
 
-  const queryVariables = useMemo(
+  const queryParams = useMemo<ProposalsQueryParams>(
     () => ({
-      skip: 0, // Always start from 0 for first query
       limit: itemsPerPage,
+      orderDirection,
+      status: status ?? undefined,
+      fromDate: fromDate ?? undefined,
+      fromEndDate: fromEndDate ?? undefined,
+      includeOptimisticProposals: includeOptimisticProposals ?? undefined,
+    }),
+    [
+      itemsPerPage,
       orderDirection,
       status,
       fromDate,
-    }),
-    [itemsPerPage, orderDirection, status, fromDate],
+      fromEndDate,
+      includeOptimisticProposals,
+    ],
   );
 
-  // Main proposals query
-  const { data, loading, error, fetchMore } = useGetProposalsFromDaoQuery({
-    variables: queryVariables,
-    notifyOnNetworkStatusChange: true,
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
-      },
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useProposalsInfinite(daoKey, queryParams, {
+    query: {
+      enabled: !!daoId,
+      getNextPageParam,
     },
   });
 
-  // Transform and filter raw GraphQL data
-  const rawProposals = useMemo(() => {
-    const currentProposals = data?.proposals?.items || [];
+  const proposals = useMemo(() => {
+    const rawProposals = data?.pages.flatMap((page) => page.items) ?? [];
 
-    // Remove null values
-    return currentProposals.filter((proposal) => proposal !== null);
-  }, [data]);
+    return rawProposals.map((proposal) => {
+      const forVotes = Number(formatUnits(proposal.forVotes, decimals));
+      const againstVotes = Number(formatUnits(proposal.againstVotes, decimals));
+      const abstainVotes = Number(formatUnits(proposal.abstainVotes, decimals));
+      const quorum = Number(formatUnits(proposal.quorum, decimals));
+      const total = forVotes + againstVotes + abstainVotes;
+      const forPercentage = total > 0 ? (forVotes / total) * 100 : 0;
+      const againstPercentage = total > 0 ? (againstVotes / total) * 100 : 0;
 
-  // Initialize allProposals on first load
-  useEffect(() => {
-    if (rawProposals.length > 0 && allProposals.length === 0) {
-      const normalizedProposals = rawProposals.map((p) =>
-        transformToGovernanceProposal(p, decimals),
-      );
-      setAllProposals(normalizedProposals);
-    }
-  }, [rawProposals, allProposals.length, decimals]);
-
-  // Pagination info
-  const pagination: PaginationInfo = useMemo(() => {
-    const totalCount = data?.proposals?.totalCount || 0;
-    const currentItemsCount = allProposals.length;
-    const hasNextPage = currentItemsCount < totalCount;
-    const currentPage = Math.ceil(currentItemsCount / itemsPerPage);
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
-
-    return {
-      hasNextPage,
-      totalCount,
-      currentPage,
-      totalPages,
-      itemsPerPage,
-      currentItemsCount,
-    };
-  }, [data?.proposals?.totalCount, allProposals.length, itemsPerPage]);
-
-  // Fetch next page function
-  const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || isPaginationLoading) {
-      console.warn("No next page available or already loading");
-      return;
-    }
-
-    setIsPaginationLoading(true);
-
-    try {
-      const nextSkip = allProposals.length; // Skip the items we already have
-
-      await fetchMore({
-        variables: {
-          ...queryVariables,
-          skip: nextSkip,
+      return {
+        ...proposal,
+        title: proposal.title,
+        status: getProposalStatus(proposal.status),
+        state: getProposalState(proposal.status),
+        proposer: proposal.proposerAccountId,
+        votes: {
+          for: forVotes.toFixed(2),
+          against: againstVotes.toFixed(2),
+          total: total.toFixed(2),
+          forPercentage: forPercentage.toFixed(0),
+          againstPercentage: againstPercentage.toFixed(0),
         },
-        updateQuery: (
-          previousResult: GetProposalsFromDaoQuery,
-          { fetchMoreResult }: { fetchMoreResult: GetProposalsFromDaoQuery },
-        ) => {
-          if (!fetchMoreResult || !fetchMoreResult.proposals?.items?.length) {
-            return previousResult;
-          }
-
-          // Filter and transform new proposals
-          const newRawProposals = (
-            fetchMoreResult.proposals?.items || []
-          ).filter((proposal) => proposal !== null);
-
-          // Transform to governance proposals and append to existing list
-          const newGovernanceProposals = newRawProposals.map((proposal) =>
-            transformToGovernanceProposal(proposal, decimals),
-          );
-
-          if (newGovernanceProposals.length > 0) {
-            setAllProposals((prev) => [...prev, ...newGovernanceProposals]);
-          }
-
-          return {
-            ...fetchMoreResult,
-            proposals: {
-              ...fetchMoreResult.proposals,
-              items: [
-                ...(previousResult.proposals?.items || []),
-                ...(fetchMoreResult.proposals?.items || []),
-              ],
-            },
-          };
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching next page:", error);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    pagination.hasNextPage,
-    isPaginationLoading,
-    queryVariables,
-    allProposals.length,
-    decimals,
-  ]);
+        quorum: quorum.toFixed(2),
+        timeText: getTimeText(proposal.startTimestamp, proposal.endTimestamp),
+        values: proposal.values?.map((value) => value.toString()) ?? [],
+        targets: proposal.targets ?? [],
+      } satisfies GovernanceProposal;
+    });
+  }, [data, decimals]);
 
   return {
-    proposals: allProposals,
-    loading,
-    error,
-    pagination,
-    fetchNextPage,
-    isPaginationLoading,
+    data: proposals,
+    isLoading,
+    error: error instanceof Error ? error : null,
+    fetchNextPage: async () => {
+      await fetchNextPage();
+    },
+    isFetchingNextPage,
+    hasNextPage,
   };
 };

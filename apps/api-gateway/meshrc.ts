@@ -1,6 +1,9 @@
+import path from "node:path";
+
 import dotenv from "dotenv";
 
 import { processConfig } from "@graphql-mesh/config";
+import { InMemoryStoreStorageAdapter, MeshStore } from "@graphql-mesh/store";
 
 dotenv.config();
 
@@ -95,14 +98,9 @@ export default processConfig(
           endDate: String
 
           """
-          Cursor for pagination. Returns items after this date.
+          Number of day buckets to skip before returning results.
           """
-          after: String
-
-          """
-          Cursor for pagination. Returns items before this date.
-          """
-          before: String
+          skip: Int
 
           """
           Sort direction: "asc" or "desc". Default: "asc"
@@ -125,5 +123,13 @@ export default processConfig(
   },
   {
     dir: __dirname,
+    // Force in-memory store so runtime schema generation works under
+    // NODE_ENV=production (the default store would read from a non-existent
+    // .mesh/ artifacts dir and return `undefined`, crashing processDirectives).
+    store: new MeshStore(
+      path.resolve(__dirname, ".mesh"),
+      new InMemoryStoreStorageAdapter(),
+      { readonly: false, validate: false },
+    ),
   },
 );

@@ -1,128 +1,81 @@
-import type { GetProposalNonVotersQuery } from "@anticapture/graphql-client/hooks";
 import {
-  OrderDirection,
-  useGetProposalNonVotersQuery,
-} from "@anticapture/graphql-client/hooks";
-import type { ApolloError } from "@apollo/client";
-import { NetworkStatus } from "@apollo/client";
-import { useMemo, useCallback } from "react";
+  getNextPageParam,
+  orderDirectionEnum,
+  type OrderDirection,
+  type ProposalNonVotersPathParamsDaoEnumKey,
+  type ProposalNonVotersQueryParams,
+  type ProposalNonVotersQueryResponse,
+} from "@anticapture/client";
+import { useProposalNonVotersInfinite } from "@anticapture/client/hooks";
+import { useMemo } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
-// Non-voter type
-export type NonVoter = NonNullable<
-  GetProposalNonVotersQuery["proposalNonVoters"]
->["items"][0] & {
+export type NonVoter = ProposalNonVotersQueryResponse["items"][number] & {
   isSubRow?: boolean;
 };
 
 export interface UseNonVotersResult {
-  nonVoters: NonVoter[];
+  data: NonVoter[];
   totalCount: number;
-  loading: boolean;
-  error: ApolloError | undefined;
-  // Pagination functions
-  loadMore: () => Promise<void>;
+  isLoading: boolean;
+  error: Error | null;
+  fetchNextPage: () => Promise<void>;
   hasNextPage: boolean;
-  isLoadingMore: boolean;
+  isFetchingNextPage: boolean;
 }
 
 export interface UseNonVotersParams {
   daoId?: DaoIdEnum;
   proposalId?: string;
   limit?: number;
-  orderDirection?: "asc" | "desc";
+  orderDirection?: OrderDirection;
 }
 
 export const useNonVoters = ({
   daoId,
   proposalId,
   limit = 10,
-  orderDirection = "desc",
+  orderDirection = orderDirectionEnum.desc,
 }: UseNonVotersParams = {}): UseNonVotersResult => {
-  // Build query variables - always skip: 0 for initial query
-  const queryVariables = useMemo(
+  const daoKey = daoId?.toLowerCase() as ProposalNonVotersPathParamsDaoEnumKey;
+  const queryParams = useMemo<ProposalNonVotersQueryParams>(
     () => ({
-      id: proposalId || "",
       limit,
-      skip: 0,
-      orderDirection:
-        orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
+      orderDirection,
     }),
-    [proposalId, limit, orderDirection],
+    [limit, orderDirection],
   );
 
-  // Main non-voters query
-  const { data, loading, error, fetchMore, networkStatus } =
-    useGetProposalNonVotersQuery({
-      variables: queryVariables,
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-          ...getAuthHeaders(),
-        },
-      },
-      skip: !proposalId,
-      notifyOnNetworkStatusChange: true,
-    });
-
-  // Extract non-voters and total count from data
-  const nonVoters = (data?.proposalNonVoters?.items as NonVoter[]) || [];
-  const totalCount = data?.proposalNonVoters?.totalCount || 0;
-
-  // Calculate if there's a next page
-  const hasNextPage = nonVoters.length < totalCount;
-  const isLoadingMore = networkStatus === NetworkStatus.fetchMore;
-
-  // Load more non-voters for pagination
-  const loadMore = useCallback(async () => {
-    if (!hasNextPage || isLoadingMore) return;
-
-    try {
-      await fetchMore({
-        variables: {
-          id: proposalId || "",
-          limit,
-          skip: nonVoters.length,
-          orderDirection:
-            orderDirection === "asc" ? OrderDirection.Asc : OrderDirection.Desc,
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult?.proposalNonVoters) return prev;
-
-          const prevItems = prev.proposalNonVoters?.items || [];
-          const newItems = fetchMoreResult.proposalNonVoters.items || [];
-
-          return {
-            ...fetchMoreResult,
-            proposalNonVoters: {
-              ...fetchMoreResult.proposalNonVoters,
-              items: [...prevItems, ...newItems],
-            },
-          };
-        },
-      });
-    } catch (error) {
-      console.error("Error loading more non-voters:", error);
-    }
-  }, [
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
     hasNextPage,
-    isLoadingMore,
-    fetchMore,
-    proposalId,
-    limit,
-    nonVoters.length,
-    orderDirection,
-  ]);
+    isFetchingNextPage,
+  } = useProposalNonVotersInfinite(daoKey, proposalId ?? "", queryParams, {
+    query: {
+      enabled: !!daoId && !!proposalId,
+      getNextPageParam,
+    },
+  });
+
+  const nonVoters = useMemo(
+    () => data?.pages.flatMap((page) => page.items) ?? [],
+    [data],
+  );
+  const totalCount = data?.pages[0]?.totalCount ?? 0;
 
   return {
-    nonVoters,
+    data: nonVoters,
     totalCount,
-    loading,
-    error,
-    loadMore,
+    isLoading,
+    error: error instanceof Error ? error : null,
+    fetchNextPage: async () => {
+      await fetchNextPage();
+    },
     hasNextPage,
-    isLoadingMore,
+    isFetchingNextPage,
   };
 };

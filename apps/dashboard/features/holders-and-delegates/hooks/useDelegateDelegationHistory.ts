@@ -14,7 +14,6 @@ import { formatUnits } from "viem";
 import type { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 // Interface for a single delegation history item
 export interface DelegationHistoryItem {
@@ -25,6 +24,7 @@ export interface DelegationHistoryItem {
     from: string;
     value: string;
     to: string;
+    previousDelegate?: string | null;
   } | null;
   transfer?: {
     value: string;
@@ -121,7 +121,6 @@ export function useDelegateDelegationHistory({
     context: {
       headers: {
         "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
       },
     },
     notifyOnNetworkStatusChange: true,
@@ -189,12 +188,9 @@ export function useDelegateDelegationHistory({
       });
   }, [data, accountId, token]);
 
-  const hasNextPage = useMemo(() => {
-    return (
-      currentPage * limit <
-      (data?.historicalVotingPowerByAccountId?.totalCount || 0)
-    );
-  }, [currentPage, limit, data?.historicalVotingPowerByAccountId?.totalCount]);
+  const hasNextPage =
+    currentPage * limit <
+    (data?.historicalVotingPowerByAccountId?.totalCount ?? 0);
 
   // Fetch next page function
   const fetchNextPage = useCallback(async () => {

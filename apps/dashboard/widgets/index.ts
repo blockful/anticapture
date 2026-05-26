@@ -3,3 +3,7 @@ export * from "@/widgets/HeaderDAOSidebar";
 export * from "@/widgets/HeaderNavMobile";
 export * from "@/widgets/HeaderSidebar";
 export * from "@/widgets/MessageStacker";
+export * from "@/widgets/WhitelabelHeader";
+export * from "@/widgets/WhitelabelHeaderMobile";
+export * from "@/widgets/WhitelabelShell";
+export * from "@/widgets/WhitelabelSidebar";

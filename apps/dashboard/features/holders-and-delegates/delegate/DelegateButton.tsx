@@ -8,9 +8,13 @@ import { useAccount, useReadContract } from "wagmi";
 
 import { DelegationModal } from "@/features/holders-and-delegates/delegate/DelegationModal";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
-import { Button } from "@/shared/components";
-import type { ButtonSize } from "@/shared/components/design-system/buttons/types";
+import { BadgeStatus, Button } from "@/shared/components";
+import type {
+  ButtonSize,
+  ButtonVariant,
+} from "@/shared/components/design-system/buttons/types";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 const ERC20VotesAbi = [
@@ -27,22 +31,22 @@ interface DelegateButtonProps {
   delegateAddress: Address;
   daoId: DaoIdEnum;
   size?: ButtonSize;
+  variant?: ButtonVariant;
 }
 
 export const DelegateButton = ({
   delegateAddress,
   daoId,
   size = "md",
+  variant = "primary",
 }: DelegateButtonProps) => {
   const { address: userAddress, isConnected } = useAccount();
   const { openConnectModal, connectModalOpen } = useConnectModal();
   const [waitingForConnection, setWaitingForConnection] = useState(false);
   const [delegationModalOpen, setDelegationModalOpen] = useState(false);
 
-  const daoConfig = daoConfigByDaoId[daoId];
-  const tokenAddress = daoConfig?.daoOverview?.contracts?.token as
-    | Address
-    | undefined;
+  const tokenAddress = daoConfigByDaoId[daoId]?.daoOverview?.contracts
+    ?.token as Address | undefined;
 
   const { data: currentDelegatee, refetch } = useReadContract({
     abi: ERC20VotesAbi,
@@ -51,6 +55,12 @@ export const DelegateButton = ({
     args: userAddress ? [userAddress] : undefined,
     query: { enabled: !!userAddress && !!tokenAddress },
   });
+
+  const { isEligible: isGaslessEligible } = useGaslessEligibility(
+    daoId,
+    userAddress,
+    "delegate",
+  );
 
   const isAlreadyDelegated =
     !!currentDelegatee &&
@@ -89,8 +99,16 @@ export const DelegateButton = ({
 
   return (
     <>
-      <Button size={size} onClick={handleClick}>
+      <Button variant={variant} size={size} onClick={handleClick}>
         Delegate
+        {isGaslessEligible && (
+          <BadgeStatus
+            variant="success"
+            className="bg-success/80 text-inverted"
+          >
+            Free
+          </BadgeStatus>
+        )}
       </Button>
       <DelegationModal
         open={delegationModalOpen}

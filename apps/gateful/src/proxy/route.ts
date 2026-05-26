@@ -1,6 +1,9 @@
 import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { proxy as honoProxy } from "hono/proxy";
+import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
+
+const PROXY_TIMEOUT_MS = 30000;
 
 /**
  * Registers a catch-all reverse proxy that forwards requests to the
@@ -9,7 +12,11 @@ import { proxy as honoProxy } from "hono/proxy";
  * Must be registered **after** all specific routes (health, daos, etc.)
  * so it only catches unmatched requests.
  */
-export function proxy(app: OpenAPIHono, daoApis: Map<string, string>) {
+export function proxy(
+  app: OpenAPIHono,
+  daoApis: Map<string, string>,
+  registry: CircuitBreakerRegistry,
+) {
   // Register path-based matches before the fallback catch-alls so the DAO
   // param is available when present in the URL.
   app.all("/:dao{[^/]+}/*", handler);
@@ -37,8 +44,17 @@ export function proxy(app: OpenAPIHono, daoApis: Map<string, string>) {
       return c.json({ error: `DAO "${resolved.dao}" not configured` }, 404);
     }
 
-    const url = new URL(resolved.path || "/", daoAPI);
-    url.search = new URL(c.req.url).search;
-    return honoProxy(url.toString(), { ...c.req });
+    return registry.get(resolved.dao).execute(async () => {
+      const url = new URL(resolved.path || "/", daoAPI);
+      url.search = new URL(c.req.url).search;
+      const res = await honoProxy(url.toString(), {
+        ...c.req,
+        signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
+      });
+      if (res.status >= 500) {
+        throw new Error(`Upstream ${resolved.dao} returned ${res.status}`);
+      }
+      return res;
+    });
   }
 }

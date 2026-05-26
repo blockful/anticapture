@@ -5,13 +5,12 @@ import type { ReactNode } from "react";
 import { useMemo, useRef } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { BACKEND_ENDPOINT, getAuthHeaders } from "@/shared/utils/server-utils";
+import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 
 function createDaoApolloClient() {
   return new ApolloClient({
     uri: BACKEND_ENDPOINT,
     cache: new InMemoryCache(),
-    headers: getAuthHeaders(),
   });
 }
 

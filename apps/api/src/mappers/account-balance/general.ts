@@ -6,12 +6,14 @@ import { accountBalance } from "@/database";
 import {
   AddressQueryArraySchema,
   AddressSchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
   PeriodResponseSchema,
   TimestampResponseMapper,
-  unixTimestampQueryParam,
+  addressOutputField,
+  bigIntRangeQueryParams,
+  decimalStringField,
+  defaultDescOrderDirection,
+  inclusiveDateRangeQueryParams,
+  paginationQueryParams,
 } from "../shared";
 
 import {
@@ -21,15 +23,9 @@ import {
 
 export const AccountBalancesRequestSchema = z
   .object({
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for balance history filters, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for balance history filters, in Unix seconds.",
-    ),
-    limit: paginationLimitQueryParam(),
-    skip: paginationSkipQueryParam(),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    ...inclusiveDateRangeQueryParams("balance history filters"),
+    ...paginationQueryParams(),
+    orderDirection: defaultDescOrderDirection(),
     orderBy: z
       .enum(["balance", "variation", "signedVariation"])
       .optional()
@@ -44,20 +40,7 @@ export const AccountBalancesRequestSchema = z
       description:
         "Filter by one or more delegate addresses. Pass repeated query params or a comma-delimited list.",
     }),
-    fromValue: z
-      .string()
-      .transform((val) => BigInt(val))
-      .openapi({
-        description: "Minimum balance encoded as a decimal string.",
-      })
-      .optional(),
-    toValue: z
-      .string()
-      .transform((val) => BigInt(val))
-      .openapi({
-        description: "Maximum balance encoded as a decimal string.",
-      })
-      .optional(),
+    ...bigIntRangeQueryParams("balance"),
   })
   .openapi("AccountBalancesRequest");
 
@@ -74,32 +57,27 @@ export const AccountBalanceRequestParamSchema = z
 
 export const AccountBalanceRequestQuerySchema = z
   .object({
-    fromDate: unixTimestampQueryParam(
-      "Inclusive lower bound for the returned balance period, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam(
-      "Inclusive upper bound for the returned balance period, in Unix seconds.",
-    ),
+    ...inclusiveDateRangeQueryParams("the returned balance period"),
   })
   .openapi("AccountBalanceRequestQuery");
 
 export const AccountBalanceResponseSchema = z
   .object({
-    address: z.string().openapi({ description: "Account address." }),
-    balance: z.string().openapi({
-      description: "Current token balance encoded as a decimal string.",
-    }),
-    tokenId: z.string().openapi({ description: "Token contract address." }),
-    delegate: z.string().openapi({ description: "Current delegate address." }),
+    address: addressOutputField("Account address."),
+    balance: decimalStringField(
+      "Current token balance encoded as a decimal string.",
+    ),
+    tokenId: addressOutputField("Token contract address."),
+    delegate: addressOutputField("Current delegate address."),
   })
   .openapi("AccountBalance");
 
 export const AccountBalanceWithVariationSchema = z
   .object({
-    address: z.string(),
-    balance: z.string(),
-    tokenId: z.string(),
-    delegate: z.string(),
+    address: z.string().openapi({ format: "ethereum-address" }),
+    balance: z.string().openapi({ format: "bigint" }),
+    tokenId: z.string().openapi({ format: "ethereum-address" }),
+    delegate: z.string().openapi({ format: "ethereum-address" }),
     variation: AccountBalanceVariationSchema,
   })
   .openapi("AccountBalanceWithVariation");

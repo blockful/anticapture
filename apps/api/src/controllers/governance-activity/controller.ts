@@ -95,21 +95,23 @@ export function governanceActivity(
             currentProposalsLaunched: 0,
             oldProposalsLaunched: 0,
             changeRate: 0,
+            rawDelta: 0,
           },
           200,
         );
       }
-      const changeRate =
-        data.oldProposalsLaunched &&
-        data.currentProposalsLaunched / data.oldProposalsLaunched - 1;
+      const changeRate = data.oldProposalsLaunched
+        ? Number(
+            (
+              data.currentProposalsLaunched / data.oldProposalsLaunched -
+              1
+            ).toFixed(6),
+          )
+        : 0;
+      const rawDelta =
+        data.currentProposalsLaunched - data.oldProposalsLaunched;
 
-      return context.json(
-        {
-          ...data,
-          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
-        },
-        200,
-      );
+      return context.json({ ...data, changeRate, rawDelta }, 200);
     },
   );
 
@@ -145,20 +147,18 @@ export function governanceActivity(
             currentVotes: 0,
             oldVotes: 0,
             changeRate: 0,
+            rawDelta: 0,
           },
           200,
         );
       }
 
-      const changeRate = data.oldVotes && data.currentVotes / data.oldVotes - 1;
+      const changeRate = data.oldVotes
+        ? Number((data.currentVotes / data.oldVotes - 1).toFixed(6))
+        : 0;
+      const rawDelta = data.currentVotes - data.oldVotes;
 
-      return context.json(
-        {
-          ...data,
-          changeRate: changeRate ? Number(Number(changeRate).toFixed(2)) : 0,
-        },
-        200,
-      );
+      return context.json({ ...data, changeRate, rawDelta }, 200);
     },
   );
 
@@ -194,39 +194,49 @@ export function governanceActivity(
             currentAverageTurnout: "0",
             oldAverageTurnout: "0",
             changeRate: 0,
+            rawDelta: "0",
           },
           200,
         );
       }
 
       if (tokenType === "ERC721") {
+        const currentInt = data.currentAverageTurnout?.split(".")[0] || "0";
+        const oldInt = data.oldAverageTurnout?.split(".")[0] || "0";
+        const oldNum = Number(data.oldAverageTurnout);
+        const changeRate =
+          oldNum > 0
+            ? Number(
+                (Number(data.currentAverageTurnout) / oldNum - 1).toFixed(6),
+              )
+            : 0;
+        const rawDelta = (BigInt(currentInt) - BigInt(oldInt)).toString();
         return context.json(
           {
-            currentAverageTurnout:
-              data.currentAverageTurnout?.split(".")[0] || "0",
-            oldAverageTurnout: data.oldAverageTurnout?.split(".")[0] || "0",
-            changeRate: data.oldAverageTurnout
-              ? Number(data.currentAverageTurnout) /
-                  Number(data.oldAverageTurnout) -
-                1
-              : 0,
+            currentAverageTurnout: currentInt,
+            oldAverageTurnout: oldInt,
+            changeRate,
+            rawDelta,
           },
           200,
         );
       }
 
-      return context.json(
-        {
-          ...data,
-          changeRate:
-            Number(formatEther(BigInt(data.oldAverageTurnout))) > 0
-              ? Number(formatEther(BigInt(data.currentAverageTurnout))) /
-                  Number(formatEther(BigInt(data.oldAverageTurnout))) -
-                1
-              : 0,
-        },
-        200,
+      // Repository can return decimal strings (e.g. "175.0000000000000000"
+      // from SQL AVG()); BigInt only accepts integer strings, so trim the
+      // fractional portion before raw-delta math.
+      const currentBig = BigInt(
+        data.currentAverageTurnout.split(".")[0] || "0",
       );
+      const oldBig = BigInt(data.oldAverageTurnout.split(".")[0] || "0");
+      const oldEth = Number(formatEther(oldBig));
+      const changeRate =
+        oldEth > 0
+          ? Number((Number(formatEther(currentBig)) / oldEth - 1).toFixed(6))
+          : 0;
+      const rawDelta = (currentBig - oldBig).toString();
+
+      return context.json({ ...data, changeRate, rawDelta }, 200);
     },
   );
 }

@@ -76,6 +76,7 @@ export const voteCast = async (
     votingPower,
     reason,
     timestamp,
+    logIndex,
   });
 
   // Update proposal vote totals
@@ -87,22 +88,13 @@ export const voteCast = async (
       abstainVotes: current.abstainVotes + (support === 2 ? votingPower : 0n),
     }));
 
-  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
-
   await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
     type: "VOTE",
     value: votingPower,
     timestamp,
-    metadata: {
-      voter: getAddress(voter),
-      reason,
-      support,
-      votingPower,
-      proposalId,
-      title: proposal?.title ?? undefined,
-    },
+    proposalId,
   });
 };
 
@@ -220,7 +212,7 @@ export const proposalCreated = async (
   });
 
   // Update proposer's proposal count
-  const { votingPower: proposerVotingPower } = await context.db
+  await context.db
     .insert(accountPower)
     .values({
       accountId: getAddress(proposer),
@@ -231,34 +223,45 @@ export const proposalCreated = async (
       proposalsCount: current.proposalsCount + 1,
     }));
 
-  // Insert feed event for activity feed
-  // Proposals are always high relevance as they are significant governance actions
   await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
     type: "PROPOSAL",
     timestamp,
-    metadata: {
-      id: proposalId,
-      proposer: getAddress(proposer),
-      votingPower: proposerVotingPower,
-      title,
-    },
+    proposalId,
   });
 };
 
 /**
  * ### Updates:
  * - `proposalsOnchain`: Sets the proposal status to the provided status value
+ * - `proposalsOnchain`: Sets queuedTimestamp and queuedTxHash when status is QUEUED
+ * - `proposalsOnchain`: Sets executedTimestamp and executedTxHash when status is EXECUTED
  */
 export const updateProposalStatus = async (
   context: Context,
   proposalId: string,
-  status: string,
+  status: ProposalStatus,
+  timestamp: bigint,
+  txHash: Hex,
 ) => {
-  await context.db.update(proposalsOnchain, { id: proposalId }).set({
-    status,
-  });
+  const extra: {
+    queuedTimestamp?: bigint;
+    executedTimestamp?: bigint;
+    queuedTxHash?: string;
+    executedTxHash?: string;
+  } = {};
+  if (status === ProposalStatus.QUEUED) {
+    extra.queuedTimestamp = timestamp;
+    extra.queuedTxHash = txHash;
+  }
+  if (status === ProposalStatus.EXECUTED) {
+    extra.executedTimestamp = timestamp;
+    extra.executedTxHash = txHash;
+  }
+  await context.db
+    .update(proposalsOnchain, { id: proposalId })
+    .set({ status, ...extra });
 };
 
 /**
@@ -274,32 +277,19 @@ export const proposalExtended = async (
   logIndex: number,
   timestamp: bigint,
 ) => {
-  let endTimestamp: bigint | undefined;
-
-  await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => {
-    endTimestamp =
+  await context.db.update(proposalsOnchain, { id: proposalId }).set((row) => ({
+    row,
+    endBlock: Number(extendedDeadline),
+    endTimestamp:
       row.endTimestamp +
-      BigInt((Number(extendedDeadline) - row.endBlock) * blockTime);
-    return {
-      row,
-      endBlock: Number(extendedDeadline),
-      endTimestamp,
-    };
-  });
-
-  const proposal = await context.db.find(proposalsOnchain, { id: proposalId });
+      BigInt((Number(extendedDeadline) - row.endBlock) * blockTime),
+  }));
 
   await context.db.insert(feedEvent).values({
     txHash,
     logIndex,
     type: "PROPOSAL_EXTENDED",
     timestamp,
-    metadata: {
-      id: proposalId,
-      title: proposal?.title ?? undefined,
-      endBlock: Number(extendedDeadline),
-      endTimestamp,
-      proposer: getAddress(proposal!.proposerAccountId),
-    },
+    proposalId,
   });
 };

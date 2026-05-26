@@ -1,3 +1,4 @@
+import { useGetAddresses } from "@anticapture/client/hooks";
 import type {
   GetAccountInteractionsQuery,
   OrderDirection,
@@ -5,16 +6,14 @@ import type {
 } from "@anticapture/graphql-client/hooks";
 import { useGetAccountInteractionsQuery } from "@anticapture/graphql-client/hooks";
 import { NetworkStatus } from "@apollo/client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import daoConfig from "@/shared/dao-config";
-import { useMultipleEnsData } from "@/shared/hooks/useEnsData";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 interface Interaction {
   accountId: string;
@@ -97,7 +96,6 @@ export const useAccountInteractionsData = ({
       context: {
         headers: {
           "anticapture-dao-id": daoId,
-          ...getAuthHeaders(),
         },
       },
       notifyOnNetworkStatusChange: true,
@@ -177,7 +175,18 @@ export const useAccountInteractionsData = ({
       .filter((interaction) => interaction?.accountId)
       .map((interaction) => interaction?.accountId as Address) || [];
 
-  const { data: ensData } = useMultipleEnsData(interactionsAddresses);
+  const { data: enrichmentData } = useGetAddresses(
+    { addresses: interactionsAddresses },
+    { query: { enabled: interactionsAddresses.length > 0 } },
+  );
+
+  const ensNameByAddress = useMemo(() => {
+    const map: Record<string, string | null | undefined> = {};
+    enrichmentData?.results?.forEach((result) => {
+      map[result.address.toLowerCase()] = result.ens?.name;
+    });
+    return map;
+  }, [enrichmentData]);
 
   const defaultData = {
     topFive: [],
@@ -247,7 +256,9 @@ export const useAccountInteractionsData = ({
         ? (Number(interaction.transferCount || 0) / totalTransfers) * 100
         : 0;
 
-    const ensName = ensData?.[interaction.accountId as Address]?.ens;
+    const ensName =
+      ensNameByAddress[(interaction.accountId as Address).toLowerCase()] ??
+      undefined;
     const displayLabel = ensName || formatAddress(interaction.accountId) || "";
 
     chartConfig[interaction.accountId || `interaction-${index}`] = {

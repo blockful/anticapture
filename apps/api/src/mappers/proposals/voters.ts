@@ -3,16 +3,15 @@ import { z } from "@hono/zod-openapi";
 import {
   AddressQueryArraySchema,
   AddressSchema,
-  OrderDirectionSchema,
-  paginationLimitQueryParam,
-  paginationSkipQueryParam,
+  defaultDescOrderDirection,
+  paginatedListResponse,
+  paginationQueryParams,
 } from "../shared";
 
 export const VotersRequestSchema = z
   .object({
-    skip: paginationSkipQueryParam(),
-    limit: paginationLimitQueryParam(),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    ...paginationQueryParams(),
+    orderDirection: defaultDescOrderDirection(),
     addresses: AddressQueryArraySchema.optional(),
   })
   .openapi("VotersRequest", {
@@ -24,10 +23,10 @@ export type VotersRequest = z.infer<typeof VotersRequestSchema>;
 
 export const VoterResponseSchema = z
   .object({
-    voter: AddressSchema,
-    votingPower: z.string(),
+    voter: AddressSchema.openapi({ format: "ethereum-address" }),
+    votingPower: z.string().openapi({ format: "bigint" }),
     lastVoteTimestamp: z.number(),
-    votingPowerVariation: z.string(),
+    votingPowerVariation: z.string().openapi({ format: "bigint" }),
   })
   .openapi("Voter", {
     description: "Voter or non-voter record associated with a proposal.",
@@ -35,13 +34,10 @@ export const VoterResponseSchema = z
 
 export type VoterResponse = z.infer<typeof VoterResponseSchema>;
 
-export const VotersResponseSchema = z
-  .object({
-    items: z.array(VoterResponseSchema),
-    totalCount: z.number().int(),
-  })
-  .openapi("VotersResponse", {
-    description: "Paginated voter or non-voter records for a proposal.",
-  });
+export const VotersResponseSchema = paginatedListResponse(
+  VoterResponseSchema,
+).openapi("VotersResponse", {
+  description: "Paginated voter or non-voter records for a proposal.",
+});
 
 export type VotersResponse = z.infer<typeof VotersResponseSchema>;

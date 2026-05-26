@@ -52,7 +52,7 @@ export const Combobox = ({
             // Colors/surfaces
             "text-primary bg-surface-contrast",
             // Border
-            "border-border-contrast border",
+            "border-border-contrast rounded-base border",
             // Transitions
             "transition-colors duration-150",
             // Hover
@@ -97,7 +97,7 @@ export const Combobox = ({
           // Colors/surfaces
           "bg-surface-contrast",
           // Border
-          "border-border-contrast border",
+          "border-border-contrast rounded-base border",
           // Z-index
           "z-50",
           // Animation

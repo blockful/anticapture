@@ -1,20 +1,11 @@
-import {
-  OrderDirection,
-  useGetProposalsFromDaoQuery,
-} from "@anticapture/graphql-client/hooks";
-import type { ApolloError } from "@apollo/client";
-import { useMemo } from "react";
-
 import type { Proposal as GovernanceProposal } from "@/features/governance/types";
-import { transformToGovernanceProposal } from "@/features/governance/utils/transformToGovernanceProposal";
-import daoConfig from "@/shared/dao-config";
+import { useProposals } from "@/features/governance/hooks/useProposals";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { getAuthHeaders } from "@/shared/utils/server-utils";
 
 export interface UseLastProposalsResult {
   proposals: GovernanceProposal[];
   loading: boolean;
-  error: ApolloError | undefined;
+  error: Error | null;
 }
 
 const LAST_PROPOSALS_LIMIT = 3;
@@ -24,35 +15,14 @@ const LAST_PROPOSALS_LIMIT = 3;
  * This is a simplified version of useProposals without pagination.
  */
 export const useLastProposals = (daoId: DaoIdEnum): UseLastProposalsResult => {
-  const { decimals } = daoConfig[daoId];
-
-  const { data, loading, error } = useGetProposalsFromDaoQuery({
-    variables: {
-      skip: 0,
-      limit: LAST_PROPOSALS_LIMIT,
-      orderDirection: OrderDirection.Desc,
-      status: null,
-      fromDate: null,
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-        ...getAuthHeaders(),
-      },
-    },
+  const { data, isLoading, error } = useProposals({
+    daoId,
+    itemsPerPage: LAST_PROPOSALS_LIMIT,
   });
 
-  const proposals = useMemo(() => {
-    const rawProposals = data?.proposals?.items || [];
-
-    return rawProposals
-      .filter((proposal) => proposal !== null)
-      .map((proposal) => transformToGovernanceProposal(proposal, decimals));
-  }, [data, decimals]);
-
   return {
-    proposals,
-    loading,
+    proposals: data.slice(0, LAST_PROPOSALS_LIMIT),
+    loading: isLoading,
     error,
   };
 };

@@ -78,6 +78,7 @@ describe("Token Distribution Controller (integration)", () => {
         previousValue: "0",
         currentValue: "0",
         changeRate: 0,
+        rawDelta: "0",
       });
     });
 
@@ -105,6 +106,7 @@ describe("Token Distribution Controller (integration)", () => {
         currentValue: "1200000000000000000",
         previousValue: "1000000000000000000",
         changeRate: 0.2,
+        rawDelta: "200000000000000000",
       });
     });
 
@@ -132,6 +134,7 @@ describe("Token Distribution Controller (integration)", () => {
         currentValue: "1000000000000000000",
         previousValue: "0",
         changeRate: 0,
+        rawDelta: "1000000000000000000",
       });
     });
 
@@ -144,6 +147,7 @@ describe("Token Distribution Controller (integration)", () => {
         previousValue: "0",
         currentValue: "0",
         changeRate: 0,
+        rawDelta: "0",
       });
     });
 
@@ -171,6 +175,7 @@ describe("Token Distribution Controller (integration)", () => {
         currentValue: "1200000000000000000",
         previousValue: "1000000000000000000",
         changeRate: 0.2,
+        rawDelta: "200000000000000000",
       });
     });
   });
@@ -239,6 +244,7 @@ describe("Token Distribution Controller (integration)", () => {
         previousValue: "0",
         currentValue: "0",
         changeRate: 0,
+        rawDelta: "0",
       });
     });
   });
