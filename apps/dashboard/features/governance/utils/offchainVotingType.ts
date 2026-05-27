@@ -3,8 +3,6 @@
  * Some types (e.g. copeland) use ranked ballots but are not listed in @snapshot-labs/snapshot.js types.
  */
 
-const RANKED_BALLOT_TYPES = new Set(["ranked-choice", "copeland"]);
-
 /** UI + validation: which vote-options component to render. */
 export type OffchainVoteUiType =
   | "basic"
@@ -38,22 +36,7 @@ export const getOffchainVoteUiType = (
 /** EIP-712 signing: snapshot.js only uses voteArrayTypes for approval + ranked-choice. */
 export const getSnapshotVoteSignType = (
   proposalType: string,
-):
-  | "basic"
-  | "single-choice"
-  | "approval"
-  | "ranked-choice"
-  | "weighted"
-  | "quadratic" => {
-  if (RANKED_BALLOT_TYPES.has(proposalType)) {
-    return "ranked-choice";
-  }
-  const uiType = getOffchainVoteUiType(proposalType);
-  if (uiType) {
-    return uiType;
-  }
-  return "single-choice";
-};
+): OffchainVoteUiType => getOffchainVoteUiType(proposalType) ?? "single-choice";
 
 export const usesRankedBallot = (proposalType: string): boolean =>
-  RANKED_BALLOT_TYPES.has(proposalType);
+  getOffchainVoteUiType(proposalType) === "ranked-choice";
