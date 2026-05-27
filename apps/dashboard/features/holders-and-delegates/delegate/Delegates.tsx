@@ -1,7 +1,6 @@
 "use client";
 
-import type { OrderDirection } from "@anticapture/graphql-client";
-import { QueryInput_VotingPowers_OrderBy } from "@anticapture/graphql-client";
+import type { VotingPowersQueryParamsOrderByEnumKey } from "@anticapture/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -97,24 +96,27 @@ export const Delegates = ({
     setCurrentAddressFilter(address || "");
   };
 
-  const orderByMap: Record<DelegateSortKey, QueryInput_VotingPowers_OrderBy> = {
-    delegationsCount: QueryInput_VotingPowers_OrderBy.DelegationsCount,
-    votingPower: QueryInput_VotingPowers_OrderBy.VotingPower,
-    signedVariation: QueryInput_VotingPowers_OrderBy.SignedVariation,
-    variation: QueryInput_VotingPowers_OrderBy.Variation,
+  const orderByMap: Record<
+    DelegateSortKey,
+    VotingPowersQueryParamsOrderByEnumKey
+  > = {
+    delegationsCount: "delegationsCount",
+    votingPower: "votingPower",
+    signedVariation: "signedVariation",
+    variation: "variation",
   };
 
   const {
     data,
     loading,
     error,
-    pagination,
+    hasNextPage,
     fetchNextPage,
     fetchingMore,
     isActivityLoadingFor,
   } = useDelegates({
     orderBy: orderByMap[sortBy],
-    orderDirection: sortOrder as OrderDirection,
+    orderDirection: sortOrder,
     daoId,
     days: timePeriod,
     address: currentAddressFilter || undefined,
@@ -536,7 +538,7 @@ export const Delegates = ({
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
           size="sm"
-          hasMore={pagination.hasNextPage}
+          hasMore={hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}
           withDownloadCSV={true}

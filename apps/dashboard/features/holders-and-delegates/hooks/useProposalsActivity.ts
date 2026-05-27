@@ -1,198 +1,91 @@
 "use client";
 
 import type {
-  GetProposalsActivityQuery,
-  GetProposalsActivityQueryVariables,
-} from "@anticapture/graphql-client";
-import { useGetProposalsActivityQuery } from "@anticapture/graphql-client/hooks";
-import { NetworkStatus } from "@apollo/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+  ProposalActivityResponse,
+  ProposalsActivityPathParamsDaoEnumKey,
+  ProposalsActivityQueryParams,
+  ProposalsActivityQueryParamsOrderByEnumKey,
+  ProposalsActivityQueryParamsUserVoteFilterEnumKey,
+} from "@anticapture/client";
+import { useProposalsActivityInfinite } from "@anticapture/client/hooks";
+import { useMemo } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-type ProposalActivityItem = NonNullable<
-  NonNullable<
-    NonNullable<GetProposalsActivityQuery["proposalsActivity"]>["proposals"]
-  >[number]
->;
-
-interface UseProposalsActivityParams extends Partial<
-  Omit<GetProposalsActivityQueryVariables, "address">
-> {
-  address: GetProposalsActivityQueryVariables["address"];
-  limit: number;
+interface UseProposalsActivityParams {
+  address: string;
   daoId: DaoIdEnum;
+  fromDate?: number;
+  orderBy?: ProposalsActivityQueryParamsOrderByEnumKey;
+  orderDirection?: "asc" | "desc";
+  userVoteFilter?: ProposalsActivityQueryParamsUserVoteFilterEnumKey | null;
+  limit: number;
 }
 
-type ProposalActivityData = {
-  totalProposals: number;
-  votedProposals: number;
-  neverVoted: number;
-  winRate: number;
-  yesRate: number;
-  avgTimeBeforeEnd: number;
-  proposals: ProposalActivityItem[];
+const getProposalsNextPage = (
+  _lastPage: ProposalActivityResponse,
+  allPages: ProposalActivityResponse[],
+): number | undefined => {
+  const loaded = allPages.reduce((s, p) => s + p.proposals.length, 0);
+  const total = allPages[0]?.totalProposals ?? 0;
+  return loaded >= total ? undefined : loaded;
 };
-
-interface UseProposalsActivityResult {
-  data: ProposalActivityData | null;
-  loading: boolean;
-  error: Error | null;
-  refetch: () => void;
-  pagination: {
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-    currentPage: number;
-  };
-  fetchNextPage: () => void;
-  fetchingMore: boolean;
-}
 
 export const useProposalsActivity = ({
   address,
   daoId,
   fromDate,
-  skip,
   orderBy,
   orderDirection,
   userVoteFilter,
   limit,
-}: UseProposalsActivityParams): UseProposalsActivityResult => {
-  const queryOptions = {
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network" as const,
-  };
+}: UseProposalsActivityParams) => {
+  const params = useMemo<ProposalsActivityQueryParams>(
+    () => ({
+      address,
+      limit,
+      ...(fromDate ? { fromDate } : {}),
+      ...(orderBy ? { orderBy } : {}),
+      ...(orderDirection ? { orderDirection } : {}),
+      ...(userVoteFilter ? { userVoteFilter } : {}),
+    }),
+    [address, limit, fromDate, orderBy, orderDirection, userVoteFilter],
+  );
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const { data, networkStatus, error, refetch, fetchMore } =
-    useGetProposalsActivityQuery({
-      variables: {
-        address,
-        fromDate: fromDate ?? null,
-        skip: skip ?? null,
-        limit,
-        orderBy: orderBy ?? null,
-        orderDirection: orderDirection ?? null,
-        userVoteFilter: userVoteFilter ?? null,
-      },
-      ...queryOptions,
-    });
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [address, daoId, fromDate, orderBy, orderDirection, userVoteFilter]);
-
-  const totalProposals = data?.proposalsActivity?.totalProposals || 0;
-  const totalPages = totalProposals ? Math.ceil(totalProposals / limit) : 1;
-  const hasNextPage = currentPage < totalPages;
-
-  // Pagination uses the accumulated state (currentPage) rather than the
-  // initial skip variable, so infinite scroll works beyond the first page.
-  const pagination = useMemo(() => {
-    return {
-      totalPages,
-      hasNextPage,
-      hasPreviousPage: currentPage > 1,
-      currentPage,
-    };
-  }, [totalPages, hasNextPage, currentPage]);
-
-  const proposalsLength = data?.proposalsActivity?.proposals?.length ?? 0;
-
-  const fetchNextPage = useCallback(async () => {
-    if (!hasNextPage || networkStatus === NetworkStatus.fetchMore) return;
-    try {
-      await fetchMore({
-        variables: {
-          address,
-          fromDate: fromDate ?? null,
-          skip: proposalsLength,
-          limit,
-          orderBy: orderBy ?? null,
-          orderDirection: orderDirection ?? null,
-          userVoteFilter: userVoteFilter ?? null,
-        },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (
-            !fetchMoreResult ||
-            !prev.proposalsActivity ||
-            !fetchMoreResult.proposalsActivity
-          )
-            return prev;
-          const prevItems = prev.proposalsActivity.proposals ?? [];
-          const newItems = fetchMoreResult.proposalsActivity.proposals ?? [];
-          const merged = [
-            ...prevItems,
-            ...newItems.filter(
-              (n) =>
-                n &&
-                !prevItems.some((p) => p?.proposal?.id === n?.proposal?.id),
-            ),
-          ].filter((item): item is ProposalActivityItem => item !== null);
-
-          return {
-            ...fetchMoreResult,
-            proposalsActivity: {
-              ...fetchMoreResult.proposalsActivity,
-              proposals: merged,
-            },
-          };
-        },
-      });
-      setCurrentPage((p) => p + 1);
-    } catch (error) {
-      console.error("Error fetching next page:", error);
-    }
-  }, [
-    fetchMore,
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
     hasNextPage,
-    networkStatus,
-    address,
-    fromDate,
-    limit,
-    orderBy,
-    orderDirection,
-    userVoteFilter,
-    proposalsLength,
-  ]);
+    isFetchingNextPage,
+  } = useProposalsActivityInfinite(
+    daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
+    params,
+    { query: { getNextPageParam: getProposalsNextPage } },
+  );
 
-  const processedData: ProposalActivityData | null = useMemo(() => {
-    if (!data?.proposalsActivity) return null;
-
-    return {
-      totalProposals: data.proposalsActivity.totalProposals,
-      votedProposals: data.proposalsActivity.votedProposals,
-      neverVoted: data.proposalsActivity.neverVoted ? 1 : 0,
-      winRate: data.proposalsActivity.winRate,
-      yesRate: data.proposalsActivity.yesRate,
-      avgTimeBeforeEnd: data.proposalsActivity.avgTimeBeforeEnd,
-      proposals: (data.proposalsActivity.proposals ?? []).filter(
-        Boolean,
-      ) as ProposalActivityItem[],
-    };
+  const processedData = useMemo((): ProposalActivityResponse | null => {
+    if (!data?.pages?.length) return null;
+    const firstPage = data.pages[0];
+    const seen = new Set<string>();
+    const proposals = data.pages
+      .flatMap((p) => p.proposals)
+      .filter((item) => {
+        const id = item.proposal.id;
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+    return { ...firstPage, proposals };
   }, [data]);
-
-  const isLoading = useMemo(() => {
-    return (
-      networkStatus === NetworkStatus.loading ||
-      networkStatus === NetworkStatus.setVariables ||
-      networkStatus === NetworkStatus.refetch
-    );
-  }, [networkStatus]);
 
   return {
     data: processedData,
     loading: isLoading,
-    error: error || null,
-    refetch,
-    pagination,
+    error: error ?? null,
+    hasNextPage,
     fetchNextPage,
-    fetchingMore: networkStatus === NetworkStatus.fetchMore,
+    fetchingMore: isFetchingNextPage,
   };
 };

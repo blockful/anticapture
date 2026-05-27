@@ -1,5 +1,21 @@
 # @anticapture/dashboard
 
+## 2.3.2
+
+### Patch Changes
+
+- [#1913](https://github.com/blockful/anticapture/pull/1913) [`156219e`](https://github.com/blockful/anticapture/commit/156219eb109011237bd2957332f092e98ec48cde) Thanks [@pikonha](https://github.com/pikonha)! - Add server-side `from` and `to` query parameters to `GET /accounts/{address}/balances/historical`. The dashboard's balance history now applies the buy/sell and custom address filters in the query (regenerated client surfaces them) so `totalCount`, pagination, and the first-page contents reflect the filtered set instead of being filtered after fetching. Fixes empty/incomplete filtered pages when matches live on later pages of the unfiltered dataset.
+
+- [#1942](https://github.com/blockful/anticapture/pull/1942) [`5e9aac3`](https://github.com/blockful/anticapture/commit/5e9aac3fab82c7e279fc9eb30e4e00ddd0ff3cbc) Thanks [@alextnetto](https://github.com/alextnetto)! - Support Snapshot copeland offchain votes and show full choice labels in proposal results.
+
+- [#1913](https://github.com/blockful/anticapture/pull/1913) [`2df53fa`](https://github.com/blockful/anticapture/commit/2df53fa4201c1a267603952694765928e89d2e5a) Thanks [@pikonha](https://github.com/pikonha)! - Fix infinite scroll on the delegate proposals activity drawer. The summary fields (`totalProposals`, `votedProposals`, etc.) are only returned by the API on the first page, so the next-page check now anchors on the first page's total instead of the last page's (which was always 0 after the initial fetch).
+
+- [#1944](https://github.com/blockful/anticapture/pull/1944) [`8978c4f`](https://github.com/blockful/anticapture/commit/8978c4f4d0b7a638486de6c80b578b8f5fb1f98f) Thanks [@pikonha](https://github.com/pikonha)! - Fix token holders pagination duplicating rows (wire the shared `getNextPageParam` into `useAccountBalancesInfinite`), unify `getHistoricalBalanceCount` on a single joined query so totals match returned items, memoize delegator dedup, anchor account-interactions `totalCount` to the first page, drop the redundant `fetchNextPageStable` wrapper in `useDelegates`, and document the single-page `limit: 1000` truncation in the balance-history and delegate-delegation-history graph hooks.
+
+- [#1913](https://github.com/blockful/anticapture/pull/1913) [`e690291`](https://github.com/blockful/anticapture/commit/e690291b206563c897b0e806054158cbcd6c676d) Thanks [@pikonha](https://github.com/pikonha)! - Migrate holders-and-delegates data fetches from GraphQL client to kubb-generated REST SDK (@anticapture/client)
+
+- [#1913](https://github.com/blockful/anticapture/pull/1913) [`37bba79`](https://github.com/blockful/anticapture/commit/37bba7916210a5a6554e9e448a4da7dd0957b298) Thanks [@pikonha](https://github.com/pikonha)! - Migrate vote-composition delegators to the REST client and restore DAO-page sorting and balance-history filter precedence.
+
 ## 2.3.1
 
 ### Patch Changes

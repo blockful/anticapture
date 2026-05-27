@@ -1,6 +1,4 @@
 export type {
-  PaginationInfo,
-  SimplePaginationInfo,
   AmountFilterVariables,
   LoadingState,
 } from "@/features/holders-and-delegates/hooks/types";
