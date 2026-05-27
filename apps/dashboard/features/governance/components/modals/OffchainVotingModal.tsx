@@ -301,11 +301,11 @@ export const OffchainVotingModal = ({
         </div>
 
         {/* Vote options */}
-        <div className="flex flex-col gap-[6px] p-4">
+        <div className="flex flex-col items-start gap-[6px] p-4 text-left">
           <p className="font-inter text-primary text-[12px] font-medium">
             Your vote
           </p>
-          {renderVoteOptions()}
+          <div className="w-full">{renderVoteOptions()}</div>
         </div>
 
         {/* Comment */}
