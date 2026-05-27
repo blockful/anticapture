@@ -100,7 +100,7 @@ export const useAccountInteractionsData = ({
         }) ?? []
     );
   }, [data]);
-  const totalCount = data?.pages[data.pages.length - 1]?.totalCount ?? 0;
+  const totalCount = data?.pages[0]?.totalCount ?? 0;
   const computedHasNextPage = hasNextPage ?? false;
 
   const topFive =
