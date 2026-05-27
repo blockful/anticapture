@@ -14,6 +14,7 @@ import { WeightedVoteOptions } from "@/features/governance/components/modals/vot
 import { useOffchainVotingPower } from "@/features/governance/hooks/useOffchainVotingPower";
 import { useVoteOnOffchainProposal } from "@/features/governance/hooks/useVoteOnOffchainProposal";
 import { normalizeChoices } from "@/features/governance/utils/offchainProposal";
+import { getOffchainVoteUiType } from "@/features/governance/utils/offchainVotingType";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { Button } from "@/shared/components";
 import { formatNumberUserReadable } from "@/shared/utils";
@@ -71,6 +72,7 @@ export const OffchainVotingModal = ({
   });
 
   const choices = normalizeChoices(proposal.choices);
+  const voteUiType = getOffchainVoteUiType(proposal.type);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -112,15 +114,15 @@ export const OffchainVotingModal = ({
 
   const isVoteEnabled = (() => {
     if (!value || !address || isVoting) return false;
-    if (proposal.type === "approval") return (value as number[]).length > 0;
-    if (proposal.type === "weighted") {
+    if (voteUiType === "approval") return (value as number[]).length > 0;
+    if (voteUiType === "weighted") {
       const total = Object.values(value as Record<string, number>).reduce(
         (a, b) => a + b,
         0,
       );
       return total === 100;
     }
-    if (proposal.type === "quadratic") {
+    if (voteUiType === "quadratic") {
       const total = Object.values(value as Record<string, number>).reduce(
         (a, b) => a + b,
         0,
@@ -153,13 +155,7 @@ export const OffchainVotingModal = ({
       await vote({
         spaceId: proposal.spaceId,
         proposalId: proposal.id,
-        type: proposal.type as
-          | "basic"
-          | "single-choice"
-          | "approval"
-          | "ranked-choice"
-          | "weighted"
-          | "quadratic",
+        proposalType: proposal.type,
         choice: value,
         reason: comment,
       });
@@ -174,7 +170,7 @@ export const OffchainVotingModal = ({
   };
 
   const renderVoteOptions = () => {
-    switch (proposal.type) {
+    switch (voteUiType) {
       case "basic":
         return (
           <BasicVoteOptions
@@ -227,7 +223,21 @@ export const OffchainVotingModal = ({
           />
         );
       default:
-        return null;
+        return (
+          <p className="text-secondary text-[14px]">
+            Voting for &quot;{proposal.type}&quot; proposals is not supported in
+            this app yet. Vote on{" "}
+            <a
+              href={proposal.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link underline"
+            >
+              Snapshot
+            </a>
+            .
+          </p>
+        );
     }
   };
 

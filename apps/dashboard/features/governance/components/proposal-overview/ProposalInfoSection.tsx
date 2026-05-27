@@ -115,18 +115,17 @@ export const ProposalInfoSection = ({
 
           <div className="scrollbar-custom flex max-h-[240px] flex-col gap-3 overflow-y-auto overflow-x-hidden lg:w-full">
             {choiceItems.map((item) => (
-              <div
-                key={item.label}
-                className="flex w-full items-center justify-between gap-2 lg:justify-start"
-              >
-                <div className="flex w-[100px] shrink-0 items-center gap-2 overflow-hidden">
+              <div key={item.label} className="flex w-full items-center gap-2">
+                <div className="flex min-w-0 flex-[1.4] items-start gap-2">
                   <ChoiceIcon label={item.label} color={item.color} />
-                  <p className="text-primary font-inter truncate text-[14px] font-normal not-italic leading-[20px]">
-                    {item.label}
-                  </p>
+                  <Tooltip tooltipContent={item.label}>
+                    <p className="text-primary font-inter line-clamp-2 text-[14px] font-normal not-italic leading-[20px]">
+                      {item.label}
+                    </p>
+                  </Tooltip>
                 </div>
 
-                <div className="bg-surface-contrast relative h-1 min-w-0 flex-1">
+                <div className="bg-surface-contrast relative h-1 min-w-[48px] flex-1">
                   <div
                     className="absolute h-full"
                     style={{
