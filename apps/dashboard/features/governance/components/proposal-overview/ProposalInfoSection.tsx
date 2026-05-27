@@ -117,7 +117,9 @@ export const ProposalInfoSection = ({
             {choiceItems.map((item) => (
               <div key={item.label} className="flex w-full flex-col gap-1.5">
                 <div className="flex items-start gap-2 text-left">
-                  <ChoiceIcon label={item.label} color={item.color} />
+                  <div className="flex h-5 shrink-0 items-center">
+                    <ChoiceIcon label={item.label} color={item.color} />
+                  </div>
                   <Tooltip
                     asChild
                     triggerClassName="min-w-0 flex-1 text-left"
