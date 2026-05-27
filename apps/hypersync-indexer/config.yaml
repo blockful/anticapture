@@ -26,8 +26,8 @@ contracts:
 
 chains:
   - id: 1
-    hypersync_config:
-      url: https://eth.hypersync.xyz
+    rpc:
+      url: http://erpc.railway.internal:5000/indexer/evm/1
     start_block: 9380410
     contracts:
       - name: ENSToken
