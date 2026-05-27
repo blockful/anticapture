@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Address } from "viem";
 
+import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import { BadgeStatus, Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
@@ -26,6 +27,7 @@ interface ProposalHeaderProps {
   isWhitelabel?: boolean;
   offchainHasVoted?: boolean;
   offchainVoteLabel?: string | null;
+  offchainProposalType?: string | null;
 }
 
 const ProposalHeaderAction = ({
@@ -36,6 +38,7 @@ const ProposalHeaderAction = ({
   isWhitelabel,
   offchainHasVoted,
   offchainVoteLabel,
+  offchainProposalType,
   daoId,
 }: {
   address: string | undefined;
@@ -45,6 +48,7 @@ const ProposalHeaderAction = ({
   isWhitelabel: boolean;
   offchainHasVoted?: boolean;
   offchainVoteLabel?: string | null;
+  offchainProposalType?: string | null;
   daoId: string;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
@@ -61,7 +65,10 @@ const ProposalHeaderAction = ({
         return (
           <div className="hidden items-center gap-4 lg:flex">
             <div className="bg-secondary ml-4 h-7 w-px shrink-0" />
-            <OffchainVotedBadge label={offchainVoteLabel ?? null} />
+            <OffchainVotedBadge
+              label={offchainVoteLabel ?? null}
+              proposalType={offchainProposalType}
+            />
             {isOngoing && (
               <Button
                 className="hidden lg:flex"
@@ -143,6 +150,7 @@ export const ProposalHeader = ({
   isWhitelabel = false,
   offchainHasVoted,
   offchainVoteLabel,
+  offchainProposalType,
 }: ProposalHeaderProps) => {
   const pathname = usePathname();
   const supportValue =
@@ -214,6 +222,9 @@ export const ProposalHeader = ({
                 offchainVoteLabel={
                   snapshotLink !== undefined ? offchainVoteLabel : undefined
                 }
+                offchainProposalType={
+                  snapshotLink !== undefined ? offchainProposalType : undefined
+                }
                 daoId={daoId}
               />
             </>
@@ -237,6 +248,7 @@ export const ProposalHeader = ({
                 isWhitelabel={isWhitelabel}
                 offchainHasVoted={offchainHasVoted}
                 offchainVoteLabel={offchainVoteLabel}
+                offchainProposalType={offchainProposalType}
                 daoId={daoId}
               />
             </>
@@ -306,16 +318,20 @@ const VotedBadge = ({ vote }: { vote: number }) => {
   );
 };
 
-const OffchainVotedBadge = ({ label }: { label: string | null }) => {
+const OffchainVotedBadge = ({
+  label,
+  proposalType,
+}: {
+  label: string | null;
+  proposalType?: string | null;
+}) => {
   return (
     <div className="flex flex-col items-end">
       <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
         You voted
       </p>
       {label && (
-        <span className="text-primary bg-surface-default font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
-          {label}
-        </span>
+        <OffchainVoteLabelChip label={label} proposalType={proposalType} />
       )}
     </div>
   );
