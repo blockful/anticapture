@@ -1,15 +1,27 @@
+import { useCompareActiveSupply } from "@anticapture/client/hooks";
+import type { CompareActiveSupplyPathParamsDaoEnumKey } from "@anticapture/client";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
 import { useDaoTokenHistoricalData } from "@/features/attack-profitability/hooks";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useActiveSupply } from "@/shared/hooks/useActiveSupply";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 
+// Mirrors Apollo's fetchPolicy: "no-cache".
+const NO_CACHE_QUERY_OPTIONS = {
+  staleTime: 0,
+  gcTime: 0,
+  refetchOnMount: "always",
+} as const;
+
 export const useCostOfAttack = (daoId: DaoIdEnum) => {
   const timeInterval = TimeInterval.NINETY_DAYS;
-  const activeSupply = useActiveSupply(daoId, timeInterval);
+  const activeSupply = useCompareActiveSupply(
+    daoId.toLowerCase() as CompareActiveSupplyPathParamsDaoEnumKey,
+    { days: timeInterval },
+    { query: NO_CACHE_QUERY_OPTIONS },
+  );
 
   const {
     data: daoTokenPriceHistoricalData,

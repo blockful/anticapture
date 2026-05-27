@@ -13,8 +13,10 @@ import { RadioCard } from "@/shared/components/design-system/form/fields/radio-c
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import daoConfig from "@/shared/dao-config";
 import { isEnsAddress } from "@/shared/utils/ens";
+import { useToken } from "@anticapture/client/hooks";
+import type { TokenPathParamsDaoEnumKey } from "@anticapture/client";
+
 import { useEthPrice } from "@/shared/hooks/useEthPrice";
-import { useTokenData } from "@/shared/hooks/useTokenData";
 import { cn } from "@/shared/utils/cn";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { SUGGESTED_TRANSFER_TOKENS } from "@/features/create-proposal/constants";
@@ -94,7 +96,10 @@ export const AddTransferModal = ({
     }
   }, [open, initialValue]);
 
-  const { data: governanceTokenData } = useTokenData(daoIdEnum);
+  const { data: governanceTokenData } = useToken(
+    daoIdEnum.toLowerCase() as TokenPathParamsDaoEnumKey,
+    { currency: "usd" },
+  );
   const { price: ethPrice } = useEthPrice();
   const governanceChainId = daoConfig[daoIdEnum]?.daoOverview?.chain?.id;
   const publicClient = usePublicClient(
