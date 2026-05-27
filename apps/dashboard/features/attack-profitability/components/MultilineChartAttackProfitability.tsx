@@ -31,7 +31,10 @@ import type {
   TokenMetricItem,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
-import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
+import { useDao } from "@anticapture/client/hooks";
+import type { DaoPathParamsDaoEnumKey } from "@anticapture/client";
+
+import { useTimeSeriesData } from "@/shared/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -56,7 +59,9 @@ export const MultilineChartAttackProfitability = ({
 }: MultilineChartAttackProfitabilityProps) => {
   const { daoId } = useParams<{ daoId: string }>();
   const daoEnum = daoId.toUpperCase() as DaoIdEnum;
-  const { data: daoData } = useDaoData(daoEnum);
+  const { data: daoData } = useDao(
+    daoEnum.toLowerCase() as DaoPathParamsDaoEnumKey,
+  );
   const daoConfig = daoConfigByDaoId[daoEnum];
 
   const { data: liquidTreasuryData } = useTreasury(
@@ -97,7 +102,7 @@ export const MultilineChartAttackProfitability = ({
   );
 
   const quorumValue = Number(
-    formatUnits(BigInt(daoData?.quorum || "0"), daoConfig.decimals),
+    formatUnits(BigInt(daoData?.quorum?.toString() || "0"), daoConfig.decimals),
   );
 
   const chartConfig = useMemo(
