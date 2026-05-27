@@ -1,19 +1,11 @@
-import { useGetProposalsQuery } from "@anticapture/graphql-client/hooks";
+import type { ProposalsPathParamsDaoEnumKey } from "@anticapture/client";
+import { useProposals as useProposalsSDK } from "@anticapture/client/hooks";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const useProposals = (daoId: DaoIdEnum, fromDate: number) => {
-  return useGetProposalsQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    variables: {
-      fromDate,
-      limit: 1000,
-    },
-    fetchPolicy: "cache-and-network",
-    notifyOnNetworkStatusChange: true,
+  return useProposalsSDK(daoId.toLowerCase() as ProposalsPathParamsDaoEnumKey, {
+    fromDate,
+    limit: 1000,
   });
 };

@@ -1,20 +1,8 @@
-import {
-  type HistoricalTokenDataQuery,
-  useHistoricalTokenDataQuery,
-} from "@anticapture/graphql-client/hooks";
+import type { HistoricalTokenDataPathParamsDaoEnumKey } from "@anticapture/client";
+import { useHistoricalTokenData } from "@anticapture/client/hooks";
 
 import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
-import type { PriceEntry } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-
-type HistoricalTokenDataItem = NonNullable<
-  NonNullable<HistoricalTokenDataQuery["historicalTokenData"]>[number]
->;
-
-const toPriceEntry = (item: HistoricalTokenDataItem): PriceEntry => ({
-  price: item.price,
-  timestamp: item.timestamp,
-});
 
 export const useDaoTokenHistoricalData = ({
   daoId,
@@ -25,27 +13,21 @@ export const useDaoTokenHistoricalData = ({
   limit?: number;
   closedDataOnly?: boolean;
 }) => {
-  const { data, loading, error, refetch } = useHistoricalTokenDataQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    variables: { limit: limit ?? null, skip: null },
-    fetchPolicy: "no-cache",
-  });
+  const { data, isLoading, error } = useHistoricalTokenData(
+    daoId.toLowerCase() as HistoricalTokenDataPathParamsDaoEnumKey,
+    { limit: limit ?? undefined },
+  );
 
-  const items =
-    data?.historicalTokenData
-      ?.filter((item): item is HistoricalTokenDataItem => item !== null)
-      .map(toPriceEntry) ?? [];
+  const items = (data ?? []).map((item) => ({
+    price: item.price,
+    timestamp: item.timestamp,
+  }));
 
   const result = closedDataOnly ? getOnlyClosedData(items) : items;
 
   return {
     data: result,
-    loading,
+    loading: isLoading,
     error,
-    refetch,
   };
 };

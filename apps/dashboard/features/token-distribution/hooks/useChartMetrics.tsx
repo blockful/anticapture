@@ -99,7 +99,7 @@ export const useChartMetrics = ({
   );
 
   // Fetch proposals data (for proposals metric) - only when needed
-  const { data: proposals, loading: proposalsLoading } = useProposals(
+  const { data: proposals, isLoading: proposalsLoading } = useProposals(
     daoId,
     oneYearAgo,
   );
@@ -202,9 +202,9 @@ export const useChartMetrics = ({
 
     if (
       appliedMetricsMemo.includes("PROPOSALS_GOVERNANCE") &&
-      filteredProposals?.proposals
+      filteredProposals?.items
     ) {
-      filteredProposals.proposals.items.forEach((proposal) => {
+      filteredProposals.items.forEach((proposal) => {
         // Only process proposals that have a valid ID
         if (!proposal || !proposal.id) return;
 
