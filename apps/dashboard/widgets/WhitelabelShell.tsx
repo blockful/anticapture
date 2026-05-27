@@ -161,6 +161,8 @@ export const WhitelabelShell = ({
                 rel="noopener noreferrer"
                 data-umami-event="feature_request_click"
                 data-umami-event-source="whitelabel_shell"
+                data-ph-event="feature_request_click"
+                data-ph-source="whitelabel_shell"
               >
                 Request feature
               </a>

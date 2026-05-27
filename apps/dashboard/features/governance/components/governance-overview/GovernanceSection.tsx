@@ -259,6 +259,9 @@ export const GovernanceSection = () => {
           className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
           data-umami-event="proposal_create_click"
           data-umami-event-dao={daoId}
+          data-ph-event="proposal_create_click"
+          data-ph-source="governance_overview"
+          data-ph-dao={daoId}
         >
           <Plus className="size-4" />
           New Proposal
