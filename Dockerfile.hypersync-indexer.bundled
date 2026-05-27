@@ -1,0 +1,43 @@
+FROM node:22-slim AS base
+
+FROM base AS builder
+WORKDIR /app
+COPY . .
+RUN npx turbo@2.3.1 prune @anticapture/hypersync-indexer --docker
+
+FROM base AS installer
+RUN apt-get update && apt-get install -y curl && npm install -g pnpm
+WORKDIR /app
+COPY package.json package.json
+COPY pnpm-lock.yaml pnpm-lock.yaml
+COPY --from=builder /app/out/json/ .
+RUN pnpm install
+COPY --from=builder /app/out/full/ .
+COPY --from=builder /app/turbo.json turbo.json
+WORKDIR /app/apps/hypersync-indexer
+RUN pnpm envio codegen
+
+FROM base AS runner
+ENV NODE_ENV=production
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl postgresql postgresql-contrib \
+    && rm -rf /var/lib/apt/lists/*
+
+# Bundled Postgres connection — Railway env vars must NOT override these
+ENV PGDATA=/var/lib/postgresql/data
+ENV ENVIO_PG_HOST=127.0.0.1
+ENV ENVIO_PG_PORT=5432
+ENV ENVIO_PG_USER=postgres
+ENV ENVIO_PG_PASSWORD=postgres
+ENV ENVIO_PG_DATABASE=envio
+ENV ENVIO_PG_SSL_MODE=disable
+
+WORKDIR /app
+COPY --from=installer /app .
+
+COPY apps/hypersync-indexer/scripts/bundled-entrypoint.sh /usr/local/bin/bundled-entrypoint.sh
+RUN chmod +x /usr/local/bin/bundled-entrypoint.sh
+
+WORKDIR /app/apps/hypersync-indexer
+
+ENTRYPOINT ["/usr/local/bin/bundled-entrypoint.sh"]
