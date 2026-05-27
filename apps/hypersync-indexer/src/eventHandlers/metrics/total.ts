@@ -1,17 +1,17 @@
 import type { Address } from "viem";
 import { getAddress } from "viem";
-import type { handlerContext } from "../../../generated/index.js";
+import type { EvmOnEventContext } from "envio";
 
 import { DaoIdEnum } from "../../lib/enums.ts";
 import { MetricTypesEnum } from "../../lib/constants.ts";
 import {
-  AddressCollection,
+  type AddressCollection,
   storeDailyBucket,
   toAddressSet,
 } from "../shared.ts";
 
 export const updateTotalSupply = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   addressList: AddressCollection,
   metricType: MetricTypesEnum,
   from: Address,

@@ -1,34 +1,26 @@
 {
   "compilerOptions": {
-    // Type checking
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    // Interop constraints
-    "verbatimModuleSyntax": false,
-    "esModuleInterop": true,
-    "isolatedModules": true,
-    "allowSyntheticDefaultImports": true,
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    // Language and environment
-    "moduleResolution": "bundler",
+    "noImplicitOverride": true,
+
     "module": "ESNext",
+    "moduleResolution": "bundler",
     "noEmit": true,
-    "lib": ["ES2022"],
-    "target": "ES2022",
-    "skipLibCheck": true,
-    "baseUrl": "."
+
+    "lib": ["es2022"],
+    "types": ["node"]
   },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS",
-      "moduleResolution": "node"
-    }
-  },
-  "include": [
-    "src/eventHandlers/**/*.ts",
-    "src/lib/**/*.ts",
-    "generated/**/*.ts"
-  ],
-  "exclude": ["node_modules", "test"]
+  "include": ["src/**/*.ts", "envio-env.d.ts"],
+  "exclude": ["node_modules"]
 }

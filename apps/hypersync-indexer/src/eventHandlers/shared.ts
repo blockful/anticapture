@@ -1,7 +1,8 @@
 import type { Address } from "viem";
 import { getAddress } from "viem";
-import type { handlerContext } from "../../generated/index.js";
-import type { MetricType_t } from "../../generated/src/db/Enums.gen.ts";
+import type { Enum, EvmOnEventContext } from "envio";
+
+type MetricType_t = Enum<"MetricType">;
 
 import { MetricTypesEnum } from "../lib/constants.ts";
 import { delta, max, min } from "../lib/utils.ts";
@@ -46,7 +47,7 @@ export const toAddressSet = (
 };
 
 export const ensureAccountExists = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   address: Address,
 ): Promise<void> => {
   await context.Account.getOrCreate({ id: getAddress(address) });
@@ -56,7 +57,7 @@ export const ensureAccountExists = async (
  * Helper function to ensure multiple accounts exist
  */
 export const ensureAccountsExist = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   addresses: Address[],
 ): Promise<void> => {
   const normalized = normalizeAddressCollection(addresses);
@@ -67,7 +68,7 @@ export const ensureAccountsExist = async (
 };
 
 export const storeDailyBucket = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   metricType: MetricTypesEnum,
   currentValue: bigint,
   newValue: bigint,
@@ -114,7 +115,7 @@ export const storeDailyBucket = async (
 };
 
 export const handleTransaction = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   transactionHash: string,
   from: Address,
   to: Address,

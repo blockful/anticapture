@@ -1,6 +1,7 @@
-import type { handlerContext } from "../../generated/index.js";
-import type { EventType_t } from "../../generated/src/db/Enums.gen.ts";
+import type { Enum, EvmOnEventContext } from "envio";
 import type { Address, Hex } from "viem";
+
+type EventType_t = Enum<"EventType">;
 import { getAddress } from "viem";
 
 import { ProposalStatus } from "../lib/constants.ts";
@@ -8,7 +9,7 @@ import { ProposalStatus } from "../lib/constants.ts";
 import { ensureAccountExists } from "./shared.ts";
 
 export const voteCast = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   daoId: string,
   args: {
     proposalId: string;
@@ -116,7 +117,7 @@ function parseProposalTitle(description: string): string {
 }
 
 export const proposalCreated = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   daoId: string,
   blockTime: number,
   args: {
@@ -211,7 +212,7 @@ export const proposalCreated = async (
 };
 
 export const updateProposalStatus = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   proposalId: string,
   status: string,
 ) => {
@@ -222,7 +223,7 @@ export const updateProposalStatus = async (
 };
 
 export const proposalExtended = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   proposalId: string,
   blockTime: number,
   extendedDeadline: bigint,

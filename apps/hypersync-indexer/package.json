@@ -2,6 +2,7 @@
   "name": "@anticapture/hypersync-indexer",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "envio dev",
     "start": "envio start",
@@ -9,16 +10,15 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf node_modules generated *.tsbuildinfo",
-    "postinstall": "test -f generated/package.json && pnpm -C generated install --ignore-workspace --silent || true"
+    "clean": "rm -rf node_modules .envio *.tsbuildinfo"
   },
   "dependencies": {
+    "envio": "^3.0.2",
     "viem": "^2.37.11"
   },
   "devDependencies": {
-    "@types/node": "^20.16.5",
+    "@types/node": "^22.10.0",
     "dotenv": "^16.5.0",
-    "envio": "^2.32.12",
     "eslint": "^9",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
@@ -26,6 +26,6 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=18.14"
+    "node": ">=22.0.0"
   }
 }

@@ -33,6 +33,8 @@ export default [
       "**/storybook-static/**",
       "**/.storybook/**",
       "apps/hypersync-indexer/generated/**",
+      "apps/hypersync-indexer/.envio/**",
+      "apps/hypersync-indexer/envio-env.d.ts",
     ],
   },
 

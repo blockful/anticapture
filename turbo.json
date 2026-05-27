@@ -131,6 +131,10 @@
     "codegen": {
       "outputs": ["generated/**"]
     },
+    "@anticapture/hypersync-indexer#codegen": {
+      "inputs": ["config.yaml", "schema.graphql", "abis/**"],
+      "outputs": [".envio/**"]
+    },
     "db:generate": {
       "inputs": ["src/**/*.ts"],
       "outputs": ["drizzle/**"]

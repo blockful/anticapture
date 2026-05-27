@@ -1,6 +1,7 @@
-import type { handlerContext } from "../../generated/index.js";
-import type { EventType_t } from "../../generated/src/db/Enums.gen.ts";
+import type { Enum, EvmOnEventContext } from "envio";
 import type { Address, Hex } from "viem";
+
+type EventType_t = Enum<"EventType">;
 import { getAddress, zeroAddress } from "viem";
 
 import {
@@ -25,7 +26,7 @@ type DelegationAddressSets = {
 };
 
 export const delegateChanged = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   daoId: DaoIdEnum,
   args: {
     delegator: Address;
@@ -151,7 +152,7 @@ export const delegateChanged = async (
 };
 
 export const delegatedVotesChanged = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   daoId: DaoIdEnum,
   args: {
     delegate: Address;

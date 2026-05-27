@@ -1,5 +1,5 @@
-import { ENSToken } from "../../generated/index.js";
-import type { handlerContext } from "../../generated/index.js";
+import { indexer } from "envio";
+import type { EvmOnEventContext } from "envio";
 import type { Address, Hex } from "viem";
 import { getAddress } from "viem";
 
@@ -52,7 +52,7 @@ const delegationAddressSets = {
 };
 
 // Lazy token initialization — replaces Ponder's setup event
-const ensureTokenExists = async (context: handlerContext) => {
+const ensureTokenExists = async (context: EvmOnEventContext) => {
   await context.Token.getOrCreate({
     id: TOKEN_ADDRESS,
     name: DAO_ID,
@@ -68,192 +68,201 @@ const ensureTokenExists = async (context: handlerContext) => {
   });
 };
 
-ENSToken.Transfer.handler(async ({ event, context }) => {
-  const from = event.params.from as Address;
-  const to = event.params.to as Address;
-  const { value } = event.params;
-  const timestamp = BigInt(event.block.timestamp);
+indexer.onEvent(
+  { contract: "ENSToken", event: "Transfer" },
+  async ({ event, context }) => {
+    const from = event.params.from as Address;
+    const to = event.params.to as Address;
+    const { value } = event.params;
+    const timestamp = BigInt(event.block.timestamp);
 
-  await ensureTokenExists(context);
+    await ensureTokenExists(context);
 
-  await tokenTransfer(
-    context,
-    DAO_ID,
-    {
+    await tokenTransfer(
+      context,
+      DAO_ID,
+      {
+        from,
+        to,
+        value,
+        token: TOKEN_ADDRESS,
+        transactionHash: event.transaction.hash as Hex,
+        timestamp,
+        logIndex: event.logIndex,
+      },
+      {
+        cex: cexAddressSet,
+        dex: dexAddressSet,
+        lending: lendingAddressSet,
+        burning: burningAddressSet,
+      },
+    );
+
+    await updateSupplyMetric(
+      context,
+      "lendingSupply",
+      lendingAddressSet,
+      MetricTypesEnum.LENDING_SUPPLY,
       from,
       to,
       value,
-      token: TOKEN_ADDRESS,
-      transactionHash: event.transaction.hash as Hex,
+      DAO_ID,
+      TOKEN_ADDRESS,
       timestamp,
-      logIndex: event.logIndex,
-    },
-    {
-      cex: cexAddressSet,
-      dex: dexAddressSet,
-      lending: lendingAddressSet,
-      burning: burningAddressSet,
-    },
-  );
+    );
+    await updateSupplyMetric(
+      context,
+      "cexSupply",
+      cexAddressSet,
+      MetricTypesEnum.CEX_SUPPLY,
+      from,
+      to,
+      value,
+      DAO_ID,
+      TOKEN_ADDRESS,
+      timestamp,
+    );
+    await updateSupplyMetric(
+      context,
+      "dexSupply",
+      dexAddressSet,
+      MetricTypesEnum.DEX_SUPPLY,
+      from,
+      to,
+      value,
+      DAO_ID,
+      TOKEN_ADDRESS,
+      timestamp,
+    );
+    await updateSupplyMetric(
+      context,
+      "treasury",
+      treasuryAddressSet,
+      MetricTypesEnum.TREASURY,
+      from,
+      to,
+      value,
+      DAO_ID,
+      TOKEN_ADDRESS,
+      timestamp,
+    );
+    await updateSupplyMetric(
+      context,
+      "nonCirculatingSupply",
+      nonCirculatingAddressSet,
+      MetricTypesEnum.NON_CIRCULATING_SUPPLY,
+      from,
+      to,
+      value,
+      DAO_ID,
+      TOKEN_ADDRESS,
+      timestamp,
+    );
+    await updateTotalSupply(
+      context,
+      burningAddressSet,
+      MetricTypesEnum.TOTAL_SUPPLY,
+      from,
+      to,
+      value,
+      DAO_ID,
+      TOKEN_ADDRESS,
+      timestamp,
+    );
+    await updateCirculatingSupply(context, DAO_ID, TOKEN_ADDRESS, timestamp);
 
-  await updateSupplyMetric(
-    context,
-    "lendingSupply",
-    lendingAddressSet,
-    MetricTypesEnum.LENDING_SUPPLY,
-    from,
-    to,
-    value,
-    DAO_ID,
-    TOKEN_ADDRESS,
-    timestamp,
-  );
-  await updateSupplyMetric(
-    context,
-    "cexSupply",
-    cexAddressSet,
-    MetricTypesEnum.CEX_SUPPLY,
-    from,
-    to,
-    value,
-    DAO_ID,
-    TOKEN_ADDRESS,
-    timestamp,
-  );
-  await updateSupplyMetric(
-    context,
-    "dexSupply",
-    dexAddressSet,
-    MetricTypesEnum.DEX_SUPPLY,
-    from,
-    to,
-    value,
-    DAO_ID,
-    TOKEN_ADDRESS,
-    timestamp,
-  );
-  await updateSupplyMetric(
-    context,
-    "treasury",
-    treasuryAddressSet,
-    MetricTypesEnum.TREASURY,
-    from,
-    to,
-    value,
-    DAO_ID,
-    TOKEN_ADDRESS,
-    timestamp,
-  );
-  await updateSupplyMetric(
-    context,
-    "nonCirculatingSupply",
-    nonCirculatingAddressSet,
-    MetricTypesEnum.NON_CIRCULATING_SUPPLY,
-    from,
-    to,
-    value,
-    DAO_ID,
-    TOKEN_ADDRESS,
-    timestamp,
-  );
-  await updateTotalSupply(
-    context,
-    burningAddressSet,
-    MetricTypesEnum.TOTAL_SUPPLY,
-    from,
-    to,
-    value,
-    DAO_ID,
-    TOKEN_ADDRESS,
-    timestamp,
-  );
-  await updateCirculatingSupply(context, DAO_ID, TOKEN_ADDRESS, timestamp);
+    if (!event.transaction.to) return;
 
-  if (!event.transaction.to) return;
+    await handleTransaction(
+      context,
+      event.transaction.hash as Hex,
+      from,
+      event.transaction.to as Address,
+      timestamp,
+      [from, to],
+      {
+        cex: cexAddressSet,
+        dex: dexAddressSet,
+        lending: lendingAddressSet,
+        burning: burningAddressSet,
+      },
+    );
+  },
+);
 
-  await handleTransaction(
-    context,
-    event.transaction.hash as Hex,
-    from,
-    event.transaction.to as Address,
-    timestamp,
-    [from, to],
-    {
-      cex: cexAddressSet,
-      dex: dexAddressSet,
-      lending: lendingAddressSet,
-      burning: burningAddressSet,
-    },
-  );
-});
+indexer.onEvent(
+  { contract: "ENSToken", event: "DelegateChanged" },
+  async ({ event, context }) => {
+    const delegator = event.params.delegator as Address;
+    const fromDelegate = event.params.fromDelegate as Address;
+    const toDelegate = event.params.toDelegate as Address;
+    const timestamp = BigInt(event.block.timestamp);
 
-ENSToken.DelegateChanged.handler(async ({ event, context }) => {
-  const delegator = event.params.delegator as Address;
-  const fromDelegate = event.params.fromDelegate as Address;
-  const toDelegate = event.params.toDelegate as Address;
-  const timestamp = BigInt(event.block.timestamp);
+    await ensureTokenExists(context);
 
-  await ensureTokenExists(context);
+    await delegateChanged(
+      context,
+      DAO_ID,
+      {
+        delegator,
+        delegate: toDelegate,
+        tokenId: TOKEN_ADDRESS,
+        previousDelegate: fromDelegate,
+        txHash: event.transaction.hash as Hex,
+        timestamp,
+        logIndex: event.logIndex,
+      },
+      delegationAddressSets,
+    );
 
-  await delegateChanged(
-    context,
-    DAO_ID,
-    {
+    if (!event.transaction.to) return;
+
+    await handleTransaction(
+      context,
+      event.transaction.hash as Hex,
       delegator,
-      delegate: toDelegate,
-      tokenId: TOKEN_ADDRESS,
-      previousDelegate: fromDelegate,
+      event.transaction.to as Address,
+      timestamp,
+      [delegator, toDelegate],
+    );
+  },
+);
+
+indexer.onEvent(
+  { contract: "ENSToken", event: "DelegateVotesChanged" },
+  async ({ event, context }) => {
+    const delegate = event.params.delegate as Address;
+    const { previousBalance, newBalance } = event.params;
+    const timestamp = BigInt(event.block.timestamp);
+
+    await ensureTokenExists(context);
+
+    await delegatedVotesChanged(context, DAO_ID, {
+      delegate,
       txHash: event.transaction.hash as Hex,
+      newBalance,
+      oldBalance: previousBalance,
       timestamp,
       logIndex: event.logIndex,
-    },
-    delegationAddressSets,
-  );
+    });
 
-  if (!event.transaction.to) return;
+    await updateDelegatedSupply(
+      context,
+      DAO_ID,
+      TOKEN_ADDRESS,
+      newBalance - previousBalance,
+      timestamp,
+    );
 
-  await handleTransaction(
-    context,
-    event.transaction.hash as Hex,
-    delegator,
-    event.transaction.to as Address,
-    timestamp,
-    [delegator, toDelegate],
-  );
-});
+    if (!event.transaction.to) return;
 
-ENSToken.DelegateVotesChanged.handler(async ({ event, context }) => {
-  const delegate = event.params.delegate as Address;
-  const { previousBalance, newBalance } = event.params;
-  const timestamp = BigInt(event.block.timestamp);
-
-  await ensureTokenExists(context);
-
-  await delegatedVotesChanged(context, DAO_ID, {
-    delegate,
-    txHash: event.transaction.hash as Hex,
-    newBalance,
-    oldBalance: previousBalance,
-    timestamp,
-    logIndex: event.logIndex,
-  });
-
-  await updateDelegatedSupply(
-    context,
-    DAO_ID,
-    TOKEN_ADDRESS,
-    newBalance - previousBalance,
-    timestamp,
-  );
-
-  if (!event.transaction.to) return;
-
-  await handleTransaction(
-    context,
-    event.transaction.hash as Hex,
-    delegate,
-    event.transaction.to as Address,
-    timestamp,
-    [delegate],
-  );
-});
+    await handleTransaction(
+      context,
+      event.transaction.hash as Hex,
+      delegate,
+      event.transaction.to as Address,
+      timestamp,
+      [delegate],
+    );
+  },
+);

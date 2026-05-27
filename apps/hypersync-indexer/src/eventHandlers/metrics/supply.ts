@@ -1,16 +1,16 @@
 import type { Address } from "viem";
 import { getAddress } from "viem";
-import type { handlerContext } from "../../../generated/index.js";
+import type { EvmOnEventContext } from "envio";
 
 import {
-  AddressCollection,
+  type AddressCollection,
   storeDailyBucket,
   toAddressSet,
 } from "../shared.ts";
 import { MetricTypesEnum } from "../../lib/constants.ts";
 
 export const updateSupplyMetric = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   supplyField:
     | "lendingSupply"
     | "cexSupply"

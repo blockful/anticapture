@@ -24,7 +24,7 @@ contracts:
       - event: "ProposalExecuted(uint256 proposalId)"
       - event: "ProposalQueued(uint256 proposalId, uint256 eta)"
 
-networks:
+chains:
   - id: 1
     hypersync_config:
       url: https://eth.hypersync.xyz

@@ -1,18 +1,19 @@
-import type { handlerContext } from "../../generated/index.js";
-import type { EventType_t } from "../../generated/src/db/Enums.gen.ts";
+import type { Enum, EvmOnEventContext } from "envio";
 import type { Address, Hex } from "viem";
+
+type EventType_t = Enum<"EventType">;
 import { getAddress, zeroAddress } from "viem";
 
 import { DaoIdEnum } from "../lib/enums.ts";
 
 import {
-  AddressCollection,
+  type AddressCollection,
   ensureAccountsExist,
   toAddressSet,
 } from "./shared.ts";
 
 export const tokenTransfer = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   daoId: DaoIdEnum,
   args: {
     from: Address;

@@ -1,13 +1,13 @@
 import type { Address } from "viem";
 import { getAddress } from "viem";
-import type { handlerContext } from "../../../generated/index.js";
+import type { EvmOnEventContext } from "envio";
 
 import { DaoIdEnum } from "../../lib/enums.ts";
 import { MetricTypesEnum } from "../../lib/constants.ts";
 import { storeDailyBucket } from "../shared.ts";
 
 export const updateDelegatedSupply = async (
-  context: handlerContext,
+  context: EvmOnEventContext,
   daoId: DaoIdEnum,
   tokenId: Address,
   amount: bigint,
