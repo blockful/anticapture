@@ -115,7 +115,7 @@ export const ProposalInfoSection = ({
 
           <div className="scrollbar-custom flex max-h-[240px] flex-col gap-3 overflow-y-auto overflow-x-hidden lg:w-full">
             {choiceItems.map((item) => (
-              <div key={item.label} className="flex w-full flex-col gap-1.5">
+              <div key={item.label} className="flex w-full flex-col">
                 <div className="flex items-start gap-2 text-left">
                   <div className="flex h-5 shrink-0 items-center">
                     <ChoiceIcon label={item.label} color={item.color} />
