@@ -15,7 +15,7 @@ export const useDaoTokenHistoricalData = ({
 }) => {
   const dao = daoId.toLowerCase() as HistoricalTokenDataPathParamsDaoEnumKey;
 
-  const { data, isLoading, error } = useHistoricalTokenData(dao, {
+  const { data, isLoading, error, refetch } = useHistoricalTokenData(dao, {
     limit,
   });
 
@@ -26,5 +26,6 @@ export const useDaoTokenHistoricalData = ({
     data: result,
     loading: isLoading,
     error,
+    refetch,
   };
 };
