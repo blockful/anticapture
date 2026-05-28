@@ -122,8 +122,8 @@ export const useProposals = (
         },
         quorum: quorum.toFixed(2),
         timeText: getTimeText(proposal.startTimestamp, proposal.endTimestamp),
-        values: proposal.values.map((value) => value.toString()),
-        targets: proposal.targets,
+        values: proposal.values?.map((value) => value.toString()) ?? [],
+        targets: proposal.targets ?? [],
       } satisfies GovernanceProposal;
     });
   }, [data, decimals]);

@@ -11,6 +11,7 @@ import type {
   DraftProposal,
   GetDraftProposalsPathParamsDaoEnumKey,
 } from "@anticapture/client";
+import { useAccount } from "wagmi";
 
 import type {
   ProposalAction,
@@ -48,10 +49,8 @@ const toDraft = (d: DraftProposal): ProposalDraft => ({
   updatedAt: Number(d.updatedAt),
 });
 
-export const useDrafts = (
-  daoId: string,
-  address: string | undefined,
-): UseDraftsReturn => {
+export const useDrafts = (daoId: string): UseDraftsReturn => {
+  const { address } = useAccount();
   const [drafts, setDrafts] = useState<ProposalDraft[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);

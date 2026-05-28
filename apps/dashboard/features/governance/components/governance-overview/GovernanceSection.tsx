@@ -86,8 +86,8 @@ const toGovernanceProposal = (
       proposal.startTimestamp.toString(),
       proposal.endTimestamp.toString(),
     ),
-    values: proposal.values.map((value) => value.toString()),
-    targets: proposal.targets,
+    values: proposal.values?.map((value) => value.toString()) ?? [],
+    targets: proposal.targets ?? [],
   };
 };
 
@@ -101,7 +101,7 @@ export const GovernanceSection = () => {
   const canCreateProposal = canCreateProposalForDao(daoIdEnum);
   const { decimals } = daoConfig[daoIdEnum];
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
 
   const [activeTab, setActiveTab] = useQueryState(
@@ -120,7 +120,7 @@ export const GovernanceSection = () => {
     isLoading: isDraftsLoading,
     error: draftsError,
     retry: retryDrafts,
-  } = useDrafts(daoId, address);
+  } = useDrafts(daoId);
   const [search] = useQueryState("search", parseAsString.withDefault(""));
   const trimmedSearch = search.trim();
   const isSearchActive = trimmedSearch.length > 0;

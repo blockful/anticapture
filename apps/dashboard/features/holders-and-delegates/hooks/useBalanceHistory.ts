@@ -1,19 +1,24 @@
 "use client";
 
 import type {
-  OrderDirection,
-  QueryInput_Transfers_OrderBy,
-} from "@anticapture/graphql-client";
-import type {
-  BalanceHistoryQueryVariables,
-  BalanceHistoryQuery,
-} from "@anticapture/graphql-client/hooks";
-import { useBalanceHistoryQuery } from "@anticapture/graphql-client/hooks";
-import { useMemo, useState, useEffect, useCallback } from "react";
+  HistoricalBalancesPathParamsDaoEnumKey,
+  HistoricalBalancesQueryParamsOrderByEnumKey,
+  HistoricalBalancesQueryResponse,
+} from "@anticapture/client";
+import { useHistoricalBalancesInfinite } from "@anticapture/client/hooks";
+import { useMemo } from "react";
 import { formatUnits } from "viem";
 
 import type { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
+
+const getNextPageParam = (
+  lastPage: HistoricalBalancesQueryResponse,
+  allPages: HistoricalBalancesQueryResponse[],
+): number | undefined => {
+  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
+  return loaded >= lastPage.totalCount ? undefined : loaded;
+};
 
 export function useBalanceHistory({
   accountId,
@@ -32,156 +37,86 @@ export function useBalanceHistory({
   accountId: string;
   daoId: DaoIdEnum;
   decimals: number;
-  customFromFilter: string | null;
-  customToFilter: string | null;
+  customFromFilter?: string | null;
+  customToFilter?: string | null;
   orderBy?: "timestamp" | "amount";
   orderDirection?: "asc" | "desc";
   transactionType?: "all" | "buy" | "sell";
   filterVariables?: AmountFilterVariables;
-  itemsPerPage?: number;
   fromTimestamp?: number;
   toTimestamp?: number;
   limit?: number;
 }) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
+  const restOrderBy: HistoricalBalancesQueryParamsOrderByEnumKey =
+    orderBy === "amount" ? "delta" : "timestamp";
 
-  // Reset page to 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    transactionType,
-    orderBy,
-    orderDirection,
-    customFromFilter,
-    customToFilter,
-    filterVariables,
-    fromTimestamp,
-    toTimestamp,
-  ]);
+  const fromFilter =
+    transactionType === "sell" ? accountId : (customFromFilter ?? undefined);
+  const toFilter =
+    transactionType === "buy" ? accountId : (customToFilter ?? undefined);
 
-  const variables = useMemo(() => {
-    const where: BalanceHistoryQueryVariables = {
-      address: accountId,
-      orderBy: orderBy as QueryInput_Transfers_OrderBy,
-      orderDirection: orderDirection as OrderDirection,
-      fromValue: filterVariables?.fromValue ?? null,
-      toValue: filterVariables?.toValue ?? null,
-      from: customFromFilter,
-      to: customToFilter,
-      skip: 0,
-      fromDate: fromTimestamp ?? null,
-      toDate: toTimestamp ?? null,
+  const params = useMemo(
+    () => ({
+      orderBy: restOrderBy,
+      orderDirection,
+      ...(filterVariables?.fromValue
+        ? { fromValue: filterVariables.fromValue }
+        : {}),
+      ...(filterVariables?.toValue ? { toValue: filterVariables.toValue } : {}),
+      ...(fromTimestamp ? { fromDate: fromTimestamp } : {}),
+      ...(toTimestamp ? { toDate: toTimestamp } : {}),
+      ...(fromFilter ? { from: fromFilter } : {}),
+      ...(toFilter ? { to: toFilter } : {}),
       limit,
-    };
+    }),
+    [
+      restOrderBy,
+      orderDirection,
+      filterVariables,
+      fromTimestamp,
+      toTimestamp,
+      fromFilter,
+      toFilter,
+      limit,
+    ],
+  );
 
-    switch (transactionType) {
-      case "buy":
-        where.to = accountId;
-        break;
-
-      case "sell":
-        where.from = accountId;
-        break;
-    }
-
-    return where;
-  }, [
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useHistoricalBalancesInfinite(
+    daoId.toLowerCase() as HistoricalBalancesPathParamsDaoEnumKey,
     accountId,
-    transactionType,
-    customFromFilter,
-    customToFilter,
-    filterVariables,
-    orderBy,
-    orderDirection,
-    fromTimestamp,
-    toTimestamp,
-    limit,
-  ]);
+    params,
+    { query: { getNextPageParam } },
+  );
 
-  const { data, error, loading, fetchMore } = useBalanceHistoryQuery({
-    variables,
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
-
-  const transformedTransfers = useMemo(() => {
-    if (!data?.transfers?.items) return [];
-
-    return data.transfers.items
-      .filter((t) => !!t)
-      .map((transfer) => ({
-        timestamp: transfer.timestamp.toString(),
-        amount: Number(formatUnits(BigInt(transfer.amount), decimals)),
-        fromAccountId: transfer.fromAccountId,
-        toAccountId: transfer.toAccountId,
-        transactionHash: transfer.transactionHash,
-        direction: (transfer.fromAccountId === accountId ? "out" : "in") as
+  const transformedData = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages
+      .flatMap((p) => p.items)
+      .map((item) => ({
+        timestamp: item.timestamp.toString(),
+        amount: Number(formatUnits(BigInt(item.transfer.value), decimals)),
+        fromAccountId: item.transfer.from,
+        toAccountId: item.transfer.to,
+        transactionHash: item.transactionHash,
+        direction: (item.transfer.from === accountId ? "out" : "in") as
           | "in"
           | "out",
       }));
   }, [data, accountId, decimals]);
 
-  const hasNextPage = useMemo(() => {
-    return currentPage * limit < (data?.transfers?.totalCount || 0);
-  }, [currentPage, limit, data?.transfers?.totalCount]);
-
-  const fetchNextPage = useCallback(async () => {
-    if (!hasNextPage || isPaginationLoading) return;
-
-    setIsPaginationLoading(true);
-
-    const nextPage = currentPage + 1;
-
-    try {
-      await fetchMore({
-        variables: {
-          ...variables,
-          skip: (nextPage - 1) * limit,
-        },
-        updateQuery: (
-          previousResult: BalanceHistoryQuery,
-          { fetchMoreResult }: { fetchMoreResult: BalanceHistoryQuery },
-        ) => {
-          if (!fetchMoreResult) return previousResult;
-
-          return {
-            transfers: {
-              ...fetchMoreResult.transfers,
-              items: [
-                ...(previousResult.transfers?.items ?? []),
-                ...(fetchMoreResult.transfers?.items ?? []),
-              ],
-              totalCount: fetchMoreResult?.transfers?.totalCount ?? 0,
-            },
-          };
-        },
-      });
-
-      setCurrentPage(nextPage);
-    } catch (err) {
-      console.error("Error fetching next page:", err);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    currentPage,
-    limit,
-    hasNextPage,
-    isPaginationLoading,
-    fetchMore,
-    variables,
-  ]);
-
   return {
-    transfers: transformedTransfers,
-    loading,
-    error,
+    data: transformedData,
+    loading: isLoading,
+    error: error ?? null,
     fetchNextPage,
-    hasNextPage,
-    hasPreviousPage: currentPage > 1,
+    hasNextPage: hasNextPage ?? false,
+    fetchingMore: isFetchingNextPage,
   };
 }

@@ -6,13 +6,32 @@ import { FeedEventType, FeedRelevance } from "@/lib/constants";
 import {
   FeedEventTypeSchema,
   FeedRelevanceSchema,
-  OrderDirectionSchema,
+  normalizeQueryArray,
+  defaultDescOrderDirection,
+  earliestLatestDateRangeQueryParams,
+  logIndexField,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
-  unixTimestampQueryParam,
+  txHashField,
 } from "../shared";
 
 export type DBFeedEvent = typeof feedEvent.$inferSelect;
+
+const FeedEventTypeValues = Object.values(FeedEventType) as [
+  FeedEventType,
+  ...FeedEventType[],
+];
+
+const FeedEventTypeListSchema = z
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => {
+    const types = normalizeQueryArray(value);
+    return types
+      ? z
+          .array(z.enum(FeedEventTypeValues))
+          .parse(types.map((type) => String(type).toUpperCase()))
+      : undefined;
+  });
 
 export const FeedRequestSchema = z
   .object({
@@ -30,28 +49,145 @@ export const FeedRequestSchema = z
         description: "Field used to sort feed events.",
         example: "timestamp",
       }),
-    orderDirection: OrderDirectionSchema.optional().default("desc"),
+    orderDirection: defaultDescOrderDirection(),
     relevance: z.enum(FeedRelevance).optional().openapi({
       description: "Filter events by relevance tier.",
     }),
-    type: z.enum(FeedEventType).optional().openapi({
-      description: "Filter events by governance activity type.",
+    type: FeedEventTypeListSchema.optional().openapi("FeedEventTypeList", {
+      type: "array",
+      items: {
+        type: "string",
+        enum: FeedEventTypeValues,
+      },
+      description:
+        "Filter events by governance activity type. Pass repeated query params or a comma-delimited list.",
+      example: ["VOTE"],
     }),
-    fromDate: unixTimestampQueryParam(
-      "Earliest event timestamp, in Unix seconds.",
-    ),
-    toDate: unixTimestampQueryParam("Latest event timestamp, in Unix seconds."),
+    ...earliestLatestDateRangeQueryParams("event"),
   })
   .openapi("FeedRequest", {
     description: "Query params used to page and filter feed events.",
   });
 
+export const FeedVoteMetadataSchema = z
+  .object({
+    kind: z.literal(FeedEventType.VOTE).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
+    voter: z.string().openapi({ description: "Voter address." }),
+    reason: z
+      .string()
+      .nullable()
+      .openapi({ description: "Vote reason, when provided." }),
+    support: z.number().int().openapi({
+      description: "Vote support: 0 = against, 1 = for, 2 = abstain.",
+    }),
+    votingPower: z.string().openapi({
+      description: "Voter voting power, as a decimal string.",
+      format: "bigint",
+    }),
+    proposalId: z.string().openapi({ description: "Proposal voted on." }),
+    title: z
+      .string()
+      .optional()
+      .openapi({ description: "Proposal title, when known." }),
+  })
+  .openapi("FeedVoteMetadata", {
+    description: "Metadata payload for a VOTE feed event.",
+  });
+
+export const FeedProposalMetadataSchema = z
+  .object({
+    kind: z.literal(FeedEventType.PROPOSAL).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
+    id: z.string().openapi({ description: "Proposal ID." }),
+    proposer: z.string().openapi({ description: "Proposer address." }),
+    votingPower: z.string().openapi({
+      description:
+        "Proposer voting power at proposal creation, as a decimal string.",
+      format: "bigint",
+    }),
+    title: z.string().openapi({ description: "Proposal title." }),
+  })
+  .openapi("FeedProposalMetadata", {
+    description: "Metadata payload for a PROPOSAL feed event.",
+  });
+
+export const FeedProposalExtendedMetadataSchema = z
+  .object({
+    kind: z.literal(FeedEventType.PROPOSAL_EXTENDED).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
+    id: z.string().openapi({ description: "Proposal ID." }),
+    title: z.string().openapi({ description: "Proposal title." }),
+    endBlock: z.number().int().openapi({
+      description: "New end block after the extension.",
+    }),
+    endTimestamp: z.string().openapi({
+      description:
+        "New proposal end timestamp in Unix seconds, as a decimal string.",
+      format: "bigint",
+    }),
+    proposer: z.string().openapi({ description: "Proposer address." }),
+  })
+  .openapi("FeedProposalExtendedMetadata", {
+    description: "Metadata payload for a PROPOSAL_EXTENDED feed event.",
+  });
+
+export const FeedTransferMetadataSchema = z
+  .object({
+    kind: z.literal(FeedEventType.TRANSFER).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
+    from: z.string().openapi({ description: "Sender address." }),
+    to: z.string().openapi({ description: "Recipient address." }),
+    amount: z.string().openapi({
+      description: "Transferred amount, as a decimal string.",
+      format: "bigint",
+    }),
+  })
+  .openapi("FeedTransferMetadata", {
+    description: "Metadata payload for a TRANSFER feed event.",
+  });
+
+export const FeedDelegationMetadataSchema = z
+  .object({
+    kind: z.literal(FeedEventType.DELEGATION).openapi({
+      description: "Discriminator identifying the metadata variant.",
+    }),
+    delegator: z.string().openapi({ description: "Delegator address." }),
+    delegate: z.string().openapi({ description: "New delegate address." }),
+    previousDelegate: z
+      .string()
+      .nullable()
+      .openapi({ description: "Previous delegate address, when known." }),
+    amount: z.string().openapi({
+      description: "Delegated voting power, as a decimal string.",
+      format: "bigint",
+    }),
+  })
+  .openapi("FeedDelegationMetadata", {
+    description: "Metadata payload for a DELEGATION feed event.",
+  });
+
+export const FeedMetadataSchema = z
+  .discriminatedUnion("kind", [
+    FeedVoteMetadataSchema,
+    FeedProposalMetadataSchema,
+    FeedProposalExtendedMetadataSchema,
+    FeedTransferMetadataSchema,
+    FeedDelegationMetadataSchema,
+  ])
+  .openapi("FeedMetadata", {
+    description:
+      "Type-specific metadata for the feed event. Narrow by the `kind` discriminator.",
+  });
+
 export const FeedItemSchema = z
   .object({
-    txHash: z.string().openapi({ description: "Transaction hash." }),
-    logIndex: z.number().int().openapi({
-      description: "Log index within the transaction receipt.",
-    }),
+    txHash: txHashField(),
+    logIndex: logIndexField(),
     type: FeedEventTypeSchema,
     value: z.string().optional().openapi({
       description:
@@ -63,9 +199,7 @@ export const FeedItemSchema = z
       example: 1704067200,
     }),
     relevance: FeedRelevanceSchema,
-    metadata: z.record(z.string(), z.any()).nullable().openapi("FeedMetadata", {
-      description: "Type-specific metadata for the feed event.",
-    }),
+    metadata: FeedMetadataSchema.nullable(),
   })
   .openapi("FeedItem", {
     description: "Single event in the governance activity feed.",

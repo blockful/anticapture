@@ -95,11 +95,11 @@ export const BalanceHistoryVariationGraph = ({
     [selectedPeriod],
   );
 
-  const { balanceHistory, loading, error } = useBalanceHistoryGraph(
-    accountId,
-    daoId,
-    fromDate,
-  );
+  const {
+    data: balanceHistory,
+    isLoading: loading,
+    error,
+  } = useBalanceHistoryGraph(accountId, daoId, fromDate);
 
   if (loading) {
     return (

@@ -91,7 +91,7 @@ export const ProposalCreationForm = ({
   const searchParams = useSearchParams();
   const draftId = searchParams?.get("draftId") ?? undefined;
   const { address } = useAccount();
-  const drafts = useDrafts(daoId, address);
+  const drafts = useDrafts(daoId);
 
   const vp = useProposalVotingPower(daoId, address || zeroAddress);
 

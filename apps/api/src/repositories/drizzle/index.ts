@@ -86,7 +86,12 @@ export class DrizzleRepository {
       JOIN old_proposals ON 1=1;
     `;
     const result = await this.db.execute<ProposalsCompareQueryResult>(query);
-    return result.rows[0];
+    const row = result.rows[0];
+    if (!row) return row;
+    return {
+      currentProposalsLaunched: Number(row.currentProposalsLaunched),
+      oldProposalsLaunched: Number(row.oldProposalsLaunched),
+    };
   }
 
   async getVotesCompare(days: DaysEnum) {
@@ -104,7 +109,12 @@ export class DrizzleRepository {
       JOIN old_votes ON 1=1;
     `;
     const result = await this.db.execute<VotesCompareQueryResult>(query);
-    return result.rows[0];
+    const row = result.rows[0];
+    if (!row) return row;
+    return {
+      currentVotes: Number(row.currentVotes),
+      oldVotes: Number(row.oldVotes),
+    };
   }
 
   async getAverageTurnoutCompare(days: DaysEnum) {

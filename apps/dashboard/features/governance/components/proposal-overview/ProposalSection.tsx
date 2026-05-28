@@ -14,6 +14,7 @@ import { useAccount } from "wagmi";
 import { GovernanceActionModal } from "@/features/governance/components/modals/GovernanceActionModal";
 import { OffchainVotingModal } from "@/features/governance/components/modals/OffchainVotingModal";
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
+import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import {
   getVoteText,
   ProposalHeader,
@@ -35,6 +36,7 @@ import {
   normalizeChoices,
   normalizeScores,
 } from "@/features/governance/utils/offchainProposal";
+import { getOffchainVoteFullLabel } from "@/features/governance/utils/offchainVoteLabel";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { ProposalHeaderProvider } from "@/features/governance/context/ProposalHeaderContext";
 import { Button } from "@/shared/components";
@@ -145,12 +147,12 @@ export const ProposalSection = ({
     skip: !isOffchain || !offchainProposalId || !address,
   });
 
-  const apiOffchainVoteChoice =
-    userOffchainVoteData?.votesOffchainByProposalId?.items?.[0]?.choice?.[0] ??
-    null;
+  const apiOffchainVoteChoice = (
+    userOffchainVoteData?.votesOffchainByProposalId?.items?.[0]?.choice ?? []
+  ).filter((c): c is string => c != null);
   const apiOffchainVoteLabel =
-    apiOffchainVoteChoice != null
-      ? (offchainChoices[Number(apiOffchainVoteChoice) - 1] ?? null)
+    apiOffchainVoteChoice.length > 0
+      ? getOffchainVoteFullLabel(apiOffchainVoteChoice, offchainChoices)
       : null;
 
   const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
@@ -177,7 +179,7 @@ export const ProposalSection = ({
         txHash: null,
         proposerAccountId: rawOffchainProposal.author as `0x${string}`,
         title: rawOffchainProposal.title,
-        description: rawOffchainProposal.body,
+        description: rawOffchainProposal.body ?? "",
         quorum: "0",
         timestamp: rawOffchainProposal.created,
         status: getOffchainProposalStatus(
@@ -252,6 +254,9 @@ export const ProposalSection = ({
           isWhitelabel={isWhitelabel}
           offchainHasVoted={isOffchain ? offchainHasVoted : undefined}
           offchainVoteLabel={isOffchain ? offchainVoteLabel : undefined}
+          offchainProposalType={
+            isOffchain ? (rawOffchainProposal?.type ?? null) : undefined
+          }
         />
         <div className="mx-auto w-full">
           <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
@@ -286,6 +291,7 @@ export const ProposalSection = ({
               offchainProposalId={offchainProposalId}
               offchainChoices={offchainChoices}
               offchainScores={isOffchain ? offchainScores : undefined}
+              offchainProposalType={rawOffchainProposal?.type ?? null}
               daoId={daoEnum}
             />
           </div>
@@ -350,6 +356,7 @@ export const ProposalSection = ({
           onExecuteClick={() => setIsExecuteModalOpen(true)}
           offchainHasVoted={offchainHasVoted}
           offchainVoteLabel={offchainVoteLabel}
+          offchainProposalType={rawOffchainProposal?.type ?? null}
         />
       </div>
     </ProposalHeaderProvider>
@@ -367,6 +374,7 @@ const MobileBottomBar = ({
   onExecuteClick,
   offchainHasVoted,
   offchainVoteLabel,
+  offchainProposalType,
 }: {
   isOffchain: boolean;
   address: string | undefined;
@@ -378,6 +386,7 @@ const MobileBottomBar = ({
   onExecuteClick: () => void;
   offchainHasVoted?: boolean;
   offchainVoteLabel?: string | null;
+  offchainProposalType?: string | null;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
 
@@ -388,7 +397,10 @@ const MobileBottomBar = ({
       if (offchainHasVoted) {
         content = (
           <div className="flex w-full flex-col items-center gap-2">
-            <MobileOffchainVotedBadge label={offchainVoteLabel ?? null} />
+            <MobileOffchainVotedBadge
+              label={offchainVoteLabel ?? null}
+              proposalType={offchainProposalType}
+            />
             {isOngoing && (
               <Button className="flex w-full" onClick={onVoteClick}>
                 Change your vote
@@ -460,16 +472,20 @@ const MobileVotedBadge = ({ vote }: { vote: number }) => {
   );
 };
 
-const MobileOffchainVotedBadge = ({ label }: { label: string | null }) => {
+const MobileOffchainVotedBadge = ({
+  label,
+  proposalType,
+}: {
+  label: string | null;
+  proposalType?: string | null;
+}) => {
   return (
     <div className="flex w-full items-center justify-center gap-2">
       <p className="text-secondary text-[12px] font-medium leading-4">
         You voted
       </p>
       {label && (
-        <span className="text-primary bg-surface-default font-inter rounded-full px-[6px] py-[2px] text-[12px] font-medium not-italic leading-[16px]">
-          {label}
-        </span>
+        <OffchainVoteLabelChip label={label} proposalType={proposalType} />
       )}
     </div>
   );

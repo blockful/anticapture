@@ -11,7 +11,9 @@ import { CheckCircle2, CircleMinus, Inbox, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 
+import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
+import { getOffchainVoteFullLabel } from "@/features/governance/utils/offchainVoteLabel";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
@@ -38,20 +40,14 @@ const getLabelDisplay = (label: string) => {
 const getChoiceInfo = (choice: string[], choices: string[]) => {
   if (choice.length === 0) return { label: "—", icon: null as React.ReactNode };
 
+  const fullLabel = getOffchainVoteFullLabel(choice, choices);
+  if (!fullLabel) return { label: "—", icon: null as React.ReactNode };
+
   if (choice.length === 1 && choice[0] != null) {
-    const idx = Number(choice[0]);
-    const label = choices[idx - 1] ?? `Choice ${choice[0]}`;
-    return getLabelDisplay(label);
+    return getLabelDisplay(fullLabel);
   }
 
-  const label = choice
-    .filter((c): c is string => c != null)
-    .map((c) => {
-      const idx = Number(c);
-      return choices[idx - 1] ?? `Choice ${c}`;
-    })
-    .join(", ");
-  return { label, icon: null as React.ReactNode };
+  return { label: fullLabel, icon: null as React.ReactNode };
 };
 
 interface OffchainVotesContentProps {
@@ -59,6 +55,7 @@ interface OffchainVotesContentProps {
   daoId: DaoIdEnum;
   totalVotingPower: number;
   choices: string[];
+  proposalType?: string | null;
 }
 
 export const OffchainVotesContent = ({
@@ -66,6 +63,7 @@ export const OffchainVotesContent = ({
   daoId,
   totalVotingPower,
   choices,
+  proposalType,
 }: OffchainVotesContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
 
@@ -270,11 +268,21 @@ export const OffchainVotesContent = ({
             );
           }
           const choice = row.getValue("choice") as string[];
-          const { icon, label } = getChoiceInfo(choice, choices);
+          const choiceInfo = getChoiceInfo(choice, choices);
+          const { icon, label } = choiceInfo;
+          const isMultiChoice = choice.length > 1;
           return (
-            <div className="flex items-center gap-2 p-2">
+            <div className="flex min-w-0 items-center gap-2 p-2">
               {icon}
-              <span className="text-sm font-medium">{label}</span>
+              {isMultiChoice ? (
+                <OffchainVoteLabelChip
+                  label={label}
+                  proposalType={proposalType}
+                  variant="inline"
+                />
+              ) : (
+                <span className="text-sm font-medium">{label}</span>
+              )}
             </div>
           );
         },
@@ -401,7 +409,14 @@ export const OffchainVotesContent = ({
         },
       },
     ],
-    [totalVotingPower, choices, orderBy, orderDirection, handleSort],
+    [
+      totalVotingPower,
+      choices,
+      proposalType,
+      orderBy,
+      orderDirection,
+      handleSort,
+    ],
   );
 
   if (error) return <div>Error: {error.message}</div>;

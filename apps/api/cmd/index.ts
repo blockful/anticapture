@@ -7,7 +7,6 @@ import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
@@ -64,6 +63,7 @@ import {
   DraftProposalsRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
+  HealthRepositoryImpl,
   HistoricalBalanceRepository,
   NFTPriceRepository,
   NounsVotingPowerRepository,
@@ -88,6 +88,7 @@ import {
   DaoService,
   DelegationPercentageService,
   DraftProposalsService,
+  HealthService,
   HistoricalBalancesService,
   NFTPriceService,
   ProposalsService,
@@ -178,24 +179,17 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pool = new Pool({ connectionString: env.DATABASE_URL });
-
-const pgClient = drizzle(pool, {
+const pgClient = drizzle(env.DATABASE_URL, {
   schema,
   casing: "snake_case",
 });
 
-const pgGeneralClient = drizzle(pool, {
+const pgGeneralClient = drizzle(env.DATABASE_URL, {
   schema: generalSchema,
   casing: "snake_case",
 });
 
-const pgOffchainClient = drizzle(pool, {
-  schema: { ...schema, ...offchainSchema },
-  casing: "snake_case",
-});
-
-health(app, pgClient);
+health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
@@ -396,11 +390,16 @@ if (env.DAO_ID === DaoIdEnum.ENS) {
 }
 
 if (daoClient.supportOffchainData()) {
+  const pgUnifiedClient = drizzle(env.DATABASE_URL, {
+    schema: { ...schema, ...offchainSchema },
+    casing: "snake_case",
+  });
+
   const offchainProposalsRepo = wrapWithTracing(
-    new OffchainProposalRepository(pgOffchainClient),
+    new OffchainProposalRepository(pgUnifiedClient),
   );
   const offchainVotesRepo = wrapWithTracing(
-    new OffchainVoteRepository(pgOffchainClient),
+    new OffchainVoteRepository(pgUnifiedClient),
   );
   offchainProposals(
     app,
@@ -412,7 +411,7 @@ if (daoClient.supportOffchainData()) {
   );
 
   const offchainNonVotersRepo = new OffchainNonVotersRepositoryImpl(
-    pgOffchainClient,
+    pgUnifiedClient,
   );
   offchainNonVoters(app, new OffchainNonVotersService(offchainNonVotersRepo));
 }

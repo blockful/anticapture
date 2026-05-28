@@ -6,6 +6,117 @@
   },
   "components": {
     "schemas": {
+      "DaoHealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok", "degraded", "error"]
+          },
+          "database": {
+            "type": "string",
+            "enum": ["ok", "error"]
+          },
+          "chain": {
+            "type": "object",
+            "properties": {
+              "head": {
+                "type": ["integer", "null"]
+              }
+            },
+            "required": ["head"]
+          },
+          "indexer": {
+            "type": "object",
+            "properties": {
+              "lastEventTimestamp": {
+                "type": ["integer", "null"]
+              },
+              "lagSeconds": {
+                "type": ["integer", "null"]
+              },
+              "fresh": {
+                "type": "boolean"
+              }
+            },
+            "required": ["lastEventTimestamp", "lagSeconds", "fresh"]
+          },
+          "circuit": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "type": "string",
+                "enum": ["CLOSED", "OPEN", "HALF_OPEN"]
+              },
+              "nextRetryIn": {
+                "type": "integer"
+              }
+            },
+            "required": ["state"]
+          }
+        },
+        "required": ["status", "database", "chain", "indexer", "circuit"]
+      },
+      "LivenessResponse": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "type": "string",
+            "enum": ["ok", "error"],
+            "description": "Database connectivity status."
+          }
+        },
+        "required": ["database"]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok", "degraded", "error"],
+            "description": "Overall health: ok when fresh, degraded when indexer is lagging, error when the database is unreachable."
+          },
+          "database": {
+            "type": "string",
+            "enum": ["ok", "error"],
+            "description": "Database connectivity status."
+          },
+          "chain": {
+            "type": "object",
+            "properties": {
+              "head": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Latest block number reported by the RPC, or null if the RPC call failed."
+              }
+            },
+            "required": ["head"],
+            "description": "On-chain state observed by this DAO API."
+          },
+          "indexer": {
+            "type": "object",
+            "properties": {
+              "lastEventTimestamp": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Unix timestamp (seconds) of the most recent indexed event, or null if no events have been recorded."
+              },
+              "lagSeconds": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Seconds between now and lastEventTimestamp, or null if the indexer hasn't produced any events."
+              },
+              "fresh": {
+                "type": "boolean",
+                "description": "True when lagSeconds is within the freshness threshold (300s)."
+              }
+            },
+            "required": ["lastEventTimestamp", "lagSeconds", "fresh"],
+            "description": "Indexer freshness signals derived from app tables."
+          }
+        },
+        "required": ["status", "database", "chain", "indexer"]
+      },
       "DelegationsResponse": {
         "type": "object",
         "properties": {
@@ -80,8 +191,7 @@
         "type": "object",
         "properties": {
           "delegatorAddress": {
-            "type": "string",
-            "format": "ethereum-address"
+            "type": "string"
           },
           "amount": {
             "type": "string",
@@ -328,12 +438,217 @@
         "description": "Filter events by relevance tier."
       },
       "FeedMetadata": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/FeedVoteMetadata"
+          },
+          {
+            "$ref": "#/components/schemas/FeedProposalMetadata"
+          },
+          {
+            "$ref": "#/components/schemas/FeedProposalExtendedMetadata"
+          },
+          {
+            "$ref": "#/components/schemas/FeedTransferMetadata"
+          },
+          {
+            "$ref": "#/components/schemas/FeedDelegationMetadata"
+          },
+          {
+            "nullable": true
+          }
+        ],
+        "description": "Type-specific metadata for the feed event. Narrow by the `kind` discriminator."
+      },
+      "FeedVoteMetadata": {
         "type": "object",
-        "nullable": true,
-        "additionalProperties": {
-          "nullable": true
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["VOTE"],
+            "description": "Discriminator identifying the metadata variant."
+          },
+          "voter": {
+            "type": "string",
+            "description": "Voter address."
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Vote reason, when provided."
+          },
+          "support": {
+            "type": "integer",
+            "description": "Vote support: 0 = against, 1 = for, 2 = abstain."
+          },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Voter voting power, as a decimal string."
+          },
+          "proposalId": {
+            "type": "string",
+            "description": "Proposal voted on."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title, when known."
+          }
         },
-        "description": "Type-specific metadata for the feed event."
+        "required": [
+          "kind",
+          "voter",
+          "reason",
+          "support",
+          "votingPower",
+          "proposalId"
+        ],
+        "description": "Metadata payload for a VOTE feed event."
+      },
+      "FeedProposalMetadata": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["PROPOSAL"],
+            "description": "Discriminator identifying the metadata variant."
+          },
+          "id": {
+            "type": "string",
+            "description": "Proposal ID."
+          },
+          "proposer": {
+            "type": "string",
+            "description": "Proposer address."
+          },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Proposer voting power at proposal creation, as a decimal string."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          }
+        },
+        "required": ["kind", "id", "proposer", "votingPower", "title"],
+        "description": "Metadata payload for a PROPOSAL feed event."
+      },
+      "FeedProposalExtendedMetadata": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["PROPOSAL_EXTENDED"],
+            "description": "Discriminator identifying the metadata variant."
+          },
+          "id": {
+            "type": "string",
+            "description": "Proposal ID."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          },
+          "endBlock": {
+            "type": "integer",
+            "description": "New end block after the extension."
+          },
+          "endTimestamp": {
+            "type": "string",
+            "format": "bigint",
+            "description": "New proposal end timestamp in Unix seconds, as a decimal string."
+          },
+          "proposer": {
+            "type": "string",
+            "description": "Proposer address."
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "title",
+          "endBlock",
+          "endTimestamp",
+          "proposer"
+        ],
+        "description": "Metadata payload for a PROPOSAL_EXTENDED feed event."
+      },
+      "FeedTransferMetadata": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["TRANSFER"],
+            "description": "Discriminator identifying the metadata variant."
+          },
+          "from": {
+            "type": "string",
+            "description": "Sender address."
+          },
+          "to": {
+            "type": "string",
+            "description": "Recipient address."
+          },
+          "amount": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Transferred amount, as a decimal string."
+          }
+        },
+        "required": ["kind", "from", "to", "amount"],
+        "description": "Metadata payload for a TRANSFER feed event."
+      },
+      "FeedDelegationMetadata": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["DELEGATION"],
+            "description": "Discriminator identifying the metadata variant."
+          },
+          "delegator": {
+            "type": "string",
+            "description": "Delegator address."
+          },
+          "delegate": {
+            "type": "string",
+            "description": "New delegate address."
+          },
+          "previousDelegate": {
+            "type": "string",
+            "nullable": true,
+            "description": "Previous delegate address, when known."
+          },
+          "amount": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Delegated voting power, as a decimal string."
+          }
+        },
+        "required": [
+          "kind",
+          "delegator",
+          "delegate",
+          "previousDelegate",
+          "amount"
+        ],
+        "description": "Metadata payload for a DELEGATION feed event."
+      },
+      "FeedEventTypeList": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "VOTE",
+            "PROPOSAL",
+            "DELEGATION",
+            "TRANSFER",
+            "PROPOSAL_EXTENDED"
+          ]
+        },
+        "description": "Filter events by governance activity type. Pass repeated query params or a comma-delimited list.",
+        "example": ["VOTE"]
       },
       "EventRelevanceThresholdResponse": {
         "type": "object",
@@ -353,17 +668,25 @@
         "properties": {
           "previousValue": {
             "type": "string",
-            "format": "bigint"
+            "format": "bigint",
+            "description": "Supply value at the start of the comparison window, encoded as a decimal string (raw token base units)."
           },
           "currentValue": {
             "type": "string",
-            "format": "bigint"
+            "format": "bigint",
+            "description": "Supply value at the end of the comparison window, encoded as a decimal string (raw token base units)."
           },
           "changeRate": {
-            "type": "number"
+            "type": "number",
+            "description": "Fractional ratio between current and previous values (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when previousValue is 0."
+          },
+          "rawDelta": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Signed bigint delta as a decimal string: currentValue - previousValue."
           }
         },
-        "required": ["previousValue", "currentValue", "changeRate"],
+        "required": ["previousValue", "currentValue", "changeRate", "rawDelta"],
         "description": "Supply metric comparison between current and previous periods."
       },
       "ActiveSupplyResponse": {
@@ -394,14 +717,20 @@
           },
           "changeRate": {
             "type": "number",
-            "description": "Relative change between current and previous periods.",
+            "description": "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
             "example": 0.6
+          },
+          "rawDelta": {
+            "type": "integer",
+            "description": "Signed integer delta: currentProposalsLaunched - oldProposalsLaunched.",
+            "example": 3
           }
         },
         "required": [
           "currentProposalsLaunched",
           "oldProposalsLaunched",
-          "changeRate"
+          "changeRate",
+          "rawDelta"
         ],
         "description": "Proposal launch comparison between two adjacent time windows."
       },
@@ -420,11 +749,16 @@
           },
           "changeRate": {
             "type": "number",
-            "description": "Relative change between current and previous periods.",
+            "description": "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
             "example": 0.33
+          },
+          "rawDelta": {
+            "type": "integer",
+            "description": "Signed integer delta: currentVotes - oldVotes.",
+            "example": 32
           }
         },
-        "required": ["currentVotes", "oldVotes", "changeRate"],
+        "required": ["currentVotes", "oldVotes", "changeRate", "rawDelta"],
         "description": "Vote-count comparison between two adjacent time windows."
       },
       "AverageTurnoutComparisonResponse": {
@@ -442,14 +776,21 @@
           },
           "changeRate": {
             "type": "number",
-            "description": "Relative change between current and previous periods.",
-            "example": 0.33
+            "description": "Fractional ratio between current and previous periods (0.0523 = +5.23%, -0.10 = -10%). Reported with 6 decimals; 0 when the previous period is empty.",
+            "example": 0.333333
+          },
+          "rawDelta": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Signed bigint delta as a decimal string: currentAverageTurnout - oldAverageTurnout.",
+            "example": "30000000000000000"
           }
         },
         "required": [
           "currentAverageTurnout",
           "oldAverageTurnout",
-          "changeRate"
+          "changeRate",
+          "rawDelta"
         ],
         "description": "Average turnout comparison between two adjacent time windows."
       },
@@ -526,7 +867,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "proposerAccountId": {
             "type": "string",
@@ -659,7 +1000,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "txHash": {
             "type": "string",
@@ -747,7 +1088,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Encoded calldata payloads executed by the proposal."
+            "description": "Encoded calldata payloads executed by the proposal. Omitted when the request sets `lean=true`."
           },
           "values": {
             "type": "array",
@@ -755,7 +1096,7 @@
               "type": "string",
               "format": "bigint"
             },
-            "description": "ETH values attached to each call, encoded as strings."
+            "description": "ETH values attached to each call, encoded as strings. Omitted when the request sets `lean=true`."
           },
           "targets": {
             "type": "array",
@@ -763,7 +1104,7 @@
               "type": "string",
               "format": "ethereum-address"
             },
-            "description": "Contract targets invoked by the proposal."
+            "description": "Contract targets invoked by the proposal. Omitted when the request sets `lean=true`."
           },
           "proposalType": {
             "type": "integer",
@@ -792,9 +1133,6 @@
           "queuedTxHash",
           "executedTxHash",
           "quorum",
-          "calldatas",
-          "values",
-          "targets",
           "proposalType"
         ]
       },
@@ -845,7 +1183,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "accountId": {
             "type": "string",
@@ -933,14 +1271,10 @@
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of matching day buckets.",
-            "example": 365
-          },
-          "pageInfo": {
-            "$ref": "#/components/schemas/PageInfo"
+            "description": "Total number of matching day buckets across the requested window (ignores skip/limit)."
           }
         },
-        "required": ["items", "totalCount", "pageInfo"]
+        "required": ["items", "totalCount"]
       },
       "DelegationPercentageItem": {
         "type": "object",
@@ -957,30 +1291,6 @@
           }
         },
         "required": ["date", "high"]
-      },
-      "PageInfo": {
-        "type": "object",
-        "properties": {
-          "hasNextPage": {
-            "type": "boolean",
-            "description": "Whether more items are available."
-          },
-          "hasPreviousPage": {
-            "type": "boolean",
-            "description": "Whether earlier items are available."
-          },
-          "endDate": {
-            "type": "string",
-            "nullable": true,
-            "description": "End cursor for the current page."
-          },
-          "startDate": {
-            "type": "string",
-            "nullable": true,
-            "description": "Start cursor for the current page."
-          }
-        },
-        "required": ["hasNextPage", "hasPreviousPage", "endDate", "startDate"]
       },
       "HistoricalVotingPowersResponse": {
         "type": "object",
@@ -1008,7 +1318,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "accountId": {
             "type": "string",
@@ -1154,7 +1464,7 @@
           },
           "percentageChange": {
             "type": "string",
-            "description": "Relative voting power change encoded as a decimal string."
+            "description": "Relative voting power change as a decimal string (e.g. \"5.23\"). Set to the sentinel \"NO BASELINE\" when the previous voting power is zero."
           }
         },
         "required": [
@@ -1295,7 +1605,7 @@
           },
           "percentageChange": {
             "type": "string",
-            "description": "Relative balance change encoded as a decimal string."
+            "description": "Relative balance change as a decimal string (e.g. \"5.23\"). Set to the sentinel \"NO BASELINE\" when the previous balance is zero."
           }
         },
         "required": [
@@ -1451,7 +1761,7 @@
           },
           "daoId": {
             "type": "string",
-            "description": "DAO identifier."
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
           },
           "tokenId": {
             "type": "string",
@@ -1497,7 +1807,7 @@
           },
           "isTotal": {
             "type": "boolean",
-            "description": "Whether the transfer counts toward total tracked supply."
+            "description": "Whether the transfer affects total-supply accounting."
           }
         },
         "required": [
@@ -1619,7 +1929,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "DAO identifier (uppercase, e.g. \"ENS\").",
+            "example": "ENS"
           },
           "chainId": {
             "type": "integer"
@@ -1644,10 +1956,10 @@
             "type": "string",
             "format": "bigint"
           },
-          "alreadySupportCalldataReview": {
+          "supportsCalldataReview": {
             "type": "boolean"
           },
-          "supportOffchainData": {
+          "supportsOffchainData": {
             "type": "boolean"
           }
         },
@@ -1659,8 +1971,8 @@
           "votingDelay",
           "votingPeriod",
           "timelockDelay",
-          "alreadySupportCalldataReview",
-          "supportOffchainData"
+          "supportsCalldataReview",
+          "supportsOffchainData"
         ],
         "description": "Current governance parameters and feature flags for the active DAO."
       },
@@ -1702,239 +2014,29 @@
         },
         "required": ["date", "high", "volume"]
       },
-      "OffchainProposalsResponse": {
+      "PageInfo": {
         "type": "object",
         "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainProposal"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainProposal": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Snapshot proposal identifier."
-          },
-          "spaceId": {
-            "type": "string",
-            "description": "Snapshot space identifier."
-          },
-          "author": {
-            "type": "string",
-            "description": "Address or ENS of the author."
-          },
-          "title": {
-            "type": "string",
-            "description": "Proposal title."
-          },
-          "body": {
-            "type": "string",
-            "description": "Proposal body."
-          },
-          "discussion": {
-            "type": "string",
-            "description": "Discussion URL or thread reference."
-          },
-          "type": {
-            "type": "string",
-            "description": "Snapshot proposal type."
-          },
-          "start": {
-            "type": "integer",
-            "description": "Voting start timestamp in Unix seconds."
-          },
-          "end": {
-            "type": "integer",
-            "description": "Voting end timestamp in Unix seconds."
-          },
-          "state": {
-            "type": "string",
-            "description": "Current Snapshot proposal state."
-          },
-          "created": {
-            "type": "integer",
-            "description": "Creation timestamp in Unix seconds."
-          },
-          "updated": {
-            "type": "integer",
-            "description": "Last update timestamp in Unix seconds."
-          },
-          "link": {
-            "type": "string",
-            "description": "Canonical Snapshot proposal URL."
-          },
-          "flagged": {
+          "hasNextPage": {
             "type": "boolean",
-            "description": "Whether the proposal was flagged by Snapshot."
+            "description": "Whether more items are available."
           },
-          "scores": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "Whether earlier items are available."
           },
-          "choices": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "network": {
-            "type": "string"
-          },
-          "snapshot": {
-            "type": "number",
-            "nullable": true
-          },
-          "strategies": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "network": {
-                  "type": "string"
-                },
-                "params": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "nullable": true
-                  }
-                }
-              },
-              "required": ["name", "network", "params"]
-            }
-          }
-        },
-        "required": [
-          "id",
-          "spaceId",
-          "author",
-          "title",
-          "body",
-          "discussion",
-          "type",
-          "start",
-          "end",
-          "state",
-          "created",
-          "updated",
-          "link",
-          "flagged",
-          "scores",
-          "choices",
-          "network",
-          "snapshot",
-          "strategies"
-        ]
-      },
-      "OffchainProposalStatusList": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": ["active", "closed", "pending"]
-        },
-        "description": "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
-        "example": ["active"]
-      },
-      "OffchainVotesResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainVote"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainVote": {
-        "type": "object",
-        "properties": {
-          "voter": {
+          "endDate": {
             "type": "string",
-            "format": "ethereum-address"
+            "nullable": true,
+            "description": "End cursor for the current page."
           },
-          "proposalId": {
-            "type": "string"
-          },
-          "choice": {
-            "$ref": "#/components/schemas/SnapshotVoteChoice"
-          },
-          "vp": {
-            "type": "number",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "created": {
-            "type": "integer"
-          },
-          "proposalTitle": {
+          "startDate": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "Start cursor for the current page."
           }
         },
-        "required": [
-          "voter",
-          "proposalId",
-          "vp",
-          "reason",
-          "created",
-          "proposalTitle"
-        ]
-      },
-      "SnapshotVoteChoice": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "nullable": false
-        }
-      },
-      "OffchainVotersResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainNonVoter"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainNonVoter": {
-        "type": "object",
-        "properties": {
-          "voter": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "votingPower": {
-            "type": "string",
-            "format": "bigint"
-          }
-        },
-        "required": ["voter", "votingPower"]
+        "required": ["hasNextPage", "hasPreviousPage", "endDate", "startDate"]
       },
       "RevenueActionsResponse": {
         "type": "object",
@@ -2255,6 +2357,239 @@
           "3+ renewals"
         ],
         "description": "Tenure bucket label as returned by Dune."
+      },
+      "OffchainProposalsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainProposal"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainProposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Snapshot proposal identifier."
+          },
+          "spaceId": {
+            "type": "string",
+            "description": "Snapshot space identifier."
+          },
+          "author": {
+            "type": "string",
+            "description": "Address or ENS of the author."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          },
+          "body": {
+            "type": "string",
+            "description": "Proposal body. Omitted when the request sets `lean=true`."
+          },
+          "discussion": {
+            "type": "string",
+            "description": "Discussion URL or thread reference."
+          },
+          "type": {
+            "type": "string",
+            "description": "Snapshot proposal type."
+          },
+          "start": {
+            "type": "integer",
+            "description": "Voting start timestamp in Unix seconds."
+          },
+          "end": {
+            "type": "integer",
+            "description": "Voting end timestamp in Unix seconds."
+          },
+          "state": {
+            "type": "string",
+            "description": "Current Snapshot proposal state."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Creation timestamp in Unix seconds."
+          },
+          "updated": {
+            "type": "integer",
+            "description": "Last update timestamp in Unix seconds."
+          },
+          "link": {
+            "type": "string",
+            "description": "Canonical Snapshot proposal URL."
+          },
+          "flagged": {
+            "type": "boolean",
+            "description": "Whether the proposal was flagged by Snapshot."
+          },
+          "scores": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "network": {
+            "type": "string"
+          },
+          "snapshot": {
+            "type": "number",
+            "nullable": true
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "network": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "nullable": true
+                  }
+                }
+              },
+              "required": ["name", "network", "params"]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "spaceId",
+          "author",
+          "title",
+          "discussion",
+          "type",
+          "start",
+          "end",
+          "state",
+          "created",
+          "updated",
+          "link",
+          "flagged",
+          "scores",
+          "choices",
+          "network",
+          "snapshot",
+          "strategies"
+        ]
+      },
+      "OffchainProposalStatusList": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["active", "closed", "pending"]
+        },
+        "description": "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
+        "example": ["active"]
+      },
+      "OffchainVotesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainVote"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainVote": {
+        "type": "object",
+        "properties": {
+          "voter": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "proposalId": {
+            "type": "string"
+          },
+          "choice": {
+            "$ref": "#/components/schemas/SnapshotVoteChoice"
+          },
+          "vp": {
+            "type": "number",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "created": {
+            "type": "integer"
+          },
+          "proposalTitle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "voter",
+          "proposalId",
+          "vp",
+          "reason",
+          "created",
+          "proposalTitle"
+        ]
+      },
+      "SnapshotVoteChoice": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "nullable": false
+        }
+      },
+      "OffchainVotersResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainNonVoter"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainNonVoter": {
+        "type": "object",
+        "properties": {
+          "voter": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint"
+          }
+        },
+        "required": ["voter", "votingPower"]
       },
       "RelayerVoteResponse": {
         "type": "object",
@@ -2583,6 +2918,9 @@
   "paths": {
     "/health": {
       "get": {
+        "operationId": "gatewayHealth",
+        "summary": "Gateway health and per-DAO circuit breaker states",
+        "tags": ["system"],
         "responses": {
           "200": {
             "description": "Gateway health and per-DAO circuit breaker states",
@@ -2620,8 +2958,65 @@
         }
       }
     },
+    "/{dao}/health": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+            },
+            "required": true,
+            "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\").",
+            "name": "dao",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per-DAO health snapshot — database, chain head, indexer freshness, and gateway circuit-breaker state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DaoHealthResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "DAO not configured.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Upstream DAO API unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DaoHealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/daos": {
       "get": {
+        "operationId": "daos",
+        "summary": "List of all configured DAOs",
+        "tags": ["governance"],
         "responses": {
           "200": {
             "description": "List of all configured DAOs",
@@ -2656,10 +3051,10 @@
                           "timelockDelay": {
                             "type": "string"
                           },
-                          "alreadySupportCalldataReview": {
+                          "supportsCalldataReview": {
                             "type": "boolean"
                           },
-                          "supportOffchainData": {
+                          "supportsOffchainData": {
                             "type": "boolean"
                           }
                         },
@@ -2671,8 +3066,8 @@
                           "votingDelay",
                           "votingPeriod",
                           "timelockDelay",
-                          "alreadySupportCalldataReview",
-                          "supportOffchainData"
+                          "supportsCalldataReview",
+                          "supportsOffchainData"
                         ]
                       }
                     },
@@ -2690,6 +3085,9 @@
     },
     "/aggregations/average-delegation-percentage": {
       "get": {
+        "operationId": "averageDelegationPercentage",
+        "summary": "Average delegation percentage across all DAOs",
+        "tags": ["governance"],
         "parameters": [
           {
             "schema": {
@@ -2713,28 +3111,24 @@
           },
           {
             "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "after",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "before",
-            "in": "query"
-          },
-          {
-            "schema": {
               "type": "string",
               "enum": ["asc", "desc"],
               "default": "asc"
             },
             "required": false,
             "name": "orderDirection",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": ["integer", "null"],
+              "minimum": 0,
+              "default": 0,
+              "description": "Number of day buckets to skip before returning results."
+            },
+            "required": false,
+            "description": "Number of day buckets to skip before returning results.",
+            "name": "skip",
             "in": "query"
           },
           {
@@ -2804,84 +3198,6 @@
           }
         }
       }
-    },
-    "/{dao}/health": {
-      "get": {
-        "operationId": "health",
-        "summary": "Check API and database health",
-        "tags": ["system"],
-        "responses": {
-          "200": {
-            "description": "API and database are healthy",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": ["ok"]
-                    },
-                    "database": {
-                      "type": "string",
-                      "enum": ["ok"]
-                    }
-                  },
-                  "required": ["status", "database"]
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Database connectivity check failed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": ["error"]
-                    },
-                    "database": {
-                      "type": "string",
-                      "enum": ["error"]
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["status", "database", "message"]
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "aave",
-              "comp",
-              "ens",
-              "fluid",
-              "gtc",
-              "lil_nouns",
-              "nouns",
-              "obol",
-              "scr",
-              "shu",
-              "uni"
-            ]
-          },
-          "description": "DAO identifier"
-        }
-      ]
     },
     "/{dao}/accounts/{address}/delegations/historical": {
       "get": {
@@ -2991,7 +3307,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3045,7 +3361,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3140,7 +3456,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3202,7 +3518,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3264,7 +3580,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3326,7 +3642,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3393,7 +3709,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3462,7 +3778,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3529,18 +3845,10 @@
           },
           {
             "schema": {
-              "type": "string",
-              "enum": [
-                "VOTE",
-                "PROPOSAL",
-                "DELEGATION",
-                "TRANSFER",
-                "PROPOSAL_EXTENDED"
-              ],
-              "description": "Filter events by governance activity type."
+              "$ref": "#/components/schemas/FeedEventTypeList"
             },
             "required": false,
-            "description": "Filter events by governance activity type.",
+            "description": "Filter events by governance activity type. Pass repeated query params or a comma-delimited list.",
             "name": "type",
             "in": "query"
           },
@@ -3600,7 +3908,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3662,7 +3970,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3714,7 +4022,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3766,7 +4074,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3818,7 +4126,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3870,7 +4178,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3922,7 +4230,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -3974,7 +4282,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4026,7 +4334,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4078,7 +4386,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4130,7 +4438,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4182,7 +4490,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4234,7 +4542,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4357,7 +4665,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4365,7 +4673,7 @@
       "get": {
         "operationId": "proposals",
         "summary": "Get proposals",
-        "description": "Returns a list of proposal",
+        "description": "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and reduce payload size.",
         "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
@@ -4442,6 +4750,26 @@
             "description": "Whether optimistic proposals should be included.",
             "name": "includeOptimisticProposals",
             "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
+              "default": false,
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "example": false
+            },
+            "required": false,
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "name": "lean",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4477,7 +4805,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4485,7 +4813,7 @@
       "get": {
         "operationId": "searchProposals",
         "summary": "Search proposals",
-        "description": "Returns proposals whose title or identifier partially matches the query.",
+        "description": "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets.",
         "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
@@ -4520,6 +4848,26 @@
             "required": false,
             "description": "Maximum number of records to return.",
             "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
+              "default": false,
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "example": false
+            },
+            "required": false,
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "name": "lean",
             "in": "query"
           }
         ],
@@ -4556,7 +4904,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4564,7 +4912,7 @@
       "get": {
         "operationId": "proposal",
         "summary": "Get a proposal by ID",
-        "description": "Returns a single proposal by its ID",
+        "description": "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets.",
         "tags": ["proposals"],
         "parameters": [
           {
@@ -4576,6 +4924,26 @@
             "example": "proposal-1",
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
+              "default": false,
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "example": false
+            },
+            "required": false,
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "name": "lean",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4621,7 +4989,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4725,6 +5093,26 @@
             "description": "Maximum balance delta encoded as a decimal string.",
             "name": "toValue",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter to transfers sent from this address (matches the sender of the transfer that caused the balance change)."
+            },
+            "required": false,
+            "description": "Filter to transfers sent from this address (matches the sender of the transfer that caused the balance change).",
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter to transfers received by this address (matches the recipient of the transfer that caused the balance change)."
+            },
+            "required": false,
+            "description": "Filter to transfers received by this address (matches the recipient of the transfer that caused the balance change).",
+            "name": "to",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4761,7 +5149,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4821,7 +5209,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -4834,22 +5222,22 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Inclusive lower bound cursor in Unix seconds.",
+              "description": "Inclusive lower bound for the day-bucket window, in Unix seconds.",
               "example": 1700000000
             },
             "required": false,
-            "description": "Inclusive lower bound cursor in Unix seconds.",
+            "description": "Inclusive lower bound for the day-bucket window, in Unix seconds.",
             "name": "startDate",
             "in": "query"
           },
           {
             "schema": {
               "type": "integer",
-              "description": "Inclusive upper bound cursor in Unix seconds.",
+              "description": "Inclusive upper bound for the day-bucket window, in Unix seconds.",
               "example": 1700000000
             },
             "required": false,
-            "description": "Inclusive upper bound cursor in Unix seconds.",
+            "description": "Inclusive upper bound for the day-bucket window, in Unix seconds.",
             "name": "endDate",
             "in": "query"
           },
@@ -4865,34 +5253,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of records to return.",
+              "description": "Number of day buckets to skip before returning results.",
+              "example": 0
+            },
+            "required": false,
+            "description": "Number of day buckets to skip before returning results.",
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of day buckets to return.",
               "example": "365"
             },
             "required": false,
-            "description": "Maximum number of records to return.",
+            "description": "Maximum number of day buckets to return.",
             "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Return items after this cursor, exclusive, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Return items after this cursor, exclusive, in Unix seconds.",
-            "name": "after",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Return items before this cursor, exclusive, in Unix seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Return items before this cursor, exclusive, in Unix seconds.",
-            "name": "before",
             "in": "query"
           }
         ],
@@ -4929,7 +5306,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5069,7 +5446,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5211,7 +5588,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5322,7 +5699,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5397,7 +5774,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5546,11 +5923,11 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
-    "/{dao}/voting-powers/{accountId}": {
+    "/{dao}/voting-powers/{address}": {
       "get": {
         "operationId": "votingPowerByAccountId",
         "summary": "Get account powers",
@@ -5562,7 +5939,7 @@
               "type": "string"
             },
             "required": true,
-            "name": "accountId",
+            "name": "address",
             "in": "path"
           },
           {
@@ -5622,7 +5999,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5733,7 +6110,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5808,7 +6185,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -5844,23 +6221,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
               "description": "Number of records to skip before collecting results.",
               "example": 0
             },
             "required": false,
             "description": "Number of records to skip before collecting results.",
             "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
             "in": "query"
           },
           {
@@ -5974,7 +6351,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6028,6 +6405,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -6052,7 +6439,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6202,7 +6589,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6226,23 +6613,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
               "description": "Number of records to skip before collecting results.",
               "example": 0
             },
             "required": false,
             "description": "Number of records to skip before collecting results.",
             "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
             "in": "query"
           },
           {
@@ -6360,7 +6747,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6503,7 +6890,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6636,7 +7023,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6733,7 +7120,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6777,7 +7164,7 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6842,23 +7229,23 @@
           {
             "schema": {
               "type": "integer",
-              "description": "Maximum number of records to return.",
-              "example": 10
-            },
-            "required": false,
-            "description": "Maximum number of records to return.",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
               "description": "Number of records to skip before collecting results.",
               "example": 0
             },
             "required": false,
             "description": "Number of records to skip before collecting results.",
             "name": "skip",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of records to return.",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of records to return.",
+            "name": "limit",
             "in": "query"
           }
         ],
@@ -6895,7 +7282,462 @@
               "uni"
             ]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/actions": {
+      "get": {
+        "operationId": "getRevenueActions",
+        "summary": "Get monthly ENS action counts by category",
+        "description": "Monthly action counts by category (Registration, Renewal, Premium).",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly action counts by category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActionsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/active-names": {
+      "get": {
+        "operationId": "getRevenueActiveNames",
+        "summary": "Get monthly net change and cumulative active .eth names",
+        "description": "Monthly net change and cumulative count of active .eth names.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly net change and cumulative count of active .eth names",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActiveNamesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/new-wallets": {
+      "get": {
+        "operationId": "getRevenueNewWallets",
+        "summary": "Get monthly new-wallet counts and cumulative wallet total",
+        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly new-wallet counts and the cumulative wallet total",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueNewWalletsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-funnel": {
+      "get": {
+        "operationId": "getRevenueRenewalFunnel",
+        "summary": "Get monthly renewal funnel keyed by expiry month",
+        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalFunnelResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/totals": {
+      "get": {
+        "operationId": "getRevenueTotals",
+        "summary": "Get monthly ENS revenue totals in USD and ETH",
+        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue totals in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueTotalsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/by-category": {
+      "get": {
+        "operationId": "getRevenueByCategory",
+        "summary": "Get monthly ENS revenue split by category (Steakhouse ledger)",
+        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue split by category in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueByCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-tenure": {
+      "get": {
+        "operationId": "getRevenueRenewalTenure",
+        "summary": "Get monthly renewal tenure distribution per expiry month",
+        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalTenureResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6903,7 +7745,7 @@
       "get": {
         "operationId": "offchainProposals",
         "summary": "Get offchain proposals",
-        "description": "Returns a list of offchain (Snapshot) proposals",
+        "description": "Returns a list of offchain (Snapshot) proposals. Pass `lean=true` to omit the markdown `body` and reduce payload size.",
         "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
@@ -6967,6 +7809,26 @@
             "description": "Latest proposal creation timestamp, in Unix seconds.",
             "name": "endDate",
             "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
+              "default": false,
+              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "example": false
+            },
+            "required": false,
+            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "name": "lean",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6991,7 +7853,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -6999,7 +7861,7 @@
       "get": {
         "operationId": "offchainSearchProposals",
         "summary": "Search offchain proposals",
-        "description": "Returns offchain proposals whose title or identifier partially matches the query.",
+        "description": "Returns offchain proposals whose title or identifier partially matches the query. Pass `lean=true` to omit the `body`.",
         "tags": ["offchain", "skip-pagination"],
         "parameters": [
           {
@@ -7035,6 +7897,26 @@
             "description": "Maximum number of records to return.",
             "name": "limit",
             "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
+              "default": false,
+              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "example": false
+            },
+            "required": false,
+            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "name": "lean",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7059,7 +7941,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7067,7 +7949,7 @@
       "get": {
         "operationId": "offchainProposalById",
         "summary": "Get an offchain proposal by ID",
-        "description": "Returns a single offchain (Snapshot) proposal by its ID",
+        "description": "Returns a single offchain (Snapshot) proposal by its ID. Pass `lean=true` to omit the `body`.",
         "tags": ["offchain"],
         "parameters": [
           {
@@ -7079,6 +7961,26 @@
             "example": "proposal-1",
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "enum": ["0", "1", "true", "false"]
+                }
+              ],
+              "default": false,
+              "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "example": false
+            },
+            "required": false,
+            "description": "When true, omit the proposal `body` to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "name": "lean",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7113,7 +8015,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7226,7 +8128,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7349,7 +8251,7 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -7443,56 +8345,62 @@
             "type": "string",
             "enum": ["comp", "ens", "gtc", "uni"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
-    "/{dao}/revenue/actions": {
-      "get": {
-        "operationId": "getRevenueActions",
-        "summary": "Get monthly ENS action counts by category",
-        "description": "Monthly action counts by category (Registration, Renewal, Premium).",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
+    "/{dao}/relay/vote": {
+      "post": {
+        "operationId": "relayVote",
+        "summary": "Relay a gasless vote",
+        "description": "Submit an EIP-712 signed vote on behalf of a user. The relayer pays gas.",
+        "tags": ["relay"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelayerVoteRequest"
+              }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
-            "description": "Monthly action counts by category",
+            "description": "Vote transaction submitted",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RevenueActionsResponse"
+                  "$ref": "#/components/schemas/RelayerVoteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or eligibility error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Relayer unavailable (low balance)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7508,56 +8416,62 @@
             "type": "string",
             "enum": ["ens"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
-    "/{dao}/revenue/active-names": {
-      "get": {
-        "operationId": "getRevenueActiveNames",
-        "summary": "Get monthly net change and cumulative active .eth names",
-        "description": "Monthly net change and cumulative count of active .eth names.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
+    "/{dao}/relay/delegate": {
+      "post": {
+        "operationId": "relayDelegate",
+        "summary": "Relay a gasless delegation",
+        "description": "Submit an EIP-712 signed delegation on behalf of a user. The relayer pays gas.",
+        "tags": ["relay"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelayerDelegateRequest"
+              }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
-            "description": "Monthly net change and cumulative count of active .eth names",
+            "description": "Delegation transaction submitted",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RevenueActiveNamesResponse"
+                  "$ref": "#/components/schemas/RelayerDelegateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation or eligibility error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Relayer unavailable (low balance)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7573,56 +8487,23 @@
             "type": "string",
             "enum": ["ens"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
-    "/{dao}/revenue/new-wallets": {
+    "/{dao}/relay/config": {
       "get": {
-        "operationId": "getRevenueNewWallets",
-        "summary": "Get monthly new-wallet counts and cumulative wallet total",
-        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
+        "operationId": "getConfig",
+        "summary": "Public relayer configuration",
+        "description": "Returns the static configuration values the dashboard needs to render eligibility hints.",
+        "tags": ["system"],
         "responses": {
           "200": {
-            "description": "Monthly new-wallet counts and the cumulative wallet total",
+            "description": "Relayer configuration",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RevenueNewWalletsResponse"
+                  "$ref": "#/components/schemas/RelayerConfigResponse"
                 }
               }
             }
@@ -7638,56 +8519,53 @@
             "type": "string",
             "enum": ["ens"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
-    "/{dao}/revenue/renewal-funnel": {
+    "/{dao}/relay/rate-limit/{address}": {
       "get": {
-        "operationId": "getRevenueRenewalFunnel",
-        "summary": "Get monthly renewal funnel keyed by expiry month",
-        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
-        "tags": ["revenue"],
+        "operationId": "getRateLimit",
+        "summary": "Per-address relay usage for the current UTC day",
+        "description": "Returns the number of relay calls already used and remaining for the given address, split by operation. Reads do not consume the rate limit.",
+        "tags": ["system"],
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
+              "type": "string"
             },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
+            "required": true,
+            "name": "address",
+            "in": "path"
           }
         ],
         "responses": {
           "200": {
-            "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+            "description": "Current usage and remaining quota",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RevenueRenewalFunnelResponse"
+                  "$ref": "#/components/schemas/RelayerRateLimitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Rate limiter storage is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7703,56 +8581,33 @@
             "type": "string",
             "enum": ["ens"]
           },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
-    "/{dao}/revenue/totals": {
+    "/{dao}/relay/balance": {
       "get": {
-        "operationId": "getRevenueTotals",
-        "summary": "Get monthly ENS revenue totals in USD and ETH",
-        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
+        "operationId": "getRelayerBalance",
+        "summary": "Relayer wallet funding status",
+        "description": "Returns the relayer wallet's current native balance and whether it meets the configured threshold. Lets the dashboard hide or warn about gasless actions before users sign a request.",
+        "tags": ["system"],
         "responses": {
           "200": {
-            "description": "Monthly ENS revenue totals in USD and ETH",
+            "description": "Relayer balance status",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RevenueTotalsResponse"
+                  "$ref": "#/components/schemas/RelayerBalanceResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to read on-chain balance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayerErrorResponse"
                 }
               }
             }
@@ -7768,137 +8623,7 @@
             "type": "string",
             "enum": ["ens"]
           },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/revenue/by-category": {
-      "get": {
-        "operationId": "getRevenueByCategory",
-        "summary": "Get monthly ENS revenue split by category (Steakhouse ledger)",
-        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly ENS revenue split by category in USD and ETH",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueByCategoryResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/revenue/renewal-tenure": {
-      "get": {
-        "operationId": "getRevenueRenewalTenure",
-        "summary": "Get monthly renewal tenure distribution per expiry month",
-        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueRenewalTenureResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
     },
@@ -8001,6 +8726,22 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "Upstream enrichment provider failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"]
+                }
+              }
+            }
           }
         }
       }
@@ -8016,7 +8757,8 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "string",
+                "format": "ethereum-address"
               },
               "minItems": 1,
               "maxItems": 100,
@@ -8130,284 +8872,6 @@
           }
         }
       }
-    },
-    "/{dao}/relay/vote": {
-      "post": {
-        "operationId": "relayVote",
-        "summary": "Relay a gasless vote",
-        "description": "Submit an EIP-712 signed vote on behalf of a user. The relayer pays gas.",
-        "tags": ["relay"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RelayerVoteRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Vote transaction submitted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerVoteResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation or eligibility error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Relayer unavailable (low balance)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/relay/delegate": {
-      "post": {
-        "operationId": "relayDelegate",
-        "summary": "Relay a gasless delegation",
-        "description": "Submit an EIP-712 signed delegation on behalf of a user. The relayer pays gas.",
-        "tags": ["relay"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RelayerDelegateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Delegation transaction submitted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerDelegateResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation or eligibility error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Relayer unavailable (low balance)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/relay/config": {
-      "get": {
-        "operationId": "getConfig",
-        "summary": "Public relayer configuration",
-        "description": "Returns the static configuration values the dashboard needs to render eligibility hints.",
-        "tags": ["system"],
-        "responses": {
-          "200": {
-            "description": "Relayer configuration",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerConfigResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/relay/rate-limit/{address}": {
-      "get": {
-        "operationId": "getRateLimit",
-        "summary": "Per-address relay usage for the current UTC day",
-        "description": "Returns the number of relay calls already used and remaining for the given address, split by operation. Reads do not consume the rate limit.",
-        "tags": ["system"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "name": "address",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Current usage and remaining quota",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerRateLimitResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid address",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Rate limiter storage is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
-    },
-    "/{dao}/relay/balance": {
-      "get": {
-        "operationId": "getRelayerBalance",
-        "summary": "Relayer wallet funding status",
-        "description": "Returns the relayer wallet's current native balance and whether it meets the configured threshold. Lets the dashboard hide or warn about gasless actions before users sign a request.",
-        "tags": ["system"],
-        "responses": {
-          "200": {
-            "description": "Relayer balance status",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerBalanceResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Failed to read on-chain balance",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RelayerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier"
-        }
-      ]
     },
     "/{dao}/proposal-drafts": {
       "get": {

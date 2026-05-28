@@ -12,8 +12,8 @@ function createDaoResponse(overrides?: Partial<DaoResponse>): DaoResponse {
     votingDelay: "7200",
     votingPeriod: "50400",
     timelockDelay: "172800",
-    alreadySupportCalldataReview: false,
-    supportOffchainData: false,
+    supportsCalldataReview: false,
+    supportsOffchainData: false,
     ...overrides,
   };
 }

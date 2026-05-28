@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useGetRevenueTotals } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
@@ -10,7 +11,10 @@ import { transformToMonthlySeries } from "@/features/revenue/utils/transform";
 
 export const MonthlyRevenueChart = () => {
   const { data, isLoading } = useGetRevenueTotals("ens");
-  const series = data ? transformToMonthlySeries(data.items) : null;
+  const series = useMemo(
+    () => (data ? transformToMonthlySeries(data.items) : null),
+    [data],
+  );
 
   return (
     <Card className="p-4">
@@ -24,6 +28,7 @@ export const MonthlyRevenueChart = () => {
           series={series.series}
           xAxisLabels={series.xAxisLabels}
           yAxisFormatter={formatMillions}
+          tooltipTotalLabel="Total"
           height={300}
         />
       ) : null}

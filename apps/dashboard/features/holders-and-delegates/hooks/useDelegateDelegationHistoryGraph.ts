@@ -1,17 +1,13 @@
 "use client";
 
-import {
-  OrderDirection,
-  QueryInput_HistoricalVotingPowerByAccountId_OrderBy,
-  useGetDelegateDelegationHistoryGraphQuery,
-} from "@anticapture/graphql-client/hooks";
+import type { HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey } from "@anticapture/client";
+import { useHistoricalVotingPowerByAccountId } from "@anticapture/client/hooks";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-// Interface for a single delegation history item for the graph
 export interface DelegationHistoryGraphItem {
   timestamp: number;
   votingPower: number;
@@ -19,11 +15,10 @@ export interface DelegationHistoryGraphItem {
   type: "delegation" | "transfer";
   isGain: boolean;
   transactionHash: string;
-  fromAddress?: string; // Address that initiated the transaction
-  toAddress?: string; // Address that received the delegation/transfer
+  fromAddress?: string;
+  toAddress?: string;
 }
 
-// Interface for the hook result
 export interface UseDelegateDelegationHistoryGraphResult {
   delegationHistory: DelegationHistoryGraphItem[];
   loading: boolean;
@@ -38,30 +33,24 @@ export function useDelegateDelegationHistoryGraph(
 ): UseDelegateDelegationHistoryGraphResult {
   const { decimals } = daoConfig[daoId];
 
-  const { data, loading, error } = useGetDelegateDelegationHistoryGraphQuery({
-    variables: {
-      accountId,
-      fromTimestamp: fromTimestamp ?? null,
-      toTimestamp: toTimestamp ?? null,
-      orderBy: QueryInput_HistoricalVotingPowerByAccountId_OrderBy.Timestamp,
-      orderDirection: OrderDirection.Desc,
+  const { data, isLoading, error } = useHistoricalVotingPowerByAccountId(
+    daoId.toLowerCase() as HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
+    accountId,
+    {
+      fromValue: "1",
+      limit: 1000,
+      orderDirection: "desc",
+      ...(fromTimestamp ? { fromDate: fromTimestamp } : {}),
+      ...(toTimestamp ? { toDate: toTimestamp } : {}),
     },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    skip: !accountId,
-    fetchPolicy: "cache-and-network",
-  });
+    { query: { enabled: !!accountId } },
+  );
 
   const delegationHistory = useMemo((): DelegationHistoryGraphItem[] => {
-    if (!data?.historicalVotingPowerByAccountId?.items) {
-      return [];
-    }
+    if (!data?.items) return [];
 
     return (
-      data.historicalVotingPowerByAccountId.items
+      data.items
         .filter((item) => !!item)
         .map((item) => {
           const delta = Number(
@@ -78,8 +67,8 @@ export function useDelegateDelegationHistoryGraph(
               : ("transfer" as "delegation" | "transfer"),
             isGain: delta > 0,
             transactionHash: item.transactionHash,
-            fromAddress: item.delegation?.from || item.transfer?.from,
-            toAddress: item.delegation?.to || item.transfer?.to,
+            fromAddress: item.delegation?.from ?? item.transfer?.from,
+            toAddress: item.delegation?.to ?? item.transfer?.to,
           };
         })
         // this is needed to ensure the graph is displayed in the ascending order
@@ -90,7 +79,7 @@ export function useDelegateDelegationHistoryGraph(
 
   return {
     delegationHistory,
-    loading,
+    loading: isLoading,
     error,
   };
 }

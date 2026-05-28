@@ -5,22 +5,17 @@ import snapshot from "@snapshot-labs/snapshot.js";
 import { useMutation } from "@tanstack/react-query";
 import { useAccount, useWalletClient } from "wagmi";
 
+import { getSnapshotVoteSignType } from "@/features/governance/utils/offchainVotingType";
+
 const HUB_URL = "https://hub.snapshot.org";
 
 type VoteChoice = number | number[] | Record<string, number>;
 
-type SnapshotProposalType =
-  | "basic"
-  | "single-choice"
-  | "approval"
-  | "ranked-choice"
-  | "weighted"
-  | "quadratic";
-
 interface VoteParams {
   spaceId: string;
   proposalId: string;
-  type: SnapshotProposalType;
+  /** Snapshot proposal type from the API (e.g. copeland, ranked-choice). */
+  proposalType: string;
   choice: VoteChoice;
   reason?: string;
 }
@@ -45,7 +40,7 @@ export const useVoteOnOffchainProposal = () => {
       await client.vote(web3, address, {
         space: params.spaceId,
         proposal: params.proposalId,
-        type: params.type,
+        type: getSnapshotVoteSignType(params.proposalType),
         choice: params.choice,
         reason: params.reason ?? "",
         app: "anticapture",

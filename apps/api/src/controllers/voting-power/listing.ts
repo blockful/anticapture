@@ -108,7 +108,7 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
     createRoute({
       method: "get",
       operationId: "votingPowerByAccountId",
-      path: "/voting-powers/{accountId}",
+      path: "/voting-powers/{address}",
       summary: "Get account powers",
       description:
         "Returns voting power information for a specific address (account)",
@@ -130,10 +130,10 @@ export function votingPowers(app: Hono, service: VotingPowerService) {
       },
     }),
     async (context) => {
-      const { accountId } = context.req.valid("param");
+      const { address } = context.req.valid("param");
       const { fromDate, toDate } = context.req.valid("query");
       const result = await service.getVotingPowersByAccountId(
-        accountId,
+        address,
         fromDate,
         toDate,
       );
