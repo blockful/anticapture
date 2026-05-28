@@ -18,12 +18,7 @@ export const useDaoTokenHistoricalData = ({
     { limit: limit ?? undefined },
   );
 
-  const items = (data ?? []).map((item) => ({
-    price: item.price,
-    timestamp: item.timestamp,
-  }));
-
-  const result = closedDataOnly ? getOnlyClosedData(items) : items;
+  const result = closedDataOnly ? getOnlyClosedData(data ?? []) : (data ?? []);
 
   return {
     data: result,

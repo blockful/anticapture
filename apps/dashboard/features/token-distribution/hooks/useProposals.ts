@@ -7,5 +7,6 @@ export const useProposals = (daoId: DaoIdEnum, fromDate: number) => {
   return useProposalsSDK(daoId.toLowerCase() as ProposalsPathParamsDaoEnumKey, {
     fromDate,
     limit: 1000,
+    lean: true,
   });
 };
