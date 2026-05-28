@@ -71,21 +71,6 @@ export class HistoricalBalanceRepository {
     fromAddress?: Address,
     toAddress?: Address,
   ): Promise<number> {
-    if (!fromAddress && !toAddress) {
-      return await this.db.$count(
-        balanceHistory,
-        and(
-          eq(balanceHistory.accountId, accountId),
-          minDelta ? gte(balanceHistory.deltaMod, BigInt(minDelta)) : undefined,
-          maxDelta ? lte(balanceHistory.deltaMod, BigInt(maxDelta)) : undefined,
-          fromDate
-            ? gte(balanceHistory.timestamp, BigInt(fromDate))
-            : undefined,
-          toDate ? lte(balanceHistory.timestamp, BigInt(toDate)) : undefined,
-        ),
-      );
-    }
-
     const [row] = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(balanceHistory)

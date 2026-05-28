@@ -5,6 +5,7 @@ import {
   type OrderDirection,
 } from "@anticapture/client";
 import { useDelegatorsInfinite } from "@anticapture/client/hooks";
+import { useMemo } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
@@ -42,15 +43,18 @@ export const useDelegators = ({
     { query: { getNextPageParam } },
   );
 
-  const seen = new Set<string>();
-  const delegators =
-    data?.pages
-      .flatMap((p) => p.items)
-      .filter((item) => {
-        if (seen.has(item.delegatorAddress)) return false;
-        seen.add(item.delegatorAddress);
-        return true;
-      }) ?? [];
+  const delegators = useMemo(() => {
+    const seen = new Set<string>();
+    return (
+      data?.pages
+        .flatMap((p) => p.items)
+        .filter((item) => {
+          if (seen.has(item.delegatorAddress)) return false;
+          seen.add(item.delegatorAddress);
+          return true;
+        }) ?? []
+    );
+  }, [data]);
 
   return {
     delegators,

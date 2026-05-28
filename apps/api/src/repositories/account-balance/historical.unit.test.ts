@@ -398,12 +398,26 @@ describe("HistoricalBalanceRepository", () => {
 
   describe("getHistoricalBalanceCount", () => {
     it("should return count for an account", async () => {
+      const txHash1 =
+        "0x0000000000000000000000000000000000000000000000000000000000000001";
+      const txHash2 =
+        "0x0000000000000000000000000000000000000000000000000000000000000002";
+      const txHash3 =
+        "0x0000000000000000000000000000000000000000000000000000000000000003";
+
       await db
         .insert(balanceHistory)
         .values([
-          createBalanceHistory({ logIndex: 0 }),
-          createBalanceHistory({ logIndex: 1 }),
-          createBalanceHistory({ logIndex: 2 }),
+          createBalanceHistory({ transactionHash: txHash1, logIndex: 0 }),
+          createBalanceHistory({ transactionHash: txHash2, logIndex: 0 }),
+          createBalanceHistory({ transactionHash: txHash3, logIndex: 0 }),
+        ]);
+      await db
+        .insert(transfer)
+        .values([
+          createTransfer({ transactionHash: txHash1, logIndex: 0 }),
+          createTransfer({ transactionHash: txHash2, logIndex: 0 }),
+          createTransfer({ transactionHash: txHash3, logIndex: 0 }),
         ]);
 
       const count = await repository.getHistoricalBalanceCount(ACCOUNT_A);
@@ -412,12 +426,36 @@ describe("HistoricalBalanceRepository", () => {
     });
 
     it("should filter count by minDelta and maxDelta", async () => {
+      const txHash1 =
+        "0x0000000000000000000000000000000000000000000000000000000000000001";
+      const txHash2 =
+        "0x0000000000000000000000000000000000000000000000000000000000000002";
+      const txHash3 =
+        "0x0000000000000000000000000000000000000000000000000000000000000003";
+
+      await db.insert(balanceHistory).values([
+        createBalanceHistory({
+          transactionHash: txHash1,
+          deltaMod: 100n,
+          logIndex: 0,
+        }),
+        createBalanceHistory({
+          transactionHash: txHash2,
+          deltaMod: 500n,
+          logIndex: 0,
+        }),
+        createBalanceHistory({
+          transactionHash: txHash3,
+          deltaMod: 1000n,
+          logIndex: 0,
+        }),
+      ]);
       await db
-        .insert(balanceHistory)
+        .insert(transfer)
         .values([
-          createBalanceHistory({ deltaMod: 100n, logIndex: 0 }),
-          createBalanceHistory({ deltaMod: 500n, logIndex: 1 }),
-          createBalanceHistory({ deltaMod: 1000n, logIndex: 2 }),
+          createTransfer({ transactionHash: txHash1, logIndex: 0 }),
+          createTransfer({ transactionHash: txHash2, logIndex: 0 }),
+          createTransfer({ transactionHash: txHash3, logIndex: 0 }),
         ]);
 
       const count = await repository.getHistoricalBalanceCount(

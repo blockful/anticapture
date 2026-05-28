@@ -47,13 +47,13 @@ export const RankedChoiceOptions = ({
         <div
           key={choiceIndex}
           className={cn(
-            "border-border-default flex items-center gap-2 border px-[10px] py-2",
+            "border-border-default flex items-start gap-2 border px-[10px] py-2 text-left",
           )}
         >
-          <span className="text-secondary font-inter w-5 shrink-0 text-[14px] font-normal not-italic leading-[20px]">
+          <span className="text-secondary font-inter w-5 shrink-0 text-left text-[14px] font-normal not-italic leading-[20px]">
             {position + 1}
           </span>
-          <span className="font-inter text-primary flex-1 text-[14px] font-normal not-italic leading-[20px]">
+          <span className="font-inter text-primary min-w-0 flex-1 text-left text-[14px] font-normal not-italic leading-[20px]">
             {choices[choiceIndex]}
           </span>
           <div className="flex flex-col">
