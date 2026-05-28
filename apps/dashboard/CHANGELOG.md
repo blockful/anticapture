@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.3.3
+
+### Patch Changes
+
+- [#1940](https://github.com/blockful/anticapture/pull/1940) [`98728e5`](https://github.com/blockful/anticapture/commit/98728e517a8deff5dc494fc6020b878605538daa) Thanks [@isadorable-png](https://github.com/isadorable-png)! - Add Umami and PostHog event tracking for `proposal_create_click` on the governance "New Proposal" button (with `dao` property) and `feature_request_click` on the whitelabel "Request feature" links in both the shell and sidebar (with `source` property). The PostHog click handler now also captures an optional `dao` property from `data-ph-dao`.
+
 ## 2.3.2
 
 ### Patch Changes
