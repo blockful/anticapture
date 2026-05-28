@@ -13,13 +13,6 @@ const toPriceEntry = (item: TokenHistoricalPriceItem): PriceEntry => ({
   timestamp: item.timestamp,
 });
 
-// Mirrors Apollo's fetchPolicy: "no-cache".
-const NO_CACHE_QUERY_OPTIONS = {
-  staleTime: 0,
-  gcTime: 0,
-  refetchOnMount: "always",
-} as const;
-
 export const useDaoTokenHistoricalData = ({
   daoId,
   limit,
@@ -31,11 +24,9 @@ export const useDaoTokenHistoricalData = ({
 }) => {
   const dao = daoId.toLowerCase() as HistoricalTokenDataPathParamsDaoEnumKey;
 
-  const { data, isLoading, error, refetch } = useHistoricalTokenData(
-    dao,
-    { limit },
-    { query: NO_CACHE_QUERY_OPTIONS },
-  );
+  const { data, isLoading, error, refetch } = useHistoricalTokenData(dao, {
+    limit,
+  });
 
   const items = (data ?? []).map(toPriceEntry);
   const result = closedDataOnly ? getOnlyClosedData(items) : items;

@@ -18,12 +18,6 @@ export interface TreasuryDataPoint {
   date: number;
 }
 
-const NO_CACHE_QUERY_OPTIONS = {
-  staleTime: 0,
-  gcTime: 0,
-  refetchOnMount: "always",
-} as const;
-
 export const useTreasury = (
   daoId: DaoIdEnum,
   type: TreasuryType = "total",
@@ -34,13 +28,13 @@ export const useTreasury = (
   const params = { days, orderDirection: order };
 
   const liquid = useGetLiquidTreasury(dao, params, {
-    query: { ...NO_CACHE_QUERY_OPTIONS, enabled: type === "liquid" },
+    query: { enabled: type === "liquid" },
   });
   const daoToken = useGetDaoTokenTreasury(dao, params, {
-    query: { ...NO_CACHE_QUERY_OPTIONS, enabled: type === "dao-token" },
+    query: { enabled: type === "dao-token" },
   });
   const total = useGetTotalTreasury(dao, params, {
-    query: { ...NO_CACHE_QUERY_OPTIONS, enabled: type === "total" },
+    query: { enabled: type === "total" },
   });
 
   const active =
