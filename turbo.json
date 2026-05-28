@@ -104,7 +104,8 @@
         "PLAYWRIGHT_BASE_URL",
         "NEXT_PUBLIC_BASE_URL",
         "NEXT_PUBLIC_GATEFUL_URL",
-        "NEXT_PUBLIC_WC_PROJECT_ID"
+        "NEXT_PUBLIC_WC_PROJECT_ID",
+        "BLOCKFUL_API_TOKEN"
       ]
     },
     "@anticapture/dashboard#test:e2e:headed": {
@@ -114,7 +115,8 @@
         "PLAYWRIGHT_BASE_URL",
         "NEXT_PUBLIC_BASE_URL",
         "NEXT_PUBLIC_GATEFUL_URL",
-        "NEXT_PUBLIC_WC_PROJECT_ID"
+        "NEXT_PUBLIC_WC_PROJECT_ID",
+        "BLOCKFUL_API_TOKEN"
       ]
     },
     "@anticapture/dashboard#test:e2e:ui": {
@@ -125,7 +127,8 @@
         "PLAYWRIGHT_BASE_URL",
         "NEXT_PUBLIC_BASE_URL",
         "NEXT_PUBLIC_GATEFUL_URL",
-        "NEXT_PUBLIC_WC_PROJECT_ID"
+        "NEXT_PUBLIC_WC_PROJECT_ID",
+        "BLOCKFUL_API_TOKEN"
       ]
     },
     "codegen": {

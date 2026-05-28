@@ -78,15 +78,20 @@ test.describe("Activity Feed page (/ens/activity-feed)", () => {
     await expect(page).not.toHaveURL(/relevance=HIGH/);
   });
 
-  test("shows feed events or empty state", async ({ goto, page }) => {
+  test("shows feed events with High or Medium relevance", async ({
+    goto,
+    page,
+  }) => {
     await goto("/ens/activity-feed");
-    const hasFeedItems = page.locator("text=High Relevance").first();
-    const hasMediumItems = page.locator("text=Medium Relevance").first();
-    const isEmpty = page.locator("text=No activity found");
-    const failedToLoad = page.locator("text=Failed to load activity feed");
-    await expect(
-      hasFeedItems.or(hasMediumItems).or(isEmpty).or(failedToLoad),
-    ).toBeVisible({ timeout: 30_000 });
+    // Min-relevance filtering is upper-inclusive, so the default feed may
+    // render both High and Medium relevance badges simultaneously. Match the
+    // badge text exactly (anchored) to avoid the uppercase
+    // "HIGH RELEVANCE ACTIVITY" section header, and require at least one
+    // event row — empty and error states must NOT satisfy this assertion.
+    const eventRelevanceBadge = page
+      .getByText(/^(High|Medium) Relevance$/)
+      .first();
+    await expect(eventRelevanceBadge).toBeVisible({ timeout: 30_000 });
   });
 
   test("event address click opens entity drawer when events exist", async ({

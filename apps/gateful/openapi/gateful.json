@@ -4966,6 +4966,26 @@
             "description": "Maximum balance delta encoded as a decimal string.",
             "name": "toValue",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter to transfers sent from this address (matches the sender of the transfer that caused the balance change)."
+            },
+            "required": false,
+            "description": "Filter to transfers sent from this address (matches the sender of the transfer that caused the balance change).",
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Filter to transfers received by this address (matches the recipient of the transfer that caused the balance change)."
+            },
+            "required": false,
+            "description": "Filter to transfers received by this address (matches the recipient of the transfer that caused the balance change).",
+            "name": "to",
+            "in": "query"
           }
         ],
         "responses": {

@@ -17,6 +17,8 @@ export class HistoricalBalanceRepository {
     maxDelta?: string,
     fromDate?: number,
     toDate?: number,
+    fromAddress?: Address,
+    toAddress?: Address,
   ): Promise<DBHistoricalBalanceWithRelations[]> {
     const result = await this.db
       .select()
@@ -34,6 +36,8 @@ export class HistoricalBalanceRepository {
             ? gte(balanceHistory.timestamp, BigInt(fromDate))
             : undefined,
           toDate ? lte(balanceHistory.timestamp, BigInt(toDate)) : undefined,
+          fromAddress ? eq(transfer.fromAccountId, fromAddress) : undefined,
+          toAddress ? eq(transfer.toAccountId, toAddress) : undefined,
         ),
       )
       .orderBy(
@@ -64,16 +68,30 @@ export class HistoricalBalanceRepository {
     maxDelta?: string,
     fromDate?: number,
     toDate?: number,
+    fromAddress?: Address,
+    toAddress?: Address,
   ): Promise<number> {
-    return await this.db.$count(
-      balanceHistory,
-      and(
-        eq(balanceHistory.accountId, accountId),
-        minDelta ? gte(balanceHistory.deltaMod, BigInt(minDelta)) : undefined,
-        maxDelta ? lte(balanceHistory.deltaMod, BigInt(maxDelta)) : undefined,
-        fromDate ? gte(balanceHistory.timestamp, BigInt(fromDate)) : undefined,
-        toDate ? lte(balanceHistory.timestamp, BigInt(toDate)) : undefined,
-      ),
-    );
+    const [row] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(balanceHistory)
+      .innerJoin(
+        transfer,
+        sql`${balanceHistory.transactionHash} = ${transfer.transactionHash} AND ${balanceHistory.logIndex} = ${transfer.logIndex}`,
+      )
+      .where(
+        and(
+          eq(balanceHistory.accountId, accountId),
+          minDelta ? gte(balanceHistory.deltaMod, BigInt(minDelta)) : undefined,
+          maxDelta ? lte(balanceHistory.deltaMod, BigInt(maxDelta)) : undefined,
+          fromDate
+            ? gte(balanceHistory.timestamp, BigInt(fromDate))
+            : undefined,
+          toDate ? lte(balanceHistory.timestamp, BigInt(toDate)) : undefined,
+          fromAddress ? eq(transfer.fromAccountId, fromAddress) : undefined,
+          toAddress ? eq(transfer.toAccountId, toAddress) : undefined,
+        ),
+      );
+
+    return row?.count ?? 0;
   }
 }

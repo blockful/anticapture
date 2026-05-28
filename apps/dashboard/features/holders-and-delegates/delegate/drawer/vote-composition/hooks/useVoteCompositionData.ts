@@ -1,20 +1,20 @@
-import { useGetAddresses } from "@anticapture/client/hooks";
+import type {
+  AccountBalanceByAccountIdPathParamsDaoEnumKey,
+  DelegatorItem,
+  VotingPowerByAccountIdPathParamsDaoEnumKey,
+} from "@anticapture/client";
 import {
-  OrderDirection,
-  QueryInput_Delegators_OrderBy,
-} from "@anticapture/graphql-client";
-import {
-  useAccountBalanceByAddressQuery,
-  useGetVotingPowerQuery,
-} from "@anticapture/graphql-client/hooks";
+  useGetAddresses,
+  useVotingPowerByAccountId,
+  useAccountBalanceByAccountId,
+} from "@anticapture/client/hooks";
 import { useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
 import daoConfig from "@/shared/dao-config";
-import type { DelegatorItem } from "@/shared/hooks/graphql-client/useDelegators";
-import { useDelegators } from "@/shared/hooks/graphql-client/useDelegators";
+import { useDelegators } from "@/shared/hooks/useDelegators";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
@@ -45,37 +45,24 @@ export const useVoteCompositionData = (
   const { delegators, loading } = useDelegators({
     daoId,
     address,
-    orderBy: QueryInput_Delegators_OrderBy.Amount,
-    orderDirection: OrderDirection.Desc,
+    orderBy: "amount",
+    orderDirection: "desc",
     limit: 5,
   });
 
-  const { data: votingPowerData } = useGetVotingPowerQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    variables: {
-      address,
-    },
-  });
+  const { data: votingPowerData } = useVotingPowerByAccountId(
+    daoId.toLowerCase() as VotingPowerByAccountIdPathParamsDaoEnumKey,
+    address,
+  );
 
   const isAave = daoId === DaoIdEnum.AAVE;
 
-  const { data: balanceData } = useAccountBalanceByAddressQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    variables: {
-      address,
-      fromDate: null,
-      toDate: null,
-    },
-    skip: !isAave,
-  });
+  const { data: balanceData } = useAccountBalanceByAccountId(
+    daoId.toLowerCase() as AccountBalanceByAccountIdPathParamsDaoEnumKey,
+    address,
+    undefined,
+    { query: { enabled: isAave } },
+  );
 
   const delegatorAddresses: Address[] = delegators.map(
     (delegator) => delegator.delegatorAddress as Address,
@@ -106,12 +93,9 @@ export const useVoteCompositionData = (
     othersPercentage: 0,
   };
 
-  const balanceResult = balanceData?.accountBalanceByAccountId;
-  const selfBalanceString =
-    balanceResult?.__typename === "AccountBalanceWithVariationResponse"
-      ? balanceResult.data?.balance
-      : undefined;
-  const actualSelfBalance = isAave ? BigInt(selfBalanceString ?? "0") : 0n;
+  const actualSelfBalance = isAave
+    ? BigInt(balanceData?.data?.balance ?? "0")
+    : 0n;
 
   const selfBalance = isAave && includeBalance ? actualSelfBalance : 0n;
 
@@ -120,7 +104,7 @@ export const useVoteCompositionData = (
   }
 
   const delegateCurrentVotingPower = BigInt(
-    votingPowerData?.votingPowerByAccountId?.votingPower ?? "0",
+    votingPowerData?.votingPower ?? "0",
   );
 
   const totalIndividualDelegators = delegators.reduce((acc, item) => {
