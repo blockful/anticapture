@@ -54,12 +54,11 @@ export const useQuorumGap = (daoId: DaoIdEnum) => {
     const { decimals } = daoConfig[daoId];
 
     const isGapEligible = proposalsData.items.length > 0;
-    const quorum = daoData.quorum
-      ? Number(formatUnits(BigInt(daoData.quorum), decimals))
-      : null;
-    const avgTurnout = turnoutData.currentAverageTurnout
-      ? Number(formatUnits(BigInt(turnoutData.currentAverageTurnout), decimals))
-      : null;
+    const quorum = Number(formatUnits(daoData.quorum, decimals));
+    const avgTurnout = Number(
+      formatUnits(BigInt(turnoutData.currentAverageTurnout), decimals),
+    );
+
     const gap = quorum && avgTurnout ? (avgTurnout / quorum - 1) * 100 : 0;
 
     quorumGap = isGapEligible ? gap : null;

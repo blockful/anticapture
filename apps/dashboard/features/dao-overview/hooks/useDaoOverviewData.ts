@@ -60,33 +60,29 @@ export const useDaoOverviewData = ({
   const proposalThresholdPercentage =
     daoData?.proposalThreshold && totalSupply
       ? (
-          (Number(formatUnits(BigInt(daoData.proposalThreshold), decimals)) /
-            Number(formatUnits(BigInt(totalSupply), decimals))) *
+          (Number(formatUnits(daoData.proposalThreshold, decimals)) /
+            Number(formatUnits(totalSupply, decimals))) *
           100
         ).toString()
       : "0";
 
   const proposalThresholdValue = daoData?.proposalThreshold
-    ? `${formatNumberUserReadable(Number(formatUnits(BigInt(daoData.proposalThreshold), decimals)))}`
+    ? `${formatNumberUserReadable(Number(formatUnits(daoData.proposalThreshold, decimals)))}`
     : "No Threshold";
 
-  const quorumValue = Number(
-    formatUnits(BigInt(daoData?.quorum || 0), decimals),
-  );
+  const quorumValue = Number(formatUnits(daoData?.quorum ?? 0n, decimals));
 
   const treasuryStats = useDaoTreasuryStats({
     daoId,
-    tokenData: { data: tokenData ?? null },
+    tokenData,
   });
 
   const topDelegatesToPass = useTopDelegatesToPass({
     topDelegates:
-      delegatesData?.items
-        .filter((item) => item !== null && item !== undefined)
-        .map((item) => ({
-          votingPower: item.votingPower.toString(),
-          accountId: item.accountId,
-        })) || [],
+      delegatesData?.items.map((item) => ({
+        votingPower: item.votingPower.toString(),
+        accountId: item.accountId,
+      })) || [],
     quorumValue,
     decimals,
   });
@@ -94,10 +90,10 @@ export const useDaoOverviewData = ({
   return {
     daoData: daoData ?? null,
     activeSupply: Number(
-      formatUnits(BigInt(activeSupplyData?.activeSupply || 0), decimals),
+      formatUnits(activeSupplyData?.activeSupply || 0n, decimals),
     ),
     delegatedSupply: Number(
-      formatUnits(BigInt(tokenData?.delegatedSupply || 0), decimals),
+      formatUnits(tokenData?.delegatedSupply || 0n, decimals),
     ),
     averageTurnout: Number(
       formatUnits(

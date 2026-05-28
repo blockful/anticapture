@@ -9,7 +9,7 @@ export const useDaoTreasuryStats = ({
   tokenData,
 }: {
   daoId: DaoIdEnum;
-  tokenData: { data?: { price?: string | null } | null };
+  tokenData?: { price: string } | null;
 }) => {
   // Use 7 days (minimum supported) with desc order to get most recent first
   const { data: liquidTreasury } = useTreasury(
@@ -32,7 +32,7 @@ export const useDaoTreasuryStats = ({
   );
 
   return useMemo(() => {
-    const lastPrice = Number(tokenData.data?.price) || 0;
+    const lastPrice = Number(tokenData?.price) || 0;
     const liquidValue = liquidTreasury[0]?.value ?? 0;
     const tokenValue = tokenTreasury[0]?.value ?? 0;
     const totalValue = allTreasury[0]?.value ?? 0;

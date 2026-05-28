@@ -45,7 +45,7 @@ import {
 } from "@/shared/utils";
 
 interface MultilineChartAttackProfitabilityProps {
-  days: string;
+  days: TimeInterval;
   filterData?: string[];
   setCsvData?: (data: Data) => void;
   context?: "overview" | "section";
@@ -64,16 +64,8 @@ export const MultilineChartAttackProfitability = ({
   );
   const daoConfig = daoConfigByDaoId[daoEnum];
 
-  const { data: liquidTreasuryData } = useTreasury(
-    daoEnum,
-    "liquid",
-    days as TimeInterval,
-  );
-  const { data: totalTreasuryData } = useTreasury(
-    daoEnum,
-    "total",
-    days as TimeInterval,
-  );
+  const { data: liquidTreasuryData } = useTreasury(daoEnum, "liquid", days);
+  const { data: totalTreasuryData } = useTreasury(daoEnum, "total", days);
 
   const {
     data: daoTokenPriceHistoricalData,
@@ -102,7 +94,7 @@ export const MultilineChartAttackProfitability = ({
   );
 
   const quorumValue = Number(
-    formatUnits(BigInt(daoData?.quorum?.toString() || "0"), daoConfig.decimals),
+    formatUnits(daoData?.quorum || 0n, daoConfig.decimals),
   );
 
   const chartConfig = useMemo(
@@ -129,12 +121,10 @@ export const MultilineChartAttackProfitability = ({
       datasets = mockedAttackProfitabilityDatasets;
     } else {
       const nonZeroLiquidTreasuryData = liquidTreasuryData.filter(
-        (item): item is NonNullable<typeof item> =>
-          item !== null && item.value > 0,
+        (item) => item.value > 0,
       );
       const nonZeroTotalTreasuryData = totalTreasuryData.filter(
-        (item): item is NonNullable<typeof item> =>
-          item !== null && item.value > 0,
+        (item) => item.value > 0,
       );
 
       datasets = {
