@@ -13,7 +13,6 @@ COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
-COPY apps/gateful/openapi/gateful.json apps/gateful/openapi/gateful.json
 RUN pnpm --filter @anticapture/client codegen \
  && pnpm --filter @anticapture/client build
 
