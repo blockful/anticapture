@@ -1,9 +1,5 @@
 "use client";
 
-import {
-  OrderDirection,
-  QueryInput_VotingPowers_OrderBy,
-} from "@anticapture/graphql-client";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
@@ -20,8 +16,8 @@ import { TimeInterval } from "@/shared/types/enums";
 export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
   const { data: delegatesData, loading } = useDelegates({
     daoId,
-    orderBy: QueryInput_VotingPowers_OrderBy.Variation,
-    orderDirection: OrderDirection.Desc,
+    orderBy: "variation",
+    orderDirection: "desc",
     limit: 10,
     days: TimeInterval.NINETY_DAYS,
     skipActivity: true,

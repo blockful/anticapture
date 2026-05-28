@@ -24,11 +24,15 @@ import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWater
 import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
-  useActiveSupply,
-  useAverageTurnout,
-  useDelegatedSupply,
-  useScreenSize,
-} from "@/shared/hooks";
+  useCompareActiveSupply,
+  useCompareAverageTurnout,
+} from "@anticapture/client/hooks";
+import type {
+  CompareActiveSupplyPathParamsDaoEnumKey,
+  CompareAverageTurnoutPathParamsDaoEnumKey,
+} from "@anticapture/client";
+
+import { useDelegatedSupply, useScreenSize } from "@/shared/hooks";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { useDaoId } from "@/shared/providers/DaoIdProvider";
@@ -70,9 +74,16 @@ export const AttackCostBarChart = ({
 
   const { data: liquidTreasuryData, loading: liquidTreasuryLoading } =
     useTreasury(daoId, "liquid", TimeInterval.SEVEN_DAYS);
+  const dao = daoId.toLowerCase();
   const delegatedSupply = useDelegatedSupply(daoId, timeInterval);
-  const activeSupply = useActiveSupply(daoId, timeInterval);
-  const averageTurnout = useAverageTurnout(daoId, timeInterval);
+  const activeSupply = useCompareActiveSupply(
+    dao as CompareActiveSupplyPathParamsDaoEnumKey,
+    { days: timeInterval },
+  );
+  const averageTurnout = useCompareAverageTurnout(
+    dao as CompareAverageTurnoutPathParamsDaoEnumKey,
+    { days: timeInterval },
+  );
 
   const {
     data: daoTokenPriceHistoricalData,
