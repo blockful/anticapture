@@ -1,17 +1,8 @@
 import { useHistoricalTokenData } from "@anticapture/client/hooks";
-import type {
-  HistoricalTokenDataPathParamsDaoEnumKey,
-  TokenHistoricalPriceItem,
-} from "@anticapture/client";
+import type { HistoricalTokenDataPathParamsDaoEnumKey } from "@anticapture/client";
 
 import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
-import type { PriceEntry } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-
-const toPriceEntry = (item: TokenHistoricalPriceItem): PriceEntry => ({
-  price: item.price,
-  timestamp: item.timestamp,
-});
 
 export const useDaoTokenHistoricalData = ({
   daoId,
@@ -28,7 +19,7 @@ export const useDaoTokenHistoricalData = ({
     limit,
   });
 
-  const items = (data ?? []).map(toPriceEntry);
+  const items = data || [];
   const result = closedDataOnly ? getOnlyClosedData(items) : items;
 
   return {
