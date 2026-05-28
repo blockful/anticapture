@@ -6,9 +6,9 @@ import { useProposals } from "@/features/token-distribution/hooks/useProposals";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
 import type { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import type { TokenHistoricalPriceItem } from "@anticapture/client";
 import type {
   TokenMetricItem,
-  PriceEntry,
   ChartDataSetPoint,
 } from "@/shared/dao-config/types";
 import { useTimeSeriesData } from "@/shared/hooks";
@@ -183,7 +183,7 @@ export const useChartMetrics = ({
       filteredHistoricalTokenData
     ) {
       filteredHistoricalTokenData.forEach(
-        ({ timestamp, price }: PriceEntry) => {
+        ({ timestamp, price }: TokenHistoricalPriceItem) => {
           result[normalizeTimestamp(timestamp)] = {
             ...result[normalizeTimestamp(timestamp)],
             date: normalizeTimestamp(timestamp),

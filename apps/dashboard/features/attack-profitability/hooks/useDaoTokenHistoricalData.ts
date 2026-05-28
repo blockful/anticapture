@@ -1,5 +1,5 @@
-import type { HistoricalTokenDataPathParamsDaoEnumKey } from "@anticapture/client";
 import { useHistoricalTokenData } from "@anticapture/client/hooks";
+import type { HistoricalTokenDataPathParamsDaoEnumKey } from "@anticapture/client";
 
 import { getOnlyClosedData } from "@/features/attack-profitability/utils/normalizeDataset";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -13,12 +13,14 @@ export const useDaoTokenHistoricalData = ({
   limit?: number;
   closedDataOnly?: boolean;
 }) => {
-  const { data, isLoading, error } = useHistoricalTokenData(
-    daoId.toLowerCase() as HistoricalTokenDataPathParamsDaoEnumKey,
-    { limit: limit ?? undefined },
-  );
+  const dao = daoId.toLowerCase() as HistoricalTokenDataPathParamsDaoEnumKey;
 
-  const result = closedDataOnly ? getOnlyClosedData(data ?? []) : (data ?? []);
+  const { data, isLoading, error } = useHistoricalTokenData(dao, {
+    limit,
+  });
+
+  const items = data || [];
+  const result = closedDataOnly ? getOnlyClosedData(items) : items;
 
   return {
     data: result,
