@@ -3,9 +3,10 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import { useAccountBalancesInfinite } from "@anticapture/client/hooks";
-import type {
-  AccountBalancesPathParamsDaoEnumKey,
-  AccountBalancesQueryParams,
+import {
+  getNextPageParam,
+  type AccountBalancesPathParamsDaoEnumKey,
+  type AccountBalancesQueryParams,
 } from "@anticapture/client";
 import { formatUnits } from "viem";
 import type { Address } from "viem";
@@ -83,6 +84,7 @@ export const useTokenHolders = (
     // this works because this endpoint is supported for all DAOs
     daoId.toLowerCase() as AccountBalancesPathParamsDaoEnumKey,
     queryParams,
+    { query: { getNextPageParam } },
   );
 
   const normalizedError =

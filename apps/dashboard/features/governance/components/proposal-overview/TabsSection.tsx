@@ -22,6 +22,7 @@ interface TabsSectionProps {
   offchainProposalId?: string;
   offchainChoices?: string[];
   offchainScores?: number[];
+  offchainProposalType?: string | null;
   daoId?: DaoIdEnum;
 }
 
@@ -33,6 +34,7 @@ export const TabsSection = ({
   offchainProposalId,
   offchainChoices = [],
   offchainScores,
+  offchainProposalType,
   daoId,
 }: TabsSectionProps) => {
   const allowedTabs: TabId[] = isOffchain
@@ -62,6 +64,7 @@ export const TabsSection = ({
             daoId={daoId}
             totalVotingPower={totalVotingPower}
             choices={offchainChoices}
+            proposalType={offchainProposalType}
           />
         ) : (
           <VotesTabContent

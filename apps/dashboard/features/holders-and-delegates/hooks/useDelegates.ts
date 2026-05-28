@@ -45,7 +45,7 @@ interface UseDelegatesResult {
   loading: boolean;
   error: Error | null;
   hasNextPage: boolean;
-  fetchNextPage: () => Promise<void>;
+  fetchNextPage: () => Promise<unknown>;
   fetchingMore: boolean;
   isActivityLoadingFor: (addr: string) => boolean;
 }
@@ -202,16 +202,12 @@ export const useDelegates = ({
     [loadingActivityAddresses],
   );
 
-  const fetchNextPageStable = useCallback(async () => {
-    await fetchNextPage();
-  }, [fetchNextPage]);
-
   return {
     data: finalData,
     loading: isLoading && !allDelegates.length,
     error: error ?? null,
     hasNextPage: hasNextPage ?? false,
-    fetchNextPage: fetchNextPageStable,
+    fetchNextPage,
     fetchingMore: isFetchingNextPage,
     isActivityLoadingFor,
   };
