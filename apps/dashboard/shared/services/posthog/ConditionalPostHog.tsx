@@ -36,6 +36,11 @@ const ConditionalPostHog = () => {
         properties.href = element.href;
       }
 
+      // Optionally add dao when provided
+      if (element.dataset.phDao) {
+        properties.dao = element.dataset.phDao;
+      }
+
       windowWithPostHog.posthog.capture(
         element.dataset.phEvent || "",
         properties,
