@@ -20,13 +20,6 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils";
 
-// Mirrors Apollo's fetchPolicy: "no-cache".
-const NO_CACHE_QUERY_OPTIONS = {
-  staleTime: 0,
-  gcTime: 0,
-  refetchOnMount: "always",
-} as const;
-
 interface ActiveTokensCellProps {
   daoId: DaoIdEnum;
   onSortValueChange: (value: number | null) => void;
@@ -48,13 +41,10 @@ export const ActiveTokensCell = ({
   const { data: activeSupplyData, isLoading } = useCompareActiveSupply(
     dao as CompareActiveSupplyPathParamsDaoEnumKey,
     { days: TimeInterval.NINETY_DAYS },
-    { query: NO_CACHE_QUERY_OPTIONS },
   );
-  const { data: tokenData } = useToken(
-    dao as TokenPathParamsDaoEnumKey,
-    { currency: "usd" },
-    { query: NO_CACHE_QUERY_OPTIONS },
-  );
+  const { data: tokenData } = useToken(dao as TokenPathParamsDaoEnumKey, {
+    currency: "usd",
+  });
   const daoConfig = daoConfigByDaoId[daoId];
 
   const activePercentage = activeSupplyData?.activeSupply

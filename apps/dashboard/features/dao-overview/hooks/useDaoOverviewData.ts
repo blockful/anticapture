@@ -21,19 +21,6 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils";
 
-// Mirrors Apollo's fetchPolicy: "no-cache".
-const NO_CACHE_QUERY_OPTIONS = {
-  staleTime: 0,
-  gcTime: 0,
-  refetchOnMount: "always",
-} as const;
-
-// Mirrors Apollo's fetchPolicy: "cache-and-network".
-const CACHE_AND_NETWORK_QUERY_OPTIONS = {
-  staleTime: 0,
-  refetchOnMount: "always",
-} as const;
-
 export const useDaoOverviewData = ({
   daoId,
   daoConfig,
@@ -49,11 +36,9 @@ export const useDaoOverviewData = ({
   );
 
   const { data: activeSupplyData, isLoading: activeSupplyLoading } =
-    useCompareActiveSupply(
-      dao as CompareActiveSupplyPathParamsDaoEnumKey,
-      { days: TimeInterval.NINETY_DAYS },
-      { query: NO_CACHE_QUERY_OPTIONS },
-    );
+    useCompareActiveSupply(dao as CompareActiveSupplyPathParamsDaoEnumKey, {
+      days: TimeInterval.NINETY_DAYS,
+    });
 
   const { data: averageTurnoutData, isLoading: averageTurnoutLoading } =
     useCompareAverageTurnout(dao as CompareAverageTurnoutPathParamsDaoEnumKey, {
@@ -63,13 +48,11 @@ export const useDaoOverviewData = ({
   const { data: tokenData, isLoading: tokenLoading } = useToken(
     dao as TokenPathParamsDaoEnumKey,
     { currency: "usd" },
-    { query: NO_CACHE_QUERY_OPTIONS },
   );
 
   const { data: delegatesData, isLoading: delegatesLoading } = useVotingPowers(
     dao as VotingPowersPathParamsDaoEnumKey,
     { orderDirection: "desc", limit: 20 },
-    { query: CACHE_AND_NETWORK_QUERY_OPTIONS },
   );
 
   const totalSupply = tokenData?.totalSupply;
