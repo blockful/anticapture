@@ -1017,7 +1017,7 @@
           },
           "description": {
             "type": "string",
-            "description": "Proposal body."
+            "description": "Proposal body. Omitted when the request sets `lean=true`."
           },
           "startBlock": {
             "type": "integer",
@@ -1118,7 +1118,6 @@
           "txHash",
           "proposerAccountId",
           "title",
-          "description",
           "startBlock",
           "endBlock",
           "timestamp",
@@ -4546,7 +4545,7 @@
       "get": {
         "operationId": "proposals",
         "summary": "Get proposals",
-        "description": "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and reduce payload size.",
+        "description": "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and the proposal description, reducing payload size.",
         "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
@@ -4636,11 +4635,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -4686,7 +4685,7 @@
       "get": {
         "operationId": "searchProposals",
         "summary": "Search proposals",
-        "description": "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets.",
+        "description": "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets and the proposal description.",
         "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
@@ -4735,11 +4734,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -4785,7 +4784,7 @@
       "get": {
         "operationId": "proposal",
         "summary": "Get a proposal by ID",
-        "description": "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets.",
+        "description": "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets and the proposal description.",
         "tags": ["proposals"],
         "parameters": [
           {
@@ -4810,11 +4809,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
