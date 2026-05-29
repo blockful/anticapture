@@ -1,11 +1,11 @@
 "use client";
 
+import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
+import { useParams } from "next/navigation";
+
 import { useVotingPowerByAccountId } from "@anticapture/client/hooks";
 import type { VotingPowerByAccountIdPathParamsDaoEnumKey } from "@anticapture/client";
-import { useParams } from "next/navigation";
-import { useMemo } from "react";
-import { formatUnits } from "viem";
-import { useAccount } from "wagmi";
 
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -15,29 +15,22 @@ export const useConnectedWalletVotingPower = () => {
   const { address } = useAccount();
   const { daoId } = useParams<{ daoId: string }>();
 
-  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum | undefined;
-  const daoConfig = daoIdEnum ? daoConfigByDaoId[daoIdEnum] : null;
+  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
+  const daoConfig = daoConfigByDaoId[daoIdEnum] ?? null;
 
   const { data, isLoading } = useVotingPowerByAccountId(
-    (daoIdEnum?.toLowerCase() ??
-      "") as VotingPowerByAccountIdPathParamsDaoEnumKey,
+    daoIdEnum.toLowerCase() as VotingPowerByAccountIdPathParamsDaoEnumKey,
     address ?? "",
     undefined,
-    { query: { enabled: Boolean(address && daoIdEnum && daoConfig) } },
+    { query: { enabled: Boolean(address && daoConfig) } },
   );
 
-  const votingPower = useMemo(() => {
-    if (!daoConfig || !data?.votingPower) {
-      return null;
-    }
-
-    return formatNumberUserReadable(
-      Number(formatUnits(BigInt(data.votingPower), daoConfig.decimals)),
-    );
-  }, [daoConfig, data?.votingPower]);
-
   return {
-    votingPower,
+    votingPower: data?.votingPower
+      ? formatNumberUserReadable(
+          Number(formatUnits(data.votingPower, daoConfig.decimals)),
+        )
+      : null,
     loading: isLoading,
   };
 };

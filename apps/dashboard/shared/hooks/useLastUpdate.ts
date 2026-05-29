@@ -1,8 +1,5 @@
 import { useLastUpdate as useLastUpdateQuery } from "@anticapture/client/hooks";
-import type {
-  LastUpdatePathParamsDaoEnumKey,
-  LastUpdateQueryParamsChartEnumKey,
-} from "@anticapture/client";
+import type { LastUpdatePathParamsDaoEnumKey } from "@anticapture/client";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
@@ -15,12 +12,12 @@ export enum ChartType {
 export const useLastUpdate = (daoId: DaoIdEnum, chart: ChartType) => {
   const { data, isLoading, error } = useLastUpdateQuery(
     daoId.toLowerCase() as LastUpdatePathParamsDaoEnumKey,
-    { chart: chart as LastUpdateQueryParamsChartEnumKey },
+    { chart },
   );
 
   return {
-    data: data ?? null,
+    data,
     isLoading,
-    error: error ?? null,
+    error,
   };
 };
