@@ -1,4 +1,4 @@
-import { useGetDelegatedSupplyHistoryQuery } from "@anticapture/graphql-client/hooks";
+import { useAverageDelegationPercentage } from "@anticapture/client/hooks";
 
 interface DelegationPercentageItem {
   date: string;
@@ -12,24 +12,24 @@ interface UseDelegationPercentageByDayResult {
   refetch: () => void;
 }
 
+const DELEGATION_HISTORY_LIMIT = 365;
+
 export const useDelegationPercentageByDay = (
-  startDate: string,
-  endDate?: string,
+  startDate: number,
+  endDate?: number,
 ): UseDelegationPercentageByDayResult => {
-  const { data, loading, error, refetch } = useGetDelegatedSupplyHistoryQuery({
-    variables: {
-      startDate,
-      endDate: endDate ?? null,
-    },
+  const { data, isLoading, error, refetch } = useAverageDelegationPercentage({
+    startDate,
+    endDate,
+    limit: DELEGATION_HISTORY_LIMIT,
   });
 
   return {
-    data:
-      (data?.averageDelegationPercentageByDay?.items as
-        | DelegationPercentageItem[]
-        | null) || null,
-    loading,
-    error: error || null,
-    refetch: () => refetch(),
+    data: data?.items ?? null,
+    loading: isLoading,
+    error: error instanceof Error ? error : null,
+    refetch: () => {
+      refetch();
+    },
   };
 };
