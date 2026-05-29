@@ -29,7 +29,7 @@ const OnchainProposalStatusListSchema = commaDelimitedEnumQueryParam(
 const leanQueryParam = () =>
   booleanQueryParam(false).openapi({
     description:
-      "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+      "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
     example: false,
   });
 
@@ -109,7 +109,9 @@ export const ProposalResponseSchema = z
       format: "ethereum-address",
     }),
     title: z.string().openapi({ description: "Proposal title." }),
-    description: z.string().openapi({ description: "Proposal body." }),
+    description: z.string().optional().openapi({
+      description: "Proposal body. Omitted when the request sets `lean=true`.",
+    }),
     startBlock: z
       .number()
       .int()
@@ -207,7 +209,6 @@ export const ProposalMapper = {
       txHash: p.txHash,
       proposerAccountId: p.proposerAccountId,
       title: p.title,
-      description: p.description,
       startBlock: p.startBlock,
       endBlock: p.endBlock,
       timestamp: Number(p.timestamp),
@@ -231,6 +232,7 @@ export const ProposalMapper = {
     if (options.lean) return base;
     return {
       ...base,
+      description: p.description,
       calldatas: p.calldatas,
       values: p.values.map((v) => v.toString()),
       targets: p.targets,
