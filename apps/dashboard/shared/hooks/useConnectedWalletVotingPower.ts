@@ -1,6 +1,7 @@
 "use client";
 
-import { useGetVotingPowerQuery } from "@anticapture/graphql-client/hooks";
+import { useVotingPowerByAccountId } from "@anticapture/client/hooks";
+import type { VotingPowerByAccountIdPathParamsDaoEnumKey } from "@anticapture/client";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
@@ -17,35 +18,26 @@ export const useConnectedWalletVotingPower = () => {
   const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum | undefined;
   const daoConfig = daoIdEnum ? daoConfigByDaoId[daoIdEnum] : null;
 
-  const { data, loading } = useGetVotingPowerQuery({
-    variables: {
-      address: address ?? "",
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoIdEnum,
-      },
-    },
-    skip: !address || !daoIdEnum || !daoConfig,
-  });
+  const { data, isLoading } = useVotingPowerByAccountId(
+    (daoIdEnum?.toLowerCase() ??
+      "") as VotingPowerByAccountIdPathParamsDaoEnumKey,
+    address ?? "",
+    undefined,
+    { query: { enabled: Boolean(address && daoIdEnum && daoConfig) } },
+  );
 
   const votingPower = useMemo(() => {
-    if (!daoConfig || !data?.votingPowerByAccountId?.votingPower) {
+    if (!daoConfig || !data?.votingPower) {
       return null;
     }
 
     return formatNumberUserReadable(
-      Number(
-        formatUnits(
-          BigInt(data.votingPowerByAccountId.votingPower),
-          daoConfig.decimals,
-        ),
-      ),
+      Number(formatUnits(BigInt(data.votingPower), daoConfig.decimals)),
     );
-  }, [daoConfig, data?.votingPowerByAccountId?.votingPower]);
+  }, [daoConfig, data?.votingPower]);
 
   return {
     votingPower,
-    loading,
+    loading: isLoading,
   };
 };

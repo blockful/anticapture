@@ -1,7 +1,8 @@
-import {
-  QueryInput_LastUpdate_Chart,
-  useLastUpdateQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useLastUpdate as useLastUpdateQuery } from "@anticapture/client/hooks";
+import type {
+  LastUpdatePathParamsDaoEnumKey,
+  LastUpdateQueryParamsChartEnumKey,
+} from "@anticapture/client";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
@@ -11,28 +12,15 @@ export enum ChartType {
   TokenDistribution = "token_distribution",
 }
 
-const CHART_TYPE_MAP: Record<ChartType, QueryInput_LastUpdate_Chart> = {
-  [ChartType.CostComparison]: QueryInput_LastUpdate_Chart.CostComparison,
-  [ChartType.AttackProfitability]:
-    QueryInput_LastUpdate_Chart.AttackProfitability,
-  [ChartType.TokenDistribution]: QueryInput_LastUpdate_Chart.TokenDistribution,
-};
-
 export const useLastUpdate = (daoId: DaoIdEnum, chart: ChartType) => {
-  const { data, loading, error } = useLastUpdateQuery({
-    variables: {
-      chart: CHART_TYPE_MAP[chart],
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-  });
+  const { data, isLoading, error } = useLastUpdateQuery(
+    daoId.toLowerCase() as LastUpdatePathParamsDaoEnumKey,
+    { chart: chart as LastUpdateQueryParamsChartEnumKey },
+  );
 
   return {
-    data: data?.lastUpdate ?? null,
-    isLoading: loading,
-    error: error || null,
+    data: data ?? null,
+    isLoading,
+    error: error ?? null,
   };
 };

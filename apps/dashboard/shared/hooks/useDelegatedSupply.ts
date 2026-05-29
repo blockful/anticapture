@@ -1,28 +1,21 @@
-import {
+import { useCompareDelegatedSupply } from "@anticapture/client/hooks";
+import type {
+  CompareDelegatedSupplyPathParamsDaoEnumKey,
   DaysWindow,
-  useCompareDelegatedSupplyQuery,
-} from "@anticapture/graphql-client/hooks";
+} from "@anticapture/client";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export const useDelegatedSupply = (daoId: DaoIdEnum, days: string) => {
-  const daysKey = days as keyof typeof DaysWindow;
-
-  const { data, loading, error } = useCompareDelegatedSupplyQuery({
-    variables: {
-      days: DaysWindow[daysKey],
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    skip: !daoId || !days,
-  });
+  const { data, isLoading, error } = useCompareDelegatedSupply(
+    daoId.toLowerCase() as CompareDelegatedSupplyPathParamsDaoEnumKey,
+    { days: days as DaysWindow },
+    { query: { enabled: Boolean(daoId && days) } },
+  );
 
   return {
-    data: data?.compareDelegatedSupply ?? null,
-    isLoading: loading,
-    error: error || null,
+    data: data ?? null,
+    isLoading,
+    error: error ?? null,
   };
 };
