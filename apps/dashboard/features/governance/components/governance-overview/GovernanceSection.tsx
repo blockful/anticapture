@@ -278,7 +278,7 @@ export const GovernanceSection = () => {
     </div>
   );
 
-  if (error) {
+  if (error && activeTab !== "drafts") {
     return (
       <div className="bg-background flex min-h-screen flex-col">
         <TheSectionLayout
