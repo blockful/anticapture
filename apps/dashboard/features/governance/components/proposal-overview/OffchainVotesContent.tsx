@@ -101,6 +101,7 @@ export const OffchainVotesContent = ({
     error,
     fetchNextPage,
     hasNextPage,
+    isFetchingNextPage,
   } = useVotesOffchainByProposalIdInfinite(
     daoId.toLowerCase() as VotesOffchainByProposalIdPathParamsDaoEnumKey,
     proposalId,
@@ -113,20 +114,21 @@ export const OffchainVotesContent = ({
     [data],
   );
 
-  const loadMore = useCallback(() => {
-    void fetchNextPage();
-  }, [fetchNextPage]);
-
+  // Intersection observer on the loading row. `isFetchingNextPage` flips
+  // true -> false on each page, re-running this effect so the observer
+  // re-attaches to the freshly rendered sentinel (mirrors the on-chain votes).
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting && hasNextPage && !loading) loadMore();
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
       },
       { threshold: 0.1 },
     );
     if (loadingRowRef.current) observer.observe(loadingRowRef.current);
     return () => observer.disconnect();
-  }, [hasNextPage, loading, loadMore]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const tableData = useMemo(() => {
     const rows: OffchainVoteRow[] = [];
@@ -145,7 +147,7 @@ export const OffchainVotesContent = ({
       }
     });
 
-    if (hasNextPage || (loading && votes.length > 0)) {
+    if (hasNextPage || isFetchingNextPage) {
       rows.push({
         voter: LOADING_ROW,
         choice: [],
@@ -156,7 +158,7 @@ export const OffchainVotesContent = ({
     }
 
     return rows;
-  }, [votes, hasNextPage, loading]);
+  }, [votes, hasNextPage, isFetchingNextPage]);
 
   const columns: ColumnDef<OffchainVoteRow>[] = useMemo(
     () => [
