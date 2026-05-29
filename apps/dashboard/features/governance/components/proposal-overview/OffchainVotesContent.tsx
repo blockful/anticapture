@@ -1,11 +1,13 @@
 "use client";
 
-import type { OffchainVote } from "@anticapture/graphql-client";
 import {
-  OrderDirection,
-  QueryInput_VotesOffchainByProposalId_OrderBy,
-  useGetOffchainVotesByProposalIdQuery,
-} from "@anticapture/graphql-client/hooks";
+  getNextPageParam,
+  type OffchainVote,
+  type OrderDirection,
+  type VotesOffchainByProposalIdPathParamsDaoEnumKey,
+  type VotesOffchainByProposalIdQueryParamsOrderByEnumKey,
+} from "@anticapture/client";
+import { useVotesOffchainByProposalIdInfinite } from "@anticapture/client/hooks";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CheckCircle2, CircleMinus, Inbox, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -25,6 +27,16 @@ import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadabl
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 
 const LOADING_ROW = "__LOADING_ROW__";
+
+// Table rows include synthetic sentinel rows (loading + description sub-rows)
+// whose `voter` is not a real address, so widen it from the strict `Address`.
+type OffchainVoteRow = Omit<
+  OffchainVote,
+  "voter" | "proposalId" | "proposalTitle"
+> & {
+  voter: string;
+  isSubRow?: boolean;
+};
 
 const getLabelDisplay = (label: string) => {
   const lower = label.toLowerCase();
@@ -68,77 +80,42 @@ export const OffchainVotesContent = ({
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
 
   const [orderBy, setOrderBy] =
-    useState<QueryInput_VotesOffchainByProposalId_OrderBy>(
-      QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp,
-    );
-  const [orderDirection, setOrderDirection] = useState<OrderDirection>(
-    OrderDirection.Desc,
-  );
+    useState<VotesOffchainByProposalIdQueryParamsOrderByEnumKey>("timestamp");
+  const [orderDirection, setOrderDirection] = useState<OrderDirection>("desc");
 
   const handleSort = useCallback(
-    (field: QueryInput_VotesOffchainByProposalId_OrderBy) => {
+    (field: VotesOffchainByProposalIdQueryParamsOrderByEnumKey) => {
       if (orderBy === field) {
-        setOrderDirection((prev) =>
-          prev === OrderDirection.Asc
-            ? OrderDirection.Desc
-            : OrderDirection.Asc,
-        );
+        setOrderDirection((prev) => (prev === "asc" ? "desc" : "asc"));
       } else {
         setOrderBy(field);
-        setOrderDirection(OrderDirection.Desc);
+        setOrderDirection("desc");
       }
     },
     [orderBy],
   );
 
-  const { data, loading, error, fetchMore } =
-    useGetOffchainVotesByProposalIdQuery({
-      variables: {
-        id: proposalId,
-        limit: 10,
-        skip: 0,
-        fromDate: null,
-        toDate: null,
-        voterAddresses: null,
-        orderBy,
-        orderDirection,
-      },
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-        },
-      },
-      skip: !proposalId,
-    });
+  const {
+    data,
+    isLoading: loading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+  } = useVotesOffchainByProposalIdInfinite(
+    daoId.toLowerCase() as VotesOffchainByProposalIdPathParamsDaoEnumKey,
+    proposalId,
+    { limit: 10, orderBy, orderDirection },
+    { query: { enabled: !!proposalId, getNextPageParam } },
+  );
 
   const votes = useMemo(
-    () =>
-      (data?.votesOffchainByProposalId?.items ?? []).filter(
-        (vote): vote is OffchainVote => vote !== null,
-      ),
+    () => data?.pages.flatMap((page) => page.items) ?? [],
     [data],
   );
-  const totalCount = data?.votesOffchainByProposalId?.totalCount ?? 0;
-  const hasNextPage = votes.length < totalCount;
 
   const loadMore = useCallback(() => {
-    fetchMore({
-      variables: { skip: votes.length },
-      updateQuery: (prev, { fetchMoreResult }) => {
-        if (!fetchMoreResult?.votesOffchainByProposalId?.items) return prev;
-        return {
-          ...prev,
-          votesOffchainByProposalId: {
-            ...prev.votesOffchainByProposalId!,
-            items: [
-              ...(prev.votesOffchainByProposalId?.items ?? []),
-              ...fetchMoreResult.votesOffchainByProposalId.items,
-            ],
-          },
-        };
-      },
-    });
-  }, [fetchMore, votes.length]);
+    void fetchNextPage();
+  }, [fetchNextPage]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -152,9 +129,7 @@ export const OffchainVotesContent = ({
   }, [hasNextPage, loading, loadMore]);
 
   const tableData = useMemo(() => {
-    const rows: (Omit<OffchainVote, "proposalId" | "proposalTitle"> & {
-      isSubRow?: boolean;
-    })[] = [];
+    const rows: OffchainVoteRow[] = [];
 
     votes.forEach((vote) => {
       rows.push(vote);
@@ -180,10 +155,10 @@ export const OffchainVotesContent = ({
       });
     }
 
-    return rows as OffchainVote[];
+    return rows;
   }, [votes, hasNextPage, loading]);
 
-  const columns: ColumnDef<OffchainVote>[] = useMemo(
+  const columns: ColumnDef<OffchainVoteRow>[] = useMemo(
     () => [
       {
         accessorKey: "voter",
@@ -295,17 +270,14 @@ export const OffchainVotesContent = ({
             variant="ghost"
             size="sm"
             className="text-secondary w-full justify-start"
-            onClick={() =>
-              handleSort(QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp)
-            }
+            onClick={() => handleSort("timestamp")}
           >
             <h4 className="text-table-header whitespace-nowrap">Date</h4>
             <ArrowUpDown
               props={{ className: "size-4 ml-1" }}
               activeState={
-                orderBy ===
-                QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp
-                  ? orderDirection === OrderDirection.Asc
+                orderBy === "timestamp"
+                  ? orderDirection === "asc"
                     ? ArrowState.UP
                     : ArrowState.DOWN
                   : ArrowState.DEFAULT
@@ -359,11 +331,7 @@ export const OffchainVotesContent = ({
             variant="ghost"
             size="sm"
             className="text-secondary w-full justify-start"
-            onClick={() =>
-              handleSort(
-                QueryInput_VotesOffchainByProposalId_OrderBy.VotingPower,
-              )
-            }
+            onClick={() => handleSort("votingPower")}
           >
             <h4 className="text-table-header whitespace-nowrap">
               Voting Power
@@ -371,9 +339,8 @@ export const OffchainVotesContent = ({
             <ArrowUpDown
               props={{ className: "size-4 ml-1" }}
               activeState={
-                orderBy ===
-                QueryInput_VotesOffchainByProposalId_OrderBy.VotingPower
-                  ? orderDirection === OrderDirection.Asc
+                orderBy === "votingPower"
+                  ? orderDirection === "asc"
                     ? ArrowState.UP
                     : ArrowState.DOWN
                   : ArrowState.DEFAULT
@@ -419,14 +386,19 @@ export const OffchainVotesContent = ({
     ],
   );
 
-  if (error) return <div>Error: {error.message}</div>;
+  if (error)
+    return (
+      <div>
+        Error: {error instanceof Error ? error.message : "Failed to load votes"}
+      </div>
+    );
 
   if (loading && votes.length === 0) {
     return (
       <div className="w-full lg:p-4">
         <VotesTable
           columns={columns}
-          data={Array.from({ length: 7 }, () => ({}) as OffchainVote)}
+          data={Array.from({ length: 7 }, () => ({}) as OffchainVoteRow)}
         />
       </div>
     );
