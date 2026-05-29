@@ -21,12 +21,10 @@ import { formatNumberUserReadable } from "@/shared/utils";
 
 type VoteChoice = number | number[] | Record<string, number>;
 
-type OffchainProposalData = OffchainProposal;
-
 interface OffchainVotingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  proposal: OffchainProposalData;
+  proposal: OffchainProposal;
   hasVoted?: boolean;
   onVoteSuccess?: (voteLabel: string) => void;
 }
@@ -45,14 +43,11 @@ export const OffchainVotingModal = ({
   const { vote, isPending: isVoting } = useVoteOnOffchainProposal();
   const strategies = useMemo(
     () =>
-      proposal.strategies
-        ?.filter((s): s is NonNullable<typeof s> => s !== null)
-        .map((s) => ({
-          name: s.name,
-          network: s.network,
-          params:
-            typeof s.params === "string" ? JSON.parse(s.params) : s.params,
-        })),
+      proposal.strategies.map((s) => ({
+        name: s.name,
+        network: s.network,
+        params: typeof s.params === "string" ? JSON.parse(s.params) : s.params,
+      })),
     [proposal.strategies],
   );
   const {

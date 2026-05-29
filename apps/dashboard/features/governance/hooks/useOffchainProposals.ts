@@ -6,22 +6,12 @@ import {
   type OrderDirection,
 } from "@anticapture/client";
 import { useOffchainProposalsInfinite } from "@anticapture/client/hooks";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
-import type { PaginationInfo } from "@/features/governance/hooks/useProposals";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type OffchainProposalItem =
   OffchainProposalsQueryResponse["items"][number];
-
-export interface UseOffchainProposalsResult {
-  proposals: OffchainProposalItem[];
-  loading: boolean;
-  error: Error | null;
-  pagination: PaginationInfo;
-  fetchNextPage: () => Promise<void>;
-  isPaginationLoading: boolean;
-}
 
 export interface UseOffchainProposalsParams {
   fromDate?: number | null;
@@ -37,7 +27,7 @@ export const useOffchainProposals = ({
   status,
   itemsPerPage = 10,
   daoId,
-}: UseOffchainProposalsParams = {}): UseOffchainProposalsResult => {
+}: UseOffchainProposalsParams = {}) => {
   const queryParams = useMemo<OffchainProposalsQueryParams>(
     () => ({
       limit: itemsPerPage,
@@ -68,32 +58,18 @@ export const useOffchainProposals = ({
 
   const totalCount = data?.pages[0]?.totalCount ?? 0;
 
-  const pagination: PaginationInfo = useMemo(() => {
-    const currentItemsCount = proposals.length;
-    const currentPage = Math.ceil(currentItemsCount / itemsPerPage);
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
-
-    return {
-      hasNextPage: Boolean(hasNextPage),
-      totalCount,
-      currentPage,
-      totalPages,
-      itemsPerPage,
-      currentItemsCount,
-    };
-  }, [proposals.length, totalCount, itemsPerPage, hasNextPage]);
-
-  const handleFetchNextPage = useCallback(async () => {
-    if (!hasNextPage || isFetchingNextPage) return;
-    await fetchNextPage();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   return {
     proposals,
     loading: isLoading,
-    error: error instanceof Error ? error : null,
-    pagination,
-    fetchNextPage: handleFetchNextPage,
+    error,
+    pagination: {
+      hasNextPage: Boolean(hasNextPage),
+      totalCount,
+      currentPage: Math.ceil(proposals.length / itemsPerPage),
+      totalPages: Math.ceil(totalCount / itemsPerPage),
+      itemsPerPage,
+    },
+    fetchNextPage,
     isPaginationLoading: isFetchingNextPage,
   };
 };

@@ -125,7 +125,7 @@ export const GovernanceSection = () => {
     isFetchingNextPage: isOnchainPaginationLoading,
     hasNextPage: hasNextOnchainPage,
   } = useProposals({
-    itemsPerPage: 10,
+    limit: 10,
     orderDirection: orderDirectionEnum.desc,
     daoId: daoIdEnum,
     fromDate: undefined,
