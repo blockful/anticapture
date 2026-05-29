@@ -2,17 +2,14 @@
 
 import type {
   ProposalNonVotersPathParamsDaoEnumKey,
+  TokenMetricsPathParamsDaoEnumKey,
   VotesByProposalIdPathParamsDaoEnumKey,
 } from "@anticapture/client";
 import {
   useProposalNonVoters,
+  useTokenMetrics,
   useVotesByProposalId,
 } from "@anticapture/client/hooks";
-import {
-  OrderDirection,
-  QueryInput_TokenMetrics_MetricType,
-} from "@anticapture/graphql-client";
-import { useTokenMetricsQuery } from "@anticapture/graphql-client/hooks";
 import { useParams } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { formatUnits } from "viem";
@@ -49,21 +46,15 @@ export const VotesTabContent = ({
   const nonVotersDaoKey =
     daoIdEnum.toLowerCase() as ProposalNonVotersPathParamsDaoEnumKey;
 
-  const { data: delegatedSupplyData } = useTokenMetricsQuery({
-    variables: {
-      metricType: QueryInput_TokenMetrics_MetricType.DelegatedSupply,
-      startDate: null,
+  const { data: delegatedSupplyData } = useTokenMetrics(
+    daoIdEnum.toLowerCase() as TokenMetricsPathParamsDaoEnumKey,
+    {
+      metricType: "DELEGATED_SUPPLY",
       endDate: Number(proposal.endTimestamp),
-      orderDirection: OrderDirection.Desc,
+      orderDirection: "desc",
       limit: 1,
-      skip: null,
     },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoIdEnum,
-      },
-    },
-  });
+  );
 
   const { data } = useVotesByProposalId(
     votesDaoKey,
@@ -100,8 +91,7 @@ export const VotesTabContent = ({
     BigInt(proposal.againstVotes) +
     BigInt(proposal.abstainVotes);
 
-  const historicalDelegatedSupply =
-    delegatedSupplyData?.tokenMetrics?.items?.[0]?.high;
+  const historicalDelegatedSupply = delegatedSupplyData?.items?.[0]?.high;
 
   const delegatedSupplyBigInt = historicalDelegatedSupply
     ? BigInt(historicalDelegatedSupply)
