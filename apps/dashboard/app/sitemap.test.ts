@@ -15,6 +15,7 @@ jest.mock("@anticapture/client", () => ({
 
 function buildOnchainProposal(id: string): OnchainProposal {
   return {
+    variant: "full",
     abstainVotes: 0n,
     againstVotes: 0n,
     calldatas: [],

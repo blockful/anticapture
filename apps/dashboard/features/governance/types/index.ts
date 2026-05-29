@@ -3,9 +3,24 @@ import type {
   ProposalsQueryResponse,
 } from "@anticapture/client";
 
-type ClientProposalListItem = ProposalsQueryResponse["items"][number];
+// The proposals endpoints return a `variant`-tagged union (full | lean). The
+// dashboard's detail/list views always request the full payload, so narrow to
+// the full variant and drop the discriminator to keep these domain types flat.
+export type OnchainFullProposalItem = Extract<
+  ProposalsQueryResponse["items"][number],
+  { variant: "full" }
+>;
 
-type ClientProposalDetails = ProposalQueryResponse;
+export const isFullProposal = (
+  proposal: ProposalsQueryResponse["items"][number],
+): proposal is OnchainFullProposalItem => proposal.variant === "full";
+
+type ClientProposalListItem = Omit<OnchainFullProposalItem, "variant">;
+
+type ClientProposalDetails = Omit<
+  Extract<ProposalQueryResponse, { variant: "full" }>,
+  "variant"
+>;
 
 export enum ProposalStatus {
   PENDING = "pending",

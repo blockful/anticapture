@@ -2,4 +2,4 @@
 "@anticapture/dashboard": patch
 ---
 
-Handle the now-optional proposal `description` in the proposal description tab, since the onchain proposals contract omits it when `lean=true`.
+Adapt the governance UI to the new `variant`-tagged onchain proposals response: narrow the SDK union to the `full` variant in the proposal hooks, search adapter, and detail page (the dashboard always requests the full payload).

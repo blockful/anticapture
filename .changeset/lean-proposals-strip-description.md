@@ -4,4 +4,4 @@
 "@anticapture/api-gateway": patch
 ---
 
-Onchain proposals endpoints (`/proposals`, `/proposals/search`, `/proposals/{id}`) now also omit the `description` field when `lean=true`, further reducing payload size.
+Model the onchain proposals response (`/proposals`, `/proposals/search`, `/proposals/{id}`) as a `variant`-tagged discriminated union. When `lean=true` the API returns the `lean` variant (omitting calldatas/values/targets and the proposal description to reduce payload size); otherwise it returns the `full` variant. Clients can narrow on the `variant` discriminator for exact typing instead of guarding optional fields.

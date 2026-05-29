@@ -97,83 +97,92 @@ export const ProposalByIdQuerySchema = z
 
 export type ProposalSearchRequest = z.infer<typeof ProposalSearchRequestSchema>;
 
+const ProposalCoreSchema = z.object({
+  id: z.string().openapi({ description: "Onchain proposal identifier." }),
+  daoId: daoIdField(),
+  txHash: z
+    .string()
+    .openapi({ description: "Proposal creation transaction hash." }),
+  proposerAccountId: z.string().openapi({
+    description: "Address that created the proposal.",
+    format: "ethereum-address",
+  }),
+  title: z.string().openapi({ description: "Proposal title." }),
+  startBlock: z.number().int().openapi({ description: "Start block number." }),
+  endBlock: z.number().int().openapi({ description: "End block number." }),
+  timestamp: unixSecondsIntField(
+    "Proposal creation timestamp in Unix seconds.",
+  ),
+  status: z.string().openapi({ description: "Current proposal status." }),
+  forVotes: decimalStringField(
+    "Votes cast in favor, encoded as a decimal string.",
+  ),
+  againstVotes: decimalStringField(
+    "Votes cast against, encoded as a decimal string.",
+  ),
+  abstainVotes: decimalStringField(
+    "Abstain votes, encoded as a decimal string.",
+  ),
+  startTimestamp: unixSecondsIntField(
+    "Proposal start timestamp in Unix seconds.",
+  ),
+  endTimestamp: unixSecondsIntField("Proposal end timestamp in Unix seconds."),
+  queuedTimestamp: unixSecondsIntField(
+    "Timestamp (Unix seconds) when the proposal was queued, or null if it never was.",
+  ).nullable(),
+  executedTimestamp: unixSecondsIntField(
+    "Timestamp (Unix seconds) when the proposal was executed, or null if it never was.",
+  ).nullable(),
+  queuedTxHash: z.string().nullable().openapi({
+    description:
+      "Transaction hash of the queue event, or null if the proposal was never queued.",
+  }),
+  executedTxHash: z.string().nullable().openapi({
+    description:
+      "Transaction hash of the execute event, or null if the proposal was never executed.",
+  }),
+  quorum: decimalStringField("Required quorum encoded as a decimal string."),
+  proposalType: z.number().int().nullable().openapi({
+    description: "Optional proposal type discriminator.",
+  }),
+});
+
+const FullProposalSchema = ProposalCoreSchema.extend({
+  variant: z.literal("full").openapi({
+    description:
+      "Discriminator. `full` when the execution payload and proposal description are included.",
+  }),
+  description: z.string().openapi({ description: "Proposal body." }),
+  calldatas: z.array(z.string()).openapi({
+    description: "Encoded calldata payloads executed by the proposal.",
+  }),
+  values: z.array(z.string().openapi({ format: "bigint" })).openapi({
+    description: "ETH values attached to each call, encoded as strings.",
+  }),
+  targets: z.array(z.string().openapi({ format: "ethereum-address" })).openapi({
+    description: "Contract targets invoked by the proposal.",
+  }),
+}).openapi("OnchainFullProposal", {
+  description:
+    "Full onchain proposal, returned when the request does not set `lean=true`.",
+});
+
+const LeanProposalSchema = ProposalCoreSchema.extend({
+  variant: z.literal("lean").openapi({
+    description:
+      "Discriminator. `lean` when the execution payload (calldatas/values/targets) and proposal description are omitted to reduce response size.",
+  }),
+}).openapi("OnchainLeanProposal", {
+  description:
+    "Lean onchain proposal, returned when the request sets `lean=true`. Omits calldatas/values/targets and the proposal description.",
+});
+
 export const ProposalResponseSchema = z
-  .object({
-    id: z.string().openapi({ description: "Onchain proposal identifier." }),
-    daoId: daoIdField(),
-    txHash: z
-      .string()
-      .openapi({ description: "Proposal creation transaction hash." }),
-    proposerAccountId: z.string().openapi({
-      description: "Address that created the proposal.",
-      format: "ethereum-address",
-    }),
-    title: z.string().openapi({ description: "Proposal title." }),
-    description: z.string().optional().openapi({
-      description: "Proposal body. Omitted when the request sets `lean=true`.",
-    }),
-    startBlock: z
-      .number()
-      .int()
-      .openapi({ description: "Start block number." }),
-    endBlock: z.number().int().openapi({ description: "End block number." }),
-    timestamp: unixSecondsIntField(
-      "Proposal creation timestamp in Unix seconds.",
-    ),
-    status: z.string().openapi({ description: "Current proposal status." }),
-    forVotes: decimalStringField(
-      "Votes cast in favor, encoded as a decimal string.",
-    ),
-    againstVotes: decimalStringField(
-      "Votes cast against, encoded as a decimal string.",
-    ),
-    abstainVotes: decimalStringField(
-      "Abstain votes, encoded as a decimal string.",
-    ),
-    startTimestamp: unixSecondsIntField(
-      "Proposal start timestamp in Unix seconds.",
-    ),
-    endTimestamp: unixSecondsIntField(
-      "Proposal end timestamp in Unix seconds.",
-    ),
-    queuedTimestamp: unixSecondsIntField(
-      "Timestamp (Unix seconds) when the proposal was queued, or null if it never was.",
-    ).nullable(),
-    executedTimestamp: unixSecondsIntField(
-      "Timestamp (Unix seconds) when the proposal was executed, or null if it never was.",
-    ).nullable(),
-    queuedTxHash: z.string().nullable().openapi({
-      description:
-        "Transaction hash of the queue event, or null if the proposal was never queued.",
-    }),
-    executedTxHash: z.string().nullable().openapi({
-      description:
-        "Transaction hash of the execute event, or null if the proposal was never executed.",
-    }),
-    quorum: decimalStringField("Required quorum encoded as a decimal string."),
-    calldatas: z.array(z.string()).optional().openapi({
-      description:
-        "Encoded calldata payloads executed by the proposal. Omitted when the request sets `lean=true`.",
-    }),
-    values: z
-      .array(z.string().openapi({ format: "bigint" }))
-      .optional()
-      .openapi({
-        description:
-          "ETH values attached to each call, encoded as strings. Omitted when the request sets `lean=true`.",
-      }),
-    targets: z
-      .array(z.string().openapi({ format: "ethereum-address" }))
-      .optional()
-      .openapi({
-        description:
-          "Contract targets invoked by the proposal. Omitted when the request sets `lean=true`.",
-      }),
-    proposalType: z.number().int().nullable().openapi({
-      description: "Optional proposal type discriminator.",
-    }),
-  })
-  .openapi("OnchainProposal");
+  .discriminatedUnion("variant", [FullProposalSchema, LeanProposalSchema])
+  .openapi("OnchainProposal", {
+    description:
+      "Onchain proposal. Narrow by the `variant` discriminator: `full` includes the execution payload and description; `lean` omits them.",
+  });
 
 export const ProposalsResponseSchema = paginatedListResponse(
   ProposalResponseSchema,
@@ -203,7 +212,7 @@ export const ProposalMapper = {
     blockTime: number,
     options: { lean?: boolean } = {},
   ): ProposalResponse => {
-    const base: ProposalResponse = {
+    const core = {
       id: p.id,
       daoId: p.daoId,
       txHash: p.txHash,
@@ -229,9 +238,10 @@ export const ProposalMapper = {
       queuedTxHash: p.queuedTxHash,
       executedTxHash: p.executedTxHash,
     };
-    if (options.lean) return base;
+    if (options.lean) return { ...core, variant: "lean" };
     return {
-      ...base,
+      ...core,
+      variant: "full",
       description: p.description,
       calldatas: p.calldatas,
       values: p.values.map((v) => v.toString()),

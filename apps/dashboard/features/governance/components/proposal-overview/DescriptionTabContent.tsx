@@ -176,7 +176,7 @@ export const DescriptionTabContent = ({
           },
         }}
       >
-        {cleanMarkdown(proposal.description ?? "")}
+        {cleanMarkdown(proposal.description)}
       </Markdown>
     </div>
   );
