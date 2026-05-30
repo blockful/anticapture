@@ -36,7 +36,6 @@ const config: StorybookConfig = {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@apollo/client": dirname(require.resolve("@apollo/client/package.json")),
       "@anticapture/client$": resolve(
         __dirname,
         "../../../packages/client/generated/hooks.ts",

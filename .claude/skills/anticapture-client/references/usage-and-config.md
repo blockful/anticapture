@@ -2,41 +2,56 @@
 
 ## Usage in Dashboard
 
-### Import Generated Code
+### React Query hook (client components)
+
+Hooks live on the `/hooks` subpath. The DAO is the first (path) argument.
 
 ```typescript
-import { useGetDaoQuery, Dao } from "@anticapture/graphql-client";
+import { useCompareActiveSupply } from "@anticapture/client/hooks";
+import type { CompareActiveSupplyPathParamsDaoEnumKey } from "@anticapture/client";
 
-export function DaoComponent() {
-  const { data, loading, error } = useGetDaoQuery({
-    context: { headers: {"anticapture-dao-id": "ens"} },
-  });
+export const useCostOfAttack = (daoId: DaoIdEnum) => {
+  const activeSupply = useCompareActiveSupply(
+    daoId.toLowerCase() as CompareActiveSupplyPathParamsDaoEnumKey,
+    { days: 90 },
+  );
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-
-  const dao: Dao | undefined = data?.dao;
-
-  return <div>{dao?.name}</div>;
-}
+  return { activeSupply: activeSupply.data?.activeSupply };
+};
 ```
 
-For hooks-only imports, use:
+### Vanilla fetch (Server Components, sitemap, SEO, scripts)
+
+Plain async functions are exported from the package root — no hooks, no React.
 
 ```typescript
-import { useGetDaoQuery } from "@anticapture/graphql-client/hooks";
+import { offchainProposals } from "@anticapture/client";
+
+const response = await offchainProposals("ens", { limit: 10 });
+const proposals = response.data;
+```
+
+### Default headers
+
+Use `setClientConfig` at app startup to attach headers (e.g. an API key or
+`x-client-source` identifier) to every request:
+
+```typescript
+import { setClientConfig } from "@anticapture/client";
 ```
 
 ## Environment Variables
 
-Preferred local setup is `packages/graphql-client/.env` (copy from `.env.example`).
-`codegen.ts` also supports falling back to `../../apps/api-gateway/schema.graphql` when no endpoint env var is set.
+The SDK targets the Gateful REST API. The base URL is configured by the
+consumer (the dashboard sets `NEXT_PUBLIC_GATEFUL_URL`). Codegen itself reads
+the **local** OpenAPI spec file, so it needs no endpoint env var.
 
-| Variable                       | Required | Description                     |
-| ------------------------------ | -------- | ------------------------------- |
-| `ANTICAPTURE_GRAPHQL_ENDPOINT` | yes      | API Gateway URL (with /graphql) |
+| Variable                  | Required        | Description                                        |
+| ------------------------- | --------------- | -------------------------------------------------- |
+| `NEXT_PUBLIC_GATEFUL_URL` | yes (dashboard) | Gateful REST API base URL the SDK calls at runtime |
 
 ## Codegen Commands
 
-- `pnpm run --filter=@anticapture/graphql-client codegen`
-- `pnpm run --filter=@anticapture/graphql-client codegen:watch`
+- `pnpm client codegen` — generate the SDK from `apps/gateful/openapi/gateful.json`
+- `pnpm client dev` — watch mode (regenerate on spec change)
+- `pnpm client build` — bundle the publishable package with `tsup`

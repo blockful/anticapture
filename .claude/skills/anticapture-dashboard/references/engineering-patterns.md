@@ -11,8 +11,8 @@ Each file should do one thing. If a file is hard to describe in one sentence, sp
 ```tsx
 // Wrong: hook doing too much
 export const useDaoPage = (daoId: string) => {
-  const proposals = useGetProposalsFromDaoQuery(...);
-  const holders = useGetHoldersQuery(...);
+  const proposals = useProposals(...);
+  const holders = useAccountBalances(...);
   const githubRelease = useGitHubRelease();
   const { address } = useAccount();
   // ...
@@ -55,7 +55,7 @@ export const formatAddress = (address: string) => {
 
 ## Server Vs Client Components
 
-Add `"use client"` only when the component uses: `useState`, `useEffect`, `useRef`, event handlers, browser APIs, Recharts, wagmi, RainbowKit, nuqs, React Query, or Apollo hooks.
+Add `"use client"` only when the component uses: `useState`, `useEffect`, `useRef`, event handlers, browser APIs, Recharts, wagmi, RainbowKit, or nuqs.
 
 Push `"use client"` as deep as possible; sections/layouts stay Server Components and interactive leaves become Client Components.
 
@@ -75,14 +75,16 @@ For hooks doing more than one query, separate data fetching from data transforma
 
 ```tsx
 // useProposals.ts - fetches only
+import { useProposals as useProposalsQuery } from "@anticapture/client/hooks";
+import type { ProposalsPathParamsDaoEnumKey } from "@anticapture/client";
+
 export const useProposals = (daoId: DaoIdEnum) => {
-  const { data, loading, error } = useGetProposalsFromDaoQuery({
-    variables: { daoId },
-    context: { headers: { "anticapture-dao-id": daoId } },
-  });
+  const { data, isLoading, error } = useProposalsQuery(
+    daoId.toLowerCase() as ProposalsPathParamsDaoEnumKey,
+  );
   return {
-    rawProposals: data?.proposals?.items ?? [],
-    isLoading: loading,
+    rawProposals: data?.items ?? [],
+    isLoading,
     error,
   };
 };
