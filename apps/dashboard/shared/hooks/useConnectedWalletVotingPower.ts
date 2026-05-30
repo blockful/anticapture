@@ -13,8 +13,8 @@ export const useConnectedWalletVotingPower = () => {
   const { address } = useAccount();
   const { daoId } = useParams<{ daoId: string }>();
 
-  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum | undefined;
-  const daoConfig = daoIdEnum ? daoConfigByDaoId[daoIdEnum] : null;
+  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
+  const daoConfig = daoConfigByDaoId[daoIdEnum] ?? null;
 
   const { data, isLoading } = useVotingPowerByAccountId(
     daoId.toLowerCase() as VotingPowerByAccountIdPathParamsDaoEnumKey,
