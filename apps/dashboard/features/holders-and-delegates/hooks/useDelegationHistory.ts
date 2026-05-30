@@ -1,8 +1,8 @@
 "use client";
 
-import type {
-  HistoricalDelegationsPathParamsDaoEnumKey,
-  HistoricalDelegationsQueryResponse,
+import {
+  getNextPageParam,
+  type HistoricalDelegationsPathParamsDaoEnumKey,
 } from "@anticapture/client";
 import { useHistoricalDelegationsInfinite } from "@anticapture/client/hooks";
 import { useMemo } from "react";
@@ -18,14 +18,6 @@ interface UseDelegationHistoryParams {
   filterVariables?: AmountFilterVariables;
   limit?: number;
 }
-
-const getNextPageParam = (
-  lastPage: HistoricalDelegationsQueryResponse,
-  allPages: HistoricalDelegationsQueryResponse[],
-): number | undefined => {
-  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
-  return loaded >= lastPage.totalCount ? undefined : loaded;
-};
 
 export const useDelegationHistory = ({
   delegatorAccountId,
