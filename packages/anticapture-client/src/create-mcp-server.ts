@@ -64,7 +64,6 @@ import { getLiquidTreasuryHandler } from "../generated/mcp/treasuryHandlers/getL
 import { getTotalTreasuryHandler } from "../generated/mcp/treasuryHandlers/getTotalTreasury.ts";
 import { averageDelegationPercentageHandler } from "../generated/mcp/governanceHandlers/averageDelegationPercentage.ts";
 import { daosHandler } from "../generated/mcp/governanceHandlers/daos.ts";
-import { gatewayHealthHandler } from "../generated/mcp/systemHandlers/gatewayHealth.ts";
 import { votesHandler } from "../generated/mcp/votesHandlers/votes.ts";
 import { historicalVotingPowerHandler } from "../generated/mcp/voting-powerHandlers/historicalVotingPower.ts";
 import { historicalVotingPowerByAccountIdHandler } from "../generated/mcp/voting-powerHandlers/historicalVotingPowerByAccountId.ts";
@@ -120,7 +119,6 @@ import {
   averageDelegationPercentageQueryParamsSchema,
   averageDelegationPercentageQueryResponseSchema,
   daosQueryResponseSchema,
-  gatewayHealthQueryResponseSchema,
   getDaoTokenTreasuryQueryParamsSchema,
   getDaoTokenTreasuryQueryResponseSchema,
   getEventRelevanceThresholdQueryParamsSchema,
@@ -221,17 +219,6 @@ export function createMcpServer(): McpServer {
     name: "Anticapture Gateful REST API",
     version: "3.1.0",
   });
-
-  server.registerTool(
-    "gatewayHealth",
-    {
-      title: "Gateway health and per-DAO circuit breaker states",
-      description:
-        "Returns gateway readiness and the current circuit-breaker state of every configured DAO API.",
-      outputSchema: { data: gatewayHealthQueryResponseSchema },
-    },
-    async () => gatewayHealthHandler(),
-  );
 
   server.registerTool(
     "daos",

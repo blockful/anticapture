@@ -36,16 +36,10 @@ const config: StorybookConfig = {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@apollo/client": dirname(
-        require.resolve("@apollo/client/package.json"),
-      ),
-      "@anticapture/graphql-client$": resolve(
+      "@apollo/client": dirname(require.resolve("@apollo/client/package.json")),
+      "@anticapture/client$": resolve(
         __dirname,
-        "../../../packages/graphql-client/generated/hooks.ts",
-      ),
-      "@anticapture/graphql-client/hooks": resolve(
-        __dirname,
-        "../../../packages/graphql-client/generated/hooks.ts",
+        "../../../packages/client/generated/hooks.ts",
       ),
       "@react-native-async-storage/async-storage": false,
     };

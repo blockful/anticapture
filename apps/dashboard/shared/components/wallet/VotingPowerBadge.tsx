@@ -4,9 +4,9 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useConnectedWalletVotingPower } from "@/shared/hooks/useConnectedWalletVotingPower";
 
 export const VotingPowerBadge = () => {
-  const { votingPower, loading } = useConnectedWalletVotingPower();
+  const { votingPower, isLoading } = useConnectedWalletVotingPower();
 
-  if (loading) {
+  if (isLoading) {
     return <SkeletonRow className="h-4 w-16" parentClassName="flex" />;
   }
 

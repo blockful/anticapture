@@ -26,13 +26,15 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import {
   useCompareActiveSupply,
   useCompareAverageTurnout,
+  useCompareDelegatedSupply,
 } from "@anticapture/client/hooks";
 import type {
   CompareActiveSupplyPathParamsDaoEnumKey,
   CompareAverageTurnoutPathParamsDaoEnumKey,
+  CompareDelegatedSupplyPathParamsDaoEnumKey,
 } from "@anticapture/client";
 
-import { useDelegatedSupply, useScreenSize } from "@/shared/hooks";
+import { useScreenSize } from "@/shared/hooks";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { useDaoId } from "@/shared/providers/DaoIdProvider";
@@ -75,7 +77,15 @@ export const AttackCostBarChart = ({
   const { data: liquidTreasuryData, loading: liquidTreasuryLoading } =
     useTreasury(daoId, "liquid", TimeInterval.SEVEN_DAYS);
   const dao = daoId.toLowerCase();
-  const delegatedSupply = useDelegatedSupply(daoId, timeInterval);
+
+  const { data: delegatedSupply, isLoading: delegatedSupplyLoading } =
+    useCompareDelegatedSupply(
+      dao as CompareDelegatedSupplyPathParamsDaoEnumKey,
+      {
+        days: timeInterval,
+      },
+    );
+
   const activeSupply = useCompareActiveSupply(
     dao as CompareActiveSupplyPathParamsDaoEnumKey,
     { days: timeInterval },
@@ -104,14 +114,14 @@ export const AttackCostBarChart = ({
 
   const isLoading =
     liquidTreasuryLoading ||
-    delegatedSupply.isLoading ||
+    delegatedSupplyLoading ||
     activeSupply.isLoading ||
     averageTurnout.isLoading ||
     daoTokenPriceHistoricalDataLoading ||
     daoTopTokenHolderExcludingTheDaoLoading;
 
   const mocked =
-    delegatedSupply.data?.currentValue === undefined &&
+    delegatedSupply?.currentValue === undefined &&
     activeSupply.data?.activeSupply === undefined &&
     averageTurnout.data?.currentAverageTurnout === undefined &&
     daoTopTokenHolderExcludingTheDao?.balance === undefined;
@@ -154,7 +164,7 @@ export const AttackCostBarChart = ({
         value: formatValue(
           Number(
             formatUnits(
-              BigInt(delegatedSupply.data?.currentValue || 0),
+              BigInt(delegatedSupply?.currentValue || 0),
               daoConfig.decimals,
             ),
           ),
@@ -215,7 +225,7 @@ export const AttackCostBarChart = ({
     daoTokenPriceHistoricalData,
     valueMode,
     liquidTreasuryData,
-    delegatedSupply.data?.currentValue,
+    delegatedSupply?.currentValue,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,

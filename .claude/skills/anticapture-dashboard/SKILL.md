@@ -33,15 +33,15 @@ pnpm dashboard build        # Production build
 
 ## Environment Variables (`apps/dashboard/.env`)
 
-| Variable                                | Required | Description                  |
-| --------------------------------------- | -------- | ---------------------------- |
-| `NEXT_PUBLIC_BASE_URL`                  | yes      | API Gateway GraphQL endpoint |
-| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | yes      | WalletConnect project ID     |
-| `NEXT_PUBLIC_ALCHEMY_KEY`               | yes      | Alchemy RPC key              |
-| `NEXT_PUBLIC_SITE_URL`                  | no       | Site URL for SEO/meta        |
-| `RESEND_API_KEY`                        | no       | Resend email API key         |
-| `RESEND_FROM_EMAIL`                     | no       | Sender email address         |
-| `CONTACT_EMAIL`                         | no       | Recipient for contact form   |
+| Variable                                | Required | Description                |
+| --------------------------------------- | -------- | -------------------------- |
+| `NEXT_PUBLIC_GATEFUL_URL`               | yes      | API Gateway endpoint       |
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | yes      | WalletConnect project ID   |
+| `NEXT_PUBLIC_ALCHEMY_KEY`               | yes      | Alchemy RPC key            |
+| `NEXT_PUBLIC_SITE_URL`                  | no       | Site URL for SEO/meta      |
+| `RESEND_API_KEY`                        | no       | Resend email API key       |
+| `RESEND_FROM_EMAIL`                     | no       | Sender email address       |
+| `CONTACT_EMAIL`                         | no       | Recipient for contact form |
 
 ## Architecture
 

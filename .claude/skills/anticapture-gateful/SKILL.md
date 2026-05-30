@@ -1,6 +1,6 @@
 ---
 name: anticapture-gateway
-description: Use for apps/api-gateway work: Mesh configuration, DAO source discovery, REST-to-GraphQL resolvers, schema aggregation, and gateway tests.
+description: Use for apps/api-gateway work: Mesh configuration, DAO source discovery, schema aggregation, and gateway tests.
 ---
 
 # [DEPRECATED] API Gateway Package Guide
