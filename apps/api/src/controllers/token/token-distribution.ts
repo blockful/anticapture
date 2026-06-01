@@ -42,6 +42,10 @@ export function tokenDistribution(
         operationId,
         path: `/${path}/compare`,
         summary: `Compare ${path.replace(/-/g, " ")} between periods`,
+        description: `Returns the ${path.replace(
+          /-/g,
+          " ",
+        )} for the current period versus the previous one, with the change rate and raw delta.`,
         tags: ["tokens"],
         middleware: [setCacheControl(60)],
         request: {

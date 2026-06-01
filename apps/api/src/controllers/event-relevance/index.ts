@@ -16,6 +16,8 @@ export function eventRelevance(app: Hono, service: EventRelevanceService) {
       operationId: "getEventRelevanceThreshold",
       path: "/event-relevance/threshold",
       summary: "Get event relevance threshold",
+      description:
+        "Returns the minimum value at which a feed event of the given type qualifies for the requested relevance level.",
       tags: ["feed"],
       middleware: [setCacheControl(3600)],
       request: {
