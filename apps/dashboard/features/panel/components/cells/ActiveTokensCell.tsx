@@ -1,5 +1,10 @@
 "use client";
 
+import { useCompareActiveSupply, useToken } from "@anticapture/client/hooks";
+import type {
+  CompareActiveSupplyPathParamsDaoEnumKey,
+  TokenPathParamsDaoEnumKey,
+} from "@anticapture/client";
 import { useEffect } from "react";
 import { formatUnits } from "viem";
 
@@ -11,7 +16,6 @@ import {
 import { SkeletonRow } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useTokenData, useActiveSupply } from "@/shared/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils";
@@ -33,11 +37,14 @@ export const ActiveTokensCell = ({
   daoId,
   onSortValueChange,
 }: ActiveTokensCellProps) => {
-  const { data: activeSupplyData, isLoading } = useActiveSupply(
-    daoId,
-    TimeInterval.NINETY_DAYS,
+  const dao = daoId.toLowerCase();
+  const { data: activeSupplyData, isLoading } = useCompareActiveSupply(
+    dao as CompareActiveSupplyPathParamsDaoEnumKey,
+    { days: TimeInterval.NINETY_DAYS },
   );
-  const { data: tokenData } = useTokenData(daoId, "usd");
+  const { data: tokenData } = useToken(dao as TokenPathParamsDaoEnumKey, {
+    currency: "usd",
+  });
   const daoConfig = daoConfigByDaoId[daoId];
 
   const activePercentage = activeSupplyData?.activeSupply
@@ -69,11 +76,11 @@ export const ActiveTokensCell = ({
 
   const formattedPercentage = formatNumberUserReadable(activePercentage, 1);
   const activeSupplyFormatted = formatSupply(
-    activeSupplyData?.activeSupply,
+    activeSupplyData?.activeSupply?.toString(),
     daoConfig.decimals,
   );
   const circulatingSupplyFormatted = formatSupply(
-    tokenData?.circulatingSupply,
+    tokenData?.circulatingSupply?.toString(),
     daoConfig.decimals,
   );
   const daoSymbol = daoId.toUpperCase();

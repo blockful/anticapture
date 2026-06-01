@@ -1,10 +1,11 @@
 "use client";
 
-import { useGetVotingPowerQuery } from "@anticapture/graphql-client/hooks";
-import { useParams } from "next/navigation";
-import { useMemo } from "react";
-import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
+import { useParams } from "next/navigation";
+
+import { useVotingPowerByAccountId } from "@anticapture/client/hooks";
+import type { VotingPowerByAccountIdPathParamsDaoEnumKey } from "@anticapture/client";
 
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -14,38 +15,22 @@ export const useConnectedWalletVotingPower = () => {
   const { address } = useAccount();
   const { daoId } = useParams<{ daoId: string }>();
 
-  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum | undefined;
-  const daoConfig = daoIdEnum ? daoConfigByDaoId[daoIdEnum] : null;
+  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
+  const daoConfig = daoConfigByDaoId[daoIdEnum] ?? null;
 
-  const { data, loading } = useGetVotingPowerQuery({
-    variables: {
-      address: address ?? "",
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoIdEnum,
-      },
-    },
-    skip: !address || !daoIdEnum || !daoConfig,
-  });
-
-  const votingPower = useMemo(() => {
-    if (!daoConfig || !data?.votingPowerByAccountId?.votingPower) {
-      return null;
-    }
-
-    return formatNumberUserReadable(
-      Number(
-        formatUnits(
-          BigInt(data.votingPowerByAccountId.votingPower),
-          daoConfig.decimals,
-        ),
-      ),
-    );
-  }, [daoConfig, data?.votingPowerByAccountId?.votingPower]);
+  const { data, isLoading } = useVotingPowerByAccountId(
+    daoIdEnum.toLowerCase() as VotingPowerByAccountIdPathParamsDaoEnumKey,
+    address ?? "",
+    undefined,
+    { query: { enabled: Boolean(address && daoConfig) } },
+  );
 
   return {
-    votingPower,
-    loading,
+    votingPower: data?.votingPower
+      ? formatNumberUserReadable(
+          Number(formatUnits(data.votingPower, daoConfig.decimals)),
+        )
+      : null,
+    loading: isLoading,
   };
 };

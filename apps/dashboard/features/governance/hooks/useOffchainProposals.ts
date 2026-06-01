@@ -1,143 +1,75 @@
-import type {
-  GetOffchainProposalsFromDaoQuery,
-  QueryOffchainProposalsArgs,
-} from "@anticapture/graphql-client/hooks";
 import {
-  OrderDirection,
-  useGetOffchainProposalsFromDaoQuery,
-} from "@anticapture/graphql-client/hooks";
-import type { ApolloError } from "@apollo/client";
-import { useCallback, useMemo, useState } from "react";
+  getNextPageParam,
+  type OffchainProposalsPathParamsDaoEnumKey,
+  type OffchainProposalsQueryParams,
+  type OffchainProposalsQueryResponse,
+  type OrderDirection,
+} from "@anticapture/client";
+import { useOffchainProposalsInfinite } from "@anticapture/client/hooks";
+import { useMemo } from "react";
 
-import type { PaginationInfo } from "@/features/governance/hooks/useProposals";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-export type OffchainProposalItem = NonNullable<
-  NonNullable<
-    GetOffchainProposalsFromDaoQuery["offchainProposals"]
-  >["items"][number]
->;
+export type OffchainProposalItem =
+  OffchainProposalsQueryResponse["items"][number];
 
-export interface UseOffchainProposalsResult {
-  proposals: OffchainProposalItem[];
-  loading: boolean;
-  error: ApolloError | undefined;
-  pagination: PaginationInfo;
-  fetchNextPage: () => Promise<void>;
-  isPaginationLoading: boolean;
-}
-
-export interface UseOffchainProposalsParams extends Partial<
-  Omit<QueryOffchainProposalsArgs, "skip" | "limit">
-> {
+export interface UseOffchainProposalsParams {
+  fromDate?: number | null;
+  orderDirection?: OrderDirection;
+  status?: OffchainProposalsQueryParams["status"];
   itemsPerPage?: number;
   daoId?: DaoIdEnum;
 }
 
 export const useOffchainProposals = ({
   fromDate,
-  orderDirection = OrderDirection.Desc,
+  orderDirection = "desc",
   status,
   itemsPerPage = 10,
   daoId,
-}: UseOffchainProposalsParams = {}): UseOffchainProposalsResult => {
-  const [isPaginationLoading, setIsPaginationLoading] = useState(false);
-
-  const queryVariables = useMemo(
+}: UseOffchainProposalsParams = {}) => {
+  const queryParams = useMemo<OffchainProposalsQueryParams>(
     () => ({
-      skip: 0,
       limit: itemsPerPage,
       orderDirection,
-      status: status ?? null,
-      fromDate: fromDate ?? null,
+      status: status ?? undefined,
+      fromDate: fromDate ?? undefined,
     }),
     [itemsPerPage, orderDirection, status, fromDate],
   );
 
-  const { data, loading, error, fetchMore } =
-    useGetOffchainProposalsFromDaoQuery({
-      variables: queryVariables,
-      skip: !daoId,
-      notifyOnNetworkStatusChange: true,
-      context: {
-        headers: {
-          "anticapture-dao-id": daoId,
-        },
-      },
-    });
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useOffchainProposalsInfinite(
+    daoId?.toLowerCase() as OffchainProposalsPathParamsDaoEnumKey,
+    queryParams,
+    { query: { enabled: !!daoId, getNextPageParam } },
+  );
 
-  const proposals = useMemo(() => {
-    return (data?.offchainProposals?.items ?? []).filter(
-      (p): p is OffchainProposalItem => p !== null,
-    );
-  }, [data]);
+  const proposals = useMemo(
+    () => data?.pages.flatMap((page) => page.items) ?? [],
+    [data],
+  );
 
-  const pagination: PaginationInfo = useMemo(() => {
-    const totalCount = data?.offchainProposals?.totalCount ?? 0;
-    const currentItemsCount = proposals.length;
-    const hasNextPage = currentItemsCount < totalCount;
-    const currentPage = Math.ceil(currentItemsCount / itemsPerPage);
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
-
-    return {
-      hasNextPage,
-      totalCount,
-      currentPage,
-      totalPages,
-      itemsPerPage,
-      currentItemsCount,
-    };
-  }, [data?.offchainProposals?.totalCount, proposals.length, itemsPerPage]);
-
-  const fetchNextPage = useCallback(async () => {
-    if (!pagination.hasNextPage || isPaginationLoading) return;
-
-    setIsPaginationLoading(true);
-
-    try {
-      await fetchMore({
-        variables: { ...queryVariables, skip: proposals.length },
-        updateQuery: (
-          previousResult: GetOffchainProposalsFromDaoQuery,
-          {
-            fetchMoreResult,
-          }: { fetchMoreResult: GetOffchainProposalsFromDaoQuery },
-        ) => {
-          if (!fetchMoreResult?.offchainProposals?.items?.length) {
-            return previousResult;
-          }
-
-          return {
-            ...fetchMoreResult,
-            offchainProposals: {
-              ...fetchMoreResult.offchainProposals,
-              items: [
-                ...(previousResult.offchainProposals?.items ?? []),
-                ...(fetchMoreResult.offchainProposals?.items ?? []),
-              ],
-            },
-          };
-        },
-      });
-    } catch (err) {
-      console.error("Error fetching next page:", err);
-    } finally {
-      setIsPaginationLoading(false);
-    }
-  }, [
-    fetchMore,
-    pagination.hasNextPage,
-    isPaginationLoading,
-    queryVariables,
-    proposals.length,
-  ]);
+  const totalCount = data?.pages[0]?.totalCount ?? 0;
 
   return {
     proposals,
-    loading,
+    loading: isLoading,
     error,
-    pagination,
+    pagination: {
+      hasNextPage: Boolean(hasNextPage),
+      totalCount,
+      currentPage: Math.ceil(proposals.length / itemsPerPage),
+      totalPages: Math.ceil(totalCount / itemsPerPage),
+      itemsPerPage,
+    },
     fetchNextPage,
-    isPaginationLoading,
+    isPaginationLoading: isFetchingNextPage,
   };
 };

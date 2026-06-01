@@ -1,8 +1,8 @@
-import type {
-  OrderDirection,
-  QueryInput_TokenMetrics_MetricType,
-} from "@anticapture/graphql-client/hooks";
-import { useTokenMetricsLazyQuery } from "@anticapture/graphql-client/hooks";
+import {
+  tokenMetrics,
+  type TokenMetricsPathParamsDaoEnumKey,
+  type TokenMetricsQueryParamsMetricTypeEnumKey,
+} from "@anticapture/client";
 
 import {
   DAYS_IN_SECONDS,
@@ -31,16 +31,8 @@ export const useTimeSeriesData = (
   const [error, setError] = useState<Error | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [fetchTokenMetrics] = useTokenMetricsLazyQuery({
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    fetchPolicy: "network-only",
-  });
-
   const stableMetricTypes = [...metricTypes].sort();
+  const daoKey = daoId.toLowerCase() as TokenMetricsPathParamsDaoEnumKey;
 
   const fetchAll = useCallback(async () => {
     if (!daoId || stableMetricTypes.length === 0) return;
@@ -53,21 +45,21 @@ export const useTimeSeriesData = (
 
       const results = await Promise.all(
         stableMetricTypes.map(async (metricType) => {
-          const result = await fetchTokenMetrics({
-            variables: {
-              metricType:
-                metricType as unknown as QueryInput_TokenMetrics_MetricType,
-              startDate,
-              endDate: null,
-              orderDirection: "asc" as OrderDirection,
-              limit: 365,
-              skip: null,
-            },
+          const result = await tokenMetrics(daoKey, {
+            metricType: metricType as TokenMetricsQueryParamsMetricTypeEnumKey,
+            startDate,
+            orderDirection: "asc",
+            limit: 365,
           });
           return {
             metricType,
-            items: (result.data?.tokenMetrics?.items ??
-              []) as TokenMetricItem[],
+            items: (result.items ?? []).map(
+              (item): TokenMetricItem => ({
+                date: item.date,
+                high: String(item.high),
+                volume: String(item.volume),
+              }),
+            ),
           };
         }),
       );

@@ -29,14 +29,14 @@ export const DelegatedSupplyHistory = () => {
   const startDate = useMemo(() => {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    return Math.floor(oneYearAgo.getTime() / 1000).toString();
+    return Math.floor(oneYearAgo.getTime() / 1000);
   }, []);
 
   // Calculate endDate as today at midnight UTC in seconds (Unix timestamp)
   const endDate = useMemo(() => {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    return Math.floor(today.getTime() / 1000).toString();
+    return Math.floor(today.getTime() / 1000);
   }, []);
 
   const { data, loading, error } = useDelegationPercentageByDay(
