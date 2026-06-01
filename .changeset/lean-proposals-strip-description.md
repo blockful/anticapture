@@ -1,7 +1,6 @@
 ---
 "@anticapture/api": patch
 "@anticapture/gateful": patch
-"@anticapture/api-gateway": patch
 "@anticapture/client": patch
 ---
 
