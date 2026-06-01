@@ -1,6 +1,0 @@
-query GetVotingPower($address: String!) {
-  votingPowerByAccountId(address: $address) {
-    accountId
-    votingPower
-  }
-}

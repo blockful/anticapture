@@ -44,12 +44,11 @@ Tests run against **live services** — feature data is not mocked.
 
 The following environment variables must point to reachable services:
 
-| Variable                  | Purpose                                   |
-| ------------------------- | ----------------------------------------- |
-| `NEXT_PUBLIC_BASE_URL`    | GraphQL gateway URL (aggregates DAO data) |
-| `NEXT_PUBLIC_GATEFUL_URL` | Gateful feature-flag service URL          |
+| Variable                  | Purpose                          |
+| ------------------------- | -------------------------------- |
+| `NEXT_PUBLIC_GATEFUL_URL` | Gateful feature-flag service URL |
 
-Analytics and noise requests may be blocked, but GraphQL and Gateful calls must be live.
+Analytics and noise requests may be blocked, but Gateful calls must be live.
 
 Optionally set `PLAYWRIGHT_BASE_URL` to override the default `http://localhost:3000` target.
 

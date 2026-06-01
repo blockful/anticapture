@@ -45,15 +45,13 @@ pnpm dev <dao_id>
 
 ## Services & Ports
 
-| Service                | Command               | Port  | Description                                                               |
-| ---------------------- | --------------------- | ----- | ------------------------------------------------------------------------- |
-| **API**                | `pnpm api dev <dao>`  | 42069 | REST API (only when dao_id is provided)                                   |
-| **Gateway**            | `pnpm gateway dev`    | 4000  | GraphQL Mesh aggregating DAO APIs                                         |
-| **Gateful**            | `pnpm gateful dev`    | 4001  | REST gateway wrapping the GraphQL layer                                   |
-| **GraphQL Client**     | `pnpm gql-client dev` | --    | GraphQL codegen + build watch (no port)                                   |
-| **REST Client**        | `pnpm client dev`     | --    | Kubb REST codegen watch from Gateful OpenAPI                              |
-| **Dashboard**          | `pnpm dashboard dev`  | 3000  | Next.js frontend                                                          |
-| **Address Enrichment** | `pnpm address dev`    | 3001  | Optional address metadata service, started through Railway when available |
+| Service                | Command              | Port  | Description                                                               |
+| ---------------------- | -------------------- | ----- | ------------------------------------------------------------------------- |
+| **API**                | `pnpm api dev <dao>` | 42069 | REST API (only when dao_id is provided)                                   |
+| **Gateful**            | `pnpm gateful dev`   | 4001  | REST gateway aggregating the DAO APIs (OpenAPI surface)                   |
+| **REST Client**        | `pnpm client dev`    | --    | Kubb REST codegen + build watch from Gateful OpenAPI (no port)            |
+| **Dashboard**          | `pnpm dashboard dev` | 3000  | Next.js frontend                                                          |
+| **Address Enrichment** | `pnpm address dev`   | 3001  | Optional address metadata service, started through Railway when available |
 
 ## Startup Order & Dependencies
 
@@ -62,23 +60,21 @@ The services must start in this exact order because each depends on the previous
 ```
 1. API (optional)       -- listens on :42069
        |
-2. Gateway              -- needs API URLs via DAO_API_* env vars; listens on :4000
+2. Gateful              -- needs API URLs via DAO_API_* env vars; listens on :4001
        |
-3. Gateful              -- needs Gateway; listens on :4001
+3. Client (codegen)     -- needs the Gateful OpenAPI spec to generate types
        |
-4. Clients (codegen)    -- need Gateway schema and Gateful OpenAPI to generate types
-       |
-5. Dashboard            -- needs generated client types; listens on :3000
+4. Dashboard            -- needs generated client types; listens on :3000
 ```
 
 ### How `pnpm dev` orchestrates this
 
-1. If a `dao_id` argument is provided, starts the API and waits for port 42069 to be listening. Sets `DAO_API_<DAO_UPPER>=http://localhost:42069` so the Gateway discovers it.
+1. If a `dao_id` argument is provided, starts the API and waits for port 42069 to be listening. Sets `DAO_API_<DAO_UPPER>=http://localhost:42069` so Gateful discovers it.
 2. Attempts to start Address Enrichment through Railway. This service is optional: if Railway CLI/service lookup fails or the port does not become ready, `pnpm dev` logs the skip and continues without `ADDRESS_ENRICHMENT_API_URL`.
-3. Starts the Gateway and waits for the log line `"Mesh running at"` to confirm readiness.
-4. Starts Gateful and waits for port 4001 to listen, so readiness does not depend on info-level logs.
-5. Starts GraphQL Client and REST Client in errors-only mode (suppresses output unless error/fail is detected).
-6. Starts the Dashboard.
+3. Starts Gateful and waits for port 4001 to listen.
+4. Starts the REST Client (Kubb codegen + build watch) in errors-only mode (suppresses output unless error/fail is detected).
+5. Exports `NEXT_PUBLIC_GATEFUL_URL=http://localhost:4001` and starts the Dashboard.
+6. A watchdog reloads Gateful (touches `apps/gateful/src/_dev-reload.ts`) when a downed API recovers.
 7. On `Ctrl+C`, sends TERM to all child processes and cleans up temp files.
 
 ## Running Individual Services
@@ -87,10 +83,9 @@ When you only need a subset (common during development):
 
 ### UI-only work (dashboard changes)
 
-Point the clients and dashboard at the deployed dev Gateway/Gateful -- no need to run API/Gateway locally:
+Point the client and dashboard at the deployed dev Gateful -- no need to run API/Gateful locally:
 
 ```bash
-pnpm gql-client dev   # GraphQL codegen against the gateway
 pnpm client dev       # REST codegen watch from Gateful OpenAPI via Kubb
 pnpm dashboard dev    # start frontend
 ```
@@ -99,30 +94,29 @@ pnpm dashboard dev    # start frontend
 
 ```bash
 pnpm api dev <dao_id>         # start local API
-pnpm gateway dev              # start gateway (picks up local API via env)
+pnpm gateful dev              # start Gateful (picks up local API via DAO_API_* env)
 # Only add client + dashboard if you need to verify the UI
 ```
 
-### Gateway/Gateful work
+### Gateful work
 
 ```bash
-pnpm gateway dev
 pnpm gateful dev
 ```
 
 ## Environment Variables
 
-- `DAO_API_<DAO_UPPER>`: Tells the Gateway where each DAO's API lives. When running a local API, `pnpm dev` sets this automatically (e.g., `DAO_API_ENS=http://localhost:42069`). For remote APIs, these come from `.env` files.
+- `DAO_API_<DAO_UPPER>`: Tells Gateful where each DAO's API lives. When running a local API, `pnpm dev` sets this automatically (e.g., `DAO_API_ENS=http://localhost:42069`). For remote APIs, these come from `.env` files.
+- `NEXT_PUBLIC_GATEFUL_URL`: Base URL the dashboard's `@anticapture/client` SDK calls. `pnpm dev` sets it to `http://localhost:4001`.
 
 ## Troubleshooting
 
 | Problem                                | Likely Cause                             | Fix                                                                           |
 | -------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
-| Gateway fails to start                 | Missing `DAO_API_*` env vars             | Ensure at least one DAO API URL is set in env or run with dao_id              |
-| Port already in use                    | Another process on 42069/4000/4001/3000  | `lsof -i :<port>` to find and kill the process                                |
-| GraphQL client codegen errors          | Gateway not ready or schema changed      | Ensure Gateway is running and healthy before starting `pnpm gql-client dev`   |
+| Gateful fails to start                 | Missing `DAO_API_*` env vars             | Ensure at least one DAO API URL is set in env or run with dao_id              |
+| Port already in use                    | Another process on 42069/4001/3000       | `lsof -i :<port>` to find and kill the process                                |
 | REST client codegen errors             | Gateful OpenAPI spec changed             | Ensure Gateful generated OpenAPI is current before starting `pnpm client dev` |
-| Dashboard type errors after API change | Stale generated types                    | Re-run `pnpm gql-client dev` and `pnpm client dev`                            |
+| Dashboard type errors after API change | Stale generated types                    | Re-run `pnpm client dev` (regenerates the SDK from the Gateful spec)          |
 | Timeout waiting for service            | Service crashed silently or slow startup | Check service logs directly: `pnpm <service> dev`                             |
 
 ## pnpm Shortcuts Reference
@@ -131,9 +125,7 @@ These are defined in the root `package.json` and map to workspace filters:
 
 ```bash
 pnpm api <cmd>       # --filter=@anticapture/api
-pnpm gateway <cmd>   # --filter=@anticapture/api-gateway
 pnpm gateful <cmd>   # --filter=@anticapture/gateful
-pnpm gql-client <cmd> # --filter=@anticapture/graphql-client
 pnpm client <cmd>    # --filter=@anticapture/client
 pnpm dashboard <cmd> # --filter=@anticapture/dashboard (with dotenv)
 pnpm indexer <cmd>   # --filter=@anticapture/indexer

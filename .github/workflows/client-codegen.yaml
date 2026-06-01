@@ -1,4 +1,4 @@
-name: GraphQL Client Codegen
+name: Client Codegen
 
 on:
   pull_request:
@@ -16,10 +16,6 @@ jobs:
         id: changes
         with:
           filters: |
-            graphql:
-              - "apps/api/**/*.ts"
-              - "apps/api-gateway/**/*.ts"
-              - "packages/graphql-client/**"
             rest:
               - "apps/gateful/openapi/gateful.json"
               - "apps/gateful/**/*.ts"
@@ -38,10 +34,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Run GraphQL codegen
-        if: ${{ steps.changes.outputs.graphql == 'true' }}
-        run: pnpm gql-client codegen
 
       - name: Run Rest codegen
         if: ${{ steps.changes.outputs.rest == 'true' }}

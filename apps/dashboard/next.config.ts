@@ -13,7 +13,6 @@ const resolveApiUrls = () => {
     !PERMANENT_BRANCHES.includes(branch ?? "")
   ) {
     return {
-      NEXT_PUBLIC_BASE_URL: `https://api-gateway-anticapture-pr-${prId}.up.railway.app/graphql`,
       NEXT_PUBLIC_GATEFUL_URL: `https://gateful-anticapture-pr-${prId}.up.railway.app`,
     };
   }
@@ -24,7 +23,7 @@ const resolveApiUrls = () => {
 
 const nextConfig = {
   env: resolveApiUrls(),
-  transpilePackages: ["@anticapture/graphql-client", "@anticapture/client"],
+  transpilePackages: ["@anticapture/client"],
   images: {
     remotePatterns: [
       {

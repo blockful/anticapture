@@ -115,12 +115,6 @@ scrape_configs:
     static_configs:
       - targets: ["${OBOL_API_ENDPOINT}"]
 
-  - job_name: anticapture-gateway
-    metrics_path: "/metrics"
-    scrape_interval: 15s
-    static_configs:
-      - targets: ["${GATEWAY_ENDPOINT}"]
-
   - job_name: anticapture-gateful
     metrics_path: "/metrics"
     scrape_interval: 15s

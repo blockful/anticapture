@@ -1,9 +1,0 @@
-query GetProposals($fromDate: Int, $limit: Int = 365) {
-  proposals(limit: $limit, orderDirection: asc, fromDate: $fromDate) {
-    items {
-      id
-      title
-      timestamp
-    }
-  }
-}
