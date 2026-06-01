@@ -38,7 +38,7 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
       "@anticapture/client$": resolve(
         __dirname,
-        "../../../packages/client/generated/hooks.ts",
+        "../../../packages/anticapture-client/dist/index.js",
       ),
       "@react-native-async-storage/async-storage": false,
     };
