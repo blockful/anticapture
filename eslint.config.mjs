@@ -18,7 +18,6 @@ export default [
   {
     ignores: [
       "apps/gateful/openapi/gateful.json",
-      "apps/api-gateway/**",
       "**/node_modules/**",
       "**/dist/**",
       "**/build/**",
@@ -29,7 +28,6 @@ export default [
       "*.config.ts",
       "*.config.mjs",
       "**/generated/**/*.ts",
-      "apps/api-gateway/schema.graphql",
       "**/storybook-static/**",
       "**/.storybook/**",
     ],

@@ -1,9 +1,9 @@
 "use client";
 
-import type {
-  HistoricalBalancesPathParamsDaoEnumKey,
-  HistoricalBalancesQueryParamsOrderByEnumKey,
-  HistoricalBalancesQueryResponse,
+import {
+  getNextPageParam,
+  type HistoricalBalancesPathParamsDaoEnumKey,
+  type HistoricalBalancesQueryParamsOrderByEnumKey,
 } from "@anticapture/client";
 import { useHistoricalBalancesInfinite } from "@anticapture/client/hooks";
 import { useMemo } from "react";
@@ -11,14 +11,6 @@ import { formatUnits } from "viem";
 
 import type { AmountFilterVariables } from "@/features/holders-and-delegates/hooks/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
-
-const getNextPageParam = (
-  lastPage: HistoricalBalancesQueryResponse,
-  allPages: HistoricalBalancesQueryResponse[],
-): number | undefined => {
-  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
-  return loaded >= lastPage.totalCount ? undefined : loaded;
-};
 
 export function useBalanceHistory({
   accountId,

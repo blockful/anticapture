@@ -20,29 +20,7 @@ import {
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-export interface PaginationInfo {
-  hasNextPage: boolean;
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
-  itemsPerPage: number;
-  currentItemsCount: number;
-}
-
-export interface UseProposalsResult {
-  data: GovernanceProposal[];
-  isLoading: boolean;
-  error: Error | null;
-  fetchNextPage: () => Promise<void>;
-  isFetchingNextPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface UseProposalsParams extends Omit<
-  ProposalsQueryParams,
-  "skip" | "limit"
-> {
-  itemsPerPage?: number;
+export interface UseProposalsParams extends Omit<ProposalsQueryParams, "skip"> {
   daoId?: DaoIdEnum;
 }
 
@@ -53,7 +31,7 @@ export const useProposals = (
     status,
     fromEndDate,
     includeOptimisticProposals,
-    itemsPerPage = 10,
+    limit = 10,
     daoId,
   }: UseProposalsParams = {
     fromDate: undefined,
@@ -61,21 +39,21 @@ export const useProposals = (
     fromEndDate: undefined,
     includeOptimisticProposals: undefined,
   },
-): UseProposalsResult => {
+) => {
   const { decimals } = daoConfig[daoId as DaoIdEnum];
   const daoKey = daoId?.toLowerCase() as ProposalsPathParamsDaoEnumKey;
 
   const queryParams = useMemo<ProposalsQueryParams>(
     () => ({
-      limit: itemsPerPage,
+      limit,
       orderDirection,
-      status: status ?? undefined,
-      fromDate: fromDate ?? undefined,
-      fromEndDate: fromEndDate ?? undefined,
-      includeOptimisticProposals: includeOptimisticProposals ?? undefined,
+      status,
+      fromDate,
+      fromEndDate,
+      includeOptimisticProposals,
     }),
     [
-      itemsPerPage,
+      limit,
       orderDirection,
       status,
       fromDate,
@@ -136,10 +114,8 @@ export const useProposals = (
   return {
     data: proposals,
     isLoading,
-    error: error instanceof Error ? error : null,
-    fetchNextPage: async () => {
-      await fetchNextPage();
-    },
+    error,
+    fetchNextPage,
     isFetchingNextPage,
     hasNextPage,
   };

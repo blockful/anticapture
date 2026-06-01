@@ -1,14 +1,7 @@
-import type { GetOffchainProposalQuery } from "@anticapture/graphql-client/hooks";
-import { useGetOffchainProposalQuery } from "@anticapture/graphql-client/hooks";
-import type { ApolloError } from "@apollo/client";
+import { useOffchainProposalById } from "@anticapture/client/hooks";
+import type { OffchainProposalByIdPathParamsDaoEnumKey } from "@anticapture/client";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
-
-export interface UseOffchainProposalResult {
-  proposal: GetOffchainProposalQuery["offchainProposalById"] | null;
-  loading: boolean;
-  error: ApolloError | undefined;
-}
 
 export interface UseOffchainProposalParams {
   proposalId: string;
@@ -18,16 +11,16 @@ export interface UseOffchainProposalParams {
 export const useOffchainProposal = ({
   proposalId,
   daoId,
-}: UseOffchainProposalParams): UseOffchainProposalResult => {
-  const { data, loading, error } = useGetOffchainProposalQuery({
-    variables: { id: proposalId },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoId,
-      },
-    },
-    skip: !proposalId,
-  });
+}: UseOffchainProposalParams) => {
+  const { data, isLoading, error } = useOffchainProposalById(
+    daoId.toLowerCase() as OffchainProposalByIdPathParamsDaoEnumKey,
+    proposalId,
+    undefined,
+  );
 
-  return { proposal: data?.offchainProposalById ?? null, loading, error };
+  return {
+    proposal: data,
+    loading: isLoading,
+    error,
+  };
 };

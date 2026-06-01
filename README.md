@@ -24,7 +24,6 @@ Anticapture is a data-driven platform that helps DAO communities identify, asses
 | Application                              | Description                                              | Technology                    |
 | ---------------------------------------- | -------------------------------------------------------- | ----------------------------- |
 | [**Dashboard**](./apps/dashboard)        | Frontend interface with DAO analytics and visualizations | Next.js, TypeScript, Tailwind |
-| [**API Gateway**](./apps/api-gateway)    | Unified GraphQL API aggregating multiple data sources    | GraphQL Mesh                  |
 | [**Gateful**](./apps/gateful)            | REST API aggregator for DAO API routes                   | Hono, OpenAPI                 |
 | [**Indexer**](./apps/indexer)            | Blockchain event indexer for real-time governance data   | Ponder, PostgreSQL            |
 | [**Monitoring**](./apps/indexer-metrics) | Performance monitoring and metrics                       | Grafana, Prometheus           |
