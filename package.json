@@ -9,6 +9,7 @@
     "api": "dotenv -- turbo run --filter=@anticapture/api",
     "codegen": "turbo run codegen",
     "client": "turbo run --filter=@anticapture/client",
+    "client-docs": "turbo run --filter=@anticapture/client-docs",
     "offchain-indexer": "turbo run --filter=@anticapture/offchain-indexer",
     "address": "turbo run --filter=@anticapture/address-enrichment",
     "relayer": "dotenv -- turbo run --filter=@anticapture/relayer",

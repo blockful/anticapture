@@ -89,7 +89,7 @@ Anticapture offers MCP tooling for LLM consumption of the API resources; in orde
 }
 ```
 
-More information on developing and running the MCP locally in the [`anticapture-client` package](./packages/anticapture-client/README.md#) documentation section "MCP Server".
+More information on developing and running the MCP locally in the [`anticapture-client` package](./packages/anticapture-client/README.md) documentation section "MCP Server".
 
 ## Contributing
 

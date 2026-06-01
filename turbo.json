@@ -17,6 +17,16 @@
       "dependsOn": ["codegen"],
       "outputs": ["dist/**"]
     },
+    "@anticapture/client-docs#build": {
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "docusaurus.config.ts",
+        "sidebars.ts",
+        "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
+      ],
+      "outputs": ["build/**"]
+    },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
       "outputs": ["dist/**", ".next/**"]
