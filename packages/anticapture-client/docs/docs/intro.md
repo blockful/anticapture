@@ -5,7 +5,7 @@ slug: /
 sidebar_position: 1
 ---
 
-# Anticapture MCP
+# Anticapture MCP Docs
 
 The Anticapture MCP server exposes the [Anticapture](https://github.com/blockful-io/anticapture)
 REST API as [Model Context Protocol](https://modelcontextprotocol.io) tools, so

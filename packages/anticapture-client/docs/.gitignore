@@ -6,6 +6,9 @@
 # Treated as a build artifact, like the package's Kubb `generated/` output.
 /docs/tools
 
+# Filtered OpenAPI spec (produced by `scripts/prepare-spec.mjs`).
+/openapi
+
 # Dependencies
 /node_modules
 

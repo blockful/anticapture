@@ -21,6 +21,7 @@
       "inputs": [
         "docs/**",
         "src/**",
+        "scripts/**",
         "docusaurus.config.ts",
         "sidebars.ts",
         "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
