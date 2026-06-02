@@ -46,7 +46,11 @@ export const DelegateEfpSocialContext = ({
   const followingInSetRequest = useMemo(():
     | PostEfpFollowingInSetMutationRequest
     | undefined => {
-    if (!viewerAddress || delegateAddresses.length === 0) {
+    if (
+      isDelegatesLoading ||
+      !viewerAddress ||
+      delegateAddresses.length === 0
+    ) {
       return undefined;
     }
 
@@ -56,7 +60,7 @@ export const DelegateEfpSocialContext = ({
       addresses:
         delegateAddresses as PostEfpFollowingInSetMutationRequest["addresses"],
     };
-  }, [viewerAddress, delegateAddresses]);
+  }, [isDelegatesLoading, viewerAddress, delegateAddresses]);
 
   const {
     data: followingInSetData,
@@ -69,7 +73,7 @@ export const DelegateEfpSocialContext = ({
       delegateAddresses,
     ] as const,
     queryFn: () => postEfpFollowingInSet(followingInSetRequest!),
-    enabled: !!followingInSetRequest,
+    enabled: !!followingInSetRequest && !isDelegatesLoading,
     staleTime: 5 * 60 * 1000,
   });
 

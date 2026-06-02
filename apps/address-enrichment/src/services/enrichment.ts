@@ -116,15 +116,9 @@ export class EnrichmentService {
       }
 
       if (needsEfpRefresh) {
-        if (efpData) {
-          updates.efpFollowersCount = efpData.followersCount;
-          updates.efpFollowingCount = efpData.followingCount;
-          updates.efpUpdatedAt = now;
-        } else {
-          updates.efpFollowersCount = null;
-          updates.efpFollowingCount = null;
-          updates.efpUpdatedAt = null;
-        }
+        updates.efpFollowersCount = efpData?.followersCount ?? null;
+        updates.efpFollowingCount = efpData?.followingCount ?? null;
+        updates.efpUpdatedAt = now;
       }
 
       await db
@@ -172,7 +166,7 @@ export class EnrichmentService {
       ensUpdatedAt: now,
       efpFollowersCount: efpData?.followersCount ?? null,
       efpFollowingCount: efpData?.followingCount ?? null,
-      efpUpdatedAt: efpData ? now : null,
+      efpUpdatedAt: now,
     };
 
     const [inserted] = await db
@@ -238,7 +232,8 @@ export class EnrichmentService {
 
   private mapToResult(record: AddressEnrichment): EnrichmentResult {
     const hasEnsData = record.ensName !== null;
-    const hasEfpData = record.efpUpdatedAt !== null;
+    const hasEfpCounts =
+      record.efpFollowersCount !== null && record.efpFollowingCount !== null;
 
     return EnrichmentResultSchema.parse({
       address: record.address,
@@ -256,10 +251,10 @@ export class EnrichmentService {
             banner: record.ensBanner,
           }
         : null,
-      efp: hasEfpData
+      efp: hasEfpCounts
         ? {
-            followersCount: record.efpFollowersCount ?? 0,
-            followingCount: record.efpFollowingCount ?? 0,
+            followersCount: record.efpFollowersCount,
+            followingCount: record.efpFollowingCount,
           }
         : null,
       createdAt: record.createdAt.toISOString(),
