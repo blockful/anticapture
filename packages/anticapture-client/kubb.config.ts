@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { defineConfig } from "@kubb/core";
 import { pluginClient } from "@kubb/plugin-client";
 import { pluginFaker } from "@kubb/plugin-faker";
@@ -27,7 +30,15 @@ type PluginTsOptionsWithSchemaTransformer = Omit<
 
 const PERMANENT_BRANCHES = ["dev", "main"];
 
-const resolveGatefulOpenApiSpec = () => {
+// The locally generated Gateful OpenAPI document. Gateful writes this to
+// `apps/gateful/openapi/gateful.json` (relative to its own cwd), which is
+// `../../apps/gateful/openapi/gateful.json` from this package.
+const LOCAL_GATEFUL_OPENAPI_SPEC = resolve(
+  __dirname,
+  "../../apps/gateful/openapi/gateful.json",
+);
+
+const resolveGatefulOpenApiSpecUrl = () => {
   const prId = process.env.VERCEL_GIT_PULL_REQUEST_ID;
   const vercelEnv = process.env.VERCEL_ENV;
   const branch = process.env.VERCEL_GIT_COMMIT_REF;
@@ -42,6 +53,13 @@ const resolveGatefulOpenApiSpec = () => {
 
   return `${process.env.NEXT_PUBLIC_GATEFUL_URL}/docs/json`;
 };
+
+// Prefer the local spec file when it exists (e.g. after `pnpm gateful` has
+// generated it), otherwise fall back to fetching it over HTTP.
+const resolveGatefulOpenApiSpec = () =>
+  existsSync(LOCAL_GATEFUL_OPENAPI_SPEC)
+    ? LOCAL_GATEFUL_OPENAPI_SPEC
+    : resolveGatefulOpenApiSpecUrl();
 
 const gatefulOpenApiSpecPath = resolveGatefulOpenApiSpec();
 

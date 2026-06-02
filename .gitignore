@@ -160,4 +160,3 @@ dist
 .mcp.json
 
 apps/gateful/openapi/gateful.json
-apps/api-gateway/schema.graphql
