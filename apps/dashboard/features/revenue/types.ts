@@ -22,6 +22,10 @@ export type KpiCard = {
   title: string;
   value: string;
   subtext: string;
+  delta?: {
+    value: string;
+    unit: string;
+    comparison: string;
+  };
   trend?: "up" | "down";
-  tooltip?: string;
 };

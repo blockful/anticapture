@@ -42,7 +42,6 @@ import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { ProposalHeaderProvider } from "@/features/governance/context/ProposalHeaderContext";
 import { Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
-import { TelegramBotMessage } from "@/shared/components/messages";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 
@@ -284,11 +283,6 @@ export const ProposalSection = ({
                 proposal={proposal}
                 isOffchain={isOffchain}
               />
-              {!isOffchain && supportValue !== undefined ? (
-                <div className="border-border-default bg-surface-default border px-4 py-3">
-                  <TelegramBotMessage />
-                </div>
-              ) : null}
             </div>
 
             <TabsSection
