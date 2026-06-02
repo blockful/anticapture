@@ -88,6 +88,24 @@ const config: Config = {
   ],
 
   themeConfig: {
+    // Restrict the generated request-sample tabs. The OpenAPI theme can only
+    // emit languages supported by postman-code-generators, which has no
+    // TypeScript target — `nodejs`/Axios is the closest stand-in for TS.
+    languageTabs: [
+      {
+        highlight: "javascript",
+        language: "nodejs",
+        logoClass: "nodejs",
+        variant: "Axios",
+      },
+      {
+        highlight: "rust",
+        language: "rust",
+        logoClass: "rust",
+        variant: "reqwest",
+      },
+      { highlight: "go", language: "go", logoClass: "go", variant: "Native" },
+    ],
     navbar: {
       title: "Anticapture MCP Docs",
       items: [
