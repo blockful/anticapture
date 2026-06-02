@@ -13,6 +13,7 @@ import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetai
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { useGetAddress } from "@anticapture/client/hooks";
+import { useAccount } from "wagmi";
 
 const TRUNCATE_ADDRESS_LENGTH = 30;
 
@@ -89,8 +90,10 @@ export const EnsAvatar = ({
   const { data, isLoading } = useGetAddress(address ?? "0x", {
     query: { enabled: !!address },
   });
+  const { address: viewerAddress } = useAccount();
   const arkham = data?.arkham ?? null;
   const ens = data?.ens ?? null;
+  const efp = data?.efp ?? null;
   const isContract = data?.isContract ?? null;
 
   const [imageError, setImageError] = useState(false);
@@ -307,8 +310,10 @@ export const EnsAvatar = ({
             address={address}
             arkhamData={arkham}
             ens={ens}
+            efp={efp}
             isContract={isContract}
             isLoading={isLoading}
+            viewerAddress={viewerAddress}
           >
             {avatarWithName}
           </AddressDetailsTooltip>

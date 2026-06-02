@@ -5,8 +5,10 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 
 import { ArkhamClient } from "@/clients/arkham";
+import { EfpClient } from "@/clients/efp";
 import { ENSClient } from "@/clients/ens";
 import { addressController } from "@/controllers/address";
+import { efpController } from "@/controllers/efp";
 import { initDb } from "@/db";
 import { env } from "@/env";
 import { logger } from "@/logger";
@@ -15,11 +17,14 @@ import { EnrichmentService } from "@/services/enrichment";
 // Initialize clients and services
 const arkhamClient = new ArkhamClient(env.ARKHAM_API_URL, env.ARKHAM_API_KEY);
 const ensClient = new ENSClient();
+const efpClient = new EfpClient(env.EFP_API_BASE_URL);
 const enrichmentService = new EnrichmentService(
   arkhamClient,
   ensClient,
+  efpClient,
   env.RPC_URL,
   env.ENS_CACHE_TTL_MINUTES,
+  env.EFP_CACHE_TTL_MINUTES,
 );
 
 // Create Hono app
@@ -73,6 +78,7 @@ app.get("/health", (c) => {
 
 // Register controllers
 addressController(app, enrichmentService);
+efpController(app, efpClient);
 
 // OpenAPI documentation
 app.doc("/docs/json", {

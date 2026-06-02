@@ -74,6 +74,24 @@ export const AddressResponseSchema = z.object({
       description:
         "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL.",
     }),
+  efp: z
+    .object({
+      followersCount: z.number().openapi({
+        description:
+          "Number of EFP followers for this address (identity context, not a risk signal)",
+        example: 5396,
+      }),
+      followingCount: z.number().openapi({
+        description:
+          "Number of accounts this address follows on EFP (identity context, not a risk signal)",
+        example: 10,
+      }),
+    })
+    .nullable()
+    .openapi({
+      description:
+        "Ethereum Follow Protocol (EFP) social graph stats. null when upstream data is unavailable. Identity context only — not used for risk scoring.",
+    }),
 });
 
 export const AddressesRequestSchema = z.object({

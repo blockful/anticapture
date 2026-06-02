@@ -4,12 +4,13 @@ import {
   boolean,
   timestamp,
   text,
+  integer,
 } from "drizzle-orm/pg-core";
 
 /**
  * Storage for address enrichment data.
  * Arkham data is permanent - once fetched, stored forever.
- * ENS data is cached with a configurable TTL (ens_updated_at tracks freshness).
+ * ENS and EFP data are cached with configurable TTLs (ens_updated_at / efp_updated_at).
  */
 export const addressEnrichment = pgTable("address_enrichment", {
   address: varchar("address", { length: 42 }).primaryKey(),
@@ -22,6 +23,9 @@ export const addressEnrichment = pgTable("address_enrichment", {
   ensAvatar: text("ens_avatar"),
   ensBanner: text("ens_banner"),
   ensUpdatedAt: timestamp("ens_updated_at"),
+  efpFollowersCount: integer("efp_followers_count"),
+  efpFollowingCount: integer("efp_following_count"),
+  efpUpdatedAt: timestamp("efp_updated_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

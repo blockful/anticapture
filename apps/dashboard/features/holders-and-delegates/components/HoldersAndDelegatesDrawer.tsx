@@ -3,6 +3,7 @@
 import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 
 import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
+import { DelegateEfpSocialContext } from "@/features/holders-and-delegates/components/DelegateEfpSocialContext";
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
@@ -199,7 +200,15 @@ export const HoldersAndDelegatesDrawer = ({
           onTabChange={handleTabChange}
           action={delegateAction}
         />
-        <DrawerBody>{renderTabContent(activeTab)}</DrawerBody>
+        <DrawerBody>
+          {entityType === "delegate" && (
+            <DelegateEfpSocialContext
+              delegateAddress={address as `0x${string}`}
+              daoId={daoId}
+            />
+          )}
+          {renderTabContent(activeTab)}
+        </DrawerBody>
       </DrawerContent>
     </DrawerRoot>
   );

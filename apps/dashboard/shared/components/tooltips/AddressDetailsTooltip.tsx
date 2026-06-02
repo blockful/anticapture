@@ -6,7 +6,13 @@ import type { Address } from "viem";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import {
+  formatEfpCounts,
+  formatEfpIdentityLabel,
+  shouldShowYouFollow,
+} from "@/shared/utils/formatEfp";
 import type { GetAddress200 } from "@anticapture/client";
+import { useGetEfpFollowerState } from "@anticapture/client/hooks";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
@@ -17,8 +23,10 @@ interface AddressDetailsTooltipProps {
   children: ReactNode;
   arkhamData: GetAddress200["arkham"];
   ens: GetAddress200["ens"];
+  efp: GetAddress200["efp"];
   isContract: boolean | null;
   isLoading: boolean;
+  viewerAddress?: Address;
 }
 
 const DashedDivider = () => {
@@ -60,10 +68,30 @@ export const AddressDetailsTooltip = ({
   address,
   arkhamData: arkham,
   ens,
+  efp,
   isContract,
   isLoading,
+  viewerAddress,
   children,
 }: AddressDetailsTooltipProps) => {
+  const { data: followerStateData, isLoading: isFollowerStateLoading } =
+    useGetEfpFollowerState(
+      address.toLowerCase(),
+      viewerAddress?.toLowerCase() ?? "",
+      {
+        query: {
+          enabled: !!viewerAddress,
+          staleTime: 5 * 60 * 1000,
+        },
+      },
+    );
+
+  const efpCountsLabel = formatEfpCounts(efp);
+  const showYouFollow =
+    !!viewerAddress &&
+    !isFollowerStateLoading &&
+    shouldShowYouFollow(followerStateData?.state);
+
   const content = (
     <div className="flex w-full flex-col gap-2">
       <Row label="ENS address">
@@ -97,6 +125,28 @@ export const AddressDetailsTooltip = ({
           <SkeletonRow parentClassName="mt-1" className="h-5 w-32" />
         ) : arkham?.label ? (
           <span className="text-primary text-sm leading-5">{arkham.label}</span>
+        ) : (
+          <NotInformed />
+        )}
+      </Row>
+
+      <DashedDivider />
+
+      <Row label="EFP" className="gap-1">
+        {isLoading ? (
+          <SkeletonRow parentClassName="mt-1" className="h-5 w-40" />
+        ) : efpCountsLabel ? (
+          <div className="flex flex-col gap-0.5">
+            <span className="text-primary text-sm leading-5">
+              {efpCountsLabel}
+            </span>
+            {showYouFollow && (
+              <span className="text-primary text-sm leading-5">You follow</span>
+            )}
+            <span className="text-secondary text-xs leading-4">
+              {formatEfpIdentityLabel()}
+            </span>
+          </div>
         ) : (
           <NotInformed />
         )}

@@ -71,4 +71,30 @@ describe("address-enrichment route", () => {
 
     expect(res.status).toBe(500);
   });
+
+  it("should proxy EFP follower-state routes to upstream", async () => {
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            addressUser: "0xuser",
+            addressFollower: "0xfollower",
+            state: { follow: true, block: false, mute: false },
+          }),
+          { status: 200 },
+        ),
+      );
+
+    const res = await app.request(
+      "/address-enrichment/efp/users/0xuser/0xfollower/follower-state",
+    );
+
+    expect(res.status).toBe(200);
+    const arg = fetchSpy.mock.calls[0]?.[0];
+    const calledUrl = arg instanceof Request ? arg.url : String(arg);
+    expect(calledUrl).toBe(
+      "http://enrichment-api/efp/users/0xuser/0xfollower/follower-state",
+    );
+  });
 });

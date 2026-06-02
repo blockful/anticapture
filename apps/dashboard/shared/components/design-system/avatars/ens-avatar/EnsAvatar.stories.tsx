@@ -256,3 +256,21 @@ export const RealENSExamples: Story = {
     </div>
   ),
 };
+
+// EFP stats appear in the address tooltip (identity context, not risk).
+// Hover desktop avatars to see the EFP row when enrichment includes efp data.
+export const WithEfpIdentityContext: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "EFP follower/following counts are shown in AddressDetailsTooltip as identity context — not used in risk or attack-profitability surfaces.",
+      },
+    },
+  },
+  args: {
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    size: "md",
+    variant: "rounded",
+  },
+};

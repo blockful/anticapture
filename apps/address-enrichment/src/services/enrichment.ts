@@ -4,6 +4,7 @@ import z from "zod";
 
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
+import type { EfpClient } from "@/clients/efp";
 import { getDb, addressEnrichment } from "@/db";
 import type { AddressEnrichment } from "@/db/schema";
 import { logger } from "@/logger";
@@ -27,6 +28,12 @@ export const EnrichmentResultSchema = z.object({
       banner: z.string().nullable(),
     })
     .nullable(),
+  efp: z
+    .object({
+      followersCount: z.number(),
+      followingCount: z.number(),
+    })
+    .nullable(),
   createdAt: z.string(),
 });
 
@@ -35,25 +42,31 @@ export type EnrichmentResult = z.infer<typeof EnrichmentResultSchema>;
 export class EnrichmentService {
   private arkhamClient: ArkhamClient;
   private ensClient: ENSClient;
+  private efpClient: EfpClient;
   private rpcClient: ReturnType<typeof createRpcClient>;
   private ensCacheTtlMinutes: number;
+  private efpCacheTtlMinutes: number;
 
   constructor(
     arkhamClient: ArkhamClient,
     ensClient: ENSClient,
+    efpClient: EfpClient,
     rpcUrl: string,
     ensCacheTtlMinutes: number,
+    efpCacheTtlMinutes: number,
   ) {
     this.arkhamClient = arkhamClient;
     this.ensClient = ensClient;
+    this.efpClient = efpClient;
     this.rpcClient = createRpcClient(rpcUrl);
     this.ensCacheTtlMinutes = ensCacheTtlMinutes;
+    this.efpCacheTtlMinutes = efpCacheTtlMinutes;
   }
 
   /**
    * Get enriched data for an address.
    * - Arkham data is permanent (fetched once, stored forever).
-   * - ENS data is cached with a configurable TTL and refetched when stale.
+   * - ENS and EFP data are cached with configurable TTLs and refetched when stale.
    */
   async getAddressEnrichment(address: string): Promise<EnrichmentResult> {
     const normalizedAddress =
@@ -62,51 +75,75 @@ export class EnrichmentService {
      * used here if we were to convert all current records */
     const db = getDb();
 
-    // Check if address exists in database
     const existing = await db.query.addressEnrichment.findFirst({
       where: eq(addressEnrichment.address, normalizedAddress),
     });
 
     if (existing) {
-      // Arkham data is permanent, but ENS may need refreshing
-      if (this.isEnsFresh(existing)) {
+      const needsEnsRefresh = !this.isEnsFresh(existing);
+      const needsEfpRefresh = !this.isEfpFresh(existing);
+
+      if (!needsEnsRefresh && !needsEfpRefresh) {
         return this.mapToResult(existing);
       }
 
-      // ENS data is stale or missing — refetch
       logger.info(
-        { address: normalizedAddress },
-        "ENS cache stale, refreshing",
+        {
+          address: normalizedAddress,
+          needsEnsRefresh,
+          needsEfpRefresh,
+        },
+        "refreshing stale enrichment cache",
       );
-      const ensData = await this.ensClient.getEnsData(normalizedAddress);
+
+      const [ensData, efpData] = await Promise.all([
+        needsEnsRefresh
+          ? this.ensClient.getEnsData(normalizedAddress)
+          : Promise.resolve(undefined),
+        needsEfpRefresh
+          ? this.efpClient.getUserStats(normalizedAddress)
+          : Promise.resolve(undefined),
+      ]);
+
       const now = new Date();
+      const updates: Partial<typeof addressEnrichment.$inferInsert> = {};
+
+      if (needsEnsRefresh) {
+        updates.ensName = ensData?.name ?? null;
+        updates.ensAvatar = ensData?.avatar ?? null;
+        updates.ensBanner = ensData?.banner ?? null;
+        updates.ensUpdatedAt = now;
+      }
+
+      if (needsEfpRefresh) {
+        if (efpData) {
+          updates.efpFollowersCount = efpData.followersCount;
+          updates.efpFollowingCount = efpData.followingCount;
+          updates.efpUpdatedAt = now;
+        } else {
+          updates.efpFollowersCount = null;
+          updates.efpFollowingCount = null;
+          updates.efpUpdatedAt = null;
+        }
+      }
 
       await db
         .update(addressEnrichment)
-        .set({
-          ensName: ensData?.name ?? null,
-          ensAvatar: ensData?.avatar ?? null,
-          ensBanner: ensData?.banner ?? null,
-          ensUpdatedAt: now,
-        })
+        .set(updates)
         .where(eq(addressEnrichment.address, normalizedAddress));
 
       return this.mapToResult({
         ...existing,
-        ensName: ensData?.name ?? null,
-        ensAvatar: ensData?.avatar ?? null,
-        ensBanner: ensData?.banner ?? null,
-        ensUpdatedAt: now,
+        ...updates,
       });
     }
 
-    // Address not in DB — fetch Arkham + ENS in parallel
-    const [arkhamData, ensData] = await Promise.all([
+    const [arkhamData, ensData, efpData] = await Promise.all([
       this.arkhamClient.getAddressIntelligence(normalizedAddress),
       this.ensClient.getEnsData(normalizedAddress),
+      this.efpClient.getUserStats(normalizedAddress),
     ]);
 
-    // Use Arkham's contract info if available, otherwise fall back to RPC
     let isContractAddress: boolean;
     if (
       arkhamData?.isContract !== null &&
@@ -122,7 +159,6 @@ export class EnrichmentService {
 
     const now = new Date();
 
-    // Store in database
     const newRecord: typeof addressEnrichment.$inferInsert = {
       address: normalizedAddress,
       isContract: isContractAddress,
@@ -134,6 +170,9 @@ export class EnrichmentService {
       ensAvatar: ensData?.avatar ?? null,
       ensBanner: ensData?.banner ?? null,
       ensUpdatedAt: now,
+      efpFollowersCount: efpData?.followersCount ?? null,
+      efpFollowingCount: efpData?.followingCount ?? null,
+      efpUpdatedAt: efpData ? now : null,
     };
 
     const [inserted] = await db
@@ -142,7 +181,6 @@ export class EnrichmentService {
       .onConflictDoNothing()
       .returning();
 
-    // If insert failed due to race condition, fetch existing
     if (!inserted) {
       logger.warn(
         { address: normalizedAddress },
@@ -154,7 +192,6 @@ export class EnrichmentService {
       if (existingAfterRace) {
         return this.mapToResult(existingAfterRace);
       }
-      // This shouldn't happen, but return fetched data anyway
       logger.error(
         { address: normalizedAddress },
         "race condition fallback failed - record still not found",
@@ -171,6 +208,7 @@ export class EnrichmentService {
             }
           : null,
         ens: ensData,
+        efp: efpData,
         createdAt: new Date().toISOString(),
       };
     }
@@ -178,9 +216,6 @@ export class EnrichmentService {
     return this.mapToResult(inserted);
   }
 
-  /**
-   * Check if ENS data is still fresh based on the configured TTL.
-   */
   private isEnsFresh(record: AddressEnrichment): boolean {
     if (!record.ensUpdatedAt) {
       return false;
@@ -191,8 +226,19 @@ export class EnrichmentService {
     return age < ttlMs;
   }
 
+  private isEfpFresh(record: AddressEnrichment): boolean {
+    if (!record.efpUpdatedAt) {
+      return false;
+    }
+
+    const ttlMs = this.efpCacheTtlMinutes * 60 * 1000;
+    const age = Date.now() - record.efpUpdatedAt.getTime();
+    return age < ttlMs;
+  }
+
   private mapToResult(record: AddressEnrichment): EnrichmentResult {
     const hasEnsData = record.ensName !== null;
+    const hasEfpData = record.efpUpdatedAt !== null;
 
     return EnrichmentResultSchema.parse({
       address: record.address,
@@ -208,6 +254,12 @@ export class EnrichmentService {
             name: record.ensName,
             avatar: record.ensAvatar,
             banner: record.ensBanner,
+          }
+        : null,
+      efp: hasEfpData
+        ? {
+            followersCount: record.efpFollowersCount ?? 0,
+            followingCount: record.efpFollowingCount ?? 0,
           }
         : null,
       createdAt: record.createdAt.toISOString(),
