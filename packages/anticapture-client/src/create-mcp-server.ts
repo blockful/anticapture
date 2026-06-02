@@ -19,8 +19,6 @@ import { accountBalanceVariationsByAccountIdHandler } from "../generated/mcp/acc
 import { accountBalancesHandler } from "../generated/mcp/account-balancesHandlers/accountBalances.ts";
 import { accountInteractionsHandler } from "../generated/mcp/account-balancesHandlers/accountInteractions.ts";
 import { historicalBalancesHandler } from "../generated/mcp/account-balancesHandlers/historicalBalances.ts";
-import { getAddressHandler } from "../generated/mcp/addressHandlers/getAddress.ts";
-import { getAddressesHandler } from "../generated/mcp/addressHandlers/getAddresses.ts";
 import { delegationsHandler } from "../generated/mcp/delegationsHandlers/delegations.ts";
 import { delegatorsHandler } from "../generated/mcp/delegationsHandlers/delegators.ts";
 import { historicalDelegationsHandler } from "../generated/mcp/delegationsHandlers/historicalDelegations.ts";
@@ -46,8 +44,6 @@ import { proposalsHandler } from "../generated/mcp/proposalsHandlers/proposals.t
 import { proposalsActivityHandler } from "../generated/mcp/proposalsHandlers/proposalsActivity.ts";
 import { searchProposalsHandler } from "../generated/mcp/proposalsHandlers/searchProposals.ts";
 import { votesByProposalIdHandler } from "../generated/mcp/proposalsHandlers/votesByProposalId.ts";
-import { relayDelegateHandler } from "../generated/mcp/relayHandlers/relayDelegate.ts";
-import { relayVoteHandler } from "../generated/mcp/relayHandlers/relayVote.ts";
 import { getDaoHealthHandler } from "../generated/mcp/undefinedHandlers/getDaoHealth.ts";
 import { compareCexSupplyHandler } from "../generated/mcp/tokensHandlers/compareCexSupply.ts";
 import { compareCirculatingSupplyHandler } from "../generated/mcp/tokensHandlers/compareCirculatingSupply.ts";
@@ -113,9 +109,6 @@ import {
   delegatorsQueryResponseSchema,
   feedEventsQueryParamsSchema,
   feedEventsQueryResponseSchema,
-  getAddressQueryResponseSchema,
-  getAddressesQueryParamsSchema,
-  getAddressesQueryResponseSchema,
   averageDelegationPercentageQueryParamsSchema,
   averageDelegationPercentageQueryResponseSchema,
   daosQueryResponseSchema,
@@ -156,10 +149,6 @@ import {
   proposalsActivityQueryResponseSchema,
   proposalsQueryParamsSchema,
   proposalsQueryResponseSchema,
-  relayDelegateMutationRequestSchema,
-  relayDelegateMutationResponseSchema,
-  relayVoteMutationRequestSchema,
-  relayVoteMutationResponseSchema,
   searchProposalsQueryParamsSchema,
   searchProposalsQueryResponseSchema,
   tokenMetricsQueryParamsSchema,
@@ -185,7 +174,6 @@ import {
   votingPowersQueryParamsSchema,
   votingPowersQueryResponseSchema,
 } from "../generated/zod.ts";
-import type { Address } from "../generated/models.ts";
 
 const DAO_ALL = [
   "aave",
@@ -1033,63 +1021,6 @@ export function createMcpServer(): McpServer {
     },
     async ({ dao, id, params }) =>
       offchainProposalNonVotersHandler({ dao, id, params }),
-  );
-
-  server.registerTool(
-    "getAddress",
-    {
-      title: "Get enriched data for an address",
-      description:
-        "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract.",
-      outputSchema: { data: getAddressQueryResponseSchema },
-      inputSchema: { address: z.string() },
-    },
-    async ({ address }) => getAddressHandler({ address }),
-  );
-
-  server.registerTool(
-    "getAddresses",
-    {
-      title: "Get enriched data for multiple addresses",
-      description:
-        "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request.",
-      outputSchema: { data: getAddressesQueryResponseSchema },
-      inputSchema: { params: getAddressesQueryParamsSchema },
-    },
-    async ({ params }) =>
-      getAddressesHandler({
-        params: { ...params, addresses: params.addresses as Address[] },
-      }),
-  );
-
-  server.registerTool(
-    "relayVote",
-    {
-      title: "Relay a gasless vote",
-      description:
-        "Submit an EIP-712 signed vote on behalf of a user. The relayer pays gas.",
-      outputSchema: { data: relayVoteMutationResponseSchema },
-      inputSchema: {
-        dao: z.enum(["ens"] as const),
-        data: relayVoteMutationRequestSchema,
-      },
-    },
-    async ({ dao, data }) => relayVoteHandler({ dao, data }),
-  );
-
-  server.registerTool(
-    "relayDelegate",
-    {
-      title: "Relay a gasless delegation",
-      description:
-        "Submit an EIP-712 signed delegation on behalf of a user. The relayer pays gas.",
-      outputSchema: { data: relayDelegateMutationResponseSchema },
-      inputSchema: {
-        dao: z.enum(["ens"] as const),
-        data: relayDelegateMutationRequestSchema,
-      },
-    },
-    async ({ dao, data }) => relayDelegateHandler({ dao, data }),
   );
 
   return server;
