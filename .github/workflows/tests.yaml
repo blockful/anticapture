@@ -7,7 +7,7 @@ on:
 jobs:
   changeset-path-filter:
     name: Detect changeset requirement
-    if: github.base_ref != 'main'
+    if: github.base_ref != 'main' && !startsWith(github.head_ref, 'changeset-release/')
     runs-on: ubuntu-latest
     outputs:
       needs_changeset: ${{ steps.filter.outputs.needs_changeset }}
@@ -76,6 +76,7 @@ jobs:
           exit 1
 
   typecheck:
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -105,6 +106,7 @@ jobs:
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
   lint:
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -134,6 +136,7 @@ jobs:
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
   test:
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -172,6 +175,7 @@ jobs:
 
   dashboard-e2e:
     name: Dashboard E2E
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

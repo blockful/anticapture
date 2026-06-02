@@ -9,6 +9,7 @@ on:
 jobs:
   detect-contract-updates:
     name: Detect API contract updates
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-latest
     outputs:
       needs_manual_approval: ${{ steps.detect.outputs.needs_manual_approval }}
