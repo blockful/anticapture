@@ -138,6 +138,10 @@ const config: Config = {
           label: "Guide",
         },
         {
+          type: "custom-llmDocs",
+          position: "right",
+        },
+        {
           href: "https://github.com/blockful-io/anticapture",
           label: "GitHub",
           position: "right",
