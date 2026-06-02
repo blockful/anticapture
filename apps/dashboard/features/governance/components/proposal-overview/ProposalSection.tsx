@@ -1,11 +1,12 @@
 "use client";
 
+import type { VotesOffchainByProposalIdPathParamsDaoEnumKey } from "@anticapture/client";
 import {
-  OrderDirection,
-  QueryInput_VotesOffchainByProposalId_OrderBy,
-  useGetOffchainVotesByProposalIdQuery,
-} from "@anticapture/graphql-client/hooks";
-import { useApolloClient } from "@apollo/client";
+  offchainProposalByIdQueryKey,
+  useVotesOffchainByProposalId,
+  votesOffchainByProposalIdQueryKey,
+} from "@anticapture/client/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState, useCallback, useMemo, useRef } from "react";
@@ -107,10 +108,9 @@ export const ProposalSection = ({
     daoId: daoEnum,
   });
 
-  const rawOffchainProposal =
-    rawOffchainResponse?.__typename === "OffchainProposal"
-      ? rawOffchainResponse
-      : null;
+  const rawOffchainProposal = rawOffchainResponse;
+  const offchainDaoKey =
+    daoEnum.toLowerCase() as VotesOffchainByProposalIdPathParamsDaoEnumKey;
 
   const { data: accountPower } = useAccountPower({
     address: address ?? "",
@@ -132,23 +132,22 @@ export const ProposalSection = ({
     [rawOffchainProposal?.choices],
   );
 
-  const { data: userOffchainVoteData } = useGetOffchainVotesByProposalIdQuery({
-    variables: {
-      id: offchainProposalId,
-      voterAddresses: address ? [address] : [],
+  const { data: userOffchainVoteData } = useVotesOffchainByProposalId(
+    offchainDaoKey,
+    offchainProposalId,
+    {
+      voterAddresses: address ? [address] : undefined,
       limit: 1,
-      skip: 0,
-      fromDate: null,
-      toDate: null,
-      orderBy: QueryInput_VotesOffchainByProposalId_OrderBy.Timestamp,
-      orderDirection: OrderDirection.Desc,
+      orderBy: "timestamp",
+      orderDirection: "desc",
     },
-    context: { headers: { "anticapture-dao-id": daoEnum } },
-    skip: !isOffchain || !offchainProposalId || !address,
-  });
+    {
+      query: { enabled: !!isOffchain && !!offchainProposalId && !!address },
+    },
+  );
 
   const apiOffchainVoteChoice = (
-    userOffchainVoteData?.votesOffchainByProposalId?.items?.[0]?.choice ?? []
+    userOffchainVoteData?.items?.[0]?.choice ?? []
   ).filter((c): c is string => c != null);
   const apiOffchainVoteLabel =
     apiOffchainVoteChoice.length > 0
@@ -158,18 +157,27 @@ export const ProposalSection = ({
   const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
   const offchainVoteLabel = localOffchainVoteLabel ?? apiOffchainVoteLabel;
 
-  const apolloClient = useApolloClient();
+  const queryClient = useQueryClient();
 
   const handleOffchainVoteSuccess = useCallback(
     (voteLabel: string) => {
       setLocalOffchainVoteLabel(voteLabel);
       // Refetch votes (badge + table) and proposal scores so the UI reflects
       // the new vote without requiring a manual page reload.
-      apolloClient.refetchQueries({
-        include: ["GetOffchainVotesByProposalId", "GetOffchainProposal"],
+      void queryClient.invalidateQueries({
+        queryKey: votesOffchainByProposalIdQueryKey(
+          offchainDaoKey,
+          offchainProposalId,
+        ),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: offchainProposalByIdQueryKey(
+          offchainDaoKey,
+          offchainProposalId,
+        ),
       });
     },
-    [apolloClient],
+    [queryClient, offchainDaoKey, offchainProposalId],
   );
 
   const adaptedOffchainProposal: ProposalViewData | null = rawOffchainProposal

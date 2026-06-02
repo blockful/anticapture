@@ -29,7 +29,8 @@ import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
-import { useDaoData } from "@/shared/hooks/useDaoData";
+import { useDao } from "@anticapture/client/hooks";
+import type { DaoPathParamsDaoEnumKey } from "@anticapture/client";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { cn } from "@/shared/utils/cn";
@@ -84,7 +85,9 @@ export const Delegates = ({
     ]).withDefault("votingPower" as DelegateSortKey),
   );
   const { decimals } = daoConfig[daoId];
-  const { data: daoData } = useDaoData(daoId);
+  const { data: daoData } = useDao(
+    daoId.toLowerCase() as DaoPathParamsDaoEnumKey,
+  );
 
   const votingPeriodSeconds = useMemo(() => {
     if (!daoData?.votingPeriod) return 0;

@@ -28,18 +28,20 @@ export const useProposal = ({
     { query: { enabled: !!proposalId } },
   );
 
+  const full = data?.variant === "full" ? data : null;
+
   return {
-    data: data
+    data: full
       ? {
-          ...data,
-          status: getProposalStatus(data.status),
-          quorum: data.quorum.toString(),
-          forVotes: data.forVotes.toString(),
-          againstVotes: data.againstVotes.toString(),
-          abstainVotes: data.abstainVotes.toString(),
-          calldatas: data.calldatas ?? [],
-          targets: data.targets ?? [],
-          values: data.values?.map((value) => value.toString()) ?? [],
+          ...full,
+          status: getProposalStatus(full.status),
+          quorum: full.quorum.toString(),
+          forVotes: full.forVotes.toString(),
+          againstVotes: full.againstVotes.toString(),
+          abstainVotes: full.abstainVotes.toString(),
+          calldatas: full.calldatas,
+          targets: full.targets,
+          values: full.values.map((value) => value.toString()),
         }
       : null,
     isLoading,

@@ -1,7 +1,0 @@
-query CompareTreasury($days: DaysWindow!) {
-  compareTreasury(days: $days) {
-    changeRate
-    currentValue
-    previousValue
-  }
-}

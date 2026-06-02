@@ -1,13 +1,12 @@
 "use client";
 
-import type {
-  BigInt as RestBigInt,
-  HistoricalVotingPower,
-  HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
-  HistoricalVotingPowerByAccountIdQueryParamsOrderByEnumKey,
-  HistoricalVotingPowerByAccountIdQueryResponse,
-  HistoricalVotingPowerDelegation,
-  HistoricalVotingPowerTransfer,
+import {
+  type HistoricalVotingPower,
+  type HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
+  type HistoricalVotingPowerByAccountIdQueryParamsOrderByEnumKey,
+  type HistoricalVotingPowerDelegation,
+  type HistoricalVotingPowerTransfer,
+  getNextPageParam,
 } from "@anticapture/client";
 import { useHistoricalVotingPowerByAccountIdInfinite } from "@anticapture/client/hooks";
 import { useMemo } from "react";
@@ -18,7 +17,7 @@ import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 type StringifyBigInt<T> = {
-  [K in keyof T]: T[K] extends RestBigInt ? string : T[K];
+  [K in keyof T]: T[K] extends bigint ? string : T[K];
 };
 
 export interface DelegationHistoryItem {
@@ -55,14 +54,6 @@ interface UseDelegateDelegationHistoryParams {
   toTimestamp?: number;
   limit?: number;
 }
-
-const getNextPageParam = (
-  lastPage: HistoricalVotingPowerByAccountIdQueryResponse,
-  allPages: HistoricalVotingPowerByAccountIdQueryResponse[],
-): number | undefined => {
-  const loaded = allPages.reduce((s, p) => s + p.items.length, 0);
-  return loaded >= lastPage.totalCount ? undefined : loaded;
-};
 
 export function useDelegateDelegationHistory({
   accountId,

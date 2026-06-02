@@ -24,11 +24,17 @@ import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWater
 import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
-  useActiveSupply,
-  useAverageTurnout,
-  useDelegatedSupply,
-  useScreenSize,
-} from "@/shared/hooks";
+  useCompareActiveSupply,
+  useCompareAverageTurnout,
+  useCompareDelegatedSupply,
+} from "@anticapture/client/hooks";
+import type {
+  CompareActiveSupplyPathParamsDaoEnumKey,
+  CompareAverageTurnoutPathParamsDaoEnumKey,
+  CompareDelegatedSupplyPathParamsDaoEnumKey,
+} from "@anticapture/client";
+
+import { useScreenSize } from "@/shared/hooks";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/";
 import { useDaoId } from "@/shared/providers/DaoIdProvider";
@@ -70,9 +76,24 @@ export const AttackCostBarChart = ({
 
   const { data: liquidTreasuryData, loading: liquidTreasuryLoading } =
     useTreasury(daoId, "liquid", TimeInterval.SEVEN_DAYS);
-  const delegatedSupply = useDelegatedSupply(daoId, timeInterval);
-  const activeSupply = useActiveSupply(daoId, timeInterval);
-  const averageTurnout = useAverageTurnout(daoId, timeInterval);
+  const dao = daoId.toLowerCase();
+
+  const { data: delegatedSupply, isLoading: delegatedSupplyLoading } =
+    useCompareDelegatedSupply(
+      dao as CompareDelegatedSupplyPathParamsDaoEnumKey,
+      {
+        days: timeInterval,
+      },
+    );
+
+  const activeSupply = useCompareActiveSupply(
+    dao as CompareActiveSupplyPathParamsDaoEnumKey,
+    { days: timeInterval },
+  );
+  const averageTurnout = useCompareAverageTurnout(
+    dao as CompareAverageTurnoutPathParamsDaoEnumKey,
+    { days: timeInterval },
+  );
 
   const {
     data: daoTokenPriceHistoricalData,
@@ -93,14 +114,14 @@ export const AttackCostBarChart = ({
 
   const isLoading =
     liquidTreasuryLoading ||
-    delegatedSupply.isLoading ||
+    delegatedSupplyLoading ||
     activeSupply.isLoading ||
     averageTurnout.isLoading ||
     daoTokenPriceHistoricalDataLoading ||
     daoTopTokenHolderExcludingTheDaoLoading;
 
   const mocked =
-    delegatedSupply.data?.currentValue === undefined &&
+    delegatedSupply?.currentValue === undefined &&
     activeSupply.data?.activeSupply === undefined &&
     averageTurnout.data?.currentAverageTurnout === undefined &&
     daoTopTokenHolderExcludingTheDao?.balance === undefined;
@@ -143,7 +164,7 @@ export const AttackCostBarChart = ({
         value: formatValue(
           Number(
             formatUnits(
-              BigInt(delegatedSupply.data?.currentValue || 0),
+              BigInt(delegatedSupply?.currentValue || 0),
               daoConfig.decimals,
             ),
           ),
@@ -204,7 +225,7 @@ export const AttackCostBarChart = ({
     daoTokenPriceHistoricalData,
     valueMode,
     liquidTreasuryData,
-    delegatedSupply.data?.currentValue,
+    delegatedSupply?.currentValue,
     activeSupply.data?.activeSupply,
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,

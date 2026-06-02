@@ -27,10 +27,8 @@ App Router pages/layouts are the only exception (they require `export default`).
 Use inline `type` keyword for mixed imports:
 
 ```tsx
-import {
-  useGetProposalsQuery,
-  type GetProposalsQuery,
-} from "@anticapture/graphql-client/hooks";
+import { useProposals } from "@anticapture/client/hooks";
+import { type ProposalsQueryResponse } from "@anticapture/client";
 ```
 
 ## Props And Types Typing
@@ -60,16 +58,16 @@ export const MetricCard = ({
 Use `interface` for hook params and hook return types; these benefit from `extends` when building on generated types:
 
 ```tsx
-import type { GetProposalsActivityQueryVariables } from "@anticapture/graphql-client";
+import type { ProposalsActivityQueryParams } from "@anticapture/client";
 
-interface UseProposalsActivityParams extends GetProposalsActivityQueryVariables {
+interface UseProposalsActivityParams extends ProposalsActivityQueryParams {
   limit: number;
   daoId: DaoIdEnum;
 }
 
 interface UseProposalsActivityResult {
   data: ProposalActivityData | null;
-  loading: boolean;
+  isLoading: boolean;
   error: Error | null;
   refetch: () => void;
 }
@@ -79,7 +77,7 @@ Rule of thumb: `type` for component props and local shapes; `interface` when ext
 
 ## Hooks
 
-Feature hooks that use Apollo or React Query require `"use client"` at the top of the file. Always return objects, never tuples. Name booleans with `is`/`has` prefixes.
+Feature hooks that use React Query (including the `@anticapture/client` hooks) require `"use client"` at the top of the file. Always return objects, never tuples. Name booleans with `is`/`has` prefixes.
 
 ```tsx
 "use client";
