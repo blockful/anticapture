@@ -11,7 +11,7 @@ FROM nginx:1.27-alpine
 # Railway service to match the real backend service names and listening ports
 # (see README.md). PORT is injected by Railway in production.
 ENV PORT=8080 \
-    DOCS_UPSTREAM=docs.railway.internal:3001 \
+    DOCS_UPSTREAM=mcp-docs.railway.internal:3001 \
     MCP_UPSTREAM=mcp-server.railway.internal:3100
 
 # Restrict envsubst to our own variables so nginx runtime variables ($host,

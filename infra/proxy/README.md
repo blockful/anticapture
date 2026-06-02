@@ -26,27 +26,42 @@ TLS at the edge.
 1. Create a service from this repo with **Config-as-code** pointing at
    `infra/proxy/railway.json` (Dockerfile builder, repo root as build context).
 2. This is the only service in the group that should have a **public domain**.
-   Remove the public domains from `docs` and `mcp-server` so they are reachable
-   over the private network only.
-3. Set these variables on the proxy service, using Railway reference variables
-   so they track the real backend service names and ports:
+   Remove the public domains from `mcp-docs` and `mcp-server` so they are
+   reachable over the private network only.
+3. **Pin the backend ports.** Railway's auto-injected `PORT` is random and
+   runtime-only -- it cannot be referenced as `${{service.PORT}}` (the reference
+   resolves to empty), and the proxy must know a fixed port to dial. Both
+   backends already listen on `$PORT`, so set an explicit `PORT` variable on
+   each so it stays stable and matches this proxy's defaults:
 
    ```text
-   DOCS_UPSTREAM=${{docs.RAILWAY_PRIVATE_DOMAIN}}:${{docs.PORT}}
-   MCP_UPSTREAM=${{mcp-server.RAILWAY_PRIVATE_DOMAIN}}:${{mcp-server.PORT}}
+   # on the mcp-docs service
+   PORT=3001
+   # on the mcp-server service
+   PORT=3100
    ```
 
-   Replace `docs` / `mcp-server` with the actual Railway service names. The port
-   on each upstream must match the port that service listens on (its `PORT`, or
-   the Dockerfile default: docs `3001`, mcp-server `3100`). `PORT` on the proxy
-   itself is injected by Railway.
+   Redeploy both services so they bind the pinned port.
 
-## Private DNS
+4. Point the proxy at those backends. The defaults baked into the Dockerfile
+   (`mcp-docs.railway.internal:3001`, `mcp-server.railway.internal:3100`)
+   already match, so this step is only needed if the Railway service names
+   differ:
+
+   ```text
+   DOCS_UPSTREAM=<docs-service>.railway.internal:3001
+   MCP_UPSTREAM=<mcp-server-service>.railway.internal:3100
+   ```
+
+   `PORT` on the proxy itself is injected by Railway and needs no pinning.
+
+## Private DNS and IPv6
 
 Backends are addressed over Railway's IPv6 private network
-(`*.railway.internal`). The config sets `resolver [fd12::10] ipv6=on valid=1s;`
-and uses a variable in `proxy_pass`, forcing nginx to re-resolve per request so
-it follows internal IP changes across redeploys instead of caching the first
+(`*.railway.internal`, which resolves to IPv6). The config sets
+`resolver [fd12::10] ipv6=on valid=1s;` and uses a variable in `proxy_pass`,
+forcing nginx to re-resolve per request so it follows internal IP changes
+across redeploys instead of caching the first
 lookup forever.
 
 ## Local check

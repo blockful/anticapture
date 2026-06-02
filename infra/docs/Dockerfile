@@ -28,6 +28,8 @@ COPY --from=installer --chown=app:app /app .
 USER app
 WORKDIR /app/packages/anticapture-client/docs
 EXPOSE 3001
-# Serve the static `build/` output. Railway injects $PORT; bind 0.0.0.0 so the
-# container is reachable.
-CMD ["sh", "-c", "pnpm exec docusaurus serve --dir build --host 0.0.0.0 --port ${PORT:-3001}"]
+# Serve the static `build/` output. Railway injects $PORT. Bind `::` (IPv6,
+# dual-stack) so the container is reachable over Railway's private network,
+# which resolves to IPv6 addresses -- an IPv4-only 0.0.0.0 bind would refuse
+# the reverse proxy's connection.
+CMD ["sh", "-c", "pnpm exec docusaurus serve --dir build --host :: --port ${PORT:-3001}"]
