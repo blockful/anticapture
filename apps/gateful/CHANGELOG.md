@@ -1,5 +1,15 @@
 # @anticapture/gateful
 
+## 1.0.4
+
+### Patch Changes
+
+- [#1947](https://github.com/blockful/anticapture/pull/1947) [`8ffc325`](https://github.com/blockful/anticapture/commit/8ffc325c76ac3e107c4ece43c9b93c828f3aa8ce) Thanks [@pikonha](https://github.com/pikonha)! - token distribution fetching lean proposals
+
+- [#1947](https://github.com/blockful/anticapture/pull/1947) [`e98cab2`](https://github.com/blockful/anticapture/commit/e98cab279ea8fbf38c1a924d1853d79e36ac47da) Thanks [@pikonha](https://github.com/pikonha)! - Add lean parameter support to proposals endpoints for sitemap generation
+
+- [#1956](https://github.com/blockful/anticapture/pull/1956) [`18aef34`](https://github.com/blockful/anticapture/commit/18aef3474e8e69ce9162d0ab67a68bf90809bc3d) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Model the onchain proposals response (`/proposals`, `/proposals/search`, `/proposals/{id}`) as a `variant`-tagged discriminated union. When `lean=true` the API returns the `lean` variant (omitting calldatas/values/targets and the proposal description to reduce payload size); otherwise it returns the `full` variant. Clients can narrow on the `variant` discriminator for exact typing instead of guarding optional fields.
+
 ## 1.0.3
 
 ### Patch Changes
