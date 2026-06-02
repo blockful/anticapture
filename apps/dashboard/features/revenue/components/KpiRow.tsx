@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, Info } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import {
   useGetRevenueNewWallets,
   useGetRevenueRenewalFunnel,
@@ -33,6 +33,9 @@ const WINDOW_BY_PERIOD: Record<string, KpiWindow> = {
 };
 
 const KPI_COUNT = 3;
+
+const PERCENTAGE_POINTS_TOOLTIP =
+  "Percentage points: the absolute change between two percentages. Going from 30% to 39% is +9pp, not +9%.";
 
 export const KpiRow = () => {
   const [timePeriod, setTimePeriod] = useState("1y");
@@ -116,23 +119,9 @@ export const KpiRow = () => {
                     "border-border-default border-b lg:border-b-0 lg:border-r",
                 )}
               >
-                <div className="flex items-center gap-1.5">
-                  <p className="text-secondary text-sm font-medium">
-                    {kpi.title}
-                  </p>
-                  {kpi.tooltip && (
-                    <Tooltip
-                      tooltipContent={
-                        <p className="text-secondary text-sm font-normal leading-5">
-                          {kpi.tooltip}
-                        </p>
-                      }
-                      triggerClassName="inline-flex cursor-help items-center border-0 bg-transparent p-0"
-                    >
-                      <Info className="text-secondary size-3.5" />
-                    </Tooltip>
-                  )}
-                </div>
+                <p className="text-secondary text-sm font-medium">
+                  {kpi.title}
+                </p>
                 <p className="text-primary mt-1 font-mono text-[30px] font-medium leading-9">
                   {kpi.value}
                 </p>
@@ -152,7 +141,29 @@ export const KpiRow = () => {
                           : "text-secondary"
                     }
                   >
-                    {kpi.subtext}
+                    {kpi.delta ? (
+                      <>
+                        {kpi.delta.value}
+                        {kpi.delta.unit === "pp" ? (
+                          <Tooltip
+                            asChild
+                            tooltipContent={
+                              <p className="text-secondary text-sm font-normal leading-5">
+                                {PERCENTAGE_POINTS_TOOLTIP}
+                              </p>
+                            }
+                            triggerClassName="cursor-help underline decoration-dotted underline-offset-2"
+                          >
+                            <span>{kpi.delta.unit}</span>
+                          </Tooltip>
+                        ) : (
+                          kpi.delta.unit
+                        )}{" "}
+                        {kpi.delta.comparison}
+                      </>
+                    ) : (
+                      kpi.subtext
+                    )}
                   </span>
                 </p>
               </div>
