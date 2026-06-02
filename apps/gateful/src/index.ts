@@ -134,7 +134,7 @@ app.get("/docs/json", async (c) => {
 });
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
-relayerProxy(app, config.daoRelayers);
+relayerProxy(app, config.daoRelayers, registry);
 
 // Proxy catch-all (must be last)
 proxy(app, config.daoApis, registry);
