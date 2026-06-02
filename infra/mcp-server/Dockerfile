@@ -24,5 +24,9 @@ WORKDIR /app
 COPY --from=installer --chown=app:app /app .
 USER app
 WORKDIR /app/packages/anticapture-client
+# Bind `::` (IPv6, dual-stack) so the server is reachable over Railway's private
+# network, which resolves to IPv6 addresses. The server reads HOST (defaults to
+# 0.0.0.0); an IPv4-only bind would refuse the reverse proxy's connection.
+ENV HOST=::
 EXPOSE 3100
 CMD ["node", "dist/mcp-server-http.cjs"]

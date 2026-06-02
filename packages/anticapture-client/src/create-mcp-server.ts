@@ -46,8 +46,6 @@ import { proposalsHandler } from "../generated/mcp/proposalsHandlers/proposals.t
 import { proposalsActivityHandler } from "../generated/mcp/proposalsHandlers/proposalsActivity.ts";
 import { searchProposalsHandler } from "../generated/mcp/proposalsHandlers/searchProposals.ts";
 import { votesByProposalIdHandler } from "../generated/mcp/proposalsHandlers/votesByProposalId.ts";
-import { relayDelegateHandler } from "../generated/mcp/relayHandlers/relayDelegate.ts";
-import { relayVoteHandler } from "../generated/mcp/relayHandlers/relayVote.ts";
 import { getDaoHealthHandler } from "../generated/mcp/undefinedHandlers/getDaoHealth.ts";
 import { compareCexSupplyHandler } from "../generated/mcp/tokensHandlers/compareCexSupply.ts";
 import { compareCirculatingSupplyHandler } from "../generated/mcp/tokensHandlers/compareCirculatingSupply.ts";
@@ -156,10 +154,6 @@ import {
   proposalsActivityQueryResponseSchema,
   proposalsQueryParamsSchema,
   proposalsQueryResponseSchema,
-  relayDelegateMutationRequestSchema,
-  relayDelegateMutationResponseSchema,
-  relayVoteMutationRequestSchema,
-  relayVoteMutationResponseSchema,
   searchProposalsQueryParamsSchema,
   searchProposalsQueryResponseSchema,
   tokenMetricsQueryParamsSchema,
@@ -1060,36 +1054,6 @@ export function createMcpServer(): McpServer {
       getAddressesHandler({
         params: { ...params, addresses: params.addresses as Address[] },
       }),
-  );
-
-  server.registerTool(
-    "relayVote",
-    {
-      title: "Relay a gasless vote",
-      description:
-        "Submit an EIP-712 signed vote on behalf of a user. The relayer pays gas.",
-      outputSchema: { data: relayVoteMutationResponseSchema },
-      inputSchema: {
-        dao: z.enum(["ens"] as const),
-        data: relayVoteMutationRequestSchema,
-      },
-    },
-    async ({ dao, data }) => relayVoteHandler({ dao, data }),
-  );
-
-  server.registerTool(
-    "relayDelegate",
-    {
-      title: "Relay a gasless delegation",
-      description:
-        "Submit an EIP-712 signed delegation on behalf of a user. The relayer pays gas.",
-      outputSchema: { data: relayDelegateMutationResponseSchema },
-      inputSchema: {
-        dao: z.enum(["ens"] as const),
-        data: relayDelegateMutationRequestSchema,
-      },
-    },
-    async ({ dao, data }) => relayDelegateHandler({ dao, data }),
   );
 
   return server;

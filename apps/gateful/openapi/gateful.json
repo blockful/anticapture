@@ -6472,7 +6472,7 @@
       "get": {
         "operationId": "accountInteractions",
         "summary": "Get top interactions between accounts for a given period",
-        "description": "Returns a mapping of the largest interactions between accounts. \nPositive amounts signify net token transfers FROM <address>, whilst negative amounts refer to net transfers TO <address>",
+        "description": "Returns a mapping of the largest interactions between accounts.\nPositive amounts signify net token transfers FROM `<address>`, whilst negative amounts refer to net transfers TO `<address>`",
         "tags": ["account-balances", "skip-pagination"],
         "parameters": [
           {
