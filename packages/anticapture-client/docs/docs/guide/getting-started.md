@@ -24,69 +24,41 @@ Anticapture offers MCP tooling for LLM consumption of the API resources; in orde
 }
 ```
 
-This will connect to the public MCP HTTP transport instance; for development purposes or in order to run the server locally, head over to [self-hosting & local development](./self-hosting.md).
+This will connect to the public MCP HTTP transport instance.
 
 ## Querying the protocol
 
 Once you've got your client connection set up, querying the Anticapture MCP is as simple as describing the request in plain natural language (ex.: Claude Code):
 
 ```
-❯ Fetch me the most recent proposals from ENS using anticapture
+❯ Query the most recent UNI proposals with anticapture
 
-⏺ I'll load the anticapture proposals tool and fetch the most recent ENS
-  proposals.
+⏺ I'll query the most recent UNI proposals. Let me load the relevant tool schema first.
 
   Called anticapture (ctrl+o to expand)
 
-⏺ Here are the 5 most recent ENS proposals (out of 69 total on-chain):
+⏺ Here are the 5 most recent UNI (Uniswap) proposals (97 total on-chain):
 
-  EP: 6.41
-  Title: [Executable] Endowment permissions to KPK — Update #9
-  Status: ✅ EXECUTED
-  For / Against / Abstain: 1,376,302 / 0 / 4,549
-  Result: Expands endowment access to liquid staking/restaking (Stader,
-    Ether.fi), Morpho USDT vaults, CoW Swap weETH/eETH routing
-  ────────────────────────────────────────
-  EP: 6.40
-  Title: [Executable] Update DNSSEC Algorithm 7
-  Status: ✅ EXECUTED
-  For / Against / Abstain: 1,346,175 / 0 / ~0
-  Result: Points DNSSEC algorithm 7 to the patched RSASHA1 contract (gap left by
+  ┌─────┬──────────────────────────────────────────────────────────┬─────────────┬───────────────────────────────┬────────────┐
+  │  #  │                          Title                           │   Status    │ For / Against / Abstain (UNI) │  Executed  │
+  ├─────┼──────────────────────────────────────────────────────────┼─────────────┼───────────────────────────────┼────────────┤
+  │ 97  │ Return 12.5M Delegated Tokens to the Governance Timelock │ ✅ EXECUTED │ 45.2M / ~0.06 / 4.77M         │ 2026-06-01 │
+  ├─────┼──────────────────────────────────────────────────────────┼─────────────┼───────────────────────────────┼────────────┤
+  │ 96  │ Protocol Fee Expansion: Vote 3                           │ ✅ EXECUTED │ 72.98M / 0 / ~112             │ 2026-05-31 │
+  ├─────┼──────────────────────────────────────────────────────────┼─────────────┼───────────────────────────────┼────────────┤
+  │ 95  │ Protocol Fee Expansion: Vote 2                           │ ✅ EXECUTED │ 77.83M / ~11 / 0              │ 2026-03-07 │
+  ├─────┼──────────────────────────────────────────────────────────┼─────────────┼───────────────────────────────┼────────────┤
+  │ 94  │ Protocol Fee Expansion: Vote 1                           │ ✅ EXECUTED │ 62.84M / ~4,968 / 0           │ 2026-03-04 │
+  ├─────┼──────────────────────────────────────────────────────────┼─────────────┼───────────────────────────────┼────────────┤
+  │ 93  │ UNIfication                                              │ ✅ EXECUTED │ 125.34M / ~742 / 1.5M         │ 2025-12-27 │
+  └─────┴──────────────────────────────────────────────────────────┴─────────────┴───────────────────────────────┴────────────┘
 
-    a prior security patch)
-  ────────────────────────────────────────
-  EP: 6.39
-  Title: [Executable] Treasury Flow Automation
-  Status: ✅ EXECUTED
-  For / Against / Abstain: 1,306,368 / 45,226 / 6,536
-  Result: Adds a Registrar Manager + Zodiac module so revenue flows
-  automatically
-    to the endowment (~$1M est. missed yield)
-  ────────────────────────────────────────
-  EP: 6.38
-  Title: [Executable] Endowment permissions to karpatkey — Update #8
-  Status: ✅ EXECUTED
-  For / Against / Abstain: 1,217,997 / ~0 / 4,549
-  Result: Routine ZRM update: GHO/FLUID CoW Swap perms, Fluid Merkle claims;
-    removes SPK perms
-  ────────────────────────────────────────
-  EP: 6.37
-  Title: [Executable] Transfer 900,000 USDC from Endowment to wallet.ensdao.eth
-  Status: ✅ EXECUTED
-  For / Against / Abstain: 1,338,773 / 0 / ~3.5
-  Result: One-time USDC transfer to cover ENS Labs stream payments
+  Notes:
+  - All five passed comfortably (quorum is 40M UNI) and have been executed.
+  - Vote totals are shown in whole UNI (raw values are in 18-decimal wei).
+  - The recent activity centers on the Protocol Fee Expansion series (votes 1–3) and the UNIfication proposal.
 
-  All five passed comfortably (quorum is 1M tokens) and have been executed
-  on-chain. Vote figures are token-weighted, shown in whole tokens (raw values
-  are 18-decimal wei).
+  Want me to pull the full details (description + execution payload) for any specific one, or fetch the next page of older proposals?
 
-  A few notes:
-  - These are on-chain proposals. ENS also has off-chain (Snapshot) proposals —
-  let me know if you want those too.
-  - I requested the lean view (no calldata/targets). I can pull the full
-  execution payload for any specific proposal, or fetch more than 5.
-
-  Want me to dig into any one of these, or grab the next page?
-
-✻ Brewed for 17s
+✻ Churned for 14s
 ```

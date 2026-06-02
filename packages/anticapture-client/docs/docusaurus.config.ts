@@ -9,7 +9,7 @@ import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 const GATEFUL_SPEC = "../../../apps/gateful/openapi/gateful.json";
 
 const config: Config = {
-  title: "Anticapture MCP",
+  title: "Anticapture MCP DOcs",
   tagline: "MCP server for Anticapture DAO governance analytics",
 
   url: "https://anticapture.xyz",
@@ -89,7 +89,7 @@ const config: Config = {
 
   themeConfig: {
     navbar: {
-      title: "Anticapture MCP",
+      title: "Anticapture MCP Docs",
       items: [
         {
           type: "doc",
