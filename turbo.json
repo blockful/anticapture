@@ -11,7 +11,13 @@
         "src/**",
         "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
       ],
-      "outputs": ["generated/**"]
+      "outputs": ["generated/**"],
+      "env": [
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "VERCEL_GIT_PULL_REQUEST_ID",
+        "VERCEL_ENV",
+        "VERCEL_GIT_COMMIT_REF"
+      ]
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
@@ -78,7 +84,8 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"],
+      "passThroughEnv": ["NEXT_PUBLIC_GATEFUL_URL"]
     },
     "test:unit": {
       "dependsOn": ["^build"],
