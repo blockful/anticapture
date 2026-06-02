@@ -51,25 +51,15 @@ export type DeltaPresentation = {
   trend: "up" | "down" | undefined;
 };
 
-/**
- * Formats a percentage-ish delta with adaptive precision: up to 2 decimals
- * for small magnitudes (<0.1), 1 decimal for [0.1, 1), 0 decimals otherwise.
- * Returns the trend in lockstep with the rendered value — when the value
- * rounds to 0 at the chosen precision, the trend is `undefined` (neutral).
- *
- * The point: a real +0.4% change should display as "+0.4%" with an up arrow,
- * not "+0%" (which would erase the signal) and not "+0%" with an arrow
- * (which would conflict with the rendered value).
- */
-export function presentDelta(value: number, suffix: string): DeltaPresentation {
+export function presentDelta(value: number): DeltaPresentation {
   const abs = Math.abs(value);
   const precision = abs >= 1 ? 0 : abs >= 0.1 ? 1 : 2;
   // Snap to display precision so text and trend can never disagree.
   const snapped = Number(value.toFixed(precision));
-  if (snapped === 0) return { text: `0${suffix}`, trend: undefined };
+  if (snapped === 0) return { text: "0", trend: undefined };
   const prefix = snapped > 0 ? "+" : "";
   return {
-    text: `${prefix}${snapped.toFixed(precision)}${suffix}`,
+    text: `${prefix}${snapped.toFixed(precision)}`,
     trend: snapped > 0 ? "up" : "down",
   };
 }
