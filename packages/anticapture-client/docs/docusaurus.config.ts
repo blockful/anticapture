@@ -73,6 +73,24 @@ const config: Config = {
         },
       },
     ],
+    // Generate LLM-friendly Markdown from the rendered HTML at build time:
+    // `/llms.txt` (index), `/llms-full.txt` (entire docs as one file), and a
+    // `.md` mirror of every page (used by the "Copy as Markdown" button).
+    // Works on built HTML, so it handles the generated tool pages too.
+    [
+      "@signalwire/docusaurus-plugin-llms-txt",
+      {
+        content: {
+          enableMarkdownFiles: true,
+          enableLlmsFullTxt: true,
+          includeDocs: true,
+        },
+        depth: 1,
+        siteTitle: "Anticapture MCP Docs",
+        siteDescription:
+          "MCP server exposing Anticapture DAO governance analytics as tools",
+      },
+    ],
   ],
 
   themes: [
