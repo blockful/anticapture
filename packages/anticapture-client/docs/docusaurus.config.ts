@@ -13,8 +13,10 @@ import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 const GATEFUL_SPEC = "./openapi/gateful.json";
 
 const config: Config = {
-  title: "Anticapture MCP DOcs",
+  title: "Anticapture MCP Docs",
   tagline: "MCP server for Anticapture DAO governance analytics",
+  // Resolved against static/ and prefixed with baseUrl -> /docs/img/favicon.svg
+  favicon: "img/favicon.svg",
 
   url: "https://anticapture.xyz",
   // Served behind the infra/proxy reverse proxy under the /docs prefix. This
