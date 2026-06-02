@@ -46,6 +46,8 @@ const route = createRoute({
   operationId: "averageDelegationPercentage",
   path: "/aggregations/average-delegation-percentage",
   summary: "Average delegation percentage across all DAOs",
+  description:
+    "Returns the delegated-supply percentage averaged across all configured DAOs, bucketed by day over the requested period.",
   tags: ["governance"],
   request: { query: QuerySchema },
   responses: {

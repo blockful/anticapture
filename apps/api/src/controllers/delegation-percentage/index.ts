@@ -18,6 +18,8 @@ export function delegationPercentage(
       operationId: "delegationPercentageByDay",
       path: "/delegation-percentage",
       summary: "Get delegation percentage day buckets with forward-fill",
+      description:
+        "Returns the delegated-supply percentage bucketed by day, forward-filling days without new data with the last known value.",
       tags: ["metrics"],
       middleware: [setCacheControl(3600)],
       request: {

@@ -18,6 +18,8 @@ const route = createRoute({
   operationId: "gatewayHealth",
   path: "/health",
   summary: "Gateway health and per-DAO circuit breaker states",
+  description:
+    "Returns the gateway status along with the circuit breaker state for each configured DAO backend.",
   tags: ["system"],
   responses: {
     200: {

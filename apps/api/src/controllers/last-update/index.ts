@@ -15,6 +15,8 @@ export function lastUpdate(app: Hono, db: Drizzle) {
       operationId: "lastUpdate",
       path: "/last-update",
       summary: "Get the last update time",
+      description:
+        "Returns the timestamp of the most recent data update for the requested chart.",
       tags: ["metrics"],
       middleware: [setCacheControl(30)],
       request: {

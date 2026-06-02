@@ -35,7 +35,7 @@ export function proposals(
       },
       responses: {
         200: {
-          description: "Successfully retrieved proposals activity",
+          description: "Successfully retrieved proposals",
           content: {
             "application/json": {
               schema: ProposalsResponseSchema,
