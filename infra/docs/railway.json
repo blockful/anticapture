@@ -10,7 +10,7 @@
     ]
   },
   "deploy": {
-    "healthcheckPath": "/",
+    "healthcheckPath": "/docs/",
     "restartPolicyType": "ALWAYS",
     "restartPolicyMaxRetries": 3
   }

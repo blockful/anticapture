@@ -13,7 +13,10 @@ const config: Config = {
   tagline: "MCP server for Anticapture DAO governance analytics",
 
   url: "https://anticapture.xyz",
-  baseUrl: "/",
+  // Served behind the infra/proxy reverse proxy under the /docs prefix. This
+  // must match the proxy's `location /docs/` so Docusaurus emits asset URLs
+  // (/docs/assets/...) that resolve through the proxy.
+  baseUrl: "/docs/",
 
   organizationName: "blockful-io",
   projectName: "anticapture",
