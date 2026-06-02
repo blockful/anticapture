@@ -22,9 +22,9 @@ Ethereum RPC ─┘         │
               ├──> API (reads DB, serves REST/OpenAPI)
               │         │
               │         v
-              └──> API Gateway (aggregates DAO APIs into GraphQL)
+              └──> Gateful (aggregates DAO APIs into one REST/OpenAPI surface)
                         │
-                        ├──> GraphQL Client (generates TS types + hooks)
+                        ├──> Client SDK (Kubb: generates TS types + React Query hooks)
                         │         │
                         v         v
                       Dashboard (Next.js frontend)
@@ -32,27 +32,27 @@ Ethereum RPC ─┘         │
 
 ### Components Summary
 
-| Component          | Port  | Purpose                                 |
-| ------------------ | ----- | --------------------------------------- |
-| **Indexer**        | 42069 | Blockchain event indexing (Ponder)      |
-| **API**            | 42069 | REST API with OpenAPI (Hono + Drizzle)  |
-| **API Gateway**    | 4000  | Unified GraphQL endpoint (GraphQL Mesh) |
-| **GraphQL Client** | —     | Generated TypeScript types & hooks      |
-| **Dashboard**      | 3000  | Next.js frontend with DAO analytics     |
+| Component      | Port  | Purpose                                               |
+| -------------- | ----- | ----------------------------------------------------- |
+| **Indexer**    | 42069 | Blockchain event indexing (Ponder)                    |
+| **API**        | 42069 | REST API with OpenAPI (Hono + Drizzle)                |
+| **Gateful**    | 4001  | Unified REST/OpenAPI gateway aggregating DAO APIs     |
+| **Client SDK** | —     | Generated TypeScript types & React Query hooks (Kubb) |
+| **Dashboard**  | 3000  | Next.js frontend with DAO analytics                   |
 
 ## Dependency Graph (startup order)
 
 For a full local stack, start services in this order:
 
 1. `pnpm api dev`
-2. `pnpm gateway dev`
+2. `pnpm gateful dev`
 3. `pnpm client codegen`
 4. `pnpm dashboard dev`
 
 Common development workflows:
 
-- **UI implementation**: Run client and dashboard pointing to dev `api-gateway`
-- **API feature**: Run API with dev envs, then gateway, then client + dashboard (only run gateway and frontend when asked)
+- **UI implementation**: Run client and dashboard pointing to dev `gateful`
+- **API feature**: Run API with dev envs, then gateful, then client + dashboard (only run gateful and frontend when asked)
 - **Full stack**: Start all services in order (rare, prefer using Railway dev services)
 
 > **For detailed conventions and strategies per package, see the skills in `.agents/skills/`.**
@@ -109,13 +109,13 @@ Commit the resulting empty `.md`. Do not use empty changesets to skip real chang
 
 ### Special case: OpenAPI / API contract changes
 
-If your PR changes API behavior that affects the generated contract, update the downstream generated artifacts too: Gateful builds its OpenAPI surface from the APIs, and API Gateway builds its GraphQL Mesh schema from the API contracts. The dependency graph for contract generation points from Gateful/Gateway to the APIs, so contract changes must version the packages whose schemas are rebuilt.
+If your PR changes API behavior that affects the generated contract, update the downstream generated artifacts too: Gateful builds its OpenAPI surface from the APIs, and the `@anticapture/client` SDK (Kubb) generates from the Gateful OpenAPI spec. The dependency graph for contract generation points from Gateful to the APIs, so contract changes must version the packages whose schemas are rebuilt.
 
-When a PR touches an API OpenAPI contract file (`apps/api/openapi/**` or the generated spec in `apps/gateful/openapi/**`), add changesets for `@anticapture/gateful` and `@anticapture/api-gateway` alongside the API package that changed. The `api-contract-updates.yaml` workflow enforces the Gateful and API Gateway changesets.
+When a PR touches an API OpenAPI contract file (`apps/api/openapi/**` or the generated spec in `apps/gateful/openapi/**`), add a changeset for `@anticapture/gateful` alongside the API package that changed. The `api-contract-updates.yaml` workflow enforces the Gateful changeset.
 
 ### Workspace dep cascades (no action needed from you)
 
-When you bump `@anticapture/observability`, `@anticapture/client`, or `@anticapture/graphql-client`, the consumer packages (apps that depend on them via `workspace:*`) automatically get a `patch` bump and a changelog line referencing the new version. You do not need to write changesets for the consumers; the cascade is handled by `updateInternalDependencies: "patch"` in `.changeset/config.json`.
+When you bump `@anticapture/observability` or `@anticapture/client`, the consumer packages (apps that depend on them via `workspace:*`) automatically get a `patch` bump and a changelog line referencing the new version. You do not need to write changesets for the consumers; the cascade is handled by `updateInternalDependencies: "patch"` in `.changeset/config.json`.
 
 ### Release flow (informational)
 

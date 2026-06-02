@@ -19,11 +19,10 @@ done
 # Ports
 PORT_INDEXER=42070
 PORT_API=42069
-PORT_GATEWAY=4000
 PORT_GATEFUL=4001
 PORT_DASHBOARD=3000
 PORT_ADDRESS_ENRICHMENT=3001
-PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEWAY" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT")
+PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT")
 
 # DAO name → short ID mapping (used to run the API)
 dao_id_for() {
@@ -48,7 +47,6 @@ fi
 # Colors per service
 C_INDEXER="\033[31m"           # red
 C_API="\033[34m"               # blue
-C_GATEWAY="\033[35m"           # magenta
 C_GATEFUL="\033[36m"           # cyan
 C_CODEGEN="\033[33m"           # yellow
 C_DASHBOARD="\033[32m"         # green
@@ -139,7 +137,6 @@ cleanup() {
   echo ""
   log "Shutting down..."
   trap - INT TERM EXIT
-  rm -f "${GATEWAY_READY:-}" 2>/dev/null
   kill 0 2>/dev/null || true
   wait 2>/dev/null
 }
@@ -233,18 +230,7 @@ else
   log "Skipping optional Address Enrichment (Railway CLI/service unavailable)"
 fi
 
-# 4. Gateway
-GATEWAY_READY=$(mktemp)
-rm -f "$GATEWAY_READY"
-log "Starting Gateway..."
-declare -a GATEWAY_OVERRIDES=()
-if [ "$RUN_API" = true ]; then
-  GATEWAY_OVERRIDES+=("DAO_API_${DAO_ID}=http://localhost:${PORT_API}")
-fi
-run_with_prefix "$C_GATEWAY" "🌎 gateway" "$GATEWAY_READY" "Mesh running at" railway_run ${GATEWAY_OVERRIDES[@]+"${GATEWAY_OVERRIDES[@]}"} api-gateway pnpm gateway dev &
-wait_for_ready "$GATEWAY_READY" "Gateway"
-
-# Watchdog: when API recovers after being down, touch the sentinel file so tsx reloads the gateway
+# Watchdog: when API recovers after being down, touch the sentinel file so tsx reloads the gateful
 if [ "$RUN_API" = true ]; then
   (
     api_was_up=true
@@ -252,8 +238,7 @@ if [ "$RUN_API" = true ]; then
       sleep 3
       if lsof -i ":$PORT_API" -sTCP:LISTEN >/dev/null 2>&1; then
         if [ "$api_was_up" = false ]; then
-          log "API recovered — reloading Gateway and Gateful..."
-          touch "$(dirname "$0")/../apps/api-gateway/src/_dev-reload.ts"
+          log "API recovered — reloading Gateful..."
           touch "$(dirname "$0")/../apps/gateful/src/_dev-reload.ts"
           api_was_up=true
         fi
@@ -267,15 +252,11 @@ fi
 # 5. Gateful
 start_gateful
 
-# 6. Clients — codegen + build watch
-export ANTICAPTURE_GRAPHQL_ENDPOINT="http://localhost:${PORT_GATEWAY}/graphql"
-log "Starting GraphQL Client (silent, errors only)..."
-run_errors_only "$C_CODEGEN" "🤝 gql-client" pnpm gql-client dev &
+# 6. Client — codegen + build watch
 log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
 # 7. Dashboard
-export NEXT_PUBLIC_BASE_URL="http://localhost:${PORT_GATEWAY}/graphql"
 export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
@@ -293,9 +274,7 @@ if [ "$ADDRESS_ENRICHMENT_AVAILABLE" = true ]; then
 else
   printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
 fi
-printf "  ${C_GATEWAY}🌎 Gateway${C_RESET}   http://localhost:${PORT_GATEWAY}\n"
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
-printf "  ${C_CODEGEN}🤝 GraphQL Client${C_RESET} codegen + build watch\n"
 printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""

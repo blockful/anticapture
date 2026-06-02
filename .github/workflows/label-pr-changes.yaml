@@ -27,8 +27,6 @@ jobs:
             dashboard:
               - 'apps/dashboard/**/*'
               - 'packages/*-client/**/*'
-            gateway:
-              - 'apps/api-gateway/**/*'
             gateful:
               - 'apps/gateful/**/*'
             relayer:
@@ -61,13 +59,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: Dashboard
-
-      - name: Add gateway label
-        if: ${{ steps.changes.outputs.gateway == 'true' }}
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: Gateway
 
       - name: Add gateful label
         if: ${{ steps.changes.outputs.gateful == 'true' }}

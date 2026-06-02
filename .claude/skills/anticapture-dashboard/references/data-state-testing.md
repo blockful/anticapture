@@ -2,30 +2,34 @@
 
 ## Data Fetching
 
-| Context                        | Tool                                          |
-| ------------------------------ | --------------------------------------------- |
-| GraphQL queries                | Apollo Client (`@anticapture/graphql-client`) |
-| Non-GraphQL (GitHub, external) | React Query (`@tanstack/react-query`)         |
-| Form submissions               | React Query `useMutation`                     |
-| URL-derived state              | `nuqs` (`useQueryState`)                      |
-| Ephemeral UI state             | `useState`                                    |
+| Context                      | Tool                                               |
+| ---------------------------- | -------------------------------------------------- |
+| Anticapture API data         | `@anticapture/client/hooks` (React Query REST SDK) |
+| Other external (GitHub, ENS) | React Query (`@tanstack/react-query`)              |
+| Form submissions             | React Query `useMutation`                          |
+| URL-derived state            | `nuqs` (`useQueryState`)                           |
+| Ephemeral UI state           | `useState`                                         |
 
 ```tsx
-// Apollo (GraphQL) - always pass anticapture-dao-id header for DAO-scoped queries
+// Anticapture data — the DAO is a PATH param (first arg), not a header.
+// Wrap the generated hook to normalize the return shape.
+import { useProposals as useProposalsQuery } from "@anticapture/client/hooks";
+import type { ProposalsPathParamsDaoEnumKey } from "@anticapture/client";
+
 export const useProposals = (daoId: DaoIdEnum) => {
-  const { data, loading, error } = useGetProposalsFromDaoQuery({
-    variables: { limit: 10, orderDirection: "desc" },
-    context: { headers: { "anticapture-dao-id": daoId } },
-  });
+  const { data, isLoading, error } = useProposalsQuery(
+    daoId.toLowerCase() as ProposalsPathParamsDaoEnumKey,
+    { limit: 10, orderDirection: "desc" },
+  );
 
   return {
-    proposals: data?.proposals?.items ?? [],
-    isLoading: loading,
+    proposals: data?.items ?? [],
+    isLoading,
     error,
   };
 };
 
-// React Query (non-GraphQL)
+// React Query (other external sources)
 export const useGitHubRelease = () => {
   return useQuery({
     queryKey: ["github-release"],
@@ -40,14 +44,14 @@ export const useGitHubRelease = () => {
 
 ## State Management
 
-| State Type                | Solution                 | Example                          |
-| ------------------------- | ------------------------ | -------------------------------- |
-| URL/shareable state       | `nuqs` (`useQueryState`) | Filters, active tabs, pagination |
-| Server data (GraphQL)     | Apollo Client cache      | DAO metrics, proposals, votes    |
-| Server data (non-GraphQL) | React Query cache        | GitHub releases, ENS data        |
-| Form state                | `react-hook-form`        | Contact form, voting modal       |
-| Ephemeral UI              | `useState`               | Modal open/close, hover states   |
-| Cross-component UI        | React Context (scoped)   | Chart brush selection            |
+| State Type                | Solution                                  | Example                          |
+| ------------------------- | ----------------------------------------- | -------------------------------- |
+| URL/shareable state       | `nuqs` (`useQueryState`)                  | Filters, active tabs, pagination |
+| Server data (Anticapture) | React Query cache (`@anticapture/client`) | DAO metrics, proposals, votes    |
+| Server data (other)       | React Query cache                         | GitHub releases, ENS data        |
+| Form state                | `react-hook-form`                         | Contact form, voting modal       |
+| Ephemeral UI              | `useState`                                | Modal open/close, hover states   |
+| Cross-component UI        | React Context (scoped)                    | Chart brush selection            |
 
 ## Bundle Size
 

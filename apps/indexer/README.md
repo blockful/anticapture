@@ -38,10 +38,6 @@ Gov Indexer is a project developed with Ponder that indexes smart contract event
    ```
    After indexing, the API server will be available at `http://localhost:42069`.
 
-## Accessing the API
-
-You can access the GraphQL API at `http://localhost:42069/graphql` to query the indexed data.
-
 ## Project Structure
 
 - `src/`: Contains the indexer source code.

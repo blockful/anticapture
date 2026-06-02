@@ -15,7 +15,6 @@ import { BadgeStatus } from "@/shared/components/design-system/badges";
 import type { Option } from "@/shared/components/dropdowns/Dropdown";
 import { Dropdown } from "@/shared/components/dropdowns/Dropdown";
 import type { AttackProfitabilityConfig } from "@/shared/dao-config/types";
-import { ChartType } from "@/shared/hooks/useLastUpdate";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { getDateRange } from "@/shared/utils";
@@ -40,8 +39,8 @@ export const AttackProfitabilitySection = ({
     useState<Data>([]);
   const [attackProfitabilityCsvData, setAttackProfitabilityCsvData] =
     useState<Data>([]);
-  const attackUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
-  const costUpdate = useLastUpdateLabel(daoId, ChartType.AttackProfitability);
+  const attackUpdate = useLastUpdateLabel(daoId, "attack_profitability");
+  const costUpdate = useLastUpdateLabel(daoId, "attack_profitability");
 
   if (!attackProfitability) {
     return null;
