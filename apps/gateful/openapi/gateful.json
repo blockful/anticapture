@@ -992,6 +992,24 @@
         "required": ["items", "totalCount"]
       },
       "OnchainProposal": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/OnchainFullProposal"
+          },
+          {
+            "$ref": "#/components/schemas/OnchainLeanProposal"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "variant",
+          "mapping": {
+            "full": "#/components/schemas/OnchainFullProposal",
+            "lean": "#/components/schemas/OnchainLeanProposal"
+          }
+        },
+        "description": "Onchain proposal. Narrow by the `variant` discriminator: `full` includes the execution payload and description; `lean` omits them."
+      },
+      "OnchainFullProposal": {
         "type": "object",
         "properties": {
           "id": {
@@ -1014,10 +1032,6 @@
           "title": {
             "type": "string",
             "description": "Proposal title."
-          },
-          "description": {
-            "type": "string",
-            "description": "Proposal body."
           },
           "startBlock": {
             "type": "integer",
@@ -1083,12 +1097,26 @@
             "format": "bigint",
             "description": "Required quorum encoded as a decimal string."
           },
+          "proposalType": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Optional proposal type discriminator."
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["full"],
+            "description": "Discriminator. `full` when the execution payload and proposal description are included."
+          },
+          "description": {
+            "type": "string",
+            "description": "Proposal body."
+          },
           "calldatas": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Encoded calldata payloads executed by the proposal. Omitted when the request sets `lean=true`."
+            "description": "Encoded calldata payloads executed by the proposal."
           },
           "values": {
             "type": "array",
@@ -1096,7 +1124,7 @@
               "type": "string",
               "format": "bigint"
             },
-            "description": "ETH values attached to each call, encoded as strings. Omitted when the request sets `lean=true`."
+            "description": "ETH values attached to each call, encoded as strings."
           },
           "targets": {
             "type": "array",
@@ -1104,12 +1132,7 @@
               "type": "string",
               "format": "ethereum-address"
             },
-            "description": "Contract targets invoked by the proposal. Omitted when the request sets `lean=true`."
-          },
-          "proposalType": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Optional proposal type discriminator."
+            "description": "Contract targets invoked by the proposal."
           }
         },
         "required": [
@@ -1118,7 +1141,6 @@
           "txHash",
           "proposerAccountId",
           "title",
-          "description",
           "startBlock",
           "endBlock",
           "timestamp",
@@ -1133,8 +1155,138 @@
           "queuedTxHash",
           "executedTxHash",
           "quorum",
-          "proposalType"
-        ]
+          "proposalType",
+          "variant",
+          "description",
+          "calldatas",
+          "values",
+          "targets"
+        ],
+        "description": "Full onchain proposal, returned when the request does not set `lean=true`."
+      },
+      "OnchainLeanProposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Onchain proposal identifier."
+          },
+          "daoId": {
+            "type": "string",
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
+          },
+          "txHash": {
+            "type": "string",
+            "description": "Proposal creation transaction hash."
+          },
+          "proposerAccountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Address that created the proposal."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          },
+          "startBlock": {
+            "type": "integer",
+            "description": "Start block number."
+          },
+          "endBlock": {
+            "type": "integer",
+            "description": "End block number."
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Proposal creation timestamp in Unix seconds."
+          },
+          "status": {
+            "type": "string",
+            "description": "Current proposal status."
+          },
+          "forVotes": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Votes cast in favor, encoded as a decimal string."
+          },
+          "againstVotes": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Votes cast against, encoded as a decimal string."
+          },
+          "abstainVotes": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Abstain votes, encoded as a decimal string."
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "description": "Proposal start timestamp in Unix seconds."
+          },
+          "endTimestamp": {
+            "type": "integer",
+            "description": "Proposal end timestamp in Unix seconds."
+          },
+          "queuedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was queued, or null if it never was."
+          },
+          "executedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was executed, or null if it never was."
+          },
+          "queuedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the queue event, or null if the proposal was never queued."
+          },
+          "executedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the execute event, or null if the proposal was never executed."
+          },
+          "quorum": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Required quorum encoded as a decimal string."
+          },
+          "proposalType": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Optional proposal type discriminator."
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["lean"],
+            "description": "Discriminator. `lean` when the execution payload (calldatas/values/targets) and proposal description are omitted to reduce response size."
+          }
+        },
+        "required": [
+          "id",
+          "daoId",
+          "txHash",
+          "proposerAccountId",
+          "title",
+          "startBlock",
+          "endBlock",
+          "timestamp",
+          "status",
+          "forVotes",
+          "againstVotes",
+          "abstainVotes",
+          "startTimestamp",
+          "endTimestamp",
+          "queuedTimestamp",
+          "executedTimestamp",
+          "queuedTxHash",
+          "executedTxHash",
+          "quorum",
+          "proposalType",
+          "variant"
+        ],
+        "description": "Lean onchain proposal, returned when the request sets `lean=true`. Omits calldatas/values/targets and the proposal description."
       },
       "OnchainProposalStatusList": {
         "type": "array",
@@ -4546,7 +4698,7 @@
       "get": {
         "operationId": "proposals",
         "summary": "Get proposals",
-        "description": "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and reduce payload size.",
+        "description": "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and the proposal description, reducing payload size.",
         "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
@@ -4636,11 +4788,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -4686,7 +4838,7 @@
       "get": {
         "operationId": "searchProposals",
         "summary": "Search proposals",
-        "description": "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets.",
+        "description": "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets and the proposal description.",
         "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
@@ -4735,11 +4887,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -4785,7 +4937,7 @@
       "get": {
         "operationId": "proposal",
         "summary": "Get a proposal by ID",
-        "description": "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets.",
+        "description": "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets and the proposal description.",
         "tags": ["proposals"],
         "parameters": [
           {
@@ -4810,11 +4962,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }

@@ -44,7 +44,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const descriptionBody = proposal
     ? isOffchainProposal(proposal)
       ? proposal.body
-      : proposal.description
+      : proposal.variant === "full"
+        ? proposal.description
+        : undefined
     : undefined;
 
   const canonicalPath = isOffchain

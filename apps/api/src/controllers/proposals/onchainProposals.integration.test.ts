@@ -109,6 +109,7 @@ beforeEach(async () => {
 });
 
 const BASE_PROPOSAL_FIELDS = {
+  variant: "full",
   daoId: "ENS",
   proposerAccountId: getAddress("0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa"),
   title: "Test Proposal",
@@ -160,6 +161,38 @@ describe("Onchain Proposals Controller", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("should return lean items omitting payload and description when lean=true", async () => {
+      await db.insert(proposalsOnchain).values(createProposal());
+
+      const res = await app.request("/proposals?lean=true");
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        description,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        calldatas,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        values,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        targets,
+        ...leanFields
+      } = BASE_PROPOSAL_FIELDS;
+      expect(body).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            ...leanFields,
+            variant: "lean",
+            id: "1",
+            txHash: "0xabc123",
+            timestamp: 1700000000,
+          },
+        ],
+      });
     });
 
     it("should accept pagination parameters", async () => {

@@ -3,7 +3,6 @@
 import {
   orderDirectionEnum,
   type OffchainSearchProposalsPathParamsDaoEnumKey,
-  type ProposalsQueryResponse,
   type SearchProposalsPathParamsDaoEnumKey,
 } from "@anticapture/client";
 import {
@@ -35,7 +34,11 @@ import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
 import { useProposals } from "@/features/governance/hooks/useProposals";
-import type { Proposal as GovernanceProposal } from "@/features/governance/types";
+import {
+  isFullProposal,
+  type OnchainFullProposalItem,
+  type Proposal as GovernanceProposal,
+} from "@/features/governance/types";
 import {
   getProposalState,
   getProposalStatus,
@@ -55,7 +58,7 @@ const ONCHAIN_TAB = { label: "Onchain", value: "onchain" };
 const OFFCHAIN_TAB = { label: "Offchain", value: "offchain" };
 
 const toGovernanceProposal = (
-  proposal: ProposalsQueryResponse["items"][number],
+  proposal: OnchainFullProposalItem,
   decimals: number,
 ): GovernanceProposal => {
   const forVotes = Number(formatUnits(proposal.forVotes, decimals));
@@ -84,8 +87,8 @@ const toGovernanceProposal = (
       proposal.startTimestamp.toString(),
       proposal.endTimestamp.toString(),
     ),
-    values: proposal.values?.map((value) => value.toString()) ?? [],
-    targets: proposal.targets ?? [],
+    values: proposal.values.map((value) => value.toString()),
+    targets: proposal.targets,
   };
 };
 
@@ -161,9 +164,9 @@ export const GovernanceSection = () => {
 
   const searchOnchainProposals = useMemo(() => {
     if (!isSearchActive) return [];
-    return (searchData?.items ?? []).map((p) =>
-      toGovernanceProposal(p, decimals),
-    );
+    return (searchData?.items ?? [])
+      .filter(isFullProposal)
+      .map((p) => toGovernanceProposal(p, decimals));
   }, [isSearchActive, searchData, decimals]);
 
   const searchOffchainProposals = useMemo(() => {

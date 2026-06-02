@@ -8,7 +8,10 @@ import { useProposalsInfinite } from "@anticapture/client/hooks";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
-import type { Proposal as GovernanceProposal } from "@/features/governance/types";
+import {
+  isFullProposal,
+  type Proposal as GovernanceProposal,
+} from "@/features/governance/types";
 import {
   getProposalState,
   getProposalStatus,
@@ -74,7 +77,9 @@ export const useProposals = (
   });
 
   const proposals = useMemo(() => {
-    const rawProposals = data?.pages.flatMap((page) => page.items) ?? [];
+    const rawProposals = (
+      data?.pages.flatMap((page) => page.items) ?? []
+    ).filter(isFullProposal);
 
     return rawProposals.map((proposal) => {
       const forVotes = Number(formatUnits(proposal.forVotes, decimals));
@@ -100,8 +105,8 @@ export const useProposals = (
         },
         quorum: quorum.toFixed(2),
         timeText: getTimeText(proposal.startTimestamp, proposal.endTimestamp),
-        values: proposal.values?.map((value) => value.toString()) ?? [],
-        targets: proposal.targets ?? [],
+        values: proposal.values.map((value) => value.toString()),
+        targets: proposal.targets,
       } satisfies GovernanceProposal;
     });
   }, [data, decimals]);
