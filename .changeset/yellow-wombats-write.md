@@ -3,4 +3,4 @@
 "@anticapture/gateful": minor
 ---
 
-codegen on CI
+Generate the client SDK from the Gateful OpenAPI spec over HTTP during CI/preview builds.
