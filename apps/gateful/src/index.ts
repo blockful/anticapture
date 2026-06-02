@@ -90,7 +90,7 @@ const registry = new CircuitBreakerRegistry(config.circuitBreaker);
 // OpenAPI routes
 health(app, registry);
 daoHealth(app, config.daoApis, registry);
-addressEnrichment(app, config.addressEnrichmentUrl);
+addressEnrichment(app, config.addressEnrichmentUrl, registry);
 
 // Aggregation routes
 const daosService = new DaosService(config.daoApis, registry);

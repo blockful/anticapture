@@ -1,7 +1,15 @@
 import type { OpenAPIHono } from "@hono/zod-openapi";
-import { proxy } from "hono/proxy";
+import { proxy as honoProxy } from "hono/proxy";
 
-export function addressEnrichment(app: OpenAPIHono, upstreamUrl?: string) {
+import type { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry.js";
+
+const PROXY_TIMEOUT_MS = 30000;
+
+export function addressEnrichment(
+  app: OpenAPIHono,
+  upstreamUrl: string | undefined,
+  registry: CircuitBreakerRegistry,
+) {
   app.all("/address-enrichment/*", async (c) => {
     if (!upstreamUrl) {
       return c.json(
@@ -14,6 +22,15 @@ export function addressEnrichment(app: OpenAPIHono, upstreamUrl?: string) {
     const url = new URL(path, upstreamUrl);
     url.search = new URL(c.req.url).search;
 
-    return proxy(url.toString(), { ...c.req });
+    return registry.get("address-enrichment").execute(async () => {
+      const res = await honoProxy(url.toString(), {
+        ...c.req,
+        signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
+      });
+      if (res.status >= 500) {
+        throw new Error(`Upstream address-enrichment returned ${res.status}`);
+      }
+      return res;
+    });
   });
 }
