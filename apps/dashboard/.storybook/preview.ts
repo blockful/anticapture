@@ -2,30 +2,18 @@ import type { Preview } from "@storybook/nextjs";
 import React, { useEffect } from "react";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  ApolloClient,
-  ApolloLink,
-  ApolloProvider,
-  InMemoryCache,
-  Observable,
-} from "@apollo/client";
 
 import "../app/globals.css";
 
 const queryClient = new QueryClient();
-
-const mockApolloClient = new ApolloClient({
-  link: new ApolloLink(() => new Observable(() => {})),
-  cache: new InMemoryCache(),
-});
 
 const preview: Preview = {
   parameters: {
     backgrounds: {
       options: {
         dark: { name: "Dark", value: "#09090B" },
-        light: { name: "Light", value: "#FFFFFF" }
-      }
+        light: { name: "Light", value: "#FFFFFF" },
+      },
     },
     controls: {
       matchers: {
@@ -49,19 +37,15 @@ const preview: Preview = {
       }, []);
 
       return React.createElement(
-        ApolloProvider,
-        { client: mockApolloClient },
+        QueryClientProvider,
+        { client: queryClient },
         React.createElement(
-          QueryClientProvider,
-          { client: queryClient },
+          TooltipProvider,
+          null,
           React.createElement(
-            TooltipProvider,
-            null,
-            React.createElement(
-              "div",
-              { className: "dark" },
-              React.createElement(Story),
-            ),
+            "div",
+            { className: "dark" },
+            React.createElement(Story),
           ),
         ),
       );
@@ -70,9 +54,9 @@ const preview: Preview = {
 
   initialGlobals: {
     backgrounds: {
-      value: "dark"
-    }
-  }
+      value: "dark",
+    },
+  },
 };
 
 export default preview;

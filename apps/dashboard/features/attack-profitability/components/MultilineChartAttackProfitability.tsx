@@ -31,7 +31,10 @@ import type {
   TokenMetricItem,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
-import { useDaoData, useTimeSeriesData } from "@/shared/hooks";
+import { useDao } from "@anticapture/client/hooks";
+import type { DaoPathParamsDaoEnumKey } from "@anticapture/client";
+
+import { useTimeSeriesData } from "@/shared/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
@@ -42,7 +45,7 @@ import {
 } from "@/shared/utils";
 
 interface MultilineChartAttackProfitabilityProps {
-  days: string;
+  days: TimeInterval;
   filterData?: string[];
   setCsvData?: (data: Data) => void;
   context?: "overview" | "section";
@@ -56,19 +59,13 @@ export const MultilineChartAttackProfitability = ({
 }: MultilineChartAttackProfitabilityProps) => {
   const { daoId } = useParams<{ daoId: string }>();
   const daoEnum = daoId.toUpperCase() as DaoIdEnum;
-  const { data: daoData } = useDaoData(daoEnum);
+  const { data: daoData } = useDao(
+    daoEnum.toLowerCase() as DaoPathParamsDaoEnumKey,
+  );
   const daoConfig = daoConfigByDaoId[daoEnum];
 
-  const { data: liquidTreasuryData } = useTreasury(
-    daoEnum,
-    "liquid",
-    days as TimeInterval,
-  );
-  const { data: totalTreasuryData } = useTreasury(
-    daoEnum,
-    "total",
-    days as TimeInterval,
-  );
+  const { data: liquidTreasuryData } = useTreasury(daoEnum, "liquid", days);
+  const { data: totalTreasuryData } = useTreasury(daoEnum, "total", days);
 
   const {
     data: daoTokenPriceHistoricalData,
@@ -97,7 +94,7 @@ export const MultilineChartAttackProfitability = ({
   );
 
   const quorumValue = Number(
-    formatUnits(BigInt(daoData?.quorum || "0"), daoConfig.decimals),
+    formatUnits(daoData?.quorum || 0n, daoConfig.decimals),
   );
 
   const chartConfig = useMemo(
@@ -124,12 +121,10 @@ export const MultilineChartAttackProfitability = ({
       datasets = mockedAttackProfitabilityDatasets;
     } else {
       const nonZeroLiquidTreasuryData = liquidTreasuryData.filter(
-        (item): item is NonNullable<typeof item> =>
-          item !== null && item.value > 0,
+        (item) => item.value > 0,
       );
       const nonZeroTotalTreasuryData = totalTreasuryData.filter(
-        (item): item is NonNullable<typeof item> =>
-          item !== null && item.value > 0,
+        (item) => item.value > 0,
       );
 
       datasets = {

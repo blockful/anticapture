@@ -992,6 +992,24 @@
         "required": ["items", "totalCount"]
       },
       "OnchainProposal": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/OnchainFullProposal"
+          },
+          {
+            "$ref": "#/components/schemas/OnchainLeanProposal"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "variant",
+          "mapping": {
+            "full": "#/components/schemas/OnchainFullProposal",
+            "lean": "#/components/schemas/OnchainLeanProposal"
+          }
+        },
+        "description": "Onchain proposal. Narrow by the `variant` discriminator: `full` includes the execution payload and description; `lean` omits them."
+      },
+      "OnchainFullProposal": {
         "type": "object",
         "properties": {
           "id": {
@@ -1014,10 +1032,6 @@
           "title": {
             "type": "string",
             "description": "Proposal title."
-          },
-          "description": {
-            "type": "string",
-            "description": "Proposal body."
           },
           "startBlock": {
             "type": "integer",
@@ -1083,12 +1097,26 @@
             "format": "bigint",
             "description": "Required quorum encoded as a decimal string."
           },
+          "proposalType": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Optional proposal type discriminator."
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["full"],
+            "description": "Discriminator. `full` when the execution payload and proposal description are included."
+          },
+          "description": {
+            "type": "string",
+            "description": "Proposal body."
+          },
           "calldatas": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Encoded calldata payloads executed by the proposal. Omitted when the request sets `lean=true`."
+            "description": "Encoded calldata payloads executed by the proposal."
           },
           "values": {
             "type": "array",
@@ -1096,7 +1124,7 @@
               "type": "string",
               "format": "bigint"
             },
-            "description": "ETH values attached to each call, encoded as strings. Omitted when the request sets `lean=true`."
+            "description": "ETH values attached to each call, encoded as strings."
           },
           "targets": {
             "type": "array",
@@ -1104,12 +1132,7 @@
               "type": "string",
               "format": "ethereum-address"
             },
-            "description": "Contract targets invoked by the proposal. Omitted when the request sets `lean=true`."
-          },
-          "proposalType": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Optional proposal type discriminator."
+            "description": "Contract targets invoked by the proposal."
           }
         },
         "required": [
@@ -1118,7 +1141,6 @@
           "txHash",
           "proposerAccountId",
           "title",
-          "description",
           "startBlock",
           "endBlock",
           "timestamp",
@@ -1133,8 +1155,138 @@
           "queuedTxHash",
           "executedTxHash",
           "quorum",
-          "proposalType"
-        ]
+          "proposalType",
+          "variant",
+          "description",
+          "calldatas",
+          "values",
+          "targets"
+        ],
+        "description": "Full onchain proposal, returned when the request does not set `lean=true`."
+      },
+      "OnchainLeanProposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Onchain proposal identifier."
+          },
+          "daoId": {
+            "type": "string",
+            "description": "DAO identifier (uppercase, e.g. \"ENS\")."
+          },
+          "txHash": {
+            "type": "string",
+            "description": "Proposal creation transaction hash."
+          },
+          "proposerAccountId": {
+            "type": "string",
+            "format": "ethereum-address",
+            "description": "Address that created the proposal."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          },
+          "startBlock": {
+            "type": "integer",
+            "description": "Start block number."
+          },
+          "endBlock": {
+            "type": "integer",
+            "description": "End block number."
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Proposal creation timestamp in Unix seconds."
+          },
+          "status": {
+            "type": "string",
+            "description": "Current proposal status."
+          },
+          "forVotes": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Votes cast in favor, encoded as a decimal string."
+          },
+          "againstVotes": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Votes cast against, encoded as a decimal string."
+          },
+          "abstainVotes": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Abstain votes, encoded as a decimal string."
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "description": "Proposal start timestamp in Unix seconds."
+          },
+          "endTimestamp": {
+            "type": "integer",
+            "description": "Proposal end timestamp in Unix seconds."
+          },
+          "queuedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was queued, or null if it never was."
+          },
+          "executedTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp (Unix seconds) when the proposal was executed, or null if it never was."
+          },
+          "queuedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the queue event, or null if the proposal was never queued."
+          },
+          "executedTxHash": {
+            "type": "string",
+            "nullable": true,
+            "description": "Transaction hash of the execute event, or null if the proposal was never executed."
+          },
+          "quorum": {
+            "type": "string",
+            "format": "bigint",
+            "description": "Required quorum encoded as a decimal string."
+          },
+          "proposalType": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Optional proposal type discriminator."
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["lean"],
+            "description": "Discriminator. `lean` when the execution payload (calldatas/values/targets) and proposal description are omitted to reduce response size."
+          }
+        },
+        "required": [
+          "id",
+          "daoId",
+          "txHash",
+          "proposerAccountId",
+          "title",
+          "startBlock",
+          "endBlock",
+          "timestamp",
+          "status",
+          "forVotes",
+          "againstVotes",
+          "abstainVotes",
+          "startTimestamp",
+          "endTimestamp",
+          "queuedTimestamp",
+          "executedTimestamp",
+          "queuedTxHash",
+          "executedTxHash",
+          "quorum",
+          "proposalType",
+          "variant"
+        ],
+        "description": "Lean onchain proposal, returned when the request sets `lean=true`. Omits calldatas/values/targets and the proposal description."
       },
       "OnchainProposalStatusList": {
         "type": "array",
@@ -2038,6 +2190,239 @@
         },
         "required": ["hasNextPage", "hasPreviousPage", "endDate", "startDate"]
       },
+      "OffchainProposalsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainProposal"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainProposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Snapshot proposal identifier."
+          },
+          "spaceId": {
+            "type": "string",
+            "description": "Snapshot space identifier."
+          },
+          "author": {
+            "type": "string",
+            "description": "Address or ENS of the author."
+          },
+          "title": {
+            "type": "string",
+            "description": "Proposal title."
+          },
+          "body": {
+            "type": "string",
+            "description": "Proposal body. Omitted when the request sets `lean=true`."
+          },
+          "discussion": {
+            "type": "string",
+            "description": "Discussion URL or thread reference."
+          },
+          "type": {
+            "type": "string",
+            "description": "Snapshot proposal type."
+          },
+          "start": {
+            "type": "integer",
+            "description": "Voting start timestamp in Unix seconds."
+          },
+          "end": {
+            "type": "integer",
+            "description": "Voting end timestamp in Unix seconds."
+          },
+          "state": {
+            "type": "string",
+            "description": "Current Snapshot proposal state."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Creation timestamp in Unix seconds."
+          },
+          "updated": {
+            "type": "integer",
+            "description": "Last update timestamp in Unix seconds."
+          },
+          "link": {
+            "type": "string",
+            "description": "Canonical Snapshot proposal URL."
+          },
+          "flagged": {
+            "type": "boolean",
+            "description": "Whether the proposal was flagged by Snapshot."
+          },
+          "scores": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "network": {
+            "type": "string"
+          },
+          "snapshot": {
+            "type": "number",
+            "nullable": true
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "network": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "nullable": true
+                  }
+                }
+              },
+              "required": ["name", "network", "params"]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "spaceId",
+          "author",
+          "title",
+          "discussion",
+          "type",
+          "start",
+          "end",
+          "state",
+          "created",
+          "updated",
+          "link",
+          "flagged",
+          "scores",
+          "choices",
+          "network",
+          "snapshot",
+          "strategies"
+        ]
+      },
+      "OffchainProposalStatusList": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["active", "closed", "pending"]
+        },
+        "description": "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
+        "example": ["active"]
+      },
+      "OffchainVotesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainVote"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainVote": {
+        "type": "object",
+        "properties": {
+          "voter": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "proposalId": {
+            "type": "string"
+          },
+          "choice": {
+            "$ref": "#/components/schemas/SnapshotVoteChoice"
+          },
+          "vp": {
+            "type": "number",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "created": {
+            "type": "integer"
+          },
+          "proposalTitle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "voter",
+          "proposalId",
+          "vp",
+          "reason",
+          "created",
+          "proposalTitle"
+        ]
+      },
+      "SnapshotVoteChoice": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "nullable": false
+        }
+      },
+      "OffchainVotersResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffchainNonVoter"
+            }
+          },
+          "totalCount": {
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"]
+      },
+      "OffchainNonVoter": {
+        "type": "object",
+        "properties": {
+          "voter": {
+            "type": "string",
+            "format": "ethereum-address"
+          },
+          "votingPower": {
+            "type": "string",
+            "format": "bigint"
+          }
+        },
+        "required": ["voter", "votingPower"]
+      },
       "RevenueActionsResponse": {
         "type": "object",
         "properties": {
@@ -2358,239 +2743,6 @@
         ],
         "description": "Tenure bucket label as returned by Dune."
       },
-      "OffchainProposalsResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainProposal"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainProposal": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Snapshot proposal identifier."
-          },
-          "spaceId": {
-            "type": "string",
-            "description": "Snapshot space identifier."
-          },
-          "author": {
-            "type": "string",
-            "description": "Address or ENS of the author."
-          },
-          "title": {
-            "type": "string",
-            "description": "Proposal title."
-          },
-          "body": {
-            "type": "string",
-            "description": "Proposal body. Omitted when the request sets `lean=true`."
-          },
-          "discussion": {
-            "type": "string",
-            "description": "Discussion URL or thread reference."
-          },
-          "type": {
-            "type": "string",
-            "description": "Snapshot proposal type."
-          },
-          "start": {
-            "type": "integer",
-            "description": "Voting start timestamp in Unix seconds."
-          },
-          "end": {
-            "type": "integer",
-            "description": "Voting end timestamp in Unix seconds."
-          },
-          "state": {
-            "type": "string",
-            "description": "Current Snapshot proposal state."
-          },
-          "created": {
-            "type": "integer",
-            "description": "Creation timestamp in Unix seconds."
-          },
-          "updated": {
-            "type": "integer",
-            "description": "Last update timestamp in Unix seconds."
-          },
-          "link": {
-            "type": "string",
-            "description": "Canonical Snapshot proposal URL."
-          },
-          "flagged": {
-            "type": "boolean",
-            "description": "Whether the proposal was flagged by Snapshot."
-          },
-          "scores": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "choices": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "network": {
-            "type": "string"
-          },
-          "snapshot": {
-            "type": "number",
-            "nullable": true
-          },
-          "strategies": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "network": {
-                  "type": "string"
-                },
-                "params": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "nullable": true
-                  }
-                }
-              },
-              "required": ["name", "network", "params"]
-            }
-          }
-        },
-        "required": [
-          "id",
-          "spaceId",
-          "author",
-          "title",
-          "discussion",
-          "type",
-          "start",
-          "end",
-          "state",
-          "created",
-          "updated",
-          "link",
-          "flagged",
-          "scores",
-          "choices",
-          "network",
-          "snapshot",
-          "strategies"
-        ]
-      },
-      "OffchainProposalStatusList": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": ["active", "closed", "pending"]
-        },
-        "description": "Snapshot proposal state filter. Pass repeated query params or a comma-delimited list.",
-        "example": ["active"]
-      },
-      "OffchainVotesResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainVote"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainVote": {
-        "type": "object",
-        "properties": {
-          "voter": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "proposalId": {
-            "type": "string"
-          },
-          "choice": {
-            "$ref": "#/components/schemas/SnapshotVoteChoice"
-          },
-          "vp": {
-            "type": "number",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "created": {
-            "type": "integer"
-          },
-          "proposalTitle": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "voter",
-          "proposalId",
-          "vp",
-          "reason",
-          "created",
-          "proposalTitle"
-        ]
-      },
-      "SnapshotVoteChoice": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "nullable": false
-        }
-      },
-      "OffchainVotersResponse": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffchainNonVoter"
-            }
-          },
-          "totalCount": {
-            "type": "integer"
-          }
-        },
-        "required": ["items", "totalCount"]
-      },
-      "OffchainNonVoter": {
-        "type": "object",
-        "properties": {
-          "voter": {
-            "type": "string",
-            "format": "ethereum-address"
-          },
-          "votingPower": {
-            "type": "string",
-            "format": "bigint"
-          }
-        },
-        "required": ["voter", "votingPower"]
-      },
       "RelayerVoteResponse": {
         "type": "object",
         "properties": {
@@ -2847,7 +2999,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Per-DAO health snapshot \u2014 database, chain head, indexer freshness, and gateway circuit-breaker state.",
+            "description": "Per-DAO health snapshot — database, chain head, indexer freshness, and gateway circuit-breaker state.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3399,7 +3551,7 @@
       "get": {
         "operationId": "getDaoTokenTreasury",
         "summary": "Get DAO token treasury data",
-        "description": "Get historical DAO Token Treasury value (governance token quantity \u00d7 token price)",
+        "description": "Get historical DAO Token Treasury value (governance token quantity × token price)",
         "tags": ["treasury"],
         "parameters": [
           {
@@ -4546,7 +4698,7 @@
       "get": {
         "operationId": "proposals",
         "summary": "Get proposals",
-        "description": "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and reduce payload size.",
+        "description": "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and the proposal description, reducing payload size.",
         "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
@@ -4636,11 +4788,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -4686,7 +4838,7 @@
       "get": {
         "operationId": "searchProposals",
         "summary": "Search proposals",
-        "description": "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets.",
+        "description": "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets and the proposal description.",
         "tags": ["proposals", "skip-pagination"],
         "parameters": [
           {
@@ -4735,11 +4887,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -4785,7 +4937,7 @@
       "get": {
         "operationId": "proposal",
         "summary": "Get a proposal by ID",
-        "description": "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets.",
+        "description": "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets and the proposal description.",
         "tags": ["proposals"],
         "parameters": [
           {
@@ -4810,11 +4962,11 @@
                 }
               ],
               "default": false,
-              "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+              "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
               "example": false
             },
             "required": false,
-            "description": "When true, omit execution-payload fields (calldatas, values, targets) to reduce response size. Defaults to false. Accepts true/false/1/0.",
+            "description": "When true, omit execution-payload fields (calldatas, values, targets) and the proposal description to reduce response size. Defaults to false. Accepts true/false/1/0.",
             "name": "lean",
             "in": "query"
           }
@@ -7159,461 +7311,6 @@
         }
       ]
     },
-    "/{dao}/revenue/actions": {
-      "get": {
-        "operationId": "getRevenueActions",
-        "summary": "Get monthly ENS action counts by category",
-        "description": "Monthly action counts by category (Registration, Renewal, Premium).",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly action counts by category",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueActionsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
-        }
-      ]
-    },
-    "/{dao}/revenue/active-names": {
-      "get": {
-        "operationId": "getRevenueActiveNames",
-        "summary": "Get monthly net change and cumulative active .eth names",
-        "description": "Monthly net change and cumulative count of active .eth names.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly net change and cumulative count of active .eth names",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueActiveNamesResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
-        }
-      ]
-    },
-    "/{dao}/revenue/new-wallets": {
-      "get": {
-        "operationId": "getRevenueNewWallets",
-        "summary": "Get monthly new-wallet counts and cumulative wallet total",
-        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly new-wallet counts and the cumulative wallet total",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueNewWalletsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
-        }
-      ]
-    },
-    "/{dao}/revenue/renewal-funnel": {
-      "get": {
-        "operationId": "getRevenueRenewalFunnel",
-        "summary": "Get monthly renewal funnel keyed by expiry month",
-        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueRenewalFunnelResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
-        }
-      ]
-    },
-    "/{dao}/revenue/totals": {
-      "get": {
-        "operationId": "getRevenueTotals",
-        "summary": "Get monthly ENS revenue totals in USD and ETH",
-        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly ENS revenue totals in USD and ETH",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueTotalsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
-        }
-      ]
-    },
-    "/{dao}/revenue/by-category": {
-      "get": {
-        "operationId": "getRevenueByCategory",
-        "summary": "Get monthly ENS revenue split by category (Steakhouse ledger)",
-        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Monthly ENS revenue split by category in USD and ETH",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueByCategoryResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
-        }
-      ]
-    },
-    "/{dao}/revenue/renewal-tenure": {
-      "get": {
-        "operationId": "getRevenueRenewalTenure",
-        "summary": "Get monthly renewal tenure distribution per expiry month",
-        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
-        "tags": ["revenue"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
-            "name": "fromDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-              "example": 1700000000
-            },
-            "required": false,
-            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
-            "name": "toDate",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "$ref": "#/components/schemas/OrderDirection"
-            },
-            "required": false,
-            "description": "Sort direction for ordered query results.",
-            "name": "orderDirection",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RevenueRenewalTenureResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "dao",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": ["ens"]
-          },
-          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
-        }
-      ]
-    },
     "/{dao}/offchain/proposals": {
       "get": {
         "operationId": "offchainProposals",
@@ -8222,6 +7919,707 @@
         }
       ]
     },
+    "/{dao}/revenue/actions": {
+      "get": {
+        "operationId": "getRevenueActions",
+        "summary": "Get monthly ENS action counts by category",
+        "description": "Monthly action counts by category (Registration, Renewal, Premium).",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly action counts by category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActionsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/active-names": {
+      "get": {
+        "operationId": "getRevenueActiveNames",
+        "summary": "Get monthly net change and cumulative active .eth names",
+        "description": "Monthly net change and cumulative count of active .eth names.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly net change and cumulative count of active .eth names",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueActiveNamesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/new-wallets": {
+      "get": {
+        "operationId": "getRevenueNewWallets",
+        "summary": "Get monthly new-wallet counts and cumulative wallet total",
+        "description": "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly new-wallet counts and the cumulative wallet total",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueNewWalletsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-funnel": {
+      "get": {
+        "operationId": "getRevenueRenewalFunnel",
+        "summary": "Get monthly renewal funnel keyed by expiry month",
+        "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renewal funnel per expiry month: terms expiring, renewed, churned, and renewal rate.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalFunnelResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/totals": {
+      "get": {
+        "operationId": "getRevenueTotals",
+        "summary": "Get monthly ENS revenue totals in USD and ETH",
+        "description": "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue totals in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueTotalsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/by-category": {
+      "get": {
+        "operationId": "getRevenueByCategory",
+        "summary": "Get monthly ENS revenue split by category (Steakhouse ledger)",
+        "description": "Monthly ENS revenue split by category (Registration vs Renewal) in USD and ETH, sourced from the Steakhouse accounting ledger.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly ENS revenue split by category in USD and ETH",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueByCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/{dao}/revenue/renewal-tenure": {
+      "get": {
+        "operationId": "getRevenueRenewalTenure",
+        "summary": "Get monthly renewal tenure distribution per expiry month",
+        "description": "Per expiry month, count of names in each tenure bucket (0/1/2/3+ renewals) and the total renewals in that bucket.",
+        "tags": ["revenue"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive lower bound for the data range, as a Unix timestamp in seconds.",
+            "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+              "example": 1700000000
+            },
+            "required": false,
+            "description": "Inclusive upper bound for the data range, as a Unix timestamp in seconds.",
+            "name": "toDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/OrderDirection"
+            },
+            "required": false,
+            "description": "Sort direction for ordered query results.",
+            "name": "orderDirection",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per expiry month, count of names in each tenure bucket and total renewals in that bucket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueRenewalTenureResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "dao",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["ens"]
+          },
+          "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
+        }
+      ]
+    },
+    "/address-enrichment/address/{address}": {
+      "get": {
+        "operationId": "getAddress",
+        "summary": "Get enriched data for an address",
+        "description": "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
+        "tags": ["address"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Ethereum address (checksummed or lowercase)",
+              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            },
+            "required": true,
+            "name": "address",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved address enrichment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "EIP-55 checksummed Ethereum address",
+                      "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                    },
+                    "isContract": {
+                      "type": "boolean",
+                      "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
+                      "example": false
+                    },
+                    "arkham": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "entity": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
+                          "example": "Vitalik Buterin"
+                        },
+                        "entityType": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
+                          "example": "individual"
+                        },
+                        "label": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Fine-grained label for the specific address within the entity",
+                          "example": "Vitalik Buterin: Personal Wallet"
+                        },
+                        "twitter": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Twitter/X handle associated with the entity, without '@'",
+                          "example": "VitalikButerin"
+                        }
+                      },
+                      "required": ["entity", "entityType", "label", "twitter"],
+                      "description": "Arkham Intelligence label data. null when no data is available for the address."
+                    },
+                    "ens": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Primary ENS name reverse-resolved for this address",
+                          "example": "vitalik.eth"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL of the ENS avatar image",
+                          "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
+                        },
+                        "banner": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "URL of the ENS profile banner image",
+                          "example": null
+                        }
+                      },
+                      "required": ["name", "avatar", "banner"],
+                      "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
+                    }
+                  },
+                  "required": ["address", "isContract", "arkham", "ens"]
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream enrichment provider failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["error"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/address-enrichment/addresses": {
+      "get": {
+        "operationId": "getAddresses",
+        "summary": "Get enriched data for multiple addresses",
+        "description": "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
+        "tags": ["address"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "ethereum-address"
+              },
+              "minItems": 1,
+              "maxItems": 100,
+              "description": "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
+              "example": [
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+                "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"
+              ]
+            },
+            "required": true,
+            "name": "addresses",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved batch enrichment data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "address": {
+                            "type": "string",
+                            "description": "EIP-55 checksummed Ethereum address",
+                            "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                          },
+                          "isContract": {
+                            "type": "boolean",
+                            "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
+                            "example": false
+                          },
+                          "arkham": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "entity": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
+                                "example": "Vitalik Buterin"
+                              },
+                              "entityType": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
+                                "example": "individual"
+                              },
+                              "label": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Fine-grained label for the specific address within the entity",
+                                "example": "Vitalik Buterin: Personal Wallet"
+                              },
+                              "twitter": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Twitter/X handle associated with the entity, without '@'",
+                                "example": "VitalikButerin"
+                              }
+                            },
+                            "required": [
+                              "entity",
+                              "entityType",
+                              "label",
+                              "twitter"
+                            ],
+                            "description": "Arkham Intelligence label data. null when no data is available for the address."
+                          },
+                          "ens": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "Primary ENS name reverse-resolved for this address",
+                                "example": "vitalik.eth"
+                              },
+                              "avatar": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "URL of the ENS avatar image",
+                                "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
+                              },
+                              "banner": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "URL of the ENS profile banner image",
+                                "example": null
+                              }
+                            },
+                            "required": ["name", "avatar", "banner"],
+                            "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
+                          }
+                        },
+                        "required": ["address", "isContract", "arkham", "ens"]
+                      },
+                      "description": "Enrichment results for each successfully resolved address. Addresses that failed to resolve are omitted."
+                    }
+                  },
+                  "required": ["results"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/{dao}/relay/vote": {
       "post": {
         "operationId": "relayVote",
@@ -8499,252 +8897,6 @@
           "description": "DAO identifier (case-insensitive at runtime; the typed contract is lowercase, e.g. \"ens\")."
         }
       ]
-    },
-    "/address-enrichment/address/{address}": {
-      "get": {
-        "operationId": "getAddress",
-        "summary": "Get enriched data for an address",
-        "description": "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
-        "tags": ["address"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "description": "Ethereum address (checksummed or lowercase)",
-              "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-            },
-            "required": true,
-            "name": "address",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved address enrichment data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "address": {
-                      "type": "string",
-                      "description": "EIP-55 checksummed Ethereum address",
-                      "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-                    },
-                    "isContract": {
-                      "type": "boolean",
-                      "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
-                      "example": false
-                    },
-                    "arkham": {
-                      "type": "object",
-                      "nullable": true,
-                      "properties": {
-                        "entity": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
-                          "example": "Vitalik Buterin"
-                        },
-                        "entityType": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
-                          "example": "individual"
-                        },
-                        "label": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Fine-grained label for the specific address within the entity",
-                          "example": "Vitalik Buterin: Personal Wallet"
-                        },
-                        "twitter": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Twitter/X handle associated with the entity, without '@'",
-                          "example": "VitalikButerin"
-                        }
-                      },
-                      "required": ["entity", "entityType", "label", "twitter"],
-                      "description": "Arkham Intelligence label data. null when no data is available for the address."
-                    },
-                    "ens": {
-                      "type": "object",
-                      "nullable": true,
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "Primary ENS name reverse-resolved for this address",
-                          "example": "vitalik.eth"
-                        },
-                        "avatar": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "URL of the ENS avatar image",
-                          "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
-                        },
-                        "banner": {
-                          "type": "string",
-                          "nullable": true,
-                          "description": "URL of the ENS profile banner image",
-                          "example": null
-                        }
-                      },
-                      "required": ["name", "avatar", "banner"],
-                      "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
-                    }
-                  },
-                  "required": ["address", "isContract", "arkham", "ens"]
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Upstream enrichment provider failed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["error"]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/address-enrichment/addresses": {
-      "get": {
-        "operationId": "getAddresses",
-        "summary": "Get enriched data for multiple addresses",
-        "description": "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request. Arkham data is stored permanently. ENS data is cached with a configurable TTL.",
-        "tags": ["address"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "ethereum-address"
-              },
-              "minItems": 1,
-              "maxItems": 100,
-              "description": "One or more Ethereum addresses to enrich. Can be passed as a repeated query parameter or a single value. Maximum 100 addresses per request.",
-              "example": [
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-                "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"
-              ]
-            },
-            "required": true,
-            "name": "addresses",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved batch enrichment data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "address": {
-                            "type": "string",
-                            "description": "EIP-55 checksummed Ethereum address",
-                            "example": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-                          },
-                          "isContract": {
-                            "type": "boolean",
-                            "description": "Whether the address is a smart contract (true) or an externally-owned account (false)",
-                            "example": false
-                          },
-                          "arkham": {
-                            "type": "object",
-                            "nullable": true,
-                            "properties": {
-                              "entity": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Human-readable name of the entity that owns the address according to Arkham Intelligence",
-                                "example": "Vitalik Buterin"
-                              },
-                              "entityType": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Category of the entity (e.g. 'individual', 'exchange', 'protocol', 'fund')",
-                                "example": "individual"
-                              },
-                              "label": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Fine-grained label for the specific address within the entity",
-                                "example": "Vitalik Buterin: Personal Wallet"
-                              },
-                              "twitter": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Twitter/X handle associated with the entity, without '@'",
-                                "example": "VitalikButerin"
-                              }
-                            },
-                            "required": [
-                              "entity",
-                              "entityType",
-                              "label",
-                              "twitter"
-                            ],
-                            "description": "Arkham Intelligence label data. null when no data is available for the address."
-                          },
-                          "ens": {
-                            "type": "object",
-                            "nullable": true,
-                            "properties": {
-                              "name": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "Primary ENS name reverse-resolved for this address",
-                                "example": "vitalik.eth"
-                              },
-                              "avatar": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "URL of the ENS avatar image",
-                                "example": "https://metadata.ens.domains/mainnet/avatar/vitalik.eth"
-                              },
-                              "banner": {
-                                "type": "string",
-                                "nullable": true,
-                                "description": "URL of the ENS profile banner image",
-                                "example": null
-                              }
-                            },
-                            "required": ["name", "avatar", "banner"],
-                            "description": "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL."
-                          }
-                        },
-                        "required": ["address", "isContract", "arkham", "ens"]
-                      },
-                      "description": "Enrichment results for each successfully resolved address. Addresses that failed to resolve are omitted."
-                    }
-                  },
-                  "required": ["results"]
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "webhooks": {},

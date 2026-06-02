@@ -38,7 +38,6 @@ jobs:
           )
 
           api_implementation_changed=false
-          gateway_schema_changed=false
           gateful_openapi_changed=false
           api_contract_changed=false
 
@@ -48,9 +47,6 @@ jobs:
                 ;;
               apps/api/src/controllers/* | apps/api/src/mappers/*)
                 api_implementation_changed=true
-                ;;
-              apps/api-gateway/schema.graphql)
-                gateway_schema_changed=true
                 ;;
               apps/api/openapi/* | apps/gateful/openapi/*)
                 api_contract_changed=true
@@ -65,26 +61,17 @@ jobs:
           done
 
           if [[ "$api_contract_changed" == "true" ]]; then
-            api_gateway_changeset_found=false
             gateful_changeset_found=false
 
             for file in "${changed_files[@]}"; do
               case "$file" in
                 .changeset/*.md)
-                  if [[ "$file" != ".changeset/README.md" ]] && [[ -f "$file" ]] && grep -q '"@anticapture/api-gateway"' "$file"; then
-                    api_gateway_changeset_found=true
-                  fi
                   if [[ "$file" != ".changeset/README.md" ]] && [[ -f "$file" ]] && grep -q '"@anticapture/gateful"' "$file"; then
                     gateful_changeset_found=true
                   fi
                   ;;
               esac
             done
-
-            if [[ "$api_gateway_changeset_found" != "true" ]]; then
-              echo "::error::API OpenAPI contract changes must include a changeset for @anticapture/api-gateway."
-              exit 1
-            fi
 
             if [[ "$gateful_changeset_found" != "true" ]]; then
               echo "::error::API OpenAPI contract changes must include a changeset for @anticapture/gateful."
@@ -98,9 +85,6 @@ jobs:
           fi
 
           missing=()
-          if [[ "$gateway_schema_changed" != "true" ]]; then
-            missing+=("apps/api-gateway/schema.graphql")
-          fi
           if [[ "$gateful_openapi_changed" != "true" ]]; then
             missing+=("apps/gateful/openapi/gateful.json")
           fi

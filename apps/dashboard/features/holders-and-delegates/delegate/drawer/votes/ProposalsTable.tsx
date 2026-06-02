@@ -1,6 +1,10 @@
 "use client";
 
-import type { ProposalActivityItem } from "@anticapture/client";
+import type {
+  DaoPathParamsDaoEnumKey,
+  ProposalActivityItem,
+} from "@anticapture/client";
+import { useDao } from "@anticapture/client/hooks";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
@@ -27,7 +31,6 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
-import { useDaoData } from "@/shared/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -77,7 +80,9 @@ export const ProposalsTable = ({
   fetchNextPage,
 }: ProposalsTableProps) => {
   const pathname = usePathname();
-  const { data: daoData } = useDaoData(daoIdEnum);
+  const { data: daoData } = useDao(
+    daoIdEnum.toLowerCase() as DaoPathParamsDaoEnumKey,
+  );
   const {
     daoOverview: { token },
   } = daoConfig[daoIdEnum];

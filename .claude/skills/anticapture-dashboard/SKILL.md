@@ -9,14 +9,14 @@ description: Use for apps/dashboard work: routes, features, shared components/ho
 
 - You are editing files in `apps/dashboard`.
 - You are adding or refactoring UI/features/routes.
-- You are wiring data from GraphQL hooks into the UI.
+- You are wiring data from the `@anticapture/client` REST hooks into the UI.
 - You are updating dashboard tests or lint/type issues.
 
 ## Package Snapshot
 
 - Location: `apps/dashboard`
 - Port: 3000
-- Runtime: Next.js 16, React 19, Tailwind CSS 4, Apollo Client 3, React Query 5, wagmi 2, viem 2, Recharts 2
+- Runtime: Next.js 16, React 19, Tailwind CSS 4, React Query 5 (via `@anticapture/client` REST SDK), wagmi 2, viem 2, Recharts 2
 - Purpose: DAO governance analytics, risk assessment, and community tools
 - DAOs: Uniswap, ENS, Optimism, Nouns, Compound, Gitcoin, Obol, Scroll
 
@@ -33,15 +33,15 @@ pnpm dashboard build        # Production build
 
 ## Environment Variables (`apps/dashboard/.env`)
 
-| Variable                                | Required | Description                  |
-| --------------------------------------- | -------- | ---------------------------- |
-| `NEXT_PUBLIC_BASE_URL`                  | yes      | API Gateway GraphQL endpoint |
-| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | yes      | WalletConnect project ID     |
-| `NEXT_PUBLIC_ALCHEMY_KEY`               | yes      | Alchemy RPC key              |
-| `NEXT_PUBLIC_SITE_URL`                  | no       | Site URL for SEO/meta        |
-| `RESEND_API_KEY`                        | no       | Resend email API key         |
-| `RESEND_FROM_EMAIL`                     | no       | Sender email address         |
-| `CONTACT_EMAIL`                         | no       | Recipient for contact form   |
+| Variable                                | Required | Description                |
+| --------------------------------------- | -------- | -------------------------- |
+| `NEXT_PUBLIC_GATEFUL_URL`               | yes      | Gateful REST API base URL  |
+| `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | yes      | WalletConnect project ID   |
+| `NEXT_PUBLIC_ALCHEMY_KEY`               | yes      | Alchemy RPC key            |
+| `NEXT_PUBLIC_SITE_URL`                  | no       | Site URL for SEO/meta      |
+| `RESEND_API_KEY`                        | no       | Resend email API key       |
+| `RESEND_FROM_EMAIL`                     | no       | Sender email address       |
+| `CONTACT_EMAIL`                         | no       | Recipient for contact form |
 
 ## Architecture
 

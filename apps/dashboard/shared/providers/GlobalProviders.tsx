@@ -1,6 +1,5 @@
 "use client";
 
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { lightTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
@@ -12,16 +11,8 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { setClientConfig } from "@anticapture/client";
 
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
-import { BACKEND_ENDPOINT } from "@/shared/utils/server-utils";
 
 const queryClient = new QueryClient();
-
-// Apollo Client setup
-export const apolloClient = new ApolloClient({
-  uri: BACKEND_ENDPOINT,
-  cache: new InMemoryCache(),
-  queryDeduplication: false,
-});
 
 export const GlobalProviders = ({
   children,
@@ -41,17 +32,15 @@ export const GlobalProviders = ({
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <ApolloProvider client={apolloClient}>
-          <TooltipProvider>
-            <RainbowKitProvider
-              theme={lightTheme({
-                accentColor: "#E66AE9",
-              })}
-            >
-              <NuqsAdapter>{children}</NuqsAdapter>
-            </RainbowKitProvider>
-          </TooltipProvider>
-        </ApolloProvider>
+        <TooltipProvider>
+          <RainbowKitProvider
+            theme={lightTheme({
+              accentColor: "#E66AE9",
+            })}
+          >
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </RainbowKitProvider>
+        </TooltipProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

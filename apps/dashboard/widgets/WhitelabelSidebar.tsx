@@ -233,7 +233,7 @@ export const WhitelabelSidebar = ({
                 rel="noopener noreferrer"
                 className="text-link"
               >
-                Blockful
+                blockful
               </a>
             </p>
           )}
