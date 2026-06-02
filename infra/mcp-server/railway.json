@@ -1,12 +1,3 @@
 {
-  "$schema": "https://railway.com/railway.schema.json",
-  "environments": {
-    "pr": {
-      "deploy": {
-        "startCommand": "echo 'NOOP'",
-        "healthcheckPath": null,
-        "preDeployCommand": null
-      }
-    }
-  }
+  "$schema": "https://railway.com/railway.schema.json"
 }
