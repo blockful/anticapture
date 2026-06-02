@@ -1,33 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import BrowserOnly from "@docusaurus/BrowserOnly";
-import { useLocation } from "@docusaurus/router";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 // API pages render via `@theme/ApiItem/Layout` and guide pages via
 // `@theme/DocItem/Layout`, so no single layout swizzle covers both. Injecting
 // the button here in `Root` (which wraps the whole app) puts it on every page.
 //
-// The Markdown twins are produced by `@signalwire/docusaurus-plugin-llms-txt`
-// at build time, so this button only works against a production build/serve —
-// in `docusaurus start` the `.md` files do not exist and the button reports
-// "Unavailable".
+// It copies the entire documentation as one Markdown file (`llms-full.txt`,
+// produced by `@signalwire/docusaurus-plugin-llms-txt` at build time), so it
+// only works against a production build/serve — in `docusaurus start` that
+// file does not exist yet and the button reports "Unavailable".
 
 type CopyState = "idle" | "copied" | "error";
 
-function CopyMarkdownButton(): React.JSX.Element {
-  const location = useLocation();
+function LlmDocumentationButton(): React.JSX.Element {
   const [state, setState] = useState<CopyState>("idle");
-
-  // Reset the label whenever the user navigates to another page.
-  useEffect(() => setState("idle"), [location.pathname]);
+  // Resolved against the site baseUrl, the same way every other asset link is.
+  const llmsFullUrl = useBaseUrl("/llms-full.txt");
 
   const onClick = async () => {
     try {
-      // Use the real browser path (not the router path) so the fetch resolves
-      // correctly even when the site is served behind a reverse-proxy prefix.
-      const path = window.location.pathname;
-      const mdPath = path.endsWith("/") ? `${path}index.md` : `${path}.md`;
-
-      const res = await fetch(mdPath);
+      const res = await fetch(llmsFullUrl);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       await navigator.clipboard.writeText(await res.text());
@@ -43,14 +36,14 @@ function CopyMarkdownButton(): React.JSX.Element {
       ? "Copied!"
       : state === "error"
         ? "Unavailable"
-        : "Copy as Markdown";
+        : "LLM Documentation";
 
   return (
     <button
       type="button"
       className="copyMarkdownButton"
       onClick={onClick}
-      aria-label="Copy this page as Markdown"
+      aria-label="Copy the entire documentation as Markdown for LLMs"
     >
       {label}
     </button>
@@ -65,7 +58,7 @@ export default function Root({
   return (
     <>
       {children}
-      <BrowserOnly>{() => <CopyMarkdownButton />}</BrowserOnly>
+      <BrowserOnly>{() => <LlmDocumentationButton />}</BrowserOnly>
     </>
   );
 }
