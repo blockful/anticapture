@@ -91,15 +91,17 @@ Health check endpoint.
 
 ## Environment Variables
 
-| Variable                | Description                        | Required                                           |
-| ----------------------- | ---------------------------------- | -------------------------------------------------- |
-| `DATABASE_URL`          | PostgreSQL connection string       | Yes                                                |
-| `ARKHAM_API_KEY`        | Arkham Intel API key               | Yes                                                |
-| `ARKHAM_API_URL`        | Arkham API base URL                | No (default: `https://api.arkhamintelligence.com`) |
-| `RPC_URL`               | Ethereum RPC URL                   | Yes                                                |
-| `ANTICAPTURE_API_URL`   | Anticapture GraphQL API URL        | Yes (for sync command)                             |
-| `ENS_CACHE_TTL_MINUTES` | TTL in minutes for cached ENS data | No (default: `60`)                                 |
-| `PORT`                  | Server port                        | No (default: `3001`)                               |
+| Variable                | Description                         | Required                                           |
+| ----------------------- | ----------------------------------- | -------------------------------------------------- |
+| `DATABASE_URL`          | PostgreSQL connection string        | Yes                                                |
+| `ARKHAM_API_KEY`        | Arkham Intel API key                | Yes                                                |
+| `ARKHAM_API_URL`        | Arkham API base URL                 | No (default: `https://api.arkhamintelligence.com`) |
+| `RPC_URL`               | Ethereum RPC URL                    | Yes                                                |
+| `ANTICAPTURE_API_URL`   | Anticapture GraphQL API URL         | Yes (for sync command)                             |
+| `ENS_CACHE_TTL_MINUTES` | TTL in minutes for cached ENS data  | No (default: `60`)                                 |
+| `EFP_API_BASE_URL`      | Ethereum Follow Protocol API base   | No (default: `https://api.ethfollow.xyz/api/v1`)   |
+| `EFP_CACHE_TTL_MINUTES` | TTL in minutes for cached EFP stats | No (default: `60`)                                 |
+| `PORT`                  | Server port                         | No (default: `3001`)                               |
 
 ## Development
 
