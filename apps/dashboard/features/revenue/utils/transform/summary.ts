@@ -49,7 +49,7 @@ const computeQoqDelta = (
   if (!presented.trend) return undefined;
 
   return {
-    text: `${presented.text}% vs prev. quarter`,
+    text: `${presented.text}% vs prior 3 months`,
     trend: presented.trend,
   };
 };
@@ -63,11 +63,11 @@ export const computeRevenueSummary = (
     (item) => item.date < toStartOfCurrentMonthUtcSeconds(),
   );
   const { current, previous } = splitIntoWindows(completedItems, 3);
-  const currentQuarterTotal = sumTotalUsd(current);
+  const trailingThreeMonthTotal = sumTotalUsd(current);
 
   return {
     actualAmount: formatUsd(actualRevenue),
-    runRate: formatUsd(currentQuarterTotal * 4),
+    runRate: formatUsd(trailingThreeMonthTotal * 4),
     qoqDelta: computeQoqDelta(current, previous),
   };
 };

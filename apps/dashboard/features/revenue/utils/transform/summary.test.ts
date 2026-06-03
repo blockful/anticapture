@@ -49,7 +49,7 @@ describe("computeRevenueSummary", () => {
       actualAmount: "$1K",
       runRate: "$1.4K",
       qoqDelta: {
-        text: "+33% vs prev. quarter",
+        text: "+33% vs prior 3 months",
         trend: "up",
       },
     });
@@ -57,7 +57,7 @@ describe("computeRevenueSummary", () => {
       actualAmount: "$690",
       runRate: "$1.4K",
       qoqDelta: {
-        text: "+33% vs prev. quarter",
+        text: "+33% vs prior 3 months",
         trend: "up",
       },
     });
@@ -65,7 +65,7 @@ describe("computeRevenueSummary", () => {
       actualAmount: "$1.1K",
       runRate: "$1.4K",
       qoqDelta: {
-        text: "+33% vs prev. quarter",
+        text: "+33% vs prior 3 months",
         trend: "up",
       },
     });
@@ -103,7 +103,7 @@ describe("computeRevenueSummary", () => {
       actualAmount: "$900",
       runRate: "$1.2K",
       qoqDelta: {
-        text: "-50% vs prev. quarter",
+        text: "-50% vs prior 3 months",
         trend: "down",
       },
     });
