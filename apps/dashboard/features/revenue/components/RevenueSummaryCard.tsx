@@ -56,7 +56,7 @@ export const RevenueSummaryCard = () => {
           {isLoading ? (
             <div className="bg-surface-raised mt-2 h-9 w-32 animate-pulse rounded" />
           ) : (
-            <p className="text-primary mt-2 font-mono text-[30px] font-medium leading-9">
+            <p className="text-primary mt-2 text-[30px] font-medium leading-9">
               {summary?.actualAmount ?? "—"}
             </p>
           )}
@@ -73,7 +73,7 @@ export const RevenueSummaryCard = () => {
             </>
           ) : (
             <>
-              <p className="text-primary mt-2 font-mono text-[30px] font-medium leading-9">
+              <p className="text-primary mt-2 text-[30px] font-medium leading-9">
                 {summary?.runRate ?? "—"} / year
               </p>
               {summary?.qoqDelta && (
