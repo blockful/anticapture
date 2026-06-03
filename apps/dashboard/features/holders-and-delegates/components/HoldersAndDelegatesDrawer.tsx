@@ -3,13 +3,13 @@
 import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 
 import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
-import { DelegateEfpSocialContext } from "@/features/holders-and-delegates/components/DelegateEfpSocialContext";
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
 import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistory } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistory";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
+import { EfpDrawerStatPills } from "@/shared/components/efp/EfpDrawerStatPills";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import {
   DrawerBody,
@@ -135,25 +135,29 @@ export const HoldersAndDelegatesDrawer = ({
     cleanupFilters();
   };
 
+  const accountAddress = address as `0x${string}`;
+  const efpTrailingTags = <EfpDrawerStatPills address={accountAddress} />;
+
   const titleContent = (
     <>
       {/* Desktop */}
       <div className="hidden lg:block">
         <EnsAvatar
-          address={address as `0x${string}`}
+          address={accountAddress}
           size="sm"
           variant="rounded"
           containerClassName="gap-2"
           showFullAddress={true}
           showTags={true}
           showCopyAddress={true}
+          trailingTags={efpTrailingTags}
         />
       </div>
 
       {/* Mobile */}
       <div className="block lg:hidden">
         <EnsAvatar
-          address={address as `0x${string}`}
+          address={accountAddress}
           size="sm"
           variant="rounded"
           containerClassName="gap-2"
@@ -161,6 +165,7 @@ export const HoldersAndDelegatesDrawer = ({
           showTags={true}
           showCopyAddress={true}
           maxVisibleTags={2}
+          trailingTags={efpTrailingTags}
         />
       </div>
     </>
@@ -200,15 +205,7 @@ export const HoldersAndDelegatesDrawer = ({
           onTabChange={handleTabChange}
           action={delegateAction}
         />
-        <DrawerBody>
-          {entityType === "delegate" && (
-            <DelegateEfpSocialContext
-              delegateAddress={address as `0x${string}`}
-              daoId={daoId}
-            />
-          )}
-          {renderTabContent(activeTab)}
-        </DrawerBody>
+        <DrawerBody>{renderTabContent(activeTab)}</DrawerBody>
       </DrawerContent>
     </DrawerRoot>
   );

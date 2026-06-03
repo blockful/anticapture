@@ -1,6 +1,7 @@
 "use client";
 
 import type { ImageProps } from "next/image";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { useState } from "react";
 import Blockies from "react-blockies";
@@ -12,7 +13,14 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { useGetAddress } from "@anticapture/client/hooks";
+import {
+  getEfpFollowNameClassName,
+  shouldShowYouFollow,
+} from "@/shared/utils/efp";
+import {
+  useGetAddress,
+  useGetEfpFollowerState,
+} from "@anticapture/client/hooks";
 import { useAccount } from "wagmi";
 
 const TRUNCATE_ADDRESS_LENGTH = 30;
@@ -40,6 +48,8 @@ interface EnsAvatarProps extends Omit<
   showTags?: boolean;
   showCopyAddress?: boolean;
   maxVisibleTags?: number;
+  /** Extra badges rendered after address tags (e.g. EFP stats in delegate drawer). */
+  trailingTags?: ReactNode;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -85,12 +95,28 @@ export const EnsAvatar = ({
   showTags = false,
   showCopyAddress = false,
   maxVisibleTags,
+  trailingTags,
   ...imageProps
 }: EnsAvatarProps) => {
   const { data, isLoading } = useGetAddress(address ?? "0x", {
     query: { enabled: !!address },
   });
   const { address: viewerAddress } = useAccount();
+  const { data: followerStateData, isLoading: isFollowerStateLoading } =
+    useGetEfpFollowerState(
+      address?.toLowerCase() ?? "",
+      viewerAddress?.toLowerCase() ?? "",
+      {
+        query: {
+          enabled: !!address && !!viewerAddress,
+          staleTime: 5 * 60 * 1000,
+        },
+      },
+    );
+  const viewerFollowsTarget =
+    !!viewerAddress &&
+    !isFollowerStateLoading &&
+    shouldShowYouFollow(followerStateData?.state);
   const arkham = data?.arkham ?? null;
   const ens = data?.ens ?? null;
   const efp = data?.efp ?? null;
@@ -192,7 +218,14 @@ export const EnsAvatar = ({
 
   if (!showAvatar) {
     return (
-      <span className={cn("text-primary text-sm", nameClassName)}>
+      <span
+        className={cn(
+          "text-primary text-sm",
+          getEfpFollowNameClassName(viewerFollowsTarget, isDashed),
+          nameClassName,
+        )}
+        title={viewerFollowsTarget ? "Following on EFP" : undefined}
+      >
         {displayName}
       </span>
     );
@@ -241,10 +274,11 @@ export const EnsAvatar = ({
               className={cn(
                 "text-primary inline-block overflow-hidden truncate whitespace-nowrap",
                 showTags ? "text-lg font-medium" : "text-sm",
-                isDashed && "border-b border-dashed border-[#3F3F46]",
+                getEfpFollowNameClassName(viewerFollowsTarget, isDashed),
                 isResolvingData && "animate-pulse",
                 nameClassName,
               )}
+              title={viewerFollowsTarget ? "Following on EFP" : undefined}
             >
               {displayName}
             </span>
@@ -296,6 +330,7 @@ export const EnsAvatar = ({
                 )}
               </>
             )}
+            {trailingTags}
           </div>
         )}
       </div>
@@ -313,7 +348,7 @@ export const EnsAvatar = ({
             efp={efp}
             isContract={isContract}
             isLoading={isLoading}
-            viewerAddress={viewerAddress}
+            viewerFollowsTarget={viewerFollowsTarget}
           >
             {avatarWithName}
           </AddressDetailsTooltip>

@@ -2,6 +2,7 @@ export * from "@/shared/components/icons/AnticaptureIcon";
 export * from "@/shared/components/icons/ArrowUpDown";
 export * from "@/shared/components/icons/BulletPoint";
 export * from "@/shared/components/icons/CookieIcon";
+export * from "@/shared/components/icons/EfpIcon";
 export * from "@/shared/components/icons/EnsIcon";
 export * from "@/shared/components/icons/FluidIcon";
 export * from "@/shared/components/icons/NounsIcon";

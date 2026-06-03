@@ -6,13 +6,8 @@ import type { Address } from "viem";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import {
-  formatEfpCounts,
-  formatEfpIdentityLabel,
-  shouldShowYouFollow,
-} from "@/shared/utils/formatEfp";
+import { formatEfpCounts, getEfpFollowNameClassName } from "@/shared/utils/efp";
 import type { GetAddress200 } from "@anticapture/client";
-import { useGetEfpFollowerState } from "@anticapture/client/hooks";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 
@@ -26,7 +21,7 @@ interface AddressDetailsTooltipProps {
   efp: GetAddress200["efp"];
   isContract: boolean | null;
   isLoading: boolean;
-  viewerAddress?: Address;
+  viewerFollowsTarget?: boolean;
 }
 
 const DashedDivider = () => {
@@ -71,26 +66,10 @@ export const AddressDetailsTooltip = ({
   efp,
   isContract,
   isLoading,
-  viewerAddress,
+  viewerFollowsTarget = false,
   children,
 }: AddressDetailsTooltipProps) => {
-  const { data: followerStateData, isLoading: isFollowerStateLoading } =
-    useGetEfpFollowerState(
-      address.toLowerCase(),
-      viewerAddress?.toLowerCase() ?? "",
-      {
-        query: {
-          enabled: !!viewerAddress,
-          staleTime: 5 * 60 * 1000,
-        },
-      },
-    );
-
   const efpCountsLabel = formatEfpCounts(efp);
-  const showYouFollow =
-    !!viewerAddress &&
-    !isFollowerStateLoading &&
-    shouldShowYouFollow(followerStateData?.state);
 
   const content = (
     <div className="flex w-full flex-col gap-2">
@@ -98,7 +77,14 @@ export const AddressDetailsTooltip = ({
         {isLoading ? (
           <SkeletonRow parentClassName="mt-1" className="h-5 w-24" />
         ) : ens?.name ? (
-          <span className="text-primary text-sm leading-5">{ens.name}</span>
+          <span
+            className={cn(
+              "text-primary text-sm leading-5",
+              getEfpFollowNameClassName(viewerFollowsTarget),
+            )}
+          >
+            {ens.name}
+          </span>
         ) : (
           <NotInformed />
         )}
@@ -132,21 +118,13 @@ export const AddressDetailsTooltip = ({
 
       <DashedDivider />
 
-      <Row label="EFP" className="gap-1">
+      <Row label="EFP">
         {isLoading ? (
           <SkeletonRow parentClassName="mt-1" className="h-5 w-40" />
         ) : efpCountsLabel ? (
-          <div className="flex flex-col gap-0.5">
-            <span className="text-primary text-sm leading-5">
-              {efpCountsLabel}
-            </span>
-            {showYouFollow && (
-              <span className="text-primary text-sm leading-5">You follow</span>
-            )}
-            <span className="text-secondary text-xs leading-4">
-              {formatEfpIdentityLabel()}
-            </span>
-          </div>
+          <span className="text-primary text-sm leading-5">
+            {efpCountsLabel}
+          </span>
         ) : (
           <NotInformed />
         )}

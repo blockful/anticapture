@@ -76,16 +76,21 @@ export const WithEfpCounts: Story = {
   },
 };
 
-export const WithViewerYouFollow: Story = {
+export const ViewerFollowsTarget: Story = {
   args: {
     ...WithEfpCounts.args,
-    viewerAddress: "0x983110309620D911731Ac0932219af06091b6744",
+    viewerFollowsTarget: true,
+    children: (
+      <span className="text-primary text-sm underline decoration-[#FFE067] decoration-2 underline-offset-2">
+        vitalik.eth
+      </span>
+    ),
   },
   parameters: {
     docs: {
       description: {
         story:
-          'When a viewer address is provided, the tooltip may show "You follow" if the follower-state API confirms the relationship.',
+          "ENS name uses an EFP-yellow underline when the connected wallet follows this address (set by EnsAvatar from follower-state API).",
       },
     },
   },
