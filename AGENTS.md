@@ -132,3 +132,76 @@ Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
 - `.claude/skills/<package>/` — package-specific guides (`anticapture-api`, `anticapture-gateful`,
   `anticapture-client`, `anticapture-dashboard`, `anticapture-indexer`, `local-dev`,
   `dao-integration`, `testing`, ...).
+
+<claude-mem-context>
+# Memory Context
+
+# [islamabad] recent context, 2026-06-03 10:26am GMT-3
+
+Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
+Format: ID TIME TYPE TITLE
+Fetch details: get_observations([IDs]) | Search: mem-search skill
+
+Stats: 50 obs (18,250t read) | 710,543t work | 97% savings
+
+### Apr 29, 2026
+
+572 10:55p 🔵 All 4 MCP tests pass; @anticapture/client codegen runs via kubb before each test run
+574 " 🔵 anticapture-mcp HTTP server confirmed working via curl smoke test
+
+### Apr 30, 2026
+
+575 10:51a 🔴 Exclude zero-address delegate from ENS lookups in useTopAccountsChartData
+597 1:15p 🔵 Code Review: PR #1818 — SEO Improvements for Anticapture Dashboard
+598 1:16p 🔵 PR #1818 Workspace Context: Branch Ahead 249 Commits, Vercel Build Failing
+599 1:17p 🔵 Confirmed Runtime Crash Bug in proposals/[proposalId]/page.tsx generateMetadata
+600 " 🔵 Source Inspection Confirms JsonLd Escaping Gap, Sitemap Limits, and getSiteUrl Localhost Issue
+601 " 🔵 Confirmed Unrelated Config Changes Bundled Into SEO PR and New llms.txt Route
+602 1:18p 🔵 Critical: Sitemap URLs Point to Routes That next.config.ts Permanently Redirects Away
+603 " 🔵 PR Diff Scope Clarified: governance/proposal Route Exists in Dev But Not Modified by PR
+604 " 🔵 Dashboard TypeCheck Passes on PR Branch; Lint Running
+605 1:19p 🔵 Dashboard Lint Passes Clean: 79 Warnings, 0 Errors, None from PR Files
+606 " 🔵 All Dashboard Tests Pass: 126/126 Across 16 Suites, None Cover New SEO Code
+607 1:20p 🔵 Vercel Build Failure Confirmed: No Log URL Available via GitHub API
+608 " 🔵 Vercel Build Root Cause: sitemap.xml Route Times Out After 60 Seconds × 3 Attempts
+609 1:21p 🔴 Added export const dynamic = "force-dynamic" to sitemap.ts to Fix Vercel Build Timeout
+610 1:40p 🔵 UI Screenshots Reviewed for Bug Fix in anticapture/ottawa Project
+611 2:02p 🔵 ripgrep (rg) not available in anticapture/ottawa workspace
+612 " 🔵 Dashboard uses Jest for unit tests, Vitest only for Storybook
+614 2:03p 🔵 Proposal Fetch Feature with 100-Limit API Parameter
+613 " 🔵 Dashboard Jest config: ts-jest, node env, `.test.ts` only, no `.tsx` tests
+615 " 🔴 Offchain proposal redirect changed from `redirect` to `permanentRedirect` (308)
+616 " 🔵 sitemap.ts getAllProposalPaths Uses Suboptimal Limits (10 and 20)
+617 " 🔵 Jest testMatch pattern misses bracket-directory test files when passed as path argument
+618 " 🔵 sitemap.test.ts Exists Alongside sitemap.ts
+619 " 🔵 Jest bracket-glob issue persists even when shell-quoting the path argument
+620 " 🔵 Workaround: use `jest --runTestsByPath` to target bracket-directory test files
+621 2:04p ✅ TypeCheck passes after `redirect` → `permanentRedirect` change
+622 " ✅ Lint passes with 0 errors after permanentRedirect fix; 79 pre-existing warnings unrelated to change
+623 2:32p 🔵 Offchain Proposals Intentionally Route to /governance/offchain-proposal Path
+624 2:38p 🔵 Anticapture Guardrails and Dashboard Frontend Skills Loaded
+625 " 🔵 Anticapture Monorepo Guardrail Boundaries and Verification Commands Established
+626 2:39p 🔵 AGENTS.md Files Found in Ottawa and Tianjin Workspaces
+627 " 🔵 Dashboard Package Technology Stack Identified
+628 " 🔵 Ottawa Workspace is a Partial Monorepo Subset
+629 " 🔴 Sitemap Proposal Fetching Made Fault-Tolerant with Per-Source Error Isolation
+630 " 🔴 Sitemap Fault-Tolerance Fix Verified — All 5 Tests Pass
+
+### Jun 2, 2026
+
+695 3:46p 🔴 CI codegen fixed to target Railway PR-preview gateful via dynamic URL
+768 6:18p 🔵 Backoff/retry logic exists in API for address enrichment
+769 " 🔵 Relayer module located in api-gateway package
+770 " 🔵 Gateful package structure mapped — relayer and address-enrichment are separate modules
+771 6:19p 🔵 Gateful circuit breaker already has exponential backoff; relayer proxy has no retry logic
+772 " 🔵 Gateful proxy/route.ts uses circuit breaker; relayer.ts is the only proxy missing it
+773 " 🔵 Gateful upstream-docs confirms relayer shares one contract across DAOs — first reachable spec wins
+774 6:20p 🟣 Backoff/circuit breaker logic added to gateful relayer proxy
+775 " 🟣 All 52 gateful tests pass after relayer circuit breaker addition
+776 " 🟣 Gateful TypeScript build passes clean after relayer circuit breaker changes
+777 " 🔵 Workspace diff shows relayer.test.ts is untracked — not yet staged
+778 6:21p 🔵 Existing changeset already covers address-enrichment circuit breaker; relayer change needs a new one
+779 " ✅ Changeset created for relayer circuit breaker patch
+
+Access 711k tokens of past work via get_observations([IDs]) or mem-search skill.
+</claude-mem-context>
