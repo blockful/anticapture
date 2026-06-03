@@ -30,7 +30,10 @@ const formatXAxisLabel = (
   _index: number,
   granularity: ChartGranularity,
 ) => {
-  if (granularity === "quarter") return value.split("'")[1] ?? value;
+  if (granularity === "quarter") {
+    const shortYear = value.split("'")[1];
+    return shortYear ? `20${shortYear}` : value;
+  }
   return value;
 };
 
