@@ -37,6 +37,11 @@ export interface EfpFollowerState {
   };
 }
 
+export type EfpFollowerStateFetchResult =
+  | { outcome: "success"; state: EfpFollowerState }
+  | { outcome: "not_found" }
+  | { outcome: "error" };
+
 export class EfpClient {
   constructor(private readonly baseUrl: string) {}
 
@@ -106,7 +111,7 @@ export class EfpClient {
   async getFollowerState(
     addressUser: string,
     addressFollower: string,
-  ): Promise<EfpFollowerState | null> {
+  ): Promise<EfpFollowerStateFetchResult> {
     const user = addressUser.toLowerCase();
     const follower = addressFollower.toLowerCase();
 
@@ -123,7 +128,7 @@ export class EfpClient {
 
       if (!response.ok) {
         if (response.status === 404) {
-          return null;
+          return { outcome: "not_found" };
         }
         logger.error(
           {
@@ -134,7 +139,7 @@ export class EfpClient {
           },
           "EFP follower state API error",
         );
-        return null;
+        return { outcome: "error" };
       }
 
       const data = await response.json();
@@ -145,20 +150,23 @@ export class EfpClient {
           { err: parsed.error, addressUser: user, addressFollower: follower },
           "failed to parse EFP follower state response",
         );
-        return null;
+        return { outcome: "error" };
       }
 
       return {
-        addressUser: parsed.data.addressUser.toLowerCase(),
-        addressFollower: parsed.data.addressFollower.toLowerCase(),
-        state: parsed.data.state,
+        outcome: "success",
+        state: {
+          addressUser: parsed.data.addressUser.toLowerCase(),
+          addressFollower: parsed.data.addressFollower.toLowerCase(),
+          state: parsed.data.state,
+        },
       };
     } catch (error) {
       logger.error(
         { err: error, addressUser: user, addressFollower: follower },
         "failed to fetch EFP follower state",
       );
-      return null;
+      return { outcome: "error" };
     }
   }
 }

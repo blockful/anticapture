@@ -121,16 +121,18 @@ export function efpController(app: Hono, efpClient: EfpClient) {
     }),
     async (context) => {
       const { user, follower } = context.req.valid("param");
-      try {
-        const state = await efpClient.getFollowerState(user, follower);
-        if (!state) {
-          return context.json({ error: "Follower state not found" }, 404);
-        }
-        return context.json(EfpFollowerStateResponseSchema.parse(state), 200);
-      } catch (err) {
-        logger.error({ err, user, follower }, "EFP follower state failed");
+      const result = await efpClient.getFollowerState(user, follower);
+      if (result.outcome === "not_found") {
+        return context.json({ error: "Follower state not found" }, 404);
+      }
+      if (result.outcome === "error") {
+        logger.error({ user, follower }, "EFP follower state upstream failed");
         return context.json({ error: "Failed to fetch follower state" }, 502);
       }
+      return context.json(
+        EfpFollowerStateResponseSchema.parse(result.state),
+        200,
+      );
     },
   );
 

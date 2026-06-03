@@ -119,10 +119,12 @@ export class EnrichmentService {
         this.applyEfpUserStatsFetch(efpResult, updates, now);
       }
 
-      await db
-        .update(addressEnrichment)
-        .set(updates)
-        .where(eq(addressEnrichment.address, normalizedAddress));
+      if (Object.keys(updates).length > 0) {
+        await db
+          .update(addressEnrichment)
+          .set(updates)
+          .where(eq(addressEnrichment.address, normalizedAddress));
+      }
 
       return this.mapToResult({
         ...existing,

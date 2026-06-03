@@ -22,11 +22,19 @@ export async function getFollowingInSet(
     const results = await Promise.all(
       batch.map(async (address) => {
         const target = address.toLowerCase();
-        const state = await efpClient.getFollowerState(
+        const result = await efpClient.getFollowerState(
           target,
           normalizedViewer,
         );
-        if (state?.state.follow && !state.state.block && !state.state.mute) {
+        if (result.outcome === "error") {
+          throw new Error("EFP follower state upstream failed");
+        }
+        if (
+          result.outcome === "success" &&
+          result.state.state.follow &&
+          !result.state.state.block &&
+          !result.state.state.mute
+        ) {
           return target;
         }
         return null;
