@@ -18,6 +18,18 @@ export const formatMonthLabel = (unixSeconds: number): string => {
   return `${MONTH_ABBR[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 };
 
+export const formatQuarterLabel = (unixSeconds: number): string => {
+  const d = new Date(unixSeconds * 1000);
+  const quarter = Math.floor(d.getUTCMonth() / 3) + 1;
+  const year = String(d.getUTCFullYear()).slice(-2);
+  return `Q${quarter} '${year}`;
+};
+
+export const formatYearLabel = (unixSeconds: number): string => {
+  const d = new Date(unixSeconds * 1000);
+  return String(d.getUTCFullYear());
+};
+
 export const formatUsd = (value: number): string => {
   const abs = Math.abs(value);
   const sign = value < 0 ? "-" : "";
