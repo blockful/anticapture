@@ -158,9 +158,12 @@ The service uses a single table `address_enrichment`:
 - `ens_avatar`: ENS avatar URL
 - `ens_banner`: ENS banner/header URL
 - `ens_updated_at`: Timestamp when ENS data was last fetched (used for TTL)
+- `efp_followers_count`: Cached EFP follower count (nullable)
+- `efp_following_count`: Cached EFP following count (nullable)
+- `efp_updated_at`: Timestamp when EFP stats were last fetched (used for TTL)
 - `created_at`: Timestamp when the record was first created
 
-> Arkham data is permanent. ENS data is refreshed when `ens_updated_at` is older than `ENS_CACHE_TTL_MINUTES`.
+> Arkham data is permanent. ENS and EFP data are refreshed when their `*_updated_at` timestamps are older than `ENS_CACHE_TTL_MINUTES` / `EFP_CACHE_TTL_MINUTES`.
 
 ## Data Flow
 

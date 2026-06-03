@@ -22,6 +22,11 @@ export interface EfpUserStats {
   followingCount: number;
 }
 
+export type EfpUserStatsFetchResult =
+  | { outcome: "success"; stats: EfpUserStats }
+  | { outcome: "not_found" }
+  | { outcome: "error" };
+
 export interface EfpFollowerState {
   addressUser: string;
   addressFollower: string;
@@ -38,7 +43,7 @@ export class EfpClient {
   /**
    * Fetches EFP follower/following counts for an address.
    */
-  async getUserStats(address: string): Promise<EfpUserStats | null> {
+  async getUserStats(address: string): Promise<EfpUserStatsFetchResult> {
     const normalizedAddress = address.toLowerCase();
 
     try {
@@ -54,7 +59,7 @@ export class EfpClient {
 
       if (!response.ok) {
         if (response.status === 404) {
-          return null;
+          return { outcome: "not_found" };
         }
         logger.error(
           {
@@ -64,7 +69,7 @@ export class EfpClient {
           },
           "EFP stats API error",
         );
-        return null;
+        return { outcome: "error" };
       }
 
       const data = await response.json();
@@ -75,19 +80,22 @@ export class EfpClient {
           { err: parsed.error, address: normalizedAddress },
           "failed to parse EFP stats response",
         );
-        return null;
+        return { outcome: "error" };
       }
 
       return {
-        followersCount: parsed.data.followers_count,
-        followingCount: parsed.data.following_count,
+        outcome: "success",
+        stats: {
+          followersCount: parsed.data.followers_count,
+          followingCount: parsed.data.following_count,
+        },
       };
     } catch (error) {
       logger.error(
         { err: error, address: normalizedAddress },
         "failed to fetch EFP stats",
       );
-      return null;
+      return { outcome: "error" };
     }
   }
 

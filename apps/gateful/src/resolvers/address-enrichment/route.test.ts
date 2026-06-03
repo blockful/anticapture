@@ -1,5 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addressEnrichment } from "./route";
 
@@ -33,14 +33,18 @@ describe("address-enrichment route", () => {
         new Response(JSON.stringify({ ens: "vitalik.eth" }), { status: 200 }),
       );
 
-    const res = await app.request("/address-enrichment/address/0x123");
-    const body = (await res.json()) as { ens: string };
+    try {
+      const res = await app.request("/address-enrichment/address/0x123");
+      const body = (await res.json()) as { ens: string };
 
-    expect(res.status).toBe(200);
-    expect(body.ens).toBe("vitalik.eth");
-    const arg = fetchSpy.mock.calls[0]?.[0];
-    const calledUrl = arg instanceof Request ? arg.url : String(arg);
-    expect(calledUrl).toBe("http://enrichment-api/address/0x123");
+      expect(res.status).toBe(200);
+      expect(body.ens).toBe("vitalik.eth");
+      const arg = fetchSpy.mock.calls[0]?.[0];
+      const calledUrl = arg instanceof Request ? arg.url : String(arg);
+      expect(calledUrl).toBe("http://enrichment-api/address/0x123");
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 
   it("should forward query strings to upstream", async () => {
@@ -50,26 +54,34 @@ describe("address-enrichment route", () => {
         new Response(JSON.stringify({ ok: true }), { status: 200 }),
       );
 
-    const res = await app.request(
-      "/address-enrichment/address/0x123?include=ens&chain=1",
-    );
+    try {
+      const res = await app.request(
+        "/address-enrichment/address/0x123?include=ens&chain=1",
+      );
 
-    expect(res.status).toBe(200);
-    const arg = fetchSpy.mock.calls[0]?.[0];
-    const calledUrl = arg instanceof Request ? arg.url : String(arg);
-    expect(calledUrl).toBe(
-      "http://enrichment-api/address/0x123?include=ens&chain=1",
-    );
+      expect(res.status).toBe(200);
+      const arg = fetchSpy.mock.calls[0]?.[0];
+      const calledUrl = arg instanceof Request ? arg.url : String(arg);
+      expect(calledUrl).toBe(
+        "http://enrichment-api/address/0x123?include=ens&chain=1",
+      );
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 
   it("should propagate upstream error status", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue(
+    const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ error: "internal" }), { status: 500 }),
     );
 
-    const res = await app.request("/address-enrichment/0x123");
+    try {
+      const res = await app.request("/address-enrichment/0x123");
 
-    expect(res.status).toBe(500);
+      expect(res.status).toBe(500);
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 
   it("should proxy EFP follower-state routes to upstream", async () => {
@@ -86,15 +98,19 @@ describe("address-enrichment route", () => {
         ),
       );
 
-    const res = await app.request(
-      "/address-enrichment/efp/users/0xuser/0xfollower/follower-state",
-    );
+    try {
+      const res = await app.request(
+        "/address-enrichment/efp/users/0xuser/0xfollower/follower-state",
+      );
 
-    expect(res.status).toBe(200);
-    const arg = fetchSpy.mock.calls[0]?.[0];
-    const calledUrl = arg instanceof Request ? arg.url : String(arg);
-    expect(calledUrl).toBe(
-      "http://enrichment-api/efp/users/0xuser/0xfollower/follower-state",
-    );
+      expect(res.status).toBe(200);
+      const arg = fetchSpy.mock.calls[0]?.[0];
+      const calledUrl = arg instanceof Request ? arg.url : String(arg);
+      expect(calledUrl).toBe(
+        "http://enrichment-api/efp/users/0xuser/0xfollower/follower-state",
+      );
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 });

@@ -10,7 +10,6 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },
   "dependencies": {
@@ -34,8 +33,7 @@
     "prettier": "^3.5.3",
     "tsup": "^8.5.1",
     "tsx": "^4.19.4",
-    "typescript": "^5.8.3",
-    "vitest": "^4.0.18"
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18.14"

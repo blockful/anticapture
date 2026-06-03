@@ -3,7 +3,7 @@
 import type { ImageProps } from "next/image";
 import type { ReactNode } from "react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Blockies from "react-blockies";
 import type { Address } from "viem";
 
@@ -13,6 +13,7 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
+import { useEfpFollowingBatch } from "@/shared/providers/EfpFollowingProvider";
 import {
   getEfpFollowNameClassName,
   shouldShowYouFollow,
@@ -102,21 +103,42 @@ export const EnsAvatar = ({
     query: { enabled: !!address },
   });
   const { address: viewerAddress } = useAccount();
+  const efpFollowingBatch = useEfpFollowingBatch();
+
+  useEffect(() => {
+    if (!efpFollowingBatch || !address || !viewerAddress) {
+      return;
+    }
+
+    efpFollowingBatch.registerTarget(address);
+    return () => efpFollowingBatch.unregisterTarget(address);
+  }, [efpFollowingBatch, address, viewerAddress]);
+
+  const batchViewerFollows =
+    efpFollowingBatch && address && viewerAddress
+      ? efpFollowingBatch.getViewerFollows(address)
+      : undefined;
+
+  const usePerAvatarFollowQuery =
+    !efpFollowingBatch && !!address && !!viewerAddress;
+
   const { data: followerStateData, isLoading: isFollowerStateLoading } =
     useGetEfpFollowerState(
       address?.toLowerCase() ?? "",
       viewerAddress?.toLowerCase() ?? "",
       {
         query: {
-          enabled: !!address && !!viewerAddress,
+          enabled: usePerAvatarFollowQuery,
           staleTime: 5 * 60 * 1000,
         },
       },
     );
-  const viewerFollowsTarget =
-    !!viewerAddress &&
-    !isFollowerStateLoading &&
-    shouldShowYouFollow(followerStateData?.state);
+
+  const viewerFollowsTarget = efpFollowingBatch
+    ? batchViewerFollows === true
+    : !!viewerAddress &&
+      !isFollowerStateLoading &&
+      shouldShowYouFollow(followerStateData?.state);
   const arkham = data?.arkham ?? null;
   const ens = data?.ens ?? null;
   const efp = data?.efp ?? null;

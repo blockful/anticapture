@@ -4,7 +4,7 @@ import z from "zod";
 
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
-import type { EfpClient } from "@/clients/efp";
+import type { EfpClient, EfpUserStatsFetchResult } from "@/clients/efp";
 import { getDb, addressEnrichment } from "@/db";
 import type { AddressEnrichment } from "@/db/schema";
 import { logger } from "@/logger";
@@ -96,7 +96,7 @@ export class EnrichmentService {
         "refreshing stale enrichment cache",
       );
 
-      const [ensData, efpData] = await Promise.all([
+      const [ensData, efpResult] = await Promise.all([
         needsEnsRefresh
           ? this.ensClient.getEnsData(normalizedAddress)
           : Promise.resolve(undefined),
@@ -115,10 +115,8 @@ export class EnrichmentService {
         updates.ensUpdatedAt = now;
       }
 
-      if (needsEfpRefresh) {
-        updates.efpFollowersCount = efpData?.followersCount ?? null;
-        updates.efpFollowingCount = efpData?.followingCount ?? null;
-        updates.efpUpdatedAt = now;
+      if (needsEfpRefresh && efpResult !== undefined) {
+        this.applyEfpUserStatsFetch(efpResult, updates, now);
       }
 
       await db
@@ -132,7 +130,7 @@ export class EnrichmentService {
       });
     }
 
-    const [arkhamData, ensData, efpData] = await Promise.all([
+    const [arkhamData, ensData, efpResult] = await Promise.all([
       this.arkhamClient.getAddressIntelligence(normalizedAddress),
       this.ensClient.getEnsData(normalizedAddress),
       this.efpClient.getUserStats(normalizedAddress),
@@ -164,10 +162,11 @@ export class EnrichmentService {
       ensAvatar: ensData?.avatar ?? null,
       ensBanner: ensData?.banner ?? null,
       ensUpdatedAt: now,
-      efpFollowersCount: efpData?.followersCount ?? null,
-      efpFollowingCount: efpData?.followingCount ?? null,
-      efpUpdatedAt: now,
+      efpFollowersCount: null,
+      efpFollowingCount: null,
+      efpUpdatedAt: null,
     };
+    this.applyEfpUserStatsFetch(efpResult, newRecord, now);
 
     const [inserted] = await db
       .insert(addressEnrichment)
@@ -202,12 +201,41 @@ export class EnrichmentService {
             }
           : null,
         ens: ensData,
-        efp: efpData,
+        efp: this.efpStatsFromFetchResult(efpResult),
         createdAt: new Date().toISOString(),
       };
     }
 
     return this.mapToResult(inserted);
+  }
+
+  /**
+   * Persists EFP counts and cache timestamp only on success or definitive 404.
+   * Upstream errors leave existing DB values untouched so the next request retries.
+   */
+  private applyEfpUserStatsFetch(
+    result: EfpUserStatsFetchResult,
+    target: Partial<typeof addressEnrichment.$inferInsert>,
+    now: Date,
+  ): void {
+    if (result.outcome === "success") {
+      target.efpFollowersCount = result.stats.followersCount;
+      target.efpFollowingCount = result.stats.followingCount;
+      target.efpUpdatedAt = now;
+      return;
+    }
+
+    if (result.outcome === "not_found") {
+      target.efpFollowersCount = null;
+      target.efpFollowingCount = null;
+      target.efpUpdatedAt = now;
+    }
+  }
+
+  private efpStatsFromFetchResult(
+    result: EfpUserStatsFetchResult,
+  ): EnrichmentResult["efp"] {
+    return result.outcome === "success" ? result.stats : null;
   }
 
   private isEnsFresh(record: AddressEnrichment): boolean {
