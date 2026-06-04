@@ -6,6 +6,7 @@ import { NameGrowthChart } from "@/features/revenue/components/NameGrowthChart";
 import { NewUsersChart } from "@/features/revenue/components/NewUsersChart";
 import { RenewalRateCohort } from "@/features/revenue/components/RenewalRateCohort";
 import { RevenueOverviewCard } from "@/features/revenue/components/RevenueOverviewCard";
+import { RevenueSummaryCard } from "@/features/revenue/components/RevenueSummaryCard";
 import { UpcomingExpirationsChart } from "@/features/revenue/components/UpcomingExpirationsChart";
 
 export const RevenueSection = () => {
@@ -16,22 +17,25 @@ export const RevenueSection = () => {
       hideDivider
     >
       <div className="flex flex-col gap-4 pb-8">
-        {/* Section 1 — Revenue Overview */}
-        <RevenueOverviewCard />
+        {/* Section 1 — Revenue Summary */}
+        <RevenueSummaryCard />
 
-        {/* Section 2 — Monthly Revenue by Stream */}
+        {/* Section 2 — All Time Revenue by Stream */}
         <MonthlyRevenueChart />
 
-        {/* Section 3 — Usage & Adoption + KPI Row */}
+        {/* Section 3 — Stream Breakdown */}
+        <RevenueOverviewCard />
+
+        {/* Section 4 — Usage & Adoption + KPI Row */}
         <KpiRow />
 
-        {/* Section 4 — Name Growth & Churn */}
+        {/* Section 5 — Name Growth & Churn */}
         <NameGrowthChart />
 
-        {/* Section 5 — New Users Entering ENS */}
+        {/* Section 6 — New Users Entering ENS */}
         <NewUsersChart />
 
-        {/* Section 6 — Bottom Row */}
+        {/* Section 7 — Bottom Row */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <UpcomingExpirationsChart />
           <RenewalRateCohort />

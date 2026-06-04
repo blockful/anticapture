@@ -122,7 +122,7 @@ export const KpiRow = () => {
                 <p className="text-secondary text-sm font-medium">
                   {kpi.title}
                 </p>
-                <p className="text-primary mt-1 font-mono text-[30px] font-medium leading-9">
+                <p className="text-primary mt-1 text-[30px] font-medium leading-9">
                   {kpi.value}
                 </p>
                 <p className="text-secondary mt-1 flex items-center gap-1 text-sm">
