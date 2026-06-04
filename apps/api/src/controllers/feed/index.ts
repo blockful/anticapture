@@ -11,6 +11,8 @@ export function feed(app: Hono, service: FeedService) {
       operationId: "feedEvents",
       path: "/feed/events",
       summary: "Get feed events",
+      description:
+        "Returns a paginated list of governance feed events, optionally filtered by type and relevance.",
       tags: ["feed", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {

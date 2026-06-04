@@ -39,7 +39,9 @@ export function governanceActivity(
       method: "get",
       operationId: "compareActiveSupply",
       path: "/active-supply/compare",
-      summary: "Get active token supply for DAO",
+      summary: "Compare active token supply between time periods",
+      description:
+        "Returns the active token supply (supply held by accounts that participated in governance) for the given period.",
       tags: ["governance"],
       middleware: [setCacheControl(60)],
       request: {
@@ -69,6 +71,8 @@ export function governanceActivity(
       operationId: "compareProposals",
       path: "/proposals/compare",
       summary: "Compare number of proposals between time periods",
+      description:
+        "Returns the number of proposals launched in the current period versus the previous one, with the change rate and raw delta.",
       tags: ["governance"],
       middleware: [setCacheControl(60)],
       request: {
@@ -121,6 +125,8 @@ export function governanceActivity(
       operationId: "compareVotes",
       path: "/votes/compare",
       summary: "Compare number of votes between time periods",
+      description:
+        "Returns the number of votes cast in the current period versus the previous one, with the change rate and raw delta.",
       tags: ["governance"],
       middleware: [setCacheControl(60)],
       request: {
@@ -168,6 +174,8 @@ export function governanceActivity(
       operationId: "compareAverageTurnout",
       path: "/average-turnout/compare",
       summary: "Compare average turnout between time periods",
+      description:
+        "Returns the average proposal turnout in the current period versus the previous one, with the change rate and raw delta.",
       tags: ["governance"],
       middleware: [setCacheControl(60)],
       request: {

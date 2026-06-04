@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import {
   useGetRevenueActions,
   useGetRevenueTotals,
@@ -30,44 +29,6 @@ export const RevenueOverviewCard = () => {
 
   return (
     <Card>
-      {/* Hero */}
-      <div className="border-border-default border-b p-4">
-        <p className="text-secondary text-sm font-medium">
-          Total Protocol Revenue
-        </p>
-        <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          {isLoading ? (
-            <div className="bg-surface-raised h-9 w-32 animate-pulse rounded" />
-          ) : (
-            <>
-              <span className="text-primary text-[30px] font-medium leading-9">
-                {overview?.totalAmount ?? "—"}
-              </span>
-              <span className="text-secondary text-sm">
-                {overview?.totalContext}
-              </span>
-              {overview?.ytdDelta && (
-                <span
-                  className={cn(
-                    "flex items-center gap-0.5 text-sm font-medium",
-                    overview.ytdDelta.trend === "up"
-                      ? "text-success"
-                      : "text-[#f87171]",
-                  )}
-                >
-                  {overview.ytdDelta.trend === "up" ? (
-                    <ArrowUp className="size-3.5" />
-                  ) : (
-                    <ArrowDown className="size-3.5" />
-                  )}
-                  {overview.ytdDelta.text}
-                </span>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
       {/* Stream columns — 1col mobile, 3col desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3">
         {isLoading

@@ -19,6 +19,8 @@ import { accountBalanceVariationsByAccountIdHandler } from "../generated/mcp/acc
 import { accountBalancesHandler } from "../generated/mcp/account-balancesHandlers/accountBalances.ts";
 import { accountInteractionsHandler } from "../generated/mcp/account-balancesHandlers/accountInteractions.ts";
 import { historicalBalancesHandler } from "../generated/mcp/account-balancesHandlers/historicalBalances.ts";
+import { getAddressHandler } from "../generated/mcp/addressHandlers/getAddress.ts";
+import { getAddressesHandler } from "../generated/mcp/addressHandlers/getAddresses.ts";
 import { delegationsHandler } from "../generated/mcp/delegationsHandlers/delegations.ts";
 import { delegatorsHandler } from "../generated/mcp/delegationsHandlers/delegators.ts";
 import { historicalDelegationsHandler } from "../generated/mcp/delegationsHandlers/historicalDelegations.ts";
@@ -173,7 +175,11 @@ import {
   votingPowerVariationsQueryResponseSchema,
   votingPowersQueryParamsSchema,
   votingPowersQueryResponseSchema,
+  getAddressQueryResponseSchema,
+  getAddressesQueryResponseSchema,
+  getAddressesQueryParamsSchema,
 } from "../generated/zod.ts";
+import { Address } from "../generated/models.ts";
 
 const DAO_ALL = [
   "aave",
@@ -1021,6 +1027,33 @@ export function createMcpServer(): McpServer {
     },
     async ({ dao, id, params }) =>
       offchainProposalNonVotersHandler({ dao, id, params }),
+  );
+
+  server.registerTool(
+    "getAddress",
+    {
+      title: "Get enriched data for an address",
+      description:
+        "Returns label information from Arkham, ENS data, and whether the address is an EOA or contract.",
+      outputSchema: { data: getAddressQueryResponseSchema },
+      inputSchema: { address: z.string() },
+    },
+    async ({ address }) => getAddressHandler({ address }),
+  );
+
+  server.registerTool(
+    "getAddresses",
+    {
+      title: "Get enriched data for multiple addresses",
+      description:
+        "Returns label information from Arkham, ENS data, and address type for multiple addresses. Maximum 100 addresses per request.",
+      outputSchema: { data: getAddressesQueryResponseSchema },
+      inputSchema: { params: getAddressesQueryParamsSchema },
+    },
+    async ({ params }) =>
+      getAddressesHandler({
+        params: { ...params, addresses: params.addresses as Address[] },
+      }),
   );
 
   return server;

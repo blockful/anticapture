@@ -8,11 +8,17 @@ import type {
   RevenueTotalsItem,
 } from "@anticapture/client";
 
-import type { RevenueOverview, RevenueStream } from "@/features/revenue/types";
+import type {
+  ChartGranularity,
+  RevenueOverview,
+  RevenueStream,
+} from "@/features/revenue/types";
 import {
   formatCompact,
   formatMonthLabel,
+  formatQuarterLabel,
   formatUsd,
+  formatYearLabel,
 } from "@/features/revenue/utils/format";
 
 // --- Revenue Overview card -------------------------------------------------
@@ -153,29 +159,100 @@ export function transformToOverview(
   };
 }
 
-// --- Monthly revenue chart -------------------------------------------------
+// --- Revenue stream chart --------------------------------------------------
 
-export function transformToMonthlySeries(items: RevenueTotalsItem[]) {
+type RevenueStreamBucket = {
+  startDate: number;
+  registrationUsd: number;
+  renewalUsd: number;
+  premiumUsd: number;
+};
+
+const toBucketStart = (
+  unixSeconds: number,
+  granularity: ChartGranularity,
+): number => {
+  const d = new Date(unixSeconds * 1000);
+  const year = d.getUTCFullYear();
+  if (granularity === "year") return Date.UTC(year, 0, 1) / 1000;
+  if (granularity === "quarter") {
+    const quarterStartMonth = Math.floor(d.getUTCMonth() / 3) * 3;
+    return Date.UTC(year, quarterStartMonth, 1) / 1000;
+  }
+  return unixSeconds;
+};
+
+const formatBucketLabel = (
+  unixSeconds: number,
+  granularity: ChartGranularity,
+): string => {
+  if (granularity === "year") return formatYearLabel(unixSeconds);
+  if (granularity === "quarter") return formatQuarterLabel(unixSeconds);
+  return formatMonthLabel(unixSeconds);
+};
+
+const groupByGranularity = (
+  items: RevenueTotalsItem[],
+  granularity: ChartGranularity,
+): RevenueStreamBucket[] => {
+  if (granularity === "month") {
+    return items.map((item) => ({
+      startDate: item.date,
+      registrationUsd: item.registrationUsd,
+      renewalUsd: item.renewalUsd,
+      premiumUsd: item.premiumUsd,
+    }));
+  }
+
+  const buckets = new Map<number, RevenueStreamBucket>();
+  for (const item of items) {
+    const startDate = toBucketStart(item.date, granularity);
+    const bucket = buckets.get(startDate) ?? {
+      startDate,
+      registrationUsd: 0,
+      renewalUsd: 0,
+      premiumUsd: 0,
+    };
+    bucket.registrationUsd += item.registrationUsd;
+    bucket.renewalUsd += item.renewalUsd;
+    bucket.premiumUsd += item.premiumUsd;
+    buckets.set(startDate, bucket);
+  }
+
+  return [...buckets.values()].sort((a, b) => a.startDate - b.startDate);
+};
+
+export function transformToStreamSeries(
+  items: RevenueTotalsItem[],
+  granularity: ChartGranularity = "month",
+) {
+  const buckets = groupByGranularity(items, granularity);
   return {
-    xAxisLabels: items.map((i) => formatMonthLabel(i.date)),
+    xAxisLabels: buckets.map((i) =>
+      formatBucketLabel(i.startDate, granularity),
+    ),
     series: [
       {
         name: "Registration",
-        data: items.map((i) => i.registrationUsd),
+        data: buckets.map((i) => i.registrationUsd),
         color: "#0080bc",
       },
       {
         name: "Renewals",
-        data: items.map((i) => i.renewalUsd),
+        data: buckets.map((i) => i.renewalUsd),
         color: "#15803d",
       },
       {
         name: "Premium",
-        data: items.map((i) => i.premiumUsd),
+        data: buckets.map((i) => i.premiumUsd),
         color: "#f472b6",
       },
     ],
   };
+}
+
+export function transformToMonthlySeries(items: RevenueTotalsItem[]) {
+  return transformToStreamSeries(items, "month");
 }
 
 // --- Name growth chart -----------------------------------------------------
