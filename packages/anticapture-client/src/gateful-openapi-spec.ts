@@ -1,0 +1,102 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+
+type FileExists = (path: string) => boolean;
+
+export type GatefulOpenApiSpecEnv = {
+  NEXT_PUBLIC_GATEFUL_URL?: string;
+  ANTICAPTURE_API_URL?: string;
+  RAILWAY_SERVICE_GATEFUL_URL?: string;
+  RAILWAY_ENVIRONMENT_NAME?: string;
+};
+
+type ResolveGatefulOpenApiSpecOptions = {
+  env?: GatefulOpenApiSpecEnv;
+  fileExists?: FileExists;
+  packageDirectory: string;
+};
+
+const GATEFUL_OPENAPI_PATH = "/docs/json";
+const RAILWAY_GATEFUL_DOMAIN_SUFFIX = ".up.railway.app";
+
+// Long-lived Railway environments serve Gateful from a stable, custom domain
+// (e.g. dev-gateful.up.railway.app, gateful.up.railway.app) that does NOT follow
+// the ephemeral `gateful-<env>` preview pattern. For those we trust the explicit
+// NEXT_PUBLIC_GATEFUL_URL; every other Railway environment is a PR preview whose
+// Gateful domain we derive from the environment name.
+const RAILWAY_DEPLOY_ENVIRONMENTS = new Set(["dev", "production"]);
+
+const readNonEmptyValue = (value: string | undefined) => {
+  const trimmed = value?.trim();
+
+  return trimmed ? trimmed : undefined;
+};
+
+const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, "");
+
+// Some sources (e.g. Railway's RAILWAY_SERVICE_GATEFUL_URL) provide a bare host
+// without a scheme. Default to https so the resulting URL is fetchable.
+const toGatefulSpecUrl = (gatefulUrl: string) => {
+  const base = trimTrailingSlashes(gatefulUrl);
+  const withScheme = /^https?:\/\//i.test(base) ? base : `https://${base}`;
+
+  return `${withScheme}${GATEFUL_OPENAPI_PATH}`;
+};
+
+// Railway names PR preview environments like `anticapture-pr-1950`, and Gateful's
+// public domain in that environment is `gateful-anticapture-pr-1950.up.railway.app`
+// — i.e. `gateful-<RAILWAY_ENVIRONMENT_NAME>`.
+const buildPreviewGatefulSpecUrl = (railwayEnvironmentName: string) =>
+  `https://gateful-${railwayEnvironmentName}${RAILWAY_GATEFUL_DOMAIN_SUFFIX}${GATEFUL_OPENAPI_PATH}`;
+
+export const resolveLocalGatefulOpenApiSpec = (packageDirectory: string) =>
+  resolve(packageDirectory, "../../apps/gateful/openapi/gateful.json");
+
+export const resolveGatefulOpenApiSpecUrl = (
+  env: GatefulOpenApiSpecEnv = process.env,
+) => {
+  const railwayEnvironmentName = readNonEmptyValue(
+    env.RAILWAY_ENVIRONMENT_NAME,
+  );
+
+  // PR preview environments interpolate their own Gateful domain and ignore
+  // NEXT_PUBLIC_GATEFUL_URL (which, on a preview, would point at the wrong host).
+  if (
+    railwayEnvironmentName &&
+    !RAILWAY_DEPLOY_ENVIRONMENTS.has(railwayEnvironmentName)
+  ) {
+    return buildPreviewGatefulSpecUrl(railwayEnvironmentName);
+  }
+
+  // dev / production (and CI) read the Gateful URL from the environment. Sources,
+  // in priority order:
+  //   1. NEXT_PUBLIC_GATEFUL_URL    — set explicitly in CI and local dev.
+  //   2. ANTICAPTURE_API_URL        — already present on the mcp-server service.
+  //   3. RAILWAY_SERVICE_GATEFUL_URL — Railway-provided reference (bare host),
+  //                                    available on services like docs that lack
+  //                                    the two above.
+  const gatefulUrl =
+    readNonEmptyValue(env.NEXT_PUBLIC_GATEFUL_URL) ??
+    readNonEmptyValue(env.ANTICAPTURE_API_URL) ??
+    readNonEmptyValue(env.RAILWAY_SERVICE_GATEFUL_URL);
+
+  if (gatefulUrl) {
+    return toGatefulSpecUrl(gatefulUrl);
+  }
+
+  throw new Error(
+    "Unable to resolve Gateful OpenAPI spec. Generate apps/gateful/openapi/gateful.json, set NEXT_PUBLIC_GATEFUL_URL / ANTICAPTURE_API_URL / RAILWAY_SERVICE_GATEFUL_URL (used on dev/production), or run codegen inside a Railway PR preview with RAILWAY_ENVIRONMENT_NAME.",
+  );
+};
+
+// Prefer the local spec file when it exists, otherwise fall back to a remote
+// spec URL so CI and Railway preview builds can still generate the client.
+export const resolveGatefulOpenApiSpec = ({
+  env = process.env,
+  fileExists = existsSync,
+  packageDirectory,
+}: ResolveGatefulOpenApiSpecOptions) => {
+  const localSpec = resolveLocalGatefulOpenApiSpec(packageDirectory);
+
+  return fileExists(localSpec) ? localSpec : resolveGatefulOpenApiSpecUrl(env);
+};

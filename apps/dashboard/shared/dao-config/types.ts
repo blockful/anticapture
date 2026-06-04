@@ -15,8 +15,6 @@ export type TokenMetricItem = {
   volume: string;
 };
 
-export type PriceEntry = { timestamp: number; price: string };
-
 export interface MultilineChartDataSetPoint {
   date: number;
   [key: string]: number | null;

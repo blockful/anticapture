@@ -8,7 +8,10 @@ import { useProposalsInfinite } from "@anticapture/client/hooks";
 import { useMemo } from "react";
 import { formatUnits } from "viem";
 
-import type { Proposal as GovernanceProposal } from "@/features/governance/types";
+import {
+  isFullProposal,
+  type Proposal as GovernanceProposal,
+} from "@/features/governance/types";
 import {
   getProposalState,
   getProposalStatus,
@@ -17,29 +20,7 @@ import {
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-export interface PaginationInfo {
-  hasNextPage: boolean;
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
-  itemsPerPage: number;
-  currentItemsCount: number;
-}
-
-export interface UseProposalsResult {
-  data: GovernanceProposal[];
-  isLoading: boolean;
-  error: Error | null;
-  fetchNextPage: () => Promise<void>;
-  isFetchingNextPage: boolean;
-  hasNextPage: boolean;
-}
-
-export interface UseProposalsParams extends Omit<
-  ProposalsQueryParams,
-  "skip" | "limit"
-> {
-  itemsPerPage?: number;
+export interface UseProposalsParams extends Omit<ProposalsQueryParams, "skip"> {
   daoId?: DaoIdEnum;
 }
 
@@ -50,7 +31,7 @@ export const useProposals = (
     status,
     fromEndDate,
     includeOptimisticProposals,
-    itemsPerPage = 10,
+    limit = 10,
     daoId,
   }: UseProposalsParams = {
     fromDate: undefined,
@@ -58,21 +39,21 @@ export const useProposals = (
     fromEndDate: undefined,
     includeOptimisticProposals: undefined,
   },
-): UseProposalsResult => {
+) => {
   const { decimals } = daoConfig[daoId as DaoIdEnum];
   const daoKey = daoId?.toLowerCase() as ProposalsPathParamsDaoEnumKey;
 
   const queryParams = useMemo<ProposalsQueryParams>(
     () => ({
-      limit: itemsPerPage,
+      limit,
       orderDirection,
-      status: status ?? undefined,
-      fromDate: fromDate ?? undefined,
-      fromEndDate: fromEndDate ?? undefined,
-      includeOptimisticProposals: includeOptimisticProposals ?? undefined,
+      status,
+      fromDate,
+      fromEndDate,
+      includeOptimisticProposals,
     }),
     [
-      itemsPerPage,
+      limit,
       orderDirection,
       status,
       fromDate,
@@ -96,7 +77,9 @@ export const useProposals = (
   });
 
   const proposals = useMemo(() => {
-    const rawProposals = data?.pages.flatMap((page) => page.items) ?? [];
+    const rawProposals = (
+      data?.pages.flatMap((page) => page.items) ?? []
+    ).filter(isFullProposal);
 
     return rawProposals.map((proposal) => {
       const forVotes = Number(formatUnits(proposal.forVotes, decimals));
@@ -122,8 +105,8 @@ export const useProposals = (
         },
         quorum: quorum.toFixed(2),
         timeText: getTimeText(proposal.startTimestamp, proposal.endTimestamp),
-        values: proposal.values?.map((value) => value.toString()) ?? [],
-        targets: proposal.targets ?? [],
+        values: proposal.values.map((value) => value.toString()),
+        targets: proposal.targets,
       } satisfies GovernanceProposal;
     });
   }, [data, decimals]);
@@ -131,10 +114,8 @@ export const useProposals = (
   return {
     data: proposals,
     isLoading,
-    error: error instanceof Error ? error : null,
-    fetchNextPage: async () => {
-      await fetchNextPage();
-    },
+    error,
+    fetchNextPage,
     isFetchingNextPage,
     hasNextPage,
   };

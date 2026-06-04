@@ -1,13 +1,11 @@
-import { fileURLToPath } from "node:url";
-
 import { defineConfig } from "@kubb/core";
 import { pluginClient } from "@kubb/plugin-client";
 import { pluginFaker } from "@kubb/plugin-faker";
 import { pluginMsw } from "@kubb/plugin-msw";
+import { pluginMcp } from "@kubb/plugin-mcp";
 import { pluginOas } from "@kubb/plugin-oas";
 import { pluginReactQuery } from "@kubb/plugin-react-query";
 import { pluginTs } from "@kubb/plugin-ts";
-import { pluginMcp } from "@kubb/plugin-mcp";
 import { pluginZod } from "@kubb/plugin-zod";
 
 import {
@@ -16,6 +14,7 @@ import {
   mapEthereumFormatFakers,
   mapEthereumFormatTypes,
 } from "./src/generators";
+import { resolveGatefulOpenApiSpec } from "./src/gateful-openapi-spec";
 
 type PluginTsOptions = NonNullable<Parameters<typeof pluginTs>[0]>;
 type PluginTsOptionsWithSchemaTransformer = Omit<
@@ -27,9 +26,9 @@ type PluginTsOptionsWithSchemaTransformer = Omit<
   };
 };
 
-const gatefulOpenApiSpecPath = fileURLToPath(
-  new URL("../../apps/gateful/openapi/gateful.json", import.meta.url),
-);
+const gatefulOpenApiSpecPath = resolveGatefulOpenApiSpec({
+  packageDirectory: __dirname,
+});
 
 // The `GET /{dao}/dao` route has `operationId: "dao"` and a path parameter
 // also named `dao`. Without this rename, Kubb emits `function dao(dao: ...)`,
@@ -111,6 +110,16 @@ export default defineConfig(({ watch }) => ({
         type: "tag",
         name: ({ group }) => `${group}Handlers`,
       },
+      // exclude: [
+      //   {
+      //     type: "path",
+      //     pattern: /.*relay.*/i,
+      //   },
+      //   {
+      //     type: "path",
+      //     pattern: /\/address-enrichment\/.*/i,
+      //   },
+      // ],
     }),
     pluginFaker({
       output: {

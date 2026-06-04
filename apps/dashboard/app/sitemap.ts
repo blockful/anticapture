@@ -81,12 +81,17 @@ async function getAllProposalPages<TItem extends { id: string }>(
   getPage: (params: {
     skip: number;
     limit: number;
+    lean: boolean;
   }) => Promise<ProposalPage<TItem>>,
 ): Promise<TItem[]> {
   const items: TItem[] = [];
 
   for (let skip = 0; ; skip += PROPOSAL_PAGE_LIMIT) {
-    const page = await getPage({ skip, limit: PROPOSAL_PAGE_LIMIT });
+    const page = await getPage({
+      skip,
+      limit: PROPOSAL_PAGE_LIMIT,
+      lean: true,
+    });
     items.push(...page.items);
 
     if (

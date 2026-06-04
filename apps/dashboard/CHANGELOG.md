@@ -1,5 +1,50 @@
 # @anticapture/dashboard
 
+## 2.5.0
+
+### Minor Changes
+
+- [#1964](https://github.com/blockful/anticapture/pull/1964) [`967b8b9`](https://github.com/blockful/anticapture/commit/967b8b9da5be1e66d9039a33879ec9270d598ed4) Thanks [@pikonha](https://github.com/pikonha)! - Revenue dashboard: run-rate hero with 1Y/YTD/MAX timeframe toggle and Month/Quarter/Year chart granularity.
+
+### Patch Changes
+
+- [#1964](https://github.com/blockful/anticapture/pull/1964) [`325d8c0`](https://github.com/blockful/anticapture/commit/325d8c07ab3ff4998a288e1cb924342af243e422) Thanks [@pikonha](https://github.com/pikonha)! - Revenue summary card: label the run-rate delta as "vs prior 3 months" instead of "vs prev. quarter" to match the trailing-3-month calculation.
+
+## 2.4.0
+
+### Minor Changes
+
+- [#1958](https://github.com/blockful/anticapture/pull/1958) [`bf3dbeb`](https://github.com/blockful/anticapture/commit/bf3dbebd3b6125a039fde50239f4e2c4c523164d) Thanks [@pikonha](https://github.com/pikonha)! - remove legacy graphql gateway integrations
+
+### Patch Changes
+
+- [#1941](https://github.com/blockful/anticapture/pull/1941) [`77e2edd`](https://github.com/blockful/anticapture/commit/77e2eddf938a2038d2b5a915593108b86aaad396) Thanks [@brunod-e](https://github.com/brunod-e)! - Migrate attack-profitability hooks (useTreasury, useDaoTokenHistoricalData) from GraphQL client to kubb-generated REST SDK (@anticapture/client)
+
+- [#1947](https://github.com/blockful/anticapture/pull/1947) [`8ffc325`](https://github.com/blockful/anticapture/commit/8ffc325c76ac3e107c4ece43c9b93c828f3aa8ce) Thanks [@pikonha](https://github.com/pikonha)! - token distribution fetching lean proposals
+
+- [#1945](https://github.com/blockful/anticapture/pull/1945) [`02ddb23`](https://github.com/blockful/anticapture/commit/02ddb2333923fe8932a722ff5cbd395c08767650) Thanks [@brunod-e](https://github.com/brunod-e)! - Migrate dao-overview hooks and 4 thin shared wrappers (useDaoData, useTokenData, useActiveSupply, useAverageTurnout) from the GraphQL client to the kubb-generated REST SDK (@anticapture/client). Delete unused useCompareTreasury wrapper.
+
+- [#1957](https://github.com/blockful/anticapture/pull/1957) [`e2f04b6`](https://github.com/blockful/anticapture/commit/e2f04b6124a667d289875d716278f0c819837fbb) Thanks [@brunod-e](https://github.com/brunod-e)! - clarify ens revenue info on the whitelabel
+
+- [#1956](https://github.com/blockful/anticapture/pull/1956) [`c549c95`](https://github.com/blockful/anticapture/commit/c549c9519f43cfab8cdb696b6db1aa9059f1c777) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Adapt the governance UI to the new `variant`-tagged onchain proposals response: narrow the SDK union to the `full` variant in the proposal hooks, search adapter, and detail page (the dashboard always requests the full payload).
+
+- [#1955](https://github.com/blockful/anticapture/pull/1955) [`4f4f56d`](https://github.com/blockful/anticapture/commit/4f4f56dde804faf0cce7ceb5ad348ffbf72c887e) Thanks [@brunod-e](https://github.com/brunod-e)! - Migrate offchain governance (proposals, votes, and token metrics in the proposal view) off `@anticapture/graphql-client` to the kubb SDK. Apollo infinite pagination (`fetchMore`) is replaced with react-query infinite queries, and cache refetch is replaced with `invalidateQueries`. No user-visible change.
+
+- [#1954](https://github.com/blockful/anticapture/pull/1954) [`52ad49d`](https://github.com/blockful/anticapture/commit/52ad49ddf0341b551afa083fe3999244f8aaca28) Thanks [@brunod-e](https://github.com/brunod-e)! - Migrate remaining shared hooks (`useDelegatedSupply`, `useLastUpdate`, `useConnectedWalletVotingPower`) off `@anticapture/graphql-client` to the kubb SDK, and remove the now-unused `useVotes` and `useTokenInfo` hooks. No user-visible change.
+
+- [#1947](https://github.com/blockful/anticapture/pull/1947) [`4faf797`](https://github.com/blockful/anticapture/commit/4faf797a930bad6d7d96e2106eea778ef61d2e76) Thanks [@pikonha](https://github.com/pikonha)! - Migrate token distribution data fetching from GraphQL client to Kubb REST SDK (`@anticapture/client`). Replaces `useGetProposalsQuery`, `useTokenMetricsLazyQuery`, and `useHistoricalTokenDataQuery` with their REST counterparts.
+
+- [#1953](https://github.com/blockful/anticapture/pull/1953) [`1436411`](https://github.com/blockful/anticapture/commit/1436411eaf5d6e7f10a354a1b41e52348cbd7099) Thanks [@brunod-e](https://github.com/brunod-e)! - Migrate the panel's delegated-supply history chart off `@anticapture/graphql-client` to the kubb SDK, using the `useAverageDelegationPercentage` aggregate endpoint. No user-visible change.
+
+- Updated dependencies [[`18aef34`](https://github.com/blockful/anticapture/commit/18aef3474e8e69ce9162d0ab67a68bf90809bc3d)]:
+  - @anticapture/client@1.2.1
+
+## 2.3.3
+
+### Patch Changes
+
+- [#1940](https://github.com/blockful/anticapture/pull/1940) [`98728e5`](https://github.com/blockful/anticapture/commit/98728e517a8deff5dc494fc6020b878605538daa) Thanks [@isadorable-png](https://github.com/isadorable-png)! - Add Umami and PostHog event tracking for `proposal_create_click` on the governance "New Proposal" button (with `dao` property) and `feature_request_click` on the whitelabel "Request feature" links in both the shell and sidebar (with `source` property). The PostHog click handler now also captures an optional `dao` property from `data-ph-dao`.
+
 ## 2.3.2
 
 ### Patch Changes

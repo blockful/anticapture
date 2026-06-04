@@ -1,7 +1,0 @@
-query CompareAverageTurnout($days: DaysWindow! = _365d) {
-  compareAverageTurnout(days: $days) {
-    currentAverageTurnout
-    oldAverageTurnout
-    changeRate
-  }
-}

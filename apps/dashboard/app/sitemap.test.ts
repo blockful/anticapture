@@ -15,6 +15,7 @@ jest.mock("@anticapture/client", () => ({
 
 function buildOnchainProposal(id: string): OnchainProposal {
   return {
+    variant: "full",
     abstainVotes: 0n,
     againstVotes: 0n,
     calldatas: [],
@@ -132,22 +133,27 @@ describe("getAllProposalPaths", () => {
     expect(mockedProposals).toHaveBeenNthCalledWith(1, "ens", {
       limit: 100,
       skip: 0,
+      lean: true,
     });
     expect(mockedProposals).toHaveBeenNthCalledWith(2, "ens", {
       limit: 100,
       skip: 100,
+      lean: true,
     });
     expect(mockedProposals).toHaveBeenNthCalledWith(3, "ens", {
       limit: 100,
       skip: 200,
+      lean: true,
     });
     expect(mockedOffchainProposals).toHaveBeenNthCalledWith(1, "ens", {
       limit: 100,
       skip: 0,
+      lean: true,
     });
     expect(mockedOffchainProposals).toHaveBeenNthCalledWith(2, "ens", {
       limit: 100,
       skip: 100,
+      lean: true,
     });
   });
 

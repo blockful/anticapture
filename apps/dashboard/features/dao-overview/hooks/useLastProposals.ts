@@ -17,7 +17,7 @@ const LAST_PROPOSALS_LIMIT = 3;
 export const useLastProposals = (daoId: DaoIdEnum): UseLastProposalsResult => {
   const { data, isLoading, error } = useProposals({
     daoId,
-    itemsPerPage: LAST_PROPOSALS_LIMIT,
+    limit: LAST_PROPOSALS_LIMIT,
   });
 
   return {

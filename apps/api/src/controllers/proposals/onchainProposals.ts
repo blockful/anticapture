@@ -27,7 +27,7 @@ export function proposals(
       path: "/proposals",
       summary: "Get proposals",
       description:
-        "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and reduce payload size.",
+        "Returns a list of proposals. Pass `lean=true` to omit calldatas/values/targets and the proposal description, reducing payload size.",
       tags: ["proposals", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {
@@ -35,7 +35,7 @@ export function proposals(
       },
       responses: {
         200: {
-          description: "Successfully retrieved proposals activity",
+          description: "Successfully retrieved proposals",
           content: {
             "application/json": {
               schema: ProposalsResponseSchema,
@@ -90,7 +90,7 @@ export function proposals(
       path: "/proposals/search",
       summary: "Search proposals",
       description:
-        "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets.",
+        "Returns proposals whose title or identifier partially matches the query. Pass `lean=true` to omit calldatas/values/targets and the proposal description.",
       tags: ["proposals", "skip-pagination"],
       middleware: [setCacheControl(60)],
       request: {
@@ -139,7 +139,7 @@ export function proposals(
       path: "/proposals/{id}",
       summary: "Get a proposal by ID",
       description:
-        "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets.",
+        "Returns a single proposal by its ID. Pass `lean=true` to omit calldatas/values/targets and the proposal description.",
       tags: ["proposals"],
       middleware: [setCacheControl(60)],
       request: {

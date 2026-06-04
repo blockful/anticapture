@@ -1,13 +1,14 @@
 import { formatUnits } from "viem";
 
+import type { TokenHistoricalPriceItem } from "@anticapture/client";
+
 import type {
-  PriceEntry,
   TokenMetricItem,
   MultilineChartDataSetPoint,
 } from "@/shared/dao-config/types";
 
 export function normalizeDataset(
-  tokenPrices: PriceEntry[],
+  tokenPrices: TokenHistoricalPriceItem[],
   key: string,
   multiplier: number | Pick<TokenMetricItem, "date" | "high">[],
   decimals: number,
@@ -47,7 +48,9 @@ export function normalizeDataset(
  * @param data - Array of price entries with timestamps
  * @returns Filtered array containing only entries with midnight timestamps
  */
-export const getOnlyClosedData = (data: PriceEntry[]): PriceEntry[] => {
+export const getOnlyClosedData = (
+  data: TokenHistoricalPriceItem[],
+): TokenHistoricalPriceItem[] => {
   return data.filter((entry) => {
     const dateStr = new Date(entry.timestamp * 1000).toISOString();
     return dateStr.endsWith("T00:00:00.000Z");

@@ -1,12 +1,14 @@
-import { formatUnits } from "viem";
-
-import type { ProposalsPathParamsDaoEnumKey } from "@anticapture/client";
-import { useProposals } from "@anticapture/client/hooks";
 import {
-  DaysWindow,
-  useCompareAverageTurnoutQuery,
-  useGetDaoDataQuery,
-} from "@anticapture/graphql-client/hooks";
+  useCompareAverageTurnout,
+  useDao,
+  useProposals,
+} from "@anticapture/client/hooks";
+import type {
+  CompareAverageTurnoutPathParamsDaoEnumKey,
+  DaoPathParamsDaoEnumKey,
+  ProposalsPathParamsDaoEnumKey,
+} from "@anticapture/client";
+import { formatUnits } from "viem";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -17,41 +19,31 @@ export const useQuorumGap = (daoId: DaoIdEnum) => {
     new Date(new Date().setDate(new Date().getDate() - days)).getTime() / 1000,
   );
 
-  const context = {
-    headers: {
-      "anticapture-dao-id": daoId,
-    },
-  };
+  const dao = daoId.toLowerCase();
 
   const {
     data: daoData,
-    loading: daoLoading,
+    isLoading: daoLoading,
     error: daoError,
-  } = useGetDaoDataQuery({
-    context,
-    skip: !daoId,
-  });
+  } = useDao(dao as DaoPathParamsDaoEnumKey);
 
   const {
     data: proposalsData,
     isLoading: proposalsLoading,
     error: proposalsError,
-  } = useProposals(daoId.toLowerCase() as ProposalsPathParamsDaoEnumKey, {
+  } = useProposals(dao as ProposalsPathParamsDaoEnumKey, {
     limit: 1,
     fromDate: cutoffDate,
   });
 
   const {
     data: turnoutData,
-    loading: turnoutLoading,
+    isLoading: turnoutLoading,
     error: turnoutError,
-  } = useCompareAverageTurnoutQuery({
-    variables: {
-      days: DaysWindow["90d"],
-    },
-    context,
-    skip: !daoId,
-  });
+  } = useCompareAverageTurnout(
+    dao as CompareAverageTurnoutPathParamsDaoEnumKey,
+    { days: "90d" },
+  );
 
   const isLoading = daoLoading || proposalsLoading || turnoutLoading;
   const error = daoError || proposalsError || turnoutError;
@@ -62,17 +54,11 @@ export const useQuorumGap = (daoId: DaoIdEnum) => {
     const { decimals } = daoConfig[daoId];
 
     const isGapEligible = proposalsData.items.length > 0;
-    const quorum = daoData.dao?.quorum
-      ? Number(formatUnits(BigInt(daoData.dao.quorum), decimals))
-      : null;
-    const avgTurnout = turnoutData.compareAverageTurnout?.currentAverageTurnout
-      ? Number(
-          formatUnits(
-            BigInt(turnoutData.compareAverageTurnout.currentAverageTurnout),
-            decimals,
-          ),
-        )
-      : null;
+    const quorum = Number(formatUnits(daoData.quorum, decimals));
+    const avgTurnout = Number(
+      formatUnits(BigInt(turnoutData.currentAverageTurnout), decimals),
+    );
+
     const gap = quorum && avgTurnout ? (avgTurnout / quorum - 1) * 100 : 0;
 
     quorumGap = isGapEligible ? gap : null;

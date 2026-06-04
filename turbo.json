@@ -5,29 +5,30 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "@anticapture/graphql-client#codegen": {
-      "inputs": [
-        "documents/**/*",
-        "codegen.ts",
-        "$TURBO_ROOT$/apps/api-gateway/schema.graphql"
-      ],
-      "outputs": ["generated/**"]
-    },
     "@anticapture/client#codegen": {
       "inputs": [
         "kubb.config.ts",
         "src/**",
         "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
       ],
-      "outputs": ["generated/**"]
-    },
-    "@anticapture/graphql-client#build": {
-      "dependsOn": ["codegen", "^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["generated/**"],
+      "env": ["NEXT_PUBLIC_GATEFUL_URL", "RAILWAY_ENVIRONMENT_NAME"]
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
       "outputs": ["dist/**"]
+    },
+    "@anticapture/client-docs#build": {
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "scripts/**",
+        "docusaurus.config.ts",
+        "sidebars.ts",
+        "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
+      ],
+      "outputs": ["build/**"],
+      "env": ["NEXT_PUBLIC_GATEFUL_URL", "RAILWAY_ENVIRONMENT_NAME"]
     },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
@@ -90,7 +91,8 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"],
+      "passThroughEnv": ["NEXT_PUBLIC_GATEFUL_URL"]
     },
     "test:unit": {
       "dependsOn": ["^build"],
@@ -102,7 +104,6 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
-        "NEXT_PUBLIC_BASE_URL",
         "NEXT_PUBLIC_GATEFUL_URL",
         "NEXT_PUBLIC_WC_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
@@ -113,7 +114,6 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
-        "NEXT_PUBLIC_BASE_URL",
         "NEXT_PUBLIC_GATEFUL_URL",
         "NEXT_PUBLIC_WC_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
@@ -125,7 +125,6 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
-        "NEXT_PUBLIC_BASE_URL",
         "NEXT_PUBLIC_GATEFUL_URL",
         "NEXT_PUBLIC_WC_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"

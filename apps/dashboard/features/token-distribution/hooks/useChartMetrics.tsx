@@ -6,9 +6,9 @@ import { useProposals } from "@/features/token-distribution/hooks/useProposals";
 import { normalizeTimestamp } from "@/features/token-distribution/utils/chart";
 import type { MetricSchema } from "@/features/token-distribution/utils/metrics";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import type { TokenHistoricalPriceItem } from "@anticapture/client";
 import type {
   TokenMetricItem,
-  PriceEntry,
   ChartDataSetPoint,
 } from "@/shared/dao-config/types";
 import { useTimeSeriesData } from "@/shared/hooks";
@@ -99,7 +99,7 @@ export const useChartMetrics = ({
   );
 
   // Fetch proposals data (for proposals metric) - only when needed
-  const { data: proposals, loading: proposalsLoading } = useProposals(
+  const { data: proposals, isLoading: proposalsLoading } = useProposals(
     daoId,
     oneYearAgo,
   );
@@ -183,7 +183,7 @@ export const useChartMetrics = ({
       filteredHistoricalTokenData
     ) {
       filteredHistoricalTokenData.forEach(
-        ({ timestamp, price }: PriceEntry) => {
+        ({ timestamp, price }: TokenHistoricalPriceItem) => {
           result[normalizeTimestamp(timestamp)] = {
             ...result[normalizeTimestamp(timestamp)],
             date: normalizeTimestamp(timestamp),
@@ -202,9 +202,9 @@ export const useChartMetrics = ({
 
     if (
       appliedMetricsMemo.includes("PROPOSALS_GOVERNANCE") &&
-      filteredProposals?.proposals
+      filteredProposals?.items
     ) {
-      filteredProposals.proposals.items.forEach((proposal) => {
+      filteredProposals.items.forEach((proposal) => {
         // Only process proposals that have a valid ID
         if (!proposal || !proposal.id) return;
 

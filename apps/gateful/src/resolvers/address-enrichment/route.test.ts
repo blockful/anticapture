@@ -1,14 +1,18 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
 
+import { CircuitBreakerRegistry } from "../../shared/circuit-breaker-registry";
+
 import { addressEnrichment } from "./route";
 
 describe("address-enrichment route", () => {
   let app: InstanceType<typeof OpenAPIHono>;
+  let registry: CircuitBreakerRegistry;
 
   beforeEach(() => {
     app = new OpenAPIHono();
-    addressEnrichment(app, "http://enrichment-api");
+    registry = new CircuitBreakerRegistry();
+    addressEnrichment(app, "http://enrichment-api", registry);
   });
 
   afterEach(() => {
@@ -17,7 +21,7 @@ describe("address-enrichment route", () => {
 
   it("should return 404 when service is not configured", async () => {
     const unconfiguredApp = new OpenAPIHono();
-    addressEnrichment(unconfiguredApp, undefined);
+    addressEnrichment(unconfiguredApp, undefined, new CircuitBreakerRegistry());
 
     const res = await unconfiguredApp.request("/address-enrichment/0x123");
     const body = (await res.json()) as { error: string };
@@ -70,5 +74,24 @@ describe("address-enrichment route", () => {
     const res = await app.request("/address-enrichment/0x123");
 
     expect(res.status).toBe(500);
+  });
+
+  it("should open the circuit and short-circuit after repeated upstream failures", async () => {
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify({ error: "internal" }), { status: 500 }),
+      );
+
+    // Default failureThreshold is 5 — drive the breaker OPEN.
+    for (let i = 0; i < 5; i++) {
+      await app.request("/address-enrichment/0x123");
+    }
+    expect(fetchSpy).toHaveBeenCalledTimes(5);
+
+    // Circuit is now OPEN: the next request is rejected without hitting upstream.
+    await app.request("/address-enrichment/0x123");
+    expect(fetchSpy).toHaveBeenCalledTimes(5);
+    expect(registry.get("address-enrichment").state).toBe("OPEN");
   });
 });

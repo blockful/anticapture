@@ -1,6 +1,6 @@
 import { ProposalStatus } from "@/features/governance/types";
 
-// Map GraphQL status to our enum
+// Map status to our enum
 export const getProposalStatus = (status: string): ProposalStatus => {
   if (!status) return ProposalStatus.PENDING;
 

@@ -13,7 +13,15 @@ COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
-COPY apps/gateful/openapi/gateful.json apps/gateful/openapi/gateful.json
+# Codegen resolves the Gateful OpenAPI spec from a URL (the committed spec was
+# removed). Railway only exposes these variables to the build when declared as
+# ARGs: PR previews interpolate from RAILWAY_ENVIRONMENT_NAME; dev/production read
+# the Gateful URL from NEXT_PUBLIC_GATEFUL_URL / ANTICAPTURE_API_URL /
+# RAILWAY_SERVICE_GATEFUL_URL. See packages/anticapture-client/src/gateful-openapi-spec.ts.
+ARG RAILWAY_ENVIRONMENT_NAME
+ARG NEXT_PUBLIC_GATEFUL_URL
+ARG ANTICAPTURE_API_URL
+ARG RAILWAY_SERVICE_GATEFUL_URL
 RUN pnpm --filter @anticapture/client codegen \
  && pnpm --filter @anticapture/client build
 
@@ -24,5 +32,9 @@ WORKDIR /app
 COPY --from=installer --chown=app:app /app .
 USER app
 WORKDIR /app/packages/anticapture-client
+# Bind `::` (IPv6, dual-stack) so the server is reachable over Railway's private
+# network, which resolves to IPv6 addresses. The server reads HOST (defaults to
+# 0.0.0.0); an IPv4-only bind would refuse the reverse proxy's connection.
+ENV HOST=::
 EXPOSE 3100
 CMD ["node", "dist/mcp-server-http.cjs"]

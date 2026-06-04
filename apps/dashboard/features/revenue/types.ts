@@ -18,10 +18,27 @@ export type RevenueOverview = {
   streams: RevenueStream[];
 };
 
+export type RevenueTimeframe = "1y" | "ytd" | "max";
+
+export type ChartGranularity = "month" | "quarter" | "year";
+
+export type RevenueSummary = {
+  actualAmount: string;
+  runRate: string;
+  qoqDelta?: {
+    text: string;
+    trend: "up" | "down";
+  };
+};
+
 export type KpiCard = {
   title: string;
   value: string;
   subtext: string;
+  delta?: {
+    value: string;
+    unit: string;
+    comparison: string;
+  };
   trend?: "up" | "down";
-  tooltip?: string;
 };

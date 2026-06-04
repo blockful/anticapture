@@ -4,10 +4,37 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+env:
+  NEXT_PUBLIC_GATEFUL_URL: https://gateful-anticapture-pr-${{ github.event.pull_request.number }}.up.railway.app
+
 jobs:
+  wait-for-gateful:
+    name: Wait for preview gateful
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Wait for preview gateful to be ready
+        shell: bash
+        run: |
+          # Poll the resource codegen actually fetches: a 200 on /docs/json means
+          # the preview server is up AND the aggregated OpenAPI spec is serveable.
+          # Avoids the race where CI runs before Railway finishes provisioning the PR preview.
+          for i in $(seq 1 60); do          # up to ~10 min (60 × 10s)
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${NEXT_PUBLIC_GATEFUL_URL}/docs/json" || echo 000)
+            if [ "$code" = "200" ]; then
+              echo "✅ gateful ready after attempt ${i}"
+              exit 0
+            fi
+            echo "attempt ${i}: HTTP ${code} — retrying in 10s"
+            sleep 10
+          done
+          echo "::error::preview gateful never returned 200 at ${NEXT_PUBLIC_GATEFUL_URL}/docs/json"
+          exit 1
+
   changeset-path-filter:
     name: Detect changeset requirement
-    if: github.base_ref != 'main'
+    if: ${{ github.base_ref != 'main' && !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     outputs:
       needs_changeset: ${{ steps.filter.outputs.needs_changeset }}
@@ -75,7 +102,9 @@ jobs:
 
           exit 1
 
-  test:
+  typecheck:
+    needs: wait-for-gateful
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
 
     steps:
@@ -98,11 +127,95 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run API tests
-        run: pnpm turbo test --filter='...[origin/${{ github.base_ref || 'dev' }}...HEAD]'
+      # The generated SDK (@anticapture/client) is produced from gateful's
+      # aggregated OpenAPI spec at codegen time, NOT via a package dependency, so
+      # turbo's `...[range]` filter never selects it for gateway/contract changes.
+      # Detect changes to any service that contributes to that aggregated spec so
+      # the SDK (and its dependents) can be typechecked explicitly below.
+      - name: Detect contract-source changes
+        id: contract
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            client_affected:
+              - "apps/gateful/**"
+              - "apps/api/**"
+              - "apps/address-enrichment/**"
+              - "apps/relayer/**"
+
+      - name: Run typecheck
+        shell: bash
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          BASE_REF: ${{ github.base_ref || 'dev' }}
+          CLIENT_AFFECTED: ${{ steps.contract.outputs.client_affected }}
+        run: |
+          set -euo pipefail
+          # `...[range]` = packages changed in the range plus their dependents.
+          filters=("--filter=...[origin/${BASE_REF}...HEAD]")
+          # Contract-only changes don't select the SDK (no package edge to gateful),
+          # so pull in @anticapture/client AND its dependents (e.g. the dashboard)
+          # with a leading-ellipsis filter; otherwise SDK/type breakage from
+          # gateway-only PRs merges unnoticed.
+          if [ "${CLIENT_AFFECTED}" = "true" ]; then
+            filters+=("--filter=...@anticapture/client")
+          fi
+          pnpm turbo typecheck "${filters[@]}"
+
+  test:
+    needs: wait-for-gateful
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # See the typecheck job: the generated SDK has no package edge to the
+      # gateway/upstream services, so contract-only changes never select it. Detect
+      # contract-source changes to pull the SDK and its dependents into the test run.
+      - name: Detect contract-source changes
+        id: contract
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            client_affected:
+              - "apps/gateful/**"
+              - "apps/api/**"
+              - "apps/address-enrichment/**"
+              - "apps/relayer/**"
+
+      - name: Run API tests
+        shell: bash
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          BASE_REF: ${{ github.base_ref || 'dev' }}
+          CLIENT_AFFECTED: ${{ steps.contract.outputs.client_affected }}
+        run: |
+          set -euo pipefail
+          filters=("--filter=...[origin/${BASE_REF}...HEAD]")
+          if [ "${CLIENT_AFFECTED}" = "true" ]; then
+            filters+=("--filter=...@anticapture/client")
+          fi
+          pnpm turbo test "${filters[@]}"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -114,6 +227,8 @@ jobs:
 
   dashboard-e2e:
     name: Dashboard E2E
+    needs: wait-for-gateful
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -152,8 +267,6 @@ jobs:
         run: pnpm dashboard test:e2e
         env:
           CI: "true"
-          NEXT_PUBLIC_BASE_URL: ${{ secrets.E2E_NEXT_PUBLIC_BASE_URL }}
-          NEXT_PUBLIC_GATEFUL_URL: ${{ secrets.E2E_NEXT_PUBLIC_GATEFUL_URL }}
           NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
           BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}

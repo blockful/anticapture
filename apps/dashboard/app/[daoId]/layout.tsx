@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 
-import { DaoApolloProvider } from "@/shared/providers/DaoApolloProvider";
 import { DaoIdProvider } from "@/shared/providers/DaoIdProvider";
 import { toDaoIdEnum } from "@/shared/types/daos";
 
@@ -21,9 +20,5 @@ export default async function DaoRootLayout({
     notFound();
   }
 
-  return (
-    <DaoIdProvider daoId={daoIdEnum}>
-      <DaoApolloProvider daoId={daoIdEnum}>{children}</DaoApolloProvider>
-    </DaoIdProvider>
-  );
+  return <DaoIdProvider daoId={daoIdEnum}>{children}</DaoIdProvider>;
 }

@@ -35,7 +35,6 @@ function buildFlowKpi<T extends { date: number }>(args: {
   /** "pct" for sums, "pp" for averages-of-percentages */
   deltaKind: "pct" | "pp";
   window: KpiWindow;
-  tooltip?: string;
 }): KpiCard {
   const sinceLabel = buildSinceLabel(args.items);
   const { current, previous } = splitIntoWindows(
@@ -55,17 +54,23 @@ function buildFlowKpi<T extends { date: number }>(args: {
 
   const presentation =
     args.window.months !== null && rawDelta !== null
-      ? presentDelta(rawDelta, args.deltaKind === "pct" ? "%" : "pp")
+      ? presentDelta(rawDelta)
       : null;
+
+  const unit = args.deltaKind === "pct" ? "%" : "pp";
 
   return {
     title: args.title,
     value: current.length > 0 ? args.formatValue(currentValue) : "—",
-    subtext: presentation
-      ? `${presentation.text} vs prev. ${args.window.label}`
-      : sinceLabel,
+    subtext: sinceLabel,
+    delta: presentation
+      ? {
+          value: presentation.text,
+          unit,
+          comparison: `vs prev. ${args.window.label}`,
+        }
+      : undefined,
     trend: presentation?.trend,
-    tooltip: args.tooltip,
   };
 }
 
@@ -99,8 +104,6 @@ export function computeKpis(
       formatValue: (n) => `${n.toFixed(0)}%`,
       deltaKind: "pp",
       window,
-      tooltip:
-        "Share of expiring names that were renewed. 'pp' (percentage points) is the absolute change between two percentages.",
     }),
     buildFlowKpi({
       title: "Revenue",

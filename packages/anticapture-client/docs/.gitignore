@@ -1,0 +1,17 @@
+# Docusaurus build + cache
+/.docusaurus
+/build
+
+# Generated OpenAPI MDX (produced by `docusaurus gen-api-docs`).
+# Treated as a build artifact, like the package's Kubb `generated/` output.
+/docs/tools
+
+# Filtered OpenAPI spec (produced by `scripts/prepare-spec.mjs`).
+/openapi
+
+# Dependencies
+/node_modules
+
+# Misc
+.DS_Store
+*.log

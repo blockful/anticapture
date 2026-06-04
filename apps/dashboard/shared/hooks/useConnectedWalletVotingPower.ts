@@ -1,51 +1,39 @@
-"use client";
-
-import { useGetVotingPowerQuery } from "@anticapture/graphql-client/hooks";
-import { useParams } from "next/navigation";
-import { useMemo } from "react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
+import { useParams } from "next/navigation";
+
+import { useVotingPowerByAccountId } from "@anticapture/client/hooks";
 
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
+import type { VotingPowerByAccountIdPathParamsDaoEnumKey } from "@anticapture/client";
 
 export const useConnectedWalletVotingPower = () => {
   const { address } = useAccount();
   const { daoId } = useParams<{ daoId: string }>();
 
-  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum | undefined;
-  const daoConfig = daoIdEnum ? daoConfigByDaoId[daoIdEnum] : null;
+  const daoIdEnum = daoId?.toUpperCase() as DaoIdEnum;
+  const daoConfig = daoConfigByDaoId[daoIdEnum] ?? null;
 
-  const { data, loading } = useGetVotingPowerQuery({
-    variables: {
-      address: address ?? "",
-    },
-    context: {
-      headers: {
-        "anticapture-dao-id": daoIdEnum,
+  const { data, isLoading } = useVotingPowerByAccountId(
+    daoId.toLowerCase() as VotingPowerByAccountIdPathParamsDaoEnumKey,
+    address ?? "",
+    undefined,
+    {
+      query: {
+        enabled: !!address && !!daoIdEnum,
       },
     },
-    skip: !address || !daoIdEnum || !daoConfig,
-  });
-
-  const votingPower = useMemo(() => {
-    if (!daoConfig || !data?.votingPowerByAccountId?.votingPower) {
-      return null;
-    }
-
-    return formatNumberUserReadable(
-      Number(
-        formatUnits(
-          BigInt(data.votingPowerByAccountId.votingPower),
-          daoConfig.decimals,
-        ),
-      ),
-    );
-  }, [daoConfig, data?.votingPowerByAccountId?.votingPower]);
+  );
 
   return {
-    votingPower,
-    loading,
+    votingPower:
+      data && daoConfig
+        ? formatNumberUserReadable(
+            Number(formatUnits(data.votingPower, daoConfig.decimals)),
+          )
+        : null,
+    isLoading,
   };
 };

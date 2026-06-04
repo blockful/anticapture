@@ -87,7 +87,7 @@ export function votingPowerVariations(
       summary:
         "Get top changes in voting power for a given period for a single account",
       description:
-        "Returns a the changes to voting power by period and accountId",
+        "Returns the changes to voting power by period and account ID",
       tags: ["voting-power"],
       middleware: [setCacheControl(60)],
       request: {

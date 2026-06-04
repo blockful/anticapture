@@ -28,6 +28,8 @@ const route = createRoute({
   operationId: "daos",
   path: "/daos",
   summary: "List of all configured DAOs",
+  description:
+    "Returns every DAO configured on the gateway along with its governance parameters and supported capabilities.",
   tags: ["governance"],
   responses: {
     200: {
