@@ -253,6 +253,7 @@ fi
 start_gateful
 
 # 6. Client — codegen + build watch
+export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 

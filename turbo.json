@@ -11,7 +11,8 @@
         "src/**",
         "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
       ],
-      "outputs": ["generated/**"]
+      "outputs": ["generated/**"],
+      "env": ["NEXT_PUBLIC_GATEFUL_URL", "RAILWAY_ENVIRONMENT_NAME"]
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
@@ -26,7 +27,8 @@
         "sidebars.ts",
         "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
       ],
-      "outputs": ["build/**"]
+      "outputs": ["build/**"],
+      "env": ["NEXT_PUBLIC_GATEFUL_URL", "RAILWAY_ENVIRONMENT_NAME"]
     },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
@@ -89,7 +91,8 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"]
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"],
+      "passThroughEnv": ["NEXT_PUBLIC_GATEFUL_URL"]
     },
     "test:unit": {
       "dependsOn": ["^build"],

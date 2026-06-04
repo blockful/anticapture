@@ -12,14 +12,5 @@
     "healthcheckPath": "/health",
     "restartPolicyType": "ALWAYS",
     "restartPolicyMaxRetries": 3
-  },
-  "environments": {
-    "pr": {
-      "deploy": {
-        "startCommand": "echo 'NOOP'",
-        "healthcheckPath": null,
-        "preDeployCommand": null
-      }
-    }
   }
 }

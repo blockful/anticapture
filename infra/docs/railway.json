@@ -5,7 +5,7 @@
     "dockerfilePath": "infra/docs/Dockerfile",
     "watchPatterns": [
       "packages/anticapture-client/docs/**",
-      "apps/gateful/openapi/gateful.json",
+      "packages/anticapture-client/src/gateful-openapi-spec.ts",
       "infra/docs/**"
     ]
   },

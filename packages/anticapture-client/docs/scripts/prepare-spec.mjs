@@ -1,12 +1,16 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 
-// Source: the committed Gateful spec at the repo root.
-const SOURCE = new URL(
-  "../../../../apps/gateful/openapi/gateful.json",
-  import.meta.url,
+import { resolveGatefulOpenApiSpec } from "../../src/gateful-openapi-spec.ts";
+
+const CLIENT_PACKAGE_DIRECTORY = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../..",
 );
+const SOURCE = resolveGatefulOpenApiSpec({
+  packageDirectory: CLIENT_PACKAGE_DIRECTORY,
+});
 // Output: a filtered copy the OpenAPI plugin generates from. Gitignored and
 // regenerated on every build (see docusaurus.config.ts `GATEFUL_SPEC`).
 const OUT = new URL("../openapi/gateful.json", import.meta.url);
@@ -17,7 +21,23 @@ const OUT = new URL("../openapi/gateful.json", import.meta.url);
 // helpers (which are tagged `system`, so a tag-based filter would miss them).
 const isRelayPath = (p) => p.split("/").includes("relay");
 
-const spec = JSON.parse(await readFile(SOURCE, "utf8"));
+const readSpec = async (source) => {
+  if (source.startsWith("http://") || source.startsWith("https://")) {
+    const response = await fetch(source);
+
+    if (!response.ok) {
+      throw new Error(
+        `Unable to fetch Gateful OpenAPI spec from ${source}: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    return response.json();
+  }
+
+  return JSON.parse(await readFile(source, "utf8"));
+};
+
+const spec = await readSpec(SOURCE);
 
 const before = Object.keys(spec.paths).length;
 spec.paths = Object.fromEntries(
@@ -34,5 +54,5 @@ await mkdir(dirname(fileURLToPath(OUT)), { recursive: true });
 await writeFile(OUT, JSON.stringify(spec, null, 2) + "\n");
 
 console.log(
-  `[prepare-spec] removed ${removed} relayer path(s); wrote ${fileURLToPath(OUT)}`,
+  `[prepare-spec] read ${SOURCE}; removed ${removed} relayer path(s); wrote ${fileURLToPath(OUT)}`,
 );
