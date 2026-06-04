@@ -6,13 +6,14 @@
       "passThroughEnv": ["*"]
     },
     "@anticapture/client#codegen": {
-      "inputs": [
-        "kubb.config.ts",
-        "src/**",
-        "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
-      ],
+      "inputs": ["kubb.config.ts", "src/**"],
       "outputs": ["generated/**"],
-      "env": ["NEXT_PUBLIC_GATEFUL_URL", "RAILWAY_ENVIRONMENT_NAME"]
+      "env": [
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "ANTICAPTURE_API_URL",
+        "RAILWAY_SERVICE_GATEFUL_URL",
+        "RAILWAY_ENVIRONMENT_NAME"
+      ]
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
@@ -24,11 +25,15 @@
         "src/**",
         "scripts/**",
         "docusaurus.config.ts",
-        "sidebars.ts",
-        "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
+        "sidebars.ts"
       ],
       "outputs": ["build/**"],
-      "env": ["NEXT_PUBLIC_GATEFUL_URL", "RAILWAY_ENVIRONMENT_NAME"]
+      "env": [
+        "NEXT_PUBLIC_GATEFUL_URL",
+        "ANTICAPTURE_API_URL",
+        "RAILWAY_SERVICE_GATEFUL_URL",
+        "RAILWAY_ENVIRONMENT_NAME"
+      ]
     },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],

@@ -14,7 +14,7 @@ import {
   mapEthereumFormatFakers,
   mapEthereumFormatTypes,
 } from "./src/generators";
-import { resolveGatefulOpenApiSpec } from "./src/gateful-openapi-spec";
+import { resolveGatefulOpenApiSpecUrl } from "./src/gateful-openapi-spec";
 
 type PluginTsOptions = NonNullable<Parameters<typeof pluginTs>[0]>;
 type PluginTsOptionsWithSchemaTransformer = Omit<
@@ -26,9 +26,9 @@ type PluginTsOptionsWithSchemaTransformer = Omit<
   };
 };
 
-const gatefulOpenApiSpecPath = resolveGatefulOpenApiSpec({
-  packageDirectory: __dirname,
-});
+// Codegen always generates from the live Gateful spec URL — never the local
+// apps/gateful/openapi/gateful.json, which can be stale.
+const gatefulOpenApiSpecPath = resolveGatefulOpenApiSpecUrl();
 
 // The `GET /{dao}/dao` route has `operationId: "dao"` and a path parameter
 // also named `dao`. Without this rename, Kubb emits `function dao(dao: ...)`,

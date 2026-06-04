@@ -132,9 +132,19 @@ start_gateful() {
 }
 
 start_relayer() {
-  log "Starting Relayer..."
-  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway_run relayer pnpm relayer dev &
-  wait_for_port "$PORT_RELAYER" "Relayer" 60
+  if [ -z "$DAO_NAME" ]; then
+    log "Skipping optional Relayer (no DAO selected)"
+    return 1
+  fi
+  local service="$(echo "$DAO_NAME" | tr '[:upper:]' '[:lower:]')-relayer"
+  log "Starting optional Relayer ($service)..."
+  # Always run through `railway run`; if the service doesn't exist it simply
+  # fails to come up and wait_for_optional_port lets the stack continue.
+  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s "$service" pnpm relayer dev &
+  if wait_for_optional_port "$PORT_RELAYER" "Relayer"; then
+    return 0
+  fi
+  return 1
 }
 
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
@@ -257,11 +267,14 @@ if [ "$RUN_API" = true ]; then
   ) &
 fi
 
-# 5. Gateful
-start_gateful
+# 5. Relayer (optional; only available for a few DAOs — do not block the rest of the stack)
+RELAYER_AVAILABLE=false
+if start_relayer; then
+  RELAYER_AVAILABLE=true
+fi
 
-# 6. Relayer
-start_relayer
+# 6. Gateful
+start_gateful
 
 # 7. Clients — codegen + build watch
 export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
@@ -287,7 +300,11 @@ else
   printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
 fi
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
-printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
+if [ "$RELAYER_AVAILABLE" = true ]; then
+  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
+else
+  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   skipped (optional)\n"
+fi
 printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""
