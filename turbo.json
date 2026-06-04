@@ -12,12 +12,7 @@
         "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
       ],
       "outputs": ["generated/**"],
-      "env": [
-        "NEXT_PUBLIC_GATEFUL_URL",
-        "VERCEL_GIT_PULL_REQUEST_ID",
-        "VERCEL_ENV",
-        "VERCEL_GIT_COMMIT_REF"
-      ]
+      "env": ["NEXT_PUBLIC_GATEFUL_URL", "RAILWAY_ENVIRONMENT_NAME"]
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],

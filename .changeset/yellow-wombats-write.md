@@ -3,4 +3,4 @@
 "@anticapture/gateful": minor
 ---
 
-Generate the client SDK from the Gateful OpenAPI spec over HTTP during CI/preview builds.
+Generate the client SDK from the Gateful OpenAPI spec using Railway environment names.

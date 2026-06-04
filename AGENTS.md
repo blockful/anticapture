@@ -136,104 +136,17 @@ Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
 <claude-mem-context>
 # Memory Context
 
+# [jakarta] recent context, 2026-06-04 3:07pm GMT-3
+
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (19,043t read) | 647,540t work | 97% savings
-
-### Apr 28, 2026
-
-420 1:25p 🟣 All CI checks pass after toJsonValue fix; package ready for commit
-
-### Apr 29, 2026
-
-452 11:14a 🔵 update-agents-md automation memory file missing
-453 11:15a 🔵 Anticapture monorepo app/package inventory and command map
-454 " 🔵 AGENTS.md is nearly empty and root package.json has notable quirks
-455 " ✅ AGENTS.md updated with Apr 29 2026 workflow discoveries
-456 " 🔵 $CODEX_HOME not expanded in sandbox — automation memory write failed
-457 " ✅ Automation memory file written using absolute path workaround
-568 10:54p 🔵 ripgrep not available in workspace environment
-569 " 🔵 @anticapture/mcp package structure and capabilities discovered
-570 " 🔵 @anticapture/mcp test suite uses in-memory and real HTTP server patterns
-571 " 🔵 openapiTools.ts dynamically generates MCP tools from gateful.json OpenAPI spec at module load time
-572 10:55p 🔵 All 4 MCP tests pass; @anticapture/client codegen runs via kubb before each test run
-573 " 🔵 anticapture-mcp binary not available via pnpm exec without building and linking first
-574 " 🔵 anticapture-mcp HTTP server confirmed working via curl smoke test
-
-### Apr 30, 2026
-
-575 10:51a 🔴 Exclude zero-address delegate from ENS lookups in useTopAccountsChartData
-597 1:15p 🔵 Code Review: PR #1818 — SEO Improvements for Anticapture Dashboard
-598 1:16p 🔵 PR #1818 Workspace Context: Branch Ahead 249 Commits, Vercel Build Failing
-599 1:17p 🔵 Confirmed Runtime Crash Bug in proposals/[proposalId]/page.tsx generateMetadata
-600 " 🔵 Source Inspection Confirms JsonLd Escaping Gap, Sitemap Limits, and getSiteUrl Localhost Issue
-601 " 🔵 Confirmed Unrelated Config Changes Bundled Into SEO PR and New llms.txt Route
-602 1:18p 🔵 Critical: Sitemap URLs Point to Routes That next.config.ts Permanently Redirects Away
-603 " 🔵 PR Diff Scope Clarified: governance/proposal Route Exists in Dev But Not Modified by PR
-604 " 🔵 Dashboard TypeCheck Passes on PR Branch; Lint Running
-605 1:19p 🔵 Dashboard Lint Passes Clean: 79 Warnings, 0 Errors, None from PR Files
-606 " 🔵 All Dashboard Tests Pass: 126/126 Across 16 Suites, None Cover New SEO Code
-607 1:20p 🔵 Vercel Build Failure Confirmed: No Log URL Available via GitHub API
-608 " 🔵 Vercel Build Root Cause: sitemap.xml Route Times Out After 60 Seconds × 3 Attempts
-609 1:21p 🔴 Added export const dynamic = "force-dynamic" to sitemap.ts to Fix Vercel Build Timeout
-610 1:40p 🔵 UI Screenshots Reviewed for Bug Fix in anticapture/ottawa Project
-611 2:02p 🔵 ripgrep (rg) not available in anticapture/ottawa workspace
-612 " 🔵 Dashboard uses Jest for unit tests, Vitest only for Storybook
-614 2:03p 🔵 Proposal Fetch Feature with 100-Limit API Parameter
-613 " 🔵 Dashboard Jest config: ts-jest, node env, `.test.ts` only, no `.tsx` tests
-615 " 🔴 Offchain proposal redirect changed from `redirect` to `permanentRedirect` (308)
-616 " 🔵 sitemap.ts getAllProposalPaths Uses Suboptimal Limits (10 and 20)
-617 " 🔵 Jest testMatch pattern misses bracket-directory test files when passed as path argument
-618 " 🔵 sitemap.test.ts Exists Alongside sitemap.ts
-619 " 🔵 Jest bracket-glob issue persists even when shell-quoting the path argument
-620 " 🔵 Workaround: use `jest --runTestsByPath` to target bracket-directory test files
-621 2:04p ✅ TypeCheck passes after `redirect` → `permanentRedirect` change
-622 " ✅ Lint passes with 0 errors after permanentRedirect fix; 79 pre-existing warnings unrelated to change
-623 2:32p 🔵 Offchain Proposals Intentionally Route to /governance/offchain-proposal Path
-624 2:38p 🔵 Anticapture Guardrails and Dashboard Frontend Skills Loaded
-625 " 🔵 Anticapture Monorepo Guardrail Boundaries and Verification Commands Established
-626 2:39p 🔵 AGENTS.md Files Found in Ottawa and Tianjin Workspaces
-627 " 🔵 Dashboard Package Technology Stack Identified
-628 " 🔵 Ottawa Workspace is a Partial Monorepo Subset
-629 " 🔴 Sitemap Proposal Fetching Made Fault-Tolerant with Per-Source Error Isolation
-630 " 🔴 Sitemap Fault-Tolerance Fix Verified — All 5 Tests Pass
-
-### Jun 2, 2026
-
-695 3:46p 🔴 CI codegen fixed to target Railway PR-preview gateful via dynamic URL
-
-Access 648k tokens of past work via get_observations([IDs]) or mem-search skill.
-Stats: 50 obs (15,193t read) | 630,818t work | 98% savings
-
-768 6:18p 🔵 Backoff/retry logic exists in API for address enrichment
-770 " 🔵 Gateful package structure mapped — relayer and address-enrichment are separate modules
-771 6:19p 🔵 Gateful circuit breaker already has exponential backoff; relayer proxy has no retry logic
-772 " 🔵 Gateful proxy/route.ts uses circuit breaker; relayer.ts is the only proxy missing it
-773 " 🔵 Gateful upstream-docs confirms relayer shares one contract across DAOs — first reachable spec wins
-774 6:20p 🟣 Backoff/circuit breaker logic added to gateful relayer proxy
-775 " 🟣 All 52 gateful tests pass after relayer circuit breaker addition
-776 " 🟣 Gateful TypeScript build passes clean after relayer circuit breaker changes
-777 " 🔵 Workspace diff shows relayer.test.ts is untracked — not yet staged
-778 6:21p 🔵 Existing changeset already covers address-enrichment circuit breaker; relayer change needs a new one
-779 " ✅ Changeset created for relayer circuit breaker patch
+Stats: 50 obs (14,612t read) | 482,724t work | 97% savings
 
 ### Jun 3, 2026
 
-813 10:27a 🟣 ENS Revenue Dashboard — Run-Rate Hero + Timeframe & Chart-Granularity Toggles
-814 " 🔵 Existing Revenue Dashboard Code Structure Mapped
-815 10:28a 🔵 Revenue Dashboard — Full Codebase Structure Confirmed for Refactor
-816 " 🔵 Dashboard Test Infrastructure Confirmed — No Existing Revenue Feature Tests
-818 10:29a 🟣 Revenue Dashboard Refactored with RevenueSummaryCard and Multi-Granularity Chart
-819 10:30a 🟣 Unit Tests Added for computeRevenueSummary and transformToStreamSeries
-820 10:31a 🔵 Test Failures: QoQ Delta Off-by-Rounding and RevenueTotalsItem Missing ETH Fields
-821 " 🔵 Typecheck Passes but MAX Timeframe Test Still Fails — actualAmount Mismatch
-822 " 🔴 All 7 Revenue Transform Tests Pass — TypeScript and Tests Green
-823 " 🔵 Lint Fails on Prettier Formatting in New Revenue Files — 6 Errors in 3 Files
-824 10:32a 🔵 Prettier Lint Errors Located — Inline Callbacks and xAxisLabels Line Need Reformatting
-826 " 🔴 Prettier Formatting Fixed in Revenue Components and charts.ts
-827 " 🔴 Lint Passes Clean — 0 Errors, Only Pre-Existing Warnings
+827 10:32a 🔴 Lint Passes Clean — 0 Errors, Only Pre-Existing Warnings
 828 10:33a 🔵 Revenue Page Routes Identified for E2E Testing
 829 " 🟣 Playwright E2E Tests Added for Revenue Page
 830 " 🔴 E2E Test Fixed — SegmentedControl Uses role=radio and aria-checked, Not role=button and aria-pressed
@@ -260,6 +173,32 @@ Stats: 50 obs (15,193t read) | 630,818t work | 98% savings
 871 " 🔵 font-mono Usage Pattern Differs Between Revenue Cards and All Other Dashboard Feature Cards
 872 " 🔴 Removed font-mono from Revenue Card Large KPI Values to Match Dashboard Typography
 873 2:55p 🔵 Dashboard Lint Passes with 0 Errors; 82 Pre-existing Warnings Unrelated to Revenue Fix
+952 4:21p ⚖️ Revenue summary card: relabel delta as "vs prior 3 months" instead of "vs prev. quarter"
+953 " 🔵 `rtk` CLI not available in Conductor workspace shell environment
+954 4:22p 🔵 Confirmed exact state of summary.ts and test file before edits; changeset already exists
+955 " 🔴 Fixed inaccurate "vs prev. quarter" label in revenue summary delta
+956 " 🔴 All 4 revenue summary tests pass with updated "vs prior 3 months" label
+957 " 🔴 Dashboard typecheck passes clean after revenue label fix
+958 " 🔴 Dashboard lint passes clean; full diff confirms minimal scope of revenue label fix
 
-Access 631k tokens of past work via get_observations([IDs]) or mem-search skill.
+### Jun 4, 2026
+
+1021 2:58p ✅ kubb.config.ts migrated from Vercel env vars to GitHub env vars
+1022 " 🔵 kubb.config.ts Vercel env var dependencies identified
+1023 2:59p 🔵 rtk CLI not available in Conductor workspace environment
+1024 " 🔵 Anticapture guardrails require "ask first" for env var changes
+1025 " 🔵 Vercel env vars used only in kubb.config.ts; no GitHub Actions workflows exist for them
+1026 " 🔵 apps/dashboard/next.config.ts also uses the same three Vercel env vars
+1027 " ✅ kubb.config.ts migrated from Vercel to GitHub Actions env vars
+1028 3:00p ✅ kubb.config.ts GitHub env var migration verified: typecheck and lint pass
+1029 3:01p ✅ kubb.config.ts gains GITHUB_EVENT_PATH fallback for PR ID resolution
+1030 " ✅ Final kubb.config.ts migration fully verified: typecheck passes with GITHUB_EVENT_PATH fallback
+1031 " 🔵 ESLint fails with ENOENT when generated directory is absent before codegen runs
+1032 3:03p 🔵 kubb.config.ts OpenAPI URL Resolution Depends on Vercel Env Vars
+1033 " 🔵 Railway Infra Config Exists Per-Service but No Dashboard/Client Railway Config
+1034 " 🔵 Vercel Env Vars Embedded Throughout Build Pipeline Including turbo.json
+1035 " 🔵 turbo.json Codegen Task Caches on Vercel Env Vars — Must Be Updated Alongside kubb.config.ts
+1036 3:04p ⚖️ Railway URL Strategy: Use RAILWAY_ENVIRONMENT_NAME to Build Gateful Preview URL
+
+Access 483k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

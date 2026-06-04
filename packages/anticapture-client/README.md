@@ -189,9 +189,15 @@ that `node_modules/.bin/tsx` and `generated/` are present.
 ## Development
 
 The SDK is generated from `apps/gateful/openapi/gateful.json` with Kubb.
+Codegen resolves the OpenAPI source in this order:
+
+1. `apps/gateful/openapi/gateful.json`
+2. `${NEXT_PUBLIC_GATEFUL_URL}/docs/json`
+3. `https://gateful-anticapture-${RAILWAY_ENVIRONMENT_NAME}.up.railway.app/docs/json`
 
 ```sh
 npm run codegen
+npm run test
 npm run typecheck
 npm run lint
 npm run build
