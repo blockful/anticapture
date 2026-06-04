@@ -136,43 +136,16 @@ Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
 <claude-mem-context>
 # Memory Context
 
-# [jakarta] recent context, 2026-06-04 3:07pm GMT-3
+# [jakarta] recent context, 2026-06-04 3:19pm GMT-3
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (14,612t read) | 482,724t work | 97% savings
+Stats: 50 obs (16,307t read) | 341,627t work | 95% savings
 
 ### Jun 3, 2026
 
-827 10:32a 🔴 Lint Passes Clean — 0 Errors, Only Pre-Existing Warnings
-828 10:33a 🔵 Revenue Page Routes Identified for E2E Testing
-829 " 🟣 Playwright E2E Tests Added for Revenue Page
-830 " 🔴 E2E Test Fixed — SegmentedControl Uses role=radio and aria-checked, Not role=button and aria-pressed
-831 " 🟣 Revenue Dashboard Refactor Fully Verified — TypeScript, Tests, and Lint All Green
-833 10:34a 🔴 E2E Test Prettier Formatting Fixed — 3 Errors in revenue.spec.ts Resolved
-834 " 🟣 Revenue Dashboard Refactor Complete — All Checks Green
-835 " 🔵 Dev Server Started for Local Visual Verification of Revenue Dashboard
-836 10:35a 🔵 Next.js Dev Server Running at localhost:3000 with Turbopack
-837 " 🔵 In-App Browser (iab) Not Available in This Environment
-838 " 🔵 Playwright Chromium Browser Not Installed — Downloading Now
-839 10:36a 🔵 Playwright Chromium v1208 Installed Successfully
-840 " 🟣 Playwright E2E Tests Pass — Revenue Dashboard Fully Verified End-to-End
-841 10:37a 🟣 Revenue Dashboard Screenshots Captured for Desktop and Mobile
-842 " 🟣 Visual Verification Complete — Revenue Dashboard Confirmed Rendered Correctly in Both Viewports
-843 " 🔵 Pre-Existing SSR Error: indexedDB Not Defined During WalletConnect Initialization
-845 10:38a 🟣 Loaded Revenue Dashboard Screenshots Captured with Real Data
-847 " 🔵 Revenue API Requires Bearer Authentication — 401 Expected for Unauthenticated Requests
-848 " 🔵 All Revenue Dashboard Changes Are Uncommitted — Working Tree Status
-850 10:39a 🔴 MonthlyRevenueChart: Skip xAxisLabelFormatter and xAxisLabelInterval for Month Granularity
-851 " 🟣 Final Verification Pass — All Checks Green After Month Granularity Fix
-852 10:40a 🟣 E2E Tests Pass After Month Granularity Fix — Revenue Dashboard Fully Verified
-869 2:53p 🔵 Font Inconsistency Reported in Dashboard UI Cards
-870 2:54p 🔵 Root Cause Identified: RevenueSummaryCard Uses font-mono for Large Values
-871 " 🔵 font-mono Usage Pattern Differs Between Revenue Cards and All Other Dashboard Feature Cards
-872 " 🔴 Removed font-mono from Revenue Card Large KPI Values to Match Dashboard Typography
-873 2:55p 🔵 Dashboard Lint Passes with 0 Errors; 82 Pre-existing Warnings Unrelated to Revenue Fix
 952 4:21p ⚖️ Revenue summary card: relabel delta as "vs prior 3 months" instead of "vs prev. quarter"
 953 " 🔵 `rtk` CLI not available in Conductor workspace shell environment
 954 4:22p 🔵 Confirmed exact state of summary.ts and test file before edits; changeset already exists
@@ -199,6 +172,33 @@ Stats: 50 obs (14,612t read) | 482,724t work | 97% savings
 1034 " 🔵 Vercel Env Vars Embedded Throughout Build Pipeline Including turbo.json
 1035 " 🔵 turbo.json Codegen Task Caches on Vercel Env Vars — Must Be Updated Alongside kubb.config.ts
 1036 3:04p ⚖️ Railway URL Strategy: Use RAILWAY_ENVIRONMENT_NAME to Build Gateful Preview URL
+1037 3:08p 🔵 Existing Changeset Already Covers the Vercel→Railway Codegen Migration
+1038 " 🔵 kubb.config.ts and turbo.json Already Modified on Branch Relative to origin/dev
+1039 3:09p 🟣 kubb.config.ts Decoupled from Vercel Env Vars — Now Uses RAILWAY_ENVIRONMENT_NAME
+1040 " 🔴 All 5 Tests Pass — Vercel→Railway Migration Verified
+1041 " 🟣 All Verification Checks Pass — kubb.config.ts Railway Migration Complete
+1042 3:10p 🔵 New Source Files Are Untracked — Must Be git-added Before Commit
+1043 " 🟣 pnpm client build Triggered — Codegen Cache Hit Confirms Turbo Env Key Stability
+1044 " 🟣 tsup Build Succeeds — Full Pipeline Complete and Ready to Commit
+1045 3:16p 🔵 apps/gateful/openapi/gateful.json Removed from Branch – Multiple Consumers Identified
+1046 " 🔵 OpenAPI Spec Resolution Order Documented in README
+1047 " 🔵 Jakarta branch CI workflow changes vs origin/dev
+1048 " 🔵 Branch fix/dev-script-multi-api-v1 full diff scope vs origin/dev
+1049 " 🔵 Deleted CI workflow files confirmed absent from working tree
+1050 3:17p 🔴 prepare-spec.mjs Updated to Use Shared Spec Resolver with HTTP Fallback
+1051 " 🔵 Deleted CI workflows enforced static gateful.json — now obsolete after dynamic spec fetch
+1052 " 🔵 tsx Not Available in @anticapture/client-docs Package
+1053 " ✅ tsx Added as devDependency to @anticapture/client-docs Package
+1054 " 🔴 Pre-existing Peer Dependency Warnings in Monorepo
+1056 3:18p 🔴 prepare-spec.mjs Fix Verified Working – Reads Local Spec and Strips 5 Relayer Paths
+1055 " 🔵 Release and version CI workflows unchanged by this branch
+1057 " ✅ Full Verification Pass: typecheck and lint Clean on Both Affected Packages
+1058 " 🔵 HTTP Fallback URL Returns 404 – /docs/json Path May Be Wrong for Production Gateful
+1059 " 🔵 Monorepo has no actionlint or YAML workflow linting configured
+1060 " 🔵 Production Gateful Lives at gateful.up.railway.app Not gateful-anticapture-production
+1061 3:19p 🔴 Full Docs Build Succeeds via HTTP Fallback with NEXT_PUBLIC_GATEFUL_URL=https://gateful.up.railway.app
+1062 " 🔴 Docusaurus Full Production Build Completes Successfully
+1063 " 🔴 Docs Build Exits 0 – Full Static Site Generated Including LLMs.txt
 
-Access 483k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 342k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

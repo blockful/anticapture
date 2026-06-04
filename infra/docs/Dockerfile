@@ -13,10 +13,6 @@ COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
-# The docs site generates its tool reference from the Gateful OpenAPI spec.
-# That spec is not a workspace dependency (the site reads it via a relative
-# path), so copy it to the location docusaurus.config.ts resolves.
-COPY apps/gateful/openapi/gateful.json apps/gateful/openapi/gateful.json
 RUN pnpm --filter @anticapture/client-docs build
 
 FROM base AS runner

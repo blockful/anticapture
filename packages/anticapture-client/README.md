@@ -188,8 +188,9 @@ that `node_modules/.bin/tsx` and `generated/` are present.
 
 ## Development
 
-The SDK is generated from `apps/gateful/openapi/gateful.json` with Kubb.
-Codegen resolves the OpenAPI source in this order:
+The SDK and client docs resolve the Gateful OpenAPI source through the shared
+spec resolver. Local generated specs are preferred when present; CI and Railway
+builds can fall back to the deployed Gateful docs endpoint. Resolution order:
 
 1. `apps/gateful/openapi/gateful.json`
 2. `${NEXT_PUBLIC_GATEFUL_URL}/docs/json`

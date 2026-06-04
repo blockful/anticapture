@@ -10,7 +10,7 @@ env:
 jobs:
   wait-for-gateful:
     name: Wait for preview gateful
-    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,7 @@ jobs:
 
   changeset-path-filter:
     name: Detect changeset requirement
-    if: github.base_ref != 'main' && !startsWith(github.head_ref, 'changeset-release/')
+    if: ${{ github.base_ref != 'main' && !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     outputs:
       needs_changeset: ${{ steps.filter.outputs.needs_changeset }}
@@ -104,7 +104,7 @@ jobs:
 
   typecheck:
     needs: wait-for-gateful
-    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
 
     steps:
@@ -135,7 +135,7 @@ jobs:
 
   test:
     needs: wait-for-gateful
-    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
 
     steps:
@@ -175,7 +175,7 @@ jobs:
   dashboard-e2e:
     name: Dashboard E2E
     needs: wait-for-gateful
-    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
