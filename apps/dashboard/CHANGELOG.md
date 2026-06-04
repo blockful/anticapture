@@ -1,5 +1,15 @@
 # @anticapture/dashboard
 
+## 2.5.0
+
+### Minor Changes
+
+- [#1964](https://github.com/blockful/anticapture/pull/1964) [`967b8b9`](https://github.com/blockful/anticapture/commit/967b8b9da5be1e66d9039a33879ec9270d598ed4) Thanks [@pikonha](https://github.com/pikonha)! - Revenue dashboard: run-rate hero with 1Y/YTD/MAX timeframe toggle and Month/Quarter/Year chart granularity.
+
+### Patch Changes
+
+- [#1964](https://github.com/blockful/anticapture/pull/1964) [`325d8c0`](https://github.com/blockful/anticapture/commit/325d8c07ab3ff4998a288e1cb924342af243e422) Thanks [@pikonha](https://github.com/pikonha)! - Revenue summary card: label the run-rate delta as "vs prior 3 months" instead of "vs prev. quarter" to match the trailing-3-month calculation.
+
 ## 2.4.0
 
 ### Minor Changes
