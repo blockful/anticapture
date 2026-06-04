@@ -27,7 +27,8 @@
         "sidebars.ts",
         "$TURBO_ROOT$/apps/gateful/openapi/gateful.json"
       ],
-      "outputs": ["build/**"]
+      "outputs": ["build/**"],
+      "env": ["NEXT_PUBLIC_GATEFUL_URL", "RAILWAY_ENVIRONMENT_NAME"]
     },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
