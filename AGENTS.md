@@ -136,36 +136,17 @@ Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
 <claude-mem-context>
 # Memory Context
 
-# [jakarta] recent context, 2026-06-04 3:19pm GMT-3
+# [jakarta] recent context, 2026-06-04 5:10pm GMT-3
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (16,307t read) | 341,627t work | 95% savings
-
-### Jun 3, 2026
-
-952 4:21p ⚖️ Revenue summary card: relabel delta as "vs prior 3 months" instead of "vs prev. quarter"
-953 " 🔵 `rtk` CLI not available in Conductor workspace shell environment
-954 4:22p 🔵 Confirmed exact state of summary.ts and test file before edits; changeset already exists
-955 " 🔴 Fixed inaccurate "vs prev. quarter" label in revenue summary delta
-956 " 🔴 All 4 revenue summary tests pass with updated "vs prior 3 months" label
-957 " 🔴 Dashboard typecheck passes clean after revenue label fix
-958 " 🔴 Dashboard lint passes clean; full diff confirms minimal scope of revenue label fix
+Stats: 50 obs (16,852t read) | 426,231t work | 96% savings
 
 ### Jun 4, 2026
 
-1021 2:58p ✅ kubb.config.ts migrated from Vercel env vars to GitHub env vars
-1022 " 🔵 kubb.config.ts Vercel env var dependencies identified
-1023 2:59p 🔵 rtk CLI not available in Conductor workspace environment
-1024 " 🔵 Anticapture guardrails require "ask first" for env var changes
-1025 " 🔵 Vercel env vars used only in kubb.config.ts; no GitHub Actions workflows exist for them
-1026 " 🔵 apps/dashboard/next.config.ts also uses the same three Vercel env vars
-1027 " ✅ kubb.config.ts migrated from Vercel to GitHub Actions env vars
-1028 3:00p ✅ kubb.config.ts GitHub env var migration verified: typecheck and lint pass
-1029 3:01p ✅ kubb.config.ts gains GITHUB_EVENT_PATH fallback for PR ID resolution
-1030 " ✅ Final kubb.config.ts migration fully verified: typecheck passes with GITHUB_EVENT_PATH fallback
+1030 3:01p ✅ Final kubb.config.ts migration fully verified: typecheck passes with GITHUB_EVENT_PATH fallback
 1031 " 🔵 ESLint fails with ENOENT when generated directory is absent before codegen runs
 1032 3:03p 🔵 kubb.config.ts OpenAPI URL Resolution Depends on Vercel Env Vars
 1033 " 🔵 Railway Infra Config Exists Per-Service but No Dashboard/Client Railway Config
@@ -199,6 +180,22 @@ Stats: 50 obs (16,307t read) | 341,627t work | 95% savings
 1061 3:19p 🔴 Full Docs Build Succeeds via HTTP Fallback with NEXT_PUBLIC_GATEFUL_URL=https://gateful.up.railway.app
 1062 " 🔴 Docusaurus Full Production Build Completes Successfully
 1063 " 🔴 Docs Build Exits 0 – Full Static Site Generated Including LLMs.txt
+1064 " 🔵 pnpm-lock.yaml Reformatted – Double to Single Quotes and Added tsx Entry for Docs Package
+1065 " ✅ pnpm-lock.yaml Updated Surgically to Add tsx Entry for docs Package
+1066 3:20p ✅ Lockfile and docs/package.json Diffs Minimized – Only tsx Addition Remains
+1067 " 🔵 Jakarta Workspace Active Modifications Before Fix
+1068 " 🔴 Final Verification Pass Complete – All Checks Green After Minimal Lockfile Patch
+1069 " 🔴 CI Workflow Conditions Tightened for changeset-release Branches
+1070 " 🔵 Lint Fails on Docusaurus-Generated Files After docs Build
+1071 " 🔵 Full Branch Diff Reveals Prior CI Additions vs origin/dev
+1072 3:21p 🔴 ESLint Config Fixed to Ignore Docusaurus-Generated Files
+1073 " 🔵 CI Skip Logic Verified Correct for All Four Scenarios
+1074 " ✅ Complete Fix Confirmed – 9 Modified Files, No Leftover Artifacts
+1075 3:26p 🔵 MCP Server Dockerfile Also Runs codegen Without gateful.json – Same Root Cause
+1076 " 🔴 NEXT_PUBLIC_GATEFUL_URL Fallback Added to Both MCP Server and Docs Dockerfiles
+1077 3:27p 🔴 Codegen Verified Working with NEXT_PUBLIC_GATEFUL_URL; All Checks Pass; Docker Build Started
+1078 3:28p 🔵 Working Tree Shows Only 3 Modified Files in New Session – Previous Changes Likely Committed
+1079 " 🔴 Final State: Both Dockerfiles Have ENV Fallback; All Verification Checks Pass
 
-Access 342k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 426k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

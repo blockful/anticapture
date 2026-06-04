@@ -127,11 +127,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The generated SDK (@anticapture/client) is produced from gateful's
+      # aggregated OpenAPI spec at codegen time, NOT via a package dependency, so
+      # turbo's `...[range]` filter never selects it for gateway/contract changes.
+      # Detect changes to any service that contributes to that aggregated spec so
+      # the SDK (and its dependents) can be typechecked explicitly below.
+      - name: Detect contract-source changes
+        id: contract
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            client_affected:
+              - "apps/gateful/**"
+              - "apps/api/**"
+              - "apps/address-enrichment/**"
+              - "apps/relayer/**"
+
       - name: Run typecheck
-        run: pnpm turbo typecheck --filter='...[origin/${{ github.base_ref || 'dev' }}...HEAD]'
+        shell: bash
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          BASE_REF: ${{ github.base_ref || 'dev' }}
+          CLIENT_AFFECTED: ${{ steps.contract.outputs.client_affected }}
+        run: |
+          set -euo pipefail
+          # `...[range]` = packages changed in the range plus their dependents.
+          filters=("--filter=...[origin/${BASE_REF}...HEAD]")
+          # Contract-only changes don't select the SDK (no package edge to gateful),
+          # so pull in @anticapture/client AND its dependents (e.g. the dashboard)
+          # with a leading-ellipsis filter; otherwise SDK/type breakage from
+          # gateway-only PRs merges unnoticed.
+          if [ "${CLIENT_AFFECTED}" = "true" ]; then
+            filters+=("--filter=...@anticapture/client")
+          fi
+          pnpm turbo typecheck "${filters[@]}"
 
   test:
     needs: wait-for-gateful
@@ -158,11 +188,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # See the typecheck job: the generated SDK has no package edge to the
+      # gateway/upstream services, so contract-only changes never select it. Detect
+      # contract-source changes to pull the SDK and its dependents into the test run.
+      - name: Detect contract-source changes
+        id: contract
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            client_affected:
+              - "apps/gateful/**"
+              - "apps/api/**"
+              - "apps/address-enrichment/**"
+              - "apps/relayer/**"
+
       - name: Run API tests
-        run: pnpm turbo test --filter='...[origin/${{ github.base_ref || 'dev' }}...HEAD]'
+        shell: bash
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          BASE_REF: ${{ github.base_ref || 'dev' }}
+          CLIENT_AFFECTED: ${{ steps.contract.outputs.client_affected }}
+        run: |
+          set -euo pipefail
+          filters=("--filter=...[origin/${BASE_REF}...HEAD]")
+          if [ "${CLIENT_AFFECTED}" = "true" ]; then
+            filters+=("--filter=...@anticapture/client")
+          fi
+          pnpm turbo test "${filters[@]}"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
