@@ -2,10 +2,12 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 
-import { resolveGatefulOpenApiSpecUrl } from "../../src/gateful-openapi-spec.ts";
+import { resolveGatefulOpenApiSpecUrl } from "./gateful-openapi-spec.mjs";
 
 // Always read from the live Gateful spec URL — never a local committed file —
-// so docs and codegen generate from the same source. See gateful-openapi-spec.ts.
+// so docs and codegen generate from the same source. The resolver is a local
+// inline copy (see gateful-openapi-spec.mjs) because this script runs in a
+// turbo-pruned image without the sibling @anticapture/client package.
 const SOURCE = resolveGatefulOpenApiSpecUrl();
 // Output: a filtered copy the OpenAPI plugin generates from. Gitignored and
 // regenerated on every build (see docusaurus.config.ts `GATEFUL_SPEC`).
