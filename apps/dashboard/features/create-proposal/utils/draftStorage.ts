@@ -20,33 +20,6 @@ export const readDrafts = (
   }
 };
 
-export const writeDrafts = (
-  storage: Storage | undefined,
-  key: string,
-  drafts: ProposalDraft[],
-): void => {
-  if (!storage) return;
-  storage.setItem(key, JSON.stringify(drafts));
-};
-
-export const upsertDraft = (
-  current: ProposalDraft[],
-  input: NewDraftInput,
-  now: number,
-  generateId: () => string,
-  id?: string,
-): { next: ProposalDraft[]; savedId: string } => {
-  const existing = id ? current.find((d) => d.id === id) : undefined;
-  const savedId = existing?.id ?? generateId();
-  const saved: ProposalDraft = existing
-    ? { ...existing, ...input, updatedAt: now }
-    : { ...input, id: savedId, createdAt: now, updatedAt: now };
-  const next = existing
-    ? current.map((d) => (d.id === existing.id ? saved : d))
-    : [...current, saved];
-  return { next, savedId };
-};
-
 export const removeDraft = (
   current: ProposalDraft[],
   id: string,

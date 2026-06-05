@@ -1,9 +1,13 @@
-export type GatefulOpenApiSpecEnv = {
-  NEXT_PUBLIC_GATEFUL_URL?: string;
-  ANTICAPTURE_API_URL?: string;
-  RAILWAY_SERVICE_GATEFUL_URL?: string;
-  RAILWAY_ENVIRONMENT_NAME?: string;
-};
+// Resolves the Gateful OpenAPI spec URL from the docs build environment.
+//
+// This is a deliberate inline copy of the resolver in
+// packages/anticapture-client/src/gateful-openapi-spec.ts. The docs build runs
+// in a `turbo prune @anticapture/client-docs` image that does NOT include the
+// sibling @anticapture/client package, so importing across the package boundary
+// breaks in Docker. The docs service is given the same Railway env vars, so it
+// resolves the URL from its own environment instead.
+//
+// KEEP IN SYNC with packages/anticapture-client/src/gateful-openapi-spec.ts.
 
 const GATEFUL_OPENAPI_PATH = "/docs/json";
 const RAILWAY_GATEFUL_DOMAIN_SUFFIX = ".up.railway.app";
@@ -15,17 +19,17 @@ const RAILWAY_GATEFUL_DOMAIN_SUFFIX = ".up.railway.app";
 // Gateful domain we derive from the environment name.
 const RAILWAY_DEPLOY_ENVIRONMENTS = new Set(["dev", "production"]);
 
-const readNonEmptyValue = (value: string | undefined) => {
+const readNonEmptyValue = (value) => {
   const trimmed = value?.trim();
 
   return trimmed ? trimmed : undefined;
 };
 
-const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, "");
+const trimTrailingSlashes = (url) => url.replace(/\/+$/, "");
 
 // Some sources (e.g. Railway's RAILWAY_SERVICE_GATEFUL_URL) provide a bare host
 // without a scheme. Default to https so the resulting URL is fetchable.
-const toGatefulSpecUrl = (gatefulUrl: string) => {
+const toGatefulSpecUrl = (gatefulUrl) => {
   const base = trimTrailingSlashes(gatefulUrl);
   const withScheme = /^https?:\/\//i.test(base) ? base : `https://${base}`;
 
@@ -35,15 +39,11 @@ const toGatefulSpecUrl = (gatefulUrl: string) => {
 // Railway names PR preview environments like `anticapture-pr-1950`, and Gateful's
 // public domain in that environment is `gateful-anticapture-pr-1950.up.railway.app`
 // — i.e. `gateful-<RAILWAY_ENVIRONMENT_NAME>`.
-const buildPreviewGatefulSpecUrl = (railwayEnvironmentName: string) =>
+const buildPreviewGatefulSpecUrl = (railwayEnvironmentName) =>
   `https://gateful-${railwayEnvironmentName}${RAILWAY_GATEFUL_DOMAIN_SUFFIX}${GATEFUL_OPENAPI_PATH}`;
 
-export const resolveGatefulOpenApiSpecUrl = (
-  env: GatefulOpenApiSpecEnv = process.env,
-) => {
-  const railwayEnvironmentName = readNonEmptyValue(
-    env.RAILWAY_ENVIRONMENT_NAME,
-  );
+export const resolveGatefulOpenApiSpecUrl = (env = process.env) => {
+  const railwayEnvironmentName = readNonEmptyValue(env.RAILWAY_ENVIRONMENT_NAME);
 
   // PR preview environments interpolate their own Gateful domain and ignore
   // NEXT_PUBLIC_GATEFUL_URL (which, on a preview, would point at the wrong host).

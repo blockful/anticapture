@@ -1,16 +1,14 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { dirname } from "node:path";
 
-import { resolveGatefulOpenApiSpec } from "../../src/gateful-openapi-spec.ts";
+import { resolveGatefulOpenApiSpecUrl } from "./gateful-openapi-spec.mjs";
 
-const CLIENT_PACKAGE_DIRECTORY = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  "../..",
-);
-const SOURCE = resolveGatefulOpenApiSpec({
-  packageDirectory: CLIENT_PACKAGE_DIRECTORY,
-});
+// Always read from the live Gateful spec URL — never a local committed file —
+// so docs and codegen generate from the same source. The resolver is a local
+// inline copy (see gateful-openapi-spec.mjs) because this script runs in a
+// turbo-pruned image without the sibling @anticapture/client package.
+const SOURCE = resolveGatefulOpenApiSpecUrl();
 // Output: a filtered copy the OpenAPI plugin generates from. Gitignored and
 // regenerated on every build (see docusaurus.config.ts `GATEFUL_SPEC`).
 const OUT = new URL("../openapi/gateful.json", import.meta.url);
@@ -22,19 +20,15 @@ const OUT = new URL("../openapi/gateful.json", import.meta.url);
 const isRelayPath = (p) => p.split("/").includes("relay");
 
 const readSpec = async (source) => {
-  if (source.startsWith("http://") || source.startsWith("https://")) {
-    const response = await fetch(source);
+  const response = await fetch(source);
 
-    if (!response.ok) {
-      throw new Error(
-        `Unable to fetch Gateful OpenAPI spec from ${source}: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    return response.json();
+  if (!response.ok) {
+    throw new Error(
+      `Unable to fetch Gateful OpenAPI spec from ${source}: ${response.status} ${response.statusText}`,
+    );
   }
 
-  return JSON.parse(await readFile(source, "utf8"));
+  return response.json();
 };
 
 const spec = await readSpec(SOURCE);

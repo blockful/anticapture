@@ -52,7 +52,11 @@ import type { ProposalFormValues } from "@/features/create-proposal/schema";
 
 type Mode = "visual" | "markdown";
 
-export const BodyField = () => {
+type BodyFieldProps = {
+  version?: number;
+};
+
+export const BodyField = ({ version = 0 }: BodyFieldProps) => {
   const { control, watch } = useFormContext<ProposalFormValues>();
   const body = watch("body") ?? "";
   const [mode, setMode] = useState<Mode>("visual");
@@ -106,7 +110,7 @@ export const BodyField = () => {
           name="body"
           render={({ field }) => (
             <MDXEditor
-              key={mode}
+              key={`${mode}-${version}`}
               markdown={field.value}
               onChange={(md) => field.onChange(md)}
               contentEditableClassName="!min-h-75 md:!min-h-130 max-w-none px-4 py-4 focus:outline-none"

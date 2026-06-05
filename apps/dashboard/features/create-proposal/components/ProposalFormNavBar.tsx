@@ -1,6 +1,6 @@
 "use client";
 
-import { Rocket } from "lucide-react";
+import { Link2, Rocket } from "lucide-react";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
@@ -9,9 +9,10 @@ interface ProposalFormNavBarProps {
   filledCount: number;
   totalCount: number;
   canPublish: boolean;
-  onSaveDraft: () => void;
+  onSaveDraft: () => Promise<void>;
   onPublish: () => void;
   isSavingDraft?: boolean;
+  onShare?: () => void;
 }
 
 export const ProposalFormNavBar = ({
@@ -21,6 +22,7 @@ export const ProposalFormNavBar = ({
   onSaveDraft,
   onPublish,
   isSavingDraft = false,
+  onShare,
 }: ProposalFormNavBarProps) => {
   const percent = (filledCount / totalCount) * 100;
   return (
@@ -32,6 +34,12 @@ export const ProposalFormNavBar = ({
         className="max-w-xs flex-1"
       />
       <div className="flex shrink-0 gap-2">
+        {onShare && (
+          <Button variant="outline" size="md" onClick={onShare}>
+            <Link2 className="size-4" />
+            Copy link
+          </Button>
+        )}
         <Button
           variant="outline"
           size="md"

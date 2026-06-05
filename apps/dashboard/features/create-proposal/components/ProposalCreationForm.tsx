@@ -20,7 +20,10 @@ import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadabl
 import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
+import { getDraftProposal } from "@anticapture/client";
+import type { GetDraftProposalPathParamsDaoEnumKey } from "@anticapture/client";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
 import { BODY_PLACEHOLDER } from "@/features/create-proposal/constants";
 import {
   ProposalFormSchema,
@@ -88,7 +91,7 @@ export const ProposalCreationForm = ({
   const searchParams = useSearchParams();
   const draftId = searchParams?.get("draftId") ?? undefined;
   const { address } = useAccount();
-  const drafts = useDrafts(daoId, address);
+  const drafts = useDrafts(daoId);
 
   const vp = useProposalVotingPower(daoId, address || zeroAddress);
 
@@ -104,26 +107,72 @@ export const ProposalCreationForm = ({
     defaultValues: DEFAULTS,
     mode: "onChange",
   });
-  const hasHydratedDraftRef = useRef(false);
+  const hydratedDraftIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!draftId) return;
-    if (hasHydratedDraftRef.current) return;
+    if (hydratedDraftIdRef.current === draftId) return;
+
     const d = drafts.getDraft(draftId);
-    if (!d) return;
-    form.reset({
-      title: d.title,
-      discussionUrl: d.discussionUrl,
-      body: d.body,
-      actions: d.actions.map(toFormAction),
-    });
-    hasHydratedDraftRef.current = true;
+    if (d) {
+      form.reset({
+        title: d.title,
+        discussionUrl: d.discussionUrl,
+        body: d.body,
+        actions: d.actions.map(toFormAction),
+      });
+      setCurrentDraftId(draftId);
+      setBodyVersion((v) => v + 1);
+      hydratedDraftIdRef.current = draftId;
+      return;
+    }
+
+    if (drafts.isLoading) return;
+
+    // Cancellation flag so a stale shared-draft response from a previous
+    // draftId cannot overwrite the form after in-app navigation between
+    // shared links resolves out of order.
+    let cancelled = false;
+
+    // Mark the guard inside the success/explicit-miss branches so a transient
+    // fetch failure does not permanently suppress later effect runs (e.g.
+    // when `drafts.drafts` or `drafts.isLoading` change after a retry).
+    void getDraftProposal(
+      daoId as GetDraftProposalPathParamsDaoEnumKey,
+      draftId,
+    )
+      .then((shared) => {
+        if (cancelled) return;
+        hydratedDraftIdRef.current = draftId;
+        if (!shared) return;
+        form.reset({
+          title: shared.title,
+          discussionUrl: shared.discussionUrl,
+          body: shared.body,
+          actions: shared.actions.map((a) => toFormAction(a as ProposalAction)),
+        });
+        if (address && shared.author.toLowerCase() === address.toLowerCase()) {
+          setCurrentDraftId(draftId);
+        } else {
+          setCurrentDraftId(undefined);
+        }
+        setBodyVersion((v) => v + 1);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        showCustomToast("Could not load the shared draft", "error");
+      });
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftId, drafts.drafts]);
+  }, [draftId, drafts.drafts, drafts.isLoading]);
 
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(
     draftId,
   );
+  const [bodyVersion, setBodyVersion] = useState(0);
   const [transferOpen, setTransferOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [editActionIndex, setEditActionIndex] = useState<number | null>(null);
@@ -134,6 +183,10 @@ export const ProposalCreationForm = ({
   const [submittedOpen, setSubmittedOpen] = useState(false);
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  // Mirror in a ref so repeated synchronous clicks (before React commits the
+  // state update) can still see an in-flight save and short-circuit early.
+  const isSavingDraftRef = useRef(false);
 
   const values = form.watch();
   const hasTitle = Boolean(values.title);
@@ -152,44 +205,65 @@ export const ProposalCreationForm = ({
     form.formState.isValid &&
     (values.body?.length ?? 0) <= 10_000;
 
-  const handleSaveDraft = (options?: { navigateToDrafts?: boolean }) => {
+  const handleShare = async () => {
+    if (!currentDraftId) return;
+    const copied = await copyDraftShareUrl(basePath, currentDraftId);
+    if (copied) {
+      showCustomToast("Share link copied", "success");
+    } else {
+      showCustomToast("Could not copy link", "error");
+    }
+  };
+
+  const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
     if (!address) {
       showCustomToast("Connect a wallet to save drafts", "error");
       return;
     }
-    const id = drafts.saveDraft(
-      {
-        daoId,
-        title: values.title,
-        discussionUrl: values.discussionUrl ?? "",
-        body: values.body,
-        actions: values.actions,
-      },
-      currentDraftId,
-    );
-    if (!id) {
+    // Guard against duplicate creates: while a save is in flight,
+    // `currentDraftId` hasn't been set yet, so a second click would create
+    // another draft. Short-circuit until the first save settles.
+    if (isSavingDraftRef.current) return;
+    isSavingDraftRef.current = true;
+    setIsSavingDraft(true);
+    try {
+      const id = await drafts.saveDraft(
+        {
+          daoId,
+          title: values.title,
+          discussionUrl: values.discussionUrl ?? "",
+          body: values.body,
+          actions: values.actions,
+        },
+        currentDraftId,
+      );
+      if (!id) {
+        showCustomToast("Could not save draft", "error");
+        return;
+      }
+      setCurrentDraftId(id);
+      form.reset(values, { keepValues: true, keepDirty: false });
+      showCustomToast("Draft saved", "success");
+      if (options?.navigateToDrafts !== false) {
+        router.push(`${basePath}/proposals?tab=drafts`);
+      }
+    } catch {
       showCustomToast("Could not save draft", "error");
-      return;
-    }
-    setCurrentDraftId(id);
-    form.reset(values, { keepValues: true, keepDirty: false });
-    showCustomToast("Draft saved", "success");
-    if (options?.navigateToDrafts !== false) {
-      router.push(`${basePath}/proposals?tab=drafts`);
+    } finally {
+      isSavingDraftRef.current = false;
+      setIsSavingDraft(false);
     }
   };
 
   const handlePublishClick = () => {
     if (vp.votingPower < threshold) {
-      handleSaveDraft({ navigateToDrafts: false });
+      void handleSaveDraft({ navigateToDrafts: false });
       setInsufficientOpen(true);
       return;
     }
     if (vp.isLoading) {
       showCustomToast(
-        vp.isLoading
-          ? "Still checking your voting power — try again in a moment."
-          : "Couldn't verify your voting power. Try again in a moment.",
+        "Still checking your voting power — try again in a moment.",
         "error",
       );
       return;
@@ -375,7 +449,7 @@ export const ProposalCreationForm = ({
 
         <div className="flex w-full flex-col gap-1">
           <FormLabel isRequired>Description</FormLabel>
-          <BodyField />
+          <BodyField version={bodyVersion} />
         </div>
 
         <div className="flex w-full flex-col gap-1">
@@ -406,6 +480,8 @@ export const ProposalCreationForm = ({
         canPublish={canPublish}
         onSaveDraft={handleSaveDraft}
         onPublish={handlePublishClick}
+        onShare={currentDraftId ? handleShare : undefined}
+        isSavingDraft={isSavingDraft}
       />
 
       <AddTransferModal
