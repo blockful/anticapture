@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "kubb generate --config kubb.config.ts --watch",
     "codegen": "kubb --config kubb.config.ts",
+    "wait-for-gateful": "tsx scripts/wait-for-gateful.ts",
     "mcp": "tsx mcp-server.ts",
     "mcp-http": "tsx mcp-server-http.ts",
     "build": "tsup",

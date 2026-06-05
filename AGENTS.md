@@ -136,7 +136,7 @@ Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
 <claude-mem-context>
 # Memory Context
 
-# [jakarta] recent context, 2026-06-04 5:10pm GMT-3
+# [tacoma] recent context, 2026-06-05 2:54pm GMT-3
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE

@@ -25,6 +25,8 @@ ARG NEXT_PUBLIC_GATEFUL_URL
 ARG ANTICAPTURE_API_URL
 ARG RAILWAY_SERVICE_GATEFUL_URL
 ARG ANTICAPTURE_PUBLIC_API_URL
+# Mirror CI's wait-for-gateful gate before prepare-spec fetches /docs/json.
+RUN pnpm --filter @anticapture/client-docs wait-for-gateful
 RUN pnpm --filter @anticapture/client-docs build
 
 FROM base AS runner

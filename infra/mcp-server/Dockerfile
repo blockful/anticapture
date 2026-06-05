@@ -22,6 +22,8 @@ ARG RAILWAY_ENVIRONMENT_NAME
 ARG NEXT_PUBLIC_GATEFUL_URL
 ARG ANTICAPTURE_API_URL
 ARG RAILWAY_SERVICE_GATEFUL_URL
+# Mirror CI's wait-for-gateful gate before Docker-time codegen fetches /docs/json.
+RUN pnpm --filter @anticapture/client wait-for-gateful
 RUN pnpm --filter @anticapture/client codegen \
  && pnpm --filter @anticapture/client build
 
