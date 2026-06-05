@@ -46,39 +46,43 @@ export const useEfpFollowingBatch = (): EfpFollowingContextValue | null =>
 
 export const EfpFollowingProvider = ({ children }: { children: ReactNode }) => {
   const { address: viewerAddress } = useAccount();
-  const [targets, setTargets] = useState<Set<string>>(() => new Set());
+  const [targetRefCounts, setTargetRefCounts] = useState<Map<string, number>>(
+    () => new Map(),
+  );
   const [debouncedTargets, setDebouncedTargets] = useState<string[]>([]);
 
   const registerTarget = useCallback((address: string) => {
     const normalized = address.toLowerCase();
-    setTargets((prev) => {
-      if (prev.has(normalized)) {
-        return prev;
-      }
-      const next = new Set(prev);
-      next.add(normalized);
+    setTargetRefCounts((prev) => {
+      const next = new Map(prev);
+      next.set(normalized, (prev.get(normalized) ?? 0) + 1);
       return next;
     });
   }, []);
 
   const unregisterTarget = useCallback((address: string) => {
     const normalized = address.toLowerCase();
-    setTargets((prev) => {
-      if (!prev.has(normalized)) {
+    setTargetRefCounts((prev) => {
+      const count = prev.get(normalized);
+      if (!count) {
         return prev;
       }
-      const next = new Set(prev);
-      next.delete(normalized);
+      const next = new Map(prev);
+      if (count <= 1) {
+        next.delete(normalized);
+      } else {
+        next.set(normalized, count - 1);
+      }
       return next;
     });
   }, []);
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
-      setDebouncedTargets(Array.from(targets).sort());
+      setDebouncedTargets(Array.from(targetRefCounts.keys()).sort());
     }, TARGETS_DEBOUNCE_MS);
     return () => window.clearTimeout(handle);
-  }, [targets]);
+  }, [targetRefCounts]);
 
   const batches = useMemo(
     () => chunk(debouncedTargets, EFP_FOLLOWING_IN_SET_MAX),
@@ -122,7 +126,7 @@ export const EfpFollowingProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const normalized = address.toLowerCase();
-      if (!targets.has(normalized)) {
+      if (!targetRefCounts.has(normalized)) {
         return undefined;
       }
 
@@ -132,7 +136,7 @@ export const EfpFollowingProvider = ({ children }: { children: ReactNode }) => {
 
       return followedSet.has(normalized);
     },
-    [viewerAddress, targets, isBatchLoading, followedSet],
+    [viewerAddress, targetRefCounts, isBatchLoading, followedSet],
   );
 
   const value = useMemo(
