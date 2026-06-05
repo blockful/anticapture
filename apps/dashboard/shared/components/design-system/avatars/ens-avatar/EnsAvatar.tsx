@@ -1,7 +1,6 @@
 "use client";
 
 import type { ImageProps } from "next/image";
-import type { ReactNode } from "react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Blockies from "react-blockies";
@@ -9,13 +8,16 @@ import type { Address } from "viem";
 
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
+import { EfpIcon } from "@/shared/components/icons/EfpIcon";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
+import { useEfpFollowingBatch } from "@/shared/providers/EfpFollowingProvider";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
-import { useEfpFollowingBatch } from "@/shared/providers/EfpFollowingProvider";
 import {
+  formatEfpDrawerStatsLabel,
   getEfpFollowNameClassName,
+  getEfpProfileUrl,
   shouldShowYouFollow,
 } from "@/shared/utils/efp";
 import {
@@ -49,8 +51,8 @@ interface EnsAvatarProps extends Omit<
   showTags?: boolean;
   showCopyAddress?: boolean;
   maxVisibleTags?: number;
-  /** Extra badges rendered after address tags (e.g. EFP stats in delegate drawer). */
-  trailingTags?: ReactNode;
+  /** Renders EFP follower/following pill using address data already fetched here. */
+  showEfpStats?: boolean;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -96,49 +98,38 @@ export const EnsAvatar = ({
   showTags = false,
   showCopyAddress = false,
   maxVisibleTags,
-  trailingTags,
+  showEfpStats = false,
   ...imageProps
 }: EnsAvatarProps) => {
   const { data, isLoading } = useGetAddress(address ?? "0x", {
     query: { enabled: !!address },
   });
   const { address: viewerAddress } = useAccount();
-  const efpFollowingBatch = useEfpFollowingBatch();
+  const efpBatch = useEfpFollowingBatch();
 
   useEffect(() => {
-    if (!efpFollowingBatch || !address || !viewerAddress) {
-      return;
-    }
+    if (!efpBatch || !address || !viewerAddress) return;
+    efpBatch.registerTarget(address);
+    return () => efpBatch.unregisterTarget(address);
+  }, [efpBatch, address, viewerAddress]);
 
-    efpFollowingBatch.registerTarget(address);
-    return () => efpFollowingBatch.unregisterTarget(address);
-  }, [efpFollowingBatch, address, viewerAddress]);
-
-  const batchViewerFollows =
-    efpFollowingBatch && address && viewerAddress
-      ? efpFollowingBatch.getViewerFollows(address)
-      : undefined;
-
-  const usePerAvatarFollowQuery =
-    !efpFollowingBatch && !!address && !!viewerAddress;
-
-  const { data: followerStateData, isLoading: isFollowerStateLoading } =
+  const { data: followerState, isLoading: followerStateLoading } =
     useGetEfpFollowerState(
       address?.toLowerCase() ?? "",
       viewerAddress?.toLowerCase() ?? "",
       {
         query: {
-          enabled: usePerAvatarFollowQuery,
+          enabled: !efpBatch && !!address && !!viewerAddress,
           staleTime: 5 * 60 * 1000,
         },
       },
     );
 
-  const viewerFollowsTarget = efpFollowingBatch
-    ? batchViewerFollows === true
+  const viewerFollowsTarget = efpBatch
+    ? efpBatch.getViewerFollows(address ?? "") === true
     : !!viewerAddress &&
-      !isFollowerStateLoading &&
-      shouldShowYouFollow(followerStateData?.state);
+      !followerStateLoading &&
+      shouldShowYouFollow(followerState?.state);
   const arkham = data?.arkham ?? null;
   const ens = data?.ens ?? null;
   const efp = data?.efp ?? null;
@@ -186,6 +177,11 @@ export const EnsAvatar = ({
   const displayName = getDisplayName();
   const isLoadingName = loading || (isLoading && !address);
   const isResolvingData = !!address && isLoading;
+  const followNameClass = getEfpFollowNameClassName(
+    viewerFollowsTarget,
+    isDashed,
+  );
+  const followTitle = viewerFollowsTarget ? "Following on EFP" : undefined;
 
   const baseClasses = cn(
     sizeClasses[size],
@@ -241,12 +237,8 @@ export const EnsAvatar = ({
   if (!showAvatar) {
     return (
       <span
-        className={cn(
-          "text-primary text-sm",
-          getEfpFollowNameClassName(viewerFollowsTarget, isDashed),
-          nameClassName,
-        )}
-        title={viewerFollowsTarget ? "Following on EFP" : undefined}
+        className={cn("text-primary text-sm", followNameClass, nameClassName)}
+        title={followTitle}
       >
         {displayName}
       </span>
@@ -296,11 +288,11 @@ export const EnsAvatar = ({
               className={cn(
                 "text-primary inline-block overflow-hidden truncate whitespace-nowrap",
                 showTags ? "text-lg font-medium" : "text-sm",
-                getEfpFollowNameClassName(viewerFollowsTarget, isDashed),
+                followNameClass,
                 isResolvingData && "animate-pulse",
                 nameClassName,
               )}
-              title={viewerFollowsTarget ? "Following on EFP" : undefined}
+              title={followTitle}
             >
               {displayName}
             </span>
@@ -352,7 +344,29 @@ export const EnsAvatar = ({
                 )}
               </>
             )}
-            {trailingTags}
+            {showEfpStats && address && isLoading ? (
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-5 w-36 rounded-full"
+              />
+            ) : showEfpStats && address && efp ? (
+              <a
+                href={getEfpProfileUrl(address, ens?.name)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-80"
+              >
+                <BadgeStatus
+                  variant="secondary"
+                  className="cursor-pointer pl-1"
+                >
+                  <span className="size-3 shrink-0 overflow-hidden rounded-md">
+                    <EfpIcon className="size-full" />
+                  </span>
+                  {formatEfpDrawerStatsLabel(efp)}
+                </BadgeStatus>
+              </a>
+            ) : null}
           </div>
         )}
       </div>

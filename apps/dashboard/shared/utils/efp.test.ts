@@ -1,8 +1,6 @@
 import {
   formatEfpCounts,
   formatEfpDrawerStatsLabel,
-  formatEfpFollowersCount,
-  formatEfpFollowingCount,
   getEfpFollowNameClassName,
   getEfpProfileSlug,
   getEfpProfileUrl,
@@ -49,20 +47,6 @@ describe("efp", () => {
       expect(
         formatEfpCounts({ followersCount: 5396, followingCount: 10 }),
       ).toBe("5396 followers · 10 following");
-    });
-  });
-
-  describe("formatEfpFollowersCount", () => {
-    test("pluralizes followers", () => {
-      expect(formatEfpFollowersCount(1)).toBe("1 follower");
-      expect(formatEfpFollowersCount(3)).toBe("3 followers");
-    });
-  });
-
-  describe("formatEfpFollowingCount", () => {
-    test("uses invariant following label", () => {
-      expect(formatEfpFollowingCount(0)).toBe("0 following");
-      expect(formatEfpFollowingCount(325)).toBe("325 following");
     });
   });
 

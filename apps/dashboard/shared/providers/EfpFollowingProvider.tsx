@@ -9,6 +9,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -29,18 +30,6 @@ const EfpFollowingContext = createContext<EfpFollowingContextValue | null>(
   null,
 );
 
-const chunk = <T,>(items: T[], size: number): T[][] => {
-  if (items.length === 0) {
-    return [];
-  }
-
-  const chunks: T[][] = [];
-  for (let i = 0; i < items.length; i += size) {
-    chunks.push(items.slice(i, i + size));
-  }
-  return chunks;
-};
-
 export const useEfpFollowingBatch = (): EfpFollowingContextValue | null =>
   useContext(EfpFollowingContext);
 
@@ -49,33 +38,36 @@ export const EfpFollowingProvider = ({ children }: { children: ReactNode }) => {
   const [targetRefCounts, setTargetRefCounts] = useState<Map<string, number>>(
     () => new Map(),
   );
+  const targetRefCountsRef = useRef(targetRefCounts);
+  targetRefCountsRef.current = targetRefCounts;
   const [debouncedTargets, setDebouncedTargets] = useState<string[]>([]);
 
-  const registerTarget = useCallback((address: string) => {
+  const adjustTargetRef = useCallback((address: string, delta: 1 | -1) => {
     const normalized = address.toLowerCase();
     setTargetRefCounts((prev) => {
+      const nextCount = (prev.get(normalized) ?? 0) + delta;
+      if (nextCount <= 0) {
+        if (!prev.has(normalized)) return prev;
+        const next = new Map(prev);
+        next.delete(normalized);
+        targetRefCountsRef.current = next;
+        return next;
+      }
       const next = new Map(prev);
-      next.set(normalized, (prev.get(normalized) ?? 0) + 1);
+      next.set(normalized, nextCount);
+      targetRefCountsRef.current = next;
       return next;
     });
   }, []);
 
-  const unregisterTarget = useCallback((address: string) => {
-    const normalized = address.toLowerCase();
-    setTargetRefCounts((prev) => {
-      const count = prev.get(normalized);
-      if (!count) {
-        return prev;
-      }
-      const next = new Map(prev);
-      if (count <= 1) {
-        next.delete(normalized);
-      } else {
-        next.set(normalized, count - 1);
-      }
-      return next;
-    });
-  }, []);
+  const registerTarget = useCallback(
+    (address: string) => adjustTargetRef(address, 1),
+    [adjustTargetRef],
+  );
+  const unregisterTarget = useCallback(
+    (address: string) => adjustTargetRef(address, -1),
+    [adjustTargetRef],
+  );
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -84,10 +76,17 @@ export const EfpFollowingProvider = ({ children }: { children: ReactNode }) => {
     return () => window.clearTimeout(handle);
   }, [targetRefCounts]);
 
-  const batches = useMemo(
-    () => chunk(debouncedTargets, EFP_FOLLOWING_IN_SET_MAX),
-    [debouncedTargets],
-  );
+  const batches = useMemo(() => {
+    const result: string[][] = [];
+    for (
+      let i = 0;
+      i < debouncedTargets.length;
+      i += EFP_FOLLOWING_IN_SET_MAX
+    ) {
+      result.push(debouncedTargets.slice(i, i + EFP_FOLLOWING_IN_SET_MAX));
+    }
+    return result;
+  }, [debouncedTargets]);
 
   const batchQueries = useQueries({
     queries: batches.map((addresses) => ({
@@ -121,22 +120,14 @@ export const EfpFollowingProvider = ({ children }: { children: ReactNode }) => {
 
   const getViewerFollows = useCallback(
     (address: string): boolean | undefined => {
-      if (!viewerAddress) {
-        return false;
-      }
-
+      if (!viewerAddress) return false;
       const normalized = address.toLowerCase();
-      if (!targetRefCounts.has(normalized)) {
+      if (!targetRefCountsRef.current.has(normalized) || isBatchLoading) {
         return undefined;
       }
-
-      if (isBatchLoading) {
-        return undefined;
-      }
-
       return followedSet.has(normalized);
     },
-    [viewerAddress, targetRefCounts, isBatchLoading, followedSet],
+    [viewerAddress, isBatchLoading, followedSet],
   );
 
   const value = useMemo(

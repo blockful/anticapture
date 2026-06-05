@@ -5,9 +5,6 @@ import { formatPlural } from "@/shared/utils/formatPlural";
 
 const EFP_APP_ORIGIN = "https://efp.app";
 
-/** EFP app icon gradient start — used for follow affordances in the UI */
-export const EFP_ACCENT_COLOR = "#FFE067";
-
 export type EfpStats = {
   followersCount: number;
   followingCount: number;
@@ -24,12 +21,10 @@ export const getEfpProfileUrl = (
   ensName?: string | null,
 ): string => `${EFP_APP_ORIGIN}/${getEfpProfileSlug(address, ensName)}`;
 
-export const formatEfpFollowersCount = (count: number): string =>
+const formatEfpFollowersCount = (count: number): string =>
   formatPlural(count, "follower");
 
-/** "following" is invariant (not followings). */
-export const formatEfpFollowingCount = (count: number): string =>
-  `${count} following`;
+const formatEfpFollowingCount = (count: number): string => `${count} following`;
 
 /** Single-line label for the drawer EFP pill. */
 export const formatEfpDrawerStatsLabel = (

@@ -9,7 +9,6 @@ import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/dr
 import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistory } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistory";
 import { TopInteractions } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractions";
-import { EfpDrawerStatPills } from "@/shared/components/efp/EfpDrawerStatPills";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import {
   DrawerBody,
@@ -136,37 +135,23 @@ export const HoldersAndDelegatesDrawer = ({
   };
 
   const accountAddress = address as `0x${string}`;
-  const efpTrailingTags = <EfpDrawerStatPills address={accountAddress} />;
+  const drawerAvatarProps = {
+    address: accountAddress,
+    size: "sm" as const,
+    variant: "rounded" as const,
+    containerClassName: "gap-2",
+    showTags: true,
+    showCopyAddress: true,
+    showEfpStats: true,
+  };
 
   const titleContent = (
     <>
-      {/* Desktop */}
       <div className="hidden lg:block">
-        <EnsAvatar
-          address={accountAddress}
-          size="sm"
-          variant="rounded"
-          containerClassName="gap-2"
-          showFullAddress={true}
-          showTags={true}
-          showCopyAddress={true}
-          trailingTags={efpTrailingTags}
-        />
+        <EnsAvatar {...drawerAvatarProps} showFullAddress />
       </div>
-
-      {/* Mobile */}
       <div className="block lg:hidden">
-        <EnsAvatar
-          address={accountAddress}
-          size="sm"
-          variant="rounded"
-          containerClassName="gap-2"
-          showFullAddress={false}
-          showTags={true}
-          showCopyAddress={true}
-          maxVisibleTags={2}
-          trailingTags={efpTrailingTags}
-        />
+        <EnsAvatar {...drawerAvatarProps} maxVisibleTags={2} />
       </div>
     </>
   );
@@ -174,18 +159,16 @@ export const HoldersAndDelegatesDrawer = ({
   const delegateAction =
     entityType === "delegate" ? (
       <>
-        {/* Desktop */}
         <div className="hidden lg:block">
           <DelegateButton
-            delegateAddress={address as `0x${string}`}
+            delegateAddress={accountAddress}
             daoId={daoId}
             size="md"
           />
         </div>
-        {/* Mobile */}
         <div className="block lg:hidden">
           <DelegateButton
-            delegateAddress={address as `0x${string}`}
+            delegateAddress={accountAddress}
             daoId={daoId}
             size="sm"
           />
