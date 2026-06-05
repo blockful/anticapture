@@ -44,6 +44,13 @@ if (Array.isArray(spec.tags)) {
   spec.tags = spec.tags.filter((t) => t?.name !== "relay");
 }
 
+// Inject the public API base URL so the "Try it" console knows where to send
+// requests. Done here (not in gateful) to keep this docs-only and avoid
+// touching the OpenAPI contract that drives Kubb codegen.
+const PUBLIC_API_URL =
+  process.env.ANTICAPTURE_PUBLIC_API_URL ?? "https://api.anticapture.com";
+spec.servers = [{ url: PUBLIC_API_URL, description: "Anticapture API" }];
+
 await mkdir(dirname(fileURLToPath(OUT)), { recursive: true });
 await writeFile(OUT, JSON.stringify(spec, null, 2) + "\n");
 

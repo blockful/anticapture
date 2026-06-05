@@ -1,0 +1,9 @@
+{
+  "label": "MCP",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "MCP Server",
+    "description": "Connect an agentic client to Anticapture via the Model Context Protocol. Covers transports, authentication, and available tools."
+  }
+}

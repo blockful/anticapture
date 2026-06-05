@@ -8,6 +8,7 @@ surfaces under a single domain:
 | `/docs`    | docs (Docusaurus static)     | Forwarded as-is; the site uses `baseUrl /docs/`.  |
 | `/mcp`     | mcp-server (Streamable HTTP) | `/mcp` prefix is stripped; backend serves at `/`. |
 | `/healthz` | (proxy itself)               | Returns `200 ok` for the Railway healthcheck.     |
+| `/*`       | gateful (REST API)           | Catch-all; serves all other paths to Gateful.     |
 
 `/` redirects to `/docs/`.
 
@@ -25,9 +26,11 @@ TLS at the edge.
 
 1. Create a service from this repo with **Config-as-code** pointing at
    `infra/proxy/railway.json` (Dockerfile builder, repo root as build context).
-2. This is the only service in the group that should have a **public domain**.
-   Remove the public domains from `mcp-docs` and `mcp-server` so they are
-   reachable over the private network only.
+2. This is the only service in the group that should have **public domains**.
+   Assign both **`api.anticapture.com`** and **`mcp.anticapture.com`** as custom
+   domains (DNS CNAME per Railway). Remove public domains from `mcp-docs`,
+   `mcp-server`, and `gateful` so they are reachable over the private network
+   only.
 3. **Pin the backend ports.** Railway's auto-injected `PORT` is random and
    runtime-only -- it cannot be referenced as `${{service.PORT}}` (the reference
    resolves to empty), and the proxy must know a fixed port to dial. Both
@@ -44,13 +47,14 @@ TLS at the edge.
    Redeploy both services so they bind the pinned port.
 
 4. Point the proxy at those backends. The defaults baked into the Dockerfile
-   (`mcp-docs.railway.internal:3001`, `mcp-server.railway.internal:3100`)
-   already match, so this step is only needed if the Railway service names
-   differ:
+   (`mcp-docs.railway.internal:3001`, `mcp-server.railway.internal:3100`,
+   `gateful.railway.internal:8080`) already match, so this step is only needed
+   if the Railway service names differ:
 
    ```text
    DOCS_UPSTREAM=<docs-service>.railway.internal:3001
    MCP_UPSTREAM=<mcp-server-service>.railway.internal:3100
+   GATEFUL_UPSTREAM=<gateful-service>.railway.internal:8080
    ```
 
    `PORT` on the proxy itself is injected by Railway and needs no pinning.

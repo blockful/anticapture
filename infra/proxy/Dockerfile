@@ -12,11 +12,12 @@ FROM nginx:1.27-alpine
 # (see README.md). PORT is injected by Railway in production.
 ENV PORT=8080 \
     DOCS_UPSTREAM=mcp-docs.railway.internal:3001 \
-    MCP_UPSTREAM=mcp-server.railway.internal:3100
+    MCP_UPSTREAM=mcp-server.railway.internal:3100 \
+    GATEFUL_UPSTREAM=gateful.railway.internal:8080
 
 # Restrict envsubst to our own variables so nginx runtime variables ($host,
 # $uri, $http_upgrade, ...) in the template are left untouched.
-ENV NGINX_ENVSUBST_FILTER='^(PORT|DOCS_UPSTREAM|MCP_UPSTREAM)$'
+ENV NGINX_ENVSUBST_FILTER='^(PORT|DOCS_UPSTREAM|MCP_UPSTREAM|GATEFUL_UPSTREAM)$'
 
 COPY infra/proxy/default.conf.template /etc/nginx/templates/default.conf.template
 

@@ -66,4 +66,18 @@ server {
     location = / {
         return 308 /docs/;
     }
+
+    # Catch-all: proxy everything else to Gateful (the REST API). Placed last so
+    # the more-specific /docs/, /mcp, /healthz, and = / blocks above take
+    # priority via nginx exact/prefix matching rules.
+    # Note: this shadows Gateful's own /docs and /docs/json (Swagger UI) on the
+    # public host — intentional, since Docusaurus replaces them. The docs build
+    # fetches the spec over the internal Gateful URL, not this public one.
+    location / {
+        set $gateful_upstream ${GATEFUL_UPSTREAM};
+        proxy_pass http://$gateful_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 }
