@@ -6,7 +6,12 @@
       "passThroughEnv": ["*"]
     },
     "@anticapture/client#codegen": {
-      "inputs": ["kubb.config.ts", "src/**"],
+      "inputs": [
+        "kubb.config.ts",
+        "src/**",
+        "$TURBO_ROOT$/apps/api/**",
+        "$TURBO_ROOT$/apps/gateful/**"
+      ],
       "outputs": ["generated/**"],
       "env": [
         "NEXT_PUBLIC_GATEFUL_URL",
