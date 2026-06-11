@@ -224,8 +224,11 @@ export const GovernanceSection = () => {
     return tabs;
   }, [canCreateProposal, isConnected]);
 
-  const showOnchain = sourceFilter !== "snapshot";
-  const showOffchain = hasOffchain && sourceFilter !== "governor";
+  // DAOs without offchain proposals ignore the source filter — otherwise a
+  // stale ?source=snapshot in the URL would render an empty, unrecoverable list
+  const effectiveSource = hasOffchain ? sourceFilter : "all";
+  const showOnchain = effectiveSource !== "snapshot";
+  const showOffchain = hasOffchain && effectiveSource !== "governor";
 
   const error =
     (showOnchain ? onchainError : null) ??
