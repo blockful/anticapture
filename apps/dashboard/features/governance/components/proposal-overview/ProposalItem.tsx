@@ -314,14 +314,14 @@ export const ProposalItem = ({
           </div>
         </div>
 
-        <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
-          <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
-            <p className={cn("whitespace-nowrap", !isBasic && "ml-auto")}>
-              {totalOffchainVotes > 0
-                ? `${formatNumberUserReadable(totalOffchainVotes)} votes`
-                : "No votes yet"}
-            </p>
-            {isBasic ? (
+        {isBasic ? (
+          <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
+            <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
+              <p className="whitespace-nowrap">
+                {totalOffchainVotes > 0
+                  ? `${formatNumberUserReadable(totalOffchainVotes)} votes`
+                  : "No votes yet"}
+              </p>
               <div className="flex items-center justify-center gap-2">
                 <div className="flex items-center justify-center gap-2">
                   <CheckCircle2 className="text-success size-4" />
@@ -332,10 +332,8 @@ export const ProposalItem = ({
                   <p>{offchainAgainstPercentage.toFixed(0)}%</p>
                 </div>
               </div>
-            ) : null}
-          </div>
+            </div>
 
-          {isBasic ? (
             <div className="flex w-full items-center justify-center gap-2">
               <div className="bg-surface-hover relative flex h-1 w-full">
                 <div
@@ -348,15 +346,22 @@ export const ProposalItem = ({
                 />
               </div>
             </div>
-          ) : null}
-
-          {!isBasic && leadingChoice ? (
-            <p className="font-inter text-secondary ml-auto whitespace-nowrap text-xs font-medium not-italic leading-4">
-              Leading: {leadingChoice.label} ·{" "}
-              {leadingChoice.percentage.toFixed(0)}%
+          </div>
+        ) : (
+          <div className="font-inter text-secondary flex w-full shrink-0 flex-col items-end justify-center not-italic lg:w-[220px]">
+            <p className="whitespace-nowrap text-[14px] font-normal leading-5">
+              {totalOffchainVotes > 0
+                ? `${formatNumberUserReadable(totalOffchainVotes)} votes`
+                : "No votes yet"}
             </p>
-          ) : null}
-        </div>
+            {leadingChoice ? (
+              <p className="whitespace-nowrap text-xs font-medium leading-4">
+                Leading: {leadingChoice.label} ·{" "}
+                {leadingChoice.percentage.toFixed(0)}%
+              </p>
+            ) : null}
+          </div>
+        )}
       </Link>
     );
   }

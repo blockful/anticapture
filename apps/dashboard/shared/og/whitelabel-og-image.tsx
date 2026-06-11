@@ -45,6 +45,7 @@ export async function createWhitelabelOgImage(
   const brandColor = config.color.svgColor;
   const background = mixWithWhite(brandColor, BACKGROUND_TINT_RATIO);
   const DaoOgIcon = config.ogIcon;
+  const DaoOgArt = config.ogArt;
 
   return new ImageResponse(
     <div
@@ -58,19 +59,33 @@ export async function createWhitelabelOgImage(
         overflow: "hidden",
       }}
     >
-      {/* Oversized brand mark bleeding off the right edge */}
-      <div
-        style={{
-          position: "absolute",
-          display: "flex",
-          width: ART_SIZE,
-          height: ART_SIZE,
-          right: -120,
-          top: (OG_DIMENSIONS.height - ART_SIZE) / 2,
-        }}
-      >
-        <DaoOgIcon size={ART_SIZE} color={brandColor} />
-      </div>
+      {/* DAO art anchored to the right edge; falls back to an oversized brand mark */}
+      {DaoOgArt ? (
+        <div
+          style={{
+            position: "absolute",
+            display: "flex",
+            right: 0,
+            top: 0,
+            height: OG_DIMENSIONS.height,
+          }}
+        >
+          <DaoOgArt height={OG_DIMENSIONS.height} color={brandColor} />
+        </div>
+      ) : (
+        <div
+          style={{
+            position: "absolute",
+            display: "flex",
+            width: ART_SIZE,
+            height: ART_SIZE,
+            right: -120,
+            top: (OG_DIMENSIONS.height - ART_SIZE) / 2,
+          }}
+        >
+          <DaoOgIcon size={ART_SIZE} color={brandColor} />
+        </div>
+      )}
 
       <div
         style={{
