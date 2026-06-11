@@ -3,6 +3,7 @@ import { randomUUID, timingSafeEqual } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp";
 import { createMcpServer } from "./src/create-mcp-server.ts";
 import { configureUpstreamClient } from "./src/configure-upstream-client.ts";
+import { inboundAuthStorage } from "./src/request-context.ts";
 import pino from "pino";
 
 const mcpApiKey = process.env["ANTICAPTURE_MCP_API_KEY"];
@@ -110,7 +111,13 @@ const httpServer = http.createServer(async (req, res) => {
       finish(404, { sessionId });
       return;
     }
-    await transport.handleRequest(req, res);
+
+    const inboundAuth = req.headers["authorization"];
+    await (inboundAuth
+      ? inboundAuthStorage.run(inboundAuth, () =>
+          transport.handleRequest(req, res),
+        )
+      : transport.handleRequest(req, res));
     finish(res.statusCode, { sessionId });
   } catch (err) {
     log.error({ reqId, err: String(err) }, "request failed");

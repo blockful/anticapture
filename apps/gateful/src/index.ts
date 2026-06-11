@@ -11,6 +11,10 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
 
+import { rateLimitMiddleware } from "./auth/rate-limit";
+import { tokenAuthMiddleware } from "./auth/token-auth";
+import { TokenfulClient } from "./auth/tokenful-client";
+import { UsageTracker, usageMiddleware } from "./auth/usage";
 import { config } from "./config";
 import { CircuitOpenError } from "./shared/circuit-breaker";
 import { createRedisClient } from "./cache/redis";
@@ -53,16 +57,36 @@ app.get("/metrics", async (c) => {
   return c.body(body, 200, { "Content-Type": contentType });
 });
 
-if (config.blockfulApiToken) {
+const PUBLIC_PATHS = new Set(["/docs", "/docs/json", "/health", "/metrics"]);
+
+const redis = config.redisUrl ? createRedisClient(config.redisUrl) : undefined;
+
+if (config.tokenService) {
+  const tokenfulClient = new TokenfulClient(
+    config.tokenService.url,
+    config.tokenService.apiKey,
+  );
+  const usageTracker = new UsageTracker(tokenfulClient);
+  usageTracker.start();
+
+  app.use(
+    "*",
+    tokenAuthMiddleware({
+      client: tokenfulClient,
+      cache: redis,
+      publicPaths: PUBLIC_PATHS,
+    }),
+  );
+  app.use("*", rateLimitMiddleware(redis));
+  app.use("*", usageMiddleware(usageTracker, config.daoApis));
+
+  logger.info("per-tenant token auth enabled (Tokenful)");
+} else if (config.blockfulApiToken) {
+  // Legacy single shared token — removed once Tokenful is fully rolled out.
   const requireBearerAuth = bearerAuth({ token: config.blockfulApiToken });
 
   app.use("*", async (c, next) => {
-    if (
-      c.req.path === "/docs" ||
-      c.req.path === "/docs/json" ||
-      c.req.path === "/health" ||
-      c.req.path === "/metrics"
-    ) {
+    if (PUBLIC_PATHS.has(c.req.path)) {
       await next();
       return;
     }
@@ -70,8 +94,7 @@ if (config.blockfulApiToken) {
     return requireBearerAuth(c, next);
   });
 }
-if (config.redisUrl) {
-  const redis = createRedisClient(config.redisUrl);
+if (redis) {
   app.use("*", cacheMiddleware(redis, config.daoApis));
 }
 
