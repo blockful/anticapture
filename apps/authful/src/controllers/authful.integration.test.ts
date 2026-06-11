@@ -6,7 +6,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { createApp } from "@/app";
-import type { TokenfulDrizzle } from "@/database";
+import type { AuthfulDrizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { tokens, usageHourly } from "@/database/schema";
 import { TokensRepository } from "@/repositories/tokens";
@@ -24,9 +24,9 @@ const internalHeaders = {
   "Content-Type": "application/json",
 };
 
-describe("tokenful app", () => {
+describe("authful app", () => {
   let client: PGlite;
-  let db: TokenfulDrizzle;
+  let db: AuthfulDrizzle;
   let app: Hono;
 
   beforeAll(async () => {

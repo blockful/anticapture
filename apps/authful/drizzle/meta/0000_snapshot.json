@@ -4,9 +4,9 @@
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "tokenful.tokens": {
+    "authful.tokens": {
       "name": "tokens",
-      "schema": "tokenful",
+      "schema": "authful",
       "columns": {
         "id": {
           "name": "id",
@@ -90,9 +90,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "tokenful.usage_hourly": {
+    "authful.usage_hourly": {
       "name": "usage_hourly",
-      "schema": "tokenful",
+      "schema": "authful",
       "columns": {
         "token_id": {
           "name": "token_id",
@@ -125,7 +125,7 @@
           "name": "usage_hourly_token_id_tokens_id_fk",
           "tableFrom": "usage_hourly",
           "tableTo": "tokens",
-          "schemaTo": "tokenful",
+          "schemaTo": "authful",
           "columnsFrom": ["token_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
@@ -146,7 +146,7 @@
   },
   "enums": {},
   "schemas": {
-    "tokenful": "tokenful"
+    "authful": "authful"
   },
   "sequences": {},
   "roles": {},

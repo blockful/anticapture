@@ -4,7 +4,7 @@ import type { Context, Next } from "hono";
 
 import { logger } from "../logger.js";
 import { safeParse } from "../shared/safe-parse.js";
-import type { TokenfulClient, TokenValidation } from "./tokenful-client.js";
+import type { AuthfulClient, TokenValidation } from "./authful-client.js";
 
 export type AuthContext = {
   tokenId: string;
@@ -32,12 +32,12 @@ export function hashBearerToken(token: string): string {
 }
 
 /**
- * Per-tenant token authentication backed by Tokenful.
+ * Per-tenant token authentication backed by Authful.
  *
  * - Validation results are cached in Redis so tokens keep working through a
- *   Tokenful outage (positive TTL 300s; negative TTL 60s).
+ *   Authful outage (positive TTL 300s; negative TTL 60s).
  * - Unknown/revoked tokens → 401 (fail-closed).
- * - Tokenful unreachable AND no cached verdict → 503 (distinguishable from
+ * - Authful unreachable AND no cached verdict → 503 (distinguishable from
  *   bad credentials; never logs the plaintext token).
  */
 export function tokenAuthMiddleware({
@@ -45,7 +45,7 @@ export function tokenAuthMiddleware({
   cache,
   publicPaths,
 }: {
-  client: TokenfulClient;
+  client: AuthfulClient;
   cache?: TokenCacheStore;
   publicPaths: ReadonlySet<string>;
 }) {
@@ -92,13 +92,13 @@ export function tokenAuthMiddleware({
 }
 
 async function validateRemote(
-  client: TokenfulClient,
+  client: AuthfulClient,
   tokenHash: string,
 ): Promise<TokenValidation | null> {
   try {
     return await client.validate(tokenHash);
   } catch (err) {
-    logger.error({ err }, "tokenful validation request failed");
+    logger.error({ err }, "authful validation request failed");
     return null;
   }
 }

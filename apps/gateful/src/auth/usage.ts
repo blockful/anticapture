@@ -1,7 +1,7 @@
 import type { Context, Next } from "hono";
 
 import { logger } from "../logger.js";
-import type { TokenfulClient, UsageBatchEntry } from "./tokenful-client.js";
+import type { AuthfulClient, UsageBatchEntry } from "./authful-client.js";
 
 const FLUSH_INTERVAL_MS = 30_000;
 
@@ -24,17 +24,17 @@ export function normalizeRoute(
 }
 
 /**
- * In-memory usage accumulator flushed to Tokenful in batches.
+ * In-memory usage accumulator flushed to Authful in batches.
  *
  * Best-effort by design: recording never blocks a request, and a failed
  * flush re-buffers the counts for the next interval. Counts survive a
- * Tokenful outage but not a Gateful restart — acceptable for usage insight.
+ * Authful outage but not a Gateful restart — acceptable for usage insight.
  */
 export class UsageTracker {
   private counts = new Map<string, number>();
   private timer?: NodeJS.Timeout;
 
-  constructor(private readonly client: TokenfulClient) {}
+  constructor(private readonly client: AuthfulClient) {}
 
   record(tokenId: string, route: string): void {
     const hour = new Date();

@@ -1,8 +1,8 @@
 import { index, pgSchema, primaryKey } from "drizzle-orm/pg-core";
 
-export const tokenfulSchema = pgSchema("tokenful");
+export const authfulSchema = pgSchema("authful");
 
-export const tokens = tokenfulSchema.table(
+export const tokens = authfulSchema.table(
   "tokens",
   (d) => ({
     id: d.uuid().primaryKey().defaultRandom(),
@@ -20,7 +20,7 @@ export const tokens = tokenfulSchema.table(
   (table) => [index().on(table.tenant)],
 );
 
-export const usageHourly = tokenfulSchema.table(
+export const usageHourly = authfulSchema.table(
   "usage_hourly",
   (d) => ({
     tokenId: d

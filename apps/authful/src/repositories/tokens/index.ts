@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
-import { type TokenfulDrizzle, tokens, usageHourly } from "@/database";
+import { type AuthfulDrizzle, tokens, usageHourly } from "@/database";
 
 export type DBToken = typeof tokens.$inferSelect;
 export type NewToken = typeof tokens.$inferInsert;
@@ -13,7 +13,7 @@ export type UsageEntry = {
 };
 
 export class TokensRepository {
-  constructor(private readonly db: TokenfulDrizzle) {}
+  constructor(private readonly db: AuthfulDrizzle) {}
 
   async list(): Promise<DBToken[]> {
     return this.db.select().from(tokens).orderBy(desc(tokens.createdAt));

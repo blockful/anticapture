@@ -45,7 +45,7 @@ Client (Uniswap, Blockful, third parties)
 
 ## Components
 
-### 1. Token Service (new app, `apps/tokenful`)
+### 1. Token Service (new app, `apps/authful`)
 
 Small Hono + Drizzle service with its own Postgres on Railway. Plaintext tokens are **never stored** — only `sha256(token)`.
 
@@ -122,10 +122,10 @@ Rollback at any stage = unset the new env vars; legacy keys still work until ste
 
 ## Implementation stages
 
-1. ✅ **Token Service** (`apps/tokenful`): app scaffold, schema/migrations, endpoints, mint/seed script, 13 integration tests (PGlite).
+1. ✅ **Token Service** (`apps/authful`): app scaffold, schema/migrations, endpoints, mint/seed script, 13 integration tests (PGlite).
 2. ✅ **Gateful middleware** (`apps/gateful/src/auth/`): validation + Redis cache + rate limit + usage flush, behind `TOKEN_SERVICE_URL` flag, 18 tests covering the resilience table.
 3. ✅ **MCP forward**: ALS-based per-request header propagation, gated by `FORWARD_CLIENT_AUTH`; spike validated concurrency isolation.
-4. **Rollout**: ✅ Railway infra (`infra/tokenful/`); remaining (operational): provision Postgres + service, seed prod tokens (`uniswap`, `blockful`), flip envs dev → prod, remove legacy keys after soak.
+4. **Rollout**: ✅ Railway infra (`infra/authful/`); remaining (operational): provision Postgres + service, seed prod tokens (`uniswap`, `blockful`), flip envs dev → prod, remove legacy keys after soak.
 
 ## Open questions
 

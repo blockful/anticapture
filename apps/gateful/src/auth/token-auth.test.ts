@@ -6,7 +6,7 @@ import {
   hashBearerToken,
   tokenAuthMiddleware,
 } from "./token-auth";
-import type { TokenfulClient, TokenValidation } from "./tokenful-client";
+import type { AuthfulClient, TokenValidation } from "./authful-client";
 
 class FakeRedis implements TokenCacheStore {
   store = new Map<string, { value: string; ttl?: number }>();
@@ -33,12 +33,12 @@ const VALID: TokenValidation = {
 };
 
 function fakeClient(impl: () => Promise<TokenValidation>) {
-  return { validate: vi.fn(impl) } as unknown as TokenfulClient & {
+  return { validate: vi.fn(impl) } as unknown as AuthfulClient & {
     validate: ReturnType<typeof vi.fn>;
   };
 }
 
-function buildApp(client: TokenfulClient, cache?: TokenCacheStore) {
+function buildApp(client: AuthfulClient, cache?: TokenCacheStore) {
   const app = new OpenAPIHono();
   app.use(
     "*",
@@ -122,7 +122,7 @@ describe("tokenAuthMiddleware", () => {
     expect(entry?.ttl).toBe(60);
   });
 
-  it("serves cached tokens through a Tokenful outage", async () => {
+  it("serves cached tokens through a Authful outage", async () => {
     const redis = new FakeRedis();
     await redis.set(
       `token:${hashBearerToken("tenant-token")}`,
@@ -138,7 +138,7 @@ describe("tokenAuthMiddleware", () => {
     expect(client.validate).not.toHaveBeenCalled();
   });
 
-  it("returns 503 when Tokenful is down and there is no cached verdict", async () => {
+  it("returns 503 when Authful is down and there is no cached verdict", async () => {
     const client = fakeClient(() => Promise.reject(new Error("down")));
     const res = await buildApp(client, new FakeRedis()).request(
       "/protected",
@@ -147,7 +147,7 @@ describe("tokenAuthMiddleware", () => {
     expect(res.status).toBe(503);
   });
 
-  it("fails open on cache errors and falls back to Tokenful", async () => {
+  it("fails open on cache errors and falls back to Authful", async () => {
     const client = fakeClient(() => Promise.resolve(VALID));
     const brokenCache: TokenCacheStore = {
       get: () => Promise.reject(new Error("redis down")),

@@ -1,10 +1,10 @@
 {
-  "name": "@anticapture/tokenful",
+  "name": "@anticapture/authful",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
-  "description": "Tokenful — per-tenant API token issuance, validation and usage tracking for Gateful",
+  "description": "Authful — per-tenant API token issuance, validation and usage tracking for Gateful",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",

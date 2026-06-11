@@ -1,3 +1,3 @@
 import { createLogger } from "@anticapture/observability";
 
-export const logger = createLogger("anticapture-tokenful");
+export const logger = createLogger("anticapture-authful");

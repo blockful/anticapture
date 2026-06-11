@@ -20,11 +20,11 @@ const app = createApp({
 
 app.doc("/docs/json", {
   openapi: "3.1.0",
-  info: { title: "Anticapture Tokenful API", version: "1.0.0" },
+  info: { title: "Anticapture Authful API", version: "1.0.0" },
 });
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
-logger.info({ port: env.PORT }, "Tokenful API running");
+logger.info({ port: env.PORT }, "Authful API running");
 
 serve({ fetch: app.fetch, port: env.PORT, hostname: "::" });
 

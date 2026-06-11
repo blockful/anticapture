@@ -13,7 +13,7 @@ import type { OpenAPIObject } from "openapi3-ts/oas31";
 
 import { rateLimitMiddleware } from "./auth/rate-limit";
 import { tokenAuthMiddleware } from "./auth/token-auth";
-import { TokenfulClient } from "./auth/tokenful-client";
+import { AuthfulClient } from "./auth/authful-client";
 import { UsageTracker, usageMiddleware } from "./auth/usage";
 import { config } from "./config";
 import { CircuitOpenError } from "./shared/circuit-breaker";
@@ -62,17 +62,17 @@ const PUBLIC_PATHS = new Set(["/docs", "/docs/json", "/health", "/metrics"]);
 const redis = config.redisUrl ? createRedisClient(config.redisUrl) : undefined;
 
 if (config.tokenService) {
-  const tokenfulClient = new TokenfulClient(
+  const authfulClient = new AuthfulClient(
     config.tokenService.url,
     config.tokenService.apiKey,
   );
-  const usageTracker = new UsageTracker(tokenfulClient);
+  const usageTracker = new UsageTracker(authfulClient);
   usageTracker.start();
 
   app.use(
     "*",
     tokenAuthMiddleware({
-      client: tokenfulClient,
+      client: authfulClient,
       cache: redis,
       publicPaths: PUBLIC_PATHS,
     }),
@@ -80,9 +80,9 @@ if (config.tokenService) {
   app.use("*", rateLimitMiddleware(redis));
   app.use("*", usageMiddleware(usageTracker, config.daoApis));
 
-  logger.info("per-tenant token auth enabled (Tokenful)");
+  logger.info("per-tenant token auth enabled (Authful)");
 } else if (config.blockfulApiToken) {
-  // Legacy single shared token — removed once Tokenful is fully rolled out.
+  // Legacy single shared token — removed once Authful is fully rolled out.
   const requireBearerAuth = bearerAuth({ token: config.blockfulApiToken });
 
   app.use("*", async (c, next) => {

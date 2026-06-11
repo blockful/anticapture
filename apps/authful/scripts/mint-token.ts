@@ -2,11 +2,11 @@
  * Mint (or seed) a tenant token directly against the database.
  *
  * Generate a new token:
- *   pnpm tokenful mint -- <tenant> <name> [--rate-limit <per-min>]
+ *   pnpm authful mint -- <tenant> <name> [--rate-limit <per-min>]
  *
  * Seed an existing credential without rotating it (migration path for the
  * legacy shared keys, e.g. Uniswap's current MCP key):
- *   TOKEN_PLAINTEXT=<existing-key> pnpm tokenful mint -- <tenant> <name>
+ *   TOKEN_PLAINTEXT=<existing-key> pnpm authful mint -- <tenant> <name>
  *
  * The plaintext is read from the TOKEN_PLAINTEXT env var — never from argv —
  * so secrets don't leak into shell history or process listings.
@@ -26,7 +26,7 @@ const rateLimitPerMin =
 
 if (!tenant || !name) {
   console.error(
-    "usage: pnpm tokenful mint -- <tenant> <name> [--rate-limit <per-min>]",
+    "usage: pnpm authful mint -- <tenant> <name> [--rate-limit <per-min>]",
   );
   process.exit(1);
 }

@@ -1,4 +1,4 @@
-# Tokenful
+# Authful
 
 Per-tenant API token issuance, validation and usage tracking for Gateful
 (DEV-758). Design: [docs/specs/dev-758-gateful-token-service.md](../../docs/specs/dev-758-gateful-token-service.md).
@@ -9,7 +9,7 @@ Plaintext tokens are **never stored or logged** — only their sha256 hash.
 
 | Variable           | Required | Description                                                                        |
 | ------------------ | -------- | ---------------------------------------------------------------------------------- |
-| `DATABASE_URL`     | yes      | Dedicated Postgres (schema `tokenful`)                                             |
+| `DATABASE_URL`     | yes      | Dedicated Postgres (schema `authful`)                                              |
 | `ADMIN_API_KEY`    | yes      | Guards `/tokens` (mint/list/revoke), min 16 chars                                  |
 | `INTERNAL_API_KEY` | yes      | Guards `/validate` + `/usage/batch`; shared with Gateful (`TOKEN_SERVICE_API_KEY`) |
 | `PORT`             | no       | Default `4002`                                                                     |
@@ -24,16 +24,16 @@ Plaintext tokens are **never stored or logged** — only their sha256 hash.
 
 ```bash
 # Generate a new tenant token (plaintext printed exactly once)
-pnpm tokenful mint -- acme "acme mcp prod" --rate-limit 600
+pnpm authful mint -- acme "acme mcp prod" --rate-limit 600
 
 # Seed an EXISTING credential without rotating it (migration path for the
 # legacy shared keys). Plaintext comes from env, never argv:
-TOKEN_PLAINTEXT=<existing-key> pnpm tokenful mint -- uniswap "uniswap mcp prod"
+TOKEN_PLAINTEXT=<existing-key> pnpm authful mint -- uniswap "uniswap mcp prod"
 ```
 
 ## Migrations
 
 ```bash
-pnpm tokenful db:generate   # after schema changes
-pnpm tokenful db:migrate    # apply (also runs automatically on deploy)
+pnpm authful db:generate   # after schema changes
+pnpm authful db:migrate    # apply (also runs automatically on deploy)
 ```

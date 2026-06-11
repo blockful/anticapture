@@ -13,8 +13,8 @@ export type UsageBatchEntry = {
 
 const REQUEST_TIMEOUT_MS = 3_000;
 
-/** Thin HTTP client for the Tokenful internal surface (/validate, /usage/batch). */
-export class TokenfulClient {
+/** Thin HTTP client for the Authful internal surface (/validate, /usage/batch). */
+export class AuthfulClient {
   constructor(
     private readonly baseUrl: string,
     private readonly apiKey: string,
@@ -28,7 +28,7 @@ export class TokenfulClient {
       body: JSON.stringify({ tokenHash }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    if (!res.ok) throw new Error(`tokenful /validate returned ${res.status}`);
+    if (!res.ok) throw new Error(`authful /validate returned ${res.status}`);
     return (await res.json()) as TokenValidation;
   }
 
@@ -41,7 +41,7 @@ export class TokenfulClient {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) {
-      throw new Error(`tokenful /usage/batch returned ${res.status}`);
+      throw new Error(`authful /usage/batch returned ${res.status}`);
     }
     logger.debug({ entries: entries.length }, "usage batch flushed");
   }

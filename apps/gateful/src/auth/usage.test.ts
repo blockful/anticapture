@@ -2,7 +2,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { describe, expect, it, vi } from "vitest";
 
 import type { AuthContext } from "./token-auth";
-import type { TokenfulClient } from "./tokenful-client";
+import type { AuthfulClient } from "./authful-client";
 import { UsageTracker, normalizeRoute, usageMiddleware } from "./usage";
 
 const DAO_APIS = new Map([["ens", "http://ens.internal"]]);
@@ -14,7 +14,7 @@ const AUTH: AuthContext = {
 };
 
 function fakeClient(impl: () => Promise<void> = () => Promise.resolve()) {
-  return { recordUsageBatch: vi.fn(impl) } as unknown as TokenfulClient & {
+  return { recordUsageBatch: vi.fn(impl) } as unknown as AuthfulClient & {
     recordUsageBatch: ReturnType<typeof vi.fn>;
   };
 }
@@ -56,7 +56,7 @@ describe("UsageTracker", () => {
     expect(entries[0].hour).toMatch(/T\d{2}:00:00\.000Z$/);
   });
 
-  it("does not call Tokenful when there is nothing to flush", async () => {
+  it("does not call Authful when there is nothing to flush", async () => {
     const client = fakeClient();
     await new UsageTracker(client).flush();
     expect(client.recordUsageBatch).not.toHaveBeenCalled();

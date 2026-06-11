@@ -3,7 +3,7 @@ FROM node:20-slim AS base
 FROM base AS builder
 WORKDIR /app
 COPY . .
-RUN npx turbo@2.3.1 prune @anticapture/tokenful --docker
+RUN npx turbo@2.3.1 prune @anticapture/authful --docker
 
 FROM base AS installer
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
@@ -16,7 +16,7 @@ COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 COPY --from=builder /app/turbo.json turbo.json
-RUN pnpm --filter @anticapture/tokenful... build
+RUN pnpm --filter @anticapture/authful... build
 
 FROM base AS runner
 ENV NODE_ENV=production
@@ -27,7 +27,7 @@ RUN addgroup --system app && adduser --system --ingroup app --home /home/app app
 WORKDIR /app
 COPY --from=installer --chown=app:app /app .
 USER app
-WORKDIR /app/apps/tokenful
+WORKDIR /app/apps/authful
 EXPOSE 4002
 # Apply pending migrations before serving — drizzle-kit migrate is a no-op
 # when the database is already up to date.

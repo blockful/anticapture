@@ -8,7 +8,7 @@ const envSchema = z
     PORT: z.coerce.number().default(4001),
     ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
     BLOCKFUL_API_TOKEN: z.string().optional(),
-    // Per-tenant token auth via Tokenful; replaces the legacy single-token guard.
+    // Per-tenant token auth via Authful; replaces the legacy single-token guard.
     TOKEN_SERVICE_URL: z.url().optional(),
     TOKEN_SERVICE_API_KEY: z.string().optional(),
     CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
