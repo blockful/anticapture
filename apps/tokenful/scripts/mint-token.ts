@@ -30,8 +30,11 @@ if (!tenant || !name) {
   );
   process.exit(1);
 }
-if (rateLimitPerMin !== undefined && !Number.isInteger(rateLimitPerMin)) {
-  console.error("--rate-limit must be an integer");
+if (
+  rateLimitPerMin !== undefined &&
+  (!Number.isInteger(rateLimitPerMin) || rateLimitPerMin <= 0)
+) {
+  console.error("--rate-limit must be a positive integer");
   process.exit(1);
 }
 
