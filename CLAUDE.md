@@ -10,6 +10,14 @@
 - Commit `node_modules`, `.env`, or generated files
 - Cast types to `any` or `unknown` without explicitly asked to
 
+## Shared memory (MEMORY.md)
+
+`MEMORY.md` at the repo root is the team's shared agent memory. Read it when starting
+work on an unfamiliar area. When you learn something durable — a non-obvious constraint,
+the why behind a decision, a pitfall that cost real time — append a short dated entry
+under the matching topic section. Never record session narration, routine work, or
+secrets. Full guidance in `AGENTS.md`.
+
 ## Architecture Overview
 
 Anticapture is a pnpm monorepo with 5 runtime components and 1 code-generation package:
