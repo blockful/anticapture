@@ -107,9 +107,10 @@ const toGovernanceProposal = (
       against: againstVotes.toFixed(2),
       abstain: abstainVotes.toFixed(2),
       total: total.toFixed(2),
-      forPercentage: forPercentage.toFixed(0),
-      againstPercentage: againstPercentage.toFixed(0),
-      abstainPercentage: abstainPercentage.toFixed(0),
+      // Keep precision for bar widths; consumers round for display
+      forPercentage: forPercentage.toFixed(2),
+      againstPercentage: againstPercentage.toFixed(2),
+      abstainPercentage: abstainPercentage.toFixed(2),
     },
     quorum: quorum.toFixed(2),
     timeText: getTimeText(

@@ -20,6 +20,7 @@ import {
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { BulletDivider } from "@/shared/components/design-system/section";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -212,6 +213,9 @@ export const ProposalItem = ({
   const {
     offchainScores,
     totalOffchainVotes,
+    offchainForVotes,
+    offchainAgainstVotes,
+    offchainAbstainVotes,
     offchainForPercentage,
     offchainAgainstPercentage,
     offchainAbstainPercentage,
@@ -224,6 +228,9 @@ export const ProposalItem = ({
       return {
         offchainScores: scores,
         totalOffchainVotes: 0,
+        offchainForVotes: 0,
+        offchainAgainstVotes: 0,
+        offchainAbstainVotes: 0,
         offchainForPercentage: 0,
         offchainAgainstPercentage: 0,
         offchainAbstainPercentage: 0,
@@ -257,6 +264,9 @@ export const ProposalItem = ({
     return {
       offchainScores: scores,
       totalOffchainVotes: total,
+      offchainForVotes: forItem?.score ?? 0,
+      offchainAgainstVotes: againstItem?.score ?? 0,
+      offchainAbstainVotes: abstainItem?.score ?? 0,
       offchainForPercentage: forItem?.percentage ?? 0,
       offchainAgainstPercentage: againstItem?.percentage ?? 0,
       offchainAbstainPercentage: abstainItem?.percentage ?? 0,
@@ -287,6 +297,7 @@ export const ProposalItem = ({
         })}
         className={cn(
           "text-primary bg-surface-default hover:bg-surface-contrast rounded-base relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
+          status === ProposalStatus.CANCELED && "opacity-70",
           className,
         )}
         prefetch={true}
@@ -340,22 +351,53 @@ export const ProposalItem = ({
               </div>
             </div>
 
-            <div className="flex w-full items-center justify-center gap-2">
-              <div className="bg-surface-hover relative flex h-1 w-full">
-                <div
-                  style={{ width: `${offchainForPercentage}%` }}
-                  className={cn("bg-success h-full")}
-                />
-                <div
-                  style={{ width: `${offchainAgainstPercentage}%` }}
-                  className={cn("bg-error h-full")}
-                />
-                <div
-                  style={{ width: `${offchainAbstainPercentage}%` }}
-                  className={cn("bg-secondary h-full")}
-                />
+            <Tooltip
+              asChild
+              disableMobileClick
+              triggerClassName="w-full"
+              tooltipContent={
+                <div className="flex flex-col gap-0.5 text-xs">
+                  <span>
+                    For: {formatNumberUserReadable(offchainForVotes)} (
+                    {offchainForPercentage.toFixed(0)}%)
+                  </span>
+                  <span>
+                    Against: {formatNumberUserReadable(offchainAgainstVotes)} (
+                    {offchainAgainstPercentage.toFixed(0)}%)
+                  </span>
+                  <span>
+                    Abstain: {formatNumberUserReadable(offchainAbstainVotes)} (
+                    {offchainAbstainPercentage.toFixed(0)}%)
+                  </span>
+                </div>
+              }
+            >
+              <div className="flex w-full items-center justify-center gap-2">
+                <div className="bg-surface-hover relative flex h-1 w-full overflow-hidden">
+                  <div
+                    style={{ width: `${offchainForPercentage}%` }}
+                    className={cn(
+                      "bg-success h-full transition-[width] duration-300",
+                      offchainForVotes > 0 && "min-w-[2px]",
+                    )}
+                  />
+                  <div
+                    style={{ width: `${offchainAgainstPercentage}%` }}
+                    className={cn(
+                      "bg-error h-full transition-[width] duration-300",
+                      offchainAgainstVotes > 0 && "min-w-[2px]",
+                    )}
+                  />
+                  <div
+                    style={{ width: `${offchainAbstainPercentage}%` }}
+                    className={cn(
+                      "bg-secondary h-full transition-[width] duration-300",
+                      offchainAbstainVotes > 0 && "min-w-[2px]",
+                    )}
+                  />
+                </div>
               </div>
-            </div>
+            </Tooltip>
           </div>
         ) : (
           <div className="font-inter text-secondary flex w-full shrink-0 flex-col items-end justify-center not-italic lg:w-[220px]">
@@ -383,6 +425,35 @@ export const ProposalItem = ({
   // Vote progress only applies once voting has started
   const hasVotingStarted = proposal!.state !== ProposalState.WAITING_TO_START;
 
+  const forVotesNum = Number(proposal!.votes.for);
+  const againstVotesNum = Number(proposal!.votes.against);
+  const abstainVotesNum = Number(proposal!.votes.abstain);
+  const quorumNum = Number(proposal!.quorum);
+  // Quorum counts For + Abstain, mirroring the proposal detail calculation
+  const countedVotesNum = forVotesNum + abstainVotesNum;
+
+  const onchainBarTooltip = (
+    <div className="flex flex-col gap-0.5 text-xs">
+      <span>
+        For: {formatNumberUserReadable(forVotesNum)} (
+        {Math.round(Number(proposal!.votes.forPercentage))}%)
+      </span>
+      <span>
+        Against: {formatNumberUserReadable(againstVotesNum)} (
+        {Math.round(Number(proposal!.votes.againstPercentage))}%)
+      </span>
+      <span>
+        Abstain: {formatNumberUserReadable(abstainVotesNum)} (
+        {Math.round(Number(proposal!.votes.abstainPercentage))}%)
+      </span>
+      <span>
+        Quorum: {formatNumberUserReadable(countedVotesNum)} /{" "}
+        {formatNumberUserReadable(quorumNum)}
+        {countedVotesNum >= quorumNum ? " · Reached" : ""}
+      </span>
+    </div>
+  );
+
   return (
     <Link
       href={getDaoProposalPath({
@@ -392,6 +463,7 @@ export const ProposalItem = ({
       })}
       className={cn(
         "text-primary bg-surface-default hover:bg-surface-contrast rounded-base relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
+        proposal!.status === ProposalStatus.CANCELED && "opacity-70",
         className,
       )}
       prefetch={true}
@@ -440,37 +512,53 @@ export const ProposalItem = ({
             <div className="flex items-center justify-center gap-2">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="text-success size-4" />
-                <p>{proposal!.votes.forPercentage}%</p>
+                <p>{Math.round(Number(proposal!.votes.forPercentage))}%</p>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <XCircle className="text-error size-4" />
-                <p>{proposal!.votes.againstPercentage}%</p>
+                <p>{Math.round(Number(proposal!.votes.againstPercentage))}%</p>
               </div>
             </div>
           </div>
-          <div className="flex w-full items-center justify-center gap-2">
-            <div className="bg-surface-hover relative flex h-1 w-full">
-              <div
-                style={{ width: `${proposal!.votes.forPercentage}%` }}
-                className={cn("bg-success h-full")}
-              />
-              <div
-                style={{ width: `${proposal!.votes.againstPercentage}%` }}
-                className={cn("bg-error h-full")}
-              />
-              <div
-                style={{ width: `${proposal!.votes.abstainPercentage}%` }}
-                className={cn("bg-secondary h-full")}
-              />
-
-              {quorumPercentage < 100 && (
+          <Tooltip
+            asChild
+            disableMobileClick
+            triggerClassName="w-full"
+            tooltipContent={onchainBarTooltip}
+          >
+            <div className="flex w-full items-center justify-center gap-2">
+              <div className="bg-surface-hover relative flex h-1 w-full overflow-hidden">
                 <div
-                  className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-2"
-                  style={{ left: `${quorumPercentage}%` }}
+                  style={{ width: `${proposal!.votes.forPercentage}%` }}
+                  className={cn(
+                    "bg-success h-full transition-[width] duration-300",
+                    forVotesNum > 0 && "min-w-[2px]",
+                  )}
                 />
-              )}
+                <div
+                  style={{ width: `${proposal!.votes.againstPercentage}%` }}
+                  className={cn(
+                    "bg-error h-full transition-[width] duration-300",
+                    againstVotesNum > 0 && "min-w-[2px]",
+                  )}
+                />
+                <div
+                  style={{ width: `${proposal!.votes.abstainPercentage}%` }}
+                  className={cn(
+                    "bg-secondary h-full transition-[width] duration-300",
+                    abstainVotesNum > 0 && "min-w-[2px]",
+                  )}
+                />
+
+                {quorumPercentage < 100 && (
+                  <div
+                    className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-2"
+                    style={{ left: `${quorumPercentage}%` }}
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          </Tooltip>
           <div className="relative flex w-full">
             {quorumPercentage < 100 && (
               <>
