@@ -214,6 +214,7 @@ export const ProposalItem = ({
     totalOffchainVotes,
     offchainForPercentage,
     offchainAgainstPercentage,
+    offchainAbstainPercentage,
     leadingChoice,
   } = useMemo(() => {
     const scores = normalizeScores(offchainProposal?.scores);
@@ -225,6 +226,7 @@ export const ProposalItem = ({
         totalOffchainVotes: 0,
         offchainForPercentage: 0,
         offchainAgainstPercentage: 0,
+        offchainAbstainPercentage: 0,
         leadingChoice: null,
       };
 
@@ -242,6 +244,9 @@ export const ProposalItem = ({
     const againstItem = withPct.find(
       (c) => c.label.toLowerCase() === "against",
     );
+    const abstainItem = withPct.find(
+      (c) => c.label.toLowerCase() === "abstain",
+    );
 
     // Polls with more than two options surface which option is leading
     const leading =
@@ -254,6 +259,7 @@ export const ProposalItem = ({
       totalOffchainVotes: total,
       offchainForPercentage: forItem?.percentage ?? 0,
       offchainAgainstPercentage: againstItem?.percentage ?? 0,
+      offchainAbstainPercentage: abstainItem?.percentage ?? 0,
       leadingChoice: leading,
     };
   }, [offchainProposal?.scores, offchainProposal?.choices, offchainProposal]);
@@ -343,6 +349,10 @@ export const ProposalItem = ({
                 <div
                   style={{ width: `${offchainAgainstPercentage}%` }}
                   className={cn("bg-error h-full")}
+                />
+                <div
+                  style={{ width: `${offchainAbstainPercentage}%` }}
+                  className={cn("bg-secondary h-full")}
                 />
               </div>
             </div>
