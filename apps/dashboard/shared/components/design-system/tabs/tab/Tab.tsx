@@ -7,6 +7,7 @@ export const Tab = ({
   label,
   isActive = false,
   size = "sm",
+  variant = "underline",
   badge,
   onClick,
   className,
@@ -30,8 +31,17 @@ export const Tab = ({
         "transition-colors duration-150",
         // Default state
         "text-secondary hover:text-primary",
-        // Active state — text-highlight + bottom border
-        isActive && "border-highlight text-highlight border-b",
+        // Underline active state — text-highlight + bottom border
+        variant === "underline" &&
+          isActive &&
+          "border-highlight text-highlight border-b",
+        // Button variant — bordered pill; active state picks up the DAO brand
+        // color through the highlight/brand tokens on whitelabel themes
+        variant === "button" && "rounded-base border px-3 py-2",
+        variant === "button" &&
+          (isActive
+            ? "border-highlight text-link bg-surface-opacity-brand hover:text-link"
+            : "border-border-contrast hover:bg-surface-contrast"),
         // Cursor
         "cursor-pointer",
         // Allow overrides

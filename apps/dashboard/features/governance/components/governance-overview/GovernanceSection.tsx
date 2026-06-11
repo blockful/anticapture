@@ -34,7 +34,10 @@ import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
 import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
-import { useOffchainProposals } from "@/features/governance/hooks/useOffchainProposals";
+import {
+  useOffchainProposals,
+  type OffchainProposalItem,
+} from "@/features/governance/hooks/useOffchainProposals";
 import { useProposals } from "@/features/governance/hooks/useProposals";
 import {
   isFullProposal,
@@ -49,15 +52,36 @@ import {
 import { TheSectionLayout } from "@/shared/components";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
+import type { TabItem } from "@/shared/components/design-system/tabs/types";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 
-const ONCHAIN_TAB = { label: "Onchain", value: "onchain" };
-const OFFCHAIN_TAB = { label: "Offchain", value: "offchain" };
+const ALL_PROPOSALS_TAB = {
+  label: (
+    <>
+      <span className="lg:hidden">All</span>
+      <span className="hidden lg:inline">All Proposals</span>
+    </>
+  ),
+  value: "all",
+};
+
+const SOURCE_FILTER_ITEMS = [
+  { label: "All sources", value: "all" },
+  { label: "Snapshot", value: "snapshot" },
+  { label: "Governor", value: "governor" },
+];
+
+type ProposalSourceFilter = "all" | "snapshot" | "governor";
+
+type MergedProposalItem =
+  | { source: "onchain"; startTs: number; proposal: GovernanceProposal }
+  | { source: "offchain"; startTs: number; proposal: OffchainProposalItem };
 
 const toGovernanceProposal = (
   proposal: OnchainFullProposalItem,
@@ -70,6 +94,7 @@ const toGovernanceProposal = (
   const total = forVotes + againstVotes + abstainVotes;
   const forPercentage = total > 0 ? (forVotes / total) * 100 : 0;
   const againstPercentage = total > 0 ? (againstVotes / total) * 100 : 0;
+  const abstainPercentage = total > 0 ? (abstainVotes / total) * 100 : 0;
 
   return {
     ...proposal,
@@ -80,9 +105,11 @@ const toGovernanceProposal = (
     votes: {
       for: forVotes.toFixed(2),
       against: againstVotes.toFixed(2),
+      abstain: abstainVotes.toFixed(2),
       total: total.toFixed(2),
       forPercentage: forPercentage.toFixed(0),
       againstPercentage: againstPercentage.toFixed(0),
+      abstainPercentage: abstainPercentage.toFixed(0),
     },
     quorum: quorum.toFixed(2),
     timeText: getTimeText(
@@ -109,11 +136,16 @@ export const GovernanceSection = () => {
 
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsStringEnum<"onchain" | "offchain" | "drafts">([
-      "onchain",
-      "offchain",
-      "drafts",
-    ]).withDefault("onchain"),
+    parseAsStringEnum<"all" | "drafts">(["all", "drafts"]).withDefault("all"),
+  );
+
+  const [sourceFilter, setSourceFilter] = useQueryState(
+    "source",
+    parseAsStringEnum<ProposalSourceFilter>([
+      "all",
+      "snapshot",
+      "governor",
+    ]).withDefault("all"),
   );
 
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
@@ -182,45 +214,120 @@ export const GovernanceSection = () => {
     return offchainSearchData?.items ?? [];
   }, [isSearchActive, offchainSearchData]);
 
-  const loadMoreOnchainRef = useRef<HTMLDivElement>(null);
-  const loadMoreOffchainRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const visibleTabs = useMemo(() => {
-    const tabs = [ONCHAIN_TAB];
-    if (hasOffchain) tabs.push(OFFCHAIN_TAB);
+    const tabs: TabItem[] = [ALL_PROPOSALS_TAB];
     if (isConnected && canCreateProposal) {
       tabs.push({ label: "My Drafts", value: "drafts" });
     }
     return tabs;
-  }, [canCreateProposal, hasOffchain, isConnected]);
+  }, [canCreateProposal, isConnected]);
 
-  const isOnchain = activeTab === "onchain" || !hasOffchain;
-  const error = isOnchain ? onchainError : offchainError;
-  const hasNextPage = isOnchain
-    ? hasNextOnchainPage
-    : offchainPagination.hasNextPage;
-  const isPaginationLoading = isOnchain
-    ? isOnchainPaginationLoading
-    : isOffchainPaginationLoading;
-  const fetchNextPage = isOnchain ? fetchNextOnchain : fetchNextOffchain;
+  const showOnchain = sourceFilter !== "snapshot";
+  const showOffchain = hasOffchain && sourceFilter !== "governor";
+
+  const error =
+    (showOnchain ? onchainError : null) ??
+    (showOffchain ? offchainError : null);
+  const isPaginationLoading =
+    (showOnchain && isOnchainPaginationLoading) ||
+    (showOffchain && isOffchainPaginationLoading);
+
+  // Both sources are paginated independently, so the merged list is only
+  // chronologically safe down to the older of the two loaded frontiers —
+  // items below that line could still interleave with unfetched pages.
+  const mergedProposals = useMemo<MergedProposalItem[]>(() => {
+    const onchainList = showOnchain
+      ? isSearchActive
+        ? searchOnchainProposals
+        : proposals
+      : [];
+    const offchainList = showOffchain
+      ? isSearchActive
+        ? searchOffchainProposals
+        : offchainProposals
+      : [];
+
+    const merged: MergedProposalItem[] = [
+      ...onchainList.map((proposal) => ({
+        source: "onchain" as const,
+        startTs: Number(proposal.startTimestamp),
+        proposal,
+      })),
+      ...offchainList.map((proposal) => ({
+        source: "offchain" as const,
+        startTs: Number(proposal.start),
+        proposal,
+      })),
+    ].sort((a, b) => b.startTs - a.startTs);
+
+    if (isSearchActive) return merged;
+
+    let cutoff = 0;
+    if (showOnchain && hasNextOnchainPage && onchainList.length > 0) {
+      cutoff = Math.max(
+        cutoff,
+        Math.min(...onchainList.map((p) => Number(p.startTimestamp))),
+      );
+    }
+    if (
+      showOffchain &&
+      offchainPagination.hasNextPage &&
+      offchainList.length > 0
+    ) {
+      cutoff = Math.max(
+        cutoff,
+        Math.min(...offchainList.map((p) => Number(p.start))),
+      );
+    }
+
+    return cutoff > 0
+      ? merged.filter((item) => item.startTs >= cutoff)
+      : merged;
+  }, [
+    showOnchain,
+    showOffchain,
+    isSearchActive,
+    searchOnchainProposals,
+    searchOffchainProposals,
+    proposals,
+    offchainProposals,
+    hasNextOnchainPage,
+    offchainPagination.hasNextPage,
+  ]);
 
   const handleLoadMore = useCallback(() => {
-    if (!isPaginationLoading && hasNextPage) {
-      fetchNextPage();
+    if (showOnchain && hasNextOnchainPage && !isOnchainPaginationLoading) {
+      fetchNextOnchain();
     }
-  }, [fetchNextPage, hasNextPage, isPaginationLoading]);
+    if (
+      showOffchain &&
+      offchainPagination.hasNextPage &&
+      !isOffchainPaginationLoading
+    ) {
+      fetchNextOffchain();
+    }
+  }, [
+    showOnchain,
+    showOffchain,
+    hasNextOnchainPage,
+    offchainPagination.hasNextPage,
+    isOnchainPaginationLoading,
+    isOffchainPaginationLoading,
+    fetchNextOnchain,
+    fetchNextOffchain,
+  ]);
 
   useEffect(() => {
     if (activeTab === "drafts" && (!isConnected || !canCreateProposal)) {
-      void setActiveTab("onchain");
+      void setActiveTab("all");
     }
   }, [activeTab, canCreateProposal, isConnected, setActiveTab]);
 
   useEffect(() => {
     if (isSearchActive) return;
-    const ref = isOnchain
-      ? loadMoreOnchainRef.current
-      : loadMoreOffchainRef.current;
+    const ref = loadMoreRef.current;
     if (!ref) return;
 
     const observer = new IntersectionObserver(
@@ -235,7 +342,7 @@ export const GovernanceSection = () => {
     observer.observe(ref);
 
     return () => observer.disconnect();
-  }, [handleLoadMore, isOnchain, isSearchActive]);
+  }, [handleLoadMore, isSearchActive]);
 
   const handleNewProposal = () => {
     if (!isConnected) {
@@ -290,17 +397,14 @@ export const GovernanceSection = () => {
           description="View and vote on executable proposals from this DAO."
           headerAction={headerActions}
         >
-          {visibleTabs.length > 1 && (
-            <TabGroup
-              tabs={visibleTabs}
-              activeTab={activeTab}
-              onTabChange={(value) =>
-                setActiveTab(value as "onchain" | "offchain" | "drafts")
-              }
-              className="mb-4"
-              size="md"
-            />
-          )}
+          <TabGroup
+            tabs={visibleTabs}
+            activeTab={activeTab}
+            onTabChange={(value) => setActiveTab(value as "all" | "drafts")}
+            className="mb-4"
+            size="md"
+            variant="button"
+          />
           <div className="flex flex-col items-center justify-center py-12">
             <EmptyState
               title="Unable to load proposals"
@@ -322,17 +426,25 @@ export const GovernanceSection = () => {
         hideDivider
         headerAction={headerActions}
       >
-        {visibleTabs.length > 1 && (
+        <div className="mb-4 flex items-center justify-between gap-2">
           <TabGroup
             tabs={visibleTabs}
             activeTab={activeTab}
-            onTabChange={(value) =>
-              setActiveTab(value as "onchain" | "offchain" | "drafts")
-            }
-            className="mb-4"
+            onTabChange={(value) => setActiveTab(value as "all" | "drafts")}
             size="md"
+            variant="button"
           />
-        )}
+          {hasOffchain && activeTab === "all" && (
+            <Select
+              items={SOURCE_FILTER_ITEMS}
+              value={sourceFilter}
+              onValueChange={(value) =>
+                setSourceFilter(value as ProposalSourceFilter)
+              }
+              className="w-[150px] lg:w-[248px]"
+            />
+          )}
+        </div>
 
         <div className="flex-1">
           {activeTab === "drafts" && isConnected ? (
@@ -406,48 +518,34 @@ export const GovernanceSection = () => {
                 }}
               />
             </>
-          ) : isOnchain ? (
+          ) : (
             <ProposalListSection
-              loading={isSearchActive ? searchLoading : onchainLoading}
-              hasItems={
+              loading={
                 isSearchActive
-                  ? searchOnchainProposals.length > 0
-                  : proposals.length > 0
+                  ? (showOnchain && searchLoading) ||
+                    (showOffchain && offchainSearchLoading)
+                  : (showOnchain && onchainLoading) ||
+                    (showOffchain && offchainLoading)
               }
-              isPaginationLoading={
-                isSearchActive ? false : isOnchainPaginationLoading
-              }
-              loadMoreRef={loadMoreOnchainRef}
+              hasItems={mergedProposals.length > 0}
+              isPaginationLoading={isSearchActive ? false : isPaginationLoading}
+              loadMoreRef={loadMoreRef}
               isSearchActive={isSearchActive}
               emptyMessage="No proposals found"
             >
-              {(isSearchActive ? searchOnchainProposals : proposals).map(
-                (proposal) => (
-                  <ProposalItem key={proposal.id} proposal={proposal} />
+              {mergedProposals.map((item) =>
+                item.source === "onchain" ? (
+                  <ProposalItem
+                    key={`onchain-${item.proposal.id}`}
+                    proposal={item.proposal}
+                  />
+                ) : (
+                  <ProposalItem
+                    key={`offchain-${item.proposal.id}`}
+                    offchainProposal={item.proposal}
+                  />
                 ),
               )}
-            </ProposalListSection>
-          ) : (
-            <ProposalListSection
-              loading={isSearchActive ? offchainSearchLoading : offchainLoading}
-              hasItems={
-                isSearchActive
-                  ? searchOffchainProposals.length > 0
-                  : offchainProposals.length > 0
-              }
-              isPaginationLoading={
-                isSearchActive ? false : isOffchainPaginationLoading
-              }
-              loadMoreRef={loadMoreOffchainRef}
-              isSearchActive={isSearchActive}
-              emptyMessage="No off-chain proposals found"
-            >
-              {(isSearchActive
-                ? searchOffchainProposals
-                : offchainProposals
-              ).map((proposal) => (
-                <ProposalItem key={proposal.id} offchainProposal={proposal} />
-              ))}
             </ProposalListSection>
           )}
         </div>

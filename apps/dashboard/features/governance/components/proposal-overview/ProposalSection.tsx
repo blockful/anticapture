@@ -272,6 +272,7 @@ export const ProposalSection = ({
               <TitleSection
                 proposal={proposal}
                 onAddressClick={handleAddressClick}
+                isOffchain={isOffchain}
               />
               <ProposalInfoSection
                 proposal={proposal}

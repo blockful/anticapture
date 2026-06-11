@@ -89,6 +89,7 @@ export const useProposals = (
       const total = forVotes + againstVotes + abstainVotes;
       const forPercentage = total > 0 ? (forVotes / total) * 100 : 0;
       const againstPercentage = total > 0 ? (againstVotes / total) * 100 : 0;
+      const abstainPercentage = total > 0 ? (abstainVotes / total) * 100 : 0;
 
       return {
         ...proposal,
@@ -99,9 +100,11 @@ export const useProposals = (
         votes: {
           for: forVotes.toFixed(2),
           against: againstVotes.toFixed(2),
+          abstain: abstainVotes.toFixed(2),
           total: total.toFixed(2),
           forPercentage: forPercentage.toFixed(0),
           againstPercentage: againstPercentage.toFixed(0),
+          abstainPercentage: abstainPercentage.toFixed(0),
         },
         quorum: quorum.toFixed(2),
         timeText: getTimeText(proposal.startTimestamp, proposal.endTimestamp),
