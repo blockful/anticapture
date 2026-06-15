@@ -32,7 +32,7 @@ export interface IRateLimiter {
 interface RateLimiterConfig {
   daoName: string;
   governorAddress: Address;
-  maxPerAddressPerDay: number;
+  limits: Record<RelayOperation, number>;
 }
 
 export class RateLimiter implements IRateLimiter {
@@ -52,7 +52,7 @@ export class RateLimiter implements IRateLimiter {
         governorAddress: this.config.governorAddress,
         address,
         operation,
-        maxPerMonth: this.config.maxPerAddressPerDay,
+        maxPerMonth: this.config.limits[operation],
       });
     } catch {
       throw Errors.RATE_LIMITER_UNAVAILABLE();

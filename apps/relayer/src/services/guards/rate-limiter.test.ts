@@ -41,7 +41,7 @@ beforeEach(() => {
   limiter = new RateLimiter(makeStore(), {
     daoName: DAO,
     governorAddress: GOVERNOR,
-    maxPerAddressPerDay: 3,
+    limits: { vote: 3, delegation: 3 },
   });
 });
 
@@ -79,6 +79,28 @@ describe("RateLimiter", () => {
     ).resolves.not.toThrow();
   });
 
+  it("enforces independent per-operation limits", async () => {
+    const limiter2 = new RateLimiter(makeStore(), {
+      daoName: DAO,
+      governorAddress: GOVERNOR,
+      limits: { vote: 2, delegation: 5 },
+    });
+
+    for (let i = 0; i < 2; i++) await limiter2.assertWithinLimit(ADDR, "vote");
+    await expect(
+      limiter2.assertWithinLimit(ADDR, "vote"),
+    ).rejects.toMatchObject({
+      code: "RATE_LIMITED",
+    });
+
+    // delegation has a higher limit and is unaffected by the exhausted vote bucket
+    for (let i = 0; i < 5; i++)
+      await limiter2.assertWithinLimit(ADDR, "delegation");
+    await expect(
+      limiter2.assertWithinLimit(ADDR, "delegation"),
+    ).rejects.toMatchObject({ code: "RATE_LIMITED" });
+  });
+
   it("throws RATE_LIMITER_UNAVAILABLE when store is unreachable", async () => {
     const brokenStore: RateLimitStorage = {
       incrementIfAllowed: () => Promise.reject(new Error("connection refused")),
@@ -88,7 +110,7 @@ describe("RateLimiter", () => {
     const brokenLimiter = new RateLimiter(brokenStore, {
       daoName: DAO,
       governorAddress: GOVERNOR,
-      maxPerAddressPerDay: 3,
+      limits: { vote: 3, delegation: 3 },
     });
 
     await expect(

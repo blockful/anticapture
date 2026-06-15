@@ -7,10 +7,14 @@ export const ConfigResponseSchema = z
       description:
         "Minimum voting power required to relay, as a decimal string (uint256).",
     }),
-    maxRelayPerAddressPerDay: z.number().int().min(0).openapi({
-      format: "bigint",
-      description:
-        "Maximum number of relays per address per UTC day, per operation.",
-    }),
+    limits: z
+      .object({
+        vote: z.number().int().min(0),
+        delegation: z.number().int().min(0),
+      })
+      .openapi({
+        description:
+          "Maximum number of relays per address per calendar month (UTC), per operation.",
+      }),
   })
   .openapi("RelayerConfigResponse");
