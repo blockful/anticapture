@@ -1,7 +1,11 @@
 import type { Context, Next } from "hono";
 
 import { logger } from "../logger.js";
-import type { AuthfulClient, UsageBatchEntry } from "./authful-client.js";
+import {
+  AuthfulResponseError,
+  type AuthfulClient,
+  type UsageBatchEntry,
+} from "./authful-client.js";
 
 const FLUSH_INTERVAL_MS = 30_000;
 
@@ -9,7 +13,11 @@ const FLUSH_INTERVAL_MS = 30_000;
  * Normalizes a request path to a bounded-cardinality route label:
  * - DAO routes keep the resource segment with the DAO templated out:
  *   `/ens/proposals/0x123` → `/{dao}/proposals`
- * - Aggregator routes keep only the first segment: `/address/0xabc` → `/address`
+ * - Any non-DAO first segment buckets to `/unknown`. Mirrors the cache
+ *   middleware: clients can send arbitrary paths (including ones that would
+ *   later 404), so passing them through verbatim would let a single caller
+ *   create unbounded route labels — and a poison label could wedge the whole
+ *   usage flush. Bucketing keeps cardinality (and the batch) bounded.
  */
 export function normalizeRoute(
   path: string,
@@ -20,7 +28,7 @@ export function normalizeRoute(
   if (daoApis.has(first.toLowerCase())) {
     return second ? `/{dao}/${second}` : "/{dao}";
   }
-  return `/${first}`;
+  return "/unknown";
 }
 
 /**
@@ -31,7 +39,10 @@ export function normalizeRoute(
  * Authful outage but not a Gateful restart — acceptable for usage insight.
  */
 export class UsageTracker {
-  private counts = new Map<string, number>();
+  // Keyed by a structured (token, route, hour) tuple, never a delimiter-joined
+  // string: routes can contain any character, so a `|`-joined key would not
+  // round-trip safely back into batch entries on flush.
+  private counts = new Map<string, UsageBatchEntry>();
   private timer?: NodeJS.Timeout;
 
   constructor(private readonly client: AuthfulClient) {}
@@ -39,8 +50,11 @@ export class UsageTracker {
   record(tokenId: string, route: string): void {
     const hour = new Date();
     hour.setUTCMinutes(0, 0, 0);
-    const key = `${tokenId}|${route}|${hour.toISOString()}`;
-    this.counts.set(key, (this.counts.get(key) ?? 0) + 1);
+    const hourIso = hour.toISOString();
+    const key = JSON.stringify([tokenId, route, hourIso]);
+    const existing = this.counts.get(key);
+    if (existing) existing.count += 1;
+    else this.counts.set(key, { tokenId, route, hour: hourIso, count: 1 });
   }
 
   start(): void {
@@ -60,23 +74,29 @@ export class UsageTracker {
     const snapshot = this.counts;
     this.counts = new Map();
 
-    const entries: UsageBatchEntry[] = [...snapshot.entries()].map(
-      ([key, count]) => {
-        const [tokenId, route, hour] = key.split("|") as [
-          string,
-          string,
-          string,
-        ];
-        return { tokenId, route, hour, count };
-      },
-    );
+    const entries = [...snapshot.values()];
 
     try {
       await this.client.recordUsageBatch(entries);
     } catch (err) {
-      // Re-buffer so counts are retried on the next interval.
-      for (const [key, count] of snapshot) {
-        this.counts.set(key, (this.counts.get(key) ?? 0) + count);
+      // A 4xx means Authful rejected the batch itself (e.g. a malformed
+      // entry) — retrying the same payload would fail forever and the buffer
+      // would grow unbounded, silently killing all usage tracking. Drop it.
+      // Only transient failures (network errors, 5xx) are worth re-buffering.
+      if (err instanceof AuthfulResponseError && err.status < 500) {
+        logger.error(
+          { err, status: err.status, entries: entries.length },
+          "usage batch rejected by Authful — dropping to avoid a poison loop",
+        );
+        return;
+      }
+
+      // Re-buffer so counts are retried on the next interval, merging with any
+      // entries recorded since the snapshot was taken.
+      for (const [key, entry] of snapshot) {
+        const existing = this.counts.get(key);
+        if (existing) existing.count += entry.count;
+        else this.counts.set(key, entry);
       }
       logger.warn(
         { err, entries: entries.length },

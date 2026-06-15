@@ -2,7 +2,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { describe, expect, it, vi } from "vitest";
 
 import type { AuthContext } from "./token-auth";
-import type { AuthfulClient } from "./authful-client";
+import { AuthfulResponseError, type AuthfulClient } from "./authful-client";
 import { UsageTracker, normalizeRoute, usageMiddleware } from "./usage";
 
 const DAO_APIS = new Map([["ens", "http://ens.internal"]]);
@@ -24,9 +24,14 @@ describe("normalizeRoute", () => {
     ["/ens/proposals/0x123", "/{dao}/proposals"],
     ["/ens/account-balances/0xabc", "/{dao}/account-balances"],
     ["/ens", "/{dao}"],
-    ["/daos", "/daos"],
-    ["/address/0xabc", "/address"],
     ["/", "/"],
+    // Any non-DAO first segment buckets to /unknown to bound cardinality.
+    ["/daos", "/unknown"],
+    ["/address/0xabc", "/unknown"],
+    ["/totally-made-up", "/unknown"],
+    // A first segment that could break a delimiter-joined buffer key is still
+    // bucketed, so it can never reach the batch as a poison label.
+    ["/a|b|c", "/unknown"],
   ])("normalizes %s to %s", (path, expected) => {
     expect(normalizeRoute(path, DAO_APIS)).toBe(expected);
   });
@@ -62,7 +67,7 @@ describe("UsageTracker", () => {
     expect(client.recordUsageBatch).not.toHaveBeenCalled();
   });
 
-  it("re-buffers counts when the flush fails", async () => {
+  it("re-buffers counts on a transient failure (network / 5xx)", async () => {
     const client = fakeClient(() => Promise.reject(new Error("down")));
     const tracker = new UsageTracker(client);
 
@@ -77,6 +82,58 @@ describe("UsageTracker", () => {
 
     const entries = client.recordUsageBatch.mock.calls[1]![0];
     expect(entries).toContainEqual(expect.objectContaining({ count: 2 }));
+  });
+
+  it("re-buffers on a 5xx response", async () => {
+    const client = fakeClient(() =>
+      Promise.reject(new AuthfulResponseError(503)),
+    );
+    const tracker = new UsageTracker(client);
+
+    tracker.record(AUTH.tokenId, "/daos");
+    await tracker.flush();
+
+    client.recordUsageBatch.mockImplementation(() => Promise.resolve());
+    await tracker.flush();
+    // The dropped-then-retried count made it through on the second flush.
+    expect(client.recordUsageBatch.mock.calls[1]![0]).toContainEqual(
+      expect.objectContaining({ count: 1 }),
+    );
+  });
+
+  it("drops the batch on a 4xx instead of re-buffering forever (no poison loop)", async () => {
+    const client = fakeClient(() =>
+      Promise.reject(new AuthfulResponseError(400)),
+    );
+    const tracker = new UsageTracker(client);
+
+    tracker.record(AUTH.tokenId, "/daos");
+    await tracker.flush();
+    expect(client.recordUsageBatch).toHaveBeenCalledTimes(1);
+
+    // The poison batch was dropped — the next flush has nothing to send,
+    // so the buffer is not stuck retrying a payload Authful will never accept.
+    client.recordUsageBatch.mockImplementation(() => Promise.resolve());
+    await tracker.flush();
+    expect(client.recordUsageBatch).toHaveBeenCalledTimes(1);
+  });
+
+  it("round-trips routes that contain the old delimiter character", async () => {
+    const client = fakeClient();
+    const tracker = new UsageTracker(client);
+
+    // Even though normalizeRoute never emits such a route, the buffer must
+    // preserve it verbatim rather than corrupt it on flush.
+    tracker.record(AUTH.tokenId, "/a|b|c");
+    await tracker.flush();
+
+    expect(client.recordUsageBatch.mock.calls[0]![0]).toContainEqual(
+      expect.objectContaining({
+        tokenId: AUTH.tokenId,
+        route: "/a|b|c",
+        count: 1,
+      }),
+    );
   });
 });
 

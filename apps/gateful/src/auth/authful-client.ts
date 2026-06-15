@@ -13,6 +13,18 @@ export type UsageBatchEntry = {
 
 const REQUEST_TIMEOUT_MS = 3_000;
 
+/**
+ * Raised when Authful answers with a non-2xx status. Carries the status so
+ * callers can distinguish a client error (4xx — the request itself is bad and
+ * will never succeed on retry) from a transient server/network failure.
+ */
+export class AuthfulResponseError extends Error {
+  constructor(readonly status: number) {
+    super(`authful returned ${status}`);
+    this.name = "AuthfulResponseError";
+  }
+}
+
 /** Thin HTTP client for the Authful internal surface (/validate, /usage/batch). */
 export class AuthfulClient {
   constructor(
@@ -28,7 +40,7 @@ export class AuthfulClient {
       body: JSON.stringify({ tokenHash }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    if (!res.ok) throw new Error(`authful /validate returned ${res.status}`);
+    if (!res.ok) throw new AuthfulResponseError(res.status);
     return (await res.json()) as TokenValidation;
   }
 
@@ -41,7 +53,7 @@ export class AuthfulClient {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) {
-      throw new Error(`authful /usage/batch returned ${res.status}`);
+      throw new AuthfulResponseError(res.status);
     }
     logger.debug({ entries: entries.length }, "usage batch flushed");
   }
