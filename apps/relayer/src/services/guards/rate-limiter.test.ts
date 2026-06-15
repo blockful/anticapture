@@ -18,12 +18,12 @@ function makeStore(): RateLimitStorage {
     async incrementIfAllowed({
       address,
       operation,
-      maxPerDay,
+      maxPerMonth,
     }: IncrementIfAllowedParams) {
       const id = `${address}:${operation}`;
       const next = (counters.get(id) ?? 0) + 1;
       counters.set(id, next);
-      return next <= maxPerDay;
+      return next <= maxPerMonth;
     },
     async getCount({ address, operation }) {
       return counters.get(`${address}:${operation}`) ?? 0;
@@ -48,7 +48,7 @@ describe("RateLimiter", () => {
     ).resolves.not.toThrow();
   });
 
-  it("blocks when daily limit is exceeded", async () => {
+  it("blocks when monthly limit is exceeded", async () => {
     for (let i = 0; i < 3; i++) await limiter.assertWithinLimit(ADDR, "vote");
 
     await expect(limiter.assertWithinLimit(ADDR, "vote")).rejects.toMatchObject(

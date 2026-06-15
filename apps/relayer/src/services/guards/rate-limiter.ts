@@ -35,7 +35,7 @@ export class RateLimiter implements IRateLimiter {
         governorAddress: this.config.governorAddress,
         address,
         operation,
-        maxPerDay: this.config.maxPerAddressPerDay,
+        maxPerMonth: this.config.maxPerAddressPerDay,
       });
     } catch {
       throw Errors.RATE_LIMITER_UNAVAILABLE();
