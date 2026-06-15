@@ -54,6 +54,8 @@ interface BaseInfo {
   };
   icon?: (props: DaoIconProps) => ReactNode;
   ogIcon: (props: { size: number; color?: string }) => ReactNode;
+  /** Decorative art for the right side of the whitelabel OG image; falls back to an oversized ogIcon */
+  ogArt?: (props: { height: number; color?: string }) => ReactNode;
   disableDaoPage?: boolean;
   notSupportedMetrics?: MetricTypesEnum[];
 }
