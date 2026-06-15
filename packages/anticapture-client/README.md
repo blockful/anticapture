@@ -156,9 +156,12 @@ Environment:
 
 - `ANTICAPTURE_API_URL` — upstream Gateful base URL (default
   `http://localhost:4001`).
-- `ANTICAPTURE_API_KEY` — bearer token sent to the upstream Gateful API.
-- `ANTICAPTURE_MCP_API_KEY` — bearer token required from inbound MCP HTTP
-  clients (omit to disable auth).
+- `ANTICAPTURE_API_KEY` — bearer token sent to the upstream Gateful API. Omit
+  when forwarding the caller's own token (`FORWARD_CLIENT_AUTH=true`).
+- `TOKEN_SERVICE_URL` / `INTERNAL_API_KEY` — Authful base URL and internal key.
+  When both are set, every inbound MCP request is authenticated against Authful
+  (the same per-tenant token store Gateful uses); invalid tokens get a `401`,
+  an unreachable Authful a `503`. Omit both to disable auth (dev only).
 - `PORT` / `HOST` — HTTP server bind (default `3100` / `0.0.0.0`).
 
 ### Wiring into Claude Desktop (stdio)

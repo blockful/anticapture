@@ -1,12 +1,14 @@
 import http from "node:http";
-import { randomUUID, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp";
 import { createMcpServer } from "./src/create-mcp-server.ts";
 import { configureUpstreamClient } from "./src/configure-upstream-client.ts";
 import { inboundAuthStorage } from "./src/request-context.ts";
+import { AuthfulClient, hashBearerToken } from "./src/authful-client.ts";
 import pino from "pino";
 
-const mcpApiKey = process.env["ANTICAPTURE_MCP_API_KEY"];
+const tokenServiceUrl = process.env["TOKEN_SERVICE_URL"];
+const internalApiKey = process.env["INTERNAL_API_KEY"];
 const port = Number(process.env["PORT"] ?? 3100);
 const host = process.env["HOST"] ?? "0.0.0.0";
 
@@ -17,16 +19,18 @@ configureUpstreamClient();
 
 const log = pino({ name: "anticapture-mcp" });
 
-log.info({ hasMcpKey: !!mcpApiKey, port, host }, "server starting");
+// Single source of identity: every inbound request is authenticated against
+// Authful (the same per-tenant token store Gateful uses), not a shared key.
+const authful =
+  tokenServiceUrl && internalApiKey
+    ? new AuthfulClient(tokenServiceUrl, internalApiKey)
+    : undefined;
 
-function isValidToken(token: string): boolean {
-  if (!mcpApiKey) return true;
-  try {
-    if (token.length !== mcpApiKey.length) return false;
-    return timingSafeEqual(Buffer.from(token), Buffer.from(mcpApiKey));
-  } catch {
-    return false;
-  }
+log.info({ authEnabled: !!authful, port, host }, "server starting");
+if (!authful) {
+  log.warn(
+    "TOKEN_SERVICE_URL/INTERNAL_API_KEY unset — Authful validation disabled, all requests allowed (dev only)",
+  );
 }
 
 async function getOrCreateTransport(
@@ -85,10 +89,11 @@ const httpServer = http.createServer(async (req, res) => {
     return;
   }
 
-  if (mcpApiKey) {
+  if (authful) {
     const auth = req.headers["authorization"];
     const token = auth?.startsWith("Bearer ") ? auth.slice(7) : "";
-    if (!isValidToken(token)) {
+
+    const reject401 = () => {
       res
         .writeHead(401, {
           "Content-Type": "application/json",
@@ -96,6 +101,29 @@ const httpServer = http.createServer(async (req, res) => {
         })
         .end(JSON.stringify({ error: "invalid_token" }));
       finish(401);
+    };
+
+    if (!token) {
+      reject401();
+      return;
+    }
+
+    let verdict;
+    try {
+      verdict = await authful.validate(hashBearerToken(token));
+    } catch (err) {
+      // Fail closed, but distinguish a token problem (401) from Authful being
+      // unreachable (503) so callers don't treat an outage as bad credentials.
+      log.error({ reqId, err: String(err) }, "authful validation failed");
+      res
+        .writeHead(503, { "Content-Type": "application/json" })
+        .end(JSON.stringify({ error: "auth_unavailable" }));
+      finish(503);
+      return;
+    }
+
+    if (!verdict.valid) {
+      reject401();
       return;
     }
   }
