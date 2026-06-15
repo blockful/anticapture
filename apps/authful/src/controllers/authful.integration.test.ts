@@ -97,6 +97,12 @@ describe("authful app", () => {
       const res = await app.request("/health");
       expect(res.status).toBe(200);
     });
+
+    it("exposes Prometheus metrics publicly", async () => {
+      const res = await app.request("/metrics");
+      expect(res.status).toBe(200);
+      expect(res.headers.get("content-type")).toContain("text/plain");
+    });
   });
 
   describe("POST /tokens", () => {

@@ -31,4 +31,4 @@ WORKDIR /app/apps/authful
 EXPOSE 4002
 # Apply pending migrations before serving — drizzle-kit migrate is a no-op
 # when the database is already up to date.
-ENTRYPOINT ["sh", "-c", "pnpm db:migrate && node dist/index.js"]
+ENTRYPOINT ["sh", "-c", "pnpm db:migrate && node --import ./dist/instrumentation.js dist/index.js"]

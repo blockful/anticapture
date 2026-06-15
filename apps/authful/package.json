@@ -6,8 +6,8 @@
   "main": "dist/index.js",
   "description": "Authful — per-tenant API token issuance, validation and usage tracking for Gateful",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
+    "dev": "tsx watch --import ./src/instrumentation.ts src/index.ts",
+    "start": "node --import ./dist/instrumentation.js dist/index.js",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -26,6 +26,7 @@
   "dependencies": {
     "@anticapture/observability": "workspace:*",
     "@hono/node-server": "^1.19.9",
+    "@opentelemetry/api": "^1.9.0",
     "@hono/swagger-ui": "^0.5.3",
     "@hono/zod-openapi": "^1.2.2",
     "dotenv": "^16.5.0",
