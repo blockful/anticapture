@@ -5,7 +5,11 @@ import type {
   IncrementIfAllowedParams,
   RateLimitStorage,
 } from "@/repository/rate-limit-storage";
-import { RateLimiter } from "./rate-limiter";
+import {
+  RateLimiter,
+  resolveRelayLimits,
+  DEFAULT_RELAY_LIMIT,
+} from "./rate-limiter";
 
 const DAO = "ens";
 const GOVERNOR = getAddress("0x323A76393544d5ecca80cd6ef2A560C6a395b7E3");
@@ -90,5 +94,35 @@ describe("RateLimiter", () => {
     await expect(
       brokenLimiter.assertWithinLimit(ADDR, "vote"),
     ).rejects.toMatchObject({ code: "RATE_LIMITER_UNAVAILABLE" });
+  });
+});
+
+describe("resolveRelayLimits", () => {
+  it("falls back to DEFAULT_RELAY_LIMIT for both when nothing is set", () => {
+    expect(resolveRelayLimits({})).toEqual({
+      vote: DEFAULT_RELAY_LIMIT,
+      delegation: DEFAULT_RELAY_LIMIT,
+    });
+  });
+
+  it("uses the votes override and defaults delegation", () => {
+    expect(resolveRelayLimits({ votes: 10 })).toEqual({
+      vote: 10,
+      delegation: DEFAULT_RELAY_LIMIT,
+    });
+  });
+
+  it("uses the delegations override and defaults vote", () => {
+    expect(resolveRelayLimits({ delegations: 7 })).toEqual({
+      vote: DEFAULT_RELAY_LIMIT,
+      delegation: 7,
+    });
+  });
+
+  it("uses both overrides when both are set", () => {
+    expect(resolveRelayLimits({ votes: 10, delegations: 7 })).toEqual({
+      vote: 10,
+      delegation: 7,
+    });
   });
 });
