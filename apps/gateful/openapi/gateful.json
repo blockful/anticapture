@@ -2855,14 +2855,17 @@
             "format": "bigint",
             "description": "Minimum voting power required to relay, as a decimal string (uint256)."
           },
-          "maxRelayPerAddressPerDay": {
-            "type": "integer",
-            "minimum": 0,
-            "format": "bigint",
-            "description": "Maximum number of relays per address per UTC day, per operation."
+          "limits": {
+            "type": "object",
+            "properties": {
+              "vote": { "type": "integer", "minimum": 0 },
+              "delegation": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["vote", "delegation"],
+            "description": "Maximum number of relays per address per calendar month (UTC), per operation."
           }
         },
-        "required": ["minVotingPower", "maxRelayPerAddressPerDay"]
+        "required": ["minVotingPower", "limits"]
       },
       "RelayerRateLimitResponse": {
         "type": "object",
@@ -2871,45 +2874,31 @@
             "type": "string",
             "description": "EIP-55 checksummed Ethereum address."
           },
-          "maxPerDay": {
-            "type": "integer",
-            "minimum": 0
-          },
           "vote": {
             "type": "object",
             "properties": {
-              "used": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "remaining": {
-                "type": "integer",
-                "minimum": 0
-              }
+              "used": { "type": "integer", "minimum": 0 },
+              "remaining": { "type": "integer", "minimum": 0 },
+              "limit": { "type": "integer", "minimum": 0 }
             },
-            "required": ["used", "remaining"]
+            "required": ["used", "remaining", "limit"]
           },
           "delegation": {
             "type": "object",
             "properties": {
-              "used": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "remaining": {
-                "type": "integer",
-                "minimum": 0
-              }
+              "used": { "type": "integer", "minimum": 0 },
+              "remaining": { "type": "integer", "minimum": 0 },
+              "limit": { "type": "integer", "minimum": 0 }
             },
-            "required": ["used", "remaining"]
+            "required": ["used", "remaining", "limit"]
           },
           "resetsAt": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO 8601 timestamp of the next UTC-midnight reset."
+            "description": "ISO 8601 timestamp of the next UTC month start."
           }
         },
-        "required": ["address", "maxPerDay", "vote", "delegation", "resetsAt"]
+        "required": ["address", "vote", "delegation", "resetsAt"]
       },
       "RelayerBalanceResponse": {
         "type": "object",
