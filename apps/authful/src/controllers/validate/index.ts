@@ -15,6 +15,7 @@ export function validateController(app: Hono, service: TokensService) {
       tags: ["internal"],
       request: {
         body: {
+          required: true,
           content: { "application/json": { schema: ValidateBodySchema } },
         },
       },

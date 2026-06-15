@@ -112,6 +112,30 @@ describe("authful app", () => {
       expect(JSON.stringify(row)).not.toContain(body.token);
     });
 
+    it("rejects a body sent without a JSON content-type (no silent {})", async () => {
+      // Regression: without `required: true`, @hono/zod-openapi skips
+      // validation for a non-JSON content-type and substitutes {}, so mint
+      // would generate a token with a null tenant and hit a NOT NULL violation.
+      const res = await app.request("/tokens", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${ADMIN_KEY}` }, // form-encoded default
+        body: "tenant=uniswap&name=uniswap+mcp",
+      });
+      expect(res.status).toBe(400);
+
+      const rows = await db.select().from(tokens);
+      expect(rows).toHaveLength(0);
+    });
+
+    it("rejects an empty JSON body (missing tenant/name)", async () => {
+      const res = await app.request("/tokens", {
+        method: "POST",
+        headers: adminHeaders,
+        body: JSON.stringify({}),
+      });
+      expect(res.status).toBe(400);
+    });
+
     it("seeds an existing plaintext credential (migration path)", async () => {
       const legacyKey = "legacy-uniswap-shared-key-123456";
       const body = await mint({ plaintext: legacyKey, rateLimitPerMin: 1200 });

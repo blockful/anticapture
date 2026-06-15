@@ -18,6 +18,7 @@ export function usageController(app: Hono, service: TokensService) {
       tags: ["internal"],
       request: {
         body: {
+          required: true,
           content: { "application/json": { schema: UsageBatchBodySchema } },
         },
       },

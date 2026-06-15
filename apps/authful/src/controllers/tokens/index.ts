@@ -22,6 +22,7 @@ export function tokensController(app: Hono, service: TokensService) {
       tags: ["tokens"],
       request: {
         body: {
+          required: true,
           content: { "application/json": { schema: MintTokenBodySchema } },
         },
       },
