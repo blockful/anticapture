@@ -6,6 +6,7 @@ export const TabGroup = ({
   tabs,
   activeTab,
   size = "sm",
+  variant = "underline",
   onTabChange,
   className,
 }: TabGroupProps) => {
@@ -15,8 +16,8 @@ export const TabGroup = ({
       className={cn(
         // Base/layout — horizontal row, gap-xsm (8px) from Figma token
         "flex items-center gap-2",
-        // Bottom border — borders/default token
-        "border-border-default border-b",
+        // Bottom border — borders/default token (underline variant only)
+        variant === "underline" && "border-border-default border-b",
         // Allow overrides
         className,
       )}
@@ -27,6 +28,7 @@ export const TabGroup = ({
           label={tab.label}
           isActive={activeTab === tab.value}
           size={size}
+          variant={variant}
           badge={tab.badge}
           onClick={() => onTabChange?.(tab.value)}
         />

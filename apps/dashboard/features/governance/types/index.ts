@@ -45,9 +45,11 @@ export enum ProposalState {
 export interface Votes {
   for: string;
   against: string;
+  abstain: string;
   total: string;
   forPercentage: string;
   againstPercentage: string;
+  abstainPercentage: string;
 }
 
 export type ProposalListItem = ClientProposalListItem;

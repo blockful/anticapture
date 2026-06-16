@@ -4,14 +4,48 @@ import daoConfig from "@/shared/dao-config";
 import { loadLocalFonts } from "@/shared/og/fonts";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-const DAO_ICON_SIZE = 300;
+const LOGO_SIZE = 180;
+const ART_SIZE = 760;
 const OG_DIMENSIONS = { width: 1200, height: 630 } as const;
 
-export async function createWhitelabelOgImage(daoId: DaoIdEnum) {
+// Background is a light tint of the DAO brand color (≈24% brand over white),
+// matching the DAO surface-2 tone from the Figma spec.
+const BACKGROUND_TINT_RATIO = 0.24;
+
+const mixWithWhite = (hex: string, ratio: number) => {
+  const normalized = hex.replace("#", "");
+  const value =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((char) => char + char)
+          .join("")
+      : normalized;
+
+  const channels = [0, 2, 4].map((offset) => {
+    const channel = parseInt(value.slice(offset, offset + 2), 16);
+    return Math.round(channel * ratio + 255 * (1 - ratio));
+  });
+
+  return `#${channels.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+};
+
+const getTitleFontSize = (title: string) => {
+  if (title.length <= 12) return 124;
+  if (title.length <= 18) return 96;
+  return 72;
+};
+
+export async function createWhitelabelOgImage(
+  daoId: DaoIdEnum,
+  pageTitle: string = "Governance",
+  subtitle: string = "Gov Interface",
+) {
   const config = daoConfig[daoId];
   const brandColor = config.color.svgColor;
-  const background = "#FAFAFA";
+  const background = mixWithWhite(brandColor, BACKGROUND_TINT_RATIO);
   const DaoOgIcon = config.ogIcon;
+  const DaoOgArt = config.ogArt;
 
   return new ImageResponse(
     <div
@@ -19,84 +53,90 @@ export async function createWhitelabelOgImage(daoId: DaoIdEnum) {
         width: "100%",
         height: "100%",
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 32,
         backgroundColor: background,
-        padding: 48,
+        padding: 40,
         position: "relative",
+        overflow: "hidden",
       }}
     >
-      {/* Corner brackets */}
-      <div
-        style={{
-          position: "absolute",
-          top: 24,
-          left: 24,
-          width: 24,
-          height: 24,
-          borderLeft: `3px solid ${brandColor}`,
-          borderTop: `3px solid ${brandColor}`,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: 24,
-          right: 24,
-          width: 24,
-          height: 24,
-          borderRight: `3px solid ${brandColor}`,
-          borderTop: `3px solid ${brandColor}`,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: 24,
-          left: 24,
-          width: 24,
-          height: 24,
-          borderLeft: `3px solid ${brandColor}`,
-          borderBottom: `3px solid ${brandColor}`,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: 24,
-          right: 24,
-          width: 24,
-          height: 24,
-          borderRight: `3px solid ${brandColor}`,
-          borderBottom: `3px solid ${brandColor}`,
-        }}
-      />
+      {/* DAO art anchored to the right edge; falls back to an oversized brand mark */}
+      {DaoOgArt ? (
+        <div
+          style={{
+            position: "absolute",
+            display: "flex",
+            right: 0,
+            top: 0,
+            height: OG_DIMENSIONS.height,
+          }}
+        >
+          <DaoOgArt height={OG_DIMENSIONS.height} color={brandColor} />
+        </div>
+      ) : (
+        <div
+          style={{
+            position: "absolute",
+            display: "flex",
+            width: ART_SIZE,
+            height: ART_SIZE,
+            right: -120,
+            top: (OG_DIMENSIONS.height - ART_SIZE) / 2,
+          }}
+        >
+          <DaoOgIcon size={ART_SIZE} color={brandColor} />
+        </div>
+      )}
 
       <div
         style={{
           display: "flex",
-          width: DAO_ICON_SIZE,
-          height: DAO_ICON_SIZE,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          height: "100%",
         }}
       >
-        <DaoOgIcon size={DAO_ICON_SIZE} color={brandColor} />
-      </div>
+        {/* DAO logo, top-left */}
+        <div
+          style={{
+            display: "flex",
+            width: LOGO_SIZE,
+            height: LOGO_SIZE,
+          }}
+        >
+          <DaoOgIcon size={LOGO_SIZE} color={brandColor} />
+        </div>
 
-      <span
-        style={{
-          color: brandColor,
-          fontFamily: "Roboto Mono, monospace",
-          fontSize: 72,
-          fontWeight: 500,
-          letterSpacing: "0.1em",
-          lineHeight: 1.24,
-          textTransform: "uppercase",
-        }}
-      >
-        {"<governance>"}
-      </span>
+        {/* Fixed product label + current page title, bottom-left */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            color: brandColor,
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 600,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 36,
+              letterSpacing: "0.08em",
+              lineHeight: 1.2,
+              textTransform: "uppercase",
+            }}
+          >
+            {subtitle}
+          </span>
+          <span
+            style={{
+              fontSize: getTitleFontSize(pageTitle),
+              lineHeight: 1.2,
+            }}
+          >
+            {pageTitle}
+          </span>
+        </div>
+      </div>
     </div>,
     {
       ...OG_DIMENSIONS,
