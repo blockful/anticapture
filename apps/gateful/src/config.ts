@@ -3,13 +3,19 @@ import { z } from "zod";
 
 dotenv.config();
 
-const envSchema = z
+export const envSchema = z
   .object({
     PORT: z.coerce.number().default(4001),
     ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
     BLOCKFUL_API_TOKEN: z.string().optional(),
     // Per-tenant token auth via Authful; replaces the legacy single-token guard.
-    TOKEN_SERVICE_URL: z.url().optional(),
+    // Trim trailing slashes so a value like `https://authful/` does not produce
+    // `//validate` downstream, which Hono serves as a 404 — making Authful look
+    // unavailable for every uncached validation.
+    TOKEN_SERVICE_URL: z
+      .url()
+      .transform((url) => url.replace(/\/+$/, ""))
+      .optional(),
     TOKEN_SERVICE_API_KEY: z.string().optional(),
     CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
     CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),

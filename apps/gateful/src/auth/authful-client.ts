@@ -39,10 +39,9 @@ export class AuthfulClient {
     baseUrl: string,
     private readonly apiKey: string,
   ) {
-    // Trim trailing slashes so a configured URL like `https://authful/` does
-    // not produce `//validate`, which Hono serves as a 404 — making Authful
-    // look unavailable (503) for every uncached validation.
-    this.baseUrl = baseUrl.replace(/\/+$/, "");
+    // baseUrl is normalized upstream (TOKEN_SERVICE_URL in config.ts trims
+    // trailing slashes) so `${baseUrl}/validate` never produces `//validate`.
+    this.baseUrl = baseUrl;
   }
 
   /** Throws on network/HTTP failure — the caller decides the failure policy. */

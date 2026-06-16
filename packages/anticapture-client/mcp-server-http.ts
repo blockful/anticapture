@@ -5,12 +5,13 @@ import { createMcpServer } from "./src/create-mcp-server.ts";
 import { configureUpstreamClient } from "./src/configure-upstream-client.ts";
 import { inboundAuthStorage } from "./src/request-context.ts";
 import { AuthfulClient, hashBearerToken } from "./src/authful-client.ts";
+import { env } from "./src/env.ts";
 import pino from "pino";
 
-const tokenServiceUrl = process.env["TOKEN_SERVICE_URL"];
-const tokenServiceApiKey = process.env["TOKEN_SERVICE_API_KEY"];
-const port = Number(process.env["PORT"] ?? 3100);
-const host = process.env["HOST"] ?? "0.0.0.0";
+const tokenServiceUrl = env.TOKEN_SERVICE_URL;
+const tokenServiceApiKey = env.TOKEN_SERVICE_API_KEY;
+const port = env.PORT;
+const host = env.HOST;
 
 const sessions = new Map<string, StreamableHTTPServerTransport>();
 let shuttingDown = false;

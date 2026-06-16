@@ -1,11 +1,12 @@
 import { axiosInstance, setConfig } from "@kubb/plugin-client/clients/axios";
 
 import { inboundAuthStorage } from "./request-context.ts";
+import { env } from "./env.ts";
 
 export function configureUpstreamClient(): void {
-  const baseURL = process.env["ANTICAPTURE_API_URL"] ?? "http://localhost:4001";
-  const apiKey = process.env["ANTICAPTURE_API_KEY"];
-  const forwardClientAuth = process.env["FORWARD_CLIENT_AUTH"] === "true";
+  const baseURL = env.ANTICAPTURE_API_URL;
+  const apiKey = env.ANTICAPTURE_API_KEY;
+  const forwardClientAuth = env.FORWARD_CLIENT_AUTH;
 
   // When forwarding client auth, never install the shared upstream key:
   // requests without an inbound Authorization must reach Gateful anonymous
