@@ -4,6 +4,7 @@ import type { Context, Next } from "hono";
 
 import { logger } from "../logger.js";
 import { safeParse } from "../shared/safe-parse.js";
+import { TokenValidationSchema } from "./authful-client.js";
 import type { AuthfulClient, TokenValidation } from "./authful-client.js";
 
 export type AuthContext = {
@@ -64,7 +65,9 @@ export function tokenAuthMiddleware({
       logger.warn({ err }, "token cache read failed");
       return null;
     });
-    const cached = cachedRaw ? safeParse<TokenValidation>(cachedRaw) : null;
+    // Validate the cached shape too: a corrupted/legacy entry is treated as a
+    // miss and revalidated, never trusted into an auth context.
+    const cached = cachedRaw ? parseCachedVerdict(cachedRaw) : null;
 
     const verdict = cached ?? (await validateRemote(client, tokenHash));
     if (verdict === null) {
@@ -89,6 +92,13 @@ export function tokenAuthMiddleware({
     });
     return next();
   };
+}
+
+function parseCachedVerdict(raw: string): TokenValidation | null {
+  const json = safeParse<unknown>(raw);
+  if (json === null) return null;
+  const result = TokenValidationSchema.safeParse(json);
+  return result.success ? result.data : null;
 }
 
 async function validateRemote(

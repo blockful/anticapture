@@ -1,8 +1,23 @@
+import { z } from "zod";
+
 import { logger } from "../logger.js";
 
-export type TokenValidation =
-  | { valid: false }
-  | { valid: true; tokenId: string; tenant: string; rateLimitPerMin: number };
+/**
+ * Authful's `/validate` response. Validated at the boundary (rather than cast)
+ * so a first-party service returning an unexpected shape is treated as a failed
+ * validation, never silently trusted into an auth context.
+ */
+export const TokenValidationSchema = z.discriminatedUnion("valid", [
+  z.object({ valid: z.literal(false) }),
+  z.object({
+    valid: z.literal(true),
+    tokenId: z.string(),
+    tenant: z.string(),
+    rateLimitPerMin: z.number().int(),
+  }),
+]);
+
+export type TokenValidation = z.infer<typeof TokenValidationSchema>;
 
 export type UsageBatchEntry = {
   tokenId: string;
@@ -27,10 +42,17 @@ export class AuthfulResponseError extends Error {
 
 /** Thin HTTP client for the Authful internal surface (/validate, /usage/batch). */
 export class AuthfulClient {
+  private readonly baseUrl: string;
+
   constructor(
-    private readonly baseUrl: string,
+    baseUrl: string,
     private readonly apiKey: string,
-  ) {}
+  ) {
+    // Trim trailing slashes so a configured URL like `https://authful/` does
+    // not produce `//validate`, which Hono serves as a 404 — making Authful
+    // look unavailable (503) for every uncached validation.
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
+  }
 
   /** Throws on network/HTTP failure — the caller decides the failure policy. */
   async validate(tokenHash: string): Promise<TokenValidation> {
@@ -41,7 +63,7 @@ export class AuthfulClient {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) throw new AuthfulResponseError(res.status);
-    return (await res.json()) as TokenValidation;
+    return TokenValidationSchema.parse(await res.json());
   }
 
   /** Throws on failure — the usage tracker re-buffers and retries later. */
