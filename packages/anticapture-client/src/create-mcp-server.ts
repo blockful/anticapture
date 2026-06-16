@@ -111,9 +111,6 @@ import {
   delegatorsQueryResponseSchema,
   feedEventsQueryParamsSchema,
   feedEventsQueryResponseSchema,
-  getAddressQueryResponseSchema,
-  getAddressesQueryParamsSchema,
-  getAddressesQueryResponseSchema,
   averageDelegationPercentageQueryParamsSchema,
   averageDelegationPercentageQueryResponseSchema,
   daosQueryResponseSchema,
@@ -178,8 +175,11 @@ import {
   votingPowerVariationsQueryResponseSchema,
   votingPowersQueryParamsSchema,
   votingPowersQueryResponseSchema,
+  getAddressQueryResponseSchema,
+  getAddressesQueryResponseSchema,
+  getAddressesQueryParamsSchema,
 } from "../generated/zod.ts";
-import type { Address } from "../generated/models.ts";
+import { Address } from "../generated/models.ts";
 
 const DAO_ALL = [
   "aave",

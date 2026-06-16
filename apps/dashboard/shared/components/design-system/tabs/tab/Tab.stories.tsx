@@ -28,6 +28,12 @@ const meta: Meta<TabStoryArgs> = {
       options: ["sm", "md"],
       description: "Size variant — sm (12px) or md (14px)",
     },
+    variant: {
+      control: "select",
+      options: ["underline", "button"],
+      description:
+        "Visual variant — underline (default) or button (bordered pill; active state uses the brand/highlight tokens, so whitelabel themes get the DAO color automatically)",
+    },
     badge: {
       control: "text",
       description:
@@ -122,6 +128,36 @@ export const Sizes: Story = {
           />
         </div>
         <span className="text-secondary text-xs">MD — 14px</span>
+      </div>
+    </div>
+  ),
+};
+
+export const ButtonVariant: Story = {
+  args: {
+    showBadge: false,
+  },
+  render: ({ showBadge }) => (
+    <div className="flex items-center gap-8">
+      <div className="flex flex-col items-center gap-2">
+        <Tab
+          label="All Proposals"
+          variant="button"
+          size="md"
+          isActive={true}
+          badge={showBadge ? 3 : undefined}
+        />
+        <span className="text-secondary text-xs">Active</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <Tab
+          label="My Drafts"
+          variant="button"
+          size="md"
+          isActive={false}
+          badge={showBadge ? 3 : undefined}
+        />
+        <span className="text-secondary text-xs">Inactive</span>
       </div>
     </div>
   ),

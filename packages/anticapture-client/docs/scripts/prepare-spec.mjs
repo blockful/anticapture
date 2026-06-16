@@ -1,12 +1,14 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 
-// Source: the committed Gateful spec at the repo root.
-const SOURCE = new URL(
-  "../../../../apps/gateful/openapi/gateful.json",
-  import.meta.url,
-);
+import { resolveGatefulOpenApiSpecUrl } from "./gateful-openapi-spec.mjs";
+
+// Always read from the live Gateful spec URL — never a local committed file —
+// so docs and codegen generate from the same source. The resolver is a local
+// inline copy (see gateful-openapi-spec.mjs) because this script runs in a
+// turbo-pruned image without the sibling @anticapture/client package.
+const SOURCE = resolveGatefulOpenApiSpecUrl();
 // Output: a filtered copy the OpenAPI plugin generates from. Gitignored and
 // regenerated on every build (see docusaurus.config.ts `GATEFUL_SPEC`).
 const OUT = new URL("../openapi/gateful.json", import.meta.url);
@@ -17,7 +19,19 @@ const OUT = new URL("../openapi/gateful.json", import.meta.url);
 // helpers (which are tagged `system`, so a tag-based filter would miss them).
 const isRelayPath = (p) => p.split("/").includes("relay");
 
-const spec = JSON.parse(await readFile(SOURCE, "utf8"));
+const readSpec = async (source) => {
+  const response = await fetch(source);
+
+  if (!response.ok) {
+    throw new Error(
+      `Unable to fetch Gateful OpenAPI spec from ${source}: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  return response.json();
+};
+
+const spec = await readSpec(SOURCE);
 
 const before = Object.keys(spec.paths).length;
 spec.paths = Object.fromEntries(
@@ -34,5 +48,5 @@ await mkdir(dirname(fileURLToPath(OUT)), { recursive: true });
 await writeFile(OUT, JSON.stringify(spec, null, 2) + "\n");
 
 console.log(
-  `[prepare-spec] removed ${removed} relayer path(s); wrote ${fileURLToPath(OUT)}`,
+  `[prepare-spec] read ${SOURCE}; removed ${removed} relayer path(s); wrote ${fileURLToPath(OUT)}`,
 );

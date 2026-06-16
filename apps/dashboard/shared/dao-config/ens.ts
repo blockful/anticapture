@@ -6,7 +6,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
-import { EnsOgIcon } from "@/shared/og/dao-og-icons";
+import { EnsOgArt, EnsOgIcon } from "@/shared/og/dao-og-icons";
 import {
   RiskLevel,
   GovernanceImplementationEnum,
@@ -24,6 +24,7 @@ export const ENS: DaoConfiguration = {
   forumLink: "https://discuss.ens.domains/",
   icon: EnsIcon,
   ogIcon: EnsOgIcon,
+  ogArt: EnsOgArt,
   hostnames: ["ens.gov.blockful.io"],
   whitelabel: {},
   daoOverview: {

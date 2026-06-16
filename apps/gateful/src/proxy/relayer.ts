@@ -1,6 +1,9 @@
 import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { proxy as honoProxy } from "hono/proxy";
+
+import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
+
 const PROXY_TIMEOUT_MS = 30000;
 
 /**
@@ -11,6 +14,7 @@ const PROXY_TIMEOUT_MS = 30000;
 export function relayerProxy(
   app: OpenAPIHono,
   daoRelayers: Map<string, string>,
+  registry: CircuitBreakerRegistry,
 ) {
   app.all("/:dao{[^/]+}/relay/*", handler);
   app.all("/:dao{[^/]+}/config", handler);
@@ -30,9 +34,16 @@ export function relayerProxy(
     const upstreamPath = c.req.path.replace(`/${paramDao}`, "");
     const url = new URL(upstreamPath, relayerUrl);
     url.search = new URL(c.req.url).search;
-    return honoProxy(url.toString(), {
-      ...c.req,
-      signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
+
+    return registry.get(`relayer:${dao}`).execute(async () => {
+      const res = await honoProxy(url.toString(), {
+        ...c.req,
+        signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
+      });
+      if (res.status >= 500) {
+        throw new Error(`Upstream relayer:${dao} returned ${res.status}`);
+      }
+      return res;
     });
   }
 }

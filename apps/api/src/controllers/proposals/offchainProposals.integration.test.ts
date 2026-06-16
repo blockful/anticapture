@@ -4,6 +4,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import type { UnifiedDrizzle } from "@/database";
+import * as generalSchema from "@/database/general-schema";
 import * as schema from "@/database/schema";
 import * as offchainSchema from "@/database/offchain-schema";
 import { offchainProposals } from "@/database/offchain-schema";
@@ -63,7 +64,7 @@ const BASE_PROPOSAL_ITEM = {
 
 beforeAll(async () => {
   client = new PGlite();
-  const unifiedSchema = { ...schema, ...offchainSchema };
+  const unifiedSchema = { ...schema, ...offchainSchema, ...generalSchema };
   db = drizzle(client, { schema: unifiedSchema });
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   const { apply } = await pushSchema(unifiedSchema, db as any);

@@ -7,9 +7,10 @@ import { useMemo } from "react";
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
 
+import { ProposalSourceBadge } from "@/features/governance/components/proposal-overview/ProposalSourceBadge";
 import type { OffchainProposalItem as OffchainProposalData } from "@/features/governance/hooks/useOffchainProposals";
 import type { Proposal } from "@/features/governance/types";
-import { ProposalStatus } from "@/features/governance/types";
+import { ProposalState, ProposalStatus } from "@/features/governance/types";
 import { getTimeText } from "@/features/governance/utils/getTimeText";
 import {
   getOffchainProposalStatus,
@@ -17,7 +18,9 @@ import {
   normalizeScores,
 } from "@/features/governance/utils/offchainProposal";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { BulletDivider } from "@/shared/components/design-system/section";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -172,32 +175,26 @@ const ProposalVoterBadge = ({
 
   if (supportValue === undefined) return null;
 
+  const variant =
+    supportValue === 1 ? "success" : supportValue === 0 ? "error" : "dimmed";
+  const icon =
+    supportValue === 1
+      ? CheckCircle2
+      : supportValue === 0
+        ? XCircle
+        : CircleMinus;
+
   return (
     <>
       <BulletDivider />
-      <span className="flex items-center gap-1 font-medium">
-        {supportValue === 1 && (
-          <CheckCircle2 className="text-success size-3.5" />
-        )}
-        {supportValue === 0 && <XCircle className="text-error size-3.5" />}
-        {supportValue === 2 && (
-          <CircleMinus className="text-secondary size-3.5" />
-        )}
-        <span
-          className={cn(
-            supportValue === 1 && "text-success",
-            supportValue === 0 && "text-error",
-            supportValue === 2 && "text-secondary",
-          )}
-        >
-          You voted{" "}
-          {supportValue === 1
-            ? "For"
-            : supportValue === 0
-              ? "Against"
-              : "Abstain"}
-        </span>
-      </span>
+      <BadgeStatus variant={variant} icon={icon}>
+        You voted{" "}
+        {supportValue === 1
+          ? "For"
+          : supportValue === 0
+            ? "Against"
+            : "Abstain"}
+      </BadgeStatus>
     </>
   );
 };
@@ -216,8 +213,13 @@ export const ProposalItem = ({
   const {
     offchainScores,
     totalOffchainVotes,
+    offchainForVotes,
+    offchainAgainstVotes,
+    offchainAbstainVotes,
     offchainForPercentage,
     offchainAgainstPercentage,
+    offchainAbstainPercentage,
+    leadingChoice,
   } = useMemo(() => {
     const scores = normalizeScores(offchainProposal?.scores);
     const choices = normalizeChoices(offchainProposal?.choices);
@@ -226,8 +228,13 @@ export const ProposalItem = ({
       return {
         offchainScores: scores,
         totalOffchainVotes: 0,
+        offchainForVotes: 0,
+        offchainAgainstVotes: 0,
+        offchainAbstainVotes: 0,
         offchainForPercentage: 0,
         offchainAgainstPercentage: 0,
+        offchainAbstainPercentage: 0,
+        leadingChoice: null,
       };
 
     const items = choices.map((label, i) => ({
@@ -244,12 +251,26 @@ export const ProposalItem = ({
     const againstItem = withPct.find(
       (c) => c.label.toLowerCase() === "against",
     );
+    const abstainItem = withPct.find(
+      (c) => c.label.toLowerCase() === "abstain",
+    );
+
+    // Polls with more than two options surface which option is leading
+    const leading =
+      withPct.length > 2 && total > 0
+        ? withPct.reduce((max, c) => (c.score > max.score ? c : max))
+        : null;
 
     return {
       offchainScores: scores,
       totalOffchainVotes: total,
+      offchainForVotes: forItem?.score ?? 0,
+      offchainAgainstVotes: againstItem?.score ?? 0,
+      offchainAbstainVotes: abstainItem?.score ?? 0,
       offchainForPercentage: forItem?.percentage ?? 0,
       offchainAgainstPercentage: againstItem?.percentage ?? 0,
+      offchainAbstainPercentage: abstainItem?.percentage ?? 0,
+      leadingChoice: leading,
     };
   }, [offchainProposal?.scores, offchainProposal?.choices, offchainProposal]);
 
@@ -276,6 +297,7 @@ export const ProposalItem = ({
         })}
         className={cn(
           "text-primary bg-surface-default hover:bg-surface-contrast rounded-base relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
+          status === ProposalStatus.CANCELED && "opacity-70",
           className,
         )}
         prefetch={true}
@@ -290,7 +312,8 @@ export const ProposalItem = ({
 
         <div className="flex w-full flex-col items-start justify-between gap-0.5 lg:w-auto">
           <h3 className="text-primary">{offchainProposal.title}</h3>
-          <div className="font-inter text-secondary flex items-center justify-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
+          <div className="font-inter text-secondary flex flex-wrap items-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
+            <ProposalSourceBadge source="offchain" />
             <p className={getTextStatusColor(status)}>
               {getStatusText(status)}
             </p>
@@ -298,7 +321,7 @@ export const ProposalItem = ({
             <p>{timeText}</p>
             <BulletDivider />
             <span>
-              by{" "}
+              By{" "}
               <EnsAvatar
                 address={offchainProposal.author as Address}
                 showAvatar={false}
@@ -308,14 +331,14 @@ export const ProposalItem = ({
           </div>
         </div>
 
-        <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
-          <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
-            <p className={cn("whitespace-nowrap", !isBasic && "ml-auto")}>
-              {totalOffchainVotes > 0
-                ? `${formatNumberUserReadable(totalOffchainVotes)} votes`
-                : "No votes yet"}
-            </p>
-            {isBasic ? (
+        {isBasic ? (
+          <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
+            <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
+              <p className="whitespace-nowrap">
+                {totalOffchainVotes > 0
+                  ? `${formatNumberUserReadable(totalOffchainVotes)} votes`
+                  : "No votes yet"}
+              </p>
               <div className="flex items-center justify-center gap-2">
                 <div className="flex items-center justify-center gap-2">
                   <CheckCircle2 className="text-success size-4" />
@@ -326,24 +349,71 @@ export const ProposalItem = ({
                   <p>{offchainAgainstPercentage.toFixed(0)}%</p>
                 </div>
               </div>
+            </div>
+
+            <Tooltip
+              asChild
+              disableMobileClick
+              triggerClassName="w-full"
+              tooltipContent={
+                <div className="flex flex-col gap-0.5 text-xs">
+                  <span>
+                    For: {formatNumberUserReadable(offchainForVotes)} (
+                    {offchainForPercentage.toFixed(0)}%)
+                  </span>
+                  <span>
+                    Against: {formatNumberUserReadable(offchainAgainstVotes)} (
+                    {offchainAgainstPercentage.toFixed(0)}%)
+                  </span>
+                  <span>
+                    Abstain: {formatNumberUserReadable(offchainAbstainVotes)} (
+                    {offchainAbstainPercentage.toFixed(0)}%)
+                  </span>
+                </div>
+              }
+            >
+              <div className="flex w-full items-center justify-center gap-2">
+                <div className="bg-surface-hover relative flex h-1 w-full overflow-hidden">
+                  <div
+                    style={{ width: `${offchainForPercentage}%` }}
+                    className={cn(
+                      "bg-success h-full transition-[width] duration-300",
+                      offchainForVotes > 0 && "min-w-[2px]",
+                    )}
+                  />
+                  <div
+                    style={{ width: `${offchainAgainstPercentage}%` }}
+                    className={cn(
+                      "bg-error h-full transition-[width] duration-300",
+                      offchainAgainstVotes > 0 && "min-w-[2px]",
+                    )}
+                  />
+                  <div
+                    style={{ width: `${offchainAbstainPercentage}%` }}
+                    className={cn(
+                      "bg-secondary h-full transition-[width] duration-300",
+                      offchainAbstainVotes > 0 && "min-w-[2px]",
+                    )}
+                  />
+                </div>
+              </div>
+            </Tooltip>
+          </div>
+        ) : (
+          <div className="font-inter text-secondary flex w-full shrink-0 flex-col items-end justify-center not-italic lg:w-[220px]">
+            <p className="whitespace-nowrap text-[14px] font-normal leading-5">
+              {totalOffchainVotes > 0
+                ? `${formatNumberUserReadable(totalOffchainVotes)} votes`
+                : "No votes yet"}
+            </p>
+            {leadingChoice ? (
+              <p className="whitespace-nowrap text-xs font-medium leading-4">
+                Leading: {leadingChoice.label} ·{" "}
+                {leadingChoice.percentage.toFixed(0)}%
+              </p>
             ) : null}
           </div>
-
-          {isBasic ? (
-            <div className="flex w-full items-center justify-center gap-2">
-              <div className="bg-surface-hover relative flex h-1 w-full">
-                <div
-                  style={{ width: `${offchainForPercentage}%` }}
-                  className={cn("bg-success h-full")}
-                />
-                <div
-                  style={{ width: `${offchainAgainstPercentage}%` }}
-                  className={cn("bg-error h-full")}
-                />
-              </div>
-            </div>
-          ) : null}
-        </div>
+        )}
       </Link>
     );
   }
@@ -351,6 +421,38 @@ export const ProposalItem = ({
   const quorumPercentage = proposal!.votes.total
     ? (Number(proposal!.quorum) / Number(proposal!.votes.total)) * 100
     : 0;
+
+  // Vote progress only applies once voting has started
+  const hasVotingStarted = proposal!.state !== ProposalState.WAITING_TO_START;
+
+  const forVotesNum = Number(proposal!.votes.for);
+  const againstVotesNum = Number(proposal!.votes.against);
+  const abstainVotesNum = Number(proposal!.votes.abstain);
+  const quorumNum = Number(proposal!.quorum);
+  // Quorum counts For + Abstain, mirroring the proposal detail calculation
+  const countedVotesNum = forVotesNum + abstainVotesNum;
+
+  const onchainBarTooltip = (
+    <div className="flex flex-col gap-0.5 text-xs">
+      <span>
+        For: {formatNumberUserReadable(forVotesNum)} (
+        {Math.round(Number(proposal!.votes.forPercentage))}%)
+      </span>
+      <span>
+        Against: {formatNumberUserReadable(againstVotesNum)} (
+        {Math.round(Number(proposal!.votes.againstPercentage))}%)
+      </span>
+      <span>
+        Abstain: {formatNumberUserReadable(abstainVotesNum)} (
+        {Math.round(Number(proposal!.votes.abstainPercentage))}%)
+      </span>
+      <span>
+        Quorum: {formatNumberUserReadable(countedVotesNum)} /{" "}
+        {formatNumberUserReadable(quorumNum)}
+        {countedVotesNum >= quorumNum ? " · Reached" : ""}
+      </span>
+    </div>
+  );
 
   return (
     <Link
@@ -361,6 +463,7 @@ export const ProposalItem = ({
       })}
       className={cn(
         "text-primary bg-surface-default hover:bg-surface-contrast rounded-base relative flex w-full cursor-pointer flex-col items-center justify-between gap-3 px-3 py-3 transition-colors duration-300 lg:flex-row lg:gap-6",
+        proposal!.status === ProposalStatus.CANCELED && "opacity-70",
         className,
       )}
       prefetch={true}
@@ -375,84 +478,111 @@ export const ProposalItem = ({
 
       <div className="flex w-full flex-col items-start justify-between gap-0.5 lg:w-auto">
         <h3 className="text-primary">{proposal!.title}</h3>
-        <div className="font-inter text-secondary flex items-center justify-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
+        <div className="font-inter text-secondary flex flex-wrap items-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
+          <ProposalSourceBadge source="onchain" />
           <p className={getTextStatusColor(proposal!.status)}>
             {getStatusText(proposal!.status)}
           </p>
-          <ProposalVoterBadge
-            address={address ?? ""}
-            daoId={daoId}
-            proposalId={proposal!.id}
-            decimals={decimals}
-          />
           <BulletDivider />
           <p>{proposal!.timeText}</p>
           <BulletDivider />
           <span>
-            by{" "}
+            By{" "}
             <EnsAvatar
               address={proposal!.proposer as Address}
               showAvatar={false}
               nameClassName="text-secondary"
             />
           </span>
+          <ProposalVoterBadge
+            address={address ?? ""}
+            daoId={daoId}
+            proposalId={proposal!.id}
+            decimals={decimals}
+          />
         </div>
       </div>
 
-      <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
-        <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
-          <p>
-            {proposal!.votes.total
-              ? `${formatNumberUserReadable(Number(proposal!.votes.total))} votes`
-              : "Waiting to start"}
-          </p>
-          <div className="flex items-center justify-center gap-2">
+      {hasVotingStarted ? (
+        <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
+          <div className="font-inter text-secondary flex w-full items-center justify-between gap-2 text-[14px] font-normal not-italic leading-5">
+            <p>
+              {`${formatNumberUserReadable(Number(proposal!.votes.total))} votes`}
+            </p>
             <div className="flex items-center justify-center gap-2">
-              <CheckCircle2 className="text-success size-4" />
-              <p>{proposal!.votes.forPercentage}%</p>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <XCircle className="text-error size-4" />
-              <p>{proposal!.votes.againstPercentage}%</p>
+              <div className="flex items-center justify-center gap-2">
+                <CheckCircle2 className="text-success size-4" />
+                <p>{Math.round(Number(proposal!.votes.forPercentage))}%</p>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <XCircle className="text-error size-4" />
+                <p>{Math.round(Number(proposal!.votes.againstPercentage))}%</p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex w-full items-center justify-center gap-2">
-          <div className="bg-surface-hover relative flex h-1 w-full">
-            <div
-              style={{ width: `${proposal!.votes.forPercentage}%` }}
-              className={cn("bg-success h-full")}
-            />
-            <div
-              style={{ width: `${proposal!.votes.againstPercentage}%` }}
-              className={cn("bg-error h-full")}
-            />
+          <Tooltip
+            asChild
+            disableMobileClick
+            triggerClassName="w-full"
+            tooltipContent={onchainBarTooltip}
+          >
+            <div className="flex w-full items-center justify-center gap-2">
+              <div className="bg-surface-hover relative flex h-1 w-full overflow-hidden">
+                <div
+                  style={{ width: `${proposal!.votes.forPercentage}%` }}
+                  className={cn(
+                    "bg-success h-full transition-[width] duration-300",
+                    forVotesNum > 0 && "min-w-[2px]",
+                  )}
+                />
+                <div
+                  style={{ width: `${proposal!.votes.againstPercentage}%` }}
+                  className={cn(
+                    "bg-error h-full transition-[width] duration-300",
+                    againstVotesNum > 0 && "min-w-[2px]",
+                  )}
+                />
+                <div
+                  style={{ width: `${proposal!.votes.abstainPercentage}%` }}
+                  className={cn(
+                    "bg-secondary h-full transition-[width] duration-300",
+                    abstainVotesNum > 0 && "min-w-[2px]",
+                  )}
+                />
 
+                {quorumPercentage < 100 && (
+                  <div
+                    className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-2"
+                    style={{ left: `${quorumPercentage}%` }}
+                  />
+                )}
+              </div>
+            </div>
+          </Tooltip>
+          <div className="relative flex w-full">
             {quorumPercentage < 100 && (
-              <div
-                className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-2"
-                style={{ left: `${quorumPercentage}%` }}
-              />
+              <>
+                <div
+                  style={{
+                    left: `${quorumPercentage}%`,
+                    transform: `translateX(-${quorumPercentage}%)`,
+                  }}
+                  className="font-inter text-secondary absolute flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
+                >
+                  Quorum: {formatNumberUserReadable(Number(proposal!.quorum))}
+                </div>
+                <div className="h-4 w-full"></div>
+              </>
             )}
           </div>
         </div>
-        <div className="relative flex w-full">
-          {quorumPercentage < 100 && (
-            <>
-              <div
-                style={{
-                  left: `${quorumPercentage}%`,
-                  transform: `translateX(-${quorumPercentage}%)`,
-                }}
-                className="font-inter text-secondary absolute flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
-              >
-                Quorum: {formatNumberUserReadable(Number(proposal!.quorum))}
-              </div>
-              <div className="h-4 w-full"></div>
-            </>
-          )}
+      ) : (
+        <div className="flex w-full shrink-0 items-center justify-end lg:w-[220px]">
+          <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-5">
+            Waiting to start
+          </p>
         </div>
-      </div>
+      )}
     </Link>
   );
 };

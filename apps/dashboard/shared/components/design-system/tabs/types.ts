@@ -1,15 +1,20 @@
+import type { ReactNode } from "react";
+
 export type TabSize = "sm" | "md";
 
+export type TabVariant = "underline" | "button";
+
 export type TabItem = {
-  label: string;
+  label: ReactNode;
   value: string;
   badge?: string | number;
 };
 
 export type TabProps = {
-  label: string;
+  label: ReactNode;
   isActive?: boolean;
   size?: TabSize;
+  variant?: TabVariant;
   badge?: string | number;
   onClick?: () => void;
   className?: string;
@@ -19,6 +24,7 @@ export type TabGroupProps = {
   tabs: TabItem[];
   activeTab?: string;
   size?: TabSize;
+  variant?: TabVariant;
   onTabChange?: (value: string) => void;
   className?: string;
 };
@@ -37,7 +43,7 @@ export type PillTabCounter = {
 };
 
 export type PillTabProps = {
-  label: string;
+  label: ReactNode;
   isActive?: boolean;
   counter?: PillTabCounter;
   onClick?: () => void;

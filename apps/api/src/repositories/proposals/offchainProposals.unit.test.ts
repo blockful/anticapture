@@ -3,6 +3,7 @@ import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 
 import type { UnifiedDrizzle } from "@/database";
+import * as generalSchema from "@/database/general-schema";
 import * as schema from "@/database/schema";
 import * as offchainSchema from "@/database/offchain-schema";
 import { offchainProposals } from "@/database/offchain-schema";
@@ -38,7 +39,7 @@ describe("OffchainProposalRepository", () => {
 
   beforeAll(async () => {
     client = new PGlite();
-    const unifiedSchema = { ...schema, ...offchainSchema };
+    const unifiedSchema = { ...schema, ...offchainSchema, ...generalSchema };
     db = drizzle(client, { schema: unifiedSchema });
     repository = new OffchainProposalRepository(db);
 

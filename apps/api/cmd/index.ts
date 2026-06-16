@@ -16,6 +16,7 @@ import {
   accountInteractions,
   dao,
   delegationPercentage,
+  draftProposals,
   governanceActivity,
   historicalBalances,
   historicalVotingPower,
@@ -42,6 +43,7 @@ import {
   health,
   revenue,
 } from "@/controllers";
+import * as generalSchema from "@/database/general-schema";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
 import { docs } from "@/docs";
@@ -58,6 +60,7 @@ import {
   AccountInteractionsRepository,
   BalanceVariationsRepository,
   DaoMetricsDayBucketRepository,
+  DraftProposalsRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
   HealthRepositoryImpl,
@@ -84,6 +87,7 @@ import {
   CoingeckoService,
   DaoService,
   DelegationPercentageService,
+  DraftProposalsService,
   HealthService,
   HistoricalBalancesService,
   NFTPriceService,
@@ -177,6 +181,11 @@ if (!daoClient) {
 
 const pgClient = drizzle(env.DATABASE_URL, {
   schema,
+  casing: "snake_case",
+});
+
+const pgGeneralClient = drizzle(env.DATABASE_URL, {
+  schema: generalSchema,
   casing: "snake_case",
 });
 
@@ -344,6 +353,15 @@ votes(
   ),
 );
 dao(app, daoService);
+draftProposals(
+  app,
+  wrapWithTracing(
+    new DraftProposalsService(
+      wrapWithTracing(new DraftProposalsRepository(pgGeneralClient)),
+    ),
+  ),
+  env.DAO_ID.toLowerCase(),
+);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
 
