@@ -39,12 +39,18 @@ test.describe("Governance page (/ens/proposals)", () => {
 
   test("Offchain tab is visible and switchable", async ({ goto, page }) => {
     await goto("/ens/proposals");
-    const offchainTab = page.getByRole("tab", { name: /Offchain/ });
-    await expect(offchainTab).toBeVisible({ timeout: 15_000 });
-    await offchainTab.click();
-    await expect(offchainTab).toHaveAttribute("aria-selected", "true");
-    await expect(page).toHaveURL(/tab=offchain/);
-    // Check offchain content loads or shows empty state
+    // ENS has off-chain proposals, so the proposals tab exposes a source
+    // filter (All sources / Snapshot / Governor) next to it. The trigger has
+    // role="combobox", which derives its accessible name from the author (not
+    // its contents), so match it by the selected value text instead.
+    const sourceFilter = page
+      .getByRole("combobox")
+      .filter({ hasText: "All sources" });
+    await expect(sourceFilter).toBeVisible({ timeout: 15_000 });
+    await sourceFilter.click();
+    await page.getByRole("option", { name: "Snapshot" }).click();
+    await expect(page).toHaveURL(/source=snapshot/);
+    // Off-chain (Snapshot) list loads or shows an explicit empty / error state.
     const hasProposals = page
       .getByRole("link")
       .filter({ has: page.locator("h3") })
