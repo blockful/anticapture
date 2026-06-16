@@ -14,7 +14,7 @@ import type { OpenAPIObject } from "openapi3-ts/oas31";
 import { rateLimitMiddleware } from "./auth/rate-limit";
 import { tokenAuthMiddleware } from "./auth/token-auth";
 import { AuthfulClient } from "./auth/authful-client";
-import { UsageTracker, usageMiddleware } from "./auth/usage";
+import { usageMiddleware } from "./auth/usage";
 import { config } from "./config";
 import { CircuitOpenError } from "./shared/circuit-breaker";
 import { createRedisClient } from "./cache/redis";
@@ -66,8 +66,6 @@ if (config.tokenService) {
     config.tokenService.url,
     config.tokenService.apiKey,
   );
-  const usageTracker = new UsageTracker(authfulClient);
-  usageTracker.start();
 
   app.use(
     "*",
@@ -78,7 +76,7 @@ if (config.tokenService) {
     }),
   );
   app.use("*", rateLimitMiddleware(redis));
-  app.use("*", usageMiddleware(usageTracker, config.daoApis));
+  app.use("*", usageMiddleware(config.daoApis));
 
   logger.info("per-tenant token auth enabled (Authful)");
 } else if (config.blockfulApiToken) {

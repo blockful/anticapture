@@ -57,21 +57,6 @@ export const ValidateResponseSchema = z
   ])
   .openapi("ValidateResponse");
 
-export const UsageBatchBodySchema = z
-  .object({
-    entries: z
-      .array(
-        z.object({
-          tokenId: z.uuid(),
-          route: z.string().min(1),
-          hour: z.iso.datetime(),
-          count: z.number().int().positive(),
-        }),
-      )
-      .max(10_000),
-  })
-  .openapi("UsageBatchBody");
-
 export const ErrorResponseSchema = z
   .object({ error: z.string() })
   .openapi("ErrorResponse");

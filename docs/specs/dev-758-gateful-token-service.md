@@ -15,7 +15,7 @@ We need per-tenant tokens issued on demand, so each consumer (us, Uniswap, futur
 
 - Per-tenant tokens; issuance is **manual** (we mint and hand over).
 - Gateful is the **single auth guardian** — same validation path for MCP traffic and direct REST.
-- Per-token rate limiting and usage tracking, attributable by tenant.
+- Per-token rate limiting and per-tenant usage visibility (Prometheus metric).
 - **Zero-downtime migration**: Uniswap's current key cannot be revoked or rotated — it must keep working unchanged.
 
 ### Non-goals (v1)
@@ -36,7 +36,7 @@ Client (Uniswap, Blockful, third parties)
                  Gateful ◄─────────────┘
    ├─ auth middleware: Redis cache → Token Service on miss (fail-closed)
    ├─ rate limit per token (Redis sliding window)
-   ├─ usage tracking per token/route (batched, best-effort)
+   ├─ usage metric per tenant/route (Prometheus counter on /metrics)
    ▼
  DAO APIs
 
@@ -51,13 +51,12 @@ Small Hono + Drizzle service with its own Postgres on Railway. Plaintext tokens 
 
 Endpoints (admin endpoints guarded by a static `ADMIN_API_KEY` in v1):
 
-| Method | Path           | Auth               | Purpose                                                 |
-| ------ | -------------- | ------------------ | ------------------------------------------------------- |
-| POST   | `/tokens`      | admin              | Mint token for `{tenant, name}`; returns plaintext once |
-| DELETE | `/tokens/:id`  | admin              | Revoke (sets `revoked_at`)                              |
-| GET    | `/tokens`      | admin              | List metadata (no hashes)                               |
-| POST   | `/validate`    | internal (Gateful) | `{tokenHash}` → `{valid, tenant, rateLimitPerMin}`      |
-| POST   | `/usage/batch` | internal (Gateful) | Idempotent upsert of usage counters                     |
+| Method | Path          | Auth               | Purpose                                                 |
+| ------ | ------------- | ------------------ | ------------------------------------------------------- |
+| POST   | `/tokens`     | admin              | Mint token for `{tenant, name}`; returns plaintext once |
+| DELETE | `/tokens/:id` | admin              | Revoke (sets `revoked_at`)                              |
+| GET    | `/tokens`     | admin              | List metadata (no hashes)                               |
+| POST   | `/validate`   | internal (Gateful) | `{tokenHash}` → `{valid, tenant, rateLimitPerMin}`      |
 
 Schema:
 
@@ -72,14 +71,6 @@ tokens (
   revoked_at timestamptz,
   last_used_at timestamptz
 )
-
-usage_hourly (
-  token_id uuid REFERENCES tokens,
-  route text NOT NULL,             -- normalized route pattern, e.g. /{dao}/proposals
-  hour timestamptz NOT NULL,       -- truncated to hour
-  count bigint NOT NULL DEFAULT 0,
-  PRIMARY KEY (token_id, route, hour)
-)
 ```
 
 ### 2. Gateful auth middleware (replaces the static `bearerAuth`)
@@ -91,9 +82,9 @@ Request flow:
 3. **Miss**: `POST /validate` on Token Service → cache result in Redis (TTL **300s**, including negative results with a short TTL, e.g. 60s).
 4. Unknown/revoked → `401` (**fail-closed**). Token Service unreachable **and** cache miss → `503` (cached tokens keep working through an outage — Uniswap must never take a 401 because our internal service restarted).
 5. Rate limit: Redis `INCR` on `rl:<tokenId>:<minute>` → over limit → `429` with `Retry-After`.
-6. After response: increment usage buffer (`tokenId`, route pattern, hour). A background interval flushes batches to `POST /usage/batch` every ~30s. **Best-effort** — tracking failures never block or fail a request.
+6. After response: increment a Prometheus counter `tenant_requests_total{tenant, route}` (route normalized to bounded cardinality). Usage is observed by scraping Gateful's `/metrics`, not persisted — never blocks or fails a request.
 
-Tenant becomes a low-cardinality label on existing Gateful metrics/logs (few tenants, safe for Prometheus).
+Tenant becomes a low-cardinality label on Gateful metrics (few tenants, safe for Prometheus).
 
 ### 3. MCP server changes (`packages/anticapture-client`)
 
@@ -112,18 +103,17 @@ Rollback at any stage = unset the new env vars; legacy keys still work until ste
 
 ## Resilience decisions
 
-| Scenario                                  | Behavior                                                                                 |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Unknown/revoked token                     | `401` fail-closed                                                                        |
-| Token Service down, token cached in Redis | Request proceeds (cache TTL 300s)                                                        |
-| Token Service down, cache miss            | `503` (distinguishable from bad credentials)                                             |
-| Redis down                                | Validate directly against Token Service; rate limit fails open; usage buffered in memory |
-| Usage flush failure                       | Log + retry next interval; never blocks requests                                         |
+| Scenario                                  | Behavior                                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Unknown/revoked token                     | `401` fail-closed                                                                          |
+| Token Service down, token cached in Redis | Request proceeds (cache TTL 300s)                                                          |
+| Token Service down, cache miss            | `503` (distinguishable from bad credentials)                                               |
+| Redis down                                | Validate directly against Token Service; rate limit fails open; usage metric still emitted |
 
 ## Implementation stages
 
 1. ✅ **Token Service** (`apps/authful`): app scaffold, schema/migrations, endpoints, mint/seed script, 13 integration tests (PGlite).
-2. ✅ **Gateful middleware** (`apps/gateful/src/auth/`): validation + Redis cache + rate limit + usage flush, behind `TOKEN_SERVICE_URL` flag, 18 tests covering the resilience table.
+2. ✅ **Gateful middleware** (`apps/gateful/src/auth/`): validation + Redis cache + rate limit + per-tenant usage metric, behind `TOKEN_SERVICE_URL` flag, tests covering the resilience table.
 3. ✅ **MCP forward**: ALS-based per-request header propagation, gated by `FORWARD_CLIENT_AUTH`; spike validated concurrency isolation.
 4. **Rollout**: ✅ Railway infra (`infra/authful/`); remaining (operational): provision Postgres + service, seed prod tokens (`uniswap`, `blockful`), flip envs dev → prod, remove legacy keys after soak.
 
@@ -131,4 +121,4 @@ Rollback at any stage = unset the new env vars; legacy keys still work until ste
 
 - Default rate limit value per token (proposal: 600 req/min; Uniswap may need a higher explicit limit).
 - Should `/validate` be replaced by Gateful reading the token DB directly? (fewer hops, but couples Gateful to the schema — current proposal keeps the service as the only DB owner).
-- Route normalization source for `usage_hourly.route` (matched Hono route pattern vs raw path).
+- Route normalization source for the `tenant_requests_total` route label (matched Hono route pattern vs raw path).

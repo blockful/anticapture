@@ -35,13 +35,4 @@ describe("AuthfulClient base URL normalization", () => {
     await new AuthfulClient(baseUrl, "internal-key").validate("a".repeat(64));
     expect(calledUrl(fetchMock)).toBe("http://authful:4002/validate");
   });
-
-  it("trims trailing slashes for /usage/batch too", async () => {
-    const fetchMock = mockFetch();
-    await new AuthfulClient(
-      "http://authful:4002/",
-      "internal-key",
-    ).recordUsageBatch([]);
-    expect(calledUrl(fetchMock)).toBe("http://authful:4002/usage/batch");
-  });
 });

@@ -8,7 +8,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "@/app";
 import type { AuthfulDrizzle } from "@/database";
 import * as schema from "@/database/schema";
-import { tokens, usageHourly } from "@/database/schema";
+import { tokens } from "@/database/schema";
 import { TokensRepository } from "@/repositories/tokens";
 import { TokensService, hashToken } from "@/services/tokens";
 
@@ -48,7 +48,6 @@ describe("authful app", () => {
   });
 
   beforeEach(async () => {
-    await db.delete(usageHourly);
     await db.delete(tokens);
   });
 
@@ -83,14 +82,12 @@ describe("authful app", () => {
     });
 
     it("rejects internal endpoints without the internal key", async () => {
-      for (const path of ["/validate", "/usage/batch"]) {
-        const res = await app.request(path, {
-          method: "POST",
-          headers: adminHeaders, // admin key must NOT open internal surface
-          body: JSON.stringify({}),
-        });
-        expect(res.status).toBe(401);
-      }
+      const res = await app.request("/validate", {
+        method: "POST",
+        headers: adminHeaders, // admin key must NOT open internal surface
+        body: JSON.stringify({}),
+      });
+      expect(res.status).toBe(401);
     });
 
     it("keeps /health public", async () => {
@@ -242,62 +239,6 @@ describe("authful app", () => {
         body: JSON.stringify({ tokenHash: hashToken("never-minted") }),
       });
       await expect(res.json()).resolves.toEqual({ valid: false });
-    });
-  });
-
-  describe("POST /usage/batch", () => {
-    it("accumulates counts per (token, route, hour)", async () => {
-      const minted = await mint({});
-      const hour = "2026-06-10T14:00:00.000Z";
-      const entry = {
-        tokenId: minted.id,
-        route: "/{dao}/proposals",
-        hour,
-        count: 5,
-      };
-
-      for (let i = 0; i < 2; i++) {
-        const res = await app.request("/usage/batch", {
-          method: "POST",
-          headers: internalHeaders,
-          body: JSON.stringify({ entries: [entry] }),
-        });
-        expect(res.status).toBe(200);
-      }
-
-      const rows = await db.select().from(usageHourly);
-      expect(rows).toHaveLength(1);
-      expect(rows[0]!.count).toBe(10n);
-    });
-
-    it("truncates timestamps to the hour", async () => {
-      const minted = await mint({});
-      const res = await app.request("/usage/batch", {
-        method: "POST",
-        headers: internalHeaders,
-        body: JSON.stringify({
-          entries: [
-            {
-              tokenId: minted.id,
-              route: "/daos",
-              hour: "2026-06-10T14:37:21.000Z",
-              count: 1,
-            },
-            {
-              tokenId: minted.id,
-              route: "/daos",
-              hour: "2026-06-10T14:59:59.000Z",
-              count: 2,
-            },
-          ],
-        }),
-      });
-      expect(res.status).toBe(200);
-
-      const rows = await db.select().from(usageHourly);
-      expect(rows).toHaveLength(1);
-      expect(rows[0]!.hour.toISOString()).toBe("2026-06-10T14:00:00.000Z");
-      expect(rows[0]!.count).toBe(3n);
     });
   });
 });

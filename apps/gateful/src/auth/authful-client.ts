@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { logger } from "../logger.js";
-
 /**
  * Authful's `/validate` response. Validated at the boundary (rather than cast)
  * so a first-party service returning an unexpected shape is treated as a failed
@@ -19,13 +17,6 @@ export const TokenValidationSchema = z.discriminatedUnion("valid", [
 
 export type TokenValidation = z.infer<typeof TokenValidationSchema>;
 
-export type UsageBatchEntry = {
-  tokenId: string;
-  route: string;
-  hour: string; // ISO datetime, truncated to the hour
-  count: number;
-};
-
 const REQUEST_TIMEOUT_MS = 3_000;
 
 /**
@@ -40,7 +31,7 @@ export class AuthfulResponseError extends Error {
   }
 }
 
-/** Thin HTTP client for the Authful internal surface (/validate, /usage/batch). */
+/** Thin HTTP client for the Authful internal surface (/validate). */
 export class AuthfulClient {
   private readonly baseUrl: string;
 
@@ -64,20 +55,6 @@ export class AuthfulClient {
     });
     if (!res.ok) throw new AuthfulResponseError(res.status);
     return TokenValidationSchema.parse(await res.json());
-  }
-
-  /** Throws on failure — the usage tracker re-buffers and retries later. */
-  async recordUsageBatch(entries: UsageBatchEntry[]): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/usage/batch`, {
-      method: "POST",
-      headers: this.headers(),
-      body: JSON.stringify({ entries }),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-    if (!res.ok) {
-      throw new AuthfulResponseError(res.status);
-    }
-    logger.debug({ entries: entries.length }, "usage batch flushed");
   }
 
   private headers() {

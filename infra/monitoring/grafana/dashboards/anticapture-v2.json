@@ -1207,13 +1207,67 @@
       ]
     },
     {
+      "id": 104,
+      "type": "row",
+      "title": "Per-Tenant Traffic",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 88,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 8,
+      "title": "Requests by Tenant - Rate over time",
+      "description": "req/s per tenant at the Gateful level, from the per-tenant token-auth counter (tenant_requests_total). Only authenticated requests are counted.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 89,
+        "w": 24,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(tenant_requests_total{job=\"anticapture-gateful\"}[5m])) by (tenant)",
+          "legendFormat": "{{tenant}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
       "id": 130,
       "type": "row",
       "title": "eRPC",
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 88,
+        "y": 97,
         "w": 24,
         "h": 1
       },
@@ -1487,7 +1541,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 89
+        "y": 98
       },
       "panels": [
         {

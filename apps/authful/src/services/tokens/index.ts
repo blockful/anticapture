@@ -1,10 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 
-import type {
-  DBToken,
-  TokensRepository,
-  UsageEntry,
-} from "@/repositories/tokens";
+import type { DBToken, TokensRepository } from "@/repositories/tokens";
 
 export const TOKEN_PREFIX = "act_";
 
@@ -75,19 +71,5 @@ export class TokensService {
       tenant: token.tenant,
       rateLimitPerMin: token.rateLimitPerMin,
     };
-  }
-
-  async recordUsage(entries: UsageEntry[]): Promise<void> {
-    // Pre-aggregate by primary key: a single INSERT ... ON CONFLICT cannot
-    // affect the same row twice, so duplicate (token, route, hour) entries in
-    // one batch must be merged before hitting the database.
-    const merged = new Map<string, UsageEntry>();
-    for (const entry of entries) {
-      const key = `${entry.tokenId}|${entry.route}|${entry.hour.getTime()}`;
-      const existing = merged.get(key);
-      if (existing) existing.count += entry.count;
-      else merged.set(key, { ...entry });
-    }
-    await this.repo.recordUsage([...merged.values()]);
   }
 }

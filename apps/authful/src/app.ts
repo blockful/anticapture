@@ -3,7 +3,6 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { bearerAuth } from "hono/bearer-auth";
 
 import { tokensController } from "@/controllers/tokens";
-import { usageController } from "@/controllers/usage";
 import { validateController } from "@/controllers/validate";
 import { exporter } from "@/instrumentation";
 import { metricsMiddleware } from "@/middlewares/metrics";
@@ -37,13 +36,11 @@ export function createApp({
   app.use("/tokens", bearerAuth({ token: adminApiKey }));
   app.use("/tokens/*", bearerAuth({ token: adminApiKey }));
 
-  // Internal surface: Gateful validating tokens and reporting usage.
+  // Internal surface: Gateful validating tokens.
   app.use("/validate", bearerAuth({ token: internalApiKey }));
-  app.use("/usage/*", bearerAuth({ token: internalApiKey }));
 
   tokensController(app, service);
   validateController(app, service);
-  usageController(app, service);
 
   return app;
 }

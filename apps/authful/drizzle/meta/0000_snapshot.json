@@ -1,5 +1,5 @@
 {
-  "id": "647d4ece-f03f-461f-a9ed-8090c29f0e32",
+  "id": "e450cece-7dd7-4813-8b7e-cfe7e28c5d70",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -86,59 +86,6 @@
           "columns": ["token_hash"]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "authful.usage_hourly": {
-      "name": "usage_hourly",
-      "schema": "authful",
-      "columns": {
-        "token_id": {
-          "name": "token_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "route": {
-          "name": "route",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "hour": {
-          "name": "hour",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "count": {
-          "name": "count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "usage_hourly_token_id_tokens_id_fk": {
-          "name": "usage_hourly_token_id_tokens_id_fk",
-          "tableFrom": "usage_hourly",
-          "tableTo": "tokens",
-          "schemaTo": "authful",
-          "columnsFrom": ["token_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "usage_hourly_token_id_route_hour_pk": {
-          "name": "usage_hourly_token_id_route_hour_pk",
-          "columns": ["token_id", "route", "hour"]
-        }
-      },
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

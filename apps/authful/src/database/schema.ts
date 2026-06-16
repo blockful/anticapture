@@ -1,4 +1,4 @@
-import { index, pgSchema, primaryKey } from "drizzle-orm/pg-core";
+import { index, pgSchema } from "drizzle-orm/pg-core";
 
 export const authfulSchema = pgSchema("authful");
 
@@ -18,22 +18,4 @@ export const tokens = authfulSchema.table(
     lastUsedAt: d.timestamp("last_used_at", { withTimezone: true }),
   }),
   (table) => [index().on(table.tenant)],
-);
-
-export const usageHourly = authfulSchema.table(
-  "usage_hourly",
-  (d) => ({
-    tokenId: d
-      .uuid("token_id")
-      .notNull()
-      .references(() => tokens.id),
-    route: d.text().notNull(), // normalized route pattern, e.g. /{dao}/proposals
-    hour: d.timestamp({ withTimezone: true }).notNull(), // truncated to the hour
-    // No default: count always comes from the batch payload, and a bigint
-    // default breaks drizzle-kit's snapshot serialization (JSON + BigInt).
-    count: d.bigint({ mode: "bigint" }).notNull(),
-  }),
-  (table) => [
-    primaryKey({ columns: [table.tokenId, table.route, table.hour] }),
-  ],
 );
