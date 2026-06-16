@@ -12,4 +12,11 @@ const envSchema = z.object({
   INTERNAL_API_KEY: z.string().min(16),
 });
 
-export const env = envSchema.parse(process.env);
+const _env = envSchema.safeParse(process.env);
+
+if (_env.success === false) {
+  console.error("Invalid environment variables", _env.error.issues);
+  throw new Error("Invalid environment variables");
+}
+
+export const env = _env.data;

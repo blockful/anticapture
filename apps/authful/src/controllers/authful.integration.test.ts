@@ -138,30 +138,6 @@ describe("authful app", () => {
       });
       expect(res.status).toBe(400);
     });
-
-    it("seeds an existing plaintext credential (migration path)", async () => {
-      const legacyKey = "legacy-uniswap-shared-key-123456";
-      const body = await mint({ plaintext: legacyKey, rateLimitPerMin: 1200 });
-      expect(body.token).toBe(legacyKey);
-      expect(body.rateLimitPerMin).toBe(1200);
-
-      const [row] = await db.select().from(tokens);
-      expect(row!.tokenHash).toBe(hashToken(legacyKey));
-    });
-
-    it("returns 409 when seeding the same credential twice", async () => {
-      await mint({ plaintext: "duplicated-credential-123456" });
-      const res = await app.request("/tokens", {
-        method: "POST",
-        headers: adminHeaders,
-        body: JSON.stringify({
-          tenant: "other",
-          name: "dup",
-          plaintext: "duplicated-credential-123456",
-        }),
-      });
-      expect(res.status).toBe(409);
-    });
   });
 
   describe("GET /tokens", () => {

@@ -12,12 +12,6 @@ export type MintInput = {
   tenant: string;
   name: string;
   rateLimitPerMin?: number;
-  /**
-   * Seed path: hash an existing plaintext credential instead of generating a
-   * new one. Used to migrate pre-existing shared keys (e.g. Uniswap's current
-   * MCP key) into the store without rotating them.
-   */
-  plaintext?: string;
 };
 
 export type MintedToken = {
@@ -39,9 +33,7 @@ export class TokensService {
   constructor(private readonly repo: TokensRepository) {}
 
   async mint(input: MintInput): Promise<MintedToken> {
-    const plaintext =
-      input.plaintext ??
-      `${TOKEN_PREFIX}${randomBytes(32).toString("base64url")}`;
+    const plaintext = `${TOKEN_PREFIX}${randomBytes(32).toString("base64url")}`;
     const token = await this.repo.create({
       tenant: input.tenant,
       name: input.name,

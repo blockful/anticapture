@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "main": "dist/index.js",
-  "description": "Authful — per-tenant API token issuance, validation and usage tracking for Gateful",
+  "description": "Authful — per-tenant API token issuance and validation for Gateful",
   "scripts": {
     "dev": "tsx watch --import ./src/instrumentation.ts src/index.ts",
     "start": "node --import ./dist/instrumentation.js dist/index.js",
@@ -12,13 +12,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run",
-    "lint": "eslint src scripts",
-    "lint:fix": "eslint src scripts --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "mint": "tsx scripts/mint-token.ts"
+    "db:push": "drizzle-kit push"
   },
   "keywords": [],
   "author": "",

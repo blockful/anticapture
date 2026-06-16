@@ -21,13 +21,6 @@ export const MintTokenBodySchema = z
     tenant: z.string().min(1),
     name: z.string().min(1),
     rateLimitPerMin: z.number().int().positive().optional(),
-    plaintext: z
-      .string()
-      .min(16)
-      .optional()
-      .describe(
-        "Seed an existing credential instead of generating a new one (migration path)",
-      ),
   })
   .openapi("MintTokenBody");
 

@@ -33,23 +33,12 @@ export function tokensController(app: Hono, service: TokensService) {
             "application/json": { schema: MintTokenResponseSchema },
           },
         },
-        409: {
-          description: "A token with the same value already exists",
-          content: { "application/json": { schema: ErrorResponseSchema } },
-        },
       },
     }),
     async (c) => {
       const body = c.req.valid("json");
-      try {
-        const { token, plaintext } = await service.mint(body);
-        return c.json({ ...toTokenMetadata(token), token: plaintext }, 201);
-      } catch (err) {
-        if (isUniqueViolation(err)) {
-          return c.json({ error: "Token already exists" }, 409);
-        }
-        throw err;
-      }
+      const { token, plaintext } = await service.mint(body);
+      return c.json({ ...toTokenMetadata(token), token: plaintext }, 201);
     },
   );
 
@@ -97,14 +86,4 @@ export function tokensController(app: Hono, service: TokensService) {
       return c.body(null, 204);
     },
   );
-}
-
-/** Drizzle wraps driver errors (DrizzleQueryError), so walk the cause chain. */
-function isUniqueViolation(err: unknown): boolean {
-  for (let current = err; current; ) {
-    if (typeof current !== "object") return false;
-    if ((current as { code?: string }).code === "23505") return true;
-    current = (current as { cause?: unknown }).cause;
-  }
-  return false;
 }

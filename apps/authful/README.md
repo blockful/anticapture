@@ -1,8 +1,6 @@
 # Authful
 
-Per-tenant API token issuance and validation for Gateful (DEV-758). Design:
-[docs/specs/dev-758-gateful-token-service.md](../../docs/specs/dev-758-gateful-token-service.md).
-Usage is observed via Gateful's Prometheus metrics, not persisted here.
+Per-tenant API token issuance and validation for Gateful (DEV-758).
 
 Plaintext tokens are **never stored or logged** — only their sha256 hash.
 
@@ -21,16 +19,19 @@ Plaintext tokens are **never stored or logged** — only their sha256 hash.
 - `POST /validate` — internal surface (Gateful)
 - `GET /health` · `GET /metrics` — public · `GET /docs` — Swagger UI
 
-## Minting tokens (v1 is manual)
+## Minting tokens
+
+Mint via the admin API (guarded by `ADMIN_API_KEY`). The plaintext token is
+returned exactly once in the response; only its sha256 hash is stored.
 
 ```bash
-# Generate a new tenant token (plaintext printed exactly once)
-pnpm authful mint -- acme "acme mcp prod" --rate-limit 600
-
-# Seed an EXISTING credential without rotating it (migration path for the
-# legacy shared keys). Plaintext comes from env, never argv:
-TOKEN_PLAINTEXT=<existing-key> pnpm authful mint -- uniswap "uniswap mcp prod"
+curl -sX POST http://localhost:4002/tokens \
+  -H "Authorization: Bearer $ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"tenant": "acme", "name": "acme mcp prod", "rateLimitPerMin": 600}'
 ```
+
+`rateLimitPerMin` is optional (defaults to 600).
 
 ## Migrations
 
