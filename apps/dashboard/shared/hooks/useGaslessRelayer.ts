@@ -73,10 +73,6 @@ export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
   return {
     enabled,
     minVotingPower,
-    // Optional-chain `limits` itself: during a staggered rollout the relayer
-    // may still return the pre-migration config shape (no `limits` object), so
-    // `data` is truthy while `data.limits` is undefined. Treat the limit as
-    // unavailable instead of throwing during render.
     voteLimit: data?.limits?.vote ?? null,
     delegationLimit: data?.limits?.delegation ?? null,
     isLoading: gaslessEnabled && (balanceLoading || (enabled && isLoading)),
@@ -109,8 +105,6 @@ export const useRelayerRateLimit = (
   );
 
   return {
-    // Same rollout-safety as above: optional-chain the per-operation objects so
-    // an unexpected/older response shape yields null rather than throwing.
     voteRemaining: data?.vote?.remaining ?? null,
     delegationRemaining: data?.delegation?.remaining ?? null,
     voteLimit: data?.vote?.limit ?? null,
