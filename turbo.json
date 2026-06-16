@@ -10,7 +10,8 @@
         "kubb.config.ts",
         "src/**",
         "$TURBO_ROOT$/apps/api/**",
-        "$TURBO_ROOT$/apps/gateful/**"
+        "$TURBO_ROOT$/apps/gateful/**",
+        "$TURBO_ROOT$/apps/relayer/**"
       ],
       "outputs": ["generated/**"],
       "env": [
