@@ -21,7 +21,7 @@ export function draftProposals(
     createRoute({
       method: "get",
       operationId: "getDraftProposals",
-      path: "/proposal/drafts",
+      path: "/proposal-drafts",
       summary: "List draft proposals for an address",
       tags: ["proposals"],
       request: { query: ListDraftsQuerySchema },
@@ -43,7 +43,7 @@ export function draftProposals(
     createRoute({
       method: "get",
       operationId: "getDraftProposal",
-      path: "/proposal/drafts/{id}",
+      path: "/proposal-drafts/{id}",
       summary: "Get a draft proposal by ID",
       description:
         "Public endpoint — anyone with the ID can view the draft, enabling sharing.",
@@ -72,7 +72,7 @@ export function draftProposals(
     createRoute({
       method: "post",
       operationId: "createDraftProposal",
-      path: "/proposal/drafts",
+      path: "/proposal-drafts",
       summary: "Create a draft proposal",
       tags: ["proposals"],
       request: {
@@ -106,7 +106,7 @@ export function draftProposals(
     createRoute({
       method: "put",
       operationId: "updateDraftProposal",
-      path: "/proposal/drafts/{id}",
+      path: "/proposal-drafts/{id}",
       summary: "Update a draft proposal",
       description:
         "Only the original author (matched by address) can update a draft.",
@@ -141,7 +141,7 @@ export function draftProposals(
     createRoute({
       method: "delete",
       operationId: "deleteDraftProposal",
-      path: "/proposal/drafts/{id}",
+      path: "/proposal-drafts/{id}",
       summary: "Delete a draft proposal",
       description:
         "Only the original author (matched by address) can delete a draft.",
