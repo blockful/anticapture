@@ -8,7 +8,7 @@ import { AuthfulClient, hashBearerToken } from "./src/authful-client.ts";
 import pino from "pino";
 
 const tokenServiceUrl = process.env["TOKEN_SERVICE_URL"];
-const internalApiKey = process.env["INTERNAL_API_KEY"];
+const tokenServiceApiKey = process.env["TOKEN_SERVICE_API_KEY"];
 const port = Number(process.env["PORT"] ?? 3100);
 const host = process.env["HOST"] ?? "0.0.0.0";
 
@@ -22,14 +22,14 @@ const log = pino({ name: "anticapture-mcp" });
 // Single source of identity: every inbound request is authenticated against
 // Authful (the same per-tenant token store Gateful uses), not a shared key.
 const authful =
-  tokenServiceUrl && internalApiKey
-    ? new AuthfulClient(tokenServiceUrl, internalApiKey)
+  tokenServiceUrl && tokenServiceApiKey
+    ? new AuthfulClient(tokenServiceUrl, tokenServiceApiKey)
     : undefined;
 
 log.info({ authEnabled: !!authful, port, host }, "server starting");
 if (!authful) {
   log.warn(
-    "TOKEN_SERVICE_URL/INTERNAL_API_KEY unset — Authful validation disabled, all requests allowed (dev only)",
+    "TOKEN_SERVICE_URL/TOKEN_SERVICE_API_KEY unset — Authful validation disabled, all requests allowed (dev only)",
   );
 }
 
