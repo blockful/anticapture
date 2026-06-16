@@ -6,8 +6,6 @@ dotenv.config();
 const envSchema = z.object({
   PORT: z.coerce.number().default(3100),
   HOST: z.string().default("0.0.0.0"),
-  TOKEN_SERVICE_URL: z.string().optional(),
-  TOKEN_SERVICE_API_KEY: z.string().optional(),
   ANTICAPTURE_API_URL: z.string().default("http://localhost:4001"),
   ANTICAPTURE_API_KEY: z.string().optional(),
   // Preserve current semantics: only the literal "true" enables forwarding.

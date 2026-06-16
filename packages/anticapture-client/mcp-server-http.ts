@@ -4,12 +4,9 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { createMcpServer } from "./src/create-mcp-server.ts";
 import { configureUpstreamClient } from "./src/configure-upstream-client.ts";
 import { inboundAuthStorage } from "./src/request-context.ts";
-import { AuthfulClient, hashBearerToken } from "./src/authful-client.ts";
 import { env } from "./src/env.ts";
 import pino from "pino";
 
-const tokenServiceUrl = env.TOKEN_SERVICE_URL;
-const tokenServiceApiKey = env.TOKEN_SERVICE_API_KEY;
 const port = env.PORT;
 const host = env.HOST;
 
@@ -20,19 +17,12 @@ configureUpstreamClient();
 
 const log = pino({ name: "anticapture-mcp" });
 
-// Single source of identity: every inbound request is authenticated against
-// Authful (the same per-tenant token store Gateful uses), not a shared key.
-const authful =
-  tokenServiceUrl && tokenServiceApiKey
-    ? new AuthfulClient(tokenServiceUrl, tokenServiceApiKey)
-    : undefined;
-
-log.info({ authEnabled: !!authful, port, host }, "server starting");
-if (!authful) {
-  log.warn(
-    "TOKEN_SERVICE_URL/TOKEN_SERVICE_API_KEY unset — Authful validation disabled, all requests allowed (dev only)",
-  );
-}
+// Token validation is delegated to Gateful: the inbound bearer is forwarded
+// upstream (see configure-upstream-client) and guarded by Gateful's
+// tokenAuthMiddleware, which has the Redis cache + fail-open fallback. Doing
+// our own uncached Authful check here would re-introduce a hard dependency on
+// Authful and 503 cache-warm tenants during an Authful restart.
+log.info({ port, host }, "server starting");
 
 async function getOrCreateTransport(
   requestSessionId: string | undefined,
@@ -88,45 +78,6 @@ const httpServer = http.createServer(async (req, res) => {
     res.writeHead(404).end();
     finish(404);
     return;
-  }
-
-  if (authful) {
-    const auth = req.headers["authorization"];
-    const token = auth?.startsWith("Bearer ") ? auth.slice(7) : "";
-
-    const reject401 = () => {
-      res
-        .writeHead(401, {
-          "Content-Type": "application/json",
-          "WWW-Authenticate": 'Bearer realm="anticapture"',
-        })
-        .end(JSON.stringify({ error: "invalid_token" }));
-      finish(401);
-    };
-
-    if (!token) {
-      reject401();
-      return;
-    }
-
-    let verdict;
-    try {
-      verdict = await authful.validate(hashBearerToken(token));
-    } catch (err) {
-      // Fail closed, but distinguish a token problem (401) from Authful being
-      // unreachable (503) so callers don't treat an outage as bad credentials.
-      log.error({ reqId, err: String(err) }, "authful validation failed");
-      res
-        .writeHead(503, { "Content-Type": "application/json" })
-        .end(JSON.stringify({ error: "auth_unavailable" }));
-      finish(503);
-      return;
-    }
-
-    if (!verdict.valid) {
-      reject401();
-      return;
-    }
   }
 
   const sessionId = req.headers["mcp-session-id"] as string | undefined;

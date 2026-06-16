@@ -150,7 +150,9 @@ agentic clients. Two transports are available:
 - `pnpm mcp` (`mcp-server.ts`) — stdio, for clients that spawn the server as a
   child process (Claude Desktop, local agents).
 - `pnpm mcp-http` (`mcp-server-http.ts`) — Streamable HTTP with session
-  management and bearer auth, used by the deployed `infra/mcp-server` image.
+  management, used by the deployed `infra/mcp-server` image. Token validation
+  is delegated to Gateful: the inbound bearer is forwarded upstream and guarded
+  by Gateful's `tokenAuthMiddleware` (Redis cache + fail-open fallback).
 
 Environment:
 
@@ -158,11 +160,9 @@ Environment:
   `http://localhost:4001`).
 - `ANTICAPTURE_API_KEY` — bearer token sent to the upstream Gateful API. Omit
   when forwarding the caller's own token (`FORWARD_CLIENT_AUTH=true`).
-- `TOKEN_SERVICE_URL` / `TOKEN_SERVICE_API_KEY` — Authful base URL and the
-  internal key it expects (same names Gateful uses). When both are set, every
-  inbound MCP request is authenticated against Authful (the same per-tenant
-  token store Gateful uses); invalid tokens get a `401`, an unreachable Authful
-  a `503`. Omit both to disable auth (dev only).
+- `FORWARD_CLIENT_AUTH` — when `true`, the caller's inbound `Authorization`
+  header is forwarded to Gateful, which validates the per-tenant token via its
+  `tokenAuthMiddleware`. This server does not validate tokens itself.
 - `PORT` / `HOST` — HTTP server bind (default `3100` / `0.0.0.0`).
 
 ### Wiring into Claude Desktop (stdio)

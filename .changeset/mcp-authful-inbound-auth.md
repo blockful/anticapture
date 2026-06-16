@@ -2,4 +2,4 @@
 "@anticapture/client": minor
 ---
 
-The MCP HTTP server now authenticates every inbound request against Authful (the per-tenant token store) instead of an equality check against the shared `ANTICAPTURE_MCP_API_KEY`. Set `TOKEN_SERVICE_URL` + `TOKEN_SERVICE_API_KEY` (same names Gateful uses) to enable: callers present their own Authful token, which is validated before any operation (invalid → `401`, Authful unreachable → `503`) and forwarded upstream so Gateful re-validates and attributes usage per tenant. `ANTICAPTURE_MCP_API_KEY` is removed; with auth unset, all requests are allowed (dev only).
+The MCP HTTP server no longer does an equality check against the shared `ANTICAPTURE_MCP_API_KEY` (now removed). Token validation is delegated to Gateful: callers present their own per-tenant token, which the MCP server forwards upstream (`FORWARD_CLIENT_AUTH=true`) for Gateful's `tokenAuthMiddleware` to validate and attribute per tenant. Validation is intentionally not duplicated at the MCP layer — Gateful owns it, including the Redis cache and fail-open fallback that keep cache-warm tenants serving through an Authful restart.
