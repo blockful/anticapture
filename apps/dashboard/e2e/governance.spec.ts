@@ -43,12 +43,8 @@ test.describe("Governance page (/ens/proposals)", () => {
   }) => {
     await goto("/ens/proposals");
     // ENS has off-chain proposals, so the proposals tab exposes a source
-    // filter (All sources / Snapshot / Governor) next to it. The trigger has
-    // role="combobox", which derives its accessible name from the author (not
-    // its contents), so match it by the selected value text instead.
-    const sourceFilter = page
-      .getByRole("combobox")
-      .filter({ hasText: "All sources" });
+    // filter (All sources / Snapshot / Governor) next to it.
+    const sourceFilter = page.getByRole("combobox", { name: /All sources/ });
     await expect(sourceFilter).toBeVisible({ timeout: 15_000 });
     await sourceFilter.click();
     await page.getByRole("option", { name: "Snapshot" }).click();
