@@ -18,11 +18,13 @@ export const SHU: DaoConfiguration = {
   ogIcon: ShutterOgIcon,
   decimals: 18,
   color: {
-    svgColor: "#1e1e1e",
+    svgColor: "#051016",
     svgBgColor: "#fff",
   },
   forumLink: "https://shutternetwork.discourse.group/c/shutter-dao/14",
   icon: ShutterIcon,
+  hostnames: ["shutter.gov.blockful.io"],
+  whitelabel: {},
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -40,6 +42,10 @@ export const SHU: DaoConfiguration = {
       cancelFunction: false,
       logic: "For + Abstain",
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
+    },
+    govPlatform: {
+      name: "Anticapture",
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/shu/proposals/`,
     },
   },
   attackProfitability: {
@@ -350,4 +356,5 @@ export const SHU: DaoConfiguration = {
   tokenDistribution: true,
   dataTables: true,
   governancePage: true,
+  activityFeed: true,
 };
