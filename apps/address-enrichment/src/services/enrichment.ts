@@ -183,12 +183,25 @@ export class EnrichmentService {
    */
   private isEnsFresh(record: AddressEnrichment): boolean {
     if (!record.ensUpdatedAt) {
+      logger.info(
+        { address: record.address },
+        "No cached ENS record for address",
+      );
       return false;
     }
 
     const ttlMs = this.ensCacheTtlMinutes * 60 * 1000;
     const age = Date.now() - record.ensUpdatedAt.getTime();
-    return age < ttlMs;
+    const isFresh = age < ttlMs;
+
+    logger.info(
+      { address: record.address },
+      isFresh
+        ? `Found valid cached ENS record; Time left to live: ${ttlMs - age}`
+        : "Found stale cached ENS record",
+    );
+
+    return isFresh;
   }
 
   private mapToResult(record: AddressEnrichment): EnrichmentResult {
