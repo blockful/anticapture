@@ -3,10 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   type TokenCacheStore,
+  type TokenValidator,
   hashBearerToken,
   tokenAuthMiddleware,
 } from "./token-auth";
-import type { AuthfulClient, TokenValidation } from "./authful-client";
+import type { TokenValidation } from "./authful-client";
 
 class FakeRedis implements TokenCacheStore {
   store = new Map<string, { value: string; ttl?: number }>();
@@ -32,13 +33,13 @@ const VALID: TokenValidation = {
   rateLimitPerMin: 600,
 };
 
-function fakeClient(impl: () => Promise<TokenValidation>) {
-  return { validate: vi.fn(impl) } as unknown as AuthfulClient & {
-    validate: ReturnType<typeof vi.fn>;
-  };
+function fakeClient(impl: () => Promise<TokenValidation>): TokenValidator & {
+  validate: ReturnType<typeof vi.fn>;
+} {
+  return { validate: vi.fn(impl) };
 }
 
-function buildApp(client: AuthfulClient, cache?: TokenCacheStore) {
+function buildApp(client: TokenValidator, cache?: TokenCacheStore) {
   const app = new OpenAPIHono();
   app.use(
     "*",

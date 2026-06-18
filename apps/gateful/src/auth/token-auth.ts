@@ -5,7 +5,12 @@ import type { Context, Next } from "hono";
 import { logger } from "../logger.js";
 import { safeParse } from "../shared/safe-parse.js";
 import { TokenValidationSchema } from "./authful-client.js";
-import type { AuthfulClient, TokenValidation } from "./authful-client.js";
+import type { TokenValidation } from "./authful-client.js";
+
+/** Minimal Authful surface the middleware needs (matches AuthfulClient). */
+export interface TokenValidator {
+  validate(tokenHash: string): Promise<TokenValidation>;
+}
 
 export type AuthContext = {
   tokenId: string;
@@ -46,7 +51,7 @@ export function tokenAuthMiddleware({
   cache,
   publicPaths,
 }: {
-  client: AuthfulClient;
+  client: TokenValidator;
   cache?: TokenCacheStore;
   publicPaths: ReadonlySet<string>;
 }) {
@@ -102,7 +107,7 @@ function parseCachedVerdict(raw: string): TokenValidation | null {
 }
 
 async function validateRemote(
-  client: AuthfulClient,
+  client: TokenValidator,
   tokenHash: string,
 ): Promise<TokenValidation | null> {
   try {
