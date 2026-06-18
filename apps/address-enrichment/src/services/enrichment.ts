@@ -195,10 +195,8 @@ export class EnrichmentService {
     const isFresh = age < ttlMs;
 
     logger.info(
-      { address: record.address },
-      isFresh
-        ? `Found valid cached ENS record; Time left to live: ${ttlMs - age}`
-        : "Found stale cached ENS record",
+      { address: record.address, ttlRemainingMs: ttlMs - age },
+      `Found ${isFresh ? "valid" : "stale"} cached ENS record`,
     );
 
     return isFresh;
