@@ -37,6 +37,7 @@ export class ENSClient {
    */
   async getEnsData(address: string): Promise<EnsData | null> {
     try {
+      logger.debug({ address }, "Fetching ENS data");
       const response = await fetch(
         `${this.baseUrl}/api/v1/users/${address}/ens`,
         {
@@ -49,6 +50,7 @@ export class ENSClient {
 
       if (!response.ok) {
         if (response.status === 404) {
+          logger.debug({ address }, "The address has no ENS");
           return null;
         }
         logger.error(
@@ -70,9 +72,21 @@ export class ENSClient {
       }
 
       const { ens } = parsed.data;
+      logger.debug(
+        {
+          address,
+          data: {
+            name: ens.name ?? null,
+            avatar: ens.avatar ? "<Omitted>" : null,
+            banner: ens.records?.header ? "<Omitted>" : null,
+          },
+        },
+        "Response data from ENS API",
+      );
 
       // If no name is returned, the address has no ENS
       if (!ens.name) {
+        logger.debug({ address }, "The address has no ENS");
         return null;
       }
 
