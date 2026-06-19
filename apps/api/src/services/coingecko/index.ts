@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 import { DaoIdEnum } from "@/lib/enums";
+import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { PriceProvider } from "@/services/treasury/types";
 
@@ -63,6 +64,10 @@ export class CoingeckoService implements PriceProvider {
       });
     }
 
+    logger.info(
+      { tokenId, days },
+      "fetching historical token prices from CoinGecko",
+    );
     const response = await this.client.get<CoingeckoHistoricalMarketData>(
       `/coins/${tokenId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
     );
@@ -92,6 +97,10 @@ export class CoingeckoService implements PriceProvider {
     const tokenId = CoingeckoTokenIdEnum[this.daoId];
     const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
     const formattedAddress = tokenContractAddress.toLowerCase();
+    logger.info(
+      { assetPlatform, tokenContractAddress: formattedAddress, targetCurrency },
+      "fetching token price from CoinGecko",
+    );
     const response = await this.client.get(
       `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
     );
