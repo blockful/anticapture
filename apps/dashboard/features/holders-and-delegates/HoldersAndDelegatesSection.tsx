@@ -7,7 +7,6 @@ import type { ReactElement } from "react";
 
 import { Delegates } from "@/features/holders-and-delegates/components";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
-import { EfpFollowingProvider } from "@/shared/providers/EfpFollowingProvider";
 import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-group/PillTabGroup";
 import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
@@ -103,9 +102,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               setTimeInterval={setDays}
             />
           </div>
-          <EfpFollowingProvider>
-            {tabComponentMap[activeTab as TabId]}
-          </EfpFollowingProvider>
+          {tabComponentMap[activeTab as TabId]}
         </SubSectionsContainer>
       </TheSectionLayout>
     </div>

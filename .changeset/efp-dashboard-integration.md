@@ -1,4 +1,5 @@
 ---
+"@anticapture/address-enrichment": minor
 "@anticapture/gateful": minor
 "@anticapture/dashboard": patch
 ---

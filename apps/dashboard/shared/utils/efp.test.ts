@@ -63,7 +63,9 @@ describe("efp", () => {
 
   describe("getEfpFollowNameClassName", () => {
     test("returns default dashed border when not following", () => {
-      expect(getEfpFollowNameClassName(false, true)).toContain("#3F3F46");
+      expect(getEfpFollowNameClassName(false, true)).toContain(
+        "border-border-contrast",
+      );
       expect(getEfpFollowNameClassName(false, false)).toBeUndefined();
     });
 

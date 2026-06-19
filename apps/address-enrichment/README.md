@@ -1,13 +1,14 @@
 # Address Enrichment Service
 
-A service that enriches Ethereum addresses with labels from Arkham Intel API, ENS data from ethfollow, and determines whether addresses are EOAs or contracts.
+A service that enriches Ethereum addresses with labels from Arkham Intel API, ENS data and Ethereum Follow Protocol (EFP) social stats from ethfollow, and determines whether addresses are EOAs or contracts.
 
 ## Features
 
 - **Arkham Labels**: Fetches entity names and labels from Arkham Intel API
 - **ENS Resolution**: Fetches ENS name, avatar, and banner via ethfollow API
+- **EFP Identity**: Fetches Ethereum Follow Protocol follower/following counts and viewer follow-state via the ethfollow API (identity context only — never a risk signal)
 - **Address Type Detection**: Determines if an address is an EOA or contract via RPC
-- **Hybrid Caching**: Arkham data is stored permanently. ENS data is cached with a configurable TTL and refreshed automatically.
+- **Hybrid Caching**: Arkham data is stored permanently. ENS and EFP data are cached with configurable TTLs and refreshed automatically.
 - **OpenAPI Documentation**: Swagger UI available at `/docs`
 
 ## API Endpoints
@@ -33,11 +34,15 @@ Returns enriched data for a single Ethereum address.
     "avatar": "https://euc.li/example.eth",
     "banner": "https://i.imgur.com/example.png"
   },
+  "efp": {
+    "followersCount": 5396,
+    "followingCount": 10
+  },
   "createdAt": "2024-01-20T10:30:00.000Z"
 }
 ```
 
-> `ens` is `null` when the address has no ENS name.
+> `ens` is `null` when the address has no ENS name; `efp` is `null` when EFP data is unavailable.
 
 ### `POST /addresses`
 
@@ -73,6 +78,10 @@ Batch endpoint for resolving multiple addresses at once (max 100 per request).
         "avatar": "https://euc.li/example.eth",
         "banner": "https://i.imgur.com/example.png"
       },
+      "efp": {
+        "followersCount": 5396,
+        "followingCount": 10
+      },
       "createdAt": "2024-01-20T10:30:00.000Z"
     }
   ],
@@ -84,6 +93,52 @@ Batch endpoint for resolving multiple addresses at once (max 100 per request).
   ]
 }
 ```
+
+### `GET /efp/users/:user/:follower/follower-state`
+
+Returns the Ethereum Follow Protocol relationship between two addresses — whether `follower` follows `user`, plus block/mute state. Used for viewer-specific UI such as "You follow" labels.
+
+**Response:**
+
+```json
+{
+  "addressUser": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  "addressFollower": "0x983110309620d911731ac0932219af06091b6744",
+  "state": {
+    "follow": true,
+    "block": false,
+    "mute": false
+  }
+}
+```
+
+> Returns `404` when the upstream has no follower-state record for the pair (i.e. not following), and `502` when the EFP API fails.
+
+### `POST /efp/following-in-set`
+
+Batch-checks up to 100 addresses against the viewer's EFP follow graph and returns the subset the viewer follows (excluding block/mute relationships).
+
+**Request:**
+
+```json
+{
+  "viewer": "0x983110309620d911731ac0932219af06091b6744",
+  "addresses": [
+    "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+    "0xb8c2c29ee19d8307cb7255e1cd9cbde883a267d5"
+  ]
+}
+```
+
+**Response:**
+
+```json
+{
+  "followed": ["0xd8da6bf26964af9d7eed9e03e53415d37aa96045"]
+}
+```
+
+> Returns `502` when the upstream EFP API fails.
 
 ### `GET /health`
 

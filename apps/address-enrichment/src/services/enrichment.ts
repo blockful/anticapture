@@ -80,8 +80,14 @@ export class EnrichmentService {
     });
 
     if (existing) {
-      const needsEnsRefresh = !this.isEnsFresh(existing);
-      const needsEfpRefresh = !this.isEfpFresh(existing);
+      const needsEnsRefresh = !this.isFresh(
+        existing.ensUpdatedAt,
+        this.ensCacheTtlMinutes,
+      );
+      const needsEfpRefresh = !this.isFresh(
+        existing.efpUpdatedAt,
+        this.efpCacheTtlMinutes,
+      );
 
       if (!needsEnsRefresh && !needsEfpRefresh) {
         return this.mapToResult(existing);
@@ -240,24 +246,9 @@ export class EnrichmentService {
     return result.outcome === "success" ? result.stats : null;
   }
 
-  private isEnsFresh(record: AddressEnrichment): boolean {
-    if (!record.ensUpdatedAt) {
-      return false;
-    }
-
-    const ttlMs = this.ensCacheTtlMinutes * 60 * 1000;
-    const age = Date.now() - record.ensUpdatedAt.getTime();
-    return age < ttlMs;
-  }
-
-  private isEfpFresh(record: AddressEnrichment): boolean {
-    if (!record.efpUpdatedAt) {
-      return false;
-    }
-
-    const ttlMs = this.efpCacheTtlMinutes * 60 * 1000;
-    const age = Date.now() - record.efpUpdatedAt.getTime();
-    return age < ttlMs;
+  private isFresh(updatedAt: Date | null, ttlMinutes: number): boolean {
+    if (!updatedAt) return false;
+    return Date.now() - updatedAt.getTime() < ttlMinutes * 60 * 1000;
   }
 
   private mapToResult(record: AddressEnrichment): EnrichmentResult {

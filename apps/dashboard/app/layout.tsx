@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 
 import { CookieConsent } from "@/features/cookie";
 import { HelpPopover } from "@/shared/components";
+import { EfpFollowingProvider } from "@/shared/providers/EfpFollowingProvider";
 import { GlobalProviders } from "@/shared/providers/GlobalProviders";
 import { JsonLd } from "@/shared/seo/JsonLd";
 import {
@@ -122,7 +123,7 @@ export default async function RootLayout({
           className="border-border-default mx-auto max-w-screen-2xl overflow-x-hidden border-x xl:overflow-hidden"
         >
           <GlobalProviders isWhitelabel={isWhitelabel}>
-            {children}
+            <EfpFollowingProvider>{children}</EfpFollowingProvider>
             <CookieConsent isWhitelabel={isWhitelabel} />
             <HelpPopover isWhitelabel={isWhitelabel} />
           </GlobalProviders>

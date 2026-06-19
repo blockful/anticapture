@@ -21,9 +21,9 @@ export async function getFollowingInSet(
     const batch = uniqueAddresses.slice(i, i + concurrency);
     const results = await Promise.all(
       batch.map(async (address) => {
-        const target = address.toLowerCase();
+        // `address` is already lowercased via uniqueAddresses above.
         const result = await efpClient.getFollowerState(
-          target,
+          address,
           normalizedViewer,
         );
         if (result.outcome === "error") {
@@ -35,7 +35,7 @@ export async function getFollowingInSet(
           !result.state.state.block &&
           !result.state.state.mute
         ) {
-          return target;
+          return address;
         }
         return null;
       }),

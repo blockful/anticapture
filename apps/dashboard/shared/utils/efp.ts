@@ -21,11 +21,6 @@ export const getEfpProfileUrl = (
   ensName?: string | null,
 ): string => `${EFP_APP_ORIGIN}/${getEfpProfileSlug(address, ensName)}`;
 
-const formatEfpFollowersCount = (count: number): string =>
-  formatPlural(count, "follower");
-
-const formatEfpFollowingCount = (count: number): string => `${count} following`;
-
 /** Single-line label for the drawer EFP pill. */
 export const formatEfpDrawerStatsLabel = (
   stats: NonNullable<EfpStats>,
@@ -38,13 +33,10 @@ export const formatEfpDrawerStatsLabel = (
   return `${followers} · ${stats.followingCount} Following`;
 };
 
-export const formatEfpCounts = (stats: EfpStats): string | null => {
-  if (!stats) {
-    return null;
-  }
-
-  return `${formatEfpFollowersCount(stats.followersCount)} · ${formatEfpFollowingCount(stats.followingCount)}`;
-};
+export const formatEfpCounts = (stats: EfpStats): string | null =>
+  stats
+    ? `${formatPlural(stats.followersCount, "follower")} · ${stats.followingCount} following`
+    : null;
 
 export const shouldShowYouFollow = (
   state:
@@ -63,7 +55,9 @@ export const getEfpFollowNameClassName = (
   isDashed = false,
 ): string | undefined => {
   if (!viewerFollows) {
-    return isDashed ? "border-b border-dashed border-[#3F3F46]" : undefined;
+    return isDashed
+      ? "border-b border-dashed border-border-contrast"
+      : undefined;
   }
 
   return cn(
