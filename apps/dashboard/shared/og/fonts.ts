@@ -6,6 +6,7 @@ const FONTS_DIR = join(process.cwd(), "public", "fonts");
 const FONT_FILES = {
   medium: "RobotoMono-Medium.ttf",
   regular: "RobotoMono-Regular.ttf",
+  interSemiBold: "Inter-SemiBold.ttf",
 } as const;
 
 async function loadFont(fileName: string): Promise<Buffer> {
@@ -20,9 +21,10 @@ async function loadFont(fileName: string): Promise<Buffer> {
 
 export async function loadLocalFonts() {
   try {
-    const [medium, regular] = await Promise.all([
+    const [medium, regular, interSemiBold] = await Promise.all([
       loadFont(FONT_FILES.medium),
       loadFont(FONT_FILES.regular),
+      loadFont(FONT_FILES.interSemiBold),
     ]);
     return [
       {
@@ -35,6 +37,12 @@ export async function loadLocalFonts() {
         name: "Roboto Mono",
         data: regular,
         weight: 400 as const,
+        style: "normal" as const,
+      },
+      {
+        name: "Inter",
+        data: interSemiBold,
+        weight: 600 as const,
         style: "normal" as const,
       },
     ];

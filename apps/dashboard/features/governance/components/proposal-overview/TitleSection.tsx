@@ -3,6 +3,7 @@
 import type { Address } from "viem";
 
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
+import { ProposalSourceBadge } from "@/features/governance/components/proposal-overview/ProposalSourceBadge";
 import type {
   ProposalStatus,
   ProposalViewData,
@@ -38,11 +39,13 @@ const DAO_TWITTER_HANDLES: Record<string, string> = {
 interface TitleSectionProps {
   proposal: ProposalViewData;
   onAddressClick?: (address: string) => void;
+  isOffchain?: boolean;
 }
 
 export const TitleSection = ({
   proposal,
   onAddressClick,
+  isOffchain = false,
 }: TitleSectionProps) => {
   const handleOpenDrawer = () => {
     if (proposal?.proposerAccountId) {
@@ -59,6 +62,9 @@ export const TitleSection = ({
   return (
     <div className="flex w-full flex-col gap-3">
       <div className="flex w-full items-center justify-start gap-2">
+        {/* Source badge — Snapshot (offchain) or Governor (onchain) */}
+        <ProposalSourceBadge source={isOffchain ? "offchain" : "onchain"} />
+
         {/* Badge Ongoing Proposal */}
         <ProposalBadge
           status={proposal.status.toLowerCase() as ProposalStatus}

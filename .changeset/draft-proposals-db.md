@@ -1,7 +1,6 @@
 ---
 "@anticapture/api": minor
 "@anticapture/dashboard": minor
-"@anticapture/api-gateway": patch
 "@anticapture/gateful": patch
 ---
 

@@ -127,17 +127,17 @@ export const getDaoGovernanceListPath = ({
   isOffchain?: boolean;
 }) => {
   const basePath = getWhitelabelBasePath({ daoId, pathname });
-  const tab = isOffchain ? "?tab=offchain" : "";
+  const sourceQuery = isOffchain ? "?source=snapshot" : "";
 
   if (basePath.startsWith("/whitelabel/")) {
-    return `${basePath}/${WHITELABEL_ROUTES.proposals}${tab}`;
+    return `${basePath}/${WHITELABEL_ROUTES.proposals}${sourceQuery}`;
   }
 
   if (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoId])) {
-    return `/${WHITELABEL_ROUTES.proposals}${tab}`;
+    return `/${WHITELABEL_ROUTES.proposals}${sourceQuery}`;
   }
 
-  return `/${daoId.toLowerCase()}/proposals${tab}`;
+  return `/${daoId.toLowerCase()}/proposals${sourceQuery}`;
 };
 
 export const getDaoNotificationsPath = ({
