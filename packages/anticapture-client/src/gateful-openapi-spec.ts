@@ -3,6 +3,10 @@ export type GatefulOpenApiSpecEnv = {
   ANTICAPTURE_API_URL?: string;
   RAILWAY_SERVICE_GATEFUL_URL?: string;
   RAILWAY_ENVIRONMENT_NAME?: string;
+  // Vercel hosts the dashboard's PR previews; these are its git-context vars.
+  VERCEL_ENV?: string;
+  VERCEL_GIT_PULL_REQUEST_ID?: string;
+  VERCEL_GIT_COMMIT_REF?: string;
 };
 
 const GATEFUL_OPENAPI_PATH = "/docs/json";
@@ -14,6 +18,11 @@ const RAILWAY_GATEFUL_DOMAIN_SUFFIX = ".up.railway.app";
 // NEXT_PUBLIC_GATEFUL_URL; every other Railway environment is a PR preview whose
 // Gateful domain we derive from the environment name.
 const RAILWAY_DEPLOY_ENVIRONMENTS = new Set(["dev", "production"]);
+
+// On Vercel, preview deployments for the long-lived `dev`/`main` branches must
+// keep using the configured Gateful URL instead of a per-PR preview host. Mirrors
+// PERMANENT_BRANCHES in apps/dashboard/next.config.ts.
+const VERCEL_PERMANENT_BRANCHES = new Set(["dev", "main"]);
 
 const readNonEmptyValue = (value: string | undefined) => {
   const trimmed = value?.trim();
@@ -54,6 +63,24 @@ export const resolveGatefulOpenApiSpecUrl = (
     return buildPreviewGatefulSpecUrl(railwayEnvironmentName);
   }
 
+  // The dashboard's PR previews run on Vercel, where the Railway env vars above
+  // are absent. Detect them via Vercel's own git vars and point codegen at the
+  // PR's Gateful (Railway names that environment `anticapture-pr-<id>`), so the
+  // generated client matches the PR's contract — not dev's. This mirrors
+  // apps/dashboard/next.config.ts, which already does this for the runtime URL;
+  // keep the two in sync. Without it, codegen falls through to the static dev
+  // URL below and regenerates the client against the wrong contract on every
+  // PR preview.
+  const vercelPrId = readNonEmptyValue(env.VERCEL_GIT_PULL_REQUEST_ID);
+  const vercelBranch = readNonEmptyValue(env.VERCEL_GIT_COMMIT_REF);
+  if (
+    readNonEmptyValue(env.VERCEL_ENV) === "preview" &&
+    vercelPrId &&
+    !VERCEL_PERMANENT_BRANCHES.has(vercelBranch ?? "")
+  ) {
+    return buildPreviewGatefulSpecUrl(`anticapture-pr-${vercelPrId}`);
+  }
+
   // dev / production (and CI) read the Gateful URL from the environment. Sources,
   // in priority order:
   //   1. NEXT_PUBLIC_GATEFUL_URL    — set explicitly in CI and local dev.
@@ -71,6 +98,6 @@ export const resolveGatefulOpenApiSpecUrl = (
   }
 
   throw new Error(
-    "Unable to resolve Gateful OpenAPI spec. Set NEXT_PUBLIC_GATEFUL_URL / ANTICAPTURE_API_URL / RAILWAY_SERVICE_GATEFUL_URL (used on dev/production), or run inside a Railway PR preview with RAILWAY_ENVIRONMENT_NAME.",
+    "Unable to resolve Gateful OpenAPI spec. Set NEXT_PUBLIC_GATEFUL_URL / ANTICAPTURE_API_URL / RAILWAY_SERVICE_GATEFUL_URL (used on dev/production), or run inside a Railway PR preview with RAILWAY_ENVIRONMENT_NAME, or a Vercel PR preview with VERCEL_ENV=preview and VERCEL_GIT_PULL_REQUEST_ID.",
   );
 };
