@@ -168,31 +168,23 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const rows = page.locator("tbody tr");
     await expect(rows.first()).toBeVisible({ timeout: 15_000 });
     const initialCount = await rows.count();
-    // Page size is 20. Need at least one full page to test pagination.
+    // Page size is 20; without a full first page there is no next page to load.
     if (initialCount < 20) return;
-    // Trigger scroll on the table's overflow container; assert scrollTop moves.
-    // A row-count assertion is unreliable due to virtualization and refetching
-    // in the live dev environment.
-    const scrolled = await page.evaluate(() => {
-      const containers = document.querySelectorAll<HTMLElement>("div");
-      for (const el of Array.from(containers)) {
-        const style = getComputedStyle(el);
-        if (
-          (style.overflowY === "auto" || style.overflowY === "scroll") &&
-          el.querySelector("table") &&
-          el.scrollHeight > el.clientHeight
-        ) {
-          el.scrollTop = el.scrollHeight;
-          return el.scrollTop > 0;
-        }
-      }
-      return false;
-    });
-    // If we couldn't find a scrollable container with overflow, treat as data-dependent.
-    if (!scrolled) return;
-    // Allow the page to settle after the scroll; the test passes as long as
-    // the scroll completed without throwing.
-    await page.waitForTimeout(500);
+    // Scrolling the sentinel into view must trigger the next page. Token holders
+    // paginate via the balances endpoint using a `skip` cursor — the first page
+    // is skip=0, so a request with skip > 0 is the load-more behavior itself,
+    // and it fires the moment the sentinel intersects (before any response).
+    // Assert that request rather than the rendered row count: a refetch can
+    // briefly collapse the table body to a single state row, which made the
+    // count assertion flaky. If the sentinel→onLoadMore→fetchNextPage wiring
+    // regresses, no skip>0 request fires and this fails.
+    const nextPageRequest = page.waitForRequest(
+      (req) =>
+        req.url().includes("/balances") && /[?&]skip=[1-9]/.test(req.url()),
+      { timeout: 15_000 },
+    );
+    await rows.last().scrollIntoViewIfNeeded();
+    await nextPageRequest;
   });
 
   test("infinite scroll loads more delegates when available", async ({
@@ -211,31 +203,24 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const rows = page.locator("tbody tr");
     await expect(rows.first()).toBeVisible({ timeout: 15_000 });
     const initialCount = await rows.count();
-    // Page size is 20. Need at least one full page to test pagination.
+    // Page size is 20; without a full first page there is no next page to load.
     if (initialCount < 20) return;
-    // Trigger scroll on the table's overflow container; assert scrollTop moves.
-    // A row-count assertion is unreliable due to virtualization and refetching
-    // in the live dev environment.
-    const scrolled = await page.evaluate(() => {
-      const containers = document.querySelectorAll<HTMLElement>("div");
-      for (const el of Array.from(containers)) {
-        const style = getComputedStyle(el);
-        if (
-          (style.overflowY === "auto" || style.overflowY === "scroll") &&
-          el.querySelector("table") &&
-          el.scrollHeight > el.clientHeight
-        ) {
-          el.scrollTop = el.scrollHeight;
-          return el.scrollTop > 0;
-        }
-      }
-      return false;
-    });
-    // If we couldn't find a scrollable container with overflow, treat as data-dependent.
-    if (!scrolled) return;
-    // Allow the page to settle after the scroll; the test passes as long as
-    // the scroll completed without throwing.
-    await page.waitForTimeout(500);
+    // Scrolling the sentinel into view must trigger the next page. Delegates
+    // paginate via the voting-powers endpoint using a `skip` cursor — the first
+    // page is skip=0, so a request with skip > 0 is the load-more behavior
+    // itself, and it fires the moment the sentinel intersects (before any
+    // response). Assert that request rather than the rendered row count: a
+    // refetch can briefly collapse the table body to a single state row, which
+    // made the count assertion flaky. If the sentinel→onLoadMore→fetchNextPage
+    // wiring regresses, no skip>0 request fires and this fails.
+    const nextPageRequest = page.waitForRequest(
+      (req) =>
+        req.url().includes("/voting-powers") &&
+        /[?&]skip=[1-9]/.test(req.url()),
+      { timeout: 15_000 },
+    );
+    await rows.last().scrollIntoViewIfNeeded();
+    await nextPageRequest;
   });
 
   test("address filter popover accepts input on Token Holders", async ({
