@@ -126,6 +126,13 @@ Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
 - Commit `node_modules`, `.env`, or generated files that aren't meant to be committed.
 - Cast types to `any`/`unknown` unless explicitly asked.
 
+## Knowledge graph (graphify)
+
+This project ships a `graphify` knowledge graph and the `/graphify` skill
+(`.claude/skills/graphify`). For how to query it and keep it current, follow the
+**graphify** section in `CLAUDE.md` — that is the single source of truth (maintained by
+`graphify claude install`). Requires `uv` (see README prerequisites).
+
 ## Shared memory (MEMORY.md)
 
 `MEMORY.md` at the repo root is the team's shared agent memory. Read it when starting

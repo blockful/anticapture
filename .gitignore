@@ -160,3 +160,7 @@ dist
 .mcp.json
 
 apps/gateful/openapi/gateful.json
+
+# graphify knowledge-graph artifacts — rebuilt per-machine by the auto-rebuild
+# hooks; not shared in git.
+graphify-out/
