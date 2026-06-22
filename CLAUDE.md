@@ -12,11 +12,15 @@
 
 ## Shared memory (MEMORY.md)
 
-`MEMORY.md` at the repo root is the team's shared agent memory. Read it when starting
-work on an unfamiliar area. When you learn something durable — a non-obvious constraint,
-the why behind a decision, a pitfall that cost real time — append a short dated entry
-under the matching topic section. Never record session narration, routine work, or
-secrets. Full guidance in `AGENTS.md`.
+`MEMORY.md` at the repo root is the team's shared agent memory — treat reading/updating it as
+part of every task's lifecycle:
+
+- **Start of a task:** read it before working an unfamiliar area.
+- **End of a task (before finishing or opening a PR):** if you learned something durable — a
+  non-obvious constraint, the _why_ behind a decision, a pitfall that cost real time — append a
+  short dated entry under the matching topic section. Treat it as a required closing step.
+
+Never record session narration, routine work, or secrets. Full guidance in `AGENTS.md`.
 
 ## Architecture Overview
 

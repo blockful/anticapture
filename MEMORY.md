@@ -15,6 +15,9 @@ doesn't). Entries are short, dated, factual, and grouped by topic. Prune what go
 - 2026-06-11 — Gateful's `index.test.ts` can flake on cold vitest cache (dynamic import
   of the app graph exceeds the 10s hook timeout). Re-run before treating it as a real
   failure.
+- 2026-06-22 — `.agents/skills` is a tracked symlink to `.claude/skills`. Vendor a skill by
+  copying only into `.claude/skills/<name>/`; copying into `.agents/skills/<name>` follows
+  the symlink and creates a nested duplicate.
 
 ## Architecture decisions
 
@@ -32,3 +35,7 @@ doesn't). Entries are short, dated, factual, and grouped by topic. Prune what go
 - 2026-06-11 — drizzle-orm ≥0.45 wraps driver errors in `DrizzleQueryError`; the Postgres
   error `code` (e.g. `23505` unique violation) lives down the `cause` chain, not on the
   thrown error itself.
+- 2026-06-22 — `graphify install --project` / `graphify claude install` rewrites `CLAUDE.md`
+  and `.claude/settings.json` with CRLF line endings (and injects PreToolUse hooks). On a LF
+  repo this surfaces as a whole-file phantom diff — normalize back to LF (`sed -i 's/\r$//'`)
+  after running it so the diff shows only the real additions.

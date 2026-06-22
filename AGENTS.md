@@ -135,9 +135,14 @@ This project ships a `graphify` knowledge graph and the `/graphify` skill
 
 ## Shared memory (MEMORY.md)
 
-`MEMORY.md` at the repo root is the team's shared agent memory. Read it when starting
-work on an unfamiliar area; write to it when you learn something durable that the next
-agent (or human) would otherwise relearn the hard way.
+`MEMORY.md` at the repo root is the team's shared agent memory. Reading and updating it is
+part of **every task's lifecycle**, not an optional afterthought:
+
+- **Start of a task:** read `MEMORY.md` before digging into an unfamiliar area, so you don't
+  relearn what a previous agent already paid for.
+- **End of a task (before you finish or open a PR):** ask yourself _"would the next agent or
+  human relearn this the hard way?"_ — if yes, append it. Treat this as a required closing step,
+  the same as running typecheck/lint.
 
 **Record:** non-obvious constraints and gotchas, the _why_ behind architectural
 decisions, recurring pitfalls and their fixes, environment quirks that cost real time.
