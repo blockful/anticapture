@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 import { AlertCard } from "@/features/alerts/components";
 import type { AlertItem } from "@/features/alerts/utils/alerts-constants";
 import { ALERTS_ITEMS } from "@/features/alerts/utils/alerts-constants";
-import { TheSectionLayout } from "@/shared/components";
+import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 
 export const AlertsSection = () => {
   return (
@@ -21,7 +21,6 @@ export const AlertsSection = () => {
             <AlertCard
               key={alert.title}
               title={alert.title}
-              description={alert.description}
               icon={alert.icon}
               availability={alert.availability}
               link={alert.link}
