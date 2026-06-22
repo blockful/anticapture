@@ -43,6 +43,10 @@ export class CompoundProvider implements TreasuryProvider {
     if (cached !== null) return this.filterData(cached, cutoffTimestamp);
 
     try {
+      logger.info(
+        { cutoffTimestamp, limit: LIMIT },
+        "fetching treasury data from Compound API",
+      );
       const response = await this.client.get<CompoundResponse>(
         `/treasury?order=DESC&limit=${LIMIT}`,
       );
