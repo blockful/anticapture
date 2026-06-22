@@ -1,4 +1,4 @@
-import type { JSX, ReactNode, SVGProps } from "react";
+import type { JSX, SVGProps } from "react";
 
 import {
   DiscordColorIcon,
@@ -17,7 +17,6 @@ export enum AlertAvailability {
 
 export interface AlertItem {
   title: string;
-  description: ReactNode;
   icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
   availability: AlertAvailability;
   link: string;
@@ -27,7 +26,6 @@ export interface AlertItem {
 export const ALERTS_ITEMS: AlertItem[] = [
   {
     title: "Telegram",
-    description: "You're in crypto, so real-time governance alerts is a must.",
     icon: TelegramColorIcon,
     availability: AlertAvailability.AVAILABLE,
     link: ANTICAPTURE_TELEGRAM_BOT,
@@ -35,8 +33,6 @@ export const ALERTS_ITEMS: AlertItem[] = [
   },
   {
     title: "Slack",
-    description:
-      "Receive direct messages of your preferred DAOs governance updates.",
     icon: SlackColorIcon,
     availability: AlertAvailability.AVAILABLE,
     link: ANTICAPTURE_SLACK_BOT,
@@ -44,8 +40,6 @@ export const ALERTS_ITEMS: AlertItem[] = [
   },
   {
     title: "Discord",
-    description:
-      "Beyond that 2021 NFT server, you can get real-time governance alerts that actually matter.",
     icon: DiscordColorIcon,
     availability: AlertAvailability.COMING_SOON,
     link: "/",

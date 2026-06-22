@@ -17,6 +17,7 @@ import type {
   ReadContractReturnType,
 } from "viem/actions";
 
+import { logger } from "@/logger";
 import { rpcRequestTotal } from "@/metrics";
 
 import { ProposalStatus } from "../lib/constants";
@@ -216,11 +217,16 @@ export abstract class GovernorBase<
     params: ReadContractParameters<TAbi, TFunctionName, TArgs>,
   ): Promise<ReadContractReturnType<TAbi, TFunctionName, TArgs>> {
     rpcRequestTotal.add(1, { method: "eth_call" });
+    logger.info(
+      { functionName: params.functionName, address: params.address },
+      "RPC eth_call: reading contract",
+    );
     return readContract(this.client, params);
   }
 
   protected async getBlockNumber(): Promise<bigint> {
     rpcRequestTotal.add(1, { method: "eth_blockNumber" });
+    logger.info("RPC eth_blockNumber: fetching latest block number");
     const result = await this.client.request({ method: "eth_blockNumber" });
     return BigInt(result);
   }
@@ -235,6 +241,7 @@ export abstract class GovernorBase<
 
   async getCurrentBlockNumber(): Promise<number> {
     rpcRequestTotal.add(1, { method: "eth_blockNumber" });
+    logger.info("RPC eth_blockNumber: fetching current block number");
     const result = await this.client.request({
       method: "eth_blockNumber",
     });
@@ -243,6 +250,7 @@ export abstract class GovernorBase<
 
   async getBlockTime(blockNumber: number): Promise<number | null> {
     rpcRequestTotal.add(1, { method: "eth_getBlockByNumber" });
+    logger.info({ blockNumber }, "RPC eth_getBlockByNumber: fetching block");
     const block = await this.client.request({
       method: "eth_getBlockByNumber",
       params: [toHex(blockNumber), false],

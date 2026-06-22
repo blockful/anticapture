@@ -6,6 +6,7 @@ import {
   calculateCutoffTimestamp,
 } from "@/lib/date-helpers";
 import { forwardFill, createDailyTimeline } from "@/lib/time-series";
+import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { PriceProvider } from "@/services/treasury/types";
 
@@ -46,6 +47,10 @@ export class NFTPriceService implements PriceProvider {
     const fromQuery = fromData.toISOString().split("T")[0];
     const toQuery = today.toISOString().split("T")[0];
 
+    logger.info(
+      { from: fromQuery, to: toQuery },
+      "fetching historical ETH prices from CoinGecko",
+    );
     const ethHistoricalPrices = await this.client.get<{
       prices: [number, number][];
     }>(
@@ -88,6 +93,7 @@ export class NFTPriceService implements PriceProvider {
     const price = await this.repo.getTokenPrice();
     const nftEthValue = Number(formatEther(BigInt(price)));
 
+    logger.info("fetching current ETH price from CoinGecko");
     const ethCurrentPrice = await this.client.get<{
       prices: [number, number][];
     }>(`/coins/ethereum/market_chart?vs_currency=usd&days=1`);
