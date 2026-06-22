@@ -1,4 +1,26 @@
+import type { Page } from "playwright/test";
+
 import { test, expect } from "./fixtures";
+
+/**
+ * Scroll every table overflow container to its bottom. The infinite-scroll
+ * sentinel is a zero-height node at the end of the table body, so targeting it
+ * with scrollIntoViewIfNeeded is unreliable in CI; driving the scroll container
+ * to the bottom deterministically brings the sentinel within the observer's
+ * rootMargin and fires onLoadMore.
+ */
+const scrollTablesToBottom = (page: Page) =>
+  page.evaluate(() => {
+    document.querySelectorAll<HTMLElement>("div").forEach((el) => {
+      const { overflowY } = getComputedStyle(el);
+      if (
+        (overflowY === "auto" || overflowY === "scroll") &&
+        el.querySelector("table")
+      ) {
+        el.scrollTop = el.scrollHeight;
+      }
+    });
+  });
 
 test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
   test("renders Holders & Delegates heading", async ({ goto, page }) => {
@@ -172,8 +194,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     if (initialCount < 20) return;
     // Scrolling the sentinel into view must trigger the next page. Token holders
     // paginate via the balances endpoint using a `skip` cursor — the first page
-    // is skip=0, so a request with skip > 0 is the load-more behavior itself,
-    // and it fires the moment the sentinel intersects (before any response).
+    // is skip=0, so a request with skip > 0 is the load-more behavior itself.
     // Assert that request rather than the rendered row count: a refetch can
     // briefly collapse the table body to a single state row, which made the
     // count assertion flaky. If the sentinel→onLoadMore→fetchNextPage wiring
@@ -183,7 +204,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
         req.url().includes("/balances") && /[?&]skip=[1-9]/.test(req.url()),
       { timeout: 15_000 },
     );
-    await rows.last().scrollIntoViewIfNeeded();
+    await scrollTablesToBottom(page);
     await nextPageRequest;
   });
 
@@ -208,18 +229,17 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     // Scrolling the sentinel into view must trigger the next page. Delegates
     // paginate via the voting-powers endpoint using a `skip` cursor — the first
     // page is skip=0, so a request with skip > 0 is the load-more behavior
-    // itself, and it fires the moment the sentinel intersects (before any
-    // response). Assert that request rather than the rendered row count: a
-    // refetch can briefly collapse the table body to a single state row, which
-    // made the count assertion flaky. If the sentinel→onLoadMore→fetchNextPage
-    // wiring regresses, no skip>0 request fires and this fails.
+    // itself. Assert that request rather than the rendered row count: a refetch
+    // can briefly collapse the table body to a single state row, which made the
+    // count assertion flaky. If the sentinel→onLoadMore→fetchNextPage wiring
+    // regresses, no skip>0 request fires and this fails.
     const nextPageRequest = page.waitForRequest(
       (req) =>
         req.url().includes("/voting-powers") &&
         /[?&]skip=[1-9]/.test(req.url()),
       { timeout: 15_000 },
     );
-    await rows.last().scrollIntoViewIfNeeded();
+    await scrollTablesToBottom(page);
     await nextPageRequest;
   });
 
