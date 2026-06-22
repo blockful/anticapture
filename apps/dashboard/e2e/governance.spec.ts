@@ -11,19 +11,19 @@ test.describe("Governance page (/ens/proposals)", () => {
     ).toBeVisible();
   });
 
-  test("shows Onchain tab as default", async ({ goto, page }) => {
+  test("shows All Proposals tab as default", async ({ goto, page }) => {
     await goto("/ens/proposals");
-    const onchainTab = page.getByRole("tab", { name: /Onchain/ });
-    await expect(onchainTab).toBeVisible({ timeout: 15_000 });
-    await expect(onchainTab).toHaveAttribute("aria-selected", "true");
+    const allTab = page.getByRole("tab", { name: /All/ });
+    await expect(allTab).toBeVisible({ timeout: 15_000 });
+    await expect(allTab).toHaveAttribute("aria-selected", "true");
   });
 
-  test("shows proposal list or explicit empty state on Onchain tab", async ({
+  test("shows proposal list or explicit empty state on All Proposals tab", async ({
     goto,
     page,
   }) => {
     await goto("/ens/proposals");
-    await expect(page.getByRole("tab", { name: /Onchain/ })).toBeVisible({
+    await expect(page.getByRole("tab", { name: /All/ })).toBeVisible({
       timeout: 15_000,
     });
     const hasProposals = page
@@ -37,19 +37,23 @@ test.describe("Governance page (/ens/proposals)", () => {
     });
   });
 
-  test("Offchain tab is visible and switchable", async ({ goto, page }) => {
+  test("source filter switches to Snapshot (offchain) proposals", async ({
+    goto,
+    page,
+  }) => {
     await goto("/ens/proposals");
-    const offchainTab = page.getByRole("tab", { name: /Offchain/ });
-    await expect(offchainTab).toBeVisible({ timeout: 15_000 });
-    await offchainTab.click();
-    await expect(offchainTab).toHaveAttribute("aria-selected", "true");
-    await expect(page).toHaveURL(/tab=offchain/);
-    // Check offchain content loads or shows empty state
+    // Offchain proposals are exposed via the source filter, not a separate tab.
+    const sourceSelect = page.getByRole("combobox", { name: /All sources/ });
+    await expect(sourceSelect).toBeVisible({ timeout: 15_000 });
+    await sourceSelect.click();
+    await page.getByRole("option", { name: "Snapshot" }).click();
+    await expect(page).toHaveURL(/source=snapshot/);
+    // Check Snapshot (offchain) content loads or shows empty/error state
     const hasProposals = page
       .getByRole("link")
       .filter({ has: page.locator("h3") })
       .first();
-    const isEmpty = page.locator("text=No off-chain proposals found");
+    const isEmpty = page.locator("text=No proposals found");
     const failedToLoad = page.locator("text=Unable to load proposals");
     await expect(hasProposals.or(isEmpty).or(failedToLoad)).toBeVisible({
       timeout: 20_000,
@@ -79,7 +83,7 @@ test.describe("Governance page (/ens/proposals)", () => {
     page,
   }) => {
     await goto("/ens/proposals");
-    await expect(page.getByRole("tab", { name: /Onchain/ })).toBeVisible({
+    await expect(page.getByRole("tab", { name: /All/ })).toBeVisible({
       timeout: 15_000,
     });
     const proposalLinks = page
@@ -97,12 +101,12 @@ test.describe("Governance page (/ens/proposals)", () => {
     }
   });
 
-  test("infinite scroll loads more onchain proposals when available", async ({
+  test("infinite scroll loads more proposals when available", async ({
     goto,
     page,
   }) => {
     await goto("/ens/proposals");
-    await expect(page.getByRole("tab", { name: /Onchain/ })).toBeVisible({
+    await expect(page.getByRole("tab", { name: /All/ })).toBeVisible({
       timeout: 15_000,
     });
     const proposalLinks = page
