@@ -1,4 +1,4 @@
-CREATE SCHEMA "general";
+CREATE SCHEMA IF NOT EXISTS "general";
 --> statement-breakpoint
 CREATE TABLE "general"."proposal_drafts" (
 	"id" text PRIMARY KEY NOT NULL,
