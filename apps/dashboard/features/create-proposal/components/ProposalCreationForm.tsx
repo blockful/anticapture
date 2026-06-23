@@ -43,6 +43,7 @@ import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCus
 import { DraftViewToggle } from "@/features/create-proposal/components/preview/DraftViewToggle";
 import { DraftPreview } from "@/features/create-proposal/components/preview/DraftPreview";
 import { draftPreviewCopy } from "@/features/create-proposal/utils/draftThresholdCopy";
+import { getRecipientPublishState } from "@/features/create-proposal/utils/recipientPublishState";
 import { ActionsList } from "@/features/create-proposal/components/actions/ActionsList";
 import { ActionsPlaceholderCard } from "@/features/create-proposal/components/actions/ActionsPlaceholderCard";
 import { AddTransferModal } from "@/features/create-proposal/components/modals/AddTransferModal";
@@ -410,12 +411,11 @@ export const ProposalCreationForm = ({
     ? formatNumberUserReadable(Number(thresholdFormatted), 0)
     : "—";
 
-  const recipientState: "eligible" | "disconnected" | "below-threshold" =
-    !address
-      ? "disconnected"
-      : vp.votingPower < threshold
-        ? "below-threshold"
-        : "eligible";
+  const recipientState = getRecipientPublishState({
+    address,
+    votingPower: vp.votingPower,
+    threshold,
+  });
 
   const previewHelperCopy = isRecipient
     ? draftPreviewCopy(
