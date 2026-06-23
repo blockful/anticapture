@@ -1,6 +1,6 @@
-CREATE SCHEMA "authful";
+CREATE SCHEMA IF NOT EXISTS "authful";
 --> statement-breakpoint
-CREATE TABLE "authful"."tokens" (
+CREATE TABLE IF NOT EXISTS "authful"."tokens" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant" text NOT NULL,
 	"name" text NOT NULL,
@@ -12,4 +12,4 @@ CREATE TABLE "authful"."tokens" (
 	CONSTRAINT "tokens_token_hash_unique" UNIQUE("token_hash")
 );
 --> statement-breakpoint
-CREATE INDEX "tokens_tenant_index" ON "authful"."tokens" USING btree ("tenant");
+CREATE INDEX IF NOT EXISTS "tokens_tenant_index" ON "authful"."tokens" USING btree ("tenant");
