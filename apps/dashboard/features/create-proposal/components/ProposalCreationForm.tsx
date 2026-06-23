@@ -13,6 +13,8 @@ import {
 } from "next/navigation";
 import { useAccount } from "wagmi";
 import { formatUnits, zeroAddress } from "viem";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -37,6 +39,10 @@ import { BodyField } from "@/features/create-proposal/components/BodyField";
 import { ProposalFormNavBar } from "@/features/create-proposal/components/ProposalFormNavBar";
 import { InsufficientVPAlert } from "@/features/create-proposal/components/InsufficientVPAlert";
 import { NavigationGuard } from "@/features/create-proposal/components/NavigationGuard";
+import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
+import { DraftViewToggle } from "@/features/create-proposal/components/preview/DraftViewToggle";
+import { DraftPreview } from "@/features/create-proposal/components/preview/DraftPreview";
+import { draftPreviewCopy } from "@/features/create-proposal/utils/draftThresholdCopy";
 import { ActionsList } from "@/features/create-proposal/components/actions/ActionsList";
 import { ActionsPlaceholderCard } from "@/features/create-proposal/components/actions/ActionsPlaceholderCard";
 import { AddTransferModal } from "@/features/create-proposal/components/modals/AddTransferModal";
@@ -102,6 +108,14 @@ export const ProposalCreationForm = ({
   } = useProposalThreshold(daoId);
   const publisher = usePublishProposal();
 
+  const { openConnectModal } = useConnectModal();
+  const [view, setView] = useQueryState(
+    "view",
+    parseAsStringEnum<"editor" | "preview">(["editor", "preview"]).withDefault(
+      "editor",
+    ),
+  );
+
   const form = useForm<ProposalFormValues>({
     resolver: zodResolver(ProposalFormSchema),
     defaultValues: DEFAULTS,
@@ -145,6 +159,7 @@ export const ProposalCreationForm = ({
         if (cancelled) return;
         hydratedDraftIdRef.current = draftId;
         if (!shared) return;
+        setSharedAuthor(shared.author);
         form.reset({
           title: shared.title,
           discussionUrl: shared.discussionUrl,
@@ -171,6 +186,9 @@ export const ProposalCreationForm = ({
 
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(
     draftId,
+  );
+  const [sharedAuthor, setSharedAuthor] = useState<string | undefined>(
+    undefined,
   );
   const [bodyVersion, setBodyVersion] = useState(0);
   const [transferOpen, setTransferOpen] = useState(false);
@@ -209,10 +227,41 @@ export const ProposalCreationForm = ({
     if (!currentDraftId) return;
     const copied = await copyDraftShareUrl(basePath, currentDraftId);
     if (copied) {
-      showCustomToast("Share link copied", "success");
+      showCustomToast("URL copied to clipboard", "success");
     } else {
       showCustomToast("Could not copy link", "error");
     }
+  };
+
+  const handleForkEdit = async () => {
+    if (!address) {
+      openConnectModal?.();
+      return;
+    }
+    try {
+      const newId = await drafts.saveDraft({
+        daoId,
+        title: values.title,
+        discussionUrl: values.discussionUrl ?? "",
+        body: values.body,
+        actions: values.actions,
+      });
+      if (!newId) {
+        showCustomToast("Could not create your copy", "error");
+        return;
+      }
+      router.push(`${basePath}/proposals/new?draftId=${newId}&view=editor`);
+    } catch {
+      showCustomToast("Could not create your copy", "error");
+    }
+  };
+
+  const handlePreviewPublish = () => {
+    if (!address) {
+      openConnectModal?.();
+      return;
+    }
+    handlePublishClick();
   };
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
@@ -348,6 +397,47 @@ export const ProposalCreationForm = ({
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
+  // A recipient is anyone viewing a shared draft they did not author. With no
+  // draftId (brand-new proposal) the viewer is always the author.
+  const isRecipient = Boolean(
+    draftId &&
+    sharedAuthor &&
+    (!address || sharedAuthor.toLowerCase() !== address.toLowerCase()),
+  );
+  const authorAddress = sharedAuthor ?? address ?? "";
+
+  const thresholdDisplay = thresholdFormatted
+    ? formatNumberUserReadable(Number(thresholdFormatted), 0)
+    : "—";
+
+  const recipientState: "eligible" | "disconnected" | "below-threshold" =
+    !address
+      ? "disconnected"
+      : vp.votingPower < threshold
+        ? "below-threshold"
+        : "eligible";
+
+  const previewHelperCopy = isRecipient
+    ? draftPreviewCopy(
+        recipientState === "below-threshold"
+          ? {
+              role: "recipient",
+              state: "below-threshold",
+              thresholdDisplay,
+              vpDisplay: votingPowerDisplay,
+              tokenSymbol: daoIdEnum,
+            }
+          : { role: "recipient", state: recipientState },
+      )
+    : draftPreviewCopy({ role: "author" });
+
+  // Recipients can only ever see the Preview — they have no editor access.
+  useEffect(() => {
+    if (isRecipient && view !== "preview") {
+      void setView("preview");
+    }
+  }, [isRecipient, view, setView]);
+
   const proposalsListHref = `${basePath}/proposals`;
 
   const showInsufficientInline =
@@ -378,7 +468,7 @@ export const ProposalCreationForm = ({
       {!isWhitelabelRoute && (
         <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
           <div className="mx-auto flex w-full flex-1 items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-1 items-center gap-2">
               <Link
                 href={proposalsListHref}
                 className="text-secondary hover:text-primary inline-flex items-center gap-2 text-[14px] font-normal leading-[20px] transition-colors"
@@ -390,99 +480,133 @@ export const ProposalCreationForm = ({
                 New Proposal
               </p>
             </div>
-            {address && (
-              <div className="flex flex-col items-end">
-                <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
-                  Your voting power
-                </p>
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {votingPowerDisplay}
-                </p>
-              </div>
-            )}
+            <div className="flex shrink-0 items-center justify-center">
+              <DraftViewToggle
+                mode={view}
+                onChange={(m) => void setView(m)}
+                showEditor={!isRecipient}
+              />
+            </div>
+            <div className="flex flex-1 items-center justify-end">
+              {address ? (
+                <div className="flex flex-col items-end">
+                  <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+                    Your voting power
+                  </p>
+                  <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                    {votingPowerDisplay}
+                  </p>
+                </div>
+              ) : (
+                <ConnectWalletCustom label="Connect Wallet" />
+              )}
+            </div>
           </div>
         </div>
       )}
-      <form
-        className="animate-page-slide-in flex min-h-screen flex-col gap-6 px-5 pb-5 pt-5"
-        noValidate
-      >
-        {showInsufficientInline && thresholdFormatted && (
-          <InsufficientVPAlert
-            threshold={formatNumberUserReadable(Number(thresholdFormatted), 0)}
-            tokenSymbol={daoIdEnum}
-          />
-        )}
-
-        <div className="flex w-full flex-col gap-1">
-          <FormLabel isRequired>Title</FormLabel>
-          <Input
-            {...form.register("title")}
-            placeholder="Proposal title"
-            error={!!form.formState.errors.title}
-          />
-          {form.formState.errors.title && (
-            <p className="text-error text-xs">
-              {form.formState.errors.title.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex w-full flex-col gap-1">
-          <FormLabel>Discussion URL</FormLabel>
-          <Input
-            {...form.register("discussionUrl")}
-            placeholder="https://discuss…"
-            error={!!form.formState.errors.discussionUrl}
-          />
-          {form.formState.errors.discussionUrl ? (
-            <p className="text-error text-xs">
-              {form.formState.errors.discussionUrl.message}
-            </p>
-          ) : (
-            <p className="text-secondary text-xs">
-              Have you discussed this proposal on the forum first? Paste the
-              link here.
-            </p>
-          )}
-        </div>
-
-        <div className="flex w-full flex-col gap-1">
-          <FormLabel isRequired>Description</FormLabel>
-          <BodyField version={bodyVersion} />
-        </div>
-
-        <div className="flex w-full flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <FormLabel isRequired>Actions</FormLabel>
-            <span className="text-secondary text-xs">
-              {values.actions.length} action(s)
-            </span>
-          </div>
-          <div className="flex flex-col gap-3">
-            {values.actions.length > 0 && (
-              <ActionsList
-                onEditAction={openEditForAction}
-                onDeleteAction={(i) => setDeleteActionIndex(i)}
+      {view === "preview" ? (
+        <DraftPreview
+          daoId={daoId}
+          daoIdEnum={daoIdEnum}
+          title={values.title}
+          discussionUrl={values.discussionUrl ?? ""}
+          body={values.body}
+          actions={values.actions}
+          authorAddress={authorAddress}
+          helperCopy={previewHelperCopy}
+          secondaryAction={isRecipient ? "edit" : "copy-link"}
+          onPublish={handlePreviewPublish}
+          onCopyLink={handleShare}
+          onEdit={handleForkEdit}
+          publishDisabled={isRecipient && recipientState === "below-threshold"}
+        />
+      ) : (
+        <>
+          <form
+            className="animate-page-slide-in flex min-h-screen flex-col gap-6 px-5 pb-5 pt-5"
+            noValidate
+          >
+            {showInsufficientInline && thresholdFormatted && (
+              <InsufficientVPAlert
+                threshold={formatNumberUserReadable(
+                  Number(thresholdFormatted),
+                  0,
+                )}
+                tokenSymbol={daoIdEnum}
               />
             )}
-            <ActionsPlaceholderCard
-              onAddTransfer={() => setTransferOpen(true)}
-              onAddCustom={() => setCustomOpen(true)}
-            />
-          </div>
-        </div>
-      </form>
 
-      <ProposalFormNavBar
-        filledCount={filledCount}
-        totalCount={3}
-        canPublish={canPublish}
-        onSaveDraft={handleSaveDraft}
-        onPublish={handlePublishClick}
-        onShare={currentDraftId ? handleShare : undefined}
-        isSavingDraft={isSavingDraft}
-      />
+            <div className="flex w-full flex-col gap-1">
+              <FormLabel isRequired>Title</FormLabel>
+              <Input
+                {...form.register("title")}
+                placeholder="Proposal title"
+                error={!!form.formState.errors.title}
+              />
+              {form.formState.errors.title && (
+                <p className="text-error text-xs">
+                  {form.formState.errors.title.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <FormLabel>Discussion URL</FormLabel>
+              <Input
+                {...form.register("discussionUrl")}
+                placeholder="https://discuss…"
+                error={!!form.formState.errors.discussionUrl}
+              />
+              {form.formState.errors.discussionUrl ? (
+                <p className="text-error text-xs">
+                  {form.formState.errors.discussionUrl.message}
+                </p>
+              ) : (
+                <p className="text-secondary text-xs">
+                  Have you discussed this proposal on the forum first? Paste the
+                  link here.
+                </p>
+              )}
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <FormLabel isRequired>Description</FormLabel>
+              <BodyField version={bodyVersion} />
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <FormLabel isRequired>Actions</FormLabel>
+                <span className="text-secondary text-xs">
+                  {values.actions.length} action(s)
+                </span>
+              </div>
+              <div className="flex flex-col gap-3">
+                {values.actions.length > 0 && (
+                  <ActionsList
+                    onEditAction={openEditForAction}
+                    onDeleteAction={(i) => setDeleteActionIndex(i)}
+                  />
+                )}
+                <ActionsPlaceholderCard
+                  onAddTransfer={() => setTransferOpen(true)}
+                  onAddCustom={() => setCustomOpen(true)}
+                />
+              </div>
+            </div>
+          </form>
+
+          <ProposalFormNavBar
+            filledCount={filledCount}
+            totalCount={3}
+            canPublish={canPublish}
+            onSaveDraft={handleSaveDraft}
+            onPublish={handlePublishClick}
+            onShare={currentDraftId ? handleShare : undefined}
+            isSavingDraft={isSavingDraft}
+          />
+        </>
+      )}
 
       <AddTransferModal
         open={transferOpen}
