@@ -22,7 +22,8 @@ PORT_API=42069
 PORT_GATEFUL=4001
 PORT_DASHBOARD=3000
 PORT_ADDRESS_ENRICHMENT=3001
-PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT")
+PORT_RELAYER=3002
+PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT" "$PORT_RELAYER")
 
 # DAO name → short ID mapping (used to run the API)
 dao_id_for() {
@@ -51,6 +52,7 @@ C_GATEFUL="\033[36m"           # cyan
 C_CODEGEN="\033[33m"           # yellow
 C_DASHBOARD="\033[32m"         # green
 C_ADDRESS_ENRICHMENT="\033[96m" # bright cyan
+C_RELAYER="\033[93m"           # bright yellow
 C_SCRIPT="\033[90m"            # gray
 C_RESET="\033[0m"
 
@@ -127,6 +129,22 @@ start_gateful() {
   log "Starting Gateful..."
   run_with_prefix "$C_GATEFUL" "🚪 gateful" "" "" railway_run gateful pnpm gateful dev &
   wait_for_port "$PORT_GATEFUL" "Gateful" 120
+}
+
+start_relayer() {
+  if [ -z "$DAO_NAME" ]; then
+    log "Skipping optional Relayer (no DAO selected)"
+    return 1
+  fi
+  local service="$(echo "$DAO_NAME" | tr '[:upper:]' '[:lower:]')-relayer"
+  log "Starting optional Relayer ($service)..."
+  # Always run through `railway run`; if the service doesn't exist it simply
+  # fails to come up and wait_for_optional_port lets the stack continue.
+  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s "$service" pnpm relayer dev &
+  if wait_for_optional_port "$PORT_RELAYER" "Relayer"; then
+    return 0
+  fi
+  return 1
 }
 
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
@@ -249,14 +267,21 @@ if [ "$RUN_API" = true ]; then
   ) &
 fi
 
-# 5. Gateful
+# 5. Relayer (optional; only available for a few DAOs — do not block the rest of the stack)
+RELAYER_AVAILABLE=false
+if start_relayer; then
+  RELAYER_AVAILABLE=true
+fi
+
+# 6. Gateful
 start_gateful
 
-# 6. Client — codegen + build watch
+# 7. Clients — codegen + build watch
+export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
-# 7. Dashboard
+# 8. Dashboard
 export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
@@ -275,6 +300,11 @@ else
   printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
 fi
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
+if [ "$RELAYER_AVAILABLE" = true ]; then
+  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
+else
+  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   skipped (optional)\n"
+fi
 printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""

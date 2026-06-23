@@ -188,10 +188,17 @@ that `node_modules/.bin/tsx` and `generated/` are present.
 
 ## Development
 
-The SDK is generated from `apps/gateful/openapi/gateful.json` with Kubb.
+The SDK and client docs resolve the Gateful OpenAPI source through the shared
+spec resolver. Local generated specs are preferred when present; CI and Railway
+builds can fall back to the deployed Gateful docs endpoint. Resolution order:
+
+1. `apps/gateful/openapi/gateful.json`
+2. `${NEXT_PUBLIC_GATEFUL_URL}/docs/json`
+3. `https://gateful-anticapture-${RAILWAY_ENVIRONMENT_NAME}.up.railway.app/docs/json`
 
 ```sh
 npm run codegen
+npm run test
 npm run typecheck
 npm run lint
 npm run build

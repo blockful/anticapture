@@ -12,6 +12,7 @@ export class DuneService {
 
   async fetchLiquidTreasury(size: number): Promise<DuneResponse> {
     try {
+      logger.info({ size }, "fetching liquid treasury from Dune");
       const response = await fetch(this.apiUrl + `?limit=${size}`, {
         headers: {
           "X-Dune-API-Key": this.apiKey,

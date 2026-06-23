@@ -39,6 +39,7 @@ export class DefiLlamaProvider implements TreasuryProvider {
     if (cached !== null) return filterWithFallback(cached, cutoffTimestamp);
 
     try {
+      logger.info({ cutoffTimestamp }, "fetching treasury data from DefiLlama");
       const response = await this.client.get<RawDefiLlamaResponse>("");
       const data = this.transformData(response.data);
       this.cache.set(data);

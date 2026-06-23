@@ -43,12 +43,15 @@ import { setClientConfig } from "@anticapture/client";
 ## Environment Variables
 
 The SDK targets the Gateful REST API. The base URL is configured by the
-consumer (the dashboard sets `NEXT_PUBLIC_GATEFUL_URL`). Codegen itself reads
-the **local** OpenAPI spec file, so it needs no endpoint env var.
+consumer (the dashboard sets `NEXT_PUBLIC_GATEFUL_URL`). Codegen prefers the
+**local** OpenAPI spec file. When the local file is missing, it fetches the spec
+from `NEXT_PUBLIC_GATEFUL_URL`, or derives the Railway preview URL from
+`RAILWAY_ENVIRONMENT_NAME`.
 
-| Variable                  | Required        | Description                                        |
-| ------------------------- | --------------- | -------------------------------------------------- |
-| `NEXT_PUBLIC_GATEFUL_URL` | yes (dashboard) | Gateful REST API base URL the SDK calls at runtime |
+| Variable                   | Required                                     | Description                                                    |
+| -------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| `NEXT_PUBLIC_GATEFUL_URL`  | yes (dashboard), optional (codegen fallback) | Gateful REST API base URL the SDK calls at runtime             |
+| `RAILWAY_ENVIRONMENT_NAME` | no, optional (Railway codegen fallback)      | Railway environment name used to derive the remote Gateful URL |
 
 ## Codegen Commands
 

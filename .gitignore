@@ -158,3 +158,8 @@ dist
 .claude/settings.local.json
 **/.claude/settings.local.json
 .mcp.json
+
+apps/gateful/openapi/gateful.json
+
+# Local planning/spec artifacts (superpowers) — not part of the repo
+docs/superpowers/

@@ -1,5 +1,23 @@
 # @anticapture/gateful
 
+## 1.1.0
+
+### Minor Changes
+
+- [#1976](https://github.com/blockful/anticapture/pull/1976) [`4e5f06a`](https://github.com/blockful/anticapture/commit/4e5f06a261211b9a94eb0e40047468000ba40363) Thanks [@LeonardoVieira1630](https://github.com/LeonardoVieira1630)! - Switch relayer rate limiting from a shared daily window to per-operation monthly limits (separate caps for votes and delegations), configurable via `MAX_VOTES_PER_ADDRESS_PER_MONTH` and `MAX_DELEGATIONS_PER_ADDRESS_PER_MONTH` (each defaulting to 3). The `/relay/config` and `/relay/rate-limit/{address}` responses now expose per-operation `limits`/`limit` and a monthly `resetsAt`; the client SDK is regenerated to match. The dashboard `useGaslessRelayer` hook now exposes `voteLimit`/`delegationLimit` in place of the removed `maxRelayPerAddressPerDay`/`maxPerDay` fields.
+
+- [#1950](https://github.com/blockful/anticapture/pull/1950) [`05a7cf2`](https://github.com/blockful/anticapture/commit/05a7cf2d7280b392579a342db3810c6e1fa0d54d) Thanks [@pikonha](https://github.com/pikonha)! - Generate the client SDK from the Gateful OpenAPI spec using Railway environment names.
+
+### Patch Changes
+
+- [#1910](https://github.com/blockful/anticapture/pull/1910) [`a006283`](https://github.com/blockful/anticapture/commit/a0062835b784f0b97363c664ab7efb3ee4177171) Thanks [@brunod-e](https://github.com/brunod-e)! - feat(draft-proposals): persist draft proposals in PostgreSQL with SIWE authentication
+
+  Moves draft proposal storage from browser localStorage to the API's PostgreSQL database. Adds SIWE-based JWT authentication endpoints (`GET /auth/nonce`, `POST /auth/verify`) and full CRUD endpoints for draft proposals (`/proposal/drafts`). On wallet connect, existing localStorage drafts are automatically migrated to the database. Drafts are scoped per user address and DAO.
+
+- [#1950](https://github.com/blockful/anticapture/pull/1950) [`02c97be`](https://github.com/blockful/anticapture/commit/02c97be45cecc29b093304288dd375e320856d3f) Thanks [@pikonha](https://github.com/pikonha)! - Protect relayer proxy routes with the same circuit-breaker backoff used for DAO API and address-enrichment upstreams.
+
+- [#1950](https://github.com/blockful/anticapture/pull/1950) [`e240a4e`](https://github.com/blockful/anticapture/commit/e240a4e0e5a420179b66e6e86736500107129857) Thanks [@pikonha](https://github.com/pikonha)! - Protect the address-enrichment proxy route with the circuit breaker, matching the resilience already applied to DAO API requests.
+
 ## 1.0.5
 
 ### Patch Changes

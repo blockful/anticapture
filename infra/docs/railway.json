@@ -3,11 +3,7 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "infra/docs/Dockerfile",
-    "watchPatterns": [
-      "packages/anticapture-client/docs/**",
-      "apps/gateful/openapi/gateful.json",
-      "infra/docs/**"
-    ]
+    "watchPatterns": ["packages/anticapture-client/docs/**", "infra/docs/**"]
   },
   "deploy": {
     "healthcheckPath": "/docs/",
