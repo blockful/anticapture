@@ -465,6 +465,13 @@ export const ProposalCreationForm = ({
         <span className="text-secondary text-sm">/</span>
         <span className="text-primary text-sm">New Proposal</span>
       </nav>
+      <div className="flex justify-center px-5 py-2 lg:hidden">
+        <DraftViewToggle
+          mode={view}
+          onChange={(m) => void setView(m)}
+          showEditor={!isRecipient}
+        />
+      </div>
       {!isWhitelabelRoute && (
         <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
           <div className="mx-auto flex w-full flex-1 items-center justify-between">
