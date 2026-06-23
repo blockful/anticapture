@@ -9,9 +9,10 @@ import { AzoriusABI } from "./abi/governor";
 
 // Azorius on-chain constants (hardcoded to avoid RPC calls)
 // Source: LinearVotingStrategy contract (0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F)
+const BLOCK_TIME_SECONDS = 12;
 const VOTING_PERIOD_BLOCKS = 21600; // votingPeriod() — ~3 days at 12s/block
 const EXECUTION_PERIOD_BLOCKS = 21600; // Azorius.executionPeriod() — ~3 days at 12s/block
-const TIMELOCK_PERIOD_BLOCKS = 0; // Azorius.timelockPeriod() — no timelock on Shutter
+const TIMELOCK_PERIOD_BLOCKS = 14400; // Azorius.timelockPeriod() — ~2 days at 12s/block
 
 export class SHUClient<
   TTransport extends Transport = Transport,
@@ -61,8 +62,9 @@ export class SHUClient<
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    // Hardcoded: Shutter has no timelock period
-    return BigInt(TIMELOCK_PERIOD_BLOCKS);
+    // Returned in seconds (cross-DAO convention — see GovernorBase.getProposalStatus),
+    // converted from Azorius.timelockPeriod() which is denominated in blocks.
+    return BigInt(TIMELOCK_PERIOD_BLOCKS * BLOCK_TIME_SECONDS);
   }
 
   /**
