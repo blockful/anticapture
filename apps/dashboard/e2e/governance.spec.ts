@@ -1,4 +1,43 @@
+import type { Page } from "playwright/test";
+
 import { test, expect } from "./fixtures";
+
+const waitForProposalLink = async (page: Page) => {
+  const proposalLink = page
+    .getByRole("link")
+    .filter({ has: page.locator("h3") })
+    .first();
+  const proposalsErrored = page
+    .getByText("Unable to load proposals")
+    .waitFor({ state: "visible", timeout: 20_000 })
+    .then(() => "error" as const);
+  const proposalLoaded = proposalLink
+    .waitFor({ state: "visible", timeout: 20_000 })
+    .then(() => "proposal" as const);
+
+  const outcome = await Promise.race([proposalLoaded, proposalsErrored]);
+  expect(outcome, "proposal list rendered an error state").toBe("proposal");
+  return proposalLink;
+};
+
+const waitForSourceSelect = async (page: Page) => {
+  const sourceSelect = page.getByRole("combobox", {
+    name: "Proposal source",
+  });
+  const proposalsErrored = page
+    .getByText("Unable to load proposals")
+    .waitFor({ state: "visible", timeout: 15_000 })
+    .then(() => "error" as const);
+  const sourceLoaded = sourceSelect
+    .waitFor({ state: "visible", timeout: 15_000 })
+    .then(() => "source" as const);
+
+  const outcome = await Promise.race([sourceLoaded, proposalsErrored]);
+  expect(outcome, "proposal source filter rendered an error state").toBe(
+    "source",
+  );
+  return sourceSelect;
+};
 
 test.describe("Governance page (/ens/proposals)", () => {
   test("renders Proposals heading and description", async ({ goto, page }) => {
@@ -26,14 +65,8 @@ test.describe("Governance page (/ens/proposals)", () => {
     await expect(page.getByRole("tab", { name: /All/ })).toBeVisible({
       timeout: 15_000,
     });
-    const hasProposals = page
-      .getByRole("link")
-      .filter({ has: page.locator("h3") })
-      .first();
-    await expect(hasProposals).toBeVisible({
-      timeout: 20_000,
-    });
-    await expect(hasProposals.locator("h3")).not.toHaveText("");
+    const proposalLink = await waitForProposalLink(page);
+    await expect(proposalLink.locator("h3")).not.toHaveText("");
   });
 
   test("source filter switches to Snapshot (offchain) proposals", async ({
@@ -41,22 +74,14 @@ test.describe("Governance page (/ens/proposals)", () => {
     page,
   }) => {
     await goto("/ens/proposals");
-    // Offchain proposals are exposed via the source filter, not a separate tab.
-    const sourceSelect = page.getByRole("combobox", {
-      name: "Proposal source",
-    });
-    await expect(sourceSelect).toBeVisible({ timeout: 15_000 });
+    const sourceSelect = await waitForSourceSelect(page);
+
     await sourceSelect.click();
     await page.getByRole("option", { name: "Snapshot" }).click();
     await expect(page).toHaveURL(/source=snapshot/);
-    const hasProposals = page
-      .getByRole("link")
-      .filter({ has: page.locator("h3"), hasText: "Snapshot" })
-      .first();
-    await expect(hasProposals).toBeVisible({
-      timeout: 20_000,
-    });
-    await expect(hasProposals.locator("h3")).not.toHaveText("");
+    const proposalLink = await waitForProposalLink(page);
+    await expect(proposalLink).toContainText("Snapshot");
+    await expect(proposalLink.locator("h3")).not.toHaveText("");
   });
 
   test("New Proposal button triggers wallet connect when disconnected", async ({
@@ -88,9 +113,9 @@ test.describe("Governance page (/ens/proposals)", () => {
     const proposalLinks = page
       .getByRole("link")
       .filter({ has: page.locator("h3") });
-    await expect(proposalLinks.first()).toBeVisible({ timeout: 20_000 });
+    await waitForProposalLink(page);
     const href = await proposalLinks.first().getAttribute("href");
-    await proposalLinks.first().click();
+    await proposalLinks.first().locator("h3").click();
     await expect(page).toHaveURL(/\/ens\/proposals\//, { timeout: 15_000 });
     if (href) {
       await expect(page).toHaveURL(
@@ -110,7 +135,7 @@ test.describe("Governance page (/ens/proposals)", () => {
     const proposalLinks = page
       .getByRole("link")
       .filter({ has: page.locator("h3") });
-    await expect(proposalLinks.first()).toBeVisible({ timeout: 20_000 });
+    await waitForProposalLink(page);
     const initialCount = await proposalLinks.count();
     // Page size is 10. Need at least one full page to test pagination.
     if (initialCount < 10) return;
