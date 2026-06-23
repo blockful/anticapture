@@ -11,8 +11,8 @@
 
 Proposal drafts must be shareable: an author drafts a proposal, shares a link, and a
 recipient (e.g. `avsa` for the security-council proposal) either **publishes it on-chain**
-or **exports it as JSON** to recreate it. The shared view is a **read-only preview that
-looks like a published proposal**, not the filled creation form.
+or **edits it** (which forks a copy they own) to take it over. The shared view is a
+**read-only preview that looks like a published proposal**, not the filled creation form.
 
 ## Decisions (locked)
 
@@ -88,29 +88,38 @@ Figma `3178:89621` (author) and recipient frames `3187:115` / `3187:1487` / `318
 
 ### 3. Author vs recipient actions (left sidebar)
 
-| Viewer                                             | Buttons                                                                                              | Helper copy                                                                                                                                                                                |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Author (Preview)                                   | **Publish** + **Copy Link**                                                                          | "This draft hasn't been submitted on-chain yet. Share the link so someone can review it, or submit it for you."                                                                            |
-| Recipient, connected, VP ≥ threshold (`3187:115`)  | **Publish** (active) + **Export JSON**                                                               | "This draft was shared with you. Review it, then publish it on-chain. You can also export the JSON to recreate it yourself."                                                               |
-| Recipient, not connected (`3187:1487`)             | **Publish** (opens wallet modal, then submits) + **Export JSON**; top-right shows **Connect Wallet** | "This draft was shared with you. Connect your wallet to publish it on-chain, or export the JSON to recreate it yourself."                                                                  |
-| Recipient, connected, VP < threshold (`3187:2563`) | **Publish** disabled + **Export JSON**                                                               | **Dynamic**: "You need {threshold} {symbol} to submit a proposal. This wallet holds {vp}. Ask someone with enough voting power to publish it, or export the JSON to recreate it yourself." |
+| Viewer                                             | Buttons                                                                                       | Helper copy                                                                                                                                                                      |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Author (Preview)                                   | **Publish** + **Copy Link**                                                                   | "This draft hasn't been submitted on-chain yet. Share the link so someone can review it, or submit it for you."                                                                  |
+| Recipient, connected, VP ≥ threshold (`3187:115`)  | **Publish** (active) + **Edit**                                                               | "This draft was shared with you. Review it, then publish it on-chain. You can also edit it to make your own copy."                                                               |
+| Recipient, not connected (`3187:1487`)             | **Publish** (opens wallet modal, then submits) + **Edit**; top-right shows **Connect Wallet** | "This draft was shared with you. Connect your wallet to publish it on-chain, or edit it to make your own copy."                                                                  |
+| Recipient, connected, VP < threshold (`3187:2563`) | **Publish** disabled + **Edit**                                                               | **Dynamic**: "You need {threshold} {symbol} to submit a proposal. This wallet holds {vp}. Ask someone with enough voting power to publish it, or edit it to make your own copy." |
 
 - Threshold + symbol come from `useProposalThreshold` (`thresholdFormatted`) and DAO config;
   recipient VP from `useProposalVotingPower`.
 - Publish reuses `usePublishProposal` + `PublishModal` / `InsufficientVPModal`. When not
   connected, Publish triggers `openConnectModal` (RainbowKit `useConnectModal`) before
   submitting.
+- **Copy note:** the Figma helper copy still references "export the JSON" (left over from the
+  earlier design); the implemented copy is the Edit-aligned wording above.
 
-### 4. Export / Import JSON (net new)
+### 4. Edit = fork-on-edit (replaces Export/Import JSON)
 
-- **`exportDraftJson(draft)`** util — serializes `{ schemaVersion, title, discussionUrl,
-body, actions }` and triggers a browser file download (e.g. `draft-<title-slug>.json`).
-  Surfaced on the recipient Preview and as a "fork" path.
-- **`importDraftJson(file)`** util + a file-picker affordance on the Editor (creation form).
-  Parses and validates the file against a zod schema derived from `ProposalFormSchema`. On
-  success, hydrate a new **local draft owned by the importer** (then editable/publishable
-  subject to normal threshold/VP checks on submit). On an invalid file, show an inline
-  error toast. (No-backend path to "edit & submit someone else's draft.")
+A recipient cannot edit the original author's draft in place. **Edit** duplicates the shared
+draft into a new draft **owned by the recipient**, then opens it in the Editor.
+
+- Available on the recipient Preview in all three states (including below-threshold — owning
+  a copy is independent of being able to publish it).
+- On click: create a new draft via the existing `drafts.saveDraft(...)` (no `id` → a fresh
+  `crypto.randomUUID()` and the recipient's connected `address`), copying `title`,
+  `discussionUrl`, `body`, `actions` from the shared draft. Then `router.push` to
+  `…/proposals/new?draftId={newId}`, where the recipient is now the author → Editor tab
+  available, fully editable, publishable subject to normal threshold/VP checks.
+- The original author's draft is never mutated; the copy is a standalone draft.
+- **Not connected:** clicking Edit first triggers `openConnectModal`; after connect, the
+  duplicate proceeds (a wallet is required to own the copy).
+- No JSON file export/import, no file picker, no client-side import schema. Export/Import
+  JSON is removed entirely from this scope.
 
 ### 5. Pixel/copy polish (acceptance criteria)
 
@@ -135,7 +144,8 @@ required.
 - **Draft Preview (new):** left sidebar (draft-specific) + right column (`TabsSection` in
   `variant="draft"`). Pure function of the draft + viewer role; no on-chain proposal fetch.
 - **draft→`ProposalViewData` adapter (new util):** isolates the shape mapping; unit-tested.
-- **`exportDraftJson` / `importDraftJson` (new utils):** isolated, unit-tested round-trip.
+- **Fork-on-edit action (new):** a handler in the draft view that duplicates the shared draft
+  via `drafts.saveDraft` and navigates to the new owned draft. Reuses existing draft CRUD.
 - **`TabsSection` / `DescriptionTabContent` / `ActionsTabContent`:** extended to accept the
   draft variant (Votes tab gated out); otherwise unchanged for published proposals.
 
@@ -143,22 +153,23 @@ required.
 
 - No redesign of the creation form fields/layout.
 - No collaborative/multi-author editing, comments, or versioning.
-- Recipient does not edit the shared draft in place (read-only); they export JSON to take
-  ownership.
+- Recipient does not edit the shared draft in place (read-only); **Edit** forks it into their
+  own copy.
+- No JSON export/import.
 - No backend changes (CRUD + public get-by-id already exist).
 
 ## Error handling
 
 - Shared draft fails to load → "Could not load the shared draft" toast (already present).
-- Import: invalid/malformed JSON → inline error toast; no partial hydration.
+- Fork-on-edit fails (create errors) → "Could not create your copy" toast; stay on Preview.
 - Publish errors reuse the existing `SubmissionFailedModal` flow.
 
 ## Testing
 
-- **Unit:** `exportDraftJson`/`importDraftJson` round-trip and invalid-file handling; the
-  draft→`ProposalViewData` adapter; dynamic threshold-copy formatting.
+- **Unit:** the draft→`ProposalViewData` adapter; dynamic threshold-copy formatting.
 - **Component:** Editor/Preview toggle; recipient lock (Editor tab absent, form unmounted);
-  the three recipient VP states (active / wallet-modal / disabled); Copy Link toast.
+  the three recipient VP states (active / wallet-modal / disabled); fork-on-edit duplicates
+  the draft under the recipient and navigates to it; Copy Link toast.
 - Follow existing dashboard test conventions (`testing` skill).
 
 ## Acceptance criteria (from PRD)
@@ -173,8 +184,9 @@ required.
 - [ ] Connected recipient with enough VP can Publish on-chain.
 - [ ] Not-connected recipient: Publish opens the wallet connection modal before submitting.
 - [ ] Below-threshold recipient: Publish disabled, copy explains the requirement.
-- [ ] Export JSON downloads the draft as JSON; Import JSON on the creation form recreates a
-      local draft (subject to normal threshold / VP checks on submit).
+- [ ] **Edit** on the recipient Preview duplicates the shared draft into a new draft owned by
+      the recipient and opens it in the Editor; the original author's draft is unchanged.
+      (When not connected, Edit opens the wallet modal first.)
 
 ## Changeset
 
