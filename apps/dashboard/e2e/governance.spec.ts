@@ -18,7 +18,7 @@ test.describe("Governance page (/ens/proposals)", () => {
     await expect(allTab).toHaveAttribute("aria-selected", "true");
   });
 
-  test("shows proposal list or explicit empty state on All Proposals tab", async ({
+  test("shows proposal list with real data on All Proposals tab", async ({
     goto,
     page,
   }) => {
@@ -30,11 +30,10 @@ test.describe("Governance page (/ens/proposals)", () => {
       .getByRole("link")
       .filter({ has: page.locator("h3") })
       .first();
-    const isEmpty = page.locator("text=No proposals found");
-    const failedToLoad = page.locator("text=Unable to load proposals");
-    await expect(hasProposals.or(isEmpty).or(failedToLoad)).toBeVisible({
+    await expect(hasProposals).toBeVisible({
       timeout: 20_000,
     });
+    await expect(hasProposals.locator("h3")).not.toHaveText("");
   });
 
   test("source filter switches to Snapshot (offchain) proposals", async ({
@@ -43,21 +42,21 @@ test.describe("Governance page (/ens/proposals)", () => {
   }) => {
     await goto("/ens/proposals");
     // Offchain proposals are exposed via the source filter, not a separate tab.
-    const sourceSelect = page.getByRole("combobox", { name: /All sources/ });
+    const sourceSelect = page.getByRole("combobox", {
+      name: "Proposal source",
+    });
     await expect(sourceSelect).toBeVisible({ timeout: 15_000 });
     await sourceSelect.click();
     await page.getByRole("option", { name: "Snapshot" }).click();
     await expect(page).toHaveURL(/source=snapshot/);
-    // Check Snapshot (offchain) content loads or shows empty/error state
     const hasProposals = page
       .getByRole("link")
-      .filter({ has: page.locator("h3") })
+      .filter({ has: page.locator("h3"), hasText: "Snapshot" })
       .first();
-    const isEmpty = page.locator("text=No proposals found");
-    const failedToLoad = page.locator("text=Unable to load proposals");
-    await expect(hasProposals.or(isEmpty).or(failedToLoad)).toBeVisible({
+    await expect(hasProposals).toBeVisible({
       timeout: 20_000,
     });
+    await expect(hasProposals.locator("h3")).not.toHaveText("");
   });
 
   test("New Proposal button triggers wallet connect when disconnected", async ({
@@ -89,8 +88,7 @@ test.describe("Governance page (/ens/proposals)", () => {
     const proposalLinks = page
       .getByRole("link")
       .filter({ has: page.locator("h3") });
-    const count = await proposalLinks.count();
-    if (count === 0) return; // no proposals live, skip
+    await expect(proposalLinks.first()).toBeVisible({ timeout: 20_000 });
     const href = await proposalLinks.first().getAttribute("href");
     await proposalLinks.first().click();
     await expect(page).toHaveURL(/\/ens\/proposals\//, { timeout: 15_000 });
@@ -112,14 +110,7 @@ test.describe("Governance page (/ens/proposals)", () => {
     const proposalLinks = page
       .getByRole("link")
       .filter({ has: page.locator("h3") });
-    const isEmpty = page.locator("text=No proposals found");
-    const failedToLoad = page.locator("text=Unable to load proposals");
-    // Wait for one of: proposals load, empty state, or error state.
-    await expect(
-      proposalLinks.first().or(isEmpty).or(failedToLoad),
-    ).toBeVisible({ timeout: 20_000 });
-    // If no proposals rendered (empty or error), there's nothing to scroll.
-    if ((await proposalLinks.count()) === 0) return;
+    await expect(proposalLinks.first()).toBeVisible({ timeout: 20_000 });
     const initialCount = await proposalLinks.count();
     // Page size is 10. Need at least one full page to test pagination.
     if (initialCount < 10) return;
