@@ -495,7 +495,7 @@ export const GovernanceSection = () => {
                       onShare={async (id) => {
                         const copied = await copyDraftShareUrl(basePath, id);
                         if (copied) {
-                          showCustomToast("Share link copied", "success");
+                          showCustomToast("URL copied to clipboard", "success");
                         } else {
                           showCustomToast("Could not copy link", "error");
                         }
