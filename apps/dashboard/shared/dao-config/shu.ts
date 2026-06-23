@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { ShutterOgIcon } from "@/shared/og/dao-og-icons";
+import { toAbsoluteUrl } from "@/shared/seo/site";
 import {
   RiskLevel,
   GovernanceImplementationEnum,
@@ -45,7 +46,7 @@ export const SHU: DaoConfiguration = {
     },
     govPlatform: {
       name: "Anticapture",
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}/shu/proposals/`,
+      url: toAbsoluteUrl("/shu/proposals/"),
     },
   },
   attackProfitability: {
