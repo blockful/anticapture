@@ -40,6 +40,7 @@ const getStorage = (): Storage | undefined =>
 const toDraft = (d: DraftProposal): ProposalDraft => ({
   id: d.id,
   daoId: d.daoId,
+  author: d.author,
   title: d.title,
   discussionUrl: d.discussionUrl,
   body: d.body,
