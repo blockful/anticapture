@@ -20,7 +20,15 @@ export const DraftCard = ({
   onDelete,
   onShare,
 }: DraftCardProps) => (
-  <div className="border-border-default bg-surface-default rounded-base flex flex-col gap-3 border p-4 sm:flex-row sm:items-center sm:justify-between">
+  <div
+    role="button"
+    tabIndex={0}
+    onClick={() => onEdit(draft.id)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" || e.key === " ") onEdit(draft.id);
+    }}
+    className="border-border-default bg-surface-default rounded-base flex cursor-pointer flex-col gap-3 border p-4 sm:flex-row sm:items-center sm:justify-between"
+  >
     <div className="flex min-w-0 flex-1 flex-col gap-1">
       <div className="flex items-center gap-2">
         <span className="text-primary truncate text-sm font-medium">
@@ -29,10 +37,10 @@ export const DraftCard = ({
         <BadgeStatus variant="outline">Draft</BadgeStatus>
       </div>
       <span className="text-secondary text-xs">
-        Updated {formatDistanceToNow(draft.updatedAt, { addSuffix: true })}
+        Draft • {formatDistanceToNow(draft.updatedAt, { addSuffix: true })}
       </span>
     </div>
-    <div className="flex gap-2">
+    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
       <Button
         variant="outline"
         size="sm"
@@ -40,7 +48,7 @@ export const DraftCard = ({
         className="flex-1 sm:flex-none"
       >
         <Link2 className="size-4" />
-        Share
+        Copy Link
       </Button>
       <Button
         variant="outline"

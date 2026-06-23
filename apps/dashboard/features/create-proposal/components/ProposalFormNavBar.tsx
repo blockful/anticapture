@@ -37,7 +37,7 @@ export const ProposalFormNavBar = ({
         {onShare && (
           <Button variant="outline" size="md" onClick={onShare}>
             <Link2 className="size-4" />
-            Copy link
+            Copy Link
           </Button>
         )}
         <Button
