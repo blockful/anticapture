@@ -18,6 +18,8 @@ export type SelectProps = {
   disabled?: boolean;
   /** Whether the select is in an error state */
   error?: boolean;
+  /** Accessible label for icon-only or context-dependent select triggers */
+  "aria-label"?: string;
   /** Additional CSS classes for the trigger */
   className?: string;
 };
