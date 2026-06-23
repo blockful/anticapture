@@ -1,5 +1,21 @@
 # @anticapture/api
 
+## 1.4.0
+
+### Minor Changes
+
+- [#1910](https://github.com/blockful/anticapture/pull/1910) [`a006283`](https://github.com/blockful/anticapture/commit/a0062835b784f0b97363c664ab7efb3ee4177171) Thanks [@brunod-e](https://github.com/brunod-e)! - feat(draft-proposals): persist draft proposals in PostgreSQL with SIWE authentication
+
+  Moves draft proposal storage from browser localStorage to the API's PostgreSQL database. Adds SIWE-based JWT authentication endpoints (`GET /auth/nonce`, `POST /auth/verify`) and full CRUD endpoints for draft proposals (`/proposal/drafts`). On wallet connect, existing localStorage drafts are automatically migrated to the database. Drafts are scoped per user address and DAO.
+
+### Patch Changes
+
+- [#1982](https://github.com/blockful/anticapture/pull/1982) [`1ff97fd`](https://github.com/blockful/anticapture/commit/1ff97fdec92883f54177ce751e78167df24d1696) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Add info logs to all external RPC and HTTP calls (governor contract reads, CoinGecko, Dune, DefiLlama, Compound) for better observability.
+
+- [#1986](https://github.com/blockful/anticapture/pull/1986) [`fb75b11`](https://github.com/blockful/anticapture/commit/fb75b1156cce63c44ebfa361898d339d48a5b266) Thanks [@brunod-e](https://github.com/brunod-e)! - Run pending `general` schema migrations on API startup so the `proposal_drafts` table exists in fresh databases, preventing draft proposal endpoints from returning 500s on new preview/production environments.
+
+- [#1988](https://github.com/blockful/anticapture/pull/1988) [`bc13205`](https://github.com/blockful/anticapture/commit/bc13205f403d8610bed729af23891871e4ccba53) Thanks [@pikonha](https://github.com/pikonha)! - create proposal draft table only if does not exists
+
 ## 1.3.2
 
 ### Patch Changes
