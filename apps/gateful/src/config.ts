@@ -3,15 +3,28 @@ import { z } from "zod";
 
 dotenv.config();
 
-const envSchema = z.object({
-  PORT: z.coerce.number().default(4001),
-  ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
-  BLOCKFUL_API_TOKEN: z.string().optional(),
-  CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
-  CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
-  CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
-  REDIS_URL: z.string().optional(),
-});
+export const envSchema = z
+  .object({
+    PORT: z.coerce.number().default(4001),
+    ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
+    BLOCKFUL_API_TOKEN: z.string().optional(),
+    // Per-tenant token auth via Authful; replaces the legacy single-token guard.
+    // Trim trailing slashes so a value like `https://authful/` does not produce
+    // `//validate` downstream, which Hono serves as a 404 — making Authful look
+    // unavailable for every uncached validation.
+    TOKEN_SERVICE_URL: z
+      .url()
+      .transform((url) => url.replace(/\/+$/, ""))
+      .optional(),
+    TOKEN_SERVICE_API_KEY: z.string().optional(),
+    CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
+    CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
+    CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
+    REDIS_URL: z.string().optional(),
+  })
+  .refine((env) => !env.TOKEN_SERVICE_URL || !!env.TOKEN_SERVICE_API_KEY, {
+    message: "TOKEN_SERVICE_API_KEY is required when TOKEN_SERVICE_URL is set",
+  });
 
 function loadDaoMap(
   prefix: string,
@@ -40,6 +53,9 @@ export const config = {
   port: env.PORT,
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
   blockfulApiToken: env.BLOCKFUL_API_TOKEN,
+  tokenService: env.TOKEN_SERVICE_URL
+    ? { url: env.TOKEN_SERVICE_URL, apiKey: env.TOKEN_SERVICE_API_KEY! }
+    : undefined,
   redisUrl: env.REDIS_URL,
   daoApis: loadDaoMap("DAO_API_"),
   daoRelayers: loadDaoMap("DAO_RELAYER_"),

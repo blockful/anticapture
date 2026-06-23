@@ -6,6 +6,7 @@
     "dashboard": "dotenv -- turbo run --filter=@anticapture/dashboard",
     "indexer": "dotenv -- turbo run --filter=@anticapture/indexer",
     "gateful": "dotenv -- turbo run --filter=@anticapture/gateful",
+    "authful": "dotenv -- turbo run --filter=@anticapture/authful",
     "api": "dotenv -- turbo run --filter=@anticapture/api",
     "codegen": "dotenv -- turbo run codegen",
     "client": "turbo run --filter=@anticapture/client",

@@ -5,6 +5,18 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
+    "db:migrate": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "db:push": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "mint": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
     "@anticapture/client#codegen": {
       "inputs": [
         "kubb.config.ts",
