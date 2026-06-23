@@ -24,6 +24,8 @@ interface TabsSectionProps {
   offchainScores?: number[];
   offchainProposalType?: string | null;
   daoId?: DaoIdEnum;
+  /** "draft" → Description + Actions only, no Votes. */
+  variant?: "default" | "draft";
 }
 
 export const TabsSection = ({
@@ -36,10 +38,14 @@ export const TabsSection = ({
   offchainScores,
   offchainProposalType,
   daoId,
+  variant = "default",
 }: TabsSectionProps) => {
-  const allowedTabs: TabId[] = isOffchain
-    ? ["description", "votes"]
-    : ["description", "votes", "actions"];
+  const isDraft = variant === "draft";
+  const allowedTabs: TabId[] = isDraft
+    ? ["description", "actions"]
+    : isOffchain
+      ? ["description", "votes"]
+      : ["description", "votes", "actions"];
 
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
@@ -79,11 +85,16 @@ export const TabsSection = ({
     }
   };
 
-  const tabs = [
-    { label: "Description", value: "description" },
-    { label: "Votes", value: "votes" },
-    ...(!isOffchain ? [{ label: "Actions", value: "actions" }] : []),
-  ];
+  const tabs = isDraft
+    ? [
+        { label: "Description", value: "description" },
+        { label: "Actions", value: "actions" },
+      ]
+    : [
+        { label: "Description", value: "description" },
+        { label: "Votes", value: "votes" },
+        ...(!isOffchain ? [{ label: "Actions", value: "actions" }] : []),
+      ];
 
   return (
     <div className="lg:bg-surface-default flex flex-1 flex-col lg:min-w-0">
