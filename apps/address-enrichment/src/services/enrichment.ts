@@ -25,6 +25,16 @@ export const EnrichmentResultSchema = z.object({
       name: z.string().nullable(),
       avatar: z.string().nullable(),
       banner: z.string().nullable(),
+      twitter: z.string().nullable(),
+      telegram: z.string().nullable(),
+      email: z.string().nullable(),
+      github: z.string().nullable(),
+    })
+    .nullable(),
+  efp: z
+    .object({
+      followers: z.number().nullable(),
+      following: z.number().nullable(),
     })
     .nullable(),
   createdAt: z.string(),
@@ -80,24 +90,25 @@ export class EnrichmentService {
       );
       const ensData = await this.ensClient.getEnsData(normalizedAddress);
       const now = new Date();
-
-      await db
-        .update(addressEnrichment)
-        .set({
-          ensName: ensData?.name ?? null,
-          ensAvatar: ensData?.avatar ?? null,
-          ensBanner: ensData?.banner ?? null,
-          ensUpdatedAt: now,
-        })
-        .where(eq(addressEnrichment.address, normalizedAddress));
-
-      return this.mapToResult({
-        ...existing,
+      const ensFields = {
         ensName: ensData?.name ?? null,
         ensAvatar: ensData?.avatar ?? null,
         ensBanner: ensData?.banner ?? null,
+        ensTwitter: ensData?.twitter ?? null,
+        ensTelegram: ensData?.telegram ?? null,
+        ensEmail: ensData?.email ?? null,
+        ensGithub: ensData?.github ?? null,
+        efpFollowers: ensData?.followers ?? null,
+        efpFollowing: ensData?.following ?? null,
         ensUpdatedAt: now,
-      });
+      };
+
+      await db
+        .update(addressEnrichment)
+        .set(ensFields)
+        .where(eq(addressEnrichment.address, normalizedAddress));
+
+      return this.mapToResult({ ...existing, ...ensFields });
     }
 
     // Address not in DB — fetch Arkham + ENS in parallel
@@ -133,6 +144,12 @@ export class EnrichmentService {
       ensName: ensData?.name ?? null,
       ensAvatar: ensData?.avatar ?? null,
       ensBanner: ensData?.banner ?? null,
+      ensTwitter: ensData?.twitter ?? null,
+      ensTelegram: ensData?.telegram ?? null,
+      ensEmail: ensData?.email ?? null,
+      ensGithub: ensData?.github ?? null,
+      efpFollowers: ensData?.followers ?? null,
+      efpFollowing: ensData?.following ?? null,
       ensUpdatedAt: now,
     };
 
@@ -170,7 +187,23 @@ export class EnrichmentService {
               twitter: arkhamData.twitter,
             }
           : null,
-        ens: ensData,
+        ens: ensData
+          ? {
+              name: ensData.name,
+              avatar: ensData.avatar,
+              banner: ensData.banner,
+              twitter: ensData.twitter,
+              telegram: ensData.telegram,
+              email: ensData.email,
+              github: ensData.github,
+            }
+          : null,
+        efp: ensData
+          ? {
+              followers: ensData.followers,
+              following: ensData.following,
+            }
+          : null,
         createdAt: new Date().toISOString(),
       };
     }
@@ -204,6 +237,8 @@ export class EnrichmentService {
 
   private mapToResult(record: AddressEnrichment): EnrichmentResult {
     const hasEnsData = record.ensName !== null;
+    const hasEfpData =
+      record.efpFollowers !== null || record.efpFollowing !== null;
 
     return EnrichmentResultSchema.parse({
       address: record.address,
@@ -219,6 +254,16 @@ export class EnrichmentService {
             name: record.ensName,
             avatar: record.ensAvatar,
             banner: record.ensBanner,
+            twitter: record.ensTwitter,
+            telegram: record.ensTelegram,
+            email: record.ensEmail,
+            github: record.ensGithub,
+          }
+        : null,
+      efp: hasEfpData
+        ? {
+            followers: record.efpFollowers,
+            following: record.efpFollowing,
           }
         : null,
       createdAt: record.createdAt.toISOString(),

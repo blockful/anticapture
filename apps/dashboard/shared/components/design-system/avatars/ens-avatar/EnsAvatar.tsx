@@ -8,6 +8,15 @@ import type { Address } from "viem";
 
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
+import {
+  EfpStats,
+  type EfpStatsData,
+} from "@/shared/components/design-system/avatars/ens-avatar/EfpStats";
+import {
+  EnsSocialLinks,
+  buildSocialLinks,
+  type EnsSocials,
+} from "@/shared/components/design-system/avatars/ens-avatar/EnsSocialLinks";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { cn } from "@/shared/utils/cn";
@@ -39,6 +48,10 @@ interface EnsAvatarProps extends Omit<
   showTags?: boolean;
   showCopyAddress?: boolean;
   maxVisibleTags?: number;
+  /** Render EFP follower/following stats (from enrichment data) between the name and tags. */
+  showEfpStats?: boolean;
+  /** Render ENS social record links (from enrichment data) below the tags. */
+  showSocials?: boolean;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -84,6 +97,8 @@ export const EnsAvatar = ({
   showTags = false,
   showCopyAddress = false,
   maxVisibleTags,
+  showEfpStats = false,
+  showSocials = false,
   ...imageProps
 }: EnsAvatarProps) => {
   const { data, isLoading } = useGetAddress(address ?? "0x", {
@@ -91,6 +106,7 @@ export const EnsAvatar = ({
   });
   const arkham = data?.arkham ?? null;
   const ens = data?.ens ?? null;
+  const efp = data?.efp ?? null;
   const isContract = data?.isContract ?? null;
 
   const [imageError, setImageError] = useState(false);
@@ -222,42 +238,90 @@ export const EnsAvatar = ({
       ? Math.max(0, allTags.length - maxVisibleTags)
       : 0;
 
+  const efpStats: EfpStatsData | null =
+    showEfpStats && efp && (efp.followers !== null || efp.following !== null)
+      ? {
+          followers: efp.followers ?? 0,
+          following: efp.following ?? 0,
+          profileUrl: `https://efp.app/${ens?.name ?? address ?? ""}`,
+        }
+      : null;
+
+  const socials: EnsSocials | null =
+    showSocials && ens
+      ? {
+          twitter: ens.twitter,
+          telegram: ens.telegram,
+          github: ens.github,
+          email: ens.email,
+        }
+      : null;
+  const hasSocials = socials ? buildSocialLinks(socials).length > 0 : false;
+
+  const hasProfileExtras = Boolean(efpStats) || hasSocials;
+
+  const nameRow = (
+    <div className="flex items-center gap-2">
+      {isLoadingName ? (
+        <SkeletonRow
+          parentClassName="flex animate-pulse"
+          className="h-4 w-24"
+        />
+      ) : (
+        <span
+          className={cn(
+            "text-primary inline-block overflow-hidden truncate whitespace-nowrap",
+            showTags ? "text-lg font-medium" : "text-sm",
+            hasProfileExtras && "leading-tight",
+            isDashed && "border-b border-dashed border-[#3F3F46]",
+            isResolvingData && "animate-pulse",
+            nameClassName,
+          )}
+        >
+          {displayName}
+        </span>
+      )}
+      {showCopyAddress && address && (
+        <CopyAndPasteButton
+          textToCopy={address}
+          className={hasProfileExtras ? "px-1 py-0" : "p-1"}
+          iconSize="md"
+          customTooltipText={{
+            default: "Copy address",
+            copied: "Address copied!",
+          }}
+        />
+      )}
+    </div>
+  );
+
   const avatarWithName = (
-    <div className={cn("flex min-w-0 items-center gap-2", containerClassName)}>
+    <div
+      className={cn(
+        "flex min-w-0 gap-2",
+        hasProfileExtras ? "items-start" : "items-center",
+        containerClassName,
+      )}
+    >
       {avatarElement()}
 
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <div className="flex items-center gap-2">
-          {isLoadingName ? (
-            <SkeletonRow
-              parentClassName="flex animate-pulse"
-              className="h-4 w-24"
-            />
-          ) : (
-            <span
-              className={cn(
-                "text-primary inline-block overflow-hidden truncate whitespace-nowrap",
-                showTags ? "text-lg font-medium" : "text-sm",
-                isDashed && "border-b border-dashed border-[#3F3F46]",
-                isResolvingData && "animate-pulse",
-                nameClassName,
-              )}
-            >
-              {displayName}
-            </span>
-          )}
-          {showCopyAddress && address && (
-            <CopyAndPasteButton
-              textToCopy={address}
-              className="p-1"
-              iconSize="md"
-              customTooltipText={{
-                default: "Copy address",
-                copied: "Address copied!",
-              }}
-            />
-          )}
-        </div>
+      <div
+        className={cn(
+          "flex min-w-0 flex-col",
+          hasProfileExtras ? "gap-1.5" : "gap-0.5",
+        )}
+      >
+        {nameRow}
+
+        {efpStats && (
+          <EfpStats
+            followers={efpStats.followers}
+            following={efpStats.following}
+            profileUrl={efpStats.profileUrl}
+          />
+        )}
+
+        {hasSocials && socials && <EnsSocialLinks socials={socials} />}
 
         {showTags && (
           <div className="flex flex-wrap items-center gap-1">
