@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { normalize } from "viem/ens";
-import { parseEventLogs, type Address } from "viem";
+import { parseEventLogs } from "viem";
 import {
   usePublicClient,
   useWaitForTransactionReceipt,
@@ -63,7 +63,7 @@ export const usePublishProposal = () => {
       }
       const { contracts, chain } =
         daoConfigByDaoId[daoIdEnum]?.daoOverview ?? {};
-      const governorAddress = contracts?.governor as Address | undefined;
+      const governorAddress = contracts?.governor;
       if (!governorAddress) {
         setResolveError(
           new Error(
@@ -100,9 +100,7 @@ export const usePublishProposal = () => {
         submitProposalRequest(writeContract, {
           daoId: daoIdEnum,
           governorAddress,
-          votingStrategyAddress: contracts?.votingStrategy as
-            | Address
-            | undefined,
+          votingStrategyAddress: contracts?.votingStrategy,
           encoded,
           title: form.title,
           body: form.body,
