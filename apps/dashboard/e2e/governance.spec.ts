@@ -43,9 +43,16 @@ test.describe("Governance page (/ens/proposals)", () => {
   }) => {
     await goto("/ens/proposals");
     // ENS has off-chain proposals, so the proposals tab exposes a source
-    // filter (All sources / Snapshot / Governor) next to it.
+    // filter (All sources / Snapshot / Governor) next to it. But a failed
+    // proposals fetch (e.g. the Snapshot upstream erroring) renders a full-page
+    // error state that drops the filter entirely. Wait for whichever the page
+    // settled into; if it errored, there's nothing to filter — skip.
     const sourceFilter = page.getByRole("combobox", { name: /All sources/ });
-    await expect(sourceFilter).toBeVisible({ timeout: 15_000 });
+    const failedToLoad = page.locator("text=Unable to load proposals");
+    await expect(sourceFilter.or(failedToLoad)).toBeVisible({
+      timeout: 15_000,
+    });
+    if ((await sourceFilter.count()) === 0) return;
     await sourceFilter.click();
     await page.getByRole("option", { name: "Snapshot" }).click();
     await expect(page).toHaveURL(/source=snapshot/);
@@ -55,7 +62,6 @@ test.describe("Governance page (/ens/proposals)", () => {
       .filter({ has: page.locator("h3") })
       .first();
     const isEmpty = page.locator("text=No proposals found");
-    const failedToLoad = page.locator("text=Unable to load proposals");
     await expect(hasProposals.or(isEmpty).or(failedToLoad)).toBeVisible({
       timeout: 20_000,
     });
