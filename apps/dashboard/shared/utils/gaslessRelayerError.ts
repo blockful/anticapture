@@ -11,7 +11,8 @@ const RATE_LIMITED = "RATE_LIMITED";
 
 const GENERIC_MESSAGE =
   "Something went wrong with your operation. Try again later";
-const RATE_LIMITED_MESSAGE = "You've reached maximum operations per day";
+const RATE_LIMITED_MESSAGE =
+  "You've reached the maximum operations for this month";
 
 const formatThreshold = (raw: bigint, decimals: number, symbol: string) =>
   `${formatUnits(raw, decimals)} ${symbol}`;

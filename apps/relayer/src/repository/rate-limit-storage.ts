@@ -8,7 +8,7 @@ export interface IncrementIfAllowedParams {
   governorAddress: Address;
   address: Address;
   operation: RelayOperation;
-  maxPerDay: number;
+  maxPerMonth: number;
 }
 
 export interface GetCountParams {
@@ -29,9 +29,6 @@ export interface RedisClient {
   get(key: string): Promise<string | null>;
 }
 
-const DAY_MS = 86_400_000;
-const DAY_SECONDS = 86400;
-
 /**
  * Builds a stable Redis key scoped to a DAO, governor, wallet address, and operation type.
  * Addresses are checksummed via EIP-55 to prevent key collisions from mixed-case inputs.
@@ -48,46 +45,67 @@ export function buildKey(
 }
 
 /**
- * Appends a UTC day bucket suffix to a base key, derived from a Unix timestamp in milliseconds.
- * Uses a fixed window aligned to UTC midnight — the counter resets at 00:00 UTC, not 24h after
- * the first request.
+ * Appends a UTC calendar-month bucket suffix to a base key, derived from a Unix timestamp in
+ * milliseconds. Uses a fixed window aligned to the first of the month — the counter resets at
+ * 00:00 UTC on the 1st, not 30 days after the first request.
  *
- * Example: `"MyDAO:0xAbc...:vote:d:19830"` (day 19830 since epoch)
+ * Example: `"MyDAO:0xAbc...:vote:m:2026-06"`
  */
-export function dailyKey(base: string, timestampMs: number): string {
-  return `${base}:d:${Math.floor(timestampMs / DAY_MS)}`;
+export function monthlyKey(base: string, timestampMs: number): string {
+  const date = new Date(timestampMs);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  return `${base}:m:${year}-${month}`;
 }
 
-/** Redis-backed rate limit store using a daily fixed-window counter per (DAO, governor, address, operation) tuple. */
+/**
+ * Seconds remaining until 00:00 UTC on the first day of the next month, relative to the given
+ * timestamp. Used as the TTL on first increment so the bucket self-expires exactly at the month
+ * boundary.
+ */
+export function secondsUntilNextUtcMonth(timestampMs: number): number {
+  const date = new Date(timestampMs);
+  const nextMonthMs = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth() + 1,
+    1,
+  );
+  return Math.ceil((nextMonthMs - timestampMs) / 1000);
+}
+
+/** Redis-backed rate limit store using a monthly fixed-window counter per (DAO, governor, address, operation) tuple. */
 export class RedisRateLimitStorage implements RateLimitStorage {
   constructor(private redis: RedisClient) {}
 
   /**
-   * Atomically increments the daily counter for the given params and returns whether the
+   * Atomically increments the monthly counter for the given params and returns whether the
    * operation is within the allowed limit.
    *
-   * On the first increment of the day, a TTL of 24 h is set so keys self-expire.
-   * Returns `false` once the count exceeds `maxPerDay`.
+   * On the first increment of the month, a TTL is set so the key expires at the next UTC month
+   * boundary. Returns `false` once the count exceeds `maxPerMonth`.
    */
   async incrementIfAllowed({
     daoName,
     governorAddress,
     address,
     operation,
-    maxPerDay,
+    maxPerMonth,
   }: IncrementIfAllowedParams): Promise<boolean> {
     const base = buildKey(daoName, governorAddress, address, operation);
-    const dayKey = dailyKey(base, Date.now());
+    const now = Date.now();
+    const monthKey = monthlyKey(base, now);
 
-    const dayCount = await this.redis.incr(dayKey);
-    if (dayCount === 1) await this.redis.expire(dayKey, DAY_SECONDS);
+    const monthCount = await this.redis.incr(monthKey);
+    if (monthCount === 1) {
+      await this.redis.expire(monthKey, secondsUntilNextUtcMonth(now));
+    }
 
-    return dayCount <= maxPerDay;
+    return monthCount <= maxPerMonth;
   }
 
   /**
-   * Reads the current daily counter without incrementing. Returns 0 if no calls have
-   * been made in the current UTC-day window (or if the key has expired).
+   * Reads the current monthly counter without incrementing. Returns 0 if no calls have been made
+   * in the current UTC-month window (or if the key has expired).
    */
   async getCount({
     daoName,
@@ -96,9 +114,9 @@ export class RedisRateLimitStorage implements RateLimitStorage {
     operation,
   }: GetCountParams): Promise<number> {
     const base = buildKey(daoName, governorAddress, address, operation);
-    const dayKey = dailyKey(base, Date.now());
+    const monthKey = monthlyKey(base, Date.now());
 
-    const raw = await this.redis.get(dayKey);
+    const raw = await this.redis.get(monthKey);
     return raw === null ? 0 : Number(raw);
   }
 }

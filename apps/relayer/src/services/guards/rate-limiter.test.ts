@@ -5,7 +5,11 @@ import type {
   IncrementIfAllowedParams,
   RateLimitStorage,
 } from "@/repository/rate-limit-storage";
-import { RateLimiter } from "./rate-limiter";
+import {
+  RateLimiter,
+  resolveRelayLimits,
+  DEFAULT_RELAY_LIMIT,
+} from "./rate-limiter";
 
 const DAO = "ens";
 const GOVERNOR = getAddress("0x323A76393544d5ecca80cd6ef2A560C6a395b7E3");
@@ -18,12 +22,12 @@ function makeStore(): RateLimitStorage {
     async incrementIfAllowed({
       address,
       operation,
-      maxPerDay,
+      maxPerMonth,
     }: IncrementIfAllowedParams) {
       const id = `${address}:${operation}`;
       const next = (counters.get(id) ?? 0) + 1;
       counters.set(id, next);
-      return next <= maxPerDay;
+      return next <= maxPerMonth;
     },
     async getCount({ address, operation }) {
       return counters.get(`${address}:${operation}`) ?? 0;
@@ -37,7 +41,7 @@ beforeEach(() => {
   limiter = new RateLimiter(makeStore(), {
     daoName: DAO,
     governorAddress: GOVERNOR,
-    maxPerAddressPerDay: 3,
+    limits: { vote: 3, delegation: 3 },
   });
 });
 
@@ -48,7 +52,7 @@ describe("RateLimiter", () => {
     ).resolves.not.toThrow();
   });
 
-  it("blocks when daily limit is exceeded", async () => {
+  it("blocks when monthly limit is exceeded", async () => {
     for (let i = 0; i < 3; i++) await limiter.assertWithinLimit(ADDR, "vote");
 
     await expect(limiter.assertWithinLimit(ADDR, "vote")).rejects.toMatchObject(
@@ -75,6 +79,28 @@ describe("RateLimiter", () => {
     ).resolves.not.toThrow();
   });
 
+  it("enforces independent per-operation limits", async () => {
+    const limiter2 = new RateLimiter(makeStore(), {
+      daoName: DAO,
+      governorAddress: GOVERNOR,
+      limits: { vote: 2, delegation: 5 },
+    });
+
+    for (let i = 0; i < 2; i++) await limiter2.assertWithinLimit(ADDR, "vote");
+    await expect(
+      limiter2.assertWithinLimit(ADDR, "vote"),
+    ).rejects.toMatchObject({
+      code: "RATE_LIMITED",
+    });
+
+    // delegation has a higher limit and is unaffected by the exhausted vote bucket
+    for (let i = 0; i < 5; i++)
+      await limiter2.assertWithinLimit(ADDR, "delegation");
+    await expect(
+      limiter2.assertWithinLimit(ADDR, "delegation"),
+    ).rejects.toMatchObject({ code: "RATE_LIMITED" });
+  });
+
   it("throws RATE_LIMITER_UNAVAILABLE when store is unreachable", async () => {
     const brokenStore: RateLimitStorage = {
       incrementIfAllowed: () => Promise.reject(new Error("connection refused")),
@@ -84,11 +110,41 @@ describe("RateLimiter", () => {
     const brokenLimiter = new RateLimiter(brokenStore, {
       daoName: DAO,
       governorAddress: GOVERNOR,
-      maxPerAddressPerDay: 3,
+      limits: { vote: 3, delegation: 3 },
     });
 
     await expect(
       brokenLimiter.assertWithinLimit(ADDR, "vote"),
     ).rejects.toMatchObject({ code: "RATE_LIMITER_UNAVAILABLE" });
+  });
+});
+
+describe("resolveRelayLimits", () => {
+  it("falls back to DEFAULT_RELAY_LIMIT for both when nothing is set", () => {
+    expect(resolveRelayLimits({})).toEqual({
+      vote: DEFAULT_RELAY_LIMIT,
+      delegation: DEFAULT_RELAY_LIMIT,
+    });
+  });
+
+  it("uses the votes override and defaults delegation", () => {
+    expect(resolveRelayLimits({ votes: 10 })).toEqual({
+      vote: 10,
+      delegation: DEFAULT_RELAY_LIMIT,
+    });
+  });
+
+  it("uses the delegations override and defaults vote", () => {
+    expect(resolveRelayLimits({ delegations: 7 })).toEqual({
+      vote: DEFAULT_RELAY_LIMIT,
+      delegation: 7,
+    });
+  });
+
+  it("uses both overrides when both are set", () => {
+    expect(resolveRelayLimits({ votes: 10, delegations: 7 })).toEqual({
+      vote: 10,
+      delegation: 7,
+    });
   });
 });

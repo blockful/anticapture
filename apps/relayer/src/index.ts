@@ -22,7 +22,10 @@ import { env } from "@/env";
 import { RelayError } from "@/errors";
 import { createClient } from "redis";
 import { RedisRateLimitStorage } from "@/repository/rate-limit-storage";
-import { RateLimiter } from "@/services/guards/rate-limiter";
+import {
+  RateLimiter,
+  resolveRelayLimits,
+} from "@/services/guards/rate-limiter";
 import { ChainStateService } from "@/services/chain/chain-state";
 import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
@@ -80,11 +83,16 @@ async function main() {
 
   const rateLimitStorage = wrapWithTracing(new RedisRateLimitStorage(redis));
 
+  const relayLimits = resolveRelayLimits({
+    votes: env.MAX_VOTES_PER_ADDRESS_PER_MONTH,
+    delegations: env.MAX_DELEGATIONS_PER_ADDRESS_PER_MONTH,
+  });
+
   const rateLimiter = wrapWithTracing(
     new RateLimiter(rateLimitStorage, {
       daoName: env.DAO_NAME,
       governorAddress: governorAddress,
-      maxPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
+      limits: relayLimits,
     }),
   );
 
@@ -154,13 +162,13 @@ async function main() {
   health(app);
   config(app, {
     minVotingPower: env.MIN_VOTING_POWER,
-    maxRelayPerAddressPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
+    limits: relayLimits,
   });
   rateLimit(app, {
     storage: rateLimitStorage,
     daoName: env.DAO_NAME,
     governorAddress: governorAddress,
-    maxPerDay: env.MAX_RELAY_PER_ADDRESS_PER_DAY,
+    limits: relayLimits,
   });
   balance(app, {
     publicClient,
@@ -182,6 +190,8 @@ async function main() {
       relayer: relayerAddress,
       governor: governorAddress,
       token: tokenAddress,
+      voteLimitPerMonth: relayLimits.vote,
+      delegationLimitPerMonth: relayLimits.delegation,
     },
     "Relayer starting",
   );
