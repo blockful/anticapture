@@ -16,6 +16,13 @@ export const envSchema = z
       .transform((url) => url.replace(/\/+$/, ""))
       .optional(),
     TOKEN_SERVICE_API_KEY: z.string().optional(),
+    // Shared bearer protecting the public `/metrics` endpoint from scraping by
+    // anyone but our Prometheus instance. Distinct from per-tenant Authful auth:
+    // the scraper is infrastructure, not a tenant, so it must not consume a
+    // tenant token or be counted in per-tenant usage. Left open when unset
+    // (local dev); set it on the public deployment. The Prometheus service reads
+    // the same variable name, so it can be wired as one shared Railway variable.
+    GATEFUL_METRICS_TOKEN: z.string().optional(),
     CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
     CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
     CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
@@ -54,6 +61,7 @@ export const config = {
   tokenService: env.TOKEN_SERVICE_URL
     ? { url: env.TOKEN_SERVICE_URL, apiKey: env.TOKEN_SERVICE_API_KEY! }
     : undefined,
+  metricsToken: env.GATEFUL_METRICS_TOKEN,
   redisUrl: env.REDIS_URL,
   daoApis: loadDaoMap("DAO_API_"),
   daoRelayers: loadDaoMap("DAO_RELAYER_"),

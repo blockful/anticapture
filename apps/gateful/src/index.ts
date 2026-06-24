@@ -6,6 +6,7 @@ import { collectPrometheusMetrics } from "@anticapture/observability";
 import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
@@ -51,10 +52,23 @@ app.use("*", cors({ origin: "*" }));
 app.use("*", requestLogger());
 app.use("*", metricsMiddleware());
 
+// Protect the public /metrics endpoint with a shared bearer so only our
+// Prometheus scraper can read it. Registered before the route handler so the
+// guard runs first; skipped entirely when GATEFUL_METRICS_TOKEN is unset (local dev).
+if (config.metricsToken) {
+  app.use("/metrics", bearerAuth({ token: config.metricsToken }));
+}
+
 app.get("/metrics", async (c) => {
   const { body, contentType } = await collectPrometheusMetrics(exporter);
   return c.body(body, 200, { "Content-Type": contentType });
 });
+
+logger.info(
+  config.metricsToken
+    ? "metrics endpoint protected by bearer token"
+    : "metrics endpoint is unauthenticated (GATEFUL_METRICS_TOKEN unset)",
+);
 
 const PUBLIC_PATHS = new Set(["/docs", "/docs/json", "/health", "/metrics"]);
 
