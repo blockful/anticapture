@@ -6,7 +6,6 @@ import { collectPrometheusMetrics } from "@anticapture/observability";
 import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { bearerAuth } from "hono/bearer-auth";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
@@ -79,18 +78,6 @@ if (config.tokenService) {
   app.use("*", usageMiddleware(config.daoApis));
 
   logger.info("per-tenant token auth enabled (Authful)");
-} else if (config.blockfulApiToken) {
-  // Legacy single shared token — removed once Authful is fully rolled out.
-  const requireBearerAuth = bearerAuth({ token: config.blockfulApiToken });
-
-  app.use("*", async (c, next) => {
-    if (PUBLIC_PATHS.has(c.req.path)) {
-      await next();
-      return;
-    }
-
-    return requireBearerAuth(c, next);
-  });
 }
 if (redis) {
   app.use("*", cacheMiddleware(redis, config.daoApis));
