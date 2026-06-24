@@ -25,6 +25,9 @@ export const DraftCard = ({
     tabIndex={0}
     onClick={() => onEdit(draft.id)}
     onKeyDown={(e) => {
+      // Only react to the card itself; Enter/Space on a nested action button
+      // (Copy Link / Edit / Delete) must not also trigger the row's edit.
+      if (e.target !== e.currentTarget) return;
       if (e.key === "Enter" || e.key === " ") onEdit(draft.id);
     }}
     className="border-border-default bg-surface-default rounded-base flex cursor-pointer flex-col gap-3 border p-4 sm:flex-row sm:items-center sm:justify-between"

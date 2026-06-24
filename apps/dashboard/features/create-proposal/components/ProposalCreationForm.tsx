@@ -136,6 +136,11 @@ export const ProposalCreationForm = ({
         body: d.body,
         actions: d.actions.map(toFormAction),
       });
+      // A locally-owned draft has no shared author. Clear any author carried
+      // over from a previously viewed shared draft (e.g. when a recipient
+      // forks via Edit and navigates to their own copy) so `isRecipient`
+      // doesn't stay true and force the editor back to Preview.
+      setSharedAuthor(undefined);
       setCurrentDraftId(draftId);
       setBodyVersion((v) => v + 1);
       hydratedDraftIdRef.current = draftId;
@@ -203,6 +208,13 @@ export const ProposalCreationForm = ({
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+  // When a disconnected user triggers Edit/Publish from the Preview, we open
+  // the wallet modal and remember the intent so it resumes automatically once
+  // `address` becomes available — instead of silently dropping the action and
+  // forcing a second click.
+  const [pendingAction, setPendingAction] = useState<"edit" | "publish" | null>(
+    null,
+  );
   // Mirror in a ref so repeated synchronous clicks (before React commits the
   // state update) can still see an in-flight save and short-circuit early.
   const isSavingDraftRef = useRef(false);
@@ -225,8 +237,33 @@ export const ProposalCreationForm = ({
     (values.body?.length ?? 0) <= 10_000;
 
   const handleShare = async () => {
-    if (!currentDraftId) return;
-    const copied = await copyDraftShareUrl(basePath, currentDraftId);
+    // A share URL needs a persisted draft. From the Preview an author may not
+    // have saved yet (currentDraftId is undefined), so save first instead of
+    // silently no-opping.
+    let id = currentDraftId;
+    if (!id) {
+      if (!address) {
+        showCustomToast("Connect a wallet to save and share drafts", "error");
+        return;
+      }
+      try {
+        id = await drafts.saveDraft({
+          daoId,
+          title: values.title,
+          discussionUrl: values.discussionUrl ?? "",
+          body: values.body,
+          actions: values.actions,
+        });
+      } catch {
+        id = "";
+      }
+      if (!id) {
+        showCustomToast("Could not save draft", "error");
+        return;
+      }
+      setCurrentDraftId(id);
+    }
+    const copied = await copyDraftShareUrl(basePath, id);
     if (copied) {
       showCustomToast("URL copied to clipboard", "success");
     } else {
@@ -236,6 +273,7 @@ export const ProposalCreationForm = ({
 
   const handleForkEdit = async () => {
     if (!address) {
+      setPendingAction("edit");
       openConnectModal?.();
       return;
     }
@@ -259,11 +297,27 @@ export const ProposalCreationForm = ({
 
   const handlePreviewPublish = () => {
     if (!address) {
+      setPendingAction("publish");
       openConnectModal?.();
       return;
     }
     handlePublishClick();
   };
+
+  // Resume a Preview action that was deferred while the wallet connected.
+  useEffect(() => {
+    if (!address || !pendingAction) return;
+    const action = pendingAction;
+    setPendingAction(null);
+    if (action === "edit") {
+      void handleForkEdit();
+    } else {
+      handlePublishClick();
+    }
+    // handlers are recreated each render; we intentionally run only when the
+    // connection state or the pending intent changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, pendingAction]);
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
     if (!address) {
@@ -512,7 +566,14 @@ export const ProposalCreationForm = ({
           onPublish={handlePreviewPublish}
           onCopyLink={handleShare}
           onEdit={handleForkEdit}
-          publishDisabled={isRecipient && recipientState === "below-threshold"}
+          // Disconnected users keep Publish enabled so it can open the wallet
+          // modal and resume. Once connected, block submission of an invalid
+          // form or a recipient who is below the proposal threshold.
+          publishDisabled={
+            Boolean(address) &&
+            (!canPublish ||
+              (isRecipient && recipientState === "below-threshold"))
+          }
         />
       ) : (
         <>
