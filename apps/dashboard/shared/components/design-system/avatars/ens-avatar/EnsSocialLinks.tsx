@@ -87,13 +87,38 @@ export const buildSocialLinks = (socials: EnsSocials): SocialLink[] => {
 interface EnsSocialLinksProps {
   socials: EnsSocials;
   className?: string;
+  /** Render compact icon-only links (no handle labels) for tight headers. */
+  iconOnly?: boolean;
 }
 
-export const EnsSocialLinks = ({ socials, className }: EnsSocialLinksProps) => {
+export const EnsSocialLinks = ({
+  socials,
+  className,
+  iconOnly = false,
+}: EnsSocialLinksProps) => {
   const links = buildSocialLinks(socials);
 
   if (links.length === 0) {
     return null;
+  }
+
+  if (iconOnly) {
+    return (
+      <div className={cn("flex items-center gap-1", className)}>
+        {links.map(({ key, icon: Icon, label, href }) => (
+          <Link
+            key={key}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={label}
+            className="bg-surface-hover hover:bg-surface-contrast text-primary flex size-6 items-center justify-center rounded-full transition-colors"
+          >
+            <Icon className="size-3.5 shrink-0" />
+          </Link>
+        ))}
+      </div>
+    );
   }
 
   return (

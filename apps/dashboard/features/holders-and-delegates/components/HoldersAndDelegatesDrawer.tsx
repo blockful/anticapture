@@ -39,7 +39,7 @@ export const HoldersAndDelegatesDrawer = ({
 }: HoldersAndDelegatesDrawerProps) => {
   const entities = {
     delegate: {
-      title: "Delegate",
+      title: "Delegate Profile",
       tabs: [
         ...(withVotes
           ? [
@@ -65,7 +65,7 @@ export const HoldersAndDelegatesDrawer = ({
       ],
     },
     tokenHolder: {
-      title: "Token Holder",
+      title: "Token Holder Profile",
       tabs: [
         {
           id: "delegationHistory",
@@ -161,7 +161,7 @@ export const HoldersAndDelegatesDrawer = ({
           showFullAddress={false}
           showTags={true}
           showCopyAddress={true}
-          maxVisibleTags={2}
+          maxVisibleTags={3}
           showEfpStats={true}
           showSocials={true}
         />

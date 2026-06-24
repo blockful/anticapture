@@ -2,16 +2,13 @@
 
 import type { ImageProps } from "next/image";
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import { Fragment, useState } from "react";
 import Blockies from "react-blockies";
 import type { Address } from "viem";
 
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
-import {
-  EfpStats,
-  type EfpStatsData,
-} from "@/shared/components/design-system/avatars/ens-avatar/EfpStats";
 import {
   EnsSocialLinks,
   buildSocialLinks,
@@ -21,6 +18,7 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { useGetAddress } from "@anticapture/client/hooks";
 
 const TRUNCATE_ADDRESS_LENGTH = 30;
@@ -238,14 +236,8 @@ export const EnsAvatar = ({
       ? Math.max(0, allTags.length - maxVisibleTags)
       : 0;
 
-  const efpStats: EfpStatsData | null =
-    showEfpStats && efp && (efp.followers !== null || efp.following !== null)
-      ? {
-          followers: efp.followers ?? 0,
-          following: efp.following ?? 0,
-          profileUrl: `https://efp.app/${ens?.name ?? address ?? ""}`,
-        }
-      : null;
+  const efpFollowers = showEfpStats ? (efp?.followers ?? null) : null;
+  const efpFollowing = showEfpStats ? (efp?.following ?? null) : null;
 
   const socials: EnsSocials | null =
     showSocials && ens
@@ -258,7 +250,51 @@ export const EnsAvatar = ({
       : null;
   const hasSocials = socials ? buildSocialLinks(socials).length > 0 : false;
 
-  const hasProfileExtras = Boolean(efpStats) || hasSocials;
+  const hasProfileExtras =
+    efpFollowers !== null || efpFollowing !== null || hasSocials;
+
+  // Compact, dot-separated metadata line shown under the name in profile mode:
+  // "5.4K followers · 10 following · EOA · Individual · 0x…".
+  const formatEntityType = (value: string) =>
+    ["cex", "dex"].includes(value.toLowerCase())
+      ? value.toUpperCase()
+      : value.charAt(0).toUpperCase() + value.slice(1);
+
+  const contractLabel = getContractLabel();
+  const efpProfileUrl = address ? `https://efp.app/${address}` : undefined;
+  type MetaItem = { text: string; emphasis: boolean; href?: string };
+  const metaItems: MetaItem[] = hasProfileExtras
+    ? [
+        efpFollowers !== null
+          ? {
+              text: `${formatNumberUserReadable(efpFollowers, 1)} followers`,
+              emphasis: true,
+              href: efpProfileUrl,
+            }
+          : null,
+        efpFollowing !== null
+          ? {
+              text: `${formatNumberUserReadable(efpFollowing, 1)} following`,
+              emphasis: true,
+              href: efpProfileUrl,
+            }
+          : null,
+        contractLabel ? { text: contractLabel, emphasis: false } : null,
+        arkham?.entityType
+          ? { text: formatEntityType(arkham.entityType), emphasis: false }
+          : null,
+        address ? { text: formatAddress(address), emphasis: false } : null,
+      ].filter((item): item is MetaItem => item !== null)
+    : [];
+
+  const visibleMeta =
+    maxVisibleTags !== undefined && !tagsExpanded
+      ? metaItems.slice(0, maxVisibleTags)
+      : metaItems;
+  const hiddenMetaCount =
+    maxVisibleTags !== undefined && !tagsExpanded
+      ? Math.max(0, metaItems.length - maxVisibleTags)
+      : 0;
 
   const nameRow = (
     <div className="flex items-center gap-2">
@@ -292,14 +328,62 @@ export const EnsAvatar = ({
           }}
         />
       )}
+      {hasProfileExtras && hasSocials && socials && (
+        <EnsSocialLinks socials={socials} iconOnly />
+      )}
+    </div>
+  );
+
+  const metaLine = (
+    <div className="text-secondary flex min-w-0 items-center gap-1.5 text-xs">
+      {visibleMeta.map((item, index) => (
+        <Fragment key={item.text}>
+          {index > 0 && <span className="text-dimmed">·</span>}
+          {item.href ? (
+            <Link
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "whitespace-nowrap transition-opacity hover:opacity-80",
+                item.emphasis && "text-primary font-medium",
+              )}
+            >
+              {item.text}
+            </Link>
+          ) : (
+            <span
+              className={cn(
+                "whitespace-nowrap",
+                item.emphasis && "text-primary font-medium",
+              )}
+            >
+              {item.text}
+            </span>
+          )}
+        </Fragment>
+      ))}
+      {hiddenMetaCount > 0 && (
+        <>
+          <span className="text-dimmed">·</span>
+          <button
+            type="button"
+            onClick={() => setTagsExpanded(true)}
+            className="text-secondary hover:text-primary cursor-pointer whitespace-nowrap"
+            aria-label={`Show ${hiddenMetaCount} more`}
+          >
+            +{hiddenMetaCount}
+          </button>
+        </>
+      )}
     </div>
   );
 
   const avatarWithName = (
     <div
       className={cn(
-        "flex min-w-0 gap-2",
-        hasProfileExtras ? "items-start" : "items-center",
+        "flex min-w-0 items-center",
+        hasProfileExtras ? "gap-3" : "gap-2",
         containerClassName,
       )}
     >
@@ -308,57 +392,49 @@ export const EnsAvatar = ({
       <div
         className={cn(
           "flex min-w-0 flex-col",
-          hasProfileExtras ? "gap-1.5" : "gap-0.5",
+          hasProfileExtras ? "gap-2" : "gap-0.5",
         )}
       >
         {nameRow}
 
-        {efpStats && (
-          <EfpStats
-            followers={efpStats.followers}
-            following={efpStats.following}
-            profileUrl={efpStats.profileUrl}
-          />
-        )}
-
-        {hasSocials && socials && <EnsSocialLinks socials={socials} />}
-
-        {showTags && (
-          <div className="flex flex-wrap items-center gap-1">
-            {isLoading ? (
-              <>
-                <SkeletonRow
-                  parentClassName="flex animate-pulse"
-                  className="h-5 w-16 rounded-full"
-                />
-                <SkeletonRow
-                  parentClassName="flex animate-pulse"
-                  className="h-5 w-20 rounded-full"
-                />
-              </>
-            ) : (
-              <>
-                {tags.map((tag) => (
-                  <BadgeStatus key={tag} variant="secondary">
-                    {tag}
-                  </BadgeStatus>
-                ))}
-                {hiddenTagsCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setTagsExpanded(true)}
-                    className="flex cursor-pointer items-center gap-0.5"
-                    aria-label={`Show ${hiddenTagsCount} more tags`}
-                  >
-                    <BadgeStatus variant="secondary">
-                      +{hiddenTagsCount}
-                    </BadgeStatus>
-                  </button>
+        {hasProfileExtras
+          ? metaItems.length > 0 && metaLine
+          : showTags && (
+              <div className="flex flex-wrap items-center gap-1">
+                {isLoading ? (
+                  <>
+                    <SkeletonRow
+                      parentClassName="flex animate-pulse"
+                      className="h-5 w-16 rounded-full"
+                    />
+                    <SkeletonRow
+                      parentClassName="flex animate-pulse"
+                      className="h-5 w-20 rounded-full"
+                    />
+                  </>
+                ) : (
+                  <>
+                    {tags.map((tag) => (
+                      <BadgeStatus key={tag} variant="secondary">
+                        {tag}
+                      </BadgeStatus>
+                    ))}
+                    {hiddenTagsCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setTagsExpanded(true)}
+                        className="flex cursor-pointer items-center gap-0.5"
+                        aria-label={`Show ${hiddenTagsCount} more tags`}
+                      >
+                        <BadgeStatus variant="secondary">
+                          +{hiddenTagsCount}
+                        </BadgeStatus>
+                      </button>
+                    )}
+                  </>
                 )}
-              </>
+              </div>
             )}
-          </div>
-        )}
       </div>
     </div>
   );
