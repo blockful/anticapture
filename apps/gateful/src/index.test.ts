@@ -13,7 +13,8 @@ describe("gateful app auth", () => {
   let app: typeof import("./index.js").app;
 
   beforeAll(async () => {
-    vi.stubEnv("BLOCKFUL_API_TOKEN", "test-token");
+    vi.stubEnv("TOKEN_SERVICE_URL", "http://authful:4002");
+    vi.stubEnv("TOKEN_SERVICE_API_KEY", "test-key");
     vi.stubEnv("PORT", "0");
     vi.stubEnv("REDIS_URL", undefined);
     vi.stubEnv("ADDRESS_ENRICHMENT_API_URL", undefined);

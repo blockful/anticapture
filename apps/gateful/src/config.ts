@@ -7,8 +7,7 @@ export const envSchema = z
   .object({
     PORT: z.coerce.number().default(4001),
     ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
-    BLOCKFUL_API_TOKEN: z.string().optional(),
-    // Per-tenant token auth via Authful; replaces the legacy single-token guard.
+    // Per-tenant token auth via Authful.
     // Trim trailing slashes so a value like `https://authful/` does not produce
     // `//validate` downstream, which Hono serves as a 404 — making Authful look
     // unavailable for every uncached validation.
@@ -52,7 +51,6 @@ const env = envSchema.parse(process.env);
 export const config = {
   port: env.PORT,
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
-  blockfulApiToken: env.BLOCKFUL_API_TOKEN,
   tokenService: env.TOKEN_SERVICE_URL
     ? { url: env.TOKEN_SERVICE_URL, apiKey: env.TOKEN_SERVICE_API_KEY! }
     : undefined,
