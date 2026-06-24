@@ -3,7 +3,6 @@
 import { Link2, Pencil, Rocket } from "lucide-react";
 import type { Address } from "viem";
 
-import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 
@@ -30,17 +29,14 @@ export const DraftPreviewSidebar = ({
   publishDisabled = false,
 }: DraftPreviewSidebarProps) => (
   <div className="flex w-full flex-col gap-4">
-    <div className="flex items-center gap-2">
-      <BadgeStatus variant="outline">Draft</BadgeStatus>
-      <span className="text-secondary flex items-center gap-1 text-sm">
-        Draft •
-        <EnsAvatar
-          size="xs"
-          address={authorAddress as Address}
-          nameClassName="text-secondary"
-        />
-      </span>
-    </div>
+    <span className="text-secondary flex items-center gap-1 text-sm">
+      Draft •
+      <EnsAvatar
+        size="xs"
+        address={authorAddress as Address}
+        nameClassName="text-secondary"
+      />
+    </span>
 
     <h4 className="text-primary text-xl">{title}</h4>
 

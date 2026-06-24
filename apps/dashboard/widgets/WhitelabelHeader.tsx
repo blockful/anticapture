@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
-import { useQueryState } from "nuqs";
+import { usePathname } from "next/navigation";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
 import { getWhitelabelSearchPlaceholder } from "@/shared/utils/whitelabel";
+import { DraftViewToggle } from "@/features/create-proposal/components/preview/DraftViewToggle";
+import { useDraftRecipient } from "@/features/create-proposal/hooks/useDraftRecipient";
 
 const isProposalDetailPath = (pathname: string) =>
   /\/proposals\/(?!new(?:\/|$))[^/]+/.test(pathname);
@@ -17,11 +18,17 @@ const isProposalNewPath = (pathname: string) =>
 
 export const WhitelabelHeader = () => {
   const pathname = usePathname();
-  const { daoId } = useParams<{ daoId: string }>();
   const [search, setSearch] = useQueryState("search", {
     defaultValue: "",
     clearOnDefault: true,
   });
+  const [view, setView] = useQueryState(
+    "view",
+    parseAsStringEnum<"editor" | "preview">(["editor", "preview"]).withDefault(
+      "editor",
+    ),
+  );
+  const { isRecipient } = useDraftRecipient();
 
   const [inputValue, setInputValue] = useState(search);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -41,19 +48,11 @@ export const WhitelabelHeader = () => {
     <header className="border-border-default bg-surface-background sticky top-0 z-10 hidden h-[65px] items-center justify-between gap-6 border-b px-6 lg:flex">
       <div className="flex min-w-0 flex-1 items-center gap-4">
         {onProposalNew ? (
-          <nav
-            aria-label="Breadcrumb"
-            className="flex items-center gap-1.5 text-sm"
-          >
-            <Link
-              href={`/whitelabel/${daoId}/proposals`}
-              className="text-link font-medium"
-            >
-              Proposals
-            </Link>
-            <span className="text-dimmed">/</span>
-            <span className="text-secondary">New Proposal</span>
-          </nav>
+          <DraftViewToggle
+            mode={view}
+            onChange={(m) => void setView(m)}
+            showEditor={!isRecipient}
+          />
         ) : (
           showSearch && (
             <div className="max-w-xl flex-1">
