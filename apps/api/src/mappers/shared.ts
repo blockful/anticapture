@@ -153,7 +153,7 @@ export const addressOutputField = (description: string) =>
 export const decimalStringField = (description: string) =>
   z.string().openapi({
     description,
-    format: "bigint",
+    format: "int64",
   });
 
 export const txHashField = () =>
@@ -196,7 +196,7 @@ export const unixSecondsStringField = (subject: string) =>
   z.string().openapi({
     description: `${subject} timestamp in Unix seconds as a string.`,
     example: "1704067200",
-    format: "bigint",
+    format: "int64",
   });
 
 export const unixSecondsIntField = (description: string) =>
@@ -292,8 +292,8 @@ export const bigintAsStringField = (description?: string) => {
     z.string(),
   ]);
   return description
-    ? schema.openapi({ format: "bigint", type: "string", description })
-    : schema.openapi({ format: "bigint", type: "string" });
+    ? schema.openapi({ format: "int64", type: "string", description })
+    : schema.openapi({ format: "int64", type: "string" });
 };
 
 const errorResponseContent = {

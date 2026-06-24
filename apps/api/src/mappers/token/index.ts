@@ -82,12 +82,12 @@ export const SupplyComparisonResponseSchema = z
     previousValue: z.string().openapi({
       description:
         "Supply value at the start of the comparison window, encoded as a decimal string (raw token base units).",
-      format: "bigint",
+      format: "int64",
     }),
     currentValue: z.string().openapi({
       description:
         "Supply value at the end of the comparison window, encoded as a decimal string (raw token base units).",
-      format: "bigint",
+      format: "int64",
     }),
     changeRate: z.number().openapi({
       description:
@@ -96,7 +96,7 @@ export const SupplyComparisonResponseSchema = z
     rawDelta: z.string().openapi({
       description:
         "Signed bigint delta as a decimal string: currentValue - previousValue.",
-      format: "bigint",
+      format: "int64",
     }),
   })
   .openapi("SupplyComparisonResponse", {

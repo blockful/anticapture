@@ -104,7 +104,7 @@ export const HistoricalVotingPowerResponseSchema = z
     ),
     delta: z.string().openapi({
       description: "Voting power change introduced by the event.",
-      format: "bigint",
+      format: "int64",
     }),
     timestamp: unixSecondsStringField("Event"),
     logIndex: logIndexField(),

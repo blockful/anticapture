@@ -92,11 +92,11 @@ export const HistoricalBalanceResponseSchema = z
     accountId: addressOutputField("Account address."),
     balance: z.string().openapi({
       description: "Account balance after the historical event.",
-      format: "bigint",
+      format: "int64",
     }),
     delta: z.string().openapi({
       description: "Balance change introduced by the historical event.",
-      format: "bigint",
+      format: "int64",
     }),
     timestamp: unixSecondsStringField("Event"),
     logIndex: logIndexField(),

@@ -48,7 +48,7 @@ export const VoteResponseSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
-        format: "bigint",
+        format: "int64",
         description: "Voting power encoded as a decimal string.",
       }),
     reason: z.string().nullish(),
