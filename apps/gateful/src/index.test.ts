@@ -18,6 +18,7 @@ describe("gateful app auth", () => {
     vi.stubEnv("PORT", "0");
     vi.stubEnv("REDIS_URL", undefined);
     vi.stubEnv("ADDRESS_ENRICHMENT_API_URL", undefined);
+    vi.stubEnv("RAILWAY_GIT_COMMIT_SHA", "test-commit-sha");
 
     ({ app } = await import("./index.js"));
   });
@@ -54,6 +55,18 @@ describe("gateful app auth", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("text/plain");
     expect(body).toContain("# HELP");
+  });
+
+  it("serves health with the deployed commit without a bearer token", async () => {
+    const res = await app.request("/health");
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toMatchObject({
+      status: "ok",
+      commit: "test-commit-sha",
+      circuits: {},
+    });
   });
 
   it("requires bearer auth outside docs endpoints", async () => {

@@ -1,6 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import type { OpenAPIHono } from "@hono/zod-openapi";
 
+import { config } from "../config.js";
 import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
 
 const CircuitStatusSchema = z.object({
@@ -10,6 +11,7 @@ const CircuitStatusSchema = z.object({
 
 const HealthResponseSchema = z.object({
   status: z.literal("ok"),
+  commit: z.string().optional(),
   circuits: z.record(z.string(), CircuitStatusSchema),
 });
 
@@ -48,6 +50,10 @@ export function health(app: OpenAPIHono, registry: CircuitBreakerRegistry) {
       circuits[name] = entry;
     }
 
-    return c.json({ status: "ok" as const, circuits });
+    return c.json({
+      status: "ok" as const,
+      commit: config.commitSha,
+      circuits,
+    });
   });
 }
