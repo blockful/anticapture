@@ -10,17 +10,18 @@
 - Commit `node_modules`, `.env`, or generated files
 - Cast types to `any` or `unknown` without explicitly asked to
 
-## Shared memory (MEMORY.md)
+## Shared memory
 
-`MEMORY.md` at the repo root is the team's shared agent memory — treat reading/updating it as
-part of every task's lifecycle:
+The team's shared agent memory is Claude Code's **auto memory**, redirected to the git-tracked
+`.agents/shared-memory/` folder so one dev's learnings reach another dev's agent via push/pull.
+Claude reads it at session start and writes to it automatically — there is no manual step.
 
-- **Start of a task:** read it before working an unfamiliar area.
-- **End of a task (before finishing or opening a PR):** if you learned something durable — a
-  non-obvious constraint, the _why_ behind a decision, a pitfall that cost real time — append a
-  short dated entry under the matching topic section. Treat it as a required closing step.
+- **Setup (once per dev):** run `pnpm setup:memory`, then restart the session. Inspect with `/memory`.
+- **Never write** secrets, tokens, `.env` values, or machine-local absolute paths; keep entries
+  repo-relative.
+- It is **not curated** — review `git status` in that folder before committing what Claude wrote.
 
-Never record session narration, routine work, or secrets. Full guidance in `AGENTS.md`.
+Full guidance in `AGENTS.md` and `.agents/shared-memory/README.md`.
 
 ## Architecture Overview
 

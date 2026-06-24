@@ -126,27 +126,24 @@ Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
 - Commit `node_modules`, `.env`, or generated files that aren't meant to be committed.
 - Cast types to `any`/`unknown` unless explicitly asked.
 
-## Shared memory (MEMORY.md)
+## Shared memory
 
-`MEMORY.md` at the repo root is the team's shared agent memory. Reading and updating it is
-part of **every task's lifecycle**, not an optional afterthought:
+The team's shared agent memory is Claude Code's **auto memory**, redirected from its default
+machine-local location into the git-tracked `.agents/shared-memory/` folder, so what one dev's
+agent learns reaches another dev's agent via commit/push/pull. It is automatic: Claude reads it
+at the start of every session and writes to it on its own as it works — there is no manual
+"read at start / append at end" step.
 
-- **Start of a task:** read `MEMORY.md` before digging into an unfamiliar area, so you don't
-  relearn what a previous agent already paid for.
-- **End of a task (before you finish or open a PR):** ask yourself _"would the next agent or
-  human relearn this the hard way?"_ — if yes, append it. Treat this as a required closing step,
-  the same as running typecheck/lint.
+**Setup (once per dev):** run `pnpm setup:memory` (it sets `autoMemoryDirectory` in your local
+settings), then restart the session. Browse or toggle it with the `/memory` command.
 
-**Record:** non-obvious constraints and gotchas, the _why_ behind architectural
-decisions, recurring pitfalls and their fixes, environment quirks that cost real time.
+**Never write:** secrets, tokens, `.env` values, private keys, signed URLs, or machine-local
+absolute paths (`/home/<name>/...`, `D:/...`). Keep entries repo-relative.
 
-**Do not record:** session narration, routine work, anything the code or docs already
-express, or secrets/tokens of any kind.
-
-Format: append a short factual entry under the matching `##` topic section (create one
-if needed), prefixed with the date. Keep entries timeless, verifiable, and one to three
-lines — if it needs more, it probably belongs in `docs/` with a pointer here. Prune
-entries you can prove stale.
+**Not curated:** unlike a hand-written doc, nobody reviews these files in a PR before the agent
+writes them. Curation happens after the fact — review `git status` in `.agents/shared-memory/`
+before committing, and prune stale entries. Detailed setup and caveats live in that folder's
+`README.md`.
 
 ## Where to go deeper
 
