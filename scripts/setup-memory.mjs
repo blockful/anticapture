@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 
 const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const memoryDir = join(repoRoot, ".agents", "shared-memory").replaceAll("\\", "/");
+const memoryDir = join(repoRoot, ".agents", "shared-memory");
 const settingsPath = join(repoRoot, ".claude", "settings.local.json");
 
 let settings = {};
