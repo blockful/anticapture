@@ -35,18 +35,6 @@ Anticapture is a data-driven platform that helps DAO communities identify, asses
 - Node.js 18.14+
 - pnpm 10.10.0+
 - Docker & Docker Compose
-- [uv](https://docs.astral.sh/uv) — optional, only for the `graphify` skill
-  (see [Knowledge graph](#knowledge-graph-graphify-optional)).
-
-### Knowledge graph (graphify, optional)
-
-The `graphify` skill (`.claude/skills/graphify`) builds a queryable knowledge graph of the
-codebase for AI agents. Optional — the stack works without it.
-
-- **`uv`** runs the skill (auto-installs `graphifyy`; falls back to `pip` + Python 3.10+).
-  Without it, `/graphify` can't build or query the graph.
-- **`python3`** is only used by the Claude Code `PreToolUse` hooks; without it they silently
-  no-op (tools still work, no graph nudge).
 
 ### Installation
 

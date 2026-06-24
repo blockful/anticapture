@@ -161,6 +161,5 @@ dist
 
 apps/gateful/openapi/gateful.json
 
-# graphify knowledge-graph artifacts — rebuilt per-machine by the auto-rebuild
-# hooks; not shared in git.
-graphify-out/
+# Local planning/spec artifacts (superpowers) — not part of the repo
+docs/superpowers/
