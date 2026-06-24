@@ -54,7 +54,7 @@ app.use("*", metricsMiddleware());
 
 // Protect the public /metrics endpoint with a shared bearer so only our
 // Prometheus scraper can read it. Registered before the route handler so the
-// guard runs first; skipped entirely when METRICS_API_TOKEN is unset (local dev).
+// guard runs first; skipped entirely when GATEFUL_METRICS_TOKEN is unset (local dev).
 if (config.metricsToken) {
   app.use("/metrics", bearerAuth({ token: config.metricsToken }));
 }
@@ -67,7 +67,7 @@ app.get("/metrics", async (c) => {
 logger.info(
   config.metricsToken
     ? "metrics endpoint protected by bearer token"
-    : "metrics endpoint is unauthenticated (METRICS_API_TOKEN unset)",
+    : "metrics endpoint is unauthenticated (GATEFUL_METRICS_TOKEN unset)",
 );
 
 const PUBLIC_PATHS = new Set(["/docs", "/docs/json", "/health", "/metrics"]);
