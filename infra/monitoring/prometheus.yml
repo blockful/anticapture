@@ -118,6 +118,12 @@ scrape_configs:
   - job_name: anticapture-gateful
     metrics_path: "/metrics"
     scrape_interval: 15s
+    # Gateful's /metrics is bearer-protected (METRICS_API_TOKEN on the Gateful
+    # service); GATEFUL_METRICS_TOKEN here must hold the same secret. Set both
+    # together — if the app requires the token and this is unset, scrapes 401.
+    authorization:
+      type: Bearer
+      credentials: "${GATEFUL_METRICS_TOKEN}"
     static_configs:
       - targets: ["${GATEFUL_ENDPOINT}"]
 
