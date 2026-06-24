@@ -182,10 +182,10 @@ export const DelegationModal = ({
             variant="success"
             text={
               delegationRemaining === 1
-                ? "This delegation is free! Last one for today — refreshes tomorrow."
+                ? "This delegation is free! Last one this month — resets next month."
                 : `This delegation is free! You'll still have ${
                     delegationRemaining - 1
-                  } left to use today.`
+                  } left to use this month.`
             }
             className="mt-2"
           />

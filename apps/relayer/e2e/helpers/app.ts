@@ -61,7 +61,7 @@ export async function createTestApp(
     {
       daoName: "test",
       governorAddress: GOVERNOR_ADDRESS,
-      maxPerAddressPerDay: 50,
+      limits: { vote: 50, delegation: 50 },
     },
   );
 

@@ -445,6 +445,7 @@ export const GovernanceSection = () => {
               onValueChange={(value) =>
                 setSourceFilter(value as ProposalSourceFilter)
               }
+              aria-label="Proposal source"
               className="w-[150px] lg:w-[248px]"
             />
           )}

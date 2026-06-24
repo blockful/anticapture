@@ -37,7 +37,18 @@ const envSchema = z.object({
     .regex(/^\d+$/, "Must be a non-negative decimal")
     .default("100000000000000000"),
 
-  MAX_RELAY_PER_ADDRESS_PER_DAY: z.coerce.number().int().optional().default(3),
+  // Per address, per calendar month (UTC). Optional; each defaults to DEFAULT_RELAY_LIMIT (3).
+  // .positive() rejects 0/negatives: a 0 limit would block all relays — omit the var to use the default instead.
+  MAX_VOTES_PER_ADDRESS_PER_MONTH: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional(),
+  MAX_DELEGATIONS_PER_ADDRESS_PER_MONTH: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional(),
 
   PORT: z.coerce.number().default(3002),
 

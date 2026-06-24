@@ -7,6 +7,7 @@ import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
@@ -188,6 +189,12 @@ const pgGeneralClient = drizzle(env.DATABASE_URL, {
   schema: generalSchema,
   casing: "snake_case",
 });
+
+await migrate(pgGeneralClient, {
+  migrationsFolder: "./drizzle",
+  migrationsSchema: "general",
+});
+logger.info("database migrations completed");
 
 health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
 

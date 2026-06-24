@@ -1,13 +1,14 @@
 import http from "node:http";
-import { randomUUID, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp";
 import { createMcpServer } from "./src/create-mcp-server.ts";
 import { configureUpstreamClient } from "./src/configure-upstream-client.ts";
+import { inboundAuthStorage } from "./src/request-context.ts";
+import { env } from "./src/env.ts";
 import pino from "pino";
 
-const mcpApiKey = process.env["ANTICAPTURE_MCP_API_KEY"];
-const port = Number(process.env["PORT"] ?? 3100);
-const host = process.env["HOST"] ?? "0.0.0.0";
+const port = env.PORT;
+const host = env.HOST;
 
 const sessions = new Map<string, StreamableHTTPServerTransport>();
 let shuttingDown = false;
@@ -16,17 +17,12 @@ configureUpstreamClient();
 
 const log = pino({ name: "anticapture-mcp" });
 
-log.info({ hasMcpKey: !!mcpApiKey, port, host }, "server starting");
-
-function isValidToken(token: string): boolean {
-  if (!mcpApiKey) return true;
-  try {
-    if (token.length !== mcpApiKey.length) return false;
-    return timingSafeEqual(Buffer.from(token), Buffer.from(mcpApiKey));
-  } catch {
-    return false;
-  }
-}
+// Token validation is delegated to Gateful: the inbound bearer is forwarded
+// upstream (see configure-upstream-client) and guarded by Gateful's
+// tokenAuthMiddleware, which has the Redis cache + fail-open fallback. Doing
+// our own uncached Authful check here would re-introduce a hard dependency on
+// Authful and 503 cache-warm tenants during an Authful restart.
+log.info({ port, host }, "server starting");
 
 async function getOrCreateTransport(
   requestSessionId: string | undefined,
@@ -84,21 +80,6 @@ const httpServer = http.createServer(async (req, res) => {
     return;
   }
 
-  if (mcpApiKey) {
-    const auth = req.headers["authorization"];
-    const token = auth?.startsWith("Bearer ") ? auth.slice(7) : "";
-    if (!isValidToken(token)) {
-      res
-        .writeHead(401, {
-          "Content-Type": "application/json",
-          "WWW-Authenticate": 'Bearer realm="anticapture"',
-        })
-        .end(JSON.stringify({ error: "invalid_token" }));
-      finish(401);
-      return;
-    }
-  }
-
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
   try {
@@ -110,7 +91,13 @@ const httpServer = http.createServer(async (req, res) => {
       finish(404, { sessionId });
       return;
     }
-    await transport.handleRequest(req, res);
+
+    const inboundAuth = req.headers["authorization"];
+    await (inboundAuth
+      ? inboundAuthStorage.run(inboundAuth, () =>
+          transport.handleRequest(req, res),
+        )
+      : transport.handleRequest(req, res));
     finish(res.statusCode, { sessionId });
   } catch (err) {
     log.error({ reqId, err: String(err) }, "request failed");

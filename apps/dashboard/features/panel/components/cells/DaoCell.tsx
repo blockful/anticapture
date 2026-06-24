@@ -25,6 +25,7 @@ export const DaoCell = ({ daoId }: { daoId: DaoIdEnum }) => {
       }
       disableMobileClick
       triggerClassName="w-full"
+      asChild
     >
       <ClickableCell
         href={config.disableDaoPage ? undefined : `/${daoId.toLowerCase()}`}

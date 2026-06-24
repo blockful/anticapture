@@ -1,10 +1,11 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
+import type { RelayOperation } from "@/services/guards/rate-limiter";
 import { ConfigResponseSchema } from "@/schemas/config";
 
 interface ConfigControllerDeps {
   minVotingPower: string;
-  maxRelayPerAddressPerDay: number;
+  limits: Record<RelayOperation, number>;
 }
 
 export function config(app: Hono, deps: ConfigControllerDeps) {
@@ -30,7 +31,7 @@ export function config(app: Hono, deps: ConfigControllerDeps) {
       c.json(
         {
           minVotingPower: deps.minVotingPower,
-          maxRelayPerAddressPerDay: deps.maxRelayPerAddressPerDay,
+          limits: deps.limits,
         },
         200,
       ),

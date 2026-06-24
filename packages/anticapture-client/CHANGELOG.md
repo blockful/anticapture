@@ -1,5 +1,19 @@
 # @anticapture/client
 
+## 1.3.0
+
+### Minor Changes
+
+- [#1976](https://github.com/blockful/anticapture/pull/1976) [`4e5f06a`](https://github.com/blockful/anticapture/commit/4e5f06a261211b9a94eb0e40047468000ba40363) Thanks [@LeonardoVieira1630](https://github.com/LeonardoVieira1630)! - Switch relayer rate limiting from a shared daily window to per-operation monthly limits (separate caps for votes and delegations), configurable via `MAX_VOTES_PER_ADDRESS_PER_MONTH` and `MAX_DELEGATIONS_PER_ADDRESS_PER_MONTH` (each defaulting to 3). The `/relay/config` and `/relay/rate-limit/{address}` responses now expose per-operation `limits`/`limit` and a monthly `resetsAt`; the client SDK is regenerated to match. The dashboard `useGaslessRelayer` hook now exposes `voteLimit`/`delegationLimit` in place of the removed `maxRelayPerAddressPerDay`/`maxPerDay` fields.
+
+- [#1950](https://github.com/blockful/anticapture/pull/1950) [`05a7cf2`](https://github.com/blockful/anticapture/commit/05a7cf2d7280b392579a342db3810c6e1fa0d54d) Thanks [@pikonha](https://github.com/pikonha)! - Generate the client SDK from the Gateful OpenAPI spec using Railway environment names.
+
+### Patch Changes
+
+- [#1970](https://github.com/blockful/anticapture/pull/1970) [`e5840e8`](https://github.com/blockful/anticapture/commit/e5840e89b2aa2d9090078a3fcbb5ba856caa65e6) Thanks [@pikonha](https://github.com/pikonha)! - Re-run client codegen whenever `apps/api` or `apps/gateful` change. Because the SDK is generated from the live Gateful spec URL (not a package dependency), Turbo had no file edge to the contract sources and would serve a stale cached SDK after a gateway/API change. Added `$TURBO_ROOT$/apps/api/**` and `$TURBO_ROOT$/apps/gateful/**` to the codegen task inputs so contract changes invalidate the cache.
+
+- [#1910](https://github.com/blockful/anticapture/pull/1910) [`cebd048`](https://github.com/blockful/anticapture/commit/cebd04865d4efd1d155ec6a5009b48bd9ee37d9e) Thanks [@brunod-e](https://github.com/brunod-e)! - Resolve the Gateful OpenAPI spec exclusively from the live Gateful URL for both codegen and docs build, dropping the committed `apps/gateful/openapi/gateful.json` fallback so generated output never comes from a stale local file.
+
 ## 1.2.1
 
 ### Patch Changes
