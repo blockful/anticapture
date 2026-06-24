@@ -3,7 +3,7 @@ import { z } from "@hono/zod-openapi";
 export const ConfigResponseSchema = z
   .object({
     minVotingPower: z.string().openapi({
-      format: "bigint",
+      format: "int64",
       description:
         "Minimum voting power required to relay, as a decimal string (uint256).",
     }),
