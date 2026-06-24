@@ -1,8 +1,8 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import type { OpenAPIHono } from "@hono/zod-openapi";
 
-import { config } from "../config.js";
-import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
+import { config } from "../config";
+import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry";
 
 const CircuitStatusSchema = z.object({
   state: z.enum(["CLOSED", "OPEN", "HALF_OPEN"]),
