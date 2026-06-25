@@ -46,17 +46,23 @@ export const DraftPreviewSidebar = ({
         size="md"
         disabled={publishDisabled}
         onClick={onPublish}
+        className="flex-1"
       >
         <Rocket className="size-4" />
         Publish
       </Button>
       {secondaryAction === "copy-link" ? (
-        <Button variant="outline" size="md" onClick={onCopyLink}>
+        <Button
+          variant="outline"
+          size="md"
+          onClick={onCopyLink}
+          className="flex-1"
+        >
           <Link2 className="size-4" />
           Copy Link
         </Button>
       ) : (
-        <Button variant="outline" size="md" onClick={onEdit}>
+        <Button variant="outline" size="md" onClick={onEdit} className="flex-1">
           <Pencil className="size-4" />
           Edit
         </Button>
