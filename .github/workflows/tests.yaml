@@ -153,7 +153,14 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}"
+          GATEFUL_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+        # `vercel deploy` builds remotely, so codegen reads ANTICAPTURE_API_URL
+        # from the Vercel project env. The branch-scoped value the
+        # configure-vercel-preview job upserts is keyed by gitBranch and is NOT
+        # applied to this CLI deployment (no branch association), so codegen
+        # falls back to the project-level preview value and fails with
+        # "fetch failed". Pass the resolved Gateful URL as a build env directly.
+        run: npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}"
 
   changeset-path-filter:
     name: Detect changeset requirement
