@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       gateful_url: ${{ steps.vercel-env.outputs.gateful_url }}
+      trusted: ${{ steps.trust.outputs.trusted }}
 
     steps:
       - name: Checkout repository
@@ -21,20 +22,62 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Upsert branch-scoped Gateful URL
+      # Gate the Vercel secret operations to trusted authors only: repo codeowners
+      # (matched against the CODEOWNERS file so the list can't drift) or members /
+      # owners of the blockful org (native PR author_association). The gateful_url
+      # output below is a plain string and stays available for every PR, so the
+      # downstream wait/typecheck/test jobs keep their coverage on external PRs.
+      - name: Determine author trust
+        id: trust
+        shell: bash
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+        run: |
+          set -euo pipefail
+
+          trusted=false
+          if [ "${AUTHOR_ASSOCIATION}" = "MEMBER" ] || [ "${AUTHOR_ASSOCIATION}" = "OWNER" ]; then
+            trusted=true
+          elif grep -oE '@[A-Za-z0-9_-]+' CODEOWNERS | sed 's/@//' | grep -qix "${PR_AUTHOR}"; then
+            trusted=true
+          fi
+
+          echo "trusted=${trusted}" >> "${GITHUB_OUTPUT}"
+          echo "PR author '${PR_AUTHOR}' (association=${AUTHOR_ASSOCIATION}) trusted=${trusted}."
+
+      - name: Compute branch-scoped Gateful URL
         id: vercel-env
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IS_TRUSTED: ${{ steps.trust.outputs.trusted }}
+        run: |
+          set -euo pipefail
+
+          # Trusted PRs get their own ephemeral Railway preview; untrusted PRs
+          # (no Vercel/Railway preview is provisioned for them) fall back to the
+          # shared dev Gateful so the downstream wait/typecheck/test jobs have a
+          # live target instead of a preview host that never comes up.
+          if [ "${IS_TRUSTED}" = "true" ]; then
+            gateful_url="https://gateful-anticapture-pr-${PR_NUMBER}.up.railway.app"
+          else
+            gateful_url="https://dev-gateful.up.railway.app"
+          fi
+          echo "gateful_url=${gateful_url}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upsert branch-scoped Gateful URL into Vercel
+        id: vercel-upsert
+        if: steps.trust.outputs.trusted == 'true'
         shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           PR_BRANCH: ${{ github.event.pull_request.head.ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GATEFUL_URL: ${{ steps.vercel-env.outputs.gateful_url }}
         run: |
           set -euo pipefail
-
-          gateful_url="https://gateful-anticapture-pr-${PR_NUMBER}.up.railway.app"
-          echo "gateful_url=${gateful_url}" >> "${GITHUB_OUTPUT}"
 
           if [ -z "${VERCEL_TOKEN:-}" ] || [ -z "${VERCEL_PROJECT_ID:-}" ] || [ -z "${VERCEL_TEAM_ID:-}" ]; then
             echo "::warning::Skipping Vercel preview env injection; Vercel secrets are not available."
@@ -44,7 +87,7 @@ jobs:
           api_url="https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env?upsert=true&teamId=${VERCEL_TEAM_ID}"
           payload=$(jq -n \
             --arg key "ANTICAPTURE_API_URL" \
-            --arg value "${gateful_url}" \
+            --arg value "${GATEFUL_URL}" \
             --arg gitBranch "${PR_BRANCH}" \
             '{ key: $key, value: $value, type: "plain", target: ["preview"], gitBranch: $gitBranch }')
 
@@ -55,11 +98,11 @@ jobs:
             --header "Content-Type: application/json" \
             --data "${payload}"
 
-          echo "Configured ANTICAPTURE_API_URL=${gateful_url} for Vercel preview branch ${PR_BRANCH}."
+          echo "Configured ANTICAPTURE_API_URL=${GATEFUL_URL} for Vercel preview branch ${PR_BRANCH}."
           echo "configured=true" >> "${GITHUB_OUTPUT}"
 
       - name: Trigger Vercel preview redeploy
-        if: steps.vercel-env.outputs.configured == 'true'
+        if: steps.vercel-upsert.outputs.configured == 'true'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -85,7 +128,10 @@ jobs:
         run: node scripts/wait-for-gateful.mjs
         env:
           ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
-          EXPECTED_GATEFUL_SHA: ${{ github.event.pull_request.head.sha }}
+          # Trusted PRs target their own preview, so wait for the exact PR commit.
+          # Untrusted PRs target shared dev Gateful (which serves a different
+          # commit), so only assert reachability — leave the SHA unset.
+          EXPECTED_GATEFUL_SHA: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && github.event.pull_request.head.sha || '' }}
 
   changeset-path-filter:
     name: Detect changeset requirement
