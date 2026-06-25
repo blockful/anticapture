@@ -7,15 +7,8 @@ import { getDraftProposal } from "@anticapture/client";
 import type { GetDraftProposalPathParamsDaoEnumKey } from "@anticapture/client";
 
 /**
- * Resolves whether the current viewer is a *recipient* of a shared draft —
- * i.e. there is a `draftId` in the URL and the connected wallet is not the
- * draft's author. Recipients only ever see the Preview, so the Editor tab is
- * hidden for them.
- *
- * This mirrors the shared-draft resolution inside `ProposalCreationForm`, but
- * is needed independently by `WhitelabelHeader`, which hosts the Editor/Preview
- * toggle on the whitelabel route and therefore must know when to hide the
- * Editor pill.
+ * Whether the viewer is a recipient of a shared draft (preview-only).
+ * Needed by `WhitelabelHeader`, which hosts the Editor/Preview toggle.
  */
 export function useDraftRecipient(): { isRecipient: boolean } {
   const { daoId: daoIdParam } = useParams();
@@ -42,8 +35,7 @@ export function useDraftRecipient(): { isRecipient: boolean } {
         setAuthor(shared.author);
       })
       .catch(() => {
-        // Leave `author` undefined on failure → treated as not editor-eligible
-        // below, so the Editor pill stays hidden (fail safe to preview-only).
+        // Leave `author` undefined on failure → not editor-eligible below.
       });
 
     return () => {
@@ -51,10 +43,8 @@ export function useDraftRecipient(): { isRecipient: boolean } {
     };
   }, [daoId, draftId]);
 
-  // The viewer may edit only once we've CONFIRMED they authored the draft.
-  // While the lookup is pending (or after a failure) `author` is undefined, so
-  // ownership is unconfirmed and the Editor pill must stay hidden — otherwise
-  // it flashes for recipients before the form corrects the view.
+  // Editor is allowed only once ownership is confirmed; a pending/failed
+  // lookup keeps `author` undefined, so the pill stays hidden (no flash).
   const isOwner = Boolean(
     draftId &&
     author &&

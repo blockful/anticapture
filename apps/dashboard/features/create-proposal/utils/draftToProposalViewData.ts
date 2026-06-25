@@ -13,15 +13,10 @@ export interface EncodedDraftActions {
 }
 
 /**
- * Adapts a local draft into the `ProposalViewData` shape consumed by the
- * published-proposal renderers (DescriptionTabContent / ActionsTabContent),
- * with all on-chain/voting fields zeroed or nulled. Mirrors the
- * `adaptedOffchainProposal` mapping in ProposalSection.tsx.
- *
- * `description` uses the SAME `encodeDescription` the publish path submits
- * on-chain (title heading + discussion URL + body), so the Preview matches what
- * recipients will actually publish. DescriptionTabContent overrides `h1` to
- * render nothing, and the title is shown separately in the Preview sidebar.
+ * Adapts a draft into `ProposalViewData` for the published-proposal renderers,
+ * with on-chain/voting fields zeroed. `description` uses the same
+ * `encodeDescription` the publish path submits, so the Preview matches what
+ * gets published.
  */
 export const draftToProposalViewData = (
   draft: ProposalDraft,

@@ -114,10 +114,7 @@ export const ProposalCreationForm = ({
     "view",
     parseAsStringEnum<"editor" | "preview">(["editor", "preview"]),
   );
-  // No explicit view in the URL: a link carrying a draftId opens in Preview
-  // (shared drafts), while a brand-new proposal opens in the Editor. Keeps the
-  // share URL clean (no ?view=preview) and avoids an editor flash for
-  // recipients. The drafts list passes view=editor explicitly for owners.
+  // A shared link (has draftId) defaults to Preview; a new proposal to Editor.
   const view = viewParam ?? (draftId ? "preview" : "editor");
 
   const form = useForm<ProposalFormValues>({
@@ -139,10 +136,7 @@ export const ProposalCreationForm = ({
         body: d.body,
         actions: d.actions.map(toFormAction),
       });
-      // A locally-owned draft has no shared author. Clear any author carried
-      // over from a previously viewed shared draft (e.g. when a recipient
-      // forks via Edit and navigates to their own copy) so `isRecipient`
-      // doesn't stay true and force the editor back to Preview.
+      // Locally-owned draft has no shared author.
       setSharedAuthor(undefined);
       setCurrentDraftId(draftId);
       setBodyVersion((v) => v + 1);
@@ -153,14 +147,9 @@ export const ProposalCreationForm = ({
 
     if (drafts.isLoading) return;
 
-    // Cancellation flag so a stale shared-draft response from a previous
-    // draftId cannot overwrite the form after in-app navigation between
-    // shared links resolves out of order.
+    // Guards against an out-of-order response overwriting the form.
     let cancelled = false;
 
-    // Mark the guard inside the success/explicit-miss branches so a transient
-    // fetch failure does not permanently suppress later effect runs (e.g.
-    // when `drafts.drafts` or `drafts.isLoading` change after a retry).
     void getDraftProposal(
       daoId as GetDraftProposalPathParamsDaoEnumKey,
       draftId,
@@ -201,9 +190,7 @@ export const ProposalCreationForm = ({
   const [sharedAuthor, setSharedAuthor] = useState<string | undefined>(
     undefined,
   );
-  // The draftId whose content has actually been loaded into the form. Used to
-  // hold off Edit/fork until a shared draft has hydrated (otherwise a fork
-  // would copy the blank default form).
+  // The draftId whose content is loaded into the form (gates Edit/fork).
   const [hydratedDraftId, setHydratedDraftId] = useState<string | undefined>(
     undefined,
   );
@@ -219,17 +206,11 @@ export const ProposalCreationForm = ({
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
-  // When a disconnected user clicks Publish from the Preview, we open the
-  // wallet modal and remember the intent so it resumes automatically once
-  // `address` becomes available — instead of silently dropping the action and
-  // forcing a second click. (Edit needs no wallet, so it isn't deferred.)
+  // Publish deferred while a disconnected user connects, resumed once ready.
   const [pendingAction, setPendingAction] = useState<"publish" | null>(null);
-  // Mirror in a ref so repeated synchronous clicks (before React commits the
-  // state update) can still see an in-flight save and short-circuit early.
+  // Ref so rapid clicks see an in-flight save before state commits.
   const isSavingDraftRef = useRef(false);
 
-  // True once the current draftId's content is in the form (or there is no
-  // draftId). Forking before this would copy the blank default form.
   const draftContentLoaded = !draftId || hydratedDraftId === draftId;
 
   const values = form.watch();
@@ -250,24 +231,18 @@ export const ProposalCreationForm = ({
     (values.body?.length ?? 0) <= 10_000;
 
   const handleShare = async () => {
-    // A share URL must point at the current content. Persist first when the
-    // draft was never saved (no currentDraftId) OR when there are unsaved edits
-    // (dirty) — otherwise recipients would open a stale server copy.
+    // Persist before sharing when unsaved or dirty, so the link isn't stale.
     let id = currentDraftId;
     if (!id || form.formState.isDirty) {
       if (!address) {
         showCustomToast("Connect a wallet to save and share drafts", "error");
         return;
       }
-      // Guard against duplicate creates from rapid clicks: without an id yet,
-      // each call would mint a fresh UUID. Shares the in-flight flag with Save
-      // Draft so the two paths can't both create.
+      // Guard against duplicate creates from rapid clicks (shared with Save Draft).
       if (isSavingDraftRef.current) return;
       isSavingDraftRef.current = true;
       setIsSavingDraft(true);
       try {
-        // Pass currentDraftId so an existing draft is updated in place rather
-        // than duplicated.
         id = await drafts.saveDraft(
           {
             daoId,
@@ -300,14 +275,10 @@ export const ProposalCreationForm = ({
   };
 
   const handleEditCopy = () => {
-    // Wait for the shared draft to hydrate, else we'd fork the blank default
-    // form. The Edit button is disabled until then; this is the belt-and-braces
-    // guard for any programmatic call.
+    // Forking the blank default form would lose the shared content.
     if (!draftContentLoaded) return;
-    // Edit does NOT persist anything. It drops the shared draftId and opens a
-    // fresh proposal form pre-filled with the shared values (RHF state survives
-    // the query-only navigation). The recipient becomes the author of a
-    // brand-new proposal; a draft is created only if they click Save Draft.
+    // Edit doesn't persist: drop the draftId and open a new prefilled form
+    // (RHF state survives the query-only nav). Saved only via Save Draft.
     setSharedAuthor(undefined);
     setCurrentDraftId(undefined);
     hydratedDraftIdRef.current = undefined;
@@ -324,12 +295,8 @@ export const ProposalCreationForm = ({
     handlePublishClick();
   };
 
-  // Resume a publish that was deferred while the wallet connected. Hold the
-  // intent (don't clear pendingAction) until everything it depends on is ready:
-  // - voting power AND proposal threshold resolved (both read 0n while loading,
-  //   which would mis-decide eligibility), and
-  // - the shared draft hydrated (otherwise the form still holds blank defaults,
-  //   so canPublish is false and handlePublishClick would silently drop it).
+  // Resume a deferred publish only once VP, threshold, and draft hydration are
+  // all ready (each reads 0n/blank while loading and would mis-decide).
   useEffect(() => {
     if (!address || pendingAction !== "publish") return;
     if (vp.isLoading || isLoadingThreshold || !draftContentLoaded) return;
@@ -349,9 +316,7 @@ export const ProposalCreationForm = ({
       showCustomToast("Connect a wallet to save drafts", "error");
       return;
     }
-    // Guard against duplicate creates: while a save is in flight,
-    // `currentDraftId` hasn't been set yet, so a second click would create
-    // another draft. Short-circuit until the first save settles.
+    // Guard against duplicate creates while a save is in flight.
     if (isSavingDraftRef.current) return;
     isSavingDraftRef.current = true;
     setIsSavingDraft(true);
@@ -385,13 +350,9 @@ export const ProposalCreationForm = ({
   };
 
   const handlePublishClick = () => {
-    // Validate the form here too, not just via the disabled button: the
-    // post-connect resume path calls this directly and would otherwise let an
-    // incomplete/invalid draft (e.g. no actions) reach the governor.
+    // Validate here too — the resume path calls this directly.
     if (!canPublish) return;
-    // Both queries read as 0n while loading, so deciding the threshold before
-    // either resolves would let an under-threshold wallet through (or wrongly
-    // route an eligible one). Wait for both.
+    // VP/threshold read 0n while loading; wait before comparing.
     if (vp.isLoading || isLoadingThreshold) {
       showCustomToast(
         "Still checking your voting power — try again in a moment.",
@@ -484,19 +445,11 @@ export const ProposalCreationForm = ({
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
-  // Ownership is decided by the viewer's own (owner-scoped) drafts list, NOT by
-  // the shared-draft fetch: `getDraftProposals` is filtered by address
-  // server-side, so a draftId that is not among the connected wallet's drafts
-  // means the viewer is a recipient — preview only. This stays correct even if
-  // the shared-draft fetch is slow or fails (which previously left the viewer
-  // mis-treated as the owner with the editor open). Undetermined while the
-  // list is still loading; a brand-new proposal (no draftId) is always owned.
+  // Ownership comes from the viewer's address-scoped drafts list, so it holds
+  // even if the shared-draft fetch is slow or fails.
   const ownsDraft = Boolean(draftId && drafts.getDraft(draftId));
   const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
-  // The Editor is available only for a brand-new proposal or a draft the
-  // connected wallet actually owns. Anyone viewing a draft that isn't theirs
-  // never sees the Editor pill — and since this does NOT depend on the drafts
-  // list finishing loading, the pill never flashes in and out for recipients.
+  // Editor only for a new proposal or an owned draft (no load-dependent flash).
   const canShowEditor = !draftId || ownsDraft;
   const authorAddress = sharedAuthor ?? address ?? "";
 
@@ -607,10 +560,8 @@ export const ProposalCreationForm = ({
           onEdit={handleEditCopy}
           editDisabled={!draftContentLoaded}
           isWhitelabelRoute={isWhitelabelRoute}
-          // Disconnected users keep Publish enabled so it can open the wallet
-          // modal and resume. Once connected, block submission of an invalid
-          // form, a still-loading threshold (which reads 0n and would let an
-          // under-threshold wallet through), or a recipient below threshold.
+          // Enabled while disconnected (to open the wallet); once connected,
+          // block an invalid form, a loading threshold, or below-threshold.
           publishDisabled={
             Boolean(address) &&
             (isLoadingThreshold ||
