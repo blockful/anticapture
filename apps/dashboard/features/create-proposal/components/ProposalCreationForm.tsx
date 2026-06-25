@@ -324,17 +324,25 @@ export const ProposalCreationForm = ({
     handlePublishClick();
   };
 
-  // Resume a publish that was deferred while the wallet connected. Wait for the
-  // freshly connected wallet's voting power AND the proposal threshold to
-  // resolve — otherwise it races those queries (which read 0n while loading)
-  // and mis-decides eligibility.
+  // Resume a publish that was deferred while the wallet connected. Hold the
+  // intent (don't clear pendingAction) until everything it depends on is ready:
+  // - voting power AND proposal threshold resolved (both read 0n while loading,
+  //   which would mis-decide eligibility), and
+  // - the shared draft hydrated (otherwise the form still holds blank defaults,
+  //   so canPublish is false and handlePublishClick would silently drop it).
   useEffect(() => {
     if (!address || pendingAction !== "publish") return;
-    if (vp.isLoading || isLoadingThreshold) return;
+    if (vp.isLoading || isLoadingThreshold || !draftContentLoaded) return;
     setPendingAction(null);
     handlePublishClick();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, pendingAction, vp.isLoading, isLoadingThreshold]);
+  }, [
+    address,
+    pendingAction,
+    vp.isLoading,
+    isLoadingThreshold,
+    draftContentLoaded,
+  ]);
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
     if (!address) {
