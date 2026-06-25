@@ -208,13 +208,11 @@ export const ProposalCreationForm = ({
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
-  // When a disconnected user triggers Edit/Publish from the Preview, we open
-  // the wallet modal and remember the intent so it resumes automatically once
+  // When a disconnected user clicks Publish from the Preview, we open the
+  // wallet modal and remember the intent so it resumes automatically once
   // `address` becomes available — instead of silently dropping the action and
-  // forcing a second click.
-  const [pendingAction, setPendingAction] = useState<"edit" | "publish" | null>(
-    null,
-  );
+  // forcing a second click. (Edit needs no wallet, so it isn't deferred.)
+  const [pendingAction, setPendingAction] = useState<"publish" | null>(null);
   // Mirror in a ref so repeated synchronous clicks (before React commits the
   // state update) can still see an in-flight save and short-circuit early.
   const isSavingDraftRef = useRef(false);
@@ -277,28 +275,16 @@ export const ProposalCreationForm = ({
     }
   };
 
-  const handleForkEdit = async () => {
-    if (!address) {
-      setPendingAction("edit");
-      openConnectModal?.();
-      return;
-    }
-    try {
-      const newId = await drafts.saveDraft({
-        daoId,
-        title: values.title,
-        discussionUrl: values.discussionUrl ?? "",
-        body: values.body,
-        actions: values.actions,
-      });
-      if (!newId) {
-        showCustomToast("Could not create your copy", "error");
-        return;
-      }
-      router.push(`${basePath}/proposals/new?draftId=${newId}&view=editor`);
-    } catch {
-      showCustomToast("Could not create your copy", "error");
-    }
+  const handleEditCopy = () => {
+    // Edit does NOT persist anything. It drops the shared draftId and opens a
+    // fresh proposal form pre-filled with the shared values (RHF state survives
+    // the query-only navigation). The recipient becomes the author of a
+    // brand-new proposal; a draft is created only if they click Save Draft.
+    setSharedAuthor(undefined);
+    setCurrentDraftId(undefined);
+    hydratedDraftIdRef.current = undefined;
+    setBodyVersion((v) => v + 1);
+    router.push(`${basePath}/proposals/new?view=editor`);
   };
 
   const handlePreviewPublish = () => {
@@ -310,22 +296,15 @@ export const ProposalCreationForm = ({
     handlePublishClick();
   };
 
-  // Resume a Preview action that was deferred while the wallet connected.
-  // A deferred publish must wait for the freshly connected wallet's voting
-  // power AND the proposal threshold to resolve — otherwise it races those
-  // queries (which read 0n while loading) and mis-decides eligibility. Edit
-  // has no such dep.
+  // Resume a publish that was deferred while the wallet connected. Wait for the
+  // freshly connected wallet's voting power AND the proposal threshold to
+  // resolve — otherwise it races those queries (which read 0n while loading)
+  // and mis-decides eligibility.
   useEffect(() => {
-    if (!address || !pendingAction) return;
-    if (pendingAction === "publish" && (vp.isLoading || isLoadingThreshold))
-      return;
-    const action = pendingAction;
+    if (!address || pendingAction !== "publish") return;
+    if (vp.isLoading || isLoadingThreshold) return;
     setPendingAction(null);
-    if (action === "edit") {
-      void handleForkEdit();
-    } else {
-      handlePublishClick();
-    }
+    handlePublishClick();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, pendingAction, vp.isLoading, isLoadingThreshold]);
 
@@ -478,6 +457,11 @@ export const ProposalCreationForm = ({
   // list is still loading; a brand-new proposal (no draftId) is always owned.
   const ownsDraft = Boolean(draftId && drafts.getDraft(draftId));
   const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
+  // The Editor is available only for a brand-new proposal or a draft the
+  // connected wallet actually owns. Anyone viewing a draft that isn't theirs
+  // never sees the Editor pill — and since this does NOT depend on the drafts
+  // list finishing loading, the pill never flashes in and out for recipients.
+  const canShowEditor = !draftId || ownsDraft;
   const authorAddress = sharedAuthor ?? address ?? "";
 
   const thresholdDisplay = thresholdFormatted
@@ -542,7 +526,7 @@ export const ProposalCreationForm = ({
         <DraftViewToggle
           mode={view}
           onChange={(m) => void setView(m)}
-          showEditor={!isRecipient}
+          showEditor={canShowEditor}
           fullWidth
         />
       </div>
@@ -552,7 +536,7 @@ export const ProposalCreationForm = ({
             <DraftViewToggle
               mode={view}
               onChange={(m) => void setView(m)}
-              showEditor={!isRecipient}
+              showEditor={canShowEditor}
             />
           </div>
           <div className="flex items-center justify-end">
@@ -584,7 +568,7 @@ export const ProposalCreationForm = ({
           secondaryAction={isRecipient ? "edit" : "copy-link"}
           onPublish={handlePreviewPublish}
           onCopyLink={handleShare}
-          onEdit={handleForkEdit}
+          onEdit={handleEditCopy}
           isWhitelabelRoute={isWhitelabelRoute}
           // Disconnected users keep Publish enabled so it can open the wallet
           // modal and resume. Once connected, block submission of an invalid
