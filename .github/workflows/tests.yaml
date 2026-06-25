@@ -1,4 +1,4 @@
-name: Tests
+name: PR Checks
 
 on:
   pull_request:
@@ -12,6 +12,7 @@ jobs:
     outputs:
       gateful_url: ${{ steps.vercel-env.outputs.gateful_url }}
       trusted: ${{ steps.trust.outputs.trusted }}
+      configured: ${{ steps.vercel-upsert.outputs.configured }}
 
     steps:
       - name: Checkout repository
@@ -104,14 +105,6 @@ jobs:
           echo "Configured ANTICAPTURE_API_URL=${GATEFUL_URL} for Vercel preview branch ${PR_BRANCH}."
           echo "configured=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Trigger Vercel preview redeploy
-        if: steps.vercel-upsert.outputs.configured == 'true'
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}"
-
   wait-for-gateful:
     name: Wait for preview gateful
     needs: configure-vercel-preview
@@ -135,6 +128,32 @@ jobs:
           # Untrusted PRs target shared dev Gateful (which serves a different
           # commit), so only assert reachability — leave the SHA unset.
           EXPECTED_GATEFUL_SHA: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && github.event.pull_request.head.sha || '' }}
+
+  deploy-vercel-preview:
+    name: Deploy Vercel preview
+    # Redeploy only AFTER the gateful preview is healthy: `vercel deploy` builds
+    # the dashboard, which runs @anticapture/client codegen against the live
+    # gateful spec. Triggering it before wait-for-gateful (as configure-vercel-preview
+    # did) races the cold preview and fails codegen with "fetch failed".
+    needs: [configure-vercel-preview, wait-for-gateful]
+    if: needs.configure-vercel-preview.outputs.configured == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Trigger Vercel preview redeploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}"
 
   changeset-path-filter:
     name: Detect changeset requirement
