@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, Pencil, Trash2 } from "lucide-react";
 import { erc20Abi, isAddress } from "viem";
 import { useReadContract } from "wagmi";
 
@@ -21,6 +21,7 @@ interface ActionRowProps {
   onMoveUp: () => void;
   onMoveDown: () => void;
   onEdit: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
 }
 
@@ -61,6 +62,7 @@ export const ActionRow = ({
   onMoveUp,
   onMoveDown,
   onEdit,
+  onDuplicate,
   onDelete,
 }: ActionRowProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -146,6 +148,18 @@ export const ActionRow = ({
         aria-label="Edit action"
       >
         <Pencil className="size-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDuplicate();
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        aria-label="Duplicate action"
+      >
+        <Copy className="size-4" />
       </Button>
       <Button
         variant="ghost"

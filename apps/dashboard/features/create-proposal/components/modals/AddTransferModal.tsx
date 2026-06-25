@@ -4,8 +4,8 @@ import { Coins } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { erc20Abi, isAddress } from "viem";
-import { usePublicClient } from "wagmi";
+import { erc20Abi, formatUnits, isAddress } from "viem";
+import { useBalance, usePublicClient, useReadContracts } from "wagmi";
 
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
@@ -13,10 +13,9 @@ import { RadioCard } from "@/shared/components/design-system/form/fields/radio-c
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import daoConfig from "@/shared/dao-config";
 import { isEnsAddress } from "@/shared/utils/ens";
-import { useToken } from "@anticapture/client/hooks";
-import type { TokenPathParamsDaoEnumKey } from "@anticapture/client";
 
 import { useEthPrice } from "@/shared/hooks/useEthPrice";
+import { useTokenPrice } from "@/shared/hooks/useTokenPrice";
 import { cn } from "@/shared/utils/cn";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { SUGGESTED_TRANSFER_TOKENS } from "@/features/create-proposal/constants";
@@ -33,13 +32,6 @@ interface AddTransferModalProps {
   onSubmit: (action: EthTransferAction | ERC20TransferAction) => void;
   initialValue?: EthTransferAction | ERC20TransferAction;
 }
-
-const governanceTokenAddress = (daoId: DaoIdEnum): string | undefined => {
-  const token = daoConfig[daoId]?.daoOverview?.contracts?.token;
-  if (typeof token === "string") return token;
-  if (Array.isArray(token)) return token[0]?.address;
-  return undefined;
-};
 
 const EthIcon = ({ className }: { className?: string }) => (
   <svg
@@ -96,47 +88,81 @@ export const AddTransferModal = ({
     }
   }, [open, initialValue]);
 
-  const { data: governanceTokenData } = useToken(
-    daoIdEnum.toLowerCase() as TokenPathParamsDaoEnumKey,
-    { currency: "usd" },
-  );
   const { price: ethPrice } = useEthPrice();
   const governanceChainId = daoConfig[daoIdEnum]?.daoOverview?.chain?.id;
   const publicClient = usePublicClient(
     governanceChainId ? { chainId: governanceChainId } : undefined,
   );
 
+  // The timelock is the treasury that actually pays when the proposal executes,
+  // so balances/limits are measured against it — not the author's wallet.
+  const treasuryAddress =
+    daoConfig[daoIdEnum]?.daoOverview?.contracts?.timelock;
+
+  const tokenAddressTrimmed = tokenAddress.trim();
+  const isErc20WithAddress =
+    tokenType === "erc20" && isAddress(tokenAddressTrimmed);
+
+  const { data: ethBalance } = useBalance({
+    address: treasuryAddress,
+    chainId: governanceChainId,
+    query: { enabled: tokenType === "eth" && Boolean(treasuryAddress) },
+  });
+
+  const { data: erc20Data } = useReadContracts({
+    allowFailure: false,
+    contracts: [
+      {
+        abi: erc20Abi,
+        address: tokenAddressTrimmed as `0x${string}`,
+        functionName: "balanceOf",
+        args: [treasuryAddress ?? "0x"],
+        chainId: governanceChainId,
+      },
+      {
+        abi: erc20Abi,
+        address: tokenAddressTrimmed as `0x${string}`,
+        functionName: "decimals",
+        chainId: governanceChainId,
+      },
+    ],
+    query: { enabled: isErc20WithAddress && Boolean(treasuryAddress) },
+  });
+
+  const { price: selectedTokenPrice } = useTokenPrice(
+    isErc20WithAddress ? tokenAddressTrimmed : undefined,
+    governanceChainId,
+  );
+
   const suggestedTokens = SUGGESTED_TRANSFER_TOKENS[daoIdEnum] ?? [];
+
+  // Available treasury balance for the selected asset (human-readable).
+  const available = useMemo<{
+    formatted: string;
+    symbol: string;
+  } | null>(() => {
+    if (tokenType === "eth") {
+      if (!ethBalance) return null;
+      return {
+        formatted: formatUnits(ethBalance.value, ethBalance.decimals),
+        symbol: ethBalance.symbol,
+      };
+    }
+    if (!erc20Data) return null;
+    const [rawBalance, decimals] = erc20Data;
+    return { formatted: formatUnits(rawBalance, Number(decimals)), symbol: "" };
+  }, [tokenType, ethBalance, erc20Data]);
 
   const usd = useMemo(() => {
     const n = Number(amount);
     if (!amount || Number.isNaN(n) || n <= 0) return null;
-
-    // ETH transfer — convert using live ETH price
     if (tokenType === "eth") {
       if (!ethPrice) return null;
       return n * ethPrice;
     }
-
-    // ERC-20 governance token — use existing token data price
-    const govAddress = governanceTokenAddress(daoIdEnum);
-    const isGovToken =
-      govAddress &&
-      tokenAddress.trim() !== "" &&
-      tokenAddress.toLowerCase() === govAddress.toLowerCase();
-    if (!isGovToken) return null;
-
-    const price = Number(governanceTokenData?.price ?? 0);
-    if (!price) return null;
-    return n * price;
-  }, [
-    tokenType,
-    amount,
-    tokenAddress,
-    daoIdEnum,
-    governanceTokenData,
-    ethPrice,
-  ]);
+    if (!selectedTokenPrice) return null;
+    return n * selectedTokenPrice;
+  }, [tokenType, amount, ethPrice, selectedTokenPrice]);
 
   const usdDisplay =
     usd !== null
@@ -146,11 +172,7 @@ export const AddTransferModal = ({
         })}`
       : "";
 
-  const usdSourceLabel = useMemo(() => {
-    if (tokenType === "eth")
-      return "Conversion price was resolved using CoinGecko.";
-    return "Conversion price was resolved using CoinGecko.";
-  }, [tokenType]);
+  const usdSourceLabel = "Conversion price was resolved using CoinGecko.";
 
   const reset = () => {
     setTokenType("eth");
@@ -181,6 +203,15 @@ export const AddTransferModal = ({
     amountTrimmed !== "" &&
     /^\d+(\.\d+)?$/.test(amountTrimmed) &&
     parseFloat(amountTrimmed) > 0;
+
+  const exceedsBalance =
+    available !== null &&
+    amountIsValid &&
+    parseFloat(amountTrimmed) > parseFloat(available.formatted);
+
+  const fillMax = () => {
+    if (available) setAmount(available.formatted);
+  };
 
   const handleConfirm = async () => {
     setDecimalsError(null);
@@ -309,10 +340,10 @@ export const AddTransferModal = ({
                         setDecimalsError(null);
                       }}
                       className={cn(
-                        "border-border-contrast hover:bg-surface-contrast flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium transition-colors",
+                        "flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium transition-colors",
                         isActive
-                          ? "border-border-action text-primary"
-                          : "text-secondary",
+                          ? "border-border-action bg-surface-opacity-brand text-primary ring-border-action ring-1"
+                          : "border-border-contrast text-secondary hover:bg-surface-contrast",
                       )}
                       aria-pressed={isActive}
                     >
@@ -344,7 +375,22 @@ export const AddTransferModal = ({
         <div className="flex flex-col gap-1.5">
           <div className="flex gap-2">
             <div className="flex flex-1 flex-col gap-1.5">
-              <FormLabel isRequired>Amount</FormLabel>
+              <div className="flex items-center justify-between gap-2">
+                <FormLabel isRequired>Amount</FormLabel>
+                {available && (
+                  <button
+                    type="button"
+                    onClick={fillMax}
+                    className="text-highlight text-xs font-medium hover:underline"
+                  >
+                    Max:{" "}
+                    {Number(available.formatted).toLocaleString("en-US", {
+                      maximumFractionDigits: 6,
+                    })}
+                    {available.symbol ? ` ${available.symbol}` : ""}
+                  </button>
+                )}
+              </div>
               <Input
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -362,9 +408,17 @@ export const AddTransferModal = ({
               />
             </div>
           </div>
-          {usd !== null && (
-            <span className="text-secondary text-xs">{usdSourceLabel}</span>
+          {exceedsBalance && (
+            <span className="text-warning text-xs">
+              Amount exceeds the treasury&apos;s available balance — the
+              proposal would revert on execution.
+            </span>
           )}
+          <span className="text-secondary text-xs">
+            {usd !== null
+              ? usdSourceLabel
+              : "USD value appears when a price is available for the selected asset."}
+          </span>
         </div>
       </div>
     </Modal>
