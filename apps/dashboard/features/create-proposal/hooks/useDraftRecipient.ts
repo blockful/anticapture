@@ -42,8 +42,8 @@ export function useDraftRecipient(): { isRecipient: boolean } {
         setAuthor(shared.author);
       })
       .catch(() => {
-        // A failed lookup leaves `author` undefined, so the Editor pill stays
-        // visible — the form itself still enforces preview-only for recipients.
+        // Leave `author` undefined on failure → treated as not editor-eligible
+        // below, so the Editor pill stays hidden (fail safe to preview-only).
       });
 
     return () => {
@@ -51,11 +51,17 @@ export function useDraftRecipient(): { isRecipient: boolean } {
     };
   }, [daoId, draftId]);
 
-  const isRecipient = Boolean(
+  // The viewer may edit only once we've CONFIRMED they authored the draft.
+  // While the lookup is pending (or after a failure) `author` is undefined, so
+  // ownership is unconfirmed and the Editor pill must stay hidden — otherwise
+  // it flashes for recipients before the form corrects the view.
+  const isOwner = Boolean(
     draftId &&
     author &&
-    (!address || author.toLowerCase() !== address.toLowerCase()),
+    address &&
+    author.toLowerCase() === address.toLowerCase(),
   );
+  const isRecipient = Boolean(draftId) && !isOwner;
 
   return { isRecipient };
 }

@@ -1,4 +1,5 @@
 import type { ProposalDraft } from "@/features/create-proposal/types";
+import { encodeDescription } from "@/features/create-proposal/utils/encodeDescription";
 import {
   ProposalStatus,
   type ProposalViewData,
@@ -17,7 +18,9 @@ export interface EncodedDraftActions {
  * with all on-chain/voting fields zeroed or nulled. Mirrors the
  * `adaptedOffchainProposal` mapping in ProposalSection.tsx.
  *
- * `description` is the draft body: DescriptionTabContent overrides `h1` to
+ * `description` uses the SAME `encodeDescription` the publish path submits
+ * on-chain (title heading + discussion URL + body), so the Preview matches what
+ * recipients will actually publish. DescriptionTabContent overrides `h1` to
  * render nothing, and the title is shown separately in the Preview sidebar.
  */
 export const draftToProposalViewData = (
@@ -29,7 +32,7 @@ export const draftToProposalViewData = (
   txHash: null,
   proposerAccountId: draft.author as `0x${string}`,
   title: draft.title,
-  description: draft.body,
+  description: encodeDescription(draft.title, draft.discussionUrl, draft.body),
   quorum: "0",
   timestamp: draft.createdAt,
   status: ProposalStatus.PENDING,

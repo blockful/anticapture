@@ -147,6 +147,7 @@ export const ProposalCreationForm = ({
       setCurrentDraftId(draftId);
       setBodyVersion((v) => v + 1);
       hydratedDraftIdRef.current = draftId;
+      setHydratedDraftId(draftId);
       return;
     }
 
@@ -181,6 +182,7 @@ export const ProposalCreationForm = ({
           setCurrentDraftId(undefined);
         }
         setBodyVersion((v) => v + 1);
+        setHydratedDraftId(draftId);
       })
       .catch(() => {
         if (cancelled) return;
@@ -197,6 +199,12 @@ export const ProposalCreationForm = ({
     draftId,
   );
   const [sharedAuthor, setSharedAuthor] = useState<string | undefined>(
+    undefined,
+  );
+  // The draftId whose content has actually been loaded into the form. Used to
+  // hold off Edit/fork until a shared draft has hydrated (otherwise a fork
+  // would copy the blank default form).
+  const [hydratedDraftId, setHydratedDraftId] = useState<string | undefined>(
     undefined,
   );
   const [bodyVersion, setBodyVersion] = useState(0);
@@ -219,6 +227,10 @@ export const ProposalCreationForm = ({
   // Mirror in a ref so repeated synchronous clicks (before React commits the
   // state update) can still see an in-flight save and short-circuit early.
   const isSavingDraftRef = useRef(false);
+
+  // True once the current draftId's content is in the form (or there is no
+  // draftId). Forking before this would copy the blank default form.
+  const draftContentLoaded = !draftId || hydratedDraftId === draftId;
 
   const values = form.watch();
   const hasTitle = Boolean(values.title);
@@ -247,6 +259,12 @@ export const ProposalCreationForm = ({
         showCustomToast("Connect a wallet to save and share drafts", "error");
         return;
       }
+      // Guard against duplicate creates from rapid clicks: without an id yet,
+      // each call would mint a fresh UUID. Shares the in-flight flag with Save
+      // Draft so the two paths can't both create.
+      if (isSavingDraftRef.current) return;
+      isSavingDraftRef.current = true;
+      setIsSavingDraft(true);
       try {
         // Pass currentDraftId so an existing draft is updated in place rather
         // than duplicated.
@@ -262,6 +280,9 @@ export const ProposalCreationForm = ({
         );
       } catch {
         id = "";
+      } finally {
+        isSavingDraftRef.current = false;
+        setIsSavingDraft(false);
       }
       if (!id) {
         showCustomToast("Could not save draft", "error");
@@ -279,6 +300,10 @@ export const ProposalCreationForm = ({
   };
 
   const handleEditCopy = () => {
+    // Wait for the shared draft to hydrate, else we'd fork the blank default
+    // form. The Edit button is disabled until then; this is the belt-and-braces
+    // guard for any programmatic call.
+    if (!draftContentLoaded) return;
     // Edit does NOT persist anything. It drops the shared draftId and opens a
     // fresh proposal form pre-filled with the shared values (RHF state survives
     // the query-only navigation). The recipient becomes the author of a
@@ -572,6 +597,7 @@ export const ProposalCreationForm = ({
           onPublish={handlePreviewPublish}
           onCopyLink={handleShare}
           onEdit={handleEditCopy}
+          editDisabled={!draftContentLoaded}
           isWhitelabelRoute={isWhitelabelRoute}
           // Disconnected users keep Publish enabled so it can open the wallet
           // modal and resume. Once connected, block submission of an invalid

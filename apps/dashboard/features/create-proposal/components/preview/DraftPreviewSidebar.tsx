@@ -16,6 +16,8 @@ interface DraftPreviewSidebarProps {
   onCopyLink: () => void;
   onEdit: () => void;
   publishDisabled?: boolean;
+  /** Recipient Edit is disabled until the shared draft has hydrated. */
+  editDisabled?: boolean;
 }
 
 export const DraftPreviewSidebar = ({
@@ -27,6 +29,7 @@ export const DraftPreviewSidebar = ({
   onCopyLink,
   onEdit,
   publishDisabled = false,
+  editDisabled = false,
 }: DraftPreviewSidebarProps) => (
   <div className="flex w-full flex-col gap-4">
     <span className="text-secondary flex items-center gap-1 text-sm">
@@ -62,7 +65,13 @@ export const DraftPreviewSidebar = ({
           Copy Link
         </Button>
       ) : (
-        <Button variant="outline" size="md" onClick={onEdit} className="flex-1">
+        <Button
+          variant="outline"
+          size="md"
+          onClick={onEdit}
+          disabled={editDisabled}
+          className="flex-1"
+        >
           <Pencil className="size-4" />
           Edit
         </Button>

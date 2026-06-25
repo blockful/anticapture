@@ -21,6 +21,7 @@ interface DraftPreviewProps {
   onCopyLink: () => void;
   onEdit: () => void;
   publishDisabled?: boolean;
+  editDisabled?: boolean;
   isWhitelabelRoute?: boolean;
 }
 
@@ -38,6 +39,7 @@ export const DraftPreview = ({
   onCopyLink,
   onEdit,
   publishDisabled,
+  editDisabled,
   isWhitelabelRoute = false,
 }: DraftPreviewProps) => {
   const { encoded } = useEncodedDraftActions(actions, daoId);
@@ -74,6 +76,7 @@ export const DraftPreview = ({
             onCopyLink={onCopyLink}
             onEdit={onEdit}
             publishDisabled={publishDisabled}
+            editDisabled={editDisabled}
           />
         </div>
         <TabsSection
