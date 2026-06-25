@@ -75,7 +75,7 @@ export const AccountBalanceResponseSchema = z
 export const AccountBalanceWithVariationSchema = z
   .object({
     address: z.string().openapi({ format: "ethereum-address" }),
-    balance: z.string().openapi({ format: "bigint" }),
+    balance: z.string().openapi({ format: "int64" }),
     tokenId: z.string().openapi({ format: "ethereum-address" }),
     delegate: z.string().openapi({ format: "ethereum-address" }),
     variation: AccountBalanceVariationSchema,

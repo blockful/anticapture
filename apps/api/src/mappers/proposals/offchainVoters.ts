@@ -9,7 +9,7 @@ export const OffchainVoterResponseSchema = z
       .refine((val) => isAddress(val, { strict: false }))
       .transform((val) => getAddress(val))
       .openapi({ format: "ethereum-address" }),
-    votingPower: z.string().openapi({ format: "bigint" }),
+    votingPower: z.string().openapi({ format: "int64" }),
   })
   .openapi("OffchainNonVoter");
 

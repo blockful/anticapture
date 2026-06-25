@@ -40,8 +40,8 @@ export const DelegationItemSchema = z
   .object({
     delegatorAddress: AddressSchema.openapi({ format: "ethereum-address" }),
     delegateAddress: AddressSchema.openapi({ format: "ethereum-address" }),
-    amount: z.string().openapi({ format: "bigint" }),
-    timestamp: z.string().openapi({ format: "bigint" }),
+    amount: z.string().openapi({ format: "int64" }),
+    timestamp: z.string().openapi({ format: "int64" }),
     transactionHash: z.string(),
   })
   .openapi("DelegationItem", {

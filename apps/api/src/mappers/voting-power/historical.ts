@@ -71,7 +71,7 @@ export type HistoricalVotingPowerRequest = z.infer<
 export const HistoricalVotingPowerDelegationSchema = z
   .object({
     from: z.string().openapi({ format: "ethereum-address" }),
-    value: z.string().openapi({ format: "bigint" }),
+    value: z.string().openapi({ format: "int64" }),
     to: z.string().openapi({ format: "ethereum-address" }),
     previousDelegate: z
       .string()
@@ -85,7 +85,7 @@ export const HistoricalVotingPowerDelegationSchema = z
 
 export const HistoricalVotingPowerTransferSchema = z
   .object({
-    value: z.string().openapi({ format: "bigint" }),
+    value: z.string().openapi({ format: "int64" }),
     from: z.string().openapi({ format: "ethereum-address" }),
     to: z.string().openapi({ format: "ethereum-address" }),
   })

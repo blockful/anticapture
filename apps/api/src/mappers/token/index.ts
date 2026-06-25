@@ -48,14 +48,14 @@ export const TokenPropertiesSchema = z
       example: 18,
       type: "integer",
     }),
-    totalSupply: z.string().openapi({ format: "bigint" }),
-    delegatedSupply: z.string().openapi({ format: "bigint" }),
-    cexSupply: z.string().openapi({ format: "bigint" }),
-    dexSupply: z.string().openapi({ format: "bigint" }),
-    lendingSupply: z.string().openapi({ format: "bigint" }),
-    circulatingSupply: z.string().openapi({ format: "bigint" }),
-    nonCirculatingSupply: z.string().openapi({ format: "bigint" }),
-    treasury: z.string().openapi({ format: "bigint" }),
+    totalSupply: z.string().openapi({ format: "int64" }),
+    delegatedSupply: z.string().openapi({ format: "int64" }),
+    cexSupply: z.string().openapi({ format: "int64" }),
+    dexSupply: z.string().openapi({ format: "int64" }),
+    lendingSupply: z.string().openapi({ format: "int64" }),
+    circulatingSupply: z.string().openapi({ format: "int64" }),
+    nonCirculatingSupply: z.string().openapi({ format: "int64" }),
+    treasury: z.string().openapi({ format: "int64" }),
   })
   .openapi("TokenProperties", {
     description:
