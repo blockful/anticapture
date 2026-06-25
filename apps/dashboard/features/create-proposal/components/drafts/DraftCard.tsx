@@ -5,6 +5,7 @@ import { Link2, Pencil, Trash2 } from "lucide-react";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { ProposalDraft } from "@/features/create-proposal/types";
 
 interface DraftCardProps {
@@ -44,33 +45,30 @@ export const DraftCard = ({
       </span>
     </div>
     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => onShare(draft.id)}
-        className="flex-1 sm:flex-none"
-      >
+      <Button variant="outline" onClick={() => onShare(draft.id)}>
         <Link2 className="size-4" />
         Copy Link
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => onEdit(draft.id)}
-        className="flex-1 sm:flex-none"
-      >
-        <Pencil className="size-4" />
-        Edit
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => onDelete(draft.id)}
-        className="flex-1 sm:flex-none"
-      >
-        <Trash2 className="size-4" />
-        Delete
-      </Button>
+      <Tooltip asChild disableMobileClick tooltipContent="Edit">
+        <Button
+          variant="outline"
+          onClick={() => onEdit(draft.id)}
+          aria-label="Edit draft"
+          className="aspect-square px-0"
+        >
+          <Pencil className="size-4" />
+        </Button>
+      </Tooltip>
+      <Tooltip asChild disableMobileClick tooltipContent="Delete">
+        <Button
+          variant="outline"
+          onClick={() => onDelete(draft.id)}
+          aria-label="Delete draft"
+          className="aspect-square px-0"
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      </Tooltip>
     </div>
   </div>
 );
