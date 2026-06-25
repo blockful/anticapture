@@ -237,23 +237,28 @@ export const ProposalCreationForm = ({
     (values.body?.length ?? 0) <= 10_000;
 
   const handleShare = async () => {
-    // A share URL needs a persisted draft. From the Preview an author may not
-    // have saved yet (currentDraftId is undefined), so save first instead of
-    // silently no-opping.
+    // A share URL must point at the current content. Persist first when the
+    // draft was never saved (no currentDraftId) OR when there are unsaved edits
+    // (dirty) — otherwise recipients would open a stale server copy.
     let id = currentDraftId;
-    if (!id) {
+    if (!id || form.formState.isDirty) {
       if (!address) {
         showCustomToast("Connect a wallet to save and share drafts", "error");
         return;
       }
       try {
-        id = await drafts.saveDraft({
-          daoId,
-          title: values.title,
-          discussionUrl: values.discussionUrl ?? "",
-          body: values.body,
-          actions: values.actions,
-        });
+        // Pass currentDraftId so an existing draft is updated in place rather
+        // than duplicated.
+        id = await drafts.saveDraft(
+          {
+            daoId,
+            title: values.title,
+            discussionUrl: values.discussionUrl ?? "",
+            body: values.body,
+            actions: values.actions,
+          },
+          currentDraftId,
+        );
       } catch {
         id = "";
       }
@@ -262,6 +267,7 @@ export const ProposalCreationForm = ({
         return;
       }
       setCurrentDraftId(id);
+      form.reset(values, { keepValues: true, keepDirty: false });
     }
     const copied = await copyDraftShareUrl(basePath, id);
     if (copied) {
@@ -306,11 +312,13 @@ export const ProposalCreationForm = ({
 
   // Resume a Preview action that was deferred while the wallet connected.
   // A deferred publish must wait for the freshly connected wallet's voting
-  // power to resolve — otherwise it races the query (which reads 0n while
-  // loading) and lands in the insufficient-VP flow. Edit has no such dep.
+  // power AND the proposal threshold to resolve — otherwise it races those
+  // queries (which read 0n while loading) and mis-decides eligibility. Edit
+  // has no such dep.
   useEffect(() => {
     if (!address || !pendingAction) return;
-    if (pendingAction === "publish" && vp.isLoading) return;
+    if (pendingAction === "publish" && (vp.isLoading || isLoadingThreshold))
+      return;
     const action = pendingAction;
     setPendingAction(null);
     if (action === "edit") {
@@ -319,7 +327,7 @@ export const ProposalCreationForm = ({
       handlePublishClick();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, pendingAction, vp.isLoading]);
+  }, [address, pendingAction, vp.isLoading, isLoadingThreshold]);
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
     if (!address) {
@@ -362,7 +370,10 @@ export const ProposalCreationForm = ({
   };
 
   const handlePublishClick = () => {
-    if (vp.isLoading) {
+    // Both queries read as 0n while loading, so deciding the threshold before
+    // either resolves would let an under-threshold wallet through (or wrongly
+    // route an eligible one). Wait for both.
+    if (vp.isLoading || isLoadingThreshold) {
       showCustomToast(
         "Still checking your voting power — try again in a moment.",
         "error",
@@ -571,10 +582,12 @@ export const ProposalCreationForm = ({
           isWhitelabelRoute={isWhitelabelRoute}
           // Disconnected users keep Publish enabled so it can open the wallet
           // modal and resume. Once connected, block submission of an invalid
-          // form or a recipient who is below the proposal threshold.
+          // form, a still-loading threshold (which reads 0n and would let an
+          // under-threshold wallet through), or a recipient below threshold.
           publishDisabled={
             Boolean(address) &&
-            (!canPublish ||
+            (isLoadingThreshold ||
+              !canPublish ||
               (isRecipient && recipientState === "below-threshold"))
           }
         />
