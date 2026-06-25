@@ -48,14 +48,14 @@ export const TokenPropertiesSchema = z
       example: 18,
       type: "integer",
     }),
-    totalSupply: z.string().openapi({ format: "int64" }),
-    delegatedSupply: z.string().openapi({ format: "int64" }),
-    cexSupply: z.string().openapi({ format: "int64" }),
-    dexSupply: z.string().openapi({ format: "int64" }),
-    lendingSupply: z.string().openapi({ format: "int64" }),
-    circulatingSupply: z.string().openapi({ format: "int64" }),
-    nonCirculatingSupply: z.string().openapi({ format: "int64" }),
-    treasury: z.string().openapi({ format: "int64" }),
+    totalSupply: z.string().openapi({ format: "bigint" }),
+    delegatedSupply: z.string().openapi({ format: "bigint" }),
+    cexSupply: z.string().openapi({ format: "bigint" }),
+    dexSupply: z.string().openapi({ format: "bigint" }),
+    lendingSupply: z.string().openapi({ format: "bigint" }),
+    circulatingSupply: z.string().openapi({ format: "bigint" }),
+    nonCirculatingSupply: z.string().openapi({ format: "bigint" }),
+    treasury: z.string().openapi({ format: "bigint" }),
   })
   .openapi("TokenProperties", {
     description:
@@ -82,12 +82,12 @@ export const SupplyComparisonResponseSchema = z
     previousValue: z.string().openapi({
       description:
         "Supply value at the start of the comparison window, encoded as a decimal string (raw token base units).",
-      format: "int64",
+      format: "bigint",
     }),
     currentValue: z.string().openapi({
       description:
         "Supply value at the end of the comparison window, encoded as a decimal string (raw token base units).",
-      format: "int64",
+      format: "bigint",
     }),
     changeRate: z.number().openapi({
       description:
@@ -96,7 +96,7 @@ export const SupplyComparisonResponseSchema = z
     rawDelta: z.string().openapi({
       description:
         "Signed bigint delta as a decimal string: currentValue - previousValue.",
-      format: "int64",
+      format: "bigint",
     }),
   })
   .openapi("SupplyComparisonResponse", {

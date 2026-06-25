@@ -84,7 +84,7 @@ export const FeedVoteMetadataSchema = z
     }),
     votingPower: z.string().openapi({
       description: "Voter voting power, as a decimal string.",
-      format: "int64",
+      format: "bigint",
     }),
     proposalId: z.string().openapi({ description: "Proposal voted on." }),
     title: z
@@ -106,7 +106,7 @@ export const FeedProposalMetadataSchema = z
     votingPower: z.string().openapi({
       description:
         "Proposer voting power at proposal creation, as a decimal string.",
-      format: "int64",
+      format: "bigint",
     }),
     title: z.string().openapi({ description: "Proposal title." }),
   })
@@ -127,7 +127,7 @@ export const FeedProposalExtendedMetadataSchema = z
     endTimestamp: z.string().openapi({
       description:
         "New proposal end timestamp in Unix seconds, as a decimal string.",
-      format: "int64",
+      format: "bigint",
     }),
     proposer: z.string().openapi({ description: "Proposer address." }),
   })
@@ -144,7 +144,7 @@ export const FeedTransferMetadataSchema = z
     to: z.string().openapi({ description: "Recipient address." }),
     amount: z.string().openapi({
       description: "Transferred amount, as a decimal string.",
-      format: "int64",
+      format: "bigint",
     }),
   })
   .openapi("FeedTransferMetadata", {
@@ -164,7 +164,7 @@ export const FeedDelegationMetadataSchema = z
       .openapi({ description: "Previous delegate address, when known." }),
     amount: z.string().openapi({
       description: "Delegated voting power, as a decimal string.",
-      format: "int64",
+      format: "bigint",
     }),
   })
   .openapi("FeedDelegationMetadata", {
@@ -192,7 +192,7 @@ export const FeedItemSchema = z
     value: z.string().optional().openapi({
       description:
         "Optional event value encoded as a decimal string when applicable.",
-      format: "int64",
+      format: "bigint",
     }),
     timestamp: z.number().int().openapi({
       description: "Event timestamp in Unix seconds.",

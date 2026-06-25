@@ -51,11 +51,11 @@ export const AccountBalanceVariationSchema = z
     accountId: addressOutputField("Account address."),
     previousBalance: z.string().openapi({
       description: "Balance at the start of the comparison window.",
-      format: "int64",
+      format: "bigint",
     }),
     currentBalance: z.string().openapi({
       description: "Balance at the end of the comparison window.",
-      format: "int64",
+      format: "bigint",
     }),
     absoluteChange: decimalStringField(
       "Absolute balance change encoded as a decimal string.",

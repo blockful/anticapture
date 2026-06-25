@@ -64,16 +64,16 @@ export const AccountInteractionResponseSchema = z
     amountTransferred: z.string().openapi({
       description:
         "Net amount transferred between the requested account and the counterparty.",
-      format: "int64",
+      format: "bigint",
     }),
     totalVolume: z.string().openapi({
       description:
         "Gross transfer volume between the requested account and the counterparty.",
-      format: "int64",
+      format: "bigint",
     }),
     transferCount: z.string().openapi({
       description: "Number of transfers observed for the interaction pair.",
-      format: "int64",
+      format: "bigint",
     }),
   })
   .openapi("AccountInteraction", {

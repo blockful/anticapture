@@ -101,11 +101,11 @@ export const VotingPowerVariationResponseSchema = z
     accountId: addressOutputField("Account address."),
     previousVotingPower: z.string().openapi({
       description: "Voting power at the start of the comparison window.",
-      format: "int64",
+      format: "bigint",
     }),
     currentVotingPower: z.string().openapi({
       description: "Voting power at the end of the comparison window.",
-      format: "int64",
+      format: "bigint",
     }),
     absoluteChange: decimalStringField(
       "Absolute voting power change encoded as a decimal string.",
@@ -151,7 +151,7 @@ export const VotingPowerResponseSchema = z
       .optional()
       .openapi({
         type: "string",
-        format: "int64",
+        format: "bigint",
         description: "Current token balance encoded as a decimal string.",
       }),
     variation: VotingPowerVariationFieldSchema,

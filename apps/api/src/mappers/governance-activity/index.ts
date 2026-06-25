@@ -15,7 +15,7 @@ export const ActiveSupplyResponseSchema = z
     activeSupply: z.string().openapi({
       description: "Active token supply encoded as a decimal string.",
       example: "1000000000000000000000000",
-      format: "int64",
+      format: "bigint",
     }),
   })
   .openapi("ActiveSupplyResponse", {
@@ -93,7 +93,7 @@ export const AverageTurnoutComparisonResponseSchema = z
       description:
         "Signed bigint delta as a decimal string: currentAverageTurnout - oldAverageTurnout.",
       example: "30000000000000000",
-      format: "int64",
+      format: "bigint",
     }),
   })
   .openapi("AverageTurnoutComparisonResponse", {

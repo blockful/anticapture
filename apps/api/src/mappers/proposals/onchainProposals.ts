@@ -156,7 +156,7 @@ const FullProposalSchema = ProposalCoreSchema.extend({
   calldatas: z.array(z.string()).openapi({
     description: "Encoded calldata payloads executed by the proposal.",
   }),
-  values: z.array(z.string().openapi({ format: "int64" })).openapi({
+  values: z.array(z.string().openapi({ format: "bigint" })).openapi({
     description: "ETH values attached to each call, encoded as strings.",
   }),
   targets: z.array(z.string().openapi({ format: "ethereum-address" })).openapi({

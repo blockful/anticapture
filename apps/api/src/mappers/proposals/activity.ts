@@ -65,7 +65,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
-        format: "int64",
+        format: "bigint",
         description: "Votes cast in favor, encoded as a decimal string.",
       }),
     againstVotes: z
@@ -73,7 +73,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
-        format: "int64",
+        format: "bigint",
         description: "Votes cast against, encoded as a decimal string.",
       }),
     abstainVotes: z
@@ -81,7 +81,7 @@ export const ProposalActivityProposalSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
-        format: "int64",
+        format: "bigint",
         description: "Abstain votes, encoded as a decimal string.",
       }),
   })
@@ -101,7 +101,7 @@ export const ProposalActivityUserVoteSchema = z
     support: VoteSupportSchema,
     votingPower: z.coerce.string().openapi({
       type: "string",
-      format: "int64",
+      format: "bigint",
       description: "Voting power used by the delegate, encoded as a string.",
     }),
     reason: z.string().nullable().openapi({

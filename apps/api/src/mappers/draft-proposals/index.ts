@@ -20,7 +20,7 @@ export const DraftResponseSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
-        format: "int64",
+        format: "bigint",
         description:
           "Creation timestamp in Unix milliseconds, as a decimal string.",
       }),
@@ -29,7 +29,7 @@ export const DraftResponseSchema = z
       .transform((val) => val.toString())
       .openapi({
         type: "string",
-        format: "int64",
+        format: "bigint",
         description:
           "Last-updated timestamp in Unix milliseconds, as a decimal string.",
       }),
