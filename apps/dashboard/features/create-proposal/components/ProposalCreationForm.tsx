@@ -469,13 +469,15 @@ export const ProposalCreationForm = ({
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
-  // A recipient is anyone viewing a shared draft they did not author. With no
-  // draftId (brand-new proposal) the viewer is always the author.
-  const isRecipient = Boolean(
-    draftId &&
-    sharedAuthor &&
-    (!address || sharedAuthor.toLowerCase() !== address.toLowerCase()),
-  );
+  // Ownership is decided by the viewer's own (owner-scoped) drafts list, NOT by
+  // the shared-draft fetch: `getDraftProposals` is filtered by address
+  // server-side, so a draftId that is not among the connected wallet's drafts
+  // means the viewer is a recipient — preview only. This stays correct even if
+  // the shared-draft fetch is slow or fails (which previously left the viewer
+  // mis-treated as the owner with the editor open). Undetermined while the
+  // list is still loading; a brand-new proposal (no draftId) is always owned.
+  const ownsDraft = Boolean(draftId && drafts.getDraft(draftId));
+  const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
   const authorAddress = sharedAuthor ?? address ?? "";
 
   const thresholdDisplay = thresholdFormatted
