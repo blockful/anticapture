@@ -490,7 +490,9 @@ export const GovernanceSection = () => {
                       key={draft.id}
                       draft={draft}
                       onEdit={(id) =>
-                        router.push(`${basePath}/proposals/new?draftId=${id}`)
+                        router.push(
+                          `${basePath}/proposals/new?draftId=${id}&view=editor`,
+                        )
                       }
                       onDelete={(id) => setDraftToDelete(id)}
                       onShare={async (id) => {

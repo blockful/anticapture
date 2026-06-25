@@ -110,12 +110,15 @@ export const ProposalCreationForm = ({
   const publisher = usePublishProposal();
 
   const { openConnectModal } = useConnectModal();
-  const [view, setView] = useQueryState(
+  const [viewParam, setView] = useQueryState(
     "view",
-    parseAsStringEnum<"editor" | "preview">(["editor", "preview"]).withDefault(
-      "editor",
-    ),
+    parseAsStringEnum<"editor" | "preview">(["editor", "preview"]),
   );
+  // No explicit view in the URL: a link carrying a draftId opens in Preview
+  // (shared drafts), while a brand-new proposal opens in the Editor. Keeps the
+  // share URL clean (no ?view=preview) and avoids an editor flash for
+  // recipients. The drafts list passes view=editor explicitly for owners.
+  const view = viewParam ?? (draftId ? "preview" : "editor");
 
   const form = useForm<ProposalFormValues>({
     resolver: zodResolver(ProposalFormSchema),
