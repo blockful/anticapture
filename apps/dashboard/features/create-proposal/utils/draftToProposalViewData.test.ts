@@ -25,8 +25,11 @@ describe("draftToProposalViewData", () => {
     expect(result.daoId).toBe("ens");
     expect(result.title).toBe("My Draft Title");
     expect(result.proposerAccountId).toBe("0xAUTHOR");
-    // Body becomes the markdown description; title lives in the sidebar.
-    expect(result.description).toBe("## Abstract\nDoes a thing.");
+    // Description matches the on-chain encoding: title heading + discussion
+    // URL + body (the title heading is hidden by the renderer).
+    expect(result.description).toBe(
+      "# My Draft Title\n\nhttps://discuss.example/123\n\n## Abstract\nDoes a thing.",
+    );
     expect(result.forVotes).toBe("0");
     expect(result.againstVotes).toBe("0");
     expect(result.abstainVotes).toBe("0");

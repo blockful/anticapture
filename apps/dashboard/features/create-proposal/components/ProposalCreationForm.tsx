@@ -445,13 +445,29 @@ export const ProposalCreationForm = ({
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
-  // Ownership comes from the viewer's address-scoped drafts list, so it holds
-  // even if the shared-draft fetch is slow or fails.
-  const ownsDraft = Boolean(draftId && drafts.getDraft(draftId));
+  // Ownership comes from the viewer's drafts list, so it holds even if the
+  // shared-draft fetch is slow or fails. Verify the cached draft's author
+  // matches the connected wallet — during a wallet switch the previous list is
+  // still exposed, and we must not treat another wallet's draft as owned.
+  const ownedDraft = draftId ? drafts.getDraft(draftId) : undefined;
+  const ownsDraft = Boolean(
+    ownedDraft &&
+    address &&
+    ownedDraft.author.toLowerCase() === address.toLowerCase(),
+  );
   const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
   // Editor only for a new proposal or an owned draft (no load-dependent flash).
   const canShowEditor = !draftId || ownsDraft;
   const authorAddress = sharedAuthor ?? address ?? "";
+
+  // Once ownership resolves (e.g. an author connects on their own share link),
+  // adopt the draftId so saves update the existing draft instead of creating a
+  // duplicate.
+  useEffect(() => {
+    if (ownsDraft && draftId && currentDraftId !== draftId) {
+      setCurrentDraftId(draftId);
+    }
+  }, [ownsDraft, draftId, currentDraftId]);
 
   const thresholdDisplay = thresholdFormatted
     ? formatNumberUserReadable(Number(thresholdFormatted), 0)

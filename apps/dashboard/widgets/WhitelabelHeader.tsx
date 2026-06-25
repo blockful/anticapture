@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
@@ -18,16 +18,18 @@ const isProposalNewPath = (pathname: string) =>
 
 export const WhitelabelHeader = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const draftId = searchParams?.get("draftId") ?? undefined;
   const [search, setSearch] = useQueryState("search", {
     defaultValue: "",
     clearOnDefault: true,
   });
-  const [view, setView] = useQueryState(
+  const [viewParam, setView] = useQueryState(
     "view",
-    parseAsStringEnum<"editor" | "preview">(["editor", "preview"]).withDefault(
-      "editor",
-    ),
+    parseAsStringEnum<"editor" | "preview">(["editor", "preview"]),
   );
+  // Match ProposalCreationForm: a link with a draftId defaults to Preview.
+  const view = viewParam ?? (draftId ? "preview" : "editor");
   const { isRecipient } = useDraftRecipient();
 
   const [inputValue, setInputValue] = useState(search);
