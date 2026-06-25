@@ -17,7 +17,7 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "@anticapture/client#codegen": {
+    "codegen": {
       "inputs": [
         "kubb.config.ts",
         "src/**",
@@ -152,9 +152,6 @@
         "NEXT_PUBLIC_WC_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
       ]
-    },
-    "codegen": {
-      "outputs": ["generated/**"]
     },
     "db:generate": {
       "inputs": ["src/**/*.ts"],

@@ -52,10 +52,23 @@ app.use("*", cors({ origin: "*" }));
 app.use("*", requestLogger());
 app.use("*", metricsMiddleware());
 
+// Protect the public /metrics endpoint with a shared bearer so only our
+// Prometheus scraper can read it. Registered before the route handler so the
+// guard runs first; skipped entirely when GATEFUL_METRICS_TOKEN is unset (local dev).
+if (config.metricsToken) {
+  app.use("/metrics", bearerAuth({ token: config.metricsToken }));
+}
+
 app.get("/metrics", async (c) => {
   const { body, contentType } = await collectPrometheusMetrics(exporter);
   return c.body(body, 200, { "Content-Type": contentType });
 });
+
+logger.info(
+  config.metricsToken
+    ? "metrics endpoint protected by bearer token"
+    : "metrics endpoint is unauthenticated (GATEFUL_METRICS_TOKEN unset)",
+);
 
 const PUBLIC_PATHS = new Set(["/docs", "/docs/json", "/health", "/metrics"]);
 
@@ -79,18 +92,6 @@ if (config.tokenService) {
   app.use("*", usageMiddleware(config.daoApis));
 
   logger.info("per-tenant token auth enabled (Authful)");
-} else if (config.blockfulApiToken) {
-  // Legacy single shared token — removed once Authful is fully rolled out.
-  const requireBearerAuth = bearerAuth({ token: config.blockfulApiToken });
-
-  app.use("*", async (c, next) => {
-    if (PUBLIC_PATHS.has(c.req.path)) {
-      await next();
-      return;
-    }
-
-    return requireBearerAuth(c, next);
-  });
 }
 if (redis) {
   app.use("*", cacheMiddleware(redis, config.daoApis));

@@ -1702,6 +1702,114 @@
               "refId": "A"
             }
           ]
+        },
+        {
+          "id": 1405,
+          "title": "Requests by Tenant — Share (donut)",
+          "description": "Share of authenticated requests per tenant, from gateful's tenant_requests_total counter (job=anticapture-gateful). Window follows the dashboard time range.",
+          "type": "piechart",
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 98
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "options": {
+            "pieType": "donut",
+            "tooltip": {
+              "mode": "single"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "displayLabels": ["percent"]
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(tenant_requests_total{job=\"anticapture-gateful\"}[$__range])) by (tenant)",
+              "legendFormat": "{{tenant}}",
+              "instant": true,
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1406,
+          "title": "Requests by Tenant & Route",
+          "description": "Per-tenant request count by normalized gateful route, from tenant_requests_total (job=anticapture-gateful). Count is over the dashboard time range.",
+          "type": "table",
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 98
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 0,
+              "custom": {
+                "align": "auto",
+                "filterable": true
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "showHeader": true,
+            "sortBy": [
+              {
+                "displayName": "Requests",
+                "desc": true
+              }
+            ]
+          },
+          "targets": [
+            {
+              "expr": "sum(increase(tenant_requests_total{job=\"anticapture-gateful\"}[$__range])) by (route, tenant)",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "indexByName": {
+                  "route": 0,
+                  "tenant": 1,
+                  "Value": 2
+                },
+                "renameByName": {
+                  "route": "Route",
+                  "tenant": "Tenant",
+                  "Value": "Requests"
+                }
+              }
+            }
+          ]
         }
       ]
     }
