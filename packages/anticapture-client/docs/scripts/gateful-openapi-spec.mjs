@@ -19,6 +19,11 @@ const RAILWAY_GATEFUL_DOMAIN_SUFFIX = ".up.railway.app";
 // Gateful domain we derive from the environment name.
 const RAILWAY_DEPLOY_ENVIRONMENTS = new Set(["dev", "production"]);
 
+// On Vercel, the `dev`/`main` branches map to long-lived Gateful environments
+// reached via an explicit ANTICAPTURE_API_URL; every other branch is a PR
+// preview whose Gateful domain we derive from the Vercel PR id.
+const VERCEL_PERMANENT_BRANCHES = new Set(["dev", "main"]);
+
 const readNonEmptyValue = (value) => {
   const trimmed = value?.trim();
 
@@ -54,6 +59,21 @@ export const resolveGatefulOpenApiSpecUrl = (env = process.env) => {
     !RAILWAY_DEPLOY_ENVIRONMENTS.has(railwayEnvironmentName)
   ) {
     return buildPreviewGatefulSpecUrl(railwayEnvironmentName);
+  }
+
+  // Vercel PR previews don't carry RAILWAY_ENVIRONMENT_NAME, but the matching
+  // Gateful preview follows the same `gateful-anticapture-pr-<id>` Railway
+  // naming — derive it from the Vercel PR id (mirrors apps/dashboard/next.config.ts).
+  const vercelEnv = readNonEmptyValue(env.VERCEL_ENV);
+  const vercelPrId = readNonEmptyValue(env.VERCEL_GIT_PULL_REQUEST_ID);
+  const vercelBranch = readNonEmptyValue(env.VERCEL_GIT_COMMIT_REF);
+
+  if (
+    vercelEnv === "preview" &&
+    vercelPrId &&
+    !VERCEL_PERMANENT_BRANCHES.has(vercelBranch ?? "")
+  ) {
+    return buildPreviewGatefulSpecUrl(`anticapture-pr-${vercelPrId}`);
   }
 
   // dev / production (and CI) read the Gateful URL from the environment
