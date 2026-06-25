@@ -17,11 +17,9 @@ COPY --from=builder /app/out/full/ .
 # a URL (the committed spec was removed). Railway only exposes these variables to
 # the build when declared as ARGs: PR previews interpolate from
 # RAILWAY_ENVIRONMENT_NAME; dev/production read the Gateful URL from
-# NEXT_PUBLIC_GATEFUL_URL / ANTICAPTURE_API_URL / RAILWAY_SERVICE_GATEFUL_URL. The
-# docs service only has RAILWAY_SERVICE_GATEFUL_URL.
+# ANTICAPTURE_API_URL.
 # See packages/anticapture-client/docs/scripts/gateful-openapi-spec.mjs.
 ARG RAILWAY_ENVIRONMENT_NAME
-ARG NEXT_PUBLIC_GATEFUL_URL
 ARG ANTICAPTURE_API_URL
 ARG RAILWAY_SERVICE_GATEFUL_URL
 RUN pnpm --filter @anticapture/client-docs build

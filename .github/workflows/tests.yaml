@@ -33,13 +33,16 @@ jobs:
         env:
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
+
+          git fetch --no-tags --depth=1 origin "${PR_BASE_SHA}"
 
           trusted=false
           if [ "${AUTHOR_ASSOCIATION}" = "MEMBER" ] || [ "${AUTHOR_ASSOCIATION}" = "OWNER" ]; then
             trusted=true
-          elif grep -oE '@[A-Za-z0-9_-]+' CODEOWNERS | sed 's/@//' | grep -qix "${PR_AUTHOR}"; then
+          elif git show FETCH_HEAD:CODEOWNERS | grep -oE '@[A-Za-z0-9_-]+' | sed 's/@//' | grep -qix "${PR_AUTHOR}"; then
             trusted=true
           fi
 
