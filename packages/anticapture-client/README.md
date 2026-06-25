@@ -203,6 +203,12 @@ Codegen runs `scripts/wait-for-gateful.mjs` before Kubb. In CI and Vercel,
 `GET /health` to return the matching deployed Gateful commit. Local runs without
 an expected SHA only require `/health` to return `200`.
 
+Dashboard Vercel setting: keep the Build Command prefixed with:
+
+```sh
+node ../../scripts/wait-for-gateful.mjs &&
+```
+
 ```sh
 npm run codegen
 npm run test

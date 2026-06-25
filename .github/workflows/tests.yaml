@@ -4,33 +4,88 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-env:
-  NEXT_PUBLIC_GATEFUL_URL: https://gateful-anticapture-pr-${{ github.event.pull_request.number }}.up.railway.app
-
 jobs:
+  configure-vercel-preview:
+    name: Configure Vercel preview env
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    outputs:
+      gateful_url: ${{ steps.vercel-env.outputs.gateful_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Upsert branch-scoped Gateful URL
+        id: vercel-env
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          gateful_url="https://gateful-anticapture-pr-${PR_NUMBER}.up.railway.app"
+          echo "gateful_url=${gateful_url}" >> "${GITHUB_OUTPUT}"
+
+          if [ -z "${VERCEL_TOKEN:-}" ] || [ -z "${VERCEL_PROJECT_ID:-}" ] || [ -z "${VERCEL_TEAM_ID:-}" ]; then
+            echo "::warning::Skipping Vercel preview env injection; Vercel secrets are not available."
+            exit 0
+          fi
+
+          api_url="https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env?upsert=true&teamId=${VERCEL_TEAM_ID}"
+          payload=$(jq -n \
+            --arg key "ANTICAPTURE_API_URL" \
+            --arg value "${gateful_url}" \
+            --arg gitBranch "${PR_BRANCH}" \
+            '{ key: $key, value: $value, type: "plain", target: ["preview"], gitBranch: $gitBranch }')
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "${api_url}" \
+            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data "${payload}"
+
+          echo "Configured ANTICAPTURE_API_URL=${gateful_url} for Vercel preview branch ${PR_BRANCH}."
+          echo "configured=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Trigger Vercel preview redeploy
+        if: steps.vercel-env.outputs.configured == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}"
+
   wait-for-gateful:
     name: Wait for preview gateful
+    needs: configure-vercel-preview
     if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Wait for preview gateful to be ready
-        shell: bash
-        run: |
-          # Poll the resource codegen actually fetches: a 200 on /docs/json means
-          # the preview server is up AND the aggregated OpenAPI spec is serveable.
-          # Avoids the race where CI runs before Railway finishes provisioning the PR preview.
-          for i in $(seq 1 60); do          # up to ~10 min (60 × 10s)
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${NEXT_PUBLIC_GATEFUL_URL}/docs/json" || echo 000)
-            if [ "$code" = "200" ]; then
-              echo "✅ gateful ready after attempt ${i}"
-              exit 0
-            fi
-            echo "attempt ${i}: HTTP ${code} — retrying in 10s"
-            sleep 10
-          done
-          echo "::error::preview gateful never returned 200 at ${NEXT_PUBLIC_GATEFUL_URL}/docs/json"
-          exit 1
+        run: node scripts/wait-for-gateful.mjs
+        env:
+          ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+          EXPECTED_GATEFUL_SHA: ${{ github.event.pull_request.head.sha }}
 
   changeset-path-filter:
     name: Detect changeset requirement
@@ -103,9 +158,11 @@ jobs:
           exit 1
 
   typecheck:
-    needs: wait-for-gateful
+    needs: [configure-vercel-preview, wait-for-gateful]
     if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
+    env:
+      ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
 
     steps:
       - name: Checkout repository
@@ -164,9 +221,11 @@ jobs:
           pnpm turbo typecheck "${filters[@]}"
 
   test:
-    needs: wait-for-gateful
+    needs: [configure-vercel-preview, wait-for-gateful]
     if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
+    env:
+      ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
 
     steps:
       - name: Checkout repository
