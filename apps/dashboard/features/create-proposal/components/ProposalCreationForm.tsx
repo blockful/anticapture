@@ -352,6 +352,8 @@ export const ProposalCreationForm = ({
   const handlePublishClick = () => {
     // Validate here too — the resume path calls this directly.
     if (!canPublish) return;
+    // Stale form values until the current draftId hydrates; don't publish them.
+    if (!draftContentLoaded) return;
     // VP/threshold read 0n while loading; wait before comparing.
     if (vp.isLoading || isLoadingThreshold) {
       showCustomToast(
@@ -582,6 +584,7 @@ export const ProposalCreationForm = ({
             Boolean(address) &&
             (isLoadingThreshold ||
               !canPublish ||
+              !draftContentLoaded ||
               (isRecipient && recipientState === "below-threshold"))
           }
         />
