@@ -85,11 +85,10 @@ export const TabsSection = ({
     }
   };
 
-  const stickyTopClassName = isDraft
-    ? isWhitelabel
-      ? "top-0 lg:top-0"
-      : "top-29.5 lg:top-[65px]"
-    : `${isWhitelabel ? "top-0" : "top-29.5"} lg:top-[85px]`;
+  // Both variants stick at lg:top-[85px]; the draft preview supplies the same
+  // top-[65px] sticky spacer the proposal-detail view uses to mask the 65→85px
+  // band, so content never scrolls up behind the tab bar.
+  const stickyTopClassName = `${isWhitelabel ? "top-0" : "top-29.5"} lg:top-[85px]`;
 
   const tabs = isDraft
     ? [

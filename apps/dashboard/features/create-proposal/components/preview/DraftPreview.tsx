@@ -42,11 +42,6 @@ export const DraftPreview = ({
 }: DraftPreviewProps) => {
   const { encoded } = useEncodedDraftActions(actions, daoId);
 
-  // Match the sticky offset to the surrounding scroll container: the whitelabel
-  // shell header lives outside it (stick at the top), while the main app's form
-  // header (65px) is inside it.
-  const stickyTopClassName = isWhitelabelRoute ? "lg:top-0" : "lg:top-[65px]";
-
   const proposal = draftToProposalViewData(
     {
       id: "preview",
@@ -63,27 +58,31 @@ export const DraftPreview = ({
   );
 
   return (
-    <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
-      <div
-        className={`flex h-fit w-full flex-col gap-4 lg:sticky lg:w-[420px] ${stickyTopClassName}`}
-      >
-        <DraftPreviewSidebar
-          title={title}
-          authorAddress={authorAddress}
-          helperCopy={helperCopy}
-          secondaryAction={secondaryAction}
-          onPublish={onPublish}
-          onCopyLink={onCopyLink}
-          onEdit={onEdit}
-          publishDisabled={publishDisabled}
+    <div className="mx-auto w-full">
+      {/* Mirrors the proposal-detail view: a sticky spacer below the 65px
+          header gives the preview its top padding and masks the 65→85px band
+          so scrolled content never shows above the sticky tab bar. */}
+      <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
+      <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
+        <div className="flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
+          <DraftPreviewSidebar
+            title={title}
+            authorAddress={authorAddress}
+            helperCopy={helperCopy}
+            secondaryAction={secondaryAction}
+            onPublish={onPublish}
+            onCopyLink={onCopyLink}
+            onEdit={onEdit}
+            publishDisabled={publishDisabled}
+          />
+        </div>
+        <TabsSection
+          proposal={proposal}
+          daoId={daoIdEnum}
+          variant="draft"
+          isWhitelabel={isWhitelabelRoute}
         />
       </div>
-      <TabsSection
-        proposal={proposal}
-        daoId={daoIdEnum}
-        variant="draft"
-        isWhitelabel={isWhitelabelRoute}
-      />
     </div>
   );
 };
