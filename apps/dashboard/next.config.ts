@@ -13,7 +13,7 @@ const resolveApiUrls = () => {
     !PERMANENT_BRANCHES.includes(branch ?? "")
   ) {
     return {
-      NEXT_PUBLIC_GATEFUL_URL: `https://gateful-anticapture-pr-${prId}.up.railway.app`,
+      ANTICAPTURE_API_URL: `https://gateful-anticapture-pr-${prId}.up.railway.app`,
     };
   }
 

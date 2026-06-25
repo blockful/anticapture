@@ -65,7 +65,7 @@ describe("gateful app auth", () => {
     expect(body).toMatchObject({
       status: "ok",
       commit: "test-commit-sha",
-      circuits: {},
+      upstreams: {},
     });
   });
 

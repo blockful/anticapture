@@ -85,7 +85,7 @@ pnpm test
 
 `API → Gateful (:4001) → Client codegen → Dashboard (:3000)`.
 Gateful discovers DAO APIs from `DAO_API_<DAO>` env vars; the dashboard reads the
-gateway via `NEXT_PUBLIC_GATEFUL_URL` (set to `http://localhost:4001` by `pnpm dev`).
+gateway via `ANTICAPTURE_API_URL` (set to `http://localhost:4001` by `pnpm dev`).
 See the `local-dev` skill for details.
 
 ## Conventions

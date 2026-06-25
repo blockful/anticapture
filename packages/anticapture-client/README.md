@@ -193,12 +193,15 @@ that `node_modules/.bin/tsx` and `generated/` are present.
 ## Development
 
 The SDK and client docs resolve the Gateful OpenAPI source through the shared
-spec resolver. Local generated specs are preferred when present; CI and Railway
-builds can fall back to the deployed Gateful docs endpoint. Resolution order:
+spec resolver. Codegen always uses the injected live Gateful URL: `${ANTICAPTURE_API_URL}/docs/json`
 
-1. `apps/gateful/openapi/gateful.json`
-2. `${NEXT_PUBLIC_GATEFUL_URL}/docs/json`
-3. `https://gateful-anticapture-${RAILWAY_ENVIRONMENT_NAME}.up.railway.app/docs/json`
+Preview and production environments must inject `ANTICAPTURE_API_URL`
+directly. CI sets a branch-scoped Vercel preview variable from the PR number;
+
+Codegen runs `scripts/wait-for-gateful.mjs` before Kubb. In CI and Vercel,
+`EXPECTED_GATEFUL_SHA` / `VERCEL_GIT_COMMIT_SHA` makes readiness require
+`GET /health` to return the matching deployed Gateful commit. Local runs without
+an expected SHA only require `/health` to return `200`.
 
 ```sh
 npm run codegen

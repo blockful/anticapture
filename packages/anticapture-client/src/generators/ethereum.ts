@@ -12,7 +12,6 @@ const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 const generatedFormatTypeByOpenApiFormat = {
   "ethereum-address": "Address",
-  bigint: "BigInt",
 } as const;
 
 const addressFakerSchema: Schema = {
@@ -22,10 +21,6 @@ const addressFakerSchema: Schema = {
     value: zeroAddress,
     format: "string",
   },
-};
-
-const bigintFakerSchema: Schema = {
-  keyword: schemaKeywords.bigint,
 };
 
 const createFormatTypeSchema = (name: string): Schema => ({
@@ -48,7 +43,6 @@ const replaceStringSchema = (schemas: Schema[], replacement: Schema) =>
 
 export const generatedFormatTypes = [
   "export type Address = `0x${string}`;",
-  "export type BigInt = bigint;",
 ].join("\n");
 
 export const mapEthereumFormatTypes = (
@@ -79,8 +73,6 @@ export const mapEthereumFormatFakers = (
   switch (getCustomStringFormat(schemaProps)) {
     case "ethereum-address":
       return replaceStringSchema(defaultSchemas, addressFakerSchema);
-    case "bigint":
-      return replaceStringSchema(defaultSchemas, bigintFakerSchema);
     default:
       return undefined;
   }
