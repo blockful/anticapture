@@ -305,8 +305,12 @@ export const ProposalCreationForm = ({
   };
 
   // Resume a Preview action that was deferred while the wallet connected.
+  // A deferred publish must wait for the freshly connected wallet's voting
+  // power to resolve — otherwise it races the query (which reads 0n while
+  // loading) and lands in the insufficient-VP flow. Edit has no such dep.
   useEffect(() => {
     if (!address || !pendingAction) return;
+    if (pendingAction === "publish" && vp.isLoading) return;
     const action = pendingAction;
     setPendingAction(null);
     if (action === "edit") {
@@ -314,10 +318,8 @@ export const ProposalCreationForm = ({
     } else {
       handlePublishClick();
     }
-    // handlers are recreated each render; we intentionally run only when the
-    // connection state or the pending intent changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, pendingAction]);
+  }, [address, pendingAction, vp.isLoading]);
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
     if (!address) {
@@ -360,16 +362,16 @@ export const ProposalCreationForm = ({
   };
 
   const handlePublishClick = () => {
-    if (vp.votingPower < threshold) {
-      void handleSaveDraft({ navigateToDrafts: false });
-      setInsufficientOpen(true);
-      return;
-    }
     if (vp.isLoading) {
       showCustomToast(
         "Still checking your voting power — try again in a moment.",
         "error",
       );
+      return;
+    }
+    if (vp.votingPower < threshold) {
+      void handleSaveDraft({ navigateToDrafts: false });
+      setInsufficientOpen(true);
       return;
     }
     void publisher.publish(values, daoIdEnum);
@@ -566,6 +568,7 @@ export const ProposalCreationForm = ({
           onPublish={handlePreviewPublish}
           onCopyLink={handleShare}
           onEdit={handleForkEdit}
+          isWhitelabelRoute={isWhitelabelRoute}
           // Disconnected users keep Publish enabled so it can open the wallet
           // modal and resume. Once connected, block submission of an invalid
           // form or a recipient who is below the proposal threshold.

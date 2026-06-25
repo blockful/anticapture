@@ -85,6 +85,12 @@ export const TabsSection = ({
     }
   };
 
+  const stickyTopClassName = isDraft
+    ? isWhitelabel
+      ? "top-0 lg:top-0"
+      : "top-29.5 lg:top-[65px]"
+    : `${isWhitelabel ? "top-0" : "top-29.5"} lg:top-[85px]`;
+
   const tabs = isDraft
     ? [
         { label: "Description", value: "description" },
@@ -99,7 +105,7 @@ export const TabsSection = ({
   return (
     <div className="lg:bg-surface-default flex flex-1 flex-col lg:min-w-0">
       <div
-        className={`border-border-default bg-surface-background lg:bg-surface-default sticky left-0 z-10 w-full shrink-0 border-b lg:top-[85px] lg:px-4 ${isWhitelabel ? "top-0" : "top-29.5"}`}
+        className={`border-border-default bg-surface-background lg:bg-surface-default sticky left-0 z-10 w-full shrink-0 border-b lg:px-4 ${stickyTopClassName}`}
       >
         <TabGroup
           size="md"
