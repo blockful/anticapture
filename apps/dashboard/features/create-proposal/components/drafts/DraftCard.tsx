@@ -44,8 +44,15 @@ export const DraftCard = ({
         Draft • {formatDistanceToNow(draft.updatedAt, { addSuffix: true })}
       </span>
     </div>
-    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-      <Button variant="outline" onClick={() => onShare(draft.id)}>
+    <div
+      className="flex items-center gap-2"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <Button
+        variant="outline"
+        onClick={() => onShare(draft.id)}
+        className="h-9"
+      >
         <Link2 className="size-4" />
         Copy Link
       </Button>
@@ -54,9 +61,9 @@ export const DraftCard = ({
           variant="outline"
           onClick={() => onEdit(draft.id)}
           aria-label="Edit draft"
-          className="aspect-square px-0"
+          className="size-9 shrink-0 p-0"
         >
-          <Pencil className="size-4" />
+          <Pencil className="size-3.5" />
         </Button>
       </Tooltip>
       <Tooltip asChild disableMobileClick tooltipContent="Delete">
@@ -64,9 +71,9 @@ export const DraftCard = ({
           variant="outline"
           onClick={() => onDelete(draft.id)}
           aria-label="Delete draft"
-          className="aspect-square px-0"
+          className="size-9 shrink-0 p-0"
         >
-          <Trash2 className="size-4" />
+          <Trash2 className="size-3.5" />
         </Button>
       </Tooltip>
     </div>
