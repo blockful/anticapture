@@ -1,4 +1,43 @@
+import type { Page } from "playwright/test";
+
 import { test, expect } from "./fixtures";
+
+const waitForProposalLink = async (page: Page) => {
+  const proposalLink = page
+    .getByRole("link")
+    .filter({ has: page.locator("h3") })
+    .first();
+  const proposalsErrored = page
+    .getByText("Unable to load proposals")
+    .waitFor({ state: "visible", timeout: 20_000 })
+    .then(() => "error" as const);
+  const proposalLoaded = proposalLink
+    .waitFor({ state: "visible", timeout: 20_000 })
+    .then(() => "proposal" as const);
+
+  const outcome = await Promise.race([proposalLoaded, proposalsErrored]);
+  expect(outcome, "proposal list rendered an error state").toBe("proposal");
+  return proposalLink;
+};
+
+const waitForSourceSelect = async (page: Page) => {
+  const sourceSelect = page.getByRole("combobox", {
+    name: "Proposal source",
+  });
+  const proposalsErrored = page
+    .getByText("Unable to load proposals")
+    .waitFor({ state: "visible", timeout: 15_000 })
+    .then(() => "error" as const);
+  const sourceLoaded = sourceSelect
+    .waitFor({ state: "visible", timeout: 15_000 })
+    .then(() => "source" as const);
+
+  const outcome = await Promise.race([sourceLoaded, proposalsErrored]);
+  expect(outcome, "proposal source filter rendered an error state").toBe(
+    "source",
+  );
+  return sourceSelect;
+};
 
 test.describe("Governance page (/ens/proposals)", () => {
   test("renders Proposals heading and description", async ({ goto, page }) => {
@@ -13,58 +52,36 @@ test.describe("Governance page (/ens/proposals)", () => {
 
   test("shows All Proposals tab as default", async ({ goto, page }) => {
     await goto("/ens/proposals");
-    const allTab = page.getByRole("tab", { name: /All Proposals/ });
+    const allTab = page.getByRole("tab", { name: /All/ });
     await expect(allTab).toBeVisible({ timeout: 15_000 });
     await expect(allTab).toHaveAttribute("aria-selected", "true");
   });
 
-  test("shows proposal list or explicit empty state on the proposals tab", async ({
+  test("shows proposal list with real data on All Proposals tab", async ({
     goto,
     page,
   }) => {
     await goto("/ens/proposals");
-    await expect(page.getByRole("tab", { name: /All Proposals/ })).toBeVisible({
+    await expect(page.getByRole("tab", { name: /All/ })).toBeVisible({
       timeout: 15_000,
     });
-    const hasProposals = page
-      .getByRole("link")
-      .filter({ has: page.locator("h3") })
-      .first();
-    const isEmpty = page.locator("text=No proposals found");
-    const failedToLoad = page.locator("text=Unable to load proposals");
-    await expect(hasProposals.or(isEmpty).or(failedToLoad)).toBeVisible({
-      timeout: 20_000,
-    });
+    const proposalLink = await waitForProposalLink(page);
+    await expect(proposalLink.locator("h3")).not.toHaveText("");
   });
 
-  test("source filter switches to Snapshot and updates the URL", async ({
+  test("source filter switches to Snapshot (offchain) proposals", async ({
     goto,
     page,
   }) => {
     await goto("/ens/proposals");
-    // ENS has off-chain proposals, so the proposals tab exposes a source
-    // filter (All sources / Snapshot / Governor) next to it. But a failed
-    // proposals fetch (e.g. the Snapshot upstream erroring) renders a full-page
-    // error state that drops the filter entirely. Wait for whichever the page
-    // settled into; if it errored, there's nothing to filter — skip.
-    const sourceFilter = page.getByRole("combobox", { name: /All sources/ });
-    const failedToLoad = page.locator("text=Unable to load proposals");
-    await expect(sourceFilter.or(failedToLoad)).toBeVisible({
-      timeout: 15_000,
-    });
-    if ((await sourceFilter.count()) === 0) return;
-    await sourceFilter.click();
+    const sourceSelect = await waitForSourceSelect(page);
+
+    await sourceSelect.click();
     await page.getByRole("option", { name: "Snapshot" }).click();
     await expect(page).toHaveURL(/source=snapshot/);
-    // Off-chain (Snapshot) list loads or shows an explicit empty / error state.
-    const hasProposals = page
-      .getByRole("link")
-      .filter({ has: page.locator("h3") })
-      .first();
-    const isEmpty = page.locator("text=No proposals found");
-    await expect(hasProposals.or(isEmpty).or(failedToLoad)).toBeVisible({
-      timeout: 20_000,
-    });
+    const proposalLink = await waitForProposalLink(page);
+    await expect(proposalLink).toContainText("Snapshot");
+    await expect(proposalLink.locator("h3")).not.toHaveText("");
   });
 
   test("New Proposal button triggers wallet connect when disconnected", async ({
@@ -90,16 +107,15 @@ test.describe("Governance page (/ens/proposals)", () => {
     page,
   }) => {
     await goto("/ens/proposals");
-    await expect(page.getByRole("tab", { name: /All Proposals/ })).toBeVisible({
+    await expect(page.getByRole("tab", { name: /All/ })).toBeVisible({
       timeout: 15_000,
     });
     const proposalLinks = page
       .getByRole("link")
       .filter({ has: page.locator("h3") });
-    const count = await proposalLinks.count();
-    if (count === 0) return; // no proposals live, skip
+    await waitForProposalLink(page);
     const href = await proposalLinks.first().getAttribute("href");
-    await proposalLinks.first().click();
+    await proposalLinks.first().locator("h3").click();
     await expect(page).toHaveURL(/\/ens\/proposals\//, { timeout: 15_000 });
     if (href) {
       await expect(page).toHaveURL(
@@ -108,25 +124,18 @@ test.describe("Governance page (/ens/proposals)", () => {
     }
   });
 
-  test("infinite scroll loads more onchain proposals when available", async ({
+  test("infinite scroll loads more proposals when available", async ({
     goto,
     page,
   }) => {
     await goto("/ens/proposals");
-    await expect(page.getByRole("tab", { name: /All Proposals/ })).toBeVisible({
+    await expect(page.getByRole("tab", { name: /All/ })).toBeVisible({
       timeout: 15_000,
     });
     const proposalLinks = page
       .getByRole("link")
       .filter({ has: page.locator("h3") });
-    const isEmpty = page.locator("text=No proposals found");
-    const failedToLoad = page.locator("text=Unable to load proposals");
-    // Wait for one of: proposals load, empty state, or error state.
-    await expect(
-      proposalLinks.first().or(isEmpty).or(failedToLoad),
-    ).toBeVisible({ timeout: 20_000 });
-    // If no proposals rendered (empty or error), there's nothing to scroll.
-    if ((await proposalLinks.count()) === 0) return;
+    await waitForProposalLink(page);
     const initialCount = await proposalLinks.count();
     // Page size is 10. Need at least one full page to test pagination.
     if (initialCount < 10) return;

@@ -43,7 +43,6 @@ export const CategoriesFilter = ({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <ButtonFilter
-          onClick={() => setIsOpen(!isOpen)}
           isOpen={isOpen}
           hasFilters={hasFilters}
           className={className}

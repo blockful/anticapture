@@ -11,6 +11,10 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
 
+import { rateLimitMiddleware } from "./auth/rate-limit";
+import { tokenAuthMiddleware } from "./auth/token-auth";
+import { AuthfulClient } from "./auth/authful-client";
+import { usageMiddleware } from "./auth/usage";
 import { config } from "./config";
 import { CircuitOpenError } from "./shared/circuit-breaker";
 import { createRedisClient } from "./cache/redis";
@@ -48,30 +52,48 @@ app.use("*", cors({ origin: "*" }));
 app.use("*", requestLogger());
 app.use("*", metricsMiddleware());
 
+// Protect the public /metrics endpoint with a shared bearer so only our
+// Prometheus scraper can read it. Registered before the route handler so the
+// guard runs first; skipped entirely when GATEFUL_METRICS_TOKEN is unset (local dev).
+if (config.metricsToken) {
+  app.use("/metrics", bearerAuth({ token: config.metricsToken }));
+}
+
 app.get("/metrics", async (c) => {
   const { body, contentType } = await collectPrometheusMetrics(exporter);
   return c.body(body, 200, { "Content-Type": contentType });
 });
 
-if (config.blockfulApiToken) {
-  const requireBearerAuth = bearerAuth({ token: config.blockfulApiToken });
+logger.info(
+  config.metricsToken
+    ? "metrics endpoint protected by bearer token"
+    : "metrics endpoint is unauthenticated (GATEFUL_METRICS_TOKEN unset)",
+);
 
-  app.use("*", async (c, next) => {
-    if (
-      c.req.path === "/docs" ||
-      c.req.path === "/docs/json" ||
-      c.req.path === "/health" ||
-      c.req.path === "/metrics"
-    ) {
-      await next();
-      return;
-    }
+const PUBLIC_PATHS = new Set(["/docs", "/docs/json", "/health", "/metrics"]);
 
-    return requireBearerAuth(c, next);
-  });
+const redis = config.redisUrl ? createRedisClient(config.redisUrl) : undefined;
+
+if (config.tokenService) {
+  const authfulClient = new AuthfulClient(
+    config.tokenService.url,
+    config.tokenService.apiKey,
+  );
+
+  app.use(
+    "*",
+    tokenAuthMiddleware({
+      client: authfulClient,
+      cache: redis,
+      publicPaths: PUBLIC_PATHS,
+    }),
+  );
+  app.use("*", rateLimitMiddleware(redis));
+  app.use("*", usageMiddleware(config.daoApis));
+
+  logger.info("per-tenant token auth enabled (Authful)");
 }
-if (config.redisUrl) {
-  const redis = createRedisClient(config.redisUrl);
+if (redis) {
   app.use("*", cacheMiddleware(redis, config.daoApis));
 }
 

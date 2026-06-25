@@ -56,9 +56,9 @@ describe("draftProposals controller", () => {
     await db.delete(proposalDrafts);
   });
 
-  describe("GET /proposal-drafts", () => {
+  describe("GET /proposal/drafts", () => {
     it("returns an empty list when no drafts exist for the address", async () => {
-      const res = await app.request(`/proposal-drafts?address=${ADDRESS_A}`);
+      const res = await app.request(`/proposal/drafts?address=${ADDRESS_A}`);
       expect(res.status).toBe(200);
       await expect(res.json()).resolves.toEqual({ items: [] });
     });
@@ -67,7 +67,7 @@ describe("draftProposals controller", () => {
       const draft = makeDraft();
       await db.insert(proposalDrafts).values(draft);
 
-      const res = await app.request(`/proposal-drafts?address=${ADDRESS_A}`);
+      const res = await app.request(`/proposal/drafts?address=${ADDRESS_A}`);
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.items).toHaveLength(1);
@@ -78,24 +78,24 @@ describe("draftProposals controller", () => {
     it("does not return drafts belonging to a different address", async () => {
       await db.insert(proposalDrafts).values(makeDraft({ author: ADDRESS_B }));
 
-      const res = await app.request(`/proposal-drafts?address=${ADDRESS_A}`);
+      const res = await app.request(`/proposal/drafts?address=${ADDRESS_A}`);
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.items).toHaveLength(0);
     });
 
     it("returns 400 when address query param is missing", async () => {
-      const res = await app.request("/proposal-drafts");
+      const res = await app.request("/proposal/drafts");
       expect(res.status).toBe(400);
     });
   });
 
-  describe("GET /proposal-drafts/:id", () => {
+  describe("GET /proposal/drafts/:id", () => {
     it("returns the draft for any caller (public share endpoint)", async () => {
       const draft = makeDraft({ author: ADDRESS_A });
       await db.insert(proposalDrafts).values(draft);
 
-      const res = await app.request(`/proposal-drafts/${draft.id}`);
+      const res = await app.request(`/proposal/drafts/${draft.id}`);
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.id).toBe(draft.id);
@@ -103,7 +103,7 @@ describe("draftProposals controller", () => {
     });
 
     it("returns 404 when the draft does not exist", async () => {
-      const res = await app.request(`/proposal-drafts/${crypto.randomUUID()}`);
+      const res = await app.request(`/proposal/drafts/${crypto.randomUUID()}`);
       expect(res.status).toBe(404);
     });
 
@@ -111,15 +111,15 @@ describe("draftProposals controller", () => {
       const draft = makeDraft({ daoId: "other-dao" });
       await db.insert(proposalDrafts).values(draft);
 
-      const res = await app.request(`/proposal-drafts/${draft.id}`);
+      const res = await app.request(`/proposal/drafts/${draft.id}`);
       expect(res.status).toBe(404);
     });
   });
 
-  describe("POST /proposal-drafts", () => {
+  describe("POST /proposal/drafts", () => {
     it("creates a draft and returns 201 with the saved data", async () => {
       const id = crypto.randomUUID();
-      const res = await app.request("/proposal-drafts", {
+      const res = await app.request("/proposal/drafts", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -144,7 +144,7 @@ describe("draftProposals controller", () => {
       const id = crypto.randomUUID();
       const mixedCaseAddress = "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-      const res = await app.request("/proposal-drafts", {
+      const res = await app.request("/proposal/drafts", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -163,7 +163,7 @@ describe("draftProposals controller", () => {
     });
 
     it("returns 400 when id is not a valid UUID", async () => {
-      const res = await app.request("/proposal-drafts", {
+      const res = await app.request("/proposal/drafts", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -179,7 +179,7 @@ describe("draftProposals controller", () => {
     });
 
     it("returns 400 when required fields are missing", async () => {
-      const res = await app.request("/proposal-drafts", {
+      const res = await app.request("/proposal/drafts", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({}),
@@ -188,12 +188,12 @@ describe("draftProposals controller", () => {
     });
   });
 
-  describe("PUT /proposal-drafts/:id", () => {
+  describe("PUT /proposal/drafts/:id", () => {
     it("updates a draft owned by the address", async () => {
       const draft = makeDraft();
       await db.insert(proposalDrafts).values(draft);
 
-      const res = await app.request(`/proposal-drafts/${draft.id}`, {
+      const res = await app.request(`/proposal/drafts/${draft.id}`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ address: ADDRESS_A, title: "Updated title" }),
@@ -209,7 +209,7 @@ describe("draftProposals controller", () => {
       const draft = makeDraft({ author: ADDRESS_A });
       await db.insert(proposalDrafts).values(draft);
 
-      const res = await app.request(`/proposal-drafts/${draft.id}`, {
+      const res = await app.request(`/proposal/drafts/${draft.id}`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ address: ADDRESS_B, title: "Hijacked" }),
@@ -219,7 +219,7 @@ describe("draftProposals controller", () => {
     });
 
     it("returns 404 when the draft does not exist", async () => {
-      const res = await app.request(`/proposal-drafts/${crypto.randomUUID()}`, {
+      const res = await app.request(`/proposal/drafts/${crypto.randomUUID()}`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ address: ADDRESS_A, title: "Ghost" }),
@@ -231,7 +231,7 @@ describe("draftProposals controller", () => {
       const draft = makeDraft();
       await db.insert(proposalDrafts).values(draft);
 
-      const res = await app.request(`/proposal-drafts/${draft.id}`, {
+      const res = await app.request(`/proposal/drafts/${draft.id}`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ title: "No address" }),
@@ -243,7 +243,7 @@ describe("draftProposals controller", () => {
       const draft = makeDraft({ daoId: "other-dao" });
       await db.insert(proposalDrafts).values(draft);
 
-      const res = await app.request(`/proposal-drafts/${draft.id}`, {
+      const res = await app.request(`/proposal/drafts/${draft.id}`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -261,18 +261,18 @@ describe("draftProposals controller", () => {
     });
   });
 
-  describe("DELETE /proposal-drafts/:id", () => {
+  describe("DELETE /proposal/drafts/:id", () => {
     it("deletes a draft owned by the address and returns 204", async () => {
       const draft = makeDraft();
       await db.insert(proposalDrafts).values(draft);
 
       const res = await app.request(
-        `/proposal-drafts/${draft.id}?address=${ADDRESS_A}`,
+        `/proposal/drafts/${draft.id}?address=${ADDRESS_A}`,
         { method: "DELETE" },
       );
       expect(res.status).toBe(204);
 
-      const check = await app.request(`/proposal-drafts/${draft.id}`);
+      const check = await app.request(`/proposal/drafts/${draft.id}`);
       expect(check.status).toBe(404);
     });
 
@@ -281,7 +281,7 @@ describe("draftProposals controller", () => {
       await db.insert(proposalDrafts).values(draft);
 
       const res = await app.request(
-        `/proposal-drafts/${draft.id}?address=${ADDRESS_B}`,
+        `/proposal/drafts/${draft.id}?address=${ADDRESS_B}`,
         { method: "DELETE" },
       );
       expect(res.status).toBe(404);
@@ -289,7 +289,7 @@ describe("draftProposals controller", () => {
 
     it("returns 404 when the draft does not exist", async () => {
       const res = await app.request(
-        `/proposal-drafts/${crypto.randomUUID()}?address=${ADDRESS_A}`,
+        `/proposal/drafts/${crypto.randomUUID()}?address=${ADDRESS_A}`,
         { method: "DELETE" },
       );
       expect(res.status).toBe(404);
@@ -299,7 +299,7 @@ describe("draftProposals controller", () => {
       const draft = makeDraft();
       await db.insert(proposalDrafts).values(draft);
 
-      const res = await app.request(`/proposal-drafts/${draft.id}`, {
+      const res = await app.request(`/proposal/drafts/${draft.id}`, {
         method: "DELETE",
       });
       expect(res.status).toBe(400);
@@ -310,7 +310,7 @@ describe("draftProposals controller", () => {
       await db.insert(proposalDrafts).values(draft);
 
       const res = await app.request(
-        `/proposal-drafts/${draft.id}?address=${ADDRESS_A}`,
+        `/proposal/drafts/${draft.id}?address=${ADDRESS_A}`,
         { method: "DELETE" },
       );
 

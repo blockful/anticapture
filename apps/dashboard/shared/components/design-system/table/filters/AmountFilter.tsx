@@ -67,7 +67,6 @@ export function AmountFilter({
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <ButtonFilter
-          onClick={() => setIsOpen(!isOpen)}
           isOpen={isOpen}
           hasFilters={hasFilters}
           className={className}

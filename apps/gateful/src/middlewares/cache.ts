@@ -2,6 +2,7 @@ import type { Context, Next } from "hono";
 
 import { logger } from "../logger.js";
 import { cacheRequestTotal } from "../metrics.js";
+import { safeParse } from "../shared/safe-parse.js";
 
 /** Minimal interface the middleware actually needs */
 export interface CacheStore {
@@ -15,14 +16,6 @@ type CachedEntry = {
   contentType: string;
   cacheControl: string;
 };
-
-function safeParse<T>(raw: string): T | null {
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Cache-aside middleware using Redis.

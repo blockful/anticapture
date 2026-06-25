@@ -79,10 +79,10 @@ export const LoadingComponent = ({
             variant="success"
             text={
               voteRemaining === 1
-                ? "This vote is free! Last one for today — refreshes tomorrow."
+                ? "This vote is free! Last one this month — resets next month."
                 : `This vote is free! You'll still have ${
                     voteRemaining - 1
-                  } left to use today.`
+                  } left to use this month.`
             }
           />
         )}

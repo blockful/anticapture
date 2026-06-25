@@ -1,5 +1,24 @@
 # @anticapture/dashboard
 
+## 2.6.0
+
+### Minor Changes
+
+- [#1910](https://github.com/blockful/anticapture/pull/1910) [`a006283`](https://github.com/blockful/anticapture/commit/a0062835b784f0b97363c664ab7efb3ee4177171) Thanks [@brunod-e](https://github.com/brunod-e)! - feat(draft-proposals): persist draft proposals in PostgreSQL with SIWE authentication
+
+  Moves draft proposal storage from browser localStorage to the API's PostgreSQL database. Adds SIWE-based JWT authentication endpoints (`GET /auth/nonce`, `POST /auth/verify`) and full CRUD endpoints for draft proposals (`/proposal/drafts`). On wallet connect, existing localStorage drafts are automatically migrated to the database. Drafts are scoped per user address and DAO.
+
+- [#1973](https://github.com/blockful/anticapture/pull/1973) [`7b562d5`](https://github.com/blockful/anticapture/commit/7b562d599a126b89e4e95ca84470b0df863a9aa5) Thanks [@isadorable-png](https://github.com/isadorable-png)! - Gov FE improvements: unify onchain/offchain proposals into a single list with a source filter (All sources / Snapshot / Governor), add source badges (Governor/Snapshot) to proposal cards and the proposal detail page, show the leading option for Snapshot polls with more than two choices, add a "You voted" badge and an abstain segment to vote progress bars, adapt the proposals view for mobile, and redesign the whitelabel OG image with a fixed "Gov Interface" label plus per-page titles.
+
+- [#1976](https://github.com/blockful/anticapture/pull/1976) [`4e5f06a`](https://github.com/blockful/anticapture/commit/4e5f06a261211b9a94eb0e40047468000ba40363) Thanks [@LeonardoVieira1630](https://github.com/LeonardoVieira1630)! - Switch relayer rate limiting from a shared daily window to per-operation monthly limits (separate caps for votes and delegations), configurable via `MAX_VOTES_PER_ADDRESS_PER_MONTH` and `MAX_DELEGATIONS_PER_ADDRESS_PER_MONTH` (each defaulting to 3). The `/relay/config` and `/relay/rate-limit/{address}` responses now expose per-operation `limits`/`limit` and a monthly `resetsAt`; the client SDK is regenerated to match. The dashboard `useGaslessRelayer` hook now exposes `voteLimit`/`delegationLimit` in place of the removed `maxRelayPerAddressPerDay`/`maxPerDay` fields.
+
+### Patch Changes
+
+- [#1983](https://github.com/blockful/anticapture/pull/1983) [`83e97d8`](https://github.com/blockful/anticapture/commit/83e97d844a442d63e4bd0ecf1f935799c1c71141) Thanks [@alextnetto](https://github.com/alextnetto)! - Remove redundant alert channel card descriptions from the alerts page.
+
+- Updated dependencies [[`e5840e8`](https://github.com/blockful/anticapture/commit/e5840e89b2aa2d9090078a3fcbb5ba856caa65e6), [`cebd048`](https://github.com/blockful/anticapture/commit/cebd04865d4efd1d155ec6a5009b48bd9ee37d9e), [`4e5f06a`](https://github.com/blockful/anticapture/commit/4e5f06a261211b9a94eb0e40047468000ba40363), [`05a7cf2`](https://github.com/blockful/anticapture/commit/05a7cf2d7280b392579a342db3810c6e1fa0d54d)]:
+  - @anticapture/client@1.3.0
+
 ## 2.5.0
 
 ### Minor Changes

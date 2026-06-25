@@ -5,12 +5,25 @@
       "cache": false,
       "passThroughEnv": ["*"]
     },
-    "@anticapture/client#codegen": {
+    "db:migrate": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "db:push": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "mint": {
+      "cache": false,
+      "passThroughEnv": ["*"]
+    },
+    "codegen": {
       "inputs": [
         "kubb.config.ts",
         "src/**",
         "$TURBO_ROOT$/apps/api/**",
-        "$TURBO_ROOT$/apps/gateful/**"
+        "$TURBO_ROOT$/apps/gateful/**",
+        "$TURBO_ROOT$/apps/relayer/**"
       ],
       "outputs": ["generated/**"],
       "env": [
@@ -139,9 +152,6 @@
         "NEXT_PUBLIC_WC_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
       ]
-    },
-    "codegen": {
-      "outputs": ["generated/**"]
     },
     "db:generate": {
       "inputs": ["src/**/*.ts"],

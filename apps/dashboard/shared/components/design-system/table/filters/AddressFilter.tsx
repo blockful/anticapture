@@ -97,7 +97,6 @@ export function AddressFilter({
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <ButtonFilter
-          onClick={() => setIsOpen(!isOpen)}
           isOpen={isOpen}
           hasFilters={!!currentFilter}
           className={className}

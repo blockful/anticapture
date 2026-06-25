@@ -22,7 +22,8 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 interface UseRelayerConfigResult {
   enabled: boolean;
   minVotingPower: bigint | null;
-  maxRelayPerAddressPerDay: number | null;
+  voteLimit: number | null;
+  delegationLimit: number | null;
   isLoading: boolean;
 }
 
@@ -72,7 +73,8 @@ export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
   return {
     enabled,
     minVotingPower,
-    maxRelayPerAddressPerDay: data?.maxRelayPerAddressPerDay ?? null,
+    voteLimit: data?.limits?.vote ?? null,
+    delegationLimit: data?.limits?.delegation ?? null,
     isLoading: gaslessEnabled && (balanceLoading || (enabled && isLoading)),
   };
 };
@@ -80,7 +82,8 @@ export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
 interface UseRelayerRateLimitResult {
   voteRemaining: number | null;
   delegationRemaining: number | null;
-  maxPerDay: number | null;
+  voteLimit: number | null;
+  delegationLimit: number | null;
   resetsAt: string | null;
   isLoading: boolean;
 }
@@ -102,9 +105,10 @@ export const useRelayerRateLimit = (
   );
 
   return {
-    voteRemaining: data?.vote.remaining ?? null,
-    delegationRemaining: data?.delegation.remaining ?? null,
-    maxPerDay: data?.maxPerDay ?? null,
+    voteRemaining: data?.vote?.remaining ?? null,
+    delegationRemaining: data?.delegation?.remaining ?? null,
+    voteLimit: data?.vote?.limit ?? null,
+    delegationLimit: data?.delegation?.limit ?? null,
     resetsAt: data?.resetsAt ?? null,
     isLoading: gaslessEnabled && (balanceLoading || (enabled && isLoading)),
   };

@@ -21,6 +21,7 @@ export const Select = ({
   onValueChange,
   disabled = false,
   error = false,
+  "aria-label": ariaLabel,
   className,
 }: SelectProps) => {
   const [open, setOpen] = useState(false);
@@ -45,6 +46,7 @@ export const Select = ({
         <button
           type="button"
           role="combobox"
+          aria-label={ariaLabel}
           aria-expanded={open}
           aria-haspopup="listbox"
           disabled={disabled}

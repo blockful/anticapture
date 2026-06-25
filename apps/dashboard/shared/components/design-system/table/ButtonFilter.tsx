@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Filter } from "lucide-react";
+import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/shared/utils";
 
@@ -22,35 +23,36 @@ const buttonFilterVariants = cva(
   },
 );
 
-type ButtonFilterProps = VariantProps<typeof buttonFilterVariants> & {
-  className?: string;
-  onClick: () => void;
-  isOpen?: boolean;
-  hasFilters?: boolean;
-};
+type ButtonFilterProps = VariantProps<typeof buttonFilterVariants> &
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    className?: string;
+    isOpen?: boolean;
+    hasFilters?: boolean;
+  };
 
-export const ButtonFilter = ({
-  variant,
-  className,
-  onClick,
-  isOpen,
-  hasFilters,
-  ...props
-}: ButtonFilterProps) => {
-  return (
-    <div className="relative inline-block">
-      <button
-        className={cn(buttonFilterVariants({ variant, isOpen }), className)}
-        {...props}
-        onClick={onClick}
-      >
-        <Filter className="text-primary size-3" />
-      </button>
-      {hasFilters && (
-        <div className="pointer-events-none absolute left-3 top-0.5 size-4">
-          <div className="bg-highlight size-2 rounded-full" />
-        </div>
-      )}
-    </div>
-  );
-};
+export const ButtonFilter = forwardRef<HTMLButtonElement, ButtonFilterProps>(
+  (
+    { variant, className, type = "button", isOpen, hasFilters, ...props },
+    ref,
+  ) => {
+    return (
+      <div className="relative inline-block">
+        <button
+          ref={ref}
+          className={cn(buttonFilterVariants({ variant, isOpen }), className)}
+          type={type}
+          {...props}
+        >
+          <Filter className="text-primary size-3" />
+        </button>
+        {hasFilters && (
+          <div className="pointer-events-none absolute left-3 top-0.5 size-4">
+            <div className="bg-highlight size-2 rounded-full" />
+          </div>
+        )}
+      </div>
+    );
+  },
+);
+
+ButtonFilter.displayName = "ButtonFilter";
