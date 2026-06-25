@@ -25,6 +25,10 @@ export function useDraftRecipient(): { isRecipient: boolean } {
       return;
     }
 
+    // Drop the prior draft's author so a draft-to-draft nav can't compute
+    // ownership against a stale author before the new lookup resolves.
+    setAuthor(undefined);
+
     let cancelled = false;
     void getDraftProposal(
       daoId as GetDraftProposalPathParamsDaoEnumKey,
