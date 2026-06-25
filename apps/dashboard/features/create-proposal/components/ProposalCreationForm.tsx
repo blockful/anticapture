@@ -370,6 +370,10 @@ export const ProposalCreationForm = ({
   };
 
   const handlePublishClick = () => {
+    // Validate the form here too, not just via the disabled button: the
+    // post-connect resume path calls this directly and would otherwise let an
+    // incomplete/invalid draft (e.g. no actions) reach the governor.
+    if (!canPublish) return;
     // Both queries read as 0n while loading, so deciding the threshold before
     // either resolves would let an under-threshold wallet through (or wrongly
     // route an eligible one). Wait for both.
