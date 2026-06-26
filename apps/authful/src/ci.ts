@@ -4,8 +4,8 @@
  * anything that isn't `dev` or `production` is a transient preview deploy.
  */
 export function isRailwayPreviewEnv(): boolean {
-  // HACK: coupled to the Railway environment for now as we have no way to avoid it
   return !["dev", "production"].includes(
+    // HACK: coupled to the Railway environment for now as we have no way to avoid it
     process.env["RAILWAY_ENVIRONMENT_NAME"] || "dev",
   );
 }
