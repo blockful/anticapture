@@ -1,4 +1,4 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, gte, inArray, sql } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 
 import type { Repository } from "@/repository/db.interface";
@@ -30,10 +30,11 @@ export class DrizzleRepository implements Repository {
     return row?.lastCursor ?? null;
   }
 
-  async getAllProposalIds(): Promise<string[]> {
+  async getProposalIdsSince(since: number): Promise<string[]> {
     const rows = await this.db
       .select({ id: schema.proposals.id })
-      .from(schema.proposals);
+      .from(schema.proposals)
+      .where(gte(schema.proposals.created, since));
 
     return rows.map((row) => row.id);
   }

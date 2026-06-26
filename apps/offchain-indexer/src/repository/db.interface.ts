@@ -5,7 +5,7 @@ export interface Repository {
   resetCursor(entity: string): Promise<void>;
   clearProposals(): Promise<void>;
   clearVotes(): Promise<void>;
-  getAllProposalIds(): Promise<string[]>;
+  getProposalIdsSince(since: number): Promise<string[]>;
   deleteProposals(ids: string[]): Promise<void>;
   saveProposals(proposals: OffchainProposal[], cursor: string): Promise<void>;
   saveVotes(votes: OffchainVote[], cursor: string): Promise<void>;

@@ -117,9 +117,9 @@ export class SnapshotProvider implements DataProvider {
     return { data: proposals, nextCursor };
   }
 
-  async fetchAllProposalIds(): Promise<string[]> {
+  async fetchProposalIdsSince(since: number): Promise<string[]> {
     const ids: string[] = [];
-    let cursor = 0;
+    let cursor = since;
 
     while (true) {
       const response = await this.query<{

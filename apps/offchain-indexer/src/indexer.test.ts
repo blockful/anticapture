@@ -65,7 +65,7 @@ function createSimpleRepository(): Repository & {
     clearVotes: vi.fn(async () => {
       savedVotes.length = 0;
     }),
-    getAllProposalIds: vi.fn(async () => proposalIds),
+    getProposalIdsSince: vi.fn(async () => proposalIds),
     deleteProposals: vi.fn(async (ids: string[]) => {
       for (const id of ids) {
         const index = proposalIds.indexOf(id);
@@ -103,7 +103,7 @@ function createSimpleProvider(options?: {
         nextCursor: options?.proposalsNextCursor ?? null,
       };
     }),
-    fetchAllProposalIds: vi.fn(async () => {
+    fetchProposalIdsSince: vi.fn(async () => {
       if (options?.failProposalIds) {
         throw new Error("Proposal id fetch failed");
       }
@@ -141,7 +141,7 @@ describe("Indexer", () => {
     expect(repo.getLastCursor).toHaveBeenCalledWith("proposals");
     expect(repo.getLastCursor).toHaveBeenCalledWith("votes");
     expect(provider.fetchProposals).toHaveBeenCalledWith("1700000000");
-    expect(provider.fetchAllProposalIds).toHaveBeenCalled();
+    expect(provider.fetchProposalIdsSince).toHaveBeenCalled();
     expect(provider.fetchVotes).toHaveBeenCalledWith("1700000050");
 
     void promise;
@@ -162,7 +162,7 @@ describe("Indexer", () => {
     expect(repo.resetCursor).toHaveBeenCalledWith("proposals");
     expect(repo.resetCursor).toHaveBeenCalledWith("votes");
     expect(provider.fetchProposals).toHaveBeenCalledWith(null);
-    expect(provider.fetchAllProposalIds).toHaveBeenCalled();
+    expect(provider.fetchProposalIdsSince).toHaveBeenCalled();
     expect(provider.fetchVotes).toHaveBeenCalledWith(null);
 
     void promise;
@@ -250,6 +250,22 @@ describe("Indexer", () => {
     void promise;
   });
 
+  it("should reconcile only within the last two weeks", async () => {
+    vi.setSystemTime(1_700_000_000_000);
+    const expectedSince = 1_700_000_000 - 14 * 24 * 60 * 60;
+    const repo = createSimpleRepository();
+    const provider = createSimpleProvider({ proposalIds: ["p-1"] });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(provider.fetchProposalIdsSince).toHaveBeenCalledWith(expectedSince);
+    expect(repo.getProposalIdsSince).toHaveBeenCalledWith(expectedSince);
+
+    void promise;
+  });
+
   it("should not delete proposals when all DB ids still exist", async () => {
     const repo = createSimpleRepository();
     repo.proposalIds.push("p-1", "p-2");
@@ -274,7 +290,7 @@ describe("Indexer", () => {
     const promise = indexer.start(false);
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(repo.getAllProposalIds).not.toHaveBeenCalled();
+    expect(repo.getProposalIdsSince).not.toHaveBeenCalled();
     expect(repo.deleteProposals).not.toHaveBeenCalled();
     expect(loggerSpy).toHaveBeenCalledWith(
       "snapshot returned no proposals - skipping proposal reconciliation",

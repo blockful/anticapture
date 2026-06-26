@@ -181,15 +181,32 @@ describe("DrizzleRepository", () => {
       ]);
     });
 
-    it("should get all proposal ids", async () => {
+    it("should get proposal ids created at or after the cutoff", async () => {
       await repo.saveProposals(
-        [createProposal({ id: "prop-1" }), createProposal({ id: "prop-2" })],
+        [
+          createProposal({ id: "prop-1", created: 1700000000 }),
+          createProposal({ id: "prop-2", created: 1700000000 }),
+        ],
         "cursor-1",
       );
 
-      const ids = await repo.getAllProposalIds();
+      const ids = await repo.getProposalIdsSince(0);
 
       expect(ids.sort()).toStrictEqual(["prop-1", "prop-2"]);
+    });
+
+    it("should exclude proposal ids created before the cutoff", async () => {
+      await repo.saveProposals(
+        [
+          createProposal({ id: "old", created: 1000 }),
+          createProposal({ id: "recent", created: 2000 }),
+        ],
+        "cursor-1",
+      );
+
+      const ids = await repo.getProposalIdsSince(2000);
+
+      expect(ids).toStrictEqual(["recent"]);
     });
 
     it("should delete proposals and their votes", async () => {

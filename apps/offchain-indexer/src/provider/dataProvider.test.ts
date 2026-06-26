@@ -193,8 +193,8 @@ describe("SnapshotProvider", () => {
     });
   });
 
-  describe("fetchAllProposalIds", () => {
-    it("should fetch all proposal ids", async () => {
+  describe("fetchProposalIdsSince", () => {
+    it("should fetch proposal ids since the cutoff", async () => {
       mockGraphQL({
         proposals: [
           { id: "proposal-1", created: 1700000000 },
@@ -202,7 +202,7 @@ describe("SnapshotProvider", () => {
         ],
       });
 
-      const result = await provider.fetchAllProposalIds();
+      const result = await provider.fetchProposalIdsSince(1699999999);
 
       expect(result).toStrictEqual(["proposal-1", "proposal-2"]);
     });
@@ -218,7 +218,7 @@ describe("SnapshotProvider", () => {
         { proposals: secondPage },
       ]);
 
-      const result = await provider.fetchAllProposalIds();
+      const result = await provider.fetchProposalIdsSince(0);
 
       expect(result).toHaveLength(1001);
       expect(result.at(0)).toBe("proposal-0");

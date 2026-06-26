@@ -5,6 +5,10 @@ import type { OffchainProposal } from "@/repository/schema";
 
 const ACTIVE_STATES = new Set(["pending", "active"]);
 
+// Only reconcile (and delete) proposals created within this window. Bounds both
+// the Snapshot fetch and the DB scan so reconciliation can't overwhelm either.
+const RECONCILE_WINDOW_SECONDS = 14 * 24 * 60 * 60;
+
 export class Indexer {
   private proposalsCursor: string | null = null;
   private votesCursor: string | null = null;
@@ -84,7 +88,8 @@ export class Indexer {
   }
 
   private async reconcileProposals(): Promise<void> {
-    const liveIds = await this.provider.fetchAllProposalIds();
+    const since = Math.floor(Date.now() / 1000) - RECONCILE_WINDOW_SECONDS;
+    const liveIds = await this.provider.fetchProposalIdsSince(since);
 
     if (liveIds.length === 0) {
       logger.warn(
@@ -94,7 +99,7 @@ export class Indexer {
     }
 
     const liveIdSet = new Set(liveIds);
-    const dbIds = await this.repository.getAllProposalIds();
+    const dbIds = await this.repository.getProposalIdsSince(since);
     const deletedIds = dbIds.filter((id) => !liveIdSet.has(id));
 
     if (deletedIds.length === 0) return;
