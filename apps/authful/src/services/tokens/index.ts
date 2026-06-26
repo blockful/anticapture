@@ -45,6 +45,30 @@ export class TokensService {
     return { token, plaintext };
   }
 
+  /**
+   * Register a token with a known plaintext (CI/preview bootstrap) so every
+   * service in the same environment shares a working key. Idempotent: a no-op
+   * when an active token with this value already exists, so it survives
+   * restarts and re-deploys. The plaintext capability is internal only — it is
+   * never exposed on the admin API.
+   */
+  async seed(
+    input: MintInput & { plaintext: string },
+  ): Promise<{ created: boolean; token: DBToken }> {
+    const tokenHash = hashToken(input.plaintext);
+    const existing = await this.repo.findActiveByHash(tokenHash);
+    if (existing) return { created: false, token: existing };
+    const token = await this.repo.create({
+      tenant: input.tenant,
+      name: input.name,
+      tokenHash,
+      ...(input.rateLimitPerMin !== undefined
+        ? { rateLimitPerMin: input.rateLimitPerMin }
+        : {}),
+    });
+    return { created: true, token };
+  }
+
   async list(): Promise<DBToken[]> {
     return this.repo.list();
   }

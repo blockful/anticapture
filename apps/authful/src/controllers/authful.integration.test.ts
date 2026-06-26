@@ -140,6 +140,47 @@ describe("authful app", () => {
     });
   });
 
+  describe("seed (CI/preview bootstrap)", () => {
+    it("seeds a known token, is idempotent, and validates", async () => {
+      const service = new TokensService(new TokensRepository(db));
+      const plaintext = "ci-seed-token-0123456789";
+
+      const first = await service.seed({
+        plaintext,
+        tenant: "ci",
+        name: "ci seed token",
+      });
+      expect(first.created).toBe(true);
+      expect(first.token.tenant).toBe("ci");
+
+      // Re-running (e.g. on restart) is a no-op, not a duplicate or a throw.
+      const second = await service.seed({
+        plaintext,
+        tenant: "ci",
+        name: "ci seed token",
+      });
+      expect(second.created).toBe(false);
+      expect(second.token.id).toBe(first.token.id);
+
+      // Exactly one row, stored as a hash only.
+      const rows = await db.select().from(tokens);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]!.tokenHash).toBe(hashToken(plaintext));
+
+      // The seeded plaintext authenticates through the validate surface.
+      const res = await app.request("/validate", {
+        method: "POST",
+        headers: internalHeaders,
+        body: JSON.stringify({ tokenHash: hashToken(plaintext) }),
+      });
+      expect(res.status).toBe(200);
+      await expect(res.json()).resolves.toMatchObject({
+        valid: true,
+        tenant: "ci",
+      });
+    });
+  });
+
   describe("GET /tokens", () => {
     it("lists metadata without hashes or plaintext", async () => {
       const minted = await mint({});

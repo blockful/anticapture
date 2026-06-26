@@ -4,13 +4,35 @@ import { drizzle } from "drizzle-orm/node-postgres";
 
 import { createApp } from "@/app";
 import * as schema from "@/database/schema";
-import { env } from "@/env";
+import { env, isPreview } from "@/env";
 import { logger } from "@/logger";
 import { TokensRepository } from "@/repositories/tokens";
 import { TokensService } from "@/services/tokens";
 
 const db = drizzle(env.DATABASE_URL, { schema });
 const service = new TokensService(new TokensRepository(db));
+
+// CI/preview bootstrap: seed a fixed, env-provided token so the rest of the
+// preview stack can authenticate with a known key. `env` validation guarantees
+// SEED_TOKEN_PLAINTEXT is set when `isPreview`. Idempotent and non-fatal.
+if (isPreview && env.SEED_TOKEN_PLAINTEXT) {
+  try {
+    const { created } = await service.seed({
+      plaintext: env.SEED_TOKEN_PLAINTEXT,
+      tenant: env.SEED_TOKEN_TENANT,
+      name: env.SEED_TOKEN_NAME,
+      ...(env.SEED_TOKEN_RATE_LIMIT !== undefined
+        ? { rateLimitPerMin: env.SEED_TOKEN_RATE_LIMIT }
+        : {}),
+    });
+    logger.info(
+      { tenant: env.SEED_TOKEN_TENANT, name: env.SEED_TOKEN_NAME, created },
+      created ? "Seeded CI token" : "CI token already present — skipped seed",
+    );
+  } catch (err) {
+    logger.error({ err }, "Failed to seed CI token");
+  }
+}
 
 const app = createApp({
   service,
