@@ -52,19 +52,20 @@ export class TokensService {
    * restarts and re-deploys. The plaintext capability is internal only — it is
    * never exposed on the admin API.
    */
-  async seed(
-    input: MintInput & { plaintext: string },
-  ): Promise<{ created: boolean; token: DBToken }> {
+  async seed(input: {
+    tenant: string;
+    name: string;
+    plaintext: string;
+  }): Promise<{ created: boolean; token: DBToken }> {
     const tokenHash = hashToken(input.plaintext);
     const existing = await this.repo.findActiveByHash(tokenHash);
     if (existing) return { created: false, token: existing };
+    // rateLimitPerMin is omitted on purpose — the column defaults to 600 at the
+    // DB level, which is plenty for an ephemeral preview.
     const token = await this.repo.create({
       tenant: input.tenant,
       name: input.name,
       tokenHash,
-      ...(input.rateLimitPerMin !== undefined
-        ? { rateLimitPerMin: input.rateLimitPerMin }
-        : {}),
     });
     return { created: true, token };
   }
