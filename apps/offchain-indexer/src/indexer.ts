@@ -54,6 +54,12 @@ export class Indexer {
     }
 
     try {
+      await this.reconcileProposals();
+    } catch (err) {
+      logger.error({ err }, "error reconciling proposals - will retry");
+    }
+
+    try {
       await this.syncVotes();
     } catch (err) {
       logger.error(
@@ -74,6 +80,29 @@ export class Indexer {
     logger.info(
       { count: data.length, cursor: this.proposalsCursor },
       "synced proposals",
+    );
+  }
+
+  private async reconcileProposals(): Promise<void> {
+    const liveIds = await this.provider.fetchAllProposalIds();
+
+    if (liveIds.length === 0) {
+      logger.warn(
+        "snapshot returned no proposals - skipping proposal reconciliation",
+      );
+      return;
+    }
+
+    const liveIdSet = new Set(liveIds);
+    const dbIds = await this.repository.getAllProposalIds();
+    const deletedIds = dbIds.filter((id) => !liveIdSet.has(id));
+
+    if (deletedIds.length === 0) return;
+
+    await this.repository.deleteProposals(deletedIds);
+    logger.info(
+      { count: deletedIds.length, ids: deletedIds },
+      "removed proposals deleted from snapshot",
     );
   }
 

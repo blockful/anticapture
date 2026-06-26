@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 
 import type { Repository } from "@/repository/db.interface";
@@ -28,6 +28,27 @@ export class DrizzleRepository implements Repository {
       .where(eq(schema.syncStatus.entity, entity));
 
     return row?.lastCursor ?? null;
+  }
+
+  async getAllProposalIds(): Promise<string[]> {
+    const rows = await this.db
+      .select({ id: schema.proposals.id })
+      .from(schema.proposals);
+
+    return rows.map((row) => row.id);
+  }
+
+  async deleteProposals(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+
+    await this.db.transaction(async (tx) => {
+      await tx
+        .delete(schema.votes)
+        .where(inArray(schema.votes.proposalId, ids));
+      await tx
+        .delete(schema.proposals)
+        .where(inArray(schema.proposals.id, ids));
+    });
   }
 
   async saveProposals(

@@ -180,6 +180,40 @@ describe("DrizzleRepository", () => {
         },
       ]);
     });
+
+    it("should get all proposal ids", async () => {
+      await repo.saveProposals(
+        [createProposal({ id: "prop-1" }), createProposal({ id: "prop-2" })],
+        "cursor-1",
+      );
+
+      const ids = await repo.getAllProposalIds();
+
+      expect(ids.sort()).toStrictEqual(["prop-1", "prop-2"]);
+    });
+
+    it("should delete proposals and their votes", async () => {
+      await repo.saveProposals(
+        [createProposal({ id: "prop-1" }), createProposal({ id: "prop-2" })],
+        "cursor-1",
+      );
+      await repo.saveVotes(
+        [
+          createVote({ proposalId: "prop-1", voter: "0xabc" }),
+          createVote({ proposalId: "prop-2", voter: "0xdef" }),
+        ],
+        "cursor-1",
+      );
+
+      await repo.deleteProposals(["prop-1"]);
+
+      const proposals = await db.select().from(schema.proposals);
+      const votes = await db.select().from(schema.votes);
+      expect(proposals.map((proposal) => proposal.id)).toStrictEqual([
+        "prop-2",
+      ]);
+      expect(votes.map((vote) => vote.proposalId)).toStrictEqual(["prop-2"]);
+    });
   });
 
   describe("votes", () => {
