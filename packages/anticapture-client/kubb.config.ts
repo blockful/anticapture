@@ -110,16 +110,6 @@ export default defineConfig(({ watch }) => ({
         type: "tag",
         name: ({ group }) => `${group}Handlers`,
       },
-      // exclude: [
-      //   {
-      //     type: "path",
-      //     pattern: /.*relay.*/i,
-      //   },
-      //   {
-      //     type: "path",
-      //     pattern: /\/address-enrichment\/.*/i,
-      //   },
-      // ],
     }),
     pluginFaker({
       output: {

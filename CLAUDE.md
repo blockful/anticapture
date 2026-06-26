@@ -10,6 +10,19 @@
 - Commit `node_modules`, `.env`, or generated files
 - Cast types to `any` or `unknown` without explicitly asked to
 
+## Shared memory
+
+The team's shared agent memory is Claude Code's **auto memory**, redirected to the git-tracked
+`.agents/shared-memory/` folder so one dev's learnings reach another dev's agent via push/pull.
+Claude reads it at session start and writes to it automatically — there is no manual step.
+
+- **Setup (once per dev):** run `pnpm setup:memory`, then restart the session. Inspect with `/memory`.
+- **Never write** secrets, tokens, `.env` values, or machine-local absolute paths; keep entries
+  repo-relative.
+- It is **not curated** — review `git status` in that folder before committing what Claude wrote.
+
+Full guidance in `AGENTS.md` and `.agents/shared-memory/README.md`.
+
 ## Architecture Overview
 
 Anticapture is a pnpm monorepo with 5 runtime components and 1 code-generation package:
