@@ -44,9 +44,9 @@ Tests run against **live services** — feature data is not mocked.
 
 The following environment variables must point to reachable services:
 
-| Variable                  | Purpose                          |
-| ------------------------- | -------------------------------- |
-| `NEXT_PUBLIC_GATEFUL_URL` | Gateful feature-flag service URL |
+| Variable              | Purpose                          |
+| --------------------- | -------------------------------- |
+| `ANTICAPTURE_API_URL` | Gateful feature-flag service URL |
 
 Analytics and noise requests may be blocked, but Gateful calls must be live.
 
