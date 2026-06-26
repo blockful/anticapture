@@ -277,12 +277,11 @@ fi
 start_gateful
 
 # 7. Clients — codegen + build watch
-export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
+export ANTICAPTURE_API_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
 # 8. Dashboard
-export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 
