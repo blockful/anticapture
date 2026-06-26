@@ -159,8 +159,11 @@ jobs:
         # configure-vercel-preview job upserts is keyed by gitBranch and is NOT
         # applied to this CLI deployment (no branch association), so codegen
         # falls back to the project-level preview value and fails with
-        # "fetch failed". Pass the resolved Gateful URL as a build env directly.
-        run: npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}"
+        # "fetch failed". Pass the resolved Gateful URL as a build env (codegen)
+        # AND a runtime env (--env): the /api/gateful/* proxy route reads
+        # process.env.ANTICAPTURE_API_URL at request time, so --build-env alone
+        # would build against the right URL but serve a stale/missing one.
+        run: npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" --env ANTICAPTURE_API_URL="${GATEFUL_URL}"
 
   changeset-path-filter:
     name: Detect changeset requirement

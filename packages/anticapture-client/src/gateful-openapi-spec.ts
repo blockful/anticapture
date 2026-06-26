@@ -1,9 +1,6 @@
 export type GatefulOpenApiSpecEnv = {
   ANTICAPTURE_API_URL?: string;
   RAILWAY_ENVIRONMENT_NAME?: string;
-  VERCEL_ENV?: string;
-  VERCEL_GIT_PULL_REQUEST_ID?: string;
-  VERCEL_GIT_COMMIT_REF?: string;
 };
 
 const GATEFUL_OPENAPI_PATH = "/docs/json";
@@ -16,11 +13,6 @@ const RAILWAY_GATEFUL_DOMAIN_SUFFIX = ".up.railway.app";
 // Gateful domain we derive from the environment name.
 const RAILWAY_DEPLOY_ENVIRONMENTS = new Set(["dev", "production"]);
 
-// On Vercel, the `dev`/`main` branches map to long-lived Gateful environments
-// reached via an explicit ANTICAPTURE_API_URL; every other branch is a PR
-// preview whose Gateful domain we derive from the Vercel PR id.
-const VERCEL_PERMANENT_BRANCHES = new Set(["dev", "main"]);
-
 const readNonEmptyValue = (value: string | undefined) => {
   const trimmed = value?.trim();
 
@@ -29,7 +21,7 @@ const readNonEmptyValue = (value: string | undefined) => {
 
 const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, "");
 
-// Some sources (e.g. Railway's RAILWAY_SERVICE_GATEFUL_URL) provide a bare host
+// Some sources (e.g. Railway's ANTICAPTURE_API_URL) provide a bare host
 // without a scheme. Default to https so the resulting URL is fetchable.
 const toGatefulSpecUrl = (gatefulUrl: string) => {
   const base = trimTrailingSlashes(gatefulUrl);
@@ -60,28 +52,18 @@ export const resolveGatefulOpenApiSpecUrl = (
     return buildPreviewGatefulSpecUrl(railwayEnvironmentName);
   }
 
-  // Vercel PR previews don't carry RAILWAY_ENVIRONMENT_NAME, but the matching
-  // Gateful preview follows the same `gateful-anticapture-pr-<id>` Railway
-  // naming — derive it from the Vercel PR id (mirrors apps/dashboard/next.config.ts).
-  const vercelEnv = readNonEmptyValue(env.VERCEL_ENV);
-  const vercelPrId = readNonEmptyValue(env.VERCEL_GIT_PULL_REQUEST_ID);
-  const vercelBranch = readNonEmptyValue(env.VERCEL_GIT_COMMIT_REF);
-
-  if (
-    vercelEnv === "preview" &&
-    vercelPrId &&
-    !VERCEL_PERMANENT_BRANCHES.has(vercelBranch ?? "")
-  ) {
-    return buildPreviewGatefulSpecUrl(`anticapture-pr-${vercelPrId}`);
-  }
-
-  // dev / production (and CI) read the Gateful URL from the environment
+  // Explicit ANTICAPTURE_API_URL wins everywhere it is set: dev / production, CI,
+  // and trusted Vercel previews (the workflow injects the PR-scoped URL via a
+  // branch-scoped Vercel env / --build-env, mirrors apps/dashboard/next.config.ts).
   const gatefulUrl = readNonEmptyValue(env.ANTICAPTURE_API_URL);
 
   if (gatefulUrl) {
     return toGatefulSpecUrl(gatefulUrl);
   }
 
+  // Untrusted/fork Vercel previews receive no ANTICAPTURE_API_URL and get no
+  // Railway preview, so they can't reflect PR changes to the APIs/Gateful — we
+  // don't support previewing them. They fall through to this throw.
   throw new Error(
     "Unable to resolve Gateful OpenAPI spec. Set ANTICAPTURE_API_URL (used on dev/production), or run inside a Railway PR preview with RAILWAY_ENVIRONMENT_NAME.",
   );

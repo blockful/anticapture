@@ -21,7 +21,6 @@ COPY --from=builder /app/out/full/ .
 # See packages/anticapture-client/docs/scripts/gateful-openapi-spec.mjs.
 ARG RAILWAY_ENVIRONMENT_NAME
 ARG ANTICAPTURE_API_URL
-ARG RAILWAY_SERVICE_GATEFUL_URL
 RUN pnpm --filter @anticapture/client-docs build
 
 FROM base AS runner
