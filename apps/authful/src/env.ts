@@ -17,11 +17,10 @@ const envSchema = z
     INTERNAL_API_KEY: z.string().min(16),
     // CI/preview only: a fixed, known token seeded into the DB on boot so every
     // service in the same Railway PR preview shares a working API key. Required
-    // in preview environments; ignored on dev/production.
+    // in preview environments; ignored on dev/production. The seeded token's
+    // tenant/name/rate-limit are fixed constants (see index.ts) — not worth env
+    // vars, since the value only matters to ephemeral previews.
     SEED_TOKEN_PLAINTEXT: z.string().min(16).optional(),
-    SEED_TOKEN_TENANT: z.string().min(1).default("ci"),
-    SEED_TOKEN_NAME: z.string().min(1).default("ci seed token"),
-    SEED_TOKEN_RATE_LIMIT: z.coerce.number().int().positive().optional(),
   })
   .superRefine((data, ctx) => {
     if (CI && !data.SEED_TOKEN_PLAINTEXT) {

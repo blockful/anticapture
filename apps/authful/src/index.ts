@@ -12,6 +12,12 @@ import { TokensService } from "@/services/tokens";
 const db = drizzle(env.DATABASE_URL, { schema });
 const service = new TokensService(new TokensRepository(db));
 
+// Fixed identity for the CI/preview seed token. Only the plaintext value varies
+// (and only across previews), so it's the lone env var; the rest are constants.
+// Rate limit is omitted so the DB default (600/min) applies.
+const SEED_TOKEN_TENANT = "ci";
+const SEED_TOKEN_NAME = "ci seed token";
+
 // CI/preview bootstrap: seed a fixed, env-provided token so the rest of the
 // preview stack can authenticate with a known key. `env` validation guarantees
 // SEED_TOKEN_PLAINTEXT is set when `isPreview`. Idempotent and non-fatal.
@@ -19,14 +25,11 @@ if (isPreview && env.SEED_TOKEN_PLAINTEXT) {
   try {
     const { created } = await service.seed({
       plaintext: env.SEED_TOKEN_PLAINTEXT,
-      tenant: env.SEED_TOKEN_TENANT,
-      name: env.SEED_TOKEN_NAME,
-      ...(env.SEED_TOKEN_RATE_LIMIT !== undefined
-        ? { rateLimitPerMin: env.SEED_TOKEN_RATE_LIMIT }
-        : {}),
+      tenant: SEED_TOKEN_TENANT,
+      name: SEED_TOKEN_NAME,
     });
     logger.info(
-      { tenant: env.SEED_TOKEN_TENANT, name: env.SEED_TOKEN_NAME, created },
+      { tenant: SEED_TOKEN_TENANT, name: SEED_TOKEN_NAME, created },
       created ? "Seeded CI token" : "CI token already present — skipped seed",
     );
   } catch (err) {
