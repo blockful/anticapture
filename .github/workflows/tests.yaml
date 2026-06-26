@@ -142,11 +142,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Check out the PR head commit (not the synthetic merge ref) so
+          # `git log` below reads the real commit author for Vercel attribution.
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Resolve commit author
+        id: author
+        run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
 
       - name: Trigger Vercel preview redeploy
         env:
@@ -154,6 +162,16 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           GATEFUL_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+          # Git metadata so Vercel attributes the deploy to the PR author (avatar +
+          # "Created by"); a bare `vercel deploy` shows "No attribution data available".
+          GIT_SHA: ${{ github.event.pull_request.head.sha }}
+          GIT_REF: ${{ github.event.pull_request.head.ref }}
+          GIT_MSG: ${{ github.event.pull_request.title }}
+          GIT_AUTHOR_LOGIN: ${{ github.event.pull_request.user.login }}
+          GIT_AUTHOR_NAME: ${{ steps.author.outputs.name }}
+          GIT_ORG: ${{ github.repository_owner }}
+          GIT_REPO: ${{ github.event.repository.name }}
+          GIT_REPO_ID: ${{ github.event.repository.id }}
         # `vercel deploy` builds remotely, so codegen reads ANTICAPTURE_API_URL
         # from the Vercel project env. The branch-scoped value the
         # configure-vercel-preview job upserts is keyed by gitBranch and is NOT
@@ -163,7 +181,22 @@ jobs:
         # AND a runtime env (--env): the /api/gateful/* proxy route reads
         # process.env.ANTICAPTURE_API_URL at request time, so --build-env alone
         # would build against the right URL but serve a stale/missing one.
-        run: npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" --env ANTICAPTURE_API_URL="${GATEFUL_URL}"
+        run: |
+          npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" \
+            --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
+            --env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
+            --meta githubCommitSha="${GIT_SHA}" \
+            --meta githubCommitRef="${GIT_REF}" \
+            --meta githubCommitMessage="${GIT_MSG}" \
+            --meta githubCommitAuthorLogin="${GIT_AUTHOR_LOGIN}" \
+            --meta githubCommitAuthorName="${GIT_AUTHOR_NAME}" \
+            --meta githubCommitOrg="${GIT_ORG}" \
+            --meta githubCommitRepo="${GIT_REPO}" \
+            --meta githubCommitRepoId="${GIT_REPO_ID}" \
+            --meta githubOrg="${GIT_ORG}" \
+            --meta githubRepo="${GIT_REPO}" \
+            --meta githubRepoId="${GIT_REPO_ID}" \
+            --meta githubDeployment=1
 
   changeset-path-filter:
     name: Detect changeset requirement
