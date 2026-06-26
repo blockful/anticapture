@@ -57,7 +57,7 @@ export function initDb(connectionString: string) {
  */
 export function runMigrations(connectionString: string) {
   const { appRoot, binPath } = findDrizzleKitBin();
-  const result = spawnSync(binPath, ["push", "--force"], {
+  const result = spawnSync(binPath, ["push"], {
     cwd: appRoot,
     encoding: "utf8",
     env: { ...process.env, DATABASE_URL: connectionString },
