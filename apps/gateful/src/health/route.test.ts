@@ -195,6 +195,28 @@ describe("gateway health route", () => {
     expect(body.upstreams.ens.nextRetryIn).toBeGreaterThan(0);
   });
 
+  it("does not trip the proxy circuit when probes fail repeatedly", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+
+    const { app, registry } = appWithHealth({
+      daoApis: new Map([["ens", "http://api.example"]]),
+      daoRelayers: new Map(),
+    });
+
+    // failureThreshold is 2 — poll more than that.
+    for (let i = 0; i < 5; i++) {
+      const res = await app.request("/health");
+      const body = await readHealthResponse(res);
+      expect(body.upstreams.ens).toMatchObject({
+        status: "down",
+        circuit: "CLOSED",
+      });
+    }
+
+    // The proxy breaker must stay CLOSED for real traffic.
+    expect(registry.get("ens").state).toBe("CLOSED");
+  });
+
   it("returns ok when no upstreams are configured", async () => {
     const fetch = okFetch();
     vi.stubGlobal("fetch", fetch);

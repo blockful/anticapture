@@ -1,10 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import type { OpenAPIHono } from "@hono/zod-openapi";
 
-import {
-  CircuitOpenError,
-  type CircuitBreaker,
-} from "../shared/circuit-breaker";
+import type { CircuitBreaker } from "../shared/circuit-breaker";
 import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry";
 
 const HEALTH_PROBE_TIMEOUT_MS = 3_000;
@@ -109,16 +106,26 @@ async function probeTarget(
 ): Promise<[string, UpstreamStatus]> {
   const breaker = registry.get(target.circuitKey);
 
+  // Read-only probe: reflect the proxy circuit's state but never run through
+  // breaker.execute(). /health is public and polled by CI/orchestrators —
+  // routing probes through the breaker would let probe failures trip the
+  // real-traffic circuit (or steal its single HALF_OPEN slot) and take routes
+  // offline before any user request actually fails.
+  if (breaker.state === "OPEN") {
+    return [
+      target.name,
+      { status: "down", ...buildCircuit(breaker), error: "circuit open" },
+    ];
+  }
+
   try {
-    await breaker.execute(async () => {
-      const url = new URL("/health", target.baseUrl);
-      const res = await fetch(url.toString(), {
-        signal: AbortSignal.timeout(HEALTH_PROBE_TIMEOUT_MS),
-      });
-      if (!res.ok) {
-        throw new Error(`${target.name} /health returned ${res.status}`);
-      }
+    const url = new URL("/health", target.baseUrl);
+    const res = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(HEALTH_PROBE_TIMEOUT_MS),
     });
+    if (!res.ok) {
+      throw new Error(`${target.name} /health returned ${res.status}`);
+    }
 
     return [
       target.name,
@@ -133,12 +140,7 @@ async function probeTarget(
       {
         status: "down",
         ...buildCircuit(breaker),
-        error:
-          err instanceof CircuitOpenError
-            ? "circuit open"
-            : err instanceof Error
-              ? err.message
-              : "health probe failed",
+        error: err instanceof Error ? err.message : "health probe failed",
       },
     ];
   }
