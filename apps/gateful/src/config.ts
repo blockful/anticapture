@@ -27,6 +27,7 @@ export const envSchema = z
     CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
     CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
     REDIS_URL: z.string().optional(),
+    RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
   })
   .refine((env) => !env.TOKEN_SERVICE_URL || !!env.TOKEN_SERVICE_API_KEY, {
     message: "TOKEN_SERVICE_API_KEY is required when TOKEN_SERVICE_URL is set",
@@ -63,6 +64,7 @@ export const config = {
     : undefined,
   metricsToken: env.GATEFUL_METRICS_TOKEN,
   redisUrl: env.REDIS_URL,
+  commitSha: env.RAILWAY_GIT_COMMIT_SHA,
   daoApis: loadDaoMap("DAO_API_"),
   daoRelayers: loadDaoMap("DAO_RELAYER_"),
   circuitBreaker: {
