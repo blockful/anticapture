@@ -35,7 +35,7 @@ pnpm dashboard build        # Production build
 
 | Variable                                | Required | Description                |
 | --------------------------------------- | -------- | -------------------------- |
-| `NEXT_PUBLIC_GATEFUL_URL`               | yes      | Gateful REST API base URL  |
+| `ANTICAPTURE_API_URL`                   | yes      | Gateful REST API base URL  |
 | `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | yes      | WalletConnect project ID   |
 | `NEXT_PUBLIC_ALCHEMY_KEY`               | yes      | Alchemy RPC key            |
 | `NEXT_PUBLIC_SITE_URL`                  | no       | Site URL for SEO/meta      |

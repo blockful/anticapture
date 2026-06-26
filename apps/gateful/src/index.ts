@@ -110,7 +110,12 @@ logger.info(
 const registry = new CircuitBreakerRegistry(config.circuitBreaker);
 
 // OpenAPI routes
-health(app, registry);
+health(app, registry, {
+  daoApis: config.daoApis,
+  daoRelayers: config.daoRelayers,
+  addressEnrichmentUrl: config.addressEnrichmentUrl,
+  commitSha: config.commitSha,
+});
 daoHealth(app, config.daoApis, registry);
 addressEnrichment(app, config.addressEnrichmentUrl, registry);
 
