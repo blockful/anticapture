@@ -54,6 +54,15 @@ function mockGraphQL(data: Record<string, unknown>) {
   server.use(http.post(ENDPOINT, () => HttpResponse.json({ data })));
 }
 
+function mockGraphQLSequence(data: Record<string, unknown>[]) {
+  let index = 0;
+  server.use(
+    http.post(ENDPOINT, () =>
+      HttpResponse.json({ data: data[Math.min(index++, data.length - 1)] }),
+    ),
+  );
+}
+
 describe("SnapshotProvider", () => {
   describe("fetchProposals", () => {
     it("should fetch and map proposals correctly", async () => {
@@ -181,6 +190,39 @@ describe("SnapshotProvider", () => {
 
       expect(result.data[0]?.vp).toBe("0");
       expect(result.data[0]?.reason).toBe("");
+    });
+  });
+
+  describe("fetchProposalIdsSince", () => {
+    it("should fetch proposal ids since the cutoff", async () => {
+      mockGraphQL({
+        proposals: [
+          { id: "proposal-1", created: 1700000000 },
+          { id: "proposal-2", created: 1700000001 },
+        ],
+      });
+
+      const result = await provider.fetchProposalIdsSince(1699999999);
+
+      expect(result).toStrictEqual(["proposal-1", "proposal-2"]);
+    });
+
+    it("should paginate until Snapshot returns fewer than a full page", async () => {
+      const firstPage = Array.from({ length: 1000 }, (_, i) => ({
+        id: `proposal-${i}`,
+        created: 1700000000 + i,
+      }));
+      const secondPage = [{ id: "proposal-1000", created: 1700001000 }];
+      mockGraphQLSequence([
+        { proposals: firstPage },
+        { proposals: secondPage },
+      ]);
+
+      const result = await provider.fetchProposalIdsSince(0);
+
+      expect(result).toHaveLength(1001);
+      expect(result.at(0)).toBe("proposal-0");
+      expect(result.at(-1)).toBe("proposal-1000");
     });
   });
 
