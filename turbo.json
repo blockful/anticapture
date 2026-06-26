@@ -23,14 +23,17 @@
         "src/**",
         "$TURBO_ROOT$/apps/api/**",
         "$TURBO_ROOT$/apps/gateful/**",
-        "$TURBO_ROOT$/apps/relayer/**"
+        "$TURBO_ROOT$/apps/relayer/**",
+        "$TURBO_ROOT$/apps/address-enrichment/**"
       ],
       "outputs": ["generated/**"],
       "env": [
-        "NEXT_PUBLIC_GATEFUL_URL",
         "ANTICAPTURE_API_URL",
-        "RAILWAY_SERVICE_GATEFUL_URL",
-        "RAILWAY_ENVIRONMENT_NAME"
+        "EXPECTED_GATEFUL_SHA",
+        "VERCEL_GIT_COMMIT_SHA",
+        "VERCEL_ENV",
+        "VERCEL_GIT_PULL_REQUEST_ID",
+        "VERCEL_GIT_COMMIT_REF"
       ]
     },
     "@anticapture/client#build": {
@@ -46,12 +49,7 @@
         "sidebars.ts"
       ],
       "outputs": ["build/**"],
-      "env": [
-        "NEXT_PUBLIC_GATEFUL_URL",
-        "ANTICAPTURE_API_URL",
-        "RAILWAY_SERVICE_GATEFUL_URL",
-        "RAILWAY_ENVIRONMENT_NAME"
-      ]
+      "env": ["ANTICAPTURE_API_URL"]
     },
     "@anticapture/dashboard#build": {
       "dependsOn": ["^codegen", "^build"],
@@ -115,7 +113,7 @@
     "test": {
       "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.*"],
-      "passThroughEnv": ["NEXT_PUBLIC_GATEFUL_URL"]
+      "passThroughEnv": ["ANTICAPTURE_API_URL"]
     },
     "test:unit": {
       "dependsOn": ["^build"],
@@ -127,7 +125,7 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
-        "NEXT_PUBLIC_GATEFUL_URL",
+        "ANTICAPTURE_API_URL",
         "NEXT_PUBLIC_WC_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
       ]
@@ -137,7 +135,7 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
-        "NEXT_PUBLIC_GATEFUL_URL",
+        "ANTICAPTURE_API_URL",
         "NEXT_PUBLIC_WC_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
       ]
@@ -148,7 +146,7 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
-        "NEXT_PUBLIC_GATEFUL_URL",
+        "ANTICAPTURE_API_URL",
         "NEXT_PUBLIC_WC_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
       ]
