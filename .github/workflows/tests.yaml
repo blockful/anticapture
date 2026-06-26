@@ -80,11 +80,6 @@ jobs:
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           PR_BRANCH: ${{ github.event.pull_request.head.ref }}
           GATEFUL_URL: ${{ steps.vercel-env.outputs.gateful_url }}
-          # Shared preview API token: the dashboard's /api/gateful/* proxy sends
-          # it as the Bearer to Gateful, which validates it against Authful. Must
-          # equal the value Authful seeds via SEED_TOKEN_PLAINTEXT on its Railway
-          # preview, or every dashboard request gets a 401.
-          SEED_API_TOKEN: ${{ secrets.PREVIEW_SEED_API_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -94,35 +89,20 @@ jobs:
           fi
 
           api_url="https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env?upsert=true&teamId=${VERCEL_TEAM_ID}"
+          payload=$(jq -n \
+            --arg key "ANTICAPTURE_API_URL" \
+            --arg value "${GATEFUL_URL}" \
+            --arg gitBranch "${PR_BRANCH}" \
+            '{ key: $key, value: $value, type: "plain", target: ["preview"], gitBranch: $gitBranch }')
 
-          upsert_env() {
-            # $1=key  $2=value  $3=type (plain|encrypted)
-            local payload
-            payload=$(jq -n \
-              --arg key "$1" \
-              --arg value "$2" \
-              --arg type "$3" \
-              --arg gitBranch "${PR_BRANCH}" \
-              '{ key: $key, value: $value, type: $type, target: ["preview"], gitBranch: $gitBranch }')
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "${api_url}" \
+            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data "${payload}"
 
-            curl --fail-with-body --silent --show-error \
-              --request POST \
-              --url "${api_url}" \
-              --header "Authorization: Bearer ${VERCEL_TOKEN}" \
-              --header "Content-Type: application/json" \
-              --data "${payload}"
-          }
-
-          upsert_env "ANTICAPTURE_API_URL" "${GATEFUL_URL}" "plain"
           echo "Configured ANTICAPTURE_API_URL=${GATEFUL_URL} for Vercel preview branch ${PR_BRANCH}."
-
-          if [ -n "${SEED_API_TOKEN:-}" ]; then
-            upsert_env "BLOCKFUL_API_TOKEN" "${SEED_API_TOKEN}" "encrypted"
-            echo "Configured BLOCKFUL_API_TOKEN (Authful seed token) for Vercel preview branch ${PR_BRANCH}."
-          else
-            echo "::warning::PREVIEW_SEED_API_TOKEN not set; dashboard preview will call Gateful unauthenticated."
-          fi
-
           echo "configured=true" >> "${GITHUB_OUTPUT}"
 
   wait-for-gateful:
@@ -182,9 +162,6 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           GATEFUL_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
-          # Bearer the dashboard proxy forwards to Gateful (validated by Authful).
-          # Must match Authful's SEED_TOKEN_PLAINTEXT on the Railway preview.
-          SEED_API_TOKEN: ${{ secrets.PREVIEW_SEED_API_TOKEN }}
           # Git metadata so Vercel attributes the deploy to the PR author (avatar +
           # "Created by"); a bare `vercel deploy` shows "No attribution data available".
           GIT_SHA: ${{ github.event.pull_request.head.sha }}
@@ -205,22 +182,9 @@ jobs:
         # process.env.ANTICAPTURE_API_URL at request time, so --build-env alone
         # would build against the right URL but serve a stale/missing one.
         run: |
-          # Runtime-only: the /api/gateful/* proxy reads BLOCKFUL_API_TOKEN at
-          # request time and forwards it as the Bearer to Gateful. Codegen needs
-          # no token (it reads the public /docs/json), so this is not a
-          # --build-env. Omitted when the secret is unset (proxy then sends no
-          # auth header) so external/secret-less runs still deploy.
-          token_env=()
-          if [ -n "${SEED_API_TOKEN:-}" ]; then
-            token_env+=(--env "BLOCKFUL_API_TOKEN=${SEED_API_TOKEN}")
-          else
-            echo "::warning::PREVIEW_SEED_API_TOKEN not set; dashboard preview will call Gateful unauthenticated."
-          fi
-
           npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" \
             --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
             --env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
-            "${token_env[@]}" \
             --meta githubCommitSha="${GIT_SHA}" \
             --meta githubCommitRef="${GIT_REF}" \
             --meta githubCommitMessage="${GIT_MSG}" \
