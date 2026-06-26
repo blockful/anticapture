@@ -126,6 +126,25 @@ Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
 - Commit `node_modules`, `.env`, or generated files that aren't meant to be committed.
 - Cast types to `any`/`unknown` unless explicitly asked.
 
+## Shared memory
+
+The team's shared agent memory is Claude Code's **auto memory**, redirected from its default
+machine-local location into the git-tracked `.agents/shared-memory/` folder, so what one dev's
+agent learns reaches another dev's agent via commit/push/pull. It is automatic: Claude reads it
+at the start of every session and writes to it on its own as it works — there is no manual
+"read at start / append at end" step.
+
+**Setup (once per dev):** run `pnpm setup:memory` (it sets `autoMemoryDirectory` in your local
+settings), then restart the session. Browse or toggle it with the `/memory` command.
+
+**Never write:** secrets, tokens, `.env` values, private keys, signed URLs, or machine-local
+absolute paths (`/home/<name>/...`, `D:/...`). Keep entries repo-relative.
+
+**Not curated:** unlike a hand-written doc, nobody reviews these files in a PR before the agent
+writes them. Curation happens after the fact — review `git status` in `.agents/shared-memory/`
+before committing, and prune stale entries. Detailed setup and caveats live in that folder's
+`README.md`.
+
 ## Where to go deeper
 
 - `CLAUDE.md` — full conventions, changeset/release flow, boundaries.
