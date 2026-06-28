@@ -11,6 +11,7 @@ export enum DaoIdEnum {
   // OPTIMISM = "OP",
   UNISWAP = "UNI",
   GITCOIN = "GTC",
+  TORN = "TORN",
 }
 
 export const ALL_DAOS = Object.values(DaoIdEnum);
