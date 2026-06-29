@@ -180,6 +180,57 @@ describe("DrizzleRepository", () => {
         },
       ]);
     });
+
+    it("should get proposal ids created at or after the cutoff", async () => {
+      await repo.saveProposals(
+        [
+          createProposal({ id: "prop-1", created: 1700000000 }),
+          createProposal({ id: "prop-2", created: 1700000000 }),
+        ],
+        "cursor-1",
+      );
+
+      const ids = await repo.getProposalIdsSince(0);
+
+      expect(ids.sort()).toStrictEqual(["prop-1", "prop-2"]);
+    });
+
+    it("should exclude proposal ids created before the cutoff", async () => {
+      await repo.saveProposals(
+        [
+          createProposal({ id: "old", created: 1000 }),
+          createProposal({ id: "recent", created: 2000 }),
+        ],
+        "cursor-1",
+      );
+
+      const ids = await repo.getProposalIdsSince(2000);
+
+      expect(ids).toStrictEqual(["recent"]);
+    });
+
+    it("should delete proposals and their votes", async () => {
+      await repo.saveProposals(
+        [createProposal({ id: "prop-1" }), createProposal({ id: "prop-2" })],
+        "cursor-1",
+      );
+      await repo.saveVotes(
+        [
+          createVote({ proposalId: "prop-1", voter: "0xabc" }),
+          createVote({ proposalId: "prop-2", voter: "0xdef" }),
+        ],
+        "cursor-1",
+      );
+
+      await repo.deleteProposals(["prop-1"]);
+
+      const proposals = await db.select().from(schema.proposals);
+      const votes = await db.select().from(schema.votes);
+      expect(proposals.map((proposal) => proposal.id)).toStrictEqual([
+        "prop-2",
+      ]);
+      expect(votes.map((vote) => vote.proposalId)).toStrictEqual(["prop-2"]);
+    });
   });
 
   describe("votes", () => {

@@ -43,15 +43,18 @@ function createSimpleRepository(): Repository & {
   cursors: Map<string, string | null>;
   savedProposals: OffchainProposal[];
   savedVotes: OffchainVote[];
+  proposalIds: string[];
 } {
   const cursors = new Map<string, string | null>();
   const savedProposals: OffchainProposal[] = [];
   const savedVotes: OffchainVote[] = [];
+  const proposalIds: string[] = [];
 
   return {
     cursors,
     savedProposals,
     savedVotes,
+    proposalIds,
     getLastCursor: vi.fn(async (entity: string) => cursors.get(entity) ?? null),
     resetCursor: vi.fn(async (entity: string) => {
       cursors.delete(entity);
@@ -61,6 +64,13 @@ function createSimpleRepository(): Repository & {
     }),
     clearVotes: vi.fn(async () => {
       savedVotes.length = 0;
+    }),
+    getProposalIdsSince: vi.fn(async () => proposalIds),
+    deleteProposals: vi.fn(async (ids: string[]) => {
+      for (const id of ids) {
+        const index = proposalIds.indexOf(id);
+        if (index !== -1) proposalIds.splice(index, 1);
+      }
     }),
     saveProposals: vi.fn(
       async (proposals: OffchainProposal[], cursor: string) => {
@@ -77,10 +87,12 @@ function createSimpleRepository(): Repository & {
 
 function createSimpleProvider(options?: {
   proposals?: OffchainProposal[];
+  proposalIds?: string[];
   votes?: OffchainVote[];
   proposalsNextCursor?: string | null;
   votesNextCursor?: string | null;
   failProposals?: boolean;
+  failProposalIds?: boolean;
   failVotes?: boolean;
 }): DataProvider {
   return {
@@ -90,6 +102,12 @@ function createSimpleProvider(options?: {
         data: options?.proposals ?? [],
         nextCursor: options?.proposalsNextCursor ?? null,
       };
+    }),
+    fetchProposalIdsSince: vi.fn(async () => {
+      if (options?.failProposalIds) {
+        throw new Error("Proposal id fetch failed");
+      }
+      return options?.proposalIds ?? ["p-1"];
     }),
     fetchVotes: vi.fn(async () => {
       if (options?.failVotes) throw new Error("Votes fetch failed");
@@ -123,6 +141,7 @@ describe("Indexer", () => {
     expect(repo.getLastCursor).toHaveBeenCalledWith("proposals");
     expect(repo.getLastCursor).toHaveBeenCalledWith("votes");
     expect(provider.fetchProposals).toHaveBeenCalledWith("1700000000");
+    expect(provider.fetchProposalIdsSince).toHaveBeenCalled();
     expect(provider.fetchVotes).toHaveBeenCalledWith("1700000050");
 
     void promise;
@@ -143,6 +162,7 @@ describe("Indexer", () => {
     expect(repo.resetCursor).toHaveBeenCalledWith("proposals");
     expect(repo.resetCursor).toHaveBeenCalledWith("votes");
     expect(provider.fetchProposals).toHaveBeenCalledWith(null);
+    expect(provider.fetchProposalIdsSince).toHaveBeenCalled();
     expect(provider.fetchVotes).toHaveBeenCalledWith(null);
 
     void promise;
@@ -215,6 +235,96 @@ describe("Indexer", () => {
     void promise;
   });
 
+  it("should delete DB-only proposals during reconciliation", async () => {
+    const repo = createSimpleRepository();
+    repo.proposalIds.push("p-1", "p-deleted", "p-2");
+    const provider = createSimpleProvider({ proposalIds: ["p-1", "p-2"] });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(repo.deleteProposals).toHaveBeenCalledWith(["p-deleted"]);
+    expect(repo.proposalIds).toStrictEqual(["p-1", "p-2"]);
+
+    void promise;
+  });
+
+  it("should reconcile only within the last two weeks", async () => {
+    vi.setSystemTime(1_700_000_000_000);
+    const expectedSince = 1_700_000_000 - 14 * 24 * 60 * 60;
+    const repo = createSimpleRepository();
+    const provider = createSimpleProvider({ proposalIds: ["p-1"] });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(provider.fetchProposalIdsSince).toHaveBeenCalledWith(expectedSince);
+    expect(repo.getProposalIdsSince).toHaveBeenCalledWith(expectedSince);
+
+    void promise;
+  });
+
+  it("should not delete proposals when all DB ids still exist", async () => {
+    const repo = createSimpleRepository();
+    repo.proposalIds.push("p-1", "p-2");
+    const provider = createSimpleProvider({ proposalIds: ["p-1", "p-2"] });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(repo.deleteProposals).not.toHaveBeenCalled();
+
+    void promise;
+  });
+
+  it("should skip reconciliation when Snapshot returns no proposal ids", async () => {
+    const repo = createSimpleRepository();
+    repo.proposalIds.push("p-1");
+    const provider = createSimpleProvider({ proposalIds: [] });
+    const loggerSpy = vi.spyOn(logger, "warn").mockImplementation(() => logger);
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(repo.getProposalIdsSince).not.toHaveBeenCalled();
+    expect(repo.deleteProposals).not.toHaveBeenCalled();
+    expect(loggerSpy).toHaveBeenCalledWith(
+      "snapshot returned no proposals - skipping proposal reconciliation",
+    );
+
+    loggerSpy.mockRestore();
+    void promise;
+  });
+
+  it("should continue syncing votes after reconciliation error", async () => {
+    const repo = createSimpleRepository();
+    const votes = [makeVote({ created: 1700000200 })];
+    const provider = createSimpleProvider({
+      failProposalIds: true,
+      votes,
+    });
+    const loggerSpy = vi
+      .spyOn(logger, "error")
+      .mockImplementation(() => logger);
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.any(Error) }),
+      "error reconciling proposals - will retry",
+    );
+    expect(repo.saveVotes).toHaveBeenCalledWith(votes, "1700000200");
+
+    loggerSpy.mockRestore();
+    void promise;
+  });
+
   it("should not save when provider returns empty data", async () => {
     const repo = createSimpleRepository();
     const provider = createSimpleProvider();
@@ -250,6 +360,7 @@ describe("Indexer", () => {
     const repo = createSimpleRepository();
     const provider = createSimpleProvider({
       failProposals: true,
+      failProposalIds: true,
       failVotes: true,
     });
     const indexer = new Indexer(repo, provider, 1_000);
@@ -267,6 +378,10 @@ describe("Indexer", () => {
     expect(loggerSpy).toHaveBeenCalledWith(
       expect.objectContaining({ cursor: null }),
       "error syncing votes - will retry",
+    );
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.any(Error) }),
+      "error reconciling proposals - will retry",
     );
 
     // Verify the loop continues — second tick fires after interval

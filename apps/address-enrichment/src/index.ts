@@ -7,7 +7,7 @@ import { HTTPException } from "hono/http-exception";
 import { ArkhamClient } from "@/clients/arkham";
 import { ENSClient } from "@/clients/ens";
 import { addressController } from "@/controllers/address";
-import { initDb } from "@/db";
+import { initDb, runMigrations } from "@/db";
 import { env } from "@/env";
 import { logger } from "@/logger";
 import { EnrichmentService } from "@/services/enrichment";
@@ -88,8 +88,10 @@ app.doc("/docs/json", {
 app.get("/docs", swaggerUI({ url: "/docs/json" }));
 
 // Run migrations then start server
+logger.info("running database migrations");
+runMigrations(env.DATABASE_URL);
+logger.info("migrations complete");
 initDb(env.DATABASE_URL);
-// runMigrations(env.DATABASE_URL);
 logger.info({ port: env.PORT }, "address enrichment API starting");
 serve({
   fetch: app.fetch,
