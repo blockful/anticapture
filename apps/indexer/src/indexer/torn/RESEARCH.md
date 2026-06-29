@@ -152,9 +152,15 @@ The June 2026 attack was an **unverified look-alike target**. Add a detection si
 - Flip `alreadySupportCalldataReview()` accordingly once decode lands.
 
 ### P2 — Per-account voting power
-- Use `RewardUpdateSuccessful(account)` (fires on every lock/unlock) as a "balance-changed" trigger to
-  `readContract lockedBalance(account)` and write `votingPowerHistory` + `accountPower.votingPower`.
-- Backfill via TORN `Transfer` to/from governor+Vault, reconciling delegation shifts.
+- Trigger a "balance-changed" snapshot on **both** `RewardUpdateSuccessful(account)` **and**
+  `RewardUpdateFailed(account, errorData)`. The governor's `updateRewards` modifier
+  (`GovernanceStakingUpgrade.sol`) wraps the reward sync in try/catch and emits one or the other, but the
+  lock/unlock runs regardless — so `lockedBalance` changes even on the *failed* path. Watching only the
+  success event would miss those balance changes.
+- On either event, `readContract lockedBalance(account)` and write `votingPowerHistory` +
+  `accountPower.votingPower`.
+- Belt-and-suspenders: reconcile against TORN `Transfer` to/from governor **+ Vault** (gap #6), since
+  `RewardUpdate*` only exists from the v3 staking upgrade onward — pre-v3 history must come from transfers.
 
 ### P3 — Correctness fixes (see §6)
 - Re-vote handling, `calculateQuorum`, vote extension, config copy.
