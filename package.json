@@ -13,7 +13,6 @@
     "client-docs": "turbo run --filter=@anticapture/client-docs",
     "offchain-indexer": "turbo run --filter=@anticapture/offchain-indexer",
     "address": "turbo run --filter=@anticapture/address-enrichment",
-    "address-enrichment": "turbo run --filter=@anticapture/address-enrichment",
     "relayer": "dotenv -- turbo run --filter=@anticapture/relayer",
     "dev": "bash scripts/dev.sh",
     "clean": "turbo clean && rm -rf node_modules .turbo .parcel-cache coverage *.log *.tsbuildinfo",
