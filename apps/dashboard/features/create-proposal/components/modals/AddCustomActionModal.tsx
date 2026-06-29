@@ -141,8 +141,11 @@ export const AddCustomActionModal = ({
   const [args, setArgs] = useState<string[]>(initialValue?.args ?? []);
   const [addressTouched, setAddressTouched] = useState(false);
 
-  // Paste & decode (escape hatch): a raw calldata blob decoded into the fields.
-  const [decodeInput, setDecodeInput] = useState("");
+  // Single calldata field: reflects the live encoded calldata as the form is
+  // filled, and doubles as a paste target to decode a raw blob back into the
+  // fields. "Decode" while it holds pasted/edited hex, "Clear" once it mirrors
+  // the encoded output.
+  const [calldataField, setCalldataField] = useState("");
   const [decodeError, setDecodeError] = useState<string | null>(null);
 
   // Re-hydrate whenever the modal opens
@@ -164,7 +167,7 @@ export const AddCustomActionModal = ({
       setIsFetchingAbi(false);
       setIsManualAbiEntry(initialValue.abi.length > 0);
       setAddressTouched(false);
-      setDecodeInput("");
+      setCalldataField("");
       setDecodeError(null);
     } else {
       setMode("fetch");
@@ -174,7 +177,7 @@ export const AddCustomActionModal = ({
       setFunctionName("");
       setArgs([]);
       setAddressTouched(false);
-      setDecodeInput("");
+      setCalldataField("");
       setDecodeError(null);
       setFetchError(null);
       setIsFetchingAbi(false);
@@ -225,7 +228,7 @@ export const AddCustomActionModal = ({
     setFunctionName("");
     setArgs([]);
     setAddressTouched(false);
-    setDecodeInput("");
+    setCalldataField("");
     setDecodeError(null);
   };
 
@@ -330,10 +333,25 @@ export const AddCustomActionModal = ({
     }
   }, [mode, selectedFn, allArgsFilled, argTrees]);
 
+  // Keep the calldata field mirroring the live encoded output as the form
+  // fields change. Guarded on a real preview, so a half-typed paste (no valid
+  // form yet) is never clobbered.
+  useEffect(() => {
+    if (encodedPreview) setCalldataField(encodedPreview);
+  }, [encodedPreview]);
+
+  const trimmedCalldataField = calldataField.trim();
+  // The field "holds the encoded output" when it matches what the form would
+  // produce — that's the Clear state. Anything else (a pasted/edited blob) is
+  // the Decode state.
+  const calldataFieldIsEncoded =
+    encodedPreview !== null && trimmedCalldataField === encodedPreview;
+
   // Decode a pasted calldata blob (hex -> form): match the selector to a write
-  // function in the ABI, select it, and fill the fields.
+  // function in the ABI, select it, and fill the fields. The reflect effect
+  // then snaps the field to the canonical encoded output.
   const handleDecode = () => {
-    const data = decodeInput.trim();
+    const data = trimmedCalldataField;
     if (!isHex(data) || data.length < 10) {
       setDecodeError("Enter 0x-prefixed calldata (selector + arguments).");
       return;
@@ -353,10 +371,17 @@ export const AddCustomActionModal = ({
       setFunctionName(toFunctionSignature(fn));
       setArgs(decoded);
       setDecodeError(null);
-      setDecodeInput("");
     } catch {
       setDecodeError("Couldn't decode this calldata against the ABI.");
     }
+  };
+
+  // Clear the field and the function/args it was driving.
+  const handleClearCalldata = () => {
+    setCalldataField("");
+    setFunctionName("");
+    setArgs([]);
+    setDecodeError(null);
   };
 
   const handleConfirm = () => {
@@ -598,33 +623,37 @@ export const AddCustomActionModal = ({
             {mode === "fetch" ? (
               <>
                 <div className="border-border-default bg-surface-contrast/40 rounded-base flex flex-col gap-2 border border-dashed p-3">
-                  <FormLabel>Paste calldata to autofill (optional)</FormLabel>
+                  <FormLabel>Calldata</FormLabel>
                   <Textarea
-                    value={decodeInput}
+                    value={calldataField}
                     onChange={(e) => {
-                      setDecodeInput(e.target.value);
+                      setCalldataField(e.target.value);
                       setDecodeError(null);
                     }}
                     placeholder="0x…"
-                    className="min-h-16 font-mono text-xs"
+                    className="text-primary min-h-16 font-mono text-xs"
                     error={Boolean(decodeError)}
                   />
                   {decodeError ? (
                     <span className="text-error text-xs">{decodeError}</span>
                   ) : (
                     <span className="text-secondary text-xs">
-                      Decodes against this ABI and fills the fields below. Your
-                      edits then update the encoded calldata.
+                      Paste calldata to decode it into the fields below, or fill
+                      in the function and arguments to generate it.
                     </span>
                   )}
                   <div>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleDecode}
-                      disabled={!decodeInput.trim()}
+                      onClick={
+                        calldataFieldIsEncoded
+                          ? handleClearCalldata
+                          : handleDecode
+                      }
+                      disabled={trimmedCalldataField.length === 0}
                     >
-                      Decode
+                      {calldataFieldIsEncoded ? "Clear" : "Decode"}
                     </Button>
                   </div>
                 </div>
@@ -675,14 +704,6 @@ export const AddCustomActionModal = ({
                     />
                   </div>
                 ))}
-                {encodedPreview && (
-                  <div className="flex flex-col gap-1.5">
-                    <FormLabel>Encoded calldata</FormLabel>
-                    <div className="border-border-default bg-surface-contrast rounded-base break-all border p-3 font-mono text-xs">
-                      {encodedPreview}
-                    </div>
-                  </div>
-                )}
               </>
             ) : (
               <div className="flex flex-col gap-3">
@@ -690,7 +711,7 @@ export const AddCustomActionModal = ({
                   variant="info"
                   text="Review the calldata before confirming. It will be sent as-is to the contract."
                 />
-                <div className="border-border-default bg-surface-contrast rounded-base break-all border p-3 font-mono text-xs">
+                <div className="border-border-default bg-surface-contrast text-primary rounded-base break-all border p-3 font-mono text-xs">
                   {calldata}
                 </div>
               </div>
