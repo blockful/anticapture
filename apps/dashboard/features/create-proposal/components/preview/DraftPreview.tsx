@@ -61,8 +61,13 @@ export const DraftPreview = ({
 
   return (
     <div className="mx-auto w-full">
-      {/* Sticky spacer that masks the 65→85px band so content doesn't show above the tab bar. */}
-      <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
+      {/* Sticky spacer that masks the 65→85px band so content doesn't show above
+          the tab bar. Only needed alongside the non-whitelabel desktop header
+          (the 65px bar); in whitelabel that header isn't rendered, so the spacer
+          would just show as a stray band over the content. */}
+      {!isWhitelabelRoute && (
+        <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
+      )}
       <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
         <div className="flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
           <DraftPreviewSidebar

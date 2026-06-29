@@ -31,7 +31,7 @@ export const ProposalFormNavBar = ({
         value={percent}
         label={`${filledCount}/${totalCount}`}
         labelPosition="left"
-        className="max-w-xs flex-1"
+        className="hidden max-w-xs flex-1 lg:block"
       />
       <div className="flex shrink-0 gap-2">
         {onShare && (

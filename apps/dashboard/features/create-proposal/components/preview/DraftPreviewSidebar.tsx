@@ -44,16 +44,6 @@ export const DraftPreviewSidebar = ({
     <h4 className="text-primary text-xl">{title}</h4>
 
     <div className="flex items-center gap-2">
-      <Button
-        variant="primary"
-        size="md"
-        disabled={publishDisabled}
-        onClick={onPublish}
-        className="flex-1"
-      >
-        <Rocket className="size-4" />
-        Publish
-      </Button>
       {secondaryAction === "copy-link" ? (
         <Button
           variant="outline"
@@ -76,6 +66,16 @@ export const DraftPreviewSidebar = ({
           Edit
         </Button>
       )}
+      <Button
+        variant="primary"
+        size="md"
+        disabled={publishDisabled}
+        onClick={onPublish}
+        className="flex-1"
+      >
+        <Rocket className="size-4" />
+        Publish
+      </Button>
     </div>
 
     <p className="text-secondary text-sm leading-5">{helperCopy}</p>

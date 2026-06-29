@@ -2,6 +2,7 @@
 
 import { Pencil, Play } from "lucide-react";
 
+import { PillTab } from "@/shared/components/design-system/tabs/pill-tab/PillTab";
 import { cn } from "@/shared/utils/cn";
 
 export type DraftViewMode = "editor" | "preview";
@@ -15,47 +16,43 @@ interface DraftViewToggleProps {
   fullWidth?: boolean;
 }
 
-const pill = (active: boolean, fullWidth: boolean) =>
-  cn(
-    "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[14px] font-medium leading-5 transition-colors",
-    fullWidth && "flex-1 justify-center",
-    active
-      ? "border-link text-link bg-surface-default"
-      : "border-border-default text-secondary hover:text-primary",
-  );
+const TABS = [
+  { value: "editor" as const, label: "Editor", Icon: Pencil },
+  { value: "preview" as const, label: "Preview", Icon: Play },
+];
 
 export const DraftViewToggle = ({
   mode,
   onChange,
   showEditor = true,
   fullWidth = false,
-}: DraftViewToggleProps) => (
-  <div
-    role="tablist"
-    aria-label="Draft view"
-    className={cn("flex items-center gap-2", fullWidth && "w-full")}
-  >
-    {showEditor && (
-      <button
-        type="button"
-        role="tab"
-        aria-selected={mode === "editor"}
-        className={pill(mode === "editor", fullWidth)}
-        onClick={() => onChange("editor")}
-      >
-        <Pencil className="size-4" />
-        Editor
-      </button>
-    )}
-    <button
-      type="button"
-      role="tab"
-      aria-selected={mode === "preview"}
-      className={pill(mode === "preview", fullWidth)}
-      onClick={() => onChange("preview")}
+}: DraftViewToggleProps) => {
+  const visibleTabs = TABS.filter(
+    (tab) => tab.value !== "editor" || showEditor,
+  );
+
+  return (
+    <div
+      role="tablist"
+      aria-label="Draft view"
+      className={cn("flex items-center gap-2", fullWidth && "w-full")}
     >
-      <Play className="size-4" />
-      Preview
-    </button>
-  </div>
-);
+      {visibleTabs.map(({ value, label, Icon }) => (
+        // Shared design-system pill: rounded-base is themed — rounded on
+        // whitelabel, square on the main app — so both surfaces use the same tab.
+        <PillTab
+          key={value}
+          isActive={mode === value}
+          onClick={() => onChange(value)}
+          className={cn(fullWidth && "flex-1 justify-center")}
+          label={
+            <span className="flex items-center gap-1.5">
+              <Icon className="size-4" />
+              {label}
+            </span>
+          }
+        />
+      ))}
+    </div>
+  );
+};
