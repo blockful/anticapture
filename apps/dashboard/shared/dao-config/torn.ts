@@ -30,7 +30,7 @@ export const TORN: DaoConfiguration = {
     },
     rules: {
       delay: true,
-      changeVote: false,
+      changeVote: true,
       timelock: true,
       cancelFunction: false,
       logic: "For",
@@ -113,7 +113,7 @@ export const TORN: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
-        currentSetting: "The Proposal Threshold is set to 25,000 TORN.",
+        currentSetting: "The Proposal Threshold is set to 1,000 TORN.",
         impact:
           "Tornado Cash has a proposal threshold that adds a cost barrier to submitting proposals, but it may not be high enough relative to circulating supply to fully deter spam.",
         recommendedSetting:
@@ -235,7 +235,7 @@ export const TORN: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
         currentSetting:
-          "The Voting Delay is set to approximately 1 block (~12 seconds).",
+          "The Voting Delay is set to 75 seconds.",
         impact:
           "The Voting Delay period is extremely short. This gives delegates and stakeholders little time to coordinate their votes and for the DAO to protect itself against an attack. This poses a critical governance risk.",
         recommendedSetting:
