@@ -84,15 +84,26 @@ ETHEREUM
 [3] API  apps/api  (Hono REST · controller→service→repository→mapper · clients/)
         • clients/torn/TORNClient extends GovernorBase  (live quorum, timestamp state machine)
         • eth_call for live params & status
-        ▼  OpenAPI
-[4] anticapture-client  (kubb → TanStack Query hooks)  →  gateful (gateway)
+        ▼  exposes per-DAO OpenAPI
+[4] GATEFUL  apps/gateful  (aggregates the per-DAO APIs; serves the merged OpenAPI)
+        ▼  live OpenAPI URL
+[5] anticapture-client  (kubb reads Gateful's OpenAPI → TanStack Query hooks)
         ▼
-[5] DASHBOARD  apps/dashboard  (Next.js, white-label via middleware + shared/dao-config/torn.ts)
+[6] DASHBOARD  apps/dashboard  (Next.js, white-label via middleware + shared/dao-config/torn.ts)
         proposals · holders-and-delegates · attack-profitability · token-distribution · governance risk
 ```
 
-**White-label:** already supported — `middleware.ts` resolves hostname→daoId; a custom domain only needs
-`hostnames: [...]` in `torn.ts`. No platform work.
+> Pipeline order matters: **API → Gateful → `@anticapture/client` → Dashboard**. Kubb generates the
+> client by reading Gateful's *live* OpenAPI URL (`packages/anticapture-client/kubb.config.ts:29-55`),
+> not an API spec pushed forward — so any new TORN endpoint must reach Gateful before client codegen,
+> or the generated hooks go stale / miss gateway-level DAO paths.
+
+**White-label:** routing is already supported, but a custom domain needs **both** of these in `torn.ts`:
+`hostnames: [...]` **and** a `whitelabel: {}` field. `middleware.ts` rewrites the hostname to
+`/whitelabel/[daoId]`, but that route calls `notFound()` unless `isWhitelabelDao(daoConfig)` is true,
+which requires `daoConfig.whitelabel` to be present (`shared/utils/whitelabel.ts:37-41`,
+`app/whitelabel/[daoId]/layout.tsx:87-90`). `torn.ts` currently has **no** `whitelabel` field, so adding
+only `hostnames` would 404 — add `whitelabel: {}` too.
 
 ---
 
