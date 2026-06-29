@@ -7,8 +7,11 @@
 ## 0. Why now — the June 2026 attack
 
 On **2026-06-25, Proposal 67** pointed execution at an **unverified look-alike contract**
-(`0x5efda50f22d34f27…` vs the real governor `0x5efda50f22d34F26…` — differs only from the 16th
-hex char) to swap governance control over a ~$23M TORN treasury. It drew **0 for / 27,163 against**
+(attacker target `0x5efda50f22d34f272c7077689d6abc42f15e285f` vs the real governor
+`0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce`) to swap governance control over a ~$23M TORN treasury.
+This is a **vanity-prefix spoof**, not a one-character typo: the two addresses share the first **15 hex
+characters** and only diverge at the 16th, so the detector in §5 must match **shared leading prefixes**
+(vanity-address collisions), not single-character edits. It drew **0 for / 27,163 against**
 and is failing quorum (≈27% of the 100,000 TORN quorum), but it is the **second** attempt after the
 May 2023 takeover. This is the motivation for the **proposal-target verification** work in §5.
 
@@ -77,7 +80,8 @@ ETHEREUM
         ▼                                                                                   ▼▼
 [1] INDEXER  apps/indexer/src/indexer/torn/{governor,erc20}.ts
         • bool→0/1 support · single target→targets:[t] · timestamp→synthetic block
-        • delegatedSupply from TORN Transfers in/out of governor + TornadoVault (post-v2 locks route to the Vault — see §4)
+        • delegatedSupply from TORN Transfers in/out of governor only (erc20.ts:150-159)
+        • TODO: also watch TornadoVault transfers — post-v2 locks route there (§4 gap #6)
         ▼  writes
 [2] POSTGRES (Ponder schema)  proposalsOnchain · votesOnchain · accountPower · delegation · transfer · token
         ▲  Drizzle (direct read)
