@@ -77,7 +77,7 @@ ETHEREUM
         ▼                                                                                   ▼▼
 [1] INDEXER  apps/indexer/src/indexer/torn/{governor,erc20}.ts
         • bool→0/1 support · single target→targets:[t] · timestamp→synthetic block
-        • delegatedSupply from Transfers in/out of governor
+        • delegatedSupply from TORN Transfers in/out of governor + TornadoVault (post-v2 locks route to the Vault — see §4)
         ▼  writes
 [2] POSTGRES (Ponder schema)  proposalsOnchain · votesOnchain · accountPower · delegation · transfer · token
         ▲  Drizzle (direct read)
@@ -115,7 +115,8 @@ only `hostnames` would 404 — add `whitelabel: {}` too.
 - [x] Proposals (custom timestamp handler), votes (binary), execution
 - [x] `TORNClient` with live `QUORUM_VOTES` + timestamp-based status
 - [x] Dashboard config: attack-profitability, governance-implementation risk matrix, attack-exposure, holders/delegates, token distribution
-- [x] Backfill verified (65 proposals, 49 executed, 1,089 votes — matches chain)
+- [x] Backfill verified **(as of March 2026)**: 65 proposals, 49 executed, 1,089 votes — matched chain.
+  ⚠️ Proposals 66–67 have since landed (incl. the **June 2026** attack) — re-run/verify backfill to cover them.
 
 ---
 
@@ -127,6 +128,11 @@ only `hostnames` would 404 — add `whitelabel: {}` too.
 3. **Staking rewards not tracked** — relayer-fee yield on locked TORN (economic only).
 4. **Proposal target not decoded** — `alreadySupportCalldataReview() = false`; target indexed but not analyzed.
 5. **abstain column** — always 0; hide for TORN in UI.
+6. **Lock custody coverage** — the indexer detects locks/unlocks via TORN transfers to/from the **governor**
+   only (`erc20.ts:150-159`). Post-v2, `lock` routes TORN to the **TornadoVault** (`0x2F50…`, per
+   `GovernanceVaultUpgrade._transferTokens`), so vault-custodied locks/unlocks can be missed and
+   `delegatedSupply`/account power may drift. (The March-2026 exact match was against the governor balance.)
+   Watch governor **and** Vault transfers.
 
 ---
 
