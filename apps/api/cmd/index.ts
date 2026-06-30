@@ -68,6 +68,7 @@ import {
   HistoricalBalanceRepository,
   NFTPriceRepository,
   NounsVotingPowerRepository,
+  TORNVotingPowerRepository,
   TokenRepository,
   TransfersRepository,
   TreasuryRepository,
@@ -236,7 +237,9 @@ const votingPowerService = wrapWithTracing(
   new VotingPowerService(
     env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
       ? wrapWithTracing(new NounsVotingPowerRepository(pgClient))
-      : votingPowerRepo,
+      : env.DAO_ID === DaoIdEnum.TORN
+        ? wrapWithTracing(new TORNVotingPowerRepository(pgClient))
+        : votingPowerRepo,
     votingPowerRepo,
   ),
 );

@@ -1,0 +1,127 @@
+import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
+import { Address } from "viem";
+
+import { Drizzle, votingPowerHistory, delegation, transfer } from "@/database";
+import { DBHistoricalVotingPowerWithRelations } from "@/mappers";
+
+/**
+ * TORN derives per-account voting power directly from lock/unlock Transfers
+ * (it emits no DelegateVotesChanged), so each `votingPowerHistory` row is
+ * written with the SAME `logIndex` as the Transfer that produced it. The
+ * generic repository links events with `logIndex < votingPowerHistory.logIndex`,
+ * which never matches a same-index event and leaves the row with no transfer —
+ * the dashboard then renders it as a bogus delegation from the zero address.
+ *
+ * This repository matches the causing event at `logIndex <= votingPowerHistory.logIndex`
+ * (closest preceding-or-equal), keeping everything else identical to the generic one.
+ */
+export class TORNVotingPowerRepository {
+  constructor(private readonly db: Drizzle) {}
+
+  async getHistoricalVotingPowerCount(
+    accountId?: Address,
+    minDelta?: string,
+    maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<number> {
+    return await this.db.$count(
+      votingPowerHistory,
+      and(
+        accountId ? eq(votingPowerHistory.accountId, accountId) : undefined,
+        minDelta
+          ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
+          : undefined,
+        maxDelta
+          ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
+          : undefined,
+        fromDate
+          ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
+          : undefined,
+        toDate ? lte(votingPowerHistory.timestamp, BigInt(toDate)) : undefined,
+      ),
+    );
+  }
+
+  async getHistoricalVotingPowers(
+    skip: number,
+    limit: number,
+    orderDirection: "asc" | "desc",
+    orderBy: "timestamp" | "delta",
+    accountId?: Address,
+    minDelta?: string,
+    maxDelta?: string,
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<DBHistoricalVotingPowerWithRelations[]> {
+    const result = await this.db
+      .select()
+      .from(votingPowerHistory)
+      .leftJoin(
+        delegation,
+        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash}
+          AND ${delegation.logIndex} = (
+            SELECT MAX(${delegation.logIndex})
+            FROM ${delegation}
+            WHERE ${delegation.transactionHash} = ${votingPowerHistory.transactionHash}
+            AND ${delegation.logIndex} <= ${votingPowerHistory.logIndex}
+        )`,
+      )
+      .leftJoin(
+        transfer,
+        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash}
+          AND ${transfer.logIndex} = (
+            SELECT MAX(${transfer.logIndex})
+            FROM ${transfer}
+            WHERE ${transfer.transactionHash} = ${votingPowerHistory.transactionHash}
+            AND ${transfer.logIndex} <= ${votingPowerHistory.logIndex}
+        )`,
+      )
+      .where(
+        and(
+          accountId ? eq(votingPowerHistory.accountId, accountId) : undefined,
+          minDelta
+            ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
+            : undefined,
+          maxDelta
+            ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
+            : undefined,
+          fromDate
+            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
+            : undefined,
+          toDate
+            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
+            : undefined,
+        ),
+      )
+      .orderBy(
+        orderDirection === "asc"
+          ? asc(
+              orderBy === "timestamp"
+                ? votingPowerHistory.timestamp
+                : votingPowerHistory.deltaMod,
+            )
+          : desc(
+              orderBy === "timestamp"
+                ? votingPowerHistory.timestamp
+                : votingPowerHistory.deltaMod,
+            ),
+      )
+      .limit(limit)
+      .offset(skip);
+
+    return result.map((row) => ({
+      ...row.voting_power_history,
+      delegations:
+        row.transfers &&
+        row.transfers?.logIndex > (row.delegations?.logIndex || 0)
+          ? null
+          : row.delegations,
+      transfers:
+        row.delegations &&
+        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
+          ? null
+          : row.transfers,
+    }));
+  }
+}

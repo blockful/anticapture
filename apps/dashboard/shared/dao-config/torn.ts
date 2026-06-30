@@ -229,8 +229,7 @@ export const TORN: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        currentSetting:
-          "The Voting Delay is set to 75 seconds.",
+        currentSetting: "The Voting Delay is set to 75 seconds.",
         impact:
           "The Voting Delay period is extremely short. This gives delegates and stakeholders little time to coordinate their votes and for the DAO to protect itself against an attack. This poses a critical governance risk.",
         recommendedSetting:
