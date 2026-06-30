@@ -105,7 +105,9 @@ export class TORNClient<
     againstVotes: bigint;
     abstainVotes: bigint;
   }): bigint {
-    return votes.forVotes;
+    // Tornado's Governance.state() reaches quorum on forVotes + againstVotes
+    // (both sides count toward QUORUM_VOTES), not forVotes alone.
+    return votes.forVotes + votes.againstVotes;
   }
 
   alreadySupportCalldataReview(): boolean {
@@ -123,7 +125,7 @@ export class TORNClient<
    *   EXECUTED → finalized (persisted by indexer)
    *   now < startTime → PENDING
    *   now < endTimestamp → ACTIVE
-   *   forVotes < quorum → NO_QUORUM
+   *   forVotes + againstVotes < quorum → NO_QUORUM
    *   forVotes <= againstVotes → DEFEATED
    *   now < endTimestamp + EXECUTION_DELAY → QUEUED
    *   now < endTimestamp + EXECUTION_DELAY + EXECUTION_EXPIRATION → PENDING_EXECUTION

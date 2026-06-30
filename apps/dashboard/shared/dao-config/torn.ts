@@ -30,10 +30,10 @@ export const TORN: DaoConfiguration = {
     },
     rules: {
       delay: true,
-      changeVote: false,
+      changeVote: true,
       timelock: true,
       cancelFunction: false,
-      logic: "For",
+      logic: "All Votes Cast",
       quorumCalculation: "Fixed at 100,000 TORN",
     },
   },
@@ -113,7 +113,7 @@ export const TORN: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.PROPOSAL_THRESHOLD
           ].description,
-        currentSetting: "The Proposal Threshold is set to 25,000 TORN.",
+        currentSetting: "The Proposal Threshold is set to 1,000 TORN.",
         impact:
           "Tornado Cash has a proposal threshold that adds a cost barrier to submitting proposals, but it may not be high enough relative to circulating supply to fully deter spam.",
         recommendedSetting:
@@ -210,23 +210,18 @@ export const TORN: DaoConfiguration = {
           "A veto mechanism or Security Council should be established to protect against malicious proposals.",
       },
       [GovernanceImplementationEnum.VOTE_MUTABILITY]: {
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTE_MUTABILITY
           ].description,
         currentSetting:
-          "The DAO does not allow changing votes once they have been cast.",
+          "The DAO allows voters to change their vote while a proposal is active; re-casting overwrites the prior ballot.",
         impact:
-          "Governance participants cannot change their votes after casting them. In the event of an interface hijack on the voting platform to support the attack, voters cannot revert their vote.",
+          "Voters can revise their vote until the voting period ends — e.g. to revert a ballot if a malicious proposal or an interface compromise is discovered.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTE_MUTABILITY],
-        nextStep:
-          "Allow voters to change their vote until the Voting Period ends.",
-        requirements: [
-          "If voters cannot revise their ballots, a last-minute interface exploit or late discovery of malicious code can trap delegates in a choice that now favors an attacker, weakening the DAO's defense.",
-          "The governance contract should let any voter overwrite their previous vote while the voting window is open.",
-        ],
+        nextStep: "The parameter is in its lowest-risk condition.",
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
         riskLevel: RiskLevel.HIGH,
@@ -235,7 +230,7 @@ export const TORN: DaoConfiguration = {
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
         currentSetting:
-          "The Voting Delay is set to approximately 1 block (~12 seconds).",
+          "The Voting Delay is set to 75 seconds.",
         impact:
           "The Voting Delay period is extremely short. This gives delegates and stakeholders little time to coordinate their votes and for the DAO to protect itself against an attack. This poses a critical governance risk.",
         recommendedSetting:
@@ -321,7 +316,7 @@ export const TORN: DaoConfiguration = {
       },
       [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: {
         description:
-          "Interface protections are present but not fully hardened, and immutable votes limit recovery from front-end compromise, resulting in moderate governance interface risk.",
+          "Interface protections are present but not fully hardened (e.g. not served from immutable/decentralized storage), resulting in moderate governance interface risk. Mutable votes do allow recovery if a front-end compromise is caught during the voting window.",
       },
     },
   },
