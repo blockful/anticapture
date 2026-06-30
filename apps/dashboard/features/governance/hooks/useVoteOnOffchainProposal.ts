@@ -2,41 +2,16 @@
 
 import { Web3Provider } from "@ethersproject/providers";
 import snapshot from "@snapshot-labs/snapshot.js";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAccount, useWalletClient } from "wagmi";
 
+import { offchainProposalPrivacyQueryOptions } from "@/features/governance/hooks/useOffchainProposalPrivacy";
 import { getSnapshotVoteSignType } from "@/features/governance/utils/offchainVotingType";
 import { encryptChoice } from "@/features/governance/utils/shutter";
 
 const HUB_URL = "https://hub.snapshot.org";
 
 type VoteChoice = number | number[] | Record<string, number>;
-
-/**
- * Snapshot stores the privacy mode on the proposal, not in the vote envelope.
- * It is not surfaced by our API, so read it from the hub before voting:
- * shutter proposals require the choice to be Shutter-encrypted.
- */
-const fetchProposalPrivacy = async (
-  proposalId: string,
-): Promise<string | null> => {
-  try {
-    const res = await fetch(`${HUB_URL}/graphql`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `query Privacy($id: String!) { proposal(id: $id) { privacy } }`,
-        variables: { id: proposalId },
-      }),
-    });
-    if (!res.ok) return null;
-    const json: { data?: { proposal?: { privacy?: string | null } | null } } =
-      await res.json();
-    return json.data?.proposal?.privacy ?? null;
-  } catch {
-    return null;
-  }
-};
 
 interface VoteParams {
   spaceId: string;
@@ -50,6 +25,7 @@ interface VoteParams {
 export const useVoteOnOffchainProposal = () => {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const queryClient = useQueryClient();
 
   const {
     mutateAsync: vote,
@@ -64,8 +40,12 @@ export const useVoteOnOffchainProposal = () => {
       const client = new snapshot.Client712(HUB_URL);
       const web3 = new Web3Provider(walletClient.transport);
 
-      const isShutter =
-        (await fetchProposalPrivacy(params.proposalId)) === "shutter";
+      // Shares the cache with the modal's privacy query, so this usually
+      // resolves without an extra request.
+      const privacy = await queryClient.ensureQueryData(
+        offchainProposalPrivacyQueryOptions(params.proposalId),
+      );
+      const isShutter = privacy === "shutter";
       const choice = isShutter
         ? await encryptChoice(JSON.stringify(params.choice), params.proposalId)
         : params.choice;
@@ -75,7 +55,9 @@ export const useVoteOnOffchainProposal = () => {
         proposal: params.proposalId,
         type: getSnapshotVoteSignType(params.proposalType),
         choice,
-        reason: params.reason ?? "",
+        // A plaintext reason on a shutter ballot would leak the vote before
+        // reveal, so drop it (Snapshot hides the field for these proposals).
+        reason: isShutter ? "" : (params.reason ?? ""),
         app: "anticapture",
         ...(isShutter ? { privacy: "shutter" } : {}),
       });
