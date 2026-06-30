@@ -22,7 +22,7 @@ import {
   useGaslessEligibility,
   useRelayerConfig,
 } from "@/shared/hooks/useGaslessRelayer";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface VotingModalProps {
@@ -51,6 +51,9 @@ export const VotingModal = ({
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
   const { isMobile } = useScreenSize();
+
+  // Tornado Cash's governor uses castVote(uint256,bool) — binary only, no abstain.
+  const supportsAbstain = daoId !== DaoIdEnum.TORN;
 
   // Parse user's voting power to BigInt for calculations
   const userVotingPowerBigInt = BigInt(rawVotingPower || "0");
@@ -248,14 +251,16 @@ export const VotingModal = ({
             />
 
             {/* Abstain vote  */}
-            <VoteOption
-              vote="abstain"
-              optionPercentage={abstainPercentage}
-              votingPower={simulatedAbstainVotes.toString()}
-              onChange={setVote}
-              checked={vote === "abstain"}
-              decimals={decimals}
-            />
+            {supportsAbstain && (
+              <VoteOption
+                vote="abstain"
+                optionPercentage={abstainPercentage}
+                votingPower={simulatedAbstainVotes.toString()}
+                onChange={setVote}
+                checked={vote === "abstain"}
+                decimals={decimals}
+              />
+            )}
 
             <div className="border-border-default bg-surface-contrast flex items-center justify-start gap-2 border px-[10px] py-2">
               <User2Icon className="text-secondary size-3.5" />
