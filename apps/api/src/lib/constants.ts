@@ -403,8 +403,50 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
       "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
     InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
+  // Governor custody (0x5efda...A1Ce) holds locked stakes — tracked as
+  // non-circulating, not treasury. Kept out of treasury to stay in sync with
+  // the indexer (where listing it in both buckets double-subtracts circulating).
+  [DaoIdEnum.TORN]: {},
+};
+
+// Mirrors the indexer's NonCirculatingAddresses. Locked/vesting supply held by
+// DAO-controlled contracts; excluded from holder listings alongside treasury
+// when excludeDaoAddresses is set.
+export const NonCirculatingAddresses: Record<
+  DaoIdEnum,
+  Record<string, Address>
+> = {
+  [DaoIdEnum.UNI]: {},
+  [DaoIdEnum.ENS]: {
+    "Token Timelock": "0xd7a029db2585553978190db5e85ec724aa4df23f",
+  },
+  [DaoIdEnum.ARB]: {},
+  [DaoIdEnum.AAVE]: {
+    "LEND to AAVE Migrator": "0x317625234562B1526Ea2FaC4030Ea499C5291de4",
+  },
+  [DaoIdEnum.OP]: {},
+  [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.LIL_NOUNS]: {},
+  [DaoIdEnum.NOUNS]: {},
+  [DaoIdEnum.GTC]: {},
+  [DaoIdEnum.SCR]: {},
+  [DaoIdEnum.COMP]: {},
+  [DaoIdEnum.OBOL]: {},
+  [DaoIdEnum.ZK]: {
+    "Initial Merkle Distributor": "0x66fd4fc8fa52c9bec2aba368047a0b27e24ecfe4",
+    "Second ZK Distributor": "0xb294F411cB52c7C6B6c0B0b61DBDf398a8b0725d",
+    "Third ZK Distributor": "0xf29d698e74ef1904bcfdb20ed38f9f3ef0a89e5b",
+    "Matter Labs Allocation": "0xa97fbc75ccbc7d4353c4d2676ed18cd0c5aaf7e6",
+    "Foundation Allocation": "0xd78dc27d4db8f428c67f542216a2b23663838405",
+    "Guardians Allocation": "0x21b27952f8621f54f3cb652630e122ec81dd2dc1",
+    "Security Council Allocation": "0x0ad50686c159040e57ddce137db0b63c67473450",
+    "ZKsync Association Allocation":
+      "0x0681e3808a0aa12004fb815ebb4515dc823cfbb4",
+  },
+  [DaoIdEnum.FLUID]: {},
   [DaoIdEnum.TORN]: {
-    Governor: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
+    governance: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
+    vault: "0x2F50508a8a3D323B91336FA3eA6ae50E55f32185",
   },
 };
 

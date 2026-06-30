@@ -417,9 +417,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
       "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
     InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
-  [DaoIdEnum.TORN]: {
-    Governor: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
-  },
+  // Governor custody (0x5efda...A1Ce) holds locked stakes, already subtracted
+  // via NonCirculatingAddresses[TORN].governance — not a treasury.
+  [DaoIdEnum.TORN]: {},
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {

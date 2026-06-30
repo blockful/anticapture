@@ -11,7 +11,6 @@ import {
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
 import {
-  CONTRACT_ADDRESSES,
   MetricTypesEnum,
   BurningAddresses,
   CEXAddresses,
@@ -24,9 +23,6 @@ import { DaoIdEnum } from "@/lib/enums";
 
 export function TORNTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.TORN;
-  const governorAddress = getAddress(
-    CONTRACT_ADDRESSES[DaoIdEnum.TORN].governor.address,
-  );
 
   // Contracts that custody locked TORN. A balance held here is voting power
   // owned by the locker, not the custody contract. TORN emits no
@@ -158,24 +154,13 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
 
     await updateCirculatingSupply(context, daoId, address, timestamp);
 
-    // Track locks/unlocks: transfers to/from the governance contract
+    // Track locks/unlocks: TORN moving in/out of governance custody — the
+    // governor pre-v2, the TornadoVault post-v2 (GovernanceVaultUpgrade._
+    // transferTokens). Both are lock sinks. Governor<->vault internal moves
+    // (e.g. the v2 migration) have custody on both sides and net to zero, so
+    // they are skipped. Governor-only accounting missed ~2.6M TORN in the Vault.
     const normalizedTo = getAddress(to);
     const normalizedFrom = getAddress(from);
-
-    if (normalizedTo === governorAddress) {
-      // Locking TORN into governance
-      await updateDelegatedSupply(context, daoId, address, value, timestamp);
-    }
-
-    if (normalizedFrom === governorAddress) {
-      // Unlocking TORN from governance
-      await updateDelegatedSupply(context, daoId, address, -value, timestamp);
-    }
-
-    // Per-account voting power. A transfer into custody locks (the locker is
-    // `from`, gaining power); out of custody unlocks (the locker is `to`,
-    // losing power). Governor<->vault internal moves (e.g. the vault migration)
-    // have custody on both sides and net to zero, so they are skipped.
     const toIsCustody = lockCustodyAddresses.has(normalizedTo);
     const fromIsCustody = lockCustodyAddresses.has(normalizedFrom);
 
@@ -183,6 +168,10 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
       const locker = toIsCustody ? normalizedFrom : normalizedTo;
       const delta = toIsCustody ? value : -value;
 
+      // Aggregate locked (delegated) supply.
+      await updateDelegatedSupply(context, daoId, address, delta, timestamp);
+
+      // Per-account voting power: the locker (`from` on lock, `to` on unlock).
       await ensureAccountExists(context, locker);
 
       const { votingPower } = await context.db
