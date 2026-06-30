@@ -58,6 +58,7 @@ export const TitleSection = ({
   const twitterHandle = DAO_TWITTER_HANDLES[proposal.daoId.toUpperCase()] ?? "";
   const proposalLink = `${process.env.NEXT_PUBLIC_SITE_URL}/${proposal.daoId.toLowerCase()}/proposals/${proposal.id}`;
   const twitterText = `🗳️ [${daoConfig?.name ?? proposal.daoId.toUpperCase()} DAO] PROPOSAL DETECTED — STATUS: [${proposal.status.toUpperCase()}] // This transmission needs a response. ${twitterHandle} ${proposalLink}`;
+  const idSlug = proposal?.id ? `${proposal?.id} - ` : "";
 
   return (
     <div className="flex w-full flex-col gap-3">
@@ -87,7 +88,10 @@ export const TitleSection = ({
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        <h4 className="text-primary text-xl">{proposal?.title}</h4>
+        <h4 className="text-primary text-xl">
+          {idSlug}
+          {proposal?.title}
+        </h4>
       </div>
 
       <div className="flex w-full items-center justify-start gap-2">

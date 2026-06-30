@@ -38,7 +38,7 @@ export const ProposalActionsInfoCard = ({
         <div className="flex w-full flex-col gap-1 p-3">
           <ProposalInfoText>Proposal Address</ProposalInfoText>
           <div className="flex w-full items-center gap-1">
-            <p className="text-secondary break-all font-mono text-sm font-normal leading-5">
+            <p className="text-link break-all font-mono text-sm font-normal leading-5">
               {proposalAddress}
             </p>
             <CopyAndPasteButton
