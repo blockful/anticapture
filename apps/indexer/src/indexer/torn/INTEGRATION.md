@@ -68,6 +68,20 @@ Tornado Cash does NOT emit events for state transitions between Pending, Active,
 
 The `TornadoStakingRewards` contract (0x5B3f656C80E8ddb9ec01Dd9018815576E9238c29) distributes relayer fees to locked TORN holders. This economic dimension is not captured. It doesn't affect governance voting directly but represents additional yield for participants.
 
+### Treasury accounting — VERIFY (deferred)
+
+`TreasuryAddresses[TORN]` is currently empty, so the indexed `treasury` supply metric is 0.
+Tornado's treasury is non-trivial: the governance contract holds ~4.73M TORN that **commingles**
+DAO-owned treasury with pre-v2 user locks, so its balance is *not* a clean treasury figure
+(adding the governor to `TreasuryAddresses` would overcount by the locked amount). The real
+treasury ≈ governance-owned TORN that does not back any account's `lockedBalance`, plus ETH.
+
+- **Before relying on attack-profitability:** confirm whether that view uses the on-chain
+  *liquid treasury call* (`attackProfitability.supportsLiquidTreasuryCall: true`) or the indexed
+  `treasury` metric. If the latter, treasury will read 0 until this is resolved.
+- A correct figure likely needs a dedicated computation (governance TORN balance − Σ `lockedBalance`
+  custodied in the governor, + ETH/other assets). Deferred as a TORN-specific specificity.
+
 ### Proposal target decoding
 
 Proposals are deployed contracts executed via `delegatecall` from the Governance contract. We index the `target` address but cannot decode what the proposal does without reading the target contract's bytecode. `alreadySupportCalldataReview` is set to `false`.
