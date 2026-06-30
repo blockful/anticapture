@@ -5,6 +5,10 @@ import type { OffchainProposal } from "@/repository/schema";
 
 const ACTIVE_STATES = new Set(["pending", "active"]);
 
+// Only reconcile (and delete) proposals created within this window. Bounds both
+// the Snapshot fetch and the DB scan so reconciliation can't overwhelm either.
+const RECONCILE_WINDOW_SECONDS = 14 * 24 * 60 * 60;
+
 export class Indexer {
   private proposalsCursor: string | null = null;
   private votesCursor: string | null = null;
@@ -54,6 +58,12 @@ export class Indexer {
     }
 
     try {
+      await this.reconcileProposals();
+    } catch (err) {
+      logger.error({ err }, "error reconciling proposals - will retry");
+    }
+
+    try {
       await this.syncVotes();
     } catch (err) {
       logger.error(
@@ -74,6 +84,30 @@ export class Indexer {
     logger.info(
       { count: data.length, cursor: this.proposalsCursor },
       "synced proposals",
+    );
+  }
+
+  private async reconcileProposals(): Promise<void> {
+    const since = Math.floor(Date.now() / 1000) - RECONCILE_WINDOW_SECONDS;
+    const liveIds = await this.provider.fetchProposalIdsSince(since);
+
+    if (liveIds.length === 0) {
+      logger.warn(
+        "snapshot returned no proposals - skipping proposal reconciliation",
+      );
+      return;
+    }
+
+    const liveIdSet = new Set(liveIds);
+    const dbIds = await this.repository.getProposalIdsSince(since);
+    const deletedIds = dbIds.filter((id) => !liveIdSet.has(id));
+
+    if (deletedIds.length === 0) return;
+
+    await this.repository.deleteProposals(deletedIds);
+    logger.info(
+      { count: deletedIds.length, ids: deletedIds },
+      "removed proposals deleted from snapshot",
     );
   }
 
