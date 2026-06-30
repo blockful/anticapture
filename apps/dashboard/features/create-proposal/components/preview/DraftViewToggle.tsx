@@ -38,8 +38,6 @@ export const DraftViewToggle = ({
       className={cn("flex items-center gap-2", fullWidth && "w-full")}
     >
       {visibleTabs.map(({ value, label, Icon }) => (
-        // Shared design-system pill: rounded-base is themed — rounded on
-        // whitelabel, square on the main app — so both surfaces use the same tab.
         <PillTab
           key={value}
           isActive={mode === value}

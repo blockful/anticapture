@@ -29,10 +29,7 @@ export const WhitelabelHeader = () => {
     setInputValue(search);
   }, [search]);
 
-  // Proposal detail and the create-proposal flow render their own in-content
-  // header (breadcrumb / Editor-Preview toggle + wallet), so the shell header
-  // bows out to avoid a duplicate bar and keep the layout identical to the
-  // main app.
+  // These routes render their own in-content header.
   if (isProposalDetailPath(pathname) || isProposalNewPath(pathname))
     return null;
 

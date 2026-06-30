@@ -537,9 +537,6 @@ export const ProposalCreationForm = ({
           fullWidth
         />
       </div>
-      {/* Single in-content header shared by both the main app and whitelabel
-          (the whitelabel shell header bows out on this route), so the preview
-          layout — sticky offsets and all — is identical across surfaces. */}
       <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
         <div className="flex items-center">
           <DraftViewToggle
