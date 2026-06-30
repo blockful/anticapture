@@ -20,7 +20,12 @@ const envSchema = z
     // in preview environments; ignored on dev/production. The seeded token's
     // tenant/name/rate-limit are fixed constants (see index.ts) — not worth env
     // vars, since the value only matters to ephemeral previews.
-    SEED_TOKEN_PLAINTEXT: z.string().min(16).optional(),
+    // Empty string (a blank var defined outside previews) is treated as unset,
+    // so it's ignored on dev/production instead of failing the min(16) guard.
+    SEED_TOKEN_PLAINTEXT: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.string().min(16).optional(),
+    ),
   })
   .superRefine((data, ctx) => {
     if (CI && !data.SEED_TOKEN_PLAINTEXT) {
