@@ -229,3 +229,59 @@ export const delegatedVotesChanged = async (
     timestamp,
   });
 };
+
+/**
+ * Tornado Cash voting power is the account's `lockedBalance` in the Governance
+ * contract — there is NO DelegateVotesChanged event. We derive each account's
+ * voting power from lock/unlock token Transfers (TORN moving in/out of the
+ * governor pre-v2 or the TornadoVault post-v2). `delta` is +amount on lock and
+ * -amount on unlock. Deterministic, no external calls (indexer-skill safe).
+ *
+ * NOTE (future refinement): the exact source of truth is `lockedBalance(account)`
+ * read on the `RewardUpdateSuccessful`/`RewardUpdateFailed` events. The
+ * Transfer-derived value here matches it unless a lock/unlock occurs without a
+ * net token movement (not possible for lock/unlock today). See RESEARCH.md §5.
+ */
+export const lockedVotingPowerChanged = async (
+  context: Context,
+  daoId: DaoIdEnum,
+  args: {
+    account: Address;
+    delta: bigint;
+    txHash: Hex;
+    timestamp: bigint;
+    logIndex: number;
+  },
+) => {
+  const { account, delta, txHash, timestamp, logIndex } = args;
+  const normalizedAccount = getAddress(account);
+
+  await ensureAccountExists(context, account);
+
+  const { votingPower: newBalance } = await context.db
+    .insert(accountPower)
+    .values({
+      accountId: normalizedAccount,
+      daoId,
+      votingPower: delta > 0n ? delta : 0n,
+    })
+    .onConflictDoUpdate((current) => ({
+      votingPower: current.votingPower + delta,
+    }));
+
+  const deltaMod = delta > 0n ? delta : -delta;
+
+  await context.db
+    .insert(votingPowerHistory)
+    .values({
+      daoId,
+      transactionHash: txHash,
+      accountId: normalizedAccount,
+      votingPower: newBalance,
+      delta,
+      deltaMod,
+      timestamp,
+      logIndex,
+    })
+    .onConflictDoNothing();
+};

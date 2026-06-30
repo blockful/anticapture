@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 import { token } from "ponder:schema";
 import { Address, getAddress } from "viem";
 
-import { tokenTransfer } from "@/eventHandlers";
+import { tokenTransfer, lockedVotingPowerChanged } from "@/eventHandlers";
 import {
   updateDelegatedSupply,
   updateCirculatingSupply,
@@ -25,6 +25,13 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.TORN;
   const governorAddress = getAddress(
     CONTRACT_ADDRESSES[DaoIdEnum.TORN].governor.address,
+  );
+  // Post-v2, locked TORN is custodied in the TornadoVault, not the governor
+  // (GovernanceVaultUpgrade._transferTokens). Both are lock "sinks": a Transfer
+  // into either is a lock; out of either is an unlock. Pre-v2 used the governor.
+  // https://etherscan.io/address/0x2F50508a8a3D323B91336FA3eA6Ae50e55f32185
+  const vaultAddress = getAddress(
+    "0x2F50508a8a3D323B91336FA3eA6Ae50e55f32185",
   );
 
   ponder.on("TORNToken:setup", async ({ context }) => {
@@ -147,18 +154,40 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
 
     await updateCirculatingSupply(context, daoId, address, timestamp);
 
-    // Track locks/unlocks: transfers to/from the governance contract
+    // Track locks/unlocks: TORN moving in/out of governance custody (the
+    // governor pre-v2, the TornadoVault post-v2). The non-custody side is the
+    // user whose lockedBalance (voting power) changes. We update both the
+    // aggregate delegatedSupply and the per-account voting power.
     const normalizedTo = getAddress(to);
     const normalizedFrom = getAddress(from);
+    const toIsSink =
+      normalizedTo === governorAddress || normalizedTo === vaultAddress;
+    const fromIsSink =
+      normalizedFrom === governorAddress || normalizedFrom === vaultAddress;
 
-    if (normalizedTo === governorAddress) {
-      // Locking TORN into governance
+    // Lock: tokens move INTO custody from a user (ignore internal
+    // governor<->vault moves such as the v2 migration).
+    if (toIsSink && !fromIsSink) {
       await updateDelegatedSupply(context, daoId, address, value, timestamp);
+      await lockedVotingPowerChanged(context, daoId, {
+        account: from,
+        delta: value,
+        txHash: event.transaction.hash,
+        timestamp,
+        logIndex: event.log.logIndex,
+      });
     }
 
-    if (normalizedFrom === governorAddress) {
-      // Unlocking TORN from governance
+    // Unlock: tokens move OUT of custody to a user.
+    if (fromIsSink && !toIsSink) {
       await updateDelegatedSupply(context, daoId, address, -value, timestamp);
+      await lockedVotingPowerChanged(context, daoId, {
+        account: to,
+        delta: -value,
+        txHash: event.transaction.hash,
+        timestamp,
+        logIndex: event.log.logIndex,
+      });
     }
   });
 }

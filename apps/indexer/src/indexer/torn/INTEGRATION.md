@@ -25,11 +25,32 @@ Governor voting token: Voting power comes from `lockedBalance` in the Governance
 
 ## What's Pending
 
-### No per-account votingPowerHistory
+### Per-account voting power — ADDRESSED (requires reindex)
 
-The standard pattern relies on `DelegateVotesChanged` events which TORN doesn't emit. Voting power = `lockedBalance` in the governor. We track aggregate `delegatedSupply` (total locked TORN) but individual `votingPowerHistory` records are not populated.
+Voting power = `lockedBalance` in the governor; TORN emits no `DelegateVotesChanged`.
+It is now derived in `erc20.ts` from lock/unlock token Transfers: TORN moving **into**
+governance custody (governor pre-v2, **TornadoVault** post-v2) is a lock crediting the
+sender's voting power; moving **out** is an unlock debiting the receiver. This populates
+`accountPower.votingPower` + `votingPowerHistory` via `lockedVotingPowerChanged`
+(`eventHandlers/delegation.ts`) and also fixes `delegatedSupply` to include the Vault
+(previously governor-only — it missed ~2.6M TORN held in the Vault).
 
-**To close this gap:** Detect Transfer events to/from the governance contract and create synthetic `votingPowerHistory` entries. Requires careful handling when delegation shifts occur (voting power moves between accounts without a Transfer).
+- **Requires a full reindex** to take effect.
+- **Verify after reindex** with the reconciliation script (`delegatedSupply` ≈ Σ `lockedBalance`;
+  sampled `accountPower.votingPower` == on-chain `lockedBalance(account)`).
+- **Future refinement (deferred):** the exact source of truth is `lockedBalance(account)` read on
+  `RewardUpdateSuccessful`/`RewardUpdateFailed`. The Transfer-derived value matches it for normal
+  lock/unlock; switch to event+`readContract` only if a discrepancy is found.
+
+### Re-vote vote-tally drift — DEFERRED (needs indexer test)
+
+`_castVote` lets a voter overwrite a prior vote, but the `Voted` handler uses
+`onConflictDoNothing` on `(voter, proposalId)` (to avoid Ponder's batch-flush
+`DelayedInsertError`), so a genuine re-vote is dropped and tallies can drift from chain.
+A correct fix must reverse the old receipt and apply the new one **while staying
+idempotent on replay** (e.g. dedupe on `(txHash, logIndex)`), which needs an indexer
+backfill run to confirm it doesn't re-introduce the crash. Re-votes appear infrequent;
+deferred until it can be tested. (Also flagged in review on #2002.)
 
 ### No abstain votes
 
@@ -46,6 +67,20 @@ Tornado Cash does NOT emit events for state transitions between Pending, Active,
 ### Staking rewards not tracked
 
 The `TornadoStakingRewards` contract (0x5B3f656C80E8ddb9ec01Dd9018815576E9238c29) distributes relayer fees to locked TORN holders. This economic dimension is not captured. It doesn't affect governance voting directly but represents additional yield for participants.
+
+### Treasury accounting — VERIFY (deferred)
+
+`TreasuryAddresses[TORN]` is currently empty, so the indexed `treasury` supply metric is 0.
+Tornado's treasury is non-trivial: the governance contract holds ~4.73M TORN that **commingles**
+DAO-owned treasury with pre-v2 user locks, so its balance is *not* a clean treasury figure
+(adding the governor to `TreasuryAddresses` would overcount by the locked amount). The real
+treasury ≈ governance-owned TORN that does not back any account's `lockedBalance`, plus ETH.
+
+- **Before relying on attack-profitability:** confirm whether that view uses the on-chain
+  *liquid treasury call* (`attackProfitability.supportsLiquidTreasuryCall: true`) or the indexed
+  `treasury` metric. If the latter, treasury will read 0 until this is resolved.
+- A correct figure likely needs a dedicated computation (governance TORN balance − Σ `lockedBalance`
+  custodied in the governor, + ETH/other assets). Deferred as a TORN-specific specificity.
 
 ### Proposal target decoding
 
