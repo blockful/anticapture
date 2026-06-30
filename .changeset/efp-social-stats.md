@@ -1,5 +1,6 @@
 ---
 "@anticapture/address-enrichment": minor
+"@anticapture/client": minor
 "@anticapture/dashboard": minor
 ---
 

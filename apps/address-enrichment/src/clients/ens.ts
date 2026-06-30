@@ -29,6 +29,27 @@ const DetailsResponseSchema = z.object({
   following_count: z.number().nullable().optional(),
 });
 
+/**
+ * ENS text records hold either a bare handle (`foo`, `@foo`) or, occasionally, a
+ * full URL (`https://twitter.com/foo`). The API contract promises a bare handle
+ * without '@', so reduce both forms here before storing/exposing.
+ */
+const normalizeHandle = (value: string | null | undefined): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  const handle = trimmed.includes("/")
+    ? ((trimmed.split(/[?#]/)[0] ?? "").split("/").filter(Boolean).pop() ?? "")
+    : trimmed;
+  const bare = handle.replace(/^@/, "");
+  return bare || null;
+};
+
+const normalizeEmail = (value: string | null | undefined): string | null => {
+  if (!value) return null;
+  const email = value.trim().replace(/^mailto:/i, "");
+  return email || null;
+};
+
 export interface EnsData {
   name: string | null;
   avatar: string | null;
@@ -106,10 +127,10 @@ export class ENSClient {
         name: ens?.name ?? null,
         avatar: ens?.avatar ?? null,
         banner: records?.header ?? null,
-        twitter: records?.["com.twitter"] ?? null,
-        telegram: records?.["org.telegram"] ?? null,
-        email: records?.email ?? null,
-        github: records?.["com.github"] ?? null,
+        twitter: normalizeHandle(records?.["com.twitter"]),
+        telegram: normalizeHandle(records?.["org.telegram"]),
+        email: normalizeEmail(records?.email),
+        github: normalizeHandle(records?.["com.github"]),
         followers: followers_count ?? null,
         following: following_count ?? null,
       };
