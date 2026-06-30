@@ -537,31 +537,32 @@ export const ProposalCreationForm = ({
           fullWidth
         />
       </div>
-      {!isWhitelabelRoute && (
-        <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
-          <div className="flex items-center">
-            <DraftViewToggle
-              mode={view}
-              onChange={(m) => void setView(m)}
-              showEditor={canShowEditor}
-            />
-          </div>
-          <div className="flex items-center justify-end">
-            {address ? (
-              <div className="flex flex-col items-end">
-                <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
-                  Your voting power
-                </p>
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {votingPowerDisplay}
-                </p>
-              </div>
-            ) : (
-              <ConnectWalletCustom label="Connect Wallet" />
-            )}
-          </div>
+      {/* Single in-content header shared by both the main app and whitelabel
+          (the whitelabel shell header bows out on this route), so the preview
+          layout — sticky offsets and all — is identical across surfaces. */}
+      <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
+        <div className="flex items-center">
+          <DraftViewToggle
+            mode={view}
+            onChange={(m) => void setView(m)}
+            showEditor={canShowEditor}
+          />
         </div>
-      )}
+        <div className="flex items-center justify-end">
+          {address ? (
+            <div className="flex flex-col items-end">
+              <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+                Your voting power
+              </p>
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                {votingPowerDisplay}
+              </p>
+            </div>
+          ) : (
+            <ConnectWalletCustom label="Connect Wallet" />
+          )}
+        </div>
+      </div>
       {view === "preview" ? (
         <DraftPreview
           daoId={daoId}
