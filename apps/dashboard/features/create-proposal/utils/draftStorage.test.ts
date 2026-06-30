@@ -27,6 +27,7 @@ function createMemoryStorage(): Storage {
 const DRAFT_X: ProposalDraft = {
   id: "id-x",
   daoId: "ens",
+  author: "0x0000000000000000000000000000000000000000",
   title: "X",
   discussionUrl: "",
   body: "",
@@ -63,6 +64,7 @@ describe("draftStorage", () => {
         {
           id: "a",
           daoId: "ens",
+          author: "0x0000000000000000000000000000000000000000",
           createdAt: 1,
           updatedAt: 1,
           title: "A",

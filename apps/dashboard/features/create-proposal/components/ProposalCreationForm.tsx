@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import Link from "next/link";
@@ -13,6 +13,8 @@ import {
 } from "next/navigation";
 import { useAccount } from "wagmi";
 import { formatUnits, zeroAddress } from "viem";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -37,6 +39,11 @@ import { BodyField } from "@/features/create-proposal/components/BodyField";
 import { ProposalFormNavBar } from "@/features/create-proposal/components/ProposalFormNavBar";
 import { InsufficientVPAlert } from "@/features/create-proposal/components/InsufficientVPAlert";
 import { NavigationGuard } from "@/features/create-proposal/components/NavigationGuard";
+import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
+import { DraftViewToggle } from "@/features/create-proposal/components/preview/DraftViewToggle";
+import { DraftPreview } from "@/features/create-proposal/components/preview/DraftPreview";
+import { draftPreviewCopy } from "@/features/create-proposal/utils/draftThresholdCopy";
+import { getRecipientPublishState } from "@/features/create-proposal/utils/recipientPublishState";
 import { ActionsList } from "@/features/create-proposal/components/actions/ActionsList";
 import { ActionsPlaceholderCard } from "@/features/create-proposal/components/actions/ActionsPlaceholderCard";
 import { AddTransferModal } from "@/features/create-proposal/components/modals/AddTransferModal";
@@ -102,6 +109,14 @@ export const ProposalCreationForm = ({
   } = useProposalThreshold(daoId);
   const publisher = usePublishProposal();
 
+  const { openConnectModal } = useConnectModal();
+  const [viewParam, setView] = useQueryState(
+    "view",
+    parseAsStringEnum<"editor" | "preview">(["editor", "preview"]),
+  );
+  // A shared link (has draftId) defaults to Preview; a new proposal to Editor.
+  const view = viewParam ?? (draftId ? "preview" : "editor");
+
   const form = useForm<ProposalFormValues>({
     resolver: zodResolver(ProposalFormSchema),
     defaultValues: DEFAULTS,
@@ -121,22 +136,20 @@ export const ProposalCreationForm = ({
         body: d.body,
         actions: d.actions.map(toFormAction),
       });
+      // Locally-owned draft has no shared author.
+      setSharedAuthor(undefined);
       setCurrentDraftId(draftId);
       setBodyVersion((v) => v + 1);
       hydratedDraftIdRef.current = draftId;
+      setHydratedDraftId(draftId);
       return;
     }
 
     if (drafts.isLoading) return;
 
-    // Cancellation flag so a stale shared-draft response from a previous
-    // draftId cannot overwrite the form after in-app navigation between
-    // shared links resolves out of order.
+    // Guards against an out-of-order response overwriting the form.
     let cancelled = false;
 
-    // Mark the guard inside the success/explicit-miss branches so a transient
-    // fetch failure does not permanently suppress later effect runs (e.g.
-    // when `drafts.drafts` or `drafts.isLoading` change after a retry).
     void getDraftProposal(
       daoId as GetDraftProposalPathParamsDaoEnumKey,
       draftId,
@@ -145,6 +158,7 @@ export const ProposalCreationForm = ({
         if (cancelled) return;
         hydratedDraftIdRef.current = draftId;
         if (!shared) return;
+        setSharedAuthor(shared.author);
         form.reset({
           title: shared.title,
           discussionUrl: shared.discussionUrl,
@@ -157,6 +171,7 @@ export const ProposalCreationForm = ({
           setCurrentDraftId(undefined);
         }
         setBodyVersion((v) => v + 1);
+        setHydratedDraftId(draftId);
       })
       .catch(() => {
         if (cancelled) return;
@@ -172,6 +187,13 @@ export const ProposalCreationForm = ({
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(
     draftId,
   );
+  const [sharedAuthor, setSharedAuthor] = useState<string | undefined>(
+    undefined,
+  );
+  // The draftId whose content is loaded into the form (gates Edit/fork).
+  const [hydratedDraftId, setHydratedDraftId] = useState<string | undefined>(
+    undefined,
+  );
   const [bodyVersion, setBodyVersion] = useState(0);
   const [transferOpen, setTransferOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
@@ -184,9 +206,12 @@ export const ProposalCreationForm = ({
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
-  // Mirror in a ref so repeated synchronous clicks (before React commits the
-  // state update) can still see an in-flight save and short-circuit early.
+  // Publish deferred while a disconnected user connects, resumed once ready.
+  const [pendingAction, setPendingAction] = useState<"publish" | null>(null);
+  // Ref so rapid clicks see an in-flight save before state commits.
   const isSavingDraftRef = useRef(false);
+
+  const draftContentLoaded = !draftId || hydratedDraftId === draftId;
 
   const values = form.watch();
   const hasTitle = Boolean(values.title);
@@ -206,23 +231,92 @@ export const ProposalCreationForm = ({
     (values.body?.length ?? 0) <= 10_000;
 
   const handleShare = async () => {
-    if (!currentDraftId) return;
-    const copied = await copyDraftShareUrl(basePath, currentDraftId);
+    // Persist before sharing when unsaved or dirty, so the link isn't stale.
+    let id = currentDraftId;
+    if (!id || form.formState.isDirty) {
+      if (!address) {
+        showCustomToast("Connect a wallet to save and share drafts", "error");
+        return;
+      }
+      // Guard against duplicate creates from rapid clicks (shared with Save Draft).
+      if (isSavingDraftRef.current) return;
+      isSavingDraftRef.current = true;
+      setIsSavingDraft(true);
+      try {
+        id = await drafts.saveDraft(
+          {
+            daoId,
+            title: values.title,
+            discussionUrl: values.discussionUrl ?? "",
+            body: values.body,
+            actions: values.actions,
+          },
+          currentDraftId,
+        );
+      } catch {
+        id = "";
+      } finally {
+        isSavingDraftRef.current = false;
+        setIsSavingDraft(false);
+      }
+      if (!id) {
+        showCustomToast("Could not save draft", "error");
+        return;
+      }
+      setCurrentDraftId(id);
+      form.reset(values, { keepValues: true, keepDirty: false });
+    }
+    const copied = await copyDraftShareUrl(basePath, id);
     if (copied) {
-      showCustomToast("Share link copied", "success");
+      showCustomToast("URL copied to clipboard", "success");
     } else {
       showCustomToast("Could not copy link", "error");
     }
   };
+
+  const handleEditCopy = () => {
+    // Forking the blank default form would lose the shared content.
+    if (!draftContentLoaded) return;
+    // Edit doesn't persist: drop the draftId and open a new prefilled form
+    // (RHF state survives the query-only nav). Saved only via Save Draft.
+    setSharedAuthor(undefined);
+    setCurrentDraftId(undefined);
+    hydratedDraftIdRef.current = undefined;
+    setBodyVersion((v) => v + 1);
+    router.push(`${basePath}/proposals/new?view=editor`);
+  };
+
+  const handlePreviewPublish = () => {
+    if (!address) {
+      setPendingAction("publish");
+      openConnectModal?.();
+      return;
+    }
+    handlePublishClick();
+  };
+
+  // Resume a deferred publish only once VP, threshold, and draft hydration are
+  // all ready (each reads 0n/blank while loading and would mis-decide).
+  useEffect(() => {
+    if (!address || pendingAction !== "publish") return;
+    if (vp.isLoading || isLoadingThreshold || !draftContentLoaded) return;
+    setPendingAction(null);
+    handlePublishClick();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    address,
+    pendingAction,
+    vp.isLoading,
+    isLoadingThreshold,
+    draftContentLoaded,
+  ]);
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
     if (!address) {
       showCustomToast("Connect a wallet to save drafts", "error");
       return;
     }
-    // Guard against duplicate creates: while a save is in flight,
-    // `currentDraftId` hasn't been set yet, so a second click would create
-    // another draft. Short-circuit until the first save settles.
+    // Guard against duplicate creates while a save is in flight.
     if (isSavingDraftRef.current) return;
     isSavingDraftRef.current = true;
     setIsSavingDraft(true);
@@ -256,16 +350,21 @@ export const ProposalCreationForm = ({
   };
 
   const handlePublishClick = () => {
-    if (vp.votingPower < threshold) {
-      void handleSaveDraft({ navigateToDrafts: false });
-      setInsufficientOpen(true);
-      return;
-    }
-    if (vp.isLoading) {
+    // Validate here too — the resume path calls this directly.
+    if (!canPublish) return;
+    // Stale form values until the current draftId hydrates; don't publish them.
+    if (!draftContentLoaded) return;
+    // VP/threshold read 0n while loading; wait before comparing.
+    if (vp.isLoading || isLoadingThreshold) {
       showCustomToast(
         "Still checking your voting power — try again in a moment.",
         "error",
       );
+      return;
+    }
+    if (vp.votingPower < threshold) {
+      void handleSaveDraft({ navigateToDrafts: false });
+      setInsufficientOpen(true);
       return;
     }
     void publisher.publish(values, daoIdEnum);
@@ -348,6 +447,61 @@ export const ProposalCreationForm = ({
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
+  // Ownership comes from the viewer's drafts list, so it holds even if the
+  // shared-draft fetch is slow or fails. Verify the cached draft's author
+  // matches the connected wallet — during a wallet switch the previous list is
+  // still exposed, and we must not treat another wallet's draft as owned.
+  const ownedDraft = draftId ? drafts.getDraft(draftId) : undefined;
+  const ownsDraft = Boolean(
+    ownedDraft &&
+    address &&
+    ownedDraft.author.toLowerCase() === address.toLowerCase(),
+  );
+  const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
+  // Editor only for a new proposal or an owned draft (no load-dependent flash).
+  const canShowEditor = !draftId || ownsDraft;
+  const authorAddress = sharedAuthor ?? address ?? "";
+
+  // Once ownership resolves (e.g. an author connects on their own share link),
+  // adopt the draftId so saves update the existing draft instead of creating a
+  // duplicate.
+  useEffect(() => {
+    if (ownsDraft && draftId && currentDraftId !== draftId) {
+      setCurrentDraftId(draftId);
+    }
+  }, [ownsDraft, draftId, currentDraftId]);
+
+  const thresholdDisplay = thresholdFormatted
+    ? formatNumberUserReadable(Number(thresholdFormatted), 0)
+    : "—";
+
+  const recipientState = getRecipientPublishState({
+    address,
+    votingPower: vp.votingPower,
+    threshold,
+  });
+
+  const previewHelperCopy = isRecipient
+    ? draftPreviewCopy(
+        recipientState === "below-threshold"
+          ? {
+              role: "recipient",
+              state: "below-threshold",
+              thresholdDisplay,
+              vpDisplay: votingPowerDisplay,
+              tokenSymbol: daoIdEnum,
+            }
+          : { role: "recipient", state: recipientState },
+      )
+    : draftPreviewCopy({ role: "author" });
+
+  // Recipients can only ever see the Preview — they have no editor access.
+  useEffect(() => {
+    if (isRecipient && view !== "preview") {
+      void setView("preview");
+    }
+  }, [isRecipient, view, setView]);
+
   const proposalsListHref = `${basePath}/proposals`;
 
   const showInsufficientInline =
@@ -375,114 +529,150 @@ export const ProposalCreationForm = ({
         <span className="text-secondary text-sm">/</span>
         <span className="text-primary text-sm">New Proposal</span>
       </nav>
-      {!isWhitelabelRoute && (
-        <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
-          <div className="mx-auto flex w-full flex-1 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Link
-                href={proposalsListHref}
-                className="text-secondary hover:text-primary inline-flex items-center gap-2 text-[14px] font-normal leading-[20px] transition-colors"
-              >
-                <span>Proposals</span>
-                <ChevronRight className="size-4" />
-              </Link>
-              <p className="text-primary text-[14px] font-medium leading-[20px]">
-                New Proposal
+      <div className="px-5 py-2 lg:hidden">
+        <DraftViewToggle
+          mode={view}
+          onChange={(m) => void setView(m)}
+          showEditor={canShowEditor}
+          fullWidth
+        />
+      </div>
+      <div className="text-primary bg-surface-background border-border-default sticky top-0 z-20 hidden h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:flex">
+        <div className="flex items-center">
+          <DraftViewToggle
+            mode={view}
+            onChange={(m) => void setView(m)}
+            showEditor={canShowEditor}
+          />
+        </div>
+        <div className="flex items-center justify-end">
+          {address ? (
+            <div className="flex flex-col items-end">
+              <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
+                Your voting power
+              </p>
+              <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
+                {votingPowerDisplay}
               </p>
             </div>
-            {address && (
-              <div className="flex flex-col items-end">
-                <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">
-                  Your voting power
-                </p>
-                <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                  {votingPowerDisplay}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      <form
-        className="animate-page-slide-in flex min-h-screen flex-col gap-6 px-5 pb-5 pt-5"
-        noValidate
-      >
-        {showInsufficientInline && thresholdFormatted && (
-          <InsufficientVPAlert
-            threshold={formatNumberUserReadable(Number(thresholdFormatted), 0)}
-            tokenSymbol={daoIdEnum}
-          />
-        )}
-
-        <div className="flex w-full flex-col gap-1">
-          <FormLabel isRequired>Title</FormLabel>
-          <Input
-            {...form.register("title")}
-            placeholder="Proposal title"
-            error={!!form.formState.errors.title}
-          />
-          {form.formState.errors.title && (
-            <p className="text-error text-xs">
-              {form.formState.errors.title.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex w-full flex-col gap-1">
-          <FormLabel>Discussion URL</FormLabel>
-          <Input
-            {...form.register("discussionUrl")}
-            placeholder="https://discuss…"
-            error={!!form.formState.errors.discussionUrl}
-          />
-          {form.formState.errors.discussionUrl ? (
-            <p className="text-error text-xs">
-              {form.formState.errors.discussionUrl.message}
-            </p>
           ) : (
-            <p className="text-secondary text-xs">
-              Have you discussed this proposal on the forum first? Paste the
-              link here.
-            </p>
+            <ConnectWalletCustom label="Connect Wallet" />
           )}
         </div>
-
-        <div className="flex w-full flex-col gap-1">
-          <FormLabel isRequired>Description</FormLabel>
-          <BodyField version={bodyVersion} />
-        </div>
-
-        <div className="flex w-full flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <FormLabel isRequired>Actions</FormLabel>
-            <span className="text-secondary text-xs">
-              {values.actions.length} action(s)
-            </span>
-          </div>
-          <div className="flex flex-col gap-3">
-            {values.actions.length > 0 && (
-              <ActionsList
-                onEditAction={openEditForAction}
-                onDeleteAction={(i) => setDeleteActionIndex(i)}
+      </div>
+      {view === "preview" ? (
+        <DraftPreview
+          daoId={daoId}
+          daoIdEnum={daoIdEnum}
+          title={values.title}
+          discussionUrl={values.discussionUrl ?? ""}
+          body={values.body}
+          actions={values.actions}
+          authorAddress={authorAddress}
+          helperCopy={previewHelperCopy}
+          secondaryAction={isRecipient ? "edit" : "copy-link"}
+          onPublish={handlePreviewPublish}
+          onCopyLink={handleShare}
+          onEdit={handleEditCopy}
+          editDisabled={!draftContentLoaded}
+          isWhitelabelRoute={isWhitelabelRoute}
+          // Enabled while disconnected (to open the wallet); once connected,
+          // block an invalid form, a loading threshold, or below-threshold.
+          publishDisabled={
+            Boolean(address) &&
+            (isLoadingThreshold ||
+              !canPublish ||
+              !draftContentLoaded ||
+              (isRecipient && recipientState === "below-threshold"))
+          }
+        />
+      ) : (
+        <>
+          <form
+            className="animate-page-slide-in flex min-h-screen flex-col gap-6 px-5 pb-5 pt-5"
+            noValidate
+          >
+            {showInsufficientInline && thresholdFormatted && (
+              <InsufficientVPAlert
+                threshold={formatNumberUserReadable(
+                  Number(thresholdFormatted),
+                  0,
+                )}
+                tokenSymbol={daoIdEnum}
               />
             )}
-            <ActionsPlaceholderCard
-              onAddTransfer={() => setTransferOpen(true)}
-              onAddCustom={() => setCustomOpen(true)}
-            />
-          </div>
-        </div>
-      </form>
 
-      <ProposalFormNavBar
-        filledCount={filledCount}
-        totalCount={3}
-        canPublish={canPublish}
-        onSaveDraft={handleSaveDraft}
-        onPublish={handlePublishClick}
-        onShare={currentDraftId ? handleShare : undefined}
-        isSavingDraft={isSavingDraft}
-      />
+            <div className="flex w-full flex-col gap-1">
+              <FormLabel isRequired>Title</FormLabel>
+              <Input
+                {...form.register("title")}
+                placeholder="Proposal title"
+                error={!!form.formState.errors.title}
+              />
+              {form.formState.errors.title && (
+                <p className="text-error text-xs">
+                  {form.formState.errors.title.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <FormLabel>Discussion URL</FormLabel>
+              <Input
+                {...form.register("discussionUrl")}
+                placeholder="https://discuss…"
+                error={!!form.formState.errors.discussionUrl}
+              />
+              {form.formState.errors.discussionUrl ? (
+                <p className="text-error text-xs">
+                  {form.formState.errors.discussionUrl.message}
+                </p>
+              ) : (
+                <p className="text-secondary text-xs">
+                  Have you discussed this proposal on the forum first? Paste the
+                  link here.
+                </p>
+              )}
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <FormLabel isRequired>Description</FormLabel>
+              <BodyField version={bodyVersion} />
+            </div>
+
+            <div className="flex w-full flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <FormLabel isRequired>Actions</FormLabel>
+                <span className="text-secondary text-xs">
+                  {values.actions.length} action(s)
+                </span>
+              </div>
+              <div className="flex flex-col gap-3">
+                {values.actions.length > 0 && (
+                  <ActionsList
+                    onEditAction={openEditForAction}
+                    onDeleteAction={(i) => setDeleteActionIndex(i)}
+                  />
+                )}
+                <ActionsPlaceholderCard
+                  onAddTransfer={() => setTransferOpen(true)}
+                  onAddCustom={() => setCustomOpen(true)}
+                />
+              </div>
+            </div>
+          </form>
+
+          <ProposalFormNavBar
+            filledCount={filledCount}
+            totalCount={3}
+            canPublish={canPublish}
+            onSaveDraft={handleSaveDraft}
+            onPublish={handlePublishClick}
+            onShare={currentDraftId ? handleShare : undefined}
+            isSavingDraft={isSavingDraft}
+          />
+        </>
+      )}
 
       <AddTransferModal
         open={transferOpen}
