@@ -102,9 +102,24 @@ export function offchainProposals(
             },
           },
         },
+        400: {
+          description: "Offchain data not supported",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
       },
     }),
     async (context) => {
+      if (!supportOffchain) {
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Offchain data not supported" }),
+          400,
+        );
+      }
+
       const { query, skip, limit, lean } = context.req.valid("query");
 
       const { items, totalCount } = await service.searchProposals({
@@ -154,9 +169,24 @@ export function offchainProposals(
             },
           },
         },
+        400: {
+          description: "Offchain data not supported",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
       },
     }),
     async (context) => {
+      if (!supportOffchain) {
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Offchain data not supported" }),
+          400,
+        );
+      }
+
       const { id } = context.req.valid("param");
       const { lean } = context.req.valid("query");
 

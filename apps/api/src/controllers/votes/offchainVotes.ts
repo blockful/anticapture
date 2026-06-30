@@ -100,9 +100,24 @@ export function offchainVotes(
             },
           },
         },
+        400: {
+          description: "Offchain data not supported",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
       },
     }),
     async (context) => {
+      if (!supportOffchain) {
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Offchain data not supported" }),
+          400,
+        );
+      }
+
       const { id } = context.req.valid("param");
       const {
         skip,
