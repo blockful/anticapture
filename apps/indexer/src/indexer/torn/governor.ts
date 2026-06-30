@@ -34,7 +34,14 @@ function parseProposalTitle(description: string): string {
     };
     if (parsed.title) return parsed.title;
   } catch {
-    // Not JSON, continue with markdown parsing
+    // Malformed pseudo-JSON is common: single quotes, missing comma between
+    // keys, or unescaped chars deeper in the description that break a full
+    // parse even though the title key itself is fine. Pull the title out
+    // directly before falling back to markdown.
+    const m = description.match(
+      /["']title["']\s*:\s*["']([\s\S]*?)["']\s*[,}]?\s*(?:["']description["']|$)/i,
+    );
+    if (m?.[1]) return m[1];
   }
 
   // Normalize literal "\n" (two chars) into real newlines
