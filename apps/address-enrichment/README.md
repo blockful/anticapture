@@ -105,17 +105,63 @@ Health check endpoint.
 
 ```bash
 # From monorepo root
-pnpm address-enrichment dev
+pnpm address dev
 
-# Run database migrations
-pnpm address-enrichment db:push
+# Generate a new migration after editing src/db/schema.ts
+DATABASE_URL=postgres://user:pass@localhost:5432/db pnpm --filter @anticapture/address-enrichment db:generate
 
 # Type check
-pnpm address-enrichment typecheck
+pnpm address typecheck
 
 # Lint
-pnpm address-enrichment lint
+pnpm address lint
 ```
+
+## Database Migrations
+
+Address Enrichment uses committed Drizzle SQL migrations. Runtime does not call
+`drizzle-kit push`; startup applies files from `apps/address-enrichment/drizzle/`
+with `drizzle-orm`'s migrator.
+
+Startup flow:
+
+1. `src/index.ts` calls `initDb(env.DATABASE_URL)`.
+2. `initDb` creates one PostgreSQL pool and Drizzle client.
+3. `runMigrations()` calls `migrate(getDb(), { migrationsFolder: "./drizzle" })`.
+4. Drizzle checks `drizzle.__drizzle_migrations`.
+5. Missing migrations run before the HTTP server starts.
+6. Services and scripts reuse the same client via `getDb()`.
+
+Fresh database:
+
+- `0000_massive_iron_patriot.sql` creates `address_enrichment`.
+- Drizzle records the migration in `drizzle.__drizzle_migrations`.
+
+Existing deployed database:
+
+- The baseline uses `CREATE TABLE IF NOT EXISTS`, so the existing table is left intact.
+- Drizzle records the baseline as applied.
+- Later restarts no-op unless new migration files exist.
+
+Create a new migration:
+
+1. Edit `apps/address-enrichment/src/db/schema.ts`.
+2. Run:
+   ```bash
+   DATABASE_URL=postgres://user:pass@localhost:5432/db pnpm --filter @anticapture/address-enrichment db:generate
+   ```
+3. Review and commit the generated files:
+   - `apps/address-enrichment/drizzle/0001_*.sql`
+   - `apps/address-enrichment/drizzle/meta/_journal.json`
+   - `apps/address-enrichment/drizzle/meta/0001_snapshot.json`
+4. Verify:
+   ```bash
+   pnpm address typecheck
+   pnpm address lint
+   pnpm address build
+   ```
+
+Do not edit old migrations after merge. Add a new migration for every schema change.
 
 ## Sync Command
 

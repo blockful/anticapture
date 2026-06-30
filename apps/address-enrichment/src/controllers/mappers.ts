@@ -68,11 +68,46 @@ export const AddressResponseSchema = z.object({
         description: "URL of the ENS profile banner image",
         example: null,
       }),
+      twitter: z.string().nullable().openapi({
+        description:
+          "Twitter/X handle from the ENS 'com.twitter' text record, without '@'",
+        example: "VitalikButerin",
+      }),
+      telegram: z.string().nullable().openapi({
+        description:
+          "Telegram handle from the ENS 'org.telegram' text record, without '@'",
+        example: null,
+      }),
+      email: z.string().nullable().openapi({
+        description: "Email address from the ENS 'email' text record",
+        example: null,
+      }),
+      github: z.string().nullable().openapi({
+        description:
+          "GitHub handle from the ENS 'com.github' text record, without '@'",
+        example: "vbuterin",
+      }),
     })
     .nullable()
     .openapi({
       description:
-        "ENS (Ethereum Name Service) data. null when no ENS name is registered for the address. Cached with a configurable TTL.",
+        "ENS (Ethereum Name Service) data, including social text records. null when no ENS name is registered for the address. Cached with a configurable TTL.",
+    }),
+  efp: z
+    .object({
+      followers: z.number().nullable().openapi({
+        description: "Number of EFP (Ethereum Follow Protocol) followers",
+        example: 5426,
+      }),
+      following: z.number().nullable().openapi({
+        description: "Number of accounts this address follows on EFP",
+        example: 10,
+      }),
+    })
+    .nullable()
+    .openapi({
+      description:
+        "EFP (Ethereum Follow Protocol) stats. Returned independently of whether the address has a primary ENS name. null when no EFP data is available. Cached with a configurable TTL.",
     }),
 });
 

@@ -1,0 +1,135 @@
+{
+  "id": "aead0176-ed03-4f3d-9361-08bdd11597d5",
+  "prevId": "7e072a63-26c9-419b-961e-b5a2c61b6ed9",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.address_enrichment": {
+      "name": "address_enrichment",
+      "schema": "",
+      "columns": {
+        "address": {
+          "name": "address",
+          "type": "varchar(42)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "is_contract": {
+          "name": "is_contract",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arkham_entity": {
+          "name": "arkham_entity",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arkham_entity_type": {
+          "name": "arkham_entity_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arkham_label": {
+          "name": "arkham_label",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arkham_twitter": {
+          "name": "arkham_twitter",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ens_name": {
+          "name": "ens_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ens_avatar": {
+          "name": "ens_avatar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ens_banner": {
+          "name": "ens_banner",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ens_twitter": {
+          "name": "ens_twitter",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ens_telegram": {
+          "name": "ens_telegram",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ens_email": {
+          "name": "ens_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ens_github": {
+          "name": "ens_github",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "efp_followers": {
+          "name": "efp_followers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "efp_following": {
+          "name": "efp_following",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ens_updated_at": {
+          "name": "ens_updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
