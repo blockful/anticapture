@@ -18,18 +18,13 @@ Governor voting token: Voting power comes from `lockedBalance` in the Governance
 - [x] Circulating supply calculation
 - [x] Delegated supply tracking (via lock/unlock detection — Transfer to/from Governance contract)
 - [x] Governor-level delegation tracking (Delegated/Undelegated events)
+- [x] Per-account voting power via synthetic `votingPowerHistory` (lock/unlock Transfers + delegation shifts — no `DelegateVotesChanged` needed)
 - [x] Governor proposals (ProposalCreated — custom handler with timestamp-based timing)
 - [x] Governor votes (Voted — binary for/against, no abstain)
 - [x] Proposal execution (ProposalExecuted event)
 - [x] API client with timestamp-based proposal status computation
 
 ## What's Pending
-
-### No per-account votingPowerHistory
-
-The standard pattern relies on `DelegateVotesChanged` events which TORN doesn't emit. Voting power = `lockedBalance` in the governor. We track aggregate `delegatedSupply` (total locked TORN) but individual `votingPowerHistory` records are not populated.
-
-**To close this gap:** Detect Transfer events to/from the governance contract and create synthetic `votingPowerHistory` entries. Requires careful handling when delegation shifts occur (voting power moves between accounts without a Transfer).
 
 ### No abstain votes
 
@@ -89,6 +84,13 @@ Tornado Cash was sanctioned by the U.S. Treasury's OFAC in August 2022. While th
 | EXECUTION_EXPIRATION | 259200 | 3 days         |
 | CLOSING_PERIOD       | 3600   | 1 hour         |
 | VOTE_EXTEND_TIME     | 21600  | 6 hours        |
+
+### Per-account voting power (no DelegateVotesChanged)
+
+Voting power is `lockedBalance`, credited to whoever the locker delegates to. Since TORN emits no `DelegateVotesChanged`, both inputs are synthesized in `torn/shared.ts`:
+
+- **Lock/unlock** (`erc20.ts`): each account's net locked balance is tracked in an `accountBalance` row keyed by the governor address (distinct from the wallet-balance row keyed by the token). Voting power is applied to the locker's current delegate (itself if none).
+- **Delegation shift** (`governor.ts` Delegated/Undelegated): the locker's locked balance moves as voting power from the old delegate to the new one — no Transfer occurs, so this is the only signal.
 
 ### Vote handler: onConflictDoNothing
 

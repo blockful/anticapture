@@ -1,15 +1,16 @@
 import { ponder } from "ponder:registry";
-import { accountPower, token, votingPowerHistory } from "ponder:schema";
+import { token } from "ponder:schema";
 import { Address, getAddress } from "viem";
 
 import { tokenTransfer } from "@/eventHandlers";
-import { ensureAccountExists } from "@/eventHandlers/shared";
 import {
   updateDelegatedSupply,
   updateCirculatingSupply,
   updateSupplyMetric,
   updateTotalSupply,
 } from "@/eventHandlers/metrics";
+
+import { addLockedBalance, applyVotingPower, getDelegate } from "./shared";
 import {
   MetricTypesEnum,
   BurningAddresses,
@@ -171,29 +172,22 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
       // Aggregate locked (delegated) supply.
       await updateDelegatedSupply(context, daoId, address, delta, timestamp);
 
-      // Per-account voting power: the locker (`from` on lock, `to` on unlock).
-      await ensureAccountExists(context, locker);
+      // Track the locker's per-account locked balance so a later delegation can
+      // move the right amount of voting power (TORN has no DelegateVotesChanged).
+      await addLockedBalance(context, locker, delta);
 
-      const { votingPower } = await context.db
-        .insert(accountPower)
-        .values({ accountId: locker, daoId, votingPower: delta })
-        .onConflictDoUpdate((current) => ({
-          votingPower: current.votingPower + delta,
-        }));
-
-      await context.db
-        .insert(votingPowerHistory)
-        .values({
-          daoId,
-          transactionHash: event.transaction.hash,
-          accountId: locker,
-          votingPower,
-          delta,
-          deltaMod: delta > 0n ? delta : -delta,
-          timestamp,
-          logIndex: event.log.logIndex,
-        })
-        .onConflictDoNothing();
+      // Voting power accrues to the locker's current delegate — itself unless it
+      // has delegated to someone else.
+      const recipient = await getDelegate(context, locker);
+      await applyVotingPower(
+        context,
+        daoId,
+        recipient,
+        delta,
+        event.transaction.hash,
+        timestamp,
+        event.log.logIndex,
+      );
     }
   });
 

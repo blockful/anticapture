@@ -13,6 +13,8 @@ import { ensureAccountExists } from "@/eventHandlers/shared";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
+import { applyVotingPower, getDelegate, getLockedBalance } from "./shared";
+
 const MAX_TITLE_LENGTH = 200;
 
 /**
@@ -242,6 +244,36 @@ export function TORNGovernorIndexer(blockTime: number) {
 
   ponder.on("TORNGovernor:Delegated", async ({ event, context }) => {
     const { account, to } = event.args;
+    const txHash = event.transaction.hash;
+    const timestamp = event.block.timestamp;
+    const logIndex = event.log.logIndex;
+
+    // TORN has no DelegateVotesChanged: locked TORN never moves on-chain when
+    // delegation changes, so shift the locker's voting power from its current
+    // delegate (itself if none) to the new one.
+    const lockedBalance = await getLockedBalance(context, account);
+    const prevRecipient = await getDelegate(context, account);
+    const newRecipient = getAddress(to);
+    if (lockedBalance !== 0n && prevRecipient !== newRecipient) {
+      await applyVotingPower(
+        context,
+        daoId,
+        prevRecipient,
+        -lockedBalance,
+        txHash,
+        timestamp,
+        logIndex,
+      );
+      await applyVotingPower(
+        context,
+        daoId,
+        newRecipient,
+        lockedBalance,
+        txHash,
+        timestamp,
+        logIndex,
+      );
+    }
 
     // Look up the previous delegate from accountBalance
     const existing = await context.db.find(accountBalance, {
@@ -255,14 +287,43 @@ export function TORNGovernorIndexer(blockTime: number) {
       delegate: to,
       tokenId: TORN_TOKEN_ADDRESS,
       previousDelegate,
-      txHash: event.transaction.hash,
-      timestamp: event.block.timestamp,
-      logIndex: event.log.logIndex,
+      txHash,
+      timestamp,
+      logIndex,
+      delegatorBalance: lockedBalance,
     });
   });
 
   ponder.on("TORNGovernor:Undelegated", async ({ event, context }) => {
     const { account, from } = event.args;
+    const txHash = event.transaction.hash;
+    const timestamp = event.block.timestamp;
+    const logIndex = event.log.logIndex;
+
+    // Move the locker's voting power back from `from` to itself.
+    const lockedBalance = await getLockedBalance(context, account);
+    const prevRecipient = getAddress(from);
+    const newRecipient = getAddress(account);
+    if (lockedBalance !== 0n && prevRecipient !== newRecipient) {
+      await applyVotingPower(
+        context,
+        daoId,
+        prevRecipient,
+        -lockedBalance,
+        txHash,
+        timestamp,
+        logIndex,
+      );
+      await applyVotingPower(
+        context,
+        daoId,
+        newRecipient,
+        lockedBalance,
+        txHash,
+        timestamp,
+        logIndex,
+      );
+    }
 
     // Undelegation: delegate reverts to self, previous delegate was `from`
     await delegateChanged(context, daoId, {
@@ -270,9 +331,10 @@ export function TORNGovernorIndexer(blockTime: number) {
       delegate: account,
       tokenId: TORN_TOKEN_ADDRESS,
       previousDelegate: from,
-      txHash: event.transaction.hash,
-      timestamp: event.block.timestamp,
-      logIndex: event.log.logIndex,
+      txHash,
+      timestamp,
+      logIndex,
+      delegatorBalance: lockedBalance,
     });
   });
 }
