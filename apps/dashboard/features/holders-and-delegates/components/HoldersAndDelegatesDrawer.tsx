@@ -39,7 +39,7 @@ export const HoldersAndDelegatesDrawer = ({
 }: HoldersAndDelegatesDrawerProps) => {
   const entities = {
     delegate: {
-      title: "Delegate",
+      title: "Delegate Profile",
       tabs: [
         ...(withVotes
           ? [
@@ -65,7 +65,7 @@ export const HoldersAndDelegatesDrawer = ({
       ],
     },
     tokenHolder: {
-      title: "Token Holder",
+      title: "Token Holder Profile",
       tabs: [
         {
           id: "delegationHistory",
@@ -140,12 +140,14 @@ export const HoldersAndDelegatesDrawer = ({
       <div className="hidden lg:block">
         <EnsAvatar
           address={address as `0x${string}`}
-          size="sm"
+          size="md"
           variant="rounded"
-          containerClassName="gap-2"
+          containerClassName="gap-3"
           showFullAddress={true}
           showTags={true}
           showCopyAddress={true}
+          showEfpStats={true}
+          showSocials={true}
         />
       </div>
 
@@ -153,13 +155,15 @@ export const HoldersAndDelegatesDrawer = ({
       <div className="block lg:hidden">
         <EnsAvatar
           address={address as `0x${string}`}
-          size="sm"
+          size="md"
           variant="rounded"
-          containerClassName="gap-2"
+          containerClassName="gap-3"
           showFullAddress={false}
           showTags={true}
           showCopyAddress={true}
-          maxVisibleTags={2}
+          maxVisibleTags={3}
+          showEfpStats={true}
+          showSocials={true}
         />
       </div>
     </>
