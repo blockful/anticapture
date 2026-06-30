@@ -83,6 +83,42 @@ const azoriusVoteHandler =
     return client.writeContract(request);
   };
 
+const TornGovernorVoteAbi = [
+  {
+    inputs: [
+      { internalType: "uint256", name: "proposalId", type: "uint256" },
+      { internalType: "bool", name: "support", type: "bool" },
+    ],
+    name: "castVote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const;
+
+/**
+ * Tornado Cash (custom stake-to-vote governor): castVote(uint256, bool) on the
+ * governor. Binary voting — for=true / against=false, no abstain, no reason.
+ * Voting power = lockedBalance, so the caller must have locked TORN.
+ */
+const tornVoteHandler =
+  (daoId: DaoIdEnum): VoteHandler =>
+  async (client, params) => {
+    const address = daoConfigByDaoId[daoId].daoOverview.contracts.governor;
+    if (!address) throw new Error("DAO governance address not found");
+    if (params.voteNumber === 2)
+      throw new Error("Tornado Cash does not support abstain votes");
+
+    const { request } = await client.simulateContract({
+      abi: TornGovernorVoteAbi,
+      address,
+      functionName: "castVote",
+      args: [BigInt(params.proposalId), params.voteNumber === 1],
+      account: params.account,
+    });
+    return client.writeContract(request);
+  };
+
 /**
  * OZ Governor: castVote / castVoteWithReason on governor contract.
  */
@@ -171,6 +207,8 @@ function getVoteHandler(
   switch (daoId) {
     case DaoIdEnum.SHU:
       return azoriusVoteHandler(daoId);
+    case DaoIdEnum.TORN:
+      return tornVoteHandler(daoId);
     default:
       return ozGovernorVoteHandler(daoId);
   }
