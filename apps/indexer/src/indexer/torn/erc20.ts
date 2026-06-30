@@ -30,9 +30,7 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
   // (GovernanceVaultUpgrade._transferTokens). Both are lock "sinks": a Transfer
   // into either is a lock; out of either is an unlock. Pre-v2 used the governor.
   // https://etherscan.io/address/0x2F50508a8a3D323B91336FA3eA6Ae50e55f32185
-  const vaultAddress = getAddress(
-    "0x2F50508a8a3D323B91336FA3eA6Ae50e55f32185",
-  );
+  const vaultAddress = getAddress("0x2F50508a8a3D323B91336FA3eA6Ae50e55f32185");
 
   ponder.on("TORNToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
