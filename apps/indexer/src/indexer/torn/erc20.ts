@@ -1,8 +1,9 @@
 import { ponder } from "ponder:registry";
-import { token } from "ponder:schema";
+import { accountPower, token, votingPowerHistory } from "ponder:schema";
 import { Address, getAddress } from "viem";
 
 import { tokenTransfer } from "@/eventHandlers";
+import { ensureAccountExists } from "@/eventHandlers/shared";
 import {
   updateDelegatedSupply,
   updateCirculatingSupply,
@@ -25,6 +26,16 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.TORN;
   const governorAddress = getAddress(
     CONTRACT_ADDRESSES[DaoIdEnum.TORN].governor.address,
+  );
+
+  // Contracts that custody locked TORN. A balance held here is voting power
+  // owned by the locker, not the custody contract. TORN emits no
+  // DelegateVotesChanged, so per-account voting power is derived from
+  // lock/unlock Transfers in/out of these addresses. Add new lock contracts here.
+  const lockCustodyAddresses = new Set<Address>(
+    Object.values(NonCirculatingAddresses[daoId]).map((addr) =>
+      getAddress(addr),
+    ),
   );
 
   ponder.on("TORNToken:setup", async ({ context }) => {
@@ -160,5 +171,46 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
       // Unlocking TORN from governance
       await updateDelegatedSupply(context, daoId, address, -value, timestamp);
     }
+
+    // Per-account voting power. A transfer into custody locks (the locker is
+    // `from`, gaining power); out of custody unlocks (the locker is `to`,
+    // losing power). Governor<->vault internal moves (e.g. the vault migration)
+    // have custody on both sides and net to zero, so they are skipped.
+    const toIsCustody = lockCustodyAddresses.has(normalizedTo);
+    const fromIsCustody = lockCustodyAddresses.has(normalizedFrom);
+
+    if (toIsCustody !== fromIsCustody) {
+      const locker = toIsCustody ? normalizedFrom : normalizedTo;
+      const delta = toIsCustody ? value : -value;
+
+      await ensureAccountExists(context, locker);
+
+      const { votingPower } = await context.db
+        .insert(accountPower)
+        .values({ accountId: locker, daoId, votingPower: delta })
+        .onConflictDoUpdate((current) => ({
+          votingPower: current.votingPower + delta,
+        }));
+
+      await context.db
+        .insert(votingPowerHistory)
+        .values({
+          daoId,
+          transactionHash: event.transaction.hash,
+          accountId: locker,
+          votingPower,
+          delta,
+          deltaMod: delta > 0n ? delta : -delta,
+          timestamp,
+          logIndex: event.log.logIndex,
+        })
+        .onConflictDoNothing();
+    }
   });
+
+  // Voting power is derived from lock/unlock Transfers (see handler above), not
+  // from these reward events — they carry only `account`, no amount. Kept as
+  // no-ops so the configured events have handlers.
+  // ponder.on("TORNGovernor:RewardUpdateSuccessful", async () => {});
+  // ponder.on("TORNGovernor:RewardUpdateFailed", async () => {});
 }

@@ -403,7 +403,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
       "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
     InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
-  [DaoIdEnum.TORN]: {},
+  [DaoIdEnum.TORN]: {
+    Governor: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
+  },
 };
 
 export enum ProposalStatus {

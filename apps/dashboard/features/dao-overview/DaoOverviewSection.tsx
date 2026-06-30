@@ -25,6 +25,7 @@ import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { Stage } from "@/shared/types/enums/Stage";
 import { BannerAlert } from "@/shared/components/design-system/alerts/banner-alert/BannerAlert";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import {
   fieldsToArray,
   getDaoStageFromFields,
@@ -102,31 +103,51 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
       <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
         <div className="w-full px-5 lg:px-0">
-          <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
-            <StagesContainer
-              daoId={daoId}
-              currentDaoStage={currentDaoStage}
-              daoConfig={daoConfig}
-              context="overview"
+          {daoConfig.resilienceStages ? (
+            <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
+              <StagesContainer
+                daoId={daoId}
+                currentDaoStage={currentDaoStage}
+                daoConfig={daoConfig}
+                context="overview"
+              />
+            </Suspense>
+          ) : (
+            <BlankSlate
+              variant="title"
+              icon={Info}
+              title="Resilience Stages"
+              description="Resilience stages are not available for this DAO."
+              className="h-full"
             />
-          </Suspense>
+          )}
         </div>
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
-        <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
-          <RiskAreaCardWrapper
-            daoId={daoId}
-            title={riskAreas.title}
-            riskAreas={riskAreas.risks}
-            onRiskClick={() => {
-              router.push(`/${daoId.toLowerCase()}/risk-analysis`);
-            }}
-            variant={RiskAreaCardEnum.DAO_OVERVIEW}
-            className="grid h-full grid-cols-2 gap-2 px-5 lg:px-0"
-            currentDaoStage={currentDaoStage}
+        {daoConfig.attackExposure ? (
+          <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
+            <RiskAreaCardWrapper
+              daoId={daoId}
+              title={riskAreas.title}
+              riskAreas={riskAreas.risks}
+              onRiskClick={() => {
+                router.push(`/${daoId.toLowerCase()}/risk-analysis`);
+              }}
+              variant={RiskAreaCardEnum.DAO_OVERVIEW}
+              className="grid h-full grid-cols-2 gap-2 px-5 lg:px-0"
+              currentDaoStage={currentDaoStage}
+            />
+          </Suspense>
+        ) : (
+          <BlankSlate
+            variant="title"
+            icon={Info}
+            title="Attack Exposure"
+            description="Attack exposure analysis is not available for this DAO."
+            className="h-full"
           />
-        </Suspense>
+        )}
         <div className="block lg:hidden">
           <DividerDefault isHorizontal />
         </div>
