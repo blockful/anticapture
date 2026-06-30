@@ -1,19 +1,7 @@
-import { Info } from "lucide-react";
-
-import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
 import type { ProposalDetails } from "@/features/governance/types";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-
-const formatDateTime = (timestamp: number): string =>
-  new Date(timestamp * 1000).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
 /**
  * Shown on the Actions tab for proposals without executable actions (e.g. Tornado
@@ -30,55 +18,41 @@ export const ProposalActionsInfoCard = ({
   const proposalAddress = proposal.targets?.[0] ?? null;
 
   return (
-    <div className="border-border-default flex w-full flex-col gap-3 border p-3">
-      <div className="flex items-center gap-2">
-        <Info className="text-secondary size-4" />
-        <ProposalInfoText>Info</ProposalInfoText>
+    <div className="border-border-default flex w-full flex-col gap-3 border">
+      <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
+        <div>
+          <p className="text-primary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider">
+            // Action
+          </p>
+        </div>
+        <DefaultLink
+          href={`${blockExplorerUrl}/address/${proposalAddress}`}
+          openInNewTab
+          className="text-secondary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider"
+        >
+          Contract
+        </DefaultLink>
       </div>
 
       {proposalAddress && (
-        <div className="flex w-full flex-col gap-1">
+        <div className="flex w-full flex-col gap-1 p-3">
           <ProposalInfoText>Proposal Address</ProposalInfoText>
-          <DefaultLink
-            href={`${blockExplorerUrl}/address/${proposalAddress}`}
-            openInNewTab
-            variant="highlight"
-            className="break-all normal-case tracking-normal"
-          >
-            {proposalAddress}
-          </DefaultLink>
-        </div>
-      )}
-
-      <div className="flex w-full gap-8">
-        <div className="flex flex-col gap-1">
-          <ProposalInfoText>ID</ProposalInfoText>
-          <p className="text-primary font-mono text-sm font-normal leading-5">
-            {proposal.id}
-          </p>
-        </div>
-        <div className="flex flex-col gap-1">
-          <ProposalInfoText>Status</ProposalInfoText>
-          <div>
-            <ProposalBadge status={proposal.status} />
+          <div className="flex w-full items-center gap-1">
+            <p className="text-secondary break-all font-mono text-sm font-normal leading-5">
+              {proposalAddress}
+            </p>
+            <CopyAndPasteButton
+              textToCopy={proposalAddress}
+              customTooltipText={{
+                default: "Copy address",
+                copied: "Address copied!",
+              }}
+              iconSize="sm"
+              className="shrink-0 p-1"
+            />
           </div>
         </div>
-      </div>
-
-      <div className="flex w-full gap-8">
-        <div className="flex flex-col gap-1">
-          <ProposalInfoText>Start Date</ProposalInfoText>
-          <p className="text-primary font-mono text-sm font-normal leading-5">
-            {formatDateTime(proposal.startTimestamp)}
-          </p>
-        </div>
-        <div className="flex flex-col gap-1">
-          <ProposalInfoText>End Date</ProposalInfoText>
-          <p className="text-primary font-mono text-sm font-normal leading-5">
-            {formatDateTime(proposal.endTimestamp)}
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
