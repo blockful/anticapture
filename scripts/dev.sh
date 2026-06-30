@@ -31,6 +31,7 @@ dao_id_for() {
     uniswap)  echo "uni" ;;
     gitcoin)  echo "gtc" ;;
     scroll)   echo "scr" ;;
+    tornado)  echo "torn" ;;
     shutter)  echo "shu" ;;
     compound) echo "comp" ;;
     *)        echo "$1" ;;
@@ -132,19 +133,9 @@ start_gateful() {
 }
 
 start_relayer() {
-  if [ -z "$DAO_NAME" ]; then
-    log "Skipping optional Relayer (no DAO selected)"
-    return 1
-  fi
-  local service="$(echo "$DAO_NAME" | tr '[:upper:]' '[:lower:]')-relayer"
-  log "Starting optional Relayer ($service)..."
-  # Always run through `railway run`; if the service doesn't exist it simply
-  # fails to come up and wait_for_optional_port lets the stack continue.
-  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s "$service" pnpm relayer dev &
-  if wait_for_optional_port "$PORT_RELAYER" "Relayer"; then
-    return 0
-  fi
-  return 1
+  export DAO_RELAYER_ENS="http://localhost:${PORT_RELAYER}"
+  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s ens-relayer pnpm relayer dev &
+  wait_for_port "$PORT_RELAYER" "Relayer"
 }
 
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
@@ -267,11 +258,8 @@ if [ "$RUN_API" = true ]; then
   ) &
 fi
 
-# 5. Relayer (optional; only available for a few DAOs — do not block the rest of the stack)
-RELAYER_AVAILABLE=false
-if start_relayer; then
-  RELAYER_AVAILABLE=true
-fi
+# 5. Relayer (only available for ENS)
+start_relayer
 
 # 6. Gateful
 start_gateful
@@ -299,11 +287,7 @@ else
   printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
 fi
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
-if [ "$RELAYER_AVAILABLE" = true ]; then
-  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
-else
-  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   skipped (optional)\n"
-fi
+printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
 printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""
