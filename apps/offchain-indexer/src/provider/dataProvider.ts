@@ -42,6 +42,20 @@ const PROPOSALS_QUERY = `
   }
 `;
 
+const PROPOSAL_IDS_QUERY = `
+  query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
+    proposals(
+      where: { space: $spaceId, created_gt: $cursor }
+      first: $pageSize
+      orderBy: "created"
+      orderDirection: asc
+    ) {
+      id
+      created
+    }
+  }
+`;
+
 const VOTES_QUERY = `
   query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
     votes(
@@ -101,6 +115,33 @@ export class SnapshotProvider implements DataProvider {
         : null;
 
     return { data: proposals, nextCursor };
+  }
+
+  async fetchProposalIdsSince(since: number): Promise<string[]> {
+    const ids: string[] = [];
+    let cursor = since;
+
+    while (true) {
+      const response = await this.query<{
+        proposals: { id: string; created: number }[];
+      }>(PROPOSAL_IDS_QUERY, {
+        spaceId: this.spaceId,
+        cursor,
+        pageSize: PAGE_SIZE,
+      });
+
+      if (response.proposals.length === 0) break;
+
+      for (const proposal of response.proposals) {
+        ids.push(proposal.id);
+      }
+
+      if (response.proposals.length < PAGE_SIZE) break;
+
+      cursor = response.proposals[response.proposals.length - 1]!.created;
+    }
+
+    return ids;
   }
 
   async fetchVotes(
