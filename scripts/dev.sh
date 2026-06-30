@@ -31,7 +31,6 @@ dao_id_for() {
     uniswap)  echo "uni" ;;
     gitcoin)  echo "gtc" ;;
     scroll)   echo "scr" ;;
-    tornado)  echo "torn" ;;
     shutter)  echo "shu" ;;
     compound) echo "comp" ;;
     *)        echo "$1" ;;
@@ -133,20 +132,19 @@ start_gateful() {
 }
 
 start_relayer() {
-  export DAO_RELAYER_ENS="http://localhost:${PORT_RELAYER}"
-  # The relayer reaches the chain via RPC_URL, which in dev points at an
-  # erpc.railway.internal host unreachable from a laptop. Set LOCAL_RELAYER_RPC_URL
-  # to a reachable RPC (e.g. https://erpc-dev.up.railway.app/api/evm/1) to run it
-  # locally; REDIS_URL is already a public proxy in dev. Without the override the
-  # relayer crashes on startup, gateful can't fetch its OpenAPI spec, and the
-  # @anticapture/client codegen omits the relayer hooks the dashboard imports.
-  if [ -n "${LOCAL_RELAYER_RPC_URL:-}" ]; then
-    run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s ens-relayer bash -c 'RPC_URL="$LOCAL_RELAYER_RPC_URL" exec pnpm relayer dev' &
-  else
-    run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s ens-relayer pnpm relayer dev &
+  if [ -z "$DAO_NAME" ]; then
+    log "Skipping optional Relayer (no DAO selected)"
+    return 1
   fi
-  # Optional: a slow/unavailable relayer must not tear down the rest of the stack.
-  wait_for_optional_port "$PORT_RELAYER" "Relayer" || true
+  local service="$(echo "$DAO_NAME" | tr '[:upper:]' '[:lower:]')-relayer"
+  log "Starting optional Relayer ($service)..."
+  # Always run through `railway run`; if the service doesn't exist it simply
+  # fails to come up and wait_for_optional_port lets the stack continue.
+  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s "$service" pnpm relayer dev &
+  if wait_for_optional_port "$PORT_RELAYER" "Relayer"; then
+    return 0
+  fi
+  return 1
 }
 
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
@@ -181,26 +179,13 @@ railway_run() {
   fi
 }
 
-# Always try railway for the API; fall back to plain execution (.env) if service not found.
-# Railway injects dev values that point at *.railway.internal hosts which only resolve
-# inside Railway's private network, so from a laptop the API can't reach them:
-#   - LOCAL_DATABASE_URL overrides DATABASE_URL (DB; e.g. the public proxy URL)
-#   - LOCAL_RPC_URL overrides RPC_URL (chain; e.g. https://erpc-dev.up.railway.app/api/evm/1)
-# Each is applied inside the railway-run child only when set, so default behavior is unchanged.
+# Always try railway for the API; fall back to plain execution (.env) if service not found
 railway_run_api() {
   local service=$1
   shift
   if railway run -e dev -s "$service" true >/dev/null 2>&1; then
-    local overrides=""
-    [ -n "${LOCAL_DATABASE_URL:-}" ] && overrides="${overrides}DATABASE_URL=\"\$LOCAL_DATABASE_URL\" "
-    [ -n "${LOCAL_RPC_URL:-}" ] && overrides="${overrides}RPC_URL=\"\$LOCAL_RPC_URL\" "
-    if [ -n "$overrides" ]; then
-      log "railway_run_api: railway run -e dev -s $service (local overrides: ${overrides}) $*"
-      railway run -e dev -s "$service" bash -c "${overrides}exec \"\$@\"" _ "$@"
-    else
-      log "railway_run_api: railway run -e dev -s $service $*"
-      railway run -e dev -s "$service" "$@"
-    fi
+    log "railway_run_api: railway run -e dev -s $service $*"
+    railway run -e dev -s "$service" "$@"
   else
     log "railway_run_api: Railway service '$service' not found, falling back to: $*"
     "$@"
@@ -282,10 +267,11 @@ if [ "$RUN_API" = true ]; then
   ) &
 fi
 
-# 5. Relayer (ENS service, but its OpenAPI schema is shared across DAOs and is
-# required for @anticapture/client codegen — the dashboard imports relayer hooks
-# unconditionally — so it runs for every DAO).
-start_relayer
+# 5. Relayer (optional; only available for a few DAOs — do not block the rest of the stack)
+RELAYER_AVAILABLE=false
+if start_relayer; then
+  RELAYER_AVAILABLE=true
+fi
 
 # 6. Gateful
 start_gateful
@@ -313,7 +299,11 @@ else
   printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
 fi
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
-printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
+if [ "$RELAYER_AVAILABLE" = true ]; then
+  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
+else
+  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   skipped (optional)\n"
+fi
 printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""
