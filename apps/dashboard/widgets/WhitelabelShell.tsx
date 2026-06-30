@@ -95,7 +95,7 @@ export const WhitelabelShell = ({
   );
 
   return (
-    <div className="bg-surface-background text-primary flex h-screen overflow-hidden">
+    <div className="bg-surface-background text-primary flex h-dvh overflow-hidden">
       <WhitelabelSidebar
         daoId={daoId}
         isCollapsed={isSidebarCollapsed}
