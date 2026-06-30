@@ -4,15 +4,12 @@ import { isAddress } from "viem";
 
 const COINGECKO_API = "https://api.coingecko.com/api/v3";
 
-// CoinGecko "asset platform" id per EVM chain. The create-proposal flow is ENS /
-// mainnet today; extend this map as more chains gain proposal support.
+// CoinGecko asset-platform id per chain id.
 const PLATFORM_BY_CHAIN: Record<string, string> = {
   "1": "ethereum",
 };
 
-// Demo/Pro CoinGecko keys raise the per-key rate limit well above the shared
-// anonymous bucket. Optional: when unset we still proxy anonymously, just with
-// the public limits.
+// Appends the optional CoinGecko API key, when configured.
 const withKey = (url: string): string => {
   const key = process.env.COINGECKO_API_KEY;
   if (!key) return url;
@@ -21,15 +18,8 @@ const withKey = (url: string): string => {
 };
 
 /**
- * Server-side proxy for CoinGecko price lookups (mirrors the /api/etherscan
- * pattern). Browsers hitting the public CoinGecko endpoints directly share one
- * anonymous rate-limit bucket per IP and routinely get 429s, which is why USD
- * conversions intermittently fail to render. Routing through here collapses all
- * users onto a single cached request per asset per minute and lets us attach an
- * optional API key that never reaches the client.
- *
- * Returns `{ usd: number | null }`; `null` means "no listing / unsupported
- * chain" and callers degrade gracefully (no USD shown) rather than erroring.
+ * Server-side proxy for CoinGecko price lookups. Returns `{ usd: number | null }`
+ * (null = no listing / unsupported chain).
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -55,7 +45,6 @@ export async function GET(request: NextRequest) {
     const address = searchParams.get("address") ?? "";
     const platform = PLATFORM_BY_CHAIN[chainId];
     if (!platform) {
-      // Unsupported chain — treat as "no price available", not an error.
       return NextResponse.json({ usd: null });
     }
     if (!isAddress(address, { strict: false })) {

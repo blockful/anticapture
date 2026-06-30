@@ -141,10 +141,7 @@ export const AddCustomActionModal = ({
   const [args, setArgs] = useState<string[]>(initialValue?.args ?? []);
   const [addressTouched, setAddressTouched] = useState(false);
 
-  // Single calldata field: reflects the live encoded calldata as the form is
-  // filled, and doubles as a paste target to decode a raw blob back into the
-  // fields. "Decode" while it holds pasted/edited hex, "Clear" once it mirrors
-  // the encoded output.
+  // Calldata field: shows the live encoded calldata and accepts a pasted blob to decode.
   const [calldataField, setCalldataField] = useState("");
   const [decodeError, setDecodeError] = useState<string | null>(null);
 
@@ -333,23 +330,16 @@ export const AddCustomActionModal = ({
     }
   }, [mode, selectedFn, allArgsFilled, argTrees]);
 
-  // Keep the calldata field mirroring the live encoded output as the form
-  // fields change. Guarded on a real preview, so a half-typed paste (no valid
-  // form yet) is never clobbered.
+  // Mirror the live encoded output into the field as the form changes.
   useEffect(() => {
     if (encodedPreview) setCalldataField(encodedPreview);
   }, [encodedPreview]);
 
   const trimmedCalldataField = calldataField.trim();
-  // The field "holds the encoded output" when it matches what the form would
-  // produce — that's the Clear state. Anything else (a pasted/edited blob) is
-  // the Decode state.
   const calldataFieldIsEncoded =
     encodedPreview !== null && trimmedCalldataField === encodedPreview;
 
-  // Decode a pasted calldata blob (hex -> form): match the selector to a write
-  // function in the ABI, select it, and fill the fields. The reflect effect
-  // then snaps the field to the canonical encoded output.
+  // Decode a pasted calldata blob into the function + args.
   const handleDecode = () => {
     const data = trimmedCalldataField;
     if (!isHex(data) || data.length < 10) {

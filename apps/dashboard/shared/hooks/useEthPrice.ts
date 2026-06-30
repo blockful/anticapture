@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 const fetchEthPrice = async (): Promise<number> => {
-  // Proxied through our own API route so the request shares a cached, optionally
-  // keyed CoinGecko call instead of hitting the public rate-limited endpoint
-  // from every browser. See app/api/coingecko/route.ts.
+  // Via the /api/coingecko proxy.
   const res = await fetch("/api/coingecko?kind=eth");
   if (!res.ok) throw new Error(`ETH price error: ${res.status}`);
   const data = (await res.json()) as { usd?: number | null };

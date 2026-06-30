@@ -4,9 +4,7 @@ const fetchTokenPrice = async (
   chainId: number,
   address: string,
 ): Promise<number | null> => {
-  // Proxied through our own API route so the request shares a cached, optionally
-  // keyed CoinGecko call instead of hitting the public rate-limited endpoint
-  // from every browser. See app/api/coingecko/route.ts.
+  // Via the /api/coingecko proxy.
   const params = new URLSearchParams({
     kind: "token",
     chainId: String(chainId),
