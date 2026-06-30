@@ -24,8 +24,8 @@ export default createConfig({
     TORNToken: {
       abi: TORNTokenAbi,
       chain: "ethereum_mainnet",
-      address: TORN_CONTRACTS.token.address,
       startBlock: TORN_CONTRACTS.token.startBlock,
+      address: TORN_CONTRACTS.token.address,
     },
     TORNGovernor: {
       abi: TORNGovernorAbi,
