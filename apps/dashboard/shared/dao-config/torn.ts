@@ -328,6 +328,5 @@ export const TORN: DaoConfiguration = {
   resilienceStages: false,
   tokenDistribution: true,
   dataTables: true,
-  overviewPage: false,
   governancePage: true,
 };
