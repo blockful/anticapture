@@ -130,7 +130,7 @@ export function TORNGovernorIndexer(blockTime: number) {
       endTimestamp: endTime,
     });
 
-    const { votingPower: proposerVotingPower } = await context.db
+    await context.db
       .insert(accountPower)
       .values({
         accountId: getAddress(proposer),
@@ -141,17 +141,15 @@ export function TORNGovernorIndexer(blockTime: number) {
         proposalsCount: current.proposalsCount + 1,
       }));
 
+    // Set the proposal_id column (not ad-hoc metadata) — the API feed
+    // enrichment rebuilds title/proposer/link from the proposal row keyed
+    // by this column and ignores the metadata JSON for PROPOSAL events.
     await context.db.insert(feedEvent).values({
       txHash: event.transaction.hash,
       logIndex: event.log.logIndex,
       type: "PROPOSAL",
       timestamp: event.block.timestamp,
-      metadata: {
-        id: proposalIdStr,
-        proposer: getAddress(proposer),
-        votingPower: proposerVotingPower,
-        title,
-      },
+      proposalId: proposalIdStr,
     });
   });
 

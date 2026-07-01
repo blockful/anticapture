@@ -233,9 +233,21 @@ const DAO_RELEVANCE_THRESHOLDS: Record<DaoIdEnum, EventRelevanceMap> = {
     [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
   },
   [DaoIdEnum.TORN]: {
-    [FeedEventType.TRANSFER]: EMPTY_THRESHOLDS,
-    [FeedEventType.DELEGATION]: EMPTY_THRESHOLDS,
-    [FeedEventType.VOTE]: EMPTY_THRESHOLDS,
+    [FeedEventType.TRANSFER]: thresholds(
+      parseEther("1000"),
+      parseEther("10000"),
+      parseEther("100000"),
+    ),
+    [FeedEventType.DELEGATION]: thresholds(
+      parseEther("1000"),
+      parseEther("10000"),
+      parseEther("100000"),
+    ),
+    [FeedEventType.VOTE]: thresholds(
+      parseEther("1000"),
+      parseEther("10000"),
+      parseEther("100000"),
+    ),
     [FeedEventType.PROPOSAL]: EMPTY_THRESHOLDS,
     [FeedEventType.PROPOSAL_EXTENDED]: EMPTY_THRESHOLDS,
   },

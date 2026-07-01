@@ -291,4 +291,5 @@ export const TORN: DaoConfiguration = {
   tokenDistribution: true,
   dataTables: true,
   governancePage: true,
+  activityFeed: true,
 };
