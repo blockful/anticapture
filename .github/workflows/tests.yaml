@@ -140,6 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout repository
