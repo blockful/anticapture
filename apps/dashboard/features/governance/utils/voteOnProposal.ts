@@ -111,10 +111,11 @@ const tornVoteHandler =
     if (!address) throw new Error("DAO governance address not found");
     if (params.voteNumber === 2)
       throw new Error("Tornado Cash does not support abstain votes");
-    const fromAddresses =
-      params.delegatedVoteAddresses && params.delegatedVoteAddresses.length > 0
-        ? params.delegatedVoteAddresses
-        : [params.account.address];
+    // `from` lists ONLY the accounts that delegated to the voter — the governor
+    // requires delegatedTo[from[i]] == msg.sender and casts the voter's own
+    // locked balance separately. Including the voter (or any self-vote) reverts,
+    // since self-delegation is forbidden. No delegators => empty list.
+    const fromAddresses = params.delegatedVoteAddresses ?? [];
 
     const { request } = await client.simulateContract({
       abi: TornGovernorVoteAbi,
