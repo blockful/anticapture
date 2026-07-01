@@ -26,7 +26,7 @@ export const ProposalActionsInfoCard = ({
           </p>
         </div>
         <DefaultLink
-          href={`${blockExplorerUrl}/address/${proposalAddress}`}
+          href={`${blockExplorerUrl}/address/${proposalAddress}#code`}
           openInNewTab
           className="text-secondary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider"
         >

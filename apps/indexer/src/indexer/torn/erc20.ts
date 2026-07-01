@@ -169,6 +169,22 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
       const locker = toIsCustody ? normalizedFrom : normalizedTo;
       const delta = toIsCustody ? value : -value;
 
+      // Only a genuine lock()/unlock() call moves voting power, and in that case
+      // the locker is always the transaction sender: lock pulls TORN from
+      // msg.sender, unlock sends it back to msg.sender. TORN also flows through
+      // the governor for treasury purposes — proposal executions funding a
+      // contract, batch grant payouts, the governor<->vault migration — where
+      // the custody counterparty is some arbitrary address that is NOT the tx
+      // sender. Counting those as locks/unlocks mints/burns phantom voting power
+      // (e.g. proposal #6 funding a staking pool booked a -120k "unlock" against
+      // a contract that never locked; treasury feeders got phantom locks). Skip
+      // any custody transfer whose counterparty isn't the tx sender.
+      // ponytail: misses locks routed via a Safe/relayer (counterparty != tx
+      // sender) — both their lock and unlock are skipped so it stays consistent
+      // (undercount, never negative). Tighten with a Governance call-trace check
+      // if Safe-locked TORN needs to be captured.
+      if (locker !== getAddress(event.transaction.from)) return;
+
       // Aggregate locked (delegated) supply.
       await updateDelegatedSupply(context, daoId, address, delta, timestamp);
 
