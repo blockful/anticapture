@@ -110,18 +110,34 @@ export class TORNVotingPowerRepository {
       .limit(limit)
       .offset(skip);
 
-    return result.map((row) => ({
-      ...row.voting_power_history,
-      delegations:
-        row.transfers &&
-        row.transfers?.logIndex > (row.delegations?.logIndex || 0)
-          ? null
-          : row.delegations,
-      transfers:
+    return result.map((row) => {
+      const transfers =
         row.delegations &&
         row.delegations?.logIndex > (row.transfers?.logIndex || 0)
           ? null
-          : row.transfers,
-    }));
+          : row.transfers;
+
+      return {
+        ...row.voting_power_history,
+        delegations:
+          row.transfers &&
+          row.transfers?.logIndex > (row.delegations?.logIndex || 0)
+            ? null
+            : row.delegations,
+        // TORN's lock/unlock Transfer moves tokens OPPOSITE to the voting-power
+        // change: a lock (VP gain) sends TORN wallet -> custody, an unlock (VP
+        // loss) sends custody -> wallet. The dashboard derives the delegator as
+        // `isGain ? transfer.to : transfer.from`, which would surface the
+        // custody contract instead of the locker. Swap from/to so the locker
+        // who caused the change is shown.
+        transfers: transfers
+          ? {
+              ...transfers,
+              fromAccountId: transfers.toAccountId,
+              toAccountId: transfers.fromAccountId,
+            }
+          : null,
+      };
+    });
   }
 }
