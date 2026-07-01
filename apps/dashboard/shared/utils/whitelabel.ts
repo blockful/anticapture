@@ -48,9 +48,12 @@ export const getWhitelabelBasePath = ({
   pathname: string;
 }) => {
   const daoSlug = daoId.toLowerCase();
-  const normalizedPathname = pathname.startsWith("/")
-    ? pathname
-    : `/${pathname}`;
+  // Match case-insensitively: routes like /ENS/... must resolve the same as
+  // /ens/..., otherwise basePath falls through to "" and whitelabel daos emit
+  // a dao-less /proposals/{id} path that 404s on the main domain.
+  const normalizedPathname = (
+    pathname.startsWith("/") ? pathname : `/${pathname}`
+  ).toLowerCase();
   const internalBasePath = `/whitelabel/${daoSlug}`;
 
   return normalizedPathname === `/${daoSlug}` ||
