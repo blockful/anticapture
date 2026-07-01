@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-USE_RAILWAY=false
+# Per-service railway toggles. Default: everything local; opt into railway per service.
+RW_API=false
+RW_GATEFUL=false
 RUN_INDEXER=false
 DEBUG_API=false
 DAO_NAME=""
@@ -9,7 +11,9 @@ DAO_NAME=""
 # Parse arguments
 for arg in "$@"; do
   case "$arg" in
-    --rw) USE_RAILWAY=true ;;
+    --rw) RW_API=true; RW_GATEFUL=true ;;   # both services via railway
+    --rw-api) RW_API=true ;;                # API via railway (.env fallback)
+    --rw-gateful) RW_GATEFUL=true ;;        # gateful via railway
     --indexer) RUN_INDEXER=true ;;
     --debug-api) DEBUG_API=true ;;
     *) DAO_NAME="$arg" ;;
@@ -151,7 +155,7 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-# Wrap a command with `railway run` for env injection when --rw flag is set
+# Wrap gateful with `railway run` for env injection when its railway toggle is set
 railway_run() {
   local -a overrides=()
   while [[ "${1:-}" == *=* ]]; do
@@ -161,7 +165,7 @@ railway_run() {
 
   local service=$1
   shift
-  if [ "$USE_RAILWAY" = true ]; then
+  if [ "$RW_GATEFUL" = true ]; then
     log "railway_run: railway run -e dev -s $service $*"
     railway run -e dev -s "$service" "$@"
   else
@@ -217,7 +221,11 @@ if [ "$DEBUG_API" = true ] && [ "$RUN_API" = true ]; then
   export "DAO_API_${DAO_ID_UPPER}=http://localhost:${PORT_API}"
 elif [ "$RUN_API" = true ]; then
   log "Starting API for $DAO_NAME..."
-  run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_NAME}-api" pnpm api dev -- "$DAO_NAME" &
+  if [ "$RW_API" = true ]; then
+    run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_NAME}-api" pnpm api dev -- "$DAO_NAME" &
+  else
+    run_with_prefix "$C_API" "🐙 api" "" "" pnpm api dev -- "$DAO_NAME" &
+  fi
 
   wait_for_port "$PORT_API" "API"
   DAO_ID_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
