@@ -18,6 +18,8 @@ export const AttackProfitabilityToggleHeader = ({
   setCostMetric: Dispatch<SetStateAction<string>>;
 }) => {
   const { daoId }: { daoId: string } = useParams();
+  const costSupplyLabel =
+    daoId.toUpperCase() === "TORN" ? "Locked" : "Delegated";
 
   return (
     <div className="flex items-start gap-1 lg:w-fit lg:flex-row lg:items-end lg:gap-2 lg:gap-3 lg:pt-0">
@@ -46,7 +48,7 @@ export const AttackProfitabilityToggleHeader = ({
         <SwitcherChart
           defaultValue={costMetric}
           setMetric={setCostMetric}
-          options={["Quorum", "Delegated"]}
+          options={["Quorum", costSupplyLabel]}
         />
       </div>
     </div>

@@ -1,6 +1,7 @@
 import Markdown from "markdown-to-jsx";
 
 import type { ProposalDetails } from "@/features/governance/types";
+import { normalizeProposalDescription } from "@/features/governance/utils/normalizeProposalDescription";
 
 interface DescriptionTabContentProps {
   proposal: ProposalDetails;
@@ -176,7 +177,7 @@ export const DescriptionTabContent = ({
           },
         }}
       >
-        {cleanMarkdown(proposal.description)}
+        {cleanMarkdown(normalizeProposalDescription(proposal.description))}
       </Markdown>
     </div>
   );

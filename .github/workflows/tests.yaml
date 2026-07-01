@@ -138,6 +138,9 @@ jobs:
     needs: [configure-vercel-preview, wait-for-gateful]
     if: needs.configure-vercel-preview.outputs.configured == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -157,6 +160,7 @@ jobs:
         run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
 
       - name: Trigger Vercel preview redeploy
+        id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
@@ -181,8 +185,11 @@ jobs:
         # AND a runtime env (--env): the /api/gateful/* proxy route reads
         # process.env.ANTICAPTURE_API_URL at request time, so --build-env alone
         # would build against the right URL but serve a stale/missing one.
+        # `vercel deploy` prints the deployment URL to stdout; capture it so the
+        # step below can surface it on the PR (the CLI deploy path doesn't get
+        # Vercel's native Git-integration check/comment).
         run: |
-          npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" \
+          url=$(npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" \
             --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
             --env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
             --meta githubCommitSha="${GIT_SHA}" \
@@ -196,7 +203,15 @@ jobs:
             --meta githubOrg="${GIT_ORG}" \
             --meta githubRepo="${GIT_REPO}" \
             --meta githubRepoId="${GIT_REPO_ID}" \
-            --meta githubDeployment=1
+            --meta githubDeployment=1)
+          echo "url=${url}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment preview URL on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: vercel-preview
+          message: |
+            🔍 **Vercel preview:** ${{ steps.deploy.outputs.url }}
 
   changeset-path-filter:
     name: Detect changeset requirement

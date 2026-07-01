@@ -62,6 +62,14 @@ const BASE_PROPOSAL_ITEM = {
   strategies: [],
 };
 
+const createApp = (supportOffchain = true) => {
+  const repo = new OffchainProposalRepository(db);
+  const service = new OffchainProposalsService(repo);
+  const testApp = new Hono();
+  offchainProposalsController(testApp, service, supportOffchain);
+  return testApp;
+};
+
 beforeAll(async () => {
   client = new PGlite();
   const unifiedSchema = { ...schema, ...offchainSchema, ...generalSchema };
@@ -78,13 +86,45 @@ afterAll(async () => {
 beforeEach(async () => {
   await db.delete(offchainProposals);
 
-  const repo = new OffchainProposalRepository(db);
-  const service = new OffchainProposalsService(repo);
-  app = new Hono();
-  offchainProposalsController(app, service);
+  app = createApp();
 });
 
 describe("Offchain Proposals Controller", () => {
+  describe("supportOffchain=false", () => {
+    it("should return 400 for proposal list", async () => {
+      app = createApp(false);
+
+      const res = await app.request("/offchain/proposals");
+
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({
+        error: "Offchain data not supported",
+      });
+    });
+
+    it("should return 400 for proposal search", async () => {
+      app = createApp(false);
+
+      const res = await app.request("/offchain/proposals/search?query=test");
+
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({
+        error: "Offchain data not supported",
+      });
+    });
+
+    it("should return 400 for proposal detail", async () => {
+      app = createApp(false);
+
+      const res = await app.request("/offchain/proposals/proposal-1");
+
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({
+        error: "Offchain data not supported",
+      });
+    });
+  });
+
   describe("GET /offchain/proposals", () => {
     it("should return 200 with correct response shape", async () => {
       const proposal = createProposal();

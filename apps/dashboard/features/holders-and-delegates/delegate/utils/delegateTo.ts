@@ -11,7 +11,7 @@ import { relayDelegate } from "@anticapture/client";
 import type { RelayDelegatePathParamsDaoEnumKey } from "@anticapture/client";
 
 import daoConfigByDaoId from "@/shared/dao-config";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 const ERC20VotesAbi = [
   {
@@ -141,9 +141,17 @@ export const delegateTo = async (
     );
   }
 
+  // Tornado Cash delegates on the governor contract (its `delegatedTo` mapping),
+  // not on an ERC20Votes token. Same `delegate(address)` signature, different target.
+  const delegationTarget =
+    daoId === DaoIdEnum.TORN
+      ? ((daoConfigByDaoId[daoId].daoOverview.contracts.governor ??
+          tokenAddress) as Address)
+      : tokenAddress;
+
   const { request } = await client.simulateContract({
     abi: ERC20VotesAbi,
-    address: tokenAddress,
+    address: delegationTarget,
     functionName: "delegate",
     args: [delegateAddress],
     account,

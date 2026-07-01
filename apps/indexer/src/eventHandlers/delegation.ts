@@ -73,12 +73,13 @@ export const delegateChanged = async (
   // Ensure all required accounts exist in parallel
   await ensureAccountsExist(context, [delegator, delegate]);
 
-  const delegatorBalance = _delegatorBalance
-    ? { balance: _delegatorBalance }
-    : await context.db.find(accountBalance, {
-        accountId: normalizedDelegator,
-        tokenId: getAddress(tokenId),
-      });
+  const delegatorBalance =
+    _delegatorBalance !== undefined
+      ? { balance: _delegatorBalance }
+      : await context.db.find(accountBalance, {
+          accountId: normalizedDelegator,
+          tokenId: getAddress(tokenId),
+        });
 
   // Pre-compute address lists for flag determination (normalized to checksum)
   const { cex, dex, lending, burning } = addressSets ?? {
