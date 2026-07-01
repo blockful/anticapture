@@ -156,10 +156,10 @@ export function TORNGovernorIndexer(blockTime: number) {
   });
 
   /**
-   * Voted — custom handler using onConflictDoNothing to prevent Ponder's
-   * DelayedInsertError crash during batch flushing. Ponder's deferred insert
-   * mechanism can hit unique constraint violations during backfill; plain
-   * inserts (as in the shared voteCast) cause unhandledRejection crashes.
+   * Voted — TORN's governor lets a voter re-cast to CHANGE their vote, so the
+   * unique (voter, proposal) row must be mutable: overwrite it and move the
+   * voting power between the for/against buckets. An exact re-processing of the
+   * same log (backfill/reorg) is a no-op so tallies aren't double-counted.
    *
    * bool support mapped: true→1 (for), false→0 (against). No reason field.
    */
@@ -168,48 +168,100 @@ export function TORNGovernorIndexer(blockTime: number) {
     const proposalIdStr = proposalId.toString();
     const supportNum = support ? 1 : 0;
     const normalizedVoter = getAddress(voter);
+    const txHash = event.transaction.hash;
+    const timestamp = event.block.timestamp;
+    const logIndex = event.log.logIndex;
 
     await ensureAccountExists(context, voter);
 
-    // onConflictDoNothing prevents DelayedInsertError from Ponder's batch flush.
-    // Returns null on conflict (duplicate vote during replay/backfill) — in that
-    // case skip all downstream updates so tallies/counts aren't double-counted.
-    const inserted = await context.db
-      .insert(votesOnchain)
-      .values({
-        txHash: event.transaction.hash,
-        daoId,
-        proposalId: proposalIdStr,
-        voterAccountId: normalizedVoter,
-        support: supportNum.toString(),
-        votingPower: votes,
-        reason: "",
-        timestamp: event.block.timestamp,
-        logIndex: event.log.logIndex,
-      })
-      .onConflictDoNothing();
+    const existing = await context.db.find(votesOnchain, {
+      voterAccountId: normalizedVoter,
+      proposalId: proposalIdStr,
+    });
 
-    if (!inserted) return;
+    // Exact same log replayed during backfill/reorg — no-op.
+    if (
+      existing &&
+      existing.txHash === txHash &&
+      existing.logIndex === logIndex
+    ) {
+      return;
+    }
 
-    await context.db
-      .insert(accountPower)
-      .values({
-        accountId: normalizedVoter,
-        daoId,
-        votesCount: 1,
-        lastVoteTimestamp: event.block.timestamp,
-      })
-      .onConflictDoUpdate((current) => ({
-        votesCount: current.votesCount + 1,
-        lastVoteTimestamp: event.block.timestamp,
-      }));
+    if (existing) {
+      // Vote change: overwrite the row and shift power from the old support
+      // bucket to the new one.
+      const prevSupport = Number(existing.support);
+      const prevVotes = existing.votingPower;
 
-    await context.db
-      .update(proposalsOnchain, { id: proposalIdStr })
-      .set((current) => ({
-        againstVotes: current.againstVotes + (supportNum === 0 ? votes : 0n),
-        forVotes: current.forVotes + (supportNum === 1 ? votes : 0n),
-      }));
+      await context.db
+        .update(votesOnchain, {
+          voterAccountId: normalizedVoter,
+          proposalId: proposalIdStr,
+        })
+        .set({
+          txHash,
+          support: supportNum.toString(),
+          votingPower: votes,
+          timestamp,
+          logIndex,
+        });
+
+      await context.db
+        .update(proposalsOnchain, { id: proposalIdStr })
+        .set((current) => ({
+          againstVotes:
+            current.againstVotes -
+            (prevSupport === 0 ? prevVotes : 0n) +
+            (supportNum === 0 ? votes : 0n),
+          forVotes:
+            current.forVotes -
+            (prevSupport === 1 ? prevVotes : 0n) +
+            (supportNum === 1 ? votes : 0n),
+        }));
+
+      // A changed vote refreshes the timestamp but isn't new participation.
+      await context.db
+        .update(accountPower, { accountId: normalizedVoter })
+        .set({ lastVoteTimestamp: timestamp });
+    } else {
+      // Brand-new vote. onConflictDoNothing guards against Ponder's
+      // DelayedInsertError during batch flushing on backfill.
+      await context.db
+        .insert(votesOnchain)
+        .values({
+          txHash,
+          daoId,
+          proposalId: proposalIdStr,
+          voterAccountId: normalizedVoter,
+          support: supportNum.toString(),
+          votingPower: votes,
+          reason: "",
+          timestamp,
+          logIndex,
+        })
+        .onConflictDoNothing();
+
+      await context.db
+        .insert(accountPower)
+        .values({
+          accountId: normalizedVoter,
+          daoId,
+          votesCount: 1,
+          lastVoteTimestamp: timestamp,
+        })
+        .onConflictDoUpdate((current) => ({
+          votesCount: current.votesCount + 1,
+          lastVoteTimestamp: timestamp,
+        }));
+
+      await context.db
+        .update(proposalsOnchain, { id: proposalIdStr })
+        .set((current) => ({
+          againstVotes: current.againstVotes + (supportNum === 0 ? votes : 0n),
+          forVotes: current.forVotes + (supportNum === 1 ? votes : 0n),
+        }));
+    }
 
     const proposal = await context.db.find(proposalsOnchain, {
       id: proposalIdStr,
