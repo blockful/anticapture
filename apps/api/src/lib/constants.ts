@@ -403,10 +403,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
       "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
     InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
-  // Governor custody (0x5efda...A1Ce) holds locked stakes — tracked as
-  // non-circulating, not treasury. Kept out of treasury to stay in sync with
-  // the indexer (where listing it in both buckets double-subtracts circulating).
-  [DaoIdEnum.TORN]: {},
+  [DaoIdEnum.TORN]: {
+    governor: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
+  },
 };
 
 // Mirrors the indexer's NonCirculatingAddresses. Locked/vesting supply held by

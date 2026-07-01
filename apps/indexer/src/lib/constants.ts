@@ -417,9 +417,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
       "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
     InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
   },
-  // Governor custody (0x5efda...A1Ce) holds locked stakes, already subtracted
-  // via NonCirculatingAddresses[TORN].governance — not a treasury.
-  [DaoIdEnum.TORN]: {},
+  [DaoIdEnum.TORN]: {
+    governor: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
+  },
 };
 
 export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -713,7 +713,12 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.FLUID]: {
     "Uniswap V3 INST/WETH": "0xc1cd3D0913f4633b43FcdDBCd7342bC9b71C676f",
   },
-  [DaoIdEnum.TORN]: {},
+  [DaoIdEnum.TORN]: {
+    "Uniswap v2 | TORN/WETH": "0x0c722a487876989af8a05fffb6e32e45cc23fb3a",
+    "Uniswap v3 | TORN/WETH 1%": "0x97a5a0b2d7ed3accb7fd6404a1f5ca29320905af",
+    "Uniswap v3 | TORN/WETH 0,3%": "0x753a90ae2fa03d31487141bf54bd853b27f7bcf5",
+    "Sushiswap | TORN/WETH": "0xb270176ba6075196df88b855c3ec7776871fdb33",
+  },
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -898,7 +903,6 @@ export const NonCirculatingAddresses: Record<
   [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.SHU]: {},
   [DaoIdEnum.TORN]: {
-    governance: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
     vault: "0x2F50508a8a3D323B91336FA3eA6ae50E55f32185",
   },
 };
