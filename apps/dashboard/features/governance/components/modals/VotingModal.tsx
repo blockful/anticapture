@@ -1,8 +1,8 @@
 "use client";
 
 import { Check, User2Icon, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { Account } from "viem";
+import { useEffect, useMemo, useState } from "react";
+import type { Account, Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
@@ -22,6 +22,7 @@ import {
   useGaslessEligibility,
   useRelayerConfig,
 } from "@/shared/hooks/useGaslessRelayer";
+import { useDelegators } from "@/shared/hooks/useDelegators";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
@@ -52,8 +53,9 @@ export const VotingModal = ({
 
   const { isMobile } = useScreenSize();
 
-  // Tornado Cash's governor uses castVote(uint256,bool) — binary only, no abstain.
-  const supportsAbstain = daoId !== DaoIdEnum.TORN;
+  // Tornado Cash's delegated vote path is binary only, with no abstain.
+  const isTorn = daoId === DaoIdEnum.TORN;
+  const supportsAbstain = !isTorn;
 
   // Parse user's voting power to BigInt for calculations
   const userVotingPowerBigInt = BigInt(rawVotingPower || "0");
@@ -108,6 +110,31 @@ export const VotingModal = ({
 
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const { delegators: tornDelegators, loading: isLoadingTornDelegators } =
+    useDelegators({
+      daoId,
+      address: address ?? "",
+      orderBy: "amount",
+      orderDirection: "desc",
+      limit: 1000,
+      enabled: isOpen && isTorn && !!address,
+    });
+
+  const tornDelegatedVoteAddresses = useMemo(() => {
+    if (!isTorn || !address) return undefined;
+
+    const seen = new Set<string>();
+    const addresses = tornDelegators
+      .map((delegator) => delegator.delegatorAddress as Address)
+      .filter((delegatorAddress) => {
+        const normalized = delegatorAddress.toLowerCase();
+        if (seen.has(normalized)) return false;
+        seen.add(normalized);
+        return true;
+      });
+
+    return addresses.length > 0 ? addresses : [address];
+  }, [address, isTorn, tornDelegators]);
 
   const { minVotingPower } = useRelayerConfig(daoId);
   const { isEligible: isGaslessEligible, remaining: voteRemaining } =
@@ -168,6 +195,7 @@ export const VotingModal = ({
       comment,
       minVotingPower,
       isGaslessEligible,
+      tornDelegatedVoteAddresses,
     );
     setIsLoading(false);
     if (hash) {
@@ -181,6 +209,7 @@ export const VotingModal = ({
     !vote ||
     !walletClient ||
     isLoading ||
+    (isTorn && isLoadingTornDelegators) ||
     !rawVotingPower ||
     rawVotingPower === "0";
 
