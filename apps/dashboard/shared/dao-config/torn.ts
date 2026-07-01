@@ -6,11 +6,7 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { TornadoCashOgIcon } from "@/shared/og/dao-og-icons";
-import {
-  RiskLevel,
-  GovernanceImplementationEnum,
-  RiskAreaEnum,
-} from "@/shared/types/enums";
+import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 
 export const TORN: DaoConfiguration = {
   name: "Tornado Cash",
@@ -288,34 +284,6 @@ export const TORN: DaoConfiguration = {
           "Without gas subsidies, smaller delegates face economic barriers to voting, reducing turnout and making it easier for well-funded attackers to dominate governance.",
           "The DAO should provide gas-free voting to ensure broad participation.",
         ],
-      },
-    },
-  },
-  attackExposure: {
-    defenseAreas: {
-      [RiskAreaEnum.SPAM_RESISTANCE]: {
-        description:
-          "Proposal submissions are unrestricted and there is no voting subsidy, significantly reducing resistance to sustained proposal spam and lowering defensive participation.",
-      },
-      [RiskAreaEnum.ECONOMIC_SECURITY]: {
-        description:
-          "The treasury managed by the DAO creates financial incentives for attack. Without a Security Council or veto mechanism, economic risk is elevated.",
-      },
-      [RiskAreaEnum.SAFEGUARDS]: {
-        description:
-          "Proposals cannot be canceled at all in Tornado Cash governance, and there is no Security Council or veto strategy to block malicious proposals.",
-      },
-      [RiskAreaEnum.CONTRACT_SAFETY]: {
-        description:
-          "Audited contracts and flash loan protections provide a solid foundation for contract safety.",
-      },
-      [RiskAreaEnum.RESPONSE_TIME]: {
-        description:
-          "An extremely short voting delay leaves little time for review or coordination, increasing the risk of rushed or unchallenged governance decisions.",
-      },
-      [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: {
-        description:
-          "Interface protections are present but not fully hardened (e.g. not served from immutable/decentralized storage), resulting in moderate governance interface risk. Mutable votes do allow recovery if a front-end compromise is caught during the voting window.",
       },
     },
   },

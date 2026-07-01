@@ -44,6 +44,8 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   });
 
   const daoRiskAreas = getDaoRiskAreas(daoId);
+  const hasResilienceOrAttackExposure =
+    daoConfig.resilienceStages || daoConfig.attackExposure;
   const riskAreas = {
     title: "Attack Exposure",
     risks: Object.entries(daoRiskAreas).map(([name, info]) => ({
@@ -101,57 +103,59 @@ export const DaoOverviewSection = ({ daoId }: { daoId: DaoIdEnum }) => {
         </div>
       )}
 
-      <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
-        <div className="w-full px-5 lg:px-0">
-          {daoConfig.resilienceStages ? (
+      {hasResilienceOrAttackExposure && (
+        <div className="border-inverted grid grid-cols-1 gap-5 border-x lg:mx-5 lg:grid-cols-2 lg:gap-2">
+          <div className="w-full px-5 lg:px-0">
+            {daoConfig.resilienceStages ? (
+              <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
+                <StagesContainer
+                  daoId={daoId}
+                  currentDaoStage={currentDaoStage}
+                  daoConfig={daoConfig}
+                  context="overview"
+                />
+              </Suspense>
+            ) : (
+              <BlankSlate
+                variant="title"
+                icon={Info}
+                title="Resilience Stages"
+                description="Resilience stages are not available for this DAO."
+                className="h-full"
+              />
+            )}
+          </div>
+          <div className="block lg:hidden">
+            <DividerDefault isHorizontal />
+          </div>
+          {daoConfig.attackExposure ? (
             <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
-              <StagesContainer
+              <RiskAreaCardWrapper
                 daoId={daoId}
+                title={riskAreas.title}
+                riskAreas={riskAreas.risks}
+                onRiskClick={() => {
+                  router.push(`/${daoId.toLowerCase()}/risk-analysis`);
+                }}
+                variant={RiskAreaCardEnum.DAO_OVERVIEW}
+                className="grid h-full grid-cols-2 gap-2 px-5 lg:px-0"
                 currentDaoStage={currentDaoStage}
-                daoConfig={daoConfig}
-                context="overview"
               />
             </Suspense>
           ) : (
             <BlankSlate
               variant="title"
               icon={Info}
-              title="Resilience Stages"
-              description="Resilience stages are not available for this DAO."
+              title="Attack Exposure"
+              description="Attack exposure analysis is not available for this DAO."
               className="h-full"
             />
           )}
+          <div className="block lg:hidden">
+            <DividerDefault isHorizontal />
+          </div>
         </div>
-        <div className="block lg:hidden">
-          <DividerDefault isHorizontal />
-        </div>
-        {daoConfig.attackExposure ? (
-          <Suspense fallback={<SkeletonRow className="h-56 w-full" />}>
-            <RiskAreaCardWrapper
-              daoId={daoId}
-              title={riskAreas.title}
-              riskAreas={riskAreas.risks}
-              onRiskClick={() => {
-                router.push(`/${daoId.toLowerCase()}/risk-analysis`);
-              }}
-              variant={RiskAreaCardEnum.DAO_OVERVIEW}
-              className="grid h-full grid-cols-2 gap-2 px-5 lg:px-0"
-              currentDaoStage={currentDaoStage}
-            />
-          </Suspense>
-        ) : (
-          <BlankSlate
-            variant="title"
-            icon={Info}
-            title="Attack Exposure"
-            description="Attack exposure analysis is not available for this DAO."
-            className="h-full"
-          />
-        )}
-        <div className="block lg:hidden">
-          <DividerDefault isHorizontal />
-        </div>
-      </div>
+      )}
       {currentDaoStage !== Stage.UNKNOWN && (
         <div className="border-inverted mx-5 border-x">
           <Suspense fallback={<SkeletonRow className="h-[90px] w-full" />}>
