@@ -15,6 +15,7 @@ import {
   MetricTypesEnum,
   BurningAddresses,
   CEXAddresses,
+  CONTRACT_ADDRESSES,
   DEXAddresses,
   LendingAddresses,
   TreasuryAddresses,
@@ -25,15 +26,21 @@ import { DaoIdEnum } from "@/lib/enums";
 export function TORNTokenIndexer(address: Address, decimals: number) {
   const daoId = DaoIdEnum.TORN;
 
-  // Contracts that custody locked TORN. A balance held here is voting power
-  // owned by the locker, not the custody contract. TORN emits no
-  // DelegateVotesChanged, so per-account voting power is derived from
-  // lock/unlock Transfers in/out of these addresses. Add new lock contracts here.
-  const lockCustodyAddresses = new Set<Address>(
-    Object.values(NonCirculatingAddresses[daoId]).map((addr) =>
+  // Contracts that custody locked TORN: the governor pre-vault, the
+  // TornadoVault post-vault. A balance held here is voting power owned by the
+  // locker, not the custody contract. TORN emits no DelegateVotesChanged, so
+  // per-account voting power is derived from lock/unlock Transfers in/out of
+  // these addresses. Add new lock contracts here. The governor is a treasury
+  // address (not non-circulating), so it is added explicitly.
+  const governorAddress = getAddress(
+    CONTRACT_ADDRESSES[daoId].governor.address,
+  );
+  const lockCustodyAddresses = new Set<Address>([
+    governorAddress,
+    ...Object.values(NonCirculatingAddresses[daoId]).map((addr) =>
       getAddress(addr),
     ),
-  );
+  ]);
 
   ponder.on("TORNToken:setup", async ({ context }) => {
     await context.db.insert(token).values({
@@ -115,31 +122,71 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
       timestamp,
     );
 
-    await updateSupplyMetric(
-      context,
-      "treasury",
-      treasuryAddressList,
-      MetricTypesEnum.TREASURY,
-      from,
-      to,
-      value,
-      daoId,
-      address,
-      timestamp,
-    );
+    // Locks/unlocks: TORN moving in/out of governance custody — the governor
+    // pre-vault, the TornadoVault post-vault (GovernanceVaultUpgrade._
+    // transferTokens). Only a genuine lock()/unlock() call moves voting power,
+    // and in that case the locker is always the transaction sender: lock pulls
+    // TORN from msg.sender, unlock sends it back to msg.sender. TORN also
+    // flows through the governor for treasury purposes — proposal executions
+    // funding a contract, batch grant payouts — where the custody counterparty
+    // is some arbitrary address that is NOT the tx sender. Counting those as
+    // locks/unlocks mints/burns phantom voting power (e.g. proposal #6 funding
+    // a staking pool booked a -120k "unlock" against a contract that never
+    // locked; treasury feeders got phantom locks). Governor<->vault internal
+    // moves (e.g. the v2 migration, ~2.6M TORN) have custody on both sides and
+    // net to zero, so they are skipped.
+    // ponytail: misses locks routed via a Safe/relayer (counterparty != tx
+    // sender) — both their lock and unlock are skipped so it stays consistent
+    // (undercount, never negative). Tighten with a Governance call-trace check
+    // if Safe-locked TORN needs to be captured.
+    const normalizedTo = getAddress(to);
+    const normalizedFrom = getAddress(from);
+    const toIsCustody = lockCustodyAddresses.has(normalizedTo);
+    const fromIsCustody = lockCustodyAddresses.has(normalizedFrom);
+    const custodyInternal = toIsCustody && fromIsCustody;
+    const locker = toIsCustody ? normalizedFrom : normalizedTo;
+    const isLockOrUnlock =
+      toIsCustody !== fromIsCustody &&
+      locker === getAddress(event.transaction.from);
 
-    await updateSupplyMetric(
-      context,
-      "nonCirculatingSupply",
-      nonCirculatingAddressList,
-      MetricTypesEnum.NON_CIRCULATING_SUPPLY,
-      from,
-      to,
-      value,
-      daoId,
-      address,
-      timestamp,
-    );
+    // Locked TORN is user-owned voting power, not DAO funds: genuine
+    // locks/unlocks and the governor<->vault migration never touch TREASURY,
+    // even though the governor is the treasury address.
+    if (!isLockOrUnlock && !custodyInternal) {
+      await updateSupplyMetric(
+        context,
+        "treasury",
+        treasuryAddressList,
+        MetricTypesEnum.TREASURY,
+        from,
+        to,
+        value,
+        daoId,
+        address,
+        timestamp,
+      );
+    }
+
+    // Locked TORN is non-circulating in every era: the vault always is; the
+    // governor (a treasury address) counts only for genuine locks so
+    // pre-vault locks match post-vault ones. The migration moved
+    // already-counted locks between custodies, so it is skipped.
+    if (!custodyInternal) {
+      await updateSupplyMetric(
+        context,
+        "nonCirculatingSupply",
+        isLockOrUnlock
+          ? [...nonCirculatingAddressList, governorAddress]
+          : nonCirculatingAddressList,
+        MetricTypesEnum.NON_CIRCULATING_SUPPLY,
+        from,
+        to,
+        value,
+        daoId,
+        address,
+        timestamp,
+      );
+    }
 
     await updateTotalSupply(
       context,
@@ -155,35 +202,8 @@ export function TORNTokenIndexer(address: Address, decimals: number) {
 
     await updateCirculatingSupply(context, daoId, address, timestamp);
 
-    // Track locks/unlocks: TORN moving in/out of governance custody — the
-    // governor pre-v2, the TornadoVault post-v2 (GovernanceVaultUpgrade._
-    // transferTokens). Both are lock sinks. Governor<->vault internal moves
-    // (e.g. the v2 migration) have custody on both sides and net to zero, so
-    // they are skipped. Governor-only accounting missed ~2.6M TORN in the Vault.
-    const normalizedTo = getAddress(to);
-    const normalizedFrom = getAddress(from);
-    const toIsCustody = lockCustodyAddresses.has(normalizedTo);
-    const fromIsCustody = lockCustodyAddresses.has(normalizedFrom);
-
-    if (toIsCustody !== fromIsCustody) {
-      const locker = toIsCustody ? normalizedFrom : normalizedTo;
+    if (isLockOrUnlock) {
       const delta = toIsCustody ? value : -value;
-
-      // Only a genuine lock()/unlock() call moves voting power, and in that case
-      // the locker is always the transaction sender: lock pulls TORN from
-      // msg.sender, unlock sends it back to msg.sender. TORN also flows through
-      // the governor for treasury purposes — proposal executions funding a
-      // contract, batch grant payouts, the governor<->vault migration — where
-      // the custody counterparty is some arbitrary address that is NOT the tx
-      // sender. Counting those as locks/unlocks mints/burns phantom voting power
-      // (e.g. proposal #6 funding a staking pool booked a -120k "unlock" against
-      // a contract that never locked; treasury feeders got phantom locks). Skip
-      // any custody transfer whose counterparty isn't the tx sender.
-      // ponytail: misses locks routed via a Safe/relayer (counterparty != tx
-      // sender) — both their lock and unlock are skipped so it stays consistent
-      // (undercount, never negative). Tighten with a Governance call-trace check
-      // if Safe-locked TORN needs to be captured.
-      if (locker !== getAddress(event.transaction.from)) return;
 
       // Aggregate locked (delegated) supply.
       await updateDelegatedSupply(context, daoId, address, delta, timestamp);
