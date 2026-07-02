@@ -1,0 +1,62 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, dev]
+
+# Only the latest push per branch matters; cancel superseded deploys.
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy Vercel (${{ github.ref_name == 'main' && 'production' || 'dev' }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Resolve commit author
+        id: author
+        run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
+
+      # ANTICAPTURE_API_URL is NOT injected here: production/dev deployments read
+      # it from the Vercel project env (managed in Vercel directly). Only PR
+      # previews (tests.yaml) inject it via CLI. Git metadata is passed for
+      # Vercel attribution.
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          PROD_FLAG: ${{ github.ref_name == 'main' && '--target=production' || '--target=dev' }}
+          GIT_SHA: ${{ github.sha }}
+          GIT_REF: ${{ github.ref_name }}
+          GIT_MSG: ${{ github.event.head_commit.message }}
+          GIT_AUTHOR_LOGIN: ${{ github.actor }}
+          GIT_AUTHOR_NAME: ${{ steps.author.outputs.name }}
+          GIT_ORG: ${{ github.repository_owner }}
+          GIT_REPO: ${{ github.event.repository.name }}
+          GIT_REPO_ID: ${{ github.event.repository.id }}
+        run: |
+          set -euo pipefail
+          npx --yes vercel@latest deploy --yes ${PROD_FLAG} --token="${VERCEL_TOKEN}" \
+            --meta githubCommitSha="${GIT_SHA}" \
+            --meta githubCommitRef="${GIT_REF}" \
+            --meta githubCommitMessage="${GIT_MSG%%$'\n'*}" \
+            --meta githubCommitAuthorLogin="${GIT_AUTHOR_LOGIN}" \
+            --meta githubCommitAuthorName="${GIT_AUTHOR_NAME}" \
+            --meta githubCommitOrg="${GIT_ORG}" \
+            --meta githubCommitRepo="${GIT_REPO}" \
+            --meta githubCommitRepoId="${GIT_REPO_ID}" \
+            --meta githubOrg="${GIT_ORG}" \
+            --meta githubRepo="${GIT_REPO}" \
+            --meta githubRepoId="${GIT_REPO_ID}" \
+            --meta githubDeployment=1
