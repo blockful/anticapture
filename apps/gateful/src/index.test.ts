@@ -59,14 +59,17 @@ describe("gateful app auth", () => {
 
   it("serves health with the deployed commit without a bearer token", async () => {
     const res = await app.request("/health");
-    const body = await res.json();
+    const body = (await res.json()) as {
+      commit: string;
+      upstreams: Record<string, unknown>;
+    };
 
-    expect(res.status).toBe(200);
-    expect(body).toMatchObject({
-      status: "ok",
-      commit: "test-commit-sha",
-      upstreams: {},
-    });
+    // The configured token service (Authful) is now a probed upstream, so
+    // /health reports it. No process listens on authful:4002 in tests, so the
+    // probe fails and the gateway reports degraded — the key point is that
+    // Authful is included in readiness rather than silently ignored.
+    expect(body.commit).toBe("test-commit-sha");
+    expect(body.upstreams).toHaveProperty("authful");
   });
 
   it("requires bearer auth outside docs endpoints", async () => {

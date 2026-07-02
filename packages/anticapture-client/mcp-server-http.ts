@@ -13,6 +13,18 @@ const host = env.HOST;
 const sessions = new Map<string, StreamableHTTPServerTransport>();
 let shuttingDown = false;
 
+// This HTTP surface is network-exposed and multi-tenant, but has no inbound
+// auth gate — it relies on forwarding each caller's Authorization to Gateful.
+// With a shared upstream key configured but forwarding off, every inbound
+// request (including unauthenticated ones) would ride the shared token. Refuse
+// to start in that footgun config; require forwarding whenever a shared key is
+// present.
+if (env.ANTICAPTURE_API_KEY !== undefined && !env.FORWARD_CLIENT_AUTH) {
+  throw new Error(
+    "ANTICAPTURE_API_KEY is set without FORWARD_CLIENT_AUTH=true: the HTTP MCP server would attach the shared upstream key to unauthenticated requests. Set FORWARD_CLIENT_AUTH=true, or unset ANTICAPTURE_API_KEY.",
+  );
+}
+
 configureUpstreamClient();
 
 const log = pino({ name: "anticapture-mcp" });
