@@ -28,6 +28,16 @@ jobs:
         id: author
         run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
 
+      # `vercel deploy` builds the dashboard, which runs @anticapture/client
+      # codegen against the live gateful spec. Wait for gateful to serve this
+      # exact commit first, or codegen races the redeploy and fails with
+      # "fetch failed" (same rationale as tests.yaml's wait-for-gateful job).
+      - name: Wait for gateful to be ready
+        run: node scripts/wait-for-gateful.mjs
+        env:
+          ANTICAPTURE_API_URL: ${{ secrets.GATEFUL_URL }}
+          EXPECTED_GATEFUL_SHA: ${{ github.sha }}
+
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
