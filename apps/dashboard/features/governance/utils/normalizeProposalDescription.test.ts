@@ -24,6 +24,15 @@ describe("normalizeProposalDescription", () => {
     expect(normalizeProposalDescription(markdown)).toBe(markdown);
   });
 
+  it("converts escaped newlines (Compound) into real line breaks", () => {
+    const compound =
+      "# Deprecation of Linea and Mantle Comets\\n## Simple Summary\\n\\nGauntlet recommends...";
+
+    expect(normalizeProposalDescription(compound)).toBe(
+      "# Deprecation of Linea and Mantle Comets\n## Simple Summary\n\nGauntlet recommends...",
+    );
+  });
+
   it("returns the raw string when JSON is malformed", () => {
     const broken = '{"title":"t","description":"oops"'; // missing closing brace
 
