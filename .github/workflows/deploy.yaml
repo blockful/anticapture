@@ -13,6 +13,7 @@ jobs:
   deploy:
     name: Deploy Vercel (${{ github.ref_name == 'main' && 'production' || 'dev' }})
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
 
     steps:
       - name: Checkout repository
@@ -27,16 +28,13 @@ jobs:
         id: author
         run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
 
-      # ANTICAPTURE_API_URL is NOT injected here: production/dev deployments read
-      # it from the Vercel project env (managed in Vercel directly). Only PR
-      # previews (tests.yaml) inject it via CLI. Git metadata is passed for
-      # Vercel attribution.
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           PROD_FLAG: ${{ github.ref_name == 'main' && '--target=production' || '--target=dev' }}
+          GATEFUL_URL: ${{ secrets.GATEFUL_URL }}
           GIT_SHA: ${{ github.sha }}
           GIT_REF: ${{ github.ref_name }}
           GIT_MSG: ${{ github.event.head_commit.message }}
@@ -48,6 +46,8 @@ jobs:
         run: |
           set -euo pipefail
           npx --yes vercel@latest deploy --yes ${PROD_FLAG} --token="${VERCEL_TOKEN}" \
+            --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
+            --env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
             --meta githubCommitSha="${GIT_SHA}" \
             --meta githubCommitRef="${GIT_REF}" \
             --meta githubCommitMessage="${GIT_MSG%%$'\n'*}" \
