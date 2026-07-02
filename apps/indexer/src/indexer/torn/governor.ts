@@ -192,6 +192,17 @@ export function TORNGovernorIndexer(blockTime: number) {
       const prevSupport = Number(existing.support);
       const prevVotes = existing.votingPower;
 
+      // The API feed enriches VOTE rows by joining feed_event -> votes_onchain
+      // on (txHash, logIndex). Since votes_onchain keeps a single mutable row
+      // per (voter, proposal), overwriting its key below would orphan the prior
+      // vote's feed_event (it would join to nothing and render null metadata).
+      // Drop that stale feed_event so the new one inserted below is the sole
+      // VOTE entry and always joins to the current row.
+      await context.db.delete(feedEvent, {
+        txHash: existing.txHash,
+        logIndex: existing.logIndex,
+      });
+
       await context.db
         .update(votesOnchain, {
           voterAccountId: normalizedVoter,

@@ -81,8 +81,11 @@ export const VotingModal = ({
   const simulatedTotalVotes =
     simulatedForVotes + simulatedAgainstVotes + simulatedAbstainVotes;
 
-  // Calculate simulated quorum votes (for + abstain only, against votes don't count toward quorum)
-  const simulatedQuorumVotes = simulatedForVotes + simulatedAbstainVotes;
+  // Calculate simulated quorum votes. Standard governors count for + abstain;
+  // Tornado counts for + against (see TORNClient.calculateQuorum).
+  const simulatedQuorumVotes = isTorn
+    ? simulatedForVotes + simulatedAgainstVotes
+    : simulatedForVotes + simulatedAbstainVotes;
 
   const userReadableQuorumVotes = formatNumberUserReadable(
     Number(formatUnits(simulatedQuorumVotes || BigInt(0), decimals)),
@@ -133,7 +136,10 @@ export const VotingModal = ({
         return true;
       });
 
-    return addresses.length > 0 ? addresses : [address];
+    // Solo voter (no delegators): send an empty `from`. The TORN governor casts
+    // the voter's own balance separately and reverts on self-delegation, so the
+    // voter's own address must never appear in this list.
+    return addresses;
   }, [address, isTorn, tornDelegators]);
 
   const { minVotingPower } = useRelayerConfig(daoId);

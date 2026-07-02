@@ -74,6 +74,15 @@ const PUBLIC_PATHS = new Set(["/docs", "/docs/json", "/health", "/metrics"]);
 
 const redis = config.redisUrl ? createRedisClient(config.redisUrl) : undefined;
 
+// Fail closed: without a configured token service, every DAO/relayer route
+// would be public. Refuse to start unless auth is explicitly opted out via
+// GATEFUL_AUTH_DISABLED (local dev only).
+if (!config.tokenService && !config.authDisabled) {
+  throw new Error(
+    "Per-tenant auth is not configured (TOKEN_SERVICE_URL unset). Set it, or set GATEFUL_AUTH_DISABLED=true to run without auth (local dev only).",
+  );
+}
+
 if (config.tokenService) {
   const authfulClient = new AuthfulClient(
     config.tokenService.url,
@@ -88,8 +97,10 @@ if (config.tokenService) {
       publicPaths: PUBLIC_PATHS,
     }),
   );
-  app.use("*", rateLimitMiddleware(redis));
+  // Usage is registered before rate limiting so its `finally` still counts
+  // requests that the rate limiter rejects with 429.
   app.use("*", usageMiddleware(config.daoApis));
+  app.use("*", rateLimitMiddleware(redis));
 
   logger.info("per-tenant token auth enabled (Authful)");
 }
@@ -114,6 +125,7 @@ health(app, registry, {
   daoApis: config.daoApis,
   daoRelayers: config.daoRelayers,
   addressEnrichmentUrl: config.addressEnrichmentUrl,
+  tokenServiceUrl: config.tokenService?.url,
   commitSha: config.commitSha,
 });
 daoHealth(app, config.daoApis, registry);

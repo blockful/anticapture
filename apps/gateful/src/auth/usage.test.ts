@@ -15,9 +15,12 @@ const AUTH: AuthContext = {
 
 describe("normalizeRoute", () => {
   it.each([
-    ["/ens/proposals/0x123", "/{dao}/proposals"],
-    ["/ens/account-balances/0xabc", "/{dao}/account-balances"],
-    ["/ens", "/{dao}"],
+    // DAO routes collapse every sub-resource to a single label so a
+    // caller-controlled segment can't blow up cardinality.
+    ["/ens/proposals/0x123", "/{dao}/*"],
+    ["/ens/account-balances/0xabc", "/{dao}/*"],
+    ["/ens/random-b3f8-uuid", "/{dao}/*"],
+    ["/ens", "/{dao}/*"],
     ["/", "/"],
     // Any non-DAO first segment buckets to /unknown to bound cardinality.
     ["/daos", "/unknown"],
@@ -54,7 +57,7 @@ describe("usageMiddleware", () => {
 
     expect(add).toHaveBeenCalledWith(1, {
       tenant: AUTH.tenant,
-      route: "/{dao}/proposals",
+      route: "/{dao}/*",
     });
   });
 
@@ -64,5 +67,27 @@ describe("usageMiddleware", () => {
     await buildApp(null).request("/ens/proposals/0x123");
 
     expect(add).not.toHaveBeenCalled();
+  });
+
+  it("counts requests even when the downstream handler throws", async () => {
+    const add = vi.spyOn(tenantRequestTotal, "add");
+    const app = new OpenAPIHono();
+    app.use("*", async (c, next) => {
+      c.set("auth", AUTH);
+      await next();
+    });
+    app.use("*", usageMiddleware(DAO_APIS));
+    app.get("/ens/proposals/:id", () => {
+      throw new Error("downstream 5xx");
+    });
+
+    await Promise.resolve(app.request("/ens/proposals/0x123")).catch(
+      () => undefined,
+    );
+
+    expect(add).toHaveBeenCalledWith(1, {
+      tenant: AUTH.tenant,
+      route: "/{dao}/*",
+    });
   });
 });

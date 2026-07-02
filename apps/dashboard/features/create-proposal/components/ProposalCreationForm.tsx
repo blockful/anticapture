@@ -455,7 +455,8 @@ export const ProposalCreationForm = ({
   const ownsDraft = Boolean(
     ownedDraft &&
     address &&
-    ownedDraft.author.toLowerCase() === address.toLowerCase(),
+    // Legacy localStorage drafts predate the `author` field and may lack it.
+    ownedDraft.author?.toLowerCase() === address.toLowerCase(),
   );
   const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
   // Editor only for a new proposal or an owned draft (no load-dependent flash).
@@ -496,11 +497,14 @@ export const ProposalCreationForm = ({
     : draftPreviewCopy({ role: "author" });
 
   // Recipients can only ever see the Preview — they have no editor access.
+  // Gated on draftContentLoaded so a not-yet-resolved ownership check (drafts
+  // still loading on mount) can't misclassify an owner as a recipient and
+  // force their own draft into Preview.
   useEffect(() => {
-    if (isRecipient && view !== "preview") {
+    if (isRecipient && draftContentLoaded && view !== "preview") {
       void setView("preview");
     }
-  }, [isRecipient, view, setView]);
+  }, [isRecipient, draftContentLoaded, view, setView]);
 
   const proposalsListHref = `${basePath}/proposals`;
 

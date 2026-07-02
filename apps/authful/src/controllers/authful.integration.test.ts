@@ -38,6 +38,7 @@ describe("authful app", () => {
 
     app = createApp({
       service: new TokensService(new TokensRepository(db)),
+      db,
       adminApiKey: ADMIN_KEY,
       internalApiKey: INTERNAL_KEY,
     });
@@ -93,6 +94,20 @@ describe("authful app", () => {
     it("keeps /health public", async () => {
       const res = await app.request("/health");
       expect(res.status).toBe(200);
+    });
+
+    it("returns 503 when the DB probe fails", async () => {
+      const failingDb = {
+        execute: () => Promise.reject(new Error("db down")),
+      } as unknown as AuthfulDrizzle;
+      const failingApp = createApp({
+        service: new TokensService(new TokensRepository(db)),
+        db: failingDb,
+        adminApiKey: ADMIN_KEY,
+        internalApiKey: INTERNAL_KEY,
+      });
+      const res = await failingApp.request("/health");
+      expect(res.status).toBe(503);
     });
 
     it("exposes Prometheus metrics publicly", async () => {
