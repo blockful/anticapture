@@ -1,6 +1,6 @@
 {
   "name": "@anticapture/gateful",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Gateful REST API aggregator for Anticapture DAO APIs",
   "main": "dist/src/index.js",
