@@ -6,8 +6,9 @@
     "dashboard": "dotenv -- turbo run --filter=@anticapture/dashboard",
     "indexer": "dotenv -- turbo run --filter=@anticapture/indexer",
     "gateful": "dotenv -- turbo run --filter=@anticapture/gateful",
+    "authful": "dotenv -- turbo run --filter=@anticapture/authful",
     "api": "dotenv -- turbo run --filter=@anticapture/api",
-    "codegen": "dotenv -- turbo run codegen",
+    "codegen": "dotenv -- node scripts/wait-for-gateful.mjs && dotenv -- turbo run codegen",
     "client": "turbo run --filter=@anticapture/client",
     "client-docs": "turbo run --filter=@anticapture/client-docs",
     "offchain-indexer": "turbo run --filter=@anticapture/offchain-indexer",
@@ -25,7 +26,8 @@
     "test:e2e": "turbo test:e2e",
     "test:e2e:headed": "turbo test:e2e:headed",
     "test:e2e:ui": "turbo test:e2e:ui",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "setup:memory": "node scripts/setup-memory.mjs"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",

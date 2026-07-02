@@ -2,7 +2,7 @@ import { Address } from "viem";
 
 import { DaoIdEnum } from "@/lib/enums";
 import { AmountFilter, DBAccountBalanceWithVariation } from "@/mappers";
-import { TreasuryAddresses } from "@/lib/constants";
+import { TreasuryAddresses, NonCirculatingAddresses } from "@/lib/constants";
 
 export interface AccountBalanceRepositoryInterface {
   getAccountBalancesWithVariation(
@@ -48,7 +48,10 @@ export class AccountBalanceService {
     totalCount: number;
   }> {
     const daoAddresses = excludeDaoAddresses
-      ? Object.values(TreasuryAddresses[daoId])
+      ? [
+          ...Object.values(TreasuryAddresses[daoId]),
+          ...Object.values(NonCirculatingAddresses[daoId]),
+        ]
       : [];
     return await this.repo.getAccountBalancesWithVariation(
       variationFromTimestamp,

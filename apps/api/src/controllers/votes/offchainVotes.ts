@@ -1,6 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  ErrorResponseSchema,
   OffchainProposalRequestSchema,
   OffchainVotesRequestSchema,
   OffchainVotesResponseSchema,
@@ -8,7 +9,11 @@ import {
 import { setCacheControl } from "@/middlewares";
 import { OffchainVotesService } from "@/services";
 
-export function offchainVotes(app: Hono, service: OffchainVotesService) {
+export function offchainVotes(
+  app: Hono,
+  service: OffchainVotesService,
+  supportOffchain: boolean,
+) {
   app.openapi(
     createRoute({
       method: "get",
@@ -30,9 +35,24 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
             },
           },
         },
+        400: {
+          description: "Offchain data not supported",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
       },
     }),
     async (context) => {
+      if (!supportOffchain) {
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Offchain data not supported" }),
+          400,
+        );
+      }
+
       const {
         skip,
         limit,
@@ -80,9 +100,24 @@ export function offchainVotes(app: Hono, service: OffchainVotesService) {
             },
           },
         },
+        400: {
+          description: "Offchain data not supported",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
       },
     }),
     async (context) => {
+      if (!supportOffchain) {
+        return context.json(
+          ErrorResponseSchema.parse({ error: "Offchain data not supported" }),
+          400,
+        );
+      }
+
       const { id } = context.req.valid("param");
       const {
         skip,

@@ -134,7 +134,7 @@ export const DaoProtectionLevels = () => {
           <ChartContainer className="h-full w-full" config={chartConfig}>
             <BarChart
               data={stageData}
-              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              margin={{ top: 16, right: 0, left: 0, bottom: 0 }}
             >
               <XAxis dataKey="stage" hide axisLine={false} tickLine={false} />
               <Tooltip

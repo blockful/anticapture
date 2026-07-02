@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import {
-  feedEventsPathParamsDaoEnum,
-  type FeedEventsPathParams,
-} from "@anticapture/client";
-
 import { ActivityFeedSection } from "@/features/feed";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { toDaoIdEnum } from "@/shared/types/daos";
@@ -13,12 +8,6 @@ import { toDaoIdEnum } from "@/shared/types/daos";
 type Props = {
   params: Promise<{ daoId: string }>;
 };
-
-const supportedDaos: string[] = Object.values(feedEventsPathParamsDaoEnum);
-
-function isSupportedDao(value: string): value is FeedEventsPathParams["dao"] {
-  return supportedDaos.includes(value);
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { daoId } = await params;
@@ -38,9 +27,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function WhitelabelActivityFeedPage({ params }: Props) {
   const { daoId } = await params;
+  const daoIdEnum = toDaoIdEnum(daoId);
   const feedDaoId = daoId.toLowerCase();
+  const daoConfig = daoIdEnum ? daoConfigByDaoId[daoIdEnum] : undefined;
 
-  if (!isSupportedDao(feedDaoId)) {
+  if (!daoConfig?.activityFeed) {
     redirect(`/whitelabel/${daoId}`);
   }
 

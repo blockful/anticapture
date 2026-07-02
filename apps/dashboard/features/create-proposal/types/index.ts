@@ -40,6 +40,8 @@ export type ProposalContent = {
 export type ProposalDraft = ProposalContent & {
   id: string;
   daoId: string;
+  /** Wallet address that originally created the draft (lowercased 0x string). */
+  author: string;
   createdAt: number;
   updatedAt: number;
   actions: ProposalAction[];

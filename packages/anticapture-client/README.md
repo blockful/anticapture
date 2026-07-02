@@ -150,15 +150,19 @@ agentic clients. Two transports are available:
 - `pnpm mcp` (`mcp-server.ts`) — stdio, for clients that spawn the server as a
   child process (Claude Desktop, local agents).
 - `pnpm mcp-http` (`mcp-server-http.ts`) — Streamable HTTP with session
-  management and bearer auth, used by the deployed `infra/mcp-server` image.
+  management, used by the deployed `infra/mcp-server` image. Token validation
+  is delegated to Gateful: the inbound bearer is forwarded upstream and guarded
+  by Gateful's `tokenAuthMiddleware` (Redis cache + fail-open fallback).
 
 Environment:
 
 - `ANTICAPTURE_API_URL` — upstream Gateful base URL (default
   `http://localhost:4001`).
-- `ANTICAPTURE_API_KEY` — bearer token sent to the upstream Gateful API.
-- `ANTICAPTURE_MCP_API_KEY` — bearer token required from inbound MCP HTTP
-  clients (omit to disable auth).
+- `ANTICAPTURE_API_KEY` — bearer token sent to the upstream Gateful API. Omit
+  when forwarding the caller's own token (`FORWARD_CLIENT_AUTH=true`).
+- `FORWARD_CLIENT_AUTH` — when `true`, the caller's inbound `Authorization`
+  header is forwarded to Gateful, which validates the per-tenant token via its
+  `tokenAuthMiddleware`. This server does not validate tokens itself.
 - `PORT` / `HOST` — HTTP server bind (default `3100` / `0.0.0.0`).
 
 ### Wiring into Claude Desktop (stdio)
@@ -189,12 +193,21 @@ that `node_modules/.bin/tsx` and `generated/` are present.
 ## Development
 
 The SDK and client docs resolve the Gateful OpenAPI source through the shared
-spec resolver. Local generated specs are preferred when present; CI and Railway
-builds can fall back to the deployed Gateful docs endpoint. Resolution order:
+spec resolver. Codegen always uses the injected live Gateful URL: `${ANTICAPTURE_API_URL}/docs/json`
 
-1. `apps/gateful/openapi/gateful.json`
-2. `${NEXT_PUBLIC_GATEFUL_URL}/docs/json`
-3. `https://gateful-anticapture-${RAILWAY_ENVIRONMENT_NAME}.up.railway.app/docs/json`
+Preview and production environments must inject `ANTICAPTURE_API_URL`
+directly. CI sets a branch-scoped Vercel preview variable from the PR number;
+
+Codegen runs `scripts/wait-for-gateful.mjs` before Kubb. In CI and Vercel,
+`EXPECTED_GATEFUL_SHA` / `VERCEL_GIT_COMMIT_SHA` makes readiness require
+`GET /health` to return the matching deployed Gateful commit. Local runs without
+an expected SHA only require `/health` to return `200`.
+
+Dashboard Vercel setting: keep the Build Command prefixed with:
+
+```sh
+node ../../scripts/wait-for-gateful.mjs &&
+```
 
 ```sh
 npm run codegen

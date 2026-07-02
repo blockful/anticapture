@@ -43,6 +43,19 @@ describe("proxy route", () => {
     expect(res.status).toBe(200);
   });
 
+  it("should strip the tenant Authorization header before forwarding", async () => {
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify({ ok: true })));
+
+    await app.request("/uni/proposals", {
+      headers: { Authorization: "Bearer tenant-secret" },
+    });
+
+    const forwarded = fetchSpy.mock.calls[0]?.[0] as Request;
+    expect(forwarded.headers.get("authorization")).toBeNull();
+  });
+
   it("should return 400 when no DAO identifier is provided", async () => {
     const res = await app.request("/");
 

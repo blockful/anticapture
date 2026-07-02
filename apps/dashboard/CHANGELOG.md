@@ -1,5 +1,38 @@
 # @anticapture/dashboard
 
+## 2.7.0
+
+### Minor Changes
+
+- [#1997](https://github.com/blockful/anticapture/pull/1997) [`8ed6328`](https://github.com/blockful/anticapture/commit/8ed6328d9864d30225a9aefb7baeb63fe790f6dd) Thanks [@brunod-e](https://github.com/brunod-e)! - feat(create-proposal): recursive calldata builder covering every Solidity type (arrays, fixed/multidimensional, tuples/structs, nested) with two-way paste & decode and a live encoded-calldata preview; debounced contract-address validation; "Duplicate action" alongside edit/delete; and improved transfer UX — treasury "Max", always-visible helper text, per-token USD via CoinGecko, and a clearer selected-token state.
+
+- [#1993](https://github.com/blockful/anticapture/pull/1993) [`add9bd1`](https://github.com/blockful/anticapture/commit/add9bd1e96ea89dd26f892fcd30353919d905126) Thanks [@caveman-eth](https://github.com/caveman-eth)! - Surface ENS social records and EFP stats for addresses.
+  - `address-enrichment` now reads the EFP `/details` endpoint, capturing the ENS `com.twitter`, `org.telegram`, `email`, and `com.github` text records plus EFP follower/following counts. These are exposed under `ens` (socials) and a new `efp` object, cached under the existing ENS TTL. EFP counts are returned even when the address has no primary ENS name.
+  - The Holders & Delegates drawer header now shows follower/following counts (linked to the EFP profile) and social links (X, Telegram, GitHub, email) for the selected address.
+
+- [#2009](https://github.com/blockful/anticapture/pull/2009) [`36992d7`](https://github.com/blockful/anticapture/commit/36992d728e562b32c87402812a54acde82092593) Thanks [@Zeugh-eth](https://github.com/Zeugh-eth)! - support Tornado Cash proposal creation
+
+- [#1990](https://github.com/blockful/anticapture/pull/1990) [`5cb8a21`](https://github.com/blockful/anticapture/commit/5cb8a2168b459c18645f42461078b47692da8430) Thanks [@brunod-e](https://github.com/brunod-e)! - Shareable proposal drafts: add an Editor/Preview toggle, a read-only draft preview, and a recipient flow for shared draft links — publish the draft on-chain or edit it to fork your own copy.
+
+- [#2012](https://github.com/blockful/anticapture/pull/2012) [`3031315`](https://github.com/blockful/anticapture/commit/303131572b12e8a9196a91ac9bd865b0977c2470) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Render Tornado Cash proposal descriptions as Markdown (unwrapping the stringified-JSON body) and show a proposal Info card on the Actions tab for proposals without executable actions.
+
+- [#2002](https://github.com/blockful/anticapture/pull/2002) [`412b9e8`](https://github.com/blockful/anticapture/commit/412b9e87b11b02b5de0dfb1d21d838af53242594) Thanks [@pikonha](https://github.com/pikonha)! - Make TORN vote recasting reachable (show "Change your vote" on already-voted onchain proposals when the DAO allows changing votes) and hide the Abstain option for Tornado Cash, whose binary governor rejects abstain votes.
+
+- [#2002](https://github.com/blockful/anticapture/pull/2002) [`451db65`](https://github.com/blockful/anticapture/commit/451db65d6497503ecebcae24fed44027a2e6479f) Thanks [@pikonha](https://github.com/pikonha)! - Integrate Tornado Cash DAO (TORN): custom stake-to-vote indexer (lock-based delegated supply, timestamp governance), timestamp-based proposal-status API client, and dashboard config/icon.
+
+### Patch Changes
+
+- [#2015](https://github.com/blockful/anticapture/pull/2015) [`196de31`](https://github.com/blockful/anticapture/commit/196de313585e028f747190f8ea7d2d497d140c94) Thanks [@pikonha](https://github.com/pikonha)! - Fix proposal descriptions rendering blank for DAOs (e.g. Compound) whose on-chain descriptions use escaped `\n` newlines, by normalizing them to real line breaks for display.
+
+- [#1995](https://github.com/blockful/anticapture/pull/1995) [`eaacf28`](https://github.com/blockful/anticapture/commit/eaacf28668967881c626e673f70af43de4233f74) Thanks [@pikonha](https://github.com/pikonha)! - Drop the shared-dev-Gateful fallback for untrusted/fork Vercel PR previews. Those previews get no PR-scoped Railway service, so they can never reflect a PR's API/Gateful changes — pointing them at `dev-gateful` only produced a misleading preview. The dashboard `next.config.ts` and the `@anticapture/client` Gateful OpenAPI spec resolver now rely solely on an explicit `ANTICAPTURE_API_URL` (injected by CI for trusted PRs / set on dev & production) or a Railway PR-preview environment; anything else throws instead of silently falling back.
+
+- [#2011](https://github.com/blockful/anticapture/pull/2011) [`acdaf82`](https://github.com/blockful/anticapture/commit/acdaf82ad448587254f9c22aaa9b99f3e611b277) Thanks [@brunod-e](https://github.com/brunod-e)! - fix(dashboard): use dynamic viewport height (dvh) for the app/whitelabel shells so the sticky bottom action bar (e.g. create-proposal Publish/Save Draft) is no longer hidden behind the mobile browser's bottom toolbar.
+
+- [#2002](https://github.com/blockful/anticapture/pull/2002) [`2fc7174`](https://github.com/blockful/anticapture/commit/2fc71740f3953d5c49eaf92d5ab7947ae821ce0f) Thanks [@pikonha](https://github.com/pikonha)! - Fix TORN historical voting power rows being rendered as bogus zero-address delegations. TORN derives voting power directly from Transfers, so each history row shares the Transfer's log index, which the generic repository's strict `<` join never matched. Added a dedicated TORN voting-power repository that links the causing event at `logIndex <= row logIndex`. Dashboard also formats the auto-delegation fallback amount instead of dumping the raw delta.
+
+- Updated dependencies [[`4a85cf4`](https://github.com/blockful/anticapture/commit/4a85cf47d6a56b3f0c9de5da87978e0687755c55), [`e57bf06`](https://github.com/blockful/anticapture/commit/e57bf06b022728ccb9bb32f6c2622125c3d2a506), [`add9bd1`](https://github.com/blockful/anticapture/commit/add9bd1e96ea89dd26f892fcd30353919d905126), [`51e110a`](https://github.com/blockful/anticapture/commit/51e110a12820493c453097fc069b194f0b8c08e5), [`172558c`](https://github.com/blockful/anticapture/commit/172558c1b1284c085b68a8cd8316a7fb023d287f), [`2dea74c`](https://github.com/blockful/anticapture/commit/2dea74c32a99f8475894df6b2e59e759ecaf233a), [`eaacf28`](https://github.com/blockful/anticapture/commit/eaacf28668967881c626e673f70af43de4233f74), [`d94129c`](https://github.com/blockful/anticapture/commit/d94129ca6d9d488689f7ada91db4d1c7c8020394)]:
+  - @anticapture/client@1.4.0
+
 ## 2.6.0
 
 ### Minor Changes

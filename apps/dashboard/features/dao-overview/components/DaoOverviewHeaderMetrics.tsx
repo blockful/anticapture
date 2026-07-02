@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { DaoOverviewHeader } from "@/features/dao-overview/components/DaoOverviewHeader";
 import { DaoOverviewMetricCard } from "@/features/dao-overview/components/DaoOverviewMetricCard";
 import { useDaoOverviewData } from "@/features/dao-overview/hooks/useDaoOverviewData";
+import { getVotableSupplyLabel } from "@/features/dao-overview/utils/votableSupplyLabel";
 import { BadgeStatus, TooltipInfo } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
@@ -191,6 +192,7 @@ export const DaoOverviewHeaderMetrics = ({
   );
 
   const quorumGapText = getQuorumGapText(quorumGap);
+  const votableSupplyLabel = getVotableSupplyLabel(daoId);
 
   const treasuryMetrics = getTreasuryMetrics(
     daoId,
@@ -226,7 +228,7 @@ export const DaoOverviewHeaderMetrics = ({
                 <span className="w-full text-center">Review needed</span>
               </BadgeStatus>
             ) : (
-              `${formattedValues.delegatedSupply} ${daoId} delegated`
+              `${formattedValues.delegatedSupply} ${daoId} ${votableSupplyLabel}`
             )
           }
           subText={

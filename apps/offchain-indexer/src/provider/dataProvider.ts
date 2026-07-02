@@ -42,6 +42,25 @@ const PROPOSALS_QUERY = `
   }
 `;
 
+// Uses created_gte (not created_gt) so this matches the DB reconciliation scan,
+// which is inclusive at the `since` boundary (gte). An exclusive filter here
+// would drop live proposals created exactly at `since` and cause reconciliation
+// to delete them. Pagination also advances with created_gte and de-dupes by id,
+// so proposals sharing a `created` second across a page boundary aren't skipped.
+const PROPOSAL_IDS_QUERY = `
+  query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
+    proposals(
+      where: { space: $spaceId, created_gte: $cursor }
+      first: $pageSize
+      orderBy: "created"
+      orderDirection: asc
+    ) {
+      id
+      created
+    }
+  }
+`;
+
 const VOTES_QUERY = `
   query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
     votes(
@@ -101,6 +120,45 @@ export class SnapshotProvider implements DataProvider {
         : null;
 
     return { data: proposals, nextCursor };
+  }
+
+  async fetchProposalIdsSince(since: number): Promise<string[]> {
+    const ids = new Set<string>();
+    let cursor = since;
+
+    while (true) {
+      const response = await this.query<{
+        proposals: { id: string; created: number }[];
+      }>(PROPOSAL_IDS_QUERY, {
+        spaceId: this.spaceId,
+        cursor,
+        pageSize: PAGE_SIZE,
+      });
+
+      if (response.proposals.length === 0) break;
+
+      for (const proposal of response.proposals) {
+        ids.add(proposal.id);
+      }
+
+      if (response.proposals.length < PAGE_SIZE) break;
+
+      const lastCreated =
+        response.proposals[response.proposals.length - 1]!.created;
+
+      // created_gte re-fetches the boundary second (Set de-dupes), so a full page
+      // that ends on a shared `created` second keeps its later proposals. If the
+      // whole page shares one second, advancing by +1 avoids an infinite loop at
+      // the cost of dropping any overflow past PAGE_SIZE in that single second —
+      // acceptable: >1000 proposals in one second is not a real Snapshot space.
+      // ponytail: +1 fallback bounds the loop; revisit only if such spaces exist.
+      cursor =
+        lastCreated === response.proposals[0]!.created
+          ? lastCreated + 1
+          : lastCreated;
+    }
+
+    return [...ids];
   }
 
   async fetchVotes(

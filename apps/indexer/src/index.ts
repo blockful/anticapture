@@ -35,6 +35,7 @@ import { CONTRACT_ADDRESSES } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 
 import { SHUGovernorIndexer, SHUTokenIndexer } from "./indexer/shu";
+import { TORNTokenIndexer, TORNGovernorIndexer } from "./indexer/torn";
 import {
   AAVETokenIndexer,
   stkAAVETokenIndexer,
@@ -118,6 +119,11 @@ switch (daoId) {
   case DaoIdEnum.FLUID: {
     FLUIDTokenIndexer(token.address, token.decimals);
     FLUIDGovernorIndexer(blockTime);
+    break;
+  }
+  case DaoIdEnum.TORN: {
+    TORNTokenIndexer(token.address, token.decimals);
+    TORNGovernorIndexer(blockTime);
     break;
   }
   case DaoIdEnum.AAVE: {

@@ -1,6 +1,5 @@
-import { execSync } from "child_process";
-
 import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 
 import * as schema from "./schema";
@@ -25,14 +24,8 @@ export function initDb(connectionString: string) {
   return db;
 }
 
-/**
- * Push schema to the database (like drizzle-kit push)
- */
-export function runMigrations(connectionString: string) {
-  execSync("drizzle-kit push --force", {
-    env: { ...process.env, DATABASE_URL: connectionString },
-    stdio: "inherit",
-  });
+export async function runMigrations() {
+  await migrate(getDb(), { migrationsFolder: "./drizzle" });
 }
 
 /**

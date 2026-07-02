@@ -10,7 +10,7 @@ const buildUpstreamUrl = (request: NextRequest, path: string[]) => {
   const pathname = path.map(encodeURIComponent).join("/");
   const upstreamUrl = new URL(
     pathname ? `./${pathname}` : "./",
-    `${process.env.NEXT_PUBLIC_GATEFUL_URL}/`,
+    `${process.env.ANTICAPTURE_API_URL}/`,
   );
   upstreamUrl.search = new URL(request.url).search;
   return upstreamUrl;

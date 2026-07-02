@@ -105,7 +105,10 @@ export const MultilineChartAttackProfitability = ({
       },
       all: { label: "All", color: "#4ade80" },
       quorum: { label: "Quorum", color: "#f87171" },
-      delegated: { label: "Delegated", color: "#f87171" },
+      delegated: {
+        label: daoEnum === "TORN" ? "Locked" : "Delegated",
+        color: "#f87171",
+      },
     }),
     [daoEnum],
   ) satisfies ChartConfig;
