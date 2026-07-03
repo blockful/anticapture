@@ -289,9 +289,10 @@ export const ProposalHeader = ({
                 )}
               {address &&
                 (proposalStatus === "pending_execution" ||
-                  proposalStatus === "queued" ||
-                  (proposalStatus === "succeeded" &&
-                    daoId.toUpperCase() === DaoIdEnum.SHU)) && (
+                  // Azorius (SHU) proposals are QUEUED while timelocked and
+                  // executeProposal reverts until PENDING_EXECUTION
+                  (proposalStatus === "queued" &&
+                    daoId.toUpperCase() !== DaoIdEnum.SHU)) && (
                   <Button
                     className="hidden lg:flex"
                     onClick={() => setIsExecuteModalOpen(true)}
