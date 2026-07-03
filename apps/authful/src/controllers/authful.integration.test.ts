@@ -115,6 +115,14 @@ describe("authful app", () => {
       expect(JSON.stringify(row)).not.toContain(body.token);
     });
 
+    it("accepts rateLimitPerMin 0 to mint an unbounded token", async () => {
+      const body = await mint({ rateLimitPerMin: 0 });
+      expect(body.rateLimitPerMin).toBe(0);
+
+      const [row] = await db.select().from(tokens);
+      expect(row!.rateLimitPerMin).toBe(0);
+    });
+
     it("rejects a body sent without a JSON content-type (no silent {})", async () => {
       // Regression: without `required: true`, @hono/zod-openapi skips
       // validation for a non-JSON content-type and substitutes {}, so mint

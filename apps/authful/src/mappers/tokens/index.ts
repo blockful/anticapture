@@ -20,7 +20,10 @@ export const MintTokenBodySchema = z
   .object({
     tenant: z.string().min(1),
     name: z.string().min(1),
-    rateLimitPerMin: z.number().int().positive().optional(),
+    rateLimitPerMin: z.number().int().nonnegative().optional().openapi({
+      description:
+        "Requests per minute. 0 means unbounded (no rate limiting). Omit to default to 600.",
+    }),
   })
   .openapi("MintTokenBody");
 
