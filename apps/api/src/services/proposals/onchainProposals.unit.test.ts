@@ -196,6 +196,36 @@ describe("ProposalsService", () => {
       ]);
     });
 
+    it("should map QUEUED to QUEUED, PENDING and ACTIVE for DB query", async () => {
+      await service.getProposals({
+        ...DEFAULT_REQ,
+        status: [ProposalStatus.QUEUED],
+      });
+
+      // QUEUED is persisted for OZ governors but computed from PENDING/ACTIVE
+      // rows for Azorius, so the DB query must cover both
+      expect(repo.lastStatusArg).toEqual([
+        ProposalStatus.QUEUED,
+        ProposalStatus.PENDING,
+        ProposalStatus.ACTIVE,
+      ]);
+    });
+
+    it("should map PENDING_EXECUTION to QUEUED, PENDING and ACTIVE for DB query", async () => {
+      await service.getProposals({
+        ...DEFAULT_REQ,
+        status: [ProposalStatus.PENDING_EXECUTION],
+      });
+
+      // PENDING_EXECUTION is never persisted: it is computed from QUEUED rows
+      // (OZ) or PENDING/ACTIVE rows (Azorius)
+      expect(repo.lastStatusArg).toEqual([
+        ProposalStatus.QUEUED,
+        ProposalStatus.PENDING,
+        ProposalStatus.ACTIVE,
+      ]);
+    });
+
     it("should filter by original status after chain check", async () => {
       repo.proposals = [
         createMockProposal({ id: "1" }),
