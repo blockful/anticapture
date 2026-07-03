@@ -25,7 +25,7 @@ const route = createRoute({
   path: "/health",
   summary: "Gateway health and upstream dependency states",
   description:
-    "Returns 200 only when every configured DAO API, relayer, and address enrichment upstream responds to /health.",
+    "Returns 200 only when every configured DAO API, relayer, address enrichment, and token service upstream responds to /health.",
   tags: ["system"],
   responses: {
     200: {
@@ -51,6 +51,7 @@ type HealthOptions = {
   daoApis: Map<string, string>;
   daoRelayers: Map<string, string>;
   addressEnrichmentUrl?: string;
+  tokenServiceUrl?: string;
   commitSha?: string;
 };
 
@@ -94,6 +95,17 @@ function buildProbeTargets(opts: HealthOptions): ProbeTarget[] {
       name: "address-enrichment",
       baseUrl: opts.addressEnrichmentUrl,
       circuitKey: "address-enrichment",
+    });
+  }
+
+  // Authful is a runtime dependency for validating uncached tokens; report it
+  // so readiness fails when it is down (the breaker key is inert here — the
+  // probe never calls breaker.execute).
+  if (opts.tokenServiceUrl) {
+    targets.push({
+      name: "authful",
+      baseUrl: opts.tokenServiceUrl,
+      circuitKey: "authful",
     });
   }
 

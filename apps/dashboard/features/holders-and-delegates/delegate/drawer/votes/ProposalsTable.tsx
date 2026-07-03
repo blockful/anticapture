@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 
+import { normalizeProposalDescription } from "@/features/governance/utils/normalizeProposalDescription";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import {
   getUserVoteData,
@@ -102,7 +103,10 @@ export const ProposalsTable = ({
       );
       return {
         proposalId: item.proposal?.id || "",
-        proposalName: item.proposal?.title || item.proposal?.description || "",
+        proposalName:
+          item.proposal?.title ||
+          normalizeProposalDescription(item.proposal?.description) ||
+          "",
         finalResult: finalResult.text,
         userVote: userVote.text,
         finalResultIcon: finalResult.icon,

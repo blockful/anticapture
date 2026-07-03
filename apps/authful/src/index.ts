@@ -39,6 +39,7 @@ if (isPreview && env.SEED_TOKEN_PLAINTEXT) {
 
 const app = createApp({
   service,
+  db,
   adminApiKey: env.ADMIN_API_KEY,
   internalApiKey: env.INTERNAL_API_KEY,
 });

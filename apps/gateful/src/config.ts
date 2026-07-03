@@ -16,6 +16,13 @@ export const envSchema = z
       .transform((url) => url.replace(/\/+$/, ""))
       .optional(),
     TOKEN_SERVICE_API_KEY: z.string().optional(),
+    // Explicit opt-in to run without per-tenant auth (local dev only). Without
+    // this flag, a missing TOKEN_SERVICE_URL is a hard startup error rather than
+    // silently serving every DAO/relayer route publicly (fail closed).
+    GATEFUL_AUTH_DISABLED: z
+      .string()
+      .optional()
+      .transform((v) => v === "true"),
     // Shared bearer protecting the public `/metrics` endpoint from scraping by
     // anyone but our Prometheus instance. Distinct from per-tenant Authful auth:
     // the scraper is infrastructure, not a tenant, so it must not consume a
@@ -62,6 +69,7 @@ export const config = {
   tokenService: env.TOKEN_SERVICE_URL
     ? { url: env.TOKEN_SERVICE_URL, apiKey: env.TOKEN_SERVICE_API_KEY! }
     : undefined,
+  authDisabled: env.GATEFUL_AUTH_DISABLED,
   metricsToken: env.GATEFUL_METRICS_TOKEN,
   redisUrl: env.REDIS_URL,
   commitSha: env.RAILWAY_GIT_COMMIT_SHA,

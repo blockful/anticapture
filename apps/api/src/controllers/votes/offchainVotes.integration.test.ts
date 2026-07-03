@@ -64,6 +64,14 @@ const createOffchainProposal = (
   ...overrides,
 });
 
+const createApp = (supportOffchain = true) => {
+  const repo = new OffchainVoteRepository(db);
+  const service = new OffchainVotesService(repo);
+  const testApp = new Hono();
+  offchainVotesController(testApp, service, supportOffchain);
+  return testApp;
+};
+
 beforeAll(async () => {
   client = new PGlite();
   const unifiedSchema = { ...schema, ...offchainSchema, ...generalSchema };
@@ -81,13 +89,34 @@ beforeEach(async () => {
   await db.delete(offchainVotes);
   await db.delete(offchainProposals);
 
-  const repo = new OffchainVoteRepository(db);
-  const service = new OffchainVotesService(repo);
-  app = new Hono();
-  offchainVotesController(app, service);
+  app = createApp();
 });
 
 describe("Offchain Votes Controller", () => {
+  describe("supportOffchain=false", () => {
+    it("should return 400 for vote list", async () => {
+      app = createApp(false);
+
+      const res = await app.request("/offchain/votes");
+
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({
+        error: "Offchain data not supported",
+      });
+    });
+
+    it("should return 400 for proposal vote list", async () => {
+      app = createApp(false);
+
+      const res = await app.request("/offchain/proposals/proposal-1/votes");
+
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({
+        error: "Offchain data not supported",
+      });
+    });
+  });
+
   describe("GET /offchain/votes", () => {
     it("should return 200 with correct response shape", async () => {
       await db.insert(offchainProposals).values(createOffchainProposal());

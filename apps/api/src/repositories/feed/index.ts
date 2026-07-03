@@ -104,25 +104,35 @@ export class FeedRepository {
     const voteKeys = rows
       .filter((r) => r.type === FeedEventType.VOTE)
       .map((r) => ({ txHash: r.txHash, logIndex: r.logIndex }));
-    const proposalIds = Array.from(
+    // A PROPOSAL creation event and its proposal row are written from the same
+    // log, so match them by txHash (one ProposalCreated per tx). This avoids
+    // relying on feed_event.proposal_id, which some governors (e.g. TORN) leave
+    // null on the creation event. PROPOSAL_EXTENDED lives in a different tx, so
+    // it still keys by proposal_id.
+    const proposalTxHashes = Array.from(
       new Set(
         rows
-          .filter(
-            (r) =>
-              r.type === FeedEventType.PROPOSAL ||
-              r.type === FeedEventType.PROPOSAL_EXTENDED,
-          )
+          .filter((r) => r.type === FeedEventType.PROPOSAL)
+          .map((r) => r.txHash),
+      ),
+    );
+    const extendedProposalIds = Array.from(
+      new Set(
+        rows
+          .filter((r) => r.type === FeedEventType.PROPOSAL_EXTENDED)
           .map((r) => r.proposalId)
           .filter((id): id is string => id != null),
       ),
     );
 
-    const [delegations, transfers, votes, proposals] = await Promise.all([
-      this.fetchDelegations(delegationKeys),
-      this.fetchTransfers(transferKeys),
-      this.fetchVotes(voteKeys),
-      this.fetchProposals(proposalIds),
-    ]);
+    const [delegations, transfers, votes, createdProposals, extendedProposals] =
+      await Promise.all([
+        this.fetchDelegations(delegationKeys),
+        this.fetchTransfers(transferKeys),
+        this.fetchVotes(voteKeys),
+        this.fetchProposalsByTxHash(proposalTxHashes),
+        this.fetchProposals(extendedProposalIds),
+      ]);
 
     const delegationByKey = new Map(
       delegations.map((d) => [`${d.transactionHash}:${d.logIndex}`, d]),
@@ -133,7 +143,10 @@ export class FeedRepository {
     const voteByKey = new Map(
       votes.map((v) => [`${v.txHash}:${v.logIndex}`, v]),
     );
-    const proposalById = new Map(proposals.map((p) => [p.id, p]));
+    const proposalByTxHash = new Map(
+      createdProposals.map((p) => [p.txHash, p]),
+    );
+    const proposalById = new Map(extendedProposals.map((p) => [p.id, p]));
 
     return rows.map((row) => ({
       ...row,
@@ -141,6 +154,7 @@ export class FeedRepository {
         delegationByKey,
         transferByKey,
         voteByKey,
+        proposalByTxHash,
         proposalById,
       }),
     }));
@@ -152,6 +166,7 @@ export class FeedRepository {
       delegationByKey: Map<string, DelegationRow>;
       transferByKey: Map<string, TransferRow>;
       voteByKey: Map<string, VoteRow>;
+      proposalByTxHash: Map<string, ProposalRow>;
       proposalById: Map<string, ProposalRow>;
     },
   ): FeedMetadata | null {
@@ -195,8 +210,7 @@ export class FeedRepository {
         return meta;
       }
       case FeedEventType.PROPOSAL: {
-        if (!row.proposalId) return null;
-        const p = lookups.proposalById.get(row.proposalId);
+        const p = lookups.proposalByTxHash.get(row.txHash);
         if (!p) return null;
         const meta: ProposalMeta = {
           kind: FeedEventType.PROPOSAL,
@@ -286,9 +300,21 @@ export class FeedRepository {
 
   private async fetchProposals(proposalIds: string[]): Promise<ProposalRow[]> {
     if (proposalIds.length === 0) return [];
+    return this.selectProposals(inArray(proposalsOnchain.id, proposalIds));
+  }
+
+  private async fetchProposalsByTxHash(
+    txHashes: string[],
+  ): Promise<ProposalRow[]> {
+    if (txHashes.length === 0) return [];
+    return this.selectProposals(inArray(proposalsOnchain.txHash, txHashes));
+  }
+
+  private selectProposals(where: SQL): Promise<ProposalRow[]> {
     return this.db
       .select({
         id: proposalsOnchain.id,
+        txHash: proposalsOnchain.txHash,
         proposerAccountId: proposalsOnchain.proposerAccountId,
         title: proposalsOnchain.title,
         endBlock: proposalsOnchain.endBlock,
@@ -311,7 +337,7 @@ export class FeedRepository {
         )`,
       })
       .from(proposalsOnchain)
-      .where(inArray(proposalsOnchain.id, proposalIds));
+      .where(where);
   }
 
   private buildRelevanceFilter(
@@ -366,6 +392,7 @@ type VoteRow = {
 
 type ProposalRow = {
   id: string;
+  txHash: string;
   proposerAccountId: string;
   title: string;
   endBlock: number;

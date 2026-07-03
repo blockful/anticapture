@@ -26,6 +26,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   ZK: "zksync",
   SHU: "shutter",
   FLUID: "fluid",
+  TORN: "tornado-cash",
 } as const;
 
 export const CoingeckoIdToAssetPlatformId = {
@@ -41,6 +42,7 @@ export const CoingeckoIdToAssetPlatformId = {
   [CoingeckoTokenIdEnum.ZK]: AssetPlatformEnum.ZKSYNC,
   [CoingeckoTokenIdEnum.SHU]: AssetPlatformEnum.ETHEREUM,
   [CoingeckoTokenIdEnum.FLUID]: AssetPlatformEnum.ETHEREUM,
+  [CoingeckoTokenIdEnum.TORN]: AssetPlatformEnum.ETHEREUM,
 } as const;
 
 export interface CoingeckoHistoricalMarketData {

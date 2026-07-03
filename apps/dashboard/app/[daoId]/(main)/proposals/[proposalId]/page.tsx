@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 
 import { ProposalSection } from "@/features/governance/components/proposal-overview/ProposalSection";
+import { normalizeProposalDescription } from "@/features/governance/utils/normalizeProposalDescription";
 import { buildProposalSeoText } from "@/shared/seo/proposalMetadata";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import {
@@ -45,7 +46,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     ? isOffchainProposal(proposal)
       ? proposal.body
       : proposal.variant === "full"
-        ? proposal.description
+        ? normalizeProposalDescription(proposal.description)
         : undefined
     : undefined;
 
