@@ -2,7 +2,7 @@ node_modules/*
 .git/*
 out/
 .turbo
-.env
+.env*
 *.dump
 
 # Logs
@@ -82,13 +82,6 @@ web_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
@@ -160,3 +153,6 @@ dist
 .mcp.json
 
 apps/gateful/openapi/gateful.json
+
+# Local planning/spec artifacts (superpowers) — not part of the repo
+docs/superpowers/

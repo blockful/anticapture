@@ -230,6 +230,20 @@ export const CONTRACT_ADDRESSES = {
       address: "0xA700b4eB416Be35b2911fd5Dee80678ff64fF6C9",
     },
   },
+  [DaoIdEnum.TORN]: {
+    blockTime: 12,
+    // https://etherscan.io/address/0x77777FeDdddFfC19Ff86DB637967013e6C6A116C
+    token: {
+      address: "0x77777FeDdddFfC19Ff86DB637967013e6C6A116C",
+      decimals: 18,
+      startBlock: 11474599,
+    },
+    // https://etherscan.io/address/0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce
+    governor: {
+      address: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
+      startBlock: 11474695,
+    },
+  },
 } as const;
 
 export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -402,6 +416,9 @@ export const TreasuryAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     "Chainlink CCIP LockReleaseTokenPool":
       "0x639f35C5E212D61Fe14Bd5CD8b66aAe4df11a50c",
     InstaTimelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
+  },
+  [DaoIdEnum.TORN]: {
+    governor: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
   },
 };
 
@@ -622,6 +639,7 @@ export const CEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
     Gate: "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe",
     Bitvavo: "0xaB782bc7D4a2b306825de5a7730034F8F63ee1bC",
   },
+  [DaoIdEnum.TORN]: {},
 };
 
 export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -695,6 +713,12 @@ export const DEXAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   [DaoIdEnum.FLUID]: {
     "Uniswap V3 INST/WETH": "0xc1cd3D0913f4633b43FcdDBCd7342bC9b71C676f",
   },
+  [DaoIdEnum.TORN]: {
+    "Uniswap v2 | TORN/WETH": "0x0c722a487876989af8a05fffb6e32e45cc23fb3a",
+    "Uniswap v3 | TORN/WETH 1%": "0x97a5a0b2d7ed3accb7fd6404a1f5ca29320905af",
+    "Uniswap v3 | TORN/WETH 0,3%": "0x753a90ae2fa03d31487141bf54bd853b27f7bcf5",
+    "Sushiswap | TORN/WETH": "0xb270176ba6075196df88b855c3ec7776871fdb33",
+  },
 };
 
 export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
@@ -745,6 +769,7 @@ export const LendingAddresses: Record<DaoIdEnum, Record<string, Address>> = {
   },
   [DaoIdEnum.SHU]: {},
   [DaoIdEnum.FLUID]: {},
+  [DaoIdEnum.TORN]: {},
 };
 
 export const BurningAddresses: Record<
@@ -832,6 +857,11 @@ export const BurningAddresses: Record<
     Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
   },
+  [DaoIdEnum.TORN]: {
+    ZeroAddress: zeroAddress,
+    Dead: "0x000000000000000000000000000000000000dEaD",
+    TokenContract: "0x77777FeDdddFfC19Ff86DB637967013e6C6A116C",
+  },
 };
 
 export const NonCirculatingAddresses: Record<
@@ -872,6 +902,9 @@ export const NonCirculatingAddresses: Record<
   },
   [DaoIdEnum.LIL_NOUNS]: {},
   [DaoIdEnum.SHU]: {},
+  [DaoIdEnum.TORN]: {
+    vault: "0x2F50508a8a3D323B91336FA3eA6ae50E55f32185",
+  },
 };
 
 export enum ProposalStatus {

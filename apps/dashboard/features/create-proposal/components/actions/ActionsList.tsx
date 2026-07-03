@@ -16,6 +16,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 
 import { ActionRow } from "@/features/create-proposal/components/actions/ActionRow";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
+import { cloneAction } from "@/features/create-proposal/utils/cloneAction";
 
 interface ActionsListProps {
   onEditAction: (index: number) => void;
@@ -26,8 +27,15 @@ export const ActionsList = ({
   onEditAction,
   onDeleteAction,
 }: ActionsListProps) => {
-  const { control } = useFormContext<ProposalFormValues>();
-  const { fields, move } = useFieldArray({ control, name: "actions" });
+  const { control, getValues } = useFormContext<ProposalFormValues>();
+  const { fields, move, insert } = useFieldArray({ control, name: "actions" });
+
+  // Insert an independent deep copy directly after the source row. `getValues`
+  // returns the raw action (without RHF's internal field id) and `insert` mints
+  // a fresh id for the copy.
+  const handleDuplicate = (index: number) => {
+    insert(index + 1, cloneAction(getValues(`actions.${index}`)));
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -62,6 +70,7 @@ export const ActionsList = ({
               onMoveUp={() => move(index, index - 1)}
               onMoveDown={() => move(index, index + 1)}
               onEdit={() => onEditAction(index)}
+              onDuplicate={() => handleDuplicate(index)}
               onDelete={() => onDeleteAction(index)}
             />
           ))}

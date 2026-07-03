@@ -7,6 +7,7 @@ import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
@@ -67,6 +68,7 @@ import {
   HistoricalBalanceRepository,
   NFTPriceRepository,
   NounsVotingPowerRepository,
+  TORNVotingPowerRepository,
   TokenRepository,
   TransfersRepository,
   TreasuryRepository,
@@ -180,7 +182,7 @@ if (!daoClient) {
 }
 
 const pgClient = drizzle(env.DATABASE_URL, {
-  schema,
+  schema: { ...schema, ...offchainSchema },
   casing: "snake_case",
 });
 
@@ -188,6 +190,12 @@ const pgGeneralClient = drizzle(env.DATABASE_URL, {
   schema: generalSchema,
   casing: "snake_case",
 });
+
+await migrate(pgGeneralClient, {
+  migrationsFolder: "./drizzle",
+  migrationsSchema: "general",
+});
+logger.info("database migrations completed");
 
 health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
 
@@ -229,7 +237,9 @@ const votingPowerService = wrapWithTracing(
   new VotingPowerService(
     env.DAO_ID === DaoIdEnum.NOUNS || env.DAO_ID === DaoIdEnum.LIL_NOUNS
       ? wrapWithTracing(new NounsVotingPowerRepository(pgClient))
-      : votingPowerRepo,
+      : env.DAO_ID === DaoIdEnum.TORN
+        ? wrapWithTracing(new TORNVotingPowerRepository(pgClient))
+        : votingPowerRepo,
     votingPowerRepo,
   ),
 );
@@ -389,32 +399,28 @@ if (env.DAO_ID === DaoIdEnum.ENS) {
   revenue(app, revenueDuneClient);
 }
 
-if (daoClient.supportOffchainData()) {
-  const pgUnifiedClient = drizzle(env.DATABASE_URL, {
-    schema: { ...schema, ...offchainSchema },
-    casing: "snake_case",
-  });
+const supportOffchain = daoClient.supportOffchainData();
+const offchainProposalsRepo = wrapWithTracing(
+  new OffchainProposalRepository(pgClient),
+);
+const offchainVotesRepo = wrapWithTracing(new OffchainVoteRepository(pgClient));
+offchainProposals(
+  app,
+  wrapWithTracing(new OffchainProposalsService(offchainProposalsRepo)),
+  supportOffchain,
+);
+offchainVotes(
+  app,
+  wrapWithTracing(new OffchainVotesService(offchainVotesRepo)),
+  supportOffchain,
+);
 
-  const offchainProposalsRepo = wrapWithTracing(
-    new OffchainProposalRepository(pgUnifiedClient),
-  );
-  const offchainVotesRepo = wrapWithTracing(
-    new OffchainVoteRepository(pgUnifiedClient),
-  );
-  offchainProposals(
-    app,
-    wrapWithTracing(new OffchainProposalsService(offchainProposalsRepo)),
-  );
-  offchainVotes(
-    app,
-    wrapWithTracing(new OffchainVotesService(offchainVotesRepo)),
-  );
-
-  const offchainNonVotersRepo = new OffchainNonVotersRepositoryImpl(
-    pgUnifiedClient,
-  );
-  offchainNonVoters(app, new OffchainNonVotersService(offchainNonVotersRepo));
-}
+const offchainNonVotersRepo = new OffchainNonVotersRepositoryImpl(pgClient);
+offchainNonVoters(
+  app,
+  wrapWithTracing(new OffchainNonVotersService(offchainNonVotersRepo)),
+  supportOffchain,
+);
 
 serve(
   {

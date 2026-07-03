@@ -197,13 +197,14 @@ describe("ProposalsService", () => {
     });
 
     it("should map QUEUED to QUEUED, PENDING and ACTIVE for DB query", async () => {
+      // TORN derives QUEUED from a stored ACTIVE row and Azorius (SHU) from
+      // PENDING/ACTIVE rows (no queue event), so both must be candidates;
+      // QUEUED covers governors that store it.
       await service.getProposals({
         ...DEFAULT_REQ,
         status: [ProposalStatus.QUEUED],
       });
 
-      // QUEUED is persisted for OZ governors but computed from PENDING/ACTIVE
-      // rows for Azorius, so the DB query must cover both
       expect(repo.lastStatusArg).toEqual([
         ProposalStatus.QUEUED,
         ProposalStatus.PENDING,
@@ -211,15 +212,16 @@ describe("ProposalsService", () => {
       ]);
     });
 
-    it("should map PENDING_EXECUTION to QUEUED, PENDING and ACTIVE for DB query", async () => {
+    it("should map PENDING_EXECUTION to PENDING_EXECUTION, QUEUED, PENDING and ACTIVE for DB query", async () => {
+      // PENDING_EXECUTION is computed from QUEUED rows (OZ), ACTIVE rows
+      // (TORN) or PENDING/ACTIVE rows (Azorius)
       await service.getProposals({
         ...DEFAULT_REQ,
         status: [ProposalStatus.PENDING_EXECUTION],
       });
 
-      // PENDING_EXECUTION is never persisted: it is computed from QUEUED rows
-      // (OZ) or PENDING/ACTIVE rows (Azorius)
       expect(repo.lastStatusArg).toEqual([
+        ProposalStatus.PENDING_EXECUTION,
         ProposalStatus.QUEUED,
         ProposalStatus.PENDING,
         ProposalStatus.ACTIVE,

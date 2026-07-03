@@ -445,6 +445,7 @@ export const GovernanceSection = () => {
               onValueChange={(value) =>
                 setSourceFilter(value as ProposalSourceFilter)
               }
+              aria-label="Proposal source"
               className="w-[150px] lg:w-[248px]"
             />
           )}
@@ -489,13 +490,15 @@ export const GovernanceSection = () => {
                       key={draft.id}
                       draft={draft}
                       onEdit={(id) =>
-                        router.push(`${basePath}/proposals/new?draftId=${id}`)
+                        router.push(
+                          `${basePath}/proposals/new?draftId=${id}&view=editor`,
+                        )
                       }
                       onDelete={(id) => setDraftToDelete(id)}
                       onShare={async (id) => {
                         const copied = await copyDraftShareUrl(basePath, id);
                         if (copied) {
-                          showCustomToast("Share link copied", "success");
+                          showCustomToast("URL copied to clipboard", "success");
                         } else {
                           showCustomToast("Could not copy link", "error");
                         }

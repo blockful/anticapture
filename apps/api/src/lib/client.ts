@@ -14,6 +14,7 @@ import {
   SHUClient,
   AAVEClient,
   FLUIDClient,
+  TORNClient,
 } from "@/clients";
 
 import { CONTRACT_ADDRESSES } from "./constants";
@@ -83,6 +84,10 @@ export function getClient<
     }
     case DaoIdEnum.AAVE: {
       return new AAVEClient(client);
+    }
+    case DaoIdEnum.TORN: {
+      const { governor } = CONTRACT_ADDRESSES[daoId];
+      return new TORNClient(client, governor.address);
     }
     default:
       return null;

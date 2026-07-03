@@ -27,9 +27,10 @@ export const AttackProfitabilitySection = ({
   attackProfitability: AttackProfitabilityConfig;
 }) => {
   const defaultDays = TimeInterval.ONE_YEAR;
+  const defaultCostMetric = daoId === "TORN" ? "Locked" : "Delegated";
   const [days, setDays] = useState<TimeInterval>(defaultDays);
   const [treasuryMetric, setTreasuryMetric] = useState<string>(`Non-${daoId}`);
-  const [costMetric, setCostMetric] = useState<string>("Delegated");
+  const [costMetric, setCostMetric] = useState<string>(defaultCostMetric);
   const [dropdownValue, setDropdownValue] = useState<Option>({
     value: "usd",
     label: "USD",

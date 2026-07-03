@@ -46,10 +46,10 @@ export class ProposalsService {
    * These statuses are computed at read time from PENDING/ACTIVE rows:
    * - ACTIVE, DEFEATED, SUCCEEDED → stored as PENDING or ACTIVE in DB
    * - EXPIRED, NO_QUORUM → stored as ACTIVE in DB (Azorius proposals)
-   * - QUEUED → persisted for OZ governors, computed from PENDING/ACTIVE rows
-   *   for Azorius (timelock window)
-   * - PENDING_EXECUTION → computed from QUEUED rows (OZ) or PENDING/ACTIVE
-   *   rows (Azorius), never persisted
+   * - QUEUED, PENDING_EXECUTION → stored QUEUED for governors with a queue
+   *   event, but derived at read time from ACTIVE rows for TORN and from
+   *   PENDING/ACTIVE rows for Azorius/SHU (no queue event), so include those
+   *   as candidates too.
    */
   private prepareStatusForDatabase(statusArray: string[]): string[] {
     const mappedStatuses = statusArray.flatMap((status) => {
@@ -60,11 +60,16 @@ export class ProposalsService {
           ProposalStatus.QUEUED,
         ];
       }
-      if (
-        status === ProposalStatus.QUEUED ||
-        status === ProposalStatus.PENDING_EXECUTION
-      ) {
+      if (status === ProposalStatus.QUEUED) {
         return [
+          ProposalStatus.QUEUED,
+          ProposalStatus.PENDING,
+          ProposalStatus.ACTIVE,
+        ];
+      }
+      if (status === ProposalStatus.PENDING_EXECUTION) {
+        return [
+          ProposalStatus.PENDING_EXECUTION,
           ProposalStatus.QUEUED,
           ProposalStatus.PENDING,
           ProposalStatus.ACTIVE,

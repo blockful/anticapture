@@ -11,6 +11,10 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
 
+import { rateLimitMiddleware } from "./auth/rate-limit";
+import { tokenAuthMiddleware } from "./auth/token-auth";
+import { AuthfulClient } from "./auth/authful-client";
+import { usageMiddleware } from "./auth/usage";
 import { config } from "./config";
 import { CircuitOpenError } from "./shared/circuit-breaker";
 import { createRedisClient } from "./cache/redis";
@@ -48,30 +52,59 @@ app.use("*", cors({ origin: "*" }));
 app.use("*", requestLogger());
 app.use("*", metricsMiddleware());
 
+// Protect the public /metrics endpoint with a shared bearer so only our
+// Prometheus scraper can read it. Registered before the route handler so the
+// guard runs first; skipped entirely when GATEFUL_METRICS_TOKEN is unset (local dev).
+if (config.metricsToken) {
+  app.use("/metrics", bearerAuth({ token: config.metricsToken }));
+}
+
 app.get("/metrics", async (c) => {
   const { body, contentType } = await collectPrometheusMetrics(exporter);
   return c.body(body, 200, { "Content-Type": contentType });
 });
 
-if (config.blockfulApiToken) {
-  const requireBearerAuth = bearerAuth({ token: config.blockfulApiToken });
+logger.info(
+  config.metricsToken
+    ? "metrics endpoint protected by bearer token"
+    : "metrics endpoint is unauthenticated (GATEFUL_METRICS_TOKEN unset)",
+);
 
-  app.use("*", async (c, next) => {
-    if (
-      c.req.path === "/docs" ||
-      c.req.path === "/docs/json" ||
-      c.req.path === "/health" ||
-      c.req.path === "/metrics"
-    ) {
-      await next();
-      return;
-    }
+const PUBLIC_PATHS = new Set(["/docs", "/docs/json", "/health", "/metrics"]);
 
-    return requireBearerAuth(c, next);
-  });
+const redis = config.redisUrl ? createRedisClient(config.redisUrl) : undefined;
+
+// Fail closed: without a configured token service, every DAO/relayer route
+// would be public. Refuse to start unless auth is explicitly opted out via
+// GATEFUL_AUTH_DISABLED (local dev only).
+if (!config.tokenService && !config.authDisabled) {
+  throw new Error(
+    "Per-tenant auth is not configured (TOKEN_SERVICE_URL unset). Set it, or set GATEFUL_AUTH_DISABLED=true to run without auth (local dev only).",
+  );
 }
-if (config.redisUrl) {
-  const redis = createRedisClient(config.redisUrl);
+
+if (config.tokenService) {
+  const authfulClient = new AuthfulClient(
+    config.tokenService.url,
+    config.tokenService.apiKey,
+  );
+
+  app.use(
+    "*",
+    tokenAuthMiddleware({
+      client: authfulClient,
+      cache: redis,
+      publicPaths: PUBLIC_PATHS,
+    }),
+  );
+  // Usage is registered before rate limiting so its `finally` still counts
+  // requests that the rate limiter rejects with 429.
+  app.use("*", usageMiddleware(config.daoApis));
+  app.use("*", rateLimitMiddleware(redis));
+
+  logger.info("per-tenant token auth enabled (Authful)");
+}
+if (redis) {
   app.use("*", cacheMiddleware(redis, config.daoApis));
 }
 
@@ -88,7 +121,13 @@ logger.info(
 const registry = new CircuitBreakerRegistry(config.circuitBreaker);
 
 // OpenAPI routes
-health(app, registry);
+health(app, registry, {
+  daoApis: config.daoApis,
+  daoRelayers: config.daoRelayers,
+  addressEnrichmentUrl: config.addressEnrichmentUrl,
+  tokenServiceUrl: config.tokenService?.url,
+  commitSha: config.commitSha,
+});
 daoHealth(app, config.daoApis, registry);
 addressEnrichment(app, config.addressEnrichmentUrl, registry);
 

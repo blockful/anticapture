@@ -10,7 +10,7 @@ export const useActivityFeed = ({
   daoId,
   filters,
 }: {
-  daoId: FeedEventsPathParams["dao"];
+  daoId: string;
   filters: FeedEventsQueryParams;
 }) => {
   const {
@@ -23,7 +23,7 @@ export const useActivityFeed = ({
     refetch,
     isFetching,
   } = useFeedEventsInfinite(
-    daoId,
+    daoId as FeedEventsPathParams["dao"],
     {
       limit: filters.limit,
       orderBy: filters.orderBy,

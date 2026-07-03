@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-USE_RAILWAY=false
+# Per-service railway toggles. Default: everything local; opt into railway per service.
+RW_API=false
+RW_GATEFUL=false
 RUN_INDEXER=false
 DEBUG_API=false
 DAO_NAME=""
@@ -9,7 +11,9 @@ DAO_NAME=""
 # Parse arguments
 for arg in "$@"; do
   case "$arg" in
-    --rw) USE_RAILWAY=true ;;
+    --rw) RW_API=true; RW_GATEFUL=true ;;   # both services via railway
+    --rw-api) RW_API=true ;;                # API via railway (.env fallback)
+    --rw-gateful) RW_GATEFUL=true ;;        # gateful via railway
     --indexer) RUN_INDEXER=true ;;
     --debug-api) DEBUG_API=true ;;
     *) DAO_NAME="$arg" ;;
@@ -31,6 +35,7 @@ dao_id_for() {
     uniswap)  echo "uni" ;;
     gitcoin)  echo "gtc" ;;
     scroll)   echo "scr" ;;
+    tornado)  echo "torn" ;;
     shutter)  echo "shu" ;;
     compound) echo "comp" ;;
     *)        echo "$1" ;;
@@ -132,19 +137,9 @@ start_gateful() {
 }
 
 start_relayer() {
-  if [ -z "$DAO_NAME" ]; then
-    log "Skipping optional Relayer (no DAO selected)"
-    return 1
-  fi
-  local service="$(echo "$DAO_NAME" | tr '[:upper:]' '[:lower:]')-relayer"
-  log "Starting optional Relayer ($service)..."
-  # Always run through `railway run`; if the service doesn't exist it simply
-  # fails to come up and wait_for_optional_port lets the stack continue.
-  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s "$service" pnpm relayer dev &
-  if wait_for_optional_port "$PORT_RELAYER" "Relayer"; then
-    return 0
-  fi
-  return 1
+  export DAO_RELAYER_ENS="http://localhost:${PORT_RELAYER}"
+  run_with_prefix "$C_RELAYER" "📡 relayer" "" "" railway run -e dev -s ens-relayer pnpm relayer dev &
+  wait_for_port "$PORT_RELAYER" "Relayer"
 }
 
 if [ "${BASH_SOURCE[0]}" != "$0" ]; then
@@ -160,7 +155,7 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-# Wrap a command with `railway run` for env injection when --rw flag is set
+# Wrap gateful with `railway run` for env injection when its railway toggle is set
 railway_run() {
   local -a overrides=()
   while [[ "${1:-}" == *=* ]]; do
@@ -170,7 +165,7 @@ railway_run() {
 
   local service=$1
   shift
-  if [ "$USE_RAILWAY" = true ]; then
+  if [ "$RW_GATEFUL" = true ]; then
     log "railway_run: railway run -e dev -s $service $*"
     railway run -e dev -s "$service" "$@"
   else
@@ -226,7 +221,11 @@ if [ "$DEBUG_API" = true ] && [ "$RUN_API" = true ]; then
   export "DAO_API_${DAO_ID_UPPER}=http://localhost:${PORT_API}"
 elif [ "$RUN_API" = true ]; then
   log "Starting API for $DAO_NAME..."
-  run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_NAME}-api" pnpm api dev -- "$DAO_NAME" &
+  if [ "$RW_API" = true ]; then
+    run_with_prefix "$C_API" "🐙 api" "" "" railway_run_api "${DAO_NAME}-api" pnpm api dev -- "$DAO_NAME" &
+  else
+    run_with_prefix "$C_API" "🐙 api" "" "" pnpm api dev -- "$DAO_NAME" &
+  fi
 
   wait_for_port "$PORT_API" "API"
   DAO_ID_UPPER=$(echo "$DAO_ID" | tr '[:lower:]' '[:upper:]')
@@ -267,22 +266,18 @@ if [ "$RUN_API" = true ]; then
   ) &
 fi
 
-# 5. Relayer (optional; only available for a few DAOs — do not block the rest of the stack)
-RELAYER_AVAILABLE=false
-if start_relayer; then
-  RELAYER_AVAILABLE=true
-fi
+# 5. Relayer (only available for ENS)
+start_relayer
 
 # 6. Gateful
 start_gateful
 
 # 7. Clients — codegen + build watch
-export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
+export ANTICAPTURE_API_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting REST Client (silent, errors only)..."
 run_errors_only "$C_CODEGEN" "🤝 client" pnpm client dev &
 
 # 8. Dashboard
-export NEXT_PUBLIC_GATEFUL_URL="http://localhost:${PORT_GATEFUL}"
 log "Starting Dashboard..."
 run_with_prefix "$C_DASHBOARD" "📺 dashboard" "" "" pnpm dashboard dev &
 
@@ -300,11 +295,7 @@ else
   printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
 fi
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
-if [ "$RELAYER_AVAILABLE" = true ]; then
-  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
-else
-  printf "  ${C_RELAYER}📡 Relayer${C_RESET}   skipped (optional)\n"
-fi
+printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
 printf "  ${C_CODEGEN}🤝 REST Client${C_RESET}    codegen + build watch\n"
 printf "  ${C_DASHBOARD}📺 Dashboard${C_RESET} http://localhost:${PORT_DASHBOARD}\n"
 echo ""

@@ -7,6 +7,11 @@ export const cacheRequestTotal = meter.createCounter("cache_requests_total", {
     "Total number of cache lookups, labelled by result (hit/miss) and route",
 });
 
+export const tenantRequestTotal = meter.createCounter("tenant_requests_total", {
+  description:
+    "Authenticated requests per tenant, labelled by tenant and normalized route",
+});
+
 export const httpRequestDuration = meter.createHistogram(
   "http_server_request_duration_seconds",
   {

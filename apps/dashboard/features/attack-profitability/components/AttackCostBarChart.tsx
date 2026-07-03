@@ -160,7 +160,7 @@ export const AttackCostBarChart = ({
           ]),
       {
         id: "delegatedSupply",
-        name: "Delegated Supply",
+        name: daoId === "TORN" ? "Locked Supply" : "Delegated Supply",
         value: formatValue(
           Number(
             formatUnits(
@@ -230,6 +230,7 @@ export const AttackCostBarChart = ({
     averageTurnout.data?.currentAverageTurnout,
     daoTopTokenHolderExcludingTheDao?.balance,
     daoConfig.decimals,
+    daoId,
   ]);
 
   const prevCsvRef = useRef<string>("");

@@ -44,6 +44,7 @@ export class DuneProvider implements TreasuryProvider {
     if (cached !== null) return filterWithFallback(cached, cutoffTimestamp);
 
     try {
+      logger.info({ cutoffTimestamp }, "fetching treasury data from Dune");
       const response = await this.client.get<DuneResponse>("/", {
         headers: {
           "X-Dune-API-Key": this.apiKey,

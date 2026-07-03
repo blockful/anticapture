@@ -51,7 +51,6 @@ export const FilterBox = <T,>({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <ButtonFilter
-          onClick={() => setIsOpen(!isOpen)}
           isOpen={isOpen}
           hasFilters={isActive}
           className={className}

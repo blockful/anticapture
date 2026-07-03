@@ -1,4 +1,87 @@
+import type { Page } from "playwright/test";
+
 import { test, expect } from "./fixtures";
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+/**
+ * Scroll every table overflow container to its bottom. The infinite-scroll
+ * sentinel is a zero-height node at the end of the table body, so targeting it
+ * with scrollIntoViewIfNeeded is unreliable in CI; driving the scroll container
+ * to the bottom deterministically brings the sentinel within the observer's
+ * rootMargin and fires onLoadMore.
+ */
+const scrollTablesToBottom = (page: Page) =>
+  page.evaluate(() => {
+    document.querySelectorAll<HTMLElement>("div").forEach((el) => {
+      const { overflowY } = getComputedStyle(el);
+      if (
+        (overflowY === "auto" || overflowY === "scroll") &&
+        el.querySelector("table")
+      ) {
+        el.scrollTop = el.scrollHeight;
+      }
+    });
+  });
+
+/**
+ * Assert that scrolling to the bottom of the table triggers the next page.
+ *
+ * Both tables paginate via kubb infinite hooks that map the page cursor to a
+ * `skip` query param; the first page is skip=0, so a request with skip > 0 is
+ * the load-more behavior itself (and fires the moment the sentinel intersects,
+ * before any response). Asserting the request — rather than a rendered row
+ * count — avoids flakiness from a refetch briefly collapsing the body.
+ *
+ * If the list renders an error state, this fails instead of treating the
+ * backend error as an acceptable test outcome.
+ */
+const assertLoadsNextPage = async (page: Page, endpoint: string) => {
+  const nextPageRequest = page
+    .waitForRequest(
+      (req) => req.url().includes(endpoint) && /[?&]skip=[1-9]/.test(req.url()),
+      { timeout: 15_000 },
+    )
+    .then(() => "request" as const);
+  const listErrored = page
+    .getByText(/we ran into a hiccup/i)
+    .first()
+    .waitFor({ state: "visible", timeout: 15_000 })
+    .then(() => "error" as const);
+
+  await scrollTablesToBottom(page);
+
+  const outcome = await Promise.race([nextPageRequest, listErrored]);
+  expect(outcome, "holders/delegates list rendered an error state").toBe(
+    "request",
+  );
+};
+
+const applyAddressFilter = async (
+  page: Page,
+  addressTrigger: ReturnType<Page["locator"]>,
+) => {
+  const popover = page
+    .locator(
+      '[role="dialog"][data-state="open"]:has(input[placeholder="Paste the address"])',
+    )
+    .first();
+
+  await expect(async () => {
+    await addressTrigger.click();
+    await expect(popover).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 15_000 });
+
+  const input = popover.getByPlaceholder("Paste the address");
+  await expect(input).toBeEditable({ timeout: 5_000 });
+  await input.fill(ZERO_ADDRESS);
+  await expect(input).toHaveValue(ZERO_ADDRESS);
+
+  const popoverApply = popover.getByRole("button", { name: /Apply/ });
+  // The popover may render off-screen in the test viewport. Click via DOM
+  // dispatch to bypass Playwright's viewport actionability check.
+  await popoverApply.evaluate((el: HTMLElement) => el.click());
+};
 
 test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
   test("renders Holders & Delegates heading", async ({ goto, page }) => {
@@ -84,19 +167,25 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       .catch(() => undefined);
     const rows = page.locator("tbody tr");
     const rowCount = await rows.count();
-    // Skip if no data or only an error/empty-state row
-    if (rowCount < 2) return;
-    const cells = rows.first().locator("td");
-    const cellCount = await cells.count();
-    if (cellCount < 3) return;
-    await cells.nth(2).click({ force: true });
-    // Drawer should open (URL gets drawerAddress param). If the live API
-    // returned an error after our pre-click wait, treat as data-dependent skip.
-    try {
-      await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
-    } catch {
+    // Skip only when there is no data; visible load errors are failures.
+    if (rowCount < 2) {
+      await expect(
+        page.getByText(/we ran into a hiccup/i).first(),
+        "holders table rendered an error state",
+      ).toBeHidden();
       return;
     }
+    const cells = rows.first().locator("td");
+    const cellCount = await cells.count();
+    if (cellCount < 3) {
+      await expect(
+        page.getByText(/we ran into a hiccup/i).first(),
+        "holders table rendered an error state",
+      ).toBeHidden();
+      return;
+    }
+    await cells.nth(2).click({ force: true });
+    await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
     // Check drawer tab labels
     await expect(
       page.locator('[role="tab"]').filter({ hasText: "Delegation History" }),
@@ -139,16 +228,24 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       .catch(() => undefined);
     const rows = page.locator("tbody tr");
     const rowCount = await rows.count();
-    if (rowCount < 2) return;
-    const cells = rows.first().locator("td");
-    const cellCount = await cells.count();
-    if (cellCount < 3) return;
-    await cells.nth(2).click({ force: true });
-    try {
-      await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
-    } catch {
+    if (rowCount < 2) {
+      await expect(
+        page.getByText(/we ran into a hiccup/i).first(),
+        "delegates table rendered an error state",
+      ).toBeHidden();
       return;
     }
+    const cells = rows.first().locator("td");
+    const cellCount = await cells.count();
+    if (cellCount < 3) {
+      await expect(
+        page.getByText(/we ran into a hiccup/i).first(),
+        "delegates table rendered an error state",
+      ).toBeHidden();
+      return;
+    }
+    await cells.nth(2).click({ force: true });
+    await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
     await expect(
       page.locator('[role="tab"]').filter({ hasText: "Vote Composition" }),
     ).toBeVisible({ timeout: 10_000 });
@@ -168,31 +265,10 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const rows = page.locator("tbody tr");
     await expect(rows.first()).toBeVisible({ timeout: 15_000 });
     const initialCount = await rows.count();
-    // Page size is 20. Need at least one full page to test pagination.
+    // Page size is 20; without a full first page there is no next page to load.
     if (initialCount < 20) return;
-    // Trigger scroll on the table's overflow container; assert scrollTop moves.
-    // A row-count assertion is unreliable due to virtualization and refetching
-    // in the live dev environment.
-    const scrolled = await page.evaluate(() => {
-      const containers = document.querySelectorAll<HTMLElement>("div");
-      for (const el of Array.from(containers)) {
-        const style = getComputedStyle(el);
-        if (
-          (style.overflowY === "auto" || style.overflowY === "scroll") &&
-          el.querySelector("table") &&
-          el.scrollHeight > el.clientHeight
-        ) {
-          el.scrollTop = el.scrollHeight;
-          return el.scrollTop > 0;
-        }
-      }
-      return false;
-    });
-    // If we couldn't find a scrollable container with overflow, treat as data-dependent.
-    if (!scrolled) return;
-    // Allow the page to settle after the scroll; the test passes as long as
-    // the scroll completed without throwing.
-    await page.waitForTimeout(500);
+    // Token holders paginate via the balances endpoint.
+    await assertLoadsNextPage(page, "/balances");
   });
 
   test("infinite scroll loads more delegates when available", async ({
@@ -211,12 +287,10 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     const rows = page.locator("tbody tr");
     await expect(rows.first()).toBeVisible({ timeout: 15_000 });
     const initialCount = await rows.count();
+    // Page size is 20; without a full first page there is no next page to load.
     if (initialCount < 20) return;
-    await rows.last().scrollIntoViewIfNeeded();
-    await expect(async () => {
-      const newCount = await rows.count();
-      expect(newCount).toBeGreaterThan(initialCount);
-    }).toPass({ timeout: 15_000 });
+    // Delegates paginate via the voting-powers endpoint.
+    await assertLoadsNextPage(page, "/voting-powers");
   });
 
   test("address filter popover accepts input on Token Holders", async ({
@@ -240,23 +314,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       .locator("button")
       .first();
     if ((await addressTrigger.count()) === 0) return; // no popover trigger, skip
-    const input = page.getByPlaceholder("Paste the address");
-    // Retry the trigger click until the popover opens; the click can be
-    // dropped if React hasn't hydrated the Radix Popover yet.
-    await expect(async () => {
-      await addressTrigger.click();
-      await expect(input).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 15_000 });
-    await input.fill("0x0000000000000000000000000000000000000000");
-    const popover = page
-      .locator(
-        '[role="dialog"]:visible, [data-state="open"]:has(input[placeholder="Paste the address"])',
-      )
-      .first();
-    const popoverApply = popover.getByRole("button", { name: /Apply/ });
-    // The popover may render off-screen in the test viewport. Click via DOM
-    // dispatch to bypass Playwright's viewport actionability check.
-    await popoverApply.evaluate((el: HTMLElement) => el.click());
+    await applyAddressFilter(page, addressTrigger);
     await expect(page).toHaveURL(/address=/, { timeout: 10_000 });
   });
 
@@ -394,21 +452,7 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       .locator("button")
       .first();
     if ((await addressTrigger.count()) === 0) return;
-    const input = page.getByPlaceholder("Paste the address");
-    await expect(async () => {
-      await addressTrigger.click();
-      await expect(input).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 15_000 });
-    await input.fill("0x0000000000000000000000000000000000000000");
-    const popover = page
-      .locator(
-        '[role="dialog"]:visible, [data-state="open"]:has(input[placeholder="Paste the address"])',
-      )
-      .first();
-    const popoverApply = popover.getByRole("button", { name: /Apply/ });
-    // The popover may render off-screen in the test viewport. Click via DOM
-    // dispatch to bypass Playwright's viewport actionability check.
-    await popoverApply.evaluate((el: HTMLElement) => el.click());
+    await applyAddressFilter(page, addressTrigger);
     await expect(page).toHaveURL(/address=/, { timeout: 10_000 });
   });
 });

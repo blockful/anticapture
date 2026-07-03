@@ -3,6 +3,7 @@ import type { Context } from "hono";
 import { proxy as honoProxy } from "hono/proxy";
 
 import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
+import { stripAuthorization } from "./strip-authorization.js";
 
 const PROXY_TIMEOUT_MS = 30000;
 
@@ -38,6 +39,8 @@ export function relayerProxy(
     return registry.get(`relayer:${dao}`).execute(async () => {
       const res = await honoProxy(url.toString(), {
         ...c.req,
+        // Strip the per-tenant bearer so it is never leaked to relayers.
+        headers: stripAuthorization(c.req.raw.headers),
         signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
       });
       if (res.status >= 500) {

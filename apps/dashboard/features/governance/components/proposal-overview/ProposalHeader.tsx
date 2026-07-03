@@ -10,6 +10,7 @@ import { OffchainVoteLabelChip } from "@/features/governance/components/proposal
 import { BadgeStatus, Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
@@ -118,10 +119,22 @@ const ProposalHeaderAction = ({
       return null;
     }
 
+    const canChangeVote =
+      daoConfigByDaoId[daoIdEnum]?.daoOverview.rules?.changeVote ?? false;
+
     return (
       <div className="hidden items-center gap-4 lg:flex">
         <div className="bg-secondary ml-4 h-7 w-px shrink-0" />
         <VotedBadge vote={Number(supportValue)} />
+        {isOngoing && canChangeVote && (
+          <Button
+            className="hidden lg:flex"
+            onClick={() => setIsVotingModalOpen(true)}
+          >
+            Change your vote
+            <ArrowRight className="size-3.5" />
+          </Button>
+        )}
       </div>
     );
   }

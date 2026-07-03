@@ -1,22 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import {
-  feedEventsPathParamsDaoEnum,
-  type FeedEventsPathParams,
-} from "@anticapture/client";
 import { ActivityFeedSection } from "@/features/feed";
-
-type Props = {
-  params: Promise<{ daoId: string }>;
-};
-
-const supportedDaos: FeedEventsPathParams["dao"][] = Object.values(
-  feedEventsPathParamsDaoEnum,
-);
-
-const isSupportedDao = (value: string): value is FeedEventsPathParams["dao"] =>
-  supportedDaos.includes(value as FeedEventsPathParams["dao"]);
+import daoConfigByDaoId from "@/shared/dao-config";
+import { toDaoIdEnum } from "@/shared/types/daos";
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
@@ -49,11 +36,17 @@ export default async function ActivityFeedPage({
   params: Promise<{ daoId: string }>;
 }) {
   const { daoId } = await params;
+  const daoIdEnum = toDaoIdEnum(daoId);
   const feedDaoId = daoId.toLowerCase();
+  const daoConfig = daoIdEnum ? daoConfigByDaoId[daoIdEnum] : undefined;
 
-  if (!isSupportedDao(feedDaoId)) {
+  if (!daoConfig?.activityFeed) {
     redirect(`/${daoId}`);
   }
 
   return <ActivityFeedSection feedDaoId={feedDaoId} />;
 }
+
+type Props = {
+  params: Promise<{ daoId: string }>;
+};

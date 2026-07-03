@@ -1,8 +1,8 @@
 "use client";
 
 import { Check, User2Icon, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { Account } from "viem";
+import { useEffect, useMemo, useState } from "react";
+import type { Account, Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
@@ -22,7 +22,8 @@ import {
   useGaslessEligibility,
   useRelayerConfig,
 } from "@/shared/hooks/useGaslessRelayer";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { useDelegators } from "@/shared/hooks/useDelegators";
+import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface VotingModalProps {
@@ -52,6 +53,10 @@ export const VotingModal = ({
 
   const { isMobile } = useScreenSize();
 
+  // Tornado Cash's delegated vote path is binary only, with no abstain.
+  const isTorn = daoId === DaoIdEnum.TORN;
+  const supportsAbstain = !isTorn;
+
   // Parse user's voting power to BigInt for calculations
   const userVotingPowerBigInt = BigInt(rawVotingPower || "0");
 
@@ -76,8 +81,11 @@ export const VotingModal = ({
   const simulatedTotalVotes =
     simulatedForVotes + simulatedAgainstVotes + simulatedAbstainVotes;
 
-  // Calculate simulated quorum votes (for + abstain only, against votes don't count toward quorum)
-  const simulatedQuorumVotes = simulatedForVotes + simulatedAbstainVotes;
+  // Calculate simulated quorum votes. Standard governors count for + abstain;
+  // Tornado counts for + against (see TORNClient.calculateQuorum).
+  const simulatedQuorumVotes = isTorn
+    ? simulatedForVotes + simulatedAgainstVotes
+    : simulatedForVotes + simulatedAbstainVotes;
 
   const userReadableQuorumVotes = formatNumberUserReadable(
     Number(formatUnits(simulatedQuorumVotes || BigInt(0), decimals)),
@@ -105,6 +113,34 @@ export const VotingModal = ({
 
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const { delegators: tornDelegators, loading: isLoadingTornDelegators } =
+    useDelegators({
+      daoId,
+      address: address ?? "",
+      orderBy: "amount",
+      orderDirection: "desc",
+      limit: 1000,
+      enabled: isOpen && isTorn && !!address,
+    });
+
+  const tornDelegatedVoteAddresses = useMemo(() => {
+    if (!isTorn || !address) return undefined;
+
+    const seen = new Set<string>();
+    const addresses = tornDelegators
+      .map((delegator) => delegator.delegatorAddress as Address)
+      .filter((delegatorAddress) => {
+        const normalized = delegatorAddress.toLowerCase();
+        if (seen.has(normalized)) return false;
+        seen.add(normalized);
+        return true;
+      });
+
+    // Solo voter (no delegators): send an empty `from`. The TORN governor casts
+    // the voter's own balance separately and reverts on self-delegation, so the
+    // voter's own address must never appear in this list.
+    return addresses;
+  }, [address, isTorn, tornDelegators]);
 
   const { minVotingPower } = useRelayerConfig(daoId);
   const { isEligible: isGaslessEligible, remaining: voteRemaining } =
@@ -165,6 +201,7 @@ export const VotingModal = ({
       comment,
       minVotingPower,
       isGaslessEligible,
+      tornDelegatedVoteAddresses,
     );
     setIsLoading(false);
     if (hash) {
@@ -178,6 +215,7 @@ export const VotingModal = ({
     !vote ||
     !walletClient ||
     isLoading ||
+    (isTorn && isLoadingTornDelegators) ||
     !rawVotingPower ||
     rawVotingPower === "0";
 
@@ -248,14 +286,16 @@ export const VotingModal = ({
             />
 
             {/* Abstain vote  */}
-            <VoteOption
-              vote="abstain"
-              optionPercentage={abstainPercentage}
-              votingPower={simulatedAbstainVotes.toString()}
-              onChange={setVote}
-              checked={vote === "abstain"}
-              decimals={decimals}
-            />
+            {supportsAbstain && (
+              <VoteOption
+                vote="abstain"
+                optionPercentage={abstainPercentage}
+                votingPower={simulatedAbstainVotes.toString()}
+                onChange={setVote}
+                checked={vote === "abstain"}
+                decimals={decimals}
+              />
+            )}
 
             <div className="border-border-default bg-surface-contrast flex items-center justify-start gap-2 border px-[10px] py-2">
               <User2Icon className="text-secondary size-3.5" />

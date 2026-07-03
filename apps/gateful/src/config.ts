@@ -3,15 +3,42 @@ import { z } from "zod";
 
 dotenv.config();
 
-const envSchema = z.object({
-  PORT: z.coerce.number().default(4001),
-  ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
-  BLOCKFUL_API_TOKEN: z.string().optional(),
-  CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
-  CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
-  CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
-  REDIS_URL: z.string().optional(),
-});
+export const envSchema = z
+  .object({
+    PORT: z.coerce.number().default(4001),
+    ADDRESS_ENRICHMENT_API_URL: z.url().optional(),
+    // Per-tenant token auth via Authful.
+    // Trim trailing slashes so a value like `https://authful/` does not produce
+    // `//validate` downstream, which Hono serves as a 404 — making Authful look
+    // unavailable for every uncached validation.
+    TOKEN_SERVICE_URL: z
+      .url()
+      .transform((url) => url.replace(/\/+$/, ""))
+      .optional(),
+    TOKEN_SERVICE_API_KEY: z.string().optional(),
+    // Explicit opt-in to run without per-tenant auth (local dev only). Without
+    // this flag, a missing TOKEN_SERVICE_URL is a hard startup error rather than
+    // silently serving every DAO/relayer route publicly (fail closed).
+    GATEFUL_AUTH_DISABLED: z
+      .string()
+      .optional()
+      .transform((v) => v === "true"),
+    // Shared bearer protecting the public `/metrics` endpoint from scraping by
+    // anyone but our Prometheus instance. Distinct from per-tenant Authful auth:
+    // the scraper is infrastructure, not a tenant, so it must not consume a
+    // tenant token or be counted in per-tenant usage. Left open when unset
+    // (local dev); set it on the public deployment. The Prometheus service reads
+    // the same variable name, so it can be wired as one shared Railway variable.
+    GATEFUL_METRICS_TOKEN: z.string().optional(),
+    CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
+    CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
+    CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
+    REDIS_URL: z.string().optional(),
+    RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
+  })
+  .refine((env) => !env.TOKEN_SERVICE_URL || !!env.TOKEN_SERVICE_API_KEY, {
+    message: "TOKEN_SERVICE_API_KEY is required when TOKEN_SERVICE_URL is set",
+  });
 
 function loadDaoMap(
   prefix: string,
@@ -39,8 +66,13 @@ const env = envSchema.parse(process.env);
 export const config = {
   port: env.PORT,
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
-  blockfulApiToken: env.BLOCKFUL_API_TOKEN,
+  tokenService: env.TOKEN_SERVICE_URL
+    ? { url: env.TOKEN_SERVICE_URL, apiKey: env.TOKEN_SERVICE_API_KEY! }
+    : undefined,
+  authDisabled: env.GATEFUL_AUTH_DISABLED,
+  metricsToken: env.GATEFUL_METRICS_TOKEN,
   redisUrl: env.REDIS_URL,
+  commitSha: env.RAILWAY_GIT_COMMIT_SHA,
   daoApis: loadDaoMap("DAO_API_"),
   daoRelayers: loadDaoMap("DAO_RELAYER_"),
   circuitBreaker: {
