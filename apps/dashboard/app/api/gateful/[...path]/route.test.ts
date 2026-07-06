@@ -6,12 +6,12 @@ const MOCK_GATEFUL_URL = "https://gateful.mock.local";
 
 describe("Gateful proxy route", () => {
   beforeEach(() => {
-    process.env.NEXT_PUBLIC_GATEFUL_URL = MOCK_GATEFUL_URL;
+    process.env.ANTICAPTURE_API_URL = MOCK_GATEFUL_URL;
     global.fetch = jest.fn();
   });
 
   afterEach(() => {
-    delete process.env.NEXT_PUBLIC_GATEFUL_URL;
+    delete process.env.ANTICAPTURE_API_URL;
   });
 
   it("forwards path segments and query params", async () => {

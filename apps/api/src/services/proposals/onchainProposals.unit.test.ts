@@ -196,6 +196,33 @@ describe("ProposalsService", () => {
       ]);
     });
 
+    it("should map QUEUED to QUEUED and ACTIVE for DB query", async () => {
+      // TORN derives QUEUED from a stored ACTIVE row (no queue event), so
+      // ACTIVE must be a candidate; QUEUED covers governors that store it.
+      await service.getProposals({
+        ...DEFAULT_REQ,
+        status: [ProposalStatus.QUEUED],
+      });
+
+      expect(repo.lastStatusArg).toEqual([
+        ProposalStatus.QUEUED,
+        ProposalStatus.ACTIVE,
+      ]);
+    });
+
+    it("should map PENDING_EXECUTION to PENDING_EXECUTION, QUEUED and ACTIVE for DB query", async () => {
+      await service.getProposals({
+        ...DEFAULT_REQ,
+        status: [ProposalStatus.PENDING_EXECUTION],
+      });
+
+      expect(repo.lastStatusArg).toEqual([
+        ProposalStatus.PENDING_EXECUTION,
+        ProposalStatus.QUEUED,
+        ProposalStatus.ACTIVE,
+      ]);
+    });
+
     it("should filter by original status after chain check", async () => {
       repo.proposals = [
         createMockProposal({ id: "1" }),

@@ -1,0 +1,401 @@
+import { ponder } from "ponder:registry";
+import {
+  accountBalance,
+  accountPower,
+  feedEvent,
+  proposalsOnchain,
+  votesOnchain,
+} from "ponder:schema";
+import { getAddress } from "viem";
+
+import { delegateChanged, updateProposalStatus } from "@/eventHandlers";
+import { ensureAccountExists } from "@/eventHandlers/shared";
+import { CONTRACT_ADDRESSES, ProposalStatus } from "@/lib/constants";
+import { DaoIdEnum } from "@/lib/enums";
+
+import { applyVotingPower, getDelegate, getLockedBalance } from "./shared";
+
+const MAX_TITLE_LENGTH = 200;
+
+/**
+ * Extracts a proposal title from a markdown description.
+ *
+ * Strategy:
+ * 1. Normalize literal `\n` sequences to real newlines (some proposers
+ *    submit descriptions with escaped newlines).
+ * 2. If the first non-empty line is an H1 (`# Title`), use it.
+ * 3. Otherwise, use the first non-empty line that is not a section header
+ *    (H2+), truncated to MAX_TITLE_LENGTH characters.
+ */
+function parseProposalTitle(description: string): string {
+  // Try JSON first — some Tornado proposals use {"title":"...","description":"..."}
+  try {
+    const parsed = JSON.parse(description) as {
+      title?: string;
+      description?: string;
+    };
+    if (parsed.title) return parsed.title;
+  } catch {
+    // Malformed pseudo-JSON is common: single quotes, missing comma between
+    // keys, or unescaped chars deeper in the description that break a full
+    // parse even though the title key itself is fine. Pull the title out
+    // directly before falling back to markdown.
+    const m = description.match(
+      /["']title["']\s*:\s*["']([\s\S]*?)["']\s*[,}]?\s*(?:["']description["']|$)/i,
+    );
+    if (m?.[1]) return m[1];
+  }
+
+  // Normalize literal "\n" (two chars) into real newlines
+  const normalized = description.replace(/\\n/g, "\n");
+  const lines = normalized.split("\n");
+
+  // Pass 1: look for an H1 among leading lines (before any content)
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (/^# /.test(trimmed)) {
+      return trimmed.replace(/^# +/, "");
+    }
+    break; // stop at first non-empty, non-H1 line
+  }
+
+  // Pass 2: no H1 found — use first non-empty, non-header line
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || /^#{1,6}\s/.test(trimmed)) continue;
+    return trimmed.length > MAX_TITLE_LENGTH
+      ? trimmed.substring(0, MAX_TITLE_LENGTH) + "..."
+      : trimmed;
+  }
+
+  return "";
+}
+
+/**
+ * Custom governance indexer for Tornado Cash DAO.
+ *
+ * Key differences from standard governors:
+ * - ProposalCreated uses timestamps (startTime/endTime) instead of block numbers
+ * - Voted event uses bool support instead of uint8
+ * - Delegation happens through the governance contract (Delegated/Undelegated events)
+ */
+export function TORNGovernorIndexer(blockTime: number) {
+  const daoId = DaoIdEnum.TORN;
+  const TORN_TOKEN_ADDRESS = getAddress(
+    CONTRACT_ADDRESSES[DaoIdEnum.TORN].token.address,
+  );
+
+  ponder.on("TORNGovernor:ProposalCreated", async ({ event, context }) => {
+    const { id, proposer, target, startTime, endTime, description } =
+      event.args;
+    const proposalIdStr = id.toString();
+
+    await ensureAccountExists(context, proposer);
+
+    const title = parseProposalTitle(description);
+
+    // Convert timestamps to synthetic block numbers for schema compat
+    const startBlock =
+      Number(event.block.number) +
+      Math.floor(
+        (Number(startTime) - Number(event.block.timestamp)) / blockTime,
+      );
+    const endBlock =
+      Number(event.block.number) +
+      Math.floor((Number(endTime) - Number(event.block.timestamp)) / blockTime);
+
+    await context.db.insert(proposalsOnchain).values({
+      id: proposalIdStr,
+      txHash: event.transaction.hash,
+      daoId,
+      proposerAccountId: getAddress(proposer),
+      targets: [getAddress(target)],
+      values: [],
+      signatures: [],
+      calldatas: [],
+      startBlock,
+      endBlock,
+      title,
+      description,
+      timestamp: event.block.timestamp,
+      logIndex: event.log.logIndex,
+      // Non-zero voting delay means a proposal can be created before its
+      // voting window opens — persist PENDING so status-filtered queries
+      // don't miss it during the pre-vote window.
+      status:
+        event.block.timestamp < startTime
+          ? ProposalStatus.PENDING
+          : ProposalStatus.ACTIVE,
+      endTimestamp: endTime,
+    });
+
+    await context.db
+      .insert(accountPower)
+      .values({
+        accountId: getAddress(proposer),
+        daoId,
+        proposalsCount: 1,
+      })
+      .onConflictDoUpdate((current) => ({
+        proposalsCount: current.proposalsCount + 1,
+      }));
+
+    // Set the proposal_id column (not ad-hoc metadata) — the API feed
+    // enrichment rebuilds title/proposer/link from the proposal row keyed
+    // by this column and ignores the metadata JSON for PROPOSAL events.
+    await context.db.insert(feedEvent).values({
+      txHash: event.transaction.hash,
+      logIndex: event.log.logIndex,
+      type: "PROPOSAL",
+      timestamp: event.block.timestamp,
+      proposalId: proposalIdStr,
+    });
+  });
+
+  /**
+   * Voted — TORN's governor lets a voter re-cast to CHANGE their vote, so the
+   * unique (voter, proposal) row must be mutable: overwrite it and move the
+   * voting power between the for/against buckets. An exact re-processing of the
+   * same log (backfill/reorg) is a no-op so tallies aren't double-counted.
+   *
+   * bool support mapped: true→1 (for), false→0 (against). No reason field.
+   */
+  ponder.on("TORNGovernor:Voted", async ({ event, context }) => {
+    const { proposalId, voter, support, votes } = event.args;
+    const proposalIdStr = proposalId.toString();
+    const supportNum = support ? 1 : 0;
+    const normalizedVoter = getAddress(voter);
+    const txHash = event.transaction.hash;
+    const timestamp = event.block.timestamp;
+    const logIndex = event.log.logIndex;
+
+    await ensureAccountExists(context, voter);
+
+    const existing = await context.db.find(votesOnchain, {
+      voterAccountId: normalizedVoter,
+      proposalId: proposalIdStr,
+    });
+
+    // Exact same log replayed during backfill/reorg — no-op.
+    if (
+      existing &&
+      existing.txHash === txHash &&
+      existing.logIndex === logIndex
+    ) {
+      return;
+    }
+
+    if (existing) {
+      // Vote change: overwrite the row and shift power from the old support
+      // bucket to the new one.
+      const prevSupport = Number(existing.support);
+      const prevVotes = existing.votingPower;
+
+      // The API feed enriches VOTE rows by joining feed_event -> votes_onchain
+      // on (txHash, logIndex). Since votes_onchain keeps a single mutable row
+      // per (voter, proposal), overwriting its key below would orphan the prior
+      // vote's feed_event (it would join to nothing and render null metadata).
+      // Drop that stale feed_event so the new one inserted below is the sole
+      // VOTE entry and always joins to the current row.
+      await context.db.delete(feedEvent, {
+        txHash: existing.txHash,
+        logIndex: existing.logIndex,
+      });
+
+      await context.db
+        .update(votesOnchain, {
+          voterAccountId: normalizedVoter,
+          proposalId: proposalIdStr,
+        })
+        .set({
+          txHash,
+          support: supportNum.toString(),
+          votingPower: votes,
+          timestamp,
+          logIndex,
+        });
+
+      await context.db
+        .update(proposalsOnchain, { id: proposalIdStr })
+        .set((current) => ({
+          againstVotes:
+            current.againstVotes -
+            (prevSupport === 0 ? prevVotes : 0n) +
+            (supportNum === 0 ? votes : 0n),
+          forVotes:
+            current.forVotes -
+            (prevSupport === 1 ? prevVotes : 0n) +
+            (supportNum === 1 ? votes : 0n),
+        }));
+
+      // A changed vote refreshes the timestamp but isn't new participation.
+      await context.db
+        .update(accountPower, { accountId: normalizedVoter })
+        .set({ lastVoteTimestamp: timestamp });
+    } else {
+      // Brand-new vote. onConflictDoNothing guards against Ponder's
+      // DelayedInsertError during batch flushing on backfill.
+      await context.db
+        .insert(votesOnchain)
+        .values({
+          txHash,
+          daoId,
+          proposalId: proposalIdStr,
+          voterAccountId: normalizedVoter,
+          support: supportNum.toString(),
+          votingPower: votes,
+          reason: "",
+          timestamp,
+          logIndex,
+        })
+        .onConflictDoNothing();
+
+      await context.db
+        .insert(accountPower)
+        .values({
+          accountId: normalizedVoter,
+          daoId,
+          votesCount: 1,
+          lastVoteTimestamp: timestamp,
+        })
+        .onConflictDoUpdate((current) => ({
+          votesCount: current.votesCount + 1,
+          lastVoteTimestamp: timestamp,
+        }));
+
+      await context.db
+        .update(proposalsOnchain, { id: proposalIdStr })
+        .set((current) => ({
+          againstVotes: current.againstVotes + (supportNum === 0 ? votes : 0n),
+          forVotes: current.forVotes + (supportNum === 1 ? votes : 0n),
+        }));
+    }
+
+    const proposal = await context.db.find(proposalsOnchain, {
+      id: proposalIdStr,
+    });
+
+    await context.db.insert(feedEvent).values({
+      txHash: event.transaction.hash,
+      logIndex: event.log.logIndex,
+      type: "VOTE",
+      value: votes,
+      timestamp: event.block.timestamp,
+      metadata: {
+        voter: normalizedVoter,
+        reason: "",
+        support: supportNum,
+        votingPower: votes,
+        proposalId: proposalIdStr,
+        title: proposal?.title ?? undefined,
+      },
+    });
+  });
+
+  ponder.on("TORNGovernor:ProposalExecuted", async ({ event, context }) => {
+    await updateProposalStatus(
+      context,
+      event.args.proposalId.toString(),
+      ProposalStatus.EXECUTED,
+      event.block.timestamp,
+      event.transaction.hash,
+    );
+  });
+
+  ponder.on("TORNGovernor:Delegated", async ({ event, context }) => {
+    const { account, to } = event.args;
+    const txHash = event.transaction.hash;
+    const timestamp = event.block.timestamp;
+    const logIndex = event.log.logIndex;
+
+    // TORN has no DelegateVotesChanged: locked TORN never moves on-chain when
+    // delegation changes, so shift the locker's voting power from its current
+    // delegate (itself if none) to the new one.
+    const lockedBalance = await getLockedBalance(context, account);
+    const prevRecipient = await getDelegate(context, account);
+    const newRecipient = getAddress(to);
+    if (lockedBalance !== 0n && prevRecipient !== newRecipient) {
+      await applyVotingPower(
+        context,
+        daoId,
+        prevRecipient,
+        -lockedBalance,
+        txHash,
+        timestamp,
+        logIndex,
+      );
+      await applyVotingPower(
+        context,
+        daoId,
+        newRecipient,
+        lockedBalance,
+        txHash,
+        timestamp,
+        logIndex,
+      );
+    }
+
+    // Look up the previous delegate from accountBalance
+    const existing = await context.db.find(accountBalance, {
+      accountId: getAddress(account),
+      tokenId: TORN_TOKEN_ADDRESS,
+    });
+    const previousDelegate = existing?.delegate ?? getAddress(account);
+
+    await delegateChanged(context, daoId, {
+      delegator: account,
+      delegate: to,
+      tokenId: TORN_TOKEN_ADDRESS,
+      previousDelegate,
+      txHash,
+      timestamp,
+      logIndex,
+      delegatorBalance: lockedBalance,
+    });
+  });
+
+  ponder.on("TORNGovernor:Undelegated", async ({ event, context }) => {
+    const { account, from } = event.args;
+    const txHash = event.transaction.hash;
+    const timestamp = event.block.timestamp;
+    const logIndex = event.log.logIndex;
+
+    // Move the locker's voting power back from `from` to itself.
+    const lockedBalance = await getLockedBalance(context, account);
+    const prevRecipient = getAddress(from);
+    const newRecipient = getAddress(account);
+    if (lockedBalance !== 0n && prevRecipient !== newRecipient) {
+      await applyVotingPower(
+        context,
+        daoId,
+        prevRecipient,
+        -lockedBalance,
+        txHash,
+        timestamp,
+        logIndex,
+      );
+      await applyVotingPower(
+        context,
+        daoId,
+        newRecipient,
+        lockedBalance,
+        txHash,
+        timestamp,
+        logIndex,
+      );
+    }
+
+    // Undelegation: delegate reverts to self, previous delegate was `from`
+    await delegateChanged(context, daoId, {
+      delegator: account,
+      delegate: account,
+      tokenId: TORN_TOKEN_ADDRESS,
+      previousDelegate: from,
+      txHash,
+      timestamp,
+      logIndex,
+      delegatorBalance: lockedBalance,
+    });
+  });
+}

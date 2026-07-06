@@ -47,6 +47,15 @@ test.describe("DAO Overview page (/ens)", () => {
     });
   });
 
+  test("hides resilience and attack exposure section when both are unavailable", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/torn");
+    await expect(page.locator("text=RESILIENCE STAGES")).toHaveCount(0);
+    await expect(page.locator("text=ATTACK EXPOSURE")).toHaveCount(0);
+  });
+
   test("shows attack profitability chart or empty state", async ({
     goto,
     page,

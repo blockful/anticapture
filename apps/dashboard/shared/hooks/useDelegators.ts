@@ -15,6 +15,7 @@ interface UseVotingPowerParams {
   orderBy?: DelegatorsQueryParamsOrderByEnumKey;
   orderDirection?: OrderDirection;
   limit?: number;
+  enabled?: boolean;
 }
 
 export const useDelegators = ({
@@ -23,6 +24,7 @@ export const useDelegators = ({
   orderBy = "amount",
   orderDirection = "desc",
   limit = 15,
+  enabled = true,
 }: UseVotingPowerParams) => {
   const {
     data,
@@ -40,7 +42,7 @@ export const useDelegators = ({
       orderDirection,
       limit,
     },
-    { query: { getNextPageParam } },
+    { query: { enabled, getNextPageParam } },
   );
 
   const delegators = useMemo(() => {

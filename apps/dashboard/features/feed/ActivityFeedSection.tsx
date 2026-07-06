@@ -3,8 +3,6 @@
 import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
-import type { FeedEventsPathParams } from "@anticapture/client";
-
 import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
 import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton";
@@ -24,11 +22,7 @@ import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { useDaoId } from "@/shared/providers/DaoIdProvider";
 import { cn } from "@/shared/utils/cn";
 
-export const ActivityFeedSection = ({
-  feedDaoId,
-}: {
-  feedDaoId: FeedEventsPathParams["dao"];
-}) => {
+export const ActivityFeedSection = ({ feedDaoId }: { feedDaoId: string }) => {
   const daoId = useDaoId();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [drawerState, setDrawerState] = useState<{

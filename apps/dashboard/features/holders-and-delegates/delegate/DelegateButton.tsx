@@ -7,25 +7,18 @@ import type { Address } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 
 import { DelegationModal } from "@/features/holders-and-delegates/delegate/DelegationModal";
+import {
+  DelegationReadAbi,
+  getDelegationReadContractConfig,
+} from "@/features/holders-and-delegates/delegate/utils/getDelegationReadContractConfig";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { BadgeStatus, Button } from "@/shared/components";
 import type {
   ButtonSize,
   ButtonVariant,
 } from "@/shared/components/design-system/buttons/types";
-import daoConfigByDaoId from "@/shared/dao-config";
 import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
 import type { DaoIdEnum } from "@/shared/types/daos";
-
-const ERC20VotesAbi = [
-  {
-    inputs: [{ internalType: "address", name: "account", type: "address" }],
-    name: "delegates",
-    outputs: [{ internalType: "address", name: "", type: "address" }],
-    stateMutability: "view",
-    type: "function",
-  },
-] as const;
 
 interface DelegateButtonProps {
   delegateAddress: Address;
@@ -45,15 +38,14 @@ export const DelegateButton = ({
   const [waitingForConnection, setWaitingForConnection] = useState(false);
   const [delegationModalOpen, setDelegationModalOpen] = useState(false);
 
-  const tokenAddress = daoConfigByDaoId[daoId]?.daoOverview?.contracts
-    ?.token as Address | undefined;
+  const delegationReadConfig = getDelegationReadContractConfig(daoId);
 
   const { data: currentDelegatee, refetch } = useReadContract({
-    abi: ERC20VotesAbi,
-    address: tokenAddress,
-    functionName: "delegates",
+    abi: DelegationReadAbi,
+    address: delegationReadConfig.address,
+    functionName: delegationReadConfig.functionName,
     args: userAddress ? [userAddress] : undefined,
-    query: { enabled: !!userAddress && !!tokenAddress },
+    query: { enabled: !!userAddress && !!delegationReadConfig.address },
   });
 
   const { isEligible: isGaslessEligible } = useGaslessEligibility(

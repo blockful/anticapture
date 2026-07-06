@@ -239,25 +239,16 @@ export const VotingPowerHistoryTable = ({
           );
         }
 
-        let amount = "0";
-        if (item.delegation) {
-          const value = Number(
-            formatUnits(BigInt(item.delegation.value), decimals),
-          );
-          amount = formatNumberUserReadable(
-            value > 0 && value < 1 ? 0.01 : value,
-          );
-        } else if (item.transfer) {
-          const value = Number(
-            formatUnits(BigInt(item.transfer.value), decimals),
-          );
-          amount = formatNumberUserReadable(
-            value > 0 && value < 1 ? 0.01 : value,
-          );
-        } else {
-          // Auto delegation protocols wont have neither delegation nor transfer, so we use the delta
-          amount = item.delta;
-        }
+        // delegation/transfer carry a raw token value; auto-delegation protocols
+        // have neither, so fall back to the already-formatted delta.
+        const rawValue = item.delegation
+          ? Number(formatUnits(BigInt(item.delegation.value), decimals))
+          : item.transfer
+            ? Number(formatUnits(BigInt(item.transfer.value), decimals))
+            : Math.abs(Number(item.delta));
+        const amount = formatNumberUserReadable(
+          rawValue > 0 && rawValue < 1 ? 0.01 : rawValue,
+        );
 
         return (
           <div className="h-13 flex flex-col items-start justify-center">

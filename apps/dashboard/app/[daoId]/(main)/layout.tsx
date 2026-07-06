@@ -28,7 +28,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
 
   // For FULL, IN_ANALYSIS and ELECTION stages, render the layout with appropriate providers
   return (
-    <div className="bg-surface-background dark relative mx-auto flex h-screen max-w-screen-2xl">
+    <div className="bg-surface-background dark relative mx-auto flex h-dvh max-w-screen-2xl">
       <div className="active relative hidden h-screen lg:flex">
         <div className="w-17 h-full shrink-0 overflow-y-auto">
           <HeaderSidebar />
@@ -37,7 +37,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
           <HeaderDAOSidebar />
         </div>
       </div>
-      <main className="h-screen flex-1 overflow-auto">
+      <main className="h-dvh flex-1 overflow-auto">
         <div className="lg:hidden">
           <HeaderMobile />
           <StickyPageHeader />

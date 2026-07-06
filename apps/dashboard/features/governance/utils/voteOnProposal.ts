@@ -1,6 +1,7 @@
 import { parseSignature, publicActions } from "viem";
 import type {
   Account,
+  Address,
   Chain,
   PublicActions,
   WalletActions,
@@ -56,6 +57,7 @@ type VoteParams = {
   voteNumber: number;
   account: Account;
   comment?: string;
+  delegatedVoteAddresses?: Address[];
 };
 
 type VoteHandler = (
@@ -78,6 +80,48 @@ const azoriusVoteHandler =
       address,
       functionName: "vote",
       args: [Number(params.proposalId), params.voteNumber],
+      account: params.account,
+    });
+    return client.writeContract(request);
+  };
+
+const TornGovernorVoteAbi = [
+  {
+    inputs: [
+      { internalType: "address[]", name: "from", type: "address[]" },
+      { internalType: "uint256", name: "proposalId", type: "uint256" },
+      { internalType: "bool", name: "support", type: "bool" },
+    ],
+    name: "castDelegatedVote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const;
+
+/**
+ * Tornado Cash (custom stake-to-vote governor): castDelegatedVote(address[],
+ * uint256, bool) on the governor. Binary voting — for=true / against=false, no
+ * abstain, no reason.
+ */
+const tornVoteHandler =
+  (daoId: DaoIdEnum): VoteHandler =>
+  async (client, params) => {
+    const address = daoConfigByDaoId[daoId].daoOverview.contracts.governor;
+    if (!address) throw new Error("DAO governance address not found");
+    if (params.voteNumber === 2)
+      throw new Error("Tornado Cash does not support abstain votes");
+    // `from` lists ONLY the accounts that delegated to the voter — the governor
+    // requires delegatedTo[from[i]] == msg.sender and casts the voter's own
+    // locked balance separately. Including the voter (or any self-vote) reverts,
+    // since self-delegation is forbidden. No delegators => empty list.
+    const fromAddresses = params.delegatedVoteAddresses ?? [];
+
+    const { request } = await client.simulateContract({
+      abi: TornGovernorVoteAbi,
+      address,
+      functionName: "castDelegatedVote",
+      args: [fromAddresses, BigInt(params.proposalId), params.voteNumber === 1],
       account: params.account,
     });
     return client.writeContract(request);
@@ -171,6 +215,8 @@ function getVoteHandler(
   switch (daoId) {
     case DaoIdEnum.SHU:
       return azoriusVoteHandler(daoId);
+    case DaoIdEnum.TORN:
+      return tornVoteHandler(daoId);
     default:
       return ozGovernorVoteHandler(daoId);
   }
@@ -187,6 +233,7 @@ export const voteOnProposal = async (
   comment?: string,
   minVotingPower: bigint | null = null,
   useGasless: boolean = false,
+  delegatedVoteAddresses?: Address[],
 ) => {
   const client = walletClient.extend(publicActions);
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
@@ -199,6 +246,7 @@ export const voteOnProposal = async (
       voteNumber,
       account,
       comment: trimmedComment,
+      delegatedVoteAddresses,
     });
 
     setTransactionhash(hash);

@@ -1,12 +1,12 @@
 "use client";
 
-import { Inbox } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
+import { ProposalActionsInfoCard } from "@/features/governance/components/proposal-overview/ProposalActionsInfoCard";
 import { useDecodeCalldata } from "@/features/governance/hooks/useDecodeCalldata";
 import type { ProposalDetails } from "@/features/governance/types";
-import { BlankSlate, Button } from "@/shared/components";
+import { Button } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -52,13 +52,22 @@ export const ActionsTabContent = ({
   const values = proposal.values ?? [];
   const calldatas = proposal.calldatas ?? [];
 
+  // A proposal is executable only when an action has a calldata to run. Some
+  // DAOs (e.g. Tornado Cash) expose a target but no calldata/value; for those we
+  // show the proposal's metadata instead of an empty action list.
+  const hasExecutableActions = targets.some(
+    (target, index) =>
+      target != null &&
+      values[index] != null &&
+      (calldatas[index] ?? null) != null,
+  );
+
   return (
     <div className="text-primary flex flex-col gap-3 py-4 lg:p-4">
-      {targets.length === 0 ? (
-        <BlankSlate
-          variant="default"
-          icon={Inbox}
-          description="No actions found"
+      {!hasExecutableActions ? (
+        <ProposalActionsInfoCard
+          proposal={proposal}
+          blockExplorerUrl={blockExplorerUrl}
         />
       ) : (
         targets.map((_, index) => (

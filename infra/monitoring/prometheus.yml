@@ -118,8 +118,21 @@ scrape_configs:
   - job_name: anticapture-gateful
     metrics_path: "/metrics"
     scrape_interval: 15s
+    # Gateful's /metrics is bearer-protected. Both the Gateful service and this
+    # scraper read the same GATEFUL_METRICS_TOKEN variable, so it can be wired as
+    # a single shared Railway variable. If the app requires it and this is unset,
+    # scrapes 401.
+    authorization:
+      type: Bearer
+      credentials: "${GATEFUL_METRICS_TOKEN}"
     static_configs:
       - targets: ["${GATEFUL_ENDPOINT}"]
+
+  - job_name: anticapture-authful
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${AUTHFUL_ENDPOINT}"]
 
   - job_name: anticapture-erpc
     metrics_path: "/metrics"

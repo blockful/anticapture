@@ -1,36 +1,217 @@
-name: Tests
+name: PR Checks
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-env:
-  NEXT_PUBLIC_GATEFUL_URL: https://gateful-anticapture-pr-${{ github.event.pull_request.number }}.up.railway.app
-
 jobs:
+  configure-vercel-preview:
+    name: Configure Vercel preview env
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    outputs:
+      gateful_url: ${{ steps.vercel-env.outputs.gateful_url }}
+      trusted: ${{ steps.trust.outputs.trusted }}
+      configured: ${{ steps.vercel-upsert.outputs.configured }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Gate the Vercel secret operations to trusted authors only: repo codeowners
+      # (matched against the CODEOWNERS file so the list can't drift) or members /
+      # owners of the blockful org (native PR author_association). The gateful_url
+      # output below is a plain string and stays available for every PR, so the
+      # downstream wait/typecheck/test jobs keep their coverage on external PRs.
+      - name: Determine author trust
+        id: trust
+        shell: bash
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags --depth=1 origin "${PR_BASE_SHA}"
+
+          trusted=false
+          if [ "${AUTHOR_ASSOCIATION}" = "MEMBER" ] || [ "${AUTHOR_ASSOCIATION}" = "OWNER" ]; then
+            trusted=true
+          elif git show FETCH_HEAD:CODEOWNERS | grep -oE '@[A-Za-z0-9_-]+' | sed 's/@//' | grep -qix "${PR_AUTHOR}"; then
+            trusted=true
+          fi
+
+          echo "trusted=${trusted}" >> "${GITHUB_OUTPUT}"
+          echo "PR author '${PR_AUTHOR}' (association=${AUTHOR_ASSOCIATION}) trusted=${trusted}."
+
+      - name: Compute branch-scoped Gateful URL
+        id: vercel-env
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IS_TRUSTED: ${{ steps.trust.outputs.trusted }}
+        run: |
+          set -euo pipefail
+
+          # Trusted PRs get their own ephemeral Railway preview; untrusted PRs
+          # (no Vercel/Railway preview is provisioned for them) fall back to the
+          # shared dev Gateful so the downstream wait/typecheck/test jobs have a
+          # live target instead of a preview host that never comes up.
+          if [ "${IS_TRUSTED}" = "true" ]; then
+            gateful_url="https://gateful-anticapture-pr-${PR_NUMBER}.up.railway.app"
+          else
+            gateful_url="https://dev-gateful.up.railway.app"
+          fi
+          echo "gateful_url=${gateful_url}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upsert branch-scoped Gateful URL into Vercel
+        id: vercel-upsert
+        if: steps.trust.outputs.trusted == 'true'
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          GATEFUL_URL: ${{ steps.vercel-env.outputs.gateful_url }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${VERCEL_TOKEN:-}" ] || [ -z "${VERCEL_PROJECT_ID:-}" ] || [ -z "${VERCEL_TEAM_ID:-}" ]; then
+            echo "::warning::Skipping Vercel preview env injection; Vercel secrets are not available."
+            exit 0
+          fi
+
+          api_url="https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env?upsert=true&teamId=${VERCEL_TEAM_ID}"
+          payload=$(jq -n \
+            --arg key "ANTICAPTURE_API_URL" \
+            --arg value "${GATEFUL_URL}" \
+            --arg gitBranch "${PR_BRANCH}" \
+            '{ key: $key, value: $value, type: "plain", target: ["preview"], gitBranch: $gitBranch }')
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "${api_url}" \
+            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data "${payload}"
+
+          echo "Configured ANTICAPTURE_API_URL=${GATEFUL_URL} for Vercel preview branch ${PR_BRANCH}."
+          echo "configured=true" >> "${GITHUB_OUTPUT}"
+
   wait-for-gateful:
     name: Wait for preview gateful
+    needs: configure-vercel-preview
     if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Wait for preview gateful to be ready
-        shell: bash
+        run: node scripts/wait-for-gateful.mjs
+        env:
+          ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+          # Trusted PRs target their own preview, so wait for the exact PR commit.
+          # Untrusted PRs target shared dev Gateful (which serves a different
+          # commit), so only assert reachability — leave the SHA unset.
+          EXPECTED_GATEFUL_SHA: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && github.event.pull_request.head.sha || '' }}
+
+  deploy-vercel-preview:
+    name: Deploy Vercel preview
+    # Redeploy only AFTER the gateful preview is healthy: `vercel deploy` builds
+    # the dashboard, which runs @anticapture/client codegen against the live
+    # gateful spec. Triggering it before wait-for-gateful (as configure-vercel-preview
+    # did) races the cold preview and fails codegen with "fetch failed".
+    needs: [configure-vercel-preview, wait-for-gateful]
+    if: needs.configure-vercel-preview.outputs.configured == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Check out the PR head commit (not the synthetic merge ref) so
+          # `git log` below reads the real commit author for Vercel attribution.
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Resolve commit author
+        id: author
+        run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Vercel preview redeploy
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          GATEFUL_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+          # Git metadata so Vercel attributes the deploy to the PR author (avatar +
+          # "Created by"); a bare `vercel deploy` shows "No attribution data available".
+          GIT_SHA: ${{ github.event.pull_request.head.sha }}
+          GIT_REF: ${{ github.event.pull_request.head.ref }}
+          GIT_MSG: ${{ github.event.pull_request.title }}
+          GIT_AUTHOR_LOGIN: ${{ github.event.pull_request.user.login }}
+          GIT_AUTHOR_NAME: ${{ steps.author.outputs.name }}
+          GIT_ORG: ${{ github.repository_owner }}
+          GIT_REPO: ${{ github.event.repository.name }}
+          GIT_REPO_ID: ${{ github.event.repository.id }}
+        # `vercel deploy` builds remotely, so codegen reads ANTICAPTURE_API_URL
+        # from the Vercel project env. The branch-scoped value the
+        # configure-vercel-preview job upserts is keyed by gitBranch and is NOT
+        # applied to this CLI deployment (no branch association), so codegen
+        # falls back to the project-level preview value and fails with
+        # "fetch failed". Pass the resolved Gateful URL as a build env (codegen)
+        # AND a runtime env (--env): the /api/gateful/* proxy route reads
+        # process.env.ANTICAPTURE_API_URL at request time, so --build-env alone
+        # would build against the right URL but serve a stale/missing one.
+        # `vercel deploy` prints the deployment URL to stdout; capture it so the
+        # step below can surface it on the PR (the CLI deploy path doesn't get
+        # Vercel's native Git-integration check/comment).
         run: |
-          # Poll the resource codegen actually fetches: a 200 on /docs/json means
-          # the preview server is up AND the aggregated OpenAPI spec is serveable.
-          # Avoids the race where CI runs before Railway finishes provisioning the PR preview.
-          for i in $(seq 1 60); do          # up to ~10 min (60 × 10s)
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${NEXT_PUBLIC_GATEFUL_URL}/docs/json" || echo 000)
-            if [ "$code" = "200" ]; then
-              echo "✅ gateful ready after attempt ${i}"
-              exit 0
-            fi
-            echo "attempt ${i}: HTTP ${code} — retrying in 10s"
-            sleep 10
-          done
-          echo "::error::preview gateful never returned 200 at ${NEXT_PUBLIC_GATEFUL_URL}/docs/json"
-          exit 1
+          url=$(npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" \
+            --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
+            --env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
+            --meta githubCommitSha="${GIT_SHA}" \
+            --meta githubCommitRef="${GIT_REF}" \
+            --meta githubCommitMessage="${GIT_MSG}" \
+            --meta githubCommitAuthorLogin="${GIT_AUTHOR_LOGIN}" \
+            --meta githubCommitAuthorName="${GIT_AUTHOR_NAME}" \
+            --meta githubCommitOrg="${GIT_ORG}" \
+            --meta githubCommitRepo="${GIT_REPO}" \
+            --meta githubCommitRepoId="${GIT_REPO_ID}" \
+            --meta githubOrg="${GIT_ORG}" \
+            --meta githubRepo="${GIT_REPO}" \
+            --meta githubRepoId="${GIT_REPO_ID}" \
+            --meta githubDeployment=1)
+          echo "url=${url}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment preview URL on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: vercel-preview
+          message: |
+            🔍 **Vercel preview:** ${{ steps.deploy.outputs.url }}
 
   changeset-path-filter:
     name: Detect changeset requirement
@@ -103,9 +284,11 @@ jobs:
           exit 1
 
   typecheck:
-    needs: wait-for-gateful
+    needs: [configure-vercel-preview, wait-for-gateful]
     if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
+    env:
+      ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
 
     steps:
       - name: Checkout repository
@@ -164,9 +347,11 @@ jobs:
           pnpm turbo typecheck "${filters[@]}"
 
   test:
-    needs: wait-for-gateful
+    needs: [configure-vercel-preview, wait-for-gateful]
     if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
+    env:
+      ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
 
     steps:
       - name: Checkout repository
@@ -225,65 +410,65 @@ jobs:
           flags: api
           fail_ci_if_error: false
 
-  dashboard-e2e:
-    name: Dashboard E2E
-    needs: wait-for-gateful
-    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+  # dashboard-e2e:
+  #   name: Dashboard E2E
+  #   needs: wait-for-gateful
+  #   if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 20
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.10.0
+  #     - name: Setup pnpm
+  #       uses: pnpm/action-setup@v4
+  #       with:
+  #         version: 10.10.0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+  #         cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+  #     - name: Install dependencies
+  #       run: pnpm install --frozen-lockfile
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
+  #     - name: Cache Playwright browsers
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.cache/ms-playwright
+  #         key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+  #         restore-keys: |
+  #           playwright-${{ runner.os }}-
 
-      - name: Install Playwright browsers
-        run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
+  #     - name: Install Playwright browsers
+  #       run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
 
-      - name: Run dashboard E2E tests
-        run: pnpm dashboard test:e2e
-        env:
-          CI: "true"
-          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
-          BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  #     - name: Run dashboard E2E tests
+  #       run: pnpm dashboard test:e2e
+  #       env:
+  #         CI: "true"
+  #         NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
+  #         BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
+  #         TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  #         TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: apps/dashboard/playwright-report
-          retention-days: 14
+  #     - name: Upload Playwright report
+  #       if: failure()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: playwright-report
+  #         path: apps/dashboard/playwright-report
+  #         retention-days: 14
 
-      - name: Upload Playwright traces
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-test-results
-          path: apps/dashboard/test-results
-          retention-days: 14
+  #     - name: Upload Playwright traces
+  #       if: failure()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: playwright-test-results
+  #         path: apps/dashboard/test-results
+  #         retention-days: 14

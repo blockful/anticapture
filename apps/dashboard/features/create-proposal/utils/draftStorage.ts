@@ -2,7 +2,7 @@ import type { ProposalDraft } from "@/features/create-proposal/types";
 
 export type NewDraftInput = Omit<
   ProposalDraft,
-  "id" | "createdAt" | "updatedAt"
+  "id" | "author" | "createdAt" | "updatedAt"
 >;
 
 export const readDrafts = (
