@@ -224,6 +224,56 @@ describe("SnapshotProvider", () => {
       expect(result.at(0)).toBe("proposal-0");
       expect(result.at(-1)).toBe("proposal-1000");
     });
+
+    // Finding 1: DB scan is inclusive (gte) at `since`; the Snapshot query must
+    // match so a proposal created exactly at `since` is not treated as DB-only.
+    it("should query inclusively at the cutoff (created_gte) so the boundary matches the DB scan", async () => {
+      const cursors: unknown[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            query: string;
+            variables: { cursor: number };
+          };
+          cursors.push(body.variables.cursor);
+          expect(body.query).toContain("created_gte");
+          expect(body.query).not.toContain("created_gt:");
+          return HttpResponse.json({
+            data: { proposals: [{ id: "boundary", created: 1699999999 }] },
+          });
+        }),
+      );
+
+      const result = await provider.fetchProposalIdsSince(1699999999);
+
+      expect(cursors[0]).toBe(1699999999);
+      expect(result).toContain("boundary");
+    });
+
+    // Finding 2: a full page ending on a shared `created` second must not drop
+    // the remaining proposals sharing that second on the next page.
+    it("should not skip proposals sharing the last created second across a page boundary", async () => {
+      // First page: 999 distinct seconds + 1 proposal on second 1700000999,
+      // which has a sibling still queued for the next page.
+      const firstPage = Array.from({ length: 1000 }, (_, i) => ({
+        id: `proposal-${i}`,
+        created: i < 999 ? 1700000000 + i : 1700000999,
+      }));
+      const secondPage = [
+        { id: "proposal-sibling", created: 1700000999 },
+        { id: "proposal-1000", created: 1700001000 },
+      ];
+      mockGraphQLSequence([
+        { proposals: firstPage },
+        { proposals: secondPage },
+      ]);
+
+      const result = await provider.fetchProposalIdsSince(0);
+
+      expect(result).toContain("proposal-sibling");
+      // Re-fetched boundary row must be de-duped, not duplicated.
+      expect(new Set(result).size).toBe(result.length);
+    });
   });
 
   describe("error handling", () => {

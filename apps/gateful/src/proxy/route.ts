@@ -2,6 +2,7 @@ import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { proxy as honoProxy } from "hono/proxy";
 import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
+import { stripAuthorization } from "./strip-authorization.js";
 
 const PROXY_TIMEOUT_MS = 30000;
 
@@ -49,6 +50,9 @@ export function proxy(
       url.search = new URL(c.req.url).search;
       const res = await honoProxy(url.toString(), {
         ...c.req,
+        // Strip the per-tenant bearer so the tenant's Gateful token is never
+        // leaked to DAO backends. Backends authenticate the gateway separately.
+        headers: stripAuthorization(c.req.raw.headers),
         signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
       });
       if (res.status >= 500) {

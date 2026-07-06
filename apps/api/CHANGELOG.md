@@ -1,5 +1,19 @@
 # @anticapture/api
 
+## 1.5.0
+
+### Minor Changes
+
+- [#2002](https://github.com/blockful/anticapture/pull/2002) [`451db65`](https://github.com/blockful/anticapture/commit/451db65d6497503ecebcae24fed44027a2e6479f) Thanks [@pikonha](https://github.com/pikonha)! - Integrate Tornado Cash DAO (TORN): custom stake-to-vote indexer (lock-based delegated supply, timestamp governance), timestamp-based proposal-status API client, and dashboard config/icon.
+
+### Patch Changes
+
+- [#2002](https://github.com/blockful/anticapture/pull/2002) [`2f0aca6`](https://github.com/blockful/anticapture/commit/2f0aca60e1a4785af8d7f52cd81c6a3cfbac63ee) Thanks [@pikonha](https://github.com/pikonha)! - Return unsupported-offchain errors consistently across offchain proposal and vote routes.
+
+- [#2002](https://github.com/blockful/anticapture/pull/2002) [`873bb45`](https://github.com/blockful/anticapture/commit/873bb4514e144aaece91246c86ba61e0e7f54c1f) Thanks [@pikonha](https://github.com/pikonha)! - Normalize TORN lock/unlock transfer direction in voting-power history so the locker (not the custody contract) is shown as the delegator.
+
+- [#2002](https://github.com/blockful/anticapture/pull/2002) [`2fc7174`](https://github.com/blockful/anticapture/commit/2fc71740f3953d5c49eaf92d5ab7947ae821ce0f) Thanks [@pikonha](https://github.com/pikonha)! - Fix TORN historical voting power rows being rendered as bogus zero-address delegations. TORN derives voting power directly from Transfers, so each history row shares the Transfer's log index, which the generic repository's strict `<` join never matched. Added a dedicated TORN voting-power repository that links the causing event at `logIndex <= row logIndex`. Dashboard also formats the auto-delegation fallback amount instead of dumping the raw delta.
+
 ## 1.4.0
 
 ### Minor Changes

@@ -217,6 +217,29 @@ describe("gateway health route", () => {
     expect(registry.get("ens").state).toBe("CLOSED");
   });
 
+  it("probes the configured token service and reports it degraded when down", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("fail", { status: 500 })),
+    );
+
+    const { app } = appWithHealth({
+      daoApis: new Map(),
+      daoRelayers: new Map(),
+      tokenServiceUrl: "http://authful.example",
+    });
+
+    const res = await app.request("/health");
+    const body = await readHealthResponse(res);
+
+    expect(res.status).toBe(503);
+    expect(body.upstreams.authful).toMatchObject({
+      status: "down",
+      circuit: "CLOSED",
+      error: "authful /health returned 500",
+    });
+  });
+
   it("returns ok when no upstreams are configured", async () => {
     const fetch = okFetch();
     vi.stubGlobal("fetch", fetch);
