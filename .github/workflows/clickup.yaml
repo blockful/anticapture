@@ -1,0 +1,26 @@
+name: ClickUp sync
+
+on:
+  create:
+  pull_request:
+    types: [opened, ready_for_review, synchronize, closed]
+  pull_request_review:
+    types: [submitted]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-sync:
+    if: github.event_name != 'push'
+    uses: blockful/.github/.github/workflows/clickup-pr-sync.yaml@main
+    secrets:
+      clickup_token: ${{ secrets.CLICKUP_API_TOKEN }}
+  release-sync:
+    if: github.event_name == 'push'
+    uses: blockful/.github/.github/workflows/clickup-release-sync.yaml@main
+    secrets:
+      clickup_token: ${{ secrets.CLICKUP_API_TOKEN }}
