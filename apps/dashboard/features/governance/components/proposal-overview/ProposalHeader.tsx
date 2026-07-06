@@ -150,6 +150,48 @@ const ProposalHeaderAction = ({
   );
 };
 
+const ProposalExecutionButtons = ({
+  address,
+  proposalStatus,
+  daoId,
+  setIsQueueModalOpen,
+  setIsExecuteModalOpen,
+}: {
+  address: string | undefined;
+  proposalStatus: string;
+  daoId: string;
+  setIsQueueModalOpen: (isOpen: boolean) => void;
+  setIsExecuteModalOpen: (isOpen: boolean) => void;
+}) => {
+  if (!address) return null;
+
+  const isShu = daoId.toUpperCase() === DaoIdEnum.SHU;
+
+  return (
+    <>
+      {proposalStatus === "succeeded" && !isShu && (
+        <Button
+          className="hidden lg:flex"
+          onClick={() => setIsQueueModalOpen(true)}
+        >
+          Queue Proposal
+        </Button>
+      )}
+      {(proposalStatus === "pending_execution" ||
+        // Azorius (SHU) proposals are QUEUED while timelocked and
+        // executeProposal reverts until PENDING_EXECUTION
+        (proposalStatus === "queued" && !isShu)) && (
+        <Button
+          className="hidden lg:flex"
+          onClick={() => setIsExecuteModalOpen(true)}
+        >
+          Execute Proposal
+        </Button>
+      )}
+    </>
+  );
+};
+
 export const ProposalHeader = ({
   daoId,
   votingPower,
@@ -240,6 +282,15 @@ export const ProposalHeader = ({
                 }
                 daoId={daoId}
               />
+              {snapshotLink === undefined && (
+                <ProposalExecutionButtons
+                  address={address}
+                  proposalStatus={proposalStatus}
+                  daoId={daoId}
+                  setIsQueueModalOpen={setIsQueueModalOpen}
+                  setIsExecuteModalOpen={setIsExecuteModalOpen}
+                />
+              )}
             </>
           ) : snapshotLink !== undefined ? (
             <>
@@ -290,29 +341,13 @@ export const ProposalHeader = ({
                 isWhitelabel={isWhitelabel}
                 daoId={daoId}
               />
-              {address &&
-                proposalStatus === "succeeded" &&
-                daoId.toUpperCase() !== DaoIdEnum.SHU && (
-                  <Button
-                    className="hidden lg:flex"
-                    onClick={() => setIsQueueModalOpen(true)}
-                  >
-                    Queue Proposal
-                  </Button>
-                )}
-              {address &&
-                (proposalStatus === "pending_execution" ||
-                  // Azorius (SHU) proposals are QUEUED while timelocked and
-                  // executeProposal reverts until PENDING_EXECUTION
-                  (proposalStatus === "queued" &&
-                    daoId.toUpperCase() !== DaoIdEnum.SHU)) && (
-                  <Button
-                    className="hidden lg:flex"
-                    onClick={() => setIsExecuteModalOpen(true)}
-                  >
-                    Execute Proposal
-                  </Button>
-                )}
+              <ProposalExecutionButtons
+                address={address}
+                proposalStatus={proposalStatus}
+                daoId={daoId}
+                setIsQueueModalOpen={setIsQueueModalOpen}
+                setIsExecuteModalOpen={setIsExecuteModalOpen}
+              />
             </>
           )}
         </div>
