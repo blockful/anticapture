@@ -310,7 +310,14 @@ export const OffchainVotingModal = ({
 
         {/* Comment — omitted for shutter proposals: a plaintext reason would
             reveal the encrypted vote before the proposal closes. */}
-        {isShutter ? (
+        {isPrivacyLoading ? (
+          <div className="flex flex-col gap-[6px] p-4">
+            <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
+              Comment <span className="text-secondary">(optional)</span>
+            </p>
+            <p className="text-secondary text-[14px]">Loading...</p>
+          </div>
+        ) : isShutter ? (
           <div className="flex flex-col gap-[6px] p-4">
             <p className="text-secondary font-inter text-[12px] not-italic leading-4">
               Votes on this proposal are encrypted until it closes, so comments
@@ -332,7 +339,12 @@ export const OffchainVotingModal = ({
         )}
 
         {/* Footer */}
-        <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
+        <div className="border-border-default flex items-center justify-end gap-2 border-t px-4 py-3">
+          {isPrivacyLoading && (
+            <p className="text-secondary mr-auto text-[12px]">
+              Checking proposal privacy...
+            </p>
+          )}
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
