@@ -123,11 +123,13 @@ await verifySiwe({
 With a `client`, verification goes through viem's `verifySiweMessage` (EIP-1271/ERC-6492
 capable) instead of raw ECDSA recovery. Without a `client`, only EOA signatures are accepted.
 
-## `AddressSchema` provenance
+## `AddressSchema`
 
-`AddressSchema` in `src/schemas.ts` is a **copy** of the schema defined in
-`apps/api/src/mappers/shared.ts`. That file remains the source of truth for the API's own address
-handling — if its semantics change, update this copy manually; there is no automated sync.
+`AddressSchema` in `src/schemas.ts` is the standard viem address idiom (`isAddress` +
+`getAddress`) — a small, stable primitive owned by this package. `apps/api/src/mappers/shared.ts`
+defines an equivalent schema for its own use; the two are **independent** (a package cannot import
+from an app, and there is no app-specific logic here, so no manual sync is needed). When the API
+adopts this package it can re-export this one as the single source of truth.
 
 ## Security notes
 
