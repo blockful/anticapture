@@ -102,8 +102,8 @@
       "description": "Indexer OTel and Ponder scrape failures.",
       "type": "stat",
       "gridPos": {
-        "x": 0,
-        "y": 4,
+        "x": 4,
+        "y": 0,
         "w": 4,
         "h": 4
       },
@@ -159,8 +159,8 @@
       "description": "Gateful, Authful, relayer, eRPC, Tempo scrape failures.",
       "type": "stat",
       "gridPos": {
-        "x": 0,
-        "y": 8,
+        "x": 8,
+        "y": 0,
         "w": 4,
         "h": 4
       },
@@ -216,9 +216,9 @@
       "description": "DAO API request rate for selected DAO(s).",
       "type": "stat",
       "gridPos": {
-        "x": 4,
+        "x": 12,
         "y": 0,
-        "w": 7,
+        "w": 4,
         "h": 4
       },
       "datasource": {
@@ -269,9 +269,9 @@
       "description": "DAO API + Gateful + Authful 5xx ratio.",
       "type": "stat",
       "gridPos": {
-        "x": 11,
+        "x": 16,
         "y": 0,
-        "w": 7,
+        "w": 4,
         "h": 4
       },
       "datasource": {
@@ -330,9 +330,9 @@
       "description": "Gateful cache hit ratio; idle cache shows 0 instead of no data.",
       "type": "stat",
       "gridPos": {
-        "x": 18,
+        "x": 20,
         "y": 0,
-        "w": 6,
+        "w": 4,
         "h": 4
       },
       "datasource": {
@@ -392,7 +392,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 12,
+        "y": 4,
         "w": 24,
         "h": 1
       },
@@ -405,9 +405,9 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 13,
-        "w": 8,
-        "h": 6
+        "y": 5,
+        "w": 24,
+        "h": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -464,7 +464,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "name"
       },
       "targets": [
         {
@@ -480,10 +480,10 @@
       "description": "Indexer OTel and Ponder scrape status.",
       "type": "stat",
       "gridPos": {
-        "x": 8,
-        "y": 13,
-        "w": 8,
-        "h": 6
+        "x": 0,
+        "y": 9,
+        "w": 24,
+        "h": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -540,13 +540,13 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "name"
       },
       "targets": [
         {
-          "expr": "label_replace(up{job=~\"anticapture-.*-indexer(?:-ponder)?\"}, \"service\", \"$1\", \"job\", \"anticapture-(.*)\")",
+          "expr": "min by (dao) (label_replace(up{job=~\"anticapture-.*-indexer(?:-ponder)?\"}, \"dao\", \"$1\", \"job\", \"anticapture-(.+?)-indexer.*\"))",
           "refId": "A",
-          "legendFormat": "{{service}}"
+          "legendFormat": "{{dao}}"
         }
       ]
     },
@@ -556,10 +556,10 @@
       "description": "Gateway/auth/relayer/RPC/monitoring scrape status.",
       "type": "stat",
       "gridPos": {
-        "x": 16,
+        "x": 0,
         "y": 13,
-        "w": 8,
-        "h": 6
+        "w": 24,
+        "h": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -616,7 +616,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "name"
       },
       "targets": [
         {
@@ -633,7 +633,7 @@
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 19,
+        "y": 17,
         "w": 24,
         "h": 6
       },
@@ -705,7 +705,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 25,
+        "y": 23,
         "w": 24,
         "h": 1
       },
@@ -718,7 +718,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 26,
+        "y": 24,
         "w": 8,
         "h": 8
       },
@@ -761,7 +761,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 26,
+        "y": 24,
         "w": 8,
         "h": 8
       },
@@ -804,7 +804,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 26,
+        "y": 24,
         "w": 8,
         "h": 8
       },
@@ -857,7 +857,7 @@
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 34,
+        "y": 32,
         "w": 16,
         "h": 8
       },
@@ -943,7 +943,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 34,
+        "y": 32,
         "w": 8,
         "h": 8
       },
@@ -986,7 +986,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 42,
+        "y": 40,
         "w": 24,
         "h": 1
       },
@@ -999,7 +999,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 43,
+        "y": 41,
         "w": 8,
         "h": 7
       },
@@ -1042,7 +1042,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 43,
+        "y": 41,
         "w": 8,
         "h": 7
       },
@@ -1085,7 +1085,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 43,
+        "y": 41,
         "w": 8,
         "h": 7
       },
@@ -1128,7 +1128,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 50,
+        "y": 48,
         "w": 8,
         "h": 7
       },
@@ -1166,12 +1166,12 @@
     },
     {
       "id": 35,
-      "title": "Gateful Requests by Tenant, Token & Route",
+      "title": "Gateful Requests by Tenant, Name & Route",
       "description": "",
       "type": "table",
       "gridPos": {
         "x": 8,
-        "y": 50,
+        "y": 48,
         "w": 16,
         "h": 7
       },
@@ -1218,7 +1218,7 @@
             "renameByName": {
               "Value #A": "requests",
               "tenant": "tenant",
-              "name": "token",
+              "name": "name",
               "route": "route"
             }
           }
@@ -1235,12 +1235,12 @@
     },
     {
       "id": 36,
-      "title": "Authful Validations by Tenant & Token",
+      "title": "Authful Validations by Tenant & Name",
       "description": "",
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 57,
+        "y": 55,
         "w": 12,
         "h": 6
       },
@@ -1287,7 +1287,7 @@
             "renameByName": {
               "Value #A": "validations",
               "tenant": "tenant",
-              "name": "token"
+              "name": "name"
             }
           }
         }
@@ -1308,7 +1308,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 57,
+        "y": 55,
         "w": 12,
         "h": 6
       },
@@ -1351,12 +1351,12 @@
     },
     {
       "id": 38,
-      "title": "Gateful Requests by Token",
-      "description": "Authenticated Gateful requests over the selected range, grouped by Authful token name.",
+      "title": "Gateful Requests by Name",
+      "description": "Authenticated Gateful requests over the selected range, grouped by Authful name.",
       "type": "piechart",
       "gridPos": {
         "x": 0,
-        "y": 63,
+        "y": 61,
         "w": 6,
         "h": 7
       },
@@ -1415,7 +1415,7 @@
       "type": "piechart",
       "gridPos": {
         "x": 6,
-        "y": 63,
+        "y": 61,
         "w": 6,
         "h": 7
       },
@@ -1474,7 +1474,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 71,
+        "y": 69,
         "w": 24,
         "h": 1
       },
@@ -1487,7 +1487,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 72,
+        "y": 70,
         "w": 8,
         "h": 7
       },
@@ -1530,7 +1530,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 72,
+        "y": 70,
         "w": 8,
         "h": 7
       },
@@ -1573,7 +1573,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 72,
+        "y": 70,
         "w": 8,
         "h": 7
       },
@@ -1616,7 +1616,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 79,
+        "y": 77,
         "w": 12,
         "h": 7
       },
@@ -1664,7 +1664,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 79,
+        "y": 77,
         "w": 12,
         "h": 7
       },
@@ -1707,7 +1707,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 86,
+        "y": 84,
         "w": 24,
         "h": 1
       },
@@ -1720,7 +1720,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 87,
+        "y": 85,
         "w": 8,
         "h": 7
       },
@@ -1763,7 +1763,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 87,
+        "y": 85,
         "w": 8,
         "h": 7
       },
@@ -1811,7 +1811,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 87,
+        "y": 85,
         "w": 8,
         "h": 7
       },
@@ -1854,7 +1854,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 94,
+        "y": 92,
         "w": 8,
         "h": 7
       },
@@ -1897,7 +1897,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 94,
+        "y": 92,
         "w": 8,
         "h": 7
       },
@@ -1940,7 +1940,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 94,
+        "y": 92,
         "w": 8,
         "h": 7
       },
@@ -1983,7 +1983,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 101,
+        "y": 99,
         "w": 24,
         "h": 1
       },
@@ -1996,7 +1996,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 102,
+        "y": 100,
         "w": 8,
         "h": 7
       },
@@ -2042,7 +2042,7 @@
       "type": "logs",
       "gridPos": {
         "x": 8,
-        "y": 102,
+        "y": 100,
         "w": 16,
         "h": 7
       },
@@ -2076,7 +2076,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 109,
+        "y": 107,
         "w": 24,
         "h": 1
       },
@@ -2089,7 +2089,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 110,
+        "y": 108,
         "w": 12,
         "h": 7
       },
@@ -2132,7 +2132,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 110,
+        "y": 108,
         "w": 12,
         "h": 7
       },
@@ -2175,7 +2175,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 117,
+        "y": 115,
         "w": 24,
         "h": 1
       },
@@ -2187,7 +2187,7 @@
       "type": "traces",
       "gridPos": {
         "x": 0,
-        "y": 118,
+        "y": 116,
         "w": 24,
         "h": 10
       },
