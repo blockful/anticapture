@@ -23,6 +23,7 @@ class FakeRateLimitStore implements RateLimitStore {
 const AUTH: AuthContext = {
   tokenId: "11111111-1111-1111-1111-111111111111",
   tenant: "uniswap",
+  name: "uniswap mcp",
   rateLimitPerMin: 3,
 };
 
@@ -61,6 +62,17 @@ describe("rateLimitMiddleware", () => {
     const retryAfter = Number(res.headers.get("Retry-After"));
     expect(retryAfter).toBeGreaterThan(0);
     expect(retryAfter).toBeLessThanOrEqual(60);
+  });
+
+  it("never limits an unbounded token (rateLimitPerMin 0) and skips the store", async () => {
+    const store = new FakeRateLimitStore();
+    const app = buildApp(store, { ...AUTH, rateLimitPerMin: 0 });
+
+    for (let i = 0; i < 10; i++) {
+      const res = await app.request("/test");
+      expect(res.status).toBe(200);
+    }
+    expect(store.counters.size).toBe(0);
   });
 
   it("skips limiting when there is no auth context (public/legacy)", async () => {

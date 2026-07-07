@@ -88,7 +88,10 @@ export class DrizzleProposalsActivityRepository {
       FROM votes_onchain
       WHERE voter_account_id = ${address}
         AND dao_id = ${daoId}
-        AND proposal_id IN (${sql.raw(proposalIds.map((id) => `'${id}'`).join(","))})
+        AND proposal_id IN (${sql.join(
+          proposalIds.map((id) => sql`${id}`),
+          sql.raw(", "),
+        )})
     `;
 
     const result = await this.db.execute<DbVote>(query);

@@ -18,6 +18,7 @@ export const useLastProposals = (daoId: DaoIdEnum): UseLastProposalsResult => {
   const { data, isLoading, error } = useProposals({
     daoId,
     limit: LAST_PROPOSALS_LIMIT,
+    lean: true,
   });
 
   return {

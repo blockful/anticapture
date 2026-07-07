@@ -14,6 +14,7 @@ import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates/comp
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { FetchErrorState } from "@/shared/components/errors/FetchErrorState";
 import {
   SubSectionsContainer,
   BulletDivider,
@@ -63,11 +64,12 @@ export const ActivityFeedSection = ({ feedDaoId }: { feedDaoId: string }) => {
   const handleIntersection = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
-      if (entry.isIntersecting && hasNextPage && !loading) {
+      // No auto-fetch while errored; the user retries via the error UI.
+      if (entry.isIntersecting && hasNextPage && !loading && !error) {
         fetchNextPage();
       }
     },
-    [hasNextPage, loading, fetchNextPage],
+    [hasNextPage, loading, error, fetchNextPage],
   );
 
   useEffect(() => {
@@ -127,15 +129,10 @@ export const ActivityFeedSection = ({ feedDaoId }: { feedDaoId: string }) => {
       <div className={cn("flex flex-col gap-2")}>
         {error && (
           <SubSectionsContainer className="p-0">
-            <div className="flex flex-col items-center justify-center gap-2 px-4 py-8">
-              <p className="text-error text-sm">Failed to load activity feed</p>
-              <button
-                onClick={() => refetch()}
-                className="text-link hover:text-link-hover text-sm underline"
-              >
-                Try again
-              </button>
-            </div>
+            <FetchErrorState
+              message="Failed to load activity feed"
+              onRetry={() => refetch()}
+            />
           </SubSectionsContainer>
         )}
 

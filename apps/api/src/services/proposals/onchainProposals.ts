@@ -11,6 +11,7 @@ export interface ProposalsRepository {
     fromDate: number | undefined,
     fromEndDate: number | undefined,
     proposalTypeExclude?: number[],
+    lean?: boolean,
   ): Promise<DBProposal[]>;
   getProposalsCount(): Promise<number>;
   searchProposals(
@@ -109,13 +110,15 @@ export class ProposalsService {
     const currentBlock = await this.daoClient.getCurrentBlockNumber();
     const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
 
-    for (const proposal of proposals) {
-      proposal.status = await this.daoClient.getProposalStatus(
-        proposal,
-        currentBlock,
-        currentTimestamp!,
-      );
-    }
+    await Promise.all(
+      proposals.map(async (proposal) => {
+        proposal.status = await this.daoClient.getProposalStatus(
+          proposal,
+          currentBlock,
+          currentTimestamp!,
+        );
+      }),
+    );
 
     return proposals;
   }
@@ -128,7 +131,8 @@ export class ProposalsService {
     fromDate,
     fromEndDate,
     includeOptimisticProposals = true,
-  }: Omit<ProposalsRequest, "lean">): Promise<DBProposal[]> {
+    lean = false,
+  }: ProposalsRequest): Promise<DBProposal[]> {
     // 1. Prepare status for database query
     const dbStatuses = status
       ? this.prepareStatusForDatabase(status)
@@ -149,6 +153,7 @@ export class ProposalsService {
       fromDate,
       fromEndDate,
       proposalTypeExclude,
+      lean,
     );
 
     // 4. Update each proposal with its real on-chain status

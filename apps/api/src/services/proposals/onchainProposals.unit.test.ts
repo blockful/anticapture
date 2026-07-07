@@ -49,6 +49,7 @@ function createStubRepo(): ProposalsRepository & {
   byId: DBProposal | undefined;
   lastStatusArg: string[] | undefined;
   lastProposalTypeExcludeArg: number[] | undefined;
+  lastLeanArg: boolean | undefined;
   lastSearchQueryArg: string | undefined;
 } {
   const stub: ProposalsRepository & {
@@ -58,6 +59,7 @@ function createStubRepo(): ProposalsRepository & {
     byId: DBProposal | undefined;
     lastStatusArg: string[] | undefined;
     lastProposalTypeExcludeArg: number[] | undefined;
+    lastLeanArg: boolean | undefined;
     lastSearchQueryArg: string | undefined;
   } = {
     proposals: [],
@@ -66,6 +68,7 @@ function createStubRepo(): ProposalsRepository & {
     byId: undefined,
     lastStatusArg: undefined,
     lastProposalTypeExcludeArg: undefined,
+    lastLeanArg: undefined,
     lastSearchQueryArg: undefined,
     getProposals: async (
       _skip: number,
@@ -75,9 +78,11 @@ function createStubRepo(): ProposalsRepository & {
       _fromDate: number | undefined,
       _fromEndDate: number | undefined,
       proposalTypeExclude?: number[],
+      lean?: boolean,
     ) => {
       stub.lastStatusArg = status;
       stub.lastProposalTypeExcludeArg = proposalTypeExclude;
+      stub.lastLeanArg = lean;
       return stub.proposals;
     },
     getProposalsCount: async () => stub.count,
@@ -293,6 +298,15 @@ describe("ProposalsService", () => {
         ProposalStatus.PENDING,
         ProposalStatus.ACTIVE,
       ]);
+    });
+
+    it("should pass lean through to the repository", async () => {
+      await service.getProposals({
+        ...DEFAULT_REQ,
+        lean: true,
+      });
+
+      expect(repo.lastLeanArg).toBe(true);
     });
   });
 

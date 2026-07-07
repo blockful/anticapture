@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { circuitBreakerState } from "../metrics.js";
 import { CircuitBreaker } from "./circuit-breaker.js";
 
 const SUCCESS = async () => "ok";
@@ -22,9 +23,11 @@ function createCircuitBreaker(opts?: {
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(0);
+  vi.spyOn(circuitBreakerState, "record");
 });
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.useRealTimers();
 });
 
@@ -56,6 +59,9 @@ describe("CircuitBreaker", () => {
       await expect(cb.execute(FAIL)).rejects.toThrow();
       await expect(cb.execute(FAIL)).rejects.toThrow();
       expect(cb.state).toBe("OPEN");
+      expect(circuitBreakerState.record).toHaveBeenLastCalledWith(2, {
+        name: "test",
+      });
     });
 
     it("resets failure counter after a success", async () => {
@@ -86,12 +92,21 @@ describe("CircuitBreaker", () => {
       const cb = await halfOpenBreaker();
       await cb.execute(SUCCESS);
       expect(cb.state).toBe("CLOSED");
+      expect(circuitBreakerState.record).toHaveBeenLastCalledWith(0, {
+        name: "test",
+      });
     });
 
     it("reopens circuit on probe failure", async () => {
       const cb = await halfOpenBreaker();
       await expect(cb.execute(FAIL)).rejects.toThrow("downstream error");
       expect(cb.state).toBe("OPEN");
+      expect(circuitBreakerState.record).toHaveBeenCalledWith(1, {
+        name: "test",
+      });
+      expect(circuitBreakerState.record).toHaveBeenLastCalledWith(2, {
+        name: "test",
+      });
     });
   });
 });

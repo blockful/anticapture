@@ -22,8 +22,10 @@ ${{<erpc-service-name>.RAILWAY_PRIVATE_DOMAIN}}:4001
 Use the actual Railway eRPC service reference name in place of
 `<erpc-service-name>`.
 
-Grafana provisions the eRPC dashboard from `grafana/dashboards/erpc.json`. The
-dashboard uses the existing Prometheus datasource UID, `prometheus`.
+Grafana provisions a single consolidated dashboard from
+`grafana/dashboards/anticapture.json` (service health, API traffic, gateful
+cache, eRPC, resources). It uses the existing Prometheus datasource UID,
+`prometheus`.
 
 The standalone `infra/erpc/Dockerfile.monitoring` image is legacy. Use this
 unified monitoring stack for the normal Anticapture Railway deployment.

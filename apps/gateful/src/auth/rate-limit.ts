@@ -15,11 +15,14 @@ export interface RateLimitStore {
  * Redis (or on Redis errors) requests pass — availability over enforcement.
  * Runs after tokenAuthMiddleware; requests without auth context (public
  * paths, auth disabled) are not limited.
+ *
+ * A non-positive limit (0 is the sentinel) means "unbounded": the token is
+ * exempt from rate limiting and never touches Redis.
  */
 export function rateLimitMiddleware(store?: RateLimitStore) {
   return async (c: Context, next: Next) => {
     const auth = c.get("auth");
-    if (!auth || !store) return next();
+    if (!auth || !store || auth.rateLimitPerMin <= 0) return next();
 
     const epochMinute = Math.floor(Date.now() / 60_000);
     const key = `rl:${auth.tokenId}:${epochMinute}`;

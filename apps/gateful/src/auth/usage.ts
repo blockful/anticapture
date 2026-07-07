@@ -26,8 +26,8 @@ export function normalizeRoute(
 
 /**
  * Counts every authenticated request as a Prometheus counter, labelled by
- * tenant and normalized route. Never blocks the request; usage is observed via
- * the `/metrics` endpoint (scraped by Prometheus) rather than persisted.
+ * tenant, token name, and normalized route. Never blocks the request; usage is
+ * observed via the `/metrics` endpoint (scraped by Prometheus) rather than persisted.
  * Requests without an auth context (public paths, auth disabled) are skipped.
  */
 export function usageMiddleware(daoApis: Map<string, string>) {
@@ -41,6 +41,7 @@ export function usageMiddleware(daoApis: Map<string, string>) {
       if (auth) {
         tenantRequestTotal.add(1, {
           tenant: auth.tenant,
+          name: auth.name,
           route: normalizeRoute(c.req.path, daoApis),
         });
       }
