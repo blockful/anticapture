@@ -21,6 +21,7 @@ import type { VoteWithHistoricalPower } from "@/features/governance/hooks/useVot
 import { useVotes } from "@/features/governance/hooks/useVotes";
 import { useVotesParams } from "@/features/governance/hooks/useVotesParams";
 import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
+import { FetchErrorState } from "@/shared/components/errors/FetchErrorState";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
@@ -82,6 +83,7 @@ export const TabsVotedContent = ({
     isLoading,
     error,
     fetchNextPage,
+    refetch,
     hasNextPage,
     isFetchingNextPage,
   } = useVotes({
@@ -97,8 +99,11 @@ export const TabsVotedContent = ({
     voterAddress: voterFilter ?? null,
   });
 
-  // Intersection observer on the loading row
+  // Intersection observer on the loading row. Paused while errored so a
+  // failed page fetch doesn't auto-retry in a loop; the user retries instead.
   useEffect(() => {
+    if (error) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
@@ -114,7 +119,7 @@ export const TabsVotedContent = ({
     }
 
     return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, error]);
 
   const columns: ColumnDef<VoteWithHistoricalPower>[] = useMemo(
     () => [
@@ -659,7 +664,7 @@ export const TabsVotedContent = ({
     });
 
     // Add loading row if there are more pages or currently loading
-    if (hasNextPage || isFetchingNextPage) {
+    if ((hasNextPage || isFetchingNextPage) && !error) {
       data.push({
         voterAddress: "__LOADING_ROW__",
         transactionHash: "",
@@ -673,7 +678,7 @@ export const TabsVotedContent = ({
     }
 
     return data;
-  }, [votes, hasNextPage, isFetchingNextPage]);
+  }, [votes, hasNextPage, isFetchingNextPage, error]);
 
   // Show skeleton table on initial load or when we have no valid data
   const hasValidData =
@@ -684,8 +689,13 @@ export const TabsVotedContent = ({
         (vote.voterAddress as string) !== "__LOADING_ROW__",
     );
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
+  if (error && !hasValidData) {
+    return (
+      <FetchErrorState
+        message="Failed to load votes"
+        onRetry={() => refetch()}
+      />
+    );
   }
 
   if (isLoading && !hasValidData) {
@@ -715,6 +725,13 @@ export const TabsVotedContent = ({
           />
         }
       />
+      {error && (
+        <FetchErrorState
+          message="Failed to load more votes"
+          onRetry={() => fetchNextPage()}
+          className="py-4"
+        />
+      )}
     </div>
   );
 };
