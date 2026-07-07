@@ -11,6 +11,7 @@ import { QuadraticVoteOptions } from "@/features/governance/components/modals/vo
 import { RankedChoiceOptions } from "@/features/governance/components/modals/vote-options/RankedChoiceOptions";
 import { SingleChoiceOptions } from "@/features/governance/components/modals/vote-options/SingleChoiceOptions";
 import { WeightedVoteOptions } from "@/features/governance/components/modals/vote-options/WeightedVoteOptions";
+import { useOffchainProposalPrivacy } from "@/features/governance/hooks/useOffchainProposalPrivacy";
 import { useOffchainVotingPower } from "@/features/governance/hooks/useOffchainVotingPower";
 import { useVoteOnOffchainProposal } from "@/features/governance/hooks/useVoteOnOffchainProposal";
 import { normalizeChoices } from "@/features/governance/utils/offchainProposal";
@@ -63,6 +64,13 @@ export const OffchainVotingModal = ({
     network: proposal.network,
   });
 
+  // Shutter proposals encrypt the ballot, so the reason would leak the vote —
+  // hide the comment field (matching Snapshot) and gate voting until known.
+  const { isShutter, isLoading: isPrivacyLoading } = useOffchainProposalPrivacy(
+    proposal.id,
+    { enabled: isOpen },
+  );
+
   const choices = normalizeChoices(proposal.choices);
   const voteUiType = getOffchainVoteUiType(proposal.type);
 
@@ -105,7 +113,7 @@ export const OffchainVotingModal = ({
   }, [isOpen, onClose]);
 
   const isVoteEnabled = (() => {
-    if (!value || !address || isVoting) return false;
+    if (!value || !address || isVoting || isPrivacyLoading) return false;
     if (voteUiType === "approval") return (value as number[]).length > 0;
     if (voteUiType === "weighted") {
       const total = Object.values(value as Record<string, number>).reduce(
@@ -300,21 +308,43 @@ export const OffchainVotingModal = ({
           <div className="w-full">{renderVoteOptions()}</div>
         </div>
 
-        {/* Comment */}
-        <div className="flex flex-col gap-[6px] p-4">
-          <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-            Comment <span className="text-secondary">(optional)</span>
-          </p>
-          <textarea
-            className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
-            placeholder="Enter your comment"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </div>
+        {/* Comment — omitted for shutter proposals: a plaintext reason would
+            reveal the encrypted vote before the proposal closes. */}
+        {isPrivacyLoading ? (
+          <div className="flex flex-col gap-[6px] p-4">
+            <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
+              Comment <span className="text-secondary">(optional)</span>
+            </p>
+            <p className="text-secondary text-[14px]">Loading...</p>
+          </div>
+        ) : isShutter ? (
+          <div className="flex flex-col gap-[6px] p-4">
+            <p className="text-secondary font-inter text-[12px] not-italic leading-4">
+              Votes on this proposal are encrypted until it closes, so comments
+              are disabled.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-[6px] p-4">
+            <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
+              Comment <span className="text-secondary">(optional)</span>
+            </p>
+            <textarea
+              className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
+              placeholder="Enter your comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+          </div>
+        )}
 
         {/* Footer */}
-        <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
+        <div className="border-border-default flex items-center justify-end gap-2 border-t px-4 py-3">
+          {isPrivacyLoading && (
+            <p className="text-secondary mr-auto text-[12px]">
+              Checking proposal privacy...
+            </p>
+          )}
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
