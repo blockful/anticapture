@@ -42,7 +42,8 @@ curl -sX POST http://localhost:4002/tokens \
   -d '{"tenant": "acme", "name": "acme mcp prod", "rateLimitPerMin": 600}'
 ```
 
-`rateLimitPerMin` is optional (defaults to 600).
+`rateLimitPerMin` is optional (defaults to 600). Set it to `0` to make the
+token unbounded — Gateful exempts it from rate limiting entirely.
 
 ## Migrations
 
