@@ -56,27 +56,29 @@ export function proposals(
         lean,
       } = context.req.valid("query");
 
-      const result = await service.getProposals({
-        skip,
-        limit,
-        orderDirection,
-        status,
-        fromDate,
-        fromEndDate,
-        includeOptimisticProposals,
-      });
-
-      const [quorums] = await Promise.all([
-        Promise.all(result.map((p) => client.getQuorum(p.id))),
-        client.getVotingDelay(),
+      const [result, totalCount] = await Promise.all([
+        service.getProposals({
+          skip,
+          limit,
+          orderDirection,
+          status,
+          fromDate,
+          fromEndDate,
+          includeOptimisticProposals,
+          lean,
+        }),
+        service.getProposalsCount(),
       ]);
+      const quorums = await Promise.all(
+        result.map((p) => client.getQuorum(p.id)),
+      );
 
       return context.json(
         {
           items: result.map((p, index) =>
             ProposalMapper.toApi(p, quorums[index]!, blockTime, { lean }),
           ),
-          totalCount: await service.getProposalsCount(),
+          totalCount,
         },
         200,
       );
@@ -110,12 +112,14 @@ export function proposals(
     async (context) => {
       const { query, skip, limit, lean } = context.req.valid("query");
 
-      const result = await service.searchProposals({
-        query,
-        skip,
-        limit,
-      });
-
+      const [result, totalCount] = await Promise.all([
+        service.searchProposals({
+          query,
+          skip,
+          limit,
+        }),
+        service.getSearchProposalsCount(query),
+      ]);
       const quorums = await Promise.all(
         result.map((p) => client.getQuorum(p.id)),
       );
@@ -125,7 +129,7 @@ export function proposals(
           items: result.map((p, index) =>
             ProposalMapper.toApi(p, quorums[index]!, blockTime, { lean }),
           ),
-          totalCount: await service.getSearchProposalsCount(query),
+          totalCount,
         },
         200,
       );
@@ -178,10 +182,7 @@ export function proposals(
         );
       }
 
-      const [quorum] = await Promise.all([
-        client.getQuorum(id),
-        client.getVotingDelay(),
-      ]);
+      const quorum = await client.getQuorum(id);
 
       return context.json(
         ProposalMapper.toApi(proposal, quorum, blockTime, { lean }),

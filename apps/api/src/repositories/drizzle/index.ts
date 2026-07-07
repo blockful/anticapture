@@ -24,6 +24,34 @@ import { DBProposal } from "@/mappers";
 export class DrizzleRepository {
   constructor(private readonly db: Drizzle) {}
 
+  private proposalSelectFields(lean: boolean) {
+    return {
+      id: proposalsOnchain.id,
+      txHash: proposalsOnchain.txHash,
+      daoId: proposalsOnchain.daoId,
+      proposerAccountId: proposalsOnchain.proposerAccountId,
+      targets: lean ? sql<string[]>`'[]'::json` : proposalsOnchain.targets,
+      values: lean ? sql<bigint[]>`'[]'::json` : proposalsOnchain.values,
+      signatures: proposalsOnchain.signatures,
+      calldatas: lean ? sql<string[]>`'[]'::json` : proposalsOnchain.calldatas,
+      startBlock: proposalsOnchain.startBlock,
+      endBlock: proposalsOnchain.endBlock,
+      title: proposalsOnchain.title,
+      description: lean ? sql<string>`''` : proposalsOnchain.description,
+      timestamp: proposalsOnchain.timestamp,
+      endTimestamp: proposalsOnchain.endTimestamp,
+      queuedTimestamp: proposalsOnchain.queuedTimestamp,
+      executedTimestamp: proposalsOnchain.executedTimestamp,
+      queuedTxHash: proposalsOnchain.queuedTxHash,
+      executedTxHash: proposalsOnchain.executedTxHash,
+      status: proposalsOnchain.status,
+      forVotes: proposalsOnchain.forVotes,
+      againstVotes: proposalsOnchain.againstVotes,
+      abstainVotes: proposalsOnchain.abstainVotes,
+      proposalType: proposalsOnchain.proposalType,
+    };
+  }
+
   private buildProposalSearchWhere(query: string): SQL<unknown> {
     const searchPattern = `%${escapeLikePattern(query)}%`;
 
@@ -147,6 +175,7 @@ export class DrizzleRepository {
     fromDate: number | undefined,
     fromEndDate: number | undefined,
     proposalTypeExclude?: number[],
+    lean: boolean = false,
   ): Promise<DBProposal[]> {
     const whereClauses: SQL<unknown>[] = [];
 
@@ -169,7 +198,7 @@ export class DrizzleRepository {
       );
     }
     return await this.db
-      .select()
+      .select(this.proposalSelectFields(lean))
       .from(proposalsOnchain)
       .where(and(...whereClauses))
       .orderBy(
