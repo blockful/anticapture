@@ -1,4 +1,5 @@
-import { index, pgSchema } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { check, index, pgSchema } from "drizzle-orm/pg-core";
 
 export const authfulSchema = pgSchema("authful");
 
@@ -9,6 +10,9 @@ export const tokens = authfulSchema.table(
     tenant: d.text().notNull(), // "uniswap", "blockful", ...
     name: d.text().notNull(), // human label, e.g. "uniswap mcp prod"
     tokenHash: d.text("token_hash").notNull().unique(), // sha256 hex; plaintext is never stored
+    // Requests per minute. 0 means unbounded (Gateful exempts the token from
+    // rate limiting); the CHECK below forbids negatives so 0 is the only
+    // non-positive value that can ever be stored.
     rateLimitPerMin: d.integer("rate_limit_per_min").notNull().default(600),
     createdAt: d
       .timestamp("created_at", { withTimezone: true })
@@ -17,5 +21,11 @@ export const tokens = authfulSchema.table(
     revokedAt: d.timestamp("revoked_at", { withTimezone: true }),
     lastUsedAt: d.timestamp("last_used_at", { withTimezone: true }),
   }),
-  (table) => [index().on(table.tenant)],
+  (table) => [
+    index().on(table.tenant),
+    check(
+      "rate_limit_per_min_non_negative",
+      sql`${table.rateLimitPerMin} >= 0`,
+    ),
+  ],
 );

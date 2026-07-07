@@ -1,0 +1,1 @@
+ALTER TABLE "authful"."tokens" ADD CONSTRAINT "rate_limit_per_min_non_negative" CHECK ("authful"."tokens"."rate_limit_per_min" >= 0);
