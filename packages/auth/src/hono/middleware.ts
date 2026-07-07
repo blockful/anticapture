@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 
-import { verifySession } from "../session.js";
+import { assertSecret, verifySession } from "../session.js";
 
 export interface SiweAuthVariables {
   siweUser: {
@@ -21,6 +21,10 @@ export interface SiweAuthOptions {
  */
 export const siweAuth = (options: SiweAuthOptions) => {
   const { secret, header = "x-user-token" } = options;
+  // Fail fast on a misconfigured secret. Validating here (not per request)
+  // keeps the catch below scoped to token errors, so a weak secret can never
+  // masquerade as a 401 `invalid_token` and hide from 5xx monitoring.
+  assertSecret(secret);
 
   return createMiddleware<{ Variables: SiweAuthVariables }>(async (c, next) => {
     const token = c.req.header(header);

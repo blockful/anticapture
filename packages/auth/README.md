@@ -134,7 +134,9 @@ adopts this package it can re-export this one as the single source of truth.
 ## Security notes
 
 - **Secret strength:** `secret` (for `issueSession`/`verifySession`/`siweAuth`/`mountAuthRoutes`)
-  must be at least 32 high-entropy characters — shorter secrets are rejected at the boundary.
+  must be at least 32 high-entropy characters. `siweAuth` and `mountAuthRoutes` reject a weak
+  secret by throwing at construction time (startup), so a misconfigured deployment fails loudly
+  instead of returning `invalid_token` 401s on every request.
 - **Rate-limit `GET /auth/nonce`:** it is unauthenticated and writes to the store on every call.
   Put a rate limiter in front of it (and prefer a durable, TTL-backed store in production).
 - **`POST /auth/verify` error semantics:** genuine verification failures return `401`

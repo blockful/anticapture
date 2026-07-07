@@ -133,6 +133,20 @@ describe("mountAuthRoutes + siweAuth integration", () => {
     expect(res.status).toBeGreaterThanOrEqual(500);
   });
 
+  it("throws at construction on a weak secret instead of 401ing per request", () => {
+    // A misconfigured secret is a server error and must surface at startup,
+    // not hide behind `invalid_token` responses.
+    expect(() => siweAuth({ secret: "too-short" })).toThrow(/secret/i);
+    expect(() =>
+      mountAuthRoutes(new OpenAPIHono(), {
+        store,
+        secret: "too-short",
+        domain: DOMAIN,
+        chainId: CHAIN_ID,
+      }),
+    ).toThrow(/secret/i);
+  });
+
   it("returns distinguishable 401 reasons from siweAuth", async () => {
     const missing = await app.request("/protected");
     expect(missing.status).toBe(401);

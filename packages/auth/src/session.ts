@@ -6,7 +6,12 @@ const JWT_ALG = "HS256";
 /** Minimum HMAC secret length (chars) — HS256 is only as strong as its key. */
 const MIN_SECRET_LENGTH = 32;
 
-const assertSecret = (secret: string): void => {
+/**
+ * Rejects secrets too weak for HS256. Called eagerly by `siweAuth` and
+ * `mountAuthRoutes` so a misconfigured deployment fails at startup instead of
+ * surfacing as per-request 401s.
+ */
+export const assertSecret = (secret: string): void => {
   if (typeof secret !== "string" || secret.length < MIN_SECRET_LENGTH) {
     throw new Error(
       `auth secret must be a string of at least ${MIN_SECRET_LENGTH} high-entropy characters`,

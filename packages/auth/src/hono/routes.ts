@@ -8,7 +8,7 @@ import {
   NonceResponseSchema,
   SiweVerifyBodySchema,
 } from "../schemas.js";
-import { issueSession } from "../session.js";
+import { assertSecret, issueSession } from "../session.js";
 import { SiweVerificationError, verifySiwe } from "../verify.js";
 
 const SessionResponseSchema = z.object({
@@ -99,6 +99,9 @@ export const mountAuthRoutes = (
     sessionTtlSec = 3600,
     nonceTtlMs,
   } = options;
+  // Fail fast on a misconfigured secret instead of erroring on the first
+  // `issueSession` call after a successful SIWE verification.
+  assertSecret(secret);
 
   app.openapi(nonceRoute, async (c) => {
     const nonce = generateNonce();
