@@ -20,6 +20,8 @@ describe("ActivityFeedPage", () => {
     });
 
     expect(redirect).not.toHaveBeenCalled();
-    expect(result.props.feedDaoId).toBe("torn");
+    // The page wraps the section in a fragment alongside the e2e-only
+    // ForceErrorTrigger; the section is the second child.
+    expect(result.props.children[1].props.feedDaoId).toBe("torn");
   });
 });
