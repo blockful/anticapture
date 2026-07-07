@@ -89,6 +89,8 @@ export const votingPowerHistory = onchainTable(
       table.accountId,
       table.timestamp,
     ),
+    votingPowerHistoryTimestampIdx: index().on(table.timestamp),
+    votingPowerHistoryDeltaModIdx: index().on(table.deltaMod),
   }),
 );
 

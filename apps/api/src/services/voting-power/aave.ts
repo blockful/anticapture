@@ -68,25 +68,27 @@ export class AAVEVotingPowerService {
     items: DBHistoricalVotingPowerWithRelations[];
     totalCount: number;
   }> {
-    const items = await this.repo.getHistoricalVotingPowers(
-      skip,
-      limit,
-      orderDirection,
-      orderBy,
-      accountId,
-      minDelta,
-      maxDelta,
-      fromDate,
-      toDate,
-    );
+    const [items, totalCount] = await Promise.all([
+      this.repo.getHistoricalVotingPowers(
+        skip,
+        limit,
+        orderDirection,
+        orderBy,
+        accountId,
+        minDelta,
+        maxDelta,
+        fromDate,
+        toDate,
+      ),
+      this.repo.getHistoricalVotingPowerCount(
+        accountId,
+        minDelta,
+        maxDelta,
+        fromDate,
+        toDate,
+      ),
+    ]);
 
-    const totalCount = await this.repo.getHistoricalVotingPowerCount(
-      accountId,
-      minDelta,
-      maxDelta,
-      fromDate,
-      toDate,
-    );
     return { items, totalCount };
   }
 

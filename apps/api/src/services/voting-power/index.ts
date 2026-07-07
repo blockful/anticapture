@@ -89,8 +89,8 @@ export class VotingPowerService {
     items: DBHistoricalVotingPowerWithRelations[];
     totalCount: number;
   }> {
-    const items =
-      await this.historicalVotingRepository.getHistoricalVotingPowers(
+    const [items, totalCount] = await Promise.all([
+      this.historicalVotingRepository.getHistoricalVotingPowers(
         skip,
         limit,
         orderDirection,
@@ -100,16 +100,16 @@ export class VotingPowerService {
         maxDelta,
         fromDate,
         toDate,
-      );
-
-    const totalCount =
-      await this.historicalVotingRepository.getHistoricalVotingPowerCount(
+      ),
+      this.historicalVotingRepository.getHistoricalVotingPowerCount(
         accountId,
         minDelta,
         maxDelta,
         fromDate,
         toDate,
-      );
+      ),
+    ]);
+
     return { items, totalCount };
   }
 
