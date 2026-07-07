@@ -139,6 +139,58 @@ describe("verifySiwe", () => {
     ).rejects.toMatchObject({ reason: "invalid_message" });
   });
 
+  it("accepts any domain from an allowlist", async () => {
+    const { store, message } = setup();
+    await store.issue("abcdefgh12345678");
+    const signature = await sign(message);
+
+    const result = await verifySiwe({
+      message,
+      signature,
+      store,
+      expectedDomain: ["other.example", DOMAIN],
+      expectedChainId: CHAIN_ID,
+    });
+
+    expect(result.address).toBe(getAddress(account.address));
+  });
+
+  it("rejects a domain absent from the allowlist", async () => {
+    const { store, message } = setup();
+    await store.issue("abcdefgh12345678");
+    const signature = await sign(message);
+
+    await expect(
+      verifySiwe({
+        message,
+        signature,
+        store,
+        expectedDomain: ["other.example", "another.example"],
+        expectedChainId: CHAIN_ID,
+      }),
+    ).rejects.toMatchObject({ reason: "invalid_message" });
+
+    // The nonce must survive a domain rejection (consume is the last gate).
+    await expect(store.consume("abcdefgh12345678")).resolves.toBe(true);
+  });
+
+  it("throws a plain Error (not a verification error) on an empty allowlist", async () => {
+    const { store, message } = setup();
+    await store.issue("abcdefgh12345678");
+    const signature = await sign(message);
+
+    const attempt = verifySiwe({
+      message,
+      signature,
+      store,
+      expectedDomain: [],
+      expectedChainId: CHAIN_ID,
+    });
+
+    await expect(attempt).rejects.toThrow("expectedDomain must not be empty");
+    await expect(attempt).rejects.not.toBeInstanceOf(SiweVerificationError);
+  });
+
   it("rejects a wrong chainId", async () => {
     const { store, message } = setup();
     await store.issue("abcdefgh12345678");

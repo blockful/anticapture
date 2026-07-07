@@ -23,7 +23,11 @@ const ErrorResponseSchema = z.object({
 export interface MountAuthRoutesOptions {
   store: NonceStore;
   secret: string;
-  domain: string;
+  /**
+   * Domain(s) SIWE messages may be bound to. Pass an array when the same API
+   * serves multiple frontend hosts (e.g. whitelabel deployments).
+   */
+  domain: string | string[];
   chainId: number;
   /**
    * Optional viem client enabling EIP-1271 smart-contract-wallet verification.
@@ -102,6 +106,11 @@ export const mountAuthRoutes = (
   // Fail fast on a misconfigured secret instead of erroring on the first
   // `issueSession` call after a successful SIWE verification.
   assertSecret(secret);
+  // Same rationale for an empty domain allowlist: it would reject every
+  // sign-in as a 401 while the real problem is deployment configuration.
+  if (Array.isArray(domain) && domain.length === 0) {
+    throw new Error("mountAuthRoutes: domain must not be empty");
+  }
 
   app.openapi(nonceRoute, async (c) => {
     const nonce = generateNonce();

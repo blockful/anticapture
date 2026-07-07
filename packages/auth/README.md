@@ -69,7 +69,9 @@ const store = memoryNonceStore();
 mountAuthRoutes(app, {
   store,
   secret: process.env.SESSION_SECRET!,
-  domain: "app.example.com",
+  // Accepts a single domain or an allowlist when the same API serves
+  // multiple frontend hosts (e.g. whitelabel deployments).
+  domain: ["app.example.com", "gov.whitelabel.example"],
   chainId: 1,
   sessionTtlSec: 3600,
 });
@@ -89,7 +91,7 @@ app.get("/me", siweAuth({ secret: process.env.SESSION_SECRET! }), (c) => {
 
 - invalid/tampered signature,
 - unknown or already-consumed nonce,
-- wrong `domain` (phishing resistance),
+- `domain` not in the expected domain(s) (phishing resistance),
 - wrong `chainId` (cross-chain replay resistance),
 - expired (`expirationTime`) or not-yet-valid (`notBefore`) messages.
 

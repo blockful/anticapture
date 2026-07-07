@@ -109,7 +109,12 @@ export interface VerifySiweParams {
   message: string;
   signature: `0x${string}`;
   store: NonceStore;
-  expectedDomain: string;
+  /**
+   * Domain(s) the SIWE message may be bound to. Pass an array when the same
+   * API serves multiple frontend hosts (e.g. whitelabel deployments); the
+   * message's `domain` field must match one of them exactly.
+   */
+  expectedDomain: string | string[];
   expectedChainId: number;
   client?: Client;
   time?: Date;
@@ -128,6 +133,16 @@ export const verifySiwe = async (
   const { message, signature, store, expectedDomain, expectedChainId } = params;
   const time = params.time ?? new Date();
 
+  const allowedDomains = Array.isArray(expectedDomain)
+    ? expectedDomain
+    : [expectedDomain];
+
+  // An empty allowlist is a server misconfiguration, not a user auth failure:
+  // throw a plain Error so it surfaces as a 5xx instead of masquerading as 401.
+  if (allowedDomains.length === 0) {
+    throw new Error("verifySiwe: expectedDomain must not be empty");
+  }
+
   const { address, fields } = await verifySiweSignature({
     message,
     signature,
@@ -135,9 +150,13 @@ export const verifySiwe = async (
     time,
   });
 
+  if (!fields.domain || !allowedDomains.includes(fields.domain)) {
+    throw new SiweVerificationError("invalid_message");
+  }
+
   const isValidMessage = validateSiweMessage({
     message: fields,
-    domain: expectedDomain,
+    domain: fields.domain,
     time,
   });
 

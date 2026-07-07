@@ -147,6 +147,48 @@ describe("mountAuthRoutes + siweAuth integration", () => {
     ).toThrow(/secret/i);
   });
 
+  it("accepts messages from any domain in an allowlist", async () => {
+    const whitelabelDomain = "gov.whitelabel.example";
+    const multiDomainApp = new OpenAPIHono();
+    mountAuthRoutes(multiDomainApp, {
+      store,
+      secret: SECRET,
+      domain: [DOMAIN, whitelabelDomain],
+      chainId: CHAIN_ID,
+    });
+
+    const nonceRes = await multiDomainApp.request("/auth/nonce");
+    const { nonce } = (await nonceRes.json()) as { nonce: string };
+    const message = createSiweMessage({
+      address: account.address,
+      chainId: CHAIN_ID,
+      domain: whitelabelDomain,
+      nonce,
+      uri: `https://${whitelabelDomain}`,
+      version: "1",
+    });
+    const signature = await account.signMessage({ message });
+
+    const res = await multiDomainApp.request("/auth/verify", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message, signature }),
+    });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("throws at construction on an empty domain allowlist", () => {
+    expect(() =>
+      mountAuthRoutes(new OpenAPIHono(), {
+        store,
+        secret: SECRET,
+        domain: [],
+        chainId: CHAIN_ID,
+      }),
+    ).toThrow(/domain/i);
+  });
+
   it("returns distinguishable 401 reasons from siweAuth", async () => {
     const missing = await app.request("/protected");
     expect(missing.status).toBe(401);
