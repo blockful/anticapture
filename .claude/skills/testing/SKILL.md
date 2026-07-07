@@ -14,6 +14,21 @@ description: Use when writing, reviewing, or improving tests for any package in 
 
 ---
 
+## Test Runners by Package
+
+The monorepo uses **two runners** — check which one before writing test code:
+
+| Package                    | Runner     | Globals                                     |
+| -------------------------- | ---------- | ------------------------------------------- |
+| `apps/api`, `apps/gateful` | **Vitest** | `vi.fn()`, `vi.useFakeTimers()`, ...        |
+| `apps/dashboard`           | **Jest**   | `jest.fn()`, `jest.useFakeTimers()`, ...    |
+| `apps/indexer`             | —          | no test suite; verify with typecheck + lint |
+
+Code examples below use Vitest (`vi.*`) syntax; in the dashboard, swap `vi` for `jest`
+— the APIs are otherwise identical for everything this guide uses.
+
+---
+
 ## Rule 1: Test Pyramid
 
 Follow the test pyramid strategy with three test types.
@@ -44,7 +59,7 @@ Prefer **stubs** and **fakes** over mocks to avoid brittle tests.
 | -------- | ---------------------------------------------- | ----------------------------------- |
 | **Stub** | Need fixed return values                       | `{ findAll: () => [mockData] }`     |
 | **Fake** | Need working simplified implementation         | `InMemoryRepository`                |
-| **Mock** | Need to verify a call was made (use sparingly) | `jest.fn()` with `toHaveBeenCalled` |
+| **Mock** | Need to verify a call was made (use sparingly) | `vi.fn()` with `toHaveBeenCalled`   |
 
 ### Why?
 

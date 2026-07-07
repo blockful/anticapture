@@ -40,7 +40,21 @@ export enum DaoIdEnum {
 
 **The enum value must be identical across indexer, API, and dashboard.**
 
-### 2. Create DAO config (`apps/dashboard/shared/dao-config/<dao>.ts`)
+### 2. Add quorum label (`apps/dashboard/shared/constants/labels.ts`)
+
+Pick the label the UI shows for the DAO's quorum calculation. Reuse a generic entry
+(`QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY`, `.DELEGATE_SUPPLY`) when it fits — FLUID
+reuses `TOTAL_SUPPLY`. Only add a DAO-specific entry when the calculation is unusual
+(like `SCROLL: "0.21% Total Supply"`):
+
+```typescript
+export const QUORUM_CALCULATION_TYPES = {
+  // ... existing entries ...
+  NEW_DAO: "0.5% Total Supply", // only if no generic label fits
+};
+```
+
+### 3. Create DAO config (`apps/dashboard/shared/dao-config/<dao>.ts`)
 
 Create the config file exporting a `DaoConfiguration` object. Reference file: `apps/dashboard/shared/dao-config/fluid.ts`.
 
@@ -85,7 +99,7 @@ export const NEW_DAO: DaoConfiguration = {
       timelock: true, // has timelock?
       cancelFunction: false, // has public cancel function?
       logic: "For", // "For" | "For + Abstain" | "For + Abstain + Against" | "All Votes Cast"
-      quorumCalculation: QUORUM_CALCULATION_TYPES.NEW_DAO,
+      quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY, // or the label from step 2
       // proposalThreshold: "100K $TOKEN",  // optional display string
     },
   },

@@ -18,7 +18,8 @@ description: Use for apps/dashboard work: routes, features, shared components/ho
 - Port: 3000
 - Runtime: Next.js 16, React 19, Tailwind CSS 4, React Query 5 (via `@anticapture/client` REST SDK), wagmi 2, viem 2, Recharts 2
 - Purpose: DAO governance analytics, risk assessment, and community tools
-- DAOs: Uniswap, ENS, Optimism, Nouns, Compound, Gitcoin, Obol, Scroll
+- DAOs: one config file per DAO in `apps/dashboard/shared/dao-config/` — that directory
+  is the current roster; don't hard-code DAO lists elsewhere
 
 ## Commands
 
@@ -112,9 +113,9 @@ apps/dashboard/
 5. Follow engineering patterns in `./references/engineering-patterns.md`.
 6. Follow data/state/testing patterns in `./references/data-state-testing.md`.
 7. Verify:
-   - `pnpm run --filter=@anticapture/dashboard typecheck`
-   - `pnpm run --filter=@anticapture/dashboard lint`
-   - `pnpm run --filter=@anticapture/dashboard test` (when behavior changes)
+   - `pnpm dashboard typecheck`
+   - `pnpm dashboard lint`
+   - `pnpm dashboard test` (when behavior changes)
 
 ## Guardrails
 

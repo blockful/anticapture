@@ -10,35 +10,51 @@
       "Write",
       "Bash(git status)",
       "Bash(git diff *)",
-      "Bash(git push *)",
       "Bash(git log *)",
       "Bash(git branch *)",
       "Bash(git show *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
       "Bash(pnpm run *)",
       "Bash(pnpm test *)",
       "Bash(pnpm install *)",
       "Bash(pnpm lint *)",
-      "Bash(pnpm typecheck *)"
+      "Bash(pnpm typecheck *)",
+      "Bash(pnpm api *)",
+      "Bash(pnpm dashboard *)",
+      "Bash(pnpm gateful *)",
+      "Bash(pnpm indexer *)",
+      "Bash(pnpm client *)",
+      "Bash(pnpm offchain-indexer *)",
+      "Bash(pnpm address *)",
+      "Bash(pnpm relayer *)",
+      "Bash(pnpm codegen)",
+      "Bash(pnpm changeset)",
+      "Bash(pnpm changeset *)",
+      "Bash(pnpm setup:memory)",
+      "Bash(cast call *)"
     ],
     "deny": [
       "Bash(rm -rf *)",
-      "Bash(git push *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
       "Bash(git reset --hard *)",
-      "Bash(git checkout -- *)"
+      "Bash(git checkout -- *)",
+      "Edit(**/.env)",
+      "Write(**/.env)",
+      "Edit(**/.env.local)",
+      "Write(**/.env.local)"
     ]
   },
   "hooks": {
-    "PostToolUse": [
+    "PreToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "PKG=$(echo \"$CLAUDE_FILE_PATH\" | grep -oE '(apps|packages)/[^/]+' | head -1) && [ -n \"$PKG\" ] && pnpm --filter \"./$PKG\" lint:fix 2>&1 || true"
-          },
-          {
-            "type": "command",
-            "command": "PKG=$(echo \"$CLAUDE_FILE_PATH\" | grep -oE '(apps|packages)/[^/]+' | head -1) && [ -n \"$PKG\" ] && pnpm --filter \"./$PKG\" typecheck 2>&1 || true"
+            "command": "INPUT=$(cat); command -v jq >/dev/null 2>&1 || exit 0; CMD=$(printf '%s' \"$INPUT\" | jq -r '.tool_input.command // empty'); if printf '%s' \"$CMD\" | grep -qE 'git +push[^|;&]*( --force[^ ]*| -[a-zA-Z]*f[a-zA-Z]*( |$)| \\+[^ ]+)'; then echo 'Blocked: force pushes are forbidden in this repo (see AGENTS.md boundaries).' >&2; exit 2; fi; exit 0"
           }
         ]
       }
