@@ -443,12 +443,14 @@ const MobileBottomBar = ({
         </Button>
       );
     } else if (supportValue === undefined) {
-      content = (
-        <Button className="flex w-full" onClick={onVoteClick}>
-          Cast your vote
-          <ArrowRight className="size-3.5" />
-        </Button>
-      );
+      if (isOngoing) {
+        content = (
+          <Button className="flex w-full" onClick={onVoteClick}>
+            Cast your vote
+            <ArrowRight className="size-3.5" />
+          </Button>
+        );
+      }
     } else {
       content = <MobileVotedBadge vote={Number(supportValue)} />;
     }
