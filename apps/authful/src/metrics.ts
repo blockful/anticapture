@@ -2,6 +2,14 @@ import { meterProvider } from "./instrumentation.js";
 
 const meter = meterProvider.getMeter("anticapture-authful");
 
+export const tokenValidationRequestTotal = meter.createCounter(
+  "authful_token_validation_requests_total",
+  {
+    description:
+      "Internal token validation requests, labelled by tenant, token name, and result",
+  },
+);
+
 export const httpRequestDuration = meter.createHistogram(
   "http_server_request_duration_seconds",
   {

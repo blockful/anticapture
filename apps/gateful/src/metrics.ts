@@ -9,7 +9,12 @@ export const cacheRequestTotal = meter.createCounter("cache_requests_total", {
 
 export const tenantRequestTotal = meter.createCounter("tenant_requests_total", {
   description:
-    "Authenticated requests per tenant, labelled by tenant and normalized route",
+    "Authenticated requests, labelled by tenant, token name, and normalized route",
+});
+
+export const circuitBreakerState = meter.createGauge("circuit_breaker_state", {
+  description:
+    "Current Gateful upstream circuit-breaker state: 0=CLOSED, 1=HALF_OPEN, 2=OPEN",
 });
 
 export const httpRequestDuration = meter.createHistogram(

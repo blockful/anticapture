@@ -15,6 +15,7 @@ export interface TokenValidator {
 export type AuthContext = {
   tokenId: string;
   tenant: string;
+  name: string;
   rateLimitPerMin: number;
 };
 
@@ -93,6 +94,7 @@ export function tokenAuthMiddleware({
     c.set("auth", {
       tokenId: verdict.tokenId,
       tenant: verdict.tenant,
+      name: verdict.name,
       rateLimitPerMin: verdict.rateLimitPerMin,
     });
     return next();

@@ -2,9 +2,9 @@ groups:
   - name: anticapture
     interval: 30s
     rules:
-      # Service is not responding (no scrape data for 5 minutes)
+      # Non-DAO service is not responding (no scrape data for 5 minutes)
       - alert: ServiceDown
-        expr: up{job!~".*-indexer"} == 0
+        expr: up{job!~"anticapture-.*-(api|indexer(?:-ponder)?)"} == 0
         for: 5m
         keep_firing_for: 5m
         labels:
@@ -16,19 +16,43 @@ groups:
             for more than 5 minutes. The service may be crashed, OOM-killed, or misconfigured.
             Check container/process status and recent logs immediately.
 
-      # Indexer is not responding — longer window to account for slow startup
-      # - alert: IndexerDown
-      #   expr: up{job=~".*-indexer"} == 0
-      #   for: 10m
-      #   labels:
-      #     severity: critical
-      #   annotations:
-      #     summary: "[CRITICAL] {{ $labels.job }} is unreachable"
-      #     description: >
-      #       Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
-      #       for more than 10 minutes. Note: indexers take time to bind their HTTP server on
-      #       cold start, so this alert has an extended window. If the indexer was not recently
-      #       deployed, check container/process status and recent logs.
+      # DAO API is not responding
+      - alert: ApiDown
+        expr: up{job=~"anticapture-.*-api"} == 0
+        for: 5m
+        keep_firing_for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "[CRITICAL] {{ $labels.job }} is unreachable"
+          description: >
+            Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
+            for more than 5 minutes. DAO API traffic for this DAO is unavailable.
+
+      # Indexer scrape endpoints are not responding — longer window for slow startup
+      - alert: IndexerDown
+        expr: up{job=~"anticapture-.*-indexer(?:-ponder)?"} == 0
+        for: 10m
+        keep_firing_for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "[CRITICAL] {{ $labels.job }} is unreachable"
+          description: >
+            Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
+            for more than 10 minutes. If the indexer was not recently deployed,
+            check process health, Ponder metrics, and recent logs.
+
+      - alert: IndexerSyncStale
+        expr: time() - max by (job) (ponder_sync_block_timestamp{job=~"anticapture-.*-indexer-ponder"}) > 600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] {{ $labels.job }} sync timestamp is stale"
+          description: >
+            Ponder has not advanced its synced block timestamp for
+            {{ printf "%.0f" $value }} seconds. Check RPC health and indexing errors.
 
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage

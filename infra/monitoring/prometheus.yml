@@ -13,6 +13,12 @@ scrape_configs:
     static_configs:
       - targets: ["${ENS_INDEXER_ENDPOINT}"]
 
+  - job_name: anticapture-ens-indexer-ponder
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${ENS_INDEXER_ENDPOINT}"]
+
   - job_name: anticapture-ens-api
     metrics_path: "/metrics"
     scrape_interval: 15s
@@ -21,6 +27,12 @@ scrape_configs:
 
   - job_name: anticapture-aave-indexer
     metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${AAVE_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-aave-indexer-ponder
+    metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
       - targets: ["${AAVE_INDEXER_ENDPOINT}"]
@@ -37,6 +49,12 @@ scrape_configs:
     static_configs:
       - targets: ["${SHUTTER_INDEXER_ENDPOINT}"]
 
+  - job_name: anticapture-shutter-indexer-ponder
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${SHUTTER_INDEXER_ENDPOINT}"]
+
   - job_name: anticapture-shutter-api
     metrics_path: "/metrics"
     scrape_interval: 15s
@@ -45,6 +63,12 @@ scrape_configs:
 
   - job_name: anticapture-scroll-indexer
     metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${SCROLL_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-scroll-indexer-ponder
+    metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
       - targets: ["${SCROLL_INDEXER_ENDPOINT}"]
@@ -61,6 +85,12 @@ scrape_configs:
     static_configs:
       - targets: ["${NOUNS_INDEXER_ENDPOINT}"]
 
+  - job_name: anticapture-nouns-indexer-ponder
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${NOUNS_INDEXER_ENDPOINT}"]
+
   - job_name: anticapture-nouns-api
     metrics_path: "/metrics"
     scrape_interval: 15s
@@ -69,6 +99,12 @@ scrape_configs:
 
   - job_name: anticapture-gitcoin-indexer
     metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${GITCOIN_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-gitcoin-indexer-ponder
+    metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
       - targets: ["${GITCOIN_INDEXER_ENDPOINT}"]
@@ -85,6 +121,12 @@ scrape_configs:
     static_configs:
       - targets: ["${COMPOUND_INDEXER_ENDPOINT}"]
 
+  - job_name: anticapture-compound-indexer-ponder
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${COMPOUND_INDEXER_ENDPOINT}"]
+
   - job_name: anticapture-compound-api
     metrics_path: "/metrics"
     scrape_interval: 15s
@@ -97,6 +139,12 @@ scrape_configs:
     static_configs:
       - targets: ["${UNISWAP_INDEXER_ENDPOINT}"]
 
+  - job_name: anticapture-uniswap-indexer-ponder
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${UNISWAP_INDEXER_ENDPOINT}"]
+
   - job_name: anticapture-uniswap-api
     metrics_path: "/metrics"
     scrape_interval: 15s
@@ -105,6 +153,12 @@ scrape_configs:
 
   - job_name: anticapture-obol-indexer
     metrics_path: "/otel-metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${OBOL_INDEXER_ENDPOINT}"]
+
+  - job_name: anticapture-obol-indexer-ponder
+    metrics_path: "/metrics"
     scrape_interval: 15s
     static_configs:
       - targets: ["${OBOL_INDEXER_ENDPOINT}"]
@@ -133,6 +187,12 @@ scrape_configs:
     scrape_interval: 15s
     static_configs:
       - targets: ["${AUTHFUL_ENDPOINT}"]
+
+  - job_name: anticapture-relayer
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${RELAYER_ENDPOINT}"]
 
   - job_name: anticapture-erpc
     metrics_path: "/metrics"
