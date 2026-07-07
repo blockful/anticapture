@@ -131,7 +131,20 @@ export const getHistoricalVotingPowersWithRelations = async (
             AND ${delegationLogIndexCondition}
         )`,
     )
-    .leftJoin(transfer, transferJoinCondition);
+    .leftJoin(transfer, transferJoinCondition)
+    .orderBy(
+      orderDirection === "asc"
+        ? asc(
+            orderBy === "timestamp"
+              ? historyPage.timestamp
+              : historyPage.deltaMod,
+          )
+        : desc(
+            orderBy === "timestamp"
+              ? historyPage.timestamp
+              : historyPage.deltaMod,
+          ),
+    );
 
   return result.map((row) => ({
     ...row.history,
