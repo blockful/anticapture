@@ -26,7 +26,10 @@ export const ENS: DaoConfiguration = {
   ogIcon: EnsOgIcon,
   ogArt: EnsOgArt,
   hostnames: ["ens.gov.blockful.io"],
-  whitelabel: {},
+  whitelabel: {
+    requestFeatureLink:
+      "https://forms.clickup.com/90132341641/f/2ky4wrw9-30353/Z1Y0VQ9TC6SQ3AMUMX",
+  },
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },

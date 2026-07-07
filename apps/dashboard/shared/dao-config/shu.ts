@@ -25,7 +25,10 @@ export const SHU: DaoConfiguration = {
   forumLink: "https://shutternetwork.discourse.group/c/shutter-dao/14",
   icon: ShutterIcon,
   hostnames: ["shutter.gov.blockful.io"],
-  whitelabel: {},
+  whitelabel: {
+    requestFeatureLink:
+      "https://forms.clickup.com/90132341641/f/2ky4wrw9-33713/JLIPUEF65J3AAMXH2L",
+  },
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
