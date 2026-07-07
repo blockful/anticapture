@@ -42,8 +42,8 @@ ERPC_METRICS_ENDPOINT=${{<erpc-service-name>.RAILWAY_PRIVATE_DOMAIN}}:4001
 ```
 
 Replace `<erpc-service-name>` with the actual Railway service reference.
-Grafana provisions the eRPC dashboard from
-`infra/monitoring/grafana/dashboards/erpc.json`.
+Grafana shows eRPC metrics in the "eRPC (Upstream RPC)" section of the
+consolidated dashboard, `infra/monitoring/grafana/dashboards/anticapture.json`.
 
 `Dockerfile.monitoring` is a legacy standalone Prometheus + Grafana image that
 depends on upstream eRPC templates and `SERVICE_ENDPOINT` / `SERVICE_PORT`.

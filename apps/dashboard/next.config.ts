@@ -66,6 +66,14 @@ const nextConfig = {
     ];
   },
   serverExternalPackages: ["pino-pretty"],
+  turbopack: {
+    resolveAlias: {
+      // @shutter-network/shutter-crypto's Go wasm_exec glue requires "fs" at
+      // runtime only outside the browser; stub it so Turbopack can bundle the
+      // package for client components.
+      fs: { browser: "./empty-module.ts" },
+    },
+  },
   experimental: {
     optimizePackageImports: [
       "lucide-react",
