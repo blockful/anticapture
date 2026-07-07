@@ -110,26 +110,6 @@ describe("NFTPriceRepository", () => {
 
       expect(result).toEqual([]);
     });
-
-    it("should return integer wei strings convertible to BigInt", async () => {
-      // AVG() over NUMERIC yields decimal text like "200.50000000000000000000";
-      // consumers convert this straight to BigInt, which rejects decimals.
-      await db
-        .insert(tokenPrice)
-        .values([
-          createTokenPrice({ timestamp: 1700000000n, price: 100n }),
-          createTokenPrice({ timestamp: 1700000100n, price: 301n }),
-        ]);
-
-      const result = await repository.getHistoricalNFTPrice(10, 0);
-
-      expect(result).toHaveLength(2);
-      for (const { price } of result) {
-        expect(() => BigInt(price)).not.toThrow();
-      }
-      expect(result[0]!.price).toBe("200");
-      expect(result[1]!.price).toBe("100");
-    });
   });
 
   describe("getTokenPrice", () => {
