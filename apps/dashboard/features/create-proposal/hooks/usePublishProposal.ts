@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { normalize } from "viem/ens";
-import { parseEventLogs, type Abi } from "viem";
+import { parseEventLogs } from "viem";
 import {
   usePublicClient,
   useWaitForTransactionReceipt,
@@ -15,48 +15,19 @@ import {
   encodeActions,
   makeAddressResolver,
 } from "@/features/create-proposal/utils/encodeActions";
-import { encodeDescription } from "@/features/create-proposal/utils/encodeDescription";
+import {
+  getProposalCreatedEventAbi,
+  submitProposalRequest,
+} from "@/features/create-proposal/utils/submitProposalRequest";
 import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
 import type { DaoIdEnum } from "@/shared/types/daos";
-
-const ozProposeAbi = [
-  {
-    type: "function",
-    name: "propose",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "targets", type: "address[]" },
-      { name: "values", type: "uint256[]" },
-      { name: "calldatas", type: "bytes[]" },
-      { name: "description", type: "string" },
-    ],
-    outputs: [{ name: "", type: "uint256" }],
-  },
-] as const satisfies Abi;
-
-const proposalCreatedEventAbi = [
-  {
-    type: "event",
-    name: "ProposalCreated",
-    inputs: [
-      { indexed: false, name: "proposalId", type: "uint256" },
-      { indexed: false, name: "proposer", type: "address" },
-      { indexed: false, name: "targets", type: "address[]" },
-      { indexed: false, name: "values", type: "uint256[]" },
-      { indexed: false, name: "signatures", type: "string[]" },
-      { indexed: false, name: "calldatas", type: "bytes[]" },
-      { indexed: false, name: "startBlock", type: "uint256" },
-      { indexed: false, name: "endBlock", type: "uint256" },
-      { indexed: false, name: "description", type: "string" },
-    ],
-  },
-] as const satisfies Abi;
 
 export const usePublishProposal = () => {
   const [resolveError, setResolveError] = useState<Error | null>(null);
   const [isResolving, setIsResolving] = useState(false);
   const [txChainId, setTxChainId] = useState<number | undefined>();
+  const [txDaoId, setTxDaoId] = useState<DaoIdEnum | undefined>();
 
   const {
     writeContract,
@@ -90,8 +61,9 @@ export const usePublishProposal = () => {
         );
         return;
       }
-      const governorAddress = daoConfigByDaoId[daoIdEnum]?.daoOverview
-        ?.contracts?.governor as `0x${string}` | undefined;
+      const { contracts, chain } =
+        daoConfigByDaoId[daoIdEnum]?.daoOverview ?? {};
+      const governorAddress = contracts?.governor;
       if (!governorAddress) {
         setResolveError(
           new Error(
@@ -121,21 +93,23 @@ export const usePublishProposal = () => {
         setIsResolving(false);
       }
 
-      const description = encodeDescription(
-        form.title,
-        form.discussionUrl ?? "",
-        form.body,
-      );
+      setTxChainId(chain?.id);
+      setTxDaoId(daoIdEnum);
 
-      const chainId = daoConfigByDaoId[daoIdEnum]?.daoOverview?.chain?.id;
-      setTxChainId(chainId);
-      writeContract({
-        address: governorAddress,
-        abi: ozProposeAbi,
-        functionName: "propose",
-        args: [encoded.targets, encoded.values, encoded.calldatas, description],
-        chainId,
-      });
+      try {
+        submitProposalRequest(writeContract, {
+          daoId: daoIdEnum,
+          governorAddress,
+          votingStrategyAddress: contracts?.votingStrategy,
+          encoded,
+          title: form.title,
+          body: form.body,
+          discussionUrl: form.discussionUrl,
+          chainId: chain?.id,
+        });
+      } catch (err) {
+        setResolveError(err as Error);
+      }
     },
     [writeContract, ensClient],
   );
@@ -146,9 +120,9 @@ export const usePublishProposal = () => {
   }, [resetWrite]);
 
   const proposalId =
-    receipt && isReceiptSuccess
+    receipt && isReceiptSuccess && txDaoId
       ? (parseEventLogs({
-          abi: proposalCreatedEventAbi,
+          abi: getProposalCreatedEventAbi(txDaoId),
           logs: receipt.logs,
           eventName: "ProposalCreated",
         })[0]?.args.proposalId ?? null)

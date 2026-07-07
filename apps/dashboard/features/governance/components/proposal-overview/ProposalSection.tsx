@@ -433,8 +433,9 @@ const MobileBottomBar = ({
       );
     } else if (
       proposalStatus === "pending_execution" ||
-      proposalStatus === "queued" ||
-      (proposalStatus === "succeeded" && daoId.toUpperCase() === DaoIdEnum.SHU)
+      // Azorius (SHU) proposals are QUEUED while timelocked and
+      // executeProposal reverts until PENDING_EXECUTION
+      (proposalStatus === "queued" && daoId.toUpperCase() !== DaoIdEnum.SHU)
     ) {
       content = (
         <Button className="flex w-full" onClick={onExecuteClick}>
@@ -442,12 +443,14 @@ const MobileBottomBar = ({
         </Button>
       );
     } else if (supportValue === undefined) {
-      content = (
-        <Button className="flex w-full" onClick={onVoteClick}>
-          Cast your vote
-          <ArrowRight className="size-3.5" />
-        </Button>
-      );
+      if (isOngoing) {
+        content = (
+          <Button className="flex w-full" onClick={onVoteClick}>
+            Cast your vote
+            <ArrowRight className="size-3.5" />
+          </Button>
+        );
+      }
     } else {
       content = <MobileVotedBadge vote={Number(supportValue)} />;
     }

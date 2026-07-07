@@ -9,9 +9,10 @@ import { AzoriusABI } from "./abi/governor";
 
 // Azorius on-chain constants (hardcoded to avoid RPC calls)
 // Source: LinearVotingStrategy contract (0x4b29d8B250B8b442ECfCd3a4e3D91933d2db720F)
+const BLOCK_TIME_SECONDS = 12;
 const VOTING_PERIOD_BLOCKS = 21600; // votingPeriod() — ~3 days at 12s/block
 const EXECUTION_PERIOD_BLOCKS = 21600; // Azorius.executionPeriod() — ~3 days at 12s/block
-const TIMELOCK_PERIOD_BLOCKS = 0; // Azorius.timelockPeriod() — no timelock on Shutter
+const TIMELOCK_PERIOD_BLOCKS = 14400; // Azorius.timelockPeriod() — ~2 days at 12s/block
 
 export class SHUClient<
   TTransport extends Transport = Transport,
@@ -61,23 +62,28 @@ export class SHUClient<
   }
 
   async getTimelockDelay(): Promise<bigint> {
-    // Hardcoded: Shutter has no timelock period
-    return BigInt(TIMELOCK_PERIOD_BLOCKS);
+    // Returned in seconds (cross-DAO convention — see GovernorBase.getProposalStatus),
+    // converted from Azorius.timelockPeriod() which is denominated in blocks.
+    return BigInt(TIMELOCK_PERIOD_BLOCKS * BLOCK_TIME_SECONDS);
   }
 
   /**
    * Azorius proposal status computation.
    *
-   * Lifecycle:
+   * Lifecycle (mirrors Azorius.proposalState — ACTIVE, TIMELOCKED, EXECUTABLE,
+   * EXECUTED, EXPIRED, FAILED):
    *   ACTIVE → DEFEATED (forVotes <= againstVotes and quorum met)
    *   ACTIVE → NO_QUORUM (quorum not met)
-   *   ACTIVE → SUCCEEDED (forVotes > againstVotes and quorum met)
-   *   SUCCEEDED → EXPIRED (execution window passed: endBlock + timelockPeriod + executionPeriod)
-   *   SUCCEEDED → EXECUTED (ProposalExecuted event, persisted by indexer)
+   *   ACTIVE → QUEUED (passed; contract TIMELOCKED until endBlock + timelockPeriod,
+   *     executeProposal reverts with ProposalNotExecutable in this window)
+   *   QUEUED → PENDING_EXECUTION (contract EXECUTABLE for executionPeriod blocks)
+   *   PENDING_EXECUTION → EXPIRED (execution window passed)
+   *   * → EXECUTED (ProposalExecuted event, persisted by indexer)
    *
-   * DEFEATED, NO_QUORUM, SUCCEEDED, and EXPIRED are computed at read-time
-   * by the base class + this override. They are never persisted in DB.
-   * prepareStatusForDatabase maps them to PENDING/ACTIVE for DB filtering.
+   * DEFEATED, NO_QUORUM, QUEUED, PENDING_EXECUTION, and EXPIRED are computed
+   * at read-time by the base class + this override. They are never persisted
+   * in DB. prepareStatusForDatabase maps them to PENDING/ACTIVE for DB
+   * filtering.
    */
   async getProposalStatus(
     proposal: {
@@ -99,14 +105,22 @@ export class SHUClient<
       currentTimestamp,
     );
 
-    // If base returns SUCCEEDED, check if the execution window has expired
+    // Base returns SUCCEEDED for any passed proposal after endBlock; derive
+    // where it sits in the Azorius post-voting lifecycle instead, so the
+    // frontend never offers execution while the contract would revert.
     if (status === ProposalStatus.SUCCEEDED) {
-      const expirationBlock =
-        proposal.endBlock + TIMELOCK_PERIOD_BLOCKS + EXECUTION_PERIOD_BLOCKS;
+      const timelockEndBlock = proposal.endBlock + TIMELOCK_PERIOD_BLOCKS;
 
-      if (currentBlock >= expirationBlock) {
+      if (currentBlock >= timelockEndBlock + EXECUTION_PERIOD_BLOCKS) {
         return ProposalStatus.EXPIRED;
       }
+
+      // Contract is TIMELOCKED while block.number <= votingEndBlock + timelockPeriod
+      if (currentBlock <= timelockEndBlock) {
+        return ProposalStatus.QUEUED;
+      }
+
+      return ProposalStatus.PENDING_EXECUTION;
     }
 
     return status;

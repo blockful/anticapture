@@ -148,25 +148,25 @@ export const WhitelabelShell = ({
               })}
             </nav>
 
-            <Button
-              variant="outline"
-              asChild
-              className="mt-4 w-full justify-center"
-            >
-              <a
-                href={
-                  "https://forms.clickup.com/90132341641/f/2ky4wrw9-30353/Z1Y0VQ9TC6SQ3AMUMX"
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                data-umami-event="feature_request_click"
-                data-umami-event-source="whitelabel_shell"
-                data-ph-event="feature_request_click"
-                data-ph-source="whitelabel_shell"
+            {daoConfig.whitelabel?.requestFeatureLink && (
+              <Button
+                variant="outline"
+                asChild
+                className="mt-4 w-full justify-center"
               >
-                Request feature
-              </a>
-            </Button>
+                <a
+                  href={daoConfig.whitelabel.requestFeatureLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-umami-event="feature_request_click"
+                  data-umami-event-source="whitelabel_shell"
+                  data-ph-event="feature_request_click"
+                  data-ph-source="whitelabel_shell"
+                >
+                  Request feature
+                </a>
+              </Button>
+            )}
           </div>
         </div>
 

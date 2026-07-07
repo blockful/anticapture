@@ -40,6 +40,27 @@ const LIGHT_THEME_VARIABLES = {
   "--radius-base": "8px",
 } satisfies Record<string, string>;
 
+const relativeLuminance = (hex: string) => {
+  const value = hex.replace("#", "");
+  const [red, green, blue] = [0, 2, 4].map((offset) => {
+    const channel = parseInt(value.slice(offset, offset + 2), 16) / 255;
+    return channel <= 0.03928
+      ? channel / 12.92
+      : Math.pow((channel + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+};
+
+const contrastRatio = (hexA: string, hexB: string) => {
+  const [lighter, darker] = [relativeLuminance(hexA), relativeLuminance(hexB)]
+    .sort((a, b) => b - a)
+    .map((luminance) => luminance + 0.05);
+  return lighter / darker;
+};
+
+// Below this ratio against body text, links would read as plain text
+const MIN_LINK_CONTRAST = 2;
+
 const withBrandColor = ({
   daoId,
   variables,
@@ -49,6 +70,12 @@ const withBrandColor = ({
 }) => {
   const daoConfig = daoConfigByDaoId[daoId];
   const brandColor = daoConfig.color.svgColor;
+  // Near-black brand colors (e.g. Shutter navy) are indistinguishable from
+  // body text, so text-level tokens get the lightened mix instead
+  const textBrandColor =
+    contrastRatio(brandColor, variables["--base-primary"]) < MIN_LINK_CONTRAST
+      ? `color-mix(in srgb, ${brandColor} 70%, white)`
+      : brandColor;
 
   return {
     ...variables,
@@ -56,9 +83,9 @@ const withBrandColor = ({
     "--base-brand-lighter": `color-mix(in srgb, ${brandColor} 70%, white)`,
     "--base-brand-opacity": `color-mix(in srgb, ${brandColor} 12%, transparent)`,
     "--color-tangerine": brandColor,
-    "--color-link": brandColor,
-    "--color-link-hover": brandColor,
-    "--color-highlight": brandColor,
+    "--color-link": textBrandColor,
+    "--color-link-hover": textBrandColor,
+    "--color-highlight": textBrandColor,
     "--color-surface-solid-brand": brandColor,
     "--color-surface-opacity-brand": `color-mix(in srgb, ${brandColor} 12%, transparent)`,
     "--color-surface-action": brandColor,
