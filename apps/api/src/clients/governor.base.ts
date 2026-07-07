@@ -40,10 +40,19 @@ export abstract class GovernorBase<
     timelockDelay?: bigint;
     executionPeriod?: bigint;
   } = {};
+  private latestBlockCache:
+    | { number: number; timestamp: number | null; expiresAt: number }
+    | undefined;
+  private latestBlockFetch: Promise<{
+    number: number;
+    timestamp: number | null;
+  }> | null = null;
   private readonly quorumCache = new Map<
     string,
     { value: bigint; expiresAt: number }
   >();
+  private readonly quorumRefreshes = new Map<string, Promise<void>>();
+  private readonly latestBlockCacheTtlMs = 7_000;
   private readonly quorumCacheTtlMs: number;
 
   protected abstract address: Address;
@@ -68,6 +77,11 @@ export abstract class GovernorBase<
       return cached.value;
     }
 
+    if (cached) {
+      this.refreshCachedQuorum(fetcher, cacheKey);
+      return cached.value;
+    }
+
     const quorum = await fetcher();
     this.quorumCache.set(cacheKey, {
       value: quorum,
@@ -75,6 +89,31 @@ export abstract class GovernorBase<
     });
 
     return quorum;
+  }
+
+  private refreshCachedQuorum(
+    fetcher: () => Promise<bigint>,
+    cacheKey: string,
+  ): void {
+    if (this.quorumRefreshes.has(cacheKey)) {
+      return;
+    }
+
+    const refresh = fetcher()
+      .then((quorum) => {
+        this.quorumCache.set(cacheKey, {
+          value: quorum,
+          expiresAt: Date.now() + this.quorumCacheTtlMs,
+        });
+      })
+      .catch((error: Error) => {
+        logger.warn({ error, cacheKey }, "Failed to refresh quorum cache");
+      })
+      .finally(() => {
+        this.quorumRefreshes.delete(cacheKey);
+      });
+
+    this.quorumRefreshes.set(cacheKey, refresh);
   }
 
   async getProposalThreshold(): Promise<bigint> {
@@ -225,10 +264,8 @@ export abstract class GovernorBase<
   }
 
   protected async getBlockNumber(): Promise<bigint> {
-    rpcRequestTotal.add(1, { method: "eth_blockNumber" });
-    logger.info("RPC eth_blockNumber: fetching latest block number");
-    const result = await this.client.request({ method: "eth_blockNumber" });
-    return BigInt(result);
+    const block = await this.getLatestBlock();
+    return BigInt(block.number);
   }
 
   alreadySupportCalldataReview(): boolean {
@@ -240,15 +277,17 @@ export abstract class GovernorBase<
   }
 
   async getCurrentBlockNumber(): Promise<number> {
-    rpcRequestTotal.add(1, { method: "eth_blockNumber" });
-    logger.info("RPC eth_blockNumber: fetching current block number");
-    const result = await this.client.request({
-      method: "eth_blockNumber",
-    });
-    return fromHex(result, "number");
+    const block = await this.getLatestBlock();
+    return block.number;
   }
 
   async getBlockTime(blockNumber: number): Promise<number | null> {
+    const cached = this.latestBlockCache;
+
+    if (cached && cached.number === blockNumber) {
+      return cached.timestamp;
+    }
+
     rpcRequestTotal.add(1, { method: "eth_getBlockByNumber" });
     logger.info({ blockNumber }, "RPC eth_getBlockByNumber: fetching block");
     const block = await this.client.request({
@@ -256,5 +295,53 @@ export abstract class GovernorBase<
       params: [toHex(blockNumber), false],
     });
     return block?.timestamp ? fromHex(block.timestamp, "number") : null;
+  }
+
+  private async getLatestBlock(): Promise<{
+    number: number;
+    timestamp: number | null;
+  }> {
+    const cached = this.latestBlockCache;
+    const now = Date.now();
+
+    if (cached && cached.expiresAt > now) {
+      return { number: cached.number, timestamp: cached.timestamp };
+    }
+
+    if (!this.latestBlockFetch) {
+      this.latestBlockFetch = this.fetchLatestBlock().finally(() => {
+        this.latestBlockFetch = null;
+      });
+    }
+
+    return this.latestBlockFetch;
+  }
+
+  private async fetchLatestBlock(): Promise<{
+    number: number;
+    timestamp: number | null;
+  }> {
+    rpcRequestTotal.add(1, { method: "eth_getBlockByNumber" });
+    logger.info("RPC eth_getBlockByNumber: fetching latest block");
+    const block = await this.client.request({
+      method: "eth_getBlockByNumber",
+      params: ["latest", false],
+    });
+
+    if (!block?.number) {
+      throw new Error("Latest block response missing block number");
+    }
+
+    const latestBlock = {
+      number: fromHex(block.number, "number"),
+      timestamp: block?.timestamp ? fromHex(block.timestamp, "number") : null,
+    };
+
+    this.latestBlockCache = {
+      ...latestBlock,
+      expiresAt: Date.now() + this.latestBlockCacheTtlMs,
+    };
+
+    return latestBlock;
   }
 }

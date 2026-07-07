@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 
+import { tokenValidationRequestTotal } from "@/metrics";
 import type { DBToken, TokensRepository } from "@/repositories/tokens";
 
 export const TOKEN_PREFIX = "act_";
@@ -26,6 +27,7 @@ export type ValidationResult =
       valid: true;
       tokenId: string;
       tenant: string;
+      name: string;
       rateLimitPerMin: number;
     };
 
@@ -80,12 +82,21 @@ export class TokensService {
 
   async validate(tokenHash: string): Promise<ValidationResult> {
     const token = await this.repo.findActiveByHash(tokenHash);
-    if (!token) return { valid: false };
+    if (!token) {
+      tokenValidationRequestTotal.add(1, { result: "invalid" });
+      return { valid: false };
+    }
     await this.repo.touchLastUsed(token.id);
+    tokenValidationRequestTotal.add(1, {
+      tenant: token.tenant,
+      name: token.name,
+      result: "valid",
+    });
     return {
       valid: true,
       tokenId: token.id,
       tenant: token.tenant,
+      name: token.name,
       rateLimitPerMin: token.rateLimitPerMin,
     };
   }

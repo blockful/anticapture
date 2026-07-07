@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ActivityFeedSection } from "@/features/feed";
+import { ForceErrorTrigger } from "@/shared/components/errors/ForceErrorTrigger";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { toDaoIdEnum } from "@/shared/types/daos";
 
@@ -44,7 +45,12 @@ export default async function ActivityFeedPage({
     redirect(`/${daoId}`);
   }
 
-  return <ActivityFeedSection feedDaoId={feedDaoId} />;
+  return (
+    <>
+      <ForceErrorTrigger />
+      <ActivityFeedSection feedDaoId={feedDaoId} />
+    </>
+  );
 }
 
 type Props = {

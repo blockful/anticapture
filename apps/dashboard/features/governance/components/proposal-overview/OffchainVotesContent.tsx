@@ -18,6 +18,7 @@ import { VotesTable } from "@/features/governance/components/proposal-overview/V
 import { getOffchainVoteFullLabel } from "@/features/governance/utils/offchainVoteLabel";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { FetchErrorState } from "@/shared/components/errors/FetchErrorState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
@@ -100,6 +101,7 @@ export const OffchainVotesContent = ({
     isLoading: loading,
     error,
     fetchNextPage,
+    refetch,
     hasNextPage,
     isFetchingNextPage,
   } = useVotesOffchainByProposalIdInfinite(
@@ -118,6 +120,10 @@ export const OffchainVotesContent = ({
   // true -> false on each page, re-running this effect so the observer
   // re-attaches to the freshly rendered sentinel (mirrors the on-chain votes).
   useEffect(() => {
+    // Paused while errored so a failed page fetch doesn't auto-retry in a
+    // loop; the user retries instead.
+    if (error) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -128,7 +134,7 @@ export const OffchainVotesContent = ({
     );
     if (loadingRowRef.current) observer.observe(loadingRowRef.current);
     return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, error]);
 
   const tableData = useMemo(() => {
     const rows: OffchainVoteRow[] = [];
@@ -147,7 +153,7 @@ export const OffchainVotesContent = ({
       }
     });
 
-    if (hasNextPage || isFetchingNextPage) {
+    if ((hasNextPage || isFetchingNextPage) && !error) {
       rows.push({
         voter: LOADING_ROW,
         choice: [],
@@ -158,7 +164,7 @@ export const OffchainVotesContent = ({
     }
 
     return rows;
-  }, [votes, hasNextPage, isFetchingNextPage]);
+  }, [votes, hasNextPage, isFetchingNextPage, error]);
 
   const columns: ColumnDef<OffchainVoteRow>[] = useMemo(
     () => [
@@ -388,12 +394,14 @@ export const OffchainVotesContent = ({
     ],
   );
 
-  if (error)
+  if (error && votes.length === 0) {
     return (
-      <div>
-        Error: {error instanceof Error ? error.message : "Failed to load votes"}
-      </div>
+      <FetchErrorState
+        message="Failed to load votes"
+        onRetry={() => refetch()}
+      />
     );
+  }
 
   if (loading && votes.length === 0) {
     return (
@@ -419,6 +427,13 @@ export const OffchainVotesContent = ({
           />
         }
       />
+      {error && (
+        <FetchErrorState
+          message="Failed to load more votes"
+          onRetry={() => fetchNextPage()}
+          className="py-4"
+        />
+      )}
     </div>
   );
 };

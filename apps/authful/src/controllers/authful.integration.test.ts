@@ -3,12 +3,21 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { pushSchema } from "drizzle-kit/api";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import { createApp } from "@/app";
 import type { AuthfulDrizzle } from "@/database";
 import * as schema from "@/database/schema";
 import { tokens } from "@/database/schema";
+import { tokenValidationRequestTotal } from "@/metrics";
 import { TokensRepository } from "@/repositories/tokens";
 import { TokensService, hashToken } from "@/services/tokens";
 
@@ -128,6 +137,14 @@ describe("authful app", () => {
       const [row] = await db.select().from(tokens);
       expect(row!.tokenHash).toBe(hashToken(body.token));
       expect(JSON.stringify(row)).not.toContain(body.token);
+    });
+
+    it("accepts rateLimitPerMin 0 to mint an unbounded token", async () => {
+      const body = await mint({ rateLimitPerMin: 0 });
+      expect(body.rateLimitPerMin).toBe(0);
+
+      const [row] = await db.select().from(tokens);
+      expect(row!.rateLimitPerMin).toBe(0);
     });
 
     it("rejects a body sent without a JSON content-type (no silent {})", async () => {
@@ -254,6 +271,7 @@ describe("authful app", () => {
         valid: true,
         tokenId: minted.id,
         tenant: "uniswap",
+        name: "uniswap mcp",
         rateLimitPerMin: 900,
       });
 
@@ -264,13 +282,32 @@ describe("authful app", () => {
       expect(row!.lastUsedAt).not.toBeNull();
     });
 
+    it("counts valid token validations by tenant and token name", async () => {
+      const add = vi.spyOn(tokenValidationRequestTotal, "add");
+      const minted = await mint({ name: "prod mcp" });
+
+      await app.request("/validate", {
+        method: "POST",
+        headers: internalHeaders,
+        body: JSON.stringify({ tokenHash: hashToken(minted.token) }),
+      });
+
+      expect(add).toHaveBeenCalledWith(1, {
+        tenant: "uniswap",
+        name: "prod mcp",
+        result: "valid",
+      });
+    });
+
     it("rejects an unknown hash", async () => {
+      const add = vi.spyOn(tokenValidationRequestTotal, "add");
       const res = await app.request("/validate", {
         method: "POST",
         headers: internalHeaders,
         body: JSON.stringify({ tokenHash: hashToken("never-minted") }),
       });
       await expect(res.json()).resolves.toEqual({ valid: false });
+      expect(add).toHaveBeenCalledWith(1, { result: "invalid" });
     });
   });
 });

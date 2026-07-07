@@ -270,6 +270,7 @@ fi
 start_relayer
 
 # 6. Gateful
+export GATEFUL_AUTH_DISABLED=true
 start_gateful
 
 # 7. Clients — codegen + build watch

@@ -10,6 +10,7 @@ const DAO_APIS = new Map([["ens", "http://ens.internal"]]);
 const AUTH: AuthContext = {
   tokenId: "11111111-1111-1111-1111-111111111111",
   tenant: "uniswap",
+  name: "uniswap mcp",
   rateLimitPerMin: 600,
 };
 
@@ -57,6 +58,7 @@ describe("usageMiddleware", () => {
 
     expect(add).toHaveBeenCalledWith(1, {
       tenant: AUTH.tenant,
+      name: AUTH.name,
       route: "/{dao}/*",
     });
   });
@@ -87,6 +89,7 @@ describe("usageMiddleware", () => {
 
     expect(add).toHaveBeenCalledWith(1, {
       tenant: AUTH.tenant,
+      name: AUTH.name,
       route: "/{dao}/*",
     });
   });
