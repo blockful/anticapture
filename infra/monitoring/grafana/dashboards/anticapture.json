@@ -102,8 +102,8 @@
       "description": "Indexer OTel and Ponder scrape failures.",
       "type": "stat",
       "gridPos": {
-        "x": 4,
-        "y": 0,
+        "x": 0,
+        "y": 4,
         "w": 4,
         "h": 4
       },
@@ -159,8 +159,8 @@
       "description": "Gateful, Authful, relayer, eRPC, Tempo scrape failures.",
       "type": "stat",
       "gridPos": {
-        "x": 8,
-        "y": 0,
+        "x": 0,
+        "y": 8,
         "w": 4,
         "h": 4
       },
@@ -216,9 +216,9 @@
       "description": "DAO API request rate for selected DAO(s).",
       "type": "stat",
       "gridPos": {
-        "x": 12,
+        "x": 4,
         "y": 0,
-        "w": 4,
+        "w": 7,
         "h": 4
       },
       "datasource": {
@@ -269,9 +269,9 @@
       "description": "DAO API + Gateful + Authful 5xx ratio.",
       "type": "stat",
       "gridPos": {
-        "x": 16,
+        "x": 11,
         "y": 0,
-        "w": 4,
+        "w": 7,
         "h": 4
       },
       "datasource": {
@@ -330,9 +330,9 @@
       "description": "Gateful cache hit ratio; idle cache shows 0 instead of no data.",
       "type": "stat",
       "gridPos": {
-        "x": 20,
+        "x": 18,
         "y": 0,
-        "w": 4,
+        "w": 6,
         "h": 4
       },
       "datasource": {
@@ -392,7 +392,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 4,
+        "y": 12,
         "w": 24,
         "h": 1
       },
@@ -405,7 +405,7 @@
       "type": "stat",
       "gridPos": {
         "x": 0,
-        "y": 5,
+        "y": 13,
         "w": 8,
         "h": 6
       },
@@ -481,7 +481,7 @@
       "type": "stat",
       "gridPos": {
         "x": 8,
-        "y": 5,
+        "y": 13,
         "w": 8,
         "h": 6
       },
@@ -557,7 +557,7 @@
       "type": "stat",
       "gridPos": {
         "x": 16,
-        "y": 5,
+        "y": 13,
         "w": 8,
         "h": 6
       },
@@ -633,7 +633,7 @@
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 11,
+        "y": 19,
         "w": 24,
         "h": 6
       },
@@ -705,7 +705,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 17,
+        "y": 25,
         "w": 24,
         "h": 1
       },
@@ -718,7 +718,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 18,
+        "y": 26,
         "w": 8,
         "h": 8
       },
@@ -761,7 +761,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 18,
+        "y": 26,
         "w": 8,
         "h": 8
       },
@@ -804,7 +804,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 18,
+        "y": 26,
         "w": 8,
         "h": 8
       },
@@ -857,7 +857,7 @@
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 26,
+        "y": 34,
         "w": 16,
         "h": 8
       },
@@ -943,7 +943,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 26,
+        "y": 34,
         "w": 8,
         "h": 8
       },
@@ -986,7 +986,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 34,
+        "y": 42,
         "w": 24,
         "h": 1
       },
@@ -999,7 +999,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 35,
+        "y": 43,
         "w": 8,
         "h": 7
       },
@@ -1042,7 +1042,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 35,
+        "y": 43,
         "w": 8,
         "h": 7
       },
@@ -1085,7 +1085,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 35,
+        "y": 43,
         "w": 8,
         "h": 7
       },
@@ -1128,7 +1128,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 42,
+        "y": 50,
         "w": 8,
         "h": 7
       },
@@ -1171,7 +1171,7 @@
       "type": "table",
       "gridPos": {
         "x": 8,
-        "y": 42,
+        "y": 50,
         "w": 16,
         "h": 7
       },
@@ -1240,7 +1240,7 @@
       "type": "table",
       "gridPos": {
         "x": 0,
-        "y": 49,
+        "y": 57,
         "w": 12,
         "h": 6
       },
@@ -1308,7 +1308,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 49,
+        "y": 57,
         "w": 12,
         "h": 6
       },
@@ -1350,13 +1350,131 @@
       ]
     },
     {
+      "id": 38,
+      "title": "Gateful Requests by Token",
+      "description": "Authenticated Gateful requests over the selected range, grouped by Authful token name.",
+      "type": "piechart",
+      "gridPos": {
+        "x": 0,
+        "y": 63,
+        "w": 6,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["value", "percent"]
+        },
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(tenant_requests_total{job=\"anticapture-gateful\"}[$__range])) by (name)",
+          "legendFormat": "{{name}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "title": "Gateful Requests by Tenant",
+      "description": "Authenticated Gateful requests over the selected range, grouped by tenant.",
+      "type": "piechart",
+      "gridPos": {
+        "x": 6,
+        "y": 63,
+        "w": 6,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["value", "percent"]
+        },
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(tenant_requests_total{job=\"anticapture-gateful\"}[$__range])) by (tenant)",
+          "legendFormat": "{{tenant}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
       "id": 40,
       "title": "Indexing",
       "type": "row",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 55,
+        "y": 71,
         "w": 24,
         "h": 1
       },
@@ -1369,7 +1487,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 56,
+        "y": 72,
         "w": 8,
         "h": 7
       },
@@ -1412,7 +1530,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 56,
+        "y": 72,
         "w": 8,
         "h": 7
       },
@@ -1455,7 +1573,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 56,
+        "y": 72,
         "w": 8,
         "h": 7
       },
@@ -1498,7 +1616,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 63,
+        "y": 79,
         "w": 12,
         "h": 7
       },
@@ -1546,7 +1664,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 63,
+        "y": 79,
         "w": 12,
         "h": 7
       },
@@ -1589,7 +1707,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 70,
+        "y": 86,
         "w": 24,
         "h": 1
       },
@@ -1602,7 +1720,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 71,
+        "y": 87,
         "w": 8,
         "h": 7
       },
@@ -1645,7 +1763,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 71,
+        "y": 87,
         "w": 8,
         "h": 7
       },
@@ -1693,7 +1811,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 71,
+        "y": 87,
         "w": 8,
         "h": 7
       },
@@ -1736,7 +1854,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 78,
+        "y": 94,
         "w": 8,
         "h": 7
       },
@@ -1779,7 +1897,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 8,
-        "y": 78,
+        "y": 94,
         "w": 8,
         "h": 7
       },
@@ -1822,7 +1940,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 16,
-        "y": 78,
+        "y": 94,
         "w": 8,
         "h": 7
       },
@@ -1865,7 +1983,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 85,
+        "y": 101,
         "w": 24,
         "h": 1
       },
@@ -1878,7 +1996,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 86,
+        "y": 102,
         "w": 8,
         "h": 7
       },
@@ -1920,7 +2038,7 @@
       "type": "logs",
       "gridPos": {
         "x": 8,
-        "y": 86,
+        "y": 102,
         "w": 16,
         "h": 7
       },
@@ -1954,7 +2072,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 93,
+        "y": 109,
         "w": 24,
         "h": 1
       },
@@ -1967,7 +2085,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 94,
+        "y": 110,
         "w": 12,
         "h": 7
       },
@@ -2010,7 +2128,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 94,
+        "y": 110,
         "w": 12,
         "h": 7
       },
@@ -2053,7 +2171,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 101,
+        "y": 117,
         "w": 24,
         "h": 1
       },
@@ -2065,7 +2183,7 @@
       "type": "traces",
       "gridPos": {
         "x": 0,
-        "y": 102,
+        "y": 118,
         "w": 24,
         "h": 10
       },
