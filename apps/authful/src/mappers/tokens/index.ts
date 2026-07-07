@@ -56,6 +56,7 @@ export const ValidateResponseSchema = z
       valid: z.literal(true),
       tokenId: z.uuid(),
       tenant: z.string(),
+      name: z.string(),
       rateLimitPerMin: z.number().int(),
     }),
   ])

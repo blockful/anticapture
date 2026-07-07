@@ -30,6 +30,7 @@ const VALID: TokenValidation = {
   valid: true,
   tokenId: "11111111-1111-1111-1111-111111111111",
   tenant: "uniswap",
+  name: "uniswap mcp",
   rateLimitPerMin: 600,
 };
 
@@ -128,6 +129,27 @@ describe("tokenAuthMiddleware", () => {
     await redis.set(
       `token:${hashBearerToken("tenant-token")}`,
       JSON.stringify(VALID),
+    );
+    const client = fakeClient(() => Promise.reject(new Error("down")));
+
+    const res = await buildApp(client, redis).request(
+      "/protected",
+      withBearer("tenant-token"),
+    );
+    expect(res.status).toBe(200);
+    expect(client.validate).not.toHaveBeenCalled();
+  });
+
+  it("serves legacy cached tokens without a name through an Authful outage", async () => {
+    const redis = new FakeRedis();
+    await redis.set(
+      `token:${hashBearerToken("tenant-token")}`,
+      JSON.stringify({
+        valid: true,
+        tokenId: VALID.tokenId,
+        tenant: VALID.tenant,
+        rateLimitPerMin: VALID.rateLimitPerMin,
+      }),
     );
     const client = fakeClient(() => Promise.reject(new Error("down")));
 
