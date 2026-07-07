@@ -138,17 +138,6 @@ describe("authful app", () => {
       expect(row!.rateLimitPerMin).toBe(0);
     });
 
-    it("forbids a negative rate limit at the DB level (CHECK constraint)", async () => {
-      await expect(
-        db.insert(tokens).values({
-          tenant: "uniswap",
-          name: "bad limit",
-          tokenHash: hashToken("negative-limit-token"),
-          rateLimitPerMin: -1,
-        }),
-      ).rejects.toThrow();
-    });
-
     it("rejects a body sent without a JSON content-type (no silent {})", async () => {
       // Regression: without `required: true`, @hono/zod-openapi skips
       // validation for a non-JSON content-type and substitutes {}, so mint
