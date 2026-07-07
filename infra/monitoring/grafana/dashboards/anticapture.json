@@ -4,574 +4,907 @@
   "editable": true,
   "schemaVersion": 38,
   "version": 1,
-  "refresh": "15s",
+  "refresh": "30s",
+  "tags": ["anticapture"],
   "time": {
-    "from": "now-30m",
+    "from": "now-1h",
     "to": "now"
   },
   "panels": [
     {
       "id": 1,
-      "title": "Request Rate (req/s)",
-      "type": "timeseries",
-      "gridPos": {
-        "x": 0,
-        "y": 0,
-        "w": 8,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "title": "Services Down",
+      "description": "Count of anticapture services failing their Prometheus scrape. Anything above 0 is red.",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps",
-          "color": {
-            "mode": "palette-classic"
-          }
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
-        }
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count[1m])) by (http_route, http_request_method)",
-          "legendFormat": "{{http_request_method}} {{http_route}}",
+          "expr": "count(up{job=~\"anticapture-.*\"} == 0) or vector(0)",
+          "instant": true,
           "refId": "A"
         }
       ]
     },
     {
       "id": 2,
-      "title": "Error Rate (5xx)",
-      "type": "timeseries",
-      "gridPos": {
-        "x": 8,
-        "y": 0,
-        "w": 8,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "title": "API Requests",
+      "description": "Total request rate across all DAO APIs (5m average).",
+      "type": "stat",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
           "unit": "reqps",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "red"
-          }
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          },
+          "color": { "mode": "thresholds" }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
-        }
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[1m])) by (http_route)",
-          "legendFormat": "5xx {{http_route}}",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m]))",
           "refId": "A"
         }
       ]
     },
     {
       "id": 3,
-      "title": "P99 / P95 / P50 Latency",
-      "type": "timeseries",
-      "gridPos": {
-        "x": 16,
-        "y": 0,
-        "w": 8,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "title": "API Error Rate",
+      "description": "Share of DAO API requests returning 5xx (5m average). Green <1%, yellow <5%, red ≥5%.",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "color": {
-            "mode": "palette-classic"
-          }
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.01 },
+              { "color": "red", "value": 0.05 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
-        }
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p99",
+          "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\",http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m]))",
           "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p95",
-          "refId": "B"
-        },
-        {
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p50",
-          "refId": "C"
         }
       ]
     },
     {
       "id": 4,
-      "title": "Latency by Route (p99)",
-      "type": "timeseries",
-      "gridPos": {
-        "x": 0,
-        "y": 8,
-        "w": 16,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "title": "API p99 Latency",
+      "description": "99th percentile latency across all DAO APIs (5m window). Green <500ms, yellow <2s, red ≥2s.",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "color": {
-            "mode": "palette-classic"
-          }
+          "decimals": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "red", "value": 2 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
-        }
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le, http_route))",
-          "legendFormat": "p99 {{http_route}}",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
           "refId": "A"
         }
       ]
     },
     {
       "id": 5,
-      "title": "Status Code Breakdown",
-      "type": "piechart",
-      "gridPos": {
-        "x": 16,
-        "y": 8,
-        "w": 8,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "title": "Cache Hit Rate",
+      "description": "Gateful cache hit ratio across all routes (5m average). Red <50%, yellow <80%, green ≥80%.",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          }
+          "unit": "percentunit",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "green", "value": 0.8 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
         },
         "overrides": []
       },
       "options": {
-        "pieType": "donut",
-        "tooltip": {
-          "mode": "multi"
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
         },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
+        "textMode": "value"
       },
       "targets": [
         {
-          "expr": "sum(increase(http_server_request_duration_seconds_count[5m])) by (http_response_status_code)",
-          "legendFormat": "{{http_response_status_code}}",
+          "expr": "sum(rate(cache_requests_total{job=\"anticapture-gateful\",result=\"hit\"}[5m])) / sum(rate(cache_requests_total{job=\"anticapture-gateful\"}[5m]))",
           "refId": "A"
         }
       ]
     },
     {
       "id": 6,
-      "title": "Trace Search — open a trace in Tempo",
-      "type": "text",
-      "gridPos": {
-        "x": 0,
-        "y": 16,
-        "w": 24,
-        "h": 3
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "To inspect individual traces: **Explore → Tempo** datasource → Service Name: `anticapture-api` or `anticapture-indexer` → Run query → click any row."
-      }
-    },
-    {
-      "id": 7,
-      "type": "timeseries",
-      "title": "RPC request rate",
-      "gridPos": {
-        "h": 8,
-        "w": 16,
-        "x": 0,
-        "y": 43
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "targets": [
-        {
-          "expr": "sum by (method) (rate(rpc_requests_total[5m]))",
-          "legendFormat": "{{method}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "pointSize": 5,
-            "showPoints": "never",
-            "axisPlacement": "auto",
-            "axisLabel": "",
-            "axisColorMode": "text",
-            "axisCenteredZero": false,
-            "barAlignment": 0,
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "unit": "reqps",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        }
-      }
-    },
-    {
-      "id": 8,
+      "title": "eRPC Critical Errors (5m)",
+      "description": "Critical network-level + upstream-level eRPC errors in the last 5 minutes. Anything above 0 is red.",
       "type": "stat",
-      "title": "RPC requests total",
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 43
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "targets": [
-        {
-          "expr": "sum by (method) (rpc_requests_total)",
-          "legendFormat": "{{method}}",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
+          "unit": "short",
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
             ]
-          }
+          },
+          "color": { "mode": "thresholds" }
         },
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "vertical",
+        "justifyMode": "center",
         "reduceOptions": {
           "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.0.0"
-    },
-    {
-      "id": 9,
-      "title": "Process CPU Usage %",
-      "type": "timeseries",
-      "gridPos": {
-        "x": 0,
-        "y": 19,
-        "w": 12,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percentunit",
-          "min": 0,
-          "max": 1,
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        }
+        "textMode": "value"
       },
       "targets": [
         {
-          "expr": "sum(process_cpu_utilization) by (job, process_cpu_state)",
-          "legendFormat": "{{job}} - {{process_cpu_state}}",
+          "expr": "(sum(increase(erpc_network_failed_request_total{job=\"anticapture-erpc\",severity=\"critical\"}[5m])) or vector(0)) + (sum(increase(erpc_upstream_request_errors_total{job=\"anticapture-erpc\",severity=\"critical\",composite=\"none\"}[5m])) or vector(0))",
           "refId": "A"
         }
       ]
     },
     {
       "id": 10,
-      "title": "Process Memory Usage",
-      "type": "timeseries",
-      "gridPos": {
-        "x": 12,
-        "y": 19,
-        "w": 12,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "title": "Service Health",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 11,
+      "title": "Scrape Status — all services",
+      "description": "One cell per scraped service (APIs, indexers, gateful, authful, erpc). Green UP / red DOWN.",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
-          "color": {
-            "mode": "palette-classic"
-          }
+          "mappings": [
+            {
+              "type": "value",
+              "options": { "1": { "text": "UP", "color": "green" } }
+            },
+            {
+              "type": "value",
+              "options": { "0": { "text": "DOWN", "color": "red" } }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
-        }
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
       },
       "targets": [
         {
-          "expr": "sum(process_memory_usage) by (job, process_memory_type)",
-          "legendFormat": "{{job}} - {{process_memory_type}}",
+          "expr": "label_replace(up{job=~\"anticapture-.*\"}, \"service\", \"$1\", \"job\", \"anticapture-(.*)\")",
+          "legendFormat": "{{service}}",
           "refId": "A"
         }
       ]
     },
     {
-      "id": 11,
-      "title": "System CPU Usage %",
+      "id": 20,
+      "title": "API Traffic",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 11, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 21,
+      "title": "Request Rate by DAO",
       "type": "timeseries",
-      "gridPos": {
-        "x": 0,
-        "y": 27,
-        "w": 12,
-        "h": 8
+      "gridPos": { "x": 0, "y": 12, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
       },
+      "targets": [
+        {
+          "expr": "label_replace(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Error Rate (5xx) by DAO",
+      "description": "Empty panel = no 5xx errors in the selected window.",
+      "type": "timeseries",
+      "gridPos": { "x": 8, "y": 12, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "label_replace(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\",http_response_status_code=~\"5..\"}[5m])), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\") > 0",
+          "legendFormat": "{{dao}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "API Latency (p50 / p95 / p99)",
+      "type": "timeseries",
+      "gridPos": { "x": 16, "y": 12, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
+          "legendFormat": "p99",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le))",
+          "legendFormat": "p50",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "Active Routes — req/s / p99 / error ratio",
+      "description": "Only routes with traffic in the last 5 minutes. One row per (DAO, route). Error ratio cell is threshold-colored: green <1%, yellow <5%, red ≥5%.",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "req/s" },
+            "properties": [
+              { "id": "unit", "value": "reqps" },
+              { "id": "decimals", "value": 3 },
+              { "id": "custom.width", "value": 100 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "p99 latency" },
+            "properties": [
+              { "id": "unit", "value": "s" },
+              { "id": "decimals", "value": 3 },
+              { "id": "custom.width", "value": 120 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "error ratio" },
+            "properties": [
+              { "id": "unit", "value": "percentunit" },
+              { "id": "decimals", "value": 2 },
+              { "id": "custom.width", "value": 120 },
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-background" }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 0.01 },
+                    { "color": "red", "value": 0.05 }
+                  ]
+                }
+              },
+              { "id": "color", "value": { "mode": "thresholds" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "sortBy": [{ "displayName": "error ratio", "desc": true }],
+        "footer": { "show": false },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "transformations": [
+        { "id": "merge", "options": {} },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "job": true
+            },
+            "renameByName": {
+              "Value #A": "req/s",
+              "Value #B": "p99 latency",
+              "Value #C": "error ratio",
+              "dao": "DAO",
+              "http_route": "route"
+            }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "expr": "label_replace(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route) > 0, \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
+          "instant": true,
+          "refId": "A",
+          "format": "table"
+        },
+        {
+          "expr": "label_replace(histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{job=~\"anticapture-.*-api\"}[5m])) by (le, job, http_route)) and sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route) > 0, \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
+          "instant": true,
+          "refId": "B",
+          "format": "table"
+        },
+        {
+          "expr": "label_replace((sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\",http_response_status_code=~\"5..\"}[5m])) by (job, http_route) or sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route) * 0) / (sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-.*-api\"}[5m])) by (job, http_route) > 0), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "legendFormat": "{{dao}}|{{http_route}}",
+          "instant": true,
+          "refId": "C",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "title": "Gateway (Gateful)",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 29, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 31,
+      "title": "Cache Hit Rate by Route",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 30, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
           "unit": "percentunit",
           "min": 0,
           "max": 1,
-          "color": {
-            "mode": "palette-classic"
-          }
+          "color": { "mode": "palette-classic" }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         }
       },
       "targets": [
         {
-          "expr": "sum(system_cpu_utilization) by (system_cpu_state)",
-          "legendFormat": "{{system_cpu_state}}",
+          "expr": "sum(rate(cache_requests_total{job=\"anticapture-gateful\",result=\"hit\"}[5m])) by (route) / sum(rate(cache_requests_total{job=\"anticapture-gateful\"}[5m])) by (route)",
+          "legendFormat": "{{route}}",
           "refId": "A"
         }
       ]
     },
     {
-      "id": 12,
-      "title": "System Memory Usage",
+      "id": 32,
+      "title": "Cache Hits vs Misses",
       "type": "timeseries",
-      "gridPos": {
-        "x": 12,
-        "y": 27,
-        "w": 12,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "gridPos": { "x": 8, "y": 30, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
-          "color": {
-            "mode": "palette-classic"
-          }
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "stacking": { "mode": "normal" }
+          },
+          "color": { "mode": "palette-classic" }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "hit" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "mode": "fixed", "fixedColor": "green" }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "miss" },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "mode": "fixed", "fixedColor": "red" }
+              }
+            ]
+          }
+        ]
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         }
       },
       "targets": [
         {
-          "expr": "sum(system_memory_usage) by (system_memory_state)",
-          "legendFormat": "{{system_memory_state}}",
+          "expr": "sum(rate(cache_requests_total{job=\"anticapture-gateful\"}[5m])) by (result)",
+          "legendFormat": "{{result}}",
           "refId": "A"
         }
       ]
     },
     {
-      "id": 13,
-      "title": "Network I/O",
+      "id": 33,
+      "title": "Requests by Client Source",
       "type": "timeseries",
-      "gridPos": {
-        "x": 0,
-        "y": 35,
-        "w": 12,
-        "h": 8
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "gridPos": { "x": 16, "y": 30, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
-          "color": {
-            "mode": "palette-classic"
-          }
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         }
       },
       "targets": [
         {
-          "expr": "sum(rate(system_network_io_total[1m])) by (network_io_direction)",
-          "legendFormat": "{{network_io_direction}}",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"anticapture-gateful\"}[5m])) by (client_source)",
+          "legendFormat": "{{client_source}}",
           "refId": "A"
         }
       ]
     },
     {
-      "id": 14,
-      "title": "Network Errors & Drops",
+      "id": 34,
+      "title": "Requests by Tenant & Route",
+      "description": "Authenticated request totals over the selected time range. Who is using what.",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 38, "w": 24, "h": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "filterable": true
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "sortBy": [{ "displayName": "requests", "desc": true }],
+        "footer": { "show": false },
+        "showHeader": true
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": { "Time": true },
+            "renameByName": {
+              "Value #A": "requests",
+              "route": "route",
+              "tenant": "tenant"
+            }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "expr": "sum(increase(tenant_requests_total{job=\"anticapture-gateful\"}[$__range])) by (route, tenant)",
+          "legendFormat": "{{tenant}}|{{route}}",
+          "instant": true,
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "title": "eRPC (Upstream RPC)",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 44, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 41,
+      "title": "Incoming RPS",
       "type": "timeseries",
-      "gridPos": {
-        "x": 12,
-        "y": 35,
-        "w": 12,
-        "h": 8
+      "gridPos": { "x": 0, "y": 45, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
       },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
       },
+      "targets": [
+        {
+          "expr": "sum(rate(erpc_network_request_received_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (network, category)",
+          "legendFormat": "{{network}} / {{category}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "title": "Critical Errors",
+      "description": "Network-level and upstream-level critical errors. Empty panel = no critical errors in the selected window.",
+      "type": "timeseries",
+      "gridPos": { "x": 8, "y": 45, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          }
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60
+          },
+          "color": { "mode": "palette-classic" }
         },
         "overrides": []
       },
       "options": {
-        "tooltip": {
-          "mode": "multi"
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         }
       },
       "targets": [
         {
-          "expr": "sum(rate(system_network_errors_total[1m])) by (network_io_direction)",
-          "legendFormat": "errors {{network_io_direction}}",
+          "expr": "sum(increase(erpc_network_failed_request_total{job=\"anticapture-erpc\", severity=\"critical\"}[$__rate_interval])) by (network, error) > 0",
+          "legendFormat": "net {{network}} / {{error}}",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(system_network_dropped_total[1m])) by (network_io_direction)",
-          "legendFormat": "drops {{network_io_direction}}",
+          "expr": "sum(increase(erpc_upstream_request_errors_total{job=\"anticapture-erpc\", severity=\"critical\", composite=\"none\"}[$__rate_interval])) by (upstream, error) > 0",
+          "legendFormat": "{{upstream}} / {{error}}",
           "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "title": "Upstream p99 Response Time",
+      "type": "timeseries",
+      "gridPos": { "x": 16, "y": 45, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(erpc_upstream_request_duration_seconds_bucket{job=\"anticapture-erpc\", composite=\"none\"}[$__rate_interval])) by (le, upstream))",
+          "legendFormat": "{{upstream}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "title": "Resources",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 53, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 51,
+      "title": "Process CPU by Service",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 54, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "label_replace(sum by (job) (process_cpu_utilization{job=~\"anticapture-.*\"}), \"service\", \"$1\", \"job\", \"anticapture-(.*)\")",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "title": "Process Memory by Service",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 54, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "label_replace(sum by (job) (process_memory_usage{job=~\"anticapture-.*\"}), \"service\", \"$1\", \"job\", \"anticapture-(.*)\")",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "title": "Traces",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "x": 0, "y": 62, "w": 24, "h": 1 },
+      "panels": []
+    },
+    {
+      "id": 60,
+      "title": "Recent Traces",
+      "type": "traces",
+      "gridPos": { "x": 0, "y": 63, "w": 24, "h": 10 },
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogsSample": false,
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "tempo", "uid": "tempo" },
+          "queryType": "traceqlSearch",
+          "filters": [
+            {
+              "id": "service-name",
+              "operator": "=~",
+              "scope": "resource",
+              "tag": "service.name",
+              "value": [
+                "anticapture-api",
+                "anticapture-indexer",
+                "anticapture-gateful"
+              ],
+              "valueType": "string"
+            }
+          ],
+          "limit": 20,
+          "refId": "A",
+          "tableType": "traces"
         }
       ]
     }
