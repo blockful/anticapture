@@ -1,5 +1,8 @@
 import { z } from "@hono/zod-openapi";
 
+/** Mirrors the `rate_limit_per_min` column default in the DB schema. */
+export const DEFAULT_RATE_LIMIT_PER_MIN = 600;
+
 export const TokenMetadataSchema = z
   .object({
     id: z.uuid(),
@@ -20,10 +23,15 @@ export const MintTokenBodySchema = z
   .object({
     tenant: z.string().min(1),
     name: z.string().min(1),
-    rateLimitPerMin: z.number().int().nonnegative().optional().openapi({
-      description:
-        "Requests per minute. 0 means unbounded (no rate limiting). Omit to default to 600.",
-    }),
+    rateLimitPerMin: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(DEFAULT_RATE_LIMIT_PER_MIN)
+      .openapi({
+        description:
+          "Requests per minute. 0 means unbounded (no rate limiting). Defaults to 600 when omitted.",
+      }),
   })
   .openapi("MintTokenBody");
 
