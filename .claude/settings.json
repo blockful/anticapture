@@ -38,13 +38,16 @@
     "deny": [
       "Bash(rm -rf *)",
       "Bash(git push --force*)",
+      "Bash(git push --mirror*)",
       "Bash(git push -f*)",
       "Bash(git reset --hard *)",
       "Bash(git checkout -- *)",
       "Edit(**/.env)",
       "Write(**/.env)",
+      "MultiEdit(**/.env)",
       "Edit(**/.env.local)",
-      "Write(**/.env.local)"
+      "Write(**/.env.local)",
+      "MultiEdit(**/.env.local)"
     ]
   },
   "hooks": {
@@ -54,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "INPUT=$(cat); command -v jq >/dev/null 2>&1 || exit 0; CMD=$(printf '%s' \"$INPUT\" | jq -r '.tool_input.command // empty'); if printf '%s' \"$CMD\" | grep -qE 'git +push[^|;&]*( --force[^ ]*| -[a-zA-Z]*f[a-zA-Z]*( |$)| \\+[^ ]+)'; then echo 'Blocked: force pushes are forbidden in this repo (see AGENTS.md boundaries).' >&2; exit 2; fi; exit 0"
+            "command": "INPUT=$(cat); if command -v jq >/dev/null 2>&1; then TARGET=$(printf '%s' \"$INPUT\" | jq -r '.tool_input.command // empty'); else TARGET=\"$INPUT\"; fi; if printf '%s' \"$TARGET\" | grep -qE 'git +push[^|;&\"]*( --force[^ \"]*| --mirror( |$|\")| -[a-zA-Z]*f[a-zA-Z]*( |$|\")| \\+[^ \"]+)'; then echo 'Blocked: force pushes are forbidden in this repo (see AGENTS.md boundaries).' >&2; exit 2; fi; exit 0"
           }
         ]
       }
