@@ -23,6 +23,7 @@ class FakeRateLimitStore implements RateLimitStore {
 const AUTH: AuthContext = {
   tokenId: "11111111-1111-1111-1111-111111111111",
   tenant: "uniswap",
+  name: "uniswap mcp",
   rateLimitPerMin: 3,
 };
 

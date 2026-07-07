@@ -318,7 +318,7 @@
       },
       "targets": [
         {
-          "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-(gateful|authful|${dao:regex}-api)\",http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / clamp_min(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-(gateful|authful|${dao:regex}-api)\"}[$__rate_interval])), 1)",
+          "expr": "(((sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-(gateful|authful|${dao:regex}-api)\",http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-(gateful|authful|${dao:regex}-api)\"}[$__rate_interval]))) and sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-(gateful|authful|${dao:regex}-api)\"}[$__rate_interval])) > 0) or vector(0)",
           "refId": "A",
           "instant": true
         }
@@ -929,7 +929,7 @@
           "format": "table"
         },
         {
-          "expr": "label_replace((sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-${dao:regex}-api\",http_response_status_code=~\"5..\"}[$__rate_interval])) by (job, http_route) or sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-${dao:regex}-api\"}[$__rate_interval])) by (job, http_route) * 0) / clamp_min(sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-${dao:regex}-api\"}[$__rate_interval])) by (job, http_route), 1), \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
+          "expr": "label_replace(((sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-${dao:regex}-api\",http_response_status_code=~\"5..\"}[$__rate_interval])) by (job, http_route) or sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-${dao:regex}-api\"}[$__rate_interval])) by (job, http_route) * 0) / sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-${dao:regex}-api\"}[$__rate_interval])) by (job, http_route)) and sum(rate(http_server_request_duration_seconds_count{job=~\"anticapture-${dao:regex}-api\"}[$__rate_interval])) by (job, http_route) > 0, \"dao\", \"$1\", \"job\", \"anticapture-(.*)-api\")",
           "refId": "C",
           "instant": true,
           "format": "table"
@@ -2001,8 +2001,8 @@
         "h": 7
       },
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
+        "type": "loki",
+        "uid": "loki"
       },
       "fieldConfig": {
         "defaults": {
@@ -2026,6 +2026,10 @@
       },
       "targets": [
         {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "sum by (service_name) (count_over_time({service_name=~\"anticapture-.*\"} | json | level=~\"error|fatal\" [$__rate_interval]))",
           "refId": "A",
           "legendFormat": "{{service_name}}"
