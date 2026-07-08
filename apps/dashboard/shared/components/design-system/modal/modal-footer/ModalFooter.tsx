@@ -19,6 +19,8 @@ export const ModalFooter = ({
   isConfirmDisabled = false,
   confirmVariant = "primary",
   leading,
+  cancelButtonProps,
+  confirmButtonProps,
   className,
 }: ModalFooterProps) => {
   return (
@@ -27,7 +29,7 @@ export const ModalFooter = ({
         // Layout
         "flex items-center gap-2",
         // Sizing
-        "w-full px-4 py-3",
+        "w-full shrink-0 px-4 py-3",
         // Colors/surfaces
         "bg-surface-default border-border-default border-t",
         className,
@@ -36,13 +38,19 @@ export const ModalFooter = ({
       {leading && <div className="min-w-0 flex-1">{leading}</div>}
       <div className={cn("flex items-center gap-2", !leading && "ml-auto")}>
         {cancelLabel && (
-          <Button variant="outline" size="md" onClick={onCancel}>
+          <Button
+            {...cancelButtonProps}
+            variant="outline"
+            size="md"
+            onClick={onCancel}
+          >
             {cancelLabel}
           </Button>
         )}
 
         {confirmLabel && (
           <Button
+            {...confirmButtonProps}
             variant={confirmVariant}
             size="md"
             onClick={onConfirm}
