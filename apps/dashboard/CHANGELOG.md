@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.8.1
+
+### Patch Changes
+
+- [#2038](https://github.com/blockful/anticapture/pull/2038) [`9525917`](https://github.com/blockful/anticapture/commit/95259173252f5be22cdc1405f00e24290a5b2d42) Thanks [@pikonha](https://github.com/pikonha)! - Accessibility & maintainability fixes in the whitelabel UI: the offchain voting modal now uses the shared Radix Dialog primitive (proper `role="dialog"`/`aria-modal`, focus trap, escape, and scroll-lock), the desktop sidebar and mobile drawer share one `NAV_ITEMS` source so they can't drift, and the brand link-contrast floor is raised to WCAG's 3:1 minimum.
+
 ## 2.8.0
 
 ### Minor Changes
