@@ -1,5 +1,13 @@
 # @anticapture/authful
 
+## 0.3.0
+
+### Minor Changes
+
+- [#2032](https://github.com/blockful/anticapture/pull/2032) [`f1fc962`](https://github.com/blockful/anticapture/commit/f1fc9620f8d64822d8d357607b68fd3ee183b40c) Thanks [@pikonha](https://github.com/pikonha)! - Expose token names in Authful validation responses so Gateful usage metrics can count requests by tenant, token name, and route. Add Authful validation counters and Gateful circuit-breaker state metrics for monitoring dashboards.
+
+- [#2022](https://github.com/blockful/anticapture/pull/2022) [`df56c8d`](https://github.com/blockful/anticapture/commit/df56c8db37a08a3669449fc10ac65a465fb2298a) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Support unbounded (rate-limit-exempt) tokens. A token with `rateLimitPerMin` set to `0` (the sentinel for any non-positive value) is now skipped entirely by Gateful's rate-limit middleware — it never touches Redis and is never throttled. Authful's mint endpoint accepts `0` accordingly (`rateLimitPerMin` validation relaxed from positive to non-negative).
+
 ## 0.2.0
 
 ### Minor Changes
