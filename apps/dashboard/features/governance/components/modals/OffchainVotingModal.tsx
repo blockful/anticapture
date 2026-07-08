@@ -1,5 +1,6 @@
 "use client";
 
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import type { OffchainProposal } from "@anticapture/client";
 import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -81,36 +82,7 @@ export const OffchainVotingModal = ({
       setComment("");
     }
   }, [isOpen]);
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add("no-scroll");
-    } else {
-      document.body.classList.remove("no-scroll");
-    }
-
-    return () => {
-      document.body.classList.remove("no-scroll");
-    };
-  }, [isOpen]);
-
-  // Handle escape key
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [isOpen, onClose]);
+  // Radix Dialog handles escape, focus trap, and body-scroll lock natively.
 
   const isVoteEnabled = (() => {
     if (!value || !address || isVoting || isPrivacyLoading) return false;
@@ -242,124 +214,118 @@ export const OffchainVotingModal = ({
   };
 
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-colors ${
-        isOpen ? "visible opacity-100" : "invisible opacity-0"
-      }`}
+    <DialogPrimitive.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      {/* Backdrop with blur */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <DialogPrimitive.Portal>
+        {/* Backdrop with blur */}
+        <DialogPrimitive.Overlay className="data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
 
-      {/* Modal content */}
-      <div
-        className={`border-border-default bg-surface-default relative z-10 mx-4 w-full max-w-[600px] border shadow-lg transition-all duration-200 ${
-          isOpen ? "translate-y-0 scale-100" : "translate-y-4 scale-95"
-        }`}
-      >
-        {/* Header */}
-        <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
-          <div className="flex flex-col items-start">
-            <h2 className="text-primary font-inter text-[16px] font-medium not-italic leading-6">
-              {hasVoted ? "Change Your Vote" : "Cast Your Vote"}
-            </h2>
-            <p className="text-secondary font-inter text-[14px] font-normal not-italic leading-5">
-              Your vote can be updated until the proposal closes.
-            </p>
+        {/* Modal content */}
+        <DialogPrimitive.Content className="border-border-default bg-surface-default data-[state=closed]:animate-modal-out data-[state=open]:animate-modal-in fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[600px] -translate-x-1/2 -translate-y-1/2 overflow-hidden border shadow-lg">
+          {/* Header */}
+          <div className="border-border-default mb-4 flex items-start justify-between border-b px-4 py-3">
+            <div className="flex flex-col items-start">
+              <DialogPrimitive.Title className="text-primary font-inter text-[16px] font-medium not-italic leading-6">
+                {hasVoted ? "Change Your Vote" : "Cast Your Vote"}
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Description className="text-secondary font-inter text-[14px] font-normal not-italic leading-5">
+                Your vote can be updated until the proposal closes.
+              </DialogPrimitive.Description>
+            </div>
+
+            <DialogPrimitive.Close
+              className="text-secondary hover:text-primary cursor-pointer rounded-sm p-1 transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="size-5" />
+            </DialogPrimitive.Close>
           </div>
 
-          <button
-            onClick={onClose}
-            className="text-secondary hover:text-primary cursor-pointer rounded-sm p-1 transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="size-5" />
-          </button>
-        </div>
-
-        {/* Voting Power */}
-        <div className="flex flex-col gap-[6px] p-4">
-          <p className="font-inter text-primary text-[12px] font-medium">
-            Your voting power
-          </p>
-          {isVpLoading && (
-            <p className="text-secondary text-[14px]">Loading...</p>
-          )}
-          {!isVpLoading && vpError && (
-            <p className="text-secondary text-[14px]">
-              Unable to fetch voting power
+          {/* Voting Power */}
+          <div className="flex flex-col gap-[6px] p-4">
+            <p className="font-inter text-primary text-[12px] font-medium">
+              Your voting power
             </p>
-          )}
-          {!isVpLoading && !vpError && (
-            <p className="text-primary text-[14px]">
-              {formatNumberUserReadable(votingPower)}
+            {isVpLoading && (
+              <p className="text-secondary text-[14px]">Loading...</p>
+            )}
+            {!isVpLoading && vpError && (
+              <p className="text-secondary text-[14px]">
+                Unable to fetch voting power
+              </p>
+            )}
+            {!isVpLoading && !vpError && (
+              <p className="text-primary text-[14px]">
+                {formatNumberUserReadable(votingPower)}
+              </p>
+            )}
+          </div>
+
+          {/* Vote options */}
+          <div className="flex flex-col items-start gap-[6px] p-4 text-left">
+            <p className="font-inter text-primary text-[12px] font-medium">
+              Your vote
             </p>
-          )}
-        </div>
+            <div className="w-full">{renderVoteOptions()}</div>
+          </div>
 
-        {/* Vote options */}
-        <div className="flex flex-col items-start gap-[6px] p-4 text-left">
-          <p className="font-inter text-primary text-[12px] font-medium">
-            Your vote
-          </p>
-          <div className="w-full">{renderVoteOptions()}</div>
-        </div>
-
-        {/* Comment — omitted for shutter proposals: a plaintext reason would
+          {/* Comment — omitted for shutter proposals: a plaintext reason would
             reveal the encrypted vote before the proposal closes. */}
-        {isPrivacyLoading ? (
-          <div className="flex flex-col gap-[6px] p-4">
-            <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-              Comment <span className="text-secondary">(optional)</span>
-            </p>
-            <p className="text-secondary text-[14px]">Loading...</p>
-          </div>
-        ) : isShutter ? (
-          <div className="flex flex-col gap-[6px] p-4">
-            <p className="text-secondary font-inter text-[12px] not-italic leading-4">
-              Votes on this proposal are encrypted until it closes, so comments
-              are disabled.
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-[6px] p-4">
-            <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-              Comment <span className="text-secondary">(optional)</span>
-            </p>
-            <textarea
-              className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
-              placeholder="Enter your comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="border-border-default flex items-center justify-end gap-2 border-t px-4 py-3">
-          {isPrivacyLoading && (
-            <p className="text-secondary mr-auto text-[12px]">
-              Checking proposal privacy...
-            </p>
+          {isPrivacyLoading ? (
+            <div className="flex flex-col gap-[6px] p-4">
+              <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
+                Comment <span className="text-secondary">(optional)</span>
+              </p>
+              <p className="text-secondary text-[14px]">Loading...</p>
+            </div>
+          ) : isShutter ? (
+            <div className="flex flex-col gap-[6px] p-4">
+              <p className="text-secondary font-inter text-[12px] not-italic leading-4">
+                Votes on this proposal are encrypted until it closes, so
+                comments are disabled.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-[6px] p-4">
+              <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
+                Comment <span className="text-secondary">(optional)</span>
+              </p>
+              <textarea
+                className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
+                placeholder="Enter your comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
           )}
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            data-ph-event="vote_offchain_submit"
-            data-ph-source="gov_fe"
-            data-umami-event="vote_offchain_submit"
-            disabled={!isVoteEnabled}
-            loading={isVoting}
-            onClick={handleVote}
-          >
-            Vote
-          </Button>
-        </div>
-      </div>
-    </div>
+
+          {/* Footer */}
+          <div className="border-border-default flex items-center justify-end gap-2 border-t px-4 py-3">
+            {isPrivacyLoading && (
+              <p className="text-secondary mr-auto text-[12px]">
+                Checking proposal privacy...
+              </p>
+            )}
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              data-ph-event="vote_offchain_submit"
+              data-ph-source="gov_fe"
+              data-umami-event="vote_offchain_submit"
+              disabled={!isVoteEnabled}
+              loading={isVoting}
+              onClick={handleVote}
+            >
+              Vote
+            </Button>
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 };

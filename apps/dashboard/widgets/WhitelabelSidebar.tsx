@@ -1,17 +1,6 @@
 "use client";
 
-import {
-  Bell,
-  Briefcase,
-  ChevronsLeft,
-  ChevronsRight,
-  DollarSign,
-  Landmark,
-  Newspaper,
-  Settings,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ChevronsLeft, ChevronsRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -21,51 +10,7 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import { getDaoPagePath, WHITELABEL_ROUTES } from "@/shared/utils/whitelabel";
-
-const NAV_ITEMS = [
-  {
-    label: "Proposals",
-    page: WHITELABEL_ROUTES.proposals,
-    icon: Landmark,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].governancePage,
-  },
-  {
-    label: "Holders & Delegates",
-    page: WHITELABEL_ROUTES.holdersAndDelegates,
-    icon: Users,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].dataTables,
-  },
-  {
-    label: "Activity Feed",
-    page: WHITELABEL_ROUTES.activityFeed,
-    icon: Newspaper,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].activityFeed,
-  },
-  {
-    label: "Service Providers",
-    page: WHITELABEL_ROUTES.serviceProviders,
-    icon: Briefcase,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].serviceProviders,
-  },
-  {
-    label: "Revenue",
-    page: WHITELABEL_ROUTES.revenue,
-    icon: DollarSign,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].revenue,
-  },
-  {
-    label: "Notifications",
-    page: WHITELABEL_ROUTES.notifications,
-    icon: Bell,
-    enabled: () => true,
-  },
-  {
-    label: "Governance Settings",
-    page: WHITELABEL_ROUTES.governanceSettings,
-    icon: Settings,
-    enabled: () => true,
-  },
-] as const;
+import { WHITELABEL_NAV_ITEMS } from "@/shared/utils/whitelabelNav";
 
 type NavItemProps = {
   icon: React.ElementType;
@@ -203,7 +148,9 @@ export const WhitelabelSidebar = ({
       {/* Navigation */}
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-2">
         {/* Nav items */}
-        <div className="flex flex-col gap-3">{renderNavItems(NAV_ITEMS)}</div>
+        <div className="flex flex-col gap-3">
+          {renderNavItems(WHITELABEL_NAV_ITEMS)}
+        </div>
 
         {/* Footer - pushed to bottom */}
         <div className="mt-auto flex flex-col items-center gap-2.5">
