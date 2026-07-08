@@ -2,6 +2,7 @@ apiVersion: 1
 datasources:
   - name: Tempo
     type: tempo
+    uid: tempo
     access: proxy
     url: ${TEMPO_URL}
     editable: true
