@@ -2,7 +2,7 @@
 
 import { TopAccountsChart } from "@/features/dao-overview/components/TopAccountsChart";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
-import { SkeletonRow, TooltipInfo } from "@/shared/components";
+import { Skeleton, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -27,7 +27,7 @@ export const AccountBalanceChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         </DefaultLink>
         <TooltipInfo text="Addresses with the highest number of governance tokens." />
       </div>
-      {isLoading && <SkeletonRow className="h-52 w-full" />}
+      {isLoading && <Skeleton className="h-52 w-full" />}
       {chartData && !isLoading && (
         <TopAccountsChart
           daoId={daoId}

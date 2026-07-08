@@ -13,7 +13,7 @@ import {
   ActiveTokensProgress,
   ActiveTokensTooltip,
 } from "@/features/panel/components/tooltips/ActiveTokensTooltip";
-import { SkeletonRow } from "@/shared/components";
+import { Skeleton } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -59,7 +59,7 @@ export const ActiveTokensCell = ({
 
   if (isLoading) {
     return (
-      <SkeletonRow
+      <Skeleton
         parentClassName="flex animate-pulse justify-end w-full"
         className="mx-4 h-5 w-full"
       />

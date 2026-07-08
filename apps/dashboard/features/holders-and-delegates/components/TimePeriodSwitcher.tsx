@@ -4,7 +4,7 @@ import { CheckIcon, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/shared/components";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 import { useScreenSize } from "@/shared/hooks";
 import { cn } from "@/shared/utils/";
 
@@ -84,24 +84,14 @@ export const TimePeriodSwitcher = ({
       )}
     </div>
   ) : (
-    <Tabs value={value} className="gap-1">
-      <TabsList>
-        {activeTimePeriods.map((period) => (
-          <TabsTrigger
-            key={period}
-            className={cn(
-              "cursor-pointer text-sm font-medium",
-              isSmall
-                ? "min-w-[60px] px-1.5 py-0.5"
-                : "min-w-[84px] px-3 py-1.5",
-            )}
-            value={period}
-            onClick={() => setTimePeriod(period)}
-          >
-            {formatPeriod(period)}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+    <SegmentedControl
+      value={value}
+      size={isSmall ? "sm" : "md"}
+      items={activeTimePeriods.map((period) => ({
+        value: period,
+        label: formatPeriod(period),
+      }))}
+      onValueChange={(period) => setTimePeriod(period as TimePeriod)}
+    />
   );
 };

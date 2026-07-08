@@ -17,7 +17,7 @@ import { AddressFilter } from "@/shared/components/design-system/table/filters/A
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { useGetAddress } from "@anticapture/client/hooks";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -46,7 +46,7 @@ const TypeCell = ({ address }: { address: Address }) => {
 
   if (isArkhamLoading) {
     return (
-      <SkeletonRow
+      <Skeleton
         parentClassName="flex animate-pulse"
         className="h-5 w-16 rounded-full"
       />
@@ -154,11 +154,11 @@ export const TokenHolders = ({
         if (isLoading) {
           return (
             <div className="flex w-full items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -219,7 +219,7 @@ export const TokenHolders = ({
       cell: ({ row }) => {
         if (isLoading) {
           return (
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-5 w-16 rounded-full"
             />
@@ -259,7 +259,7 @@ export const TokenHolders = ({
         if (isLoading) {
           return (
             <div className="flex w-full items-center justify-end">
-              <SkeletonRow className="h-4 w-20" />
+              <Skeleton className="h-4 w-20" />
             </div>
           );
         }
@@ -312,7 +312,7 @@ export const TokenHolders = ({
         if (isLoading) {
           return (
             <div className="flex w-full items-center justify-center">
-              <SkeletonRow
+              <Skeleton
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
               />
@@ -350,11 +350,11 @@ export const TokenHolders = ({
         if (isLoading) {
           return (
             <div className="flex items-center gap-1.5">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />

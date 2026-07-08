@@ -3,7 +3,7 @@
 import { ChevronDown, CheckIcon } from "lucide-react";
 import { useState } from "react";
 
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 import { useScreenSize } from "@/shared/hooks";
 import { cn } from "@/shared/utils/";
 
@@ -81,19 +81,11 @@ export const SwitcherChart = ({
       )}
     </div>
   ) : (
-    <Tabs defaultValue={defaultValue} className="flex gap-1 rounded-md">
-      <TabsList>
-        {options.map((option) => (
-          <TabsTrigger
-            className="cursor-pointer px-3 py-0.5 text-sm font-normal"
-            key={option}
-            value={option}
-            onClick={() => setMetric(option)}
-          >
-            {option}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+    <SegmentedControl
+      value={isSelected}
+      size="sm"
+      items={options.map((option) => ({ value: option, label: option }))}
+      onValueChange={handleSelect}
+    />
   );
 };

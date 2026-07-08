@@ -7,7 +7,7 @@ import type { Address } from "viem";
 import { formatUnits } from "viem";
 
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { SkeletonRow, Button } from "@/shared/components";
+import { Skeleton, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
@@ -78,11 +78,11 @@ export const VoteCompositionTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex w-full items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -149,7 +149,7 @@ export const VoteCompositionTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex w-full items-center justify-end text-sm">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse justify-end"
                 className="h-4 w-16"
               />
@@ -203,7 +203,7 @@ export const VoteCompositionTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex w-full">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-20"
               />

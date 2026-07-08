@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { SkeletonRow } from "@/shared/components";
+import { Skeleton } from "@/shared/components";
 import { cn } from "@/shared/utils";
 
 export const DaoOverviewMetricCard = ({
@@ -28,7 +28,7 @@ export const DaoOverviewMetricCard = ({
       {title}
     </p>
     {isLoading ? (
-      <SkeletonRow
+      <Skeleton
         parentClassName="flex animate-pulse justify-start w-full"
         className="bg-surface-hover h-4 w-20"
       />
@@ -36,7 +36,7 @@ export const DaoOverviewMetricCard = ({
       <p className={cn("text-primary text-sm", textClassName)}>{text}</p>
     )}
     {isLoading ? (
-      <SkeletonRow
+      <Skeleton
         parentClassName="flex animate-pulse justify-start w-full"
         className="bg-surface-hover mt-1 h-4 w-40"
       />

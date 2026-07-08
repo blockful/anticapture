@@ -2,6 +2,7 @@
 
 import { TooltipInfo } from "@/shared/components";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 // Fake data for now
@@ -53,12 +54,11 @@ export const TreasuryMonitoring = () => {
 
               {/* Progress bar */}
               <div className="flex h-5 items-center gap-1">
-                <div className="bg-surface-hover relative h-1 flex-1 overflow-hidden">
-                  <div
-                    className="bg-error h-full transition-all duration-300 ease-in-out"
-                    style={{ width: `${item.percentage}%` }}
-                  />
-                </div>
+                <ProgressBar
+                  value={item.percentage}
+                  color="var(--color-error)"
+                  className="flex-1"
+                />
                 <p className="text-error text-sm font-normal leading-5">
                   {item.percentage}%
                 </p>

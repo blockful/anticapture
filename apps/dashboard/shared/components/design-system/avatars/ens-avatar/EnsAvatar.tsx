@@ -14,7 +14,7 @@ import {
   buildSocialLinks,
   type EnsSocials,
 } from "@/shared/components/design-system/avatars/ens-avatar/EnsSocialLinks";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
@@ -160,7 +160,7 @@ export const EnsAvatar = ({
   const avatarElement = () => {
     if (loading || (isLoading && !address)) {
       return (
-        <SkeletonRow
+        <Skeleton
           parentClassName="flex animate-pulse"
           className={cn(sizeClasses[size], variantClasses[variant])}
         />
@@ -299,10 +299,7 @@ export const EnsAvatar = ({
   const nameRow = (
     <div className="flex items-center gap-2">
       {isLoadingName ? (
-        <SkeletonRow
-          parentClassName="flex animate-pulse"
-          className="h-4 w-24"
-        />
+        <Skeleton parentClassName="flex animate-pulse" className="h-4 w-24" />
       ) : (
         <span
           className={cn(
@@ -403,11 +400,11 @@ export const EnsAvatar = ({
               <div className="flex flex-wrap items-center gap-1">
                 {isLoading ? (
                   <>
-                    <SkeletonRow
+                    <Skeleton
                       parentClassName="flex animate-pulse"
                       className="h-5 w-16 rounded-full"
                     />
-                    <SkeletonRow
+                    <Skeleton
                       parentClassName="flex animate-pulse"
                       className="h-5 w-20 rounded-full"
                     />

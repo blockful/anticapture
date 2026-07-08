@@ -1,6 +1,6 @@
 import { DollarSign } from "lucide-react";
 
-import { SkeletonRow, TooltipInfo } from "@/shared/components";
+import { Skeleton, TooltipInfo } from "@/shared/components";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
@@ -51,7 +51,7 @@ export const DaoOverviewHeader = ({
           {chainName}
         </BadgeStatus>
         {isLoading ? (
-          <SkeletonRow
+          <Skeleton
             parentClassName="flex animate-pulse justify-end w-full"
             className="bg-surface-hover h-5 w-20 rounded-full"
           />

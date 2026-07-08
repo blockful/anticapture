@@ -19,7 +19,7 @@ import {
   useTopTokenHolderNonDao,
   useTreasury,
 } from "@/features/attack-profitability/hooks";
-import { SkeletonRow } from "@/shared/components";
+import { Skeleton } from "@/shared/components";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import { mockedAttackCostBarData } from "@/shared/constants/mocked-data/mocked-attack-cost-bar-data";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -247,7 +247,7 @@ export const AttackCostBarChart = ({
   if (isLoading) {
     return (
       <div className={`h-80 w-full ${className || ""}`}>
-        <SkeletonRow className="h-70 w-full" />
+        <Skeleton className="h-70 w-full" />
       </div>
     );
   }

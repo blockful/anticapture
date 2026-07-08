@@ -6,9 +6,8 @@ import { TooltipInfo } from "@/shared/components/tooltips/TooltipInfo";
 import {
   Card,
   CardHeader,
-  CardTitle,
   CardContent,
-} from "@/shared/components/ui/card";
+} from "@/shared/components/design-system/cards";
 import { cn } from "@/shared/utils/";
 
 export interface CardSection {
@@ -38,7 +37,7 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
             data.optionalHeaderValue ? "justify-between" : "justify-start",
           )}
         >
-          <CardTitle className="!text-alternative-sm text-primary flex items-center gap-2 font-mono !font-medium uppercase !tracking-wide">
+          <h2 className="!text-alternative-sm text-primary flex items-center gap-2 font-mono !font-medium uppercase !tracking-wide">
             <div>{data.icon}</div>
             {data.title}
             {data.optionalHeaderValue && (
@@ -47,7 +46,7 @@ export const BaseCardDaoInfo = ({ data }: BaseCardDaoInfoProps) => {
                 {data.optionalHeaderValue}
               </>
             )}
-          </CardTitle>
+          </h2>
         </div>
       </CardHeader>
 

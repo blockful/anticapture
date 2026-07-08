@@ -1,4 +1,4 @@
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 
 export const ProposalSectionSkeleton = () => {
   return (
@@ -8,17 +8,17 @@ export const ProposalSectionSkeleton = () => {
         <div className="mx-auto flex w-full flex-1 items-center justify-between px-5">
           <div className="flex items-center gap-2">
             {/* Back arrow */}
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="size-[14px] shrink-0"
             />
             {/* DAO Avatar */}
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="size-6 shrink-0 rounded-full"
             />
             {/* DAO name text */}
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-[20px] w-48 shrink-0"
             />
@@ -27,17 +27,17 @@ export const ProposalSectionSkeleton = () => {
           <div className="flex items-center gap-4">
             {/* Voting power section */}
             <div className="hidden flex-col items-end lg:flex">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-[16px] w-24 shrink-0"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-[20px] w-16 shrink-0"
               />
             </div>
             {/* Vote button */}
-            <SkeletonRow
+            <Skeleton
               parentClassName="hidden animate-pulse lg:flex"
               className="h-10 w-32 shrink-0 rounded"
             />
@@ -58,22 +58,22 @@ export const ProposalSectionSkeleton = () => {
               {/* Badge + Bullet + Proposer */}
               <div className="flex w-full items-center justify-start gap-2">
                 {/* Badge */}
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-[22px] w-20 shrink-0 rounded-full"
                 />
                 {/* Bullet */}
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="size-1 shrink-0 rounded-full"
                 />
                 {/* ENS Avatar (circle + name) */}
                 <div className="flex items-center gap-1.5">
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="size-5 shrink-0 rounded-full"
                   />
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="h-[20px] w-24 shrink-0"
                   />
@@ -82,7 +82,7 @@ export const ProposalSectionSkeleton = () => {
 
               {/* Title */}
               <div className="flex w-full flex-col gap-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-[28px] w-full"
                 />
@@ -92,27 +92,27 @@ export const ProposalSectionSkeleton = () => {
               <div className="flex w-full items-center justify-start gap-2">
                 {/* Forum link */}
                 <div className="flex items-center gap-1">
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="size-4 shrink-0"
                   />
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="h-[20px] w-12 shrink-0"
                   />
                 </div>
                 {/* Bullet */}
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="size-1 shrink-0 rounded-full"
                 />
                 {/* Share link */}
                 <div className="flex items-center gap-1">
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="size-4 shrink-0"
                   />
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="h-[20px] w-12 shrink-0"
                   />
@@ -125,11 +125,11 @@ export const ProposalSectionSkeleton = () => {
               <div className="flex w-full flex-col p-3 lg:w-[420px]">
                 {/* Current Results Title */}
                 <div className="flex items-center gap-1 pb-4">
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="size-4 shrink-0"
                   />
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="h-[20px] w-28 shrink-0"
                   />
@@ -144,27 +144,27 @@ export const ProposalSectionSkeleton = () => {
                     >
                       {/* Vote type icon + label */}
                       <div className="flex w-[100px] shrink-0 items-center gap-2">
-                        <SkeletonRow
+                        <Skeleton
                           parentClassName="flex animate-pulse"
                           className="size-3.5 shrink-0 rounded-full"
                         />
-                        <SkeletonRow
+                        <Skeleton
                           parentClassName="flex animate-pulse"
                           className="h-[20px] w-12 shrink-0"
                         />
                       </div>
                       {/* Progress bar */}
-                      <SkeletonRow
+                      <Skeleton
                         parentClassName="flex animate-pulse w-full lg:w-[184px] lg:flex-1"
                         className="h-1 w-full"
                       />
                       {/* Vote count + percentage */}
                       <div className="flex w-[100px] items-center gap-2">
-                        <SkeletonRow
+                        <Skeleton
                           parentClassName="flex animate-pulse"
                           className="h-[20px] w-12 shrink-0"
                         />
-                        <SkeletonRow
+                        <Skeleton
                           parentClassName="flex animate-pulse"
                           className="h-[20px] w-12 shrink-0"
                         />
@@ -180,19 +180,19 @@ export const ProposalSectionSkeleton = () => {
 
                 {/* Quorum section */}
                 <div className="flex items-center gap-2">
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="size-3.5 shrink-0"
                   />
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="h-[20px] w-14 shrink-0"
                   />
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="size-1 shrink-0 rounded-full"
                   />
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="h-[20px] w-24 shrink-0"
                   />
@@ -201,11 +201,11 @@ export const ProposalSectionSkeleton = () => {
 
               {/* Time Left section */}
               <div className="bg-surface-opacity-brand flex w-full items-center gap-2 p-3">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="size-1 shrink-0 rounded-full"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-[16px] w-32 shrink-0"
                 />
@@ -215,11 +215,11 @@ export const ProposalSectionSkeleton = () => {
             {/* Status Section Skeleton */}
             <div className="border-border-default flex w-full flex-col gap-3 border p-3">
               <div className="flex items-center gap-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="size-4 shrink-0"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-[20px] w-14 shrink-0"
                 />
@@ -231,12 +231,12 @@ export const ProposalSectionSkeleton = () => {
                   <div key={index}>
                     <div className="flex items-center gap-2">
                       {/* Timeline dot */}
-                      <SkeletonRow
+                      <Skeleton
                         parentClassName="flex animate-pulse"
                         className="size-2 shrink-0 rounded-full"
                       />
                       {/* Timeline content */}
-                      <SkeletonRow
+                      <Skeleton
                         parentClassName="flex animate-pulse"
                         className="h-[20px] w-48 shrink-0"
                       />
@@ -256,7 +256,7 @@ export const ProposalSectionSkeleton = () => {
             {/* Tabs header */}
             <div className="border-border-default lg:bg-surface-default sticky left-0 top-[7px] z-10 flex w-full shrink-0 gap-2 border-b lg:top-[85px] lg:px-4">
               {Array.from({ length: 3 }).map((_, index) => (
-                <SkeletonRow
+                <Skeleton
                   key={index}
                   parentClassName="flex animate-pulse"
                   className="h-10 w-24 shrink-0"
@@ -266,24 +266,24 @@ export const ProposalSectionSkeleton = () => {
 
             {/* Tab content skeleton - Description */}
             <div className="flex flex-1 flex-col gap-4 p-4">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse justify-start"
                 className="h-[28px] w-48 shrink-0"
               />
               <div className="flex flex-col gap-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse justify-start"
                   className="h-[20px] w-full"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse justify-start"
                   className="h-[20px] w-full"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse justify-start"
                   className="h-[20px] w-5/6"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse justify-start"
                   className="h-[20px] w-4/5"
                 />
@@ -291,12 +291,12 @@ export const ProposalSectionSkeleton = () => {
 
               {/* More content */}
               <div className="mt-4 flex flex-col gap-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse justify-start"
                   className="h-[24px] w-32 shrink-0"
                 />
                 {Array.from({ length: 2 }).map((_, index) => (
-                  <SkeletonRow
+                  <Skeleton
                     key={index}
                     parentClassName="flex animate-pulse justify-start"
                     className="h-[20px] w-full"
@@ -310,7 +310,7 @@ export const ProposalSectionSkeleton = () => {
 
       {/* Fixed bottom bar skeleton for mobile voting */}
       <div className="bg-surface-background fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 p-4 lg:hidden dark:border-gray-800">
-        <SkeletonRow
+        <Skeleton
           parentClassName="flex animate-pulse w-full"
           className="h-10 w-full rounded"
         />

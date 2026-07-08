@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { DonationCardProps } from "@/features/donation/types";
 import { Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { Card, CardContent } from "@/shared/components/ui/card";
+import { Card, CardContent } from "@/shared/components/design-system/cards";
 
 export const DonationCard = ({
   title,

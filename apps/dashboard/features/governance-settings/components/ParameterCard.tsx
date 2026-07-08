@@ -1,4 +1,4 @@
-import { SkeletonRow } from "@/shared/components";
+import { Skeleton } from "@/shared/components";
 
 interface ParameterCardProps {
   label: string;
@@ -16,7 +16,7 @@ export const ParameterCard = ({
   <div className="bg-surface-default flex flex-col gap-1 rounded-lg p-3">
     <p className="text-secondary text-xs font-medium">{label}</p>
     {isLoading ? (
-      <SkeletonRow
+      <Skeleton
         parentClassName="flex animate-pulse w-full"
         className="bg-surface-hover h-5 w-32"
       />
@@ -24,7 +24,7 @@ export const ParameterCard = ({
       <p className="text-primary text-sm font-medium">{value}</p>
     )}
     {isLoading ? (
-      <SkeletonRow
+      <Skeleton
         parentClassName="flex animate-pulse w-full"
         className="bg-surface-hover h-4 w-48"
       />

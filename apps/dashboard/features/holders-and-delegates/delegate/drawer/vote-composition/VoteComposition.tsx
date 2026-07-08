@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
 import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/ThePieChart";
 import { VoteCompositionTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteCompositionTable";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 
@@ -21,11 +21,11 @@ const ChartLegend = ({
       <div className="flex w-full flex-wrap items-center justify-between gap-2 lg:justify-normal lg:gap-3">
         {Array.from({ length: 10 }, (_, i) => (
           <div key={i} className="flex items-center gap-2">
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="rounded-xs size-2"
             />
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-4 w-16"
             />
@@ -124,7 +124,7 @@ export const VoteComposition = ({
                 </p>
                 <div className="text-md font-normal">
                   {!currentVotingPower ? (
-                    <SkeletonRow
+                    <Skeleton
                       parentClassName="flex animate-pulse"
                       className="h-6 w-24"
                     />

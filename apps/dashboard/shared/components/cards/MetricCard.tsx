@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { SkeletonRow } from "@/shared/components";
+import { Skeleton } from "@/shared/components";
 import { cn } from "@/shared/utils";
 
 interface MetricCardProps {
@@ -37,7 +37,7 @@ export const MetricCard = ({
 
       {/* Value */}
       <div className="text-primary font-regular text-sm">
-        {value !== undefined ? value : <SkeletonRow className="h-5 w-16" />}
+        {value !== undefined ? value : <Skeleton className="h-5 w-16" />}
       </div>
     </div>
   );

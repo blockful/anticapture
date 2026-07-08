@@ -6,7 +6,7 @@ import { useAccountInteractionsData } from "@/features/holders-and-delegates/tok
 import { TopInteractionsChart } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsChart";
 import { TopInteractionsTable } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/TopInteractionsTable";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
@@ -22,11 +22,11 @@ const ChartLegend = ({
       <div className="flex w-full flex-wrap items-center justify-between gap-2 lg:justify-normal lg:gap-3">
         {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="flex items-center gap-2">
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="rounded-xs size-2"
             />
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-4 w-32"
             />
@@ -100,7 +100,7 @@ export const TopInteractions = ({
             <div className="flex w-full flex-col gap-4 lg:flex-row">
               <div>
                 {loadingVotingPowerData ? (
-                  <SkeletonRow
+                  <Skeleton
                     parentClassName="flex animate-pulse"
                     className="h-40 w-40"
                   />
@@ -120,7 +120,7 @@ export const TopInteractions = ({
                   </p>
                   <div className="text-md font-normal">
                     {!netBalanceChange || loadingVotingPowerData ? (
-                      <SkeletonRow
+                      <Skeleton
                         parentClassName="justify-start flex animate-pulse items-start"
                         className="h-6 w-24"
                       />

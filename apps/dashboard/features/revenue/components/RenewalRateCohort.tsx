@@ -5,6 +5,7 @@ import { useGetRevenueRenewalFunnel } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 
 import { transformToRenewalCohorts } from "@/features/revenue/utils/transform";
 
@@ -31,10 +32,10 @@ export const RenewalRateCohort = () => {
           ? Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex flex-col gap-1">
                 <div className="flex items-center justify-between">
-                  <div className="bg-surface-raised h-4 w-10 animate-pulse rounded" />
-                  <div className="bg-surface-raised h-4 w-8 animate-pulse rounded" />
+                  <Skeleton className="h-4 w-10 rounded" />
+                  <Skeleton className="h-4 w-8 rounded" />
                 </div>
-                <div className="bg-surface-raised h-2 w-full animate-pulse rounded" />
+                <Skeleton className="h-2 w-full rounded" />
               </div>
             ))
           : cohorts?.map((cohort) => (

@@ -14,7 +14,7 @@ import { parseUnits } from "viem";
 
 import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { SkeletonRow, Button, IconButton } from "@/shared/components";
+import { Skeleton, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
@@ -147,7 +147,7 @@ export const BalanceHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-20"
               />
@@ -206,7 +206,7 @@ export const BalanceHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center justify-end">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -280,7 +280,7 @@ export const BalanceHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-6 w-12 rounded-full"
               />
@@ -324,11 +324,11 @@ export const BalanceHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -396,11 +396,11 @@ export const BalanceHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />

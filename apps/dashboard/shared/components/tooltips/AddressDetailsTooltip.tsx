@@ -5,7 +5,7 @@ import type { Address } from "viem";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import type { GetAddress200 } from "@anticapture/client";
 import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
@@ -68,7 +68,7 @@ export const AddressDetailsTooltip = ({
     <div className="flex w-full flex-col gap-2">
       <Row label="ENS address">
         {isLoading ? (
-          <SkeletonRow parentClassName="mt-1" className="h-5 w-24" />
+          <Skeleton parentClassName="mt-1" className="h-5 w-24" />
         ) : ens?.name ? (
           <span className="text-primary text-sm leading-5">{ens.name}</span>
         ) : (
@@ -80,7 +80,7 @@ export const AddressDetailsTooltip = ({
 
       <Row label="Arkham Entity">
         {isLoading ? (
-          <SkeletonRow parentClassName="mt-1" className="h-5 w-32" />
+          <Skeleton parentClassName="mt-1" className="h-5 w-32" />
         ) : arkham?.entity ? (
           <span className="text-primary text-sm leading-5">
             {arkham.entity}
@@ -94,7 +94,7 @@ export const AddressDetailsTooltip = ({
 
       <Row label="Arkham Label">
         {isLoading ? (
-          <SkeletonRow parentClassName="mt-1" className="h-5 w-32" />
+          <Skeleton parentClassName="mt-1" className="h-5 w-32" />
         ) : arkham?.label ? (
           <span className="text-primary text-sm leading-5">{arkham.label}</span>
         ) : (
@@ -115,8 +115,8 @@ export const AddressDetailsTooltip = ({
       <Row label="Main Tag/Type" className="gap-1">
         {isLoading ? (
           <div className="flex gap-1">
-            <SkeletonRow className="h-5 w-16 rounded-full" />
-            <SkeletonRow className="h-5 w-10 rounded-full" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-10 rounded-full" />
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-1">

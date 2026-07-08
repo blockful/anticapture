@@ -12,7 +12,6 @@ import {
   metricsSchema,
 } from "@/features/token-distribution/utils/metrics";
 import { BlankSlate, TooltipInfo } from "@/shared/components";
-import { CardTitle } from "@/shared/components/ui/card";
 import type { ChartDataSetPoint } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -114,7 +113,7 @@ export const TokenDistributionMetrics = ({
 
                 return (
                   <div key={category} className="mb-4 flex flex-col gap-2">
-                    <CardTitle className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <p className="text-alternative-sm! text-secondary font-mono font-medium uppercase tracking-wide">
                         {category}
                       </p>
@@ -124,7 +123,7 @@ export const TokenDistributionMetrics = ({
                         </p>
                       )}
                       {tooltipText && <TooltipInfo text={tooltipText} />}
-                    </CardTitle>
+                    </div>
                     <div className="grid grid-cols-2 gap-2 xl:flex xl:flex-col">
                       {metrics.map((metric: MetricWithKey) => {
                         const metricData = dataToUse

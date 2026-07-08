@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ElementType, ReactNode } from "react";
 
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { cn } from "@/shared/utils/cn";
 
 const badgeStatusVariants = cva(
@@ -61,14 +62,7 @@ export const BadgeStatus = ({
   ...props
 }: BadgeStatusProps) => {
   if (isLoading) {
-    return (
-      <div
-        className={cn(
-          "bg-surface-hover h-5 w-28 animate-pulse rounded-full",
-          className,
-        )}
-      />
-    );
+    return <Skeleton className={cn("h-5 w-28 rounded-full", className)} />;
   }
 
   return (

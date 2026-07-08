@@ -9,6 +9,7 @@ import {
   ConnectWallet,
   BottomNavigationButtons,
 } from "@/shared/components";
+import { Sidebar } from "@/shared/components/design-system/navigation/sidebar";
 import { AnticaptureIcon } from "@/shared/components/icons";
 
 export const HeaderSidebar = () => {
@@ -31,10 +32,10 @@ export const HeaderSidebar = () => {
   );
 
   return (
-    <header
-      className={`border-light-dark bg-surface-background z-50 hidden h-screen w-[68px] border-r lg:block`}
-    >
-      <div className="flex h-full w-full flex-col items-start">
+    <Sidebar
+      isCollapsed
+      className="z-50 hidden lg:flex"
+      header={
         <Link
           prefetch={true}
           href="/"
@@ -42,29 +43,27 @@ export const HeaderSidebar = () => {
         >
           <AnticaptureIcon className="size-9" />
         </Link>
-        <div className="flex h-full w-full flex-col items-center justify-between">
-          <div className="flex h-full flex-col gap-1.5 p-1.5">
-            {headerItems.map((item) => (
-              <ButtonMainNav
-                key={item.page || item.label}
-                page={item.page || ""}
-                icon={item.icon}
-                label={item.label}
-                isGlobal={item.isGlobal}
-              />
-            ))}
+      }
+      footer={
+        <div className="flex w-full flex-col">
+          <div className="border-middle-dark mx-1.5 flex flex-col gap-2 border-b border-t py-2">
+            <BottomNavigationButtons />
           </div>
-
-          <div className="flex w-full flex-col">
-            <div className="border-middle-dark mx-1.5 flex flex-col gap-2 border-b border-t py-2">
-              <BottomNavigationButtons />
-            </div>
-            <div className="mx-auto flex flex-col px-2 py-4">
-              <ConnectWallet label="" className="px-2.5" />
-            </div>
+          <div className="mx-auto flex flex-col px-2 py-4">
+            <ConnectWallet label="" className="px-2.5" />
           </div>
         </div>
-      </div>
-    </header>
+      }
+    >
+      {headerItems.map((item) => (
+        <ButtonMainNav
+          key={item.page || item.label}
+          page={item.page || ""}
+          icon={item.icon}
+          label={item.label}
+          isGlobal={item.isGlobal}
+        />
+      ))}
+    </Sidebar>
   );
 };

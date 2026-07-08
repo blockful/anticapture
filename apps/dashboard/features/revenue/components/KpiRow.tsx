@@ -9,7 +9,9 @@ import {
 } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
+import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { cn } from "@/shared/utils/cn";
 
@@ -79,18 +81,13 @@ export const KpiRow = () => {
           className="hidden lg:inline-flex"
         />
 
-        {/* Mobile: Select dropdown */}
-        <select
+        <Select
+          items={TIME_PERIOD_OPTIONS}
           value={timePeriod}
-          onChange={(e) => setTimePeriod(e.target.value)}
-          className="border-border-default bg-surface-default text-primary rounded-base border px-2 py-1 text-xs font-medium lg:hidden"
-        >
-          {TIME_PERIOD_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          onValueChange={setTimePeriod}
+          className="w-24 lg:hidden"
+          aria-label="Usage timeframe"
+        />
       </div>
 
       {/* KPI columns — stacked on mobile, 3 columns on desktop */}
@@ -105,9 +102,9 @@ export const KpiRow = () => {
                     "border-border-default border-b lg:border-b-0 lg:border-r",
                 )}
               >
-                <div className="bg-surface-raised h-4 w-24 animate-pulse rounded" />
-                <div className="bg-surface-raised mt-2 h-9 w-20 animate-pulse rounded" />
-                <div className="bg-surface-raised mt-2 h-4 w-32 animate-pulse rounded" />
+                <Skeleton className="h-4 w-24 rounded" />
+                <Skeleton className="mt-2 h-9 w-20 rounded" />
+                <Skeleton className="mt-2 h-4 w-32 rounded" />
               </div>
             ))
           : kpis.map((kpi, index) => (

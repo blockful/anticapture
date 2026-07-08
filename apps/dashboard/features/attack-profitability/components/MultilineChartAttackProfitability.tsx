@@ -1,6 +1,5 @@
 "use client";
 
-import Lottie from "lottie-react";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import type { Data } from "react-csv/lib/core";
@@ -20,8 +19,8 @@ import {
   useTreasury,
 } from "@/features/attack-profitability/hooks";
 import { normalizeDataset } from "@/features/attack-profitability/utils";
-import loadingAnimation from "@/public/loading-animation.json";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
+import { LogoAnimation } from "@/shared/components/design-system/loading-animation/LogoAnimation";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import type { ChartConfig } from "@/shared/components/ui/chart";
 import { ChartContainer } from "@/shared/components/ui/chart";
@@ -244,7 +243,7 @@ export const MultilineChartAttackProfitability = ({
           "h-[300px]": context === "section",
         })}
       >
-        <Lottie animationData={loadingAnimation} height={40} width={40} />
+        <LogoAnimation size="sm" />
       </div>
     );
   }

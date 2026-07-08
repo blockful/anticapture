@@ -18,9 +18,10 @@ import {
   getAvgVoteTimingData,
   DEFAULT_ITEMS_PER_PAGE,
 } from "@/features/holders-and-delegates/utils";
-import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
+import { Skeleton, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
@@ -209,11 +210,11 @@ export const Delegates = ({
         if (loading) {
           return (
             <div className="flex items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -278,7 +279,7 @@ export const Delegates = ({
 
         if (loading) {
           return (
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
               className="h-5 w-full max-w-20"
             />
@@ -330,7 +331,7 @@ export const Delegates = ({
         if (loading) {
           return (
             <div className="flex w-full items-center justify-center">
-              <SkeletonRow
+              <Skeleton
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
               />
@@ -387,7 +388,7 @@ export const Delegates = ({
         if (isActivityLoadingFor(addr) || loading) {
           return (
             <div className="flex items-center justify-start">
-              <SkeletonRow className="h-5 w-10" />
+              <Skeleton className="h-5 w-10" />
             </div>
           );
         }
@@ -419,7 +420,7 @@ export const Delegates = ({
         if (loading) {
           return (
             <div className="flex items-center justify-start">
-              <SkeletonRow className="h-5 w-20" />
+              <Skeleton className="h-5 w-20" />
             </div>
           );
         }
@@ -438,7 +439,7 @@ export const Delegates = ({
               {avgVoteTiming.text}
             </div>
             {avgVoteTiming.text !== "-" && (
-              <SimpleProgressBar percentage={avgVoteTiming.percentage} />
+              <ProgressBar value={avgVoteTiming.percentage} />
             )}
           </div>
         );
@@ -464,7 +465,7 @@ export const Delegates = ({
         if (loading) {
           return (
             <div className="flex items-center justify-start">
-              <SkeletonRow className="h-5 w-12" />
+              <Skeleton className="h-5 w-12" />
             </div>
           );
         }

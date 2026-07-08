@@ -1,6 +1,5 @@
 "use client";
 
-import Lottie from "lottie-react";
 import { useMemo } from "react";
 import {
   CartesianGrid,
@@ -11,8 +10,8 @@ import {
   Tooltip,
 } from "recharts";
 
-import loadingAnimation from "@/public/loading-animation.json";
 import { TooltipInfo } from "@/shared/components";
+import { LogoAnimation } from "@/shared/components/design-system/loading-animation/LogoAnimation";
 import type { ChartConfig } from "@/shared/components/ui/chart";
 import { ChartContainer } from "@/shared/components/ui/chart";
 import { useDelegationPercentageByDay } from "@/shared/hooks";
@@ -133,9 +132,7 @@ export const DelegatedSupplyHistory = () => {
   if (loading) {
     return (
       <ContentWrapper>
-        <div className="text-center">
-          <Lottie animationData={loadingAnimation} height={400} width={400} />
-        </div>
+        <LogoAnimation size="lg" />
       </ContentWrapper>
     );
   }

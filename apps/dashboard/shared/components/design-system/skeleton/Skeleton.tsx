@@ -7,6 +7,8 @@ export type SkeletonProps = {
   shape?: SkeletonShape;
   /** Additional CSS classes — use w-* and h-* to control dimensions */
   className?: string;
+  /** Optional wrapper classes for legacy row/layout skeleton placements */
+  parentClassName?: string;
 };
 
 const shapeStyles: Record<SkeletonShape, string> = {
@@ -15,8 +17,12 @@ const shapeStyles: Record<SkeletonShape, string> = {
   text: "",
 };
 
-export const Skeleton = ({ shape = "rectangle", className }: SkeletonProps) => {
-  return (
+export const Skeleton = ({
+  shape = "rectangle",
+  className,
+  parentClassName,
+}: SkeletonProps) => {
+  const skeleton = (
     <div
       className={cn(
         // Base
@@ -28,4 +34,10 @@ export const Skeleton = ({ shape = "rectangle", className }: SkeletonProps) => {
       )}
     />
   );
+
+  if (parentClassName) {
+    return <div className={parentClassName}>{skeleton}</div>;
+  }
+
+  return skeleton;
 };

@@ -5,7 +5,7 @@ import type {
   ButtonProps,
   ButtonSize,
 } from "@/shared/components/design-system/buttons/types";
-import Spinner from "@/shared/components/ui/spinner";
+import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import { cn } from "@/shared/utils/cn";
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -57,7 +57,14 @@ export const Button = ({
       type={asChild ? type : (type ?? "button")}
       {...props}
     >
-      {loading ? <Spinner label={loadingText} /> : children}
+      {loading ? (
+        <>
+          <Spinner size="sm" />
+          {loadingText}
+        </>
+      ) : (
+        children
+      )}
     </Comp>
   );
 };

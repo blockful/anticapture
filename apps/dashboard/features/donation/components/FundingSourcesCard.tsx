@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import type { FundingSourcesCardProps } from "@/features/donation/types";
 import { DaoAvatarIcon } from "@/shared/components/icons/DaoAvatarIcon";
-import { Card, CardContent } from "@/shared/components/ui/card";
+import { Card, CardContent } from "@/shared/components/design-system/cards";
 
 export const FundingSourcesCard = ({
   title,

@@ -16,7 +16,7 @@ import { formatUnits, isAddressEqual, parseUnits, zeroAddress } from "viem";
 import type { DelegationHistoryItem } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import { useDelegateDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { SkeletonRow, Button, IconButton } from "@/shared/components";
+import { Skeleton, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
@@ -164,7 +164,7 @@ export const VotingPowerHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center justify-start px-4">
-              <SkeletonRow className="h-5 w-20" />
+              <Skeleton className="h-5 w-20" />
             </div>
           );
         }
@@ -234,7 +234,7 @@ export const VotingPowerHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center justify-start">
-              <SkeletonRow className="h-5 w-16" />
+              <Skeleton className="h-5 w-16" />
             </div>
           );
         }
@@ -300,11 +300,11 @@ export const VotingPowerHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -391,11 +391,11 @@ export const VotingPowerHistoryTable = ({
         if (isInitialLoading) {
           return (
             <div className="flex items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />

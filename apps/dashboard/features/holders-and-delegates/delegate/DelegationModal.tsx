@@ -15,7 +15,7 @@ import {
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
-import { SpinIcon } from "@/shared/components/icons/SpinIcon";
+import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   useGaslessEligibility,
@@ -235,7 +235,7 @@ const StepRow = ({ done, active, icon, label, error }: StepRowProps) => {
       <div className="flex w-full items-center gap-2">
         <div className="relative flex size-8 shrink-0 items-center justify-center">
           {active && (
-            <SpinIcon className="text-link absolute inset-0 size-8 animate-spin" />
+            <Spinner size="lg" className="text-link absolute inset-0" />
           )}
           <div
             className={cn(

@@ -13,6 +13,7 @@ import type { ProposalViewData } from "@/features/governance/types";
 import { getTimeLeftText } from "@/features/governance/utils";
 import { getOffchainChoiceColor } from "@/features/governance/utils/offchainChoiceColor";
 import { BulletDivider } from "@/shared/components/design-system/section";
+import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { formatNumberUserReadable } from "@/shared/utils";
 
@@ -133,15 +134,11 @@ export const ProposalInfoSection = ({
                 </div>
 
                 <div className="flex items-center gap-2 pl-4">
-                  <div className="bg-surface-contrast relative h-1 min-w-0 flex-1">
-                    <div
-                      className="absolute h-full"
-                      style={{
-                        width: `${item.percentage}%`,
-                        backgroundColor: item.color,
-                      }}
-                    />
-                  </div>
+                  <ProgressBar
+                    value={item.percentage}
+                    color={item.color}
+                    className="min-w-0 flex-1"
+                  />
 
                   <div className="flex shrink-0 items-center gap-2">
                     <p className="text-primary font-inter w-12 text-left text-[14px] font-normal not-italic leading-[20px]">
@@ -250,12 +247,17 @@ export const ProposalInfoSection = ({
                 </p>
               </div>
 
-              <div className="bg-surface-contrast relative h-1 w-full lg:w-[184px] lg:flex-1">
-                <div
-                  className={`${row.barClass} absolute h-full`}
-                  style={{ width: `${row.percentage}%` }}
-                />
-              </div>
+              <ProgressBar
+                value={row.percentage}
+                color={
+                  row.barClass === "bg-success"
+                    ? "var(--color-success)"
+                    : row.barClass === "bg-error"
+                      ? "var(--color-error)"
+                      : "var(--color-secondary)"
+                }
+                className="w-full lg:w-[184px] lg:flex-1"
+              />
 
               <div className="flex w-[100px] items-center gap-2">
                 <div className="flex w-12 items-center">

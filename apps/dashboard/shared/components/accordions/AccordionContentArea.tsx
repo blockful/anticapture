@@ -2,7 +2,7 @@
 
 import type { MouseEvent, ReactNode } from "react";
 
-import { Card } from "@/shared/components/ui/card";
+import { Card } from "@/shared/components/design-system/cards";
 import { useScreenSize } from "@/shared/hooks";
 import { cn } from "@/shared/utils/";
 

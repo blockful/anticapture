@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { AlertItem } from "@/features/alerts/utils/alerts-constants";
 import { AlertAvailability } from "@/features/alerts/utils/alerts-constants";
 import { Badge } from "@/shared/components/badges/Badge";
-import { Card, CardContent } from "@/shared/components/ui/card";
+import { Card, CardContent } from "@/shared/components/design-system/cards";
 import { cn } from "@/shared/utils/cn";
 
 export const AlertCard = ({

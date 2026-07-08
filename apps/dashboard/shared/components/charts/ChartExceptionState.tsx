@@ -1,6 +1,6 @@
 import { Inbox } from "lucide-react";
 
-import { BlankSlate, SkeletonRow } from "@/shared/components";
+import { BlankSlate, Skeleton } from "@/shared/components";
 
 interface ChartExceptionStateProps {
   state: "loading" | "error" | "no-data";
@@ -24,7 +24,7 @@ export const ChartExceptionState = ({
       case "loading":
         return (
           <div className={`${height} w-full`}>
-            <SkeletonRow className={`${height} w-full`} />
+            <Skeleton className={`${height} w-full`} />
           </div>
         );
       case "error":

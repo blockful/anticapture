@@ -16,7 +16,7 @@ import { parseUnits, formatUnits } from "viem";
 
 import { useDelegationHistory } from "@/features/holders-and-delegates/hooks/useDelegationHistory";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { Button, IconButton, SkeletonRow } from "@/shared/components";
+import { Button, IconButton, Skeleton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
@@ -134,11 +134,11 @@ export const DelegationHistoryTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex items-center gap-2">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -208,7 +208,7 @@ export const DelegationHistoryTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex w-full items-center justify-end">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse justify-end"
                 className="h-4 w-16"
               />
@@ -261,7 +261,7 @@ export const DelegationHistoryTable = ({
       cell: ({ row }) => {
         if (!isMounted || loading) {
           return (
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-4 w-20"
             />
@@ -288,7 +288,7 @@ export const DelegationHistoryTable = ({
         if (loading) {
           return (
             <div className="flex items-center justify-center">
-              <SkeletonRow className="h-6 w-6" />
+              <Skeleton className="h-6 w-6" />
             </div>
           );
         }

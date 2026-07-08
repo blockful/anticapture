@@ -6,7 +6,7 @@ import { formatUnits } from "viem";
 import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 import { TopAccountsChart } from "@/features/dao-overview/components/TopAccountsChart";
 import { useDelegates } from "@/features/holders-and-delegates/hooks/useDelegates";
-import { SkeletonRow, TooltipInfo } from "@/shared/components";
+import { Skeleton, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
@@ -69,7 +69,7 @@ export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
         </DefaultLink>
         <TooltipInfo text="Addresses with the most delegated votes." />
       </div>
-      {loading && <SkeletonRow className="h-52 w-full" />}
+      {loading && <Skeleton className="h-52 w-full" />}
       {!loading && (
         <TopAccountsChart
           daoId={daoId}

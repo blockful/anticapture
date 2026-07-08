@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { ClickableCell } from "@/features/panel/components/cells/ClickableCell";
 import { useCostOfAttack } from "@/features/panel/hooks";
-import { SkeletonRow, BadgeStatus } from "@/shared/components";
+import { Skeleton, BadgeStatus } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -32,7 +32,7 @@ export const CostOfAttackCell = ({
 
   if (isLoading) {
     return (
-      <SkeletonRow
+      <Skeleton
         parentClassName="flex animate-pulse justify-end w-full"
         className="h-5 w-full max-w-20 lg:max-w-32"
       />

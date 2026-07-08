@@ -56,7 +56,7 @@ import { Select } from "@/shared/components/design-system/form/fields/select/Sel
 import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
 import type { TabItem } from "@/shared/components/design-system/tabs/types";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
@@ -625,14 +625,14 @@ const DraftCardSkeleton = () => (
   <div className="border-border-default bg-surface-default rounded-base flex flex-col gap-3 border p-4 sm:flex-row sm:items-center sm:justify-between">
     <div className="flex flex-1 flex-col gap-1">
       <div className="flex items-center gap-2">
-        <SkeletonRow className="h-4 w-48" />
-        <SkeletonRow className="h-4 w-12" />
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="h-4 w-12" />
       </div>
-      <SkeletonRow className="h-3 w-32" />
+      <Skeleton className="h-3 w-32" />
     </div>
     <div className="flex gap-2">
       {Array.from({ length: 3 }).map((_, i) => (
-        <SkeletonRow key={i} className="h-8 w-20" />
+        <Skeleton key={i} className="h-8 w-20" />
       ))}
     </div>
   </div>
@@ -644,44 +644,29 @@ const ProposalItemSkeleton = () => {
       <div className="bg-surface-hover absolute left-0 top-1/2 h-[calc(100%-24px)] w-[2px] -translate-y-1/2 animate-pulse" />
 
       <div className="flex w-full flex-col items-start justify-between gap-2 lg:w-auto">
-        <SkeletonRow
-          parentClassName="flex animate-pulse"
-          className="h-5 w-64"
-        />
+        <Skeleton parentClassName="flex animate-pulse" className="h-5 w-64" />
         <div className="flex items-center gap-2">
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-4 w-16"
-          />
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-4 w-24"
-          />
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-4 w-32"
-          />
+          <Skeleton parentClassName="flex animate-pulse" className="h-4 w-16" />
+          <Skeleton parentClassName="flex animate-pulse" className="h-4 w-24" />
+          <Skeleton parentClassName="flex animate-pulse" className="h-4 w-32" />
         </div>
       </div>
 
       <div className="flex w-full shrink-0 flex-col items-center gap-1 lg:w-[220px]">
         <div className="flex w-full items-center justify-between gap-2">
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-4 w-20"
-          />
+          <Skeleton parentClassName="flex animate-pulse" className="h-4 w-20" />
           <div className="flex items-center gap-2">
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-4 w-12"
             />
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-4 w-12"
             />
           </div>
         </div>
-        <SkeletonRow
+        <Skeleton
           parentClassName="flex animate-pulse w-full"
           className="h-1 w-full"
         />

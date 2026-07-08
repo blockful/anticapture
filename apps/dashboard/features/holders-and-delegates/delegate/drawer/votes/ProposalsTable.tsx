@@ -20,12 +20,12 @@ import {
   proposalsFinalResultMapping,
 } from "@/features/holders-and-delegates/utils/proposalsTableUtils";
 import {
-  SkeletonRow,
+  Skeleton,
   TextIconLeft,
-  SimpleProgressBar,
   Button,
   IconButton,
 } from "@/shared/components";
+import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { CategoriesFilter } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { Table } from "@/shared/components/design-system/table/Table";
@@ -148,7 +148,7 @@ export const ProposalsTable = ({
         if (loading) {
           return (
             <div className="flex items-center">
-              <SkeletonRow className="h-5 w-48" />
+              <Skeleton className="h-5 w-48" />
             </div>
           );
         }
@@ -215,7 +215,7 @@ export const ProposalsTable = ({
         if (loading) {
           return (
             <div className="flex items-center justify-start">
-              <SkeletonRow className="h-5 w-16" />
+              <Skeleton className="h-5 w-16" />
             </div>
           );
         }
@@ -240,7 +240,7 @@ export const ProposalsTable = ({
         if (loading) {
           return (
             <div className="flex items-center justify-start">
-              <SkeletonRow className="h-5 w-16" />
+              <Skeleton className="h-5 w-16" />
             </div>
           );
         }
@@ -276,7 +276,7 @@ export const ProposalsTable = ({
         if (loading) {
           return (
             <div className="flex items-center justify-end">
-              <SkeletonRow className="h-5 w-16" />
+              <Skeleton className="h-5 w-16" />
             </div>
           );
         }
@@ -332,7 +332,7 @@ export const ProposalsTable = ({
         if (loading) {
           return (
             <div className="flex items-center justify-start">
-              <SkeletonRow className="h-5 w-20" />
+              <Skeleton className="h-5 w-20" />
             </div>
           );
         }
@@ -347,7 +347,7 @@ export const ProposalsTable = ({
               {voteTiming.text}
             </div>
             {voteTiming.text !== "-" && (
-              <SimpleProgressBar percentage={voteTiming.percentage} />
+              <ProgressBar value={voteTiming.percentage} />
             )}
           </div>
         );
@@ -397,7 +397,7 @@ export const ProposalsTable = ({
         if (loading) {
           return (
             <div className="flex items-center justify-center">
-              <SkeletonRow className="h-4 w-4" />
+              <Skeleton className="h-4 w-4" />
             </div>
           );
         }

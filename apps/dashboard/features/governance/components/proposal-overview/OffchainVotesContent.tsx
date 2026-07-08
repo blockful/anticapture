@@ -19,7 +19,7 @@ import { getOffchainVoteFullLabel } from "@/features/governance/utils/offchainVo
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FetchErrorState } from "@/shared/components/errors/FetchErrorState";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -185,11 +185,11 @@ export const OffchainVotesContent = ({
                 ref={loadingRowRef}
                 className="flex h-10 items-center gap-3 p-2"
               >
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="size-6 rounded-full"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-24"
                 />
@@ -200,11 +200,11 @@ export const OffchainVotesContent = ({
           if (!voter) {
             return (
               <div className="flex h-10 items-center gap-3 p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="size-6 rounded-full"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-24"
                 />
@@ -243,7 +243,7 @@ export const OffchainVotesContent = ({
           if (voter === LOADING_ROW || !voter) {
             return (
               <div className="flex items-center gap-2 p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-6 w-16"
                 />
@@ -298,7 +298,7 @@ export const OffchainVotesContent = ({
           if (voter === LOADING_ROW || !voter) {
             return (
               <div className="flex h-10 items-center p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-20"
                 />
@@ -361,7 +361,7 @@ export const OffchainVotesContent = ({
           if (voter === LOADING_ROW || !voter) {
             return (
               <div className="flex h-10 items-center p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-24"
                 />

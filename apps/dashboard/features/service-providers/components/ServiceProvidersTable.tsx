@@ -14,7 +14,7 @@ import { getDueDateLabel } from "@/features/service-providers/utils/computeQuart
 import { getCurrentQuarter } from "@/features/service-providers/utils/getCurrentQuarter";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { Table } from "@/shared/components/design-system/table/Table";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -31,7 +31,7 @@ interface ProviderRow {
   quarters: Record<string, QuarterReport>;
 }
 
-const makeSkeletonRow = (cols: ParsedQuarter[]): ProviderRow => ({
+const makeSkeleton = (cols: ParsedQuarter[]): ProviderRow => ({
   name: "",
   budget: 0,
   streamDuration: 1,
@@ -60,7 +60,7 @@ export const ServiceProvidersTable = ({
 
   const skeletonRows: ProviderRow[] = Array.from(
     { length: providers.length || 6 },
-    () => makeSkeletonRow(allCols),
+    () => makeSkeleton(allCols),
   );
 
   const data: ProviderRow[] = isLoading
@@ -129,7 +129,7 @@ export const ServiceProvidersTable = ({
       cell: ({ row }: { row: { original: ProviderRow } }) => {
         if (isLoading) {
           return (
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-4 w-20"
             />
@@ -165,11 +165,11 @@ export const ServiceProvidersTable = ({
       cell: ({ row }) =>
         isLoading ? (
           <div className="flex items-center gap-3">
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="size-6 rounded-full"
             />
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse"
               className="h-4 w-24"
             />
@@ -221,10 +221,7 @@ export const ServiceProvidersTable = ({
       ),
       cell: ({ row }) =>
         isLoading ? (
-          <SkeletonRow
-            parentClassName="flex animate-pulse"
-            className="h-4 w-16"
-          />
+          <Skeleton parentClassName="flex animate-pulse" className="h-4 w-16" />
         ) : (
           <div className="flex flex-col">
             <span className="text-secondary text-sm">

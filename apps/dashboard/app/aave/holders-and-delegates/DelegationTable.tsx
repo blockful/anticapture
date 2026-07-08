@@ -13,7 +13,7 @@ import {
   HoldersAndDelegatesDrawer,
 } from "@/features/holders-and-delegates";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { SkeletonRow } from "@/shared/components/skeletons";
+import { Skeleton } from "@/shared/components/design-system/skeleton";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -174,11 +174,11 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         if (loading) {
           return (
             <div className="flex items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -241,7 +241,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
 
         if (loading) {
           return (
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
               className="h-5 w-full max-w-20"
             />
@@ -285,7 +285,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
 
         if (loading) {
           return (
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
               className="h-5 w-full max-w-20"
             />
@@ -331,7 +331,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
 
         if (loading) {
           return (
-            <SkeletonRow
+            <Skeleton
               parentClassName="flex animate-pulse w-full items-center justify-end pr-4"
               className="h-5 w-full max-w-20"
             />
@@ -381,7 +381,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         if (loading) {
           return (
             <div className="flex w-full items-center justify-center">
-              <SkeletonRow
+              <Skeleton
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
               />
@@ -433,7 +433,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         if (loading) {
           return (
             <div className="flex items-center justify-start">
-              <SkeletonRow className="h-5 w-12" />
+              <Skeleton className="h-5 w-12" />
             </div>
           );
         }

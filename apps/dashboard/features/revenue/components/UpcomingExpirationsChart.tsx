@@ -5,6 +5,7 @@ import { useGetRevenueRenewalTenure } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 
 import { formatCompact } from "@/features/revenue/utils/format";
 import { transformToRenewalTenure } from "@/features/revenue/utils/transform";
@@ -33,7 +34,7 @@ export const UpcomingExpirationsChart = () => {
         </p>
       )}
       {isLoading ? (
-        <div className="bg-surface-raised mt-2 h-[260px] w-full animate-pulse rounded" />
+        <Skeleton className="mt-2 h-[260px] w-full rounded" />
       ) : series ? (
         <StackedBarChart
           series={series.series}

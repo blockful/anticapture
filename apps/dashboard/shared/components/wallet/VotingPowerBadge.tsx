@@ -1,13 +1,13 @@
 "use client";
 
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { useConnectedWalletVotingPower } from "@/shared/hooks/useConnectedWalletVotingPower";
 
 export const VotingPowerBadge = () => {
   const { votingPower, isLoading } = useConnectedWalletVotingPower();
 
   if (isLoading) {
-    return <SkeletonRow className="h-4 w-16" parentClassName="flex" />;
+    return <Skeleton className="h-4 w-16" parentClassName="flex" />;
   }
 
   if (!votingPower) {

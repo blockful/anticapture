@@ -8,6 +8,7 @@ import {
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { cn } from "@/shared/utils/cn";
 
 import { transformToOverview } from "@/features/revenue/utils/transform";
@@ -41,10 +42,10 @@ export const RevenueOverviewCard = () => {
                     "border-border-default border-b lg:border-b-0 lg:border-r",
                 )}
               >
-                <div className="bg-surface-raised h-2 w-full animate-pulse rounded" />
-                <div className="bg-surface-raised mt-4 h-4 w-24 animate-pulse rounded" />
-                <div className="bg-surface-raised mt-2 h-7 w-20 animate-pulse rounded" />
-                <div className="bg-surface-raised mt-2 h-4 w-40 animate-pulse rounded" />
+                <Skeleton className="h-2 w-full rounded" />
+                <Skeleton className="mt-4 h-4 w-24 rounded" />
+                <Skeleton className="mt-2 h-7 w-20 rounded" />
+                <Skeleton className="mt-2 h-4 w-40 rounded" />
               </div>
             ))
           : overview?.streams.map((stream, index) => (

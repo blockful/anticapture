@@ -5,7 +5,9 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { useGetRevenueTotals } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
+import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { cn } from "@/shared/utils/cn";
 
 import type { RevenueTimeframe } from "@/features/revenue/types";
@@ -41,20 +43,16 @@ export const RevenueSummaryCard = () => {
               onValueChange={(value) => setTimeframe(value as RevenueTimeframe)}
               className="hidden lg:inline-flex"
             />
-            <select
+            <Select
+              items={TIMEFRAME_OPTIONS}
               value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value as RevenueTimeframe)}
-              className="border-border-default bg-surface-default text-primary rounded-base border px-2 py-1 text-xs font-medium lg:hidden"
-            >
-              {TIMEFRAME_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onValueChange={(value) => setTimeframe(value as RevenueTimeframe)}
+              className="w-24 lg:hidden"
+              aria-label="Revenue timeframe"
+            />
           </div>
           {isLoading ? (
-            <div className="bg-surface-raised mt-2 h-9 w-32 animate-pulse rounded" />
+            <Skeleton className="mt-2 h-9 w-32 rounded" />
           ) : (
             <p className="text-primary mt-2 text-[30px] font-medium leading-9">
               {summary?.actualAmount ?? "—"}
@@ -68,8 +66,8 @@ export const RevenueSummaryCard = () => {
           </p>
           {isLoading ? (
             <>
-              <div className="bg-surface-raised mt-2 h-9 w-36 animate-pulse rounded" />
-              <div className="bg-surface-raised mt-2 h-4 w-32 animate-pulse rounded" />
+              <Skeleton className="mt-2 h-9 w-36 rounded" />
+              <Skeleton className="mt-2 h-4 w-32 rounded" />
             </>
           ) : (
             <>

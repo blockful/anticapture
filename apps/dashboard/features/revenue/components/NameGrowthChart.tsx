@@ -5,6 +5,7 @@ import { useGetRevenueActiveNames } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ComboChart } from "@/shared/components/design-system/charts/combo-chart/ComboChart";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 
 import { formatCompact } from "@/features/revenue/utils/format";
 import { transformToNameGrowth } from "@/features/revenue/utils/transform";
@@ -32,7 +33,7 @@ export const NameGrowthChart = () => {
         </p>
       )}
       {isLoading ? (
-        <div className="bg-surface-raised mt-3 h-[300px] w-full animate-pulse rounded" />
+        <Skeleton className="mt-3 h-[300px] w-full rounded" />
       ) : series ? (
         <ComboChart
           barSeries={series.barSeries}

@@ -1,4 +1,4 @@
-import { SimpleProgressBar } from "@/shared/components";
+import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { cn } from "@/shared/utils";
 
 export interface ActiveTokensTooltipProps {
@@ -30,7 +30,7 @@ export const ActiveTokensProgress = ({
           / {totalAmount}
         </span>
       </div>
-      <SimpleProgressBar percentage={percentage} progressClassName="bg-link" />
+      <ProgressBar value={percentage} color="var(--color-link)" />
     </div>
   );
 };

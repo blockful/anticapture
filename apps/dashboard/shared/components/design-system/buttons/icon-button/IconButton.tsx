@@ -6,7 +6,7 @@ import type {
   ButtonSize,
   ButtonProps,
 } from "@/shared/components/design-system/buttons/types";
-import Spinner from "@/shared/components/ui/spinner";
+import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import { cn } from "@/shared/utils/cn";
 
 interface IconButtonProps extends ButtonProps {
@@ -57,7 +57,10 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         {...props}
       >
         {loading ? (
-          <Spinner label={loadingText} />
+          <>
+            <Spinner size="sm" />
+            {loadingText}
+          </>
         ) : (
           Icon && (
             <Icon

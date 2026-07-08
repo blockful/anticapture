@@ -15,7 +15,7 @@ import { formatUnits, parseUnits } from "viem";
 
 import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
-import { Button, SkeletonRow } from "@/shared/components";
+import { Button, Skeleton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
@@ -129,11 +129,11 @@ export const TopInteractionsTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex w-full items-center gap-3">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="size-6 rounded-full"
               />
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse"
                 className="h-4 w-24"
               />
@@ -224,7 +224,7 @@ export const TopInteractionsTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex w-full items-center justify-end text-sm">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse justify-end"
                 className="h-4 w-16"
               />
@@ -260,7 +260,7 @@ export const TopInteractionsTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex w-full items-center justify-end text-sm">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse justify-end"
                 className="h-4 w-16"
               />
@@ -361,7 +361,7 @@ export const TopInteractionsTable = ({
         if (!isMounted || loading) {
           return (
             <div className="flex w-full items-center justify-end text-sm">
-              <SkeletonRow
+              <Skeleton
                 parentClassName="flex animate-pulse justify-end"
                 className="h-4 w-16"
               />

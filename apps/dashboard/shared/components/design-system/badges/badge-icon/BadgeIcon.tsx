@@ -4,6 +4,7 @@ import type { ElementType } from "react";
 import { cn } from "@/shared/utils/cn";
 
 import type { BadgeSize } from "@/shared/components/design-system/badges/types";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 
 const sizeStyles: Record<BadgeSize, string> = {
   default: "size-6",
@@ -73,14 +74,7 @@ export const BadgeIcon = ({
   ...props
 }: BadgeIconProps) => {
   if (isLoading) {
-    return (
-      <div
-        className={cn(
-          "bg-surface-hover h-5 w-28 animate-pulse rounded-full",
-          className,
-        )}
-      />
-    );
+    return <Skeleton className={cn("h-5 w-28 rounded-full", className)} />;
   }
 
   return (

@@ -3,7 +3,7 @@
 import { CheckIcon, ChevronDown } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 import { useScreenSize } from "@/shared/hooks";
 import { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { cn } from "@/shared/utils/";
@@ -100,24 +100,14 @@ export const SwitcherDate = ({
       )}
     </div>
   ) : (
-    <Tabs value={isSelected} className="gap-1">
-      <TabsList>
-        {activeTimeIntervals.map((interval) => (
-          <TabsTrigger
-            key={interval}
-            className={cn(
-              "cursor-pointer text-sm font-medium",
-              isSmall
-                ? "min-w-[60px] px-1.5 py-0.5"
-                : "min-w-[84px] px-3 py-1.5",
-            )}
-            value={interval}
-            onClick={() => handleSelect(interval)}
-          >
-            {formatInterval(interval)}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+    <SegmentedControl
+      value={isSelected}
+      size={isSmall ? "sm" : "md"}
+      items={activeTimeIntervals.map((interval) => ({
+        value: interval,
+        label: formatInterval(interval),
+      }))}
+      onValueChange={(interval) => handleSelect(interval as TimeInterval)}
+    />
   );
 };

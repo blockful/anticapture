@@ -10,8 +10,7 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardTitle,
-} from "@/shared/components/ui/card";
+} from "@/shared/components/design-system/cards";
 
 interface TheCardChartLayoutProps {
   children: ReactNode;
@@ -39,9 +38,9 @@ export const TheCardChartLayout = ({
           <div className="flex h-full w-full items-center">
             <div className="flex h-full w-full flex-col">
               <div className="flex h-full w-full gap-1.5">
-                <CardTitle className="!text-alternative-sm text-primary flex items-center text-nowrap font-mono font-medium uppercase tracking-wide lg:gap-2.5">
+                <h2 className="!text-alternative-sm text-primary flex items-center text-nowrap font-mono font-medium uppercase tracking-wide lg:gap-2.5">
                   {title}
-                </CardTitle>
+                </h2>
                 {csvData && (
                   <CSVLink
                     filename={`${title.toLowerCase().replace(/\s+/g, "_")}.csv`}

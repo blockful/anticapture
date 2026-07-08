@@ -3,9 +3,9 @@
 import {
   Card,
   CardHeader,
-  CardTitle,
   CardContent,
-} from "@/shared/components/ui/card";
+} from "@/shared/components/design-system/cards";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 
 export const SkeletonDaoInfoCards = () => {
   return (
@@ -15,10 +15,10 @@ export const SkeletonDaoInfoCards = () => {
         className="py-2! min-h-[32px] px-0 lg:p-2"
       >
         <div className="flex w-full items-center justify-start">
-          <CardTitle className="text-primary flex items-center gap-2 text-xs font-semibold uppercase">
-            <div className="size-4 animate-pulse rounded-full bg-gray-700/50" />
-            <div className="h-4 w-16 animate-pulse rounded-sm bg-gray-700/50" />
-          </CardTitle>
+          <div className="text-primary flex items-center gap-2 text-xs font-semibold uppercase">
+            <Skeleton className="size-4 rounded-full" />
+            <Skeleton className="h-4 w-16 rounded-sm" />
+          </div>
         </div>
       </CardHeader>
 
@@ -30,15 +30,15 @@ export const SkeletonDaoInfoCards = () => {
           >
             <div className="flex w-full items-center gap-1.5">
               <h1 className="text-secondary text-sm font-normal">
-                <div className="h-4 w-16 animate-pulse rounded-sm bg-gray-700/50" />
+                <Skeleton className="h-4 w-16 rounded-sm" />
               </h1>
-              <div className="size-3 animate-pulse rounded-full bg-gray-700/50" />
+              <Skeleton className="size-3 rounded-full" />
             </div>
 
             <div className="flex h-full w-full justify-end gap-2 lg:justify-start">
               {[1, 2].map((_, itemIndex) => (
                 <div key={itemIndex} className="flex">
-                  <div className="h-6 w-16 animate-pulse rounded-full bg-gray-700/50" />
+                  <Skeleton className="h-6 w-16 rounded-full" />
                 </div>
               ))}
             </div>

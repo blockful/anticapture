@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
+import { Activity, Filter, Newspaper } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
 import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
@@ -19,6 +19,7 @@ import {
   SubSectionsContainer,
   BulletDivider,
 } from "@/shared/components/design-system/section";
+import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { useDaoId } from "@/shared/providers/DaoIdProvider";
 import { cn } from "@/shared/utils/cn";
@@ -205,7 +206,7 @@ export const ActivityFeedSection = ({ feedDaoId }: { feedDaoId: string }) => {
 
         {showIncrementalSpinner && (
           <div className="flex justify-center py-4">
-            <Loader2 className="text-secondary size-6 animate-spin" />
+            <Spinner size="md" className="text-secondary" />
           </div>
         )}
       </div>

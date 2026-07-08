@@ -1,20 +1,11 @@
 "use client";
 
-import {
-  Close,
-  Content,
-  Overlay,
-  Portal,
-  Root,
-  Title,
-  Trigger,
-} from "@radix-ui/react-dialog";
-import { X, Plus, PlusIcon, Check } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import { Plus, PlusIcon, Check } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import type { MetricWithKey } from "@/features/token-distribution/types";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { CardTitle } from "@/shared/components/ui/card";
+import { Modal } from "@/shared/components/design-system/modal/Modal";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
@@ -31,15 +22,15 @@ export const TokenDistributionDialog = ({
   onApply: (metric: (MetricTypesEnum | string)[]) => void;
   daoId: DaoIdEnum;
 }) => {
-  let notSupportedMetrics: MetricTypesEnum[] = [];
-
-  if (daoConfig[daoId].notSupportedMetrics) {
-    notSupportedMetrics = daoConfig[daoId].notSupportedMetrics;
-  }
+  const notSupportedMetrics = useMemo(
+    () => daoConfig[daoId].notSupportedMetrics ?? [],
+    [daoId],
+  );
 
   const [selectedMetrics, setSelectedMetrics] = useState<
     (MetricTypesEnum | string)[]
   >([]);
+  const [open, setOpen] = useState(false);
 
   const handleSelectMetric = (metricKey: MetricTypesEnum | string) => {
     setSelectedMetrics((prev) =>
@@ -52,6 +43,7 @@ export const TokenDistributionDialog = ({
   const handleApplyMetric = () => {
     onApply(selectedMetrics);
     setSelectedMetrics([]);
+    setOpen(false);
   };
 
   const isAllMetricsApplied =
@@ -71,114 +63,93 @@ export const TokenDistributionDialog = ({
   );
 
   return (
-    <Root>
-      <Trigger asChild>
-        <Button
-          data-ph-event="metric_added"
-          data-ph-source="token_distribution"
-          data-umami-event="metric_added"
-          variant="outline"
-          disabled={isAllMetricsApplied}
-          size="sm"
-        >
-          {isAllMetricsApplied ? (
-            <>
-              <Check className="text-dimmed size-3.5" />
-              <p className="text-dimmed text-sm font-medium">
-                All metrics added
-              </p>
-            </>
-          ) : (
-            <>
-              <PlusIcon className="text-primary size-3.5" />
-              <p className="text-primary text-sm font-medium">Add metric</p>
-            </>
-          )}
-        </Button>
-      </Trigger>
-      <Portal>
-        <Overlay className="fixed inset-0 z-50 bg-black/80" />
-        <Content className="z-60 fixed left-1/2 top-1/2 max-h-[85vh] w-full max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-md bg-[#18181b] shadow-lg">
-          <Title className="text-primary px-4 py-3.5 text-[16px] font-medium leading-6">
-            Add metrics to chart
-          </Title>
-          <div className="border-light-dark h-px w-full border-t" />
-          <div className="flex flex-col p-4">
-            {Object.entries(metricsSchema)
-              .filter(
-                ([category, metrics]) =>
-                  appliedMetrics[category]?.length !== metrics.length,
-              )
-              .map(([category, metrics], index, visibleEntries) => {
-                return (
-                  <div key={category}>
-                    <CardTitle className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide lg:gap-2.5">
-                      {category}
-                    </CardTitle>
-                    <div className="flex w-full flex-wrap gap-2 lg:gap-3">
-                      {metrics.map((metric) => {
-                        const isMetricAlreadyApplied = appliedMetrics[
-                          category
-                        ]?.some((i) => i.key === metric.key);
+    <>
+      <Button
+        data-ph-event="metric_added"
+        data-ph-source="token_distribution"
+        data-umami-event="metric_added"
+        variant="outline"
+        disabled={isAllMetricsApplied}
+        size="sm"
+        onClick={() => setOpen(true)}
+      >
+        {isAllMetricsApplied ? (
+          <>
+            <Check className="text-dimmed size-3.5" />
+            <p className="text-dimmed text-sm font-medium">All metrics added</p>
+          </>
+        ) : (
+          <>
+            <PlusIcon className="text-primary size-3.5" />
+            <p className="text-primary text-sm font-medium">Add metric</p>
+          </>
+        )}
+      </Button>
 
-                        const isSelected = selectedMetricsSet.has(metric.key);
+      <Modal
+        open={open}
+        onOpenChange={setOpen}
+        title="Add metrics to chart"
+        cancelLabel="Cancel"
+        confirmLabel="Apply metrics"
+        onConfirm={handleApplyMetric}
+        className="max-w-[520px]"
+      >
+        <div className="flex flex-col">
+          {Object.entries(metricsSchema)
+            .filter(
+              ([category, metrics]) =>
+                appliedMetrics[category]?.length !== metrics.length,
+            )
+            .map(([category, metrics], index, visibleEntries) => {
+              return (
+                <div key={category}>
+                  <h3 className="!text-alternative-sm text-secondary mb-1.5 flex items-center font-mono font-medium uppercase tracking-wide lg:gap-2.5">
+                    {category}
+                  </h3>
+                  <div className="flex w-full flex-wrap gap-2 lg:gap-3">
+                    {metrics.map((metric) => {
+                      const isMetricAlreadyApplied = appliedMetrics[
+                        category
+                      ]?.some((i) => i.key === metric.key);
 
-                        if (isMetricAlreadyApplied) return null;
+                      const isSelected = selectedMetricsSet.has(metric.key);
 
-                        return (
-                          <Button
-                            key={metric.label}
-                            onClick={() => handleSelectMetric(metric.key)}
-                            className={cn(
-                              "bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm",
-                              isSelected
-                                ? "border-tangerine"
-                                : "border-transparent",
-                            )}
-                            disabled={notSupportedMetricsSet.has(
-                              metric.key as MetricTypesEnum,
-                            )}
-                          >
-                            {isSelected ? (
-                              <Check className="size-3" />
-                            ) : (
-                              <Plus className="size-3" />
-                            )}
-                            {metric.label}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                    {visibleEntries.length > 1 &&
-                      index !== visibleEntries.length - 1 && (
-                        <div className="border-light-dark my-4 h-px w-full border-t border-dashed" />
-                      )}
+                      if (isMetricAlreadyApplied) return null;
+
+                      return (
+                        <Button
+                          key={metric.label}
+                          onClick={() => handleSelectMetric(metric.key)}
+                          className={cn(
+                            "bg-light-dark hover:bg-middle-dark text-primary flex cursor-pointer items-center justify-between gap-2 rounded-sm border px-2 py-1 text-sm",
+                            isSelected
+                              ? "border-tangerine"
+                              : "border-transparent",
+                          )}
+                          disabled={notSupportedMetricsSet.has(
+                            metric.key as MetricTypesEnum,
+                          )}
+                        >
+                          {isSelected ? (
+                            <Check className="size-3" />
+                          ) : (
+                            <Plus className="size-3" />
+                          )}
+                          {metric.label}
+                        </Button>
+                      );
+                    })}
                   </div>
-                );
-              })}
-          </div>
-          <div className="border-light-dark h-px w-full border-t" />
-          <div className="flex justify-end gap-2 px-4 py-3">
-            <Close asChild>
-              <Button variant="outline">Cancel</Button>
-            </Close>
-            <Close asChild>
-              <Button variant="primary" onClick={handleApplyMetric}>
-                Apply metrics
-              </Button>
-            </Close>
-          </div>
-
-          <Close asChild>
-            <button
-              className="text-primary focus:ring-primary absolute right-4 top-3.5 inline-flex size-[25px] cursor-pointer items-center justify-center rounded-full focus:outline-none focus:ring-1"
-              aria-label="Close"
-            >
-              <X className="size-4" />
-            </button>
-          </Close>
-        </Content>
-      </Portal>
-    </Root>
+                  {visibleEntries.length > 1 &&
+                    index !== visibleEntries.length - 1 && (
+                      <div className="border-light-dark my-4 h-px w-full border-t border-dashed" />
+                    )}
+                </div>
+              );
+            })}
+        </div>
+      </Modal>
+    </>
   );
 };

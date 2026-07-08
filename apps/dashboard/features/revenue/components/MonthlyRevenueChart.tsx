@@ -5,7 +5,9 @@ import { useGetRevenueTotals } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
+import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 
 import type { ChartGranularity } from "@/features/revenue/types";
 import { formatMillions } from "@/features/revenue/utils/format";
@@ -62,21 +64,17 @@ export const MonthlyRevenueChart = () => {
             onValueChange={(value) => setGranularity(value as ChartGranularity)}
             className="hidden lg:inline-flex"
           />
-          <select
+          <Select
+            items={GRANULARITY_OPTIONS}
             value={granularity}
-            onChange={(e) => setGranularity(e.target.value as ChartGranularity)}
-            className="border-border-default bg-surface-default text-primary rounded-base border px-2 py-1 text-xs font-medium lg:hidden"
-          >
-            {GRANULARITY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onValueChange={(value) => setGranularity(value as ChartGranularity)}
+            className="w-28 lg:hidden"
+            aria-label="Revenue chart granularity"
+          />
         </div>
       </div>
       {isLoading ? (
-        <div className="bg-surface-raised h-[300px] w-full animate-pulse rounded" />
+        <Skeleton className="h-[300px] w-full rounded" />
       ) : series ? (
         <StackedBarChart
           series={series.series}

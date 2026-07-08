@@ -6,6 +6,7 @@ import { useLastProposals } from "@/features/dao-overview/hooks/useLastProposals
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import { TooltipInfo } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { EmptyState as ErrorState } from "@/shared/components/design-system/table/components/EmptyState";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
@@ -17,14 +18,14 @@ const LastProposalsCardSkeleton = () => {
           key={index}
           className="bg-surface-default flex items-center gap-3 p-3"
         >
-          <div className="bg-surface-contrast h-12 w-[2px] animate-pulse" />
+          <Skeleton className="h-12 w-[2px]" />
           <div className="flex flex-1 flex-col gap-2">
-            <div className="bg-surface-contrast h-5 w-3/4 animate-pulse rounded" />
-            <div className="bg-surface-contrast h-4 w-1/2 animate-pulse rounded" />
+            <Skeleton className="h-5 w-3/4 rounded" />
+            <Skeleton className="h-4 w-1/2 rounded" />
           </div>
           <div className="hidden w-[220px] flex-col gap-2 lg:flex">
-            <div className="bg-surface-contrast h-4 w-full animate-pulse rounded" />
-            <div className="bg-surface-contrast h-1 w-full animate-pulse rounded-full" />
+            <Skeleton className="h-4 w-full rounded" />
+            <Skeleton className="h-1 w-full rounded-full" />
           </div>
         </div>
       ))}

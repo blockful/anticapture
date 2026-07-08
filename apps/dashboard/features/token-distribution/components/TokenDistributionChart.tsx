@@ -1,4 +1,3 @@
-import Lottie from "lottie-react";
 import { AlertOctagon } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -7,9 +6,9 @@ import { SectionComposedChart } from "@/features/token-distribution/components/S
 import { TokenDistributionWrapper } from "@/features/token-distribution/components/TokenDistributionWrapper";
 import { useBrushStore } from "@/features/token-distribution/store/useBrushStore";
 import type { MetricSchema } from "@/features/token-distribution/utils/metrics";
-import loadingAnimation from "@/public/loading-animation.json";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { LogoAnimation } from "@/shared/components/design-system/loading-animation/LogoAnimation";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { ChartDataSetPoint } from "@/shared/dao-config/types";
@@ -159,9 +158,7 @@ export const TokenDistributionChart = ({
   if (isLoading || !chartData) {
     return (
       <TokenDistributionWrapper context={context}>
-        <div className="text-center">
-          <Lottie animationData={loadingAnimation} height={400} width={400} />
-        </div>
+        <LogoAnimation size="lg" />
       </TokenDistributionWrapper>
     );
   }

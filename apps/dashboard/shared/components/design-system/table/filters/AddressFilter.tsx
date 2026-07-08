@@ -1,12 +1,12 @@
 "use client";
 
 import { ResetIcon } from "@radix-ui/react-icons";
-import { Loader2 } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { isAddress } from "viem";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
+import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import SearchField from "@/shared/components/design-system/SearchField";
 import { ButtonFilter } from "@/shared/components/design-system/table/ButtonFilter";
 import {
@@ -162,7 +162,7 @@ export function AddressFilter({
             >
               {isResolving ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  <Spinner size="sm" />
                   Resolving ENS...
                 </>
               ) : (

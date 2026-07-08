@@ -9,7 +9,7 @@ import type { NonVoter } from "@/features/governance/hooks/useNonVoters";
 import type { ProposalDetails } from "@/features/governance/types";
 import { useNonVoters } from "@/features/governance/hooks/useNonVoters";
 import { useNonVotersParams } from "@/features/governance/hooks/useNonVotersParams";
-import { SkeletonRow, Button } from "@/shared/components";
+import { Skeleton, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
@@ -91,11 +91,11 @@ export const TabsDidntVoteContent = ({
                 ref={loadingRowRef}
                 className="flex h-10 items-center gap-3 p-2"
               >
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="size-6 rounded-full"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-24"
                 />
@@ -107,11 +107,11 @@ export const TabsDidntVoteContent = ({
           if (!voterAddress) {
             return (
               <div className="flex h-10 items-center gap-3 p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="size-6 rounded-full"
                 />
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-24"
                 />
@@ -159,7 +159,7 @@ export const TabsDidntVoteContent = ({
           if (voterAddress === "__LOADING_ROW__") {
             return (
               <div className="flex h-10 items-center p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-20"
                 />
@@ -171,7 +171,7 @@ export const TabsDidntVoteContent = ({
           if (!voterAddress) {
             return (
               <div className="flex h-10 items-center p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-20"
                 />
@@ -211,7 +211,7 @@ export const TabsDidntVoteContent = ({
           if (voterAddress === "__LOADING_ROW__") {
             return (
               <div className="flex h-10 items-center p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-24"
                 />
@@ -223,7 +223,7 @@ export const TabsDidntVoteContent = ({
           if (!voterAddress) {
             return (
               <div className="flex h-10 items-center p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-24"
                 />
@@ -290,7 +290,7 @@ export const TabsDidntVoteContent = ({
           if (voterAddress === "__LOADING_ROW__") {
             return (
               <div className="flex h-10 items-center p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-16"
                 />
@@ -302,7 +302,7 @@ export const TabsDidntVoteContent = ({
           if (!voterAddress) {
             return (
               <div className="flex h-10 items-center p-2">
-                <SkeletonRow
+                <Skeleton
                   parentClassName="flex animate-pulse"
                   className="h-4 w-16"
                 />

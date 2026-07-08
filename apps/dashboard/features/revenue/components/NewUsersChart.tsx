@@ -6,6 +6,7 @@ import { useGetRevenueNewWallets } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ComboChart } from "@/shared/components/design-system/charts/combo-chart/ComboChart";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
 import { formatCompact } from "@/features/revenue/utils/format";
@@ -38,7 +39,7 @@ export const NewUsersChart = () => {
         </Tooltip>
       </div>
       {isLoading ? (
-        <div className="bg-surface-raised h-[300px] w-full animate-pulse rounded" />
+        <Skeleton className="h-[300px] w-full rounded" />
       ) : series ? (
         <ComboChart
           barSeries={series.barSeries}

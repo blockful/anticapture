@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 import { renderCustomizedLabel } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/utils/renderCustomizedLabel";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
-import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { formatNumberUserReadable } from "@/shared/utils";
 
 const PieChartCustomTooltip: React.FC<
@@ -57,7 +57,7 @@ export const ThePieChart = ({
   if (!pieData || pieData.length === 0) {
     return (
       <div className="flex items-center justify-center rounded-full">
-        <SkeletonRow
+        <Skeleton
           parentClassName="flex animate-pulse"
           className="size-[200px] rounded-full"
         />
