@@ -876,7 +876,20 @@
           },
           "decimals": 2
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p99 latency"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "sortBy": [
@@ -2030,7 +2043,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (service_name) (count_over_time({service_name=~\"anticapture-.*\"} | json | level=~\"error|fatal\" [$__rate_interval]))",
+          "expr": "sum by (service_name) (count_over_time({service_name=~\".+\"} | detected_level=~\"error|fatal\" [$__auto]))",
           "refId": "A",
           "legendFormat": "{{service_name}}"
         }
@@ -2064,7 +2077,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{service_name=~\"anticapture-.*\"} | json | level=~\"error|fatal\"",
+          "expr": "{service_name=~\".+\"} | detected_level=~\"error|fatal\"",
           "refId": "A"
         }
       ]
@@ -2206,23 +2219,8 @@
             "type": "tempo",
             "uid": "tempo"
           },
-          "queryType": "traceqlSearch",
-          "filters": [
-            {
-              "id": "service-name",
-              "operator": "=~",
-              "scope": "resource",
-              "tag": "service.name",
-              "value": [
-                "anticapture-api",
-                "anticapture-indexer",
-                "anticapture-gateful",
-                "anticapture-authful",
-                "anticapture-relayer"
-              ],
-              "valueType": "string"
-            }
-          ],
+          "queryType": "traceql",
+          "query": "{resource.service.name=~\"anticapture-.*\"}",
           "limit": 20,
           "refId": "A",
           "tableType": "traces"
