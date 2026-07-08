@@ -12,6 +12,9 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # `GATEFUL_URL` is a `production`-scoped Environment secret; without this the
+    # build step's ANTICAPTURE_API_URL is empty and client codegen throws.
+    environment: production
     permissions:
       contents: write
       pull-requests: write
