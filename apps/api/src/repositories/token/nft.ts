@@ -16,11 +16,15 @@ export class NFTPriceRepository {
   ): Promise<TokenHistoricalPriceResponse> {
     return await this.db
       .select({
+        // FLOOR keeps the value an integer wei string: AVG over NUMERIC emits
+        // decimal text (e.g. "200.5000000000000000"), which BigInt() rejects.
         price: sql<string>`
       CAST(
-        AVG(CAST(${tokenPrice.price} AS NUMERIC)) OVER (
-          ORDER BY ${tokenPrice.timestamp}
-          RANGE BETWEEN 2505600 PRECEDING AND CURRENT ROW
+        FLOOR(
+          AVG(CAST(${tokenPrice.price} AS NUMERIC)) OVER (
+            ORDER BY ${tokenPrice.timestamp}
+            RANGE BETWEEN 2505600 PRECEDING AND CURRENT ROW
+          )
         ) AS TEXT
       )
     `,
