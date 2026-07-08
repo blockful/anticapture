@@ -1,5 +1,19 @@
 # @anticapture/dashboard
 
+## 2.8.0
+
+### Minor Changes
+
+- [#1979](https://github.com/blockful/anticapture/pull/1979) [`62064e7`](https://github.com/blockful/anticapture/commit/62064e7d70618bd6ae56c709c6b2b805c3f9d181) Thanks [@Zeugh-eth](https://github.com/Zeugh-eth)! - Add Shutter DAO whitelabel governance frontend. Enables the whitelabel route for Shutter with its navy brand color, and adds Azorius (`submitProposal`) support to the proposal creation flow so Shutter proposals can be created alongside the existing OZ Governor path. The Execute button for Shutter proposals now only appears once the Azorius timelock has elapsed (status `PENDING_EXECUTION`), instead of showing during the ~2-day timelock window where execution reverts on-chain.
+
+### Patch Changes
+
+- [#2030](https://github.com/blockful/anticapture/pull/2030) [`95a976a`](https://github.com/blockful/anticapture/commit/95a976a939419c12cec8e9d4b70ab9714a42ef3a) Thanks [@pikonha](https://github.com/pikonha)! - Fix dashboard production build: stub Node's `fs` module for browser bundles so Turbopack can bundle `@shutter-network/shutter-crypto` used by Shutter offchain voting
+
+- [#2026](https://github.com/blockful/anticapture/pull/2026) [`0743c45`](https://github.com/blockful/anticapture/commit/0743c45530fb9fadfe5c75b07f038a8c74e03240) Thanks [@pikonha](https://github.com/pikonha)! - Add route error boundaries with a recovery UI to DAO and whitelabel pages so a render error no longer blanks the whole page, and surface failed votes-table loads and pagination with a visible error and retry
+
+- [#2013](https://github.com/blockful/anticapture/pull/2013) [`63142ab`](https://github.com/blockful/anticapture/commit/63142ab9b688465382a16fbf8a0f6c6c037b1335) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix voting on Shutter-encrypted offchain proposals (e.g. ENS Copeland elections). The vote choice is now Shutter-encrypted before submission, so the Snapshot sequencer no longer rejects encrypted-privacy proposals with "invalid choice".
+
 ## 2.7.0
 
 ### Minor Changes
