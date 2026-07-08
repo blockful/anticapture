@@ -11,6 +11,7 @@ export const TokenValidationSchema = z.discriminatedUnion("valid", [
     valid: z.literal(true),
     tokenId: z.string(),
     tenant: z.string(),
+    name: z.string().default("unknown"),
     rateLimitPerMin: z.number().int(),
   }),
 ]);

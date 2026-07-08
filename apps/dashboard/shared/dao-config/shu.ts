@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { ShutterOgIcon } from "@/shared/og/dao-og-icons";
+import { toAbsoluteUrl } from "@/shared/seo/site";
 import {
   RiskLevel,
   GovernanceImplementationEnum,
@@ -18,11 +19,16 @@ export const SHU: DaoConfiguration = {
   ogIcon: ShutterOgIcon,
   decimals: 18,
   color: {
-    svgColor: "#1e1e1e",
+    svgColor: "#051016",
     svgBgColor: "#fff",
   },
   forumLink: "https://shutternetwork.discourse.group/c/shutter-dao/14",
   icon: ShutterIcon,
+  hostnames: ["shutter.gov.blockful.io"],
+  whitelabel: {
+    requestFeatureLink:
+      "https://forms.clickup.com/90132341641/f/2ky4wrw9-33713/JLIPUEF65J3AAMXH2L",
+  },
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -40,6 +46,10 @@ export const SHU: DaoConfiguration = {
       cancelFunction: false,
       logic: "For + Abstain",
       quorumCalculation: QUORUM_CALCULATION_TYPES.TOTAL_SUPPLY,
+    },
+    govPlatform: {
+      name: "Anticapture",
+      url: toAbsoluteUrl("/shu/proposals/"),
     },
   },
   attackProfitability: {
@@ -350,4 +360,5 @@ export const SHU: DaoConfiguration = {
   tokenDistribution: true,
   dataTables: true,
   governancePage: true,
+  activityFeed: true,
 };

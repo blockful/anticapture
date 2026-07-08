@@ -207,22 +207,22 @@ export const WhitelabelSidebar = ({
 
         {/* Footer - pushed to bottom */}
         <div className="mt-auto flex flex-col items-center gap-2.5">
-          <Button variant="outline" asChild className="w-full justify-center">
-            <a
-              href={
-                "https://forms.clickup.com/90132341641/f/2ky4wrw9-30353/Z1Y0VQ9TC6SQ3AMUMX"
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              data-umami-event="feature_request_click"
-              data-umami-event-source="whitelabel_sidebar"
-              data-ph-event="feature_request_click"
-              data-ph-source="whitelabel_sidebar"
-            >
-              <Sparkles className="size-4" />
-              {!isCollapsed && "Request feature"}
-            </a>
-          </Button>
+          {daoConfig.whitelabel?.requestFeatureLink && (
+            <Button variant="outline" asChild className="w-full justify-center">
+              <a
+                href={daoConfig.whitelabel.requestFeatureLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-umami-event="feature_request_click"
+                data-umami-event-source="whitelabel_sidebar"
+                data-ph-event="feature_request_click"
+                data-ph-source="whitelabel_sidebar"
+              >
+                <Sparkles className="size-4" />
+                {!isCollapsed && "Request feature"}
+              </a>
+            </Button>
+          )}
 
           {!isCollapsed && (
             <p className="text-dimmed w-full text-center text-xs font-medium leading-4">

@@ -1,5 +1,15 @@
 # @anticapture/api
 
+## 1.5.1
+
+### Patch Changes
+
+- [#2029](https://github.com/blockful/anticapture/pull/2029) [`1b9aef0`](https://github.com/blockful/anticapture/commit/1b9aef01669aacac2c4923aafde183e607328381) Thanks [@pikonha](https://github.com/pikonha)! - improve perfomance of the proposals endpoint
+
+- [#1979](https://github.com/blockful/anticapture/pull/1979) [`2ea392e`](https://github.com/blockful/anticapture/commit/2ea392ea9c6b0ce44466f0eee14f476eedfd2bd7) Thanks [@Zeugh-eth](https://github.com/Zeugh-eth)! - Fix Shutter (SHU) timelock period: `Azorius.timelockPeriod()` is 14400 blocks (~2 days), not zero. Corrects the `timelockDelay` reported by the DAO endpoint, and surfaces the Azorius post-voting lifecycle in proposal status: passed proposals now report `QUEUED` during the timelock window (when `executeProposal` would revert) and `PENDING_EXECUTION` during the execution window, instead of `SUCCEEDED` throughout. Status filters for `QUEUED`/`PENDING_EXECUTION` now also match Azorius proposals.
+
+- [#2025](https://github.com/blockful/anticapture/pull/2025) [`95b15e6`](https://github.com/blockful/anticapture/commit/95b15e69c30f5c2d9e4cd0e594212ec19bfeedd8) Thanks [@pikonha](https://github.com/pikonha)! - Fix SQL injection pattern in proposals-activity repository: proposal IDs in the getUserVotes IN clause are now bound parameters instead of string-interpolated raw SQL
+
 ## 1.5.0
 
 ### Minor Changes

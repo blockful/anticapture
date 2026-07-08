@@ -49,6 +49,7 @@ function createStubRepo(): ProposalsRepository & {
   byId: DBProposal | undefined;
   lastStatusArg: string[] | undefined;
   lastProposalTypeExcludeArg: number[] | undefined;
+  lastLeanArg: boolean | undefined;
   lastSearchQueryArg: string | undefined;
 } {
   const stub: ProposalsRepository & {
@@ -58,6 +59,7 @@ function createStubRepo(): ProposalsRepository & {
     byId: DBProposal | undefined;
     lastStatusArg: string[] | undefined;
     lastProposalTypeExcludeArg: number[] | undefined;
+    lastLeanArg: boolean | undefined;
     lastSearchQueryArg: string | undefined;
   } = {
     proposals: [],
@@ -66,6 +68,7 @@ function createStubRepo(): ProposalsRepository & {
     byId: undefined,
     lastStatusArg: undefined,
     lastProposalTypeExcludeArg: undefined,
+    lastLeanArg: undefined,
     lastSearchQueryArg: undefined,
     getProposals: async (
       _skip: number,
@@ -75,9 +78,11 @@ function createStubRepo(): ProposalsRepository & {
       _fromDate: number | undefined,
       _fromEndDate: number | undefined,
       proposalTypeExclude?: number[],
+      lean?: boolean,
     ) => {
       stub.lastStatusArg = status;
       stub.lastProposalTypeExcludeArg = proposalTypeExclude;
+      stub.lastLeanArg = lean;
       return stub.proposals;
     },
     getProposalsCount: async () => stub.count,
@@ -196,9 +201,10 @@ describe("ProposalsService", () => {
       ]);
     });
 
-    it("should map QUEUED to QUEUED and ACTIVE for DB query", async () => {
-      // TORN derives QUEUED from a stored ACTIVE row (no queue event), so
-      // ACTIVE must be a candidate; QUEUED covers governors that store it.
+    it("should map QUEUED to QUEUED, PENDING and ACTIVE for DB query", async () => {
+      // TORN derives QUEUED from a stored ACTIVE row and Azorius (SHU) from
+      // PENDING/ACTIVE rows (no queue event), so both must be candidates;
+      // QUEUED covers governors that store it.
       await service.getProposals({
         ...DEFAULT_REQ,
         status: [ProposalStatus.QUEUED],
@@ -206,11 +212,14 @@ describe("ProposalsService", () => {
 
       expect(repo.lastStatusArg).toEqual([
         ProposalStatus.QUEUED,
+        ProposalStatus.PENDING,
         ProposalStatus.ACTIVE,
       ]);
     });
 
-    it("should map PENDING_EXECUTION to PENDING_EXECUTION, QUEUED and ACTIVE for DB query", async () => {
+    it("should map PENDING_EXECUTION to PENDING_EXECUTION, QUEUED, PENDING and ACTIVE for DB query", async () => {
+      // PENDING_EXECUTION is computed from QUEUED rows (OZ), ACTIVE rows
+      // (TORN) or PENDING/ACTIVE rows (Azorius)
       await service.getProposals({
         ...DEFAULT_REQ,
         status: [ProposalStatus.PENDING_EXECUTION],
@@ -219,6 +228,7 @@ describe("ProposalsService", () => {
       expect(repo.lastStatusArg).toEqual([
         ProposalStatus.PENDING_EXECUTION,
         ProposalStatus.QUEUED,
+        ProposalStatus.PENDING,
         ProposalStatus.ACTIVE,
       ]);
     });
@@ -288,6 +298,15 @@ describe("ProposalsService", () => {
         ProposalStatus.PENDING,
         ProposalStatus.ACTIVE,
       ]);
+    });
+
+    it("should pass lean through to the repository", async () => {
+      await service.getProposals({
+        ...DEFAULT_REQ,
+        lean: true,
+      });
+
+      expect(repo.lastLeanArg).toBe(true);
     });
   });
 

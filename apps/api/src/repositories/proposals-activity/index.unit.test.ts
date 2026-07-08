@@ -182,6 +182,33 @@ describe("DrizzleProposalsActivityRepository", () => {
       expect(result[0]?.id).toBe("0xvote1");
     });
 
+    it("binds proposalIds containing quotes and SQL metacharacters as parameters", async () => {
+      const hostileId = "proposal'; DROP TABLE votes_onchain; --";
+      await db
+        .insert(proposalsOnchain)
+        .values([
+          createProposal({ id: hostileId, txHash: "0xtx1" }),
+          createProposal({ id: "proposal-2", txHash: "0xtx2" }),
+        ]);
+      await db
+        .insert(votesOnchain)
+        .values([
+          createVote({ txHash: "0xvote1", proposalId: hostileId }),
+          createVote({ txHash: "0xvote2", proposalId: "proposal-2" }),
+        ]);
+
+      const result = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, [
+        hostileId,
+      ]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]?.proposal_id).toBe(hostileId);
+
+      // Table untouched — the hostile ID was a value, not SQL
+      const remaining = await db.select().from(votesOnchain);
+      expect(remaining).toHaveLength(2);
+    });
+
     it("returns multiple votes when multiple proposalIds match", async () => {
       await db
         .insert(proposalsOnchain)

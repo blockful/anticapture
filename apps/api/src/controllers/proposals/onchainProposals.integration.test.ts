@@ -18,9 +18,12 @@ class FakeDAOClient implements DAOClient {
   getDaoId(): string {
     return "ENS";
   }
+
   async getVotingDelay(): Promise<bigint> {
+    votingDelayCalls++;
     return 1n;
   }
+
   async getVotingPeriod(): Promise<bigint> {
     return 100n;
   }
@@ -57,6 +60,7 @@ let client: PGlite;
 let db: Drizzle;
 let app: Hono;
 let fakeClient: FakeDAOClient;
+let votingDelayCalls: number;
 
 type ProposalInsert = typeof proposalsOnchain.$inferInsert;
 
@@ -102,6 +106,7 @@ beforeEach(async () => {
   await db.delete(proposalsOnchain);
 
   fakeClient = new FakeDAOClient();
+  votingDelayCalls = 0;
   const repo = new DrizzleRepository(db);
   const service = new ProposalsService(repo, fakeClient);
   app = new Hono();
@@ -153,6 +158,7 @@ describe("Onchain Proposals Controller", () => {
           },
         ],
       });
+      expect(votingDelayCalls).toBe(0);
     });
 
     it("should return 200 with empty items when no proposals", async () => {
@@ -396,6 +402,7 @@ describe("Onchain Proposals Controller", () => {
         txHash: "0xabc123",
         timestamp: 1700000000,
       });
+      expect(votingDelayCalls).toBe(0);
     });
 
     it("should return 404 when proposal not found", async () => {

@@ -30,6 +30,7 @@ export interface UseVotesResult {
   isLoading: boolean;
   error: Error | null;
   fetchNextPage: () => Promise<void>;
+  refetch: () => void;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
 }
@@ -80,6 +81,7 @@ export const useVotes = ({
     isLoading,
     error,
     fetchNextPage,
+    refetch,
     hasNextPage,
     isFetchingNextPage,
   } = useVotesByProposalIdInfinite(daoKey, proposalId ?? "", queryParams, {
@@ -162,6 +164,7 @@ export const useVotes = ({
     fetchNextPage: async () => {
       await fetchNextPage();
     },
+    refetch,
     hasNextPage,
     isFetchingNextPage,
   };

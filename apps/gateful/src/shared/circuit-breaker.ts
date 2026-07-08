@@ -1,3 +1,5 @@
+import { circuitBreakerState } from "../metrics.js";
+
 /** Marker error thrown when the circuit is OPEN — lets consumers (error handler, fan-out)
  *  distinguish "circuit rejected the call" from "upstream actually failed" via instanceof. */
 export class CircuitOpenError extends Error {
@@ -8,6 +10,12 @@ export class CircuitOpenError extends Error {
 }
 
 type State = "CLOSED" | "OPEN" | "HALF_OPEN";
+
+const STATE_VALUE: Record<State, number> = {
+  CLOSED: 0,
+  HALF_OPEN: 1,
+  OPEN: 2,
+};
 
 /** Wraps async calls with failure tracking and automatic recovery.
  *  After consecutive failures hit the threshold, the circuit OPENS and rejects calls instantly.
@@ -36,6 +44,7 @@ export class CircuitBreaker {
     this.failureThreshold = opts?.failureThreshold ?? 5;
     this.cooldownMs = opts?.cooldownMs ?? 300_000;
     this.maxCooldownMs = opts?.maxCooldownMs ?? 2_400_000;
+    this.recordState();
   }
 
   get state(): State {
@@ -66,12 +75,20 @@ export class CircuitBreaker {
     this.failureCount = 0;
     this.backoffMultiplier = 1;
     this.probeInFlight = false;
+    this.recordState();
   }
 
   /** Transition to OPEN — record failure time. */
   private openTheCircuit(): void {
     this._state = "OPEN";
     this.lastFailureTime = Date.now();
+    this.recordState();
+  }
+
+  private recordState(): void {
+    circuitBreakerState.record(STATE_VALUE[this._state], {
+      name: this._name,
+    });
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
@@ -93,6 +110,7 @@ export class CircuitBreaker {
       throw new CircuitOpenError(this._name);
     }
     this._state = "HALF_OPEN";
+    this.recordState();
     console.warn(
       `[circuit-breaker] ${this._name}: OPEN -> HALF_OPEN (cooldown expired, probing)`,
     );

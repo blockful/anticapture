@@ -122,6 +122,8 @@ export interface AttackProfitabilityConfig {
 export type GovernanceImplementationConfig = GovernanceImplementation;
 
 export interface WhitelabelConfig {
+  /** External form for the "Request feature" button; the button is hidden when absent */
+  requestFeatureLink?: string;
   governanceParameters?: Array<{
     label: string;
     value: string;
