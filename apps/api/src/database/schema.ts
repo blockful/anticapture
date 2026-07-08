@@ -93,6 +93,8 @@ export const votingPowerHistory = pgTable(
       columns: [table.transactionHash, table.accountId, table.logIndex],
     }),
     index().on(table.accountId, table.timestamp),
+    index().on(table.timestamp),
+    index().on(table.deltaMod),
   ],
 );
 
