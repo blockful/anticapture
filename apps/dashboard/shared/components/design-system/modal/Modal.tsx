@@ -35,7 +35,10 @@ export const Modal = ({
   isConfirmDisabled = false,
   confirmVariant = "primary",
   footerLeading,
+  cancelButtonProps,
+  confirmButtonProps,
   className,
+  bodyClassName,
 }: ModalProps) => {
   const { isMobile } = useScreenSize();
   // useScreenSize defaults to false until the effect runs, which would render
@@ -64,6 +67,8 @@ export const Modal = ({
       isConfirmDisabled={isConfirmDisabled}
       confirmVariant={confirmVariant}
       leading={footerLeading}
+      cancelButtonProps={cancelButtonProps}
+      confirmButtonProps={confirmButtonProps}
     />
   );
 
@@ -76,7 +81,9 @@ export const Modal = ({
             subtitle={description}
             onClose={() => onOpenChange(false)}
           />
-          <DrawerBody className="overflow-y-auto p-4">{children}</DrawerBody>
+          <DrawerBody className={cn("overflow-y-auto p-4", bodyClassName)}>
+            {children}
+          </DrawerBody>
           {footer}
         </DrawerContent>
       </DrawerRoot>
@@ -121,7 +128,9 @@ export const Modal = ({
           <ModalHeader title={title} description={description} />
 
           {/* Body */}
-          <div className="bg-surface-default w-full p-4">{children}</div>
+          <div className={cn("bg-surface-default w-full p-4", bodyClassName)}>
+            {children}
+          </div>
 
           {/* Footer */}
           {footer}

@@ -56,7 +56,7 @@ export const RankedChoiceOptions = ({
           <span className="font-inter text-primary min-w-0 flex-1 text-left text-[14px] font-normal not-italic leading-[20px]">
             {choices[choiceIndex]}
           </span>
-          <div className="flex flex-col">
+          <div className="flex shrink-0 items-center gap-1 self-center">
             <IconButton
               icon={ChevronUp}
               variant="ghost"

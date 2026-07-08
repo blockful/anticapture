@@ -41,6 +41,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build publishable packages
+        # @anticapture/client's build depends on codegen, which fetches the live
+        # Gateful OpenAPI spec and throws without ANTICAPTURE_API_URL (same
+        # secret deploy.yaml uses).
+        env:
+          ANTICAPTURE_API_URL: ${{ secrets.GATEFUL_URL }}
         run: pnpm turbo run build --filter=@anticapture/client --filter=@anticapture/observability
 
       - name: Publish packages and create releases

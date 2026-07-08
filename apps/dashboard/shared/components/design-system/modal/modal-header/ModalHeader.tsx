@@ -24,7 +24,7 @@ export const ModalHeader = ({
         // Layout
         "flex items-start gap-2.5",
         // Sizing
-        "w-full px-4 py-3",
+        "w-full shrink-0 px-4 py-3",
         // Colors/surfaces
         "bg-surface-default border-border-default border-b",
         className,
@@ -44,7 +44,13 @@ export const ModalHeader = ({
 
       {/* Close button */}
       <DialogPrimitive.Close asChild>
-        <IconButton variant="ghost" size="sm" icon={X} aria-label="Close" />
+        <IconButton
+          variant="ghost"
+          size="sm"
+          icon={X}
+          aria-label="Close"
+          className="-m-2 size-11"
+        />
       </DialogPrimitive.Close>
     </div>
   );

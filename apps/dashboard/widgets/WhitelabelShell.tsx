@@ -1,14 +1,5 @@
 "use client";
 
-import {
-  Bell,
-  Briefcase,
-  DollarSign,
-  Landmark,
-  Newspaper,
-  Settings,
-  Users,
-} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -19,55 +10,11 @@ import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelCo
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
-import { getDaoPagePath, WHITELABEL_ROUTES } from "@/shared/utils/whitelabel";
+import { getDaoPagePath } from "@/shared/utils/whitelabel";
+import { WHITELABEL_NAV_ITEMS } from "@/shared/utils/whitelabelNav";
 import { WhitelabelHeader } from "@/widgets/WhitelabelHeader";
 import { WhitelabelHeaderMobile } from "@/widgets/WhitelabelHeaderMobile";
 import { WhitelabelSidebar } from "@/widgets/WhitelabelSidebar";
-
-const NAV_ITEMS = [
-  {
-    label: "Proposals",
-    page: WHITELABEL_ROUTES.proposals,
-    icon: Landmark,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].governancePage,
-  },
-  {
-    label: "Holders & Delegates",
-    page: WHITELABEL_ROUTES.holdersAndDelegates,
-    icon: Users,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].dataTables,
-  },
-  {
-    label: "Activity Feed",
-    page: WHITELABEL_ROUTES.activityFeed,
-    icon: Newspaper,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].activityFeed,
-  },
-  {
-    label: "Service Providers",
-    page: WHITELABEL_ROUTES.serviceProviders,
-    icon: Briefcase,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].serviceProviders,
-  },
-  {
-    label: "Revenue",
-    page: WHITELABEL_ROUTES.revenue,
-    icon: DollarSign,
-    enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].revenue,
-  },
-  {
-    label: "Notifications",
-    page: WHITELABEL_ROUTES.notifications,
-    icon: Bell,
-    enabled: () => true,
-  },
-  {
-    label: "Governance Settings",
-    page: WHITELABEL_ROUTES.governanceSettings,
-    icon: Settings,
-    enabled: () => true,
-  },
-] as const;
 
 export const WhitelabelShell = ({
   daoId,
@@ -83,7 +30,7 @@ export const WhitelabelShell = ({
 
   const navItems = useMemo(
     () =>
-      NAV_ITEMS.map((item) => ({
+      WHITELABEL_NAV_ITEMS.map((item) => ({
         ...item,
         href: getDaoPagePath({
           daoId,

@@ -1,3 +1,15 @@
+import type { ButtonProps } from "@/shared/components/design-system/buttons/types";
+
+type DataAttributeProps = {
+  [key: `data-${string}`]: string | number | boolean | undefined;
+};
+
+type ModalFooterButtonProps = Omit<
+  ButtonProps,
+  "children" | "disabled" | "loading" | "onClick" | "size" | "variant"
+> &
+  DataAttributeProps;
+
 export type ModalHeaderProps = {
   /** Title text displayed in the header. */
   title: string;
@@ -26,6 +38,10 @@ export type ModalFooterProps = {
   confirmVariant?: ModalConfirmVariant;
   /** Extra content rendered before the cancel/confirm buttons (e.g. a progress indicator). */
   leading?: React.ReactNode;
+  /** Additional props passed to the cancel button. */
+  cancelButtonProps?: ModalFooterButtonProps;
+  /** Additional props passed to the confirm button. */
+  confirmButtonProps?: ModalFooterButtonProps;
   /** Additional CSS classes. */
   className?: string;
 };
@@ -57,6 +73,12 @@ export type ModalProps = {
   confirmVariant?: ModalConfirmVariant;
   /** Extra content rendered in the footer before the cancel/confirm buttons. */
   footerLeading?: React.ReactNode;
+  /** Additional props passed to the cancel button. */
+  cancelButtonProps?: ModalFooterButtonProps;
+  /** Additional props passed to the confirm button. */
+  confirmButtonProps?: ModalFooterButtonProps;
   /** Additional CSS classes for the dialog content panel. */
   className?: string;
+  /** Additional CSS classes for the modal body. */
+  bodyClassName?: string;
 };
