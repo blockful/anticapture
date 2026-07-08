@@ -58,8 +58,9 @@ const contrastRatio = (hexA: string, hexB: string) => {
   return lighter / darker;
 };
 
-// Below this ratio against body text, links would read as plain text
-const MIN_LINK_CONTRAST = 2;
+// WCAG 3:1 minimum for non-text UI; below this against body text a brand color
+// reads as plain text, so we lighten it for links/highlights.
+const MIN_LINK_CONTRAST = 3;
 
 const withBrandColor = ({
   daoId,

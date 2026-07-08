@@ -1,5 +1,11 @@
 # @anticapture/api
 
+## 1.5.2
+
+### Patch Changes
+
+- [#2023](https://github.com/blockful/anticapture/pull/2023) [`7ba3449`](https://github.com/blockful/anticapture/commit/7ba344927fc8546ac79d4efa99b5be6cedfc4aec) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix `/token/historical-data` returning 500 for NFT-priced DAOs (Nouns, Lil Nouns): the rolling-average SQL emitted decimal strings that crashed the wei-to-USD conversion, which in turn tripped the gateway circuit breaker and made the whole DAO unavailable.
+
 ## 1.5.1
 
 ### Patch Changes
