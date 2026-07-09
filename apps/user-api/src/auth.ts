@@ -40,6 +40,16 @@ export type AuthResolver = {
   primary: Auth;
 };
 
+/**
+ * The browser-facing host behind the dashboard's /api/user proxy. The proxy
+ * sets x-forwarded-host to the real dashboard/whitelabel host; the direct Host
+ * header would be the internal service host, which is never in AUTH_SIWE_DOMAINS.
+ */
+export const forwardedHost = (
+  headers: Pick<Headers, "get">,
+): string | undefined =>
+  headers.get("x-forwarded-host") ?? headers.get("host") ?? undefined;
+
 function createAuth(config: AuthConfig, domain: string) {
   return betterAuth({
     database: drizzleAdapter(config.db, { provider: "pg" }),

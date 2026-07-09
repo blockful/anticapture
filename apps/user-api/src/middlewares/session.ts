@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 
-import type { AuthResolver } from "@/auth";
+import { forwardedHost, type AuthResolver } from "@/auth";
 
 export type SessionUser = { id: string };
 
@@ -19,7 +19,7 @@ export type OptionalSessionVariables = {
  */
 export const sessionAuth = (resolver: AuthResolver) =>
   createMiddleware<{ Variables: SessionVariables }>(async (c, next) => {
-    const auth = resolver.resolve(c.req.header("host"));
+    const auth = resolver.resolve(forwardedHost(c.req.raw.headers));
     if (!auth) return c.json({ error: "untrusted_host" }, 400);
 
     const session = await auth.api.getSession({
@@ -37,7 +37,7 @@ export const sessionAuth = (resolver: AuthResolver) =>
  */
 export const optionalSession = (resolver: AuthResolver) =>
   createMiddleware<{ Variables: OptionalSessionVariables }>(async (c, next) => {
-    const auth = resolver.resolve(c.req.header("host"));
+    const auth = resolver.resolve(forwardedHost(c.req.raw.headers));
     const session = auth
       ? await auth.api.getSession({ headers: c.req.raw.headers })
       : null;

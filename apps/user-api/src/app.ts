@@ -2,7 +2,7 @@ import { collectPrometheusMetrics } from "@anticapture/observability";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { sql } from "drizzle-orm";
 
-import type { AuthResolver } from "@/auth";
+import { forwardedHost, type AuthResolver } from "@/auth";
 import { draftsController } from "@/controllers/drafts";
 import type { UserApiDrizzle } from "@/database/types";
 import { exporter } from "@/instrumentation";
@@ -49,7 +49,7 @@ export function createApp({
   // whitelabel domains verify SIWE against their own host; an unlisted host is
   // rejected before any session can be issued.
   app.on(["POST", "GET"], "/api/auth/*", (c) => {
-    const auth = authResolver.resolve(c.req.header("host"));
+    const auth = authResolver.resolve(forwardedHost(c.req.raw.headers));
     if (!auth) return c.json({ error: "untrusted_host" }, 400);
     return auth.handler(c.req.raw);
   });
