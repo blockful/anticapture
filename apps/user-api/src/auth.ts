@@ -2,52 +2,63 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { generateRandomString } from "better-auth/crypto";
 import { siwe } from "better-auth/plugins";
-import { createPublicClient, http } from "viem";
-import { mainnet } from "viem/chains";
 
-import { db } from "@/database";
-import { env } from "@/env";
+import type { UserApiDrizzle } from "@/database/types";
 
-// Verifies both EOA signatures and EIP-1271 / ERC-6492 smart-contract wallets
-// (Safe, etc.). `publicClient.verifyMessage` recovers the signer for EOAs and
-// falls back to the on-chain isValidSignature call for contract wallets.
-// TODO: governance today is mainnet-only (ENS, SHU). When a draft-enabled DAO
-// ships on another chain, resolve the client by the message's chainId.
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(env.RPC_URL),
-});
+export type VerifySiweMessage = (params: {
+  message: string;
+  signature: string;
+  address: string;
+  chainId: number;
+}) => Promise<boolean>;
 
-// Shared across every per-host instance below — same DB, same adapter.
-const database = drizzleAdapter(db, { provider: "pg" });
+export type AuthConfig = {
+  db: UserApiDrizzle;
+  secret: string;
+  baseURL: string;
+  trustedOrigins: string[];
+  /**
+   * Hosts a SIWE message may be bound to. One better-auth instance is built
+   * per entry because the SIWE plugin validates the signed message against
+   * exactly one domain — the mechanism that lets each frontend (main +
+   * whitelabel) sign with its real host, preserving SIWE's anti-phishing
+   * guarantee. Must have at least one entry (env validation enforces it).
+   */
+  domains: string[];
+  /** Signature verifier — injected so tests can verify EOAs offline. */
+  verifyMessage: VerifySiweMessage;
+};
 
-export type Auth = ReturnType<typeof createAuth>;
+export type AuthResolver = {
+  /**
+   * Picks the better-auth instance whose SIWE domain matches the request
+   * Host. Returns undefined for hosts outside `domains` so callers can fail
+   * closed — an unlisted host must never get a session issued or read.
+   */
+  resolve: (host: string | undefined) => Auth | undefined;
+  /** Instance bound to the first configured domain. */
+  primary: Auth;
+};
 
-/**
- * Builds a better-auth instance bound to a single SIWE `domain`. We create one
- * per allowed host (see resolver below) because the SIWE plugin validates the
- * signed message against exactly one domain — the mechanism that makes each
- * frontend (main + whitelabel) sign with its real host and keeps SIWE's
- * anti-phishing guarantee intact.
- */
-export function createAuth(domain: string) {
+function createAuth(config: AuthConfig, domain: string) {
   return betterAuth({
-    database,
-    secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
-    trustedOrigins: env.TRUSTED_ORIGINS,
+    database: drizzleAdapter(config.db, { provider: "pg" }),
+    secret: config.secret,
+    baseURL: config.baseURL,
+    trustedOrigins: config.trustedOrigins,
     plugins: [
       siwe({
         domain,
         // Wallet-only users have no email; better-auth stores a placeholder.
         anonymous: true,
         getNonce: async () => generateRandomString(32, "a-z", "A-Z", "0-9"),
-        verifyMessage: async ({ message, signature, address }) => {
+        verifyMessage: async ({ message, signature, address, chainId }) => {
           try {
-            return await publicClient.verifyMessage({
-              address: address as `0x${string}`,
+            return await config.verifyMessage({
               message,
-              signature: signature as `0x${string}`,
+              signature,
+              address,
+              chainId,
             });
           } catch {
             return false;
@@ -58,29 +69,29 @@ export function createAuth(domain: string) {
   });
 }
 
-// env validation guarantees at least one entry.
-const [primaryDomain, ...otherDomains] = env.AUTH_SIWE_DOMAINS as [
-  string,
-  ...string[],
-];
+// Derived from the concrete return of createAuth (not betterAuth's generic
+// default) so instances remain assignable to this alias.
+export type Auth = ReturnType<typeof createAuth>;
 
-// Representative instance for tooling: the better-auth CLI introspects this
-// export to generate the schema (which is domain-independent). It doubles as
-// the primary host's instance. Request handling uses resolveAuth() per host.
-export const auth = createAuth(primaryDomain);
+export function createAuthResolver(config: AuthConfig): AuthResolver {
+  const [primaryDomain, ...otherDomains] = config.domains as [
+    string,
+    ...string[],
+  ];
 
-// One instance per allowed SIWE host. Instances are cheap — they share the
-// adapter, DB, and secret; only the SIWE domain differs.
-const instances = new Map<string, Auth>([
-  [primaryDomain, auth],
-  ...otherDomains.map((domain) => [domain, createAuth(domain)] as const),
-]);
+  const primary = createAuth(config, primaryDomain);
 
-/**
- * Picks the better-auth instance whose SIWE domain matches the request Host.
- * Returns undefined for hosts outside AUTH_SIWE_DOMAINS so the caller can fail
- * closed — an unlisted host must never get a session issued.
- */
-export function resolveAuth(host: string | undefined): Auth | undefined {
-  return host ? instances.get(host) : undefined;
+  // Instances are cheap — they share the DB and secret; only the SIWE domain
+  // differs, so sessions issued via one host validate on any of them.
+  const instances = new Map<string, Auth>([
+    [primaryDomain, primary],
+    ...otherDomains.map(
+      (domain) => [domain, createAuth(config, domain)] as const,
+    ),
+  ]);
+
+  return {
+    resolve: (host) => (host ? instances.get(host) : undefined),
+    primary,
+  };
 }

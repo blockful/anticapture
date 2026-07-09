@@ -1,19 +1,27 @@
 import { collectPrometheusMetrics } from "@anticapture/observability";
-import { Hono } from "hono";
+import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { sql } from "drizzle-orm";
 
-import { resolveAuth } from "@/auth";
-import type { UserApiDrizzle } from "@/database";
+import type { AuthResolver } from "@/auth";
+import { draftsController } from "@/controllers/drafts";
+import type { UserApiDrizzle } from "@/database/types";
 import { exporter } from "@/instrumentation";
 import { logger } from "@/logger";
 import { metricsMiddleware } from "@/middlewares/metrics";
 import { requestLogger } from "@/middlewares/logger";
+import type { DraftsService } from "@/services/drafts";
 
 export type AppConfig = {
   db: UserApiDrizzle;
+  authResolver: AuthResolver;
+  draftsService: DraftsService;
 };
 
-export function createApp({ db }: AppConfig): Hono {
+export function createApp({
+  db,
+  authResolver,
+  draftsService,
+}: AppConfig): Hono {
   const app = new Hono();
 
   app.use("*", requestLogger());
@@ -36,15 +44,17 @@ export function createApp({ db }: AppConfig): Hono {
     return c.body(body, 200, { "Content-Type": contentType });
   });
 
-  // Better-auth owns all of /api/auth/* (nonce, SIWE verify, session, sign-out,
+  // Better-auth owns all of /api/auth/* (SIWE nonce/verify, session, sign-out,
   // and later Google/magic-link). The instance is resolved per request Host so
   // whitelabel domains verify SIWE against their own host; an unlisted host is
   // rejected before any session can be issued.
   app.on(["POST", "GET"], "/api/auth/*", (c) => {
-    const auth = resolveAuth(c.req.header("host"));
+    const auth = authResolver.resolve(c.req.header("host"));
     if (!auth) return c.json({ error: "untrusted_host" }, 400);
     return auth.handler(c.req.raw);
   });
+
+  draftsController(app, draftsService, authResolver);
 
   return app;
 }
