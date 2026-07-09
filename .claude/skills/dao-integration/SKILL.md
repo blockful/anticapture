@@ -235,6 +235,20 @@ Add `export * from "./<dao>";`
 
 **Ask the user** for the CoinGecko token ID (the slug used in CoinGecko URLs, e.g. `"uniswap"`, `"fluid"`). Add it to `CoingeckoTokenIdEnum` and add the corresponding asset platform to `CoingeckoIdToAssetPlatformId`. Both are `Record<DaoIdEnum, ...>` — the compiler will error if missing.
 
+### Step 4: Gateway
+
+Gateful needs **no code change** for a standard DAO — it discovers per-DAO APIs at
+startup from `DAO_API_<DAO_ID>` env vars (`apps/gateful/src/config.ts`). Register the
+new DAO's API URL in each environment:
+
+- **Local**: `scripts/dev.sh` exports `DAO_API_<DAO_ID>` automatically when you pass
+  the DAO name (or add it to your `.env`).
+- **Deployed** (Railway dev/prod): add the `DAO_API_<DAO_ID>` env var to the Gateful
+  service — flag this to the user, it is a deployment config change.
+
+Only touch Gateful code if the DAO needs custom routing or aggregation — then follow
+the `anticapture-gateful` skill.
+
 ### Step 5: Dashboard
 
 Follow the **`dashboard-dao` skill** (`.agents/skills/dashboard-dao/SKILL.md`) for the full step-by-step guide. The dashboard enum entry is already handled in Step 1 above — the `dashboard-dao` skill covers the remaining dashboard-specific work:
@@ -252,7 +266,7 @@ After all changes, run typecheck and lint on each affected package:
 ```bash
 pnpm indexer typecheck && pnpm indexer lint
 pnpm api typecheck && pnpm api lint
-pnpm gateway typecheck && pnpm gateway lint
+pnpm gateful typecheck && pnpm gateful lint
 pnpm dashboard typecheck && pnpm dashboard lint
 ```
 

@@ -15,6 +15,9 @@ auto-learned knowledge is **shared across the team via git**.
 
 ## Setup (each dev, once)
 
+Run `pnpm setup:memory` — it resolves the absolute path for your clone and writes the
+setting below into your gitignored local settings. Or do it by hand:
+
 `autoMemoryDirectory` must be an **absolute path** (Claude Code does not accept a
 repo-relative path), so it can't be committed in the shared `settings.json`. Each dev
 points their **local** settings at their own clone:

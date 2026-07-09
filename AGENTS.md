@@ -1,8 +1,9 @@
 # AGENTS.md
 
-Instructions for AI agents working in the Anticapture monorepo. Read this first,
-then consult `CLAUDE.md` (deeper conventions) and the per-package skills in
-`.claude/skills/` (mirrored at `.agents/skills/`) for the package you're editing.
+Instructions for AI agents working in the Anticapture monorepo. This is the
+**single source of truth** (`CLAUDE.md` just imports it). Read this first, then
+consult the per-package skills in `.claude/skills/` (mirrored at
+`.agents/skills/`) for the package you're editing.
 
 ## What this is
 
@@ -39,7 +40,7 @@ Ethereum RPC ┘        │
 
 | Package                           | Purpose                                       | Port  |
 | --------------------------------- | --------------------------------------------- | ----- |
-| `@anticapture/indexer`            | Ponder blockchain event indexing              | 42069 |
+| `@anticapture/indexer`            | Ponder blockchain event indexing              | 42070 |
 | `@anticapture/offchain-indexer`   | Off-chain (e.g. Snapshot) governance indexing | —     |
 | `@anticapture/api`                | REST API with OpenAPI (Hono + Drizzle)        | 42069 |
 | `@anticapture/gateful`            | REST/OpenAPI gateway aggregating DAO APIs     | 4001  |
@@ -86,7 +87,7 @@ pnpm test
 `API → Gateful (:4001) → Client codegen → Dashboard (:3000)`.
 Gateful discovers DAO APIs from `DAO_API_<DAO>` env vars; the dashboard reads the
 gateway via `ANTICAPTURE_API_URL` (set to `http://localhost:4001` by `pnpm dev`).
-See the `local-dev` skill for details.
+See the `local-dev-stack` skill for details.
 
 ## Conventions
 
@@ -100,6 +101,9 @@ See the `local-dev` skill for details.
   boundaries. Features are self-contained, no cross-feature imports; shared code lives in `shared/`.
 - **Style:** enforced by Prettier + ESLint. Arrow functions; named exports (App Router
   pages are the `export default` exception); inline `type` imports.
+- **Commits:** conventional commits (`feat:`, `fix(api):`, `chore:`, ...) — enforced by
+  commitlint via husky's `commit-msg` hook; non-conforming messages are rejected at
+  commit time. Pushing is fine; force-pushing is never allowed (blocked by permissions).
 
 ## Verification (required before claiming done)
 
@@ -113,10 +117,12 @@ pnpm typecheck && pnpm lint                        # when changes span packages
 ## Changesets
 
 Every PR to `dev` needs a changeset (`pnpm changeset`) or an empty one
-(`pnpm changeset --empty`); the `changeset-check` CI job enforces it. When a change
-touches an API OpenAPI contract (`apps/api/openapi/**` or `apps/gateful/openapi/gateful.json`),
-also add a `@anticapture/gateful` changeset (enforced by `api-contract-updates.yaml`).
-Never hand-edit `version` fields or `CHANGELOG.md` — Changesets owns them.
+(`pnpm changeset --empty`); the `changeset-check` CI job in `tests.yaml` enforces it.
+When a change alters the API contract exposed through Gateful (and therefore the
+regenerated `@anticapture/client` SDK), also add a `@anticapture/gateful` changeset
+alongside the changed API package's. Never hand-edit `version` fields or `CHANGELOG.md`
+— Changesets owns them. Full guidance (bump types, empty changesets, release flow) is
+in the `changesets` skill.
 
 ## Boundaries — never do
 
@@ -147,7 +153,7 @@ before committing, and prune stale entries. Detailed setup and caveats live in t
 
 ## Where to go deeper
 
-- `CLAUDE.md` — full conventions, changeset/release flow, boundaries.
-- `.claude/skills/<package>/` — package-specific guides (`anticapture-api`, `anticapture-gateful`,
-  `anticapture-client`, `anticapture-dashboard`, `anticapture-indexer`, `local-dev`,
-  `dao-integration`, `testing`, ...).
+- `.claude/skills/<name>/` — package and workflow guides: `anticapture-api`,
+  `anticapture-gateful`, `anticapture-dashboard`, `anticapture-indexer`,
+  `anticapture-design-system`, `local-dev-stack`, `dao-integration`, `dashboard-dao`,
+  `testing`, `changesets`, `tenderly-alerts`.
