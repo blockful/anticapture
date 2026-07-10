@@ -21,7 +21,7 @@ import {
 import { DraftsRepository } from "@/repositories/drafts";
 import { DraftsService } from "@/services/drafts";
 
-const HOST = "test.local";
+const HOST = "localhost:3000";
 const ORIGIN = `http://${HOST}`;
 const DAO_ID = "ens";
 
@@ -69,8 +69,6 @@ describe("drafts + SIWE session integration", () => {
     const authResolver = createAuthResolver({
       db,
       secret: "integration-test-secret-0123456789abcdef",
-      baseURL: ORIGIN,
-      trustedOrigins: [ORIGIN],
       domains: [HOST],
       verifyMessage,
     });
