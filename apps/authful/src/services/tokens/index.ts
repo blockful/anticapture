@@ -76,7 +76,21 @@ export class TokensService {
     return this.repo.list();
   }
 
-  async revoke(id: string): Promise<boolean> {
+  /**
+   * Revokes a token. When `requireTenantPrefix` is given (provisioning scope),
+   * a token whose tenant lacks that prefix is treated as not-found (404) rather
+   * than 403 — so the provisioning key can't probe for first-party token ids.
+   */
+  async revoke(
+    id: string,
+    opts: { requireTenantPrefix?: string } = {},
+  ): Promise<boolean> {
+    if (opts.requireTenantPrefix !== undefined) {
+      const token = await this.repo.findById(id);
+      if (!token || !token.tenant.startsWith(opts.requireTenantPrefix)) {
+        return false;
+      }
+    }
     return this.repo.revoke(id);
   }
 

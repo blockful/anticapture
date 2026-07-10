@@ -23,6 +23,10 @@ export class TokensRepository {
     });
   }
 
+  async findById(id: string): Promise<DBToken | undefined> {
+    return this.db.query.tokens.findFirst({ where: eq(tokens.id, id) });
+  }
+
   /** Sets revoked_at; idempotent. Returns false when the id doesn't exist. */
   async revoke(id: string): Promise<boolean> {
     const result = await this.db

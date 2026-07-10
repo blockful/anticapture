@@ -8,7 +8,13 @@ import {
   TokenParamsSchema,
   toTokenMetadata,
 } from "@/mappers/tokens";
+import { USER_TENANT_PREFIX } from "@/middlewares/token-auth";
 import type { TokensService } from "@/services/tokens";
+
+const forbiddenResponse = {
+  description: "Scope not permitted for this operation",
+  content: { "application/json": { schema: ErrorResponseSchema } },
+};
 
 export function tokensController(app: Hono, service: TokensService) {
   app.openapi(
@@ -33,10 +39,23 @@ export function tokensController(app: Hono, service: TokensService) {
             "application/json": { schema: MintTokenResponseSchema },
           },
         },
+        403: forbiddenResponse,
       },
     }),
     async (c) => {
       const body = c.req.valid("json");
+      // The provisioning key may only mint end-user keys.
+      if (
+        c.get("authScope") === "provisioning" &&
+        !body.tenant.startsWith(USER_TENANT_PREFIX)
+      ) {
+        return c.json(
+          {
+            error: `provisioning scope may only mint ${USER_TENANT_PREFIX}* tenants`,
+          },
+          403,
+        );
+      }
       const { token, plaintext } = await service.mint(body);
       return c.json({ ...toTokenMetadata(token), token: plaintext }, 201);
     },
@@ -54,9 +73,15 @@ export function tokensController(app: Hono, service: TokensService) {
           description: "All tokens, newest first",
           content: { "application/json": { schema: TokenListResponseSchema } },
         },
+        403: forbiddenResponse,
       },
     }),
     async (c) => {
+      // Listing exposes every tenant's metadata — admin only. The User API
+      // tracks its own users' keys, so it never needs this.
+      if (c.get("authScope") !== "admin") {
+        return c.json({ error: "listing requires the admin scope" }, 403);
+      }
       const tokens = await service.list();
       return c.json({ items: tokens.map(toTokenMetadata) }, 200);
     },
@@ -81,7 +106,11 @@ export function tokensController(app: Hono, service: TokensService) {
     }),
     async (c) => {
       const { id } = c.req.valid("param");
-      const revoked = await service.revoke(id);
+      // Provisioning scope can only revoke `user:*` tokens; a non-matching id
+      // returns 404 (same as missing) to avoid a first-party-token oracle.
+      const requireTenantPrefix =
+        c.get("authScope") === "provisioning" ? USER_TENANT_PREFIX : undefined;
+      const revoked = await service.revoke(id, { requireTenantPrefix });
       if (!revoked) return c.json({ error: "Token not found" }, 404);
       return c.body(null, 204);
     },

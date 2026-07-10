@@ -15,6 +15,13 @@ const envSchema = z
     ADMIN_API_KEY: z.string().min(16),
     // Guards service-facing endpoints (/validate), shared with Gateful.
     INTERNAL_API_KEY: z.string().min(16),
+    // Optional scoped key for the User API to broker end-user keys: restricted
+    // to `user:*` tenants (mint/revoke only, no listing). Left unset until the
+    // User API's key-provisioning feature ships.
+    PROVISIONING_API_KEY: z.preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.string().min(16).optional(),
+    ),
     // CI/preview only: a fixed, known token seeded into the DB on boot so every
     // service in the same Railway PR preview shares a working API key. Required
     // in preview environments; ignored on dev/production. The seeded token's

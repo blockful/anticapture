@@ -1,0 +1,230 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { PGlite } from "@electric-sql/pglite";
+import { pushSchema } from "drizzle-kit/api";
+import { drizzle } from "drizzle-orm/pglite";
+import { recoverMessageAddress } from "viem";
+import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
+import { createSiweMessage } from "viem/siwe";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+import { createApp } from "@/app";
+import { createAuthResolver } from "@/auth";
+import type { AuthfulClient } from "@/clients/authful";
+import * as fullSchema from "@/database/schema";
+import {
+  account,
+  drafts,
+  session,
+  user,
+  userApiKeys,
+  verification,
+  walletAddress,
+} from "@/database/schema";
+import { ApiKeysRepository } from "@/repositories/api-keys";
+import { DraftsRepository } from "@/repositories/drafts";
+import { ApiKeysService } from "@/services/api-keys";
+import { DraftsService } from "@/services/drafts";
+
+const HOST = "test.local";
+const ORIGIN = `http://${HOST}`;
+
+const verifyMessage = async ({
+  message,
+  signature,
+  address,
+}: {
+  message: string;
+  signature: string;
+  address: string;
+}) => {
+  const recovered = await recoverMessageAddress({
+    message,
+    signature: signature as `0x${string}`,
+  });
+  return recovered.toLowerCase() === address.toLowerCase();
+};
+
+type TestApp = ReturnType<typeof createApp>;
+
+describe("api-keys + Authful brokering integration", () => {
+  let client: PGlite;
+  let app: TestApp;
+
+  // Fake Authful: records mint/revoke calls, returns a deterministic plaintext.
+  const authful: AuthfulClient & {
+    mint: ReturnType<typeof vi.fn>;
+    revoke: ReturnType<typeof vi.fn>;
+  } = {
+    mint: vi.fn(async (tenant: string) => ({
+      id: crypto.randomUUID(),
+      token: `act_${tenant}`,
+    })),
+    revoke: vi.fn(async () => undefined),
+  };
+
+  beforeAll(async () => {
+    client = new PGlite();
+    const db = drizzle(client, { schema: fullSchema });
+    const tables = {
+      user,
+      session,
+      account,
+      verification,
+      walletAddress,
+      drafts,
+      userApiKeys,
+    };
+    const { apply } = await pushSchema(tables as any, db as any);
+    await apply();
+
+    const authResolver = createAuthResolver({
+      db,
+      secret: "integration-test-secret-0123456789abcdef",
+      baseURL: ORIGIN,
+      trustedOrigins: [ORIGIN],
+      domains: [HOST],
+      verifyMessage,
+    });
+
+    app = createApp({
+      db,
+      authResolver,
+      draftsService: new DraftsService(new DraftsRepository(db)),
+      // small quota to exercise the limit
+      apiKeysService: new ApiKeysService(new ApiKeysRepository(db), authful, 2),
+    });
+  });
+
+  afterAll(async () => {
+    await client.close();
+  });
+
+  const baseHeaders = { host: HOST, origin: ORIGIN };
+
+  const signIn = async () => {
+    const wallet = privateKeyToAccount(generatePrivateKey());
+    const nonceRes = await app.request("/api/auth/siwe/nonce", {
+      method: "POST",
+      headers: { ...baseHeaders, "content-type": "application/json" },
+      body: JSON.stringify({ walletAddress: wallet.address, chainId: 1 }),
+    });
+    const { nonce } = (await nonceRes.json()) as any;
+    const message = createSiweMessage({
+      domain: HOST,
+      address: wallet.address,
+      chainId: 1,
+      nonce,
+      uri: ORIGIN,
+      version: "1",
+    });
+    const signature = await wallet.signMessage({ message });
+    const verifyRes = await app.request("/api/auth/siwe/verify", {
+      method: "POST",
+      headers: { ...baseHeaders, "content-type": "application/json" },
+      body: JSON.stringify({
+        message,
+        signature,
+        walletAddress: wallet.address,
+        chainId: 1,
+      }),
+    });
+    const cookie = verifyRes.headers
+      .getSetCookie()
+      .map((c) => c.split(";")[0])
+      .join("; ");
+    return cookie;
+  };
+
+  const authed = (cookie: string, extra: Record<string, string> = {}) => ({
+    ...baseHeaders,
+    cookie,
+    ...extra,
+  });
+
+  const createKey = (cookie: string, label = "my-agent") =>
+    app.request("/me/api-keys", {
+      method: "POST",
+      headers: authed(cookie, { "content-type": "application/json" }),
+      body: JSON.stringify({ label }),
+    });
+
+  it("requires a session", async () => {
+    const res = await app.request("/me/api-keys", { headers: baseHeaders });
+    expect(res.status).toBe(401);
+  });
+
+  it("mints via Authful under the user's tenant and returns plaintext once", async () => {
+    const cookie = await signIn();
+    const res = await createKey(cookie, "prod-agent");
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as any;
+
+    expect(body.label).toBe("prod-agent");
+    expect(body.token).toMatch(/^act_user:/); // tenant = user:<id>
+    expect(authful.mint).toHaveBeenCalledWith(
+      expect.stringMatching(/^user:/),
+      "prod-agent",
+    );
+  });
+
+  it("lists the session user's keys without the plaintext", async () => {
+    const cookie = await signIn();
+    await createKey(cookie, "a");
+    const res = await app.request("/me/api-keys", { headers: authed(cookie) });
+    const { items } = (await res.json()) as any;
+
+    expect(items.length).toBe(1);
+    expect(items[0].label).toBe("a");
+    expect(items[0]).not.toHaveProperty("token");
+  });
+
+  it("does not list another user's keys", async () => {
+    const alice = await signIn();
+    const bob = await signIn();
+    await createKey(alice, "alice-key");
+
+    const res = await app.request("/me/api-keys", { headers: authed(bob) });
+    const { items } = (await res.json()) as any;
+    expect(items).toHaveLength(0);
+  });
+
+  it("revokes in Authful then locally, and 404s a foreign key", async () => {
+    const owner = await signIn();
+    const attacker = await signIn();
+    const created = (await (await createKey(owner, "temp")).json()) as any;
+
+    // Attacker cannot revoke it — 404, and Authful is never called.
+    authful.revoke.mockClear();
+    const foreign = await app.request(`/me/api-keys/${created.id}`, {
+      method: "DELETE",
+      headers: authed(attacker),
+    });
+    expect(foreign.status).toBe(404);
+    expect(authful.revoke).not.toHaveBeenCalled();
+
+    // Owner revokes — Authful called, key drops from the list.
+    const res = await app.request(`/me/api-keys/${created.id}`, {
+      method: "DELETE",
+      headers: authed(owner),
+    });
+    expect(res.status).toBe(204);
+    expect(authful.revoke).toHaveBeenCalledOnce();
+
+    const list = await app.request("/me/api-keys", { headers: authed(owner) });
+    const { items } = (await list.json()) as any;
+    expect(
+      items.find((k: { id: string }) => k.id === created.id),
+    ).toBeUndefined();
+  });
+
+  it("enforces the per-user key quota", async () => {
+    const cookie = await signIn();
+    expect((await createKey(cookie)).status).toBe(201);
+    expect((await createKey(cookie)).status).toBe(201);
+    const third = await createKey(cookie);
+    expect(third.status).toBe(403);
+    await expect(third.json() as any).resolves.toEqual({
+      error: "api_key_limit_reached",
+    });
+  });
+});

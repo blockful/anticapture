@@ -1,5 +1,13 @@
 import { sql } from "drizzle-orm";
-import { bigint, index, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 import { user } from "./auth-schema";
 
@@ -40,4 +48,24 @@ export const drafts = pgTable(
     index().on(table.userId, table.daoId),
     index().on(table.authorAddress),
   ],
+);
+
+// Ownership record for user-minted API keys. The plaintext and hash live only
+// in Authful (tenant `user:<userId>`); here we keep just who owns which Authful
+// token, plus the user's label. Never stores secrets.
+export const userApiKeys = pgTable(
+  "user_api_keys",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    authfulTokenId: uuid("authful_token_id").notNull(),
+    label: text("label").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (table) => [index().on(table.userId)],
 );

@@ -3,24 +3,30 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { sql } from "drizzle-orm";
 
 import { forwardedHost, type AuthResolver } from "@/auth";
+import { apiKeysController } from "@/controllers/api-keys";
 import { draftsController } from "@/controllers/drafts";
 import type { UserApiDrizzle } from "@/database/types";
 import { exporter } from "@/instrumentation";
 import { logger } from "@/logger";
 import { metricsMiddleware } from "@/middlewares/metrics";
 import { requestLogger } from "@/middlewares/logger";
+import type { ApiKeysService } from "@/services/api-keys";
 import type { DraftsService } from "@/services/drafts";
 
 export type AppConfig = {
   db: UserApiDrizzle;
   authResolver: AuthResolver;
   draftsService: DraftsService;
+  // Present only when Authful provisioning is configured — the API-key surface
+  // stays absent otherwise (env-gated, like Google / magic link).
+  apiKeysService?: ApiKeysService;
 };
 
 export function createApp({
   db,
   authResolver,
   draftsService,
+  apiKeysService,
 }: AppConfig): Hono {
   const app = new Hono();
 
@@ -55,6 +61,9 @@ export function createApp({
   });
 
   draftsController(app, draftsService, authResolver);
+  if (apiKeysService) {
+    apiKeysController(app, apiKeysService, authResolver);
+  }
 
   return app;
 }

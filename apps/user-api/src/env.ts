@@ -47,6 +47,12 @@ const envSchema = z
     // defaults to Resend's sandbox sender for local/dev.
     RESEND_API_KEY: z.string().optional(),
     RESEND_FROM_EMAIL: z.string().default("onboarding@resend.dev"),
+
+    // User self-service API keys: enabled when both are set. The User API
+    // brokers keys into Authful over the private network using a provisioning
+    // key scoped to `user:*` tenants.
+    AUTHFUL_URL: z.string().url().optional(),
+    AUTHFUL_PROVISIONING_API_KEY: z.string().min(16).optional(),
   })
   .superRefine((data, ctx) => {
     if (Boolean(data.GOOGLE_CLIENT_ID) !== Boolean(data.GOOGLE_CLIENT_SECRET)) {
@@ -55,6 +61,16 @@ const envSchema = z
         path: ["GOOGLE_CLIENT_SECRET"],
         message:
           "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together",
+      });
+    }
+    if (
+      Boolean(data.AUTHFUL_URL) !== Boolean(data.AUTHFUL_PROVISIONING_API_KEY)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["AUTHFUL_PROVISIONING_API_KEY"],
+        message:
+          "AUTHFUL_URL and AUTHFUL_PROVISIONING_API_KEY must be set together",
       });
     }
   });
