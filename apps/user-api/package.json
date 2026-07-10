@@ -18,7 +18,8 @@
     "auth:generate": "better-auth generate --config ./src/auth.ts --output ./src/database/auth-schema.ts --yes",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "migrate:drafts": "tsx scripts/migrate-drafts.ts"
   },
   "keywords": [],
   "author": "",
