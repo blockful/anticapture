@@ -11,6 +11,7 @@ import {
   PieChart,
   Newspaper,
   Bomb,
+  Code2,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -86,6 +87,14 @@ export const HeaderDAOSidebar = () => {
                 isCollapsed={isCollapsed}
               />
             )}
+            {/* User feature (per-account, not per-DAO) — always available. */}
+            <ButtonHeaderSidebar
+              page="api-keys"
+              icon={Code2}
+              label="API"
+              key="API"
+              isCollapsed={isCollapsed}
+            />
             {daoConfig.attackProfitability &&
               daoConfig.attackProfitability.supportsLiquidTreasuryCall && (
                 <ButtonHeaderSidebar
