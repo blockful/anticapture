@@ -90,6 +90,16 @@ describe("optional auth methods", () => {
       expect(arg.email).toBe("alice@example.com");
       expect(arg.url).toContain("/api/auth/magic-link/verify");
     });
+
+    it("advertises magic link in /auth/methods", async () => {
+      const res = await app.request("/auth/methods", { headers });
+      expect(res.status).toBe(200);
+      await expect(res.json()).resolves.toEqual({
+        siwe: true,
+        magicLink: true,
+        google: false,
+      });
+    });
   });
 
   describe("magic link disabled (no sender configured)", () => {
@@ -109,6 +119,37 @@ describe("optional auth methods", () => {
 
       // 404 (route absent) — the method is off until a sender is wired.
       expect(res.status).toBe(404);
+    });
+
+    it("advertises only SIWE in /auth/methods", async () => {
+      const res = await app.request("/auth/methods", { headers });
+      expect(res.status).toBe(200);
+      await expect(res.json()).resolves.toEqual({
+        siwe: true,
+        magicLink: false,
+        google: false,
+      });
+    });
+  });
+
+  describe("google configured", () => {
+    const { client, db, app } = buildApp({
+      google: { clientId: "gid", clientSecret: "gsecret" },
+    });
+
+    beforeAll(() => applySchema(db));
+    afterAll(async () => {
+      await client.close();
+    });
+
+    it("advertises google in /auth/methods", async () => {
+      const res = await app.request("/auth/methods", { headers });
+      expect(res.status).toBe(200);
+      await expect(res.json()).resolves.toEqual({
+        siwe: true,
+        magicLink: false,
+        google: true,
+      });
     });
   });
 });

@@ -50,6 +50,11 @@ export function createApp({
     return c.body(body, 200, { "Content-Type": contentType });
   });
 
+  // Public capability discovery: which sign-in methods this deployment
+  // serves. The frontend gates its Email/Google buttons on this instead of
+  // its own env, so a method the server can't handle is never offered.
+  app.get("/auth/methods", (c) => c.json(authResolver.methods));
+
   // Better-auth owns all of /api/auth/* (SIWE nonce/verify, session, sign-out,
   // and later Google/magic-link). The instance is resolved per request Host so
   // whitelabel domains verify SIWE against their own host; an unlisted host is

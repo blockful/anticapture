@@ -3,6 +3,7 @@
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { ArrowLeft, Mail, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
@@ -13,6 +14,7 @@ import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { AnticaptureLogo } from "@/shared/components/icons/AnticaptureWatermark";
 import { GoogleIcon } from "@/shared/components/icons/GoogleIcon";
 import { authClient } from "@/shared/services/auth/client";
+import { useAuthMethods } from "@/shared/services/auth/useAuthMethods";
 import { useEmailLogin } from "@/shared/services/auth/useEmailLogin";
 import { useSiweLogin } from "@/shared/services/auth/useSiweLogin";
 
@@ -24,11 +26,6 @@ export type LoginModalProps = {
   onAuthenticated?: () => void;
 };
 
-// Each method is enabled only where its server plugin is configured; a disabled
-// method is hidden rather than shown broken. Whitelabel is wallet-only.
-const emailLoginEnabled = process.env.NEXT_PUBLIC_EMAIL_LOGIN !== "false";
-const googleLoginEnabled = process.env.NEXT_PUBLIC_GOOGLE_LOGIN === "true";
-
 const RESEND_COOLDOWN_SEC = 30;
 
 type View = "options" | "email" | "sent";
@@ -39,7 +36,8 @@ export const LoginModal = ({
   isWhitelabel = false,
   onAuthenticated,
 }: LoginModalProps) => {
-  const { openConnectModal } = useConnectModal();
+  const { openConnectModal, connectModalOpen } = useConnectModal();
+  const { isConnected } = useAccount();
   const [view, setView] = useState<View>("options");
   const [email, setEmail] = useState("");
 
@@ -49,10 +47,25 @@ export const LoginModal = ({
   });
   const emailLogin = useEmailLogin();
 
-  const showEmail = !isWhitelabel && emailLoginEnabled;
-  const showGoogle = !isWhitelabel && googleLoginEnabled;
+  // The server reports which methods its deployment actually serves (magic
+  // link / Google are env-gated there); a method it can't handle is hidden
+  // rather than shown broken. Whitelabel is wallet-only by design.
+  const methods = useAuthMethods(!isWhitelabel && open);
+  const showEmail = !isWhitelabel && methods.magicLink;
+  const showGoogle = !isWhitelabel && methods.google;
   const showAlternatives = showEmail || showGoogle;
   const siweBusy = siwe.status !== "idle" && siwe.status !== "error";
+
+  // If RainbowKit was dismissed without a wallet connecting, drop the pending
+  // SIWE flow so the button doesn't come back stuck on "Connecting…". The
+  // grace timer absorbs the race where RainbowKit closes an instant before
+  // wagmi reports the new connection (a connect cancels the timer via deps).
+  const { status: siweStatus, reset: siweReset } = siwe;
+  useEffect(() => {
+    if (connectModalOpen || isConnected || siweStatus !== "connecting") return;
+    const timer = setTimeout(siweReset, 500);
+    return () => clearTimeout(timer);
+  }, [connectModalOpen, isConnected, siweStatus, siweReset]);
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
@@ -76,7 +89,11 @@ export const LoginModal = ({
 
   return (
     <Modal
-      open={open}
+      // Hidden (not closed) while RainbowKit's connect modal is up: both are
+      // focus-trapping dialogs, so stacked they block each other's clicks.
+      // This component stays mounted, so the pending SIWE flow survives and
+      // the modal comes back in the signing state once the wallet connects.
+      open={open && !connectModalOpen}
       onOpenChange={handleOpenChange}
       ariaLabel="Sign in to Anticapture"
       className="max-w-100"
