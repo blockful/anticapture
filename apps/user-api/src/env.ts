@@ -19,21 +19,15 @@ const envSchema = z
     // Better-auth session signing key. Own root of trust for every session
     // this service issues — must be >= 32 high-entropy chars.
     BETTER_AUTH_SECRET: z.string().min(32),
-    // Browser-visible base URL of this service (through the dashboard's
-    // /api/user proxy). Better-auth pins cookies and callbacks to it.
-    BETTER_AUTH_URL: z.string().url(),
 
-    // Hosts a SIWE message may be bound to. One better-auth instance is built
-    // per entry so whitelabel domains can sign in against their real host
-    // (the SIWE plugin validates a single domain per instance). First entry is
-    // the fallback for unknown hosts.
+    // Allowed frontend hosts (main dashboard, localhost for local dev, every
+    // whitelabel host). Single source of truth per host: the SIWE domain a
+    // signed message must match, the better-auth baseURL (cookie/CSRF scope,
+    // derived as https://<host> — http for localhost), and the trusted-origin
+    // allowlist. There is deliberately no single BETTER_AUTH_URL: the service
+    // serves many origins and each request is scoped to its own.
     AUTH_SIWE_DOMAINS: csv().refine((a) => a.length > 0, {
       message: "AUTH_SIWE_DOMAINS must list at least one host",
-    }),
-    // Origins allowed to call the auth endpoints (CSRF allowlist). Include the
-    // main dashboard and every whitelabel origin.
-    TRUSTED_ORIGINS: csv().refine((a) => a.length > 0, {
-      message: "TRUSTED_ORIGINS must list at least one origin",
     }),
 
     // RPC endpoint used to verify EIP-1271 / smart-contract-wallet signatures.
