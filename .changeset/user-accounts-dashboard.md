@@ -8,5 +8,5 @@ wallet (SIWE) authentication against the new User API through a same-origin
 scoped User API: identity comes from the session (no caller-supplied address),
 shared-draft ownership is derived server-side, and saving prompts sign-in when
 there is no session. The modal also offers email (magic link) and Google
-sign-in, each shown only where enabled (NEXT_PUBLIC_EMAIL_LOGIN /
-NEXT_PUBLIC_GOOGLE_LOGIN); whitelabel is wallet-only.
+sign-in, each shown only when the User API deployment reports it as enabled
+(GET /auth/methods); whitelabel is wallet-only.
