@@ -7,6 +7,7 @@ import Image from "next/image";
 
 import { Button } from "@/shared/components";
 import { Tooltip } from "@/shared/components/design-system/tooltips";
+import { useLogin } from "@/shared/services/auth/LoginProvider";
 import { cn } from "@/shared/utils";
 
 const Jazzicon = dynamic(
@@ -23,6 +24,7 @@ export const ConnectWallet = ({
   label?: string;
   className?: string;
 }) => {
+  const { openLogin } = useLogin();
   return (
     <ConnectButton.Custom>
       {({
@@ -30,7 +32,6 @@ export const ConnectWallet = ({
         chain,
         openAccountModal,
         openChainModal,
-        openConnectModal,
         authenticationStatus,
         mounted,
       }) => {
@@ -56,7 +57,7 @@ export const ConnectWallet = ({
               if (!connected) {
                 return (
                   <Button
-                    onClick={openConnectModal}
+                    onClick={openLogin}
                     type="button"
                     variant="outline"
                     className={cn(className, "text-primary!")}
