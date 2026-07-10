@@ -37,7 +37,10 @@ export class AuthfulHttpClient implements AuthfulClient {
     const res = await fetch(`${this.baseUrl}/tokens`, {
       method: "POST",
       headers: this.headers(),
-      body: JSON.stringify({ tenant, name }),
+      // Product decision: user API keys are unbounded for now (free, no
+      // metering); gateful treats rateLimitPerMin <= 0 as no rate limit.
+      // Monetization later will mint with a real per-plan limit.
+      body: JSON.stringify({ tenant, name, rateLimitPerMin: 0 }),
     });
     if (!res.ok) {
       throw new Error(`authful mint failed: ${res.status}`);
