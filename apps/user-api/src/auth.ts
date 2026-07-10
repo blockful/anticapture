@@ -20,14 +20,14 @@ export type SendMagicLink = (params: {
 export type AuthConfig = {
   db: UserApiDrizzle;
   secret: string;
-  baseURL: string;
-  trustedOrigins: string[];
   /**
-   * Hosts a SIWE message may be bound to. One better-auth instance is built
-   * per entry because the SIWE plugin validates the signed message against
-   * exactly one domain — the mechanism that lets each frontend (main +
-   * whitelabel) sign with its real host, preserving SIWE's anti-phishing
-   * guarantee. Must have at least one entry (env validation enforces it).
+   * Allowed frontend hosts (main dashboard, localhost for local dev, and each
+   * whitelabel host). This one list drives everything per host: the SIWE
+   * `domain` a signed message must match, the better-auth `baseURL` (so the
+   * session cookie and CSRF are scoped to the origin the request actually came
+   * from — never a single hard-coded domain), and the trusted-origin allowlist.
+   * One better-auth instance is built per entry. Must have at least one entry
+   * (env validation enforces it).
    */
   domains: string[];
   /** Signature verifier — injected so tests can verify EOAs offline. */
@@ -71,6 +71,16 @@ export const forwardedHost = (
   headers.get("host") ??
   undefined;
 
+/**
+ * The browser-visible origin for a frontend host. Localhost is served over
+ * http (dev); every other host is https. Used as each better-auth instance's
+ * baseURL so cookies/CSRF are scoped to the requesting frontend's own origin.
+ */
+export const originForHost = (host: string): string =>
+  /^(localhost|127\.0\.0\.1)(:|$)/.test(host)
+    ? `http://${host}`
+    : `https://${host}`;
+
 function createAuth(config: AuthConfig, domain: string) {
   const plugins: BetterAuthPlugin[] = [
     siwe({
@@ -103,8 +113,12 @@ function createAuth(config: AuthConfig, domain: string) {
   return betterAuth({
     database: drizzleAdapter(config.db, { provider: "pg" }),
     secret: config.secret,
-    baseURL: config.baseURL,
-    trustedOrigins: config.trustedOrigins,
+    // Per-host origin: the session cookie and CSRF scope to the frontend that
+    // made the request, so the same service serves localhost, the main domain,
+    // and every whitelabel host correctly. All origins are trusted so a
+    // session issued via one instance is accepted by the others.
+    baseURL: originForHost(domain),
+    trustedOrigins: config.domains.map(originForHost),
     // No account linking in v1 (product decision): a wallet login and a
     // Google/email login are deliberately separate users.
     ...(config.google
