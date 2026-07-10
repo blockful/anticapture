@@ -35,9 +35,16 @@ const getForwardHeaders = (request: NextRequest) => {
   if (origin) headers.set("origin", origin);
 
   // The real browser-facing host — the upstream fetch would otherwise set Host
-  // to the internal service host, which is never in AUTH_SIWE_DOMAINS.
+  // to the internal service host, which is never in AUTH_SIWE_DOMAINS. Sent as
+  // a custom header (not just x-forwarded-host) because Railway's edge proxy in
+  // front of the User API overwrites the x-forwarded-* set; a custom x- header
+  // passes through untouched. x-forwarded-host is kept for edge-less setups
+  // (local dev). See forwardedHost() in @anticapture/user-api.
   const host = request.headers.get("host");
-  if (host) headers.set("x-forwarded-host", host);
+  if (host) {
+    headers.set("x-anticapture-host", host);
+    headers.set("x-forwarded-host", host);
+  }
   headers.set(
     "x-forwarded-proto",
     request.nextUrl.protocol.replace(":", "") || "https",
