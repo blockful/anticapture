@@ -73,6 +73,44 @@ describe("voteOnProposal", () => {
     expect(setTransactionhash).toHaveBeenNthCalledWith(2, "");
   });
 
+  it("casts governor votes with a void-return ABI (GovernorBravo compat)", async () => {
+    const account = { address: accountAddress } as unknown as Account;
+    const request = { to: governor };
+    const simulateContract = jest.fn().mockResolvedValue({ request });
+    const writeContract = jest.fn().mockResolvedValue(transactionHash);
+    const waitForTransactionReceipt = jest
+      .fn()
+      .mockResolvedValue({ transactionHash });
+    const walletClient = {
+      extend: jest.fn(() => ({
+        simulateContract,
+        writeContract,
+        waitForTransactionReceipt,
+      })),
+    } as unknown as WalletClient;
+
+    const receipt = await voteOnProposal(
+      "for",
+      "98",
+      account,
+      {} as Chain,
+      DaoIdEnum.UNISWAP,
+      walletClient,
+      jest.fn(),
+    );
+
+    expect(receipt).toEqual({ transactionHash });
+    const call = simulateContract.mock.calls[0][0];
+    expect(call.functionName).toBe("castVote");
+    expect(call.args).toEqual([98n, 1]);
+    // GovernorBravo's castVote returns no data; declaring outputs makes viem
+    // throw decoding the empty simulate result, so the ABI must stay void.
+    const castVoteAbi = call.abi.find(
+      (entry: { name?: string }) => entry.name === "castVote",
+    );
+    expect(castVoteAbi.outputs).toEqual([]);
+  });
+
   it("rejects Tornado Cash abstain votes before sending a transaction", async () => {
     const account = { address: accountAddress } as unknown as Account;
     const simulateContract = jest.fn();
