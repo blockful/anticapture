@@ -10,6 +10,7 @@ import { Input } from "@/shared/components/design-system/form/fields/input/Input
 import { DefaultLink } from "@/shared/components/design-system/links/default-link/DefaultLink";
 import { Logo } from "@/shared/components/design-system/logo/Logo";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
+import { AnticaptureLogo } from "@/shared/components/icons/AnticaptureWatermark";
 import { GoogleIcon } from "@/shared/components/icons/GoogleIcon";
 import { authClient } from "@/shared/services/auth/client";
 import { useEmailLogin } from "@/shared/services/auth/useEmailLogin";
@@ -81,7 +82,16 @@ export const LoginModal = ({
       className="max-w-100"
       bodyClassName="flex flex-col items-center gap-6 p-5"
     >
-      <Logo variant="brand" size="md" />
+      {/* Whitelabel keeps the neutral mark; the main app shows the wordmark. */}
+      {isWhitelabel ? (
+        <Logo variant="brand" size="md" />
+      ) : (
+        <AnticaptureLogo
+          className="text-highlight h-8 w-auto"
+          aria-label="Anticapture"
+          role="img"
+        />
+      )}
 
       {view === "sent" ? (
         <div className="flex w-full flex-col gap-4">
