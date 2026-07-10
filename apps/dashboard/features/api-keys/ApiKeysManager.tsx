@@ -1,7 +1,7 @@
 "use client";
 
 import { Code, Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
@@ -54,24 +54,15 @@ export const ApiKeysManager = () => {
     revoke.mutate(toRevoke.id, { onSuccess: () => setToRevoke(null) });
   };
 
-  // Signed-out: the whole surface is gated behind sign-in.
-  if (!isAuthed) {
-    return (
-      <div className="flex w-full flex-col items-center gap-4 py-16 text-center">
-        <Code className="text-secondary size-8" />
-        <div className="flex flex-col gap-1">
-          <h4 className="text-primary text-lg font-medium">API Keys</h4>
-          <p className="text-secondary max-w-md text-sm">
-            Sign in to create keys and query Anticapture from Claude, Cursor, or
-            Codex.
-          </p>
-        </div>
-        <Button variant="primary" size="md" onClick={openLogin}>
-          Sign in
-        </Button>
-      </div>
-    );
-  }
+  // Signed-out visitors get the sign-in modal right away, over the page —
+  // no interstitial screen. Once only, so dismissing it isn't a fight; any
+  // gated action (Create key) re-opens it.
+  const autoOpenedLogin = useRef(false);
+  useEffect(() => {
+    if (isPending || session || autoOpenedLogin.current) return;
+    autoOpenedLogin.current = true;
+    openLogin();
+  }, [isPending, session, openLogin]);
 
   return (
     <div className="flex w-full flex-col gap-6 p-5">
@@ -86,7 +77,7 @@ export const ApiKeysManager = () => {
             variant="primary"
             size="md"
             className="shrink-0"
-            onClick={() => setCreateOpen(true)}
+            onClick={() => (isAuthed ? setCreateOpen(true) : openLogin())}
           >
             <Plus className="size-3.5" />
             Create key
