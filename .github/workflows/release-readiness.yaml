@@ -9,6 +9,9 @@ on:
 jobs:
   unconsumed-changesets:
     name: Check unconsumed changesets
+    # Only the dev -> main promotion must be changeset-free; hotfix PRs carry
+    # their own changeset, consumed later when main is back-merged into dev.
+    if: github.head_ref == 'dev'
     runs-on: ubuntu-latest
 
     steps:
