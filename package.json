@@ -7,6 +7,7 @@
     "indexer": "dotenv -- turbo run --filter=@anticapture/indexer",
     "gateful": "dotenv -- turbo run --filter=@anticapture/gateful",
     "authful": "dotenv -- turbo run --filter=@anticapture/authful",
+    "user-api": "dotenv -- turbo run --filter=@anticapture/user-api",
     "api": "dotenv -- turbo run --filter=@anticapture/api",
     "codegen": "dotenv -- node scripts/wait-for-gateful.mjs && dotenv -- turbo run codegen",
     "client": "turbo run --filter=@anticapture/client",
