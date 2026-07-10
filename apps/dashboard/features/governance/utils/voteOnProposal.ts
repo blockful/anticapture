@@ -11,7 +11,6 @@ import type {
 import { relayVote } from "@anticapture/client";
 import type { RelayVotePathParamsDaoEnumKey } from "@anticapture/client";
 
-import EnsGovernorAbi from "@/abis/ens-governor.json";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -27,6 +26,33 @@ const LinearVotingStrategyAbi = [
       { internalType: "uint8", name: "_voteType", type: "uint8" },
     ],
     name: "vote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const;
+
+// Shared by OZ Governor (returns uint256) and GovernorBravo (returns void).
+// `outputs` must stay empty: Bravo's castVote returns no data, and declaring a
+// uint256 output makes viem's simulateContract throw decoding the empty result.
+const GovernorCastVoteAbi = [
+  {
+    inputs: [
+      { internalType: "uint256", name: "proposalId", type: "uint256" },
+      { internalType: "uint8", name: "support", type: "uint8" },
+    ],
+    name: "castVote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "proposalId", type: "uint256" },
+      { internalType: "uint8", name: "support", type: "uint8" },
+      { internalType: "string", name: "reason", type: "string" },
+    ],
+    name: "castVoteWithReason",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -138,20 +164,20 @@ const ozGovernorVoteHandler =
 
     if (!params.comment) {
       const { request } = await client.simulateContract({
-        abi: EnsGovernorAbi,
+        abi: GovernorCastVoteAbi,
         address,
         functionName: "castVote",
-        args: [params.proposalId, params.voteNumber],
+        args: [BigInt(params.proposalId), params.voteNumber],
         account: params.account,
       });
       return client.writeContract(request);
     }
 
     const { request } = await client.simulateContract({
-      abi: EnsGovernorAbi,
+      abi: GovernorCastVoteAbi,
       address,
       functionName: "castVoteWithReason",
-      args: [params.proposalId, params.voteNumber, params.comment],
+      args: [BigInt(params.proposalId), params.voteNumber, params.comment],
       account: params.account,
     });
     return client.writeContract(request);
