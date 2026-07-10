@@ -1,9 +1,19 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Ellipsis } from "lucide-react";
+import { useMemo, useState } from "react";
 
+import { Button } from "@/shared/components";
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
+import { Table } from "@/shared/components/design-system/table/Table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/components/ui/popover";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
+import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
 const dateFmt = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
@@ -11,10 +21,43 @@ const dateFmt = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
-const formatDate = (iso: string | null): string =>
-  iso ? dateFmt.format(new Date(iso)) : "—";
+// ⋯ options menu per row — revoke is the only action for now (rotate later).
+const KeyOptions = ({
+  apiKey,
+  onRevoke,
+}: {
+  apiKey: UserApiKey;
+  onRevoke: (key: UserApiKey) => void;
+}) => {
+  const [open, setOpen] = useState(false);
 
-const HEADERS = ["Name", "Status", "Created", "Last used", ""] as const;
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="p-2"
+          aria-label={`Options for ${apiKey.label}`}
+        >
+          <Ellipsis className="size-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-40 p-1">
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            onRevoke(apiKey);
+          }}
+          className="text-error hover:bg-surface-contrast rounded-base w-full px-3 py-2 text-left text-sm font-medium transition-colors"
+        >
+          Revoke key
+        </button>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 export const ApiKeysTable = ({
   keys,
@@ -23,60 +66,66 @@ export const ApiKeysTable = ({
   keys: UserApiKey[];
   onRevoke: (key: UserApiKey) => void;
 }) => {
+  const columns = useMemo<ColumnDef<UserApiKey>[]>(
+    () => [
+      {
+        accessorKey: "label",
+        header: "Name",
+        cell: ({ row }) => (
+          <span className="text-primary text-sm font-medium">
+            {row.original.label}
+          </span>
+        ),
+      },
+      {
+        id: "status",
+        header: "Status",
+        cell: ({ row }) =>
+          row.original.revokedAt === null ? (
+            <BadgeStatus variant="success">Active</BadgeStatus>
+          ) : (
+            <BadgeStatus variant="dimmed">Disabled</BadgeStatus>
+          ),
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Created",
+        cell: ({ row }) => (
+          <span className="text-secondary text-sm">
+            {dateFmt.format(new Date(row.original.createdAt))}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "lastUsedAt",
+        header: "Last Used",
+        cell: ({ row }) => (
+          <span className="text-secondary text-sm">
+            {row.original.lastUsedAt
+              ? formatRelativeTime(Date.parse(row.original.lastUsedAt) / 1000)
+              : "—"}
+          </span>
+        ),
+      },
+      {
+        id: "options",
+        header: "",
+        cell: ({ row }) =>
+          row.original.revokedAt === null && (
+            <KeyOptions apiKey={row.original} onRevoke={onRevoke} />
+          ),
+        meta: { columnClassName: "w-14" },
+      },
+    ],
+    [onRevoke],
+  );
+
   return (
-    <div className="border-border-default bg-surface-default w-full overflow-hidden rounded-md border">
-      <table className="w-full text-left">
-        <thead>
-          <tr className="border-border-default border-b">
-            {HEADERS.map((h) => (
-              <th
-                key={h}
-                className="text-secondary px-4 py-2.5 text-xs font-medium"
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {keys.map((key) => {
-            const active = key.revokedAt === null;
-            return (
-              <tr
-                key={key.id}
-                className="border-border-default border-b last:border-b-0"
-              >
-                <td className="text-primary px-4 py-3 text-sm font-medium">
-                  {key.label}
-                </td>
-                <td className="px-4 py-3">
-                  <BadgeStatus variant={active ? "success" : "dimmed"}>
-                    {active ? "Active" : "Revoked"}
-                  </BadgeStatus>
-                </td>
-                <td className="text-secondary px-4 py-3 text-sm">
-                  {formatDate(key.createdAt)}
-                </td>
-                <td className="text-secondary px-4 py-3 text-sm">
-                  {formatDate(key.lastUsedAt)}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  {active && (
-                    <button
-                      type="button"
-                      onClick={() => onRevoke(key)}
-                      aria-label={`Revoke ${key.label}`}
-                      className="text-secondary hover:text-error transition-colors"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <Table
+      columns={columns}
+      data={keys}
+      emptyTitle="No API keys yet"
+      emptyDescription="Create one to connect your AI agent."
+    />
   );
 };

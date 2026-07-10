@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart4, Bell } from "lucide-react";
+import { BarChart4, Bell, Code } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 
@@ -24,6 +24,12 @@ export const HeaderSidebar = () => {
         page: "alerts",
         label: "Alerts",
         icon: Bell,
+        isGlobal: true,
+      },
+      {
+        page: "api-keys",
+        label: "API",
+        icon: Code,
         isGlobal: true,
       },
     ],

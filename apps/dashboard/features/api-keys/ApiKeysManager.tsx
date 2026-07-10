@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyRound, Plus } from "lucide-react";
+import { Code, Plus } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/shared/components";
@@ -25,11 +25,17 @@ export const ApiKeysManager = () => {
   const { keys, isLoading, create, revoke } = useApiKeys(isAuthed);
 
   const [createOpen, setCreateOpen] = useState(false);
-  // Holds the just-created plaintext for the one-time reveal.
+  // Holds the just-created plaintext for the one-time reveal modal.
   const [created, setCreated] = useState<{
     token: string;
     label: string;
   } | null>(null);
+  // Plaintexts of keys created this session, so the connect command can
+  // embed the real key ("Your key is already in it"). Never persisted.
+  const [sessionTokens, setSessionTokens] = useState<Record<string, string>>(
+    {},
+  );
+  const [lastCreatedId, setLastCreatedId] = useState<string | null>(null);
   const [toRevoke, setToRevoke] = useState<UserApiKey | null>(null);
 
   const handleCreate = (label: string) => {
@@ -37,6 +43,8 @@ export const ApiKeysManager = () => {
       onSuccess: (key) => {
         setCreateOpen(false);
         setCreated({ token: key.token, label: key.label });
+        setSessionTokens((prev) => ({ ...prev, [key.id]: key.token }));
+        setLastCreatedId(key.id);
       },
     });
   };
@@ -50,7 +58,7 @@ export const ApiKeysManager = () => {
   if (!isAuthed) {
     return (
       <div className="flex w-full flex-col items-center gap-4 py-16 text-center">
-        <KeyRound className="text-secondary size-8" />
+        <Code className="text-secondary size-8" />
         <div className="flex flex-col gap-1">
           <h4 className="text-primary text-lg font-medium">API Keys</h4>
           <p className="text-secondary max-w-md text-sm">
@@ -67,10 +75,10 @@ export const ApiKeysManager = () => {
 
   return (
     <div className="flex w-full flex-col gap-6 p-5">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <div className="flex items-start justify-between gap-4">
           <SectionTitle
-            icon={<KeyRound className="text-primary size-5" />}
+            icon={<Code className="text-primary size-5" />}
             title="API Keys"
             description="Query Anticapture from Claude, Cursor, or Codex. Just ask in natural language."
           />
@@ -87,10 +95,6 @@ export const ApiKeysManager = () => {
 
         {isLoading ? (
           <p className="text-secondary text-sm">Loading…</p>
-        ) : keys.length === 0 ? (
-          <div className="border-border-default text-secondary rounded-md border border-dashed p-8 text-center text-sm">
-            No API keys yet. Create one to connect your AI agent.
-          </div>
         ) : (
           <ApiKeysTable keys={keys} onRevoke={setToRevoke} />
         )}
@@ -98,7 +102,11 @@ export const ApiKeysManager = () => {
 
       <DividerDefault />
 
-      <ConnectAgentSection />
+      <ConnectAgentSection
+        keys={keys}
+        sessionTokens={sessionTokens}
+        lastCreatedId={lastCreatedId}
+      />
 
       <CreateApiKeyModal
         open={createOpen}
