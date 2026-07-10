@@ -41,6 +41,18 @@ export type AuthConfig = {
   google?: { clientId: string; clientSecret: string };
 };
 
+/**
+ * Which sign-in methods this deployment actually serves. SIWE is always on;
+ * the optional ones mirror the exact config presence that registers their
+ * plugin, so a frontend reading this never renders a button whose endpoint
+ * would 404.
+ */
+export type AuthMethods = {
+  siwe: true;
+  magicLink: boolean;
+  google: boolean;
+};
+
 export type AuthResolver = {
   /**
    * Picks the better-auth instance whose SIWE domain matches the request
@@ -50,6 +62,8 @@ export type AuthResolver = {
   resolve: (host: string | undefined) => Auth | undefined;
   /** Instance bound to the first configured domain. */
   primary: Auth;
+  /** Sign-in methods enabled by this deployment's configuration. */
+  methods: AuthMethods;
 };
 
 /**
@@ -159,5 +173,10 @@ export function createAuthResolver(config: AuthConfig): AuthResolver {
   return {
     resolve: (host) => (host ? instances.get(host) : undefined),
     primary,
+    methods: {
+      siwe: true,
+      magicLink: Boolean(config.magicLink),
+      google: Boolean(config.google),
+    },
   };
 }
