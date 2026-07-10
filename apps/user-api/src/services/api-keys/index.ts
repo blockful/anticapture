@@ -18,6 +18,8 @@ export type CreatedApiKey = {
   plaintext: string;
 };
 
+export type ApiKeyWithUsage = ApiKeyRow & { lastUsedAt: string | null };
+
 export class ApiKeysService {
   constructor(
     private readonly repo: ApiKeysRepository,
@@ -51,8 +53,26 @@ export class ApiKeysService {
     }
   }
 
-  async list(userId: string): Promise<ApiKeyRow[]> {
-    return this.repo.listActiveByUser(userId);
+  async list(userId: string): Promise<ApiKeyWithUsage[]> {
+    const rows = await this.repo.listActiveByUser(userId);
+
+    // lastUsedAt lives in Authful. Enrich best-effort: if Authful is
+    // unreachable, still return the keys (usage shown as unknown) rather than
+    // failing the whole list.
+    let usage = new Map<string, string | null>();
+    try {
+      const tokens = await this.authful.listByTenant(
+        `${USER_TENANT_PREFIX}${userId}`,
+      );
+      usage = new Map(tokens.map((t) => [t.id, t.lastUsedAt]));
+    } catch {
+      // leave usage empty
+    }
+
+    return rows.map((row) => ({
+      ...row,
+      lastUsedAt: usage.get(row.authfulTokenId) ?? null,
+    }));
   }
 
   /**

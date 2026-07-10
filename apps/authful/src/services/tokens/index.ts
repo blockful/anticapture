@@ -72,8 +72,8 @@ export class TokensService {
     return { created: true, token };
   }
 
-  async list(): Promise<DBToken[]> {
-    return this.repo.list();
+  async list(tenant?: string): Promise<DBToken[]> {
+    return tenant ? this.repo.listByTenant(tenant) : this.repo.list();
   }
 
   /**

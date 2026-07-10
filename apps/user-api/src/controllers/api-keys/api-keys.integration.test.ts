@@ -51,15 +51,18 @@ describe("api-keys + Authful brokering integration", () => {
   let app: TestApp;
 
   // Fake Authful: records mint/revoke calls, returns a deterministic plaintext.
+  // listByTenant reports a fixed lastUsedAt so the enrichment path is covered.
   const authful: AuthfulClient & {
     mint: ReturnType<typeof vi.fn>;
     revoke: ReturnType<typeof vi.fn>;
+    listByTenant: ReturnType<typeof vi.fn>;
   } = {
     mint: vi.fn(async (tenant: string) => ({
       id: crypto.randomUUID(),
       token: `act_${tenant}`,
     })),
     revoke: vi.fn(async () => undefined),
+    listByTenant: vi.fn(async () => []),
   };
 
   beforeAll(async () => {
@@ -174,6 +177,34 @@ describe("api-keys + Authful brokering integration", () => {
     expect(items.length).toBe(1);
     expect(items[0].label).toBe("a");
     expect(items[0]).not.toHaveProperty("token");
+    expect(items[0]).toHaveProperty("lastUsedAt");
+  });
+
+  it("surfaces lastUsedAt from Authful for the listed keys", async () => {
+    const cookie = await signIn();
+    await createKey(cookie, "used");
+    const mintedId = (await authful.mint.mock.results.at(-1)!.value).id;
+    authful.listByTenant.mockResolvedValueOnce([
+      { id: mintedId, lastUsedAt: "2026-01-02T03:04:05.000Z" },
+    ]);
+
+    const res = await app.request("/me/api-keys", { headers: authed(cookie) });
+    const { items } = (await res.json()) as any;
+    const used = items.find((k: { id: string }) => k.label === "used");
+    expect(used.lastUsedAt).toBe("2026-01-02T03:04:05.000Z");
+  });
+
+  it("still lists keys when Authful is unreachable (lastUsedAt null)", async () => {
+    const cookie = await signIn();
+    await createKey(cookie, "resilient");
+    authful.listByTenant.mockRejectedValueOnce(new Error("authful down"));
+
+    const res = await app.request("/me/api-keys", { headers: authed(cookie) });
+    expect(res.status).toBe(200);
+    const { items } = (await res.json()) as any;
+    expect(
+      items.find((k: { label: string }) => k.label === "resilient"),
+    ).toBeTruthy();
   });
 
   it("does not list another user's keys", async () => {

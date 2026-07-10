@@ -168,11 +168,34 @@ describe("authful app", () => {
       expect(items).toHaveLength(0);
     });
 
-    it("cannot list tokens", async () => {
+    it("cannot list all tokens (no tenant filter)", async () => {
       const res = await app.request("/tokens", {
         headers: provisioningHeaders,
       });
       expect(res.status).toBe(403);
+    });
+
+    it("cannot list a non-user tenant", async () => {
+      const res = await app.request("/tokens?tenant=uniswap", {
+        headers: provisioningHeaders,
+      });
+      expect(res.status).toBe(403);
+    });
+
+    it("lists only its own user:* tenant", async () => {
+      await provMint({ tenant: "user:abc", name: "one" });
+      await provMint({ tenant: "user:abc", name: "two" });
+      await mint({ tenant: "uniswap" }); // must not leak into the result
+
+      const res = await app.request("/tokens?tenant=user:abc", {
+        headers: provisioningHeaders,
+      });
+      expect(res.status).toBe(200);
+      const { items } = (await res.json()) as {
+        items: { tenant: string; lastUsedAt: string | null }[];
+      };
+      expect(items).toHaveLength(2);
+      expect(items.every((t) => t.tenant === "user:abc")).toBe(true);
     });
 
     it("revokes its own user:* token", async () => {

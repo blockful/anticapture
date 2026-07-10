@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
   ErrorResponseSchema,
+  ListTokensQuerySchema,
   MintTokenBodySchema,
   MintTokenResponseSchema,
   TokenListResponseSchema,
@@ -67,22 +68,36 @@ export function tokensController(app: Hono, service: TokensService) {
       operationId: "listTokens",
       path: "/tokens",
       summary: "List token metadata (never hashes or plaintext)",
+      description:
+        "Admin lists all tenants (optionally filtered by ?tenant). The " +
+        "provisioning scope may list only a single user:* tenant it owns.",
       tags: ["tokens"],
+      request: { query: ListTokensQuerySchema },
       responses: {
         200: {
-          description: "All tokens, newest first",
+          description: "Matching tokens, newest first",
           content: { "application/json": { schema: TokenListResponseSchema } },
         },
         403: forbiddenResponse,
       },
     }),
     async (c) => {
-      // Listing exposes every tenant's metadata — admin only. The User API
-      // tracks its own users' keys, so it never needs this.
-      if (c.get("authScope") !== "admin") {
-        return c.json({ error: "listing requires the admin scope" }, 403);
+      const { tenant } = c.req.valid("query");
+      // Unfiltered listing exposes every tenant's metadata — admin only. The
+      // provisioning key may list, but only its own user:* tenant (so the User
+      // API can read its users' keys, e.g. lastUsedAt).
+      if (
+        c.get("authScope") !== "admin" &&
+        (!tenant || !tenant.startsWith(USER_TENANT_PREFIX))
+      ) {
+        return c.json(
+          {
+            error: `provisioning scope may only list a single ${USER_TENANT_PREFIX}* tenant`,
+          },
+          403,
+        );
       }
-      const tokens = await service.list();
+      const tokens = await service.list(tenant);
       return c.json({ items: tokens.map(toTokenMetadata) }, 200);
     },
   );

@@ -8,9 +8,16 @@ export type MintedToken = {
   token: string; // plaintext, returned exactly once by Authful
 };
 
+export type TokenUsage = {
+  id: string;
+  lastUsedAt: string | null;
+};
+
 export interface AuthfulClient {
   mint(tenant: string, name: string): Promise<MintedToken>;
   revoke(tokenId: string): Promise<void>;
+  /** Token metadata for a single tenant (used to surface lastUsedAt). */
+  listByTenant(tenant: string): Promise<TokenUsage[]>;
 }
 
 export class AuthfulHttpClient implements AuthfulClient {
@@ -48,5 +55,19 @@ export class AuthfulHttpClient implements AuthfulClient {
     if (!res.ok && res.status !== 404) {
       throw new Error(`authful revoke failed: ${res.status}`);
     }
+  }
+
+  async listByTenant(tenant: string): Promise<TokenUsage[]> {
+    const res = await fetch(
+      `${this.baseUrl}/tokens?tenant=${encodeURIComponent(tenant)}`,
+      { headers: this.headers() },
+    );
+    if (!res.ok) {
+      throw new Error(`authful list failed: ${res.status}`);
+    }
+    const body = (await res.json()) as {
+      items: { id: string; lastUsedAt: string | null }[];
+    };
+    return body.items.map((t) => ({ id: t.id, lastUsedAt: t.lastUsedAt }));
   }
 }

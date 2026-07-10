@@ -15,11 +15,12 @@ import {
   type ApiKeysService,
 } from "@/services/api-keys";
 
-const toResponse = (row: ApiKeyRow) => ({
+const toResponse = (row: ApiKeyRow, lastUsedAt: string | null = null) => ({
   id: row.id,
   label: row.label,
   createdAt: row.createdAt.toISOString(),
   revokedAt: row.revokedAt?.toISOString() ?? null,
+  lastUsedAt,
 });
 
 const unauthorizedResponses = {
@@ -59,7 +60,9 @@ export function apiKeysController(
       const { id: userId } = c.get("sessionUser");
       const keys = await service.list(userId);
       return c.json(
-        ApiKeyListResponseSchema.parse({ items: keys.map(toResponse) }),
+        ApiKeyListResponseSchema.parse({
+          items: keys.map((k) => toResponse(k, k.lastUsedAt)),
+        }),
         200,
       );
     },

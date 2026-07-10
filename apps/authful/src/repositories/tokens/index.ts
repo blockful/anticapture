@@ -12,6 +12,14 @@ export class TokensRepository {
     return this.db.select().from(tokens).orderBy(desc(tokens.createdAt));
   }
 
+  async listByTenant(tenant: string): Promise<DBToken[]> {
+    return this.db
+      .select()
+      .from(tokens)
+      .where(eq(tokens.tenant, tenant))
+      .orderBy(desc(tokens.createdAt));
+  }
+
   async create(token: NewToken): Promise<DBToken> {
     const [created] = await this.db.insert(tokens).values(token).returning();
     return created!;

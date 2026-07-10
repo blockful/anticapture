@@ -6,6 +6,8 @@ export const ApiKeySchema = z
     label: z.string(),
     createdAt: z.string(),
     revokedAt: z.string().nullable(),
+    // Sourced from Authful; null when never used or Authful was unreachable.
+    lastUsedAt: z.string().nullable(),
   })
   .openapi("ApiKey");
 
