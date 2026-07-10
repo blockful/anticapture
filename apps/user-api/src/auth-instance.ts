@@ -26,8 +26,9 @@ const google =
 export const authResolver = createAuthResolver({
   db,
   secret: env.BETTER_AUTH_SECRET,
-  baseURL: env.BETTER_AUTH_URL,
-  trustedOrigins: env.TRUSTED_ORIGINS,
+  // baseURL + trusted origins are derived per host from this list — see
+  // createAuthResolver. No single BETTER_AUTH_URL: the service serves many
+  // frontend origins (localhost, main, whitelabels).
   domains: env.AUTH_SIWE_DOMAINS,
   verifyMessage: ({ message, signature, address }) =>
     publicClient.verifyMessage({
