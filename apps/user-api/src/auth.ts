@@ -54,13 +54,22 @@ export type AuthResolver = {
 
 /**
  * The browser-facing host behind the dashboard's /api/user proxy. The proxy
- * sets x-forwarded-host to the real dashboard/whitelabel host; the direct Host
- * header would be the internal service host, which is never in AUTH_SIWE_DOMAINS.
+ * sets it so we resolve the right per-host SIWE instance; the direct Host
+ * header would be the internal service host, never in AUTH_SIWE_DOMAINS.
+ *
+ * Prefers the custom x-anticapture-host: when a managed edge (e.g. Railway)
+ * sits in front of this service, it overwrites the x-forwarded-* set with its
+ * own host, so the proxy's value would be lost. A custom x- header passes
+ * through untouched. x-forwarded-host remains the fallback for edge-less
+ * setups (local dev).
  */
 export const forwardedHost = (
   headers: Pick<Headers, "get">,
 ): string | undefined =>
-  headers.get("x-forwarded-host") ?? headers.get("host") ?? undefined;
+  headers.get("x-anticapture-host") ??
+  headers.get("x-forwarded-host") ??
+  headers.get("host") ??
+  undefined;
 
 function createAuth(config: AuthConfig, domain: string) {
   const plugins: BetterAuthPlugin[] = [
