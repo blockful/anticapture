@@ -42,3 +42,12 @@ pnpm --filter @anticapture/user-api db:migrate
 
 See `.env.example`. Required: `DATABASE_URL`, `BETTER_AUTH_SECRET`,
 `BETTER_AUTH_URL`, `AUTH_SIWE_DOMAINS`, `TRUSTED_ORIGINS`, `RPC_URL`.
+
+> `BETTER_AUTH_URL` is the dashboard **origin** (e.g. `https://dev.anticapture.com`),
+> not the `/api/user` proxy path. better-auth mounts at `baseURL` + `basePath`
+> (`/api/auth`), and the proxy strips `/api/user` before forwarding — so a path
+> in `BETTER_AUTH_URL` makes better-auth 404 every route.
+
+Behind a managed edge (e.g. Railway) the dashboard proxy's host arrives as
+`x-anticapture-host` (the edge overwrites `x-forwarded-*`); `PORT` must match
+the generated domain's target port (4003).
