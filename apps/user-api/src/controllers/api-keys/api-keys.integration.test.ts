@@ -190,7 +190,7 @@ describe("api-keys + Authful brokering integration", () => {
 
     const res = await app.request("/me/api-keys", { headers: authed(cookie) });
     const { items } = (await res.json()) as any;
-    const used = items.find((k: { id: string }) => k.label === "used");
+    const used = items.find((k: { label: string }) => k.label === "used");
     expect(used.lastUsedAt).toBe("2026-01-02T03:04:05.000Z");
   });
 
