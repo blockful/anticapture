@@ -1,6 +1,6 @@
 "use client";
 
-import { siweClient } from "better-auth/client/plugins";
+import { magicLinkClient, siweClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 // The User API lives behind the same-origin /api/user proxy; better-auth's
@@ -12,7 +12,7 @@ const origin =
 
 export const authClient = createAuthClient({
   baseURL: `${origin}/api/user`,
-  plugins: [siweClient()],
+  plugins: [siweClient(), magicLinkClient()],
 });
 
 export const { useSession, signOut } = authClient;
