@@ -39,11 +39,14 @@ const envSchema = z
     // RPC endpoint used to verify EIP-1271 / smart-contract-wallet signatures.
     RPC_URL: z.string().url(),
 
-    // Deferred v1 additions (Google OAuth, magic link). Optional so the service
-    // boots with SIWE-only until these are wired.
+    // Optional auth methods — each stays disabled until its config is present,
+    // so the service boots SIWE-only out of the box.
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
+    // Magic link: enabled when RESEND_API_KEY is set. RESEND_FROM_EMAIL
+    // defaults to Resend's sandbox sender for local/dev.
     RESEND_API_KEY: z.string().optional(),
+    RESEND_FROM_EMAIL: z.string().default("onboarding@resend.dev"),
   })
   .superRefine((data, ctx) => {
     if (Boolean(data.GOOGLE_CLIENT_ID) !== Boolean(data.GOOGLE_CLIENT_SECRET)) {

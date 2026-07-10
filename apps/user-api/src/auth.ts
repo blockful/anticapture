@@ -1,7 +1,7 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, type BetterAuthPlugin } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { generateRandomString } from "better-auth/crypto";
-import { siwe } from "better-auth/plugins";
+import { magicLink, siwe } from "better-auth/plugins";
 
 import type { UserApiDrizzle } from "@/database/types";
 
@@ -11,6 +11,11 @@ export type VerifySiweMessage = (params: {
   address: string;
   chainId: number;
 }) => Promise<boolean>;
+
+export type SendMagicLink = (params: {
+  email: string;
+  url: string;
+}) => Promise<void>;
 
 export type AuthConfig = {
   db: UserApiDrizzle;
@@ -27,6 +32,13 @@ export type AuthConfig = {
   domains: string[];
   /** Signature verifier — injected so tests can verify EOAs offline. */
   verifyMessage: VerifySiweMessage;
+  /**
+   * Enables magic-link sign-in when provided (email delivery is injected).
+   * Omitted (e.g. no email provider configured) leaves the method disabled.
+   */
+  magicLink?: SendMagicLink;
+  /** Enables Google OAuth when the credentials are provided. */
+  google?: { clientId: string; clientSecret: string };
 };
 
 export type AuthResolver = {
@@ -51,31 +63,52 @@ export const forwardedHost = (
   headers.get("x-forwarded-host") ?? headers.get("host") ?? undefined;
 
 function createAuth(config: AuthConfig, domain: string) {
+  const plugins: BetterAuthPlugin[] = [
+    siwe({
+      domain,
+      // Wallet-only users have no email; better-auth stores a placeholder.
+      anonymous: true,
+      getNonce: async () => generateRandomString(32, "a-z", "A-Z", "0-9"),
+      verifyMessage: async ({ message, signature, address, chainId }) => {
+        try {
+          return await config.verifyMessage({
+            message,
+            signature,
+            address,
+            chainId,
+          });
+        } catch {
+          return false;
+        }
+      },
+    }),
+  ];
+
+  if (config.magicLink) {
+    const send = config.magicLink;
+    plugins.push(
+      magicLink({ sendMagicLink: ({ email, url }) => send({ email, url }) }),
+    );
+  }
+
   return betterAuth({
     database: drizzleAdapter(config.db, { provider: "pg" }),
     secret: config.secret,
     baseURL: config.baseURL,
     trustedOrigins: config.trustedOrigins,
-    plugins: [
-      siwe({
-        domain,
-        // Wallet-only users have no email; better-auth stores a placeholder.
-        anonymous: true,
-        getNonce: async () => generateRandomString(32, "a-z", "A-Z", "0-9"),
-        verifyMessage: async ({ message, signature, address, chainId }) => {
-          try {
-            return await config.verifyMessage({
-              message,
-              signature,
-              address,
-              chainId,
-            });
-          } catch {
-            return false;
-          }
-        },
-      }),
-    ],
+    // No account linking in v1 (product decision): a wallet login and a
+    // Google/email login are deliberately separate users.
+    ...(config.google
+      ? {
+          socialProviders: {
+            google: {
+              clientId: config.google.clientId,
+              clientSecret: config.google.clientSecret,
+            },
+          },
+        }
+      : {}),
+    plugins,
   });
 }
 

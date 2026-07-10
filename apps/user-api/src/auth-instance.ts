@@ -3,6 +3,7 @@ import { mainnet } from "viem/chains";
 
 import { createAuthResolver } from "@/auth";
 import { db } from "@/database";
+import { createMagicLinkSender } from "@/email/magic-link";
 import { env } from "@/env";
 
 // Verifies both EOA signatures and EIP-1271 / ERC-6492 smart-contract wallets
@@ -14,6 +15,13 @@ const publicClient = createPublicClient({
   chain: mainnet,
   transport: http(env.RPC_URL),
 });
+
+// Each optional method is wired only when its config is present, so the
+// service runs SIWE-only until Resend / Google credentials are set.
+const google =
+  env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+    ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }
+    : undefined;
 
 export const authResolver = createAuthResolver({
   db,
@@ -27,6 +35,8 @@ export const authResolver = createAuthResolver({
       message,
       signature: signature as `0x${string}`,
     }),
+  magicLink: createMagicLinkSender(env.RESEND_API_KEY, env.RESEND_FROM_EMAIL),
+  google,
 });
 
 // The better-auth CLI introspects this export to generate the schema (which
