@@ -27,7 +27,8 @@ PORT_GATEFUL=4001
 PORT_DASHBOARD=3000
 PORT_ADDRESS_ENRICHMENT=3001
 PORT_RELAYER=3002
-PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT" "$PORT_RELAYER")
+PORT_USER_API=4003
+PORTS=("$PORT_INDEXER" "$PORT_API" "$PORT_GATEFUL" "$PORT_DASHBOARD" "$PORT_ADDRESS_ENRICHMENT" "$PORT_RELAYER" "$PORT_USER_API")
 
 # DAO name → short ID mapping (used to run the API)
 dao_id_for() {
@@ -58,6 +59,7 @@ C_CODEGEN="\033[33m"           # yellow
 C_DASHBOARD="\033[32m"         # green
 C_ADDRESS_ENRICHMENT="\033[96m" # bright cyan
 C_RELAYER="\033[93m"           # bright yellow
+C_USER_API="\033[95m"          # bright magenta
 C_SCRIPT="\033[90m"            # gray
 C_RESET="\033[0m"
 
@@ -247,6 +249,22 @@ else
   log "Skipping optional Address Enrichment (Railway CLI/service unavailable)"
 fi
 
+# 4. User API (optional; identity + drafts + API keys). Needs its own Postgres,
+# supplied by the Railway dev env — so it runs like enrichment: via `railway
+# run`, skipped when the service/CLI isn't available. When up, the dashboard's
+# /api/user proxy targets it; when skipped, auth/drafts UIs are simply inert.
+USER_API_AVAILABLE=false
+if railway_service_available "user-api"; then
+  log "Starting optional User API..."
+  run_with_prefix "$C_USER_API" "👤 user-api" "" "" railway run -e dev -s user-api pnpm user-api dev &
+  if wait_for_optional_port "$PORT_USER_API" "User API"; then
+    USER_API_AVAILABLE=true
+    export USER_API_URL="http://localhost:${PORT_USER_API}"
+  fi
+else
+  log "Skipping optional User API (Railway CLI/service unavailable)"
+fi
+
 # Watchdog: when API recovers after being down, touch the sentinel file so tsx reloads the gateful
 if [ "$RUN_API" = true ]; then
   (
@@ -294,6 +312,11 @@ if [ "$ADDRESS_ENRICHMENT_AVAILABLE" = true ]; then
   printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} http://localhost:${PORT_ADDRESS_ENRICHMENT}\n"
 else
   printf "  ${C_ADDRESS_ENRICHMENT}💰 Enrichment${C_RESET} skipped (optional)\n"
+fi
+if [ "$USER_API_AVAILABLE" = true ]; then
+  printf "  ${C_USER_API}👤 User API${C_RESET}  http://localhost:${PORT_USER_API}\n"
+else
+  printf "  ${C_USER_API}👤 User API${C_RESET}  skipped (optional)\n"
 fi
 printf "  ${C_GATEFUL}🚪 Gateful${C_RESET}   http://localhost:${PORT_GATEFUL}\n"
 printf "  ${C_RELAYER}📡 Relayer${C_RESET}   http://localhost:${PORT_RELAYER}\n"
