@@ -22,7 +22,11 @@ export const useAuthMethods = (enabled = true) => {
     queryKey: ["user-api", "auth-methods"],
     queryFn: async (): Promise<AuthMethods> => {
       const res = await fetch("/api/user/auth/methods");
-      if (!res.ok) return FALLBACK;
+      // Throw (don't resolve the fallback) so a transient 5xx — e.g. the
+      // user-api mid-deploy — isn't cached as fresh "wallet-only" data for
+      // the whole SPA session; the query stays refetchable and the
+      // `query.data ?? FALLBACK` below keeps the UX fail-closed meanwhile.
+      if (!res.ok) throw new Error(`auth methods responded ${res.status}`);
       return (await res.json()) as AuthMethods;
     },
     enabled,

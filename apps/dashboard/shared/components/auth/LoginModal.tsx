@@ -67,6 +67,17 @@ export const LoginModal = ({
     return () => clearTimeout(timer);
   }, [connectModalOpen, isConnected, siweStatus, siweReset]);
 
+  // A previous attempt can settle after the modal closed and was reset (e.g.
+  // a wallet prompt rejected late), leaving a stale error/status behind —
+  // start every (re)open clean. `open` is the provider prop, which stays true
+  // during the RainbowKit hand-off, so this never clobbers a live ceremony.
+  const { reset: emailReset } = emailLogin;
+  useEffect(() => {
+    if (!open) return;
+    siweReset();
+    emailReset();
+  }, [open, siweReset, emailReset]);
+
   const handleOpenChange = (next: boolean) => {
     if (!next) {
       setView("options");
