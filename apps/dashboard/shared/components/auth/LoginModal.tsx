@@ -23,10 +23,10 @@ export type LoginModalProps = {
   onOpenChange: (open: boolean) => void;
   /** Whitelabel deployments offer wallet sign-in only (no email/Google). */
   isWhitelabel?: boolean;
-  onAuthenticated?: () => void;
   /**
-   * Route to land on after sign-in. SIWE navigates via onAuthenticated;
-   * the redirect-based methods (magic link, Google) get it as callbackURL.
+   * Route to land on after sign-in. SIWE completion is handled by
+   * LoginProvider's session watcher (close + navigate); the redirect-based
+   * methods (magic link, Google) get this as callbackURL.
    */
   redirectTo?: string | null;
 };
@@ -39,7 +39,6 @@ export const LoginModal = ({
   open,
   onOpenChange,
   isWhitelabel = false,
-  onAuthenticated,
   redirectTo,
 }: LoginModalProps) => {
   const { openConnectModal, connectModalOpen } = useConnectModal();
@@ -47,10 +46,7 @@ export const LoginModal = ({
   const [view, setView] = useState<View>("options");
   const [email, setEmail] = useState("");
 
-  const siwe = useSiweLogin(() => {
-    onOpenChange(false);
-    onAuthenticated?.();
-  });
+  const siwe = useSiweLogin();
   const emailLogin = useEmailLogin();
 
   // The server reports which methods its deployment actually serves (magic
