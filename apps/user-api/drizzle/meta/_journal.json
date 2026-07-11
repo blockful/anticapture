@@ -15,6 +15,13 @@
       "when": 1783638916278,
       "tag": "0001_needy_molly_hayes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783685472681,
+      "tag": "0002_ordinary_lord_tyger",
+      "breakpoints": true
     }
   ]
 }

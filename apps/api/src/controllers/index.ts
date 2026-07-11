@@ -1,5 +1,4 @@
 export * from "./account-balance";
-export * from "./draft-proposals";
 export * from "./delegation-percentage";
 export * from "./governance-activity";
 export * from "./health";

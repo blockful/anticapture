@@ -23,6 +23,7 @@ import { TokensService, hashToken } from "@/services/tokens";
 
 const ADMIN_KEY = "test-admin-key-0123456789";
 const INTERNAL_KEY = "test-internal-key-0123456789";
+const PROVISIONING_KEY = "test-provisioning-key-0123456789";
 
 const adminHeaders = {
   Authorization: `Bearer ${ADMIN_KEY}`,
@@ -30,6 +31,10 @@ const adminHeaders = {
 };
 const internalHeaders = {
   Authorization: `Bearer ${INTERNAL_KEY}`,
+  "Content-Type": "application/json",
+};
+const provisioningHeaders = {
+  Authorization: `Bearer ${PROVISIONING_KEY}`,
   "Content-Type": "application/json",
 };
 
@@ -50,6 +55,7 @@ describe("authful app", () => {
       db,
       adminApiKey: ADMIN_KEY,
       internalApiKey: INTERNAL_KEY,
+      provisioningApiKey: PROVISIONING_KEY,
     });
   });
 
@@ -105,6 +111,18 @@ describe("authful app", () => {
       expect(res.status).toBe(200);
     });
 
+    it("rejects an unknown bearer token", async () => {
+      const res = await app.request("/tokens", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer not-a-real-key-000000000000",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tenant: "user:1", name: "x" }),
+      });
+      expect(res.status).toBe(401);
+    });
+
     it("returns 503 when the DB probe fails", async () => {
       const failingDb = {
         execute: () => Promise.reject(new Error("db down")),
@@ -123,6 +141,88 @@ describe("authful app", () => {
       const res = await app.request("/metrics");
       expect(res.status).toBe(200);
       expect(res.headers.get("content-type")).toContain("text/plain");
+    });
+  });
+
+  describe("provisioning scope", () => {
+    const provMint = (body: Record<string, unknown>) =>
+      app.request("/tokens", {
+        method: "POST",
+        headers: provisioningHeaders,
+        body: JSON.stringify(body),
+      });
+
+    it("mints a user:* token", async () => {
+      const res = await provMint({ tenant: "user:abc", name: "my-agent" });
+      expect(res.status).toBe(201);
+      const body = (await res.json()) as MintResponse;
+      expect(body.tenant).toBe("user:abc");
+      expect(body.token).toMatch(/^act_/);
+    });
+
+    it("cannot mint a first-party (non-user) tenant", async () => {
+      const res = await provMint({ tenant: "uniswap", name: "sneaky" });
+      expect(res.status).toBe(403);
+      const before = await app.request("/tokens", { headers: adminHeaders });
+      const { items } = (await before.json()) as { items: unknown[] };
+      expect(items).toHaveLength(0);
+    });
+
+    it("cannot list all tokens (no tenant filter)", async () => {
+      const res = await app.request("/tokens", {
+        headers: provisioningHeaders,
+      });
+      expect(res.status).toBe(403);
+    });
+
+    it("cannot list a non-user tenant", async () => {
+      const res = await app.request("/tokens?tenant=uniswap", {
+        headers: provisioningHeaders,
+      });
+      expect(res.status).toBe(403);
+    });
+
+    it("lists only its own user:* tenant", async () => {
+      await provMint({ tenant: "user:abc", name: "one" });
+      await provMint({ tenant: "user:abc", name: "two" });
+      await mint({ tenant: "uniswap" }); // must not leak into the result
+
+      const res = await app.request("/tokens?tenant=user:abc", {
+        headers: provisioningHeaders,
+      });
+      expect(res.status).toBe(200);
+      const { items } = (await res.json()) as {
+        items: { tenant: string; lastUsedAt: string | null }[];
+      };
+      expect(items).toHaveLength(2);
+      expect(items.every((t) => t.tenant === "user:abc")).toBe(true);
+    });
+
+    it("revokes its own user:* token", async () => {
+      const minted = (await (
+        await provMint({ tenant: "user:abc", name: "temp" })
+      ).json()) as MintResponse;
+      const res = await app.request(`/tokens/${minted.id}`, {
+        method: "DELETE",
+        headers: provisioningHeaders,
+      });
+      expect(res.status).toBe(204);
+    });
+
+    it("cannot revoke a first-party token — 404, not 403 (no oracle)", async () => {
+      const firstParty = await mint({ tenant: "uniswap" });
+      const res = await app.request(`/tokens/${firstParty.id}`, {
+        method: "DELETE",
+        headers: provisioningHeaders,
+      });
+      expect(res.status).toBe(404);
+
+      // The token is untouched — admin can still see it active.
+      const list = await app.request("/tokens", { headers: adminHeaders });
+      const { items } = (await list.json()) as {
+        items: { id: string; revokedAt: string | null }[];
+      };
+      expect(items.find((t) => t.id === firstParty.id)?.revokedAt).toBeNull();
     });
   });
 

@@ -12,6 +12,14 @@ export class TokensRepository {
     return this.db.select().from(tokens).orderBy(desc(tokens.createdAt));
   }
 
+  async listByTenant(tenant: string): Promise<DBToken[]> {
+    return this.db
+      .select()
+      .from(tokens)
+      .where(eq(tokens.tenant, tenant))
+      .orderBy(desc(tokens.createdAt));
+  }
+
   async create(token: NewToken): Promise<DBToken> {
     const [created] = await this.db.insert(tokens).values(token).returning();
     return created!;
@@ -21,6 +29,10 @@ export class TokensRepository {
     return this.db.query.tokens.findFirst({
       where: and(eq(tokens.tokenHash, tokenHash), isNull(tokens.revokedAt)),
     });
+  }
+
+  async findById(id: string): Promise<DBToken | undefined> {
+    return this.db.query.tokens.findFirst({ where: eq(tokens.id, id) });
   }
 
   /** Sets revoked_at; idempotent. Returns false when the id doesn't exist. */
