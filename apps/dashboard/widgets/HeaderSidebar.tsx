@@ -23,7 +23,7 @@ type HeaderItem = {
 };
 
 export const HeaderSidebar = () => {
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession();
   const { openLogin } = useLogin();
 
   const headerItems = useMemo<HeaderItem[]>(
@@ -75,9 +75,12 @@ export const HeaderSidebar = () => {
                 onClick={
                   item.requiresAuth
                     ? (e) => {
-                        // Gated page: don't navigate signed-out — open the
-                        // sign-in modal; sign-in then lands on the page.
-                        if (!isPending && !session) {
+                        // Gated page: only a present session navigates.
+                        // Signed-out (or still resolving) opens the sign-in
+                        // modal instead; if the session resolves signed-in a
+                        // moment later, LoginProvider closes the modal and
+                        // completes the navigation via redirectTo.
+                        if (!session) {
                           e.preventDefault();
                           openLogin({ redirectTo: `/${item.page}` });
                         }

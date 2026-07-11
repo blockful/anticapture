@@ -40,7 +40,7 @@ export const HeaderMobile = ({
 }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession();
   const { openLogin } = useLogin();
 
   const menuItems = useMemo<MenuItem[]>(
@@ -183,9 +183,12 @@ export const HeaderMobile = ({
                 label={item.label}
                 isGlobal={item.isGlobal}
                 onClick={(e) => {
-                  // Gated page: don't navigate signed-out — open the sign-in
-                  // modal; sign-in then lands on the page.
-                  if (item.requiresAuth && !isPending && !session) {
+                  // Gated page: only a present session navigates. Signed-out
+                  // (or still resolving) opens the sign-in modal instead; if
+                  // the session resolves signed-in a moment later,
+                  // LoginProvider closes the modal and completes the
+                  // navigation via redirectTo.
+                  if (item.requiresAuth && !session) {
                     e.preventDefault();
                     setIsMenuOpen(false);
                     openLogin({ redirectTo: `/${item.page}` });
