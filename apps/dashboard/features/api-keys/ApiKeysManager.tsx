@@ -54,14 +54,16 @@ export const ApiKeysManager = () => {
     revoke.mutate(toRevoke.id, { onSuccess: () => setToRevoke(null) });
   };
 
-  // Signed-out visitors get the sign-in modal right away, over the page —
-  // no interstitial screen. Once only, so dismissing it isn't a fight; any
-  // gated action (Create key) re-opens it.
+  // Signed-out arrivals get the sign-in modal right away, over the page —
+  // no interstitial screen. The gate is consumed on the FIRST session
+  // resolution either way, so it neither re-pops after a dismissal nor when
+  // the user signs out while on the page; gated actions (Create key)
+  // re-open it.
   const autoOpenedLogin = useRef(false);
   useEffect(() => {
-    if (isPending || session || autoOpenedLogin.current) return;
+    if (isPending || autoOpenedLogin.current) return;
     autoOpenedLogin.current = true;
-    openLogin();
+    if (!session) openLogin();
   }, [isPending, session, openLogin]);
 
   return (
