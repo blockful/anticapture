@@ -57,7 +57,7 @@ export const ConnectWallet = ({
               if (!connected) {
                 return (
                   <Button
-                    onClick={openLogin}
+                    onClick={() => openLogin()}
                     type="button"
                     variant="outline"
                     className={cn(className, "text-primary!")}

@@ -2,7 +2,7 @@
 
 import { BarChart4, Bell, Code } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, type ElementType } from "react";
 
 import {
   ButtonMainNav,
@@ -10,9 +10,23 @@ import {
   BottomNavigationButtons,
 } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
+import { useSession } from "@/shared/services/auth/client";
+import { useLogin } from "@/shared/services/auth/LoginProvider";
+
+type HeaderItem = {
+  page: string;
+  label: string;
+  icon: ElementType;
+  isGlobal: boolean;
+  /** Login-gated page: signed-out clicks open the sign-in modal instead. */
+  requiresAuth?: boolean;
+};
 
 export const HeaderSidebar = () => {
-  const headerItems = useMemo(
+  const { data: session, isPending } = useSession();
+  const { openLogin } = useLogin();
+
+  const headerItems = useMemo<HeaderItem[]>(
     () => [
       {
         page: "/",
@@ -31,6 +45,7 @@ export const HeaderSidebar = () => {
         label: "API",
         icon: Code,
         isGlobal: true,
+        requiresAuth: true,
       },
     ],
     [],
@@ -57,6 +72,18 @@ export const HeaderSidebar = () => {
                 icon={item.icon}
                 label={item.label}
                 isGlobal={item.isGlobal}
+                onClick={
+                  item.requiresAuth
+                    ? (e) => {
+                        // Gated page: don't navigate signed-out — open the
+                        // sign-in modal; sign-in then lands on the page.
+                        if (!isPending && !session) {
+                          e.preventDefault();
+                          openLogin({ redirectTo: `/${item.page}` });
+                        }
+                      }
+                    : undefined
+                }
               />
             ))}
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -11,9 +12,14 @@ import {
 
 import { LoginModal } from "@/shared/components/auth/LoginModal";
 
+export type OpenLoginOptions = {
+  /** Route to navigate to once the user authenticates. */
+  redirectTo?: string;
+};
+
 type LoginContextValue = {
   /** Opens the sign-in modal. */
-  openLogin: () => void;
+  openLogin: (options?: OpenLoginOptions) => void;
   /** Closes the sign-in modal. */
   closeLogin: () => void;
   isOpen: boolean;
@@ -28,10 +34,26 @@ export function LoginProvider({
   isWhitelabel?: boolean;
   children: ReactNode;
 }) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  // Where to land after sign-in (login-gated pages pass their own route).
+  // Cleared when the modal is dismissed without authenticating.
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
-  const openLogin = useCallback(() => setIsOpen(true), []);
+  const openLogin = useCallback((options?: OpenLoginOptions) => {
+    setRedirectTo(options?.redirectTo ?? null);
+    setIsOpen(true);
+  }, []);
   const closeLogin = useCallback(() => setIsOpen(false), []);
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsOpen(open);
+    if (!open) setRedirectTo(null);
+  }, []);
+
+  const handleAuthenticated = useCallback(() => {
+    if (redirectTo) router.push(redirectTo);
+  }, [redirectTo, router]);
 
   const value = useMemo(
     () => ({ openLogin, closeLogin, isOpen }),
@@ -43,8 +65,10 @@ export function LoginProvider({
       {children}
       <LoginModal
         open={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={handleOpenChange}
         isWhitelabel={isWhitelabel}
+        onAuthenticated={handleAuthenticated}
+        redirectTo={redirectTo}
       />
     </LoginContext.Provider>
   );

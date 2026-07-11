@@ -1,6 +1,7 @@
 "use client";
 
 import { Code, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/shared/components";
@@ -18,6 +19,7 @@ import { SaveApiKeyModal } from "./components/SaveApiKeyModal";
 import { useApiKeys } from "./hooks/useApiKeys";
 
 export const ApiKeysManager = () => {
+  const router = useRouter();
   const { data: session, isPending } = useSession();
   const { openLogin } = useLogin();
   const isAuthed = !isPending && !!session;
@@ -54,17 +56,21 @@ export const ApiKeysManager = () => {
     revoke.mutate(toRevoke.id, { onSuccess: () => setToRevoke(null) });
   };
 
-  // Signed-out arrivals get the sign-in modal right away, over the page —
-  // no interstitial screen. The gate is consumed on the FIRST session
-  // resolution either way, so it neither re-pops after a dismissal nor when
-  // the user signs out while on the page; gated actions (Create key)
-  // re-open it.
-  const autoOpenedLogin = useRef(false);
+  // The page is login-gated: it only renders with a session. A signed-out
+  // arrival is bounced home with the sign-in modal open, and signing in
+  // navigates back here (redirectTo). Signing out while on the page just
+  // bounces home, without re-prompting.
+  const wasAuthed = useRef(false);
   useEffect(() => {
-    if (isPending || autoOpenedLogin.current) return;
-    autoOpenedLogin.current = true;
-    if (!session) openLogin();
-  }, [isPending, session, openLogin]);
+    if (session) wasAuthed.current = true;
+  }, [session]);
+  useEffect(() => {
+    if (isPending || session) return;
+    if (!wasAuthed.current) openLogin({ redirectTo: "/api-keys" });
+    router.replace("/");
+  }, [isPending, session, openLogin, router]);
+
+  if (!isAuthed) return null;
 
   return (
     <div className="flex w-full flex-col gap-6 p-5">
@@ -79,7 +85,7 @@ export const ApiKeysManager = () => {
             variant="primary"
             size="md"
             className="shrink-0"
-            onClick={() => (isAuthed ? setCreateOpen(true) : openLogin())}
+            onClick={() => setCreateOpen(true)}
           >
             <Plus className="size-3.5" />
             Create key

@@ -13,11 +13,23 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, type ElementType } from "react";
 
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
+import { useSession } from "@/shared/services/auth/client";
+import { useLogin } from "@/shared/services/auth/LoginProvider";
 import { cn } from "@/shared/utils/";
+
+type MenuItem = {
+  page: string;
+  label: string;
+  icon: ElementType;
+  isGlobal: boolean;
+  /** Login-gated page: signed-out clicks open the sign-in modal instead. */
+  requiresAuth?: boolean;
+  onClick?: () => void;
+};
 
 export const HeaderMobile = ({
   className,
@@ -28,8 +40,10 @@ export const HeaderMobile = ({
 }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const { data: session, isPending } = useSession();
+  const { openLogin } = useLogin();
 
-  const menuItems = useMemo(
+  const menuItems = useMemo<MenuItem[]>(
     () => [
       {
         page: "/",
@@ -51,6 +65,7 @@ export const HeaderMobile = ({
         isGlobal: true,
         label: "API",
         icon: Code,
+        requiresAuth: true,
       },
     ],
     [],
@@ -167,7 +182,17 @@ export const HeaderMobile = ({
                 icon={item.icon}
                 label={item.label}
                 isGlobal={item.isGlobal}
-                onClick={item.onClick}
+                onClick={(e) => {
+                  // Gated page: don't navigate signed-out — open the sign-in
+                  // modal; sign-in then lands on the page.
+                  if (item.requiresAuth && !isPending && !session) {
+                    e.preventDefault();
+                    setIsMenuOpen(false);
+                    openLogin({ redirectTo: `/${item.page}` });
+                    return;
+                  }
+                  item.onClick?.();
+                }}
               />
             ))}
 

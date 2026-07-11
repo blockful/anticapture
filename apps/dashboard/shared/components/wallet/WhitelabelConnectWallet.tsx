@@ -54,7 +54,7 @@ export const WhitelabelConnectWallet = ({
           >
             {!connected ? (
               <Button
-                onClick={openLogin}
+                onClick={() => openLogin()}
                 type="button"
                 variant="outline"
                 size="md"
