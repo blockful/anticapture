@@ -22,8 +22,8 @@ import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadabl
 import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
-import { getDraftProposal } from "@anticapture/client";
-import type { GetDraftProposalPathParamsDaoEnumKey } from "@anticapture/client";
+import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { getDraft } from "@/shared/services/user-api/draftsClient";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
 import { BODY_PLACEHOLDER } from "@/features/create-proposal/constants";
@@ -98,6 +98,7 @@ export const ProposalCreationForm = ({
   const searchParams = useSearchParams();
   const draftId = searchParams?.get("draftId") ?? undefined;
   const { address } = useAccount();
+  const { openLogin } = useLogin();
   const drafts = useDrafts(daoId);
 
   const vp = useProposalVotingPower(daoId, address || zeroAddress);
@@ -150,26 +151,22 @@ export const ProposalCreationForm = ({
     // Guards against an out-of-order response overwriting the form.
     let cancelled = false;
 
-    void getDraftProposal(
-      daoId as GetDraftProposalPathParamsDaoEnumKey,
-      draftId,
-    )
+    void getDraft(draftId)
       .then((shared) => {
         if (cancelled) return;
         hydratedDraftIdRef.current = draftId;
         if (!shared) return;
-        setSharedAuthor(shared.author);
+        setSharedAuthor(shared.authorAddress ?? undefined);
         form.reset({
           title: shared.title,
           discussionUrl: shared.discussionUrl,
           body: shared.body,
           actions: shared.actions.map((a) => toFormAction(a as ProposalAction)),
         });
-        if (address && shared.author.toLowerCase() === address.toLowerCase()) {
-          setCurrentDraftId(draftId);
-        } else {
-          setCurrentDraftId(undefined);
-        }
+        // Ownership is derived server-side from the session (works for
+        // wallet- and email/Google-authored drafts alike), not by comparing
+        // the author against the connected wallet.
+        setCurrentDraftId(shared.isOwner ? draftId : undefined);
         setBodyVersion((v) => v + 1);
         setHydratedDraftId(draftId);
       })
@@ -312,8 +309,10 @@ export const ProposalCreationForm = ({
   ]);
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
-    if (!address) {
-      showCustomToast("Connect a wallet to save drafts", "error");
+    // Saving is session-gated now, not wallet-gated: prompt sign-in when there
+    // is no session (the user may be connected but not authenticated).
+    if (drafts.needsAuth) {
+      openLogin();
       return;
     }
     // Guard against duplicate creates while a save is in flight.
@@ -447,17 +446,11 @@ export const ProposalCreationForm = ({
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
-  // Ownership comes from the viewer's drafts list, so it holds even if the
-  // shared-draft fetch is slow or fails. Verify the cached draft's author
-  // matches the connected wallet — during a wallet switch the previous list is
-  // still exposed, and we must not treat another wallet's draft as owned.
+  // The drafts list is session-scoped (the User API returns only the session
+  // user's drafts), so a draft present in it is owned — no wallet comparison
+  // needed, and it holds for email/Google authors who have no wallet.
   const ownedDraft = draftId ? drafts.getDraft(draftId) : undefined;
-  const ownsDraft = Boolean(
-    ownedDraft &&
-    address &&
-    // Legacy localStorage drafts predate the `author` field and may lack it.
-    ownedDraft.author?.toLowerCase() === address.toLowerCase(),
-  );
+  const ownsDraft = Boolean(ownedDraft);
   const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
   // Editor only for a new proposal or an owned draft (no load-dependent flash).
   const canShowEditor = !draftId || ownsDraft;

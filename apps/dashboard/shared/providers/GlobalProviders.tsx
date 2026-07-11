@@ -10,6 +10,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import { setClientConfig } from "@anticapture/client";
 
+import { LoginProvider } from "@/shared/services/auth/LoginProvider";
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
 
 const queryClient = new QueryClient();
@@ -38,7 +39,9 @@ export const GlobalProviders = ({
               accentColor: "#E66AE9",
             })}
           >
-            <NuqsAdapter>{children}</NuqsAdapter>
+            <LoginProvider isWhitelabel={isWhitelabel}>
+              <NuqsAdapter>{children}</NuqsAdapter>
+            </LoginProvider>
           </RainbowKitProvider>
         </TooltipProvider>
       </QueryClientProvider>
