@@ -21,33 +21,49 @@ export class DraftsService {
   ) {}
 
   /**
-   * Lists the session user's drafts for a DAO. Also adopts migrated rows
-   * whose author wallet belongs to this user (claim-on-first-login) so the
-   * list is complete from the first sign-in after the migration.
+   * Adopts migrated rows (userId NULL) authored by one of this user's
+   * wallets — claim-on-first-touch, so ownership is settled on EVERY entry
+   * point (list, direct share view, update, delete), not just the list.
+   * Idempotent. Returns the user's wallets for callers that need them.
    */
-  async listForUser(userId: string, daoId: string): Promise<DraftRow[]> {
+  private async claimMigrated(userId: string): Promise<string[]> {
     const wallets = await this.repo.findWalletAddresses(userId);
     await this.repo.claimByAddresses(userId, wallets);
+    return wallets;
+  }
+
+  async listForUser(userId: string, daoId: string): Promise<DraftRow[]> {
+    await this.claimMigrated(userId);
     return this.repo.listByUserAndDao(userId, daoId);
   }
 
-  async getById(id: string): Promise<DraftRow | undefined> {
+  /**
+   * Share read. When a session is present, migrated rows are claimed first
+   * so `isOwner` is correct even when this is the user's very first request
+   * after the migration.
+   */
+  async getById(
+    id: string,
+    viewerId: string | null,
+  ): Promise<DraftRow | undefined> {
+    if (viewerId) await this.claimMigrated(viewerId);
     return this.repo.findById(id);
   }
 
   async create(
     input: Omit<CreateDraftInput, "authorAddress">,
   ): Promise<DraftRow> {
-    const current = await this.repo.countByUser(input.userId);
-    if (current >= this.maxDraftsPerUser) {
-      throw new DraftQuotaExceededError(this.maxDraftsPerUser);
-    }
+    // Claimed rows count toward the quota, like everywhere else.
+    const [primaryWallet] = await this.claimMigrated(input.userId);
 
     // Recorded for display on shared drafts (and as the claim key shape used
     // by migrated rows). Email/Google authors simply have none.
-    const [primaryWallet] = await this.repo.findWalletAddresses(input.userId);
-
-    return this.repo.create({ ...input, authorAddress: primaryWallet ?? null });
+    const row = await this.repo.createWithinQuota(
+      { ...input, authorAddress: primaryWallet ?? null },
+      this.maxDraftsPerUser,
+    );
+    if (!row) throw new DraftQuotaExceededError(this.maxDraftsPerUser);
+    return row;
   }
 
   async update(
@@ -55,10 +71,12 @@ export class DraftsService {
     userId: string,
     patch: UpdateDraftInput,
   ): Promise<DraftRow | undefined> {
+    await this.claimMigrated(userId);
     return this.repo.update(id, userId, patch);
   }
 
   async delete(id: string, userId: string): Promise<boolean> {
+    await this.claimMigrated(userId);
     return this.repo.delete(id, userId);
   }
 }

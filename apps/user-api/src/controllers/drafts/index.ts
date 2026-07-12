@@ -101,9 +101,9 @@ export function draftsController(
     }),
     async (c) => {
       const { id } = c.req.valid("param");
-      const draft = await service.getById(id);
-      if (!draft) return c.json({ error: "draft_not_found" }, 404);
       const sessionUser = c.get("sessionUser");
+      const draft = await service.getById(id, sessionUser?.id ?? null);
+      if (!draft) return c.json({ error: "draft_not_found" }, 404);
       return c.json(
         DraftResponseSchema.parse(toResponse(draft, sessionUser?.id ?? null)),
         200,
@@ -123,6 +123,9 @@ export function draftsController(
       middleware: [auth] as const,
       request: {
         body: {
+          // Without this a body-less POST skips JSON validation entirely and
+          // surfaces as a DB 500 instead of the intended 400.
+          required: true,
           content: { "application/json": { schema: CreateDraftBodySchema } },
         },
       },
@@ -168,6 +171,7 @@ export function draftsController(
       request: {
         params: DraftParamsSchema,
         body: {
+          required: true,
           content: { "application/json": { schema: UpdateDraftBodySchema } },
         },
       },

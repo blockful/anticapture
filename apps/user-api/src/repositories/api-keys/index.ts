@@ -1,4 +1,5 @@
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, count, desc, eq, isNull } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 import type { UserApiDrizzle } from "@/database/types";
 import { userApiKeys } from "@/database/schema";
@@ -8,13 +9,39 @@ export type ApiKeyRow = typeof userApiKeys.$inferSelect;
 export class ApiKeysRepository {
   constructor(private readonly db: UserApiDrizzle) {}
 
-  async create(input: {
-    userId: string;
-    authfulTokenId: string;
-    label: string;
-  }): Promise<ApiKeyRow> {
-    const [row] = await this.db.insert(userApiKeys).values(input).returning();
-    return row as ApiKeyRow;
+  /**
+   * Quota-checked insert, serialized per user: the transaction-scoped
+   * advisory lock queues concurrent creates for the same user, so the
+   * active-key count can't be read stale and the cap can't be raced past.
+   * Returns undefined when the quota is already full.
+   */
+  async createWithinQuota(
+    input: {
+      userId: string;
+      authfulTokenId: string;
+      label: string;
+    },
+    maxPerUser: number,
+  ): Promise<ApiKeyRow | undefined> {
+    return this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtext(${input.userId}))`,
+      );
+
+      const [current] = await tx
+        .select({ value: count() })
+        .from(userApiKeys)
+        .where(
+          and(
+            eq(userApiKeys.userId, input.userId),
+            isNull(userApiKeys.revokedAt),
+          ),
+        );
+      if ((current?.value ?? 0) >= maxPerUser) return undefined;
+
+      const [row] = await tx.insert(userApiKeys).values(input).returning();
+      return row as ApiKeyRow;
+    });
   }
 
   /** Active (non-revoked) keys for a user, newest first. */

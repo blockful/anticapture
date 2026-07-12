@@ -52,6 +52,17 @@ See `.env.example`. Required: `DATABASE_URL`, `BETTER_AUTH_SECRET`,
 > proxy strips `/api/user` before forwarding, so the service receives
 > `/api/auth/*` and the origin (no path) is exactly what's needed.
 
+### Browser-facing URLs the service generates
+
+better-auth self-generates some URLs the **browser** must be able to open:
+the Google OAuth `redirect_uri` and the magic-link verify URL, both under
+`{origin}/api/auth/*`. The dashboard serves them via a Next rewrite
+(`/api/auth/:path*` → the `/api/user` proxy), and magic-link emails point at
+the dashboard's `/auth/magic-link` interstitial (which triggers the verify
+from the browser, so mail-pipeline prefetchers can't burn the single-use
+token). The proxy, the rewrite and the interstitial all ship with the
+dashboard PR — this service and that dashboard release deploy together.
+
 Behind a managed edge (e.g. Railway) the dashboard proxy's host arrives as
 `x-anticapture-host` (the edge overwrites `x-forwarded-*`); `PORT` must match
 the generated domain's target port (4003).

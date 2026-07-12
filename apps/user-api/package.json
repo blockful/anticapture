@@ -15,7 +15,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "clean": "rm -rf node_modules *.tsbuildinfo dist",
-    "auth:generate": "better-auth generate --config ./src/auth.ts --output ./src/database/auth-schema.ts --yes",
+    "auth:generate": "better-auth generate --config ./src/auth-instance.ts --output ./src/database/auth-schema.ts --yes",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
