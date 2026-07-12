@@ -28,6 +28,8 @@ export class ApiKeysService {
   ) {}
 
   async create(userId: string, label: string): Promise<CreatedApiKey> {
+    // Fast-path reject at the cap without minting anything. Not
+    // authoritative — the quota is enforced atomically at insert time.
     const current = await this.repo.countActiveByUser(userId);
     if (current >= this.maxKeysPerUser) {
       throw new ApiKeyQuotaExceededError(this.maxKeysPerUser);
@@ -40,15 +42,22 @@ export class ApiKeysService {
     );
 
     try {
-      const key = await this.repo.create({
-        userId,
-        authfulTokenId: minted.id,
-        label,
-      });
+      const key = await this.repo.createWithinQuota(
+        { userId, authfulTokenId: minted.id, label },
+        this.maxKeysPerUser,
+      );
+      if (!key) {
+        // Lost a concurrent race to the last slot — release the minted token.
+        await this.authful.revoke(minted.id).catch(() => undefined);
+        throw new ApiKeyQuotaExceededError(this.maxKeysPerUser);
+      }
       return { key, plaintext: minted.token };
     } catch (err) {
-      // Don't leak an orphan usable token if the ownership write fails.
-      await this.authful.revoke(minted.id).catch(() => undefined);
+      // Don't leak an orphan usable token if the ownership write fails (the
+      // quota branch above has already revoked its own mint).
+      if (!(err instanceof ApiKeyQuotaExceededError)) {
+        await this.authful.revoke(minted.id).catch(() => undefined);
+      }
       throw err;
     }
   }

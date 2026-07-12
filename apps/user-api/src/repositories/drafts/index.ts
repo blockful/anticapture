@@ -39,23 +39,44 @@ export class DraftsRepository {
     return row;
   }
 
-  async create(input: CreateDraftInput): Promise<DraftRow> {
-    const now = Date.now();
-    const [row] = await this.db
-      .insert(drafts)
-      .values({
-        userId: input.userId,
-        authorAddress: input.authorAddress?.toLowerCase() ?? null,
-        daoId: input.daoId,
-        title: input.title,
-        discussionUrl: input.discussionUrl,
-        body: input.body,
-        actions: input.actions,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-    return row as DraftRow;
+  /**
+   * Quota-checked insert, serialized per user: the transaction-scoped
+   * advisory lock queues concurrent creates for the same user, so the count
+   * can't be read stale and the cap can't be raced past. Returns undefined
+   * when the quota is already full.
+   */
+  async createWithinQuota(
+    input: CreateDraftInput,
+    maxPerUser: number,
+  ): Promise<DraftRow | undefined> {
+    return this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtext(${input.userId}))`,
+      );
+
+      const [current] = await tx
+        .select({ value: count() })
+        .from(drafts)
+        .where(eq(drafts.userId, input.userId));
+      if ((current?.value ?? 0) >= maxPerUser) return undefined;
+
+      const now = Date.now();
+      const [row] = await tx
+        .insert(drafts)
+        .values({
+          userId: input.userId,
+          authorAddress: input.authorAddress?.toLowerCase() ?? null,
+          daoId: input.daoId,
+          title: input.title,
+          discussionUrl: input.discussionUrl,
+          body: input.body,
+          actions: input.actions,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+      return row as DraftRow;
+    });
   }
 
   /** Ownership lives in the WHERE clause: a foreign row matches zero rows. */
@@ -78,14 +99,6 @@ export class DraftsRepository {
       .where(and(eq(drafts.id, id), eq(drafts.userId, userId)))
       .returning();
     return rows.length > 0;
-  }
-
-  async countByUser(userId: string): Promise<number> {
-    const [row] = await this.db
-      .select({ value: count() })
-      .from(drafts)
-      .where(eq(drafts.userId, userId));
-    return row?.value ?? 0;
   }
 
   /** Wallets linked to the user by the SIWE plugin, lowercased. */
