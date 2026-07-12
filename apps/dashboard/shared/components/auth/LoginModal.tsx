@@ -31,7 +31,7 @@ export type LoginModalProps = {
   redirectTo?: string | null;
 };
 
-const RESEND_COOLDOWN_SEC = 30;
+const RESEND_COOLDOWN_SEC = 60;
 
 type View = "options" | "email" | "sent";
 
@@ -130,15 +130,17 @@ export const LoginModal = ({
         <div className="flex w-full flex-col gap-4">
           <ModalHeading
             title="Check your inbox"
-            subtitle={
-              <>
-                We sent a sign-in link to
-                <br />
-                <span className="text-primary">{email}</span>
-              </>
-            }
+            subtitle="We sent a sign-in link to"
           />
-          <ResendButton onResend={() => emailLogin.send(email.trim())} />
+          {/* The recipient gets its own bordered row, per the Figma. */}
+          <div className="border-border-contrast bg-surface-default rounded-base text-primary w-full truncate border px-3 py-2.5 text-center text-sm">
+            {email}
+          </div>
+          {/* Same callbackURL as the first send — a resent link must land on
+              the same post-login destination. */}
+          <ResendButton
+            onResend={() => emailLogin.send(email.trim(), callbackURL())}
+          />
           <BackButton onClick={() => setView("options")} />
         </div>
       ) : view === "email" ? (

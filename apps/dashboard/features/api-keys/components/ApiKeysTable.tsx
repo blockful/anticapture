@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Ellipsis } from "lucide-react";
+import { Circle, Ellipsis } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/shared/components";
@@ -21,13 +21,20 @@ const dateFmt = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
-// ⋯ options menu per row — revoke is the only action for now (rotate later).
+// Filled status dot inside the badge, per the Figma (hasIcon).
+const statusDotProps = {
+  icon: Circle,
+  iconClassName: "size-1.5 fill-current",
+} as const;
+
+// ⋯ options menu per row — delete is the only action for now (rotate and
+// disable are follow-ups).
 const KeyOptions = ({
   apiKey,
-  onRevoke,
+  onDelete,
 }: {
   apiKey: UserApiKey;
-  onRevoke: (key: UserApiKey) => void;
+  onDelete: (key: UserApiKey) => void;
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -37,7 +44,9 @@ const KeyOptions = ({
         <Button
           variant="ghost"
           size="sm"
-          className="p-2"
+          // p-2 keeps the desktop density; the min sizes preserve a 44px
+          // touch target on coarse pointers.
+          className="min-h-11 min-w-11 p-2 lg:min-h-0 lg:min-w-0"
           aria-label={`Options for ${apiKey.label}`}
         >
           <Ellipsis className="size-4" />
@@ -48,11 +57,11 @@ const KeyOptions = ({
           type="button"
           onClick={() => {
             setOpen(false);
-            onRevoke(apiKey);
+            onDelete(apiKey);
           }}
           className="text-error hover:bg-surface-contrast rounded-base w-full px-3 py-2 text-left text-sm font-medium transition-colors"
         >
-          Revoke key
+          Delete key
         </button>
       </PopoverContent>
     </Popover>
@@ -61,10 +70,13 @@ const KeyOptions = ({
 
 export const ApiKeysTable = ({
   keys,
-  onRevoke,
+  isError = false,
+  onDelete,
 }: {
   keys: UserApiKey[];
-  onRevoke: (key: UserApiKey) => void;
+  /** Failed fetch — renders the error state instead of "no keys yet". */
+  isError?: boolean;
+  onDelete: (key: UserApiKey) => void;
 }) => {
   const columns = useMemo<ColumnDef<UserApiKey>[]>(
     () => [
@@ -82,9 +94,13 @@ export const ApiKeysTable = ({
         header: "Status",
         cell: ({ row }) =>
           row.original.revokedAt === null ? (
-            <BadgeStatus variant="success">Active</BadgeStatus>
+            <BadgeStatus variant="success" {...statusDotProps}>
+              Active
+            </BadgeStatus>
           ) : (
-            <BadgeStatus variant="dimmed">Disabled</BadgeStatus>
+            <BadgeStatus variant="dimmed" {...statusDotProps}>
+              Disabled
+            </BadgeStatus>
           ),
       },
       {
@@ -112,20 +128,21 @@ export const ApiKeysTable = ({
         header: "",
         cell: ({ row }) =>
           row.original.revokedAt === null && (
-            <KeyOptions apiKey={row.original} onRevoke={onRevoke} />
+            <KeyOptions apiKey={row.original} onDelete={onDelete} />
           ),
         meta: { columnClassName: "w-14" },
       },
     ],
-    [onRevoke],
+    [onDelete],
   );
 
   return (
     <Table
       columns={columns}
       data={keys}
-      emptyTitle="No API keys yet"
-      emptyDescription="Create one to connect your AI agent."
+      error={isError ? new Error("api keys fetch failed") : null}
+      emptyTitle="No key yet"
+      emptyDescription="Create your first key to connect Claude, Cursor, or any AI agent to Anticapture's data."
     />
   );
 };

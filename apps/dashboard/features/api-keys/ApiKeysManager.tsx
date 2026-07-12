@@ -8,6 +8,7 @@ import { Button } from "@/shared/components";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
+import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
 import { useSession } from "@/shared/services/auth/client";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
@@ -23,8 +24,10 @@ export const ApiKeysManager = () => {
   const { data: session, isPending } = useSession();
   const { openLogin } = useLogin();
   const isAuthed = !isPending && !!session;
+  const userId = session?.user.id ?? null;
 
-  const { keys, isLoading, create, revoke } = useApiKeys(isAuthed);
+  const { keys, isLoading, isError, isUnavailable, create, revoke } =
+    useApiKeys(userId);
 
   const [createOpen, setCreateOpen] = useState(false);
   // Holds the just-created plaintext for the one-time reveal modal.
@@ -38,7 +41,15 @@ export const ApiKeysManager = () => {
     {},
   );
   const [lastCreatedId, setLastCreatedId] = useState<string | null>(null);
-  const [toRevoke, setToRevoke] = useState<UserApiKey | null>(null);
+  const [toDelete, setToDelete] = useState<UserApiKey | null>(null);
+
+  // Plaintexts belong to exactly one account: a sign-out or a different user
+  // signing in must never inherit (or copy) the previous user's tokens.
+  useEffect(() => {
+    setSessionTokens({});
+    setLastCreatedId(null);
+    setCreated(null);
+  }, [userId]);
 
   const handleCreate = (label: string) => {
     create.mutate(label, {
@@ -51,9 +62,9 @@ export const ApiKeysManager = () => {
     });
   };
 
-  const handleRevoke = () => {
-    if (!toRevoke) return;
-    revoke.mutate(toRevoke.id, { onSuccess: () => setToRevoke(null) });
+  const handleDelete = () => {
+    if (!toDelete) return;
+    revoke.mutate(toDelete.id, { onSuccess: () => setToDelete(null) });
   };
 
   // The page is login-gated: it only renders with a session. A signed-out
@@ -71,6 +82,22 @@ export const ApiKeysManager = () => {
   }, [isPending, session, openLogin, router]);
 
   if (!isAuthed) return null;
+
+  // A deployment without Authful provisioning has no API-key surface —
+  // showing working-looking controls that can never succeed would be worse.
+  if (isUnavailable) {
+    return (
+      <div className="flex w-full flex-col items-center gap-2 py-16 text-center">
+        <Code className="text-secondary size-8" />
+        <h4 className="text-primary text-lg font-medium">
+          API access isn&apos;t enabled here
+        </h4>
+        <p className="text-secondary max-w-md text-sm">
+          This deployment doesn&apos;t serve self-service API keys.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full flex-col gap-6 p-5">
@@ -93,9 +120,13 @@ export const ApiKeysManager = () => {
         </div>
 
         {isLoading ? (
-          <p className="text-secondary text-sm">Loading…</p>
+          <div className="flex flex-col gap-1">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-13 w-full" />
+            <Skeleton className="h-13 w-full" />
+          </div>
         ) : (
-          <ApiKeysTable keys={keys} onRevoke={setToRevoke} />
+          <ApiKeysTable keys={keys} isError={isError} onDelete={setToDelete} />
         )}
       </div>
 
@@ -124,19 +155,19 @@ export const ApiKeysManager = () => {
       )}
 
       <Modal
-        open={!!toRevoke}
-        onOpenChange={(open) => !open && setToRevoke(null)}
-        title="Revoke API key"
+        open={!!toDelete}
+        onOpenChange={(open) => !open && setToDelete(null)}
+        title="Delete API key?"
         description={
-          toRevoke
-            ? `This permanently revokes "${toRevoke.label}". Any agent using it stops working right away. This can't be undone.`
+          toDelete
+            ? `This permanently deletes "${toDelete.label}". Any agent using it stops working right away. This can't be undone.`
             : ""
         }
-        confirmLabel="Revoke"
+        confirmLabel="Delete key"
         cancelLabel="Cancel"
         confirmVariant="destructive"
         isConfirmLoading={revoke.isPending}
-        onConfirm={handleRevoke}
+        onConfirm={handleDelete}
       >
         <div className="p-4" />
       </Modal>

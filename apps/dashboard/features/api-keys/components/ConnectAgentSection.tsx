@@ -16,14 +16,32 @@ import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
 const MCP_URL = "https://mcp.anticapture.com/v1";
 
-// Per-client install command.
+// Per-client install snippet. The key travels as `Authorization: Bearer` —
+// the only scheme the MCP proxy forwards and Gateful's token middleware
+// accepts. Cursor and Codex have no CLI for remote HTTP servers, so they
+// get their documented config-file snippets instead.
 const CLIENTS = {
   "Claude Code": (key: string) =>
-    `claude mcp add anticapture --transport http ${MCP_URL} --header "X-API-KEY: ${key}"`,
+    `claude mcp add anticapture --transport http ${MCP_URL} --header "Authorization: Bearer ${key}"`,
   Cursor: (key: string) =>
-    `cursor mcp add anticapture --transport http ${MCP_URL} --header "X-API-KEY: ${key}"`,
+    [
+      "// add to ~/.cursor/mcp.json",
+      "{",
+      '  "mcpServers": {',
+      '    "anticapture": {',
+      `      "url": "${MCP_URL}",`,
+      `      "headers": { "Authorization": "Bearer ${key}" }`,
+      "    }",
+      "  }",
+      "}",
+    ].join("\n"),
   Codex: (key: string) =>
-    `codex mcp add anticapture --url ${MCP_URL} --header "X-API-KEY: ${key}"`,
+    [
+      "# add to ~/.codex/config.toml",
+      "[mcp_servers.anticapture]",
+      `url = "${MCP_URL}"`,
+      `http_headers = { "Authorization" = "Bearer ${key}" }`,
+    ].join("\n"),
 } as const;
 
 type ClientName = keyof typeof CLIENTS;
@@ -133,8 +151,8 @@ export const ConnectAgentSection = ({
           )}
         </div>
 
-        <div className="border-border-contrast bg-surface-default flex h-[84px] w-full gap-2.5 border p-3">
-          <code className="text-secondary min-w-0 flex-1 break-all font-mono text-sm leading-5">
+        <div className="border-border-contrast bg-surface-default flex min-h-[84px] w-full gap-2.5 border p-3">
+          <code className="text-secondary min-w-0 flex-1 whitespace-pre-wrap break-words font-mono text-sm leading-5">
             {CLIENTS[client](shownKey)}
           </code>
           <Button

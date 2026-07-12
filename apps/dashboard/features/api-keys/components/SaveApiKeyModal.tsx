@@ -1,10 +1,9 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/shared/components";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
-import { cn } from "@/shared/utils/cn";
 
 /**
  * Shown once, right after a key is created: the plaintext is never retrievable
@@ -40,24 +39,20 @@ export const SaveApiKeyModal = ({
       onConfirm={() => onOpenChange(false)}
     >
       <div className="flex flex-col gap-2 p-4">
-        <div className="border-border-contrast bg-surface-default flex items-start gap-2.5 rounded-md border p-3">
+        <div className="border-border-contrast bg-surface-default flex items-start gap-2.5 border p-3">
           <code className="text-secondary min-w-0 flex-1 break-all font-mono text-sm">
             {token}
           </code>
-          <button
-            type="button"
+          {/* Labeled like ConnectAgentSection's — this is the one-time
+              reveal, where the copy affordance matters most. */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="self-end"
             onClick={copy}
-            aria-label="Copy API key"
-            className={cn(
-              "text-secondary hover:text-primary shrink-0 transition-colors",
-            )}
           >
-            {copied ? (
-              <Check className="text-success size-4" />
-            ) : (
-              <Copy className="size-4" />
-            )}
-          </button>
+            {copied ? "Copied" : "Copy"}
+          </Button>
         </div>
       </div>
     </Modal>

@@ -1,10 +1,11 @@
 "use client";
 
-import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { useAccount, useReadContract } from "wagmi";
+
+import { useLogin } from "@/shared/services/auth/LoginProvider";
 
 import { DelegationModal } from "@/features/holders-and-delegates/delegate/DelegationModal";
 import {
@@ -34,7 +35,7 @@ export const DelegateButton = ({
   variant = "primary",
 }: DelegateButtonProps) => {
   const { address: userAddress, isConnected } = useAccount();
-  const { openConnectModal, connectModalOpen } = useConnectModal();
+  const { openLogin, isOpen: isLoginOpen } = useLogin();
   const [waitingForConnection, setWaitingForConnection] = useState(false);
   const [delegationModalOpen, setDelegationModalOpen] = useState(false);
 
@@ -60,7 +61,9 @@ export const DelegateButton = ({
 
   useEffect(() => {
     if (!waitingForConnection) return;
-    if (connectModalOpen) return;
+    // Sign-in modal still up (including the RainbowKit hand-off, during
+    // which it hides but stays open) — keep waiting.
+    if (isLoginOpen) return;
 
     if (isConnected) {
       setWaitingForConnection(false);
@@ -69,12 +72,15 @@ export const DelegateButton = ({
       setWaitingForConnection(false);
       showCustomToast("Connect your wallet to delegate", "error");
     }
-  }, [connectModalOpen, isConnected, waitingForConnection]);
+  }, [isLoginOpen, isConnected, waitingForConnection]);
 
   const handleClick = () => {
     if (!isConnected) {
+      // Through the sign-in modal (not raw RainbowKit): connecting a wallet
+      // and platform identity are one step, and LoginProvider's coherence
+      // sync would disconnect a wallet that connected without signing in.
       setWaitingForConnection(true);
-      openConnectModal?.();
+      openLogin();
     } else {
       setDelegationModalOpen(true);
     }

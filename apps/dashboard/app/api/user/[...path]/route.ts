@@ -11,6 +11,20 @@ type RouteContext = {
   params: Promise<{ path?: string[] }>;
 };
 
+// Only the browser-facing surface is proxied. The User API also serves
+// internal endpoints (/health, /metrics) that must not become publicly
+// reachable through the dashboard origin.
+const isAllowedPath = (path: string[]) => {
+  const joined = path.join("/");
+  return (
+    joined.startsWith("api/auth/") || // better-auth (sessions, sign-in/out)
+    joined === "auth/methods" || // sign-in capability discovery
+    joined === "drafts" ||
+    joined.startsWith("drafts/") ||
+    joined.startsWith("me/") // per-user resources (API keys)
+  );
+};
+
 const buildUpstreamUrl = (request: NextRequest, path: string[]) => {
   const pathname = path.map(encodeURIComponent).join("/");
   const base = process.env.USER_API_URL;
@@ -59,6 +73,9 @@ const proxyRequest = async (
   method: string,
 ) => {
   const { path = [] } = await params;
+  if (!isAllowedPath(path)) {
+    return Response.json({ error: "not_found" }, { status: 404 });
+  }
 
   const upstreamResponse = await fetch(buildUpstreamUrl(request, path), {
     method,

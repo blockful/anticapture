@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { Modal } from "@/shared/components/design-system/modal/Modal";
+import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
+import { Modal } from "@/shared/components/design-system/modal/Modal";
 
 /**
  * Names a new key, then delegates the one-time plaintext reveal to the caller
@@ -43,17 +44,14 @@ export const CreateApiKeyModal = ({
       onConfirm={() => onCreate(trimmed)}
     >
       <div className="flex flex-col gap-2 p-4">
-        <label
-          htmlFor="api-key-label"
-          className="text-primary text-sm font-medium"
-        >
-          Name
-        </label>
+        <FormLabel htmlFor="api-key-label" isRequired>
+          Name your key
+        </FormLabel>
         <Input
           id="api-key-label"
           value={label}
           maxLength={100}
-          placeholder="my-claude-agent"
+          placeholder="e.g. my-claude-agent"
           onChange={(e) => setLabel(e.target.value)}
         />
       </div>

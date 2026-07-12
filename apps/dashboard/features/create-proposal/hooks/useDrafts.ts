@@ -1,12 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAccount } from "wagmi";
 
 import type {
   ProposalAction,
   ProposalDraft,
 } from "@/features/create-proposal/types";
-import { type NewDraftInput } from "@/features/create-proposal/utils/draftStorage";
+import { draftKey } from "@/features/create-proposal/utils/draftKey";
+import {
+  readDrafts,
+  type NewDraftInput,
+} from "@/features/create-proposal/utils/draftStorage";
 import { useSession } from "@/shared/services/auth/client";
 import {
   createDraft,
@@ -43,10 +48,13 @@ const toDraft = (d: UserApiDraft): ProposalDraft => ({
 
 export const useDrafts = (daoId: string): UseDraftsReturn => {
   const { data: session, isPending: isSessionPending } = useSession();
+  const { address } = useAccount();
   const [drafts, setDrafts] = useState<ProposalDraft[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [retryToken, setRetryToken] = useState(0);
+  // Browser-local upload runs once per dao:address (see below).
+  const drainedLocalRef = useRef<Set<string>>(new Set());
 
   const userId = session?.user.id ?? null;
   const needsAuth = !isSessionPending && !userId;
@@ -55,19 +63,49 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
 
   // Drafts are session-scoped: load them once authenticated. Identity comes
   // from the session cookie, never a request param. Legacy drafts created
-  // before accounts are migrated server-side (DAO DB -> User DB, claimed on
-  // first SIWE login), so there is nothing to migrate from the browser here.
+  // before accounts existed had two homes: the DAO DB (migrated server-side,
+  // claimed on first SIWE login) and this browser's localStorage — those are
+  // drained here on the first authenticated load, then the key is removed.
   useEffect(() => {
-    if (!userId) {
-      setDrafts([]);
-      return;
-    }
+    // Reset immediately so one user's drafts (or a previous session's) never
+    // linger on screen while another session's fetch is in flight.
+    setDrafts([]);
+    if (!userId) return;
 
     let cancelled = false;
     const run = async () => {
       setIsLoading(true);
       setError(false);
       try {
+        const wallet = address ?? null;
+        const localKey = wallet ? `${daoId}:${wallet.toLowerCase()}` : null;
+        const storage =
+          typeof window === "undefined" ? undefined : window.localStorage;
+        const localDrafts =
+          wallet &&
+          localKey &&
+          storage &&
+          !drainedLocalRef.current.has(localKey)
+            ? readDrafts(storage, draftKey(daoId, wallet))
+            : [];
+
+        // Server ids are authoritative now, so local rows upload as new
+        // drafts. The key is cleared only after every upload succeeded;
+        // a failure leaves it for the next attempt.
+        for (const d of localDrafts) {
+          await createDraft({
+            daoId,
+            title: d.title,
+            discussionUrl: d.discussionUrl,
+            body: d.body,
+            actions: d.actions,
+          });
+        }
+        if (wallet && storage && localDrafts.length > 0) {
+          storage.removeItem(draftKey(daoId, wallet));
+        }
+        if (localKey) drainedLocalRef.current.add(localKey);
+
         const { items } = await listDrafts(daoId);
         if (!cancelled) setDrafts(items.map(toDraft));
       } catch {
@@ -81,7 +119,7 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
     return () => {
       cancelled = true;
     };
-  }, [daoId, userId, retryToken]);
+  }, [daoId, userId, address, retryToken]);
 
   const saveDraft = useCallback(
     async (draft: NewDraftInput, id?: string): Promise<string> => {

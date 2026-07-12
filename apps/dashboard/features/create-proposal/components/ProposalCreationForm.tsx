@@ -14,7 +14,6 @@ import {
 import { useAccount } from "wagmi";
 import { formatUnits, zeroAddress } from "viem";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -110,7 +109,6 @@ export const ProposalCreationForm = ({
   } = useProposalThreshold(daoId);
   const publisher = usePublishProposal();
 
-  const { openConnectModal } = useConnectModal();
   const [viewParam, setView] = useQueryState(
     "view",
     parseAsStringEnum<"editor" | "preview">(["editor", "preview"]),
@@ -156,6 +154,13 @@ export const ProposalCreationForm = ({
         if (cancelled) return;
         hydratedDraftIdRef.current = draftId;
         if (!shared) return;
+        // A draft link belongs to one DAO: refuse content prepared for
+        // another one (stale or crafted cross-DAO links would otherwise be
+        // previewed — and publishable — under this route's DAO).
+        if (shared.daoId !== daoId) {
+          showCustomToast("This draft belongs to another DAO", "error");
+          return;
+        }
         setSharedAuthor(shared.authorAddress ?? undefined);
         form.reset({
           title: shared.title,
@@ -231,8 +236,9 @@ export const ProposalCreationForm = ({
     // Persist before sharing when unsaved or dirty, so the link isn't stale.
     let id = currentDraftId;
     if (!id || form.formState.isDirty) {
-      if (!address) {
-        showCustomToast("Connect a wallet to save and share drafts", "error");
+      // Session-gated like Save Draft — email/Google authors have no wallet.
+      if (drafts.needsAuth) {
+        openLogin();
         return;
       }
       // Guard against duplicate creates from rapid clicks (shared with Save Draft).
@@ -285,8 +291,11 @@ export const ProposalCreationForm = ({
 
   const handlePreviewPublish = () => {
     if (!address) {
+      // Through the sign-in modal (not raw RainbowKit): connecting a wallet
+      // and platform identity are one step, and LoginProvider's coherence
+      // sync would disconnect a wallet that connected without signing in.
       setPendingAction("publish");
-      openConnectModal?.();
+      openLogin();
       return;
     }
     handlePublishClick();
