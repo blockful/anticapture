@@ -6,7 +6,9 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 
 import { Button } from "@/shared/components";
+import { SessionAccountButton } from "@/shared/components/auth/SessionAccountButton";
 import { Tooltip } from "@/shared/components/design-system/tooltips";
+import { useSession } from "@/shared/services/auth/client";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
 import { cn } from "@/shared/utils";
 
@@ -25,6 +27,7 @@ export const ConnectWallet = ({
   className?: string;
 }) => {
   const { openLogin } = useLogin();
+  const { data: session } = useSession();
   return (
     <ConnectButton.Custom>
       {({
@@ -55,6 +58,16 @@ export const ConnectWallet = ({
           >
             {(() => {
               if (!connected) {
+                // A platform session without a wallet (magic link / Google):
+                // show the account identity, not a connect prompt.
+                if (session) {
+                  return (
+                    <SessionAccountButton
+                      user={session.user}
+                      className={className}
+                    />
+                  );
+                }
                 return (
                   <Button
                     onClick={() => openLogin()}
