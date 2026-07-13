@@ -80,6 +80,9 @@ export function apiKeysController(
       middleware: [auth] as const,
       request: {
         body: {
+          // Without this a body-less POST skips JSON validation entirely and
+          // surfaces as a 500 instead of the intended 400.
+          required: true,
           content: { "application/json": { schema: CreateApiKeyBodySchema } },
         },
       },
