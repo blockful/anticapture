@@ -14,7 +14,9 @@ import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
 import { cn } from "@/shared/utils/cn";
 import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
-const MCP_URL = "https://mcp.anticapture.com/v1";
+// The deployed proxy exposes the Streamable HTTP MCP server under /mcp
+// (infra/proxy/default.conf.template), matching the public client docs.
+const MCP_URL = "https://mcp.anticapture.com/mcp";
 
 // Per-client install snippet. The key travels as `Authorization: Bearer` —
 // the only scheme the MCP proxy forwards and Gateful's token middleware
