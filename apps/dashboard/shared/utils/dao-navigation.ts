@@ -92,7 +92,7 @@ export const getDaoNavigationPath = ({
   }
 
   const currentFeaturePage = getCurrentDaoFeaturePage(pathname, currentDaoId);
-  const fallbackPage = targetDaoConfig.initialPage ?? "/";
+  const fallbackPage = "/";
   const targetFeaturePage = isFeatureEnabledForDao(
     targetDaoConfig,
     currentFeaturePage,

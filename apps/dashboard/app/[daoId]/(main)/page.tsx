@@ -42,10 +42,6 @@ export default async function DaoPage({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const daoConfig = daoConfigByDaoId[daoIdEnum];
 
-  if (daoConfig?.initialPage) {
-    redirect(`/${daoId.toLowerCase()}/${daoConfig.initialPage}`);
-  }
-
   if (!daoConfig?.daoOverview) {
     redirect("/");
   }
