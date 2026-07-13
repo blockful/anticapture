@@ -1,4 +1,5 @@
 export * from "./daoMetricsDayBucket";
+export * from "./draft-proposals";
 export * from "./last-update";
 export * from "./drizzle";
 export * from "./proposals-activity";
