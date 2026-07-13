@@ -1,7 +1,7 @@
 "use client";
 
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { ArrowLeft, Mail, Wallet } from "lucide-react";
+import { ArrowLeft, FlaskConical, Mail, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -16,6 +16,7 @@ import { GoogleIcon } from "@/shared/components/icons/GoogleIcon";
 import { authClient } from "@/shared/services/auth/client";
 import { useAuthMethods } from "@/shared/services/auth/useAuthMethods";
 import { useEmailLogin } from "@/shared/services/auth/useEmailLogin";
+import { usePreviewLogin } from "@/shared/services/auth/usePreviewLogin";
 import { useSiweLogin } from "@/shared/services/auth/useSiweLogin";
 
 export type LoginModalProps = {
@@ -48,6 +49,7 @@ export const LoginModal = ({
 
   const siwe = useSiweLogin();
   const emailLogin = useEmailLogin();
+  const previewLogin = usePreviewLogin();
 
   // The server reports which methods its deployment actually serves (magic
   // link / Google are env-gated there); a method it can't handle is hidden
@@ -55,6 +57,8 @@ export const LoginModal = ({
   const methods = useAuthMethods(!isWhitelabel && open);
   const showEmail = !isWhitelabel && methods.magicLink;
   const showGoogle = !isWhitelabel && methods.google;
+  // Railway PR previews only — the server never advertises this elsewhere.
+  const showPreviewLogin = !isWhitelabel && methods.previewLogin;
   const showAlternatives = showEmail || showGoogle;
   const siweBusy = siwe.status !== "idle" && siwe.status !== "error";
 
@@ -245,6 +249,26 @@ export const LoginModal = ({
                 )}
               </div>
             </>
+          )}
+
+          {/* Railway PR previews only (server-advertised): one-click sign-in
+              as the shared test account, so login-gated flows are reviewable
+              from the preview link without a wallet. */}
+          {showPreviewLogin && (
+            <Button
+              variant="ghost"
+              size="md"
+              className="text-secondary w-full"
+              loading={previewLogin.status === "signing"}
+              loadingText="Signing in…"
+              onClick={() => void previewLogin.login()}
+            >
+              <FlaskConical className="size-4" />
+              Preview login (test account)
+            </Button>
+          )}
+          {previewLogin.status === "error" && (
+            <ErrorText>Preview login failed — try again</ErrorText>
           )}
 
           <div className="flex flex-col items-center gap-0.5 text-center">
