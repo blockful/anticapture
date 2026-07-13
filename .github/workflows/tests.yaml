@@ -50,7 +50,7 @@ jobs:
           echo "trusted=${trusted}" >> "${GITHUB_OUTPUT}"
           echo "PR author '${PR_AUTHOR}' (association=${AUTHOR_ASSOCIATION}) trusted=${trusted}."
 
-      - name: Compute branch-scoped Gateful URL
+      - name: Compute branch-scoped preview service URLs
         id: vercel-env
         shell: bash
         env:
@@ -61,16 +61,19 @@ jobs:
 
           # Trusted PRs get their own ephemeral Railway preview; untrusted PRs
           # (no Vercel/Railway preview is provisioned for them) fall back to the
-          # shared dev Gateful so the downstream wait/typecheck/test jobs have a
-          # live target instead of a preview host that never comes up.
+          # shared dev services so the downstream wait/typecheck/test jobs have
+          # a live target instead of a preview host that never comes up.
           if [ "${IS_TRUSTED}" = "true" ]; then
             gateful_url="https://gateful-anticapture-pr-${PR_NUMBER}.up.railway.app"
+            user_api_url="https://user-api-anticapture-pr-${PR_NUMBER}.up.railway.app"
           else
             gateful_url="https://dev-gateful.up.railway.app"
+            user_api_url="https://user-api-dev-9002.up.railway.app"
           fi
           echo "gateful_url=${gateful_url}" >> "${GITHUB_OUTPUT}"
+          echo "user_api_url=${user_api_url}" >> "${GITHUB_OUTPUT}"
 
-      - name: Upsert branch-scoped Gateful URL into Vercel
+      - name: Upsert branch-scoped service URLs into Vercel
         id: vercel-upsert
         if: steps.trust.outputs.trusted == 'true'
         shell: bash
@@ -80,6 +83,7 @@ jobs:
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           PR_BRANCH: ${{ github.event.pull_request.head.ref }}
           GATEFUL_URL: ${{ steps.vercel-env.outputs.gateful_url }}
+          USER_API_URL: ${{ steps.vercel-env.outputs.user_api_url }}
         run: |
           set -euo pipefail
 
@@ -89,20 +93,27 @@ jobs:
           fi
 
           api_url="https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env?upsert=true&teamId=${VERCEL_TEAM_ID}"
-          payload=$(jq -n \
-            --arg key "ANTICAPTURE_API_URL" \
-            --arg value "${GATEFUL_URL}" \
-            --arg gitBranch "${PR_BRANCH}" \
-            '{ key: $key, value: $value, type: "plain", target: ["preview"], gitBranch: $gitBranch }')
+          upsert() {
+            payload=$(jq -n \
+              --arg key "$1" \
+              --arg value "$2" \
+              --arg gitBranch "${PR_BRANCH}" \
+              '{ key: $key, value: $value, type: "plain", target: ["preview"], gitBranch: $gitBranch }')
 
-          curl --fail-with-body --silent --show-error \
-            --request POST \
-            --url "${api_url}" \
-            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
-            --header "Content-Type: application/json" \
-            --data "${payload}"
+            curl --fail-with-body --silent --show-error \
+              --request POST \
+              --url "${api_url}" \
+              --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+              --header "Content-Type: application/json" \
+              --data "${payload}"
 
-          echo "Configured ANTICAPTURE_API_URL=${GATEFUL_URL} for Vercel preview branch ${PR_BRANCH}."
+            echo "Configured $1=$2 for Vercel preview branch ${PR_BRANCH}."
+          }
+
+          # ANTICAPTURE_API_URL feeds the data proxy (/api/gateful);
+          # USER_API_URL feeds the auth/session proxy (/api/user).
+          upsert "ANTICAPTURE_API_URL" "${GATEFUL_URL}"
+          upsert "USER_API_URL" "${USER_API_URL}"
           echo "configured=true" >> "${GITHUB_OUTPUT}"
 
   wait-for-gateful:

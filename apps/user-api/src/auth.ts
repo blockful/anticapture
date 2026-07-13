@@ -39,7 +39,34 @@ export type AuthConfig = {
   magicLink?: SendMagicLink;
   /** Enables Google OAuth when the credentials are provided. */
   google?: { clientId: string; clientSecret: string };
+  /**
+   * Railway PR previews only: resolve better-auth instances on demand for
+   * *.vercel.app hosts (each Vercel preview URL is unique, so a static
+   * allowlist can't cover them). Must NEVER be enabled on dev/production —
+   * the caller derives it from the Railway environment name, not from
+   * configuration, so it can't drift on.
+   */
+  previewDynamicHosts?: boolean;
 };
+
+/**
+ * Preview-only test credential. In Railway PR previews the SIWE verifier
+ * accepts exactly this address+signature pair, so anyone with the preview
+ * link can sign in as the shared test account without a wallet (designers
+ * reviewing login-gated flows). Deliberately public: preview databases are
+ * ephemeral and empty, and the pair is refused outside preview envs.
+ * Mirrored in the dashboard's usePreviewLogin hook.
+ */
+export const PREVIEW_LOGIN_ADDRESS =
+  "0x1111111111111111111111111111111111111111";
+export const PREVIEW_LOGIN_SIGNATURE = `0x${"11".repeat(65)}`;
+
+/** Hosts eligible for on-demand instances in preview mode. */
+const isPreviewHost = (host: string): boolean =>
+  /^[a-z0-9-]+(\.[a-z0-9-]+)*\.vercel\.app$/i.test(host);
+
+/** Ceiling for cached dynamic instances (scanner-junk guard). */
+const MAX_DYNAMIC_INSTANCES = 100;
 
 /**
  * Which sign-in methods this deployment actually serves. SIWE is always on;
@@ -51,6 +78,8 @@ export type AuthMethods = {
   siwe: true;
   magicLink: boolean;
   google: boolean;
+  /** Preview envs only: one-click sign-in as the shared test account. */
+  previewLogin: boolean;
 };
 
 export type AuthResolver = {
@@ -132,7 +161,12 @@ function createAuth(config: AuthConfig, domain: string) {
     // and every whitelabel host correctly. All origins are trusted so a
     // session issued via one instance is accepted by the others.
     baseURL: originForHost(domain),
-    trustedOrigins: config.domains.map(originForHost),
+    // The instance's own domain is always trusted — for static instances it
+    // is already in the list; for preview-mode dynamic instances (a unique
+    // *.vercel.app host) it is what makes CSRF checks pass on that host.
+    trustedOrigins: [...new Set([...config.domains, domain])].map(
+      originForHost,
+    ),
     // No account linking in v1 (product decision): a wallet login and a
     // Google/email login are deliberately separate users.
     ...(config.google
@@ -170,13 +204,29 @@ export function createAuthResolver(config: AuthConfig): AuthResolver {
     ),
   ]);
 
+  const resolve = (host: string | undefined): Auth | undefined => {
+    if (!host) return undefined;
+    const existing = instances.get(host);
+    if (existing) return existing;
+
+    // Preview envs only: every Vercel preview deployment gets a unique URL,
+    // so instances for them are built on demand. Anything that isn't a
+    // *.vercel.app host still fails closed, exactly like dev/production.
+    if (!config.previewDynamicHosts || !isPreviewHost(host)) return undefined;
+
+    const dynamic = createAuth(config, host);
+    if (instances.size < MAX_DYNAMIC_INSTANCES) instances.set(host, dynamic);
+    return dynamic;
+  };
+
   return {
-    resolve: (host) => (host ? instances.get(host) : undefined),
+    resolve,
     primary,
     methods: {
       siwe: true,
       magicLink: Boolean(config.magicLink),
       google: Boolean(config.google),
+      previewLogin: Boolean(config.previewDynamicHosts),
     },
   };
 }

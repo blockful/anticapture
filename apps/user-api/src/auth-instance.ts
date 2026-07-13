@@ -1,7 +1,13 @@
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
 
-import { createAuthResolver } from "@/auth";
+import {
+  createAuthResolver,
+  PREVIEW_LOGIN_ADDRESS,
+  PREVIEW_LOGIN_SIGNATURE,
+  type VerifySiweMessage,
+} from "@/auth";
+import { isRailwayPreviewEnv } from "@/ci";
 import { db } from "@/database";
 import { createMagicLinkSender } from "@/email/magic-link";
 import { env } from "@/env";
@@ -23,6 +29,31 @@ const google =
     ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }
     : undefined;
 
+const isPreview = isRailwayPreviewEnv();
+
+const onChainVerify: VerifySiweMessage = ({ message, signature, address }) =>
+  publicClient.verifyMessage({
+    address: address as `0x${string}`,
+    message,
+    signature: signature as `0x${string}`,
+  });
+
+// Railway PR previews accept exactly the shared test credential (and nothing
+// else beyond real signatures), so login-gated flows are reviewable from the
+// preview link without a wallet. Never active on dev/production — the flag
+// comes from the Railway environment name, not from configuration.
+const verifyMessage: VerifySiweMessage = isPreview
+  ? async (params) => {
+      if (
+        params.address.toLowerCase() === PREVIEW_LOGIN_ADDRESS &&
+        params.signature === PREVIEW_LOGIN_SIGNATURE
+      ) {
+        return true;
+      }
+      return onChainVerify(params);
+    }
+  : onChainVerify;
+
 export const authResolver = createAuthResolver({
   db,
   secret: env.BETTER_AUTH_SECRET,
@@ -30,14 +61,10 @@ export const authResolver = createAuthResolver({
   // createAuthResolver. No single BETTER_AUTH_URL: the service serves many
   // frontend origins (localhost, main, whitelabels).
   domains: env.AUTH_SIWE_DOMAINS,
-  verifyMessage: ({ message, signature, address }) =>
-    publicClient.verifyMessage({
-      address: address as `0x${string}`,
-      message,
-      signature: signature as `0x${string}`,
-    }),
+  verifyMessage,
   magicLink: createMagicLinkSender(env.RESEND_API_KEY, env.RESEND_FROM_EMAIL),
   google,
+  previewDynamicHosts: isPreview,
 });
 
 // The better-auth CLI introspects this export to generate the schema (which
