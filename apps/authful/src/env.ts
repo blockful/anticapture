@@ -7,6 +7,17 @@ dotenv.config();
 
 const CI = isRailwayPreviewEnv();
 
+// A secret that may be absent: accepts a real value, and treats unset OR
+// empty-string (a blank var defined in some environments) as undefined.
+// zod v4 note: `z.preprocess(fn, schema.optional())` REJECTS a truly unset
+// var ("expected nonoptional" — the inner optional doesn't make the pipe's
+// input optional), which crashed boots in environments without the var.
+const optionalSecret = z
+  .string()
+  .min(16)
+  .optional()
+  .or(z.literal("").transform(() => undefined));
+
 const envSchema = z
   .object({
     PORT: z.coerce.number().default(4002),
@@ -16,23 +27,15 @@ const envSchema = z
     // Guards service-facing endpoints (/validate), shared with Gateful.
     INTERNAL_API_KEY: z.string().min(16),
     // Optional scoped key for the User API to broker end-user keys: restricted
-    // to `user:*` tenants (mint/revoke only, no listing). Left unset until the
-    // User API's key-provisioning feature ships.
-    PROVISIONING_API_KEY: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.string().min(16).optional(),
-    ),
+    // to `user:*` tenants (mint/revoke only, no listing). Absent until the
+    // environment enables the User API's key provisioning.
+    PROVISIONING_API_KEY: optionalSecret,
     // CI/preview only: a fixed, known token seeded into the DB on boot so every
     // service in the same Railway PR preview shares a working API key. Required
     // in preview environments; ignored on dev/production. The seeded token's
     // tenant/name/rate-limit are fixed constants (see index.ts) — not worth env
     // vars, since the value only matters to ephemeral previews.
-    // Empty string (a blank var defined outside previews) is treated as unset,
-    // so it's ignored on dev/production instead of failing the min(16) guard.
-    SEED_TOKEN_PLAINTEXT: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.string().min(16).optional(),
-    ),
+    SEED_TOKEN_PLAINTEXT: optionalSecret,
   })
   .superRefine((data, ctx) => {
     if (CI && !data.SEED_TOKEN_PLAINTEXT) {
