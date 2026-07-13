@@ -93,7 +93,7 @@ export const TokenDistributionDialog = ({
         cancelLabel="Cancel"
         confirmLabel="Apply metrics"
         onConfirm={handleApplyMetric}
-        className="max-w-[520px]"
+        className="max-h-[85vh] max-w-[520px] overflow-y-auto"
       >
         <div className="flex flex-col">
           {Object.entries(metricsSchema)

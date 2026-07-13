@@ -20,7 +20,7 @@ import {
 } from "@/features/attack-profitability/hooks";
 import { normalizeDataset } from "@/features/attack-profitability/utils";
 import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPendingChartBlur";
-import { LogoAnimation } from "@/shared/components/design-system/loading-animation/LogoAnimation";
+import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import type { ChartConfig } from "@/shared/components/ui/chart";
 import { ChartContainer } from "@/shared/components/ui/chart";
@@ -243,7 +243,7 @@ export const MultilineChartAttackProfitability = ({
           "h-[300px]": context === "section",
         })}
       >
-        <LogoAnimation size="sm" />
+        <Spinner size="lg" />
       </div>
     );
   }
