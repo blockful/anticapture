@@ -9,7 +9,14 @@ import { logger } from "@/logger";
 import { TokensRepository } from "@/repositories/tokens";
 import { TokensService } from "@/services/tokens";
 
-const db = drizzle(env.DATABASE_URL, { schema });
+const db = drizzle({
+  connection: {
+    connectionString: env.DATABASE_URL,
+    connectionTimeoutMillis: 10_000,
+    statement_timeout: 30_000,
+  },
+  schema,
+});
 const service = new TokensService(new TokensRepository(db));
 
 // Fixed identity for the CI/preview seed token. Only the plaintext value varies
