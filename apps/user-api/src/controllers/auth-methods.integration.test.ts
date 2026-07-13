@@ -98,6 +98,7 @@ describe("optional auth methods", () => {
         siwe: true,
         magicLink: true,
         google: false,
+        previewLogin: false,
       });
     });
   });
@@ -128,6 +129,7 @@ describe("optional auth methods", () => {
         siwe: true,
         magicLink: false,
         google: false,
+        previewLogin: false,
       });
     });
   });
@@ -149,6 +151,7 @@ describe("optional auth methods", () => {
         siwe: true,
         magicLink: false,
         google: true,
+        previewLogin: false,
       });
     });
   });
