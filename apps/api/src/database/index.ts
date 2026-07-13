@@ -1,7 +1,6 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { PgliteDatabase } from "drizzle-orm/pglite";
 
-import type * as generalSchema from "./general-schema";
 import type * as offchainSchema from "./offchain-schema";
 import type * as schema from "./schema";
 
@@ -23,14 +22,9 @@ export type OffchainDrizzle =
   | NodePgDatabase<typeof offchainSchema>
   | PgliteDatabase<typeof offchainSchema>;
 
-export type GeneralDrizzle =
-  | NodePgDatabase<typeof generalSchema>
-  | PgliteDatabase<typeof generalSchema>;
-
 export type UnifiedDrizzle =
   | NodePgDatabase<typeof schema & typeof offchainSchema>
   | PgliteDatabase<typeof schema & typeof offchainSchema>;
 
 export * from "./schema";
 export * from "./offchain-schema";
-export * from "./general-schema";
