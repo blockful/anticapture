@@ -12,7 +12,15 @@ import * as schema from "@/repository/schema";
 async function main() {
   logger.info({ dao: env.PROVIDER_DAO_ID }, "starting offchain indexer");
 
-  const db = drizzle(env.DATABASE_URL, { schema });
+  // Fail fast when Postgres is unreachable instead of hanging pg-pool connects
+  // forever.
+  const db = drizzle({
+    connection: {
+      connectionString: env.DATABASE_URL,
+      connectionTimeoutMillis: 10_000,
+    },
+    schema,
+  });
 
   await migrate(db, {
     migrationsFolder: "./drizzle",

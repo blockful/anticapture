@@ -181,12 +181,23 @@ if (!daoClient) {
   throw new Error(`Client not found for DAO ${env.DAO_ID}`);
 }
 
-const pgClient = drizzle(env.DATABASE_URL, {
+// Fail fast when Postgres is unreachable/starved instead of hanging pg-pool
+// connects for minutes.
+const pgClient = drizzle({
+  connection: {
+    connectionString: env.DATABASE_URL,
+    connectionTimeoutMillis: 10_000,
+    statement_timeout: 30_000,
+  },
   schema: { ...schema, ...offchainSchema },
   casing: "snake_case",
 });
 
-const pgGeneralClient = drizzle(env.DATABASE_URL, {
+const pgGeneralClient = drizzle({
+  connection: {
+    connectionString: env.DATABASE_URL,
+    connectionTimeoutMillis: 10_000,
+  },
   schema: generalSchema,
   casing: "snake_case",
 });
