@@ -22,10 +22,15 @@ const envSchema = z
     // vars, since the value only matters to ephemeral previews.
     // Empty string (a blank var defined outside previews) is treated as unset,
     // so it's ignored on dev/production instead of failing the min(16) guard.
-    SEED_TOKEN_PLAINTEXT: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.string().min(16).optional(),
-    ),
+    // Outer .optional() is required: zod v4's z.preprocess makes the object
+    // key required even when the inner schema is optional, so an unset var
+    // would fail with "expected nonoptional, received undefined".
+    SEED_TOKEN_PLAINTEXT: z
+      .preprocess(
+        (v) => (v === "" ? undefined : v),
+        z.string().min(16).optional(),
+      )
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (CI && !data.SEED_TOKEN_PLAINTEXT) {
