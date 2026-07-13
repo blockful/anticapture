@@ -22,6 +22,7 @@ import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useWalletPrompt } from "@/shared/services/auth/useWalletPrompt";
 import { getDraft } from "@/shared/services/user-api/draftsClient";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
@@ -98,6 +99,7 @@ export const ProposalCreationForm = ({
   const draftId = searchParams?.get("draftId") ?? undefined;
   const { address } = useAccount();
   const { openLogin } = useLogin();
+  const { promptWalletConnection } = useWalletPrompt();
   const drafts = useDrafts(daoId);
 
   const vp = useProposalVotingPower(daoId, address || zeroAddress);
@@ -291,11 +293,11 @@ export const ProposalCreationForm = ({
 
   const handlePreviewPublish = () => {
     if (!address) {
-      // Through the sign-in modal (not raw RainbowKit): connecting a wallet
-      // and platform identity are one step, and LoginProvider's coherence
-      // sync would disconnect a wallet that connected without signing in.
+      // Publishing needs a wallet to sign. Signed out → sign-in modal;
+      // signed in without a wallet (email/Google) → RainbowKit directly,
+      // keeping the session. See useWalletPrompt.
       setPendingAction("publish");
-      openLogin();
+      promptWalletConnection();
       return;
     }
     handlePublishClick();

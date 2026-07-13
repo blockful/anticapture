@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 
-import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useWalletPrompt } from "@/shared/services/auth/useWalletPrompt";
 
 import { DelegationModal } from "@/features/holders-and-delegates/delegate/DelegationModal";
 import {
@@ -35,7 +35,7 @@ export const DelegateButton = ({
   variant = "primary",
 }: DelegateButtonProps) => {
   const { address: userAddress, isConnected } = useAccount();
-  const { openLogin, isOpen: isLoginOpen } = useLogin();
+  const { promptWalletConnection, promptOpen } = useWalletPrompt();
   const [waitingForConnection, setWaitingForConnection] = useState(false);
   const [delegationModalOpen, setDelegationModalOpen] = useState(false);
 
@@ -61,9 +61,9 @@ export const DelegateButton = ({
 
   useEffect(() => {
     if (!waitingForConnection) return;
-    // Sign-in modal still up (including the RainbowKit hand-off, during
-    // which it hides but stays open) — keep waiting.
-    if (isLoginOpen) return;
+    // Whichever prompt is up (sign-in modal — including its RainbowKit
+    // hand-off — or the direct connect modal), keep waiting.
+    if (promptOpen) return;
 
     if (isConnected) {
       setWaitingForConnection(false);
@@ -72,15 +72,15 @@ export const DelegateButton = ({
       setWaitingForConnection(false);
       showCustomToast("Connect your wallet to delegate", "error");
     }
-  }, [isLoginOpen, isConnected, waitingForConnection]);
+  }, [promptOpen, isConnected, waitingForConnection]);
 
   const handleClick = () => {
     if (!isConnected) {
-      // Through the sign-in modal (not raw RainbowKit): connecting a wallet
-      // and platform identity are one step, and LoginProvider's coherence
-      // sync would disconnect a wallet that connected without signing in.
+      // Signed out → sign-in modal (connecting IS signing in); signed in
+      // without a wallet (email/Google) → RainbowKit directly, keeping the
+      // session. See useWalletPrompt.
       setWaitingForConnection(true);
-      openLogin();
+      promptWalletConnection();
     } else {
       setDelegationModalOpen(true);
     }
