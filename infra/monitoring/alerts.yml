@@ -71,32 +71,37 @@ groups:
       - alert: HighLatency
         expr: >
           histogram_quantile(0.99,
-            sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le)
+            sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le, job)
           ) > 2
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: "[WARNING] High p99 HTTP latency"
+          summary: "[WARNING] High p99 HTTP latency on {{ $labels.job }}"
           description: >
-            The p99 HTTP response time has been {{ printf "%.2f" $value }}s for more than
-            5 minutes (threshold: 2s). This may indicate slow database queries, resource
-            contention, or downstream bottlenecks. Check slow query logs and DB connection pool.
+            {{ $labels.job }} p99 HTTP response time has been {{ printf "%.2f" $value }}s for
+            more than 5 minutes (threshold: 2s). This may indicate slow database queries,
+            resource contention, or downstream bottlenecks. Check slow query logs and DB
+            connection pool.
 
       # 5xx error rate above 1% for 2 minutes
       - alert: HighErrorRate
         expr: >
-          sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[2m]))
-          /
-          sum(rate(http_server_request_duration_seconds_count[2m]))
-          * 100 > 1
+          (
+            sum by (job) (rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[2m]))
+            /
+            sum by (job) (rate(http_server_request_duration_seconds_count[2m]))
+            * 100 > 1
+          )
+          and
+          sum by (job) (rate(http_server_request_duration_seconds_count[2m])) > 0.1
         for: 2m
         labels:
           severity: critical
         annotations:
-          summary: "[CRITICAL] Elevated 5xx error rate"
+          summary: "[CRITICAL] Elevated 5xx error rate on {{ $labels.job }}"
           description: >
-            The 5xx error rate has been {{ printf "%.2f" $value }}% for more than 2 minutes
-            (threshold: 1%). Users are experiencing server errors. Check application logs for
-            stack traces, database connectivity, and any recent deployments that may have
-            introduced regressions.
+            {{ $labels.job }} 5xx error rate has been {{ printf "%.2f" $value }}% for more than
+            2 minutes (threshold: 1%). Users are experiencing server errors. Check application
+            logs for stack traces, database connectivity, and any recent deployments that may
+            have introduced regressions.
