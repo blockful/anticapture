@@ -153,8 +153,14 @@ function createAuth(config: AuthConfig, domain: string) {
     trustedOrigins: [...new Set([...config.domains, domain])].map(
       originForHost,
     ),
-    // No account linking in v1 (product decision): a wallet login and a
-    // Google/email login are deliberately separate users.
+    // No wallet⟷email linking in v1 (product decision): a wallet login and a
+    // Google/email login are deliberately separate users (SIWE users carry a
+    // placeholder email, so they never collide). Same-email methods DO link:
+    // magic link and Google with one email converge on one user, and the
+    // link copies the provider's name/photo onto the local profile (local
+    // email/emailVerified are never touched) so a magic-link-born account
+    // still gets the Google picture.
+    account: { accountLinking: { updateUserInfoOnLink: true } },
     ...(config.google
       ? {
           socialProviders: {
