@@ -10,8 +10,7 @@ import {
   BottomNavigationButtons,
 } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
-import { useSession } from "@/shared/services/auth/client";
-import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useGatedNavClick } from "@/shared/services/auth/useGatedNav";
 
 type HeaderItem = {
   page: string;
@@ -23,8 +22,7 @@ type HeaderItem = {
 };
 
 export const HeaderSidebar = () => {
-  const { data: session } = useSession();
-  const { openLogin } = useLogin();
+  const gatedNavClick = useGatedNavClick();
 
   const headerItems = useMemo<HeaderItem[]>(
     () => [
@@ -74,17 +72,7 @@ export const HeaderSidebar = () => {
                 isGlobal={item.isGlobal}
                 onClick={
                   item.requiresAuth
-                    ? (e) => {
-                        // Gated page: only a present session navigates.
-                        // Signed-out (or still resolving) opens the sign-in
-                        // modal instead; if the session resolves signed-in a
-                        // moment later, LoginProvider closes the modal and
-                        // completes the navigation via redirectTo.
-                        if (!session) {
-                          e.preventDefault();
-                          openLogin({ redirectTo: `/${item.page}` });
-                        }
-                      }
+                    ? (e) => void gatedNavClick(e, item.page)
                     : undefined
                 }
               />

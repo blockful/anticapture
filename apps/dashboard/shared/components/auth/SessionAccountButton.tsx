@@ -13,15 +13,13 @@ import {
 } from "@/shared/components/ui/popover";
 import { authClient } from "@/shared/services/auth/client";
 import { cn } from "@/shared/utils/cn";
+import { formatAddress } from "@/shared/utils/formatAddress";
 
 type SessionUser = {
   name: string;
   email: string;
   image?: string | null;
 };
-
-const shortAddress = (address: string) =>
-  `${address.slice(0, 6)}…${address.slice(-4)}`;
 
 /**
  * Account chip for platform sessions that have no connected wallet (magic
@@ -44,7 +42,7 @@ export const SessionAccountButton = ({
   const displayName = !user.name
     ? user.email
     : isAddress(user.name)
-      ? shortAddress(user.name)
+      ? formatAddress(user.name)
       : user.name;
   const initial = (displayName || "?").trim().charAt(0).toUpperCase();
 

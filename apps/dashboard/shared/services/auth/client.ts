@@ -16,4 +16,4 @@ export const authClient = createAuthClient({
   plugins: [siweClient(), magicLinkClient()],
 });
 
-export const { useSession, signOut } = authClient;
+export const { useSession } = authClient;

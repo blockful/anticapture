@@ -26,8 +26,6 @@ export type OpenLoginOptions = {
 type LoginContextValue = {
   /** Opens the sign-in modal. */
   openLogin: (options?: OpenLoginOptions) => void;
-  /** Closes the sign-in modal. */
-  closeLogin: () => void;
   isOpen: boolean;
 };
 
@@ -54,7 +52,6 @@ export function LoginProvider({
     setRedirectTo(options?.redirectTo ?? null);
     setIsOpen(true);
   }, []);
-  const closeLogin = useCallback(() => setIsOpen(false), []);
 
   // Wallet ⟷ session coherence. Both effects stand down while the sign-in
   // modal OR RainbowKit's connect modal is up: the ceremony legitimately
@@ -118,10 +115,7 @@ export function LoginProvider({
     prevUserId.current = userId;
   }, [session, isOpen, redirectTo, router]);
 
-  const value = useMemo(
-    () => ({ openLogin, closeLogin, isOpen }),
-    [openLogin, closeLogin, isOpen],
-  );
+  const value = useMemo(() => ({ openLogin, isOpen }), [openLogin, isOpen]);
 
   return (
     <LoginContext.Provider value={value}>

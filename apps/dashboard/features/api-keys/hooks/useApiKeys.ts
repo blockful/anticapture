@@ -3,13 +3,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
-  ApiKeysRequestError,
   createApiKey,
   listApiKeys,
   revokeApiKey,
   type CreatedApiKey,
-  type UserApiKey,
 } from "@/shared/services/user-api/apiKeysClient";
+import { UserApiRequestError } from "@/shared/services/user-api/request";
 
 /**
  * API-key list + create/revoke against the User API (session-authenticated
@@ -29,7 +28,7 @@ export const useApiKeys = (userId: string | null) => {
       // 404 = the deployment doesn't serve API keys (no Authful provisioning
       // configured); 401 = session vanished. Neither heals by retrying.
       if (
-        error instanceof ApiKeysRequestError &&
+        error instanceof UserApiRequestError &&
         (error.status === 404 || error.status === 401)
       ) {
         return false;
@@ -52,10 +51,10 @@ export const useApiKeys = (userId: string | null) => {
   });
 
   const isUnavailable =
-    query.error instanceof ApiKeysRequestError && query.error.status === 404;
+    query.error instanceof UserApiRequestError && query.error.status === 404;
 
   return {
-    keys: (query.data ?? []) as UserApiKey[],
+    keys: query.data ?? [],
     isLoading: query.isLoading,
     /** The deployment doesn't serve the API-key surface at all. */
     isUnavailable,

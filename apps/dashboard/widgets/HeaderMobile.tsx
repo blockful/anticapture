@@ -17,8 +17,7 @@ import { useState, useEffect, useMemo, type ElementType } from "react";
 
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
-import { useSession } from "@/shared/services/auth/client";
-import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useGatedNavClick } from "@/shared/services/auth/useGatedNav";
 import { cn } from "@/shared/utils/";
 
 type MenuItem = {
@@ -40,8 +39,7 @@ export const HeaderMobile = ({
 }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
-  const { openLogin } = useLogin();
+  const gatedNavClick = useGatedNavClick();
 
   const menuItems = useMemo<MenuItem[]>(
     () => [
@@ -183,15 +181,8 @@ export const HeaderMobile = ({
                 label={item.label}
                 isGlobal={item.isGlobal}
                 onClick={(e) => {
-                  // Gated page: only a present session navigates. Signed-out
-                  // (or still resolving) opens the sign-in modal instead; if
-                  // the session resolves signed-in a moment later,
-                  // LoginProvider closes the modal and completes the
-                  // navigation via redirectTo.
-                  if (item.requiresAuth && !session) {
-                    e.preventDefault();
+                  if (item.requiresAuth && gatedNavClick(e, item.page)) {
                     setIsMenuOpen(false);
-                    openLogin({ redirectTo: `/${item.page}` });
                     return;
                   }
                   item.onClick?.();

@@ -16,11 +16,11 @@ import { useSession } from "@/shared/services/auth/client";
 import {
   createDraft,
   deleteDraft as deleteDraftRequest,
-  DraftsRequestError,
   listDrafts,
   updateDraft,
   type UserApiDraft,
 } from "@/shared/services/user-api/draftsClient";
+import { UserApiRequestError } from "@/shared/services/user-api/request";
 
 export type UseDraftsReturn = {
   drafts: ProposalDraft[];
@@ -62,10 +62,9 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
   const retry = useCallback(() => setRetryToken((n) => n + 1), []);
 
   // Drafts are session-scoped: load them once authenticated. Identity comes
-  // from the session cookie, never a request param. Legacy drafts created
-  // before accounts existed had two homes: the DAO DB (migrated server-side,
-  // claimed on first SIWE login) and this browser's localStorage — those are
-  // drained here on the first authenticated load, then the key is removed.
+  // from the session cookie, never a request param — so the fetch is keyed by
+  // the session user only, and a wallet connect/disconnect never clears or
+  // refetches the list.
   useEffect(() => {
     // Reset immediately so one user's drafts (or a previous session's) never
     // linger on screen while another session's fetch is in flight.
@@ -77,41 +76,62 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
       setIsLoading(true);
       setError(false);
       try {
-        const wallet = address ?? null;
-        const localKey = wallet ? `${daoId}:${wallet.toLowerCase()}` : null;
-        const storage =
-          typeof window === "undefined" ? undefined : window.localStorage;
-        const localDrafts =
-          wallet &&
-          localKey &&
-          storage &&
-          !drainedLocalRef.current.has(localKey)
-            ? readDrafts(storage, draftKey(daoId, wallet))
-            : [];
-
-        // Server ids are authoritative now, so local rows upload as new
-        // drafts. The key is cleared only after every upload succeeded;
-        // a failure leaves it for the next attempt.
-        for (const d of localDrafts) {
-          await createDraft({
-            daoId,
-            title: d.title,
-            discussionUrl: d.discussionUrl,
-            body: d.body,
-            actions: d.actions,
-          });
-        }
-        if (wallet && storage && localDrafts.length > 0) {
-          storage.removeItem(draftKey(daoId, wallet));
-        }
-        if (localKey) drainedLocalRef.current.add(localKey);
-
         const { items } = await listDrafts(daoId);
         if (!cancelled) setDrafts(items.map(toDraft));
       } catch {
         if (!cancelled) setError(true);
       } finally {
         if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [daoId, userId, retryToken]);
+
+  // Legacy drafts created before accounts existed had two homes: the DAO DB
+  // (migrated server-side, claimed on first SIWE login) and this browser's
+  // localStorage — drained here once per dao:wallet on an authenticated load.
+  // Server ids are authoritative now, so local rows upload (concurrently) as
+  // new drafts. The key is cleared only after every upload succeeded — a
+  // failure surfaces the error state and leaves the key for the retry, which
+  // re-runs this effect via retryToken. A successful drain also bumps
+  // retryToken so the list refetches with the drained rows included.
+  useEffect(() => {
+    if (!userId || !address) return;
+    const localKey = `${daoId}:${address.toLowerCase()}`;
+    if (drainedLocalRef.current.has(localKey)) return;
+    const storage =
+      typeof window === "undefined" ? undefined : window.localStorage;
+    if (!storage) return;
+
+    const localDrafts = readDrafts(storage, draftKey(daoId, address));
+    if (localDrafts.length === 0) {
+      drainedLocalRef.current.add(localKey);
+      return;
+    }
+
+    let cancelled = false;
+    const run = async () => {
+      try {
+        await Promise.all(
+          localDrafts.map((d) =>
+            createDraft({
+              daoId,
+              title: d.title,
+              discussionUrl: d.discussionUrl,
+              body: d.body,
+              actions: d.actions,
+            }),
+          ),
+        );
+        storage.removeItem(draftKey(daoId, address));
+        drainedLocalRef.current.add(localKey);
+        if (!cancelled) setRetryToken((n) => n + 1);
+      } catch {
+        if (!cancelled) setError(true);
       }
     };
 
@@ -159,7 +179,7 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
       } catch (err) {
         // A missing/foreign row is already gone from the user's perspective.
         const notFound =
-          err instanceof DraftsRequestError && err.status === 404;
+          err instanceof UserApiRequestError && err.status === 404;
         if (!notFound) throw err;
       }
       setDrafts((prev) => prev.filter((d) => d.id !== id));

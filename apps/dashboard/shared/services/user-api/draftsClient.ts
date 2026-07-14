@@ -1,6 +1,6 @@
-// Hand-written client for the User API drafts surface, reached through the
-// same-origin /api/user proxy with the better-auth session cookie. The User
-// API is not part of Gateful's OpenAPI, so it has no generated SDK.
+// Hand-written client for the User API drafts surface (transport and error
+// semantics live in ./request).
+import { request } from "@/shared/services/user-api/request";
 
 const BASE = "/api/user/drafts";
 
@@ -28,27 +28,6 @@ export type CreateDraftInput = {
 };
 
 export type UpdateDraftInput = Partial<Omit<CreateDraftInput, "daoId">>;
-
-export class DraftsRequestError extends Error {
-  constructor(readonly status: number) {
-    super(`drafts request failed with status ${status}`);
-    this.name = "DraftsRequestError";
-  }
-}
-
-const request = async <T>(url: string, init?: RequestInit): Promise<T> => {
-  const res = await fetch(url, {
-    ...init,
-    credentials: "include",
-    headers: {
-      ...(init?.body ? { "content-type": "application/json" } : {}),
-      ...init?.headers,
-    },
-  });
-  if (!res.ok) throw new DraftsRequestError(res.status);
-  if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
-};
 
 export const listDrafts = (daoId: string) =>
   request<{ items: UserApiDraft[] }>(
