@@ -245,7 +245,7 @@ describe("authful app", () => {
         headers: internalHeaders,
         body: JSON.stringify({ tokenHash: hashToken(minted.token) }),
       });
-      expect(validateRes.status).toBe(400);
+      expect(validateRes.status).toBe(200);
       await expect(validateRes.json()).resolves.toEqual({ valid: false });
     });
 
@@ -307,7 +307,7 @@ describe("authful app", () => {
         headers: internalHeaders,
         body: JSON.stringify({ tokenHash: hashToken("never-minted") }),
       });
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(200);
       await expect(res.json()).resolves.toEqual({ valid: false });
       expect(add).toHaveBeenCalledWith(1, { result: "invalid" });
     });

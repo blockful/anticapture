@@ -21,11 +21,7 @@ export function validateController(app: Hono, service: TokensService) {
       },
       responses: {
         200: {
-          description: "Valid token with tenant metadata",
-          content: { "application/json": { schema: ValidateResponseSchema } },
-        },
-        400: {
-          description: "Token validation failed",
+          description: "Validation verdict with tenant metadata when valid",
           content: { "application/json": { schema: ValidateResponseSchema } },
         },
       },
@@ -33,7 +29,6 @@ export function validateController(app: Hono, service: TokensService) {
     async (c) => {
       const { tokenHash } = c.req.valid("json");
       const result = await service.validate(tokenHash);
-      if (!result.valid) return c.json(result, 400);
       return c.json(result, 200);
     },
   );
