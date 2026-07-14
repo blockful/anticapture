@@ -49,18 +49,6 @@ export type AuthConfig = {
   previewDynamicHosts?: boolean;
 };
 
-/**
- * Preview-only test credential. In Railway PR previews the SIWE verifier
- * accepts exactly this address+signature pair, so anyone with the preview
- * link can sign in as the shared test account without a wallet (designers
- * reviewing login-gated flows). Deliberately public: preview databases are
- * ephemeral and empty, and the pair is refused outside preview envs.
- * Mirrored in the dashboard's usePreviewLogin hook.
- */
-export const PREVIEW_LOGIN_ADDRESS =
-  "0x1111111111111111111111111111111111111111";
-export const PREVIEW_LOGIN_SIGNATURE = `0x${"11".repeat(65)}`;
-
 /** Hosts eligible for on-demand instances in preview mode. */
 const isPreviewHost = (host: string): boolean =>
   /^[a-z0-9-]+(\.[a-z0-9-]+)*\.vercel\.app$/i.test(host);
@@ -78,8 +66,6 @@ export type AuthMethods = {
   siwe: true;
   magicLink: boolean;
   google: boolean;
-  /** Preview envs only: one-click sign-in as the shared test account. */
-  previewLogin: boolean;
 };
 
 export type AuthResolver = {
@@ -226,7 +212,6 @@ export function createAuthResolver(config: AuthConfig): AuthResolver {
       siwe: true,
       magicLink: Boolean(config.magicLink),
       google: Boolean(config.google),
-      previewLogin: Boolean(config.previewDynamicHosts),
     },
   };
 }

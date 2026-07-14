@@ -69,23 +69,17 @@ the generated domain's target port (4003).
 
 ## Preview environments (Railway PR envs)
 
-Login-gated flows are reviewable from the Vercel preview link. Two
-affordances activate **only** when `RAILWAY_ENVIRONMENT_NAME` is a PR
-preview (never dev/production — derived from the deploy, not from config):
-
-- **Dynamic hosts**: every Vercel preview URL is unique, so better-auth
-  instances for `*.vercel.app` hosts are built on demand instead of coming
-  from `AUTH_SIWE_DOMAINS`. All other hosts still fail closed.
-- **Preview login**: the SIWE verifier additionally accepts one fixed,
-  deliberately public test credential (`PREVIEW_LOGIN_ADDRESS` +
-  `PREVIEW_LOGIN_SIGNATURE`), and `/auth/methods` advertises
-  `previewLogin: true` so the dashboard shows a one-click "Preview login"
-  button. Anyone with the preview link signs in as the shared test account.
+Login-gated flows are reviewable from the Vercel preview link with a real
+wallet. When `RAILWAY_ENVIRONMENT_NAME` is a PR preview (never
+dev/production — derived from the deploy, not from config), **dynamic
+hosts** activate: every Vercel preview URL is unique, so better-auth
+instances for `*.vercel.app` hosts are built on demand instead of coming
+from `AUTH_SIWE_DOMAINS`. All other hosts still fail closed, and signatures
+are verified on-chain exactly like everywhere else.
 
 Security posture: preview databases are ephemeral and empty, PR environments
 must only inherit **throwaway** values (never real secrets — same rule as
-authful's seeded preview token), the test credential only ever authenticates
-the fixed test address, and untrusted (fork) PRs get no preview environment
-at all (see `tests.yaml`'s trust gate). Google OAuth stays off in previews
-(its redirect URIs are registered per exact host); magic link stays off
-unless a sandbox Resend key is provided.
+authful's seeded preview token), and untrusted (fork) PRs get no preview
+environment at all (see `tests.yaml`'s trust gate). Google OAuth stays off
+in previews (its redirect URIs are registered per exact host); magic link
+stays off unless a sandbox Resend key is provided.
