@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { isAddress } from "viem";
 
 import * as schema from "@/database/schema";
 import { drafts } from "@/database/schema";
@@ -46,13 +47,12 @@ export type MigrationReport = {
 const isUuid = (v: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 
-const isAddress = (v: string) => /^0x[0-9a-fA-F]{40}$/.test(v);
-
 /** Imported rows are untrusted DB content — reject anything malformed. */
 const isValid = (row: SourceDraft): boolean =>
   isUuid(row.id) &&
   row.daoId.length > 0 &&
-  isAddress(row.author) &&
+  // Non-strict: legacy rows may carry any casing; they're lowercased on write.
+  isAddress(row.author, { strict: false }) &&
   Number.isFinite(row.createdAt) &&
   Number.isFinite(row.updatedAt);
 

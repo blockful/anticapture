@@ -3,13 +3,12 @@ import { z } from "zod";
 
 dotenv.config();
 
-const csv = () =>
-  z.string().transform((val) =>
-    val
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean),
-  );
+const csv = z.string().transform((val) =>
+  val
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
 
 const envSchema = z
   .object({
@@ -26,7 +25,7 @@ const envSchema = z
     // derived as https://<host> — http for localhost), and the trusted-origin
     // allowlist. There is deliberately no single BETTER_AUTH_URL: the service
     // serves many origins and each request is scoped to its own.
-    AUTH_SIWE_DOMAINS: csv().refine((a) => a.length > 0, {
+    AUTH_SIWE_DOMAINS: csv.refine((a) => a.length > 0, {
       message: "AUTH_SIWE_DOMAINS must list at least one host",
     }),
 

@@ -63,20 +63,17 @@ export class ApiKeysService {
   }
 
   async list(userId: string): Promise<ApiKeyWithUsage[]> {
-    const rows = await this.repo.listActiveByUser(userId);
-
     // lastUsedAt lives in Authful. Enrich best-effort: if Authful is
     // unreachable, still return the keys (usage shown as unknown) rather than
-    // failing the whole list.
-    let usage = new Map<string, string | null>();
-    try {
-      const tokens = await this.authful.listByTenant(
-        `${USER_TENANT_PREFIX}${userId}`,
-      );
-      usage = new Map(tokens.map((t) => [t.id, t.lastUsedAt]));
-    } catch {
-      // leave usage empty
-    }
+    // failing the whole list. Both lookups depend only on userId, so the DB
+    // read and the Authful round-trip run concurrently.
+    const [rows, usage] = await Promise.all([
+      this.repo.listActiveByUser(userId),
+      this.authful
+        .listByTenant(`${USER_TENANT_PREFIX}${userId}`)
+        .then((tokens) => new Map(tokens.map((t) => [t.id, t.lastUsedAt])))
+        .catch(() => new Map<string, string | null>()),
+    ]);
 
     return rows.map((row) => ({
       ...row,

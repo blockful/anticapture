@@ -2,14 +2,6 @@ import { meterProvider } from "./instrumentation.js";
 
 const meter = meterProvider.getMeter("anticapture-user-api");
 
-export const authCeremonyTotal = meter.createCounter(
-  "user_api_auth_ceremony_total",
-  {
-    description:
-      "Authentication ceremonies, labelled by method (siwe|google|magic-link) and result",
-  },
-);
-
 export const httpRequestDuration = meter.createHistogram(
   "http_server_request_duration_seconds",
   {

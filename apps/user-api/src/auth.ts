@@ -180,21 +180,13 @@ function createAuth(config: AuthConfig, domain: string) {
 export type Auth = ReturnType<typeof createAuth>;
 
 export function createAuthResolver(config: AuthConfig): AuthResolver {
-  const [primaryDomain, ...otherDomains] = config.domains as [
-    string,
-    ...string[],
-  ];
-
-  const primary = createAuth(config, primaryDomain);
-
   // Instances are cheap — they share the DB and secret; only the SIWE domain
   // differs, so sessions issued via one host validate on any of them.
-  const instances = new Map<string, Auth>([
-    [primaryDomain, primary],
-    ...otherDomains.map(
-      (domain) => [domain, createAuth(config, domain)] as const,
-    ),
-  ]);
+  const instances = new Map<string, Auth>(
+    config.domains.map((domain) => [domain, createAuth(config, domain)]),
+  );
+  // domains is non-empty by env validation.
+  const primary = instances.get(config.domains[0]!)!;
 
   const resolve = (host: string | undefined): Auth | undefined => {
     if (!host) return undefined;

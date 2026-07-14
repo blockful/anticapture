@@ -60,7 +60,3 @@ export const UpdateDraftBodySchema = z
     actions: z.array(ActionSchema).optional(),
   })
   .openapi("UpdateDraftBody");
-
-export const ErrorResponseSchema = z
-  .object({ error: z.string() })
-  .openapi("ErrorResponse");

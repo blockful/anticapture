@@ -7,7 +7,7 @@ import {
   CreateApiKeyBodySchema,
   CreatedApiKeyResponseSchema,
 } from "@/mappers/api-keys";
-import { ErrorResponseSchema } from "@/mappers/drafts";
+import { ErrorResponseSchema, unauthorizedResponses } from "@/mappers/errors";
 import { sessionAuth } from "@/middlewares/session";
 import type { ApiKeyRow } from "@/repositories/api-keys";
 import {
@@ -22,17 +22,6 @@ const toResponse = (row: ApiKeyRow, lastUsedAt: string | null = null) => ({
   revokedAt: row.revokedAt?.toISOString() ?? null,
   lastUsedAt,
 });
-
-const unauthorizedResponses = {
-  400: {
-    description: "Request Host is not a trusted domain",
-    content: { "application/json": { schema: ErrorResponseSchema } },
-  },
-  401: {
-    description: "Missing or invalid session",
-    content: { "application/json": { schema: ErrorResponseSchema } },
-  },
-} as const;
 
 export function apiKeysController(
   app: OpenAPIHono,
