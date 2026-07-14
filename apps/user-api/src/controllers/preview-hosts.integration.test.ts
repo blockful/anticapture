@@ -2,16 +2,12 @@ import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
 import { recoverMessageAddress } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { createSiweMessage } from "viem/siwe";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createApp } from "@/app";
-import {
-  createAuthResolver,
-  PREVIEW_LOGIN_ADDRESS,
-  PREVIEW_LOGIN_SIGNATURE,
-  type VerifySiweMessage,
-} from "@/auth";
+import { createAuthResolver, type VerifySiweMessage } from "@/auth";
 import * as fullSchema from "@/database/schema";
 import {
   account,
@@ -27,9 +23,11 @@ import { DraftsService } from "@/services/drafts";
 const STATIC_HOST = "app.anticapture.com";
 const PREVIEW_HOST = "anticapture-abc123-ful.vercel.app";
 
-// Mirrors auth-instance.ts: the preview verifier accepts exactly the shared
-// test pair and delegates everything else to the real (EOA) verifier.
-const realVerify: VerifySiweMessage = async ({
+// Throwaway test-only EOA — signs real SIWE messages offline.
+const wallet = privateKeyToAccount(`0x${"11".repeat(32)}`);
+
+// Offline EOA verifier (mirrors what publicClient.verifyMessage does for EOAs).
+const verifyMessage: VerifySiweMessage = async ({
   message,
   signature,
   address,
@@ -40,20 +38,8 @@ const realVerify: VerifySiweMessage = async ({
   });
   return recovered.toLowerCase() === address.toLowerCase();
 };
-const previewVerify: VerifySiweMessage = async (params) => {
-  if (
-    params.address.toLowerCase() === PREVIEW_LOGIN_ADDRESS &&
-    params.signature === PREVIEW_LOGIN_SIGNATURE
-  ) {
-    return true;
-  }
-  return realVerify(params);
-};
 
-const previewLogin = async (
-  app: ReturnType<typeof createApp>,
-  host: string,
-) => {
+const siweLogin = async (app: ReturnType<typeof createApp>, host: string) => {
   const headers = {
     host,
     origin: `https://${host}`,
@@ -62,26 +48,27 @@ const previewLogin = async (
   const nonceRes = await app.request("/api/auth/siwe/nonce", {
     method: "POST",
     headers,
-    body: JSON.stringify({ walletAddress: PREVIEW_LOGIN_ADDRESS, chainId: 1 }),
+    body: JSON.stringify({ walletAddress: wallet.address, chainId: 1 }),
   });
   if (nonceRes.status !== 200) return nonceRes;
 
   const { nonce } = (await nonceRes.json()) as { nonce: string };
   const message = createSiweMessage({
     domain: host,
-    address: PREVIEW_LOGIN_ADDRESS,
+    address: wallet.address,
     chainId: 1,
     nonce,
     uri: `https://${host}`,
     version: "1",
   });
+  const signature = await wallet.signMessage({ message });
   return app.request("/api/auth/siwe/verify", {
     method: "POST",
     headers,
     body: JSON.stringify({
       message,
-      signature: PREVIEW_LOGIN_SIGNATURE,
-      walletAddress: PREVIEW_LOGIN_ADDRESS,
+      signature,
+      walletAddress: wallet.address,
       chainId: 1,
     }),
   });
@@ -106,7 +93,7 @@ const buildApp = async (previewDynamicHosts: boolean) => {
     db,
     secret: "integration-test-secret-0123456789abcdef",
     domains: [STATIC_HOST],
-    verifyMessage: previewVerify,
+    verifyMessage,
     previewDynamicHosts,
   });
 
@@ -118,7 +105,7 @@ const buildApp = async (previewDynamicHosts: boolean) => {
   return { client, app };
 };
 
-describe("preview environments", () => {
+describe("preview dynamic hosts", () => {
   describe("preview mode on", () => {
     let client: PGlite;
     let app: ReturnType<typeof createApp>;
@@ -130,15 +117,8 @@ describe("preview environments", () => {
       await client.close();
     });
 
-    it("advertises previewLogin in /auth/methods", async () => {
-      const res = await app.request("/auth/methods", {
-        headers: { host: STATIC_HOST },
-      });
-      await expect(res.json()).resolves.toMatchObject({ previewLogin: true });
-    });
-
-    it("signs in with the shared test credential on a dynamic vercel.app host", async () => {
-      const res = await previewLogin(app, PREVIEW_HOST);
+    it("signs in with real SIWE on a dynamic vercel.app host", async () => {
+      const res = await siweLogin(app, PREVIEW_HOST);
       expect(res.status).toBe(200);
       expect(res.headers.getSetCookie().join(";")).toContain(
         "better-auth.session_token",
@@ -146,44 +126,9 @@ describe("preview environments", () => {
     });
 
     it("still refuses hosts outside *.vercel.app", async () => {
-      const res = await previewLogin(app, "evil.example.com");
+      const res = await siweLogin(app, "evil.example.com");
       expect(res.status).toBe(400);
       await expect(res.json()).resolves.toEqual({ error: "untrusted_host" });
-    });
-
-    it("refuses the test signature for any OTHER address", async () => {
-      const host = PREVIEW_HOST;
-      const headers = {
-        host,
-        origin: `https://${host}`,
-        "content-type": "application/json",
-      };
-      const other = "0x2222222222222222222222222222222222222222";
-      const nonceRes = await app.request("/api/auth/siwe/nonce", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ walletAddress: other, chainId: 1 }),
-      });
-      const { nonce } = (await nonceRes.json()) as { nonce: string };
-      const message = createSiweMessage({
-        domain: host,
-        address: other,
-        chainId: 1,
-        nonce,
-        uri: `https://${host}`,
-        version: "1",
-      });
-      const res = await app.request("/api/auth/siwe/verify", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          message,
-          signature: PREVIEW_LOGIN_SIGNATURE,
-          walletAddress: other,
-          chainId: 1,
-        }),
-      });
-      expect(res.status).toBeGreaterThanOrEqual(400);
     });
   });
 
@@ -198,15 +143,8 @@ describe("preview environments", () => {
       await client.close();
     });
 
-    it("does not advertise previewLogin", async () => {
-      const res = await app.request("/auth/methods", {
-        headers: { host: STATIC_HOST },
-      });
-      await expect(res.json()).resolves.toMatchObject({ previewLogin: false });
-    });
-
     it("refuses dynamic vercel.app hosts", async () => {
-      const res = await previewLogin(app, PREVIEW_HOST);
+      const res = await siweLogin(app, PREVIEW_HOST);
       expect(res.status).toBe(400);
       await expect(res.json()).resolves.toEqual({ error: "untrusted_host" });
     });
