@@ -143,7 +143,7 @@ async function main() {
         status: c.res.status,
         durationMs: Date.now() - start,
       },
-      "request",
+      `${c.req.method} ${c.req.path} ${c.res.status}`,
     );
   });
 

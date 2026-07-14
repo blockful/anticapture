@@ -4,6 +4,7 @@ import { logger } from "../logger.js";
 
 export const requestLogger = (): MiddlewareHandler => {
   return async (c, next) => {
+    if (c.req.path === "/metrics" || c.req.path === "/health") return next();
     const start = performance.now();
 
     try {
@@ -16,7 +17,7 @@ export const requestLogger = (): MiddlewareHandler => {
           path: c.req.path,
           durationMs: Math.round(performance.now() - start),
         },
-        "request failed",
+        `${c.req.method} ${c.req.path} ${c.res?.status || 500}`,
       );
       throw err;
     }
@@ -28,7 +29,7 @@ export const requestLogger = (): MiddlewareHandler => {
         status: c.res.status,
         durationMs: Math.round(performance.now() - start),
       },
-      "request completed",
+      `${c.req.method} ${c.req.path} ${c.res.status}`,
     );
   };
 };
