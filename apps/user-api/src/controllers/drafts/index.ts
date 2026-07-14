@@ -6,10 +6,10 @@ import {
   DraftListResponseSchema,
   DraftParamsSchema,
   DraftResponseSchema,
-  ErrorResponseSchema,
   ListDraftsQuerySchema,
   UpdateDraftBodySchema,
 } from "@/mappers/drafts";
+import { ErrorResponseSchema, unauthorizedResponses } from "@/mappers/errors";
 import { optionalSession, sessionAuth } from "@/middlewares/session";
 import type { DraftRow } from "@/repositories/drafts";
 import { DraftQuotaExceededError, type DraftsService } from "@/services/drafts";
@@ -28,17 +28,6 @@ const toResponse = (row: DraftRow, sessionUserId: string | null) => ({
   // the caller's identity comes exclusively from the session.
   isOwner: row.userId !== null && row.userId === sessionUserId,
 });
-
-const unauthorizedResponses = {
-  400: {
-    description: "Request Host is not a trusted domain",
-    content: { "application/json": { schema: ErrorResponseSchema } },
-  },
-  401: {
-    description: "Missing or invalid session",
-    content: { "application/json": { schema: ErrorResponseSchema } },
-  },
-} as const;
 
 export function draftsController(
   app: OpenAPIHono,

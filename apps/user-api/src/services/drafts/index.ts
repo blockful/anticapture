@@ -21,6 +21,16 @@ export class DraftsService {
   ) {}
 
   /**
+   * Users whose migrated rows this process already claimed. Claimable rows
+   * are the fixed pre-migration set (new drafts are born with a userId) and
+   * a user's wallet set is settled at SIWE sign-up (no linking in v1), so
+   * one successful claim settles the user forever — later requests skip the
+   * claim UPDATE. Process-local: a restart just re-claims once, so this
+   * stays correct even if wallet linking ships later.
+   */
+  private readonly claimed = new Set<string>();
+
+  /**
    * Adopts migrated rows (userId NULL) authored by one of this user's
    * wallets — claim-on-first-touch, so ownership is settled on EVERY entry
    * point (list, direct share view, update, delete), not just the list.
@@ -28,7 +38,12 @@ export class DraftsService {
    */
   private async claimMigrated(userId: string): Promise<string[]> {
     const wallets = await this.repo.findWalletAddresses(userId);
-    await this.repo.claimByAddresses(userId, wallets);
+    if (!this.claimed.has(userId)) {
+      await this.repo.claimByAddresses(userId, wallets);
+      // Guard against unbounded growth across a very long process life.
+      if (this.claimed.size >= 10_000) this.claimed.clear();
+      this.claimed.add(userId);
+    }
     return wallets;
   }
 
