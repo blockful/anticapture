@@ -52,7 +52,10 @@ export const LoginModal = ({
   // The server reports which methods its deployment actually serves (magic
   // link / Google are env-gated there); a method it can't handle is hidden
   // rather than shown broken. Whitelabel is wallet-only by design.
-  const methods = useAuthMethods(!isWhitelabel && open);
+  // Fetched at mount (this component is always mounted, `open` just toggles
+  // it) so the answer is already cached when the modal first opens — the
+  // Email/Google buttons must not pop in after a round-trip.
+  const methods = useAuthMethods(!isWhitelabel);
   const showEmail = !isWhitelabel && methods.magicLink;
   const showGoogle = !isWhitelabel && methods.google;
   const showAlternatives = showEmail || showGoogle;
