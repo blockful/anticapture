@@ -6,8 +6,6 @@ export type AuthMethods = {
   siwe: boolean;
   magicLink: boolean;
   google: boolean;
-  /** Railway PR previews only: one-click sign-in as the shared test user. */
-  previewLogin: boolean;
 };
 
 // Fail closed: on error only wallet sign-in is offered, so we never render a
@@ -16,7 +14,6 @@ const FALLBACK: AuthMethods = {
   siwe: true,
   magicLink: false,
   google: false,
-  previewLogin: false,
 };
 
 /**
