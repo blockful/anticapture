@@ -80,34 +80,39 @@ export const SessionAccountButton = ({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent side="top" align="start" className="w-60 p-3">
-        <div className="flex flex-col gap-3">
-          <div className="flex min-w-0 flex-col">
-            <span className="text-primary truncate text-sm font-medium">
-              {displayName}
-            </span>
-            {/* Wallet-born users carry a synthetic <address>@<origin>
-                placeholder email — never show it as an identity. */}
-            {user.email &&
-              user.email !== displayName &&
-              !user.email.includes("@http") && (
-                <span className="text-secondary truncate text-xs">
-                  {user.email}
-                </span>
-              )}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            loading={signingOut}
-            loadingText="Signing out…"
-            onClick={() => void signOut()}
-          >
-            <LogOut className="size-3.5" />
-            Sign out
-          </Button>
+      {/* Panel and row mirror the design-system Combobox dropdown (surface,
+          padding, hover); the identity header is a non-interactive block
+          with the same row padding. */}
+      <PopoverContent
+        side="top"
+        align="start"
+        className="bg-surface-contrast border-border-contrast rounded-base flex w-60 flex-col px-0 py-1 shadow-none"
+      >
+        <div className="flex min-w-0 flex-col px-3 py-2">
+          <span className="text-primary truncate text-sm font-medium">
+            {displayName}
+          </span>
+          {/* Wallet-born users carry a synthetic <address>@<origin>
+              placeholder email — never show it as an identity. */}
+          {user.email &&
+            user.email !== displayName &&
+            !user.email.includes("@http") && (
+              <span className="text-secondary truncate text-xs">
+                {user.email}
+              </span>
+            )}
         </div>
+        <button
+          type="button"
+          disabled={signingOut}
+          onClick={() => void signOut()}
+          className="text-primary hover:bg-surface-hover flex w-full cursor-pointer items-center gap-1.5 px-3 py-2 text-sm font-normal leading-5 transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50"
+        >
+          <LogOut className="size-3.5 shrink-0" />
+          <span className="min-w-0 flex-1 truncate text-left">
+            {signingOut ? "Signing out…" : "Sign out"}
+          </span>
+        </button>
       </PopoverContent>
     </Popover>
   );

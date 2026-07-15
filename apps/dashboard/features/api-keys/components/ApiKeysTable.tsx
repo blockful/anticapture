@@ -45,14 +45,20 @@ const KeyOptions = ({
           <Ellipsis className="size-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-40 p-1">
+      {/* Panel and row mirror the design-system Combobox dropdown (surface,
+          padding, hover) — this is an action menu, so the row keeps the
+          destructive color instead of ComboboxItem's selection semantics. */}
+      <PopoverContent
+        align="end"
+        className="bg-surface-contrast border-border-contrast rounded-base flex w-40 flex-col px-0 py-1 shadow-none"
+      >
         <button
           type="button"
           onClick={() => {
             setOpen(false);
             onDelete(apiKey);
           }}
-          className="text-error hover:bg-surface-contrast rounded-base w-full px-3 py-2 text-left text-sm font-medium transition-colors"
+          className="text-error hover:bg-surface-hover w-full cursor-pointer px-3 py-2 text-left text-sm font-normal leading-5 transition-colors duration-150"
         >
           Delete key
         </button>
