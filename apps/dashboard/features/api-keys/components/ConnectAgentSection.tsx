@@ -4,6 +4,7 @@ import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/shared/components";
+import { CodeBlock } from "@/shared/components/design-system/code-block/CodeBlock";
 import { Combobox } from "@/shared/components/design-system/combobox";
 import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
@@ -65,7 +66,6 @@ export const ConnectAgentSection = ({
 }) => {
   const [client, setClient] = useState<ClientName>("Claude Code");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   // A key created in this session becomes the selected one.
   useEffect(() => {
@@ -83,12 +83,6 @@ export const ConnectAgentSection = ({
   // carries the full plaintext so it works as-is.
   const shownKey = token ? `${token.slice(0, 12)}…` : KEY_PLACEHOLDER;
   const copiedKey = token ?? KEY_PLACEHOLDER;
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(CLIENTS[client](copiedKey));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -122,22 +116,13 @@ export const ConnectAgentSection = ({
           )}
         </div>
 
-        <div className="border-border-contrast bg-surface-default relative min-h-[84px] w-full border p-3">
-          <code className="text-secondary block min-w-0 whitespace-pre-wrap break-words pr-16 font-mono text-sm leading-5">
-            {CLIENTS[client](shownKey)}
-          </code>
-          {/* Pinned flush to the block's corner like the gov frontend's
-              Encode button; nudged -1px so its border overlaps the box's
-              instead of stacking beside it. */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="absolute -bottom-[1px] -right-[1px]"
-            onClick={copy}
-          >
-            {copied ? "Copied" : "Copy"}
-          </Button>
-        </div>
+        {/* On-screen the key is redacted; the copied command carries the
+            full plaintext so it works as-is. */}
+        <CodeBlock
+          code={CLIENTS[client](shownKey)}
+          copyText={CLIENTS[client](copiedKey)}
+          className="min-h-[84px]"
+        />
 
         {selected && (
           <div className="flex items-center gap-2">
