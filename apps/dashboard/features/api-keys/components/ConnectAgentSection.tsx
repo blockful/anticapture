@@ -4,7 +4,6 @@ import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/shared/components";
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { Combobox } from "@/shared/components/design-system/combobox";
 import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
@@ -66,6 +65,7 @@ export const ConnectAgentSection = ({
 }) => {
   const [client, setClient] = useState<ClientName>("Claude Code");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // A key created in this session becomes the selected one.
   useEffect(() => {
@@ -83,6 +83,12 @@ export const ConnectAgentSection = ({
   // carries the full plaintext so it works as-is.
   const shownKey = token ? `${token.slice(0, 12)}…` : KEY_PLACEHOLDER;
   const copiedKey = token ?? KEY_PLACEHOLDER;
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(CLIENTS[client](copiedKey));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -117,15 +123,19 @@ export const ConnectAgentSection = ({
         </div>
 
         <div className="border-border-contrast bg-surface-default relative min-h-[84px] w-full border p-3">
-          <code className="text-secondary block min-w-0 whitespace-pre-wrap break-words pr-8 font-mono text-sm leading-5">
+          <code className="text-secondary block min-w-0 whitespace-pre-wrap break-words pr-16 font-mono text-sm leading-5">
             {CLIENTS[client](shownKey)}
           </code>
-          {/* Copy affordance pinned to the block's corner, matching the
-              design-system pattern used across the gov frontend. */}
-          <CopyAndPasteButton
-            textToCopy={CLIENTS[client](copiedKey)}
+          {/* Pinned flush to the block's corner (b-0 r-0), like the gov
+              frontend's Encode button. */}
+          <Button
+            variant="outline"
+            size="sm"
             className="absolute bottom-0 right-0"
-          />
+            onClick={copy}
+          >
+            {copied ? "Copied" : "Copy"}
+          </Button>
         </div>
 
         {selected && (

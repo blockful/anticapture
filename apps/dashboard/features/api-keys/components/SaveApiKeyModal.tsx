@@ -1,6 +1,8 @@
 "use client";
 
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { useState } from "react";
+
+import { Button } from "@/shared/components";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 
 /**
@@ -19,6 +21,14 @@ export const SaveApiKeyModal = ({
   token: string;
   label: string;
 }) => {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(token);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <Modal
       open={open}
@@ -30,13 +40,19 @@ export const SaveApiKeyModal = ({
     >
       {/* The modal body brings its own padding. */}
       <div className="border-border-contrast bg-surface-default relative border p-3">
-        <code className="text-secondary block min-w-0 break-all pr-8 font-mono text-sm">
+        <code className="text-secondary block min-w-0 break-all pr-16 font-mono text-sm">
           {token}
         </code>
-        <CopyAndPasteButton
-          textToCopy={token}
+        {/* Pinned flush to the block's corner (b-0 r-0), like the gov
+            frontend's Encode button. */}
+        <Button
+          variant="outline"
+          size="sm"
           className="absolute bottom-0 right-0"
-        />
+          onClick={copy}
+        >
+          {copied ? "Copied" : "Copy"}
+        </Button>
       </div>
     </Modal>
   );
