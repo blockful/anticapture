@@ -49,7 +49,7 @@ export const SaveApiKeyModal = ({
         <Button
           variant="outline"
           size="sm"
-          className="absolute -bottom-px -right-px"
+          className="absolute -bottom-[1px] -right-[1px]"
           onClick={copy}
         >
           {copied ? "Copied" : "Copy"}
