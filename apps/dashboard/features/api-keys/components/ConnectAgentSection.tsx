@@ -1,15 +1,12 @@
 "use client";
 
-import { ChevronDown, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { Combobox } from "@/shared/components/design-system/combobox";
 import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/shared/components/ui/popover";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
 import { cn } from "@/shared/utils/cn";
 import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
@@ -69,8 +66,6 @@ export const ConnectAgentSection = ({
 }) => {
   const [client, setClient] = useState<ClientName>("Claude Code");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectorOpen, setSelectorOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   // A key created in this session becomes the selected one.
   useEffect(() => {
@@ -88,12 +83,6 @@ export const ConnectAgentSection = ({
   // carries the full plaintext so it works as-is.
   const shownKey = token ? `${token.slice(0, 12)}…` : KEY_PLACEHOLDER;
   const copiedKey = token ?? KEY_PLACEHOLDER;
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(CLIENTS[client](copiedKey));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -119,52 +108,24 @@ export const ConnectAgentSection = ({
           </div>
 
           {selected && (
-            <Popover open={selectorOpen} onOpenChange={setSelectorOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="border-border-contrast bg-surface-default hover:bg-surface-contrast rounded-base text-primary flex items-center gap-1.5 border py-[5px] pl-2.5 pr-2 text-xs font-medium transition-colors"
-                >
-                  Key: {selected.label}
-                  <ChevronDown className="text-secondary size-3.5" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-56 p-1">
-                {keys.map((key) => (
-                  <button
-                    key={key.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedId(key.id);
-                      setSelectorOpen(false);
-                    }}
-                    className={cn(
-                      "hover:bg-surface-contrast rounded-base w-full truncate px-3 py-2 text-left text-sm transition-colors",
-                      key.id === selected.id
-                        ? "text-primary"
-                        : "text-secondary",
-                    )}
-                  >
-                    {key.label}
-                  </button>
-                ))}
-              </PopoverContent>
-            </Popover>
+            <Combobox
+              items={keys.map((k) => ({ value: k.id, label: k.label }))}
+              value={selected.id}
+              onValueChange={setSelectedId}
+            />
           )}
         </div>
 
-        <div className="border-border-contrast bg-surface-default flex min-h-[84px] w-full gap-2.5 border p-3">
-          <code className="text-secondary min-w-0 flex-1 whitespace-pre-wrap break-words font-mono text-sm leading-5">
+        <div className="border-border-contrast bg-surface-default relative min-h-[84px] w-full border p-3">
+          <code className="text-secondary block min-w-0 whitespace-pre-wrap break-words pr-8 font-mono text-sm leading-5">
             {CLIENTS[client](shownKey)}
           </code>
-          <Button
-            variant="outline"
-            size="sm"
-            className="self-end"
-            onClick={copy}
-          >
-            {copied ? "Copied" : "Copy"}
-          </Button>
+          {/* Copy affordance pinned to the block's corner, matching the
+              design-system pattern used across the gov frontend. */}
+          <CopyAndPasteButton
+            textToCopy={CLIENTS[client](copiedKey)}
+            className="absolute bottom-0 right-0"
+          />
         </div>
 
         {selected && (

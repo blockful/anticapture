@@ -17,7 +17,6 @@ import { useState, useEffect, useMemo, type ElementType } from "react";
 
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
-import { useGatedNavClick } from "@/shared/services/auth/useGatedNav";
 import { cn } from "@/shared/utils/";
 
 type MenuItem = {
@@ -25,8 +24,6 @@ type MenuItem = {
   label: string;
   icon: ElementType;
   isGlobal: boolean;
-  /** Login-gated page: signed-out clicks open the sign-in modal instead. */
-  requiresAuth?: boolean;
   onClick?: () => void;
 };
 
@@ -39,7 +36,6 @@ export const HeaderMobile = ({
 }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const gatedNavClick = useGatedNavClick();
 
   const menuItems = useMemo<MenuItem[]>(
     () => [
@@ -63,7 +59,6 @@ export const HeaderMobile = ({
         isGlobal: true,
         label: "API",
         icon: Code,
-        requiresAuth: true,
       },
     ],
     [],
@@ -180,13 +175,7 @@ export const HeaderMobile = ({
                 icon={item.icon}
                 label={item.label}
                 isGlobal={item.isGlobal}
-                onClick={(e) => {
-                  if (item.requiresAuth && gatedNavClick(e, item.page)) {
-                    setIsMenuOpen(false);
-                    return;
-                  }
-                  item.onClick?.();
-                }}
+                onClick={item.onClick}
               />
             ))}
 

@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-import { Button } from "@/shared/components";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 
 /**
@@ -21,14 +19,6 @@ export const SaveApiKeyModal = ({
   token: string;
   label: string;
 }) => {
-  const [copied, setCopied] = useState(false);
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(token);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
     <Modal
       open={open}
@@ -38,22 +28,15 @@ export const SaveApiKeyModal = ({
       confirmLabel="Done"
       onConfirm={() => onOpenChange(false)}
     >
-      <div className="flex flex-col gap-2 p-4">
-        <div className="border-border-contrast bg-surface-default flex items-start gap-2.5 border p-3">
-          <code className="text-secondary min-w-0 flex-1 break-all font-mono text-sm">
-            {token}
-          </code>
-          {/* Labeled like ConnectAgentSection's — this is the one-time
-              reveal, where the copy affordance matters most. */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="self-end"
-            onClick={copy}
-          >
-            {copied ? "Copied" : "Copy"}
-          </Button>
-        </div>
+      {/* The modal body brings its own padding. */}
+      <div className="border-border-contrast bg-surface-default relative border p-3">
+        <code className="text-secondary block min-w-0 break-all pr-8 font-mono text-sm">
+          {token}
+        </code>
+        <CopyAndPasteButton
+          textToCopy={token}
+          className="absolute bottom-0 right-0"
+        />
       </div>
     </Modal>
   );

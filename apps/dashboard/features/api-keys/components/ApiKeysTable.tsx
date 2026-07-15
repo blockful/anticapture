@@ -1,11 +1,10 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Circle, Ellipsis } from "lucide-react";
+import { Ellipsis } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/shared/components";
-import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Table } from "@/shared/components/design-system/table/Table";
 import {
   Popover,
@@ -20,12 +19,6 @@ const dateFmt = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
 });
-
-// Filled status dot inside the badge, per the Figma (hasIcon).
-const statusDotProps = {
-  icon: Circle,
-  iconClassName: "size-1.5 fill-current",
-} as const;
 
 // ⋯ options menu per row — delete is the only action for now (rotate and
 // disable are follow-ups).
@@ -88,20 +81,6 @@ export const ApiKeysTable = ({
             {row.original.label}
           </span>
         ),
-      },
-      {
-        id: "status",
-        header: "Status",
-        cell: ({ row }) =>
-          row.original.revokedAt === null ? (
-            <BadgeStatus variant="success" {...statusDotProps}>
-              Active
-            </BadgeStatus>
-          ) : (
-            <BadgeStatus variant="dimmed" {...statusDotProps}>
-              Disabled
-            </BadgeStatus>
-          ),
       },
       {
         accessorKey: "createdAt",

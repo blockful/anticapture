@@ -1,10 +1,10 @@
 "use client";
 
-import { Code, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Code, KeyRound, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/shared/components";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
@@ -20,7 +20,6 @@ import { SaveApiKeyModal } from "./components/SaveApiKeyModal";
 import { useApiKeys } from "./hooks/useApiKeys";
 
 export const ApiKeysManager = () => {
-  const router = useRouter();
   const { data: session, isPending } = useSession();
   const { openLogin } = useLogin();
   const isAuthed = !isPending && !!session;
@@ -67,22 +66,6 @@ export const ApiKeysManager = () => {
     revoke.mutate(toDelete.id, { onSuccess: () => setToDelete(null) });
   };
 
-  // The page is login-gated: it only renders with a session. A signed-out
-  // arrival is bounced home with the sign-in modal open, and signing in
-  // navigates back here (redirectTo). Signing out while on the page just
-  // bounces home, without re-prompting.
-  const wasAuthed = useRef(false);
-  useEffect(() => {
-    if (session) wasAuthed.current = true;
-  }, [session]);
-  useEffect(() => {
-    if (isPending || session) return;
-    if (!wasAuthed.current) openLogin({ redirectTo: "/api-keys" });
-    router.replace("/");
-  }, [isPending, session, openLogin, router]);
-
-  if (!isAuthed) return null;
-
   // A deployment without Authful provisioning has no API-key surface —
   // showing working-looking controls that can never succeed would be worse.
   if (isUnavailable) {
@@ -112,19 +95,32 @@ export const ApiKeysManager = () => {
             variant="primary"
             size="md"
             className="shrink-0"
-            onClick={() => setCreateOpen(true)}
+            // Anyone can browse the page; actions are what prompt sign-in.
+            onClick={() => (isAuthed ? setCreateOpen(true) : openLogin())}
           >
             <Plus className="size-3.5" />
             Create key
           </Button>
         </div>
 
-        {isLoading ? (
+        {isPending || isLoading ? (
           <div className="flex flex-col gap-1">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-13 w-full" />
             <Skeleton className="h-13 w-full" />
           </div>
+        ) : !isAuthed ? (
+          // Signed-out visitors see the page; keys themselves need a session.
+          <BlankSlate
+            variant="title"
+            icon={KeyRound}
+            title="Sign in to manage API keys"
+            description="Keys belong to your account. Sign in to create one and connect your AI agent."
+          >
+            <Button variant="primary" size="md" onClick={() => openLogin()}>
+              Sign in
+            </Button>
+          </BlankSlate>
         ) : (
           <ApiKeysTable keys={keys} isError={isError} onDelete={setToDelete} />
         )}

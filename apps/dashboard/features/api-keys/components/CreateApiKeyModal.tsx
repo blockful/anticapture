@@ -43,7 +43,8 @@ export const CreateApiKeyModal = ({
       isConfirmLoading={isCreating}
       onConfirm={() => onCreate(trimmed)}
     >
-      <div className="flex flex-col gap-2 p-4">
+      {/* The modal body brings its own padding. */}
+      <div className="flex flex-col gap-2">
         <FormLabel htmlFor="api-key-label" isRequired>
           Name your key
         </FormLabel>

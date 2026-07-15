@@ -10,20 +10,15 @@ import {
   BottomNavigationButtons,
 } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
-import { useGatedNavClick } from "@/shared/services/auth/useGatedNav";
 
 type HeaderItem = {
   page: string;
   label: string;
   icon: ElementType;
   isGlobal: boolean;
-  /** Login-gated page: signed-out clicks open the sign-in modal instead. */
-  requiresAuth?: boolean;
 };
 
 export const HeaderSidebar = () => {
-  const gatedNavClick = useGatedNavClick();
-
   const headerItems = useMemo<HeaderItem[]>(
     () => [
       {
@@ -43,7 +38,6 @@ export const HeaderSidebar = () => {
         label: "API",
         icon: Code,
         isGlobal: true,
-        requiresAuth: true,
       },
     ],
     [],
@@ -70,11 +64,6 @@ export const HeaderSidebar = () => {
                 icon={item.icon}
                 label={item.label}
                 isGlobal={item.isGlobal}
-                onClick={
-                  item.requiresAuth
-                    ? (e) => void gatedNavClick(e, item.page)
-                    : undefined
-                }
               />
             ))}
           </div>
