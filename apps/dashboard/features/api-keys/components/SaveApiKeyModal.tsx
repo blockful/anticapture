@@ -43,12 +43,13 @@ export const SaveApiKeyModal = ({
         <code className="text-secondary block min-w-0 break-all pr-16 font-mono text-sm">
           {token}
         </code>
-        {/* Pinned flush to the block's corner (b-0 r-0), like the gov
-            frontend's Encode button. */}
+        {/* Pinned flush to the block's corner like the gov frontend's
+            Encode button; nudged -1px so its border overlaps the box's
+            instead of stacking beside it. */}
         <Button
           variant="outline"
           size="sm"
-          className="absolute bottom-0 right-0"
+          className="absolute -bottom-px -right-px"
           onClick={copy}
         >
           {copied ? "Copied" : "Copy"}
