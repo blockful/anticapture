@@ -361,4 +361,5 @@ export const SHU: DaoConfiguration = {
   dataTables: true,
   governancePage: true,
   activityFeed: true,
+  offchainProposals: true,
 };
