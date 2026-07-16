@@ -15,6 +15,12 @@ type RouteContext = {
 // internal endpoints (/health, /metrics) that must not become publicly
 // reachable through the dashboard origin.
 const isAllowedPath = (path: string[]) => {
+  // Next decodes %2e before we see the segments, so a dot segment would
+  // survive into new URL(), which normalizes it ("me/../metrics" →
+  // "/metrics") and defeats this allowlist. Reject them outright.
+  if (path.some((segment) => segment === "." || segment === "..")) {
+    return false;
+  }
   const joined = path.join("/");
   return (
     joined.startsWith("api/auth/") || // better-auth (sessions, sign-in/out)
@@ -87,10 +93,17 @@ const proxyRequest = async (
 
   // Rebuild response headers so every Set-Cookie survives (a plain header copy
   // collapses duplicates); drop hop-by-hop encoding headers fetch already
-  // decoded.
+  // decoded — including content-length, which still describes the compressed
+  // body and would truncate/fail the decompressed one we forward.
   const headers = new Headers();
   upstreamResponse.headers.forEach((value, key) => {
-    if (key === "set-cookie" || key === "content-encoding") return;
+    if (
+      key === "set-cookie" ||
+      key === "content-encoding" ||
+      key === "content-length"
+    ) {
+      return;
+    }
     headers.set(key, value);
   });
   for (const cookie of upstreamResponse.headers.getSetCookie()) {

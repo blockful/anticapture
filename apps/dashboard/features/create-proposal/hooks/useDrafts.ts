@@ -10,6 +10,7 @@ import type {
 import { draftKey } from "@/features/create-proposal/utils/draftKey";
 import {
   readDrafts,
+  writeDrafts,
   type NewDraftInput,
 } from "@/features/create-proposal/utils/draftStorage";
 import { useSession } from "@/shared/services/auth/client";
@@ -67,9 +68,15 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
   // refetches the list.
   useEffect(() => {
     // Reset immediately so one user's drafts (or a previous session's) never
-    // linger on screen while another session's fetch is in flight.
+    // linger on screen while another session's fetch is in flight. A fetch
+    // cancelled by this effect's cleanup skips its finally, so the flags are
+    // cleared here too — sign-out mid-request must not strand isLoading.
     setDrafts([]);
-    if (!userId) return;
+    if (!userId) {
+      setIsLoading(false);
+      setError(false);
+      return;
+    }
 
     let cancelled = false;
     const run = async () => {
@@ -115,23 +122,29 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
 
     let cancelled = false;
     const run = async () => {
-      try {
-        await Promise.all(
-          localDrafts.map((d) =>
-            createDraft({
-              daoId,
-              title: d.title,
-              discussionUrl: d.discussionUrl,
-              body: d.body,
-              actions: d.actions,
-            }),
-          ),
-        );
-        storage.removeItem(draftKey(daoId, address));
+      // Per-row idempotency: rows that upload successfully are removed from
+      // the key right away, so a partial failure retries only the failed
+      // rows instead of duplicating the migrated ones on the next attempt.
+      const results = await Promise.allSettled(
+        localDrafts.map((d) =>
+          createDraft({
+            daoId,
+            title: d.title,
+            discussionUrl: d.discussionUrl,
+            body: d.body,
+            actions: d.actions,
+          }),
+        ),
+      );
+      const failed = localDrafts.filter(
+        (_, i) => results[i]?.status === "rejected",
+      );
+      writeDrafts(storage, draftKey(daoId, address), failed);
+      if (failed.length === 0) {
         drainedLocalRef.current.add(localKey);
         if (!cancelled) setRetryToken((n) => n + 1);
-      } catch {
-        if (!cancelled) setError(true);
+      } else if (!cancelled) {
+        setError(true);
       }
     };
 

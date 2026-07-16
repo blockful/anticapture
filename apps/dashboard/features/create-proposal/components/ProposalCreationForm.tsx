@@ -161,6 +161,10 @@ export const ProposalCreationForm = ({
         // previewed — and publishable — under this route's DAO).
         if (shared.daoId !== daoId) {
           showCustomToast("This draft belongs to another DAO", "error");
+          // The URL's draftId must not stay armed as the save target: a
+          // later Save Draft would overwrite the foreign-DAO draft with
+          // this route's form content.
+          setCurrentDraftId(undefined);
           return;
         }
         setSharedAuthor(shared.authorAddress ?? undefined);
@@ -210,6 +214,36 @@ export const ProposalCreationForm = ({
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+
+  // Email/Google sign-in leaves the page, so a dirty form would be lost on
+  // the auth round-trip. Save Draft stashes the values before opening the
+  // login modal; back on the page the stash is restored — after any shared
+  // draft hydrated, so the user's newer edits win — and cleared. The in-page
+  // SIWE path restores a byte-identical form, a visual no-op.
+  const pendingDraftStashKey = `anticapture:pending-draft:${daoId}`;
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(pendingDraftStashKey);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    if (draftId && hydratedDraftId !== draftId) return;
+    try {
+      form.reset(JSON.parse(raw) as ProposalFormValues);
+      setBodyVersion((v) => v + 1);
+    } catch {
+      // corrupted stash — drop it
+    } finally {
+      try {
+        sessionStorage.removeItem(pendingDraftStashKey);
+      } catch {
+        // ignore
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingDraftStashKey, draftId, hydratedDraftId]);
   // Publish deferred while a disconnected user connects, resumed once ready.
   const [pendingAction, setPendingAction] = useState<"publish" | null>(null);
   // Ref so rapid clicks see an in-flight save before state commits.
@@ -323,6 +357,13 @@ export const ProposalCreationForm = ({
     // Saving is session-gated now, not wallet-gated: prompt sign-in when there
     // is no session (the user may be connected but not authenticated).
     if (drafts.needsAuth) {
+      // Stash the form first: the email/Google paths leave the page, and the
+      // restore effect above brings the content back after the round-trip.
+      try {
+        sessionStorage.setItem(pendingDraftStashKey, JSON.stringify(values));
+      } catch {
+        // storage blocked — the in-page SIWE path still preserves the form
+      }
       openLogin();
       return;
     }

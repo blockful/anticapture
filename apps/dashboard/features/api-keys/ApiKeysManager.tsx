@@ -39,14 +39,19 @@ export const ApiKeysManager = () => {
   const [sessionTokens, setSessionTokens] = useState<Record<string, string>>(
     {},
   );
-  const [lastCreatedId, setLastCreatedId] = useState<string | null>(null);
+  // id+label (not just the id): the connect section must be able to render
+  // the key even before the invalidated list refetch returns it.
+  const [lastCreated, setLastCreated] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
   const [toDelete, setToDelete] = useState<UserApiKey | null>(null);
 
   // Plaintexts belong to exactly one account: a sign-out or a different user
   // signing in must never inherit (or copy) the previous user's tokens.
   useEffect(() => {
     setSessionTokens({});
-    setLastCreatedId(null);
+    setLastCreated(null);
     setCreated(null);
   }, [userId]);
 
@@ -56,7 +61,7 @@ export const ApiKeysManager = () => {
         setCreateOpen(false);
         setCreated({ token: key.token, label: key.label });
         setSessionTokens((prev) => ({ ...prev, [key.id]: key.token }));
-        setLastCreatedId(key.id);
+        setLastCreated({ id: key.id, label: key.label });
       },
     });
   };
@@ -131,7 +136,7 @@ export const ApiKeysManager = () => {
       <ConnectAgentSection
         keys={keys}
         sessionTokens={sessionTokens}
-        lastCreatedId={lastCreatedId}
+        lastCreated={lastCreated}
       />
 
       <CreateApiKeyModal

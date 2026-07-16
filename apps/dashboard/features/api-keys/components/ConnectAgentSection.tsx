@@ -58,24 +58,42 @@ const KEY_PLACEHOLDER = "<YOUR_API_KEY>";
 export const ConnectAgentSection = ({
   keys,
   sessionTokens,
-  lastCreatedId,
+  lastCreated,
 }: {
   keys: UserApiKey[];
   sessionTokens: Record<string, string>;
-  lastCreatedId: string | null;
+  lastCreated: { id: string; label: string } | null;
 }) => {
   const [client, setClient] = useState<ClientName>("Claude Code");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // A key created in this session becomes the selected one.
   useEffect(() => {
-    if (lastCreatedId) setSelectedId(lastCreatedId);
-  }, [lastCreatedId]);
+    if (lastCreated) setSelectedId(lastCreated.id);
+  }, [lastCreated]);
+
+  // A just-created key may not be in `keys` yet (the invalidated list is
+  // still refetching, or that refetch failed) — synthesize it so the copied
+  // command carries the fresh plaintext instead of an older key or the
+  // placeholder.
+  const knownKeys =
+    lastCreated && !keys.some((k) => k.id === lastCreated.id)
+      ? [
+          {
+            id: lastCreated.id,
+            label: lastCreated.label,
+            createdAt: "",
+            revokedAt: null,
+            lastUsedAt: null,
+          },
+          ...keys,
+        ]
+      : keys;
 
   const selected =
-    keys.find((k) => k.id === selectedId) ??
-    keys.find((k) => sessionTokens[k.id]) ??
-    keys[0] ??
+    knownKeys.find((k) => k.id === selectedId) ??
+    knownKeys.find((k) => sessionTokens[k.id]) ??
+    knownKeys[0] ??
     null;
 
   const token = selected ? sessionTokens[selected.id] : undefined;
@@ -109,7 +127,7 @@ export const ConnectAgentSection = ({
 
           {selected && (
             <Combobox
-              items={keys.map((k) => ({ value: k.id, label: k.label }))}
+              items={knownKeys.map((k) => ({ value: k.id, label: k.label }))}
               value={selected.id}
               onValueChange={setSelectedId}
             />

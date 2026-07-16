@@ -20,6 +20,21 @@ export const readDrafts = (
   }
 };
 
+/** Rewrites a legacy-draft key; an empty list clears it. Best-effort. */
+export const writeDrafts = (
+  storage: Storage | undefined,
+  key: string,
+  drafts: ProposalDraft[],
+): void => {
+  if (!storage) return;
+  try {
+    if (drafts.length === 0) storage.removeItem(key);
+    else storage.setItem(key, JSON.stringify(drafts));
+  } catch {
+    // quota/blocked storage keeps the previous value
+  }
+};
+
 export const removeDraft = (
   current: ProposalDraft[],
   id: string,
