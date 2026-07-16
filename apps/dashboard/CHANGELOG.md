@@ -1,5 +1,13 @@
 # @anticapture/dashboard
 
+## 2.8.2
+
+### Patch Changes
+
+- [#2056](https://github.com/blockful/anticapture/pull/2056) [`1051a2d`](https://github.com/blockful/anticapture/commit/1051a2d698b74c95219df903862ed3afe658c514) Thanks [@pikonha](https://github.com/pikonha)! - enable offchain (Snapshot) proposal data for ShutterDAO
+
+- [#2043](https://github.com/blockful/anticapture/pull/2043) [`d071210`](https://github.com/blockful/anticapture/commit/d071210fccfa986abd25bc2e33e545ac2eea386b) Thanks [@brunod-e](https://github.com/brunod-e)! - Update Shutter whitelabel branding: brand color changed to #0044A4, new striped-shield icon (app + OG image), and brand text tokens keep the pure color for saturated dark brands instead of being lightened
+
 ## 2.8.1
 
 ### Patch Changes

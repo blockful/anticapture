@@ -1,5 +1,11 @@
 # @anticapture/indexer
 
+## 1.2.1
+
+### Patch Changes
+
+- [#2031](https://github.com/blockful/anticapture/pull/2031) [`4e6c3eb`](https://github.com/blockful/anticapture/commit/4e6c3ebcc3d527d1e90059bc00ff3d38ed4f6655) Thanks [@pikonha](https://github.com/pikonha)! - improve performance of the voting power historical endpoint
+
 ## 1.2.0
 
 ### Minor Changes
