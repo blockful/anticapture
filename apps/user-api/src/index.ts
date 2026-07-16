@@ -9,7 +9,7 @@ import { logger } from "@/logger";
 import { ApiKeysRepository } from "@/repositories/api-keys";
 import { DraftsRepository } from "@/repositories/drafts";
 import { ApiKeysService } from "@/services/api-keys";
-import { DraftsService } from "@/services/drafts";
+import { ProposalDraftsService } from "@/services/drafts";
 
 // Self-service API keys are enabled only when Authful provisioning is wired
 // (env validation guarantees the pair is set together).
@@ -27,7 +27,7 @@ const apiKeysService =
 const app = createApp({
   db,
   authResolver,
-  draftsService: new DraftsService(new DraftsRepository(db)),
+  draftsService: new ProposalDraftsService(new DraftsRepository(db)),
   apiKeysService,
 });
 

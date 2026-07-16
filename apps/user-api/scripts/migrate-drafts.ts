@@ -9,7 +9,7 @@
  *
  * Migrated rows land unclaimed (`user_id NULL`) with the original author
  * wallet in `author_address`; the User API claims them onto a user on that
- * wallet's first SIWE login (DraftsService.listForUser). Draft ids are
+ * wallet's first SIWE login (ProposalDraftsService.listForUser). Draft ids are
  * preserved verbatim so existing share links keep resolving. Idempotent:
  * re-running skips ids already present (also how cross-DAO id collisions are
  * handled — first writer wins, the rest are logged as skipped).

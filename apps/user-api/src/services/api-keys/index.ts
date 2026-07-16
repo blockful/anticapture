@@ -36,9 +36,13 @@ export class ApiKeysService {
     }
 
     // Mint in Authful under this user's own tenant, then record ownership.
+    // The Authful token name is deliberately NOT the user's label: gateful
+    // exports tenant+name as Prometheus labels, so a user-supplied string
+    // here would mint unbounded time series. The human label lives only in
+    // this service's own table.
     const minted = await this.authful.mint(
       `${USER_TENANT_PREFIX}${userId}`,
-      label,
+      "self-service",
     );
 
     try {

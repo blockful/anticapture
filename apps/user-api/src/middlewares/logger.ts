@@ -16,7 +16,7 @@ export const requestLogger = (): MiddlewareHandler => {
           path: c.req.path,
           durationMs: Math.round(performance.now() - start),
         },
-        "request failed",
+        `${c.req.method} ${c.req.path} failed`,
       );
       throw err;
     }
@@ -28,7 +28,7 @@ export const requestLogger = (): MiddlewareHandler => {
         status: c.res.status,
         durationMs: Math.round(performance.now() - start),
       },
-      "request completed",
+      `${c.req.method} ${c.req.path} ${c.res.status}`,
     );
   };
 };

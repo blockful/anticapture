@@ -19,7 +19,7 @@ import {
   walletAddress,
 } from "@/database/schema";
 import { DraftsRepository } from "@/repositories/drafts";
-import { DraftsService } from "@/services/drafts";
+import { ProposalDraftsService } from "@/services/drafts";
 
 const HOST = "localhost:3000";
 const ORIGIN = `http://${HOST}`;
@@ -77,13 +77,13 @@ describe("drafts + SIWE session integration", () => {
     app = createApp({
       db,
       authResolver,
-      draftsService: new DraftsService(repo),
+      draftsService: new ProposalDraftsService(repo),
     });
     // Same DB, tiny quota — exercises the limit without 100 inserts.
     quotaApp = createApp({
       db,
       authResolver,
-      draftsService: new DraftsService(repo, 2),
+      draftsService: new ProposalDraftsService(repo, 2),
     });
   });
 

@@ -28,7 +28,7 @@ export const drafts = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     // Owner. Null only for rows migrated from the DAO APIs whose author
     // wallet has not signed in yet — claimed on first SIWE login via
-    // authorAddress (see DraftsService.claimForUser).
+    // authorAddress (see ProposalDraftsService.claimMigrated).
     userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
     // Wallet that authored the draft, when known (SIWE authors and migrated
     // rows): display + claim key. Null for email/Google authors.
