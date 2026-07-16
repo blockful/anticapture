@@ -14,36 +14,26 @@ export class DraftQuotaExceededError extends Error {
   }
 }
 
-export class DraftsService {
+export class ProposalDraftsService {
   constructor(
     private readonly repo: DraftsRepository,
     private readonly maxDraftsPerUser = DEFAULT_MAX_DRAFTS_PER_USER,
   ) {}
 
   /**
-   * Users whose migrated rows this process already claimed. Claimable rows
-   * are the fixed pre-migration set (new drafts are born with a userId) and
-   * a user's wallet set is settled at SIWE sign-up (no linking in v1), so
-   * one successful claim settles the user forever — later requests skip the
-   * claim UPDATE. Process-local: a restart just re-claims once, so this
-   * stays correct even if wallet linking ships later.
-   */
-  private readonly claimed = new Set<string>();
-
-  /**
-   * Adopts migrated rows (userId NULL) authored by one of this user's
-   * wallets — claim-on-first-touch, so ownership is settled on EVERY entry
-   * point (list, direct share view, update, delete), not just the list.
-   * Idempotent. Returns the user's wallets for callers that need them.
+   * "Claiming" = attaching ownership: legacy drafts were migrated from the
+   * per-DAO databases with `user_id NULL` and only the author's wallet in
+   * `author_address` (accounts didn't exist back then). When a signed-in
+   * user touches drafts, any still-unowned row authored by one of their
+   * wallets is attached (claimed) to their account. Runs on EVERY entry
+   * point (list, direct share view, update, delete) — claim-on-first-touch —
+   * and stays idempotent per request: no process-local memo, because the
+   * one-shot migration script may insert claimable rows AFTER a user was
+   * first seen. Returns the user's wallets for callers that need them.
    */
   private async claimMigrated(userId: string): Promise<string[]> {
     const wallets = await this.repo.findWalletAddresses(userId);
-    if (!this.claimed.has(userId)) {
-      await this.repo.claimByAddresses(userId, wallets);
-      // Guard against unbounded growth across a very long process life.
-      if (this.claimed.size >= 10_000) this.claimed.clear();
-      this.claimed.add(userId);
-    }
+    await this.repo.claimByAddresses(userId, wallets);
     return wallets;
   }
 

@@ -21,10 +21,17 @@ export interface AuthfulClient {
 }
 
 export class AuthfulHttpClient implements AuthfulClient {
+  private readonly baseUrl: string;
+
   constructor(
-    private readonly baseUrl: string,
+    baseUrl: string,
     private readonly provisioningApiKey: string,
-  ) {}
+  ) {
+    // Hono 404s doubled paths ("//tokens"), so a trailing slash in
+    // AUTHFUL_URL must never leak into the endpoints — same trim gateful
+    // applies to its TOKEN_SERVICE_URL.
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
+  }
 
   private headers() {
     return {

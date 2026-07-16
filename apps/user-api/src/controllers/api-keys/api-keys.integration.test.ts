@@ -23,7 +23,7 @@ import {
 import { ApiKeysRepository } from "@/repositories/api-keys";
 import { DraftsRepository } from "@/repositories/drafts";
 import { ApiKeysService } from "@/services/api-keys";
-import { DraftsService } from "@/services/drafts";
+import { ProposalDraftsService } from "@/services/drafts";
 
 const HOST = "localhost:3000";
 const ORIGIN = `http://${HOST}`;
@@ -90,7 +90,7 @@ describe("api-keys + Authful brokering integration", () => {
     app = createApp({
       db,
       authResolver,
-      draftsService: new DraftsService(new DraftsRepository(db)),
+      draftsService: new ProposalDraftsService(new DraftsRepository(db)),
       // small quota to exercise the limit
       apiKeysService: new ApiKeysService(new ApiKeysRepository(db), authful, 2),
     });
@@ -164,7 +164,7 @@ describe("api-keys + Authful brokering integration", () => {
     expect(body.token).toMatch(/^act_user:/); // tenant = user:<id>
     expect(authful.mint).toHaveBeenCalledWith(
       expect.stringMatching(/^user:/),
-      "prod-agent",
+      "self-service",
     );
   });
 

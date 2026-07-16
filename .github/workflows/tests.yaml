@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       gateful_url: ${{ steps.vercel-env.outputs.gateful_url }}
+      user_api_url: ${{ steps.vercel-env.outputs.user_api_url }}
       trusted: ${{ steps.trust.outputs.trusted }}
       configured: ${{ steps.vercel-upsert.outputs.configured }}
 
@@ -177,6 +178,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           GATEFUL_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+          USER_API_URL: ${{ needs.configure-vercel-preview.outputs.user_api_url }}
           # Git metadata so Vercel attributes the deploy to the PR author (avatar +
           # "Created by"); a bare `vercel deploy` shows "No attribution data available".
           GIT_SHA: ${{ github.event.pull_request.head.sha }}
@@ -203,6 +205,7 @@ jobs:
           url=$(npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" \
             --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
             --env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
+            --env USER_API_URL="${USER_API_URL}" \
             --meta githubCommitSha="${GIT_SHA}" \
             --meta githubCommitRef="${GIT_REF}" \
             --meta githubCommitMessage="${GIT_MSG}" \

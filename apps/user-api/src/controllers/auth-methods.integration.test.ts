@@ -15,7 +15,7 @@ import {
   walletAddress,
 } from "@/database/schema";
 import { DraftsRepository } from "@/repositories/drafts";
-import { DraftsService } from "@/services/drafts";
+import { ProposalDraftsService } from "@/services/drafts";
 
 const HOST = "localhost:3000";
 const ORIGIN = `http://${HOST}`;
@@ -39,7 +39,7 @@ const buildApp = (opts: {
   const app = createApp({
     db,
     authResolver,
-    draftsService: new DraftsService(new DraftsRepository(db)),
+    draftsService: new ProposalDraftsService(new DraftsRepository(db)),
   });
 
   return { client, db, app };

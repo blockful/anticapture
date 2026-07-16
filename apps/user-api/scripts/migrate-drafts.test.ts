@@ -15,7 +15,7 @@ import {
   walletAddress,
 } from "@/database/schema";
 import { DraftsRepository } from "@/repositories/drafts";
-import { DraftsService } from "@/services/drafts";
+import { ProposalDraftsService } from "@/services/drafts";
 import { migrateDrafts, type SourceDraft } from "./migrate-drafts";
 
 const ADDR = "0xAbC0000000000000000000000000000000000001";
@@ -129,7 +129,7 @@ describe("migrateDrafts", () => {
       createdAt: new Date(),
     });
 
-    const service = new DraftsService(new DraftsRepository(db));
+    const service = new ProposalDraftsService(new DraftsRepository(db));
     const list = await service.listForUser(u!.id, "ens");
 
     expect(list).toHaveLength(1);

@@ -43,9 +43,19 @@ const envSchema = z
 
     // User self-service API keys: enabled when both are set. The User API
     // brokers keys into Authful over the private network using a provisioning
-    // key scoped to `user:*` tenants.
-    AUTHFUL_URL: z.string().url().optional(),
-    AUTHFUL_PROVISIONING_API_KEY: z.string().min(16).optional(),
+    // key scoped to `user:*` tenants. Blank counts as unset (an empty Railway
+    // var or env template must not fail a SIWE-only boot) — same normalization
+    // as authful's optionalSecret.
+    AUTHFUL_URL: z
+      .string()
+      .url()
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
+    AUTHFUL_PROVISIONING_API_KEY: z
+      .string()
+      .min(16)
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
   })
   .superRefine((data, ctx) => {
     if (Boolean(data.GOOGLE_CLIENT_ID) !== Boolean(data.GOOGLE_CLIENT_SECRET)) {

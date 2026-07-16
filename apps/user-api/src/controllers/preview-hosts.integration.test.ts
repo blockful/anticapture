@@ -18,7 +18,7 @@ import {
   walletAddress,
 } from "@/database/schema";
 import { DraftsRepository } from "@/repositories/drafts";
-import { DraftsService } from "@/services/drafts";
+import { ProposalDraftsService } from "@/services/drafts";
 
 const STATIC_HOST = "app.anticapture.com";
 const PREVIEW_HOST = "anticapture-abc123-ful.vercel.app";
@@ -100,7 +100,7 @@ const buildApp = async (previewDynamicHosts: boolean) => {
   const app = createApp({
     db,
     authResolver,
-    draftsService: new DraftsService(new DraftsRepository(db)),
+    draftsService: new ProposalDraftsService(new DraftsRepository(db)),
   });
   return { client, app };
 };

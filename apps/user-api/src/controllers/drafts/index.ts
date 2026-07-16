@@ -12,7 +12,10 @@ import {
 import { ErrorResponseSchema, unauthorizedResponses } from "@/mappers/errors";
 import { optionalSession, sessionAuth } from "@/middlewares/session";
 import type { DraftRow } from "@/repositories/drafts";
-import { DraftQuotaExceededError, type DraftsService } from "@/services/drafts";
+import {
+  DraftQuotaExceededError,
+  type ProposalDraftsService,
+} from "@/services/drafts";
 
 const toResponse = (row: DraftRow, sessionUserId: string | null) => ({
   id: row.id,
@@ -31,7 +34,7 @@ const toResponse = (row: DraftRow, sessionUserId: string | null) => ({
 
 export function draftsController(
   app: OpenAPIHono,
-  service: DraftsService,
+  service: ProposalDraftsService,
   resolver: AuthResolver,
 ) {
   const auth = sessionAuth(resolver);
@@ -40,14 +43,15 @@ export function draftsController(
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "listDrafts",
+      operationId: "listProposalDrafts",
       path: "/drafts",
       summary: "List the session user's drafts for a DAO",
       middleware: [auth] as const,
       request: { query: ListDraftsQuerySchema },
       responses: {
         200: {
-          description: "Drafts owned by the session user, newest first",
+          description:
+            "Proposal drafts owned by the session user, newest first",
           content: { "application/json": { schema: DraftListResponseSchema } },
         },
         ...unauthorizedResponses,
