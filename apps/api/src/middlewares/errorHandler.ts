@@ -21,9 +21,12 @@ export const errorHandler: ErrorHandler = (err, c) => {
     );
   }
 
+  // viem errors carry a one-line shortMessage; err.message is multi-line.
+  const cause =
+    (err as Error & { shortMessage?: string }).shortMessage ?? err.message;
   logger.error(
     { err, url: c.req.path, method: c.req.method },
-    "unhandled error",
+    `unhandled error: ${cause}`,
   );
 
   return c.json(

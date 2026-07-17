@@ -16,8 +16,11 @@ class TestGovernor extends GovernorBase {
     return this.getCachedQuorum(async () => 1n);
   }
 
-  getTimelockDelay(): Promise<bigint> {
-    return Promise.resolve(0n);
+  timelockDelayFetches = 0;
+
+  protected async fetchTimelockDelay(): Promise<bigint> {
+    this.timelockDelayFetches++;
+    return 0n;
   }
 }
 
@@ -51,5 +54,22 @@ describe("GovernorBase", () => {
       timestamp: 100,
       latestBlockCalls: 1,
     });
+  });
+
+  it("should dedupe concurrent timelock delay fetches", async () => {
+    const client = createPublicClient({
+      chain: mainnet,
+      transport: custom({ request: async () => null }),
+    });
+    const governor = new TestGovernor(client);
+
+    const delays = await Promise.all([
+      governor.getTimelockDelay(),
+      governor.getTimelockDelay(),
+      governor.getTimelockDelay(),
+    ]);
+
+    expect(delays).toEqual([0n, 0n, 0n]);
+    expect(governor.timelockDelayFetches).toBe(1);
   });
 });

@@ -1,5 +1,11 @@
 # @anticapture/api
 
+## 1.5.5
+
+### Patch Changes
+
+- [#2064](https://github.com/blockful/anticapture/pull/2064) [`a28e99f`](https://github.com/blockful/anticapture/commit/a28e99f5f7974437a6ba038106cb380984080f5f) Thanks [@pikonha](https://github.com/pikonha)! - Dedupe concurrent timelock delay RPC reads in GovernorBase, fall back to the indexed proposal status when RPC reads fail (e.g. rate limits) instead of returning 500, and include the error cause in the unhandled-error log message.
+
 ## 1.5.4
 
 ### Patch Changes
