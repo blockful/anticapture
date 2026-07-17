@@ -33,6 +33,12 @@ schema_config:
 
 limits_config:
   allow_structured_metadata: true
+  retention_period: 744h
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem
 
 query_range:
   results_cache:

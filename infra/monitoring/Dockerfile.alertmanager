@@ -1,4 +1,4 @@
-FROM prom/alertmanager:latest
+FROM prom/alertmanager:v0.33.1
 COPY alertmanager.yml /etc/alertmanager/config.yml.tmpl
 COPY slack.tmpl /etc/alertmanager/slack.tmpl
 COPY entrypoint.alertmanager.sh /entrypoint.sh
