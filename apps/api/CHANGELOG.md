@@ -1,5 +1,11 @@
 # @anticapture/api
 
+## 1.5.4
+
+### Patch Changes
+
+- [#2060](https://github.com/blockful/anticapture/pull/2060) [`b7df0bb`](https://github.com/blockful/anticapture/commit/b7df0bb80e90a55e94bbf05aaeec8e6769212c4f) Thanks [@pikonha](https://github.com/pikonha)! - Preserve voting-power history pagination when transactions contain partial delegations.
+
 ## 1.5.3
 
 ### Patch Changes
