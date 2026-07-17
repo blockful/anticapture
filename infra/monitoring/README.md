@@ -3,6 +3,14 @@
 The unified monitoring stack provisions Prometheus and Grafana for Anticapture
 services.
 
+## Per-DAO scrape jobs
+
+Prometheus's per-DAO scrape jobs (`anticapture-<dao>-indexer`, `-indexer-ponder`,
+`-api`) are generated at container start by `entrypoint.prometheus.sh` from the
+space-separated `DAOS` env var (defaults to the current DAO list). To add a DAO,
+append its name to `DAOS` and set `<DAO>_INDEXER_ENDPOINT` and
+`<DAO>_API_ENDPOINT` on the Prometheus service.
+
 ## eRPC metrics
 
 eRPC exposes Prometheus metrics on `:4001` at `/metrics`. Prometheus scrapes
