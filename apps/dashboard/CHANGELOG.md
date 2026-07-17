@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.8.3
+
+### Patch Changes
+
+- [#2050](https://github.com/blockful/anticapture/pull/2050) [`97b2dc7`](https://github.com/blockful/anticapture/commit/97b2dc77b66fa332f4da37608d04c443a2b0aec9) Thanks [@pikonha](https://github.com/pikonha)! - Fix "Failed to vote" on GovernorBravo DAOs (UNI, COMP, GTC, Nouns): castVote simulation used an OZ Governor ABI declaring a uint256 return, but Bravo's castVote returns no data, making viem throw before the wallet opened. Votes now simulate with a void-return ABI.
+
 ## 2.8.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @anticapture/authful
 
+## 0.3.2
+
+### Patch Changes
+
+- [#2052](https://github.com/blockful/anticapture/pull/2052) [`74be484`](https://github.com/blockful/anticapture/commit/74be48478c2c39c684e9f088cd393b7c7736dadb) Thanks [@pikonha](https://github.com/pikonha)! - seed token as optional
+
 ## 0.3.1
 
 ### Patch Changes
