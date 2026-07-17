@@ -26,8 +26,7 @@
     "test:e2e": "turbo test:e2e",
     "test:e2e:headed": "turbo test:e2e:headed",
     "test:e2e:ui": "turbo test:e2e:ui",
-    "changeset": "changeset",
-    "setup:memory": "node scripts/setup-memory.mjs"
+    "changeset": "changeset"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
