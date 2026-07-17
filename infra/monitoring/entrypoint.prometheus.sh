@@ -5,7 +5,7 @@ envsubst < /etc/prometheus/prometheus.yml.tmpl > /etc/prometheus/prometheus.yml
 # its <DAO>_INDEXER_ENDPOINT / <DAO>_API_ENDPOINT vars).
 DAOS="${DAOS:-ens aave shutter scroll nouns gitcoin compound uniswap obol}"
 for dao in $DAOS; do
-  DAO=$(echo "$dao" | tr '[:lower:]' '[:upper:]')
+  DAO=$(echo "$dao" | tr '[:lower:]-' '[:upper:]_')
   eval indexer=\"\$${DAO}_INDEXER_ENDPOINT\"
   eval api=\"\$${DAO}_API_ENDPOINT\"
   cat >> /etc/prometheus/prometheus.yml <<EOF
