@@ -1,5 +1,17 @@
 # @anticapture/api
 
+## 1.5.3
+
+### Patch Changes
+
+- [#2031](https://github.com/blockful/anticapture/pull/2031) [`4e6c3eb`](https://github.com/blockful/anticapture/commit/4e6c3ebcc3d527d1e90059bc00ff3d38ed4f6655) Thanks [@pikonha](https://github.com/pikonha)! - improve performance of the voting power historical endpoint
+
+- [#2055](https://github.com/blockful/anticapture/pull/2055) [`248a451`](https://github.com/blockful/anticapture/commit/248a4518fd7d22c24ceaa23ad4692e1a5cb18aa6) Thanks [@pikonha](https://github.com/pikonha)! - Make request log messages human-readable in Loki (`GET /path 200` instead of `request`) and stop logging `/metrics` and `/health` scrapes
+
+- [#2056](https://github.com/blockful/anticapture/pull/2056) [`1051a2d`](https://github.com/blockful/anticapture/commit/1051a2d698b74c95219df903862ed3afe658c514) Thanks [@pikonha](https://github.com/pikonha)! - enable offchain (Snapshot) proposal data for ShutterDAO
+
+- [#2053](https://github.com/blockful/anticapture/pull/2053) [`633b628`](https://github.com/blockful/anticapture/commit/633b6287869693b8c707677d7b0af62a4b2c6ad7) Thanks [@pikonha](https://github.com/pikonha)! - add pg pool config to avoid hanging db connections
+
 ## 1.5.2
 
 ### Patch Changes

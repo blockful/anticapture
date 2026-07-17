@@ -1,5 +1,11 @@
 # @anticapture/gateful
 
+## 1.3.1
+
+### Patch Changes
+
+- [#2055](https://github.com/blockful/anticapture/pull/2055) [`248a451`](https://github.com/blockful/anticapture/commit/248a4518fd7d22c24ceaa23ad4692e1a5cb18aa6) Thanks [@pikonha](https://github.com/pikonha)! - Make request log messages human-readable in Loki (`GET /path 200` instead of `request`) and stop logging `/metrics` and `/health` scrapes
+
 ## 1.3.0
 
 ### Minor Changes
