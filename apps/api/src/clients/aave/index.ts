@@ -41,7 +41,7 @@ export class AAVEClient<
     return 0n;
   }
 
-  async getTimelockDelay(): Promise<bigint> {
+  protected async fetchTimelockDelay(): Promise<bigint> {
     return 0n;
   }
 
