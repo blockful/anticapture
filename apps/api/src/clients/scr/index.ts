@@ -33,34 +33,31 @@ export class SCRClient<
     });
   }
 
-  async getTimelockDelay(): Promise<bigint> {
-    if (!this.cache.timelockDelay) {
-      const timelockAddress = await this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "timelock",
-      });
-      this.cache.timelockDelay = await this.readContract({
-        abi: [
-          {
-            inputs: [],
-            name: "getMinDelay",
-            outputs: [
-              {
-                internalType: "uint256",
-                name: "duration",
-                type: "uint256",
-              },
-            ],
-            stateMutability: "view",
-            type: "function",
-          },
-        ],
-        address: timelockAddress,
-        functionName: "getMinDelay",
-      });
-    }
-    return this.cache.timelockDelay;
+  protected async fetchTimelockDelay(): Promise<bigint> {
+    const timelockAddress = await this.readContract({
+      abi: this.abi,
+      address: this.address,
+      functionName: "timelock",
+    });
+    return this.readContract({
+      abi: [
+        {
+          inputs: [],
+          name: "getMinDelay",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "duration",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      address: timelockAddress,
+      functionName: "getMinDelay",
+    });
   }
 
   calculateQuorum(votes: {

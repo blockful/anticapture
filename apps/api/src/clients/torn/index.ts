@@ -78,15 +78,12 @@ export class TORNClient<
     return this.cache.proposalThreshold!;
   }
 
-  async getTimelockDelay(): Promise<bigint> {
-    if (!this.cache.timelockDelay) {
-      this.cache.timelockDelay = (await this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "EXECUTION_DELAY",
-      })) as bigint;
-    }
-    return this.cache.timelockDelay!;
+  protected async fetchTimelockDelay(): Promise<bigint> {
+    return (await this.readContract({
+      abi: this.abi,
+      address: this.address,
+      functionName: "EXECUTION_DELAY",
+    })) as bigint;
   }
 
   private async getExecutionExpiration(): Promise<bigint> {
