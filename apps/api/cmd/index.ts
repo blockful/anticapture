@@ -131,7 +131,7 @@ const app = new Hono({
 });
 
 app.use(async (c, next) => {
-  if (c.req.path === "/metrics") return next();
+  if (c.req.path === "/metrics" || c.req.path === "/health") return next();
   const start = Date.now();
   let status: number | undefined;
   try {
