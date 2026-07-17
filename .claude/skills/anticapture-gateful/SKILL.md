@@ -22,7 +22,9 @@ Gateful's REST/OpenAPI.
 - Location: `apps/gateful` (`@anticapture/gateful`)
 - Runtime: Hono + `@hono/zod-openapi` (OpenAPIHono) on Node, TypeScript
 - Default port: `4001`
-- OpenAPI spec: `apps/gateful/openapi/gateful.json` — the source of truth for `@anticapture/client` codegen
+- OpenAPI spec: served **live** by the running gateway (merged from upstream API specs
+  in `src/upstream-docs.ts`); `@anticapture/client` codegen consumes the live spec URL —
+  there is no committed spec file
 - Optional Redis cache (`REDIS_URL`); Prometheus metrics via `@anticapture/observability`
 
 ## How It Works
@@ -45,22 +47,23 @@ Gateful's REST/OpenAPI.
 2. If DAO discovery changed, update how `DAO_API_*` / `DAO_RELAYER_*` are read in `src/config.ts`.
 3. Keep route logic consistent with the upstream API contracts.
 4. **If the OpenAPI surface changes, regenerate the SDK** so the dashboard stays in
-   sync: `pnpm client codegen` (see the `anticapture-client` skill). Commit the
-   updated `apps/gateful/openapi/gateful.json` and regenerated client.
+   sync: `pnpm client codegen` (runs against a live Gateful — `scripts/wait-for-gateful.mjs`
+   waits for it). Commit the regenerated files under `packages/anticapture-client/generated/`.
 5. Verify:
-   - `pnpm run --filter=@anticapture/gateful typecheck`
-   - `pnpm run --filter=@anticapture/gateful lint`
-   - `pnpm run --filter=@anticapture/gateful test`
+   - `pnpm gateful typecheck`
+   - `pnpm gateful lint`
+   - `pnpm gateful test`
 
 ## Changeset Note
 
-Per the repo's `api-contract-updates.yaml` workflow, any change to an API OpenAPI
-contract (`apps/api/openapi/**`) or to `apps/gateful/openapi/gateful.json` must
-ship with a `@anticapture/gateful` changeset.
+Any change that alters the API contract exposed through the gateway must ship with a
+`@anticapture/gateful` changeset alongside the changed API package's — see the
+`changesets` skill.
 
 ## Guardrails
 
 - Every new or changed API endpoint exposed to the dashboard should be reflected
   in Gateful's routes **and** the regenerated `@anticapture/client` SDK.
 - Keep DAO-specific routing explicit and fail fast on missing `DAO_API_*` config.
-- Do not hand-edit `openapi/gateful.json` to paper over a route change — fix the route.
+- Do not hand-edit files under `packages/anticapture-client/generated/` to paper over
+  a route change — fix the route and regenerate.

@@ -27,6 +27,7 @@ const app = new Hono();
 
 // Middleware
 app.use(async (c, next) => {
+  if (c.req.path === "/health") return next();
   const start = Date.now();
   let status: number | undefined;
   try {
@@ -35,14 +36,15 @@ app.use(async (c, next) => {
     status = err instanceof HTTPException ? err.status : 500;
     throw err;
   } finally {
+    const finalStatus = status ?? c.res?.status ?? 500;
     logger.info(
       {
         method: c.req.method,
         url: c.req.path,
-        status: status ?? c.res?.status ?? 500,
+        status: finalStatus,
         durationMs: Date.now() - start,
       },
-      "request",
+      `${c.req.method} ${c.req.path} ${finalStatus}`,
     );
   }
 });

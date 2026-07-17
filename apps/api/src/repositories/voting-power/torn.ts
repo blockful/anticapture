@@ -1,8 +1,10 @@
-import { gte, and, lte, desc, eq, asc, sql } from "drizzle-orm";
+import { gte, and, lte, eq } from "drizzle-orm";
 import { Address } from "viem";
 
-import { Drizzle, votingPowerHistory, delegation, transfer } from "@/database";
+import { Drizzle, votingPowerHistory } from "@/database";
 import { DBHistoricalVotingPowerWithRelations } from "@/mappers";
+
+import { getHistoricalVotingPowersWithRelations } from "./historical-query";
 
 /**
  * TORN derives per-account voting power directly from lock/unlock Transfers
@@ -54,76 +56,24 @@ export class TORNVotingPowerRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<DBHistoricalVotingPowerWithRelations[]> {
-    const result = await this.db
-      .select()
-      .from(votingPowerHistory)
-      .leftJoin(
-        delegation,
-        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash}
-          AND ${delegation.logIndex} = (
-            SELECT MAX(${delegation.logIndex})
-            FROM ${delegation}
-            WHERE ${delegation.transactionHash} = ${votingPowerHistory.transactionHash}
-            AND ${delegation.logIndex} <= ${votingPowerHistory.logIndex}
-        )`,
-      )
-      .leftJoin(
-        transfer,
-        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash}
-          AND ${transfer.logIndex} = (
-            SELECT MAX(${transfer.logIndex})
-            FROM ${transfer}
-            WHERE ${transfer.transactionHash} = ${votingPowerHistory.transactionHash}
-            AND ${transfer.logIndex} <= ${votingPowerHistory.logIndex}
-        )`,
-      )
-      .where(
-        and(
-          accountId ? eq(votingPowerHistory.accountId, accountId) : undefined,
-          minDelta
-            ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
-            : undefined,
-          maxDelta
-            ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
-            : undefined,
-          fromDate
-            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
-            : undefined,
-          toDate
-            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
-            : undefined,
-        ),
-      )
-      .orderBy(
-        orderDirection === "asc"
-          ? asc(
-              orderBy === "timestamp"
-                ? votingPowerHistory.timestamp
-                : votingPowerHistory.deltaMod,
-            )
-          : desc(
-              orderBy === "timestamp"
-                ? votingPowerHistory.timestamp
-                : votingPowerHistory.deltaMod,
-            ),
-      )
-      .limit(limit)
-      .offset(skip);
+    const result = await getHistoricalVotingPowersWithRelations(this.db, {
+      skip,
+      limit,
+      orderDirection,
+      orderBy,
+      accountId,
+      minDelta,
+      maxDelta,
+      fromDate,
+      toDate,
+      includeSameLogIndex: true,
+    });
 
     return result.map((row) => {
-      const transfers =
-        row.delegations &&
-        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
-          ? null
-          : row.transfers;
+      const transfers = row.transfers;
 
       return {
-        ...row.voting_power_history,
-        delegations:
-          row.transfers &&
-          row.transfers?.logIndex > (row.delegations?.logIndex || 0)
-            ? null
-            : row.delegations,
+        ...row,
         // TORN's lock/unlock Transfer moves tokens OPPOSITE to the voting-power
         // change: a lock (VP gain) sends TORN wallet -> custody, an unlock (VP
         // loss) sends custody -> wallet. The dashboard derives the delegator as

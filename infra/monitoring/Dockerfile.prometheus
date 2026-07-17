@@ -1,4 +1,4 @@
-FROM prom/prometheus:latest AS prometheus
+FROM prom/prometheus:v3.13.1 AS prometheus
 
 FROM alpine:3.19
 RUN apk add --no-cache gettext

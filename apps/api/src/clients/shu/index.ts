@@ -67,6 +67,10 @@ export class SHUClient<
     return BigInt(TIMELOCK_PERIOD_BLOCKS * BLOCK_TIME_SECONDS);
   }
 
+  supportOffchainData(): boolean {
+    return true;
+  }
+
   /**
    * Azorius proposal status computation.
    *

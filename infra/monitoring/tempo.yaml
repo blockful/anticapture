@@ -41,6 +41,10 @@ storage:
     wal:
       path: /var/tempo/wal
 
+compactor:
+  compaction:
+    block_retention: 336h
+
 overrides:
   defaults:
     metrics_generator:

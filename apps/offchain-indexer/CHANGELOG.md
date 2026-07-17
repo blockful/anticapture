@@ -1,5 +1,11 @@
 # @anticapture/offchain-indexer
 
+## 1.1.1
+
+### Patch Changes
+
+- [#2053](https://github.com/blockful/anticapture/pull/2053) [`633b628`](https://github.com/blockful/anticapture/commit/633b6287869693b8c707677d7b0af62a4b2c6ad7) Thanks [@pikonha](https://github.com/pikonha)! - add pg pool config to avoid hanging db connections
+
 ## 1.1.0
 
 ### Minor Changes

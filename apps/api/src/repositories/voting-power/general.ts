@@ -13,13 +13,7 @@ import {
 } from "drizzle-orm";
 import { Address } from "viem";
 
-import {
-  Drizzle,
-  votingPowerHistory,
-  delegation,
-  transfer,
-  accountPower,
-} from "@/database";
+import { Drizzle, votingPowerHistory, accountPower } from "@/database";
 import {
   AmountFilter,
   DBAccountPowerWithVariation,
@@ -27,6 +21,8 @@ import {
   DBHistoricalVotingPowerWithRelations,
 } from "@/mappers";
 import { PERCENTAGE_NO_BASELINE } from "@/mappers/constants";
+
+import { getHistoricalVotingPowersWithRelations } from "./historical-query";
 
 export class VotingPowerRepository {
   constructor(private readonly db: Drizzle) {}
@@ -67,75 +63,17 @@ export class VotingPowerRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<DBHistoricalVotingPowerWithRelations[]> {
-    const result = await this.db
-      .select()
-      .from(votingPowerHistory)
-      .leftJoin(
-        delegation,
-        sql`${votingPowerHistory.transactionHash} = ${delegation.transactionHash} 
-          AND ${delegation.logIndex} = (
-            SELECT MAX(${delegation.logIndex}) 
-            FROM ${delegation} 
-            WHERE ${delegation.transactionHash} = ${votingPowerHistory.transactionHash} 
-            AND ${delegation.logIndex} < ${votingPowerHistory.logIndex}
-        )`,
-      )
-      .leftJoin(
-        transfer,
-        sql`${votingPowerHistory.transactionHash} = ${transfer.transactionHash} 
-          AND ${transfer.logIndex} = (
-            SELECT MAX(${transfer.logIndex}) 
-            FROM ${transfer}
-            WHERE ${transfer.transactionHash} = ${votingPowerHistory.transactionHash} 
-            AND ${transfer.logIndex} < ${votingPowerHistory.logIndex}
-        )`,
-      )
-      .where(
-        and(
-          accountId ? eq(votingPowerHistory.accountId, accountId) : undefined,
-          minDelta
-            ? gte(votingPowerHistory.deltaMod, BigInt(minDelta))
-            : undefined,
-          maxDelta
-            ? lte(votingPowerHistory.deltaMod, BigInt(maxDelta))
-            : undefined,
-          fromDate
-            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
-            : undefined,
-          toDate
-            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
-            : undefined,
-        ),
-      )
-      .orderBy(
-        orderDirection === "asc"
-          ? asc(
-              orderBy === "timestamp"
-                ? votingPowerHistory.timestamp
-                : votingPowerHistory.deltaMod,
-            )
-          : desc(
-              orderBy === "timestamp"
-                ? votingPowerHistory.timestamp
-                : votingPowerHistory.deltaMod,
-            ),
-      )
-      .limit(limit)
-      .offset(skip);
-
-    return result.map((row) => ({
-      ...row.voting_power_history,
-      delegations:
-        row.transfers &&
-        row.transfers?.logIndex > (row.delegations?.logIndex || 0)
-          ? null
-          : row.delegations,
-      transfers:
-        row.delegations &&
-        row.delegations?.logIndex > (row.transfers?.logIndex || 0)
-          ? null
-          : row.transfers,
-    }));
+    return await getHistoricalVotingPowersWithRelations(this.db, {
+      skip,
+      limit,
+      orderDirection,
+      orderBy,
+      accountId,
+      minDelta,
+      maxDelta,
+      fromDate,
+      toDate,
+    });
   }
 
   async getVotingPowerVariations(

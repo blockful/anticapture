@@ -1,4 +1,4 @@
-FROM grafana/grafana:latest
+FROM grafana/grafana:13.0.3
 COPY --chown=grafana:root grafana/datasources /etc/grafana/provisioning/datasources
 COPY --chown=grafana:root grafana/dashboards /etc/grafana/provisioning/dashboards
 COPY --chown=grafana:root grafana/grafana.ini /etc/grafana/grafana.ini

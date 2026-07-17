@@ -1,5 +1,5 @@
 ---
-name: local-dev
+name: local-dev-stack
 description: Use when you need to hit the running local stack (API, gateful, dashboard, indexer) to test or verify a change. Covers scripts/dev.sh, hot reload, and the ports each service listens on.
 ---
 

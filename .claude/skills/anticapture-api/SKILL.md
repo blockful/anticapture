@@ -45,9 +45,9 @@ description: Use for apps/api work: adding or changing REST controllers, service
 3. If schema-related, follow `./references/database-schema.md` exactly.
 4. Add/update tests per `./references/testing-endpoint.md`.
 5. Run verification:
-   - `pnpm run --filter=@anticapture/api typecheck`
-   - `pnpm run --filter=@anticapture/api lint`
-   - `pnpm run --filter=@anticapture/api test`
+   - `pnpm api typecheck`
+   - `pnpm api lint`
+   - `pnpm api test`
 
 ## Guardrails
 
