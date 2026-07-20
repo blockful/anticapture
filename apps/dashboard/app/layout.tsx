@@ -20,11 +20,13 @@ import {
 import ConditionalPostHog from "@/shared/services/posthog/ConditionalPostHog";
 import UmamiScript from "@/shared/services/umami";
 import { ALL_DAOS, type DaoIdEnum } from "@/shared/types/daos";
-import { resolveDaoIdFromHostname } from "@/shared/utils/whitelabel";
+import { resolveWhitelabelDaoIdFromHeaders } from "@/shared/utils/whitelabel";
 
-const isForceDaoSet = () => {
+const getForcedDaoId = (): DaoIdEnum | null => {
   const forced = process.env.FORCE_DAO?.trim().toUpperCase();
-  return !!forced && ALL_DAOS.includes(forced as DaoIdEnum);
+  return forced && ALL_DAOS.includes(forced as DaoIdEnum)
+    ? (forced as DaoIdEnum)
+    : null;
 };
 
 const inter = Inter({ weight: ["400", "500", "600"], subsets: ["latin"] });
@@ -91,15 +93,16 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const headersList = await headers();
-  const host =
-    headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
-  const hostname = host.split(":")[0];
   const pathname =
     headersList.get("x-invoke-path") ?? headersList.get("next-url") ?? "";
-  const isWhitelabel =
-    !!resolveDaoIdFromHostname(hostname) ||
-    isForceDaoSet() ||
-    pathname.startsWith("/whitelabel/");
+  const pathDao = pathname.match(/^\/whitelabel\/([^/]+)/)?.[1]?.toUpperCase();
+  const whitelabelDaoId =
+    resolveWhitelabelDaoIdFromHeaders(headersList) ??
+    getForcedDaoId() ??
+    (pathDao && ALL_DAOS.includes(pathDao as DaoIdEnum)
+      ? (pathDao as DaoIdEnum)
+      : null);
+  const isWhitelabel = !!whitelabelDaoId || pathname.startsWith("/whitelabel/");
 
   return (
     <html
@@ -121,7 +124,10 @@ export default async function RootLayout({
           data-vaul-drawer-wrapper=""
           className="border-border-default mx-auto max-w-screen-2xl overflow-x-hidden border-x xl:overflow-hidden"
         >
-          <GlobalProviders isWhitelabel={isWhitelabel}>
+          <GlobalProviders
+            isWhitelabel={isWhitelabel}
+            whitelabelDaoId={whitelabelDaoId}
+          >
             {children}
             <CookieConsent isWhitelabel={isWhitelabel} />
             <HelpPopover isWhitelabel={isWhitelabel} />
