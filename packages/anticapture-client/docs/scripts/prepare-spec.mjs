@@ -36,6 +36,81 @@ const isRelayPath = (p) => p.split("/").includes("relay");
 // groups — so it is stripped from every operation and the tag list.
 const INTERNAL_TAGS = new Set(["skip-pagination"]);
 
+// Human-readable category labels for the generated API sidebar, in display
+// order (domain groups first, plumbing last). Tags found in the spec but not
+// listed here fall back to title-cased names, appended at the end.
+const GATEFUL_TAG_ORDER = [
+  ["governance", "Governance"],
+  ["proposals", "Proposals"],
+  ["votes", "Votes"],
+  ["voting-power", "Voting Power"],
+  ["delegations", "Delegations"],
+  ["tokens", "Tokens"],
+  ["account-balances", "Account Balances"],
+  ["transfers", "Transfers"],
+  ["treasury", "Treasury"],
+  ["revenue", "Revenue"],
+  ["metrics", "Metrics"],
+  ["feed", "Feed"],
+  ["offchain", "Offchain"],
+  ["address", "Address"],
+  ["system", "System"],
+];
+
+const WEBHOOK_TAG_ORDER = [["webhooks", "Webhooks"]];
+
+// The webhook spec has no summaries; its descriptions are full paragraphs, so
+// derived first-sentence summaries make unwieldy sidebar labels. Keep these
+// short and imperative.
+const WEBHOOK_SUMMARIES = new Map([
+  ["post /webhooks", "Register a webhook"],
+  ["delete /webhooks", "Deactivate a webhook"],
+]);
+
+const titleCase = (tag) =>
+  tag
+    .split("-")
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
+
+// Rewrite `spec.tags` as the ordered, labelled list the docs sidebar groups
+// by: the OpenAPI plugin renders categories in spec-tag order and uses
+// `x-displayName` as the category label.
+const applyTagMetadata = (spec, order) => {
+  const used = new Set();
+
+  for (const operations of Object.values(spec.paths ?? {})) {
+    for (const operation of Object.values(operations)) {
+      if (Array.isArray(operation?.tags)) {
+        for (const tag of operation.tags) used.add(tag);
+      }
+    }
+  }
+
+  const ordered = [
+    ...order.filter(([name]) => used.has(name)),
+    ...[...used]
+      .filter((name) => !order.some(([ordered_name]) => ordered_name === name))
+      .sort()
+      .map((name) => [name, titleCase(name)]),
+  ];
+
+  spec.tags = ordered.map(([name, label]) => ({
+    name,
+    "x-displayName": label,
+  }));
+};
+
+const applySummaryOverrides = (spec, overrides) => {
+  for (const [path, operations] of Object.entries(spec.paths ?? {})) {
+    for (const [method, operation] of Object.entries(operations)) {
+      const summary = overrides.get(`${method} ${path}`);
+
+      if (summary) operation.summary = summary;
+    }
+  }
+};
+
 const HTTP_METHODS = new Set([
   "get",
   "put",
@@ -48,10 +123,11 @@ const HTTP_METHODS = new Set([
 ]);
 
 // The OpenAPI docs plugin refuses operations without a summary or
-// operationId (the webhook spec declares neither). Derive stable fallbacks:
+// operationId (the webhook spec declares neither), and renders untagged
+// operations under a literal "UNTAGGED" category. Derive stable fallbacks:
 // operationId from the method + path, summary from the description's first
-// sentence.
-const ensureOperationMetadata = (spec) => {
+// sentence, and `defaultTag` for tagless operations (e.g. GET /{dao}/health).
+const ensureOperationMetadata = (spec, defaultTag) => {
   for (const [path, operations] of Object.entries(spec.paths ?? {})) {
     for (const [method, operation] of Object.entries(operations)) {
       if (!HTTP_METHODS.has(method)) continue;
@@ -63,6 +139,10 @@ const ensureOperationMetadata = (spec) => {
       operation.summary ??=
         operation.description?.match(/^[^.\n]+/)?.[0].trim() ??
         `${method.toUpperCase()} ${path}`;
+
+      if (!Array.isArray(operation.tags) || operation.tags.length === 0) {
+        operation.tags = [defaultTag];
+      }
     }
   }
 };
@@ -121,7 +201,23 @@ const strippedTags = stripInternalTags(gateful);
 
 // A few operations (e.g. GET /{dao}/health) ship without operationId/summary,
 // which the docs plugin refuses to render.
-ensureOperationMetadata(gateful);
+ensureOperationMetadata(gateful, "system");
+applyTagMetadata(gateful, GATEFUL_TAG_ORDER);
+
+// Neither spec declares `servers`, so generated request samples would fall
+// back to the docs site's own origin as the base URL.
+gateful.servers = [{ url: "https://gateful.up.railway.app" }];
+
+// Public-facing naming and copy for the generated reference landing page —
+// "Gateful" is the internal service name, and the upstream spec ships no
+// description.
+gateful.info.title = "Anticapture REST API";
+gateful.info.description ||=
+  "REST API for Anticapture's DAO governance analytics: proposals, votes, " +
+  "voting power, delegations, token and treasury data, indexed from onchain " +
+  "and offchain sources.\n\nAll endpoints are served from " +
+  "`https://gateful.up.railway.app` and require a bearer token — see " +
+  "[Getting started](/getting-started).";
 
 await writeSpec(GATEFUL_OUT, gateful);
 console.log(
@@ -132,7 +228,11 @@ console.log(
 // summary/operationId metadata the docs plugin requires.
 const webhook = await readSpec(WEBHOOK_SOURCE);
 
-ensureOperationMetadata(webhook);
+webhook.servers = [{ url: "https://webhook.anticapture.com" }];
+
+applySummaryOverrides(webhook, WEBHOOK_SUMMARIES);
+ensureOperationMetadata(webhook, "webhooks");
+applyTagMetadata(webhook, WEBHOOK_TAG_ORDER);
 
 await writeSpec(WEBHOOK_OUT, webhook);
 console.log(

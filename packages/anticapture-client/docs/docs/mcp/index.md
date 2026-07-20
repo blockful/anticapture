@@ -3,6 +3,7 @@ id: index
 title: MCP server
 sidebar_label: MCP
 sidebar_position: 4
+hide_table_of_contents: true
 ---
 
 # MCP server
@@ -35,7 +36,7 @@ This connects to the public MCP HTTP transport instance.
 ## How tools map to the API
 
 The MCP tools are generated from the same OpenAPI spec as the
-[API Reference](../api-reference/anticapture-gateful-rest-api):
+[API Reference](/api-reference/anticapture-rest-api):
 
 - **Tool name** = the operation's `operationId` (e.g. the `proposals` tool
   calls `GET /{dao}/proposals`).

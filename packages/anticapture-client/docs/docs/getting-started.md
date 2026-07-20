@@ -2,6 +2,7 @@
 id: getting-started
 title: Getting started
 sidebar_position: 2
+hide_table_of_contents: true
 ---
 
 # Getting started
@@ -40,7 +41,7 @@ GET /{dao}/accounts/{address}/delegations
 ```
 
 List the supported DAOs (and their identifiers) with
-[`GET /daos`](./api-reference/anticapture-gateful-rest-api).
+[`GET /daos`](/api-reference/daos).
 
 ## Your first request
 
@@ -73,8 +74,8 @@ maximums.
 
 ## Where to go next
 
-- **[API Reference](./api-reference/anticapture-gateful-rest-api)** — every
-  endpoint, generated from the live OpenAPI spec.
+- **[API Reference](/api-reference/anticapture-rest-api)** — every endpoint,
+  generated from the live OpenAPI spec.
 - **[MCP server](./mcp/index.md)** — query the same API from LLM agents in
   natural language.
 - **[Webhooks](./webhooks/index.md)** — push notifications instead of polling.

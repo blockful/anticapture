@@ -1,26 +1,58 @@
 /**
- * Anticapture theme for the API docs.
+ * Anticapture docs — Orbit UI design system.
  *
- * Mirrors the dashboard identity (apps/dashboard/app/globals.css): Inter +
- * Roboto Mono, brand orange #ec762e on a zinc palette, dark-first.
+ * Tokens and component recipes come straight from the dashboard
+ * implementation of Orbit UI (apps/dashboard/app/globals.css and
+ * shared/components/design-system/): zinc palette on #09090b, brand #ec762e,
+ * Inter + Roboto Mono, square interactive elements (--radius-base: 0),
+ * mono-uppercase standalone links, and the inverted (white-on-dark) active
+ * sidebar item.
+ *
  * Docusaurus Infima variables: https://docusaurus.io/docs/styling-layout
  */
 
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 @import "@fontsource/roboto-mono/400.css";
 @import "@fontsource/roboto-mono/500.css";
 
+/* ---------------------------------------------------------------------------
+ * Tokens (Orbit UI, light = dashboard :root, dark = dashboard .dark)
+ * ------------------------------------------------------------------------ */
+
 :root {
-  /* Brand (dashboard --base-brand / --base-brand-lighter) */
-  --ifm-color-primary: #ec762e;
-  --ifm-color-primary-dark: #db6519;
-  --ifm-color-primary-darker: #cf5f18;
-  --ifm-color-primary-darkest: #aa4e14;
-  --ifm-color-primary-light: #ef8646;
-  --ifm-color-primary-lighter: #fb8f4d;
-  --ifm-color-primary-lightest: #f5a878;
+  /* base/brand — theme-invariant */
+  --ac-brand: #ec762e;
+  --ac-brand-lighter: #fb8f4d;
+  --ac-brand-opacity: #fb8f4d1f;
+  --ac-success: #4ade80;
+  --ac-warning: #facc15;
+  --ac-error: #f87171;
+  --ac-success-opacity: #4ade801f;
+  --ac-warning-opacity: #facc151f;
+  --ac-error-opacity: #f871711f;
+
+  /* surfaces / borders / text — light */
+  --ac-surface-background: #ffffff;
+  --ac-surface-default: #fafafa;
+  --ac-surface-contrast: #f4f4f5;
+  --ac-border-default: #f4f4f5;
+  --ac-border-contrast: #e4e4e7;
+  --ac-text-primary: #18181b;
+  --ac-text-secondary: #71717a;
+  --ac-text-dimmed: #a1a1aa;
+  --ac-text-inverted: #ffffff;
+
+  /* Infima mapping */
+  --ifm-color-primary: #cf5f18;
+  --ifm-color-primary-dark: #ba5516;
+  --ifm-color-primary-darker: #aa4e14;
+  --ifm-color-primary-darkest: #8c400f;
+  --ifm-color-primary-light: var(--ac-brand);
+  --ifm-color-primary-lighter: var(--ac-brand);
+  --ifm-color-primary-lightest: var(--ac-brand-lighter);
 
   --ifm-font-family-base:
     "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
@@ -28,117 +60,647 @@
   --ifm-font-family-monospace:
     "Roboto Mono", ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Consolas",
     "Liberation Mono", "Courier New", monospace;
-  --ifm-code-font-size: 95%;
-  --ifm-heading-font-weight: 600;
 
-  /* Zinc light (dashboard root palette) */
-  --ifm-color-content-secondary: #71717a;
-  --ifm-toc-border-color: #e4e4e7;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
+  /* Orbit UI text-body-md: 14/20 is the product's base body size */
+  --ifm-font-size-base: 14px;
+  --ifm-line-height-base: 1.55;
+  --ifm-code-font-size: 92%;
+  --ifm-code-border-radius: 0;
+  /* Orbit UI --radius-base: interactive elements are square */
+  --ifm-global-radius: 0;
+  --ifm-button-border-radius: 0;
+  --ifm-heading-font-weight: 600;
+  /* Tighter vertical rhythm (Infima default is 1.25) */
+  --ifm-leading-desktop: 1;
+  --ifm-spacing-horizontal: 1.25rem;
+
+  --ifm-navbar-height: 56px;
+  --doc-sidebar-width: 272px !important;
+
+  --ifm-toc-border-color: var(--ac-border-contrast);
+  --ifm-color-content-secondary: var(--ac-text-secondary);
+  --ifm-table-border-color: var(--ac-border-contrast);
+  --ifm-hr-background-color: var(--ac-border-contrast);
+  --ifm-background-surface-color: var(--ac-surface-default);
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.06);
+
+  /* HTTP method chips (status tokens; POST uses chart-1 blue) */
+  --ac-method-get: #16a34a;
+  --ac-method-post: #3b82f6;
+  --ac-method-put: #ca8a04;
+  --ac-method-patch: #a855f7;
+  --ac-method-delete: #dc2626;
 }
 
 [data-theme="dark"] {
-  /* Brand pops brighter on dark, like dashboard hover states */
-  --ifm-color-primary: #ec762e;
+  --ac-surface-background: #09090b;
+  --ac-surface-default: #18181b;
+  --ac-surface-contrast: #27272a;
+  --ac-border-default: #27272a;
+  --ac-border-contrast: #3f3f46;
+  --ac-text-primary: #fafafa;
+  --ac-text-secondary: #a1a1aa;
+  --ac-text-dimmed: #52525b;
+  --ac-text-inverted: #18181b;
+
+  --ifm-color-primary: var(--ac-brand);
   --ifm-color-primary-dark: #db6519;
   --ifm-color-primary-darker: #cf5f18;
   --ifm-color-primary-darkest: #aa4e14;
   --ifm-color-primary-light: #ef8646;
-  --ifm-color-primary-lighter: #fb8f4d;
+  --ifm-color-primary-lighter: var(--ac-brand-lighter);
   --ifm-color-primary-lightest: #f5a878;
 
-  /* Zinc dark (dashboard .dark palette) */
-  --ifm-background-color: #09090b;
-  --ifm-background-surface-color: #18181b;
-  --ifm-navbar-background-color: #09090b;
-  --ifm-footer-background-color: #09090b;
-  --ifm-color-content: #fafafa;
-  --ifm-color-content-secondary: #a1a1aa;
-  --ifm-toc-border-color: #27272a;
-  --ifm-color-emphasis-300: #3f3f46;
-  --ifm-hr-background-color: #27272a;
-  --ifm-table-border-color: #3f3f46;
-  --ifm-code-background: #18181b;
-  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.08);
+  --ifm-background-color: var(--ac-surface-background);
+  --ifm-background-surface-color: var(--ac-surface-default);
+  --ifm-navbar-background-color: var(--ac-surface-background);
+  --ifm-footer-background-color: var(--ac-surface-background);
+
+  --ifm-color-content: var(--ac-text-primary);
+  --ifm-heading-color: var(--ac-text-primary);
+  --ifm-color-content-secondary: var(--ac-text-secondary);
+
+  --ifm-toc-border-color: var(--ac-border-default);
+  --ifm-table-border-color: var(--ac-border-contrast);
+  --ifm-hr-background-color: var(--ac-border-default);
+  --ifm-color-emphasis-300: var(--ac-border-contrast);
+
+  --ifm-code-background: var(--ac-surface-contrast);
+  --ifm-pre-background: var(--ac-surface-default);
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.07);
+
+  --ifm-menu-color: var(--ac-text-secondary);
+  --ifm-menu-color-background-active: transparent;
+  --ifm-menu-color-background-hover: var(--ac-surface-contrast);
+
+  --ifm-link-color: var(--ac-brand);
+
+  --ac-method-get: var(--ac-success);
+  --ac-method-post: #3b82f6;
+  --ac-method-put: var(--ac-warning);
+  --ac-method-patch: #a855f7;
+  --ac-method-delete: var(--ac-error);
 }
 
-/* Hairline borders around the chrome, like the dashboard's bordered panels. */
-[data-theme="dark"] .navbar {
-  border-bottom: 1px solid #27272a;
+/* ---------------------------------------------------------------------------
+ * Navbar — dashboard header: flat, hairline border, mono-uppercase links
+ * ------------------------------------------------------------------------ */
+
+.navbar {
+  border-bottom: 1px solid var(--ac-border-default);
   box-shadow: none;
+  padding: 0 1rem;
 }
 
-[data-theme="dark"] .footer {
-  border-top: 1px solid #27272a;
-}
-
-/* Sidebar category labels echo the dashboard's mono uppercase section titles
-   (.link-tangerine / overline styles). */
-.menu__list-item-collapsible > .menu__link--sublist {
+.navbar__title {
   font-family: var(--ifm-font-family-monospace);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.72px;
   text-transform: uppercase;
 }
 
-/* --- Landing page cards (docs/index.mdx) ------------------------------- */
+/* DefaultLink recipe: mono 13px medium uppercase, secondary -> primary */
+.navbar__link {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.72px;
+  text-transform: uppercase;
+  color: var(--ac-text-secondary);
+  transition: color 0.3s;
+}
 
+.navbar__link:hover,
+.navbar__link--active {
+  color: var(--ac-text-primary);
+}
+
+[data-theme="dark"] .navbar__search-input {
+  background-color: var(--ac-surface-default);
+  border: 1px solid var(--ac-border-contrast);
+  border-radius: 0;
+  color: var(--ac-text-primary);
+}
+
+/* ---------------------------------------------------------------------------
+ * Sidebar — dashboard SidebarNavItem: 33px rows, square, inverted active
+ * ------------------------------------------------------------------------ */
+
+@media (min-width: 997px) {
+  .theme-doc-sidebar-container {
+    border-right: 1px solid var(--ac-border-default) !important;
+  }
+}
+
+.menu {
+  padding: 0.75rem !important;
+  font-weight: 500;
+}
+
+.menu__link,
+.menu__list-item-collapsible {
+  border-radius: 0;
+}
+
+.menu__link {
+  font-size: 14px;
+  line-height: 20px;
+  padding: 6px 8px;
+  color: var(--ac-text-secondary);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.menu__link:hover,
+.menu__list-item-collapsible:hover {
+  background: var(--ac-surface-contrast);
+  color: var(--ac-text-primary);
+}
+
+.menu__list-item-collapsible:hover .menu__link {
+  color: var(--ac-text-primary);
+}
+
+/* Active leaf: inverted, like the dashboard's active nav item */
+.menu__link--active:not(.menu__link--sublist) {
+  background: var(--ac-text-primary);
+  color: var(--ac-text-inverted);
+  font-weight: 500;
+}
+
+.menu__link--active:not(.menu__link--sublist):hover {
+  background: var(--ac-text-primary);
+  color: var(--ac-text-inverted);
+}
+
+/* Accordion (category) headers stay text-styled, never inverted */
+.menu__link--sublist {
+  color: var(--ac-text-secondary);
+}
+
+.menu__link--sublist.menu__link--active {
+  color: var(--ac-text-primary);
+  background: transparent;
+}
+
+.menu__list .menu__list {
+  border-left: 1px solid var(--ac-border-default);
+  margin-left: 0.625rem;
+  padding-left: 0.25rem;
+}
+
+.menu__caret::before,
+.menu__link--sublist-caret::after {
+  background-size: 1.125rem 1.125rem;
+  opacity: 0.45;
+}
+
+/* HTTP method chips on generated sidebar items */
+.api-method > .menu__link {
+  align-items: center;
+  justify-content: start;
+}
+
+.api-method > .menu__link::before {
+  width: 42px;
+  height: 17px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 15px;
+  text-transform: uppercase;
+  text-align: center;
+  margin-right: 8px;
+  flex-shrink: 0;
+  border: 1px solid;
+}
+
+/* Chip colors survive the inverted active row via explicit borders */
+.get > .menu__link::before {
+  content: "get";
+  color: var(--ac-method-get);
+  border-color: color-mix(in srgb, var(--ac-method-get) 50%, transparent);
+}
+
+.post > .menu__link::before {
+  content: "post";
+  color: var(--ac-method-post);
+  border-color: color-mix(in srgb, var(--ac-method-post) 50%, transparent);
+}
+
+.put > .menu__link::before {
+  content: "put";
+  color: var(--ac-method-put);
+  border-color: color-mix(in srgb, var(--ac-method-put) 50%, transparent);
+}
+
+.patch > .menu__link::before {
+  content: "patch";
+  color: var(--ac-method-patch);
+  border-color: color-mix(in srgb, var(--ac-method-patch) 50%, transparent);
+}
+
+.delete > .menu__link::before {
+  content: "del";
+  color: var(--ac-method-delete);
+  border-color: color-mix(in srgb, var(--ac-method-delete) 50%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+ * Content — Orbit UI typography scale
+ * ------------------------------------------------------------------------ */
+
+/* Orbit UI scale, one notch denser than marketing pages: page titles use
+   text-h3 (24/32/600), section headings text-h5-ish */
+.markdown h1:first-child,
+.markdown header h1,
+h1.openapi__heading {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.006em;
+  margin-bottom: 1rem;
+}
+
+.markdown h2 {
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -0.005em;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown h3 {
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+/* Generated endpoint pages: compact the method/path pill and section
+   headings (Request / Responses) */
+.openapi__method-endpoint {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.openapi__method-endpoint-path {
+  font-size: 14px;
+}
+
+.openapi__divider {
+  margin: 1rem 0;
+}
+
+h2.openapi-tabs__heading {
+  font-size: 16px;
+  line-height: 24px;
+  margin-top: 1.5rem;
+}
+
+/* Right-hand explorer panel: product-density text */
+.openapi-right-panel__container {
+  font-size: 13px;
+}
+
+.openapi-right-panel__container .theme-code-block pre {
+  font-size: 12.5px;
+}
+
+/* Content column breathing room: tighter than Docusaurus defaults */
+main .container.padding-top--md {
+  padding-top: 1.25rem !important;
+}
+
+.theme-doc-breadcrumbs {
+  margin-bottom: 1rem !important;
+}
+
+.markdown a:not(.ac-btn):not(.ac-card):not(.ac-endpoint) {
+  color: var(--ac-brand);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.markdown a:not(.ac-btn):not(.ac-card):not(.ac-endpoint):hover {
+  color: var(--ac-brand-lighter);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+code {
+  border: 1px solid var(--ac-border-default);
+  padding: 0.15rem 0.35rem;
+}
+
+div[class*="codeBlockContainer"] {
+  border: 1px solid var(--ac-border-default);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.theme-code-block pre {
+  font-size: 13px;
+}
+
+/* Right-hand TOC is off — navigation lives in the left sidebar only */
+.theme-doc-toc-desktop {
+  display: none;
+}
+
+.breadcrumbs__link {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.72px;
+  text-transform: uppercase;
+  color: var(--ac-text-secondary);
+}
+
+.breadcrumbs__item--active .breadcrumbs__link {
+  background: none;
+  color: var(--ac-text-primary);
+}
+
+.theme-admonition {
+  border: none;
+  border-left: 2px solid var(--ac-border-contrast);
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--ac-surface-default);
+}
+
+.theme-admonition-warning,
+.theme-admonition-caution {
+  border-left-color: var(--ac-warning);
+  background: var(--ac-warning-opacity);
+}
+
+.theme-admonition-danger {
+  border-left-color: var(--ac-error);
+  background: var(--ac-error-opacity);
+}
+
+.theme-admonition-tip {
+  border-left-color: var(--ac-success);
+  background: var(--ac-success-opacity);
+}
+
+.theme-admonition-info,
+.theme-admonition-note {
+  border-left-color: var(--ac-border-contrast);
+  background: var(--ac-surface-default);
+}
+
+.pagination-nav__link {
+  border: 1px solid var(--ac-border-default);
+  border-radius: 0;
+  background: var(--ac-surface-default);
+  transition: background 0.15s ease;
+}
+
+.pagination-nav__link:hover {
+  background: var(--ac-surface-contrast);
+  border-color: var(--ac-border-contrast);
+}
+
+.pagination-nav__sublabel {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.72px;
+  text-transform: uppercase;
+  color: var(--ac-text-secondary);
+}
+
+table th {
+  font-size: 13px;
+  background: var(--ac-surface-default);
+}
+
+/* ---------------------------------------------------------------------------
+ * Footer
+ * ------------------------------------------------------------------------ */
+
+.footer {
+  border-top: 1px solid var(--ac-border-default);
+  padding: 3rem 0 2.5rem;
+}
+
+.footer__title {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.72px;
+  text-transform: uppercase;
+  color: var(--ac-text-secondary);
+}
+
+.footer__link-item {
+  font-size: 14px;
+  color: var(--ifm-color-content);
+  opacity: 0.85;
+  transition: color 0.3s;
+}
+
+.footer__link-item:hover {
+  opacity: 1;
+  color: var(--ac-brand);
+  text-decoration: none;
+}
+
+.footer__copyright {
+  font-size: 13px;
+  color: var(--ac-text-secondary);
+  margin-top: 2rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * Landing page (docs/index.mdx)
+ * ------------------------------------------------------------------------ */
+
+.ac-hero {
+  padding: 1.25rem 0 0.5rem;
+}
+
+/* link-tangerine recipe: mono 12px medium uppercase tracking-wider */
+.ac-hero__eyebrow {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.72px;
+  text-transform: uppercase;
+  color: var(--ac-brand);
+  margin-bottom: 0.75rem;
+}
+
+/* text-h2 scale: 30/36/-0.75%, bold for the single hero moment */
+.ac-hero__title {
+  font-size: clamp(1.75rem, 4vw, 1.875rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.0075em;
+  margin-bottom: 0.75rem;
+}
+
+.ac-hero__lede {
+  max-width: 38rem;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ac-text-secondary);
+  margin-bottom: 1.25rem;
+}
+
+.ac-hero__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Orbit UI Button: square, text-sm/tight medium, md = py-2 px-4 */
+.ac-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 500;
+  transition:
+    background 0.3s,
+    border-color 0.3s;
+}
+
+.ac-btn:hover {
+  text-decoration: none;
+}
+
+/* variant primary: bg-surface-action text-inverted */
+.ac-btn--primary {
+  background: var(--ac-brand);
+  border: 1px solid transparent;
+  color: var(--ac-text-inverted);
+}
+
+.ac-btn--primary:hover {
+  background: color-mix(in srgb, var(--ac-brand) 80%, black);
+  color: var(--ac-text-inverted);
+}
+
+/* variant outline: border-border-contrast bg-surface-default text-primary */
+.ac-btn--ghost {
+  border: 1px solid var(--ac-border-contrast);
+  background: var(--ac-surface-default);
+  color: var(--ac-text-primary);
+}
+
+.ac-btn--ghost:hover {
+  background: var(--ac-surface-contrast);
+  color: var(--ac-text-primary);
+}
+
+/* Cards: card-container-about recipe — surface-default, contrast border,
+   rounded-lg (cards keep radius; only interactive elements are square) */
 .ac-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 1rem;
-  margin: 2rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+  margin: 1.75rem 0 1rem;
 }
 
 .ac-card {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1.25rem;
-  border: 1px solid var(--ifm-toc-border-color);
-  border-radius: 10px;
-  background: var(--ifm-background-surface-color);
-  color: var(--ifm-color-content);
-  transition:
-    border-color 0.15s ease,
-    transform 0.15s ease;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--ac-border-contrast);
+  border-radius: 0.5rem;
+  background: var(--ac-surface-default);
+  color: var(--ac-text-primary);
+  transition: background 0.15s ease;
 }
 
 .ac-card:hover {
-  border-color: var(--ifm-color-primary);
-  color: var(--ifm-color-content);
+  background: var(--ac-surface-contrast);
+  color: var(--ac-text-primary);
   text-decoration: none;
-  transform: translateY(-2px);
 }
 
-.ac-card__badge {
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ifm-color-primary);
+.ac-card__icon {
+  color: var(--ac-brand);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.ac-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .ac-card__title {
-  margin: 0;
-  font-size: 1.125rem;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
 }
 
 .ac-card__body {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--ifm-color-content-secondary);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ac-text-secondary);
 }
 
-.ac-card__cta {
-  margin-top: auto;
+/* Landing section headings echo the dashboard's mono-uppercase section
+   titles (scoped to the landing page only) */
+html.docs-doc-id-index .markdown h2 {
   font-family: var(--ifm-font-family-monospace);
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 500;
   letter-spacing: 0.72px;
   text-transform: uppercase;
-  color: var(--ifm-color-primary);
+  color: var(--ac-text-secondary);
+  margin-top: 2.25rem;
+}
+
+.ac-endpoints {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.ac-endpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4375rem 0.625rem;
+  border: 1px solid var(--ac-border-default);
+  border-radius: 0.5rem;
+  background: var(--ac-surface-default);
+  color: var(--ac-text-primary);
+  font-size: 13px;
+  transition: background 0.15s ease;
+}
+
+.ac-endpoint:hover {
+  background: var(--ac-surface-contrast);
+  color: var(--ac-text-primary);
+  text-decoration: none;
+}
+
+.ac-endpoint__method {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--ac-method-get) 50%, transparent);
+  color: var(--ac-method-get);
+}
+
+.ac-endpoint__label {
+  font-weight: 500;
 }
