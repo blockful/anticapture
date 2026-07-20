@@ -202,6 +202,12 @@ describe("drafts + SIWE session integration", () => {
     expect(draft.daoId).toBe(DAO_ID);
   });
 
+  it("rejects oversized draft fields", async () => {
+    const { cookie } = await signIn(newWallet());
+    const res = await createDraft(cookie, { title: "x".repeat(301) });
+    expect(res.status).toBe(400);
+  });
+
   it("ignores a client-supplied id on create", async () => {
     const { cookie } = await signIn(newWallet());
     const res = await createDraft(cookie, {

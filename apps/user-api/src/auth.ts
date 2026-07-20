@@ -198,8 +198,12 @@ export function createAuthResolver(config: AuthConfig): AuthResolver {
     // *.vercel.app host still fails closed, exactly like dev/production.
     if (!config.previewDynamicHosts || !isPreviewHost(host)) return undefined;
 
+    // At the cap, fail closed instead of rebuilding an uncached instance on
+    // every request — the ceiling exists so scanner junk can't burn CPU.
+    if (instances.size >= MAX_DYNAMIC_INSTANCES) return undefined;
+
     const dynamic = createAuth(config, host);
-    if (instances.size < MAX_DYNAMIC_INSTANCES) instances.set(host, dynamic);
+    instances.set(host, dynamic);
     return dynamic;
   };
 

@@ -42,21 +42,30 @@ export const DraftParamsSchema = z
   })
   .openapi("DraftParams");
 
+// Self-service accounts can create drafts, so every persisted field is
+// bounded — the row-count quota alone wouldn't stop one user from storing
+// megabytes per row. Generous for real proposals, hostile to abuse. The app
+// additionally enforces an overall request body limit.
+const TITLE_MAX = 300;
+const URL_MAX = 2048;
+const BODY_MAX = 100_000;
+const ACTIONS_MAX = 50;
+
 export const CreateDraftBodySchema = z
   .object({
-    daoId: z.string().min(1),
-    title: z.string().default(""),
-    discussionUrl: z.string().default(""),
-    body: z.string().default(""),
-    actions: z.array(ActionSchema).default([]),
+    daoId: z.string().min(1).max(64),
+    title: z.string().max(TITLE_MAX).default(""),
+    discussionUrl: z.string().max(URL_MAX).default(""),
+    body: z.string().max(BODY_MAX).default(""),
+    actions: z.array(ActionSchema).max(ACTIONS_MAX).default([]),
   })
   .openapi("CreateDraftBody");
 
 export const UpdateDraftBodySchema = z
   .object({
-    title: z.string().optional(),
-    discussionUrl: z.string().optional(),
-    body: z.string().optional(),
-    actions: z.array(ActionSchema).optional(),
+    title: z.string().max(TITLE_MAX).optional(),
+    discussionUrl: z.string().max(URL_MAX).optional(),
+    body: z.string().max(BODY_MAX).optional(),
+    actions: z.array(ActionSchema).max(ACTIONS_MAX).optional(),
   })
   .openapi("UpdateDraftBody");

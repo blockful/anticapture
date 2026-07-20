@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
@@ -20,6 +19,10 @@ import {
   verification,
   walletAddress,
 } from "@/database/schema";
+import {
+  ApiKeyListResponseSchema,
+  CreatedApiKeyResponseSchema,
+} from "@/mappers/api-keys";
 import { ApiKeysRepository } from "@/repositories/api-keys";
 import { DraftsRepository } from "@/repositories/drafts";
 import { ApiKeysService } from "@/services/api-keys";
@@ -77,7 +80,10 @@ describe("api-keys + Authful brokering integration", () => {
       drafts,
       userApiKeys,
     };
-    const { apply } = await pushSchema(tables as any, db as any);
+    // drizzle-kit's PgDatabase generic can't unify with our schema's inferred
+    // relations type; this is a drizzle-kit typing gap, not a test-side any.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { apply } = await pushSchema(tables, db as any);
     await apply();
 
     const authResolver = createAuthResolver({
@@ -109,7 +115,7 @@ describe("api-keys + Authful brokering integration", () => {
       headers: { ...baseHeaders, "content-type": "application/json" },
       body: JSON.stringify({ walletAddress: wallet.address, chainId: 1 }),
     });
-    const { nonce } = (await nonceRes.json()) as any;
+    const { nonce } = (await nonceRes.json()) as { nonce: string };
     const message = createSiweMessage({
       domain: HOST,
       address: wallet.address,
@@ -158,7 +164,9 @@ describe("api-keys + Authful brokering integration", () => {
     const cookie = await signIn();
     const res = await createKey(cookie, "prod-agent");
     expect(res.status).toBe(201);
-    const body = (await res.json()) as any;
+    // Route schema as the contract check — a drifted response shape fails
+    // the parse instead of sliding through an untyped cast.
+    const body = CreatedApiKeyResponseSchema.parse(await res.json());
 
     expect(body.label).toBe("prod-agent");
     expect(body.token).toMatch(/^act_user:/); // tenant = user:<id>
@@ -172,10 +180,14 @@ describe("api-keys + Authful brokering integration", () => {
     const cookie = await signIn();
     await createKey(cookie, "a");
     const res = await app.request("/me/api-keys", { headers: authed(cookie) });
-    const { items } = (await res.json()) as any;
+    // Raw JSON shape (no schema parse here — zod would strip an accidental
+    // `token` field and defeat the leak assertion below).
+    const { items } = (await res.json()) as {
+      items: Record<string, unknown>[];
+    };
 
     expect(items.length).toBe(1);
-    expect(items[0].label).toBe("a");
+    expect(items[0]!.label).toBe("a");
     expect(items[0]).not.toHaveProperty("token");
     expect(items[0]).toHaveProperty("lastUsedAt");
   });
@@ -189,9 +201,9 @@ describe("api-keys + Authful brokering integration", () => {
     ]);
 
     const res = await app.request("/me/api-keys", { headers: authed(cookie) });
-    const { items } = (await res.json()) as any;
-    const used = items.find((k: { label: string }) => k.label === "used");
-    expect(used.lastUsedAt).toBe("2026-01-02T03:04:05.000Z");
+    const { items } = ApiKeyListResponseSchema.parse(await res.json());
+    const used = items.find((k) => k.label === "used");
+    expect(used?.lastUsedAt).toBe("2026-01-02T03:04:05.000Z");
   });
 
   it("still lists keys when Authful is unreachable (lastUsedAt null)", async () => {
@@ -201,10 +213,8 @@ describe("api-keys + Authful brokering integration", () => {
 
     const res = await app.request("/me/api-keys", { headers: authed(cookie) });
     expect(res.status).toBe(200);
-    const { items } = (await res.json()) as any;
-    expect(
-      items.find((k: { label: string }) => k.label === "resilient"),
-    ).toBeTruthy();
+    const { items } = ApiKeyListResponseSchema.parse(await res.json());
+    expect(items.find((k) => k.label === "resilient")).toBeTruthy();
   });
 
   it("does not list another user's keys", async () => {
@@ -213,14 +223,16 @@ describe("api-keys + Authful brokering integration", () => {
     await createKey(alice, "alice-key");
 
     const res = await app.request("/me/api-keys", { headers: authed(bob) });
-    const { items } = (await res.json()) as any;
+    const { items } = ApiKeyListResponseSchema.parse(await res.json());
     expect(items).toHaveLength(0);
   });
 
   it("revokes in Authful then locally, and 404s a foreign key", async () => {
     const owner = await signIn();
     const attacker = await signIn();
-    const created = (await (await createKey(owner, "temp")).json()) as any;
+    const created = CreatedApiKeyResponseSchema.parse(
+      await (await createKey(owner, "temp")).json(),
+    );
 
     // Attacker cannot revoke it — 404, and Authful is never called.
     authful.revoke.mockClear();
@@ -240,10 +252,8 @@ describe("api-keys + Authful brokering integration", () => {
     expect(authful.revoke).toHaveBeenCalledOnce();
 
     const list = await app.request("/me/api-keys", { headers: authed(owner) });
-    const { items } = (await list.json()) as any;
-    expect(
-      items.find((k: { id: string }) => k.id === created.id),
-    ).toBeUndefined();
+    const { items } = ApiKeyListResponseSchema.parse(await list.json());
+    expect(items.find((k) => k.id === created.id)).toBeUndefined();
   });
 
   it("enforces the per-user key quota", async () => {
@@ -252,7 +262,7 @@ describe("api-keys + Authful brokering integration", () => {
     expect((await createKey(cookie)).status).toBe(201);
     const third = await createKey(cookie);
     expect(third.status).toBe(403);
-    await expect(third.json() as any).resolves.toEqual({
+    await expect(third.json()).resolves.toEqual({
       error: "api_key_limit_reached",
     });
   });
