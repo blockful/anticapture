@@ -60,6 +60,8 @@
   },
   "pnpm": {
     "overrides": {
+      "@typescript-eslint/project-service@8.53.0>@typescript-eslint/tsconfig-utils": "8.53.0",
+      "@typescript-eslint/project-service@8.53.0>@typescript-eslint/types": "8.53.0",
       "eslint-plugin-react-hooks>zod-validation-error": "^4.0.0"
     }
   },
