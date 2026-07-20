@@ -38,30 +38,27 @@ export class UNIClient<
     });
   }
 
-  async getTimelockDelay(): Promise<bigint> {
-    if (!this.cache.timelockDelay) {
-      const timelockAddress = await this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "timelock",
-      });
-      this.cache.timelockDelay = await this.readContract({
-        abi: [
-          {
-            constant: true,
-            inputs: [],
-            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-            payable: false,
-            stateMutability: "view",
-            type: "function",
-            name: "delay",
-          },
-        ],
-        address: timelockAddress,
-        functionName: "delay",
-      });
-    }
-    return this.cache.timelockDelay;
+  protected async fetchTimelockDelay(): Promise<bigint> {
+    const timelockAddress = await this.readContract({
+      abi: this.abi,
+      address: this.address,
+      functionName: "timelock",
+    });
+    return this.readContract({
+      abi: [
+        {
+          constant: true,
+          inputs: [],
+          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+          name: "delay",
+        },
+      ],
+      address: timelockAddress,
+      functionName: "delay",
+    });
   }
 
   async getGracePeriod(): Promise<bigint> {

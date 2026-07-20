@@ -39,7 +39,7 @@ export class OPClient<
     }, `quorum:proposal:${proposalId}`);
   }
 
-  async getTimelockDelay(): Promise<bigint> {
+  protected async fetchTimelockDelay(): Promise<bigint> {
     return 0n;
   }
 

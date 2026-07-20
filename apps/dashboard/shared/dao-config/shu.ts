@@ -19,7 +19,7 @@ export const SHU: DaoConfiguration = {
   ogIcon: ShutterOgIcon,
   decimals: 18,
   color: {
-    svgColor: "#051016",
+    svgColor: "#0044A4",
     svgBgColor: "#fff",
   },
   forumLink: "https://shutternetwork.discourse.group/c/shutter-dao/14",
@@ -361,4 +361,5 @@ export const SHU: DaoConfiguration = {
   dataTables: true,
   governancePage: true,
   activityFeed: true,
+  offchainProposals: true,
 };

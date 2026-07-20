@@ -56,6 +56,20 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "cwd": "${workspaceFolder}/apps/api"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "authful",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "dev"],
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
+        "ENV_FILE": "${workspaceFolder}/apps/authful/.env"
+      },
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
+      "cwd": "${workspaceFolder}/apps/authful"
     }
   ]
 }

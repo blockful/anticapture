@@ -61,10 +61,14 @@ export class SHUClient<
     return BigInt(VOTING_PERIOD_BLOCKS);
   }
 
-  async getTimelockDelay(): Promise<bigint> {
+  protected async fetchTimelockDelay(): Promise<bigint> {
     // Returned in seconds (cross-DAO convention — see GovernorBase.getProposalStatus),
     // converted from Azorius.timelockPeriod() which is denominated in blocks.
     return BigInt(TIMELOCK_PERIOD_BLOCKS * BLOCK_TIME_SECONDS);
+  }
+
+  supportOffchainData(): boolean {
+    return true;
   }
 
   /**

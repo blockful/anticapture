@@ -62,6 +62,18 @@ const contrastRatio = (hexA: string, hexB: string) => {
 // reads as plain text, so we lighten it for links/highlights.
 const MIN_LINK_CONTRAST = 3;
 
+const chroma = (hex: string) => {
+  const value = hex.replace("#", "");
+  const channels = [0, 2, 4].map((offset) =>
+    parseInt(value.slice(offset, offset + 2), 16),
+  );
+  return Math.max(...channels) - Math.min(...channels);
+};
+
+// Below this max-minus-min channel spread a color is close enough to neutral
+// that hue alone can't set it apart from body text.
+const MIN_CHROMA = 48;
+
 const withBrandColor = ({
   daoId,
   variables,
@@ -71,10 +83,13 @@ const withBrandColor = ({
 }) => {
   const daoConfig = daoConfigByDaoId[daoId];
   const brandColor = daoConfig.color.svgColor;
-  // Near-black brand colors (e.g. Shutter navy) are indistinguishable from
-  // body text, so text-level tokens get the lightened mix instead
+  // Dark near-neutral brand colors are indistinguishable from body text, so
+  // text-level tokens get the lightened mix instead. Saturated dark brands
+  // (e.g. Shutter blue #0044A4) stay apart from body text by hue, so they
+  // keep the pure color.
   const textBrandColor =
-    contrastRatio(brandColor, variables["--base-primary"]) < MIN_LINK_CONTRAST
+    contrastRatio(brandColor, variables["--base-primary"]) <
+      MIN_LINK_CONTRAST && chroma(brandColor) < MIN_CHROMA
       ? `color-mix(in srgb, ${brandColor} 70%, white)`
       : brandColor;
 

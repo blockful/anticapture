@@ -47,6 +47,7 @@ export abstract class GovernorBase<
     number: number;
     timestamp: number | null;
   }> | null = null;
+  private timelockDelayFetch: Promise<bigint> | null = null;
   private readonly quorumCache = new Map<
     string,
     { value: bigint; expiresAt: number }
@@ -160,7 +161,30 @@ export abstract class GovernorBase<
 
   abstract getQuorum(proposalId: string | null): Promise<bigint>;
 
-  abstract getTimelockDelay(): Promise<bigint>;
+  /** Uncached timelock delay read (RPC or constant), implemented per DAO. */
+  protected abstract fetchTimelockDelay(): Promise<bigint>;
+
+  async getTimelockDelay(): Promise<bigint> {
+    if (this.cache.timelockDelay !== undefined) {
+      return this.cache.timelockDelay;
+    }
+
+    // Share one in-flight fetch across concurrent callers: getProposalStatus
+    // runs per proposal, so a cache miss would otherwise fire a burst of
+    // eth_calls and trip upstream RPC rate limits.
+    if (!this.timelockDelayFetch) {
+      this.timelockDelayFetch = this.fetchTimelockDelay()
+        .then((delay) => {
+          this.cache.timelockDelay = delay;
+          return delay;
+        })
+        .finally(() => {
+          this.timelockDelayFetch = null;
+        });
+    }
+
+    return this.timelockDelayFetch;
+  }
 
   async getGracePeriod(): Promise<bigint | null> {
     return null;
@@ -180,8 +204,20 @@ export abstract class GovernorBase<
     currentBlock: number,
     currentTimestamp: number,
   ): Promise<string> {
-    const timelockDelay = await this.getTimelockDelay();
-    const gracePeriod = await this.getGracePeriod();
+    let timelockDelay: bigint;
+    let gracePeriod: bigint | null;
+    try {
+      timelockDelay = await this.getTimelockDelay();
+      gracePeriod = await this.getGracePeriod();
+    } catch (error) {
+      // Degrade gracefully on RPC failures (e.g. rate limits): serve the
+      // indexed status instead of failing the whole request.
+      logger.warn(
+        { error, proposalId: proposal.id },
+        "RPC read failed while computing proposal status; falling back to indexed status",
+      );
+      return proposal.status;
+    }
 
     if (
       proposal.status === ProposalStatus.QUEUED &&
@@ -232,7 +268,16 @@ export abstract class GovernorBase<
         abstainVotes: proposal.abstainVotes,
       });
 
-      const quorum = await this.getQuorum(proposal.id);
+      let quorum: bigint;
+      try {
+        quorum = await this.getQuorum(proposal.id);
+      } catch (error) {
+        logger.warn(
+          { error, proposalId: proposal.id },
+          "RPC read failed while computing proposal status; falling back to indexed status",
+        );
+        return proposal.status;
+      }
       const hasQuorum = proposalQuorum >= quorum;
       if (!hasQuorum) return ProposalStatus.NO_QUORUM;
 

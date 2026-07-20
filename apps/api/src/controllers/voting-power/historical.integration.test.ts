@@ -18,6 +18,9 @@ const VALID_ADDRESS = getAddress("0x1234567890123456789012345678901234567890");
 const DELEGATE_ADDRESS = getAddress(
   "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 );
+const NEXT_DELEGATE_ADDRESS = getAddress(
+  "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+);
 const TX_HASH =
   "0xabc1230000000000000000000000000000000000000000000000000000000000";
 const TX_HASH_1 =
@@ -291,6 +294,86 @@ describe("Historical Voting Power Controller", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            transactionHash: TX_HASH,
+            daoId: DAO_ID,
+            accountId: VALID_ADDRESS,
+            votingPower: "1000000000000000000",
+            delta: "500000000000000000",
+            timestamp: "1700000000",
+            logIndex: 1,
+            delegation: {
+              from: DELEGATE_ADDRESS,
+              value: "500000000000000000",
+              to: VALID_ADDRESS,
+              previousDelegate: null,
+            },
+            transfer: null,
+          },
+        ],
+      });
+    });
+
+    it("should include redelegation data for the previous delegate", async () => {
+      await db.insert(delegation).values(
+        createDelegationRow({
+          delegateAccountId: NEXT_DELEGATE_ADDRESS,
+          previousDelegate: VALID_ADDRESS,
+          logIndex: 0,
+        }),
+      );
+      await db
+        .insert(votingPowerHistory)
+        .values(createHistoryRow({ logIndex: 1 }));
+
+      const res = await app.request(
+        `/accounts/${VALID_ADDRESS}/voting-powers/historical`,
+      );
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({
+        totalCount: 1,
+        items: [
+          {
+            transactionHash: TX_HASH,
+            daoId: DAO_ID,
+            accountId: VALID_ADDRESS,
+            votingPower: "1000000000000000000",
+            delta: "500000000000000000",
+            timestamp: "1700000000",
+            logIndex: 1,
+            delegation: {
+              from: DELEGATE_ADDRESS,
+              value: "500000000000000000",
+              to: NEXT_DELEGATE_ADDRESS,
+              previousDelegate: VALID_ADDRESS,
+            },
+            transfer: null,
+          },
+        ],
+      });
+    });
+
+    it("should keep pagination cardinality for partial delegations", async () => {
+      await db.insert(delegation).values([
+        createDelegationRow({ logIndex: 0 }),
+        createDelegationRow({
+          delegateAccountId: NEXT_DELEGATE_ADDRESS,
+          logIndex: 0,
+        }),
+      ]);
+      await db
+        .insert(votingPowerHistory)
+        .values(createHistoryRow({ logIndex: 1 }));
+
+      const res = await app.request(
+        `/accounts/${VALID_ADDRESS}/voting-powers/historical?limit=1`,
+      );
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({
         totalCount: 1,
         items: [
           {

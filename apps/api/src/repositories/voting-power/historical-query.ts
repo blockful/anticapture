@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, lt, lte, or, sql } from "drizzle-orm";
 import { Address } from "viem";
 
 import { delegation, Drizzle, transfer, votingPowerHistory } from "@/database";
@@ -82,28 +82,52 @@ export const getHistoricalVotingPowersWithRelations = async (
     .offset(skip)
     .as("history_page");
 
-  const delegationLogIndexCondition = includeSameLogIndex
-    ? sql`d2.log_index <= ${historyPage.logIndex}`
-    : sql`d2.log_index < ${historyPage.logIndex}`;
-  const previousTransferLogIndexCondition = includeSameLogIndex
-    ? sql`t2.log_index <= ${historyPage.logIndex}`
-    : sql`t2.log_index < ${historyPage.logIndex}`;
-  const transferJoinCondition =
-    transferRelation === "next"
-      ? sql`${historyPage.transactionHash} = ${transfer.transactionHash}
-          AND ${transfer.logIndex} = (
-            SELECT MIN(t2.log_index)
-            FROM ${transfer} t2
-            WHERE t2.transaction_hash = ${historyPage.transactionHash}
-            AND t2.log_index > ${historyPage.logIndex}
-        )`
-      : sql`${historyPage.transactionHash} = ${transfer.transactionHash}
-          AND ${transfer.logIndex} = (
-            SELECT MAX(t2.log_index)
-            FROM ${transfer} t2
-            WHERE t2.transaction_hash = ${historyPage.transactionHash}
-            AND ${previousTransferLogIndexCondition}
-        )`;
+  const relatedDelegation = db
+    .select()
+    .from(delegation)
+    .where(
+      and(
+        eq(delegation.transactionHash, historyPage.transactionHash),
+        includeSameLogIndex
+          ? lte(delegation.logIndex, historyPage.logIndex)
+          : lt(delegation.logIndex, historyPage.logIndex),
+        or(
+          eq(delegation.delegateAccountId, historyPage.accountId),
+          eq(delegation.previousDelegate, historyPage.accountId),
+        ),
+      ),
+    )
+    .orderBy(
+      desc(delegation.logIndex),
+      sql`CASE WHEN ${delegation.delegateAccountId} = ${historyPage.accountId} THEN 0 ELSE 1 END`,
+      asc(delegation.delegatorAccountId),
+      asc(delegation.delegateAccountId),
+    )
+    .limit(1)
+    .as("related_delegation");
+
+  const relatedTransfer = db
+    .select()
+    .from(transfer)
+    .where(
+      and(
+        eq(transfer.transactionHash, historyPage.transactionHash),
+        transferRelation === "next"
+          ? gt(transfer.logIndex, historyPage.logIndex)
+          : includeSameLogIndex
+            ? lte(transfer.logIndex, historyPage.logIndex)
+            : lt(transfer.logIndex, historyPage.logIndex),
+      ),
+    )
+    .orderBy(
+      transferRelation === "next"
+        ? asc(transfer.logIndex)
+        : desc(transfer.logIndex),
+      asc(transfer.fromAccountId),
+      asc(transfer.toAccountId),
+    )
+    .limit(1)
+    .as("related_transfer");
 
   const result = await db
     .select({
@@ -117,21 +141,38 @@ export const getHistoricalVotingPowersWithRelations = async (
         timestamp: historyPage.timestamp,
         logIndex: historyPage.logIndex,
       },
-      delegations: delegation,
-      transfers: transfer,
+      delegations: {
+        transactionHash: relatedDelegation.transactionHash,
+        daoId: relatedDelegation.daoId,
+        delegateAccountId: relatedDelegation.delegateAccountId,
+        delegatorAccountId: relatedDelegation.delegatorAccountId,
+        delegatedValue: relatedDelegation.delegatedValue,
+        previousDelegate: relatedDelegation.previousDelegate,
+        timestamp: relatedDelegation.timestamp,
+        logIndex: relatedDelegation.logIndex,
+        isCex: relatedDelegation.isCex,
+        isDex: relatedDelegation.isDex,
+        isLending: relatedDelegation.isLending,
+        isTotal: relatedDelegation.isTotal,
+      },
+      transfers: {
+        transactionHash: relatedTransfer.transactionHash,
+        daoId: relatedTransfer.daoId,
+        tokenId: relatedTransfer.tokenId,
+        amount: relatedTransfer.amount,
+        fromAccountId: relatedTransfer.fromAccountId,
+        toAccountId: relatedTransfer.toAccountId,
+        timestamp: relatedTransfer.timestamp,
+        logIndex: relatedTransfer.logIndex,
+        isCex: relatedTransfer.isCex,
+        isDex: relatedTransfer.isDex,
+        isLending: relatedTransfer.isLending,
+        isTotal: relatedTransfer.isTotal,
+      },
     })
     .from(historyPage)
-    .leftJoin(
-      delegation,
-      sql`${historyPage.transactionHash} = ${delegation.transactionHash}
-          AND ${delegation.logIndex} = (
-            SELECT MAX(d2.log_index)
-            FROM ${delegation} d2
-            WHERE d2.transaction_hash = ${historyPage.transactionHash}
-            AND ${delegationLogIndexCondition}
-        )`,
-    )
-    .leftJoin(transfer, transferJoinCondition)
+    .leftJoinLateral(relatedDelegation, sql`true`)
+    .leftJoinLateral(relatedTransfer, sql`true`)
     .orderBy(
       orderDirection === "asc"
         ? asc(

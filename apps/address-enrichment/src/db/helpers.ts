@@ -16,8 +16,11 @@ export function initDb(connectionString: string) {
     return db;
   }
 
+  // Fail fast when Postgres is unreachable instead of hanging pg-pool connects
+  // forever. No statement_timeout: this pool also runs migrations.
   pool = new Pool({
     connectionString,
+    connectionTimeoutMillis: 10_000,
   });
 
   db = drizzle(pool, { schema });

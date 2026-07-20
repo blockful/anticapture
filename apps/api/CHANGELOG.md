@@ -1,5 +1,29 @@
 # @anticapture/api
 
+## 1.5.5
+
+### Patch Changes
+
+- [#2064](https://github.com/blockful/anticapture/pull/2064) [`a28e99f`](https://github.com/blockful/anticapture/commit/a28e99f5f7974437a6ba038106cb380984080f5f) Thanks [@pikonha](https://github.com/pikonha)! - Dedupe concurrent timelock delay RPC reads in GovernorBase, fall back to the indexed proposal status when RPC reads fail (e.g. rate limits) instead of returning 500, and include the error cause in the unhandled-error log message.
+
+## 1.5.4
+
+### Patch Changes
+
+- [#2060](https://github.com/blockful/anticapture/pull/2060) [`b7df0bb`](https://github.com/blockful/anticapture/commit/b7df0bb80e90a55e94bbf05aaeec8e6769212c4f) Thanks [@pikonha](https://github.com/pikonha)! - Preserve voting-power history pagination when transactions contain partial delegations.
+
+## 1.5.3
+
+### Patch Changes
+
+- [#2031](https://github.com/blockful/anticapture/pull/2031) [`4e6c3eb`](https://github.com/blockful/anticapture/commit/4e6c3ebcc3d527d1e90059bc00ff3d38ed4f6655) Thanks [@pikonha](https://github.com/pikonha)! - improve performance of the voting power historical endpoint
+
+- [#2055](https://github.com/blockful/anticapture/pull/2055) [`248a451`](https://github.com/blockful/anticapture/commit/248a4518fd7d22c24ceaa23ad4692e1a5cb18aa6) Thanks [@pikonha](https://github.com/pikonha)! - Make request log messages human-readable in Loki (`GET /path 200` instead of `request`) and stop logging `/metrics` and `/health` scrapes
+
+- [#2056](https://github.com/blockful/anticapture/pull/2056) [`1051a2d`](https://github.com/blockful/anticapture/commit/1051a2d698b74c95219df903862ed3afe658c514) Thanks [@pikonha](https://github.com/pikonha)! - enable offchain (Snapshot) proposal data for ShutterDAO
+
+- [#2053](https://github.com/blockful/anticapture/pull/2053) [`633b628`](https://github.com/blockful/anticapture/commit/633b6287869693b8c707677d7b0af62a4b2c6ad7) Thanks [@pikonha](https://github.com/pikonha)! - add pg pool config to avoid hanging db connections
+
 ## 1.5.2
 
 ### Patch Changes
