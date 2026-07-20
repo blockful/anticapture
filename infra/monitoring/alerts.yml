@@ -54,6 +54,31 @@ groups:
             Ponder has not advanced its synced block timestamp for
             {{ printf "%.0f" $value }} seconds. Check RPC health and indexing errors.
 
+      # Nodeful (our own node) stopped serving mainnet traffic through eRPC while the
+      # network still has traffic — everything is silently falling back to chainstack.
+      # Catches the failed-bootstrap case too: an unregistered upstream has no evm:1
+      # series at all, which the `or vector(0)` turns into a firing zero.
+      - alert: ErpcNodefulNoTraffic
+        expr: >
+          (
+            sum(rate(erpc_upstream_request_total{upstream="nodeful", network="evm:1"}[15m]))
+            or vector(0)
+          ) == 0
+          and
+          sum(rate(erpc_upstream_request_total{network="evm:1"}[15m])) > 0.05
+        for: 10m
+        keep_firing_for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] eRPC is serving no mainnet traffic through nodeful"
+          description: >
+            Nodeful has served zero evm:1 requests for 15+ minutes while eRPC is receiving
+            mainnet traffic — all of it is falling back to chainstack. Most likely nodeful
+            failed its eth_chainId bootstrap probe. Check that reth on the nodeful box is
+            listening on 8545 (not localhost-only), the nodeful Railway tailscale proxy is
+            up with a valid TAILSCALE_AUTHKEY, and erpc logs for "initialization task failed".
+
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage
         expr: sum by (job) (rate(process_cpu_time_seconds_total[1m])) * 100 > 80
