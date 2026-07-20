@@ -125,7 +125,7 @@ export function LoginProvider({
       {children}
       <LoginModal
         open={isOpen}
-        onOpenChange={handleOpenChange}
+        onOpenChangeAction={handleOpenChange}
         isWhitelabel={isWhitelabel}
         whitelabelDaoId={whitelabelDaoId}
         redirectTo={redirectTo}

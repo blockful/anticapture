@@ -34,15 +34,19 @@ export const createMagicLinkSender = (
     const { error } = await resend.emails.send({
       from,
       to: email,
-      subject: "Sign in to Blockful",
+      subject: "Sign in to Anticapture",
+      // Inline-styled with the dashboard's dark-theme tokens (globals.css):
+      // background #09090b, surface #18181b, border #3f3f46, text #fafafa /
+      // #a1a1aa / #71717a, brand #ec762e — square corners like rounded-base.
       html: `
-        <div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2 style="font-size: 18px;">Sign in to Blockful</h2>
-          <p style="color: #555;">Click the button below to sign in. This link expires shortly and can be used once.</p>
-          <p style="margin: 24px 0;">
-            <a href="${landingUrl}" style="background: #E66AE9; color: #fff; padding: 12px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Sign in</a>
-          </p>
-          <p style="color: #888; font-size: 13px;">If you didn't request this, you can safely ignore this email.</p>
+        <div style="background-color: #09090b; padding: 40px 16px; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;">
+          <div style="max-width: 400px; margin: 0 auto; background-color: #18181b; border: 1px solid #3f3f46; padding: 32px 24px; text-align: center;">
+            <p style="margin: 0 0 24px; font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 13px; line-height: 20px; letter-spacing: 0.08em; text-transform: uppercase; color: #ec762e;">Anticapture</p>
+            <h2 style="margin: 0 0 4px; font-size: 16px; line-height: 24px; font-weight: 600; color: #fafafa;">Sign in to Anticapture</h2>
+            <p style="margin: 0 0 24px; font-size: 14px; line-height: 20px; color: #a1a1aa;">Click the button below to sign in. This link expires shortly and can be used once.</p>
+            <a href="${landingUrl}" style="display: inline-block; background-color: #ec762e; color: #09090b; padding: 12px 24px; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none;">Sign in</a>
+            <p style="margin: 24px 0 0; font-size: 12px; line-height: 16px; color: #71717a;">If you didn't request this, you can safely ignore this email.</p>
+          </div>
         </div>
       `,
     });
