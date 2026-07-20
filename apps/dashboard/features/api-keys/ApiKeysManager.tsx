@@ -68,7 +68,20 @@ export const ApiKeysManager = () => {
 
   const handleDelete = () => {
     if (!toDelete) return;
-    revoke.mutate(toDelete.id, { onSuccess: () => setToDelete(null) });
+    const revokedId = toDelete.id;
+    revoke.mutate(revokedId, {
+      onSuccess: () => {
+        // A revoked key must vanish from the connect section too: keeping
+        // its session plaintext (or the synthesized last-created entry)
+        // would let the copied command carry a token that no longer works.
+        setSessionTokens((prev) => {
+          const { [revokedId]: _removed, ...rest } = prev;
+          return rest;
+        });
+        setLastCreated((prev) => (prev?.id === revokedId ? null : prev));
+        setToDelete(null);
+      },
+    });
   };
 
   // A deployment without Authful provisioning has no API-key surface —
