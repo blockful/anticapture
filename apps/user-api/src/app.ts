@@ -1,6 +1,7 @@
 import { collectPrometheusMetrics } from "@anticapture/observability";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { sql } from "drizzle-orm";
+import { bodyLimit } from "hono/body-limit";
 
 import { forwardedHost, type AuthResolver } from "@/auth";
 import { apiKeysController } from "@/controllers/api-keys";
@@ -32,6 +33,10 @@ export function createApp({
 
   app.use("*", requestLogger());
   app.use("*", metricsMiddleware());
+  // Global backstop against oversized payloads (the drafts schemas also
+  // bound each field): self-service accounts must not consume request
+  // memory at will. 1 MiB comfortably fits the largest legitimate draft.
+  app.use("*", bodyLimit({ maxSize: 1024 * 1024 }));
 
   // Railway healthcheck: probe the DB so a bad DATABASE_URL / down Postgres
   // marks the service unhealthy instead of serving auth traffic that 500s.

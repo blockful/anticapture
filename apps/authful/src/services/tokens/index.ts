@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 
 import { tokenValidationRequestTotal } from "@/metrics";
+import { USER_TENANT_PREFIX } from "@/middlewares/token-auth";
 import type { DBToken, TokensRepository } from "@/repositories/tokens";
 
 export const TOKEN_PREFIX = "act_";
@@ -72,8 +73,14 @@ export class TokensService {
     return { created: true, token };
   }
 
-  async list(tenant?: string): Promise<DBToken[]> {
-    return tenant ? this.repo.listByTenant(tenant) : this.repo.list();
+  async list(
+    tenant?: string,
+    opts: { activeOnly?: boolean } = {},
+  ): Promise<DBToken[]> {
+    if (!tenant) return this.repo.list();
+    return opts.activeOnly
+      ? this.repo.listActiveByTenant(tenant)
+      : this.repo.listByTenant(tenant);
   }
 
   /**
@@ -102,7 +109,12 @@ export class TokensService {
     }
     await this.repo.touchLastUsed(token.id);
     tokenValidationRequestTotal.add(1, {
-      tenant: token.tenant,
+      // Self-service keys mint one `user:<id>` tenant per user — unbounded.
+      // Bucket them so the Prometheus label set stays bounded; ops tenants
+      // keep their verbatim label. Mirrors gateful's usage middleware.
+      tenant: token.tenant.startsWith(USER_TENANT_PREFIX)
+        ? `${USER_TENANT_PREFIX}*`
+        : token.tenant,
       name: token.name,
       result: "valid",
     });

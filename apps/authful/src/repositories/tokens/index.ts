@@ -20,6 +20,19 @@ export class TokensRepository {
       .orderBy(desc(tokens.createdAt));
   }
 
+  /**
+   * Active tokens only — the provisioning enrichment path (User API
+   * lastUsedAt lookups) must stay bounded under key churn: revoked rows
+   * accumulate forever, active rows are quota-capped.
+   */
+  async listActiveByTenant(tenant: string): Promise<DBToken[]> {
+    return this.db
+      .select()
+      .from(tokens)
+      .where(and(eq(tokens.tenant, tenant), isNull(tokens.revokedAt)))
+      .orderBy(desc(tokens.createdAt));
+  }
+
   async create(token: NewToken): Promise<DBToken> {
     const [created] = await this.db.insert(tokens).values(token).returning();
     return created!;

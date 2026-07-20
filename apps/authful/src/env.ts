@@ -45,6 +45,22 @@ const envSchema = z
         message: "SEED_TOKEN_PLAINTEXT is required in CI/preview environments",
       });
     }
+    // The provisioning key is a security boundary: scopedTokenAuth matches
+    // the admin key first, so a provisioning key configured to the same
+    // value would classify every User API call as admin and silently void
+    // the user:* tenant restriction. Refuse to boot in that state.
+    if (
+      data.PROVISIONING_API_KEY &&
+      (data.PROVISIONING_API_KEY === data.ADMIN_API_KEY ||
+        data.PROVISIONING_API_KEY === data.INTERNAL_API_KEY)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["PROVISIONING_API_KEY"],
+        message:
+          "PROVISIONING_API_KEY must differ from ADMIN_API_KEY and INTERNAL_API_KEY",
+      });
+    }
   });
 
 const _env = envSchema.safeParse(process.env);

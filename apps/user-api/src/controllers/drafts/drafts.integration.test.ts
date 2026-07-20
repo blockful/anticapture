@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
@@ -6,6 +5,7 @@ import { recoverMessageAddress } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 import { createSiweMessage } from "viem/siwe";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { z, type ZodType } from "zod";
 
 import { createApp } from "@/app";
 import { createAuthResolver } from "@/auth";
@@ -18,8 +18,20 @@ import {
   verification,
   walletAddress,
 } from "@/database/schema";
+import { DraftListResponseSchema, DraftResponseSchema } from "@/mappers/drafts";
+import { ErrorResponseSchema } from "@/mappers/errors";
 import { DraftsRepository } from "@/repositories/drafts";
 import { ProposalDraftsService } from "@/services/drafts";
+
+// better-auth's SIWE plugin has no exported response schema — this is the
+// only shape this suite reads from it.
+const NonceResponseSchema = z.object({ nonce: z.string() });
+
+// Runtime-validates every response body against its route's own zod schema
+// instead of casting, so a controller/schema mismatch fails the test.
+async function readJson<T>(res: Response, schema: ZodType<T>): Promise<T> {
+  return schema.parse(await res.json());
+}
 
 const HOST = "localhost:3000";
 const ORIGIN = `http://${HOST}`;
@@ -63,7 +75,10 @@ describe("drafts + SIWE session integration", () => {
       drafts,
     };
 
-    const { apply } = await pushSchema(tables as any, db as any);
+    // drizzle-kit's PgDatabase generic can't unify with our schema's inferred
+    // relations type; this is a drizzle-kit typing gap, not a test-side any.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { apply } = await pushSchema(tables, db as any);
     await apply();
 
     const authResolver = createAuthResolver({
@@ -100,7 +115,7 @@ describe("drafts + SIWE session integration", () => {
       body: JSON.stringify({ walletAddress: wallet.address, chainId: 1 }),
     });
     expect(nonceRes.status).toBe(200);
-    const { nonce } = (await nonceRes.json()) as any as { nonce: string };
+    const { nonce } = await readJson(nonceRes, NonceResponseSchema);
 
     const message = createSiweMessage({
       domain: HOST,
@@ -166,7 +181,7 @@ describe("drafts + SIWE session integration", () => {
       headers: { host: "evil.example", origin: "http://evil.example" },
     });
     expect(res.status).toBe(400);
-    await expect(res.json() as any).resolves.toEqual({
+    await expect(readJson(res, ErrorResponseSchema)).resolves.toEqual({
       error: "untrusted_host",
     });
   });
@@ -177,7 +192,7 @@ describe("drafts + SIWE session integration", () => {
 
     const res = await createDraft(cookie, { title: "My proposal" });
     expect(res.status).toBe(201);
-    const draft = (await res.json()) as any;
+    const draft = await readJson(res, DraftResponseSchema);
 
     expect(draft.id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
@@ -187,13 +202,19 @@ describe("drafts + SIWE session integration", () => {
     expect(draft.daoId).toBe(DAO_ID);
   });
 
+  it("rejects oversized draft fields", async () => {
+    const { cookie } = await signIn(newWallet());
+    const res = await createDraft(cookie, { title: "x".repeat(301) });
+    expect(res.status).toBe(400);
+  });
+
   it("ignores a client-supplied id on create", async () => {
     const { cookie } = await signIn(newWallet());
     const res = await createDraft(cookie, {
       id: "11111111-1111-1111-1111-111111111111",
     });
     expect(res.status).toBe(201);
-    const draft = (await res.json()) as any;
+    const draft = await readJson(res, DraftResponseSchema);
     expect(draft.id).not.toBe("11111111-1111-1111-1111-111111111111");
   });
 
@@ -201,7 +222,10 @@ describe("drafts + SIWE session integration", () => {
     const alice = await signIn(newWallet());
     const bob = await signIn(newWallet());
 
-    const created = (await (await createDraft(alice.cookie)).json()) as any;
+    const created = await readJson(
+      await createDraft(alice.cookie),
+      DraftResponseSchema,
+    );
     await createDraft(alice.cookie, { daoId: "shu" });
     await createDraft(bob.cookie);
 
@@ -209,47 +233,57 @@ describe("drafts + SIWE session integration", () => {
       headers: authed(alice.cookie),
     });
     expect(res.status).toBe(200);
-    const { items } = (await res.json()) as any;
+    const { items } = await readJson(res, DraftListResponseSchema);
 
-    expect(items.some((d: { id: string }) => d.id === created.id)).toBe(true);
-    expect(items.every((d: { daoId: string }) => d.daoId === DAO_ID)).toBe(
-      true,
-    );
-    expect(items.every((d: { isOwner: boolean }) => d.isOwner)).toBe(true);
+    expect(items.some((d) => d.id === created.id)).toBe(true);
+    expect(items.every((d) => d.daoId === DAO_ID)).toBe(true);
+    expect(items.every((d) => d.isOwner)).toBe(true);
   });
 
   it("serves the share endpoint publicly with isOwner from the session", async () => {
     const owner = await signIn(newWallet());
     const other = await signIn(newWallet());
-    const draft = (await (await createDraft(owner.cookie)).json()) as any;
+    const draft = await readJson(
+      await createDraft(owner.cookie),
+      DraftResponseSchema,
+    );
 
     const anonymous = await app.request(`/drafts/${draft.id}`, {
       headers: baseHeaders,
     });
     expect(anonymous.status).toBe(200);
-    await expect(anonymous.json() as any).resolves.toMatchObject({
+    await expect(
+      readJson(anonymous, DraftResponseSchema),
+    ).resolves.toMatchObject({
       isOwner: false,
     });
 
     const asOwner = await app.request(`/drafts/${draft.id}`, {
       headers: authed(owner.cookie),
     });
-    await expect(asOwner.json() as any).resolves.toMatchObject({
-      isOwner: true,
-    });
+    await expect(readJson(asOwner, DraftResponseSchema)).resolves.toMatchObject(
+      {
+        isOwner: true,
+      },
+    );
 
     const asOther = await app.request(`/drafts/${draft.id}`, {
       headers: authed(other.cookie),
     });
-    await expect(asOther.json() as any).resolves.toMatchObject({
-      isOwner: false,
-    });
+    await expect(readJson(asOther, DraftResponseSchema)).resolves.toMatchObject(
+      {
+        isOwner: false,
+      },
+    );
   });
 
   it("returns identical 404s for foreign and nonexistent drafts (no oracle)", async () => {
     const owner = await signIn(newWallet());
     const attacker = await signIn(newWallet());
-    const draft = (await (await createDraft(owner.cookie)).json()) as any;
+    const draft = await readJson(
+      await createDraft(owner.cookie),
+      DraftResponseSchema,
+    );
 
     const patch = () => ({
       method: "PUT",
@@ -264,20 +298,25 @@ describe("drafts + SIWE session integration", () => {
 
     expect(foreign.status).toBe(404);
     expect(missing.status).toBe(404);
-    await expect(foreign.json() as any).resolves.toEqual(
-      (await missing.json()) as any,
+    await expect(readJson(foreign, ErrorResponseSchema)).resolves.toEqual(
+      await readJson(missing, ErrorResponseSchema),
     );
 
     // And the draft is untouched.
     const check = await app.request(`/drafts/${draft.id}`, {
       headers: baseHeaders,
     });
-    await expect(check.json() as any).resolves.toMatchObject({ title: "t" });
+    await expect(readJson(check, DraftResponseSchema)).resolves.toMatchObject({
+      title: "t",
+    });
   });
 
   it("lets the owner update and delete", async () => {
     const owner = await signIn(newWallet());
-    const draft = (await (await createDraft(owner.cookie)).json()) as any;
+    const draft = await readJson(
+      await createDraft(owner.cookie),
+      DraftResponseSchema,
+    );
 
     const updated = await app.request(`/drafts/${draft.id}`, {
       method: "PUT",
@@ -285,9 +324,11 @@ describe("drafts + SIWE session integration", () => {
       body: JSON.stringify({ title: "updated" }),
     });
     expect(updated.status).toBe(200);
-    await expect(updated.json() as any).resolves.toMatchObject({
-      title: "updated",
-    });
+    await expect(readJson(updated, DraftResponseSchema)).resolves.toMatchObject(
+      {
+        title: "updated",
+      },
+    );
 
     const foreignDelete = await app.request(`/drafts/${draft.id}`, {
       method: "DELETE",
@@ -315,7 +356,7 @@ describe("drafts + SIWE session integration", () => {
 
     const third = await createDraft(cookie, {}, quotaApp);
     expect(third.status).toBe(403);
-    await expect(third.json() as any).resolves.toEqual({
+    await expect(readJson(third, ErrorResponseSchema)).resolves.toEqual({
       error: "draft_limit_reached",
     });
   });
@@ -344,12 +385,12 @@ describe("drafts + SIWE session integration", () => {
     const res = await app.request(`/drafts?daoId=${DAO_ID}`, {
       headers: authed(cookie),
     });
-    const { items } = (await res.json()) as any;
+    const { items } = await readJson(res, DraftListResponseSchema);
 
-    const claimed = items.find((d: { id: string }) => d.id === migrated!.id);
+    const claimed = items.find((d) => d.id === migrated!.id);
     expect(claimed).toBeDefined();
-    expect(claimed.isOwner).toBe(true);
-    expect(claimed.title).toBe("migrated draft");
+    expect(claimed!.isOwner).toBe(true);
+    expect(claimed!.title).toBe("migrated draft");
   });
 
   it("rejects a create without daoId", async () => {

@@ -97,7 +97,12 @@ export function tokensController(app: Hono, service: TokensService) {
           403,
         );
       }
-      const tokens = await service.list(tenant);
+      // Provisioning callers use this purely for usage enrichment of the
+      // (quota-capped) active keys — revoked history would grow unbounded
+      // under key churn. Admin keeps the full history view.
+      const tokens = await service.list(tenant, {
+        activeOnly: c.get("authScope") === "provisioning",
+      });
       return c.json({ items: tokens.map(toTokenMetadata) }, 200);
     },
   );

@@ -399,6 +399,23 @@ describe("authful app", () => {
       });
     });
 
+    it("buckets user tenants to user:* to bound the metric's cardinality", async () => {
+      const add = vi.spyOn(tokenValidationRequestTotal, "add");
+      const minted = await mint({ tenant: "user:1", name: "my-agent" });
+
+      await app.request("/validate", {
+        method: "POST",
+        headers: internalHeaders,
+        body: JSON.stringify({ tokenHash: hashToken(minted.token) }),
+      });
+
+      expect(add).toHaveBeenCalledWith(1, {
+        tenant: "user:*",
+        name: "my-agent",
+        result: "valid",
+      });
+    });
+
     it("rejects an unknown hash", async () => {
       const add = vi.spyOn(tokenValidationRequestTotal, "add");
       const res = await app.request("/validate", {
