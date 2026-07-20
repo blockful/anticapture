@@ -22,7 +22,7 @@ import { useSiweLogin } from "@/shared/services/auth/useSiweLogin";
 
 export type LoginModalProps = {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChangeAction: (open: boolean) => void;
   /** Whitelabel deployments offer wallet sign-in only (no email/Google). */
   isWhitelabel?: boolean;
   /** The DAO branding a whitelabel render — drives the modal's icon. */
@@ -41,7 +41,7 @@ type View = "options" | "email" | "sent";
 
 export const LoginModal = ({
   open,
-  onOpenChange,
+  onOpenChangeAction,
   isWhitelabel = false,
   whitelabelDaoId = null,
   redirectTo,
@@ -56,13 +56,13 @@ export const LoginModal = ({
 
   // The server reports which methods its deployment actually serves (magic
   // link / Google are env-gated there); a method it can't handle is hidden
-  // rather than shown broken. Whitelabel is wallet-only by design.
-  // Fetched at mount (this component is always mounted, `open` just toggles
-  // it) so the answer is already cached when the modal first opens — the
-  // Email/Google buttons must not pop in after a round-trip.
+  // rather than shown broken. Fetched at mount (this component is always
+  // mounted, `open` just toggles it) so the answer is already cached when the
+  // modal first opens. Whitelabel is wallet-only by design, regardless of
+  // what the server offers.
   const methods = useAuthMethods();
-  const showEmail = methods.magicLink;
-  const showGoogle = methods.google;
+  const showEmail = methods.magicLink && !isWhitelabel;
+  const showGoogle = methods.google && !isWhitelabel;
   const showAlternatives = showEmail || showGoogle;
   const siweBusy = siwe.status !== "idle" && siwe.status !== "error";
 
@@ -95,7 +95,7 @@ export const LoginModal = ({
       siwe.reset();
       emailLogin.reset();
     }
-    onOpenChange(next);
+    onOpenChangeAction(next);
   };
 
   const callbackURL = () =>
