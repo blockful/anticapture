@@ -9,6 +9,7 @@ import type {
 } from "@/features/create-proposal/types";
 import { draftKey } from "@/features/create-proposal/utils/draftKey";
 import {
+  excludePersistedDrafts,
   readDrafts,
   writeDrafts,
   type NewDraftInput,
@@ -53,6 +54,7 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
   const [drafts, setDrafts] = useState<ProposalDraft[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [loadedScope, setLoadedScope] = useState<string | null>(null);
   const [retryToken, setRetryToken] = useState(0);
   // Browser-local upload runs once per dao:address (see below).
   const drainedLocalRef = useRef<Set<string>>(new Set());
@@ -72,19 +74,24 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
     // cancelled by this effect's cleanup skips its finally, so the flags are
     // cleared here too — sign-out mid-request must not strand isLoading.
     setDrafts([]);
+    setLoadedScope(null);
     if (!userId) {
       setIsLoading(false);
       setError(false);
       return;
     }
 
+    const scope = `${userId}:${daoId}`;
     let cancelled = false;
     const run = async () => {
       setIsLoading(true);
       setError(false);
       try {
         const { items } = await listDrafts(daoId);
-        if (!cancelled) setDrafts(items.map(toDraft));
+        if (!cancelled) {
+          setDrafts(items.map(toDraft));
+          setLoadedScope(scope);
+        }
       } catch {
         if (!cancelled) setError(true);
       } finally {
@@ -108,13 +115,17 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
   // retryToken so the list refetches with the drained rows included.
   useEffect(() => {
     if (!userId || !address) return;
+    if (loadedScope !== `${userId}:${daoId}`) return;
     const localKey = `${daoId}:${address.toLowerCase()}`;
     if (drainedLocalRef.current.has(localKey)) return;
     const storage =
       typeof window === "undefined" ? undefined : window.localStorage;
     if (!storage) return;
 
-    const localDrafts = readDrafts(storage, draftKey(daoId, address));
+    const localDrafts = excludePersistedDrafts(
+      readDrafts(storage, draftKey(daoId, address)),
+      drafts,
+    );
     if (localDrafts.length === 0) {
       drainedLocalRef.current.add(localKey);
       return;
@@ -152,7 +163,7 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
     return () => {
       cancelled = true;
     };
-  }, [daoId, userId, address, retryToken]);
+  }, [daoId, userId, address, loadedScope, drafts, retryToken]);
 
   const saveDraft = useCallback(
     async (draft: NewDraftInput, id?: string): Promise<string> => {

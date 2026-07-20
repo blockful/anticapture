@@ -231,7 +231,9 @@ export const ProposalCreationForm = ({
     if (!raw) return;
     if (draftId && hydratedDraftId !== draftId) return;
     try {
-      form.reset(JSON.parse(raw) as ProposalFormValues);
+      form.reset(JSON.parse(raw) as ProposalFormValues, {
+        keepDefaultValues: true,
+      });
       setBodyVersion((v) => v + 1);
     } catch {
       // corrupted stash — drop it
@@ -268,12 +270,21 @@ export const ProposalCreationForm = ({
     form.formState.isValid &&
     (values.body?.length ?? 0) <= 10_000;
 
+  const stashPendingDraft = () => {
+    try {
+      sessionStorage.setItem(pendingDraftStashKey, JSON.stringify(values));
+    } catch {
+      // Storage can be blocked; the in-page SIWE path still preserves the form.
+    }
+  };
+
   const handleShare = async () => {
     // Persist before sharing when unsaved or dirty, so the link isn't stale.
     let id = currentDraftId;
     if (!id || form.formState.isDirty) {
       // Session-gated like Save Draft — email/Google authors have no wallet.
       if (drafts.needsAuth) {
+        stashPendingDraft();
         openLogin();
         return;
       }
@@ -359,11 +370,8 @@ export const ProposalCreationForm = ({
     if (drafts.needsAuth) {
       // Stash the form first: the email/Google paths leave the page, and the
       // restore effect above brings the content back after the round-trip.
-      try {
-        sessionStorage.setItem(pendingDraftStashKey, JSON.stringify(values));
-      } catch {
-        // storage blocked — the in-page SIWE path still preserves the form
-      }
+      stashPendingDraft();
+      // storage blocked — the in-page SIWE path still preserves the form
       openLogin();
       return;
     }

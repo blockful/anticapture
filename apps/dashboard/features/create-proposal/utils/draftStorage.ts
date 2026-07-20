@@ -35,6 +35,15 @@ export const writeDrafts = (
   }
 };
 
+/** Drops browser rows that the authenticated user already owns server-side. */
+export const excludePersistedDrafts = (
+  localDrafts: ProposalDraft[],
+  persistedDrafts: ProposalDraft[],
+): ProposalDraft[] => {
+  const persistedIds = new Set(persistedDrafts.map((draft) => draft.id));
+  return localDrafts.filter((draft) => !persistedIds.has(draft.id));
+};
+
 export const removeDraft = (
   current: ProposalDraft[],
   id: string,
