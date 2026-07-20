@@ -1,25 +1,144 @@
 /**
- * Minimal theme overrides for the Anticapture MCP docs.
+ * Anticapture theme for the API docs.
+ *
+ * Mirrors the dashboard identity (apps/dashboard/app/globals.css): Inter +
+ * Roboto Mono, brand orange #ec762e on a zinc palette, dark-first.
  * Docusaurus Infima variables: https://docusaurus.io/docs/styling-layout
  */
 
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/roboto-mono/400.css";
+@import "@fontsource/roboto-mono/500.css";
+
 :root {
-  --ifm-color-primary: #2563eb;
-  --ifm-color-primary-dark: #1d4ed8;
-  --ifm-color-primary-darker: #1e40af;
-  --ifm-color-primary-darkest: #1e3a8a;
-  --ifm-color-primary-light: #3b82f6;
-  --ifm-color-primary-lighter: #60a5fa;
-  --ifm-color-primary-lightest: #93c5fd;
+  /* Brand (dashboard --base-brand / --base-brand-lighter) */
+  --ifm-color-primary: #ec762e;
+  --ifm-color-primary-dark: #db6519;
+  --ifm-color-primary-darker: #cf5f18;
+  --ifm-color-primary-darkest: #aa4e14;
+  --ifm-color-primary-light: #ef8646;
+  --ifm-color-primary-lighter: #fb8f4d;
+  --ifm-color-primary-lightest: #f5a878;
+
+  --ifm-font-family-base:
+    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --ifm-font-family-monospace:
+    "Roboto Mono", ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Consolas",
+    "Liberation Mono", "Courier New", monospace;
   --ifm-code-font-size: 95%;
+  --ifm-heading-font-weight: 600;
+
+  /* Zinc light (dashboard root palette) */
+  --ifm-color-content-secondary: #71717a;
+  --ifm-toc-border-color: #e4e4e7;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] {
-  --ifm-color-primary: #60a5fa;
-  --ifm-color-primary-dark: #3b82f6;
-  --ifm-color-primary-darker: #2563eb;
-  --ifm-color-primary-darkest: #1d4ed8;
-  --ifm-color-primary-light: #93c5fd;
-  --ifm-color-primary-lighter: #bfdbfe;
-  --ifm-color-primary-lightest: #dbeafe;
+  /* Brand pops brighter on dark, like dashboard hover states */
+  --ifm-color-primary: #ec762e;
+  --ifm-color-primary-dark: #db6519;
+  --ifm-color-primary-darker: #cf5f18;
+  --ifm-color-primary-darkest: #aa4e14;
+  --ifm-color-primary-light: #ef8646;
+  --ifm-color-primary-lighter: #fb8f4d;
+  --ifm-color-primary-lightest: #f5a878;
+
+  /* Zinc dark (dashboard .dark palette) */
+  --ifm-background-color: #09090b;
+  --ifm-background-surface-color: #18181b;
+  --ifm-navbar-background-color: #09090b;
+  --ifm-footer-background-color: #09090b;
+  --ifm-color-content: #fafafa;
+  --ifm-color-content-secondary: #a1a1aa;
+  --ifm-toc-border-color: #27272a;
+  --ifm-color-emphasis-300: #3f3f46;
+  --ifm-hr-background-color: #27272a;
+  --ifm-table-border-color: #3f3f46;
+  --ifm-code-background: #18181b;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.08);
+}
+
+/* Hairline borders around the chrome, like the dashboard's bordered panels. */
+[data-theme="dark"] .navbar {
+  border-bottom: 1px solid #27272a;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .footer {
+  border-top: 1px solid #27272a;
+}
+
+/* Sidebar category labels echo the dashboard's mono uppercase section titles
+   (.link-tangerine / overline styles). */
+.menu__list-item-collapsible > .menu__link--sublist {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.72px;
+  text-transform: uppercase;
+}
+
+/* --- Landing page cards (docs/index.mdx) ------------------------------- */
+
+.ac-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.ac-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-color-content);
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.ac-card:hover {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-content);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.ac-card__badge {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ifm-color-primary);
+}
+
+.ac-card__title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.ac-card__body {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--ifm-color-content-secondary);
+}
+
+.ac-card__cta {
+  margin-top: auto;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.72px;
+  text-transform: uppercase;
+  color: var(--ifm-color-primary);
 }

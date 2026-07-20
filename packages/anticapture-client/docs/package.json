@@ -2,7 +2,7 @@
   "name": "@anticapture/client-docs",
   "version": "0.0.1",
   "private": true,
-  "description": "Documentation site for the Anticapture MCP server (@anticapture/client).",
+  "description": "Documentation site for the Anticapture API: REST reference, MCP server, and webhooks.",
   "scripts": {
     "docusaurus": "docusaurus",
     "prepare-spec": "tsx scripts/prepare-spec.mjs",
@@ -16,9 +16,12 @@
   },
   "dependencies": {
     "@docusaurus/core": "3.10.1",
+    "@docusaurus/plugin-client-redirects": "3.10.1",
     "@docusaurus/preset-classic": "3.10.1",
     "@easyops-cn/docusaurus-search-local": "0.55.2",
     "@signalwire/docusaurus-plugin-llms-txt": "1.2.2",
+    "@fontsource/inter": "^5.2.5",
+    "@fontsource/roboto-mono": "^5.2.5",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^2.1.0",
     "docusaurus-plugin-openapi-docs": "5.0.2",

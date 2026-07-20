@@ -1,0 +1,50 @@
+---
+id: index
+title: Anticapture API
+slug: /
+hide_table_of_contents: true
+---
+
+import Link from "@docusaurus/Link";
+
+export const Card = ({ to, title, badge, children }) => (
+  <Link className="ac-card" to={to}>
+    <span className="ac-card__badge">{badge}</span>
+    <h3 className="ac-card__title">{title}</h3>
+    <p className="ac-card__body">{children}</p>
+    <span className="ac-card__cta">Read more →</span>
+  </Link>
+);
+
+# Anticapture API
+
+Programmatic access to [Anticapture](https://app.anticapture.com) — DAO
+governance, delegation, treasury, and voting analytics indexed from onchain and
+offchain sources, for protocols like ENS, Uniswap, Optimism, and Arbitrum.
+
+There are three ways to consume the platform:
+
+<div className="ac-cards">
+  <Card
+    to="/api-reference/anticapture-gateful-rest-api"
+    title="REST API"
+    badge="HTTP"
+  >
+    Query governance data over plain REST — proposals, delegations, voting
+    power, treasury, token metrics, and more, scoped per DAO.
+  </Card>
+  <Card to="/mcp" title="MCP server" badge="Agents">
+    Plug Anticapture into Claude, Cursor, or any Model Context Protocol client
+    and query DAO analytics in natural language.
+  </Card>
+  <Card to="/webhooks" title="Webhooks" badge="Push">
+    Register an HTTPS endpoint and get signed notifications pushed to you,
+    instead of polling the API.
+  </Card>
+</div>
+
+## New here?
+
+Start with the [getting started guide](./getting-started.md): base URL,
+authentication, DAO scoping, pagination, and your first request in under five
+minutes.
