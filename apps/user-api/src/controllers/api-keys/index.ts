@@ -4,6 +4,7 @@ import type { AuthResolver } from "@/auth";
 import {
   ApiKeyListResponseSchema,
   ApiKeyParamsSchema,
+  ApiKeyUsageListResponseSchema,
   CreateApiKeyBodySchema,
   CreatedApiKeyResponseSchema,
 } from "@/mappers/api-keys";
@@ -29,6 +30,34 @@ export function apiKeysController(
   resolver: AuthResolver,
 ) {
   const auth = sessionAuth(resolver);
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "listApiKeyUsage",
+      path: "/me/api-keys/usage",
+      summary: "List daily request usage for the session user's active keys",
+      middleware: [auth] as const,
+      responses: {
+        200: {
+          description: "Daily request counts for the last 30 days",
+          content: {
+            "application/json": { schema: ApiKeyUsageListResponseSchema },
+          },
+        },
+        ...unauthorizedResponses,
+      },
+    }),
+    async (c) => {
+      const { id: userId } = c.get("sessionUser");
+      return c.json(
+        ApiKeyUsageListResponseSchema.parse({
+          items: await service.usage(userId),
+        }),
+        200,
+      );
+    },
+  );
 
   app.openapi(
     createRoute({

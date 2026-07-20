@@ -21,6 +21,7 @@ import {
 } from "@/database/schema";
 import {
   ApiKeyListResponseSchema,
+  ApiKeyUsageListResponseSchema,
   CreatedApiKeyResponseSchema,
 } from "@/mappers/api-keys";
 import { ApiKeysRepository } from "@/repositories/api-keys";
@@ -59,6 +60,7 @@ describe("api-keys + Authful brokering integration", () => {
     mint: ReturnType<typeof vi.fn>;
     revoke: ReturnType<typeof vi.fn>;
     listByTenant: ReturnType<typeof vi.fn>;
+    usageByTenant: ReturnType<typeof vi.fn>;
   } = {
     mint: vi.fn(async (tenant: string) => ({
       id: crypto.randomUUID(),
@@ -66,6 +68,7 @@ describe("api-keys + Authful brokering integration", () => {
     })),
     revoke: vi.fn(async () => undefined),
     listByTenant: vi.fn(async () => []),
+    usageByTenant: vi.fn(async () => []),
   };
 
   beforeAll(async () => {
@@ -156,8 +159,10 @@ describe("api-keys + Authful brokering integration", () => {
     });
 
   it("requires a session", async () => {
-    const res = await app.request("/me/api-keys", { headers: baseHeaders });
-    expect(res.status).toBe(401);
+    for (const path of ["/me/api-keys", "/me/api-keys/usage"]) {
+      const res = await app.request(path, { headers: baseHeaders });
+      expect(res.status).toBe(401);
+    }
   });
 
   it("mints via Authful under the user's tenant and returns plaintext once", async () => {
@@ -215,6 +220,47 @@ describe("api-keys + Authful brokering integration", () => {
     expect(res.status).toBe(200);
     const { items } = ApiKeyListResponseSchema.parse(await res.json());
     expect(items.find((k) => k.label === "resilient")).toBeTruthy();
+  });
+
+  it("returns daily usage joined to active user-api key ids and labels", async () => {
+    const cookie = await signIn();
+    const created = CreatedApiKeyResponseSchema.parse(
+      await (await createKey(cookie, "usage-key")).json(),
+    );
+    const mintedId = (await authful.mint.mock.results.at(-1)!.value).id;
+    authful.usageByTenant.mockResolvedValueOnce([
+      { tokenId: mintedId, day: "2026-07-20", count: 12 },
+      { tokenId: crypto.randomUUID(), day: "2026-07-20", count: 99 },
+    ]);
+
+    const res = await app.request("/me/api-keys/usage", {
+      headers: authed(cookie),
+    });
+    expect(res.status).toBe(200);
+    expect(ApiKeyUsageListResponseSchema.parse(await res.json())).toEqual({
+      items: [
+        {
+          keyId: created.id,
+          label: "usage-key",
+          day: "2026-07-20",
+          count: 12,
+        },
+      ],
+    });
+  });
+
+  it("returns empty usage when Authful is unreachable", async () => {
+    const cookie = await signIn();
+    await createKey(cookie, "offline-usage");
+    authful.usageByTenant.mockRejectedValueOnce(new Error("authful down"));
+
+    const res = await app.request("/me/api-keys/usage", {
+      headers: authed(cookie),
+    });
+    expect(res.status).toBe(200);
+    expect(ApiKeyUsageListResponseSchema.parse(await res.json())).toEqual({
+      items: [],
+    });
   });
 
   it("does not list another user's keys", async () => {

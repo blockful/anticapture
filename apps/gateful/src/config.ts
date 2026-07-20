@@ -16,6 +16,7 @@ export const envSchema = z
       .transform((url) => url.replace(/\/+$/, ""))
       .optional(),
     TOKEN_SERVICE_API_KEY: z.string().optional(),
+    TOKEN_SERVICE_PROVISIONING_API_KEY: z.string().optional(),
     // Explicit opt-in to run without per-tenant auth (local dev only). Without
     // this flag, a missing TOKEN_SERVICE_URL is a hard startup error rather than
     // silently serving every DAO/relayer route publicly (fail closed).
@@ -38,7 +39,14 @@ export const envSchema = z
   })
   .refine((env) => !env.TOKEN_SERVICE_URL || !!env.TOKEN_SERVICE_API_KEY, {
     message: "TOKEN_SERVICE_API_KEY is required when TOKEN_SERVICE_URL is set",
-  });
+  })
+  .refine(
+    (env) => !env.TOKEN_SERVICE_URL || !!env.TOKEN_SERVICE_PROVISIONING_API_KEY,
+    {
+      message:
+        "TOKEN_SERVICE_PROVISIONING_API_KEY is required when TOKEN_SERVICE_URL is set",
+    },
+  );
 
 function loadDaoMap(
   prefix: string,
@@ -67,7 +75,11 @@ export const config = {
   port: env.PORT,
   addressEnrichmentUrl: env.ADDRESS_ENRICHMENT_API_URL,
   tokenService: env.TOKEN_SERVICE_URL
-    ? { url: env.TOKEN_SERVICE_URL, apiKey: env.TOKEN_SERVICE_API_KEY! }
+    ? {
+        url: env.TOKEN_SERVICE_URL,
+        apiKey: env.TOKEN_SERVICE_API_KEY!,
+        provisioningApiKey: env.TOKEN_SERVICE_PROVISIONING_API_KEY!,
+      }
     : undefined,
   authDisabled: env.GATEFUL_AUTH_DISABLED,
   metricsToken: env.GATEFUL_METRICS_TOKEN,

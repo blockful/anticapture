@@ -1,6 +1,121 @@
 import type { Context, Next } from "hono";
 
+import { logger } from "../logger.js";
 import { tenantRequestTotal } from "../metrics.js";
+import type { TokenUsageIncrement } from "./authful-client.js";
+import type { AuthContext } from "./token-auth.js";
+
+const USER_TENANT_PREFIX = "user:";
+const DEFAULT_FLUSH_INTERVAL_MS = 60_000;
+const DEFAULT_MAX_BUCKETS = 10_000;
+
+export interface TokenUsageWriter {
+  recordUsage(items: TokenUsageIncrement[]): Promise<void>;
+}
+
+type UsageBucket = TokenUsageIncrement;
+
+export class UsageAccumulator {
+  private buckets = new Map<string, UsageBucket>();
+  private flushPromise: Promise<void> | undefined;
+  private interval: ReturnType<typeof setInterval> | undefined;
+
+  constructor(
+    private readonly writer: TokenUsageWriter,
+    private readonly options: {
+      flushIntervalMs?: number;
+      maxBuckets?: number;
+      now?: () => Date;
+    } = {},
+  ) {}
+
+  record(auth: AuthContext): void {
+    if (!auth.tenant.startsWith(USER_TENANT_PREFIX)) return;
+
+    const day = this.currentDay();
+    const key = `${auth.tokenId}:${day}`;
+    const existing = this.buckets.get(key);
+    if (existing) {
+      existing.count += 1;
+      return;
+    }
+
+    if (this.buckets.size >= this.maxBuckets) {
+      // Swapping is synchronous, so a non-overlapping flush immediately frees
+      // space without adding latency to the request path.
+      void this.flush();
+    }
+    if (this.buckets.size >= this.maxBuckets) {
+      logger.warn(
+        { maxBuckets: this.maxBuckets },
+        "token usage buffer full; dropping a new usage bucket",
+      );
+      return;
+    }
+
+    this.buckets.set(key, { tokenId: auth.tokenId, day, count: 1 });
+  }
+
+  start(): void {
+    if (this.interval) return;
+    this.interval = setInterval(() => {
+      void this.flush();
+    }, this.options.flushIntervalMs ?? DEFAULT_FLUSH_INTERVAL_MS);
+    this.interval.unref();
+  }
+
+  async stop(): Promise<void> {
+    if (this.interval) clearInterval(this.interval);
+    this.interval = undefined;
+    // The first call may only await an already-running flush. A second pass
+    // drains requests that arrived while that batch was in flight and retries
+    // a batch restored after a transient failure.
+    await this.flush();
+    await this.flush();
+  }
+
+  async flush(): Promise<void> {
+    if (this.flushPromise) return this.flushPromise;
+    if (this.buckets.size === 0) return;
+
+    const pending = this.buckets;
+    this.buckets = new Map();
+    this.flushPromise = this.writer
+      .recordUsage([...pending.values()])
+      .catch((err: unknown) => {
+        this.remerge(pending);
+        logger.warn({ err }, "failed to flush token usage to Authful");
+      })
+      .finally(() => {
+        this.flushPromise = undefined;
+      });
+    return this.flushPromise;
+  }
+
+  private remerge(pending: Map<string, UsageBucket>): void {
+    for (const [key, item] of pending) {
+      const live = this.buckets.get(key);
+      if (live) {
+        live.count += item.count;
+      } else if (this.buckets.size < this.maxBuckets) {
+        this.buckets.set(key, item);
+      } else {
+        logger.warn(
+          { maxBuckets: this.maxBuckets },
+          "token usage buffer full while restoring a failed batch",
+        );
+      }
+    }
+  }
+
+  private currentDay(): string {
+    return (this.options.now?.() ?? new Date()).toISOString().slice(0, 10);
+  }
+
+  private get maxBuckets(): number {
+    return this.options.maxBuckets ?? DEFAULT_MAX_BUCKETS;
+  }
+}
 
 /**
  * Normalizes a request path to a bounded-cardinality route label:
@@ -25,12 +140,14 @@ export function normalizeRoute(
 }
 
 /**
- * Counts every authenticated request as a Prometheus counter, labelled by
- * tenant, token name, and normalized route. Never blocks the request; usage is
- * observed via the `/metrics` endpoint (scraped by Prometheus) rather than persisted.
+ * Counts every authenticated request as a Prometheus counter and, for user
+ * keys, in the bounded persistence accumulator. Never blocks the request.
  * Requests without an auth context (public paths, auth disabled) are skipped.
  */
-export function usageMiddleware(daoApis: Map<string, string>) {
+export function usageMiddleware(
+  daoApis: Map<string, string>,
+  usageAccumulator?: UsageAccumulator,
+) {
   return async (c: Context, next: Next) => {
     // Record in a finally so failed requests (downstream 5xx surfaced as a
     // thrown error, or a later middleware returning 429) are still counted.
@@ -39,11 +156,14 @@ export function usageMiddleware(daoApis: Map<string, string>) {
     } finally {
       const auth = c.get("auth");
       if (auth) {
+        usageAccumulator?.record(auth);
         tenantRequestTotal.add(1, {
           // Self-service keys mint one `user:<id>` tenant per user —
           // unbounded. Bucket them so the Prometheus label set stays
           // bounded; ops tenants keep their verbatim label.
-          tenant: auth.tenant.startsWith("user:") ? "user:*" : auth.tenant,
+          tenant: auth.tenant.startsWith(USER_TENANT_PREFIX)
+            ? `${USER_TENANT_PREFIX}*`
+            : auth.tenant,
           name: auth.name,
           route: normalizeRoute(c.req.path, daoApis),
         });

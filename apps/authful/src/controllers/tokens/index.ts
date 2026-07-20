@@ -2,11 +2,14 @@ import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
   ErrorResponseSchema,
+  ListTokenUsageQuerySchema,
   ListTokensQuerySchema,
   MintTokenBodySchema,
   MintTokenResponseSchema,
+  RecordTokenUsageBodySchema,
   TokenListResponseSchema,
   TokenParamsSchema,
+  TokenUsageListResponseSchema,
   toTokenMetadata,
 } from "@/mappers/tokens";
 import { USER_TENANT_PREFIX } from "@/middlewares/token-auth";
@@ -18,6 +21,72 @@ const forbiddenResponse = {
 };
 
 export function tokensController(app: Hono, service: TokensService) {
+  app.openapi(
+    createRoute({
+      method: "post",
+      operationId: "recordTokenUsage",
+      path: "/tokens/usage",
+      summary: "Increment daily request usage for tokens",
+      tags: ["tokens"],
+      request: {
+        body: {
+          required: true,
+          content: {
+            "application/json": { schema: RecordTokenUsageBodySchema },
+          },
+        },
+      },
+      responses: {
+        204: { description: "Usage recorded; unknown token ids are ignored" },
+      },
+    }),
+    async (c) => {
+      const { items } = c.req.valid("json");
+      await service.recordUsage(items, {
+        requireTenantPrefix:
+          c.get("authScope") === "provisioning"
+            ? USER_TENANT_PREFIX
+            : undefined,
+      });
+      return c.body(null, 204);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "listTokenUsage",
+      path: "/tokens/usage",
+      summary: "List the last 30 days of token usage for one tenant",
+      tags: ["tokens"],
+      request: { query: ListTokenUsageQuerySchema },
+      responses: {
+        200: {
+          description: "Daily usage rows for the tenant's tokens",
+          content: {
+            "application/json": { schema: TokenUsageListResponseSchema },
+          },
+        },
+        403: forbiddenResponse,
+      },
+    }),
+    async (c) => {
+      const { tenant } = c.req.valid("query");
+      if (
+        c.get("authScope") !== "admin" &&
+        !tenant.startsWith(USER_TENANT_PREFIX)
+      ) {
+        return c.json(
+          {
+            error: `provisioning scope may only list a single ${USER_TENANT_PREFIX}* tenant`,
+          },
+          403,
+        );
+      }
+      return c.json({ items: await service.usageByTenant(tenant) }, 200);
+    },
+  );
+
   app.openapi(
     createRoute({
       method: "post",

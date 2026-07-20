@@ -1,4 +1,4 @@
-import { index, pgSchema } from "drizzle-orm/pg-core";
+import { index, pgSchema, primaryKey } from "drizzle-orm/pg-core";
 
 export const authfulSchema = pgSchema("authful");
 
@@ -18,4 +18,20 @@ export const tokens = authfulSchema.table(
     lastUsedAt: d.timestamp("last_used_at", { withTimezone: true }),
   }),
   (table) => [index().on(table.tenant)],
+);
+
+export const tokenUsageDaily = authfulSchema.table(
+  "token_usage_daily",
+  (d) => ({
+    tokenId: d
+      .uuid("token_id")
+      .notNull()
+      .references(() => tokens.id, { onDelete: "cascade" }),
+    day: d.date().notNull(),
+    count: d.bigint({ mode: "number" }).notNull().default(0),
+  }),
+  (table) => [
+    primaryKey({ columns: [table.tokenId, table.day] }),
+    index().on(table.day),
+  ],
 );
