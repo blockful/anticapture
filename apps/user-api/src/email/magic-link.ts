@@ -34,10 +34,10 @@ export const createMagicLinkSender = (
     const { error } = await resend.emails.send({
       from,
       to: email,
-      subject: "Sign in to Anticapture",
+      subject: "Sign in to Blockful",
       html: `
         <div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2 style="font-size: 18px;">Sign in to Anticapture</h2>
+          <h2 style="font-size: 18px;">Sign in to Blockful</h2>
           <p style="color: #555;">Click the button below to sign in. This link expires shortly and can be used once.</p>
           <p style="margin: 24px 0;">
             <a href="${landingUrl}" style="background: #E66AE9; color: #fff; padding: 12px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Sign in</a>

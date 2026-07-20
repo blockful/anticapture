@@ -13,6 +13,8 @@ import { Logo } from "@/shared/components/design-system/logo/Logo";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { AnticaptureLogo } from "@/shared/components/icons/AnticaptureWatermark";
 import { GoogleIcon } from "@/shared/components/icons/GoogleIcon";
+import daoConfigByDaoId from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { authClient } from "@/shared/services/auth/client";
 import { useAuthMethods } from "@/shared/services/auth/useAuthMethods";
 import { useEmailLogin } from "@/shared/services/auth/useEmailLogin";
@@ -23,6 +25,8 @@ export type LoginModalProps = {
   onOpenChange: (open: boolean) => void;
   /** Whitelabel deployments offer wallet sign-in only (no email/Google). */
   isWhitelabel?: boolean;
+  /** The DAO branding a whitelabel render — drives the modal's icon. */
+  whitelabelDaoId?: DaoIdEnum | null;
   /**
    * Route to land on after sign-in. SIWE completion is handled by
    * LoginProvider's session watcher (close + navigate); the redirect-based
@@ -39,6 +43,7 @@ export const LoginModal = ({
   open,
   onOpenChange,
   isWhitelabel = false,
+  whitelabelDaoId = null,
   redirectTo,
 }: LoginModalProps) => {
   const { openConnectModal, connectModalOpen } = useConnectModal();
@@ -55,9 +60,9 @@ export const LoginModal = ({
   // Fetched at mount (this component is always mounted, `open` just toggles
   // it) so the answer is already cached when the modal first opens — the
   // Email/Google buttons must not pop in after a round-trip.
-  const methods = useAuthMethods(!isWhitelabel);
-  const showEmail = !isWhitelabel && methods.magicLink;
-  const showGoogle = !isWhitelabel && methods.google;
+  const methods = useAuthMethods();
+  const showEmail = methods.magicLink;
+  const showGoogle = methods.google;
   const showAlternatives = showEmail || showGoogle;
   const siweBusy = siwe.status !== "idle" && siwe.status !== "error";
 
@@ -114,13 +119,23 @@ export const LoginModal = ({
       // the modal comes back in the signing state once the wallet connects.
       open={open && !connectModalOpen}
       onOpenChange={handleOpenChange}
-      ariaLabel="Sign in to Anticapture"
+      ariaLabel={isWhitelabel ? "Sign in" : "Sign in to Anticapture"}
       className="max-w-100"
       bodyClassName="flex flex-col items-center gap-6 p-5"
     >
-      {/* Whitelabel keeps the neutral mark; the main app shows the wordmark. */}
+      {/* Whitelabel shows the DAO's own mark (neutral logo as fallback);
+          the main app shows the Anticapture wordmark. */}
       {isWhitelabel ? (
-        <Logo variant="brand" size="md" />
+        (() => {
+          const DaoIcon = whitelabelDaoId
+            ? daoConfigByDaoId[whitelabelDaoId]?.icon
+            : undefined;
+          return DaoIcon ? (
+            <DaoIcon className="rounded-base size-12" aria-hidden />
+          ) : (
+            <Logo variant="brand" size="md" />
+          );
+        })()
       ) : (
         <AnticaptureLogo
           className="text-highlight h-8 w-auto"
@@ -184,14 +199,22 @@ export const LoginModal = ({
         </div>
       ) : (
         <div className="flex w-full flex-col gap-4">
+          {/* Whitelabel copy stays brand-neutral (and wallet-only — no
+              email to advertise). */}
           <ModalHeading
-            title="Sign in to Anticapture"
+            title={
+              isWhitelabel ? "Sign in to continue" : "Sign in to Anticapture"
+            }
             subtitle={
-              <>
-                One account for everything.
-                <br />
-                Use your wallet, or just your email.
-              </>
+              isWhitelabel ? (
+                "Use your wallet to sign in."
+              ) : (
+                <>
+                  One account for everything.
+                  <br />
+                  Use your wallet, or just your email.
+                </>
+              )
             }
           />
 
@@ -250,19 +273,21 @@ export const LoginModal = ({
             </>
           )}
 
-          <div className="flex flex-col items-center gap-0.5 text-center">
-            <span className="text-dimmed text-xs font-medium leading-4">
-              By continuing, you agree to the
-            </span>
-            <DefaultLink
-              href="/terms-of-service"
-              openInNewTab
-              size="sm"
-              className="text-dimmed hover:text-secondary"
-            >
-              Terms of Use &amp; Privacy Policy
-            </DefaultLink>
-          </div>
+          {!isWhitelabel && (
+            <div className="flex flex-col items-center gap-0.5 text-center">
+              <span className="text-dimmed text-xs font-medium leading-4">
+                By continuing, you agree to the
+              </span>
+              <DefaultLink
+                href="/terms-of-service"
+                openInNewTab
+                size="sm"
+                className="text-dimmed hover:text-secondary"
+              >
+                Terms of Use &amp; Privacy Policy
+              </DefaultLink>
+            </div>
+          )}
         </div>
       )}
     </Modal>

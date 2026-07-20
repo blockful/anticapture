@@ -12,15 +12,18 @@ import { setClientConfig } from "@anticapture/client";
 
 import { LoginProvider } from "@/shared/services/auth/LoginProvider";
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 const queryClient = new QueryClient();
 
 export const GlobalProviders = ({
   children,
   isWhitelabel = false,
+  whitelabelDaoId = null,
 }: {
   children: ReactNode;
   isWhitelabel?: boolean;
+  whitelabelDaoId?: DaoIdEnum | null;
 }) => {
   setClientConfig({
     defaultHeaders: {
@@ -39,7 +42,10 @@ export const GlobalProviders = ({
               accentColor: "#E66AE9",
             })}
           >
-            <LoginProvider isWhitelabel={isWhitelabel}>
+            <LoginProvider
+              isWhitelabel={isWhitelabel}
+              whitelabelDaoId={whitelabelDaoId}
+            >
               <NuqsAdapter>{children}</NuqsAdapter>
             </LoginProvider>
           </RainbowKitProvider>

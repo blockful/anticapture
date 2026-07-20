@@ -4,6 +4,8 @@ import { useEffect, useMemo } from "react";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { AnticaptureLogo } from "@/shared/components/icons/AnticaptureWatermark";
+import daoConfigByDaoId from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 /**
  * Magic-link landing: the email links here instead of the verify endpoint,
@@ -15,9 +17,11 @@ import { AnticaptureLogo } from "@/shared/components/icons/AnticaptureWatermark"
 export const MagicLinkContinue = ({
   token,
   callbackURL,
+  whitelabelDaoId,
 }: {
   token: string | null;
   callbackURL: string | null;
+  whitelabelDaoId: DaoIdEnum | null;
 }) => {
   // Same-origin by construction (relative path) — the target route is fixed
   // and only the query is caller-controlled; the server validates
@@ -33,13 +37,21 @@ export const MagicLinkContinue = ({
     if (verifyUrl) window.location.replace(verifyUrl);
   }, [verifyUrl]);
 
+  const DaoIcon = whitelabelDaoId
+    ? daoConfigByDaoId[whitelabelDaoId]?.icon
+    : undefined;
+
   return (
     <div className="bg-surface-background dark flex min-h-screen w-full flex-col items-center justify-center gap-6 p-5 text-center">
-      <AnticaptureLogo
-        className="text-highlight h-8 w-auto"
-        aria-label="Anticapture"
-        role="img"
-      />
+      {DaoIcon ? (
+        <DaoIcon className="size-12 rounded" aria-hidden />
+      ) : (
+        <AnticaptureLogo
+          className="text-highlight h-8 w-auto"
+          aria-label="Anticapture"
+          role="img"
+        />
+      )}
       {verifyUrl ? (
         <>
           <div className="flex flex-col gap-1">
@@ -64,8 +76,8 @@ export const MagicLinkContinue = ({
               Request a new link from the sign-in dialog.
             </p>
           </div>
-          <Button variant="outline" size="md" asChild>
-            <a href="/">Back to Anticapture</a>
+          <Button variant="outline" size="md">
+            <a href="/">Back to {whitelabelDaoId ? `Login` : "Anticapture"}</a>
           </Button>
         </>
       )}

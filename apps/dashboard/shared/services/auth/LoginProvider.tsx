@@ -17,6 +17,7 @@ import { useAccount, useDisconnect } from "wagmi";
 
 import { LoginModal } from "@/shared/components/auth/LoginModal";
 import { authClient, useSession } from "@/shared/services/auth/client";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type OpenLoginOptions = {
   /** Route to navigate to once the user authenticates. */
@@ -33,9 +34,11 @@ const LoginContext = createContext<LoginContextValue | null>(null);
 
 export function LoginProvider({
   isWhitelabel = false,
+  whitelabelDaoId = null,
   children,
 }: {
   isWhitelabel?: boolean;
+  whitelabelDaoId?: DaoIdEnum | null;
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -124,6 +127,7 @@ export function LoginProvider({
         open={isOpen}
         onOpenChange={handleOpenChange}
         isWhitelabel={isWhitelabel}
+        whitelabelDaoId={whitelabelDaoId}
         redirectTo={redirectTo}
       />
     </LoginContext.Provider>
