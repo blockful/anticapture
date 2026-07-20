@@ -65,45 +65,45 @@ export const IconWebhook = () => (
 export const SurfaceCard = ({ to, icon, title, children }) => (
   <Link className="ac-card" to={to}>
     <span className="ac-card__icon">{icon}</span>
-    <span className="ac-card__text">
-      <span className="ac-card__title">{title}</span>
-      <span className="ac-card__body">{children}</span>
-    </span>
+    <div className="ac-card__text">
+      <div className="ac-card__title">{title}</div>
+      <div className="ac-card__body">{children}</div>
+    </div>
   </Link>
 );
 
 export const EndpointLink = ({ to, method = "GET", children }) => (
   <Link className="ac-endpoint" to={to}>
-    <span
-      className={`ac-endpoint__method ac-endpoint__method--${method.toLowerCase()}`}
-    >
-      {method}
-    </span>
-    <span className="ac-endpoint__label">{children}</span>
+    <span className="ac-endpoint__method">{method}</span>
+    <div className="ac-endpoint__label">{children}</div>
   </Link>
 );
 
-<div className="ac-hero">
-  <p className="ac-hero__eyebrow">Developer documentation</p>
-  <h1 className="ac-hero__title">Build with the Anticapture API</h1>
-  <p className="ac-hero__lede">
-    Governance, delegation, treasury, and voting analytics for DAOs — indexed
-    from onchain and offchain sources and served over a single REST API. The
-    same data that powers{" "}
-    <a href="https://app.anticapture.com">app.anticapture.com</a>.
-  </p>
-  <div className="ac-hero__actions">
-    <Link className="ac-btn ac-btn--primary" to="/getting-started">
-      Get started
-    </Link>
-    <Link
-      className="ac-btn ac-btn--ghost"
-      to="/api-reference/anticapture-rest-api"
-    >
-      Browse the API
-    </Link>
+export const Hero = () => (
+  <div className="ac-hero">
+    <p className="ac-hero__eyebrow">Developer documentation</p>
+    <h1 className="ac-hero__title">Build with the Anticapture API</h1>
+    <p className="ac-hero__lede">
+      Governance, delegation, treasury, and voting analytics for DAOs — indexed
+      from onchain and offchain sources and served over a single REST API. The
+      same data that powers{" "}
+      <a href="https://app.anticapture.com">app.anticapture.com</a>.
+    </p>
+    <div className="ac-hero__actions">
+      <Link className="ac-btn ac-btn--primary" to="/getting-started">
+        Get started
+      </Link>
+      <Link
+        className="ac-btn ac-btn--ghost"
+        to="/api-reference/anticapture-rest-api"
+      >
+        Browse the API
+      </Link>
+    </div>
   </div>
-</div>
+);
+
+<Hero />
 
 <div className="ac-cards">
   <SurfaceCard

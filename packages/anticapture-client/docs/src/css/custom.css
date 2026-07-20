@@ -176,6 +176,13 @@
   color: var(--ac-text-primary);
 }
 
+/* External-link icon: align with the mono-uppercase baseline */
+.navbar__link svg,
+.footer__link-item svg {
+  vertical-align: -2px;
+  margin-left: 0.25rem;
+}
+
 [data-theme="dark"] .navbar__search-input {
   background-color: var(--ac-surface-default);
   border: 1px solid var(--ac-border-contrast);
@@ -338,14 +345,36 @@ h1.openapi__heading {
 }
 
 /* Generated endpoint pages: compact the method/path pill and section
-   headings (Request / Responses) */
+   headings (Request / Responses). The pill is a flex row so the method badge
+   and the path share one baseline. */
 .openapi__method-endpoint {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   margin-bottom: 0.75rem;
 }
 
+.openapi__method-endpoint > * {
+  margin: 0;
+}
+
+.openapi__method-endpoint .badge {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+}
+
 .openapi__method-endpoint-path {
   font-size: 14px;
+  margin: 0;
 }
 
 .openapi__divider {
@@ -453,10 +482,22 @@ div[class*="codeBlockContainer"] {
   background: var(--ac-surface-default);
 }
 
+/* No trailing paragraph margin bloating boxed containers */
+.theme-admonition p:last-child,
+.theme-admonition ul:last-child,
+.theme-admonition ol:last-child {
+  margin-bottom: 0;
+}
+
+.pagination-nav {
+  margin-top: 2rem;
+}
+
 .pagination-nav__link {
   border: 1px solid var(--ac-border-default);
   border-radius: 0;
   background: var(--ac-surface-default);
+  padding: 0.75rem 1rem;
   transition: background 0.15s ease;
 }
 
@@ -472,6 +513,19 @@ div[class*="codeBlockContainer"] {
   letter-spacing: 0.72px;
   text-transform: uppercase;
   color: var(--ac-text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+/* Quiet content-colored labels — brand only on hover, product-density size */
+.pagination-nav__label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--ifm-color-content);
+}
+
+.pagination-nav__link:hover .pagination-nav__label {
+  color: var(--ac-brand);
 }
 
 table th {
@@ -554,8 +608,17 @@ table th {
 
 .ac-hero__actions {
   display: flex;
+  align-items: stretch;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+/* MDX parses multi-line JSX children as markdown and wraps them in <p>;
+   inside these components that margin breaks alignment and inflates height */
+.ac-btn p,
+.ac-card p,
+.ac-endpoint p {
+  margin: 0;
 }
 
 /* Orbit UI Button: square, text-sm/tight medium, md = py-2 px-4 */
