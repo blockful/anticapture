@@ -7,6 +7,7 @@ import Image from "next/image";
 
 import { Button } from "@/shared/components";
 import { VotingPowerBadge } from "@/shared/components/wallet/VotingPowerBadge";
+import { useLogin } from "@/shared/services/auth/LoginProvider";
 import { cn } from "@/shared/utils";
 
 const Jazzicon = dynamic(
@@ -21,6 +22,7 @@ export const WhitelabelConnectWallet = ({
 }: {
   className?: string;
 }) => {
+  const { openLogin } = useLogin();
   return (
     <ConnectButton.Custom>
       {({
@@ -28,7 +30,6 @@ export const WhitelabelConnectWallet = ({
         chain,
         openAccountModal,
         openChainModal,
-        openConnectModal,
         authenticationStatus,
         mounted,
       }) => {
@@ -53,7 +54,7 @@ export const WhitelabelConnectWallet = ({
           >
             {!connected ? (
               <Button
-                onClick={openConnectModal}
+                onClick={() => openLogin()}
                 type="button"
                 variant="outline"
                 size="md"

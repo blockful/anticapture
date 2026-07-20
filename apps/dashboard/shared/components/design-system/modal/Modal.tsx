@@ -1,8 +1,10 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import {
   DrawerBody,
   DrawerContent,
@@ -25,6 +27,7 @@ export const Modal = ({
   open,
   onOpenChange,
   title,
+  ariaLabel,
   description,
   children,
   cancelLabel,
@@ -76,8 +79,12 @@ export const Modal = ({
     return (
       <DrawerRoot open={open} onOpenChange={onOpenChange}>
         <DrawerContent className={className}>
+          {/* Headerless: keep the close affordance with a screen-reader-only
+              title so the sheet stays accessible and dismissable. */}
           <DrawerHeader
-            title={title}
+            title={
+              title ?? <span className="sr-only">{ariaLabel ?? "Dialog"}</span>
+            }
             subtitle={description}
             onClose={() => onOpenChange(false)}
           />
@@ -124,8 +131,26 @@ export const Modal = ({
             className,
           )}
         >
-          {/* Header */}
-          <ModalHeader title={title} description={description} />
+          {title ? (
+            <ModalHeader title={title} description={description} />
+          ) : (
+            // Headerless: the body owns the surface; keep an accessible name
+            // and a bare close button in the corner.
+            <>
+              <DialogPrimitive.Title className="sr-only">
+                {ariaLabel ?? "Dialog"}
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Close asChild>
+                <IconButton
+                  variant="ghost"
+                  size="sm"
+                  icon={X}
+                  aria-label="Close"
+                  className="absolute right-3 top-3 z-10"
+                />
+              </DialogPrimitive.Close>
+            </>
+          )}
 
           {/* Body */}
           <div className={cn("bg-surface-default w-full p-4", bodyClassName)}>

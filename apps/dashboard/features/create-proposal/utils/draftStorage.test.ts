@@ -1,4 +1,5 @@
 import {
+  excludePersistedDrafts,
   readDrafts,
   removeDraft,
 } from "@/features/create-proposal/utils/draftStorage";
@@ -85,6 +86,19 @@ describe("draftStorage", () => {
 
     test("no-op when id not found", () => {
       expect(removeDraft([DRAFT_X], "other")).toEqual([DRAFT_X]);
+    });
+  });
+
+  describe("excludePersistedDrafts", () => {
+    test("keeps only browser drafts missing from the server list", () => {
+      const localDraft: ProposalDraft = {
+        ...DRAFT_X,
+        id: "browser-only-id",
+      };
+
+      expect(excludePersistedDrafts([DRAFT_X, localDraft], [DRAFT_X])).toEqual([
+        localDraft,
+      ]);
     });
   });
 });

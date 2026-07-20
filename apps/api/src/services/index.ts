@@ -1,5 +1,4 @@
 export * from "./delegation-percentage";
-export * from "./draft-proposals";
 export * from "./token-metrics";
 export * from "./voting-power";
 export * from "./coingecko";
