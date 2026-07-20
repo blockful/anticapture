@@ -31,6 +31,14 @@ const NORMALIZED_HOSTNAME_TO_DAO_ID = Object.entries(daoConfigByDaoId).reduce(
 export const resolveDaoIdFromHostname = (hostname: string): DaoIdEnum | null =>
   NORMALIZED_HOSTNAME_TO_DAO_ID[hostname.toLowerCase()] ?? null;
 
+export const resolveWhitelabelDaoIdFromHeaders = (
+  requestHeaders: Headers,
+): DaoIdEnum | null => {
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "";
+  return resolveDaoIdFromHostname(host.split(":")[0]);
+};
+
 export const getWhitelabelConfig = (daoId: DaoIdEnum) =>
   daoConfigByDaoId[daoId]?.whitelabel ?? null;
 

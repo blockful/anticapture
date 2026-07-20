@@ -9,7 +9,6 @@ import {
   useOffchainSearchProposals,
   useSearchProposals,
 } from "@anticapture/client/hooks";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Building2, Landmark, MessageSquare, Plus, Search } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -22,7 +21,6 @@ import {
   type RefObject,
 } from "react";
 import { formatUnits } from "viem";
-import { useAccount } from "wagmi";
 
 import {
   DraftCard,
@@ -50,6 +48,8 @@ import {
   getTimeText,
 } from "@/features/governance/utils";
 import { TheSectionLayout } from "@/shared/components";
+import { useSession } from "@/shared/services/auth/client";
+import { useLogin } from "@/shared/services/auth/LoginProvider";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { Select } from "@/shared/components/design-system/form/fields/select/Select";
@@ -132,8 +132,11 @@ export const GovernanceSection = () => {
   const canCreateProposal = canCreateProposalForDao(daoIdEnum);
   const { decimals } = daoConfig[daoIdEnum];
   const router = useRouter();
-  const { isConnected } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  // Drafts are platform-account data: gates run on the session (email and
+  // Google authors have no wallet), not on the wallet connection.
+  const { data: session, isPending: isSessionPending } = useSession();
+  const hasSession = !!session;
+  const { openLogin } = useLogin();
 
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
@@ -219,11 +222,11 @@ export const GovernanceSection = () => {
 
   const visibleTabs = useMemo(() => {
     const tabs: TabItem[] = [ALL_PROPOSALS_TAB];
-    if (isConnected && canCreateProposal) {
+    if (hasSession && canCreateProposal) {
       tabs.push({ label: "My Drafts", value: "drafts" });
     }
     return tabs;
-  }, [canCreateProposal, isConnected]);
+  }, [canCreateProposal, hasSession]);
 
   // DAOs without offchain proposals ignore the source filter — otherwise a
   // stale ?source=snapshot in the URL would render an empty, unrecoverable list
@@ -324,10 +327,21 @@ export const GovernanceSection = () => {
   ]);
 
   useEffect(() => {
-    if (activeTab === "drafts" && (!isConnected || !canCreateProposal)) {
+    // Only reset after the session RESOLVES signed-out — resetting during the
+    // initial pending state would eat a legitimate ?tab=drafts deep link.
+    if (
+      activeTab === "drafts" &&
+      (!canCreateProposal || (!isSessionPending && !hasSession))
+    ) {
       void setActiveTab("all");
     }
-  }, [activeTab, canCreateProposal, isConnected, setActiveTab]);
+  }, [
+    activeTab,
+    canCreateProposal,
+    hasSession,
+    isSessionPending,
+    setActiveTab,
+  ]);
 
   useEffect(() => {
     if (isSearchActive) return;
@@ -349,8 +363,8 @@ export const GovernanceSection = () => {
   }, [handleLoadMore, isSearchActive]);
 
   const handleNewProposal = () => {
-    if (!isConnected) {
-      openConnectModal?.();
+    if (!hasSession) {
+      openLogin({ redirectTo: `${basePath}/proposals/new` });
     } else {
       router.push(`${basePath}/proposals/new`);
     }
@@ -452,7 +466,7 @@ export const GovernanceSection = () => {
         </div>
 
         <div className="flex-1">
-          {activeTab === "drafts" && isConnected ? (
+          {activeTab === "drafts" && hasSession ? (
             <>
               {isDraftsLoading ? (
                 <div className="flex flex-col gap-2">

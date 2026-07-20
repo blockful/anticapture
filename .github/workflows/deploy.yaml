@@ -45,6 +45,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           PROD_FLAG: ${{ github.ref_name == 'main' && '--target=production' || '--target=dev' }}
           GATEFUL_URL: ${{ secrets.GATEFUL_URL }}
+          USER_API_URL: ${{ secrets.USER_API_URL }}
           GIT_SHA: ${{ github.sha }}
           GIT_REF: ${{ github.ref_name }}
           GIT_MSG: ${{ github.event.head_commit.message }}
@@ -55,9 +56,17 @@ jobs:
           GIT_REPO_ID: ${{ github.event.repository.id }}
         run: |
           set -euo pipefail
+          # USER_API_URL feeds the dashboard's /api/user proxy (runtime-only).
+          # Passed only when the secret exists so an unset secret falls back
+          # to the Vercel project's own env instead of overriding it with "".
+          EXTRA_ENV=()
+          if [ -n "${USER_API_URL}" ]; then
+            EXTRA_ENV+=(--env USER_API_URL="${USER_API_URL}")
+          fi
           npx --yes vercel@latest deploy --yes ${PROD_FLAG} --token="${VERCEL_TOKEN}" \
             --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
             --env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
+            "${EXTRA_ENV[@]}" \
             --meta githubCommitSha="${GIT_SHA}" \
             --meta githubCommitRef="${GIT_REF}" \
             --meta githubCommitMessage="${GIT_MSG%%$'\n'*}" \

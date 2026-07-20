@@ -51,8 +51,18 @@ export type ModalProps = {
   open: boolean;
   /** Called when the open state changes. */
   onOpenChange: (open: boolean) => void;
-  /** Modal title passed to ModalHeader. */
-  title: string;
+  /**
+   * Title passed to ModalHeader. Optional: when omitted, the header chrome is
+   * not rendered and the body owns the full surface (e.g. a centered login
+   * layout). A bare close button is still shown, and `ariaLabel` provides the
+   * dialog's accessible name.
+   */
+  title?: string;
+  /**
+   * Accessible name for the dialog when `title` is omitted. Required by the
+   * dialog primitive for screen readers; ignored when `title` is set.
+   */
+  ariaLabel?: string;
   /** Optional description passed to ModalHeader. */
   description?: string;
   /** Modal body content. */

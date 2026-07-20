@@ -1,16 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  createDraftProposal,
-  deleteDraftProposal,
-  getDraftProposals,
-  updateDraftProposal,
-} from "@anticapture/client";
-import type {
-  DraftProposal,
-  GetDraftProposalsPathParamsDaoEnumKey,
-} from "@anticapture/client";
 import { useAccount } from "wagmi";
 
 import type {
@@ -19,10 +9,20 @@ import type {
 } from "@/features/create-proposal/types";
 import { draftKey } from "@/features/create-proposal/utils/draftKey";
 import {
-  type NewDraftInput,
+  excludePersistedDrafts,
   readDrafts,
-  removeDraft,
+  writeDrafts,
+  type NewDraftInput,
 } from "@/features/create-proposal/utils/draftStorage";
+import { useSession } from "@/shared/services/auth/client";
+import {
+  createDraft,
+  deleteDraft as deleteDraftRequest,
+  listDrafts,
+  updateDraft,
+  type UserApiDraft,
+} from "@/shared/services/user-api/draftsClient";
+import { UserApiRequestError } from "@/shared/services/user-api/request";
 
 export type UseDraftsReturn = {
   drafts: ProposalDraft[];
@@ -31,122 +31,146 @@ export type UseDraftsReturn = {
   getDraft: (id: string) => ProposalDraft | undefined;
   isLoading: boolean;
   error: boolean;
+  /** True when there is no session — the caller should prompt sign-in. */
+  needsAuth: boolean;
   retry: () => void;
 };
 
-const getStorage = (): Storage | undefined =>
-  typeof window === "undefined" ? undefined : window.localStorage;
-
-const toDraft = (d: DraftProposal): ProposalDraft => ({
+const toDraft = (d: UserApiDraft): ProposalDraft => ({
   id: d.id,
   daoId: d.daoId,
-  author: d.author,
+  author: d.authorAddress ?? "",
   title: d.title,
   discussionUrl: d.discussionUrl,
   body: d.body,
-  // API returns actions as unknown[] (open JSON objects); cast is intentional
   actions: d.actions as unknown as ProposalAction[],
-  createdAt: Number(d.createdAt),
-  updatedAt: Number(d.updatedAt),
+  createdAt: d.createdAt,
+  updatedAt: d.updatedAt,
 });
 
 export const useDrafts = (daoId: string): UseDraftsReturn => {
+  const { data: session, isPending: isSessionPending } = useSession();
   const { address } = useAccount();
   const [drafts, setDrafts] = useState<ProposalDraft[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [loadedScope, setLoadedScope] = useState<string | null>(null);
   const [retryToken, setRetryToken] = useState(0);
-  const migratedRef = useRef<Set<string>>(new Set());
+  // Browser-local upload runs once per dao:address (see below).
+  const drainedLocalRef = useRef<Set<string>>(new Set());
 
-  const dao = daoId as GetDraftProposalsPathParamsDaoEnumKey;
+  const userId = session?.user.id ?? null;
+  const needsAuth = !isSessionPending && !userId;
 
-  const retry = useCallback(() => {
-    setRetryToken((n) => n + 1);
-  }, []);
+  const retry = useCallback(() => setRetryToken((n) => n + 1), []);
 
-  // Migrate localStorage drafts to API on first connect
+  // Drafts are session-scoped: load them once authenticated. Identity comes
+  // from the session cookie, never a request param — so the fetch is keyed by
+  // the session user only, and a wallet connect/disconnect never clears or
+  // refetches the list.
   useEffect(() => {
-    if (!address) return;
-    // Capture address so stale in-flight responses from a previous address
-    // cannot overwrite state after the user switches wallets.
-    const capturedAddress = address;
-    const key = `${daoId}:${capturedAddress}`;
-    if (migratedRef.current.has(key)) return;
+    // Reset immediately so one user's drafts (or a previous session's) never
+    // linger on screen while another session's fetch is in flight. A fetch
+    // cancelled by this effect's cleanup skips its finally, so the flags are
+    // cleared here too — sign-out mid-request must not strand isLoading.
+    setDrafts([]);
+    setLoadedScope(null);
+    if (!userId) {
+      setIsLoading(false);
+      setError(false);
+      return;
+    }
 
+    const scope = `${userId}:${daoId}`;
     let cancelled = false;
-
-    const storage = getStorage();
-    const localDrafts = storage
-      ? readDrafts(storage, draftKey(daoId, capturedAddress))
-      : [];
-
     const run = async () => {
       setIsLoading(true);
       setError(false);
       try {
-        const result = await getDraftProposals(dao, {
-          address: capturedAddress,
-        });
-        if (cancelled) return;
-
-        if (localDrafts.length === 0) {
-          setDrafts(result.items.map(toDraft));
-          // Only lock once the fetch has succeeded so transient failures can retry.
-          migratedRef.current.add(key);
-          return;
+        const { items } = await listDrafts(daoId);
+        if (!cancelled) {
+          setDrafts(items.map(toDraft));
+          setLoadedScope(scope);
         }
-
-        const remoteIds = new Set(result.items.map((d) => d.id));
-        const newlyCreated = await Promise.all(
-          localDrafts
-            .filter((d) => !remoteIds.has(d.id))
-            .map((d) =>
-              createDraftProposal(dao, {
-                id: d.id,
-                address: capturedAddress,
-                title: d.title,
-                discussionUrl: d.discussionUrl,
-                body: d.body,
-                actions: d.actions,
-              }),
-            ),
-        );
-
-        if (cancelled) return;
-        setDrafts([...result.items, ...newlyCreated].map(toDraft));
-
-        if (storage) {
-          storage.removeItem(draftKey(daoId, capturedAddress));
-        }
-        // Only lock the migration once it actually succeeded; otherwise a
-        // transient API outage would strand the user until full remount.
-        migratedRef.current.add(key);
       } catch {
-        if (cancelled) return;
-        // Migration failed — fall back to local drafts and surface an error so
-        // the UI can offer a manual retry. The lock stays unset so a later
-        // retry (via the `retry()` callback) can replay the migration.
-        setDrafts(localDrafts);
-        setError(true);
+        if (!cancelled) setError(true);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
     };
 
-    run();
-
+    void run();
     return () => {
       cancelled = true;
     };
-  }, [daoId, dao, address, retryToken]);
+  }, [daoId, userId, retryToken]);
+
+  // Legacy drafts created before accounts existed had two homes: the DAO DB
+  // (migrated server-side, claimed on first SIWE login) and this browser's
+  // localStorage — drained here once per dao:wallet on an authenticated load.
+  // Server ids are authoritative now, so local rows upload (concurrently) as
+  // new drafts. The key is cleared only after every upload succeeded — a
+  // failure surfaces the error state and leaves the key for the retry, which
+  // re-runs this effect via retryToken. A successful drain also bumps
+  // retryToken so the list refetches with the drained rows included.
+  useEffect(() => {
+    if (!userId || !address) return;
+    if (loadedScope !== `${userId}:${daoId}`) return;
+    const localKey = `${daoId}:${address.toLowerCase()}`;
+    if (drainedLocalRef.current.has(localKey)) return;
+    const storage =
+      typeof window === "undefined" ? undefined : window.localStorage;
+    if (!storage) return;
+
+    const localDrafts = excludePersistedDrafts(
+      readDrafts(storage, draftKey(daoId, address)),
+      drafts,
+    );
+    if (localDrafts.length === 0) {
+      drainedLocalRef.current.add(localKey);
+      return;
+    }
+
+    let cancelled = false;
+    const run = async () => {
+      // Per-row idempotency: rows that upload successfully are removed from
+      // the key right away, so a partial failure retries only the failed
+      // rows instead of duplicating the migrated ones on the next attempt.
+      const results = await Promise.allSettled(
+        localDrafts.map((d) =>
+          createDraft({
+            daoId,
+            title: d.title,
+            discussionUrl: d.discussionUrl,
+            body: d.body,
+            actions: d.actions,
+          }),
+        ),
+      );
+      const failed = localDrafts.filter(
+        (_, i) => results[i]?.status === "rejected",
+      );
+      writeDrafts(storage, draftKey(daoId, address), failed);
+      if (failed.length === 0) {
+        drainedLocalRef.current.add(localKey);
+        if (!cancelled) setRetryToken((n) => n + 1);
+      } else if (!cancelled) {
+        setError(true);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [daoId, userId, address, loadedScope, drafts, retryToken]);
 
   const saveDraft = useCallback(
     async (draft: NewDraftInput, id?: string): Promise<string> => {
-      if (!address) return "";
+      if (!userId) return "";
 
       if (id) {
-        const updated = await updateDraftProposal(dao, id, {
-          address,
+        const updated = await updateDraft(id, {
           title: draft.title,
           discussionUrl: draft.discussionUrl,
           body: draft.body,
@@ -158,10 +182,8 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
         return id;
       }
 
-      const newId = crypto.randomUUID();
-      const created = await createDraftProposal(dao, {
-        id: newId,
-        address,
+      const created = await createDraft({
+        daoId,
         title: draft.title,
         discussionUrl: draft.discussionUrl,
         body: draft.body,
@@ -170,16 +192,23 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
       setDrafts((prev) => [toDraft(created), ...prev]);
       return created.id;
     },
-    [dao, address],
+    [daoId, userId],
   );
 
   const deleteDraft = useCallback(
     async (id: string): Promise<void> => {
-      if (!address) return;
-      await deleteDraftProposal(dao, id, { address });
-      setDrafts((prev) => removeDraft(prev, id));
+      if (!userId) return;
+      try {
+        await deleteDraftRequest(id);
+      } catch (err) {
+        // A missing/foreign row is already gone from the user's perspective.
+        const notFound =
+          err instanceof UserApiRequestError && err.status === 404;
+        if (!notFound) throw err;
+      }
+      setDrafts((prev) => prev.filter((d) => d.id !== id));
     },
-    [dao, address],
+    [userId],
   );
 
   const getDraft = useCallback(
@@ -187,5 +216,14 @@ export const useDrafts = (daoId: string): UseDraftsReturn => {
     [drafts],
   );
 
-  return { drafts, saveDraft, deleteDraft, getDraft, isLoading, error, retry };
+  return {
+    drafts,
+    saveDraft,
+    deleteDraft,
+    getDraft,
+    isLoading,
+    error,
+    needsAuth,
+    retry,
+  };
 };
