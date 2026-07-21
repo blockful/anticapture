@@ -29,7 +29,8 @@ without creating duplicates.
 ## Endpoints
 
 - `POST /tokens` · `GET /tokens` · `DELETE /tokens/:id` — token surface
-- `POST /tokens/usage` · `GET /tokens/usage?tenant=...` — daily usage surface
+- `POST /tokens/usage` · `GET /tokens/usage?tenant=...` — daily usage surface;
+  writes require a UUID `idempotencyKey`, and replaying one is a no-op
 - `POST /validate` — internal surface (Gateful)
 - `GET /health` · `GET /metrics` — public · `GET /docs` — Swagger UI
 

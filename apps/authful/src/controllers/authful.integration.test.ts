@@ -17,7 +17,7 @@ import {
 import { createApp } from "@/app";
 import type { AuthfulDrizzle } from "@/database";
 import * as schema from "@/database/schema";
-import { tokenUsageDaily, tokens } from "@/database/schema";
+import { tokenUsageBatches, tokenUsageDaily, tokens } from "@/database/schema";
 import { tokenValidationRequestTotal } from "@/metrics";
 import { TokensRepository } from "@/repositories/tokens";
 import { TokensService, hashToken } from "@/services/tokens";
@@ -71,6 +71,7 @@ describe("authful app", () => {
   });
 
   beforeEach(async () => {
+    await db.delete(tokenUsageBatches);
     await db.delete(tokenUsageDaily);
     await db.delete(tokens);
   });
@@ -349,11 +350,13 @@ describe("authful app", () => {
     it("upserts duplicate increments and ignores unknown token ids", async () => {
       const minted = await mint({ tenant: "user:abc" });
       const day = new Date().toISOString().slice(0, 10);
+      const idempotencyKey = crypto.randomUUID();
 
       const res = await app.request("/tokens/usage", {
         method: "POST",
         headers: provisioningHeaders,
         body: JSON.stringify({
+          idempotencyKey,
           items: [
             { tokenId: minted.id, day, count: 2 },
             { tokenId: minted.id, day, count: 3 },
@@ -368,6 +371,7 @@ describe("authful app", () => {
         method: "POST",
         headers: provisioningHeaders,
         body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
           items: [{ tokenId: minted.id, day, count: 4 }],
         }),
       });
@@ -375,6 +379,29 @@ describe("authful app", () => {
 
       const rows = await db.select().from(tokenUsageDaily);
       expect(rows).toEqual([{ tokenId: minted.id, day, count: 9 }]);
+    });
+
+    it("applies a usage batch exactly once when its request is replayed", async () => {
+      const minted = await mint({ tenant: "user:abc" });
+      const day = new Date().toISOString().slice(0, 10);
+      const body = JSON.stringify({
+        idempotencyKey: crypto.randomUUID(),
+        items: [{ tokenId: minted.id, day, count: 5 }],
+      });
+
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const res = await app.request("/tokens/usage", {
+          method: "POST",
+          headers: usageHeaders,
+          body,
+        });
+        expect(res.status).toBe(204);
+      }
+
+      expect(await db.select().from(tokenUsageDaily)).toEqual([
+        { tokenId: minted.id, day, count: 5 },
+      ]);
+      expect(await db.select().from(tokenUsageBatches)).toHaveLength(1);
     });
 
     it("scopes reads by tenant and returns only the last 30 days", async () => {
@@ -413,6 +440,7 @@ describe("authful app", () => {
         method: "POST",
         headers: provisioningHeaders,
         body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
           items: [{ tokenId: minted.id, day: today, count: 1 }],
         }),
       });
@@ -430,6 +458,7 @@ describe("authful app", () => {
         method: "POST",
         headers: provisioningHeaders,
         body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
           items: [{ tokenId: minted.id, day, count: 5 }],
         }),
       });
@@ -451,6 +480,7 @@ describe("authful app", () => {
         method: "POST",
         headers: usageHeaders,
         body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
           items: [
             { tokenId: own.id, day, count: 5 },
             { tokenId: ops.id, day, count: 9 },

@@ -41,10 +41,10 @@ export function tokensController(app: Hono, service: TokensService) {
       },
     }),
     async (c) => {
-      const { items } = c.req.valid("json");
+      const { idempotencyKey, items } = c.req.valid("json");
       // Both non-admin scopes (provisioning and usage) may only touch
       // end-user tokens — Gateful only accumulates `user:*` tenants anyway.
-      await service.recordUsage(items, {
+      await service.recordUsage(idempotencyKey, items, {
         requireTenantPrefix:
           c.get("authScope") === "admin" ? undefined : USER_TENANT_PREFIX,
       });

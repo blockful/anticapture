@@ -35,3 +35,14 @@ export const tokenUsageDaily = authfulSchema.table(
     index().on(table.day),
   ],
 );
+
+export const tokenUsageBatches = authfulSchema.table(
+  "token_usage_batches",
+  (d) => ({
+    idempotencyKey: d.uuid("idempotency_key").primaryKey(),
+    createdAt: d
+      .timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  }),
+);

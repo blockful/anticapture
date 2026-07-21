@@ -1,8 +1,10 @@
+import { randomUUID } from "node:crypto";
+
 import type { Context, Next } from "hono";
 
 import { logger } from "../logger.js";
 import { tenantRequestTotal } from "../metrics.js";
-import type { TokenUsageIncrement } from "./authful-client.js";
+import type { TokenUsageBatch, TokenUsageIncrement } from "./authful-client.js";
 import type { AuthContext } from "./token-auth.js";
 
 const USER_TENANT_PREFIX = "user:";
@@ -10,13 +12,15 @@ const DEFAULT_FLUSH_INTERVAL_MS = 60_000;
 const DEFAULT_MAX_BUCKETS = 10_000;
 
 export interface TokenUsageWriter {
-  recordUsage(items: TokenUsageIncrement[]): Promise<void>;
+  recordUsage(batch: TokenUsageBatch): Promise<void>;
+  isRetryableUsageError?(error: unknown): boolean;
 }
 
 type UsageBucket = TokenUsageIncrement;
 
 export class UsageAccumulator {
   private buckets = new Map<string, UsageBucket>();
+  private retryBatches: TokenUsageBatch[] = [];
   private flushPromise: Promise<void> | undefined;
   private interval: ReturnType<typeof setInterval> | undefined;
 
@@ -26,6 +30,7 @@ export class UsageAccumulator {
       flushIntervalMs?: number;
       maxBuckets?: number;
       now?: () => Date;
+      createIdempotencyKey?: () => string;
     } = {},
   ) {}
 
@@ -41,19 +46,15 @@ export class UsageAccumulator {
     }
 
     if (this.buckets.size >= this.maxBuckets) {
-      // Swapping is synchronous, so a non-overlapping flush immediately frees
-      // space without adding latency to the request path.
       void this.flush();
     }
-    if (this.buckets.size >= this.maxBuckets) {
+    this.buckets.set(key, { tokenId: auth.tokenId, day, count: 1 });
+    if (this.buckets.size === this.maxBuckets + 1) {
       logger.warn(
         { maxBuckets: this.maxBuckets },
-        "token usage buffer full; dropping a new usage bucket",
+        "token usage buffer exceeded flush threshold while a flush is in flight",
       );
-      return;
     }
-
-    this.buckets.set(key, { tokenId: auth.tokenId, day, count: 1 });
   }
 
   start(): void {
@@ -67,24 +68,34 @@ export class UsageAccumulator {
   async stop(): Promise<void> {
     if (this.interval) clearInterval(this.interval);
     this.interval = undefined;
-    // The first call may only await an already-running flush. A second pass
-    // drains requests that arrived while that batch was in flight and retries
-    // a batch restored after a transient failure.
-    await this.flush();
-    await this.flush();
+    // Bound shutdown retries so an unavailable Authful cannot block process
+    // termination forever. Three passes cover an in-flight batch, one retry,
+    // and requests that arrived while the HTTP server was draining.
+    for (let attempt = 0; attempt < 3 && this.hasPending; attempt++) {
+      await this.flush();
+    }
   }
 
   async flush(): Promise<void> {
     if (this.flushPromise) return this.flushPromise;
-    if (this.buckets.size === 0) return;
+    const batch = this.nextBatch();
+    if (!batch) return;
 
-    const pending = this.buckets;
-    this.buckets = new Map();
     this.flushPromise = this.writer
-      .recordUsage([...pending.values()])
+      .recordUsage(batch)
       .catch((err: unknown) => {
-        this.remerge(pending);
-        logger.warn({ err }, "failed to flush token usage to Authful");
+        if (this.writer.isRetryableUsageError?.(err) ?? true) {
+          this.retryBatches.unshift(batch);
+          logger.warn(
+            { err },
+            "failed to flush token usage to Authful; retrying",
+          );
+          return;
+        }
+        logger.warn(
+          { err, idempotencyKey: batch.idempotencyKey },
+          "discarding token usage batch after permanent Authful rejection",
+        );
       })
       .finally(() => {
         this.flushPromise = undefined;
@@ -92,20 +103,17 @@ export class UsageAccumulator {
     return this.flushPromise;
   }
 
-  private remerge(pending: Map<string, UsageBucket>): void {
-    for (const [key, item] of pending) {
-      const live = this.buckets.get(key);
-      if (live) {
-        live.count += item.count;
-      } else if (this.buckets.size < this.maxBuckets) {
-        this.buckets.set(key, item);
-      } else {
-        logger.warn(
-          { maxBuckets: this.maxBuckets },
-          "token usage buffer full while restoring a failed batch",
-        );
-      }
-    }
+  private nextBatch(): TokenUsageBatch | undefined {
+    const retry = this.retryBatches.shift();
+    if (retry) return retry;
+    if (this.buckets.size === 0) return undefined;
+
+    const pending = this.buckets;
+    this.buckets = new Map();
+    return {
+      idempotencyKey: this.options.createIdempotencyKey?.() ?? randomUUID(),
+      items: [...pending.values()],
+    };
   }
 
   private currentDay(): string {
@@ -114,6 +122,14 @@ export class UsageAccumulator {
 
   private get maxBuckets(): number {
     return this.options.maxBuckets ?? DEFAULT_MAX_BUCKETS;
+  }
+
+  private get hasPending(): boolean {
+    return (
+      this.flushPromise !== undefined ||
+      this.retryBatches.length > 0 ||
+      this.buckets.size > 0
+    );
   }
 }
 

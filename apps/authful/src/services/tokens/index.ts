@@ -133,10 +133,11 @@ export class TokensService {
   }
 
   async recordUsage(
+    idempotencyKey: string,
     items: TokenUsageIncrement[],
     options: { requireTenantPrefix?: string } = {},
   ): Promise<void> {
-    await this.repo.incrementUsage(items, options);
+    await this.repo.incrementUsage(idempotencyKey, items, options);
   }
 
   async usageByTenant(tenant: string): Promise<TokenUsage[]> {

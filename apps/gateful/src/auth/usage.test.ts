@@ -2,6 +2,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { tenantRequestTotal } from "../metrics";
+import type { TokenUsageBatch } from "./authful-client";
 import type { AuthContext } from "./token-auth";
 import { UsageAccumulator, normalizeRoute, usageMiddleware } from "./usage";
 import type { TokenUsageWriter } from "./usage";
@@ -99,10 +100,10 @@ describe("usageMiddleware", () => {
   });
 
   it("forwards user-key requests to persistent usage accumulation", async () => {
-    const batches: Parameters<TokenUsageWriter["recordUsage"]>[0][] = [];
+    const batches: TokenUsageBatch["items"][] = [];
     const accumulator = new UsageAccumulator(
       {
-        recordUsage: async (items) => {
+        recordUsage: async ({ items }) => {
           batches.push(items);
         },
       },
@@ -127,9 +128,9 @@ describe("UsageAccumulator", () => {
   const NOW = new Date("2026-07-20T23:59:00.000Z");
 
   it("accumulates user-key requests and flushes one daily increment", async () => {
-    const batches: Parameters<TokenUsageWriter["recordUsage"]>[0][] = [];
+    const batches: TokenUsageBatch["items"][] = [];
     const writer: TokenUsageWriter = {
-      recordUsage: async (items) => {
+      recordUsage: async ({ items }) => {
         batches.push(items);
       },
     };
@@ -147,9 +148,9 @@ describe("UsageAccumulator", () => {
 
   it("keeps UTC-day buckets separate across midnight", async () => {
     let now = NOW;
-    const batches: Parameters<TokenUsageWriter["recordUsage"]>[0][] = [];
+    const batches: TokenUsageBatch["items"][] = [];
     const writer: TokenUsageWriter = {
-      recordUsage: async (items) => {
+      recordUsage: async ({ items }) => {
         batches.push(items);
       },
     };
@@ -168,24 +169,28 @@ describe("UsageAccumulator", () => {
     ]);
   });
 
-  it("re-merges a failed batch with live counts for the next flush", async () => {
+  it("retries the exact failed batch before flushing live counts", async () => {
     let attempt = 0;
     let releaseFailure: (() => void) | undefined;
     const failed = new Promise<void>((resolve) => {
       releaseFailure = resolve;
     });
-    const batches: Parameters<TokenUsageWriter["recordUsage"]>[0][] = [];
+    const batches: TokenUsageBatch[] = [];
     const writer: TokenUsageWriter = {
-      recordUsage: async (items) => {
+      recordUsage: async (batch) => {
+        batches.push(batch);
         attempt += 1;
         if (attempt === 1) {
           await failed;
           throw new Error("Authful unavailable");
         }
-        batches.push(items);
       },
     };
-    const accumulator = new UsageAccumulator(writer, { now: () => NOW });
+    const ids = ["batch-1", "batch-2"];
+    const accumulator = new UsageAccumulator(writer, {
+      now: () => NOW,
+      createIdempotencyKey: () => ids.shift()!,
+    });
 
     accumulator.record(USER_AUTH);
     const firstFlush = accumulator.flush();
@@ -193,16 +198,96 @@ describe("UsageAccumulator", () => {
     releaseFailure?.();
     await firstFlush;
     await accumulator.flush();
+    await accumulator.flush();
 
     expect(batches).toEqual([
-      [{ tokenId: USER_AUTH.tokenId, day: "2026-07-20", count: 2 }],
+      {
+        idempotencyKey: "batch-1",
+        items: [{ tokenId: USER_AUTH.tokenId, day: "2026-07-20", count: 1 }],
+      },
+      {
+        idempotencyKey: "batch-1",
+        items: [{ tokenId: USER_AUTH.tokenId, day: "2026-07-20", count: 1 }],
+      },
+      {
+        idempotencyKey: "batch-2",
+        items: [{ tokenId: USER_AUTH.tokenId, day: "2026-07-20", count: 1 }],
+      },
+    ]);
+  });
+
+  it("keeps new buckets while another flush is in flight", async () => {
+    let releaseFirst: (() => void) | undefined;
+    const firstPending = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    const batches: TokenUsageBatch[] = [];
+    const writer: TokenUsageWriter = {
+      recordUsage: async (batch) => {
+        batches.push(batch);
+        if (batches.length === 1) await firstPending;
+      },
+    };
+    const ids = ["batch-1", "batch-2"];
+    const accumulator = new UsageAccumulator(writer, {
+      maxBuckets: 1,
+      now: () => NOW,
+      createIdempotencyKey: () => ids.shift()!,
+    });
+
+    accumulator.record({ ...USER_AUTH, tokenId: "token-1" });
+    const firstFlush = accumulator.flush();
+    accumulator.record({ ...USER_AUTH, tokenId: "token-2" });
+    accumulator.record({ ...USER_AUTH, tokenId: "token-3" });
+    releaseFirst?.();
+    await firstFlush;
+    await accumulator.flush();
+
+    expect(batches).toEqual([
+      {
+        idempotencyKey: "batch-1",
+        items: [{ tokenId: "token-1", day: "2026-07-20", count: 1 }],
+      },
+      {
+        idempotencyKey: "batch-2",
+        items: [
+          { tokenId: "token-2", day: "2026-07-20", count: 1 },
+          { tokenId: "token-3", day: "2026-07-20", count: 1 },
+        ],
+      },
+    ]);
+  });
+
+  it("discards a permanently rejected batch instead of retrying forever", async () => {
+    const batches: TokenUsageBatch[] = [];
+    const writer: TokenUsageWriter = {
+      recordUsage: async (batch) => {
+        batches.push(batch);
+        throw new Error("invalid request");
+      },
+      isRetryableUsageError: () => false,
+    };
+    const accumulator = new UsageAccumulator(writer, {
+      now: () => NOW,
+      createIdempotencyKey: () => "batch-1",
+    });
+
+    accumulator.record(USER_AUTH);
+    await accumulator.flush();
+    await accumulator.flush();
+
+    expect(batches).toEqual([
+      {
+        idempotencyKey: "batch-1",
+        items: [{ tokenId: USER_AUTH.tokenId, day: "2026-07-20", count: 1 }],
+      },
     ]);
   });
 
   it("flushes pending usage when stopped", async () => {
-    const batches: Parameters<TokenUsageWriter["recordUsage"]>[0][] = [];
+    const batches: TokenUsageBatch["items"][] = [];
     const writer: TokenUsageWriter = {
-      recordUsage: async (items) => {
+      recordUsage: async ({ items }) => {
         batches.push(items);
       },
     };
@@ -225,9 +310,9 @@ describe("UsageAccumulator", () => {
     const firstPending = new Promise<void>((resolve) => {
       releaseFirst = resolve;
     });
-    const batches: Parameters<TokenUsageWriter["recordUsage"]>[0][] = [];
+    const batches: TokenUsageBatch["items"][] = [];
     const writer: TokenUsageWriter = {
-      recordUsage: async (items) => {
+      recordUsage: async ({ items }) => {
         if (batches.length === 0) await firstPending;
         batches.push(items);
       },

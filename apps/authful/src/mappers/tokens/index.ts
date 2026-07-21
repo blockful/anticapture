@@ -38,6 +38,10 @@ export const TokenUsageSchema = z
 
 export const RecordTokenUsageBodySchema = z
   .object({
+    idempotencyKey: z.uuid().openapi({
+      description:
+        "Stable batch identifier. Replaying the same batch is a no-op.",
+    }),
     items: z
       .array(
         TokenUsageSchema.extend({

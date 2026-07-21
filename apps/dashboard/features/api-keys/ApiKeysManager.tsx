@@ -147,7 +147,7 @@ export const ApiKeysManager = () => {
               isError={isError}
               onDelete={setToDelete}
             />
-            <UsageSection keys={keys} userId={userId} />
+            {keys.length > 0 && <UsageSection keys={keys} userId={userId} />}
           </>
         )}
       </div>

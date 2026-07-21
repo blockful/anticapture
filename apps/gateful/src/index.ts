@@ -14,6 +14,7 @@ import type { OpenAPIObject } from "openapi3-ts/oas31";
 import { rateLimitMiddleware } from "./auth/rate-limit";
 import { tokenAuthMiddleware } from "./auth/token-auth";
 import { AuthfulClient } from "./auth/authful-client";
+import { drainServerAndFlushUsage } from "./auth/graceful-shutdown";
 import { UsageAccumulator, usageMiddleware } from "./auth/usage";
 import { config } from "./config";
 import { CircuitOpenError } from "./shared/circuit-breaker";
@@ -83,13 +84,15 @@ if (!config.tokenService && !config.authDisabled) {
   );
 }
 
+let usageAccumulator: UsageAccumulator | undefined;
+
 if (config.tokenService) {
   const authfulClient = new AuthfulClient(
     config.tokenService.url,
     config.tokenService.apiKey,
     config.tokenService.usageApiKey,
   );
-  const usageAccumulator = new UsageAccumulator(authfulClient);
+  usageAccumulator = new UsageAccumulator(authfulClient);
   usageAccumulator.start();
 
   app.use(
@@ -106,10 +109,6 @@ if (config.tokenService) {
   app.use("*", rateLimitMiddleware(redis));
 
   logger.info("per-tenant token auth enabled (Authful)");
-
-  process.once("SIGTERM", () => {
-    void usageAccumulator.stop().finally(() => process.exit(0));
-  });
 }
 if (redis) {
   app.use("*", cacheMiddleware(redis, config.daoApis));
@@ -187,6 +186,17 @@ proxy(app, config.daoApis, registry);
 
 logger.info({ port: config.port }, "Gateful REST API running");
 
-serve({ fetch: app.fetch, port: config.port, hostname: "::" });
+const server = serve({ fetch: app.fetch, port: config.port, hostname: "::" });
+
+if (usageAccumulator) {
+  const accumulator = usageAccumulator;
+  process.once("SIGTERM", () => {
+    void drainServerAndFlushUsage(server, accumulator)
+      .catch((err: unknown) => {
+        logger.error({ err }, "failed to shut down Gateful gracefully");
+      })
+      .finally(() => process.exit(0));
+  });
+}
 
 export { app };

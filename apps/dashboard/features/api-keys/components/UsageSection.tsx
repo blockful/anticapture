@@ -18,9 +18,6 @@ const requestCountFormatter = new Intl.NumberFormat("en-US");
 const formatRequestCount = (value: number): string =>
   requestCountFormatter.format(value);
 
-const filterLabel = (label: string): string =>
-  label.length > 18 ? `${label.slice(0, 17)}…` : label;
-
 export const UsageSection = ({
   keys,
   userId,
@@ -47,7 +44,7 @@ export const UsageSection = ({
     () => [
       { label: "All", value: ALL_KEYS },
       ...keys.map(({ id, label }) => ({
-        label: filterLabel(label),
+        label,
         value: id,
       })),
     ],

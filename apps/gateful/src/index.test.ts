@@ -1,8 +1,12 @@
 import { serve } from "@hono/node-server";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
+const serverClose = vi.hoisted(() =>
+  vi.fn((callback: (error?: Error) => void) => callback()),
+);
+
 vi.mock("@hono/node-server", () => ({
-  serve: vi.fn(),
+  serve: vi.fn(() => ({ close: serverClose })),
 }));
 
 vi.mock("./upstream-docs.js", () => ({

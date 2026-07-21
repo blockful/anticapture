@@ -24,6 +24,11 @@ export type TokenUsageIncrement = {
   count: number;
 };
 
+export type TokenUsageBatch = {
+  idempotencyKey: string;
+  items: TokenUsageIncrement[];
+};
+
 const REQUEST_TIMEOUT_MS = 3_000;
 
 /**
@@ -64,14 +69,19 @@ export class AuthfulClient {
     return TokenValidationSchema.parse(await res.json());
   }
 
-  async recordUsage(items: TokenUsageIncrement[]): Promise<void> {
+  async recordUsage(batch: TokenUsageBatch): Promise<void> {
     const res = await fetch(`${this.baseUrl}/tokens/usage`, {
       method: "POST",
       headers: this.headers(this.usageApiKey),
-      body: JSON.stringify({ items }),
+      body: JSON.stringify(batch),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) throw new AuthfulResponseError(res.status);
+  }
+
+  isRetryableUsageError(error: unknown): boolean {
+    if (!(error instanceof AuthfulResponseError)) return true;
+    return error.status === 408 || error.status === 429 || error.status >= 500;
   }
 
   private headers(apiKey: string) {

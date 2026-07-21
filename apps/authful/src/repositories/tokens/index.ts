@@ -10,7 +10,12 @@ import {
   sql,
 } from "drizzle-orm";
 
-import { type AuthfulDrizzle, tokenUsageDaily, tokens } from "@/database";
+import {
+  type AuthfulDrizzle,
+  tokenUsageBatches,
+  tokenUsageDaily,
+  tokens,
+} from "@/database";
 
 export type DBToken = typeof tokens.$inferSelect;
 export type NewToken = typeof tokens.$inferInsert;
@@ -78,6 +83,7 @@ export class TokensRepository {
   }
 
   async incrementUsage(
+    idempotencyKey: string,
     items: TokenUsageIncrement[],
     options: { requireTenantPrefix?: string } = {},
   ): Promise<void> {
@@ -92,6 +98,13 @@ export class TokensRepository {
     }
 
     await this.db.transaction(async (tx) => {
+      const claimed = await tx
+        .insert(tokenUsageBatches)
+        .values({ idempotencyKey })
+        .onConflictDoNothing()
+        .returning();
+      if (claimed.length === 0) return;
+
       const tokenIds = [...new Set(items.map(({ tokenId }) => tokenId))];
       if (tokenIds.length > 0) {
         const tenantFilter = options.requireTenantPrefix
@@ -128,6 +141,11 @@ export class TokensRepository {
       await tx
         .delete(tokenUsageDaily)
         .where(lt(tokenUsageDaily.day, usagePruneBefore()));
+      await tx
+        .delete(tokenUsageBatches)
+        .where(
+          lt(tokenUsageBatches.createdAt, sql`now() - interval '31 days'`),
+        );
     });
   }
 

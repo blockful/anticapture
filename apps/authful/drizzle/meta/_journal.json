@@ -15,6 +15,13 @@
       "when": 1784579622074,
       "tag": "0001_overconfident_firedrake",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784651775424,
+      "tag": "0002_lucky_squadron_supreme",
+      "breakpoints": true
     }
   ]
 }
