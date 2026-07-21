@@ -569,6 +569,16 @@ table th {
   padding: 3rem 0 2.5rem;
 }
 
+/* footer.style "dark" scopes its own slate background (#303846) onto the
+   element, beating html-level tokens — re-scope to the page background so
+   the footer sits flush with the app chrome */
+.footer--dark {
+  --ifm-footer-background-color: var(--ac-surface-background);
+  --ifm-footer-color: var(--ifm-color-content);
+  --ifm-footer-link-color: var(--ifm-color-content);
+  --ifm-footer-title-color: var(--ac-text-secondary);
+}
+
 .footer__title {
   font-family: var(--ifm-font-family-monospace);
   font-size: 13px;
