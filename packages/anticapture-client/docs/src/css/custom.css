@@ -17,6 +17,7 @@
 @import "@fontsource/inter/700.css";
 @import "@fontsource/roboto-mono/400.css";
 @import "@fontsource/roboto-mono/500.css";
+@import "@fontsource/roboto-mono/700.css";
 
 /* ---------------------------------------------------------------------------
  * Tokens (Orbit UI, light = dashboard :root, dark = dashboard .dark)
@@ -45,13 +46,14 @@
   --ac-text-dimmed: #a1a1aa;
   --ac-text-inverted: #ffffff;
 
-  /* Infima mapping */
-  --ifm-color-primary: #cf5f18;
-  --ifm-color-primary-dark: #ba5516;
-  --ifm-color-primary-darker: #aa4e14;
-  --ifm-color-primary-darkest: #8c400f;
+  /* Infima mapping — only the official brand oranges: #ec762e, #fb8f4d,
+     and the DS hover recipe (brand mixed toward black). No derived tints. */
+  --ifm-color-primary: var(--ac-brand);
+  --ifm-color-primary-dark: color-mix(in srgb, var(--ac-brand) 80%, black);
+  --ifm-color-primary-darker: color-mix(in srgb, var(--ac-brand) 70%, black);
+  --ifm-color-primary-darkest: color-mix(in srgb, var(--ac-brand) 60%, black);
   --ifm-color-primary-light: var(--ac-brand);
-  --ifm-color-primary-lighter: var(--ac-brand);
+  --ifm-color-primary-lighter: var(--ac-brand-lighter);
   --ifm-color-primary-lightest: var(--ac-brand-lighter);
 
   --ifm-font-family-base:
@@ -69,6 +71,7 @@
   /* Orbit UI --radius-base: interactive elements are square */
   --ifm-global-radius: 0;
   --ifm-button-border-radius: 0;
+  --openapi-card-border-radius: 0;
   --ifm-heading-font-weight: 600;
   /* Tighter vertical rhythm (Infima default is 1.25) */
   --ifm-leading-desktop: 1;
@@ -119,12 +122,12 @@ html[data-theme="dark"] {
   --ac-text-inverted: #18181b;
 
   --ifm-color-primary: var(--ac-brand);
-  --ifm-color-primary-dark: #db6519;
-  --ifm-color-primary-darker: #cf5f18;
-  --ifm-color-primary-darkest: #aa4e14;
-  --ifm-color-primary-light: #ef8646;
+  --ifm-color-primary-dark: color-mix(in srgb, var(--ac-brand) 80%, black);
+  --ifm-color-primary-darker: color-mix(in srgb, var(--ac-brand) 70%, black);
+  --ifm-color-primary-darkest: color-mix(in srgb, var(--ac-brand) 60%, black);
+  --ifm-color-primary-light: var(--ac-brand);
   --ifm-color-primary-lighter: var(--ac-brand-lighter);
-  --ifm-color-primary-lightest: #f5a878;
+  --ifm-color-primary-lightest: var(--ac-brand-lighter);
 
   --ifm-background-color: var(--ac-surface-background);
   --ifm-background-surface-color: var(--ac-surface-default);
@@ -169,12 +172,14 @@ html[data-theme="dark"] {
   padding: 0 1rem;
 }
 
-.navbar__title {
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.72px;
-  text-transform: uppercase;
+/* Oval wordmark logo (156x52 source) */
+.navbar__logo {
+  height: 2rem;
+}
+
+.navbar__logo img {
+  height: 100%;
+  width: auto;
 }
 
 /* DefaultLink recipe: mono 13px medium uppercase, secondary -> primary */
@@ -193,17 +198,41 @@ html[data-theme="dark"] {
   color: var(--ac-text-primary);
 }
 
-/* External-link icon: align with the mono-uppercase baseline */
+/* No external-link icons — the DS DefaultLink renders bare mono-uppercase
+   links */
 .navbar__link svg,
 .footer__link-item svg {
-  vertical-align: -2px;
-  margin-left: 0.25rem;
+  display: none;
+}
+
+.navbar .navbar__search-input {
+  width: 15rem;
+  height: 34px;
+  font-size: 13px;
+  border-radius: 0;
+}
+
+/* Wide viewports: search sits centered in the header, command-palette style
+   (px on purpose — rem here is 14px, not 16). Below 1200px it stays in the
+   right cluster to avoid overlapping the nav links. */
+@media (min-width: 1200px) {
+  .navbar__search {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* The search plugin pins its own width at desktop breakpoints */
+  .navbar .navbar__search-input {
+    width: 500px !important;
+    max-width: none !important;
+  }
 }
 
 [data-theme="dark"] .navbar__search-input {
   background-color: var(--ac-surface-default);
   border: 1px solid var(--ac-border-contrast);
-  border-radius: 0;
   color: var(--ac-text-primary);
 }
 
@@ -412,6 +441,41 @@ h2.openapi-tabs__heading {
   font-size: 16px;
   line-height: 24px;
   margin-top: 1.5rem;
+}
+
+/* Schema/Example tabs match the mime-type tabs' typography (the theme puts
+   them in bold mono, which reads as a different component) */
+.tabs__item.openapi-tabs__schema-item {
+  font-family: var(--ifm-font-family-base);
+}
+
+/* Flat panels: the explorer cards ship whitish elevation shadows (with
+   stronger :hover states) that read as a glow on the dark theme — Orbit UI
+   panels are flat, border-only */
+.openapi-explorer__playground-container,
+.openapi-explorer__request-form,
+.openapi-explorer__request-form:hover,
+.openapi-explorer__response-container,
+.openapi-explorer__response-container:hover,
+.openapi-explorer__code-block-container,
+.openapi-tabs__code-container,
+.openapi-tabs__code-container:hover,
+.openapi-tabs__code-container-inner,
+.openapi-markdown__details,
+.openapi-markdown__details:hover,
+.openapi-security__details,
+.openapi-security__details:hover {
+  box-shadow: none !important;
+}
+
+/* Explorer submit button follows the DS primary Button recipe */
+button.openapi-explorer__request-btn {
+  color: var(--ac-text-inverted);
+  transition: background 0.3s;
+}
+
+button.openapi-explorer__request-btn:hover {
+  color: var(--ac-text-inverted);
 }
 
 /* Right-hand explorer panel: product-density text */
@@ -702,8 +766,8 @@ table th {
   color: var(--ac-text-primary);
 }
 
-/* Cards: card-container-about recipe — surface-default, contrast border,
-   rounded-lg (cards keep radius; only interactive elements are square) */
+/* Cards: surface-default with contrast border, square like the rest of the
+   interactive chrome */
 .ac-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -716,7 +780,7 @@ table th {
   gap: 0.625rem;
   padding: 0.875rem 1rem;
   border: 1px solid var(--ac-border-contrast);
-  border-radius: 0.5rem;
+  border-radius: 0;
   background: var(--ac-surface-default);
   color: var(--ac-text-primary);
   transition: background 0.15s ease;
@@ -778,7 +842,7 @@ html.docs-doc-id-index .markdown h2 {
   gap: 0.5rem;
   padding: 0.4375rem 0.625rem;
   border: 1px solid var(--ac-border-default);
-  border-radius: 0.5rem;
+  border-radius: 0;
   background: var(--ac-surface-default);
   color: var(--ac-text-primary);
   font-size: 13px;

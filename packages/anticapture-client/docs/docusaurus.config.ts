@@ -33,7 +33,7 @@ const anticaptureCodeTheme: PrismTheme = {
     },
     {
       types: ["property", "attr-name", "builtin", "variable"],
-      style: { color: "#f5a878" },
+      style: { color: "#fb8f4d" },
     },
   ],
 };
@@ -176,9 +176,11 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Match the Anticapture dashboard identity: the product is dark-first.
+    // Match the Anticapture dashboard identity: the product is dark-only, so
+    // the docs pin dark mode and drop the toggle.
     colorMode: {
       defaultMode: "dark",
+      disableSwitch: true,
       respectPrefersColorScheme: false,
     },
     prism: {
@@ -209,7 +211,7 @@ const config: Config = {
       { highlight: "go", language: "go", logoClass: "go", variant: "Native" },
     ],
     navbar: {
-      title: "Anticapture",
+      // The oval wordmark carries the lettering — no navbar title text.
       logo: {
         alt: "Anticapture",
         src: "img/logo.svg",
