@@ -18,6 +18,15 @@ docker build \
   infra/erpc
 ```
 
+## Dashboard integration
+
+The dashboard sends wallet JSON-RPC requests through its same-origin
+`/api/rpc/<chainId>` route. Configure that dashboard service with `ERPC_URL`
+(the `dashboard` project base URL) and `ERPC_SECRET` (`RPC_SECRET` on the eRPC
+service). Both variables must remain server-only; never use a `NEXT_PUBLIC_`
+prefix for the secret. Both are required; the route fails closed when either is
+absent.
+
 Rate limits are split because the deployments share provider API keys and the
 configured rate limiter uses the in-memory driver. Provider-level budgets are
 allocated 80% to production and 20% to dev/staging. Per-IP budgets stay the same
