@@ -41,7 +41,7 @@ GET /{dao}/accounts/{address}/delegations
 ```
 
 List the supported DAOs (and their identifiers) with
-[`GET /daos`](/api-reference/daos).
+[`GET /daos`](./api-reference/daos.api.mdx).
 
 ## Your first request
 
@@ -74,8 +74,8 @@ maximums.
 
 ## Where to go next
 
-- **[API Reference](/api-reference/anticapture-rest-api)**: every endpoint,
-  generated from the live OpenAPI spec.
+- **[API Reference](./api-reference/anticapture-rest-api.info.mdx)**: every
+  endpoint, generated from the live OpenAPI spec.
 - **[MCP server](./mcp/index.md)**: query the same API from LLM agents in
   natural language.
 - **[Webhooks](./webhooks/index.md)**: push notifications instead of polling.

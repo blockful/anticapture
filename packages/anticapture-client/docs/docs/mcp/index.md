@@ -36,7 +36,7 @@ This connects to the public MCP HTTP transport instance.
 ## How tools map to the API
 
 The MCP tools are generated from the same OpenAPI spec as the
-[API Reference](/api-reference/anticapture-rest-api):
+[API Reference](../api-reference/anticapture-rest-api.info.mdx):
 
 - **Tool name** = the operation's `operationId` (e.g. the `proposals` tool
   calls `GET /{dao}/proposals`).

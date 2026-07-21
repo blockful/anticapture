@@ -219,8 +219,11 @@ gateful.info.description ||=
   "REST API for Anticapture's DAO governance analytics: proposals, votes, " +
   "voting power, delegations, token and treasury data, indexed from onchain " +
   "and offchain sources.\n\nAll endpoints are served from " +
+  // File-relative link: the site's baseUrl is /docs/, and Docusaurus emits
+  // root-relative markdown URL paths unchanged (they would escape the proxy
+  // prefix). The description lands in docs/api-reference/*.info.mdx.
   `\`${gatefulOrigin}\` and require a bearer token; see ` +
-  "[Getting started](/getting-started).";
+  "[Getting started](../getting-started.md).";
 
 await writeSpec(GATEFUL_OUT, gateful);
 console.log(
