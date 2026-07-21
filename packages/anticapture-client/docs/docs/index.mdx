@@ -1,0 +1,147 @@
+---
+id: index
+title: Introduction
+slug: /
+hide_title: true
+hide_table_of_contents: true
+---
+
+import Link from "@docusaurus/Link";
+
+export const IconRest = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M7 8l-4 4 4 4" />
+    <path d="M17 8l4 4-4 4" />
+    <path d="M14 4l-4 16" />
+  </svg>
+);
+
+export const IconMcp = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" />
+    <path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z" />
+  </svg>
+);
+
+export const IconWebhook = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="5" r="2.5" />
+    <circle cx="5" cy="18" r="2.5" />
+    <circle cx="19" cy="18" r="2.5" />
+    <path d="M10.9 7.2L7 15.5M13.1 7.2L17 15.5M7.5 18h9" />
+  </svg>
+);
+
+export const SurfaceCard = ({ to, icon, title, children }) => (
+  <Link className="ac-card" to={to}>
+    <span className="ac-card__icon">{icon}</span>
+    <div className="ac-card__text">
+      <div className="ac-card__title">{title}</div>
+      <div className="ac-card__body">{children}</div>
+    </div>
+  </Link>
+);
+
+export const EndpointLink = ({ to, method = "GET", children }) => (
+  <Link className="ac-endpoint" to={to}>
+    <span className="ac-endpoint__method">{method}</span>
+    <div className="ac-endpoint__label">{children}</div>
+  </Link>
+);
+
+export const Hero = () => (
+  <div className="ac-hero">
+    <p className="ac-hero__eyebrow">Developer documentation</p>
+    <h1 className="ac-hero__title">Build with the Anticapture API</h1>
+    <p className="ac-hero__lede">
+      Governance, delegation, treasury, and voting analytics for DAOs, indexed
+      from onchain and offchain sources and served over a single REST API. The
+      same data that powers{" "}
+      <a href="https://app.anticapture.com">app.anticapture.com</a>.
+    </p>
+    <div className="ac-hero__actions">
+      <Link className="ac-btn ac-btn--primary" to="/getting-started">
+        Get started
+      </Link>
+      <Link
+        className="ac-btn ac-btn--ghost"
+        to="/api-reference/anticapture-rest-api"
+      >
+        Browse the API
+      </Link>
+    </div>
+  </div>
+);
+
+<Hero />
+
+<div className="ac-cards">
+  <SurfaceCard
+    to="/api-reference/anticapture-rest-api"
+    icon={<IconRest />}
+    title="REST API"
+  >
+    Query proposals, voting power, delegations, treasury, and token metrics,
+    scoped per DAO.
+  </SurfaceCard>
+  <SurfaceCard to="/mcp" icon={<IconMcp />} title="MCP server">
+    Connect Claude, Cursor, or any MCP client and query DAO analytics in natural
+    language.
+  </SurfaceCard>
+  <SurfaceCard to="/webhooks" icon={<IconWebhook />} title="Webhooks">
+    Receive signed governance notifications on your endpoint instead of polling.
+  </SurfaceCard>
+</div>
+
+## Popular endpoints
+
+<div className="ac-endpoints">
+  <EndpointLink to="/api-reference/daos">List all DAOs</EndpointLink>
+  <EndpointLink to="/api-reference/proposals">Get proposals</EndpointLink>
+  <EndpointLink to="/api-reference/voting-powers">
+    Get voting power
+  </EndpointLink>
+  <EndpointLink to="/api-reference/delegations">Get delegations</EndpointLink>
+  <EndpointLink to="/api-reference/get-total-treasury">
+    Get treasury
+  </EndpointLink>
+  <EndpointLink to="/api-reference/token-metrics">
+    Get token metrics
+  </EndpointLink>
+</div>
+
+## Talk to us
+
+Access requires an API key. Reach out to the team through
+[blockful](https://blockful.io) to get one, or open an issue on
+[GitHub](https://github.com/blockful-io/anticapture).

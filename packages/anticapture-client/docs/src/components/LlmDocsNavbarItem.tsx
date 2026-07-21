@@ -36,7 +36,7 @@ export default function LlmDocsNavbarItem({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* file absent (dev) or clipboard blocked — no-op */
+      /* file absent (dev) or clipboard blocked - no-op */
     }
   };
 
