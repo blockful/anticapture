@@ -23,6 +23,22 @@ configured rate limiter uses the in-memory driver. Provider-level budgets are
 allocated 80% to production and 20% to dev/staging. Per-IP budgets stay the same
 in both configs.
 
+| Budget            | Production | Dev/staging | Purpose                                        |
+| ----------------- | ---------: | ----------: | ---------------------------------------------- |
+| `nodeful`         |      800/s |       200/s | Ethereum requests to the self-hosted Reth node |
+| `chainstack`      |      200/s |        50/s | Paid-provider cap and L2 capacity              |
+| `indexer-limit`   |      600/s |       150/s | Aggregate indexer project capacity             |
+| `api-limit`       |    20/s/IP |     20/s/IP | Public API project protection                  |
+| `dashboard-limit` |    20/s/IP |     20/s/IP | Authenticated dashboard protection             |
+
+`MAX_REQUESTS_PER_SECOND` is a per-indexer, per-instance limit. Keep the sum of
+that value across concurrently running indexer instances below the environment's
+`indexer-limit`; otherwise eRPC rejects excess calls and Ponder retries them.
+
+Mainnet prefers Nodeful by a 50:1 routing score (10 versus 0.2), while Chainstack
+remains available when Nodeful is unhealthy or cannot serve a method. L2 requests
+always use Chainstack because Nodeful serves Ethereum only.
+
 ## Monitoring
 
 eRPC exposes Prometheus metrics on port `4001`:

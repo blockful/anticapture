@@ -19,55 +19,84 @@ projects:
     networks:
       - architecture: evm
         failsafe:
-          timeout:
-            duration: 30s
-          retry:
-            maxAttempts: 5
-            delay: 500ms
-            backoffMaxDelay: 10s
-            backoffFactor: 0.5
-            jitter: 200ms
-          hedge:
-            delay: 3s
-            maxCount: 2
+          - matchMethod: "eth_getLogs|eth_getBlockReceipts"
+            timeout:
+              duration: 45s
+            retry:
+              maxAttempts: 5
+              delay: 500ms
+              backoffMaxDelay: 10s
+              backoffFactor: 1.2
+              jitter: 200ms
+          - matchMethod: "*"
+            timeout:
+              duration: 15s
+            retry:
+              maxAttempts: 3
+            hedge:
+              quantile: 0.95
+              minDelay: 500ms
+              maxDelay: 5s
+              maxCount: 1
         evm:
           chainId: 1
       - architecture: evm
         failsafe:
-          timeout:
-            duration: 30s
-          retry:
-            maxAttempts: 5
-            delay: 500ms
-            backoffMaxDelay: 10s
-            backoffFactor: 0.5
-            jitter: 200ms
-          hedge:
-            delay: 3s
-            maxCount: 2
+          - matchMethod: "eth_getLogs|eth_getBlockReceipts"
+            timeout:
+              duration: 45s
+            retry:
+              maxAttempts: 5
+              delay: 500ms
+              backoffMaxDelay: 10s
+              backoffFactor: 1.2
+              jitter: 200ms
+          - matchMethod: "*"
+            timeout:
+              duration: 15s
+            retry:
+              maxAttempts: 3
+            hedge:
+              quantile: 0.95
+              minDelay: 500ms
+              maxDelay: 5s
+              maxCount: 1
         evm:
           chainId: 10
       - architecture: evm
         failsafe:
-          timeout:
-            duration: 30s
-          retry:
-            maxAttempts: 5
-            delay: 500ms
-            backoffMaxDelay: 10s
-            backoffFactor: 0.5
-            jitter: 200ms
-          hedge:
-            delay: 3s
-            maxCount: 2
+          - matchMethod: "eth_getLogs|eth_getBlockReceipts"
+            timeout:
+              duration: 45s
+            retry:
+              maxAttempts: 5
+              delay: 500ms
+              backoffMaxDelay: 10s
+              backoffFactor: 1.2
+              jitter: 200ms
+          - matchMethod: "*"
+            timeout:
+              duration: 15s
+            retry:
+              maxAttempts: 3
+            hedge:
+              quantile: 0.95
+              minDelay: 500ms
+              maxDelay: 5s
+              maxCount: 1
         evm:
           chainId: 534352
     upstreams:
       - id: nodeful
         endpoint: ${NODEFUL_RPC_URL}
-        vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
+        evm:
+          getLogsAutoSplittingRangeThreshold: 0
+        jsonRpc:
+          supportsBatch: true
+          batchMaxSize: 50
+          batchMaxWait: 10ms
         routing:
           scoreMultipliers:
             - network: "*"
@@ -79,10 +108,13 @@ projects:
               throttledRate: 1
       - id: chainstack
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
-        vendorName: Chainstack
         rateLimitBudget: chainstack
-        group: fallback
         autoIgnoreUnsupportedMethods: true
+        routing:
+          scoreMultipliers:
+            - network: "*"
+              method: "*"
+              overall: 0.2
 
   - id: api
     rateLimitBudget: api-limit
@@ -123,9 +155,14 @@ projects:
     upstreams:
       - id: nodeful
         endpoint: ${NODEFUL_RPC_URL}
-        vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
+        evm:
+          getLogsAutoSplittingRangeThreshold: 0
+        jsonRpc:
+          supportsBatch: true
+          batchMaxSize: 50
+          batchMaxWait: 10ms
         routing:
           scoreMultipliers:
             - network: "*"
@@ -137,10 +174,13 @@ projects:
               throttledRate: 1
       - id: chainstack
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
-        vendorName: Chainstack
         rateLimitBudget: chainstack
-        group: fallback
         autoIgnoreUnsupportedMethods: true
+        routing:
+          scoreMultipliers:
+            - network: "*"
+              method: "*"
+              overall: 0.2
 
   - id: dashboard
     rateLimitBudget: dashboard-limit
@@ -181,9 +221,14 @@ projects:
     upstreams:
       - id: nodeful
         endpoint: ${NODEFUL_RPC_URL}
-        vendorName: nodeful
         rateLimitBudget: nodeful
         autoIgnoreUnsupportedMethods: true
+        evm:
+          getLogsAutoSplittingRangeThreshold: 0
+        jsonRpc:
+          supportsBatch: true
+          batchMaxSize: 50
+          batchMaxWait: 10ms
         routing:
           scoreMultipliers:
             - network: "*"
@@ -195,10 +240,13 @@ projects:
               throttledRate: 1
       - id: chainstack
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
-        vendorName: Chainstack
         rateLimitBudget: chainstack
-        group: fallback
         autoIgnoreUnsupportedMethods: true
+        routing:
+          scoreMultipliers:
+            - network: "*"
+              method: "*"
+              overall: 0.2
     auth:
       strategies:
         - type: secret
@@ -227,20 +275,18 @@ rateLimiters:
     - id: nodeful
       rules:
         - method: "*"
-          maxCount: 100
+          maxCount: 200
           period: 1s
-          waitTime: 10s
     - id: chainstack
       rules:
         - method: "*"
           maxCount: 50
           period: 1s
-          waitTime: 30s
 
     - id: indexer-limit
       rules:
         - method: "*"
-          maxCount: 60
+          maxCount: 150
           period: 1s
     - id: api-limit
       rules:
@@ -248,7 +294,6 @@ rateLimiters:
           maxCount: 20
           period: 1s
           perIP: true
-          waitTime: 5s
     - id: dashboard-limit
       rules:
         - method: "*"
@@ -287,13 +332,13 @@ database:
         empty: ignore
         ttl: 2s
         maxItemSize: 20KB
-      - connector: memory-unfinalized
+      - connector: pg-main
         network: "*"
         method: "*"
         finality: unknown
         empty: ignore
-        ttl: 2s
-        maxItemSize: 20KB
+        ttl: 0
+        maxItemSize: 4MB
       - connector: memory-realtime
         network: "evm:1"
         method: "*"
