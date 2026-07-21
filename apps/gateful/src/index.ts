@@ -87,7 +87,7 @@ if (config.tokenService) {
   const authfulClient = new AuthfulClient(
     config.tokenService.url,
     config.tokenService.apiKey,
-    config.tokenService.provisioningApiKey,
+    config.tokenService.usageApiKey,
   );
   const usageAccumulator = new UsageAccumulator(authfulClient);
   usageAccumulator.start();

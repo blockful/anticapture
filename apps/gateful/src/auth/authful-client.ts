@@ -45,7 +45,7 @@ export class AuthfulClient {
   constructor(
     baseUrl: string,
     private readonly validationApiKey: string,
-    private readonly provisioningApiKey: string,
+    private readonly usageApiKey: string,
   ) {
     // baseUrl is normalized upstream (TOKEN_SERVICE_URL in config.ts trims
     // trailing slashes) so `${baseUrl}/validate` never produces `//validate`.
@@ -67,7 +67,7 @@ export class AuthfulClient {
   async recordUsage(items: TokenUsageIncrement[]): Promise<void> {
     const res = await fetch(`${this.baseUrl}/tokens/usage`, {
       method: "POST",
-      headers: this.headers(this.provisioningApiKey),
+      headers: this.headers(this.usageApiKey),
       body: JSON.stringify({ items }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });

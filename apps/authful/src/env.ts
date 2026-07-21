@@ -30,6 +30,11 @@ const envSchema = z
     // to `user:*` tenants (mint/revoke only, no listing). Absent until the
     // environment enables the User API's key provisioning.
     PROVISIONING_API_KEY: optionalSecret,
+    // Optional usage-only key for Gateful's usage flush: may only record
+    // usage (POST /tokens/usage). Kept separate from the provisioning key so
+    // the internet-facing edge never holds a credential that can mint or
+    // revoke tokens. Absent until the environment enables usage recording.
+    USAGE_API_KEY: optionalSecret,
     // CI/preview only: a fixed, known token seeded into the DB on boot so every
     // service in the same Railway PR preview shares a working API key. Required
     // in preview environments; ignored on dev/production. The seeded token's
@@ -59,6 +64,22 @@ const envSchema = z
         path: ["PROVISIONING_API_KEY"],
         message:
           "PROVISIONING_API_KEY must differ from ADMIN_API_KEY and INTERNAL_API_KEY",
+      });
+    }
+    // Same boundary for the usage key: scopedTokenAuth matches keys in
+    // admin → provisioning → usage order, so a colliding value would silently
+    // grant the broader scope to Gateful's flush credential.
+    if (
+      data.USAGE_API_KEY &&
+      (data.USAGE_API_KEY === data.ADMIN_API_KEY ||
+        data.USAGE_API_KEY === data.INTERNAL_API_KEY ||
+        data.USAGE_API_KEY === data.PROVISIONING_API_KEY)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["USAGE_API_KEY"],
+        message:
+          "USAGE_API_KEY must differ from ADMIN_API_KEY, INTERNAL_API_KEY and PROVISIONING_API_KEY",
       });
     }
   });

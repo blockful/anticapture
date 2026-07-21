@@ -16,7 +16,10 @@ export const envSchema = z
       .transform((url) => url.replace(/\/+$/, ""))
       .optional(),
     TOKEN_SERVICE_API_KEY: z.string().optional(),
-    TOKEN_SERVICE_PROVISIONING_API_KEY: z.string().optional(),
+    // Authful usage-scope key: may only record usage (POST /tokens/usage).
+    // Deliberately NOT the provisioning key — Gateful is internet-facing and
+    // must not hold a credential that can mint or revoke tokens.
+    TOKEN_SERVICE_USAGE_API_KEY: z.string().optional(),
     // Explicit opt-in to run without per-tenant auth (local dev only). Without
     // this flag, a missing TOKEN_SERVICE_URL is a hard startup error rather than
     // silently serving every DAO/relayer route publicly (fail closed).
@@ -41,10 +44,10 @@ export const envSchema = z
     message: "TOKEN_SERVICE_API_KEY is required when TOKEN_SERVICE_URL is set",
   })
   .refine(
-    (env) => !env.TOKEN_SERVICE_URL || !!env.TOKEN_SERVICE_PROVISIONING_API_KEY,
+    (env) => !env.TOKEN_SERVICE_URL || !!env.TOKEN_SERVICE_USAGE_API_KEY,
     {
       message:
-        "TOKEN_SERVICE_PROVISIONING_API_KEY is required when TOKEN_SERVICE_URL is set",
+        "TOKEN_SERVICE_USAGE_API_KEY is required when TOKEN_SERVICE_URL is set",
     },
   );
 
@@ -78,7 +81,7 @@ export const config = {
     ? {
         url: env.TOKEN_SERVICE_URL,
         apiKey: env.TOKEN_SERVICE_API_KEY!,
-        provisioningApiKey: env.TOKEN_SERVICE_PROVISIONING_API_KEY!,
+        usageApiKey: env.TOKEN_SERVICE_USAGE_API_KEY!,
       }
     : undefined,
   authDisabled: env.GATEFUL_AUTH_DISABLED,

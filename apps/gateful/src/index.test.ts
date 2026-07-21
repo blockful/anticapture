@@ -15,7 +15,7 @@ describe("gateful app auth", () => {
   beforeAll(async () => {
     vi.stubEnv("TOKEN_SERVICE_URL", "http://authful:4002");
     vi.stubEnv("TOKEN_SERVICE_API_KEY", "test-key");
-    vi.stubEnv("TOKEN_SERVICE_PROVISIONING_API_KEY", "provisioning-key");
+    vi.stubEnv("TOKEN_SERVICE_USAGE_API_KEY", "usage-key");
     vi.stubEnv("PORT", "0");
     vi.stubEnv("REDIS_URL", undefined);
     vi.stubEnv("ADDRESS_ENRICHMENT_API_URL", undefined);
@@ -95,7 +95,7 @@ describe("metrics endpoint auth (GATEFUL_METRICS_TOKEN set)", () => {
     vi.resetModules();
     vi.stubEnv("TOKEN_SERVICE_URL", "http://authful:4002");
     vi.stubEnv("TOKEN_SERVICE_API_KEY", "test-key");
-    vi.stubEnv("TOKEN_SERVICE_PROVISIONING_API_KEY", "provisioning-key");
+    vi.stubEnv("TOKEN_SERVICE_USAGE_API_KEY", "usage-key");
     vi.stubEnv("GATEFUL_METRICS_TOKEN", "metrics-secret");
     vi.stubEnv("PORT", "0");
     vi.stubEnv("REDIS_URL", undefined);

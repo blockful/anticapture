@@ -25,6 +25,7 @@ import { TokensService, hashToken } from "@/services/tokens";
 const ADMIN_KEY = "test-admin-key-0123456789";
 const INTERNAL_KEY = "test-internal-key-0123456789";
 const PROVISIONING_KEY = "test-provisioning-key-0123456789";
+const USAGE_KEY = "test-usage-key-0123456789";
 
 const adminHeaders = {
   Authorization: `Bearer ${ADMIN_KEY}`,
@@ -36,6 +37,10 @@ const internalHeaders = {
 };
 const provisioningHeaders = {
   Authorization: `Bearer ${PROVISIONING_KEY}`,
+  "Content-Type": "application/json",
+};
+const usageHeaders = {
+  Authorization: `Bearer ${USAGE_KEY}`,
   "Content-Type": "application/json",
 };
 
@@ -57,6 +62,7 @@ describe("authful app", () => {
       adminApiKey: ADMIN_KEY,
       internalApiKey: INTERNAL_KEY,
       provisioningApiKey: PROVISIONING_KEY,
+      usageApiKey: USAGE_KEY,
     });
   });
 
@@ -434,6 +440,50 @@ describe("authful app", () => {
         headers: provisioningHeaders,
       });
       expect(get.status).toBe(403);
+    });
+
+    it("records user:* usage with the usage key but ignores ops tenants", async () => {
+      const own = await mint({ tenant: "user:abc" });
+      const ops = await mint({ tenant: "uniswap", name: "ops" });
+      const day = new Date().toISOString().slice(0, 10);
+
+      const res = await app.request("/tokens/usage", {
+        method: "POST",
+        headers: usageHeaders,
+        body: JSON.stringify({
+          items: [
+            { tokenId: own.id, day, count: 5 },
+            { tokenId: ops.id, day, count: 9 },
+          ],
+        }),
+      });
+      expect(res.status).toBe(204);
+      expect(await db.select().from(tokenUsageDaily)).toEqual([
+        { tokenId: own.id, day, count: 5 },
+      ]);
+    });
+
+    it("forbids the usage key from everything but recording usage", async () => {
+      const minted = await mint({ tenant: "user:abc" });
+
+      const attempts = [
+        app.request("/tokens", {
+          method: "POST",
+          headers: usageHeaders,
+          body: JSON.stringify({ tenant: "user:abc", name: "self-service" }),
+        }),
+        app.request("/tokens?tenant=user%3Aabc", { headers: usageHeaders }),
+        app.request("/tokens/usage?tenant=user%3Aabc", {
+          headers: usageHeaders,
+        }),
+        app.request(`/tokens/${minted.id}`, {
+          method: "DELETE",
+          headers: usageHeaders,
+        }),
+      ];
+      for (const res of await Promise.all(attempts)) {
+        expect(res.status).toBe(403);
+      }
     });
   });
 

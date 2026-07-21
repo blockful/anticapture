@@ -11,7 +11,7 @@ describe("envSchema TOKEN_SERVICE_URL normalization", () => {
     const parsed = envSchema.parse({
       TOKEN_SERVICE_URL: input,
       TOKEN_SERVICE_API_KEY: "internal-key",
-      TOKEN_SERVICE_PROVISIONING_API_KEY: "provisioning-key",
+      TOKEN_SERVICE_USAGE_API_KEY: "usage-key",
     });
     expect(parsed.TOKEN_SERVICE_URL).toBe(expected);
   });
@@ -22,7 +22,7 @@ describe("envSchema TOKEN_SERVICE_URL normalization", () => {
     ).toThrow();
   });
 
-  it("requires TOKEN_SERVICE_PROVISIONING_API_KEY when TOKEN_SERVICE_URL is set", () => {
+  it("requires TOKEN_SERVICE_USAGE_API_KEY when TOKEN_SERVICE_URL is set", () => {
     expect(() =>
       envSchema.parse({
         TOKEN_SERVICE_URL: "http://authful:4002",

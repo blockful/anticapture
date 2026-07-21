@@ -7,14 +7,15 @@ Plaintext tokens are **never stored or logged** — only their sha256 hash.
 
 ## Environment
 
-| Variable               | Required        | Description                                                                                                           |
-| ---------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`         | yes             | Dedicated Postgres (schema `authful`)                                                                                 |
-| `ADMIN_API_KEY`        | yes             | Guards unrestricted `/tokens` operations, min 16 chars                                                                |
-| `INTERNAL_API_KEY`     | yes             | Guards `/validate`; shared with Gateful as `TOKEN_SERVICE_API_KEY`                                                    |
-| `PROVISIONING_API_KEY` | user keys       | Guards `user:*` token operations and usage; shared with User API and Gateful as their Authful provisioning credential |
-| `PORT`                 | no              | Default `4002`                                                                                                        |
-| `SEED_TOKEN_PLAINTEXT` | CI/preview only | Token seeded on boot in PR previews (min 16 chars) — see below                                                        |
+| Variable               | Required        | Description                                                                                                            |
+| ---------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`         | yes             | Dedicated Postgres (schema `authful`)                                                                                  |
+| `ADMIN_API_KEY`        | yes             | Guards unrestricted `/tokens` operations, min 16 chars                                                                 |
+| `INTERNAL_API_KEY`     | yes             | Guards `/validate`; shared with Gateful as `TOKEN_SERVICE_API_KEY`                                                     |
+| `PROVISIONING_API_KEY` | user keys       | Guards `user:*` token operations and usage reads; shared with the User API as its Authful provisioning credential      |
+| `USAGE_API_KEY`        | usage recording | May only `POST /tokens/usage`; shared with Gateful as `TOKEN_SERVICE_USAGE_API_KEY` (the edge never holds mint/revoke) |
+| `PORT`                 | no              | Default `4002`                                                                                                         |
+| `SEED_TOKEN_PLAINTEXT` | CI/preview only | Token seeded on boot in PR previews (min 16 chars) — see below                                                         |
 
 ## CI / preview seeding
 

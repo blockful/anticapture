@@ -19,6 +19,7 @@ export type AppConfig = {
   adminApiKey: string;
   internalApiKey: string;
   provisioningApiKey?: string;
+  usageApiKey?: string;
 };
 
 export function createApp({
@@ -27,6 +28,7 @@ export function createApp({
   adminApiKey,
   internalApiKey,
   provisioningApiKey,
+  usageApiKey,
 }: AppConfig): Hono {
   const app = new Hono();
 
@@ -51,9 +53,14 @@ export function createApp({
     return c.body(body, 200, { "Content-Type": contentType });
   });
 
-  // Token-management surface: the admin key (unrestricted) or the optional
-  // provisioning key (scoped to `user:*`, enforced in the controller).
-  const tokenAuth = scopedTokenAuth({ adminApiKey, provisioningApiKey });
+  // Token-management surface: the admin key (unrestricted), the optional
+  // provisioning key (scoped to `user:*`, enforced in the controller), or the
+  // optional usage key (POST /tokens/usage only, enforced in the middleware).
+  const tokenAuth = scopedTokenAuth({
+    adminApiKey,
+    provisioningApiKey,
+    usageApiKey,
+  });
   app.use("/tokens", tokenAuth);
   app.use("/tokens/*", tokenAuth);
 
