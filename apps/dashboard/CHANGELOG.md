@@ -1,5 +1,31 @@
 # @anticapture/dashboard
 
+## 2.9.0
+
+### Minor Changes
+
+- [#2051](https://github.com/blockful/anticapture/pull/2051) [`c96bf63`](https://github.com/blockful/anticapture/commit/c96bf63062163bf7c46f7dd6da0b9eea4d67cffb) Thanks [@brunod-e](https://github.com/brunod-e)! - Add the API Keys page: signed-in users create, view, and revoke personal API keys for the Anticapture MCP server / public API. Includes the one-time key reveal on creation, a per-key list (name, status, created, last used), and a "Connect your AI agent" section with copy-paste install commands for Claude Code, Cursor, and Codex. Reached from the new "API" sidebar entry; gated behind sign-in.
+
+- [#2051](https://github.com/blockful/anticapture/pull/2051) [`c96bf63`](https://github.com/blockful/anticapture/commit/c96bf63062163bf7c46f7dd6da0b9eea4d67cffb) Thanks [@brunod-e](https://github.com/brunod-e)! - Add platform sign-in (accounts) to the dashboard. A sign-in modal offers
+  wallet (SIWE) authentication against the new User API through a same-origin
+  `/api/user` proxy, mounted app-wide. Draft proposals move onto the session-
+  scoped User API: identity comes from the session (no caller-supplied address),
+  shared-draft ownership is derived server-side, and saving prompts sign-in when
+  there is no session. The modal also offers email (magic link) and Google
+  sign-in, each shown only when the User API deployment reports it as enabled
+  (GET /auth/methods); whitelabel is wallet-only.
+
+### Patch Changes
+
+- [#2070](https://github.com/blockful/anticapture/pull/2070) [`23c62be`](https://github.com/blockful/anticapture/commit/23c62be1b2a888cb73059c00e89e995bd04b9000) Thanks [@pikonha](https://github.com/pikonha)! - avoid showing v1.0.0 as default
+
+- [#2067](https://github.com/blockful/anticapture/pull/2067) [`0c03def`](https://github.com/blockful/anticapture/commit/0c03def668daa43ec91b1b677613b9863b6668f0) Thanks [@blockfulintern](https://github.com/blockfulintern)! - fix: upgrade Next.js to 16.2.6 to patch a high-severity RSC DoS (CVE-2026-23870)
+
+- [#2071](https://github.com/blockful/anticapture/pull/2071) [`29cd22f`](https://github.com/blockful/anticapture/commit/29cd22f21caf0e2d1be6ba5f0ca6b7f519afcba3) Thanks [@brunod-e](https://github.com/brunod-e)! - Whitelabel login modal is wallet-only again: the Email and Google sign-in options are hidden on whitelabel deployments regardless of which methods the server offers.
+
+- Updated dependencies [[`fe815fe`](https://github.com/blockful/anticapture/commit/fe815fe4b4fd25e6fa44dd2cf353833fd83d4f4e)]:
+  - @anticapture/client@2.0.0
+
 ## 2.8.3
 
 ### Patch Changes
