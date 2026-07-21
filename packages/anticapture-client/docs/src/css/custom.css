@@ -92,7 +92,22 @@
   --ac-method-delete: #dc2626;
 }
 
-[data-theme="dark"] {
+/* html:root outranks theme-classic's :root, which loads after this file.
+   Infima alerts and <details> (the params/schema collapsibles on generated
+   API pages) re-scope --ifm-code-background to their own info-blue, and the
+   OpenAPI theme overrides it again at the root — pin the brand tint at every
+   scope that matters. */
+html:root,
+html .markdown,
+html .markdown .alert,
+html .markdown details {
+  --ifm-code-background: var(--ac-brand-opacity);
+}
+
+/* html[data-theme] outranks theme-classic's own [data-theme] variable blocks
+   (e.g. its blue-tinted dark --ifm-code-background), which load after this
+   file */
+html[data-theme="dark"] {
   --ac-surface-background: #09090b;
   --ac-surface-default: #18181b;
   --ac-surface-contrast: #27272a;
@@ -125,7 +140,9 @@
   --ifm-hr-background-color: var(--ac-border-default);
   --ifm-color-emphasis-300: var(--ac-border-contrast);
 
-  --ifm-code-background: var(--ac-surface-contrast);
+  /* Inline code / enum pills: subtle brand tint (DS bg-orange-400/12
+     precedent), not theme-classic's blue */
+  --ifm-code-background: var(--ac-brand-opacity);
   --ifm-pre-background: var(--ac-surface-default);
   --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.07);
 
@@ -350,7 +367,7 @@ h1.openapi__heading {
 .openapi__method-endpoint {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   margin-bottom: 0.75rem;
@@ -372,9 +389,19 @@ h1.openapi__heading {
   margin: 0;
 }
 
+/* The path is an <h2> inside a <pre>: outrank the .markdown h2 heading
+   scale, and wrap long paths inside their own column instead of dropping
+   below the method badge */
+.markdown h2.openapi__method-endpoint-path,
 .openapi__method-endpoint-path {
   font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0;
   margin: 0;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .openapi__divider {
