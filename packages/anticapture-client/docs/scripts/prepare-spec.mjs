@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 
 import { resolveGatefulOpenApiSpecUrl } from "./gateful-openapi-spec.mjs";
 
-// Always read from the live spec URLs — never a local committed file — so docs
+// Always read from the live spec URLs - never a local committed file - so docs
 // and codegen generate from the same source. The Gateful resolver is a local
 // inline copy (see gateful-openapi-spec.mjs) because this script runs in a
 // turbo-pruned image without the sibling @anticapture/client package.
@@ -33,7 +33,7 @@ const isRelayPath = (p) => p.split("/").includes("relay");
 // `skip-pagination` is an internal marker tag (it flags operations whose list
 // responses skip pagination), not a domain group. Left in, the docs sidebar
 // grows a "skip-pagination" category duplicating 25 operations from their real
-// groups — so it is stripped from every operation and the tag list.
+// groups - so it is stripped from every operation and the tag list.
 const INTERNAL_TAGS = new Set(["skip-pagination"]);
 
 // Human-readable category labels for the generated API sidebar, in display
@@ -208,7 +208,7 @@ applyTagMetadata(gateful, GATEFUL_TAG_ORDER);
 // back to the docs site's own origin as the base URL.
 gateful.servers = [{ url: "https://gateful.up.railway.app" }];
 
-// Public-facing naming and copy for the generated reference landing page —
+// Public-facing naming and copy for the generated reference landing page -
 // "Gateful" is the internal service name, and the upstream spec ships no
 // description.
 gateful.info.title = "Anticapture REST API";
@@ -216,7 +216,7 @@ gateful.info.description ||=
   "REST API for Anticapture's DAO governance analytics: proposals, votes, " +
   "voting power, delegations, token and treasury data, indexed from onchain " +
   "and offchain sources.\n\nAll endpoints are served from " +
-  "`https://gateful.up.railway.app` and require a bearer token — see " +
+  "`https://gateful.up.railway.app` and require a bearer token; see " +
   "[Getting started](/getting-started).";
 
 await writeSpec(GATEFUL_OUT, gateful);

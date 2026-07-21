@@ -11,7 +11,7 @@ type SidebarItem = {
 
 // The OpenAPI plugin writes tag-grouped sidebars (categories with HTTP-method
 // badges) into the generated output dirs. Those files only exist after
-// `gen-api-docs` has run — every start/build script runs it first — so fall
+// `gen-api-docs` has run - every start/build script runs it first - so fall
 // back to plain directory autogeneration to keep editor tooling and a fresh
 // checkout from crashing on the missing module.
 const generatedSidebar = (path: string, fallbackDir: string): SidebarItem[] => {
@@ -23,7 +23,7 @@ const generatedSidebar = (path: string, fallbackDir: string): SidebarItem[] => {
   }
 };
 
-// First generated item is the spec info page — it becomes the category link
+// First generated item is the spec info page - it becomes the category link
 // below (its own `sidebar_label: Introduction` cannot be overridden from
 // here); the rest are the tag-grouped endpoint categories.
 const [, ...apiGroups] = generatedSidebar(
@@ -42,7 +42,7 @@ const webhookOperations = webhookReference.flatMap((item) =>
 );
 
 // One sidebar for the whole site: guides as top-level items, the API
-// reference as an accordion of tag groups — mirroring the dashboard's single
+// reference as an accordion of tag groups - mirroring the dashboard's single
 // accordion sidebar.
 const sidebars = {
   docs: [

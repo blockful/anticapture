@@ -42,7 +42,7 @@ The MCP tools are generated from the same OpenAPI spec as the
   calls `GET /{dao}/proposals`).
 - **Tool group** = the operation's tag (e.g. `governance`, `treasury`,
   `voting-power`).
-- **Tool inputs** = the operation's path, query, and body parameters — the
+- **Tool inputs** = the operation's path, query, and body parameters; the
   `dao` path parameter becomes a required tool argument.
 
 Every tool's parameters, defaults, and response shape are documented on the
@@ -62,11 +62,11 @@ Once connected, describe what you want in plain language:
 
 ⏺ Here are the 5 most recent UNI (Uniswap) proposals (97 total on-chain):
 
-  #97 Return 12.5M Delegated Tokens to the Governance Timelock — EXECUTED
-  #96 Protocol Fee Expansion: Vote 3 — EXECUTED
-  #95 Protocol Fee Expansion: Vote 2 — EXECUTED
-  #94 Protocol Fee Expansion: Vote 1 — EXECUTED
-  #93 UNIfication — EXECUTED
+  #97 Return 12.5M Delegated Tokens to the Governance Timelock - EXECUTED
+  #96 Protocol Fee Expansion: Vote 3 - EXECUTED
+  #95 Protocol Fee Expansion: Vote 2 - EXECUTED
+  #94 Protocol Fee Expansion: Vote 1 - EXECUTED
+  #93 UNIfication - EXECUTED
 
   All five passed comfortably (quorum is 40M UNI) and have been executed.
 ```

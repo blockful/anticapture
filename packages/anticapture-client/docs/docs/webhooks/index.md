@@ -34,7 +34,7 @@ verify delivery signatures:
 {
   "success": true,
   "secret": "whsec_...",
-  "note": "Store this secret now — it is never shown again."
+  "note": "Store this secret now; it is never shown again."
 }
 ```
 
@@ -44,7 +44,7 @@ returns `{ "success": true }` without a secret.
 :::
 
 To stop deliveries, deactivate the endpoint with `DELETE /webhooks` and the
-same payload — see the [reference](#reference) below for both operations.
+same payload; see the [reference](#reference) below for both operations.
 
 ## Verifying deliveries
 
@@ -71,7 +71,7 @@ const MAX_AGE_SECONDS = 5 * 60;
 
 const app = express();
 
-// The signature covers the RAW body — parse it only after verifying.
+// The signature covers the RAW body; parse it only after verifying.
 app.post(
   "/anticapture-webhook",
   express.raw({ type: "application/json" }),

@@ -1,5 +1,5 @@
 /**
- * Anticapture docs — Orbit UI design system.
+ * Anticapture docs - Orbit UI design system.
  *
  * Tokens and component recipes come straight from the dashboard
  * implementation of Orbit UI (apps/dashboard/app/globals.css and
@@ -24,7 +24,7 @@
  * ------------------------------------------------------------------------ */
 
 :root {
-  /* base/brand — theme-invariant */
+  /* base/brand - theme-invariant */
   --ac-brand: #ec762e;
   --ac-brand-lighter: #fb8f4d;
   --ac-brand-opacity: #fb8f4d1f;
@@ -35,7 +35,7 @@
   --ac-warning-opacity: #facc151f;
   --ac-error-opacity: #f871711f;
 
-  /* surfaces / borders / text — light */
+  /* surfaces / borders / text - light */
   --ac-surface-background: #ffffff;
   --ac-surface-default: #fafafa;
   --ac-surface-contrast: #f4f4f5;
@@ -46,7 +46,7 @@
   --ac-text-dimmed: #a1a1aa;
   --ac-text-inverted: #ffffff;
 
-  /* Infima mapping — only the official brand oranges: #ec762e, #fb8f4d,
+  /* Infima mapping - only the official brand oranges: #ec762e, #fb8f4d,
      and the DS hover recipe (brand mixed toward black). No derived tints. */
   --ifm-color-primary: var(--ac-brand);
   --ifm-color-primary-dark: color-mix(in srgb, var(--ac-brand) 80%, black);
@@ -98,7 +98,7 @@
 /* html:root outranks theme-classic's :root, which loads after this file.
    Infima alerts and <details> (the params/schema collapsibles on generated
    API pages) re-scope --ifm-code-background to their own info-blue, and the
-   OpenAPI theme overrides it again at the root — pin the brand tint at every
+   OpenAPI theme overrides it again at the root - pin the brand tint at every
    scope that matters. */
 html:root,
 html .markdown,
@@ -166,7 +166,7 @@ html[data-theme="dark"] {
 }
 
 /* ---------------------------------------------------------------------------
- * Navbar — dashboard header: flat, hairline border, mono-uppercase links
+ * Navbar - dashboard header: flat, hairline border, mono-uppercase links
  * ------------------------------------------------------------------------ */
 
 .navbar {
@@ -201,7 +201,7 @@ html[data-theme="dark"] {
   color: var(--ac-text-primary);
 }
 
-/* No external-link icons — the DS DefaultLink renders bare mono-uppercase
+/* No external-link icons - the DS DefaultLink renders bare mono-uppercase
    links */
 .navbar__link svg,
 .footer__link-item svg {
@@ -216,7 +216,7 @@ html[data-theme="dark"] {
 }
 
 /* Wide viewports: search sits centered in the header, command-palette style
-   (px on purpose — rem here is 14px, not 16). Below 1200px it stays in the
+   (px on purpose - rem here is 14px, not 16). Below 1200px it stays in the
    right cluster to avoid overlapping the nav links. */
 @media (min-width: 1200px) {
   .navbar__search {
@@ -240,7 +240,7 @@ html[data-theme="dark"] {
 }
 
 /* ---------------------------------------------------------------------------
- * Sidebar — dashboard SidebarNavItem: 33px rows, square, inverted active
+ * Sidebar - dashboard SidebarNavItem: 33px rows, square, inverted active
  * ------------------------------------------------------------------------ */
 
 @media (min-width: 997px) {
@@ -365,7 +365,7 @@ html[data-theme="dark"] {
 }
 
 /* ---------------------------------------------------------------------------
- * Content — Orbit UI typography scale
+ * Content - Orbit UI typography scale
  * ------------------------------------------------------------------------ */
 
 /* Orbit UI scale, one notch denser than marketing pages: page titles use
@@ -453,7 +453,7 @@ h2.openapi-tabs__heading {
 }
 
 /* Flat panels: the explorer cards ship whitish elevation shadows (with
-   stronger :hover states) that read as a glow on the dark theme — Orbit UI
+   stronger :hover states) that read as a glow on the dark theme - Orbit UI
    panels are flat, border-only */
 .openapi-explorer__playground-container,
 .openapi-explorer__request-form,
@@ -527,7 +527,7 @@ div[class*="codeBlockContainer"] {
   font-size: 13px;
 }
 
-/* Right-hand TOC is off — navigation lives in the left sidebar only */
+/* Right-hand TOC is off - navigation lives in the left sidebar only */
 .theme-doc-toc-desktop {
   display: none;
 }
@@ -624,7 +624,7 @@ td p:last-child {
   margin-bottom: 0.25rem;
 }
 
-/* Quiet content-colored labels — brand only on hover, product-density size */
+/* Quiet content-colored labels - brand only on hover, product-density size */
 .pagination-nav__label {
   font-size: 14px;
   line-height: 20px;
@@ -647,11 +647,11 @@ table th {
 
 .footer {
   border-top: 1px solid var(--ac-border-default);
-  padding: 3rem 0 2.5rem;
+  padding: 1.5rem 0;
 }
 
 /* footer.style "dark" scopes its own slate background (#303846) onto the
-   element, beating html-level tokens — re-scope to the page background so
+   element, beating html-level tokens - re-scope to the page background so
    the footer sits flush with the app chrome */
 .footer--dark {
   --ifm-footer-background-color: var(--ac-surface-background);
@@ -685,7 +685,6 @@ table th {
 .footer__copyright {
   font-size: 13px;
   color: var(--ac-text-secondary);
-  margin-top: 2rem;
 }
 
 /* ---------------------------------------------------------------------------

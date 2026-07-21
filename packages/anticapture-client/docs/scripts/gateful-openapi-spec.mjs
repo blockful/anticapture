@@ -38,7 +38,7 @@ const toGatefulSpecUrl = (gatefulUrl) => {
 
 // Railway names PR preview environments like `anticapture-pr-1950`, and Gateful's
 // public domain in that environment is `gateful-anticapture-pr-1950.up.railway.app`
-// — i.e. `gateful-<RAILWAY_ENVIRONMENT_NAME>`.
+// - i.e. `gateful-<RAILWAY_ENVIRONMENT_NAME>`.
 const buildPreviewGatefulSpecUrl = (railwayEnvironmentName) =>
   `https://gateful-${railwayEnvironmentName}${RAILWAY_GATEFUL_DOMAIN_SUFFIX}${GATEFUL_OPENAPI_PATH}`;
 
@@ -66,7 +66,7 @@ export const resolveGatefulOpenApiSpecUrl = (env = process.env) => {
   }
 
   // Untrusted/fork Vercel previews receive no ANTICAPTURE_API_URL and get no
-  // Railway preview, so they can't reflect PR changes to the APIs/Gateful — we
+  // Railway preview, so they can't reflect PR changes to the APIs/Gateful - we
   // don't support previewing them. They fall through to this throw.
   throw new Error(
     "Unable to resolve Gateful OpenAPI spec. Set ANTICAPTURE_API_URL (used on dev/production), or run inside a Railway PR preview with RAILWAY_ENVIRONMENT_NAME.",
