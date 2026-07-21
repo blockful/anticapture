@@ -36,9 +36,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "pnpm"
           registry-url: "https://registry.npmjs.org"
+
+      # npm trusted publishing (OIDC) needs npm >= 11.5.1 and Node >= 22.14;
+      # Node 22 still bundles npm 10, which silently falls back to token auth.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@11
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -58,6 +63,8 @@ jobs:
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # npm >= 11.5.1 prefers OIDC (trusted publisher configured on
+          # npmjs.com); NPM_TOKEN remains only as fallback auth.
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

@@ -1,5 +1,11 @@
 # @anticapture/api
 
+## 1.6.0
+
+### Minor Changes
+
+- [#2051](https://github.com/blockful/anticapture/pull/2051) [`fe815fe`](https://github.com/blockful/anticapture/commit/fe815fe4b4fd25e6fa44dd2cf353833fd83d4f4e) Thanks [@brunod-e](https://github.com/brunod-e)! - Remove the draft-proposal endpoints from the DAO APIs — drafts now live in the User API (user-scoped, session-authenticated). The `/{dao}/proposal/drafts*` routes, their controller/service/repository/mappers, and the `general` Postgres schema wiring are gone from `@anticapture/api`; the gateway spec and the generated `@anticapture/client` SDK no longer expose any `Draft*` fetchers, hooks, MCP tools, or models (breaking for external SDK consumers). The physical `general.proposal_drafts` table is left intact in each DAO database for the one-shot migration into the User API; a follow-up drops it.
+
 ## 1.5.5
 
 ### Patch Changes

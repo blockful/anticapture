@@ -4,7 +4,8 @@
 
 # Generated OpenAPI MDX (produced by `docusaurus gen-api-docs`).
 # Treated as a build artifact, like the package's Kubb `generated/` output.
-/docs/tools
+/docs/api-reference
+/docs/webhooks/reference
 
 # Filtered OpenAPI spec (produced by `scripts/prepare-spec.mjs`).
 /openapi
