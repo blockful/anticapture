@@ -60,7 +60,7 @@ const config: Config = {
   // Served behind the infra/proxy reverse proxy under the /docs prefix. This
   // must match the proxy's `location /docs/` so Docusaurus emits asset URLs
   // (/docs/assets/...) that resolve through the proxy.
-  baseUrl: "/docs/",
+  baseUrl: "/",
 
   organizationName: "blockful-io",
   projectName: "anticapture",
