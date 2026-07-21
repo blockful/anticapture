@@ -110,11 +110,11 @@ projects:
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
         rateLimitBudget: chainstack
         autoIgnoreUnsupportedMethods: true
-        routing:
-          scoreMultipliers:
-            - network: "*"
-              method: "*"
-              overall: 0.2
+        # Fallback tier: eRPC's default selection policy keeps Chainstack out
+        # of rotation until Nodeful is excluded (unhealthy/throttled/lagging)
+        # or cannot serve a method. A score multiplier alone would only re-sort
+        # it, still exposing the paid provider to hedges and failover.
+        tags: ["tier:fallback"]
 
   - id: api
     rateLimitBudget: api-limit
@@ -176,11 +176,11 @@ projects:
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
         rateLimitBudget: chainstack
         autoIgnoreUnsupportedMethods: true
-        routing:
-          scoreMultipliers:
-            - network: "*"
-              method: "*"
-              overall: 0.2
+        # Fallback tier: eRPC's default selection policy keeps Chainstack out
+        # of rotation until Nodeful is excluded (unhealthy/throttled/lagging)
+        # or cannot serve a method. A score multiplier alone would only re-sort
+        # it, still exposing the paid provider to hedges and failover.
+        tags: ["tier:fallback"]
 
   - id: dashboard
     rateLimitBudget: dashboard-limit
@@ -242,11 +242,11 @@ projects:
         endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
         rateLimitBudget: chainstack
         autoIgnoreUnsupportedMethods: true
-        routing:
-          scoreMultipliers:
-            - network: "*"
-              method: "*"
-              overall: 0.2
+        # Fallback tier: eRPC's default selection policy keeps Chainstack out
+        # of rotation until Nodeful is excluded (unhealthy/throttled/lagging)
+        # or cannot serve a method. A score multiplier alone would only re-sort
+        # it, still exposing the paid provider to hedges and failover.
+        tags: ["tier:fallback"]
     auth:
       strategies:
         - type: secret

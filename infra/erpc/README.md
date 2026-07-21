@@ -44,9 +44,11 @@ in both configs.
 that value across concurrently running indexer instances below the environment's
 `indexer-limit`; otherwise eRPC rejects excess calls and Ponder retries them.
 
-Mainnet prefers Nodeful by a 50:1 routing score (10 versus 0.2), while Chainstack
-remains available when Nodeful is unhealthy or cannot serve a method. L2 requests
-always use Chainstack because Nodeful serves Ethereum only.
+Mainnet routes to Nodeful first; Chainstack carries the `tier:fallback` tag, so
+eRPC's default selection policy holds it out of rotation until Nodeful is
+excluded (unhealthy, throttled, or lagging) or cannot serve a method — this
+keeps the paid provider off hedges and transient failover. L2 requests always
+use Chainstack because Nodeful serves Ethereum only.
 
 ## Monitoring
 
