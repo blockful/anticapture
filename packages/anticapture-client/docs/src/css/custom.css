@@ -576,6 +576,18 @@ div[class*="codeBlockContainer"] {
   background: var(--ac-surface-default);
 }
 
+/* Details carets vertically centered on the summary line (Docusaurus and the
+   OpenAPI theme pin them near the top, misaligned with our 24px summary
+   headings; the html prefix outranks both) */
+html .markdown summary::before,
+html
+  .openapi-left-panel__container
+  > .openapi-markdown__details
+  > summary::before,
+html .openapi-markdown__details.mime > summary::before {
+  top: calc(50% - 0.4rem);
+}
+
 /* No trailing paragraph margin bloating boxed containers */
 .theme-admonition p:last-child,
 .theme-admonition ul:last-child,
