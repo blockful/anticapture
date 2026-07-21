@@ -11,14 +11,20 @@ import { createConfig, http } from "wagmi";
 import { mainnet, optimism, scroll } from "wagmi/chains";
 
 const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
+// eRPC "dashboard" project base URL, e.g. https://<erpc-host>/dashboard
+const erpcUrl = process.env.NEXT_PUBLIC_ERPC_URL;
+const erpcSecret = process.env.NEXT_PUBLIC_ERPC_SECRET;
 
-export const rpcHttpUrl = `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-const rpcOptimismUrl = `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-const rpcScrollUrl = `https://scroll-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+const rpcTransport = (chainId: number, alchemySubdomain: string) =>
+  erpcUrl && erpcSecret
+    ? http(`${erpcUrl}/evm/${chainId}`, {
+        fetchOptions: { headers: { "X-ERPC-Secret-Token": erpcSecret } },
+      })
+    : http(`https://${alchemySubdomain}.g.alchemy.com/v2/${alchemyApiKey}`);
 
 export const walletClient = createWalletClient({
   chain: mainnet,
-  transport: http(rpcHttpUrl),
+  transport: rpcTransport(mainnet.id, "eth-mainnet"),
 });
 
 const projectId =
@@ -50,9 +56,9 @@ const wagmiConfig = createConfig({
   connectors,
   chains: [mainnet, optimism, scroll],
   transports: {
-    [mainnet.id]: http(rpcHttpUrl),
-    [optimism.id]: http(rpcOptimismUrl),
-    [scroll.id]: http(rpcScrollUrl),
+    [mainnet.id]: rpcTransport(mainnet.id, "eth-mainnet"),
+    [optimism.id]: rpcTransport(optimism.id, "opt-mainnet"),
+    [scroll.id]: rpcTransport(scroll.id, "scroll-mainnet"),
   },
 });
 
