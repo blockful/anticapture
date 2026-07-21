@@ -14,7 +14,8 @@ import type { OpenAPIObject } from "openapi3-ts/oas31";
 import { rateLimitMiddleware } from "./auth/rate-limit";
 import { tokenAuthMiddleware } from "./auth/token-auth";
 import { AuthfulClient } from "./auth/authful-client";
-import { usageMiddleware } from "./auth/usage";
+import { drainServerAndFlushUsage } from "./auth/graceful-shutdown";
+import { UsageAccumulator, usageMiddleware } from "./auth/usage";
 import { config } from "./config";
 import { CircuitOpenError } from "./shared/circuit-breaker";
 import { createRedisClient } from "./cache/redis";
@@ -83,11 +84,16 @@ if (!config.tokenService && !config.authDisabled) {
   );
 }
 
+let usageAccumulator: UsageAccumulator | undefined;
+
 if (config.tokenService) {
   const authfulClient = new AuthfulClient(
     config.tokenService.url,
     config.tokenService.apiKey,
+    config.tokenService.usageApiKey,
   );
+  usageAccumulator = new UsageAccumulator(authfulClient);
+  usageAccumulator.start();
 
   app.use(
     "*",
@@ -99,7 +105,7 @@ if (config.tokenService) {
   );
   // Usage is registered before rate limiting so its `finally` still counts
   // requests that the rate limiter rejects with 429.
-  app.use("*", usageMiddleware(config.daoApis));
+  app.use("*", usageMiddleware(config.daoApis, usageAccumulator));
   app.use("*", rateLimitMiddleware(redis));
 
   logger.info("per-tenant token auth enabled (Authful)");
@@ -180,6 +186,17 @@ proxy(app, config.daoApis, registry);
 
 logger.info({ port: config.port }, "Gateful REST API running");
 
-serve({ fetch: app.fetch, port: config.port, hostname: "::" });
+const server = serve({ fetch: app.fetch, port: config.port, hostname: "::" });
+
+if (usageAccumulator) {
+  const accumulator = usageAccumulator;
+  process.once("SIGTERM", () => {
+    void drainServerAndFlushUsage(server, accumulator)
+      .catch((err: unknown) => {
+        logger.error({ err }, "failed to shut down Gateful gracefully");
+      })
+      .finally(() => process.exit(0));
+  });
+}
 
 export { app };

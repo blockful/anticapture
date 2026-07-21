@@ -50,6 +50,7 @@ const app = createApp({
   adminApiKey: env.ADMIN_API_KEY,
   internalApiKey: env.INTERNAL_API_KEY,
   provisioningApiKey: env.PROVISIONING_API_KEY,
+  usageApiKey: env.USAGE_API_KEY,
 });
 
 app.doc("/docs/json", {

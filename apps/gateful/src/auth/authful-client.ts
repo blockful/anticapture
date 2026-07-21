@@ -18,6 +18,17 @@ export const TokenValidationSchema = z.discriminatedUnion("valid", [
 
 export type TokenValidation = z.infer<typeof TokenValidationSchema>;
 
+export type TokenUsageIncrement = {
+  tokenId: string;
+  day: string;
+  count: number;
+};
+
+export type TokenUsageBatch = {
+  idempotencyKey: string;
+  items: TokenUsageIncrement[];
+};
+
 const REQUEST_TIMEOUT_MS = 3_000;
 
 /**
@@ -38,7 +49,8 @@ export class AuthfulClient {
 
   constructor(
     baseUrl: string,
-    private readonly apiKey: string,
+    private readonly validationApiKey: string,
+    private readonly usageApiKey: string,
   ) {
     // baseUrl is normalized upstream (TOKEN_SERVICE_URL in config.ts trims
     // trailing slashes) so `${baseUrl}/validate` never produces `//validate`.
@@ -49,7 +61,7 @@ export class AuthfulClient {
   async validate(tokenHash: string): Promise<TokenValidation> {
     const res = await fetch(`${this.baseUrl}/validate`, {
       method: "POST",
-      headers: this.headers(),
+      headers: this.headers(this.validationApiKey),
       body: JSON.stringify({ tokenHash }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
@@ -57,10 +69,25 @@ export class AuthfulClient {
     return TokenValidationSchema.parse(await res.json());
   }
 
-  private headers() {
+  async recordUsage(batch: TokenUsageBatch): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/tokens/usage`, {
+      method: "POST",
+      headers: this.headers(this.usageApiKey),
+      body: JSON.stringify(batch),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+    if (!res.ok) throw new AuthfulResponseError(res.status);
+  }
+
+  isRetryableUsageError(error: unknown): boolean {
+    if (!(error instanceof AuthfulResponseError)) return true;
+    return error.status === 408 || error.status === 429 || error.status >= 500;
+  }
+
+  private headers(apiKey: string) {
     return {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${this.apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
     };
   }
 }

@@ -17,6 +17,7 @@ import { ApiKeysTable } from "./components/ApiKeysTable";
 import { ConnectAgentSection } from "./components/ConnectAgentSection";
 import { CreateApiKeyModal } from "./components/CreateApiKeyModal";
 import { SaveApiKeyModal } from "./components/SaveApiKeyModal";
+import { UsageSection } from "./components/UsageSection";
 import { useApiKeys } from "./hooks/useApiKeys";
 
 export const ApiKeysManager = () => {
@@ -140,7 +141,14 @@ export const ApiKeysManager = () => {
             </Button>
           </BlankSlate>
         ) : (
-          <ApiKeysTable keys={keys} isError={isError} onDelete={setToDelete} />
+          <>
+            <ApiKeysTable
+              keys={keys}
+              isError={isError}
+              onDelete={setToDelete}
+            />
+            {keys.length > 0 && <UsageSection keys={keys} userId={userId} />}
+          </>
         )}
       </div>
 

@@ -27,6 +27,54 @@ User API ──(east-west, provisioning key)──> Authful
   is the **same account** across them.
 - EOA and EIP-1271 / ERC-6492 (smart-contract wallets) verified via viem.
 
+## API keys & usage
+
+Self-service API keys are minted in Authful under the user's own tenant
+(`user:<id>`); this service stores only ownership + label. Gateful counts every
+authenticated request (it's the only component that sees them all — Authful
+validations are Redis-cached, so `/validate` traffic undercounts) and flushes
+per-key daily totals to Authful with a **usage-only** key that cannot mint or
+revoke. The dashboard reads the last 30 days back through this service.
+
+```mermaid
+sequenceDiagram
+    participant B as Browser (dashboard /api-keys)
+    participant U as User API
+    participant A as Authful
+    participant G as Gateful
+    participant D as DAO APIs
+
+    rect rgb(240, 240, 240)
+    note over B,A: Create key (session cookie)
+    B->>U: POST /me/api-keys
+    U->>A: POST /tokens (PROVISIONING_API_KEY, tenant user:<id>)
+    A-->>U: token plaintext (returned exactly once)
+    U-->>B: key + plaintext
+    end
+
+    rect rgb(240, 240, 240)
+    note over B,D: Use key (Bearer token)
+    B->>G: GET /{dao}/... (Authorization: Bearer)
+    G->>A: POST /validate (TOKEN_SERVICE_API_KEY, Redis-cached 30s)
+    G->>D: proxy request
+    G->>G: accumulate tokenId → count in memory
+    G-)A: POST /tokens/usage every ~60s (TOKEN_SERVICE_USAGE_API_KEY)
+    A->>A: upsert token_usage_daily, prune > 30 days
+    end
+
+    rect rgb(240, 240, 240)
+    note over B,A: View usage chart
+    B->>U: GET /me/api-keys/usage
+    U->>A: GET /tokens/usage?tenant=user:<id> (PROVISIONING_API_KEY)
+    A-->>U: per-token daily counts (last 30 days)
+    U-->>B: per-key series → StackedBarChart
+    end
+```
+
+Each Authful credential is scoped to its caller's least privilege: the User API
+holds the provisioning key (`user:*` mint/revoke/read), internet-facing Gateful
+holds only the validate + usage-recording keys.
+
 ## Database
 
 The User API runs on its **own** Postgres database (default `public` schema). The
