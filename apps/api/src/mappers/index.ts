@@ -15,4 +15,3 @@ export * from "./treasury";
 export * from "./votes";
 export * from "./voting-power";
 export * from "./feed";
-export * from "./draft-proposals";

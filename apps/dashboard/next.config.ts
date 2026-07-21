@@ -18,6 +18,19 @@ const nextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  async rewrites() {
+    return [
+      // better-auth self-generates browser-facing URLs (magic-link emails,
+      // OAuth redirect_uri) as {origin}/api/auth/* — its baseURL can't carry
+      // the /api/user proxy prefix without breaking inbound route matching on
+      // the service. Rewrite those hits into the cookie-relaying User API
+      // proxy so the links actually resolve.
+      {
+        source: "/api/auth/:path*",
+        destination: "/api/user/api/auth/:path*",
+      },
+    ];
+  },
   async redirects() {
     const redirects = [];
 

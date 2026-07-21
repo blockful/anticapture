@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 
 import { tokenValidationRequestTotal } from "@/metrics";
+import { USER_TENANT_PREFIX } from "@/middlewares/token-auth";
 import type { DBToken, TokensRepository } from "@/repositories/tokens";
 
 export const TOKEN_PREFIX = "act_";
@@ -72,11 +73,31 @@ export class TokensService {
     return { created: true, token };
   }
 
-  async list(): Promise<DBToken[]> {
-    return this.repo.list();
+  async list(
+    tenant?: string,
+    opts: { activeOnly?: boolean } = {},
+  ): Promise<DBToken[]> {
+    if (!tenant) return this.repo.list();
+    return opts.activeOnly
+      ? this.repo.listActiveByTenant(tenant)
+      : this.repo.listByTenant(tenant);
   }
 
-  async revoke(id: string): Promise<boolean> {
+  /**
+   * Revokes a token. When `requireTenantPrefix` is given (provisioning scope),
+   * a token whose tenant lacks that prefix is treated as not-found (404) rather
+   * than 403 — so the provisioning key can't probe for first-party token ids.
+   */
+  async revoke(
+    id: string,
+    opts: { requireTenantPrefix?: string } = {},
+  ): Promise<boolean> {
+    if (opts.requireTenantPrefix !== undefined) {
+      const token = await this.repo.findById(id);
+      if (!token || !token.tenant.startsWith(opts.requireTenantPrefix)) {
+        return false;
+      }
+    }
     return this.repo.revoke(id);
   }
 
@@ -88,7 +109,12 @@ export class TokensService {
     }
     await this.repo.touchLastUsed(token.id);
     tokenValidationRequestTotal.add(1, {
-      tenant: token.tenant,
+      // Self-service keys mint one `user:<id>` tenant per user — unbounded.
+      // Bucket them so the Prometheus label set stays bounded; ops tenants
+      // keep their verbatim label. Mirrors gateful's usage middleware.
+      tenant: token.tenant.startsWith(USER_TENANT_PREFIX)
+        ? `${USER_TENANT_PREFIX}*`
+        : token.tenant,
       name: token.name,
       result: "valid",
     });

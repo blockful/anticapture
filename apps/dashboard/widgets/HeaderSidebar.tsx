@@ -1,8 +1,8 @@
 "use client";
 
-import { BarChart4, Bell } from "lucide-react";
+import { BarChart4, Bell, Code } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, type ElementType } from "react";
 
 import {
   ButtonMainNav,
@@ -11,8 +11,15 @@ import {
 } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
 
+type HeaderItem = {
+  page: string;
+  label: string;
+  icon: ElementType;
+  isGlobal: boolean;
+};
+
 export const HeaderSidebar = () => {
-  const headerItems = useMemo(
+  const headerItems = useMemo<HeaderItem[]>(
     () => [
       {
         page: "/",
@@ -24,6 +31,12 @@ export const HeaderSidebar = () => {
         page: "alerts",
         label: "Alerts",
         icon: Bell,
+        isGlobal: true,
+      },
+      {
+        page: "api-keys",
+        label: "API",
+        icon: Code,
         isGlobal: true,
       },
     ],

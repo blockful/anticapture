@@ -7,6 +7,7 @@
     "indexer": "dotenv -- turbo run --filter=@anticapture/indexer",
     "gateful": "dotenv -- turbo run --filter=@anticapture/gateful",
     "authful": "dotenv -- turbo run --filter=@anticapture/authful",
+    "user-api": "dotenv -- turbo run --filter=@anticapture/user-api",
     "api": "dotenv -- turbo run --filter=@anticapture/api",
     "codegen": "dotenv -- node scripts/wait-for-gateful.mjs && dotenv -- turbo run codegen",
     "client": "turbo run --filter=@anticapture/client",
@@ -60,6 +61,8 @@
   },
   "pnpm": {
     "overrides": {
+      "@typescript-eslint/project-service@8.53.0>@typescript-eslint/tsconfig-utils": "8.53.0",
+      "@typescript-eslint/project-service@8.53.0>@typescript-eslint/types": "8.53.0",
       "eslint-plugin-react-hooks>zod-validation-error": "^4.0.0"
     }
   },

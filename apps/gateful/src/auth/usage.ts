@@ -40,7 +40,10 @@ export function usageMiddleware(daoApis: Map<string, string>) {
       const auth = c.get("auth");
       if (auth) {
         tenantRequestTotal.add(1, {
-          tenant: auth.tenant,
+          // Self-service keys mint one `user:<id>` tenant per user —
+          // unbounded. Bucket them so the Prometheus label set stays
+          // bounded; ops tenants keep their verbatim label.
+          tenant: auth.tenant.startsWith("user:") ? "user:*" : auth.tenant,
           name: auth.name,
           route: normalizeRoute(c.req.path, daoApis),
         });

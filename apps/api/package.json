@@ -16,10 +16,7 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "tsx watch cmd/index.ts",
-    "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "dev": "tsx watch cmd/index.ts"
   },
   "keywords": [],
   "author": "",

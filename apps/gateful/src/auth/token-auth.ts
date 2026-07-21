@@ -33,6 +33,10 @@ export interface TokenCacheStore {
 
 const POSITIVE_TTL_SECONDS = 300;
 const NEGATIVE_TTL_SECONDS = 60;
+// Self-service (`user:*`) keys are revocable from the dashboard, so their
+// positive verdicts get a short TTL: a revoke must stop authenticating in
+// seconds, not minutes. Ops tenants keep the longer outage-tolerant TTL.
+const USER_POSITIVE_TTL_SECONDS = 30;
 
 export function hashBearerToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -81,7 +85,11 @@ export function tokenAuthMiddleware({
     }
 
     if (!cached) {
-      const ttl = verdict.valid ? POSITIVE_TTL_SECONDS : NEGATIVE_TTL_SECONDS;
+      const positiveTtl =
+        verdict.valid && verdict.tenant.startsWith("user:")
+          ? USER_POSITIVE_TTL_SECONDS
+          : POSITIVE_TTL_SECONDS;
+      const ttl = verdict.valid ? positiveTtl : NEGATIVE_TTL_SECONDS;
       await cache
         ?.set(cacheKey, JSON.stringify(verdict), { EX: ttl })
         .catch((err: unknown) => {

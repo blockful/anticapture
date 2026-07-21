@@ -5,7 +5,6 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { getAddress } from "viem";
 
 import type { UnifiedDrizzle } from "@/database";
-import * as generalSchema from "@/database/general-schema";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
 import { accountPower } from "@/database/schema";
@@ -75,7 +74,7 @@ describe("OffchainNonVotersRepositoryImpl", () => {
 
   beforeAll(async () => {
     client = new PGlite();
-    const combinedSchema = { ...schema, ...offchainSchema, ...generalSchema };
+    const combinedSchema = { ...schema, ...offchainSchema };
 
     db = drizzle(client, { schema: combinedSchema });
 

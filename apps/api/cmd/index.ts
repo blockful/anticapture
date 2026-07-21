@@ -7,7 +7,6 @@ import { serve } from "@hono/node-server";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createPublicClient, http } from "viem";
 import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
@@ -17,7 +16,6 @@ import {
   accountInteractions,
   dao,
   delegationPercentage,
-  draftProposals,
   governanceActivity,
   historicalBalances,
   historicalVotingPower,
@@ -44,7 +42,6 @@ import {
   health,
   revenue,
 } from "@/controllers";
-import * as generalSchema from "@/database/general-schema";
 import * as offchainSchema from "@/database/offchain-schema";
 import * as schema from "@/database/schema";
 import { docs } from "@/docs";
@@ -61,7 +58,6 @@ import {
   AccountInteractionsRepository,
   BalanceVariationsRepository,
   DaoMetricsDayBucketRepository,
-  DraftProposalsRepository,
   DrizzleProposalsActivityRepository,
   DrizzleRepository,
   HealthRepositoryImpl,
@@ -89,7 +85,6 @@ import {
   CoingeckoService,
   DaoService,
   DelegationPercentageService,
-  DraftProposalsService,
   HealthService,
   HistoricalBalancesService,
   NFTPriceService,
@@ -194,21 +189,6 @@ const pgClient = drizzle({
   schema: { ...schema, ...offchainSchema },
   casing: "snake_case",
 });
-
-const pgGeneralClient = drizzle({
-  connection: {
-    connectionString: env.DATABASE_URL,
-    connectionTimeoutMillis: 10_000,
-  },
-  schema: generalSchema,
-  casing: "snake_case",
-});
-
-await migrate(pgGeneralClient, {
-  migrationsFolder: "./drizzle",
-  migrationsSchema: "general",
-});
-logger.info("database migrations completed");
 
 health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
 
@@ -376,15 +356,6 @@ votes(
   ),
 );
 dao(app, daoService);
-draftProposals(
-  app,
-  wrapWithTracing(
-    new DraftProposalsService(
-      wrapWithTracing(new DraftProposalsRepository(pgGeneralClient)),
-    ),
-  ),
-  env.DAO_ID.toLowerCase(),
-);
 docs(app);
 tokenMetrics(app, tokenMetricsService);
 
