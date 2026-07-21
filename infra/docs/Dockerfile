@@ -21,7 +21,14 @@ COPY --from=builder /app/out/full/ .
 # See packages/anticapture-client/docs/scripts/gateful-openapi-spec.mjs.
 ARG RAILWAY_ENVIRONMENT_NAME
 ARG ANTICAPTURE_API_URL
-RUN pnpm --filter @anticapture/client-docs build
+# The build bakes the spec fetched from the live Gateful into the static
+# output. Deploys triggered after a gateful deploy (deploy.yaml redeploy-docs)
+# usually arrive with an unchanged docs tree, so reference the commit SHA in
+# the RUN to defeat Railway's layer cache — a cached layer would keep serving
+# the previous spec.
+ARG RAILWAY_GIT_COMMIT_SHA
+RUN echo "docs build for commit ${RAILWAY_GIT_COMMIT_SHA:-unknown}" \
+  && pnpm --filter @anticapture/client-docs build
 
 FROM base AS runner
 ENV NODE_ENV=production

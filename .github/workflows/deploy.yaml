@@ -79,3 +79,89 @@ jobs:
             --meta githubRepo="${GIT_REPO}" \
             --meta githubRepoId="${GIT_REPO_ID}" \
             --meta githubDeployment=1
+
+  # The docs site bakes the LIVE gateful OpenAPI spec into its static build
+  # (packages/anticapture-client/docs/scripts/prepare-spec.mjs), but Railway
+  # only auto-deploys the docs service when docs files change (watchPatterns
+  # in infra/docs/railway.json). Without this job, a gateful deploy leaves the
+  # published API reference stale until the next docs commit.
+  redeploy-docs:
+    name: Redeploy docs (${{ github.ref_name == 'main' && 'production' || 'dev' }})
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Rebuild only AFTER gateful serves this exact commit: the docs build
+      # fetches the spec from the live gateful, so triggering it against the
+      # previous deployment would bake in the OLD spec (same race the deploy
+      # job above guards against for dashboard codegen).
+      - name: Wait for gateful to be ready
+        run: node scripts/wait-for-gateful.mjs
+        env:
+          ANTICAPTURE_API_URL: ${{ secrets.GATEFUL_URL }}
+          EXPECTED_GATEFUL_SHA: ${{ github.sha }}
+
+      # RAILWAY_TOKEN is a Railway *project token* scoped to this GitHub
+      # environment's Railway environment; RAILWAY_DOCS_SERVICE_ID is the docs
+      # service id. Both live in the dev/production GitHub environments (see
+      # packages/anticapture-client/docs/README.md).
+      - name: Trigger docs rebuild on Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_DOCS_SERVICE_ID: ${{ secrets.RAILWAY_DOCS_SERVICE_ID }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${RAILWAY_TOKEN:-}" ] || [ -z "${RAILWAY_DOCS_SERVICE_ID:-}" ]; then
+            echo "::warning::Skipping docs redeploy; RAILWAY_TOKEN / RAILWAY_DOCS_SERVICE_ID secrets are not configured."
+            exit 0
+          fi
+
+          api="https://backboard.railway.com/graphql/v2"
+
+          graphql() {
+            local body response
+            body="$1"
+            response=$(curl --fail-with-body --silent --show-error \
+              --request POST "${api}" \
+              --header "Project-Access-Token: ${RAILWAY_TOKEN}" \
+              --header "Content-Type: application/json" \
+              --data "${body}")
+            # GraphQL errors come back as HTTP 200 with an `errors` array, so
+            # --fail-with-body alone doesn't catch them.
+            if jq --exit-status '.errors' >/dev/null 2>&1 <<<"${response}"; then
+              echo "::error::Railway API error: ${response}" >&2
+              return 1
+            fi
+            echo "${response}"
+          }
+
+          # Project tokens are scoped to a single project+environment; resolve
+          # the environment from the token itself instead of a third secret so
+          # the pair can never point at the wrong environment.
+          environment_id=$(graphql '{"query":"query { projectToken { environmentId } }"}' \
+            | jq --exit-status --raw-output '.data.projectToken.environmentId')
+
+          # serviceInstanceDeployV2 builds from the connected repo at the given
+          # commit. serviceInstanceRedeploy would NOT work here: it reuses the
+          # previous build, whose static output embeds the old spec.
+          payload=$(jq --null-input \
+            --arg query 'mutation Deploy($serviceId: String!, $environmentId: String!, $commitSha: String) { serviceInstanceDeployV2(serviceId: $serviceId, environmentId: $environmentId, commitSha: $commitSha) }' \
+            --arg serviceId "${RAILWAY_DOCS_SERVICE_ID}" \
+            --arg environmentId "${environment_id}" \
+            --arg commitSha "${GIT_SHA}" \
+            '{ query: $query, variables: { serviceId: $serviceId, environmentId: $environmentId, commitSha: $commitSha } }')
+
+          deployment_id=$(graphql "${payload}" \
+            | jq --exit-status --raw-output '.data.serviceInstanceDeployV2')
+
+          echo "Triggered docs deployment ${deployment_id} for commit ${GIT_SHA}."
