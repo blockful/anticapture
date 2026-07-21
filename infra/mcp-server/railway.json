@@ -3,7 +3,12 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "infra/mcp-server/Dockerfile",
-    "watchPatterns": ["infra/mcp-server/**"]
+    "watchPatterns": [
+      "infra/mcp-server/**",
+      "apps/api/**",
+      "apps/gateful/**",
+      "packages/anticapture-client/**"
+    ]
   },
   "deploy": {
     "healthcheckPath": "/health"
