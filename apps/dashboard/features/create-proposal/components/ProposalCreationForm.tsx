@@ -14,7 +14,6 @@ import {
 import { useAccount } from "wagmi";
 import { formatUnits, zeroAddress } from "viem";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -22,8 +21,9 @@ import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadabl
 import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
-import { getDraftProposal } from "@anticapture/client";
-import type { GetDraftProposalPathParamsDaoEnumKey } from "@anticapture/client";
+import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useWalletPrompt } from "@/shared/services/auth/useWalletPrompt";
+import { getDraft } from "@/shared/services/user-api/draftsClient";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
 import { BODY_PLACEHOLDER } from "@/features/create-proposal/constants";
@@ -98,6 +98,8 @@ export const ProposalCreationForm = ({
   const searchParams = useSearchParams();
   const draftId = searchParams?.get("draftId") ?? undefined;
   const { address } = useAccount();
+  const { openLogin } = useLogin();
+  const { promptWalletConnection } = useWalletPrompt();
   const drafts = useDrafts(daoId);
 
   const vp = useProposalVotingPower(daoId, address || zeroAddress);
@@ -109,7 +111,6 @@ export const ProposalCreationForm = ({
   } = useProposalThreshold(daoId);
   const publisher = usePublishProposal();
 
-  const { openConnectModal } = useConnectModal();
   const [viewParam, setView] = useQueryState(
     "view",
     parseAsStringEnum<"editor" | "preview">(["editor", "preview"]),
@@ -150,26 +151,33 @@ export const ProposalCreationForm = ({
     // Guards against an out-of-order response overwriting the form.
     let cancelled = false;
 
-    void getDraftProposal(
-      daoId as GetDraftProposalPathParamsDaoEnumKey,
-      draftId,
-    )
+    void getDraft(draftId)
       .then((shared) => {
         if (cancelled) return;
         hydratedDraftIdRef.current = draftId;
         if (!shared) return;
-        setSharedAuthor(shared.author);
+        // A draft link belongs to one DAO: refuse content prepared for
+        // another one (stale or crafted cross-DAO links would otherwise be
+        // previewed — and publishable — under this route's DAO).
+        if (shared.daoId !== daoId) {
+          showCustomToast("This draft belongs to another DAO", "error");
+          // The URL's draftId must not stay armed as the save target: a
+          // later Save Draft would overwrite the foreign-DAO draft with
+          // this route's form content.
+          setCurrentDraftId(undefined);
+          return;
+        }
+        setSharedAuthor(shared.authorAddress ?? undefined);
         form.reset({
           title: shared.title,
           discussionUrl: shared.discussionUrl,
           body: shared.body,
           actions: shared.actions.map((a) => toFormAction(a as ProposalAction)),
         });
-        if (address && shared.author.toLowerCase() === address.toLowerCase()) {
-          setCurrentDraftId(draftId);
-        } else {
-          setCurrentDraftId(undefined);
-        }
+        // Ownership is derived server-side from the session (works for
+        // wallet- and email/Google-authored drafts alike), not by comparing
+        // the author against the connected wallet.
+        setCurrentDraftId(shared.isOwner ? draftId : undefined);
         setBodyVersion((v) => v + 1);
         setHydratedDraftId(draftId);
       })
@@ -206,6 +214,38 @@ export const ProposalCreationForm = ({
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+
+  // Email/Google sign-in leaves the page, so a dirty form would be lost on
+  // the auth round-trip. Save Draft stashes the values before opening the
+  // login modal; back on the page the stash is restored — after any shared
+  // draft hydrated, so the user's newer edits win — and cleared. The in-page
+  // SIWE path restores a byte-identical form, a visual no-op.
+  const pendingDraftStashKey = `anticapture:pending-draft:${daoId}`;
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(pendingDraftStashKey);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    if (draftId && hydratedDraftId !== draftId) return;
+    try {
+      form.reset(JSON.parse(raw) as ProposalFormValues, {
+        keepDefaultValues: true,
+      });
+      setBodyVersion((v) => v + 1);
+    } catch {
+      // corrupted stash — drop it
+    } finally {
+      try {
+        sessionStorage.removeItem(pendingDraftStashKey);
+      } catch {
+        // ignore
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingDraftStashKey, draftId, hydratedDraftId]);
   // Publish deferred while a disconnected user connects, resumed once ready.
   const [pendingAction, setPendingAction] = useState<"publish" | null>(null);
   // Ref so rapid clicks see an in-flight save before state commits.
@@ -230,12 +270,22 @@ export const ProposalCreationForm = ({
     form.formState.isValid &&
     (values.body?.length ?? 0) <= 10_000;
 
+  const stashPendingDraft = () => {
+    try {
+      sessionStorage.setItem(pendingDraftStashKey, JSON.stringify(values));
+    } catch {
+      // Storage can be blocked; the in-page SIWE path still preserves the form.
+    }
+  };
+
   const handleShare = async () => {
     // Persist before sharing when unsaved or dirty, so the link isn't stale.
     let id = currentDraftId;
     if (!id || form.formState.isDirty) {
-      if (!address) {
-        showCustomToast("Connect a wallet to save and share drafts", "error");
+      // Session-gated like Save Draft — email/Google authors have no wallet.
+      if (drafts.needsAuth) {
+        stashPendingDraft();
+        openLogin();
         return;
       }
       // Guard against duplicate creates from rapid clicks (shared with Save Draft).
@@ -288,8 +338,11 @@ export const ProposalCreationForm = ({
 
   const handlePreviewPublish = () => {
     if (!address) {
+      // Publishing needs a wallet to sign. Signed out → sign-in modal;
+      // signed in without a wallet (email/Google) → RainbowKit directly,
+      // keeping the session. See useWalletPrompt.
       setPendingAction("publish");
-      openConnectModal?.();
+      promptWalletConnection();
       return;
     }
     handlePublishClick();
@@ -312,8 +365,14 @@ export const ProposalCreationForm = ({
   ]);
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
-    if (!address) {
-      showCustomToast("Connect a wallet to save drafts", "error");
+    // Saving is session-gated now, not wallet-gated: prompt sign-in when there
+    // is no session (the user may be connected but not authenticated).
+    if (drafts.needsAuth) {
+      // Stash the form first: the email/Google paths leave the page, and the
+      // restore effect above brings the content back after the round-trip.
+      stashPendingDraft();
+      // storage blocked — the in-page SIWE path still preserves the form
+      openLogin();
       return;
     }
     // Guard against duplicate creates while a save is in flight.
@@ -447,17 +506,11 @@ export const ProposalCreationForm = ({
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
-  // Ownership comes from the viewer's drafts list, so it holds even if the
-  // shared-draft fetch is slow or fails. Verify the cached draft's author
-  // matches the connected wallet — during a wallet switch the previous list is
-  // still exposed, and we must not treat another wallet's draft as owned.
+  // The drafts list is session-scoped (the User API returns only the session
+  // user's drafts), so a draft present in it is owned — no wallet comparison
+  // needed, and it holds for email/Google authors who have no wallet.
   const ownedDraft = draftId ? drafts.getDraft(draftId) : undefined;
-  const ownsDraft = Boolean(
-    ownedDraft &&
-    address &&
-    // Legacy localStorage drafts predate the `author` field and may lack it.
-    ownedDraft.author?.toLowerCase() === address.toLowerCase(),
-  );
+  const ownsDraft = Boolean(ownedDraft);
   const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
   // Editor only for a new proposal or an owned draft (no load-dependent flash).
   const canShowEditor = !draftId || ownsDraft;

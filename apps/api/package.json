@@ -1,6 +1,6 @@
 {
   "name": "@anticapture/api",
-  "version": "1.5.5",
+  "version": "1.6.0",
   "private": true,
   "main": "dist/index.js",
   "type": "module",
@@ -16,10 +16,7 @@
     "build:watch": "tsc --watch",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "dev": "tsx watch cmd/index.ts",
-    "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "dev": "tsx watch cmd/index.ts"
   },
   "keywords": [],
   "author": "",

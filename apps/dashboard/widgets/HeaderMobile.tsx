@@ -5,6 +5,7 @@ import {
   Menu,
   BarChart4,
   BookOpen,
+  Code,
   Heart,
   HelpCircle,
   Bell,
@@ -12,11 +13,19 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, type ElementType } from "react";
 
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
 import { cn } from "@/shared/utils/";
+
+type MenuItem = {
+  page: string;
+  label: string;
+  icon: ElementType;
+  isGlobal: boolean;
+  onClick?: () => void;
+};
 
 export const HeaderMobile = ({
   className,
@@ -28,7 +37,7 @@ export const HeaderMobile = ({
   const [lastScrollY, setLastScrollY] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  const menuItems = useMemo(
+  const menuItems = useMemo<MenuItem[]>(
     () => [
       {
         page: "/",
@@ -44,6 +53,12 @@ export const HeaderMobile = ({
         isGlobal: true,
         label: "Alerts",
         icon: Bell,
+      },
+      {
+        page: "api-keys",
+        isGlobal: true,
+        label: "API",
+        icon: Code,
       },
     ],
     [],

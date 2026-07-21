@@ -3,12 +3,14 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "infra/docs/Dockerfile",
-    "watchPatterns": ["packages/anticapture-client/docs/**", "infra/docs/**"]
-  },
-  "deploy": {
-    "healthcheckPath": "/docs/",
-    "restartPolicyType": "ALWAYS",
-    "restartPolicyMaxRetries": 3
+    "watchPatterns": [
+      "packages/anticapture-client/docs/**",
+      "infra/docs/**",
+      "apps/api/**",
+      "apps/docs/**",
+      "apps/gateful/**",
+      "packages/anticapture-client/**"
+    ]
   },
   "environments": {
     "pr": {

@@ -1,5 +1,15 @@
 # @anticapture/authful
 
+## 0.4.0
+
+### Minor Changes
+
+- [#2044](https://github.com/blockful/anticapture/pull/2044) [`b1c8e28`](https://github.com/blockful/anticapture/commit/b1c8e28f961ecf64d267194b6759f2121d466658) Thanks [@brunod-e](https://github.com/brunod-e)! - Add self-service API keys (DEV-950). Authful gains an optional scoped provisioning key that may only mint/revoke `user:*` tenants and cannot list all tenants (the admin key stays unrestricted). The User API brokers end-user keys through it: `POST/GET/DELETE /me/api-keys` (session-authenticated) mint into Authful under tenant `user:<userId>`, return the plaintext exactly once, and store only ownership (never the secret) — with a per-user quota and Authful-first revocation. Both surfaces stay disabled until their env is configured.
+
+### Patch Changes
+
+- [#2044](https://github.com/blockful/anticapture/pull/2044) [`d39173e`](https://github.com/blockful/anticapture/commit/d39173e50f94415d7f763bddd033444a0b7b5528) Thanks [@brunod-e](https://github.com/brunod-e)! - Self-service (`user:*`) API keys: the internal token validation metric buckets the per-user tenant label as `user:*` so the Prometheus series set stays bounded, matching Gateful's usage metric.
+
 ## 0.3.2
 
 ### Patch Changes

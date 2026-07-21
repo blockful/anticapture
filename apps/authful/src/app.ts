@@ -9,6 +9,7 @@ import { validateController } from "@/controllers/validate";
 import { exporter } from "@/instrumentation";
 import { metricsMiddleware } from "@/middlewares/metrics";
 import { requestLogger } from "@/middlewares/logger";
+import { scopedTokenAuth } from "@/middlewares/token-auth";
 import { logger } from "@/logger";
 import type { TokensService } from "@/services/tokens";
 
@@ -17,6 +18,7 @@ export type AppConfig = {
   db: AuthfulDrizzle;
   adminApiKey: string;
   internalApiKey: string;
+  provisioningApiKey?: string;
 };
 
 export function createApp({
@@ -24,6 +26,7 @@ export function createApp({
   db,
   adminApiKey,
   internalApiKey,
+  provisioningApiKey,
 }: AppConfig): Hono {
   const app = new Hono();
 
@@ -48,9 +51,11 @@ export function createApp({
     return c.body(body, 200, { "Content-Type": contentType });
   });
 
-  // Admin surface: humans minting/listing/revoking tokens.
-  app.use("/tokens", bearerAuth({ token: adminApiKey }));
-  app.use("/tokens/*", bearerAuth({ token: adminApiKey }));
+  // Token-management surface: the admin key (unrestricted) or the optional
+  // provisioning key (scoped to `user:*`, enforced in the controller).
+  const tokenAuth = scopedTokenAuth({ adminApiKey, provisioningApiKey });
+  app.use("/tokens", tokenAuth);
+  app.use("/tokens/*", tokenAuth);
 
   // Internal surface: Gateful validating tokens.
   app.use("/validate", bearerAuth({ token: internalApiKey }));

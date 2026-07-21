@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 
 import { Button } from "@/shared/components";
+import { useWalletPrompt } from "@/shared/services/auth/useWalletPrompt";
 import { cn } from "@/shared/utils";
 
 const Jazzicon = dynamic(
@@ -22,6 +23,9 @@ export const ConnectWalletCustom = ({
   label?: string;
   className?: string;
 }) => {
+  // Voting needs a wallet to sign; a signed-in email/Google user connects
+  // one directly (session kept), a signed-out user goes through sign-in.
+  const { promptWalletConnection } = useWalletPrompt();
   return (
     <ConnectButton.Custom>
       {({
@@ -29,7 +33,6 @@ export const ConnectWalletCustom = ({
         chain,
         openAccountModal,
         openChainModal,
-        openConnectModal,
         authenticationStatus,
         mounted,
       }) => {
@@ -55,7 +58,7 @@ export const ConnectWalletCustom = ({
               if (!connected) {
                 return (
                   <Button
-                    onClick={openConnectModal}
+                    onClick={promptWalletConnection}
                     type="button"
                     variant="primary"
                     className={cn(className)}

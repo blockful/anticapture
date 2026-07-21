@@ -19,6 +19,15 @@ export const TokenListResponseSchema = z
   .object({ items: z.array(TokenMetadataSchema) })
   .openapi("TokenListResponse");
 
+export const ListTokensQuerySchema = z
+  .object({
+    tenant: z
+      .string()
+      .optional()
+      .openapi({ description: "Filter to a single tenant's tokens." }),
+  })
+  .openapi("ListTokensQuery");
+
 export const MintTokenBodySchema = z
   .object({
     tenant: z.string().min(1),

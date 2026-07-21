@@ -46,6 +46,7 @@ the first.
 | Dashboard          | 3000  | http://localhost:3000  | always                              |
 | Address Enrichment | 3001  | http://localhost:3001  | optional, skipped if no Railway svc |
 | Relayer (ENS)      | 3002  | http://localhost:3002  | ENS only                            |
+| User API           | 4003  | http://localhost:4003  | optional                            |
 
 Client SDK codegen runs in watch mode (no port) and regenerates on API/gateful changes.
 

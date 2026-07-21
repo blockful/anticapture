@@ -29,7 +29,7 @@ export type FooterProps = VariantProps<typeof footerVariant> & {
 
 export const Footer = ({ variant, className }: FooterProps) => {
   const { data: release } = useGitHubRelease();
-  const version = release?.version || "v1.1.0";
+  const version = release?.version;
   const releaseUrl =
     release?.html_url || "https://github.com/blockful/anticapture/releases";
 
@@ -39,14 +39,16 @@ export const Footer = ({ variant, className }: FooterProps) => {
     >
       <div className="flex flex-col items-center justify-center gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2">
-          <DefaultLink
-            href={releaseUrl}
-            openInNewTab
-            variant="default"
-            className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider"
-          >
-            &gt;{version}_
-          </DefaultLink>
+          {version && (
+            <DefaultLink
+              href={releaseUrl}
+              openInNewTab
+              variant="default"
+              className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider"
+            >
+              &gt;{version}_
+            </DefaultLink>
+          )}
           <p className="text-alternative-sm text-secondary flex font-mono uppercase tracking-wider">
             powered by
           </p>
