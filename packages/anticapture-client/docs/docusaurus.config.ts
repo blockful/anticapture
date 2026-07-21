@@ -136,6 +136,13 @@ const config: Config = {
         redirects: [
           // The old MCP getting-started guide is now the MCP section.
           { from: "/guide/getting-started", to: "/mcp" },
+          // The old reference landing slug came from the upstream spec title
+          // ("Anticapture Gateful REST API"); createRedirects only covers the
+          // renamed slug, so map the old one explicitly.
+          {
+            from: "/tools/anticapture-gateful-rest-api",
+            to: "/api-reference/anticapture-rest-api",
+          },
         ],
       },
     ],

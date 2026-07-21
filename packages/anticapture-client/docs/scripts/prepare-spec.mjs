@@ -205,8 +205,11 @@ ensureOperationMetadata(gateful, "system");
 applyTagMetadata(gateful, GATEFUL_TAG_ORDER);
 
 // Neither spec declares `servers`, so generated request samples would fall
-// back to the docs site's own origin as the base URL.
-gateful.servers = [{ url: "https://gateful.up.railway.app" }];
+// back to the docs site's own origin as the base URL. Derive the host from
+// the URL the spec was fetched from, so preview/dev builds document and call
+// the same environment they validated (not production).
+const gatefulOrigin = new URL(GATEFUL_SOURCE).origin;
+gateful.servers = [{ url: gatefulOrigin }];
 
 // Public-facing naming and copy for the generated reference landing page -
 // "Gateful" is the internal service name, and the upstream spec ships no
@@ -216,7 +219,7 @@ gateful.info.description ||=
   "REST API for Anticapture's DAO governance analytics: proposals, votes, " +
   "voting power, delegations, token and treasury data, indexed from onchain " +
   "and offchain sources.\n\nAll endpoints are served from " +
-  "`https://gateful.up.railway.app` and require a bearer token; see " +
+  `\`${gatefulOrigin}\` and require a bearer token; see ` +
   "[Getting started](/getting-started).";
 
 await writeSpec(GATEFUL_OUT, gateful);
@@ -228,7 +231,7 @@ console.log(
 // summary/operationId metadata the docs plugin requires.
 const webhook = await readSpec(WEBHOOK_SOURCE);
 
-webhook.servers = [{ url: "https://webhook.anticapture.com" }];
+webhook.servers = [{ url: new URL(WEBHOOK_SOURCE).origin }];
 
 applySummaryOverrides(webhook, WEBHOOK_SUMMARIES);
 ensureOperationMetadata(webhook, "webhooks");
