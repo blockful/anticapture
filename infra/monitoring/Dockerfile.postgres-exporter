@@ -1,0 +1,3 @@
+FROM quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+
+EXPOSE 9187

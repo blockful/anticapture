@@ -319,48 +319,58 @@ database:
         postgresql:
           connectionUri: "${DATABASE_URL}"
           table: rpc_cache
+          minConns: 2
+          maxConns: 10
+          initTimeout: 5s
+          getTimeout: 250ms
+          setTimeout: 1s
       - id: memory-unfinalized
         driver: memory
         memory:
-          maxItems: 4096
+          maxItems: 10000
+          maxTotalSize: 128MB
+          emitMetrics: false
       - id: memory-realtime
         driver: memory
         memory:
-          maxItems: 4096
+          maxItems: 10000
+          maxTotalSize: 128MB
+          emitMetrics: false
     policies:
+      # Raw JSON-RPC result bodies, including eth_getBlockByNumber, survive
+      # restarts. Finalized data is immutable, so it never expires.
       - connector: pg-main
         network: "*"
-        method: "*"
+        method: eth_getBlockByNumber
         finality: finalized
         empty: allow
         maxItemSize: 4MB
         ttl: 0
       - connector: memory-unfinalized
         network: "*"
-        method: "*"
+        method: eth_getBlockByNumber
         finality: unfinalized
         empty: ignore
-        ttl: 2s
-        maxItemSize: 20KB
-      - connector: pg-main
-        network: "*"
-        method: "*"
-        finality: unknown
-        empty: ignore
-        ttl: 0
+        ttl: 10s
         maxItemSize: 4MB
       - connector: memory-realtime
         network: "evm:1"
-        method: "*"
+        method: eth_getBlockByNumber
         finality: realtime
+        empty: ignore
+        maxItemSize: 4MB
         ttl: 12s
       - connector: memory-realtime
         network: "evm:10"
-        method: "*"
+        method: eth_getBlockByNumber
         finality: realtime
+        empty: ignore
+        maxItemSize: 4MB
         ttl: 2s
       - connector: memory-realtime
         network: "evm:534352"
-        method: "*"
+        method: eth_getBlockByNumber
         finality: realtime
+        empty: ignore
+        maxItemSize: 4MB
         ttl: 1s

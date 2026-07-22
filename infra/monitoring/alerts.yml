@@ -6,7 +6,7 @@ groups:
       - alert: ServiceDown
         expr: up{job!~"anticapture-.*-(api|indexer(?:-ponder)?)"} == 0
         for: 5m
-        keep_firing_for: 5m
+        keep_firing_for: 15m
         labels:
           severity: critical
         annotations:
@@ -20,7 +20,7 @@ groups:
       - alert: ApiDown
         expr: up{job=~"anticapture-.*-api"} == 0
         for: 5m
-        keep_firing_for: 5m
+        keep_firing_for: 15m
         labels:
           severity: critical
         annotations:
@@ -33,7 +33,7 @@ groups:
       - alert: IndexerDown
         expr: up{job=~"anticapture-.*-indexer(?:-ponder)?"} == 0
         for: 10m
-        keep_firing_for: 5m
+        keep_firing_for: 15m
         labels:
           severity: critical
         annotations:
@@ -46,6 +46,7 @@ groups:
       - alert: IndexerSyncStale
         expr: time() - max by (job) (ponder_sync_block_timestamp{job=~"anticapture-.*-indexer-ponder"}) > 600
         for: 10m
+        keep_firing_for: 15m
         labels:
           severity: warning
         annotations:
@@ -67,7 +68,7 @@ groups:
           and
           sum(rate(erpc_upstream_request_total{network="evm:1"}[15m])) > 0.05
         for: 10m
-        keep_firing_for: 5m
+        keep_firing_for: 15m
         labels:
           severity: warning
         annotations:
@@ -79,10 +80,138 @@ groups:
             listening on 8545 (not localhost-only), the nodeful Railway tailscale proxy is
             up with a valid TAILSCALE_AUTHKEY, and erpc logs for "initialization task failed".
 
+      - alert: ErpcCacheHitRateLow
+        expr: >
+          (
+            (sum(rate(erpc_cache_get_success_hit_total{job="anticapture-erpc"}[15m])) or vector(0))
+            /
+            clamp_min(
+              (sum(rate(erpc_cache_get_success_hit_total{job="anticapture-erpc"}[15m])) or vector(0))
+              + (sum(rate(erpc_cache_get_success_miss_total{job="anticapture-erpc"}[15m])) or vector(0)),
+              0.000001
+            )
+          ) < 0.5
+          and
+          (sum(rate(erpc_cache_get_success_hit_total{job="anticapture-erpc"}[15m])) or vector(0))
+          + (sum(rate(erpc_cache_get_success_miss_total{job="anticapture-erpc"}[15m])) or vector(0)) > 0.1
+        for: 15m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] eRPC cache hit rate is below 50%"
+          description: >
+            eRPC cache hit rate has been {{ printf "%.1f" $value }} for 15 minutes while
+            cache traffic is active. Check finality classification, PostgreSQL health,
+            cache policy matching, and whether indexers are requesting identical block bodies.
+
+      - alert: ErpcCacheErrors
+        expr: >
+          (sum(rate(erpc_cache_get_error_total{job="anticapture-erpc"}[5m])) or vector(0))
+          + (sum(rate(erpc_cache_set_error_total{job="anticapture-erpc"}[5m])) or vector(0)) > 0
+        for: 5m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] eRPC cache operations are failing"
+          description: >
+            eRPC cache operations have failed continuously for 5 minutes. Requests still
+            fall through to upstreams, but RPC spend and latency will increase. Check the
+            cache PostgreSQL service and eRPC logs.
+
+      - alert: RailwayExporterStale
+        expr: time() - (railway_exporter_last_scrape_success or vector(0)) > 300
+        for: 5m
+        keep_firing_for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "[CRITICAL] Railway platform metrics are stale"
+          description: >
+            The Railway exporter has not completed an API collection for at least 5 minutes.
+            Check its API token, environment targets, rate limits, and logs.
+
+      - alert: RailwayHighMemoryUtilization
+        expr: max by (project_name, environment_name, service_name) (railway_service_memory_utilization) > 0.85
+        for: 10m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] Railway RAM above 85% on {{ $labels.service_name }}"
+          description: >
+            {{ $labels.project_name }}/{{ $labels.environment_name }}/{{ $labels.service_name }}
+            has used {{ printf "%.1f" $value }} of its Railway memory limit for 10 minutes.
+            Check for growth, cache pressure, and OOM restarts before increasing the limit.
+
+      - alert: RailwayHighEgress
+        expr: >
+          sum by (project_name, environment_name, service_name) (
+            clamp_min(increase(railway_service_network_tx_gb_total[1h]), 0)
+          ) > 5
+        for: 10m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] Railway egress above 5 GB/hour on {{ $labels.service_name }}"
+          description: >
+            {{ $labels.project_name }}/{{ $labels.environment_name }}/{{ $labels.service_name }}
+            transmitted {{ printf "%.2f" $value }} GB over the last hour. Check public database
+            URLs, oversized responses, and traffic spikes; prefer Railway private networking.
+
+      - alert: PostgreSQLHighConnections
+        expr: >
+          sum by (server) (pg_stat_activity_count{job="anticapture-postgres-exporter"})
+          /
+          clamp_min(max by (server) (pg_settings_max_connections{job="anticapture-postgres-exporter"}), 1)
+          > 0.8
+        for: 10m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] PostgreSQL connections above 80% on {{ $labels.server }}"
+          description: >
+            PostgreSQL instance {{ $labels.server }} has used {{ printf "%.1f" $value }} of
+            max_connections for 10 minutes. Inspect eRPC pool use and other clients before
+            the database starts rejecting sessions.
+
+      - alert: PostgreSQLUnavailable
+        expr: >
+          pg_up{job="anticapture-postgres-exporter"} == 0
+          or absent(pg_up{job="anticapture-postgres-exporter"})
+        for: 2m
+        keep_firing_for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "[CRITICAL] PostgreSQL is unavailable {{ with $labels.server }}on {{ . }}{{ end }}"
+          description: >
+            postgres_exporter cannot query PostgreSQL instance
+            {{ or $labels.server "(no pg_up series at all — exporter down?)" }}. eRPC cache
+            requests will fall through to upstream RPC providers until connectivity recovers.
+
+      - alert: PostgreSQLDeadlocks
+        expr: >
+          sum by (server) (increase(pg_stat_database_deadlocks{job="anticapture-postgres-exporter"}[5m])) > 0
+        for: 1m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] PostgreSQL deadlock detected on {{ $labels.server }}"
+          description: >
+            PostgreSQL instance {{ $labels.server }} reported {{ printf "%.0f" $value }}
+            deadlocks in the last 5 minutes. Inspect blocked statements and cache database
+            contention.
+
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage
         expr: sum by (job) (rate(process_cpu_time_seconds_total[1m])) * 100 > 80
         for: 5m
+        keep_firing_for: 15m
         labels:
           severity: warning
         annotations:
@@ -99,6 +228,7 @@ groups:
             sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le, job)
           ) > 2
         for: 5m
+        keep_firing_for: 15m
         labels:
           severity: warning
         annotations:
@@ -121,6 +251,7 @@ groups:
           and
           sum by (job) (rate(http_server_request_duration_seconds_count[2m])) > 0.1
         for: 2m
+        keep_firing_for: 15m
         labels:
           severity: critical
         annotations:

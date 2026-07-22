@@ -57,6 +57,27 @@ excluded (unhealthy, throttled, or lagging) or cannot serve a method — this
 keeps the paid provider off hedges and transient failover. L2 requests always
 use Chainstack because Nodeful serves Ethereum only.
 
+## Block response cache
+
+Both configs cache raw `eth_getBlockByNumber` result bodies in two tiers:
+
+- finalized blocks go to the existing `rpc_cache` PostgreSQL table with no
+  expiry because their contents are immutable;
+- unfinalized blocks use a bounded 128 MB in-process cache with a 10-second TTL,
+  matching the indexers' default polling interval;
+- realtime blocks use the same bounded cache with chain-specific freshness
+  windows (12 seconds for Ethereum, 2 for Optimism, 1 for Scroll).
+
+Set `DATABASE_URL` on each eRPC service to a private Railway PostgreSQL URL.
+eRPC creates and maintains the `rpc_cache` table automatically; the
+database user therefore needs `CREATE` access on the target schema. Cache reads
+are best-effort and fall through to the configured upstreams if PostgreSQL is
+slow or unavailable.
+
+Use the PostgreSQL exporter described in `infra/monitoring/README.md` to watch
+connection pressure, buffer hit ratio, transaction rate, and deadlocks. The
+consolidated dashboard also shows eRPC's own cache hit/miss/error counters.
+
 ## Monitoring
 
 eRPC exposes Prometheus metrics on port `4001`:
