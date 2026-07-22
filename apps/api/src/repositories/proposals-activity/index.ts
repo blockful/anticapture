@@ -69,6 +69,7 @@ export class DrizzleProposalsActivityRepository {
              (timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp
       FROM proposals_onchain
       WHERE (timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+        AND UPPER(status) <> 'CANCELED'
       ORDER BY timestamp DESC
     `;
 
@@ -153,6 +154,7 @@ export class DrizzleProposalsActivityRepository {
       FROM proposals_onchain p
       LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+        AND UPPER(p.status) <> 'CANCELED'
         ${sql.raw(voteFilterCondition)}
       ${sql.raw(orderByClause)}
       LIMIT ${limit} OFFSET ${skip}
@@ -164,6 +166,7 @@ export class DrizzleProposalsActivityRepository {
       FROM proposals_onchain p
       LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+        AND UPPER(p.status) <> 'CANCELED'
         ${sql.raw(voteFilterCondition)}
     `;
 

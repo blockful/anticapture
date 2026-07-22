@@ -262,6 +262,22 @@ describe("DrizzleProposalsActivityRepository", () => {
       expect(result[0]?.id).toBe("proposal-1");
     });
 
+    it("excludes canceled proposals", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({ id: "active", txHash: "0xtx1", status: "ACTIVE" }),
+        createProposal({
+          id: "canceled",
+          txHash: "0xtx2",
+          status: "CANCELED",
+        }),
+      ]);
+
+      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]?.id).toBe("active");
+    });
+
     it("returns empty array when no proposals meet the activityStart threshold", async () => {
       await db
         .insert(proposalsOnchain)
