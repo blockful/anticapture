@@ -23,7 +23,7 @@ export const CONTRACT_ADDRESSES = {
     token: {
       address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
       decimals: 18,
-      startBlock: 9380410,
+      startBlock: 13533418,
     },
     // https://etherscan.io/address/0x323a76393544d5ecca80cd6ef2a560c6a395b7e3
     governor: {
