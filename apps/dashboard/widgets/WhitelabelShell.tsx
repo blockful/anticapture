@@ -15,6 +15,7 @@ import { WHITELABEL_NAV_ITEMS } from "@/shared/utils/whitelabelNav";
 import { WhitelabelHeader } from "@/widgets/WhitelabelHeader";
 import { WhitelabelHeaderMobile } from "@/widgets/WhitelabelHeaderMobile";
 import { WhitelabelSidebar } from "@/widgets/WhitelabelSidebar";
+import { ReportDataButton } from "@/shared/components/ReportDataButton";
 
 export const WhitelabelShell = ({
   daoId,
@@ -120,6 +121,7 @@ export const WhitelabelShell = ({
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           {children}
         </main>
+        <ReportDataButton daoId={daoId} />
       </div>
     </div>
   );

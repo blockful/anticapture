@@ -6,6 +6,7 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { ALL_DAOS } from "@/shared/types/daos";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
+import { ReportDataButton } from "@/shared/components/ReportDataButton";
 // import { BaseHeaderLayoutSidebar } from "@/shared/components";
 
 type DaoParams = {
@@ -46,6 +47,7 @@ export default async function DaoLayout({ children, params }: DaoLayoutProps) {
           <div className="w-full flex-1">{children}</div>
           <ConditionalFooter />
         </div>
+        <ReportDataButton daoId={daoId} />
       </main>
     </div>
   );
