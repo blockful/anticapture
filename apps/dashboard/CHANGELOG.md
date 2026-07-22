@@ -1,5 +1,17 @@
 # @anticapture/dashboard
 
+## 2.10.0
+
+### Minor Changes
+
+- [#2072](https://github.com/blockful/anticapture/pull/2072) [`90a98bc`](https://github.com/blockful/anticapture/commit/90a98bc052455fd28dfdd0fd79351a2a4f815d4c) Thanks [@pikonha](https://github.com/pikonha)! - Add a user-facing 30-day daily request chart for self-service API keys, backed by resilient Gateful usage batching and tenant-scoped Authful storage. Gateful flushes with a new usage-only Authful credential (`USAGE_API_KEY` / `TOKEN_SERVICE_USAGE_API_KEY`) that can only record usage — the internet-facing edge never holds mint/revoke capability.
+
+### Patch Changes
+
+- [#2073](https://github.com/blockful/anticapture/pull/2073) [`ec67a25`](https://github.com/blockful/anticapture/commit/ec67a253f63b85b75085408b60568181b13843f3) Thanks [@pikonha](https://github.com/pikonha)! - Route wallet RPC transports exclusively through a server-side proxy that requires authenticated eRPC configuration without exposing the secret to browsers.
+
+- [#2079](https://github.com/blockful/anticapture/pull/2079) [`f40e9bd`](https://github.com/blockful/anticapture/commit/f40e9bd59f53dcb64ff5ecf34c0cda25e56269bf) Thanks [@pikonha](https://github.com/pikonha)! - fix panel height overflow
+
 ## 2.9.0
 
 ### Minor Changes
