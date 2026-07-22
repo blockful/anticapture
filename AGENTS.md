@@ -138,3 +138,17 @@ in the `changesets` skill.
   `anticapture-gateful`, `anticapture-dashboard`, `anticapture-indexer`,
   `anticapture-design-system`, `local-dev-stack`, `dao-integration`, `dashboard-dao`,
   `testing`, `changesets`, `tenderly-alerts`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in ClickUp (Tech space, shared Backlog + current sprint), read/written via the `mcp__clickup__*` tools. See `docs/agents/issue-tracker.md`. All of them have the project relationship set to Anticapture (86ahtje7p).
+
+### Triage labels
+
+Default five canonical roles, applied as ClickUp tags. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
