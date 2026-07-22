@@ -52,7 +52,10 @@ Deploy a PostgreSQL exporter service from this directory with:
 
 - Dockerfile: `Dockerfile.postgres-exporter`
 - Railway config: `postgres-exporter.railway.toml`
-- `DATA_SOURCE_NAME`: the monitored database's private `DATABASE_URL`
+- `DATA_SOURCE_NAME`: the monitored database's private `DATABASE_URL`. To monitor
+  several Postgres instances from the same exporter, comma-separate their URLs;
+  each instance's metrics carry a `server` label and the PostgreSQL alerts group
+  by it.
 
 The exporter user needs `CONNECT` plus access to PostgreSQL statistics views.
 For a dedicated least-privilege user on PostgreSQL 10+, grant `pg_monitor`.

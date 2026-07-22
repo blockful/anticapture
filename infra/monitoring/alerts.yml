@@ -163,43 +163,49 @@ groups:
 
       - alert: PostgreSQLHighConnections
         expr: >
-          sum(pg_stat_activity_count{job="anticapture-postgres-exporter"})
+          sum by (server) (pg_stat_activity_count{job="anticapture-postgres-exporter"})
           /
-          clamp_min(max(pg_settings_max_connections{job="anticapture-postgres-exporter"}), 1)
+          clamp_min(max by (server) (pg_settings_max_connections{job="anticapture-postgres-exporter"}), 1)
           > 0.8
         for: 10m
         keep_firing_for: 15m
         labels:
           severity: warning
         annotations:
-          summary: "[WARNING] PostgreSQL connections above 80%"
+          summary: "[WARNING] PostgreSQL connections above 80% on {{ $labels.server }}"
           description: >
-            PostgreSQL has used {{ printf "%.1f" $value }} of max_connections for 10 minutes.
-            Inspect eRPC pool use and other clients before the database starts rejecting sessions.
+            PostgreSQL instance {{ $labels.server }} has used {{ printf "%.1f" $value }} of
+            max_connections for 10 minutes. Inspect eRPC pool use and other clients before
+            the database starts rejecting sessions.
 
       - alert: PostgreSQLUnavailable
-        expr: (max(pg_up{job="anticapture-postgres-exporter"}) or vector(0)) == 0
+        expr: >
+          pg_up{job="anticapture-postgres-exporter"} == 0
+          or absent(pg_up{job="anticapture-postgres-exporter"})
         for: 2m
         keep_firing_for: 15m
         labels:
           severity: critical
         annotations:
-          summary: "[CRITICAL] PostgreSQL is unavailable"
+          summary: "[CRITICAL] PostgreSQL is unavailable {{ with $labels.server }}on {{ . }}{{ end }}"
           description: >
-            postgres_exporter cannot query PostgreSQL. eRPC cache requests will fall through
-            to upstream RPC providers until database connectivity recovers.
+            postgres_exporter cannot query PostgreSQL instance
+            {{ or $labels.server "(no pg_up series at all — exporter down?)" }}. eRPC cache
+            requests will fall through to upstream RPC providers until connectivity recovers.
 
       - alert: PostgreSQLDeadlocks
-        expr: sum(increase(pg_stat_database_deadlocks{job="anticapture-postgres-exporter"}[5m])) > 0
+        expr: >
+          sum by (server) (increase(pg_stat_database_deadlocks{job="anticapture-postgres-exporter"}[5m])) > 0
         for: 1m
         keep_firing_for: 15m
         labels:
           severity: warning
         annotations:
-          summary: "[WARNING] PostgreSQL deadlock detected"
+          summary: "[WARNING] PostgreSQL deadlock detected on {{ $labels.server }}"
           description: >
-            PostgreSQL reported {{ printf "%.0f" $value }} deadlocks in the last 5 minutes.
-            Inspect blocked statements and cache database contention.
+            PostgreSQL instance {{ $labels.server }} reported {{ printf "%.0f" $value }}
+            deadlocks in the last 5 minutes. Inspect blocked statements and cache database
+            contention.
 
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage
