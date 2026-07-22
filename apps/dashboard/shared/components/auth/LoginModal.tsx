@@ -2,7 +2,7 @@
 
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { ArrowLeft, Mail, Wallet } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -23,7 +23,10 @@ import { useSiweLogin } from "@/shared/services/auth/useSiweLogin";
 export type LoginModalProps = {
   open: boolean;
   onOpenChangeAction: (open: boolean) => void;
-  /** Whitelabel deployments offer wallet sign-in only (no email/Google). */
+  /**
+   * Whitelabel deployments offer wallet sign-in only (no email/Google), so
+   * opening skips the method chooser and starts the SIWE flow directly.
+   */
   isWhitelabel?: boolean;
   /** The DAO branding a whitelabel render — drives the modal's icon. */
   whitelabelDaoId?: DaoIdEnum | null;
@@ -66,37 +69,80 @@ export const LoginModal = ({
   const showAlternatives = showEmail || showGoogle;
   const siweBusy = siwe.status !== "idle" && siwe.status !== "error";
 
+  const { status: siweStatus, reset: siweReset } = siwe;
+  const { reset: emailReset } = emailLogin;
+
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      if (!next) {
+        setView("options");
+        setEmail("");
+        siweReset();
+        emailReset();
+      }
+      onOpenChangeAction(next);
+    },
+    [onOpenChangeAction, siweReset, emailReset],
+  );
+
   // If RainbowKit was dismissed without a wallet connecting, drop the pending
   // SIWE flow so the button doesn't come back stuck on "Connecting…". The
   // grace timer absorbs the race where RainbowKit closes an instant before
   // wagmi reports the new connection (a connect cancels the timer via deps).
-  const { status: siweStatus, reset: siweReset } = siwe;
+  // Whitelabel has no chooser behind the wallet picker, so dismissing it
+  // cancels the sign-in outright instead of revealing a one-button modal.
   useEffect(() => {
     if (connectModalOpen || isConnected || siweStatus !== "connecting") return;
-    const timer = setTimeout(siweReset, 500);
+    const timer = setTimeout(() => {
+      siweReset();
+      if (isWhitelabel) handleOpenChange(false);
+    }, 500);
     return () => clearTimeout(timer);
-  }, [connectModalOpen, isConnected, siweStatus, siweReset]);
+  }, [
+    connectModalOpen,
+    isConnected,
+    siweStatus,
+    siweReset,
+    isWhitelabel,
+    handleOpenChange,
+  ]);
 
   // A previous attempt can settle after the modal closed and was reset (e.g.
   // a wallet prompt rejected late), leaving a stale error/status behind —
   // start every (re)open clean. `open` is the provider prop, which stays true
   // during the RainbowKit hand-off, so this never clobbers a live ceremony.
-  const { reset: emailReset } = emailLogin;
   useEffect(() => {
     if (!open) return;
     siweReset();
     emailReset();
   }, [open, siweReset, emailReset]);
 
-  const handleOpenChange = (next: boolean) => {
-    if (!next) {
-      setView("options");
-      setEmail("");
-      siwe.reset();
-      emailLogin.reset();
+  // Whitelabel offers exactly one sign-in method, so opening the sign-in
+  // goes straight into the SIWE flow (wallet picker, then signature) instead
+  // of showing a one-button chooser. Declared after the reset-on-open effect
+  // so the reset runs first; `autoStarted` keeps it to one start per open
+  // (state, not a ref, because the dialog visibility below reads it).
+  const [autoStarted, setAutoStarted] = useState(false);
+  const { login: siweLogin } = siwe;
+  useEffect(() => {
+    if (!open || !isWhitelabel) {
+      setAutoStarted(false);
+      return;
     }
-    onOpenChangeAction(next);
-  };
+    if (autoStarted) return;
+    setAutoStarted(true);
+    siweLogin(() => openConnectModal?.());
+  }, [open, isWhitelabel, autoStarted, siweLogin, openConnectModal]);
+
+  // While the flow auto-runs there is nothing to show yet: RainbowKit owns
+  // the screen during connect. The dialog only surfaces for ceremony state
+  // worth seeing: signing/verifying progress or an error to retry from. Idle
+  // is hidden only before the auto-start kicks in; back at idle AFTER a
+  // started flow (e.g. the verify timeout unstuck it), it shows the plain
+  // connect button again so the user can retry.
+  const whitelabelAutoFlow =
+    isWhitelabel &&
+    ((!autoStarted && siwe.status === "idle") || siwe.status === "connecting");
 
   const callbackURL = () =>
     redirectTo ? window.location.origin + redirectTo : window.location.href;
@@ -117,7 +163,7 @@ export const LoginModal = ({
       // focus-trapping dialogs, so stacked they block each other's clicks.
       // This component stays mounted, so the pending SIWE flow survives and
       // the modal comes back in the signing state once the wallet connects.
-      open={open && !connectModalOpen}
+      open={open && !connectModalOpen && !whitelabelAutoFlow}
       onOpenChange={handleOpenChange}
       ariaLabel={isWhitelabel ? "Sign in" : "Sign in to Anticapture"}
       className="max-w-100"

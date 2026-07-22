@@ -61,9 +61,18 @@ export const Footer = ({ variant, className }: FooterProps) => {
             Blockful
           </DefaultLink>
         </div>
-        <div className="flex gap-2 lg:hidden">
+        <div className="flex flex-wrap justify-center gap-2 lg:hidden">
           <DefaultLink
             href="https://blockful.gitbook.io/anticapture/"
+            openInNewTab
+            variant="default"
+            className="uppercase leading-none"
+          >
+            About
+          </DefaultLink>
+          <p className="text-alternative-xs text-secondary">/</p>
+          <DefaultLink
+            href="https://docs.anticapture.com"
             openInNewTab
             variant="default"
             className="uppercase leading-none"
@@ -93,6 +102,17 @@ export const Footer = ({ variant, className }: FooterProps) => {
           <div className="hidden lg:flex">
             <DefaultLink
               href="https://blockful.gitbook.io/anticapture/"
+              openInNewTab
+              variant="default"
+              className="uppercase leading-none"
+            >
+              About
+            </DefaultLink>
+            <p className="text-dimmed mx-2 hidden items-center uppercase lg:flex">
+              /
+            </p>
+            <DefaultLink
+              href="https://docs.anticapture.com"
               openInNewTab
               variant="default"
               className="uppercase leading-none"
