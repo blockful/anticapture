@@ -2,7 +2,7 @@
 
 import { Flag } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import {
@@ -69,19 +69,26 @@ export const ReportDataButton = ({ daoId }: ReportDataButtonProps) => {
     value: label,
   }));
 
+  const resetReportForm = useCallback(() => {
+    form.reset({
+      daoId,
+      section,
+      panel: "",
+      description: "",
+      email: "",
+      url,
+    });
+  }, [daoId, form, section, url]);
+
+  useEffect(() => {
+    setIsSubmitted(false);
+    resetReportForm();
+  }, [resetReportForm]);
+
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    if (!open) {
-      setIsSubmitted(false);
-      form.reset({
-        daoId,
-        section,
-        panel: "",
-        description: "",
-        email: "",
-        url,
-      });
-    }
+    setIsSubmitted(false);
+    resetReportForm();
   };
 
   const handleSubmit = (data: ReportFormValues) => {

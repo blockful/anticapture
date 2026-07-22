@@ -52,4 +52,40 @@ test.describe("Data report", () => {
       ),
     ).toBeVisible();
   });
+
+  test("submits current section context after sidebar navigation", async ({
+    goto,
+    page,
+  }) => {
+    await goto("/ens");
+    let reportPayload: Record<string, string> | null = null;
+    await page.route("**/api/report", async (route) => {
+      reportPayload = route.request().postDataJSON() as Record<string, string>;
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Report submitted successfully" }),
+      });
+    });
+
+    await page.getByRole("link", { name: /token distribution/i }).click();
+    await page.getByTestId("report-data-button").click();
+    await page
+      .getByRole("combobox", { name: "Which panel is incorrect?" })
+      .click();
+    await page.getByRole("option", { name: "Token distribution" }).click();
+    await page
+      .getByLabel("What looks incorrect?")
+      .fill("The displayed supply is stale.");
+    await page.getByRole("button", { name: "Submit report" }).click();
+
+    await expect(page.getByText("Report received")).toBeVisible();
+    expect(reportPayload).toEqual({
+      daoId: "ens",
+      section: "token-distribution",
+      panel: "Token distribution",
+      description: "The displayed supply is stale.",
+      email: "",
+      url: "http://localhost:3000/ens/token-distribution",
+    });
+  });
 });

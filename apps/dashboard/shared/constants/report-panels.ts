@@ -22,9 +22,15 @@ const SECTION_ALIASES: Record<string, ReportSection> = {
 };
 
 export const getReportSection = (pathname: string): ReportSection => {
-  const segment = pathname.split("/").filter(Boolean).at(-1) ?? "overview";
-  if (segment in REPORT_PANELS_BY_SECTION) return segment as ReportSection;
-  return SECTION_ALIASES[segment] ?? "overview";
+  const segments = pathname.split("/").filter(Boolean);
+  const section = segments.find(
+    (segment) =>
+      segment in REPORT_PANELS_BY_SECTION || segment in SECTION_ALIASES,
+  );
+
+  if (!section) return "overview";
+  if (section in REPORT_PANELS_BY_SECTION) return section as ReportSection;
+  return SECTION_ALIASES[section];
 };
 
 export const getReportPanels = (section: string) =>
