@@ -1,7 +1,7 @@
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, ne, sql } from "drizzle-orm";
 import { Address } from "viem";
 
-import { Drizzle, votesOnchain } from "@/database";
+import { Drizzle, proposalsOnchain, votesOnchain } from "@/database";
 import { DaoIdEnum } from "@/lib/enums";
 
 export type DbProposal = {
@@ -48,13 +48,23 @@ export class DrizzleProposalsActivityRepository {
   constructor(private readonly db: Drizzle) {}
 
   async getFirstVoteTimestamp(address: Address): Promise<number | null> {
-    const firstVote = await this.db.query.votesOnchain.findFirst({
-      where: eq(votesOnchain.voterAccountId, address),
-      columns: {
-        timestamp: true,
-      },
-      orderBy: asc(votesOnchain.timestamp),
-    });
+    // Only consider votes on non-canceled proposals so activityStart matches
+    // the activity scope (canceled proposals are excluded from the metrics).
+    const [firstVote] = await this.db
+      .select({ timestamp: votesOnchain.timestamp })
+      .from(votesOnchain)
+      .innerJoin(
+        proposalsOnchain,
+        eq(proposalsOnchain.id, votesOnchain.proposalId),
+      )
+      .where(
+        and(
+          eq(votesOnchain.voterAccountId, address),
+          ne(proposalsOnchain.status, "CANCELED"),
+        ),
+      )
+      .orderBy(asc(votesOnchain.timestamp))
+      .limit(1);
     return Number(firstVote?.timestamp) || null;
   }
 

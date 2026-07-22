@@ -106,6 +106,32 @@ describe("DrizzleProposalsActivityRepository", () => {
       const result = await repository.getFirstVoteTimestamp(VOTER);
       expect(result).toBe(1699000000);
     });
+
+    it("ignores votes on canceled proposals", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "canceled",
+          txHash: "0xtx1",
+          status: "CANCELED",
+        }),
+        createProposal({ id: "active", txHash: "0xtx2", status: "ACTIVE" }),
+      ]);
+      await db.insert(votesOnchain).values([
+        createVote({
+          txHash: "0xvote1",
+          proposalId: "canceled",
+          timestamp: 1699000000n,
+        }),
+        createVote({
+          txHash: "0xvote2",
+          proposalId: "active",
+          timestamp: 1700000000n,
+        }),
+      ]);
+
+      const result = await repository.getFirstVoteTimestamp(VOTER);
+      expect(result).toBe(1700000000);
+    });
   });
 
   describe("getUserVotes", () => {
