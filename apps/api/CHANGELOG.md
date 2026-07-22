@@ -1,5 +1,11 @@
 # @anticapture/api
 
+## 1.6.1
+
+### Patch Changes
+
+- [#2079](https://github.com/blockful/anticapture/pull/2079) [`a7ae338`](https://github.com/blockful/anticapture/commit/a7ae33870774dffb2ab82822212d5e4e4fde8627) Thanks [@pikonha](https://github.com/pikonha)! - remove canceled proposals from the activity
+
 ## 1.6.0
 
 ### Minor Changes

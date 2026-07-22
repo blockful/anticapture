@@ -1,5 +1,11 @@
 # @anticapture/indexer
 
+## 1.2.2
+
+### Patch Changes
+
+- [#2080](https://github.com/blockful/anticapture/pull/2080) [`55ea76e`](https://github.com/blockful/anticapture/commit/55ea76eb00ec160b1caae4fe551c4a26c6be3b4c) Thanks [@pikonha](https://github.com/pikonha)! - fix ens token start block
+
 ## 1.2.1
 
 ### Patch Changes
