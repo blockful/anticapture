@@ -3,7 +3,7 @@
   "uid": "anticapture",
   "editable": true,
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "tags": ["anticapture"],
   "graphTooltip": 1,
@@ -1990,13 +1990,133 @@
       ]
     },
     {
+      "id": 57,
+      "title": "eRPC Cache Hit Rate",
+      "description": "Hit ratio across active eRPC cache connectors and policies.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 99,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "green",
+                "value": 0.8
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "(sum(rate(erpc_cache_get_success_hit_total{job=\"anticapture-erpc\"}[$__rate_interval])) or vector(0)) / clamp_min((sum(rate(erpc_cache_get_success_hit_total{job=\"anticapture-erpc\"}[$__rate_interval])) or vector(0)) + (sum(rate(erpc_cache_get_success_miss_total{job=\"anticapture-erpc\"}[$__rate_interval])) or vector(0)), 0.000001)",
+          "refId": "A",
+          "legendFormat": "hit rate"
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "title": "eRPC Cache Operations",
+      "description": "Cache hits, misses, and connector errors by operation rate.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 99,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(erpc_cache_get_success_hit_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (connector)",
+          "refId": "A",
+          "legendFormat": "hit {{connector}}"
+        },
+        {
+          "expr": "sum(rate(erpc_cache_get_success_miss_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (connector)",
+          "refId": "B",
+          "legendFormat": "miss {{connector}}"
+        },
+        {
+          "expr": "sum(rate(erpc_cache_get_error_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (connector)",
+          "refId": "C",
+          "legendFormat": "get error {{connector}}"
+        },
+        {
+          "expr": "sum(rate(erpc_cache_set_error_total{job=\"anticapture-erpc\"}[$__rate_interval])) by (connector)",
+          "refId": "D",
+          "legendFormat": "set error {{connector}}"
+        }
+      ]
+    },
+    {
       "id": 60,
       "title": "Logs",
       "type": "row",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 99,
+        "y": 106,
         "w": 24,
         "h": 1
       },
@@ -2009,7 +2129,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 100,
+        "y": 107,
         "w": 8,
         "h": 7
       },
@@ -2055,7 +2175,7 @@
       "type": "logs",
       "gridPos": {
         "x": 8,
-        "y": 100,
+        "y": 107,
         "w": 16,
         "h": 7
       },
@@ -2089,7 +2209,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 107,
+        "y": 114,
         "w": 24,
         "h": 1
       },
@@ -2102,7 +2222,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 0,
-        "y": 108,
+        "y": 115,
         "w": 12,
         "h": 7
       },
@@ -2145,7 +2265,7 @@
       "type": "timeseries",
       "gridPos": {
         "x": 12,
-        "y": 108,
+        "y": 115,
         "w": 12,
         "h": 7
       },
@@ -2182,13 +2302,334 @@
       ]
     },
     {
+      "id": 73,
+      "title": "Railway RAM by Service",
+      "description": "Container memory reported by Railway, including non-process memory.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 122,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (project_name, environment_name, service_name) (railway_service_memory_usage_gb) * 1000000000",
+          "refId": "A",
+          "legendFormat": "{{project_name}} / {{environment_name}} / {{service_name}}"
+        }
+      ]
+    },
+    {
+      "id": 74,
+      "title": "Railway RAM Utilization",
+      "description": "Railway container RAM divided by the configured service limit.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 8,
+        "y": 122,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.75
+              },
+              {
+                "color": "red",
+                "value": 0.85
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "max by (project_name, environment_name, service_name) (railway_service_memory_utilization)",
+          "refId": "A",
+          "legendFormat": "{{project_name}} / {{environment_name}} / {{service_name}}"
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "title": "Railway Public Egress Rate",
+      "description": "Public network transmit rate. Railway private-network traffic is not billed as egress.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 122,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (project_name, environment_name, service_name) (clamp_min(rate(railway_service_network_tx_gb_total[$__rate_interval]), 0)) * 1000000000",
+          "refId": "A",
+          "legendFormat": "{{project_name}} / {{environment_name}} / {{service_name}}"
+        }
+      ]
+    },
+    {
+      "id": 76,
+      "title": "PostgreSQL",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 129,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 77,
+      "title": "PostgreSQL Connections",
+      "description": "Active exporter-visible sessions compared with max_connections.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 130,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.65
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(pg_stat_activity_count{job=\"anticapture-postgres-exporter\"}) / clamp_min(max(pg_settings_max_connections{job=\"anticapture-postgres-exporter\"}), 1)",
+          "refId": "A",
+          "legendFormat": "connections / max"
+        }
+      ]
+    },
+    {
+      "id": 78,
+      "title": "PostgreSQL Buffer Hit Rate",
+      "description": "Share of block reads served from PostgreSQL shared buffers.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 8,
+        "y": 130,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (datname) (rate(pg_stat_database_blks_hit{job=\"anticapture-postgres-exporter\",datname!~\"template.*\"}[$__rate_interval])) / clamp_min(sum by (datname) (rate(pg_stat_database_blks_hit{job=\"anticapture-postgres-exporter\",datname!~\"template.*\"}[$__rate_interval]) + rate(pg_stat_database_blks_read{job=\"anticapture-postgres-exporter\",datname!~\"template.*\"}[$__rate_interval])), 0.000001)",
+          "refId": "A",
+          "legendFormat": "{{datname}}"
+        }
+      ]
+    },
+    {
+      "id": 79,
+      "title": "PostgreSQL Transactions & Deadlocks",
+      "description": "Commit/rollback throughput and deadlock rate by database.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 130,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (datname) (rate(pg_stat_database_xact_commit{job=\"anticapture-postgres-exporter\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "commit {{datname}}"
+        },
+        {
+          "expr": "sum by (datname) (rate(pg_stat_database_xact_rollback{job=\"anticapture-postgres-exporter\"}[$__rate_interval]))",
+          "refId": "B",
+          "legendFormat": "rollback {{datname}}"
+        },
+        {
+          "expr": "sum by (datname) (rate(pg_stat_database_deadlocks{job=\"anticapture-postgres-exporter\"}[$__rate_interval]))",
+          "refId": "C",
+          "legendFormat": "deadlock {{datname}}"
+        }
+      ]
+    },
+    {
       "id": 80,
       "title": "Traces",
       "type": "row",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 115,
+        "y": 137,
         "w": 24,
         "h": 1
       },
@@ -2200,7 +2641,7 @@
       "type": "traces",
       "gridPos": {
         "x": 0,
-        "y": 116,
+        "y": 138,
         "w": 24,
         "h": 10
       },
