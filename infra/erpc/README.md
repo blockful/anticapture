@@ -27,6 +27,13 @@ service). Both variables must remain server-only; never use a `NEXT_PUBLIC_`
 prefix for the secret. Both are required; the route fails closed when either is
 absent.
 
+The proxy validates Railway's `X-Real-IP` and sends exactly one
+`X-Anticapture-Client-IP` value. eRPC prefers that header, then Railway's own
+`X-Real-IP`, only when the request arrives from a loopback or private-network
+peer. This preserves browser IPs for `perIP` rate limits without trusting
+caller-supplied forwarding headers. Prefer a Railway private URL for `ERPC_URL`
+so the proxy-to-eRPC hop stays within those trusted ranges.
+
 Rate limits are split because the deployments share provider API keys and the
 configured rate limiter uses the in-memory driver. Provider-level budgets are
 allocated 80% to production and 20% to dev/staging. Per-IP budgets stay the same

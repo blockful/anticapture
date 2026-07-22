@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -8,6 +10,12 @@ type RouteContext = {
 };
 
 const SUPPORTED_CHAIN_IDS = new Set(["1", "10", "534352"]);
+const CLIENT_IP_HEADER = "X-Anticapture-Client-IP";
+
+const getClientIP = (request: NextRequest) => {
+  const realIP = request.headers.get("x-real-ip")?.trim();
+  return realIP && isIP(realIP) ? realIP : null;
+};
 
 const getUpstream = (chainId: string) => {
   const erpcUrl = process.env.ERPC_URL;
@@ -39,6 +47,8 @@ export const POST = async (request: NextRequest, { params }: RouteContext) => {
     "content-type": request.headers.get("content-type") ?? "application/json",
     "X-ERPC-Secret-Token": upstream.secret,
   });
+  const clientIP = getClientIP(request);
+  if (clientIP) headers.set(CLIENT_IP_HEADER, clientIP);
 
   try {
     const upstreamResponse = await fetch(upstream.url, {

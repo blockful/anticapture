@@ -7,16 +7,22 @@ const ERPC_SECRET = "server-only-secret";
 const originalFetch = global.fetch;
 const originalEnvironment = { ...process.env };
 
-const createRequest = () =>
+const createRequest = (headers: Record<string, string> = {}) =>
   new NextRequest("http://localhost:3000/api/rpc/1", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...headers },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_chainId" }),
   });
 
 const createContext = (chainId: string) => ({
   params: Promise.resolve({ chainId }),
 });
+
+type ClientIPTestCase = {
+  name: string;
+  incomingHeaders: Record<string, string>;
+  expectedIP: string | null;
+};
 
 describe("Wallet RPC proxy route", () => {
   beforeEach(() => {
@@ -44,7 +50,10 @@ describe("Wallet RPC proxy route", () => {
       }),
     );
 
-    const response = await POST(createRequest(), createContext("1"));
+    const response = await POST(
+      createRequest({ "x-real-ip": "203.0.113.10" }),
+      createContext("1"),
+    );
     const [url, init] = (global.fetch as jest.MockedFunction<typeof fetch>).mock
       .calls[0];
 
@@ -61,6 +70,7 @@ describe("Wallet RPC proxy route", () => {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        "x-anticapture-client-ip": "203.0.113.10",
         "x-erpc-secret-token": ERPC_SECRET,
       },
       body: JSON.stringify({
@@ -72,6 +82,46 @@ describe("Wallet RPC proxy route", () => {
       responseStatus: 200,
       responseBody: { jsonrpc: "2.0", id: 1, result: "0x1" },
     });
+  });
+
+  it.each<ClientIPTestCase>([
+    {
+      name: "Railway's validated real IP",
+      incomingHeaders: {
+        "x-real-ip": "2001:db8::1",
+        "x-forwarded-for": "198.51.100.20, 10.0.0.2",
+      },
+      expectedIP: "2001:db8::1",
+    },
+    {
+      name: "no client IP when only a caller-controlled forwarded header exists",
+      incomingHeaders: {
+        "x-forwarded-for": "198.51.100.20, 10.0.0.2",
+      },
+      expectedIP: null,
+    },
+    {
+      name: "no client IP when platform headers are malformed",
+      incomingHeaders: {
+        "x-real-ip": "not-an-ip",
+        "x-forwarded-for": "198.51.100.20",
+      },
+      expectedIP: null,
+    },
+  ])("forwards $name", async ({ incomingHeaders, expectedIP }) => {
+    process.env.ERPC_URL = ERPC_URL;
+    process.env.ERPC_SECRET = ERPC_SECRET;
+    (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(
+      new Response(null, { status: 200 }),
+    );
+
+    await POST(createRequest(incomingHeaders), createContext("1"));
+
+    const [, init] = (global.fetch as jest.MockedFunction<typeof fetch>).mock
+      .calls[0];
+    expect(new Headers(init?.headers).get("x-anticapture-client-ip")).toBe(
+      expectedIP,
+    );
   });
 
   it("rejects unsupported chains without contacting an upstream", async () => {
