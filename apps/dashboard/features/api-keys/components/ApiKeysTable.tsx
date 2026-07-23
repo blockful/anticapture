@@ -1,16 +1,12 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Ellipsis } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Trash2 } from "lucide-react";
+import { useMemo } from "react";
 
 import { Button } from "@/shared/components";
 import { Table } from "@/shared/components/design-system/table/Table";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/shared/components/ui/popover";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
 import { formatRelativeTime } from "@/shared/utils/formatRelativeTime";
 
@@ -20,52 +16,29 @@ const dateFmt = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
-// ⋯ options menu per row — delete is the only action for now (rotate and
-// disable are follow-ups).
-const KeyOptions = ({
+// Delete is the row's only action, so it gets a direct button instead of an
+// options menu (per design review). Confirmation stays in the manager's modal.
+const DeleteKeyButton = ({
   apiKey,
   onDelete,
 }: {
   apiKey: UserApiKey;
   onDelete: (key: UserApiKey) => void;
-}) => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          // p-2 keeps the desktop density; the min sizes preserve a 44px
-          // touch target on coarse pointers.
-          className="min-h-11 min-w-11 p-2 lg:min-h-0 lg:min-w-0"
-          aria-label={`Options for ${apiKey.label}`}
-        >
-          <Ellipsis className="size-4" />
-        </Button>
-      </PopoverTrigger>
-      {/* Panel and row mirror the design-system Combobox dropdown (surface,
-          padding, hover) — this is an action menu, so the row keeps the
-          destructive color instead of ComboboxItem's selection semantics. */}
-      <PopoverContent
-        align="end"
-        className="bg-surface-contrast border-border-contrast rounded-base flex w-40 flex-col px-0 py-1 shadow-none"
-      >
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(false);
-            onDelete(apiKey);
-          }}
-          className="text-error hover:bg-surface-hover w-full cursor-pointer px-3 py-2 text-left text-sm font-normal leading-5 transition-colors duration-150"
-        >
-          Delete key
-        </button>
-      </PopoverContent>
-    </Popover>
-  );
-};
+}) => (
+  <Tooltip asChild disableMobileClick tooltipContent="Delete key">
+    <Button
+      variant="ghost"
+      size="sm"
+      // p-2 keeps the desktop density; the min sizes preserve a 44px
+      // touch target on coarse pointers.
+      className="text-error min-h-11 min-w-11 p-2 lg:min-h-0 lg:min-w-0"
+      aria-label={`Delete ${apiKey.label}`}
+      onClick={() => onDelete(apiKey)}
+    >
+      <Trash2 className="size-4" />
+    </Button>
+  </Tooltip>
+);
 
 export const ApiKeysTable = ({
   keys,
@@ -113,7 +86,7 @@ export const ApiKeysTable = ({
         header: "",
         cell: ({ row }) =>
           row.original.revokedAt === null && (
-            <KeyOptions apiKey={row.original} onDelete={onDelete} />
+            <DeleteKeyButton apiKey={row.original} onDelete={onDelete} />
           ),
         meta: { columnClassName: "w-14" },
       },
