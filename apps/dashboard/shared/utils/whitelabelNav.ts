@@ -23,7 +23,7 @@ export const WHITELABEL_NAV_ITEMS = [
     enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].governancePage,
   },
   {
-    label: "Holders & Delegates",
+    label: "Stakeholders",
     page: WHITELABEL_ROUTES.holdersAndDelegates,
     icon: Users,
     enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].dataTables,

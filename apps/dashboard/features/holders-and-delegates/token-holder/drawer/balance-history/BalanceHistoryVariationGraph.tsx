@@ -275,14 +275,14 @@ export const BalanceHistoryVariationGraph = ({
                           <p
                             className={`text-xs ${data.direction === "in" ? "text-success" : data.direction === "out" ? "text-error" : "text-primary"}`}
                           >
-                            {data.direction === "in" ? "Buy" : "Sell"}
+                            {data.direction === "in" ? "In" : "Out"}
                           </p>
                         </p>
                       )}
 
                       {displayAddress && (
                         <p className="text-secondary text-xs">
-                          {data.direction === "in" ? "Buy from" : "Sell to"}:
+                          {data.direction === "in" ? "From" : "To"}:
                         </p>
                       )}
                       {displayAddress && (

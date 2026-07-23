@@ -10,6 +10,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits, isAddressEqual, parseUnits, zeroAddress } from "viem";
 
@@ -18,7 +19,7 @@ import { useDelegateDelegationHistory } from "@/features/holders-and-delegates/h
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
@@ -62,11 +63,27 @@ export const VotingPowerHistoryTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
+  const [filterLowImportance] = useQueryState(
+    "lowImportance",
+    parseAsBoolean.withDefault(true),
+  );
 
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
   ];
+
+  // low importance filter hides deltas below 1 whole token unless the user
+  // sets an explicit minimum in the amount filter
+  const effectiveFilterVariables = useMemo(
+    () => ({
+      ...filterVariables,
+      fromValue:
+        filterVariables.fromValue ||
+        (filterLowImportance ? parseUnits("1", decimals).toString() : null),
+    }),
+    [filterVariables, filterLowImportance, decimals],
+  );
 
   const {
     delegationHistory,
@@ -80,7 +97,7 @@ export const VotingPowerHistoryTable = ({
     daoId,
     orderBy: sortBy,
     orderDirection: sortDirection,
-    filterVariables,
+    filterVariables: effectiveFilterVariables,
     fromTimestamp,
     toTimestamp,
     limit,
@@ -329,11 +346,8 @@ export const VotingPowerHistoryTable = ({
         return (
           <div className="group flex items-center gap-3">
             <div className="overflow-truncate flex max-w-24 items-center gap-2">
-              <EnsAvatar
+              <DrawerAddressButton
                 address={delegatorAddress}
-                size="sm"
-                variant="rounded"
-                showName={true}
                 nameClassName={cn(
                   "truncate max-w-[125px]",
                   delegatorAddress === accountId
@@ -418,11 +432,8 @@ export const VotingPowerHistoryTable = ({
         return (
           <div className="group flex items-center justify-between gap-3">
             <div className="max-w-35 flex items-center gap-2 overflow-hidden">
-              <EnsAvatar
+              <DrawerAddressButton
                 address={delegateAddress}
-                size="sm"
-                variant="rounded"
-                showName={true}
                 nameClassName={cn(
                   "truncate max-w-[125px]",
                   delegateAddress === accountId

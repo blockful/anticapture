@@ -3,6 +3,7 @@
 import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 
 import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
+import { DrawerActivityFeed } from "@/features/holders-and-delegates/components/DrawerActivityFeed";
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
@@ -54,13 +55,18 @@ export const HoldersAndDelegatesDrawer = ({
           : []),
         {
           id: "voteComposition",
-          label: "Vote Composition",
+          label: "Voting Power",
           content: <VoteComposition address={address} daoId={daoId} />,
         },
         {
           id: "votingPowerHistory",
-          label: "Voting Power History",
+          label: "Delegation History",
           content: <VotingPowerHistory accountId={address} daoId={daoId} />,
+        },
+        {
+          id: "activity",
+          label: "Activity",
+          content: <DrawerActivityFeed address={address} daoId={daoId} />,
         },
       ],
     },
@@ -81,6 +87,11 @@ export const HoldersAndDelegatesDrawer = ({
           id: "balanceHistory",
           label: "Balance History",
           content: <BalanceHistory accountId={address} daoId={daoId} />,
+        },
+        {
+          id: "activity",
+          label: "Activity",
+          content: <DrawerActivityFeed address={address} daoId={daoId} />,
         },
       ],
     },
@@ -103,6 +114,8 @@ export const HoldersAndDelegatesDrawer = ({
   const setSelectedPeriod = useQueryState("selectedPeriod")[1];
   const setTypeFilter = useQueryState("type")[1];
   const setTabAddress = useQueryState("tabAddress")[1];
+  const setFeedOrder = useQueryState("feedOrder")[1];
+  const setFeedRelevance = useQueryState("feedRelevance")[1];
 
   const cleanupFilters = () => {
     setSortOrder(null);
@@ -117,6 +130,8 @@ export const HoldersAndDelegatesDrawer = ({
     setSelectedPeriod(null);
     setTypeFilter(null);
     setTabAddress(null);
+    setFeedOrder(null);
+    setFeedRelevance(null);
   };
 
   const handleTabChange = (tabId: string) => {

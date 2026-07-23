@@ -1,6 +1,7 @@
 "use client";
 
 import type {
+  ProposalActivityStatusListEnumKey,
   ProposalsActivityQueryParamsOrderByEnumKey,
   ProposalsActivityQueryParamsUserVoteFilterEnumKey,
 } from "@anticapture/client";
@@ -47,6 +48,16 @@ export const DelegateProposalsActivity = ({
       "all",
     ),
   );
+  const [proposalStatus, setProposalStatus] = useQueryState(
+    "proposalStatus",
+    parseAsStringEnum([
+      "all",
+      "passed",
+      "failed",
+      "canceled",
+      "active",
+    ]).withDefault("all"),
+  );
   const [orderBy, setOrderBy] = useQueryState(
     "orderBy",
     parseAsStringEnum(["timestamp", "votingPower"]).withDefault("timestamp"),
@@ -65,6 +76,26 @@ export const DelegateProposalsActivity = ({
     { value: "no_vote", label: "Didn't Vote" },
   ];
 
+  // Final-result filter maps a friendly label to the underlying proposal
+  // statuses passed to the API via proposalStatusIn (DEV-562 item 9 / #13).
+  const proposalStatusFilterOptions: FilterOption[] = [
+    { value: "all", label: "All Results" },
+    { value: "passed", label: "Passed" },
+    { value: "failed", label: "Failed" },
+    { value: "canceled", label: "Canceled" },
+    { value: "active", label: "Active" },
+  ];
+
+  const proposalStatusGroups: Record<
+    string,
+    ProposalActivityStatusListEnumKey[]
+  > = {
+    passed: ["SUCCEEDED", "QUEUED", "PENDING_EXECUTION", "EXECUTED"],
+    failed: ["DEFEATED", "EXPIRED", "VETOED", "NO_QUORUM"],
+    canceled: ["CANCELED"],
+    active: ["ACTIVE", "PENDING"],
+  };
+
   // Handle sorting changes
   const handleSortChange = (field: string, direction: "asc" | "desc") => {
     setOrderBy(field as "timestamp" | "votingPower");
@@ -81,6 +112,10 @@ export const DelegateProposalsActivity = ({
         userVoteFilter === "all"
           ? undefined
           : (userVoteFilter as ProposalsActivityQueryParamsUserVoteFilterEnumKey),
+      proposalStatusIn:
+        proposalStatus === "all"
+          ? undefined
+          : proposalStatusGroups[proposalStatus],
       limit,
     });
 
@@ -117,7 +152,7 @@ export const DelegateProposalsActivity = ({
           />
           <MetricCard
             icon={<Check className="size-3.5" />}
-            title="For Rate"
+            title="Yes Rate"
             value={yesRateValue}
           />
           <MetricCard
@@ -142,6 +177,13 @@ export const DelegateProposalsActivity = ({
               );
             }}
             userVoteFilterOptions={userVoteFilterOptions}
+            proposalStatusFilter={proposalStatus}
+            onProposalStatusFilterChange={(filter) => {
+              void setProposalStatus(
+                filter as "all" | "passed" | "failed" | "canceled" | "active",
+              );
+            }}
+            proposalStatusFilterOptions={proposalStatusFilterOptions}
             orderBy={orderBy}
             orderDirection={orderDirection}
             onSortChange={handleSortChange}

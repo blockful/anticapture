@@ -31,6 +31,8 @@ export function AddressFilter({
   const [tempAddress, setTempAddress] = useState<string>(currentFilter);
   const [isResolving, setIsResolving] = useState<boolean>(false);
   const [ensAddressError, setEnsAddressError] = useState<string | null>(null);
+  const [showValidationError, setShowValidationError] =
+    useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const isValidAddress =
@@ -43,6 +45,12 @@ export function AddressFilter({
     if (!trimmedAddress) {
       onApply(undefined);
       setIsOpen(false);
+      return;
+    }
+
+    // negative feedback only after the user submits (Enter or Apply)
+    if (!isValidAddress) {
+      setShowValidationError(true);
       return;
     }
 
@@ -82,6 +90,7 @@ export function AddressFilter({
 
   const handleReset = () => {
     setTempAddress("");
+    setShowValidationError(false);
     onApply(undefined);
     setIsOpen(false);
   };
@@ -90,6 +99,7 @@ export function AddressFilter({
     setIsOpen(open);
     if (open) {
       setTempAddress(currentFilter);
+      setShowValidationError(false);
     }
   };
 
@@ -136,10 +146,16 @@ export function AddressFilter({
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 setTempAddress(e.target.value);
                 setEnsAddressError(null);
+                setShowValidationError(false);
+              }}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                if (e.key === "Enter") {
+                  void handleApply();
+                }
               }}
               className="text-dimmed placeholder:text-dimmed w-full bg-transparent text-sm font-normal leading-5 outline-none"
             />
-            {tempAddress.trim() && !isValidAddress && (
+            {showValidationError && (
               <p className="text-error mt-2 text-xs">
                 Please enter a valid Ethereum address or ENS name
               </p>
@@ -153,9 +169,7 @@ export function AddressFilter({
           <div className="px-3 py-2">
             <Button
               onClick={handleApply}
-              disabled={
-                (tempAddress.trim() !== "" && !isValidAddress) || isResolving
-              }
+              disabled={isResolving}
               size="sm"
               variant="primary"
               className="w-full"

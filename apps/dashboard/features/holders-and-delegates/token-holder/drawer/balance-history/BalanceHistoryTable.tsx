@@ -12,11 +12,14 @@ import {
 import { useMemo } from "react";
 import { parseUnits } from "viem";
 
+import { useAddressLabels } from "@anticapture/client/hooks";
+import type { AddressLabelsPathParamsDaoEnumKey } from "@anticapture/client";
+import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
 import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
@@ -33,11 +36,13 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
+type BalanceHistoryType = "In" | "Out" | "Vesting";
+
 interface BalanceHistoryData {
   id: string;
   timestamp: string;
   amount: number;
-  type: "Buy" | "Sell";
+  type: BalanceHistoryType;
   fromAddress: string;
   fromEns?: string;
   toAddress: string;
@@ -86,11 +91,11 @@ export const BalanceHistoryTable = ({
     { value: "smallest-first", label: "Smallest first" },
   ];
 
-  // Filter options for transaction type
+  // Filter options for transaction type (API still speaks buy/sell)
   const typeFilterOptions: FilterOption[] = [
     { value: "all", label: "All Transactions" },
-    { value: "buy", label: "Buy" },
-    { value: "sell", label: "Sell" },
+    { value: "buy", label: "In" },
+    { value: "sell", label: "Out" },
   ];
 
   // Convert UI filter to hook filter format
@@ -121,19 +126,41 @@ export const BalanceHistoryTable = ({
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
 
+  // Known vesting contract addresses for this DAO, used to relabel incoming
+  // transfers from a vesting contract as "Vested" (DEV-562 item 6 / #10).
+  const { data: addressLabels } = useAddressLabels(
+    daoId.toLowerCase() as AddressLabelsPathParamsDaoEnumKey,
+  );
+  const vestingAddresses = useMemo(() => {
+    const set = new Set<string>();
+    addressLabels?.items?.forEach((item) => {
+      if (item.category === "vesting") set.add(item.address.toLowerCase());
+    });
+    return set;
+  }, [addressLabels]);
+
   // Transform transfers to table data format
   const transformedData = useMemo(() => {
     return transfers.map((transfer) => {
+      const isIncoming = transfer.direction === "in";
+      const fromVesting =
+        isIncoming &&
+        vestingAddresses.has(transfer.fromAccountId.toLowerCase());
+      const type: BalanceHistoryType = fromVesting
+        ? "Vesting"
+        : isIncoming
+          ? "In"
+          : "Out";
       return {
         id: transfer.transactionHash,
         timestamp: transfer.timestamp,
         amount: transfer.amount,
-        type: transfer.direction === "in" ? "Buy" : ("Sell" as "Buy" | "Sell"),
+        type,
         fromAddress: transfer.fromAccountId,
         toAddress: transfer.toAccountId,
       };
     });
-  }, [transfers]);
+  }, [transfers, vestingAddresses]);
 
   const balanceHistoryColumns: ColumnDef<BalanceHistoryData>[] = [
     {
@@ -275,7 +302,7 @@ export const BalanceHistoryTable = ({
         columnClassName: "w-20",
       },
       cell: ({ row }) => {
-        const type = row.getValue("type") as "Buy" | "Sell";
+        const type = row.getValue("type") as BalanceHistoryType;
 
         if (isInitialLoading) {
           return (
@@ -288,11 +315,21 @@ export const BalanceHistoryTable = ({
           );
         }
 
+        const badge = (
+          <BadgeStatus variant={type === "Out" ? "error" : "success"}>
+            {type}
+          </BadgeStatus>
+        );
+
         return (
           <div className="flex items-center">
-            <BadgeStatus variant={type === "Buy" ? "success" : "error"}>
-              {type}
-            </BadgeStatus>
+            {type === "Vesting" ? (
+              <Tooltip tooltipContent="Token unlock from vesting contract">
+                {badge}
+              </Tooltip>
+            ) : (
+              badge
+            )}
           </div>
         );
       },
@@ -339,11 +376,8 @@ export const BalanceHistoryTable = ({
         return (
           <div className="group flex w-full items-center justify-between gap-3">
             <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
-              <EnsAvatar
+              <DrawerAddressButton
                 address={fromAddress as `0x${string}`}
-                size="sm"
-                variant="rounded"
-                showName={true}
                 nameClassName={cn(
                   "text-secondary truncate max-w-[120px]",
                   fromAddress === accountId && "text-primary",
@@ -411,11 +445,8 @@ export const BalanceHistoryTable = ({
         return (
           <div className="group flex w-full items-center justify-between gap-3">
             <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
-              <EnsAvatar
+              <DrawerAddressButton
                 address={toAddress as `0x${string}`}
-                size="sm"
-                variant="rounded"
-                showName={true}
                 nameClassName={cn(
                   "text-secondary truncate max-w-[120px]",
                   toAddress === accountId && "text-primary",

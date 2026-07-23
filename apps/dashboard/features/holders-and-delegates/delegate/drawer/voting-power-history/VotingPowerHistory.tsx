@@ -1,10 +1,11 @@
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsBoolean, parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 
 import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { VotingPowerHistoryTable } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistoryTable";
 import { VotingPowerVariationGraph } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerVariationGraph";
 import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
+import { Switch } from "@/shared/components/design-system/switch/Switch";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface VotingPowerHistoryProps {
@@ -19,6 +20,10 @@ export const VotingPowerHistory = ({
   const [selectedPeriod] = useQueryState(
     "selectedPeriod",
     parseAsStringEnum<TimePeriod>(["30d", "90d", "all"]).withDefault("all"),
+  );
+  const [filterLowImportance, setFilterLowImportance] = useQueryState(
+    "lowImportance",
+    parseAsBoolean.withDefault(true),
   );
 
   const { fromTimestamp, toTimestamp } = useMemo(
@@ -41,6 +46,13 @@ export const VotingPowerHistory = ({
           fromTimestamp={fromTimestamp}
           toTimestamp={toTimestamp}
         />
+        <div className="flex shrink-0 justify-end">
+          <Switch
+            checked={filterLowImportance}
+            onCheckedChange={setFilterLowImportance}
+            label="Filter low importance"
+          />
+        </div>
       </div>
     </div>
   );

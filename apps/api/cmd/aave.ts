@@ -13,6 +13,7 @@ import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalances,
+  addressLabels,
   dao,
   historicalBalances,
   historicalVotingPower,
@@ -20,6 +21,7 @@ import {
   votingPowers,
   delegations,
   delegators,
+  formerDelegators,
   historicalDelegations,
   token,
   accountInteractions,
@@ -37,6 +39,7 @@ import {
   TransfersRepository,
   DelegationsRepository,
   DelegatorsRepository,
+  FormerDelegatorsRepository,
   HistoricalDelegationsRepository,
   AccountBalanceQueryFragments,
   AAVEAccountBalanceRepository,
@@ -46,6 +49,7 @@ import {
 import { AAVEVotingPowerRepository } from "@/repositories/voting-power/aave";
 import {
   AccountBalanceService,
+  AddressLabelsService,
   DaoService,
   HealthService,
   HistoricalBalancesService,
@@ -53,6 +57,7 @@ import {
   HistoricalDelegationsService,
   DelegationsService,
   DelegatorsService,
+  FormerDelegatorsService,
   CoingeckoService,
   TokenService,
 } from "@/services";
@@ -192,6 +197,14 @@ delegators(
     new DelegatorsService(wrapWithTracing(new DelegatorsRepository(pgClient))),
   ),
 );
+formerDelegators(
+  app,
+  wrapWithTracing(
+    new FormerDelegatorsService(
+      wrapWithTracing(new FormerDelegatorsRepository(pgClient)),
+    ),
+  ),
+);
 historicalBalances(
   app,
   wrapWithTracing(
@@ -214,6 +227,7 @@ transfers(
   ),
 );
 dao(app, daoService);
+addressLabels(app, new AddressLabelsService(env.DAO_ID));
 docs(app);
 
 serve(

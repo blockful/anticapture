@@ -52,6 +52,7 @@ export function proposalsActivity(
         orderBy,
         orderDirection,
         userVoteFilter,
+        proposalStatusIn,
       } = context.req.valid("query");
 
       const blockTime = CONTRACT_ADDRESSES[daoId].blockTime;
@@ -66,6 +67,7 @@ export function proposalsActivity(
         orderBy,
         orderDirection,
         userVoteFilter,
+        proposalStatusIn,
       });
 
       return context.json(ProposalActivityResponseSchema.parse(result), 200);

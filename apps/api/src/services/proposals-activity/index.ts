@@ -1,6 +1,7 @@
 import { Address } from "viem";
 
 import { DAOClient } from "@/clients";
+import { ProposalStatus } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { DBProposal } from "@/mappers";
 import {
@@ -24,6 +25,7 @@ export interface ProposalActivityRequest {
   orderBy?: OrderByField;
   orderDirection?: OrderDirection;
   userVoteFilter?: VoteFilter;
+  proposalStatusIn?: ProposalStatus[];
 }
 
 export interface ProposalWithUserVote {
@@ -88,6 +90,7 @@ export interface ProposalsActivityRepository {
     orderBy: OrderByField,
     orderDirection: OrderDirection,
     userVoteFilter?: VoteFilter,
+    proposalStatusIn?: ProposalStatus[],
   ): Promise<{
     proposals: DbProposalWithVote[];
     totalCount: number;
@@ -110,6 +113,7 @@ export class ProposalsActivityService {
     orderBy = "timestamp",
     orderDirection = "desc",
     userVoteFilter,
+    proposalStatusIn,
   }: ProposalActivityRequest): Promise<DelegateProposalActivity> {
     // Check if user has ever voted
     const firstVoteTimestamp =
@@ -140,6 +144,7 @@ export class ProposalsActivityService {
         orderBy,
         orderDirection,
         userVoteFilter,
+        proposalStatusIn,
       );
 
     if (proposalsWithVotes.length === 0) {

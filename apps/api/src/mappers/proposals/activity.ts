@@ -1,16 +1,23 @@
 import { z } from "@hono/zod-openapi";
 
+import { ProposalStatus } from "@/lib/constants";
 import { VoteFilter } from "@/repositories/";
 import {
   AddressSchema,
   VoteSupportSchema,
   addressOutputField,
+  commaDelimitedEnumQueryParam,
   daoIdField,
   defaultDescOrderDirection,
   paginationLimitQueryParam,
   paginationSkipQueryParam,
   unixTimestampQueryParam,
 } from "../shared";
+
+const ProposalStatusValues = Object.values(ProposalStatus) as [
+  ProposalStatus,
+  ...ProposalStatus[],
+];
 
 export const ProposalActivityRequestSchema = z
   .object({
@@ -41,6 +48,21 @@ export const ProposalActivityRequestSchema = z
         "Optional vote filter. Use yes, no, abstain, or no-vote to narrow the result set.",
       example: VoteFilter.YES,
     }),
+    proposalStatusIn: commaDelimitedEnumQueryParam(
+      ProposalStatusValues,
+      (input) => input.toUpperCase(),
+    )
+      .optional()
+      .openapi("ProposalActivityStatusList", {
+        type: "array",
+        items: {
+          type: "string",
+          enum: ProposalStatusValues,
+        },
+        description:
+          "Filter proposals by status. Pass repeated query params or a comma-delimited list.",
+        example: [ProposalStatus.EXECUTED],
+      }),
   })
   .openapi("ProposalActivityRequest", {
     description: "Query params for delegate proposal activity.",

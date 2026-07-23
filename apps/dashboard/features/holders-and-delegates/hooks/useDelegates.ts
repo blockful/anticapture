@@ -14,9 +14,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useCallback, useState, useEffect } from "react";
 
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import type { TimeInterval } from "@/shared/types/enums";
 
 export interface ProposalsActivity {
   totalProposals: number;
@@ -51,23 +49,29 @@ interface UseDelegatesResult {
 }
 
 interface UseDelegatesParams {
-  days: TimeInterval;
+  fromDate?: number;
+  toDate?: number;
   daoId: DaoIdEnum;
   address?: string;
   orderBy?: VotingPowersQueryParamsOrderByEnumKey;
   orderDirection?: "asc" | "desc";
   limit?: number;
   skipActivity?: boolean;
+  fromValue?: string;
+  toValue?: string;
 }
 
 export const useDelegates = ({
   daoId,
   orderBy,
   orderDirection = "desc",
-  days,
+  fromDate,
+  toDate,
   address,
   limit = 15,
   skipActivity = false,
+  fromValue,
+  toValue,
 }: UseDelegatesParams): UseDelegatesResult => {
   const queryClient = useQueryClient();
 
@@ -78,24 +82,32 @@ export const useDelegates = ({
     Set<string>
   >(() => new Set());
 
-  const fromDate = useMemo(() => {
-    return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days];
-  }, [days]);
-
   useEffect(() => {
     setDelegateActivities(new Map());
     setLoadingActivityAddresses(new Set());
-  }, [orderDirection, address, days, orderBy]);
+  }, [orderDirection, address, fromDate, toDate, orderBy]);
 
   const params = useMemo(
     () => ({
       orderDirection,
       ...(orderBy ? { orderBy } : {}),
       limit,
-      fromDate,
+      ...(fromDate ? { fromDate } : {}),
+      ...(toDate ? { toDate } : {}),
       ...(address ? { addresses: [address] } : {}),
+      ...(fromValue ? { fromValue } : {}),
+      ...(toValue ? { toValue } : {}),
     }),
-    [orderDirection, orderBy, limit, fromDate, address],
+    [
+      orderDirection,
+      orderBy,
+      limit,
+      fromDate,
+      toDate,
+      address,
+      fromValue,
+      toValue,
+    ],
   );
 
   const {
@@ -139,7 +151,7 @@ export const useDelegates = ({
           const result = await queryClient.fetchQuery(
             proposalsActivityQueryOptions(
               daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
-              { address: addr, fromDate },
+              { address: addr, ...(fromDate ? { fromDate } : {}) },
             ),
           );
           return { address: addr, activity: result ?? null };

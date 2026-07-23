@@ -318,4 +318,94 @@ describe("DrizzleProposalsActivityRepository", () => {
       expect(result).toHaveLength(0);
     });
   });
+
+  describe("getProposalsWithVotesAndPagination", () => {
+    beforeEach(async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "proposal-1",
+          txHash: "0xtx1",
+          status: "EXECUTED",
+          timestamp: 1699900000n,
+        }),
+        createProposal({
+          id: "proposal-2",
+          txHash: "0xtx2",
+          status: "DEFEATED",
+          timestamp: 1699800000n,
+        }),
+        createProposal({
+          id: "proposal-3",
+          txHash: "0xtx3",
+          status: "ACTIVE",
+          timestamp: 1699700000n,
+        }),
+      ]);
+    });
+
+    const getPage = (proposalStatusIn?: string[]) =>
+      repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        proposalStatusIn,
+      );
+
+    it("returns all proposals when no status filter is provided", async () => {
+      const result = await getPage();
+
+      expect(result.proposals).toHaveLength(3);
+      expect(result.totalCount).toBe(3);
+    });
+
+    it("filters proposals and totalCount by a single status", async () => {
+      const result = await getPage(["EXECUTED"]);
+
+      expect(result.proposals.map((p) => p.proposal.id)).toEqual([
+        "proposal-1",
+      ]);
+      expect(result.totalCount).toBe(1);
+    });
+
+    it("filters proposals by multiple statuses", async () => {
+      const result = await getPage(["EXECUTED", "DEFEATED"]);
+
+      expect(result.proposals.map((p) => p.proposal.id)).toEqual([
+        "proposal-1",
+        "proposal-2",
+      ]);
+      expect(result.totalCount).toBe(2);
+    });
+
+    it("matches statuses stored in lowercase", async () => {
+      await db.insert(proposalsOnchain).values(
+        createProposal({
+          id: "proposal-4",
+          txHash: "0xtx4",
+          status: "executed",
+          timestamp: 1699600000n,
+        }),
+      );
+
+      const result = await getPage(["EXECUTED"]);
+
+      expect(result.proposals.map((p) => p.proposal.id)).toEqual([
+        "proposal-1",
+        "proposal-4",
+      ]);
+      expect(result.totalCount).toBe(2);
+    });
+
+    it("returns empty when no proposal matches the status filter", async () => {
+      const result = await getPage(["CANCELED"]);
+
+      expect(result.proposals).toHaveLength(0);
+      expect(result.totalCount).toBe(0);
+    });
+  });
 });

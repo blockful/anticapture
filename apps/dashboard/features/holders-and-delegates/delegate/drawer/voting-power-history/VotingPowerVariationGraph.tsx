@@ -1,6 +1,6 @@
 "use client";
 
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsBoolean, parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import {
   CartesianGrid,
@@ -90,6 +90,10 @@ export const VotingPowerVariationGraph = ({
     "selectedPeriod",
     parseAsStringEnum<TimePeriod>(["30d", "90d", "all"]).withDefault("all"),
   );
+  const [filterLowImportance] = useQueryState(
+    "lowImportance",
+    parseAsBoolean.withDefault(true),
+  );
 
   const { fromTimestamp, toTimestamp } = useMemo(
     () => getTimestampRangeFromPeriod(selectedPeriod),
@@ -102,6 +106,7 @@ export const VotingPowerVariationGraph = ({
       daoId,
       fromTimestamp,
       toTimestamp,
+      filterLowImportance,
     );
 
   const extendedChartData = useMemo(

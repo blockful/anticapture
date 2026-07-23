@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 
+import { FormerDelegatorsTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/FormerDelegatorsTable";
 import { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
 import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/ThePieChart";
 import { VoteCompositionTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteCompositionTable";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { cn } from "@/shared/utils/cn";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 
@@ -75,6 +77,7 @@ export const VoteComposition = ({
 }) => {
   const isAave = daoId === DaoIdEnum.AAVE;
   const [includeBalance, setIncludeBalance] = useState(false);
+  const [view, setView] = useState<"current" | "former">("current");
 
   const {
     currentVotingPower,
@@ -85,77 +88,101 @@ export const VoteComposition = ({
   } = useVoteCompositionData(daoId, address, includeBalance);
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
-      {isAave && (
-        <div className="flex items-center gap-2 self-end">
-          <span className="text-secondary text-xs font-medium">
-            Include own balance
-          </span>
-          <button
-            role="switch"
-            aria-checked={includeBalance}
-            onClick={() => setIncludeBalance((prev) => !prev)}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
-              includeBalance ? "bg-orange-500" : "bg-zinc-600"
-            }`}
-          >
-            <span
-              className={`inline-block size-3.5 rounded-full bg-white shadow transition-transform ${
-                includeBalance ? "translate-x-4.5" : "translate-x-0.5"
-              }`}
-            />
-          </button>
+      <div className="flex items-center justify-end gap-2">
+        <div className="bg-surface-contrast flex rounded-lg p-0.5">
+          {(["current", "former"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={cn(
+                "cursor-pointer rounded-md px-3 py-1 text-sm font-medium transition-colors",
+                view === v ? "bg-middle-dark text-primary" : "text-secondary",
+              )}
+            >
+              {v === "current" ? "Current Delegators" : "Former Delegators"}
+            </button>
+          ))}
         </div>
-      )}
-      <div className="border-light-dark text-primary flex h-fit w-full shrink-0 flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
-        <div className="flex h-full w-full flex-col">
-          <div className="flex w-full flex-col gap-4 lg:flex-row">
-            <div>
-              <ThePieChart
-                currentVotingPower={currentVotingPower}
-                pieData={pieData}
-                chartConfig={chartConfig}
-              />
+      </div>
+      {view === "former" ? (
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+          <FormerDelegatorsTable address={address} daoId={daoId} />
+        </div>
+      ) : (
+        <>
+          {isAave && (
+            <div className="flex items-center gap-2 self-end">
+              <span className="text-secondary text-xs font-medium">
+                Include own balance
+              </span>
+              <button
+                role="switch"
+                aria-checked={includeBalance}
+                onClick={() => setIncludeBalance((prev) => !prev)}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
+                  includeBalance ? "bg-orange-500" : "bg-zinc-600"
+                }`}
+              >
+                <span
+                  className={`inline-block size-3.5 rounded-full bg-white shadow transition-transform ${
+                    includeBalance ? "translate-x-4.5" : "translate-x-0.5"
+                  }`}
+                />
+              </button>
             </div>
-
-            <div className="flex w-full flex-col gap-6">
-              <div className="flex flex-col gap-1">
-                <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                  Current Voting Power
-                </p>
-                <div className="text-md font-normal">
-                  {!currentVotingPower ? (
-                    <SkeletonRow
-                      parentClassName="flex animate-pulse"
-                      className="h-6 w-24"
-                    />
-                  ) : (
-                    formatNumberUserReadable(currentVotingPower)
-                  )}
-                </div>
-              </div>
-
-              <div className="hidden h-px w-full bg-[#27272A] lg:flex" />
-
-              {/* Delegators */}
-              <div className="hidden flex-col gap-2 lg:flex">
-                <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                  Delegators
-                </p>
-
-                <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
-                  <ChartLegend
-                    items={legendItems}
-                    loading={loadingVotingPowerData}
+          )}
+          <div className="border-light-dark text-primary flex h-fit w-full shrink-0 flex-col gap-4 overflow-y-auto border p-4 lg:flex-row">
+            <div className="flex h-full w-full flex-col">
+              <div className="flex w-full flex-col gap-4 lg:flex-row">
+                <div>
+                  <ThePieChart
+                    currentVotingPower={currentVotingPower}
+                    pieData={pieData}
+                    chartConfig={chartConfig}
                   />
+                </div>
+
+                <div className="flex w-full flex-col gap-6">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
+                      Current Voting Power
+                    </p>
+                    <div className="text-md font-normal">
+                      {!currentVotingPower ? (
+                        <SkeletonRow
+                          parentClassName="flex animate-pulse"
+                          className="h-6 w-24"
+                        />
+                      ) : (
+                        formatNumberUserReadable(currentVotingPower)
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="hidden h-px w-full bg-[#27272A] lg:flex" />
+
+                  {/* Delegators */}
+                  <div className="hidden flex-col gap-2 lg:flex">
+                    <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
+                      Delegators
+                    </p>
+
+                    <div className="scrollbar-none flex flex-col gap-4 overflow-y-auto">
+                      <ChartLegend
+                        items={legendItems}
+                        loading={loadingVotingPowerData}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden">
-        <VoteCompositionTable address={address} daoId={daoId} />
-      </div>
+          <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden">
+            <VoteCompositionTable address={address} daoId={daoId} />
+          </div>
+        </>
+      )}
     </div>
   );
 };
