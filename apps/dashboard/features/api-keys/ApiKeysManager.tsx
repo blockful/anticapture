@@ -1,6 +1,6 @@
 "use client";
 
-import { Code, KeyRound, Plus } from "lucide-react";
+import { BookOpen, Code, KeyRound, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/shared/components";
@@ -110,16 +110,27 @@ export const ApiKeysManager = () => {
             title="API Keys"
             description="Query Anticapture from Claude, Cursor, or Codex. Just ask in natural language."
           />
-          <Button
-            variant="primary"
-            size="md"
-            className="shrink-0"
-            // Anyone can browse the page; actions are what prompt sign-in.
-            onClick={() => (isAuthed ? setCreateOpen(true) : openLogin())}
-          >
-            <Plus className="size-3.5" />
-            Create key
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button variant="outline" size="md" asChild>
+              <a
+                href="https://docs.anticapture.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <BookOpen className="size-3.5" />
+                See our Docs
+              </a>
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              // Anyone can browse the page; actions are what prompt sign-in.
+              onClick={() => (isAuthed ? setCreateOpen(true) : openLogin())}
+            >
+              <Plus className="size-3.5" />
+              Create key
+            </Button>
+          </div>
         </div>
 
         {isPending || isLoading ? (
