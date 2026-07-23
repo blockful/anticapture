@@ -9,20 +9,24 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Address } from "viem";
 import { formatUnits, parseUnits } from "viem";
+import { useToken } from "@anticapture/client/hooks";
+import type { TokenPathParamsDaoEnumKey } from "@anticapture/client";
 
 import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { Button, SkeletonRow } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
+import { Switch } from "@/shared/components/design-system/switch/Switch";
 import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
@@ -58,6 +62,11 @@ export const TopInteractionsTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
+  // dust interactions (< $1 of volume) are hidden by default
+  const [hideDust, setHideDust] = useQueryState(
+    "hideDust",
+    parseAsBoolean.withDefault(true),
+  );
 
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
@@ -87,6 +96,19 @@ export const TopInteractionsTable = ({
     limit: 10,
   });
 
+  const { data: tokenData } = useToken(
+    daoId.toLowerCase() as TokenPathParamsDaoEnumKey,
+    { currency: "usd" },
+  );
+
+  // raw token units worth $1 at the current spot price; interactions whose
+  // total volume is below this are flagged (and hidden) as dust
+  const dustThresholdRawUnits = useMemo(() => {
+    const priceUsd = Number(tokenData?.price) || 0;
+    if (priceUsd <= 0) return 0;
+    return Number(parseUnits("1", decimals)) / priceUsd;
+  }, [tokenData?.price, decimals]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -95,14 +117,19 @@ export const TopInteractionsTable = ({
     return null;
   }
 
-  const tableData = interactions.map((interaction) => {
-    return {
-      address: interaction?.accountId,
-      volume: Number(interaction?.totalVolume) || 0,
-      balanceChange: Number(interaction?.amountTransferred) || 0,
-      totalInteractions: Number(interaction?.transferCount) || 0,
-    };
-  });
+  const isDust = (volume: number) =>
+    dustThresholdRawUnits > 0 && volume < dustThresholdRawUnits;
+
+  const tableData = interactions
+    .map((interaction) => {
+      return {
+        address: interaction?.accountId,
+        volume: Number(interaction?.totalVolume) || 0,
+        balanceChange: Number(interaction?.amountTransferred) || 0,
+        totalInteractions: Number(interaction?.transferCount) || 0,
+      };
+    })
+    .filter((row) => !hideDust || !isDust(row.volume));
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || null);
@@ -143,11 +170,10 @@ export const TopInteractionsTable = ({
         const addressValue: string = row.getValue("address");
         return (
           <div className="flex w-full items-center gap-2">
-            <EnsAvatar
-              address={addressValue as Address}
-              size="sm"
-              variant="rounded"
-            />
+            <DrawerAddressButton address={addressValue as Address} />
+            {isDust(row.original.volume) && (
+              <BadgeStatus variant="dimmed">Dust</BadgeStatus>
+            )}
             <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
               <CopyAndPasteButton
                 textToCopy={addressValue as `0x${string}`}
@@ -394,6 +420,13 @@ export const TopInteractionsTable = ({
         onLoadMore={fetchNextPage}
         fillHeight
       />
+      <div className="flex shrink-0 justify-end pt-2">
+        <Switch
+          checked={hideDust}
+          onCheckedChange={setHideDust}
+          label="Hide dust"
+        />
+      </div>
     </div>
   );
 };

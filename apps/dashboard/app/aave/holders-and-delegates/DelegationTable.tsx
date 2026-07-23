@@ -22,6 +22,7 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums";
@@ -41,6 +42,11 @@ interface DelegateTableData {
 
 export function DelegationTable({ days }: { days: TimeInterval }) {
   const pageLimit: number = 20;
+
+  const fromDate = useMemo(
+    () => Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days],
+    [days],
+  );
 
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
@@ -92,7 +98,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
       orderBy: orderByMap[sortBy as DelegateSortKey],
       orderDirection: sortOrder,
       daoId,
-      days,
+      fromDate,
       address: currentAddressFilter || undefined,
       limit: pageLimit,
       skipActivity: true,
@@ -477,7 +483,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
           columns={delegateColumns}
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
-          size="sm"
+          withRowBorders
           hasMore={hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}

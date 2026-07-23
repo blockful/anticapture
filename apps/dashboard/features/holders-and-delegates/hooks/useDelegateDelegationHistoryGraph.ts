@@ -3,7 +3,7 @@
 import type { HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey } from "@anticapture/client";
 import { useHistoricalVotingPowerByAccountId } from "@anticapture/client/hooks";
 import { useMemo } from "react";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -30,6 +30,7 @@ export function useDelegateDelegationHistoryGraph(
   daoId: DaoIdEnum,
   fromTimestamp?: number,
   toTimestamp?: number,
+  filterLowImportance?: boolean,
 ): UseDelegateDelegationHistoryGraphResult {
   const { decimals } = daoConfig[daoId];
 
@@ -37,7 +38,10 @@ export function useDelegateDelegationHistoryGraph(
     daoId.toLowerCase() as HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
     accountId,
     {
-      fromValue: "1",
+      // low importance filter hides deltas below 1 whole token
+      fromValue: filterLowImportance
+        ? parseUnits("1", decimals).toString()
+        : "1",
       limit: 1000,
       orderDirection: "desc",
       ...(fromTimestamp ? { fromDate: fromTimestamp } : {}),

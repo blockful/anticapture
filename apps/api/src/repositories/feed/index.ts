@@ -59,14 +59,23 @@ export class FeedRepository {
     items: EnrichedFeedEvent[];
     totalCount: number;
   }> {
-    const { skip, limit, orderBy, orderDirection, type, fromDate, toDate } =
-      req;
+    const {
+      skip,
+      limit,
+      orderBy,
+      orderDirection,
+      type,
+      fromDate,
+      toDate,
+      address,
+    } = req;
 
     const relevanceFilter = this.buildRelevanceFilter(type, valueThresholds);
 
     const where = and(
       fromDate ? gte(feedEvent.timestamp, fromDate) : undefined,
       toDate ? lte(feedEvent.timestamp, toDate) : undefined,
+      address ? this.buildAddressFilter(address) : undefined,
       relevanceFilter,
     );
 
@@ -338,6 +347,57 @@ export class FeedRepository {
       })
       .from(proposalsOnchain)
       .where(where);
+  }
+
+  // The feed_event table has no account column; addresses live in the source
+  // tables each event type is derived from. Match with EXISTS lookups keyed
+  // by (tx_hash, log_index), which the source tables index. Comparisons are
+  // lowercased on both sides so the filter works regardless of whether the
+  // source table stores checksummed or lowercase addresses. Outer feed_event
+  // columns use Drizzle column refs so they follow whatever alias the query
+  // builder assigns; the source tables are inlined as raw SQL with explicit
+  // aliases (see the proposerVotingPower note above).
+  private buildAddressFilter(address: string): SQL {
+    const addr = address.toLowerCase();
+    return sql`(
+      (${feedEvent.type} = 'DELEGATION' AND EXISTS (
+        SELECT 1 FROM delegations d
+        WHERE d.transaction_hash = ${feedEvent.txHash}
+          AND d.log_index = ${feedEvent.logIndex}
+          AND (
+            LOWER(d.delegator_account_id) = ${addr}
+            OR LOWER(d.delegate_account_id) = ${addr}
+            OR LOWER(d.previous_delegate) = ${addr}
+          )
+      ))
+      OR (${feedEvent.type} = 'TRANSFER' AND EXISTS (
+        SELECT 1 FROM transfers t
+        WHERE t.transaction_hash = ${feedEvent.txHash}
+          AND t.log_index = ${feedEvent.logIndex}
+          AND (
+            LOWER(t.from_account_id) = ${addr}
+            OR LOWER(t.to_account_id) = ${addr}
+          )
+      ))
+      OR (${feedEvent.type} = 'VOTE' AND EXISTS (
+        SELECT 1 FROM votes_onchain v
+        WHERE v.tx_hash = ${feedEvent.txHash}
+          AND v.log_index = ${feedEvent.logIndex}
+          AND LOWER(v.voter_account_id) = ${addr}
+      ))
+      OR (${feedEvent.type} = 'PROPOSAL' AND EXISTS (
+        SELECT 1 FROM proposals_onchain p
+        WHERE p.tx_hash = ${feedEvent.txHash}
+          AND LOWER(p.proposer_account_id) = ${addr}
+      ))
+      OR (${feedEvent.type} = 'PROPOSAL_EXTENDED'
+        AND ${feedEvent.proposalId} IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM proposals_onchain p
+          WHERE p.id = ${feedEvent.proposalId}
+            AND LOWER(p.proposer_account_id) = ${addr}
+      ))
+    )`;
   }
 
   private buildRelevanceFilter(

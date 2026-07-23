@@ -68,6 +68,7 @@ interface DataTableProps<TData, TValue> {
   onRowClick?: (row: TData) => void;
   size?: "default" | "sm";
   stickyFirstColumn?: boolean;
+  withRowBorders?: boolean;
   withDownloadCSV?: boolean;
   csvFilename?: string;
   withSorting?: boolean;
@@ -104,6 +105,7 @@ export const Table = <TData, TValue>({
   onRowClick,
   size = "default",
   stickyFirstColumn = false,
+  withRowBorders = false,
   withDownloadCSV = false,
   csvFilename,
   withSorting = false,
@@ -260,7 +262,10 @@ export const Table = <TData, TValue>({
                     <TableRow
                       key={row.id}
                       className={cn(
-                        "group border-transparent transition-colors duration-300",
+                        "group transition-colors duration-300",
+                        withRowBorders
+                          ? "border-light-dark"
+                          : "border-transparent",
                         (onRowClick || rowHref) &&
                           !disableRowClick?.(row.original)
                           ? "hover:bg-surface-contrast cursor-pointer"

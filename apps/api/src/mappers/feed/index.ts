@@ -4,6 +4,7 @@ import { feedEvent } from "@/database";
 import { FeedEventType, FeedRelevance } from "@/lib/constants";
 
 import {
+  AddressSchema,
   FeedEventTypeSchema,
   FeedRelevanceSchema,
   normalizeQueryArray,
@@ -62,6 +63,11 @@ export const FeedRequestSchema = z
       description:
         "Filter events by governance activity type. Pass repeated query params or a comma-delimited list.",
       example: ["VOTE"],
+    }),
+    address: AddressSchema.optional().openapi({
+      description:
+        "Filter events involving this address in any role (voter, proposer, delegator, delegate, previous delegate, sender or recipient). Case-insensitive.",
+      example: "0x1111111111111111111111111111111111111111",
     }),
     ...earliestLatestDateRangeQueryParams("event"),
   })

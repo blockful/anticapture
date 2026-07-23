@@ -32,7 +32,7 @@ export const TimePeriodSwitcher = ({
   };
 
   const formatPeriod = (period: TimePeriod) =>
-    period === "all" ? "Max available data" : period;
+    period === "all" ? "All time" : period;
 
   return isMobile ? (
     <div

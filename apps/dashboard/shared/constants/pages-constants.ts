@@ -23,6 +23,7 @@ export const PAGES_CONSTANTS = {
   },
   holdersAndDelegates: {
     title: "Holders & Delegates",
+    navTitle: "Stakeholders",
     page: "holders-and-delegates",
     description:
       "Explore top token holders and high-power delegates. Click on any row to view more details.",

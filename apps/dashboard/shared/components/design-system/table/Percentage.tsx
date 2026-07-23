@@ -25,9 +25,15 @@ type PercentageProps = Omit<
 > & {
   className?: string;
   value: number;
+  iconPosition?: "left" | "right";
 };
 
-export const Percentage = ({ className, value, ...props }: PercentageProps) => {
+export const Percentage = ({
+  className,
+  value,
+  iconPosition = "left",
+  ...props
+}: PercentageProps) => {
   if (value === 0)
     return (
       <span
@@ -39,18 +45,22 @@ export const Percentage = ({ className, value, ...props }: PercentageProps) => {
     );
   const variant = value >= 0 ? "positive" : "negative";
 
+  const icon =
+    value > 0 ? (
+      <ArrowUp
+        className={cn("size-4", variant === "positive" && "text-success")}
+      />
+    ) : (
+      <ArrowDown
+        className={cn("size-4", variant === "negative" && "text-error")}
+      />
+    );
+
   return (
     <span className={cn(percentageVariants({ variant }), className)} {...props}>
-      {value > 0 ? (
-        <ArrowUp
-          className={cn("size-4", variant === "positive" && "text-success")}
-        />
-      ) : (
-        <ArrowDown
-          className={cn("size-4", variant === "negative" && "text-error")}
-        />
-      )}
+      {iconPosition === "left" && icon}
       {value > 1000 ? "> 1000" : value < -1000 ? "< -1000" : Math.abs(value)}%
+      {iconPosition === "right" && icon}
     </span>
   );
 };
