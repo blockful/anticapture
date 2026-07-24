@@ -1,0 +1,7 @@
+FROM quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+
+# Exporter listens on 9187 (fixed). Tell Railway so its healthcheck probes
+# the right port — without this, probes hit the default PORT and fail with
+# "service unavailable".
+ENV PORT=9187
+EXPOSE 9187
