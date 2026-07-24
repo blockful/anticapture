@@ -18,10 +18,44 @@ docker build \
   infra/erpc
 ```
 
+## Dashboard integration
+
+The dashboard sends wallet JSON-RPC requests through its same-origin
+`/api/rpc/<chainId>` route. Configure that dashboard service with `ERPC_URL`
+(the `dashboard` project base URL) and `ERPC_SECRET` (`RPC_SECRET` on the eRPC
+service). Both variables must remain server-only; never use a `NEXT_PUBLIC_`
+prefix for the secret. Both are required; the route fails closed when either is
+absent.
+
+The proxy validates Railway's `X-Real-IP` and sends exactly one
+`X-Anticapture-Client-IP` value. eRPC prefers that header, then Railway's own
+`X-Real-IP`, only when the request arrives from a loopback or private-network
+peer. This preserves browser IPs for `perIP` rate limits without trusting
+caller-supplied forwarding headers. Prefer a Railway private URL for `ERPC_URL`
+so the proxy-to-eRPC hop stays within those trusted ranges.
+
 Rate limits are split because the deployments share provider API keys and the
 configured rate limiter uses the in-memory driver. Provider-level budgets are
 allocated 80% to production and 20% to dev/staging. Per-IP budgets stay the same
 in both configs.
+
+| Budget            | Production | Dev/staging | Purpose                                        |
+| ----------------- | ---------: | ----------: | ---------------------------------------------- |
+| `nodeful`         |      800/s |       200/s | Ethereum requests to the self-hosted Reth node |
+| `chainstack`      |      200/s |        50/s | Paid-provider cap and L2 capacity              |
+| `indexer-limit`   |      600/s |       150/s | Aggregate indexer project capacity             |
+| `api-limit`       |    20/s/IP |     20/s/IP | Public API project protection                  |
+| `dashboard-limit` |    20/s/IP |     20/s/IP | Authenticated dashboard protection             |
+
+`MAX_REQUESTS_PER_SECOND` is a per-indexer, per-instance limit. Keep the sum of
+that value across concurrently running indexer instances below the environment's
+`indexer-limit`; otherwise eRPC rejects excess calls and Ponder retries them.
+
+Mainnet routes to Nodeful first; Chainstack carries the `tier:fallback` tag, so
+eRPC's default selection policy holds it out of rotation until Nodeful is
+excluded (unhealthy, throttled, or lagging) or cannot serve a method — this
+keeps the paid provider off hedges and transient failover. L2 requests always
+use Chainstack because Nodeful serves Ethereum only.
 
 ## Monitoring
 

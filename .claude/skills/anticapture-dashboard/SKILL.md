@@ -38,7 +38,8 @@ pnpm dashboard build        # Production build
 | --------------------------------------- | -------- | -------------------------- |
 | `ANTICAPTURE_API_URL`                   | yes      | Gateful REST API base URL  |
 | `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` | yes      | WalletConnect project ID   |
-| `NEXT_PUBLIC_ALCHEMY_KEY`               | yes      | Alchemy RPC key            |
+| `ERPC_URL`                              | yes      | eRPC dashboard project URL |
+| `ERPC_SECRET`                           | yes      | eRPC server-side auth      |
 | `NEXT_PUBLIC_SITE_URL`                  | no       | Site URL for SEO/meta      |
 | `RESEND_API_KEY`                        | no       | Resend email API key       |
 | `RESEND_FROM_EMAIL`                     | no       | Sender email address       |
