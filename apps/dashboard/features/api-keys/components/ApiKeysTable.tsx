@@ -28,14 +28,11 @@ const DeleteKeyButton = ({
   <Tooltip asChild disableMobileClick tooltipContent="Delete key">
     <Button
       variant="ghost"
-      size="sm"
-      // p-2 keeps the desktop density; the min sizes preserve a 44px
-      // touch target on coarse pointers.
-      className="text-error min-h-11 min-w-11 p-2 lg:min-h-0 lg:min-w-0"
+      size="md"
       aria-label={`Delete ${apiKey.label}`}
       onClick={() => onDelete(apiKey)}
     >
-      <Trash2 className="size-4" />
+      <Trash2 className="text-secondary size-4" />
     </Button>
   </Tooltip>
 );
@@ -88,7 +85,7 @@ export const ApiKeysTable = ({
           row.original.revokedAt === null && (
             <DeleteKeyButton apiKey={row.original} onDelete={onDelete} />
           ),
-        meta: { columnClassName: "w-14" },
+        meta: { columnClassName: "w-20" },
       },
     ],
     [onDelete],

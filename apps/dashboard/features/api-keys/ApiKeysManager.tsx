@@ -104,7 +104,7 @@ export const ApiKeysManager = () => {
   return (
     <div className="flex w-full flex-col gap-6 p-5">
       <div className="flex flex-col gap-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row">
           <SectionTitle
             icon={<Code className="text-primary size-5" />}
             title="API Keys"
@@ -191,18 +191,17 @@ export const ApiKeysManager = () => {
         open={!!toDelete}
         onOpenChange={(open) => !open && setToDelete(null)}
         title="Delete API key?"
-        description={
-          toDelete
-            ? `This permanently deletes "${toDelete.label}". Any agent using it stops working right away. This can't be undone.`
-            : ""
-        }
         confirmLabel="Delete key"
         cancelLabel="Cancel"
         confirmVariant="destructive"
         isConfirmLoading={revoke.isPending}
         onConfirm={handleDelete}
       >
-        <div className="p-4" />
+        <span className="text-secondary text-sm">
+          {toDelete
+            ? `This permanently deletes "${toDelete.label}". Any agent using it stops working right away. This can't be undone.`
+            : ""}
+        </span>
       </Modal>
     </div>
   );
