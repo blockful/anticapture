@@ -1,3 +1,7 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "infra/monitoring/Dockerfile.railway-exporter"
+
 [deploy]
 healthcheckPath = "/health"
 healthcheckTimeout = 30

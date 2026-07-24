@@ -1,5 +1,11 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "infra/monitoring/Dockerfile.postgres-exporter"
+
 [deploy]
-healthcheckPath = "/metrics"
+# / is the exporter's landing page — returns 200 instantly. /metrics would
+# scrape every DB in DATA_SOURCE_NAME on each probe and blow the timeout.
+healthcheckPath = "/"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
