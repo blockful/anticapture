@@ -10,6 +10,7 @@ test.describe("Data report", () => {
       });
     });
 
+    await page.getByRole("button", { name: "Help" }).click();
     await page.getByTestId("report-data-button").click();
     await page
       .getByRole("combobox", { name: "Which panel is incorrect?" })
@@ -36,6 +37,7 @@ test.describe("Data report", () => {
       });
     });
 
+    await page.getByRole("button", { name: "Help" }).click();
     await page.getByTestId("report-data-button").click();
     await page
       .getByRole("combobox", { name: "Which panel is incorrect?" })
@@ -68,6 +70,7 @@ test.describe("Data report", () => {
     });
 
     await page.getByRole("link", { name: /token distribution/i }).click();
+    await page.getByRole("button", { name: "Help" }).click();
     await page.getByTestId("report-data-button").click();
     await page
       .getByRole("combobox", { name: "Which panel is incorrect?" })

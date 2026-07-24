@@ -10,11 +10,7 @@ describe("report panel routing", () => {
     expect(getReportSection(pathname)).toBe(expectedSection);
   });
 
-  it("uses overview options only when no reportable section exists", () => {
-    expect(getReportPanels(getReportSection("/ens"))).toEqual([
-      "Overview metrics",
-      "Resilience stages",
-      "Attack exposure",
-    ]);
+  it("uses the single overview panel when no reportable section exists", () => {
+    expect(getReportPanels(getReportSection("/ens"))).toEqual(["Overview"]);
   });
 });

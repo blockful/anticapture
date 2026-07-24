@@ -1,5 +1,5 @@
 export const REPORT_PANELS_BY_SECTION = {
-  overview: ["Overview metrics", "Resilience stages", "Attack exposure"],
+  overview: ["Overview"],
   "holders-and-delegates": ["Holders", "Delegates", "Delegation history"],
   "token-distribution": ["Token distribution", "Supply metrics", "Charts"],
   governance: ["Governance settings", "Voting", "Quorum"],

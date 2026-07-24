@@ -26,8 +26,10 @@ import {
   useReportForm,
 } from "@/shared/hooks/useReportForm";
 
-type ReportDataButtonProps = {
+type ReportDataModalProps = {
   daoId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
 const getErrorMessage = (error: unknown) => {
@@ -49,15 +51,18 @@ const getErrorMessage = (error: unknown) => {
   return "We couldn't submit your report. Please try again shortly.";
 };
 
-/** Opens the public data-quality report flow for the current DAO section. */
-export const ReportDataButton = ({ daoId }: ReportDataButtonProps) => {
+/** The public data-quality report flow for the current DAO section, as a controlled modal. */
+export const ReportDataModal = ({
+  daoId,
+  open,
+  onOpenChange,
+}: ReportDataModalProps) => {
   const pathname = usePathname();
   const section = getReportSection(pathname);
   const url =
     typeof window === "undefined"
       ? "https://anticapture.com"
       : window.location.href;
-  const [isOpen, setIsOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { form, mutate, isPending, error } = useReportForm({
     daoId,
@@ -68,25 +73,27 @@ export const ReportDataButton = ({ daoId }: ReportDataButtonProps) => {
     label,
     value: label,
   }));
+  const isOverview = section === "overview";
+  const defaultPanel = isOverview ? panels[0].value : "";
 
   const resetReportForm = useCallback(() => {
     form.reset({
       daoId,
       section,
-      panel: "",
+      panel: defaultPanel,
       description: "",
       email: "",
       url,
     });
-  }, [daoId, form, section, url]);
+  }, [daoId, defaultPanel, form, section, url]);
 
   useEffect(() => {
     setIsSubmitted(false);
     resetReportForm();
   }, [resetReportForm]);
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
+  const handleOpenChange = (nextOpen: boolean) => {
+    onOpenChange(nextOpen);
     setIsSubmitted(false);
     resetReportForm();
   };
@@ -100,6 +107,120 @@ export const ReportDataButton = ({ daoId }: ReportDataButtonProps) => {
   };
 
   return (
+    <Modal
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Report incorrect data"
+      description="Tell us what looks wrong. We'll review it as soon as possible."
+      className="max-w-125"
+      bodyClassName="p-5"
+    >
+      {isSubmitted ? (
+        <div className="space-y-3 py-4 text-center">
+          <h2 className="text-primary text-lg font-medium">Report received</h2>
+          <p className="text-secondary text-sm">
+            Thanks for helping us improve Anticapture.
+          </p>
+          <Button variant="primary" onClick={() => handleOpenChange(false)}>
+            Done
+          </Button>
+        </div>
+      ) : (
+        <Form {...form}>
+          <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit(handleSubmit)}
+          >
+            <FormField
+              control={form.control}
+              name="panel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Which panel is incorrect?</FormLabel>
+                  <FormControl>
+                    <Select
+                      items={panels}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="Choose a panel"
+                      disabled={isOverview}
+                      aria-label="Which panel is incorrect?"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="report-description">
+                    What looks incorrect?
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      id="report-description"
+                      className="min-h-28 resize-y"
+                      placeholder="Describe the data issue and, if possible, the expected value."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="report-email" isOptional>
+                    Email
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      id="report-email"
+                      type="email"
+                      placeholder="you@example.com"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {error && (
+              <p className="text-error text-sm" role="alert">
+                {getErrorMessage(error)}
+              </p>
+            )}
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              loading={isPending}
+              loadingText="Sending…"
+            >
+              Submit report
+            </Button>
+          </form>
+        </Form>
+      )}
+    </Modal>
+  );
+};
+
+type ReportDataButtonProps = {
+  daoId: string;
+};
+
+/** Floating trigger + modal for the public data-quality report flow. Used where there's no help dropdown to nest the option into (e.g. whitelabel). */
+export const ReportDataButton = ({ daoId }: ReportDataButtonProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
     <>
       <Button
         variant="outline"
@@ -111,102 +232,7 @@ export const ReportDataButton = ({ daoId }: ReportDataButtonProps) => {
         <Flag className="size-4" aria-hidden />
         Report incorrect data
       </Button>
-      <Modal
-        open={isOpen}
-        onOpenChange={handleOpenChange}
-        title="Report incorrect data"
-        description="Tell us what looks wrong. We'll review it as soon as possible."
-        className="max-w-125"
-        bodyClassName="p-5"
-      >
-        {isSubmitted ? (
-          <div className="space-y-3 py-4 text-center">
-            <h2 className="text-primary text-lg font-medium">
-              Report received
-            </h2>
-            <p className="text-secondary text-sm">
-              Thanks for helping us improve Anticapture.
-            </p>
-            <Button variant="primary" onClick={() => handleOpenChange(false)}>
-              Done
-            </Button>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form
-              className="space-y-4"
-              onSubmit={form.handleSubmit(handleSubmit)}
-            >
-              <FormField
-                control={form.control}
-                name="panel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Which panel is incorrect?</FormLabel>
-                    <FormControl>
-                      <Select
-                        items={panels}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        placeholder="Choose a panel"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>What looks incorrect?</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        className="min-h-28 resize-y"
-                        placeholder="Describe the data issue and, if possible, the expected value."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel isOptional>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="email"
-                        placeholder="you@example.com"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {error && (
-                <p className="text-error text-sm" role="alert">
-                  {getErrorMessage(error)}
-                </p>
-              )}
-              <Button
-                type="submit"
-                variant="primary"
-                className="w-full"
-                loading={isPending}
-                loadingText="Sending…"
-              >
-                Submit report
-              </Button>
-            </form>
-          </Form>
-        )}
-      </Modal>
+      <ReportDataModal daoId={daoId} open={isOpen} onOpenChange={setIsOpen} />
     </>
   );
 };
