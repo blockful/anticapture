@@ -1,9 +1,8 @@
 "use client";
 
-import { AlertCircle } from "lucide-react";
-
 import { useInactiveVotingPowerSummary } from "@anticapture/client/hooks";
 import type { InactiveVotingPowerSummaryPathParamsDaoEnumKey } from "@anticapture/client";
+import { InlineAlert } from "@/shared/components/design-system/alerts";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface InactiveDelegatesBannerProps {
@@ -35,18 +34,20 @@ export const InactiveDelegatesBanner = ({
   if (!data || totalProposals === 0 || percentage <= 0) return null;
 
   return (
-    <div className="bg-surface-opacity-warning border-warning/30 flex items-start gap-2 rounded-lg border p-3">
-      <AlertCircle className="text-warning mt-0.5 size-4 shrink-0" />
-      <div className="flex flex-col gap-0.5">
-        <p className="text-primary text-sm font-medium">
-          {Math.round(percentage)}% of delegated voting power is assigned to
-          inactive delegates.
-        </p>
-        <p className="text-secondary text-xs font-normal">
-          Inactive = no votes cast in the selected period. Flagged rows below
-          indicate holders whose delegate has not participated recently.
-        </p>
-      </div>
-    </div>
+    <InlineAlert
+      variant="warning"
+      text={
+        <span className="flex flex-col gap-0.5">
+          <span className="text-primary text-sm font-medium">
+            {Math.round(percentage)}% of delegated voting power is assigned to
+            inactive delegates.
+          </span>
+          <span className="text-secondary text-xs font-normal">
+            Inactive = no votes cast in the selected period. Flagged rows below
+            indicate holders whose delegate has not participated recently.
+          </span>
+        </span>
+      }
+    />
   );
 };

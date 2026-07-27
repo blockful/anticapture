@@ -1,13 +1,20 @@
 "use client";
 
+import {
+  getNextPageParam,
+  type FormerDelegatorsPathParamsDaoEnumKey,
+} from "@anticapture/client";
+import { useFormerDelegatorsInfinite } from "@anticapture/client/hooks";
 import { useState } from "react";
+import { formatUnits } from "viem";
 
 import { FormerDelegatorsTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/FormerDelegatorsTable";
 import { useVoteCompositionData } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/hooks/useVoteCompositionData";
 import { ThePieChart } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/ThePieChart";
 import { VoteCompositionTable } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteCompositionTable";
+import { SegmentedControl } from "@/shared/components/design-system/segmented-control";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { cn } from "@/shared/utils/cn";
+import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 
@@ -86,23 +93,61 @@ export const VoteComposition = ({
     chartConfig,
     loading: loadingVotingPowerData,
   } = useVoteCompositionData(daoId, address, includeBalance);
+
+  const { decimals } = daoConfig[daoId];
+
+  // Summary for the "Former Delegators" view. Shares the same query key as
+  // FormerDelegatorsTable, so this only reads from cache (no extra request).
+  const { data: formerData } = useFormerDelegatorsInfinite(
+    daoId.toLowerCase() as FormerDelegatorsPathParamsDaoEnumKey,
+    address,
+    { limit: 20, orderDirection: "desc" },
+    { query: { getNextPageParam, enabled: view === "former" } },
+  );
+  const formerRows = (formerData?.pages ?? []).flatMap((page) => page.items);
+  const formerTotalCount =
+    formerData?.pages?.[0]?.totalCount ?? formerRows.length;
+  const formerTotalVpLost = formerRows.reduce(
+    (sum, item) =>
+      sum + Number(formatUnits(BigInt(item.amount.toString()), decimals)),
+    0,
+  );
+
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
-      <div className="flex items-center justify-end gap-2">
-        <div className="bg-surface-contrast flex rounded-lg p-0.5">
-          {(["current", "former"] as const).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={cn(
-                "cursor-pointer rounded-md px-3 py-1 text-sm font-medium transition-colors",
-                view === v ? "bg-middle-dark text-primary" : "text-secondary",
-              )}
-            >
-              {v === "current" ? "Current Delegators" : "Former Delegators"}
-            </button>
-          ))}
+      {/* Summary at the left, view selector at the right, on one line */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-secondary text-alternative-xs font-mono font-medium uppercase">
+            {view === "current" ? "Current Voting Power" : "Total VP Lost"}
+          </span>
+          {view === "current" ? (
+            !currentVotingPower ? (
+              <SkeletonRow
+                parentClassName="flex animate-pulse"
+                className="h-6 w-24"
+              />
+            ) : (
+              <span className="text-primary text-md font-normal">
+                {formatNumberUserReadable(currentVotingPower)}
+              </span>
+            )
+          ) : (
+            <span className="text-primary text-md font-normal">
+              {formatNumberUserReadable(formerTotalVpLost)} cross{" "}
+              {formerTotalCount}{" "}
+              {formerTotalCount === 1 ? "address" : "addresses"}
+            </span>
+          )}
         </div>
+        <SegmentedControl
+          value={view}
+          onValueChange={(value) => setView(value as "current" | "former")}
+          items={[
+            { value: "current", label: "Current Delegators" },
+            { value: "former", label: "Former Delegators" },
+          ]}
+        />
       </div>
       {view === "former" ? (
         <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
@@ -143,24 +188,6 @@ export const VoteComposition = ({
                 </div>
 
                 <div className="flex w-full flex-col gap-6">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-                      Current Voting Power
-                    </p>
-                    <div className="text-md font-normal">
-                      {!currentVotingPower ? (
-                        <SkeletonRow
-                          parentClassName="flex animate-pulse"
-                          className="h-6 w-24"
-                        />
-                      ) : (
-                        formatNumberUserReadable(currentVotingPower)
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="hidden h-px w-full bg-[#27272A] lg:flex" />
-
                   {/* Delegators */}
                   <div className="hidden flex-col gap-2 lg:flex">
                     <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">

@@ -20,6 +20,7 @@ import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
+import { Switch } from "@/shared/components/design-system/switch/Switch";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
@@ -63,7 +64,7 @@ export const VotingPowerHistoryTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
-  const [filterLowImportance] = useQueryState(
+  const [filterLowImportance, setFilterLowImportance] = useQueryState(
     "lowImportance",
     parseAsBoolean.withDefault(true),
   );
@@ -486,6 +487,13 @@ export const VotingPowerHistoryTable = ({
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         csvFilename="voting-power-history.csv"
+        footerActions={
+          <Switch
+            checked={filterLowImportance}
+            onCheckedChange={setFilterLowImportance}
+            label="Filter low importance"
+          />
+        }
         error={error}
         fillHeight
       />

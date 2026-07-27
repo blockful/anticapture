@@ -11,10 +11,10 @@ import { useEffect, useRef } from "react";
 
 import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
 import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
+import { SegmentedControl } from "@/shared/components/design-system/segmented-control";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { cn } from "@/shared/utils/cn";
 
 const RELEVANCE_OPTIONS: {
   value: FeedEventsQueryParamsRelevanceEnumKey | "ALL";
@@ -94,41 +94,29 @@ export const DrawerActivityFeed = ({
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <span className="text-secondary text-xs font-medium">Date</span>
-          <div className="bg-surface-contrast flex rounded-lg p-0.5">
-            {(["desc", "asc"] as const).map((dir) => (
-              <button
-                key={dir}
-                onClick={() => setOrderDirection(dir)}
-                className={cn(
-                  "cursor-pointer rounded-md px-2 py-1 text-xs font-medium transition-colors",
-                  orderDirection === dir
-                    ? "bg-middle-dark text-primary"
-                    : "text-secondary",
-                )}
-              >
-                {dir === "desc" ? "Newest first" : "Oldest first"}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            size="sm"
+            value={orderDirection}
+            onValueChange={(value) =>
+              setOrderDirection(value as "asc" | "desc")
+            }
+            items={[
+              { value: "desc", label: "Newest first" },
+              { value: "asc", label: "Oldest first" },
+            ]}
+          />
         </div>
         <div className="flex items-center gap-2">
           <span className="text-secondary text-xs font-medium">Relevance</span>
-          <div className="bg-surface-contrast flex rounded-lg p-0.5">
-            {RELEVANCE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setRelevance(opt.value)}
-                className={cn(
-                  "cursor-pointer rounded-md px-2 py-1 text-xs font-medium transition-colors",
-                  relevance === opt.value
-                    ? "bg-middle-dark text-primary"
-                    : "text-secondary",
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            size="sm"
+            value={relevance}
+            onValueChange={setRelevance}
+            items={RELEVANCE_OPTIONS.map((opt) => ({
+              value: opt.value,
+              label: opt.label,
+            }))}
+          />
         </div>
       </div>
 

@@ -71,6 +71,7 @@ interface DataTableProps<TData, TValue> {
   withRowBorders?: boolean;
   withDownloadCSV?: boolean;
   csvFilename?: string;
+  footerActions?: ReactNode;
   withSorting?: boolean;
   wrapperClassName?: string;
   enableExpanding?: boolean;
@@ -108,6 +109,7 @@ export const Table = <TData, TValue>({
   withRowBorders = false,
   withDownloadCSV = false,
   csvFilename,
+  footerActions,
   withSorting = false,
   wrapperClassName,
   enableExpanding = false,
@@ -410,22 +412,31 @@ export const Table = <TData, TValue>({
           )}
         </TableBody>
       </TableContainer>
-      {withDownloadCSV && data.length > 0 && isMounted && (
-        <p className="text-secondary mt-2 flex font-mono text-[13px] tracking-wider">
-          [DOWNLOAD AS{" "}
-          <CSVLink
-            data={formatCsvData(data)}
-            filename={csvFilename ?? "table-data.csv"}
-            className={cn(
-              defaultLinkVariants({ variant: "highlight" }),
-              "pl-2",
-            )}
-            separator=";"
-          >
-            CSV <DownloadIcon className="size-3.5" />
-          </CSVLink>
-          ]
-        </p>
+      {(footerActions || (withDownloadCSV && data.length > 0 && isMounted)) && (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          {withDownloadCSV && data.length > 0 && isMounted ? (
+            <p className="text-secondary flex font-mono text-[13px] tracking-wider">
+              [DOWNLOAD AS{" "}
+              <CSVLink
+                data={formatCsvData(data)}
+                filename={csvFilename ?? "table-data.csv"}
+                className={cn(
+                  defaultLinkVariants({ variant: "highlight" }),
+                  "pl-2",
+                )}
+                separator=";"
+              >
+                CSV <DownloadIcon className="size-3.5" />
+              </CSVLink>
+              ]
+            </p>
+          ) : (
+            <span />
+          )}
+          {footerActions && (
+            <div className="flex items-center">{footerActions}</div>
+          )}
+        </div>
       )}
     </div>
   );

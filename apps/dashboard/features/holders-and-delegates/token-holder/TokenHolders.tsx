@@ -479,19 +479,21 @@ export const TokenHolders = ({
           fromDate={activityFromDate}
           toDate={toDate}
         />
-        <Table
-          columns={tokenHoldersColumns}
-          data={rows}
-          hasMore={hasNextPage}
-          isLoadingMore={isFetchingNextPage}
-          onLoadMore={fetchNextPage}
-          onRowClick={(row) => setDrawerAddress(row.address)}
-          withRowBorders
-          withDownloadCSV={true}
-          csvFilename="token-holders.csv"
-          error={error}
-          fillHeight
-        />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <Table
+            columns={tokenHoldersColumns}
+            data={rows}
+            hasMore={hasNextPage}
+            isLoadingMore={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            onRowClick={(row) => setDrawerAddress(row.address)}
+            withRowBorders
+            withDownloadCSV={true}
+            csvFilename="token-holders.csv"
+            error={error}
+            fillHeight
+          />
+        </div>
       </div>
       <HoldersAndDelegatesDrawer
         isOpen={!!drawerAddress}

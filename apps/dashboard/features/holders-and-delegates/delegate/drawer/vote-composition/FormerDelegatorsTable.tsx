@@ -14,7 +14,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { formatFullDate } from "@/shared/utils/formatRelativeTime";
+import { formatShortDate } from "@/shared/utils/formatRelativeTime";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 
 interface FormerDelegatorRow {
@@ -58,9 +58,6 @@ export const FormerDelegatorsTable = ({
     })),
   );
 
-  const totalCount = data?.pages?.[0]?.totalCount ?? rows.length;
-  const totalVpLost = rows.reduce((sum, r) => sum + r.vpImpact, 0);
-
   const columns: ColumnDef<FormerDelegatorRow>[] = [
     {
       accessorKey: "address",
@@ -85,6 +82,12 @@ export const FormerDelegatorsTable = ({
           <div className="flex justify-end">
             <SkeletonRow className="h-5 w-16" />
           </div>
+        ) : row.original.vpImpact === row.original.redelegatedAmount ? (
+          <div className="flex w-full items-center justify-end text-sm tabular-nums">
+            <span className="text-primary">
+              {formatNumberUserReadable(row.original.vpImpact)}
+            </span>
+          </div>
         ) : (
           <div className="flex w-full items-center justify-end gap-1.5 text-sm tabular-nums">
             <span className="text-secondary line-through">
@@ -108,9 +111,9 @@ export const FormerDelegatorsTable = ({
           <SkeletonRow className="h-5 w-32" />
         ) : (
           <div className="text-secondary flex items-center gap-1.5 text-sm">
-            <span>{formatFullDate(row.original.startTimestamp)}</span>
+            <span>{formatShortDate(row.original.startTimestamp)}</span>
             <ArrowRight className="size-3.5" />
-            <span>{formatFullDate(row.original.endTimestamp)}</span>
+            <span>{formatShortDate(row.original.endTimestamp)}</span>
           </div>
         ),
       meta: { columnClassName: "w-56" },
@@ -133,17 +136,6 @@ export const FormerDelegatorsTable = ({
 
   return (
     <div className="flex h-full flex-col gap-3">
-      {!isLoading && rows.length > 0 && (
-        <div className="flex flex-col gap-0.5">
-          <span className="text-secondary text-alternative-xs font-mono font-medium uppercase">
-            Total VP Lost
-          </span>
-          <span className="text-primary text-md font-normal">
-            {formatNumberUserReadable(totalVpLost)} cross {totalCount}{" "}
-            {totalCount === 1 ? "address" : "addresses"}
-          </span>
-        </div>
-      )}
       <Table
         columns={columns}
         data={isLoading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : rows}

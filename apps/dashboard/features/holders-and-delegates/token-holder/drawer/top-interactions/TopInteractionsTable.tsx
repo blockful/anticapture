@@ -82,7 +82,6 @@ export const TopInteractionsTable = ({
     interactions,
     loading,
     error,
-    totalTransfers,
     fetchNextPage,
     fetchingMore,
     hasNextPage,
@@ -394,11 +393,15 @@ export const TopInteractionsTable = ({
             </div>
           );
         }
-        const totalInteractions: number = row.getValue("totalInteractions");
+        const priceUsd = Number(tokenData?.price) || 0;
+        const volumeTokens =
+          token === "ERC20"
+            ? Number(row.original.volume) / 10 ** decimals
+            : Number(row.original.volume);
+        const usdValue = volumeTokens * priceUsd;
         return (
           <div className="flex w-full items-center justify-end text-sm">
-            {Number(totalInteractions) || 0} (
-            {((totalInteractions / totalTransfers) * 100).toFixed(2)}%)
+            ${formatNumberUserReadable(usdValue)}
           </div>
         );
       },
@@ -418,15 +421,15 @@ export const TopInteractionsTable = ({
         hasMore={hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
+        footerActions={
+          <Switch
+            checked={hideDust}
+            onCheckedChange={setHideDust}
+            label="Hide dust"
+          />
+        }
         fillHeight
       />
-      <div className="flex shrink-0 justify-end pt-2">
-        <Switch
-          checked={hideDust}
-          onCheckedChange={setHideDust}
-          label="Hide dust"
-        />
-      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import {
@@ -23,6 +24,7 @@ import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWater
 import { ChartContainer } from "@/shared/components/ui/chart";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import {
+  cn,
   timestampToReadableDate,
   formatNumberUserReadable,
 } from "@/shared/utils";
@@ -175,6 +177,12 @@ export const BalanceHistoryVariationGraph = ({
     },
   ];
 
+  // Net balance change across the selected period: ending balance minus the
+  // balance the address held just before the first transfer in the window.
+  const startingBalance = extendedChartData[0]?.balance ?? 0;
+  const endingBalance = balanceHistory[balanceHistory.length - 1]?.balance ?? 0;
+  const netChange = endingBalance - startingBalance;
+
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
@@ -203,10 +211,25 @@ export const BalanceHistoryVariationGraph = ({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between">
-        <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
-          BALANCE HISTORY
-        </h3>
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
+            Balance Change
+          </h3>
+          <span
+            className={cn(
+              "text-md flex items-center gap-1 font-normal",
+              netChange >= 0 ? "text-success" : "text-error",
+            )}
+          >
+            {netChange >= 0 ? (
+              <ArrowUp className="size-4" />
+            ) : (
+              <ArrowDown className="size-4" />
+            )}
+            {formatNumberUserReadable(Math.abs(netChange))}
+          </span>
+        </div>
         <TimePeriodSwitcher
           value={selectedPeriod}
           setTimePeriod={setSelectedPeriod}
