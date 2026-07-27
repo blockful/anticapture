@@ -1,0 +1,136 @@
+{
+  "title": "User API Validation",
+  "uid": "user-api-validation",
+  "editable": true,
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "timezone": "America/Sao_Paulo",
+  "tags": ["anticapture", "user-api", "validation"],
+  "time": { "from": "now-30d", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "People using it",
+      "description": "All registered accounts and callers active today (GMT-3).",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "short", "decimals": 0 },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "user_api_accounts_total",
+          "legendFormat": "Accounts",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(user_api_active_users)",
+          "legendFormat": "Active today",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "API calls per day",
+      "description": "All self-service key calls, including 429 and downstream 5xx.",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "short", "decimals": 0 },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(tenant_requests_total{tenant=\"user:*\"}[1d]))",
+          "legendFormat": "Calls",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Keys",
+      "description": "Current live keys and keys created over the trailing day.",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "short", "decimals": 0 },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "user_api_keys_live",
+          "legendFormat": "Live keys",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(user_api_keys_created_total[1d])",
+          "legendFormat": "Created / day",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Active-user retention by key age",
+      "description": "Today's active users bucketed by their newest key age.",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "custom": {
+            "stacking": { "mode": "normal", "group": "A" },
+            "fillOpacity": 70
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "user_api_active_users",
+          "legendFormat": "{{age_bucket}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

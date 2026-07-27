@@ -23,6 +23,7 @@ const ORIGIN = `http://${HOST}`;
 const buildApp = (opts: {
   magicLink?: Parameters<typeof createAuthResolver>[0]["magicLink"];
   google?: Parameters<typeof createAuthResolver>[0]["google"];
+  metricsToken?: string;
 }) => {
   const client = new PGlite();
   const db = drizzle(client, { schema: fullSchema });
@@ -40,6 +41,7 @@ const buildApp = (opts: {
     db,
     authResolver,
     draftsService: new ProposalDraftsService(new DraftsRepository(db)),
+    metricsToken: opts.metricsToken,
   });
 
   return { client, db, app };
@@ -66,6 +68,34 @@ const headers = {
 };
 
 describe("optional auth methods", () => {
+  describe("/metrics auth", () => {
+    const open = buildApp({});
+    const protectedApp = buildApp({
+      metricsToken: "test-metrics-token-0123456789",
+    });
+
+    it("is public when no token is configured", async () => {
+      const res = await open.app.request("/metrics");
+      expect(res.status).toBe(200);
+    });
+
+    it("requires the configured bearer token", async () => {
+      const unauthorized = await protectedApp.app.request("/metrics");
+      const authorized = await protectedApp.app.request("/metrics", {
+        headers: {
+          Authorization: "Bearer test-metrics-token-0123456789",
+        },
+      });
+
+      expect(unauthorized.status).toBe(401);
+      expect(authorized.status).toBe(200);
+    });
+
+    afterAll(async () => {
+      await Promise.all([open.client.close(), protectedApp.client.close()]);
+    });
+  });
+
   describe("magic link enabled", () => {
     const sendMagicLink = vi.fn(
       async (_params: { email: string; url: string }) => undefined,

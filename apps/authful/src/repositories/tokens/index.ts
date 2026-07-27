@@ -3,6 +3,7 @@ import {
   between,
   desc,
   eq,
+  gte,
   inArray,
   isNull,
   like,
@@ -48,6 +49,15 @@ export class TokensRepository {
       .from(tokens)
       .where(and(eq(tokens.tenant, tenant), isNull(tokens.revokedAt)))
       .orderBy(desc(tokens.createdAt));
+  }
+
+  async listUserTokenIdsUsedSince(since: Date): Promise<string[]> {
+    const rows = await this.db
+      .select({ id: tokens.id })
+      .from(tokens)
+      .where(and(like(tokens.tenant, "user:%"), gte(tokens.lastUsedAt, since)))
+      .orderBy(tokens.id);
+    return rows.map(({ id }) => id);
   }
 
   async create(token: NewToken): Promise<DBToken> {

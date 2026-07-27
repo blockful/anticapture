@@ -56,6 +56,11 @@ const envSchema = z
       .min(16)
       .optional()
       .or(z.literal("").transform(() => undefined)),
+    USER_API_METRICS_TOKEN: z
+      .string()
+      .min(16)
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
   })
   .superRefine((data, ctx) => {
     if (Boolean(data.GOOGLE_CLIENT_ID) !== Boolean(data.GOOGLE_CLIENT_SECRET)) {

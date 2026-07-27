@@ -143,4 +143,8 @@ export class TokensService {
   async usageByTenant(tenant: string): Promise<TokenUsage[]> {
     return this.repo.listUsageByTenant(tenant);
   }
+
+  async activeUserTokenIds(since: Date): Promise<string[]> {
+    return this.repo.listUserTokenIdsUsedSince(since);
+  }
 }

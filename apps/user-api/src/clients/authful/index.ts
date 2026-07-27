@@ -25,6 +25,7 @@ export interface AuthfulClient {
   /** Token metadata for a single tenant (used to surface lastUsedAt). */
   listByTenant(tenant: string): Promise<TokenMetadata[]>;
   usageByTenant(tenant: string): Promise<TokenUsage[]>;
+  activeTokenIds(since: Date): Promise<string[]>;
 }
 
 export class AuthfulHttpClient implements AuthfulClient {
@@ -98,5 +99,17 @@ export class AuthfulHttpClient implements AuthfulClient {
     }
     const body = (await res.json()) as { items: TokenUsage[] };
     return body.items;
+  }
+
+  async activeTokenIds(since: Date): Promise<string[]> {
+    const res = await fetch(
+      `${this.baseUrl}/tokens/active?since=${encodeURIComponent(since.toISOString())}`,
+      { headers: this.headers() },
+    );
+    if (!res.ok) {
+      throw new Error(`authful active token list failed: ${res.status}`);
+    }
+    const body = (await res.json()) as { tokenIds: string[] };
+    return body.tokenIds;
   }
 }

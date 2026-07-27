@@ -207,6 +207,32 @@ describe("authful app", () => {
       expect(items.every((t) => t.tenant === "user:abc")).toBe(true);
     });
 
+    it("lists recently active user token ids without leaking ops tenants", async () => {
+      const active = await mint({ tenant: "user:abc" });
+      const stale = await mint({ tenant: "user:def" });
+      const ops = await mint({ tenant: "uniswap" });
+      await db
+        .update(tokens)
+        .set({ lastUsedAt: new Date("2026-07-27T12:00:00.000Z") })
+        .where(eq(tokens.id, active.id));
+      await db
+        .update(tokens)
+        .set({ lastUsedAt: new Date("2026-07-20T12:00:00.000Z") })
+        .where(eq(tokens.id, stale.id));
+      await db
+        .update(tokens)
+        .set({ lastUsedAt: new Date("2026-07-27T12:00:00.000Z") })
+        .where(eq(tokens.id, ops.id));
+
+      const res = await app.request(
+        "/tokens/active?since=2026-07-27T03%3A00%3A00.000Z",
+        { headers: provisioningHeaders },
+      );
+
+      expect(res.status).toBe(200);
+      await expect(res.json()).resolves.toEqual({ tokenIds: [active.id] });
+    });
+
     it("revokes its own user:* token", async () => {
       const minted = (await (
         await provMint({ tenant: "user:abc", name: "temp" })
