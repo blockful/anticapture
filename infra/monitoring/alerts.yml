@@ -120,47 +120,6 @@ groups:
             fall through to upstreams, but RPC spend and latency will increase. Check the
             cache PostgreSQL service and eRPC logs.
 
-      - alert: RailwayExporterStale
-        expr: time() - (railway_exporter_last_scrape_success or vector(0)) > 300
-        for: 5m
-        keep_firing_for: 15m
-        labels:
-          severity: critical
-        annotations:
-          summary: "[CRITICAL] Railway platform metrics are stale"
-          description: >
-            The Railway exporter has not completed an API collection for at least 5 minutes.
-            Check its API token, environment targets, rate limits, and logs.
-
-      - alert: RailwayHighMemoryUtilization
-        expr: max by (project_name, environment_name, service_name) (railway_service_memory_utilization) > 0.85
-        for: 10m
-        keep_firing_for: 15m
-        labels:
-          severity: warning
-        annotations:
-          summary: "[WARNING] Railway RAM above 85% on {{ $labels.service_name }}"
-          description: >
-            {{ $labels.project_name }}/{{ $labels.environment_name }}/{{ $labels.service_name }}
-            has used {{ printf "%.1f" $value }} of its Railway memory limit for 10 minutes.
-            Check for growth, cache pressure, and OOM restarts before increasing the limit.
-
-      - alert: RailwayHighEgress
-        expr: >
-          sum by (project_name, environment_name, service_name) (
-            clamp_min(increase(railway_service_network_tx_gb_total[1h]), 0)
-          ) > 5
-        for: 10m
-        keep_firing_for: 15m
-        labels:
-          severity: warning
-        annotations:
-          summary: "[WARNING] Railway egress above 5 GB/hour on {{ $labels.service_name }}"
-          description: >
-            {{ $labels.project_name }}/{{ $labels.environment_name }}/{{ $labels.service_name }}
-            transmitted {{ printf "%.2f" $value }} GB over the last hour. Check public database
-            URLs, oversized responses, and traffic spikes; prefer Railway private networking.
-
       - alert: PostgreSQLHighConnections
         expr: >
           sum by (server) (pg_stat_activity_count{job="anticapture-postgres-exporter"})
