@@ -19,8 +19,10 @@ import { VotingModal } from "@/features/governance/components/modals/VotingModal
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import {
   getVoteText,
+  type OffchainVoteIndicator,
   ProposalHeader,
 } from "@/features/governance/components/proposal-overview/ProposalHeader";
+import { OffchainVotedChip } from "@/features/governance/components/proposal-overview/OffchainVotedChip";
 import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
 import { ProposalSectionSkeleton } from "@/features/governance/components/proposal-overview/ProposalSectionSkeleton";
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
@@ -213,6 +215,24 @@ export const ProposalSection = ({
     setIsChangingVote(false);
   }, []);
 
+  // Feeds the "You voted" chip: only once the indexed vote is available, since
+  // the tooltip quotes its voting power and date.
+  const offchainVoteIndicator = useMemo(
+    () =>
+      userOffchainVote
+        ? {
+            votingPower: userOffchainVote.vp ?? 0,
+            votedAt: userOffchainVote.created,
+            tokenSymbol: daoEnum,
+            onOpen: () => {
+              setIsChangingVote(false);
+              setIsVotingModalOpen(true);
+            },
+          }
+        : undefined,
+    [userOffchainVote, daoEnum],
+  );
+
   const queryClient = useQueryClient();
 
   const handleOffchainVoteSuccess = useCallback(
@@ -318,6 +338,7 @@ export const ProposalSection = ({
           offchainProposalType={
             isOffchain ? (rawOffchainProposal?.type ?? null) : undefined
           }
+          offchainVote={isOffchain ? offchainVoteIndicator : undefined}
         />
         <div className="mx-auto w-full">
           <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
@@ -432,6 +453,7 @@ export const ProposalSection = ({
           offchainHasVoted={offchainHasVoted}
           offchainVoteLabel={offchainVoteLabel}
           offchainProposalType={rawOffchainProposal?.type ?? null}
+          offchainVote={offchainVoteIndicator}
         />
       </div>
     </ProposalHeaderProvider>
@@ -450,6 +472,7 @@ const MobileBottomBar = ({
   offchainHasVoted,
   offchainVoteLabel,
   offchainProposalType,
+  offchainVote,
 }: {
   isOffchain: boolean;
   address: string | undefined;
@@ -462,6 +485,7 @@ const MobileBottomBar = ({
   offchainHasVoted?: boolean;
   offchainVoteLabel?: string | null;
   offchainProposalType?: string | null;
+  offchainVote?: OffchainVoteIndicator;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
 
@@ -475,6 +499,7 @@ const MobileBottomBar = ({
             <MobileOffchainVotedBadge
               label={offchainVoteLabel ?? null}
               proposalType={offchainProposalType}
+              vote={offchainVote}
             />
             {isOngoing && (
               <Button className="flex w-full" onClick={onVoteClick}>
@@ -553,10 +578,27 @@ const MobileVotedBadge = ({ vote }: { vote: number }) => {
 const MobileOffchainVotedBadge = ({
   label,
   proposalType,
+  vote,
 }: {
   label: string | null;
   proposalType?: string | null;
+  vote?: OffchainVoteIndicator;
 }) => {
+  if (label && vote) {
+    return (
+      <div className="flex w-full items-center justify-center">
+        <OffchainVotedChip
+          voteLabel={label}
+          proposalType={proposalType}
+          votingPower={vote.votingPower}
+          tokenSymbol={vote.tokenSymbol}
+          votedAt={vote.votedAt}
+          onClick={vote.onOpen}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full items-center justify-center gap-2">
       <p className="text-secondary text-[12px] font-medium leading-4">
