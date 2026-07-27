@@ -59,7 +59,8 @@ export const OffchainVotedModal = ({
       className="flex max-h-[75dvh] flex-col"
       bodyClassName="min-h-0 overflow-y-auto p-0"
     >
-      <div className="p-4">
+      {/* Single padded body, 16px gap between sections, matching the frames. */}
+      <div className="flex flex-col gap-4 p-4">
         <div className="bg-surface-opacity-success flex w-full items-center gap-2 px-4 py-3">
           <CircleCheck className="text-success size-4 shrink-0" />
           <p className="text-success text-[14px] leading-5">
@@ -67,79 +68,79 @@ export const OffchainVotedModal = ({
             {tokenSymbol}
           </p>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-[6px] px-4 pb-4">
-        <p className="font-inter text-primary text-[12px] font-medium leading-4">
-          Your vote
-        </p>
-        <div className="flex flex-col gap-2">
-          {weights
-            ? choices.map((label, index) => {
-                const percent = weights[index] ?? 0;
-                const isChosen = percent > 0;
-                return (
+        <div className="flex flex-col gap-[6px]">
+          <p className="font-inter text-primary text-[12px] font-medium leading-4">
+            Your vote
+          </p>
+          <div className="flex flex-col gap-2">
+            {weights
+              ? choices.map((label, index) => {
+                  const percent = weights[index] ?? 0;
+                  const isChosen = percent > 0;
+                  return (
+                    <div
+                      key={label + index}
+                      className="border-border-default flex w-full flex-col gap-2 border px-[10px] py-2"
+                    >
+                      <div className="flex items-center justify-between gap-2 text-[14px] leading-5">
+                        <span
+                          className={cn(
+                            "min-w-0 truncate",
+                            isChosen ? "text-primary" : "text-dimmed",
+                          )}
+                        >
+                          {label}
+                        </span>
+                        <span
+                          className={cn(
+                            "shrink-0 font-medium",
+                            isChosen ? "text-primary" : "text-dimmed",
+                          )}
+                        >
+                          {percent}%
+                        </span>
+                      </div>
+                      <div className="bg-surface-contrast flex h-1 w-full items-start">
+                        {isChosen && (
+                          <div
+                            className="bg-primary h-1"
+                            style={{ width: `${percent}%` }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              : choiceLabels.map((label, index) => (
                   <div
                     key={label + index}
-                    className="border-border-default flex w-full flex-col gap-2 border px-[10px] py-2"
+                    className="border-border-default flex w-full items-center gap-2 border px-[10px] py-2"
                   >
-                    <div className="flex items-center justify-between gap-2 text-[14px] leading-5">
-                      <span
-                        className={cn(
-                          "min-w-0 truncate",
-                          isChosen ? "text-primary" : "text-dimmed",
-                        )}
-                      >
-                        {label}
+                    {choiceLabels.length > 1 && (
+                      <span className="text-dimmed shrink-0 text-[14px] font-medium leading-5">
+                        {index + 1}
                       </span>
-                      <span
-                        className={cn(
-                          "shrink-0 font-medium",
-                          isChosen ? "text-primary" : "text-dimmed",
-                        )}
-                      >
-                        {percent}%
-                      </span>
-                    </div>
-                    <div className="bg-surface-contrast flex h-1 w-full items-start">
-                      {isChosen && (
-                        <div
-                          className="bg-primary h-1"
-                          style={{ width: `${percent}%` }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            : choiceLabels.map((label, index) => (
-                <div
-                  key={label + index}
-                  className="border-border-default flex w-full items-center gap-2 border px-[10px] py-2"
-                >
-                  {choiceLabels.length > 1 && (
-                    <span className="text-dimmed shrink-0 text-[14px] font-medium leading-5">
-                      {index + 1}
+                    )}
+                    <span className="text-primary min-w-0 truncate text-[14px] leading-5">
+                      {label}
                     </span>
-                  )}
-                  <span className="text-primary min-w-0 truncate text-[14px] leading-5">
-                    {label}
-                  </span>
-                </div>
-              ))}
+                  </div>
+                ))}
+          </div>
         </div>
-      </div>
 
-      {comment && comment.trim() !== "" && (
-        <div className="flex flex-col gap-[6px] px-4 pb-4">
-          <p className="font-inter text-primary text-[12px] font-medium leading-4">
-            Your comment
-          </p>
-          <p className="text-secondary text-[14px] leading-5">
-            &ldquo;{comment}&rdquo;
-          </p>
-        </div>
-      )}
+        {comment && comment.trim() !== "" && (
+          <div className="flex flex-col gap-[6px]">
+            <p className="font-inter text-primary text-[12px] font-medium leading-4">
+              Your comment
+            </p>
+            <p className="text-secondary text-[14px] leading-5">
+              &ldquo;{comment}&rdquo;
+            </p>
+          </div>
+        )}
+      </div>
     </Modal>
   );
 };

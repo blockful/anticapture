@@ -244,60 +244,61 @@ export const OffchainVotingModal = ({
       className="flex max-h-[75dvh] flex-col"
       bodyClassName="min-h-0 overflow-y-auto p-0"
     >
-      {/* Voting Power */}
-      <div className="flex flex-col gap-[6px] p-4">
-        <p className="font-inter text-primary text-[12px] font-medium">
-          Your voting power
-        </p>
-        {isVpLoading && (
-          <p className="text-secondary text-[14px]">Loading...</p>
-        )}
-        {!isVpLoading && vpError && (
-          <p className="text-secondary text-[14px]">
-            Unable to fetch voting power
+      {/* One padded body with a 16px gap between sections, matching the frames.
+          Padding per section would stack into 32px gaps. */}
+      <div className="flex flex-col gap-4 p-4">
+        <div className="flex flex-col gap-[6px]">
+          <p className="font-inter text-primary text-[12px] font-medium">
+            Your voting power
           </p>
-        )}
-        {!isVpLoading && !vpError && (
-          <p className="text-primary text-[14px]">
-            {formatNumberUserReadable(votingPower)} {tokenSymbol}
-          </p>
-        )}
-      </div>
-
-      {/* Vote options — each ballot renders its own "Your vote" label row so it
-          can place a selection counter or remaining-allocation chip beside it. */}
-      <div className="flex flex-col items-start p-4 text-left">
-        {renderVoteOptions()}
-      </div>
-
-      {/* Comment — omitted for shutter proposals: a plaintext reason would
-            reveal the encrypted vote before the proposal closes. */}
-      {isPrivacyLoading ? (
-        <div className="flex flex-col gap-[6px] p-4">
-          <FormLabel>Comment (optional)</FormLabel>
-          <p className="text-secondary text-[14px]">Loading...</p>
+          {isVpLoading && (
+            <p className="text-secondary text-[14px]">Loading...</p>
+          )}
+          {!isVpLoading && vpError && (
+            <p className="text-secondary text-[14px]">
+              Unable to fetch voting power
+            </p>
+          )}
+          {!isVpLoading && !vpError && (
+            <p className="text-primary text-[14px]">
+              {formatNumberUserReadable(votingPower)} {tokenSymbol}
+            </p>
+          )}
         </div>
-      ) : isShutter ? (
-        <div className="flex flex-col gap-[6px] p-4">
+
+        {/* Each ballot renders its own "Your vote" label row so it can place a
+            selection counter or remaining-allocation chip beside it. */}
+        <div className="flex flex-col items-start text-left">
+          {renderVoteOptions()}
+        </div>
+
+        {/* Comment — omitted for shutter proposals: a plaintext reason would
+            reveal the encrypted vote before the proposal closes. */}
+        {isPrivacyLoading ? (
+          <div className="flex flex-col gap-[6px]">
+            <FormLabel>Comment (optional)</FormLabel>
+            <p className="text-secondary text-[14px]">Loading...</p>
+          </div>
+        ) : isShutter ? (
           <p className="text-secondary font-inter text-[12px] not-italic leading-4">
             Votes on this proposal are encrypted until it closes, so comments
             are disabled.
           </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-[6px] p-4">
-          <FormLabel htmlFor="offchain-vote-comment">
-            Comment (optional)
-          </FormLabel>
-          <Textarea
-            id="offchain-vote-comment"
-            className="h-[100px]"
-            placeholder="Enter your comment"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </div>
-      )}
+        ) : (
+          <div className="flex flex-col gap-[6px]">
+            <FormLabel htmlFor="offchain-vote-comment">
+              Comment (optional)
+            </FormLabel>
+            <Textarea
+              id="offchain-vote-comment"
+              className="h-[100px]"
+              placeholder="Enter your comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+          </div>
+        )}
+      </div>
     </Modal>
   );
 };

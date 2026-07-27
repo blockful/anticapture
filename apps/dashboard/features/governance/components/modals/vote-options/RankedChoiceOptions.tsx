@@ -46,6 +46,9 @@ export const RankedChoiceOptions = ({
         choice: choiceIndex + 1,
         label: choices[choiceIndex] ?? `Choice ${choiceIndex + 1}`,
       }))}
+      // Ranking is an ordering, not a selection: filtering rows away would hide
+      // positions the voter still has to place.
+      enableFilter={false}
       helper={
         <p className="text-dimmed font-inter text-[12px] font-normal not-italic leading-[18px]">
           Drag to reorder — all options must be ranked

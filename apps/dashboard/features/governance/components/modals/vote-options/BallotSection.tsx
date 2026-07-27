@@ -25,6 +25,11 @@ interface BallotSectionProps {
   helper?: ReactNode;
   /** Content under the list and helper (e.g. the weighted allocation bar and totals). */
   footer?: ReactNode;
+  /**
+   * Ranked ballots opt out: the list is an ordering, not a selection, so hiding
+   * rows would hide positions the voter still has to rank.
+   */
+  enableFilter?: boolean;
 }
 
 /**
@@ -38,9 +43,11 @@ export const BallotSection = ({
   labelSlot,
   helper,
   footer,
+  enableFilter = true,
 }: BallotSectionProps) => {
   const [filter, setFilter] = useState("");
   const isOverflowing = options.length > OVERFLOW_THRESHOLD;
+  const showFilter = isOverflowing && enableFilter;
 
   const visibleOptions = useMemo(() => {
     const needle = filter.trim().toLowerCase();
@@ -63,7 +70,7 @@ export const BallotSection = ({
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        {isOverflowing && (
+        {showFilter && (
           <Input
             hasIcon
             placeholder="Filter options..."
@@ -76,7 +83,8 @@ export const BallotSection = ({
         <div
           className={cn(
             "flex w-full flex-col gap-2",
-            isOverflowing && "overflow-y-auto",
+            isOverflowing &&
+              "scrollbar-custom overflow-y-auto overflow-x-hidden",
           )}
           style={isOverflowing ? { maxHeight: SCROLL_MAX_HEIGHT } : undefined}
         >
