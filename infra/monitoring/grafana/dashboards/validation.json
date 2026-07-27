@@ -179,6 +179,18 @@
           "options": {}
         },
         {
+          "id": "convertFieldType",
+          "options": {
+            "fields": {},
+            "conversions": [
+              {
+                "targetField": "identifier",
+                "destinationType": "string"
+              }
+            ]
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
