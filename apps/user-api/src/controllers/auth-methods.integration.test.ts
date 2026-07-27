@@ -76,7 +76,10 @@ describe("optional auth methods", () => {
 
     it("is public when no token is configured", async () => {
       const res = await open.app.request("/metrics");
+      const body = await res.text();
+
       expect(res.status).toBe(200);
+      expect(body).toContain("user_api_keys_created_total 0");
     });
 
     it("requires the configured bearer token", async () => {

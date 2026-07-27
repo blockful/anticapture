@@ -23,6 +23,9 @@ export const keysCreatedTotal = meter.createCounter(
   "user_api_keys_created_total",
   { description: "Total user API keys created" },
 );
+// Emit a baseline immediately so Prometheus can measure the first increment
+// after every process start instead of treating 1 as the initial sample.
+keysCreatedTotal.add(0);
 
 export const registerValidationMetrics = (
   service: MetricsSnapshotService,

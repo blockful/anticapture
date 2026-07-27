@@ -27,9 +27,16 @@ const apiKeysService = authfulClient
   ? new ApiKeysService(new ApiKeysRepository(db), authfulClient)
   : undefined;
 
-const metricsService = authfulClient
-  ? new MetricsSnapshotService(new DatabaseMetricsDataSource(db), authfulClient)
-  : undefined;
+// Per-user gauges contain email or wallet identifiers. Keep them entirely
+// unregistered unless /metrics is protected, even if env validation is later
+// relaxed or bypassed by another entry point.
+const metricsService =
+  authfulClient && env.USER_API_METRICS_TOKEN
+    ? new MetricsSnapshotService(
+        new DatabaseMetricsDataSource(db),
+        authfulClient,
+      )
+    : undefined;
 
 const app = createApp({
   db,
