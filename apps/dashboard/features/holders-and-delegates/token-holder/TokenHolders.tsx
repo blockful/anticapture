@@ -37,6 +37,10 @@ import { useMemo } from "react";
 import { useDelegatesActivity } from "@/features/holders-and-delegates/hooks/useDelegatesActivity";
 import { InactiveDelegatesBanner } from "@/features/holders-and-delegates/components/InactiveDelegatesBanner";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import {
+  ADDRESS_ENRICHMENT_GC_TIME,
+  ADDRESS_ENRICHMENT_STALE_TIME,
+} from "@/shared/constants/api";
 import { cn } from "@/shared/utils/cn";
 
 const AMOUNT_SORT_OPTIONS = [
@@ -53,7 +57,11 @@ interface TokenHolderTableData {
 
 const TypeCell = ({ address }: { address: Address }) => {
   const { data, isLoading: isArkhamLoading } = useGetAddress(address ?? "0x", {
-    query: { enabled: !!address },
+    query: {
+      enabled: !!address,
+      staleTime: ADDRESS_ENRICHMENT_STALE_TIME,
+      gcTime: ADDRESS_ENRICHMENT_GC_TIME,
+    },
   });
   const isContract = data?.isContract ?? null;
 

@@ -20,6 +20,10 @@ import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { useGetAddress } from "@anticapture/client/hooks";
+import {
+  ADDRESS_ENRICHMENT_GC_TIME,
+  ADDRESS_ENRICHMENT_STALE_TIME,
+} from "@/shared/constants/api";
 
 const TRUNCATE_ADDRESS_LENGTH = 30;
 
@@ -100,7 +104,11 @@ export const EnsAvatar = ({
   ...imageProps
 }: EnsAvatarProps) => {
   const { data, isLoading } = useGetAddress(address ?? "0x", {
-    query: { enabled: !!address },
+    query: {
+      enabled: !!address,
+      staleTime: ADDRESS_ENRICHMENT_STALE_TIME,
+      gcTime: ADDRESS_ENRICHMENT_GC_TIME,
+    },
   });
   const arkham = data?.arkham ?? null;
   const ens = data?.ens ?? null;
