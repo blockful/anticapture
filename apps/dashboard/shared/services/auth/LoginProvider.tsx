@@ -13,7 +13,7 @@ import {
   type ReactNode,
 } from "react";
 import { isAddress } from "viem";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount } from "wagmi";
 
 import { LoginModal } from "@/shared/components/auth/LoginModal";
 import { authClient, useSession } from "@/shared/services/auth/client";
@@ -42,10 +42,9 @@ export function LoginProvider({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession();
   const { status: walletStatus, address } = useAccount();
   const { connectModalOpen } = useConnectModal();
-  const { disconnect } = useDisconnect();
   const [isOpen, setIsOpen] = useState(false);
   // Where to land after sign-in (login-gated pages pass their own route).
   // Cleared when the modal is dismissed without authenticating.
@@ -56,18 +55,22 @@ export function LoginProvider({
     setIsOpen(true);
   }, []);
 
-  // Wallet ⟷ session coherence. Both effects stand down while the sign-in
-  // modal OR RainbowKit's connect modal is up: the ceremony legitimately
-  // passes through connected-without-a-session and must never be yanked
-  // mid-flight.
+  // Wallet ⟷ session coherence. Stands down while the sign-in modal OR
+  // RainbowKit's connect modal is up: the ceremony legitimately passes
+  // through connected-without-a-session and must never be yanked mid-flight.
   const authFlowActive = isOpen || connectModalOpen;
 
-  // 1. Wallet-born sessions (SIWE stores the wallet address as the user
-  //    name) are bound to that wallet: disconnected — now or on a later
-  //    visit — means signed out, and switching to a DIFFERENT account in
-  //    the wallet signs the old session out and asks for a fresh SIWE, so
-  //    on-chain actions and the platform identity can't diverge.
-  //    Email/Google sessions are wallet-independent.
+  // Wallet-born sessions (SIWE stores the wallet address as the user name)
+  // stay bound to that wallet: disconnecting it, now or on a later visit,
+  // means signed out, and switching to a DIFFERENT account signs the old
+  // session out, so on-chain actions and the platform identity can't diverge.
+  // Email/Google sessions are wallet-independent.
+  //
+  // The reverse does NOT hold: a connected wallet without a session is a
+  // perfectly valid state. Connecting is not signing in, and everything
+  // on-chain (vote, delegate, publish) works from the connection alone, so
+  // nothing here disconnects the wallet and nothing re-opens the sign-in
+  // modal on its own. Signing in is always something the user asks for.
   useEffect(() => {
     if (authFlowActive || !session || !isAddress(session.user.name)) return;
     const sessionAddress = session.user.name.toLowerCase();
@@ -82,19 +85,8 @@ export function LoginProvider({
       address.toLowerCase() !== sessionAddress
     ) {
       void authClient.signOut();
-      openLogin();
     }
-  }, [authFlowActive, session, walletStatus, address, openLogin]);
-
-  // 2. And the reverse: a connected wallet with no session reads as "logged
-  //    in" in the header while every gated surface asks to sign in. Losing
-  //    the session (expiry, sign-out, or an abandoned ceremony) disconnects
-  //    the wallet too.
-  useEffect(() => {
-    if (authFlowActive || isPending || session) return;
-    if (walletStatus !== "connected") return;
-    disconnect();
-  }, [authFlowActive, isPending, session, walletStatus, disconnect]);
+  }, [authFlowActive, session, walletStatus, address]);
 
   const handleOpenChange = useCallback((open: boolean) => {
     setIsOpen(open);

@@ -279,7 +279,10 @@ export const LoginModal = ({
             onClick={() => siwe.login(() => openConnectModal?.())}
           >
             <Wallet className="size-4" />
-            Connect wallet
+            {/* Not "Connect wallet": connecting is a separate, signature-free
+                action available everywhere else. This button signs a message
+                to open a platform session. */}
+            Sign in with wallet
           </Button>
 
           {siwe.error && <ErrorText>{siwe.error}</ErrorText>}
