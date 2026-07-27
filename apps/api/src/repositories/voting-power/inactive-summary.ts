@@ -28,7 +28,7 @@ export class InactiveVotingPowerSummaryRepository {
       WITH window_proposals AS (
         SELECT id
         FROM proposals_onchain
-        WHERE TRUE${fromFilter}${toFilter}
+        WHERE UPPER(status) <> 'CANCELED'${fromFilter}${toFilter}
       )
       SELECT
         (SELECT COUNT(*) FROM window_proposals) AS total_proposals,

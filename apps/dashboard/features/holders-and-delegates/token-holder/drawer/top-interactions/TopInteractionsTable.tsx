@@ -355,7 +355,7 @@ export const TopInteractionsTable = ({
 
         return (
           <div className="flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
-            <Tooltip tooltipContent="Addresses ranked by how many transactions they had with the holder (interaction count).">
+            <Tooltip tooltipContent="Value of everything transferred between the two addresses, at the current token price. Sorting is by how many transactions they had with the holder.">
               <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
                 Total Interactions
               </h4>
@@ -394,6 +394,16 @@ export const TopInteractionsTable = ({
           );
         }
         const priceUsd = Number(tokenData?.price) || 0;
+        // The price comes from its own query. Falling back to 0 would render a
+        // confident "$0" on every row while it is still in flight or if it
+        // failed, so show nothing until there is a real price to multiply by.
+        if (priceUsd <= 0) {
+          return (
+            <div className="text-secondary flex w-full items-center justify-end text-sm">
+              -
+            </div>
+          );
+        }
         const volumeTokens =
           token === "ERC20"
             ? Number(row.original.volume) / 10 ** decimals

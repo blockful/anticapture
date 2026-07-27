@@ -29,12 +29,21 @@ export const useDelegatesActivity = ({
   const [loadingAddresses, setLoadingAddresses] = useState<Set<string>>(
     () => new Set(),
   );
+  // Addresses whose fetch already settled, successfully or not. `activities`
+  // alone cannot play this role: a rejected (or empty) response leaves no entry
+  // there, and since this effect depends on both sets, releasing the address
+  // from `loadingAddresses` would immediately re-select it and refetch it in a
+  // loop for as long as the endpoint keeps failing.
+  const [settledAddresses, setSettledAddresses] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const addressesKey = addresses.join(",");
 
   useEffect(() => {
     setActivities(new Map());
     setLoadingAddresses(new Set());
+    setSettledAddresses(new Set());
   }, [fromDate, daoId]);
 
   useEffect(() => {
@@ -42,52 +51,49 @@ export const useDelegatesActivity = ({
       ...new Set(addressesKey.split(",").filter(Boolean)),
     ];
     const newAddresses = uniqueAddresses.filter(
-      (addr) => !activities.has(addr) && !loadingAddresses.has(addr),
+      (addr) => !settledAddresses.has(addr) && !loadingAddresses.has(addr),
     );
     if (newAddresses.length === 0) return;
 
     const fetchActivities = async () => {
       setLoadingAddresses((prev) => new Set([...prev, ...newAddresses]));
-      try {
-        const results = await Promise.all(
-          newAddresses.map(async (addr) => {
-            const result = await queryClient.fetchQuery(
-              proposalsActivityQueryOptions(
-                daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
-                { address: addr, ...(fromDate ? { fromDate } : {}) },
-              ),
-            );
-            return { address: addr, activity: result ?? null };
-          }),
-        );
-        setActivities((prev) => {
-          const next = new Map(prev);
-          results.forEach(({ address, activity }) => {
-            if (activity) {
-              next.set(address, {
-                totalProposals: activity.totalProposals,
-                votedProposals: activity.votedProposals,
-                neverVoted: activity.neverVoted,
-                avgTimeBeforeEnd: activity.avgTimeBeforeEnd,
-              });
-            }
+      // One address failing must not discard the activity of the others.
+      const results = await Promise.allSettled(
+        newAddresses.map(async (addr) => {
+          const result = await queryClient.fetchQuery(
+            proposalsActivityQueryOptions(
+              daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
+              { address: addr, ...(fromDate ? { fromDate } : {}) },
+            ),
+          );
+          return { address: addr, activity: result ?? null };
+        }),
+      );
+      setActivities((prev) => {
+        const next = new Map(prev);
+        results.forEach((result) => {
+          if (result.status !== "fulfilled" || !result.value.activity) return;
+          const { address, activity } = result.value;
+          next.set(address, {
+            totalProposals: activity.totalProposals,
+            votedProposals: activity.votedProposals,
+            neverVoted: activity.neverVoted,
+            avgTimeBeforeEnd: activity.avgTimeBeforeEnd,
           });
-          return next;
         });
-      } catch (err) {
-        console.error("Error fetching delegate activities:", err);
-      } finally {
-        setLoadingAddresses((prev) => {
-          const next = new Set(prev);
-          newAddresses.forEach((addr) => next.delete(addr));
-          return next;
-        });
-      }
+        return next;
+      });
+      setSettledAddresses((prev) => new Set([...prev, ...newAddresses]));
+      setLoadingAddresses((prev) => {
+        const next = new Set(prev);
+        newAddresses.forEach((addr) => next.delete(addr));
+        return next;
+      });
     };
     void fetchActivities();
   }, [
     addressesKey,
-    activities,
+    settledAddresses,
     loadingAddresses,
     queryClient,
     fromDate,

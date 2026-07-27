@@ -37,13 +37,19 @@ export const FormerDelegatorsTable = ({
 }) => {
   const { decimals } = daoConfigByDaoId[daoId];
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useFormerDelegatorsInfinite(
-      daoId.toLowerCase() as FormerDelegatorsPathParamsDaoEnumKey,
-      address,
-      { limit: 20, orderDirection: "desc" },
-      { query: { getNextPageParam } },
-    );
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFormerDelegatorsInfinite(
+    daoId.toLowerCase() as FormerDelegatorsPathParamsDaoEnumKey,
+    address,
+    { limit: 20, orderDirection: "desc" },
+    { query: { getNextPageParam } },
+  );
 
   const rows: FormerDelegatorRow[] = (data?.pages ?? []).flatMap((page) =>
     page.items.map((item) => ({
@@ -146,6 +152,9 @@ export const FormerDelegatorsTable = ({
         onLoadMore={fetchNextPage}
         withDownloadCSV
         csvFilename="former-delegators.csv"
+        // Without this a failed request is indistinguishable from a delegate
+        // who genuinely never lost a delegator.
+        error={error as Error | null}
         emptyTitle="No former delegators"
         emptyDescription="No addresses have moved their delegation away from this delegate."
         fillHeight

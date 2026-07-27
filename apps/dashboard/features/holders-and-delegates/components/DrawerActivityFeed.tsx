@@ -47,21 +47,27 @@ export const DrawerActivityFeed = ({
     parseAsString.withDefault("ALL"),
   );
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useFeedEventsInfinite(
-      daoId.toLowerCase() as FeedEventsPathParams["dao"],
-      {
-        address,
-        limit: 20,
-        orderDirection,
-        // Always sent explicitly: the API reads a missing `relevance` as MEDIUM,
-        // whose value thresholds would hide most of the address's activity.
-        // "ALL" drops the threshold and returns every tier at once.
-        relevance: relevance as FeedEventsQueryParamsRelevanceEnumKey,
-      },
-      // An empty address would be rejected with a 400 while the drawer closes.
-      { query: { getNextPageParam, enabled: Boolean(address) } },
-    );
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFeedEventsInfinite(
+    daoId.toLowerCase() as FeedEventsPathParams["dao"],
+    {
+      address,
+      limit: 20,
+      orderDirection,
+      // Always sent explicitly: the API reads a missing `relevance` as MEDIUM,
+      // whose value thresholds would hide most of the address's activity.
+      // "ALL" drops the threshold and returns every tier at once.
+      relevance: relevance as FeedEventsQueryParamsRelevanceEnumKey,
+    },
+    // An empty address would be rejected with a 400 while the drawer closes.
+    { query: { getNextPageParam, enabled: Boolean(address) } },
+  );
 
   const events = data?.pages ? data.pages.flatMap((page) => page.items) : [];
 
@@ -135,6 +141,12 @@ export const DrawerActivityFeed = ({
               <SkeletonRow key={i} className="h-12 w-full" />
             ))}
           </div>
+        ) : error ? (
+          // A failed request must not read as "this address did nothing".
+          <EmptyState
+            title="Could not load activity"
+            description="Something went wrong fetching this address's activity. Try again in a moment."
+          />
         ) : events.length === 0 ? (
           <EmptyState
             title="No activity yet"

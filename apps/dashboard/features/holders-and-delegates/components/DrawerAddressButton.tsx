@@ -42,6 +42,9 @@ export const DrawerAddressButton = ({
         variant="rounded"
         isDashed={true}
         nameClassName={cn("hover:border-primary", nameClassName)}
+        // This button is already the interactive element; the tooltip would add
+        // a nested button, a second tab stop and the wrong accessible name.
+        withDetailsTooltip={false}
       />
     </button>
   );

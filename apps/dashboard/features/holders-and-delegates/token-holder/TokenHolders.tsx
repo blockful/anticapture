@@ -22,7 +22,7 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { useGetAddress } from "@anticapture/client/hooks";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import {
@@ -171,9 +171,18 @@ export const TokenHolders = ({
     ? Array(DEFAULT_ITEMS_PER_PAGE).fill({} as TokenHolderTableData)
     : (tableData ?? []);
 
-  const activityFromDate =
-    fromDate ??
-    (days ? Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days] : undefined);
+  // Memoized on the inputs rather than recomputed per render: this value keys
+  // the per-delegate activity cache and the banner query, and a bare Date.now()
+  // changes on every render that crosses a second boundary, which would discard
+  // both caches and refetch continuously.
+  const activityFromDate = useMemo(
+    () =>
+      fromDate ??
+      (days
+        ? Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]
+        : undefined),
+    [fromDate, days],
+  );
 
   const delegateAddresses = useMemo(
     () =>
@@ -183,9 +192,15 @@ export const TokenHolders = ({
     [tableData],
   );
 
+  // AAVE's API registers no proposal endpoints, so everything derived from
+  // proposal activity has to stay off there: asking for it returns 404 per
+  // delegate, and /voting-powers/inactive-summary falls through to the
+  // /voting-powers/{address} param route and 400s.
+  const hasProposalActivity = daoId !== DaoIdEnum.AAVE;
+
   const { activityFor, isActivityLoadingFor } = useDelegatesActivity({
     daoId,
-    addresses: delegateAddresses,
+    addresses: hasProposalActivity ? delegateAddresses : [],
     fromDate: activityFromDate,
   });
 
@@ -471,11 +486,13 @@ export const TokenHolders = ({
   return (
     <>
       <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col gap-3 text-white">
-        <InactiveDelegatesBanner
-          daoId={daoId}
-          fromDate={activityFromDate}
-          toDate={toDate}
-        />
+        {hasProposalActivity && (
+          <InactiveDelegatesBanner
+            daoId={daoId}
+            fromDate={activityFromDate}
+            toDate={toDate}
+          />
+        )}
         <div className="flex min-h-0 flex-1 flex-col">
           <Table
             columns={tokenHoldersColumns}

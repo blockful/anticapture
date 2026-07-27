@@ -58,6 +58,13 @@ interface EnsAvatarProps extends Omit<
   /** Extra line rendered under the name, inside the name column, so the avatar
    *  stays vertically centered against the whole (name + subtitle) block. */
   subtitle?: ReactNode;
+  /**
+   * Wrap the avatar in the address details tooltip. Turn this off when the
+   * avatar already sits inside an interactive element: the tooltip trigger is
+   * itself a button, and a button inside a button is invalid HTML that adds a
+   * second tab stop and hands the accessible name to the tooltip.
+   */
+  withDetailsTooltip?: boolean;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -106,6 +113,7 @@ export const EnsAvatar = ({
   showEfpStats = false,
   showSocials = false,
   subtitle,
+  withDetailsTooltip = true,
   ...imageProps
 }: EnsAvatarProps) => {
   const { data, isLoading } = useGetAddress(address ?? "0x", {
@@ -454,7 +462,7 @@ export const EnsAvatar = ({
     </div>
   );
 
-  if (address && !showTags) {
+  if (address && !showTags && withDetailsTooltip) {
     return (
       <>
         <span className="hidden md:contents">

@@ -98,12 +98,13 @@ export const VoteComposition = ({
 
   // Summary for the "Former Delegators" view. Shares the same query key as
   // FormerDelegatorsTable, so this only reads from cache (no extra request).
-  const { data: formerData } = useFormerDelegatorsInfinite(
-    daoId.toLowerCase() as FormerDelegatorsPathParamsDaoEnumKey,
-    address,
-    { limit: 20, orderDirection: "desc" },
-    { query: { getNextPageParam, enabled: view === "former" } },
-  );
+  const { data: formerData, hasNextPage: formerHasMorePages } =
+    useFormerDelegatorsInfinite(
+      daoId.toLowerCase() as FormerDelegatorsPathParamsDaoEnumKey,
+      address,
+      { limit: 20, orderDirection: "desc" },
+      { query: { getNextPageParam, enabled: view === "former" } },
+    );
   const formerRows = (formerData?.pages ?? []).flatMap((page) => page.items);
   const formerTotalCount =
     formerData?.pages?.[0]?.totalCount ?? formerRows.length;
@@ -134,7 +135,12 @@ export const VoteComposition = ({
             )
           ) : (
             <span className="text-primary text-md font-normal">
-              {formatNumberUserReadable(formerTotalVpLost)} cross{" "}
+              {/* The sum can only cover the pages already fetched, while the
+                  count comes from the API and covers every former delegator.
+                  Claim a total only once there is nothing left to load, so the
+                  two numbers can never contradict each other. */}
+              {!formerHasMorePages &&
+                `${formatNumberUserReadable(formerTotalVpLost)} across `}
               {formerTotalCount}{" "}
               {formerTotalCount === 1 ? "address" : "addresses"}
             </span>
