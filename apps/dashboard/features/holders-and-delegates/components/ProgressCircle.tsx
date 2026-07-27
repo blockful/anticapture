@@ -26,7 +26,7 @@ export const ProgressCircle = ({ percentage }: ProgressCircleProps) => {
         cx={SIZE / 2}
         cy={SIZE / 2}
         r={radius}
-        stroke="#3F3F46"
+        className="stroke-border-contrast"
         strokeWidth={STROKE_WIDTH}
       />
       {clampedPercentage > 0 && (
@@ -34,7 +34,7 @@ export const ProgressCircle = ({ percentage }: ProgressCircleProps) => {
           cx={SIZE / 2}
           cy={SIZE / 2}
           r={radius}
-          stroke="#4ADE80"
+          className="stroke-success"
           strokeWidth={STROKE_WIDTH}
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}

@@ -18,8 +18,7 @@ import {
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
 import type { DaoIdEnum } from "@/shared/types/daos";
-
-export type EntityType = "delegate" | "tokenHolder";
+import type { EntityType } from "@/shared/types/entities";
 
 interface HoldersAndDelegatesDrawerProps {
   isOpen: boolean;

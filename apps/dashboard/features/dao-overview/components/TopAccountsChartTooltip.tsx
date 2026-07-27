@@ -3,7 +3,7 @@
 import React from "react";
 
 import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
-import type { EntityType } from "@/features/holders-and-delegates";
+import type { EntityType } from "@/shared/types/entities";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils";
 import { formatAddress } from "@/shared/utils/formatAddress";

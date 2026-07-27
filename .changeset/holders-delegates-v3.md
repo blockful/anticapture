@@ -22,5 +22,5 @@ Token Holders; clickable addresses that re-point the drawer everywhere; a
 per-address Activity tab in the drawer; Buy/Sell relabeled to In / Out / Vested;
 a dust badge and "Hide dust" switch on Top Interactions; a "Filter low importance"
 toggle and "All time" range on Voting Power History; a MAX option and custom
-calendar range on the time selector; a Former Delegators view in the delegate
-profile; and a proposal final-result filter on the votes tab.
+calendar range on the time selector; and a Former Delegators view in the
+delegate profile.

@@ -9,12 +9,12 @@ import { useFeedEventsInfinite } from "@anticapture/client/hooks";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 
-import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
-import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control";
+import { FeedEventItem } from "@/shared/components/feed/FeedEventItem";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import type { EntityType } from "@/shared/types/entities";
 
 const RELEVANCE_OPTIONS: {
   value: FeedEventsQueryParamsRelevanceEnumKey | "ALL";
@@ -32,7 +32,7 @@ interface DrawerActivityFeedProps {
 }
 
 // Recent activity feed scoped to a single address, shown inside the profile
-// drawer (DEV-562 item 3). Reuses the feed's event renderer and the new
+// drawer (DEV-562 item 3). Reuses the shared event renderer and the new
 // `address` filter on GET /:dao/feed/events.
 export const DrawerActivityFeed = ({
   address,

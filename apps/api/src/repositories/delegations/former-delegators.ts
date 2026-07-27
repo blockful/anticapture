@@ -64,27 +64,52 @@ export class FormerDelegatorsRepository {
    * stints of consecutive events towards the queried address; the event right
    * after the last stint is the move-away event, so a delegator with such an
    * event no longer delegates to the queried address.
+   *
+   * Rows are collapsed per source event before being sequenced. DAOs with
+   * partial delegation write one row per delegatee out of a single
+   * `DelegateChanged` (SCR does this), and every row shares the transaction
+   * hash, log index and timestamp. Sequencing those rows individually would
+   * order concurrent delegates arbitrarily and read each one as a move away
+   * from its own sibling, reporting a still-active delegate as former.
    */
   private buildFormerDelegatorsCte(address: Address) {
     return sql`
-      WITH events AS (
+      WITH delegation_rows AS (
         SELECT
           delegator_account_id AS delegator,
           delegate_account_id AS delegate,
           previous_delegate,
           delegated_value,
           timestamp,
-          ROW_NUMBER() OVER (
-            PARTITION BY delegator_account_id
-            ORDER BY timestamp ASC, log_index ASC
-          ) AS rn,
-          (delegate_account_id = ${address}) AS to_target
+          transaction_hash,
+          log_index
         FROM delegations
         WHERE delegator_account_id IN (
           SELECT DISTINCT delegator_account_id
           FROM delegations
           WHERE delegate_account_id = ${address}
         )
+      ),
+      events AS (
+        SELECT
+          delegator,
+          MIN(timestamp) AS timestamp,
+          BOOL_OR(delegate = ${address}) AS to_target,
+          -- what the delegator had on the queried address at this event
+          MAX(delegated_value) FILTER (WHERE delegate = ${address})
+            AS target_value,
+          -- everything the event delegated, across all delegatees
+          SUM(delegated_value) AS event_value,
+          COUNT(*) FILTER (WHERE previous_delegate = ${address})
+            AS from_target_count,
+          MIN(delegate) FILTER (WHERE previous_delegate = ${address})
+            AS from_target_delegate,
+          ROW_NUMBER() OVER (
+            PARTITION BY delegator
+            ORDER BY MIN(timestamp) ASC, log_index ASC, transaction_hash ASC
+          ) AS rn
+        FROM delegation_rows
+        GROUP BY delegator, transaction_hash, log_index
       ),
       islands AS (
         SELECT
@@ -116,13 +141,16 @@ export class FormerDelegatorsRepository {
       former_delegators AS (
         SELECT
           ls.delegator AS delegator_address,
-          last_event.delegated_value::text AS amount,
-          move_event.delegated_value::text AS redelegated_amount,
+          last_event.target_value::text AS amount,
+          move_event.event_value::text AS redelegated_amount,
           ls.start_timestamp::text AS start_timestamp,
           move_event.timestamp::text AS end_timestamp,
+          -- Only name a destination when the move-away event points a single
+          -- delegation away from the queried address. A split across several
+          -- new delegatees has no single destination, so it stays null.
           CASE
-            WHEN move_event.previous_delegate = ${address}
-            THEN move_event.delegate
+            WHEN move_event.from_target_count = 1
+            THEN move_event.from_target_delegate
             ELSE NULL
           END AS redelegated_to
         FROM last_stints ls

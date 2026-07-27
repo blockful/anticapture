@@ -41,12 +41,16 @@ function AavePageContent() {
   const setCurrentAddressFilter = useQueryState("address")[1];
   const setSortOrder = useQueryState("sort")[1];
   const setSortBy = useQueryState("sortBy")[1];
+  const setMinValue = useQueryState("minValue")[1];
+  const setMaxValue = useQueryState("maxValue")[1];
 
   const cleanupFilters = () => {
     setDrawerAddress(null);
     setCurrentAddressFilter(null);
     setSortOrder(null);
     setSortBy(null);
+    setMinValue(null);
+    setMaxValue(null);
   };
 
   const handleTabChange = (tab: TabId) => {
@@ -73,7 +77,6 @@ function AavePageContent() {
           <div className="w-full flex-1">
             <TheSectionLayout
               title={PAGES_CONSTANTS.holdersAndDelegates.title}
-              subtitle={"Holders & Delegates"}
               icon={<UserCheck className="section-layout-icon" />}
               description={PAGES_CONSTANTS.holdersAndDelegates.description}
             >

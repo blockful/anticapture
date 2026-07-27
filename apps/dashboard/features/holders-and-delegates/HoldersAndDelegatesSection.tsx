@@ -60,8 +60,10 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     "days",
     parseAsString.withDefault(defaultDays),
   );
-  const [fromParam, setFromParam] = useQueryState("from");
-  const [toParam, setToParam] = useQueryState("to");
+  // Namespaced on purpose: the drawer's Balance History tab already owns plain
+  // `from`/`to` as address filters, and it clears them on every tab change.
+  const [fromParam, setFromParam] = useQueryState("rangeFrom");
+  const [toParam, setToParam] = useQueryState("rangeTo");
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
     parseAsString.withDefault("delegates"),
@@ -138,7 +140,6 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     <div>
       <TheSectionLayout
         title={PAGES_CONSTANTS.holdersAndDelegates.title}
-        subtitle={"Holders & Delegates"}
         icon={<UserCheck className="section-layout-icon" />}
         description={PAGES_CONSTANTS.holdersAndDelegates.description}
       >

@@ -287,6 +287,98 @@ describe("FormerDelegatorsRepository", () => {
     expect(result).toEqual({ items: [], totalCount: 0 });
   });
 
+  // DAOs with partial delegation (SCR) write one row per delegatee out of a
+  // single DelegateChanged, all sharing the transaction hash, log index and
+  // timestamp.
+  describe("partial delegation", () => {
+    const splitDelegation = (
+      transactionHash: string,
+      delegates: { delegate: Address; value: bigint }[],
+      timestamp: bigint,
+    ): DelegationInsert[] =>
+      delegates.map(({ delegate, value }) => ({
+        transactionHash,
+        daoId: "SCR",
+        delegateAccountId: delegate,
+        delegatorAccountId: DELEGATOR_A,
+        delegatedValue: value,
+        previousDelegate: null,
+        timestamp,
+        logIndex: 0,
+      }));
+
+    it("keeps a delegate that shares the latest event with another delegate", async () => {
+      await db.insert(delegation).values(
+        splitDelegation(
+          `0x${"1".padStart(64, "0")}`,
+          [
+            { delegate: DELEGATE, value: 400n },
+            { delegate: OTHER_DELEGATE, value: 600n },
+          ],
+          1000n,
+        ),
+      );
+
+      const result = await repository.getFormerDelegators(
+        DELEGATE,
+        0,
+        10,
+        "desc",
+      );
+
+      expect(result).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("reports the delegate dropped from a later split, not its siblings", async () => {
+      await db.insert(delegation).values([
+        ...splitDelegation(
+          `0x${"1".padStart(64, "0")}`,
+          [
+            { delegate: DELEGATE, value: 400n },
+            { delegate: OTHER_DELEGATE, value: 600n },
+          ],
+          1000n,
+        ),
+        ...splitDelegation(
+          `0x${"2".padStart(64, "0")}`,
+          [
+            { delegate: OTHER_DELEGATE, value: 500n },
+            { delegate: THIRD_DELEGATE, value: 500n },
+          ],
+          2000n,
+        ),
+      ]);
+
+      const result = await repository.getFormerDelegators(
+        DELEGATE,
+        0,
+        10,
+        "desc",
+      );
+
+      expect(result.items).toEqual([
+        {
+          delegatorAddress: DELEGATOR_A,
+          amount: 400n,
+          // no single destination for a split, so the whole event is reported
+          redelegatedAmount: 1000n,
+          startTimestamp: 1000n,
+          endTimestamp: 2000n,
+          redelegatedTo: null,
+        },
+      ]);
+
+      // the sibling that stayed is still an active delegate
+      const other = await repository.getFormerDelegators(
+        OTHER_DELEGATE,
+        0,
+        10,
+        "desc",
+      );
+      expect(other).toEqual({ items: [], totalCount: 0 });
+    });
+  });
+
   describe("ordering and pagination", () => {
     beforeEach(async () => {
       await db.insert(delegation).values([
