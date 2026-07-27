@@ -31,19 +31,6 @@ const metricsService = authfulClient
   ? new MetricsSnapshotService(new DatabaseMetricsDataSource(db), authfulClient)
   : undefined;
 
-if (metricsService) {
-  registerValidationMetrics(metricsService);
-  await metricsService.refresh().catch((err: unknown) => {
-    logger.error({ err }, "Initial validation metrics refresh failed");
-  });
-  const refreshTimer = setInterval(() => {
-    void metricsService.refresh().catch((err: unknown) => {
-      logger.error({ err }, "Validation metrics refresh failed");
-    });
-  }, 60_000);
-  refreshTimer.unref();
-}
-
 const app = createApp({
   db,
   authResolver,
@@ -60,5 +47,21 @@ app.doc("/docs/json", {
 logger.info({ port: env.PORT }, "User API running");
 
 serve({ fetch: app.fetch, port: env.PORT, hostname: "::" });
+
+// Refresh metrics after serving starts: a slow/unreachable Authful must not
+// keep /health and the rest of the API unavailable long enough for Railway to
+// restart the process. The interval retries on its own cadence.
+if (metricsService) {
+  registerValidationMetrics(metricsService);
+  void metricsService.refresh().catch((err: unknown) => {
+    logger.error({ err }, "Initial validation metrics refresh failed");
+  });
+  const refreshTimer = setInterval(() => {
+    void metricsService.refresh().catch((err: unknown) => {
+      logger.error({ err }, "Validation metrics refresh failed");
+    });
+  }, 60_000);
+  refreshTimer.unref();
+}
 
 export { app };

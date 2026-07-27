@@ -211,18 +211,13 @@ describe("authful app", () => {
       const active = await mint({ tenant: "user:abc" });
       const stale = await mint({ tenant: "user:def" });
       const ops = await mint({ tenant: "uniswap" });
-      await db
-        .update(tokens)
-        .set({ lastUsedAt: new Date("2026-07-27T12:00:00.000Z") })
-        .where(eq(tokens.id, active.id));
-      await db
-        .update(tokens)
-        .set({ lastUsedAt: new Date("2026-07-20T12:00:00.000Z") })
-        .where(eq(tokens.id, stale.id));
-      await db
-        .update(tokens)
-        .set({ lastUsedAt: new Date("2026-07-27T12:00:00.000Z") })
-        .where(eq(tokens.id, ops.id));
+      // Daily-active is derived from per-request usage records (written on
+      // every request, incl. Gateful cache hits), not tokens.lastUsedAt.
+      await db.insert(tokenUsageDaily).values([
+        { tokenId: active.id, day: "2026-07-27", count: 1 },
+        { tokenId: stale.id, day: "2026-07-20", count: 1 },
+        { tokenId: ops.id, day: "2026-07-27", count: 1 },
+      ]);
 
       const res = await app.request(
         "/tokens/active?since=2026-07-27T03%3A00%3A00.000Z",

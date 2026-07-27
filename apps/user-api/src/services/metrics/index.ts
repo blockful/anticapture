@@ -111,10 +111,13 @@ export class MetricsSnapshotService {
 
   async refresh(): Promise<void> {
     const now = this.now();
-    const [counts, tokenIds] = await Promise.all([
-      this.dataSource.counts(),
-      this.authful.activeTokenIds(saoPauloMidnight(now)),
-    ]);
+    // Publish DB-derived counts before touching Authful: if Authful is down we
+    // must not leave keysCreatedTotal at 0 and then have it jump to the
+    // lifetime count on recovery (breaks the increase(...[1d]) dashboard query).
+    const counts = await this.dataSource.counts();
+    this.current = { ...this.current, ...counts };
+
+    const tokenIds = await this.authful.activeTokenIds(saoPauloMidnight(now));
     const keys = await this.dataSource.newestKeysForActiveTokenIds(tokenIds);
     const newestKeyByUser = new Map<string, Date>();
     for (const key of keys) {
@@ -127,6 +130,6 @@ export class MetricsSnapshotService {
     for (const createdAt of newestKeyByUser.values()) {
       activeUsers[ageBucket(now.getTime() - createdAt.getTime())] += 1;
     }
-    this.current = { ...counts, activeUsers };
+    this.current = { ...this.current, activeUsers };
   }
 }

@@ -52,10 +52,21 @@ export class TokensRepository {
   }
 
   async listUserTokenIdsUsedSince(since: Date): Promise<string[]> {
+    // Derive from per-request usage records, not tokens.lastUsedAt: Gateful
+    // caches validation verdicts for 30s and only refreshes lastUsedAt on an
+    // uncached validation, so a user's sole request of the day can land on a
+    // cache hit and never bump lastUsedAt. tokenUsageDaily is written on every
+    // request (day granularity is enough for a daily-active metric).
     const rows = await this.db
-      .select({ id: tokens.id })
+      .selectDistinct({ id: tokens.id })
       .from(tokens)
-      .where(and(like(tokens.tenant, "user:%"), gte(tokens.lastUsedAt, since)))
+      .innerJoin(tokenUsageDaily, eq(tokenUsageDaily.tokenId, tokens.id))
+      .where(
+        and(
+          like(tokens.tenant, "user:%"),
+          gte(tokenUsageDaily.day, utcDay(since)),
+        ),
+      )
       .orderBy(tokens.id);
     return rows.map(({ id }) => id);
   }
