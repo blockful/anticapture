@@ -31,6 +31,7 @@ import { TitleSection } from "@/features/governance/components/proposal-overview
 import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import { useOffchainProposal } from "@/features/governance/hooks/useOffchainProposal";
 import { useOffchainProposalPrivacy } from "@/features/governance/hooks/useOffchainProposalPrivacy";
+import { useOffchainVoteIndexing } from "@/features/governance/hooks/useOffchainVoteIndexing";
 import { useProposal } from "@/features/governance/hooks/useProposal";
 import type {
   ProposalDetails,
@@ -76,6 +77,10 @@ export const ProposalSection = ({
     string | null
   >(null);
   const [isChangingVote, setIsChangingVote] = useState(false);
+  const [optimisticScores, setOptimisticScores] = useState<number[] | null>(
+    null,
+  );
+  const [signedAt, setSignedAt] = useState<number | null>(null);
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
@@ -189,6 +194,21 @@ export const ProposalSection = ({
   const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
   const offchainVoteLabel = localOffchainVoteLabel ?? apiOffchainVoteLabel;
 
+  // The vote counts as indexed once the API returns it for this wallet, which
+  // flips the chip to "Indexed" and stops applying the optimistic delta.
+  const {
+    status: indexingStatus,
+    isFading: isIndexingChipFading,
+    isOptimistic,
+  } = useOffchainVoteIndexing({
+    signedAt,
+    isIndexed: !!apiOffchainVoteLabel,
+  });
+
+  // Dropped the moment the indexer has the vote, otherwise the delta would be
+  // counted twice on top of the now-indexed tally.
+  const pendingScores = isOptimistic ? optimisticScores : null;
+
   // Read-only first for a wallet that already voted, unless it asked to change.
   const showVotedModal =
     offchainHasVoted && !!userOffchainVote && !isChangingVote;
@@ -236,8 +256,12 @@ export const ProposalSection = ({
   const queryClient = useQueryClient();
 
   const handleOffchainVoteSuccess = useCallback(
-    (voteLabel: string) => {
+    (voteLabel: string, optimisticScores: number[]) => {
       setLocalOffchainVoteLabel(voteLabel);
+      // Held until the indexer reflects the vote, so the tally moves the moment
+      // the signature returns instead of after the next poll.
+      setOptimisticScores(optimisticScores);
+      setSignedAt(Date.now());
       // Refetch votes (badge + table) and proposal scores so the UI reflects
       // the new vote without requiring a manual page reload.
       void queryClient.invalidateQueries({
@@ -355,6 +379,9 @@ export const ProposalSection = ({
                 offchainChoices={isOffchain ? offchainChoices : undefined}
                 offchainScores={isOffchain ? offchainScores : undefined}
                 isShutter={isShutter}
+                optimisticScores={pendingScores}
+                indexingStatus={indexingStatus}
+                isIndexingChipFading={isIndexingChipFading}
               />
               <ProposalStatusSection
                 proposal={proposal}

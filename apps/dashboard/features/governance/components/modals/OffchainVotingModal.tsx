@@ -14,7 +14,10 @@ import { WeightedVoteOptions } from "@/features/governance/components/modals/vot
 import { useOffchainProposalPrivacy } from "@/features/governance/hooks/useOffchainProposalPrivacy";
 import { useOffchainVotingPower } from "@/features/governance/hooks/useOffchainVotingPower";
 import { useVoteOnOffchainProposal } from "@/features/governance/hooks/useVoteOnOffchainProposal";
-import { normalizeChoices } from "@/features/governance/utils/offchainProposal";
+import {
+  normalizeChoices,
+  normalizeScores,
+} from "@/features/governance/utils/offchainProposal";
 import { getOffchainVoteUiType } from "@/features/governance/utils/offchainVotingType";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
@@ -29,7 +32,12 @@ interface OffchainVotingModalProps {
   onClose: () => void;
   proposal: OffchainProposal;
   hasVoted?: boolean;
-  onVoteSuccess?: (voteLabel: string) => void;
+  /**
+   * `optimisticScores` carries the voter's power on the choices they just
+   * picked, aligned with the proposal's choices, so the results card can show
+   * the vote before the indexer has it.
+   */
+  onVoteSuccess?: (voteLabel: string, optimisticScores: number[]) => void;
 }
 
 export const OffchainVotingModal = ({
@@ -125,6 +133,37 @@ export const OffchainVotingModal = ({
       .join(", ");
   };
 
+  /**
+   * The voter's power spread over the choices they picked, so the results card
+   * can add it on top of the indexed tally. Weighted and quadratic split it by
+   * their allocation; every other type applies the full power to each pick,
+   * which is how Snapshot itself tallies approval and ranked ballots.
+   */
+  const computeOptimisticScores = (): number[] => {
+    const delta = choices.map(() => 0);
+    if (!value) return delta;
+
+    if (typeof value === "number") {
+      if (value - 1 in delta) delta[value - 1] = votingPower;
+      return delta;
+    }
+
+    if (Array.isArray(value)) {
+      for (const choice of value) {
+        if (choice - 1 in delta) delta[choice - 1] = votingPower;
+      }
+      return delta;
+    }
+
+    const total = Object.values(value).reduce((sum, w) => sum + w, 0);
+    if (total <= 0) return delta;
+    for (const [index, weight] of Object.entries(value)) {
+      const position = Number(index) - 1;
+      if (position in delta) delta[position] = (votingPower * weight) / total;
+    }
+    return delta;
+  };
+
   const handleVote = async () => {
     if (!address || !value) return;
     try {
@@ -136,7 +175,7 @@ export const OffchainVotingModal = ({
         reason: comment,
       });
       showCustomToast("Vote submitted successfully!", "success");
-      onVoteSuccess?.(computeVoteLabel());
+      onVoteSuccess?.(computeVoteLabel(), computeOptimisticScores());
       onClose();
     } catch (err) {
       const message =
@@ -161,6 +200,12 @@ export const OffchainVotingModal = ({
             choices={choices}
             value={value as number | null}
             onChange={setValue}
+            // Shutter ballots conceal the tally, so a preview would leak it.
+            liveImpact={
+              isShutter
+                ? null
+                : { scores: normalizeScores(proposal.scores), votingPower }
+            }
           />
         );
       case "approval":

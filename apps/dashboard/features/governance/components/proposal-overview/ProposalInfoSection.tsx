@@ -9,6 +9,7 @@ import {
 import { formatUnits } from "viem";
 
 import { OffchainResultsCard } from "@/features/governance/components/proposal-overview/OffchainResultsCard";
+import type { OffchainVoteIndexingStatus } from "@/features/governance/hooks/useOffchainVoteIndexing";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
 import type { ProposalViewData } from "@/features/governance/types";
 import { getTimeLeftText } from "@/features/governance/utils";
@@ -68,6 +69,10 @@ interface ProposalInfoSectionProps {
   offchainScores?: number[];
   /** Shutter proposals conceal the tally, so the card shows dashes, not zeros. */
   isShutter?: boolean;
+  /** Just-signed vote, applied on top of the tally until the indexer catches up. */
+  optimisticScores?: number[] | null;
+  indexingStatus?: OffchainVoteIndexingStatus;
+  isIndexingChipFading?: boolean;
 }
 
 export const ProposalInfoSection = ({
@@ -76,6 +81,9 @@ export const ProposalInfoSection = ({
   offchainChoices,
   offchainScores,
   isShutter = false,
+  optimisticScores = null,
+  indexingStatus,
+  isIndexingChipFading,
 }: ProposalInfoSectionProps) => {
   const timeLeftText = getTimeLeftText(proposal.endTimestamp);
 
@@ -90,6 +98,9 @@ export const ProposalInfoSection = ({
           scores={offchainScores}
           end={Number(proposal.endTimestamp)}
           isShutter={isShutter}
+          optimisticScores={optimisticScores}
+          indexingStatus={indexingStatus}
+          isIndexingChipFading={isIndexingChipFading}
           className="border-0"
         />
 
