@@ -73,23 +73,23 @@ export const FormerDelegatorsTable = ({
     {
       accessorKey: "vpImpact",
       header: () => (
-        <span className="text-table-header flex w-full justify-start">
+        <span className="text-table-header flex w-full justify-center">
           VP Impact
         </span>
       ),
       cell: ({ row }) =>
         isLoading ? (
-          <div className="flex justify-end">
+          <div className="flex justify-center">
             <SkeletonRow className="h-5 w-16" />
           </div>
         ) : row.original.vpImpact === row.original.redelegatedAmount ? (
-          <div className="flex w-full items-center justify-end text-sm tabular-nums">
+          <div className="flex w-full items-center justify-center text-sm tabular-nums">
             <span className="text-primary">
               {formatNumberUserReadable(row.original.vpImpact)}
             </span>
           </div>
         ) : (
-          <div className="flex w-full items-center justify-end gap-1.5 text-sm tabular-nums">
+          <div className="flex w-full items-center justify-center gap-1.5 text-sm tabular-nums">
             <span className="text-secondary line-through">
               {formatNumberUserReadable(row.original.vpImpact)}
             </span>

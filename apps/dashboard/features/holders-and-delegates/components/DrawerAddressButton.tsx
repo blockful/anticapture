@@ -24,7 +24,11 @@ export const DrawerAddressButton = ({
   return (
     <button
       type="button"
-      className="cursor-pointer"
+      // Clamped to the cell: a button is inline-block, so without this it is
+      // sized by its content and long names (an ENS record can be a 42 char
+      // address plus ".eth") overflow into the next column instead of being
+      // truncated.
+      className="min-w-0 max-w-full cursor-pointer"
       onClick={(e) => {
         e.stopPropagation();
         setTabAddress(null);
