@@ -1,9 +1,5 @@
 import { meterProvider } from "@/instrumentation";
-import {
-  AGE_BUCKETS,
-  LOGIN_METHODS,
-  type MetricsSnapshotService,
-} from "@/services/metrics";
+import { AGE_BUCKETS, type MetricsSnapshotService } from "@/services/metrics";
 
 const meter = meterProvider.getMeter("anticapture-user-api");
 
@@ -52,23 +48,27 @@ export const registerValidationMetrics = (
       }
     });
   meter
-    .createObservableGauge("user_api_login_method_tokens", {
-      description: "Current live user API keys by account login method",
+    .createObservableGauge("user_api_user_tokens", {
+      description: "Current live API keys by user identifier and login method",
     })
     .addCallback((result) => {
-      const { loginMethods } = service.snapshot();
-      for (const method of LOGIN_METHODS) {
-        result.observe(loginMethods[method].tokens, { login_method: method });
+      for (const userMetrics of service.snapshot().users) {
+        result.observe(userMetrics.tokens, {
+          identifier: userMetrics.identifier,
+          login_method: userMetrics.loginMethod,
+        });
       }
     });
   meter
-    .createObservableGauge("user_api_login_method_usage_today", {
-      description: "Today's user API requests by account login method",
+    .createObservableGauge("user_api_user_usage_today", {
+      description: "Today's API requests by user identifier and login method",
     })
     .addCallback((result) => {
-      const { loginMethods } = service.snapshot();
-      for (const method of LOGIN_METHODS) {
-        result.observe(loginMethods[method].usage, { login_method: method });
+      for (const userMetrics of service.snapshot().users) {
+        result.observe(userMetrics.usage, {
+          identifier: userMetrics.identifier,
+          login_method: userMetrics.loginMethod,
+        });
       }
     });
 };

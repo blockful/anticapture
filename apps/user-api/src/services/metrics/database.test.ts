@@ -65,21 +65,18 @@ describe("database validation metrics", () => {
       { id: "wallet-user", name: "Wallet", email: "wallet@example.com" },
       { id: "google-user", name: "Google", email: "google@example.com" },
       { id: "email-user", name: "Email", email: "email@example.com" },
-    ]);
-    await db.insert(account).values([
       {
-        id: "wallet-google",
-        accountId: "wallet-google",
-        providerId: "google",
-        userId: "wallet-user",
-      },
-      {
-        id: "google",
-        accountId: "google",
-        providerId: "google",
-        userId: "google-user",
+        id: "no-token-user",
+        name: "No token",
+        email: "no-token@example.com",
       },
     ]);
+    await db.insert(account).values({
+      id: "google",
+      accountId: "google",
+      providerId: "google",
+      userId: "google-user",
+    });
     await db.insert(walletAddress).values({
       id: "wallet",
       userId: "wallet-user",
@@ -124,21 +121,46 @@ describe("database validation metrics", () => {
     await client.close();
   });
 
-  it("counts live tokens under wallet, Google, and email", async () => {
+  it("lists every user by email, Google email, then wallet identifier", async () => {
     const result = await dataSource.counts();
 
     expect(result).toEqual({
-      accountsTotal: 3,
+      accountsTotal: 4,
       keysLive: 3,
-      liveTokens: {
-        wallet: 1,
-        google: 1,
-        email: 1,
-      },
+      users: [
+        {
+          userId: "email-user",
+          identifier: "email@example.com",
+          loginMethod: "email",
+          tokens: 1,
+          usage: 0,
+        },
+        {
+          userId: "no-token-user",
+          identifier: "no-token@example.com",
+          loginMethod: "email",
+          tokens: 0,
+          usage: 0,
+        },
+        {
+          userId: "google-user",
+          identifier: "google@example.com",
+          loginMethod: "google",
+          tokens: 1,
+          usage: 0,
+        },
+        {
+          userId: "wallet-user",
+          identifier: "0x0000000000000000000000000000000000000001",
+          loginMethod: "wallet",
+          tokens: 1,
+          usage: 0,
+        },
+      ],
     });
   });
 
-  it("classifies active token owners with wallet precedence", async () => {
+  it("returns all keys owned by active users", async () => {
     const result = await dataSource.keysForActiveTokenIds([
       WALLET_TOKEN,
       GOOGLE_TOKEN,
@@ -151,25 +173,21 @@ describe("database validation metrics", () => {
         tokenId: WALLET_TOKEN,
         userId: "wallet-user",
         createdAt: CREATED_AT,
-        loginMethod: "wallet",
       },
       {
         tokenId: GOOGLE_TOKEN,
         userId: "google-user",
         createdAt: CREATED_AT,
-        loginMethod: "google",
       },
       {
         tokenId: EMAIL_TOKEN,
         userId: "email-user",
         createdAt: CREATED_AT,
-        loginMethod: "email",
       },
       {
         tokenId: REVOKED_TOKEN,
         userId: "email-user",
         createdAt: CREATED_AT,
-        loginMethod: "email",
       },
     ]);
   });

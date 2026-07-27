@@ -11,44 +11,64 @@ const DAY = 24 * HOUR;
 
 const dataSource: MetricsDataSource = {
   counts: async () => ({
-    accountsTotal: 9,
+    accountsTotal: 4,
     keysLive: 4,
-    liveTokens: {
-      wallet: 2,
-      google: 1,
-      email: 1,
-    },
+    users: [
+      {
+        userId: "three",
+        identifier: "email@example.com",
+        loginMethod: "email",
+        tokens: 1,
+        usage: 0,
+      },
+      {
+        userId: "two",
+        identifier: "google@example.com",
+        loginMethod: "google",
+        tokens: 1,
+        usage: 0,
+      },
+      {
+        userId: "four",
+        identifier: "0x0000000000000000000000000000000000000004",
+        loginMethod: "wallet",
+        tokens: 1,
+        usage: 0,
+      },
+      {
+        userId: "one",
+        identifier: "0x0000000000000000000000000000000000000001",
+        loginMethod: "wallet",
+        tokens: 1,
+        usage: 0,
+      },
+    ],
   }),
   keysForActiveTokenIds: async () => [
     {
       tokenId: "wallet-token",
       userId: "one",
       createdAt: new Date(NOW.getTime() - 12 * HOUR),
-      loginMethod: "wallet",
     },
     {
       tokenId: "google-token",
       userId: "two",
       createdAt: new Date(NOW.getTime() - 3 * DAY),
-      loginMethod: "google",
     },
     {
       tokenId: "email-token",
       userId: "three",
       createdAt: new Date(NOW.getTime() - 10 * DAY),
-      loginMethod: "email",
     },
     {
       tokenId: "older-wallet-token",
       userId: "four",
       createdAt: new Date(NOW.getTime() - 60 * DAY),
-      loginMethod: "wallet",
     },
     {
       tokenId: "oldest-wallet-token",
       userId: "four",
       createdAt: new Date(NOW.getTime() - 90 * DAY),
-      loginMethod: "wallet",
     },
   ],
 };
@@ -71,7 +91,7 @@ describe("validation metrics snapshot", () => {
     await service.refresh();
 
     expect(service.snapshot()).toEqual({
-      accountsTotal: 9,
+      accountsTotal: 4,
       keysLive: 4,
       activeUsers: {
         "0-1d": 1,
@@ -79,11 +99,36 @@ describe("validation metrics snapshot", () => {
         "7-30d": 1,
         "30d+": 1,
       },
-      loginMethods: {
-        wallet: { tokens: 2, usage: 17 },
-        google: { tokens: 1, usage: 8 },
-        email: { tokens: 1, usage: 3 },
-      },
+      users: [
+        {
+          userId: "three",
+          identifier: "email@example.com",
+          loginMethod: "email",
+          tokens: 1,
+          usage: 3,
+        },
+        {
+          userId: "two",
+          identifier: "google@example.com",
+          loginMethod: "google",
+          tokens: 1,
+          usage: 8,
+        },
+        {
+          userId: "four",
+          identifier: "0x0000000000000000000000000000000000000004",
+          loginMethod: "wallet",
+          tokens: 1,
+          usage: 5,
+        },
+        {
+          userId: "one",
+          identifier: "0x0000000000000000000000000000000000000001",
+          loginMethod: "wallet",
+          tokens: 1,
+          usage: 12,
+        },
+      ],
     });
   });
 
@@ -123,19 +168,16 @@ describe("validation metrics snapshot", () => {
             tokenId: "one-day",
             userId: "one-day",
             createdAt: new Date(NOW.getTime() - DAY),
-            loginMethod: "wallet",
           },
           {
             tokenId: "seven-days",
             userId: "seven-days",
             createdAt: new Date(NOW.getTime() - 7 * DAY),
-            loginMethod: "google",
           },
           {
             tokenId: "thirty-days",
             userId: "thirty-days",
             createdAt: new Date(NOW.getTime() - 30 * DAY),
-            loginMethod: "email",
           },
         ],
       },

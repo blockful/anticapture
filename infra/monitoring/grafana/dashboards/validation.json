@@ -134,8 +134,8 @@
     },
     {
       "id": 5,
-      "title": "Tokens and usage by login method",
-      "description": "Current live tokens and API requests recorded today, grouped by account login method.",
+      "title": "User tokens and usage",
+      "description": "Every registered user with their email or wallet identifier, login method, current live tokens, and requests recorded today.",
       "type": "table",
       "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -145,21 +145,31 @@
       },
       "options": {
         "cellHeight": "sm",
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Login method",
+            "desc": false
+          },
+          {
+            "displayName": "Identifier",
+            "desc": false
+          }
+        ]
       },
       "targets": [
         {
-          "expr": "max by (login_method) (user_api_login_method_tokens)",
+          "expr": "max by (login_method, identifier) (user_api_user_tokens)",
           "format": "table",
           "instant": true,
-          "legendFormat": "{{login_method}}",
+          "legendFormat": "{{identifier}}",
           "refId": "A"
         },
         {
-          "expr": "max by (login_method) (user_api_login_method_usage_today)",
+          "expr": "max by (login_method, identifier) (user_api_user_usage_today)",
           "format": "table",
           "instant": true,
-          "legendFormat": "{{login_method}}",
+          "legendFormat": "{{identifier}}",
           "refId": "B"
         }
       ],
@@ -175,11 +185,13 @@
               "Time": true
             },
             "indexByName": {
-              "login_method": 0,
-              "Value #A": 1,
-              "Value #B": 2
+              "identifier": 0,
+              "login_method": 1,
+              "Value #A": 2,
+              "Value #B": 3
             },
             "renameByName": {
+              "identifier": "Identifier",
               "login_method": "Login method",
               "Value #A": "Tokens",
               "Value #B": "Usage today"
