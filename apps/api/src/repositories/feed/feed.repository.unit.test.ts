@@ -13,7 +13,7 @@ import {
   votesOnchain,
   votingPowerHistory,
 } from "@/database/schema";
-import { FeedEventType, FeedRelevance } from "@/lib/constants";
+import { FeedEventType, FeedRelevanceFilter } from "@/lib/constants";
 import { FeedRequest } from "@/mappers";
 
 import { FeedRepository } from ".";
@@ -27,7 +27,7 @@ const defaultFeedParams = (
   limit: 10,
   orderBy: "timestamp",
   orderDirection: "desc",
-  relevance: FeedRelevance.MEDIUM,
+  relevance: FeedRelevanceFilter.MEDIUM,
   ...overrides,
 });
 

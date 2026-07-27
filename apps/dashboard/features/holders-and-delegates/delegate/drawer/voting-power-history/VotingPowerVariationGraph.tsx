@@ -137,7 +137,7 @@ export const VotingPowerVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="loading"
-          title="VOTING POWER VARIATION"
+          title="Voting Power Change"
           headerContent={
             <TimePeriodSwitcher
               value={selectedPeriod}
@@ -155,7 +155,7 @@ export const VotingPowerVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="error"
-          title="VOTING POWER VARIATION"
+          title="Voting Power Change"
           errorMessage="Error loading data"
           headerContent={
             <TimePeriodSwitcher
@@ -174,7 +174,7 @@ export const VotingPowerVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="no-data"
-          title="VOTING POWER VARIATION"
+          title="Voting Power Change"
           noDataMessage="No voting power data available"
           headerContent={
             <TimePeriodSwitcher

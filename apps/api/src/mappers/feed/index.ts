@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { feedEvent } from "@/database";
-import { FeedEventType, FeedRelevance } from "@/lib/constants";
+import { FeedEventType, FeedRelevanceFilter } from "@/lib/constants";
 
 import {
   AddressSchema,
@@ -51,8 +51,9 @@ export const FeedRequestSchema = z
         example: "timestamp",
       }),
     orderDirection: defaultDescOrderDirection(),
-    relevance: z.enum(FeedRelevance).optional().openapi({
-      description: "Filter events by relevance tier.",
+    relevance: z.enum(FeedRelevanceFilter).optional().openapi({
+      description:
+        "Filter events by relevance tier. Tiers are cumulative value floors, so LOW also returns MEDIUM and HIGH events. Use ALL to drop the floor and return every event. Defaults to MEDIUM when omitted.",
     }),
     type: FeedEventTypeListSchema.optional().openapi("FeedEventTypeList", {
       type: "array",

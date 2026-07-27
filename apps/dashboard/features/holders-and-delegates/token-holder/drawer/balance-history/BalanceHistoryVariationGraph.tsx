@@ -108,7 +108,7 @@ export const BalanceHistoryVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="loading"
-          title="BALANCE HISTORY"
+          title="Balance Change"
           headerContent={
             <TimePeriodSwitcher
               value={selectedPeriod}
@@ -126,7 +126,7 @@ export const BalanceHistoryVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="error"
-          title="BALANCE HISTORY"
+          title="Balance Change"
           errorMessage="Error loading data"
           headerContent={
             <TimePeriodSwitcher
@@ -145,7 +145,7 @@ export const BalanceHistoryVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="no-data"
-          title="BALANCE HISTORY"
+          title="Balance Change"
           noDataMessage="No balance history data found for this address"
           headerContent={
             <TimePeriodSwitcher

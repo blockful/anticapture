@@ -484,6 +484,18 @@ export enum FeedRelevance {
   LOW = "LOW",
 }
 
+// Query-only counterpart of FeedRelevance. The tiers are cumulative value
+// floors (LOW also returns MEDIUM and HIGH events), so ALL is the opt out that
+// drops the floor entirely and returns every event, including the ones below
+// the LOW threshold. It is not a tier an event can have, which is why it lives
+// apart from FeedRelevance instead of extending it.
+export enum FeedRelevanceFilter {
+  ALL = "ALL",
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
+}
+
 export enum FeedEventType {
   VOTE = "VOTE",
   PROPOSAL = "PROPOSAL",

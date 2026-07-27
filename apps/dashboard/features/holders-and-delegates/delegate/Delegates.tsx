@@ -533,7 +533,10 @@ export const Delegates = ({
           percentage: number;
         } | null;
 
-        if (loading) {
+        // Timing comes from the same per-row proposals activity as the Activity
+        // column, so it has to wait on that request too. Without this guard the
+        // cell renders "-" (the no-data value) while the data is still loading.
+        if (isActivityLoadingFor(row.original.address) || loading) {
           return (
             <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-20" />

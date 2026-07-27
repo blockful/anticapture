@@ -140,6 +140,10 @@ export const AddressDetailsTooltip = ({
     <Tooltip
       tooltipContent={content}
       className="w-70 rounded-none p-2 text-left"
+      // The trigger is an inline-block button between the table cell and the
+      // name, so without these it sizes to its content and long arkham labels
+      // overflow the column instead of being truncated.
+      triggerClassName="block min-w-0 max-w-full"
     >
       {children}
     </Tooltip>

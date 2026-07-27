@@ -54,16 +54,19 @@ export const DrawerActivityFeed = ({
         address,
         limit: 20,
         orderDirection,
-        ...(relevance !== "ALL"
-          ? { relevance: relevance as FeedEventsQueryParamsRelevanceEnumKey }
-          : {}),
+        // Always sent explicitly: the API reads a missing `relevance` as MEDIUM,
+        // whose value thresholds would hide most of the address's activity.
+        // "ALL" drops the threshold and returns every tier at once.
+        relevance: relevance as FeedEventsQueryParamsRelevanceEnumKey,
       },
-      { query: { getNextPageParam } },
+      // An empty address would be rejected with a 400 while the drawer closes.
+      { query: { getNextPageParam, enabled: Boolean(address) } },
     );
 
   const events = data?.pages ? data.pages.flatMap((page) => page.items) : [];
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!hasNextPage) return;
     const node = sentinelRef.current;
@@ -72,7 +75,11 @@ export const DrawerActivityFeed = ({
       ([entry]) => {
         if (entry.isIntersecting && !isFetchingNextPage) fetchNextPage();
       },
-      { rootMargin: "0px 0px 200px 0px" },
+      // The list scrolls inside its own container, so that container has to be
+      // the root: against the viewport the sentinel sits exactly on the
+      // container's clipped edge and never registers as visible, which left
+      // the feed stuck on its first page.
+      { root: scrollRef.current, rootMargin: "0px 0px 200px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -121,7 +128,7 @@ export const DrawerActivityFeed = ({
       </div>
 
       {/* Timeline */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="flex flex-col gap-4 pl-5">
             {Array.from({ length: 5 }).map((_, i) => (

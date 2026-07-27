@@ -338,7 +338,7 @@ export const TokenHolders = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-center p-0"
+          className="text-secondary w-full justify-end p-0"
           onClick={handleVariationSort}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -368,7 +368,7 @@ export const TokenHolders = ({
 
         if (isLoading) {
           return (
-            <div className="flex w-full items-center justify-center">
+            <div className="flex w-full items-center justify-end">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -378,8 +378,8 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="flex w-full flex-col items-center justify-center overflow-hidden text-sm">
-            <span className="min-w-0 tabular-nums">
+          <div className="flex w-full flex-col items-end justify-center overflow-hidden text-end text-sm">
+            <span className="text-primary min-w-0 tabular-nums">
               {(variation?.percentageChange || 0) < 0 ? "-" : ""}
               {formatNumberUserReadable(
                 Math.abs(variation?.absoluteChange || 0),

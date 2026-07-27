@@ -90,7 +90,7 @@ export const SwitcherDateRange = ({
           )}
         />
       </PopoverTrigger>
-      <PopoverContent className="z-[200] w-auto p-0" align="end">
+      <PopoverContent className="rounded-base z-[200] w-auto p-0" align="end">
         <Calendar
           mode="range"
           numberOfMonths={isMobile ? 1 : 2}

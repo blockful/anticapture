@@ -51,7 +51,13 @@ export function useActivityFeedParams() {
   const setFilters = useCallback(
     (newFilters: FeedEventsQueryParams) => {
       setOrderDirection(newFilters.orderDirection ?? "desc");
-      setRelevance(newFilters.relevance ?? null);
+      // The API also accepts "ALL", but this page only offers the three tiers,
+      // so anything outside them resets to the default instead.
+      setRelevance(
+        newFilters.relevance && newFilters.relevance !== "ALL"
+          ? newFilters.relevance
+          : null,
+      );
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
       setEventTypes(
