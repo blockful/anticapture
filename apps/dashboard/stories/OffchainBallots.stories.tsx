@@ -205,6 +205,41 @@ export const Quadratic: Story = {
   },
 };
 
+/**
+ * Frame 09 — live impact preview on the single-choice ballot: per-row bar, voting
+ * power and share, with a green delta on the selected row. The frame's own
+ * numbers show only 3 rows of a longer list, so they do not sum to 100%; these
+ * are self-consistent so the projection math is checkable.
+ */
+export const LiveImpactPreview: Story = {
+  parameters: {
+    design: { type: "figma", url: `${FIGMA_FILE}?node-id=3536-25938` },
+  },
+  render: () => {
+    const Demo = () => {
+      const [value, setValue] = useState<number | null>(2);
+      return (
+        <BallotFrame>
+          <SingleChoiceOptions
+            choices={[
+              "Deploy on all v3 pools",
+              "Run a 90-day pilot first",
+              "Deploy fee switch on 3 pilot pools",
+            ]}
+            value={value}
+            onChange={setValue}
+            liveImpact={{
+              scores: [90_700, 371_800, 90_700],
+              votingPower: 26_400,
+            }}
+          />
+        </BallotFrame>
+      );
+    };
+    return <Demo />;
+  },
+};
+
 /** Basic (For / Against / Abstain). */
 export const Basic: Story = {
   render: () => {
