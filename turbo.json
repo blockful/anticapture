@@ -130,6 +130,10 @@
         "BLOCKFUL_API_TOKEN"
       ]
     },
+    "@anticapture/dashboard#test:synthetic": {
+      "cache": false,
+      "passThroughEnv": ["CI", "PLAYWRIGHT_BASE_URL"]
+    },
     "@anticapture/dashboard#test:e2e:headed": {
       "cache": false,
       "passThroughEnv": [

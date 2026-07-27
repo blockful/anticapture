@@ -1,0 +1,183 @@
+name: Synthetic Monitoring
+
+# Scheduled browser smoke probes against the live dashboard. Catches outages a
+# plain HTTP health check can't: broken hydration, a dead gateway data path,
+# or a route that only fails in the browser. The e2e fixture blocks Umami, so
+# these runs never register in analytics; the handful of real requests they
+# make to gateful is intentional — if those 5xx, the probe should fail.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Dashboard URL to probe"
+        required: false
+        default: "https://app.anticapture.com"
+
+permissions:
+  contents: read
+  issues: write
+
+# Never stack overlapping probes; let an in-flight run finish.
+concurrency:
+  group: synthetic-monitoring
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Production smoke probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_BASE_URL: ${{ github.event.inputs.target_url || 'https://app.anticapture.com' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter "@anticapture/dashboard..."
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
+
+      - name: Run synthetic smoke suite
+        run: pnpm dashboard test:synthetic
+        env:
+          CI: "true"
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-playwright-report-${{ github.run_id }}
+          path: apps/dashboard/playwright-report
+          retention-days: 14
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-playwright-traces-${{ github.run_id }}
+          path: apps/dashboard/test-results
+          retention-days: 14
+
+      # Alerting: keep exactly one open issue labeled `synthetic-monitoring`
+      # while probes fail — new failures append a comment instead of opening
+      # duplicates. Close the issue once the probe is healthy again.
+      - name: Open or update alert issue
+        if: failure()
+        uses: actions/github-script@v7
+        env:
+          TARGET_URL: ${{ env.PLAYWRIGHT_BASE_URL }}
+        with:
+          script: |
+            const label = "synthetic-monitoring";
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              `Synthetic smoke probe failed against ${process.env.TARGET_URL}.`,
+              "",
+              `Run: ${runUrl}`,
+              "",
+              "The Playwright report and traces are attached to the run as artifacts.",
+            ].join("\n");
+
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: label,
+              per_page: 1,
+            });
+
+            if (open.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: "🚨 Synthetic monitoring: production dashboard probe failing",
+                body,
+                labels: [label],
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: open[0].number,
+                body,
+              });
+            }
+
+      - name: Close alert issue on recovery
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "synthetic-monitoring";
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: label,
+              per_page: 10,
+            });
+
+            for (const issue of open) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `✅ Synthetic probe is passing again: ${runUrl}`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "closed",
+                state_reason: "completed",
+              });
+            }
+
+      # Optional Slack alert — no-op until a SLACK_WEBHOOK_URL secret exists.
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TARGET_URL: ${{ env.PLAYWRIGHT_BASE_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SLACK_WEBHOOK_URL:-}" ]; then
+            echo "SLACK_WEBHOOK_URL not configured; skipping Slack notification."
+            exit 0
+          fi
+          payload=$(jq -n \
+            --arg text "🚨 Synthetic monitoring failed against ${TARGET_URL} — ${RUN_URL}" \
+            '{ text: $text }')
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data "${payload}" \
+            "${SLACK_WEBHOOK_URL}"

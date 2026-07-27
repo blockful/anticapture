@@ -18,6 +18,14 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      testIgnore: /\/synthetic\//,
+    },
+    // Scheduled smoke probes against a live deployment; run with
+    // PLAYWRIGHT_BASE_URL set (see .github/workflows/synthetic-monitoring.yaml).
+    {
+      name: "synthetic",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /\/synthetic\/.*\.spec\.ts$/,
     },
   ],
   // Skip webServer when PLAYWRIGHT_BASE_URL points to a remote target.
