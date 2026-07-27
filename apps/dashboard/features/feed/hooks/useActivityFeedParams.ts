@@ -51,11 +51,13 @@ export function useActivityFeedParams() {
   const setFilters = useCallback(
     (newFilters: FeedEventsQueryParams) => {
       setOrderDirection(newFilters.orderDirection ?? "desc");
-      // The API also accepts "ALL", but this page only offers the three tiers,
-      // so anything outside them resets to the default instead.
+      // The API accepts values this page does not model (e.g. "ALL", which the
+      // drawer feed uses), so keep only the tiers offered here and let anything
+      // else fall back to the default.
+      const tiers: string[] = Object.values(feedRelevanceEnum);
       setRelevance(
-        newFilters.relevance && newFilters.relevance !== "ALL"
-          ? newFilters.relevance
+        newFilters.relevance && tiers.includes(newFilters.relevance)
+          ? (newFilters.relevance as FeedRelevance)
           : null,
       );
       setFromDate(newFilters.fromDate || null);
