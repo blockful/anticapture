@@ -27,6 +27,7 @@ import { TabsSection } from "@/features/governance/components/proposal-overview/
 import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
 import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import { useOffchainProposal } from "@/features/governance/hooks/useOffchainProposal";
+import { useOffchainProposalPrivacy } from "@/features/governance/hooks/useOffchainProposalPrivacy";
 import { useProposal } from "@/features/governance/hooks/useProposal";
 import type {
   ProposalDetails,
@@ -146,6 +147,12 @@ export const ProposalSection = ({
         : null,
     [rawOffchainProposal, offchainScores, offchainChoices],
   );
+
+  // Shutter proposals conceal the running tally, so the results card must render
+  // dashes rather than the zeros a closed encrypted election used to show.
+  const { isShutter } = useOffchainProposalPrivacy(offchainProposalId, {
+    enabled: isOffchain && !!offchainProposalId,
+  });
 
   const { data: userOffchainVoteData } = useVotesOffchainByProposalId(
     offchainDaoKey,
@@ -294,6 +301,7 @@ export const ProposalSection = ({
                 decimals={isOffchain ? 0 : decimals}
                 offchainChoices={isOffchain ? offchainChoices : undefined}
                 offchainScores={isOffchain ? offchainScores : undefined}
+                isShutter={isShutter}
               />
               <ProposalStatusSection
                 proposal={proposal}
