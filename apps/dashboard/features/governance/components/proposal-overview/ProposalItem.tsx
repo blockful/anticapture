@@ -13,7 +13,7 @@ import type { Proposal } from "@/features/governance/types";
 import { ProposalState, ProposalStatus } from "@/features/governance/types";
 import { getTimeText } from "@/features/governance/utils/getTimeText";
 import {
-  getOffchainProposalStatus,
+  getOffchainProposalStatusView,
   normalizeChoices,
   normalizeScores,
 } from "@/features/governance/utils/offchainProposal";
@@ -55,6 +55,10 @@ export const getTextStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.SUCCEEDED:
       return "text-success";
     case ProposalStatus.EXPIRED:
+      return "text-error";
+    case ProposalStatus.PASSED:
+      return "text-success";
+    case ProposalStatus.REJECTED:
       return "text-error";
     case ProposalStatus.NO_QUORUM:
       return "text-secondary";
@@ -114,6 +118,10 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
       return "bg-surface-opacity-success";
     case ProposalStatus.EXPIRED:
       return "bg-surface-opacity-error";
+    case ProposalStatus.PASSED:
+      return "bg-surface-opacity-success";
+    case ProposalStatus.REJECTED:
+      return "bg-surface-opacity-error";
     case ProposalStatus.NO_QUORUM:
       return "bg-surface-opacity";
     case ProposalStatus.CLOSED:
@@ -143,6 +151,10 @@ export const getStatusText = (status: ProposalStatus) => {
       return "Pending Queue";
     case ProposalStatus.EXPIRED:
       return "Expired";
+    case ProposalStatus.PASSED:
+      return "Passed";
+    case ProposalStatus.REJECTED:
+      return "Rejected";
     case ProposalStatus.NO_QUORUM:
       return "No Quorum";
     case ProposalStatus.CLOSED:
@@ -275,11 +287,13 @@ export const ProposalItem = ({
   }, [offchainProposal?.scores, offchainProposal?.choices, offchainProposal]);
 
   if (offchainProposal) {
-    const status = getOffchainProposalStatus(
-      offchainProposal.state,
-      offchainProposal.type ?? "single-choice",
-      offchainScores,
-    );
+    const { status } = getOffchainProposalStatusView({
+      type: offchainProposal.type ?? "single-choice",
+      start: offchainProposal.start,
+      end: offchainProposal.end,
+      scores: offchainScores,
+      choices: offchainProposal.choices ?? [],
+    });
     const isBasic = offchainProposal.type === "basic";
     const timeText = getTimeText(
       String(offchainProposal.start),

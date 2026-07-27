@@ -33,7 +33,7 @@ import type {
   ProposalViewData,
 } from "@/features/governance/types";
 import {
-  getOffchainProposalStatus,
+  getOffchainProposalStatusView,
   normalizeChoices,
   normalizeScores,
 } from "@/features/governance/utils/offchainProposal";
@@ -131,6 +131,22 @@ export const ProposalSection = ({
     [rawOffchainProposal?.choices],
   );
 
+  // Derived once here so the status, its winner copy, and the results card all
+  // agree instead of each recomputing the outcome.
+  const offchainStatus = useMemo(
+    () =>
+      rawOffchainProposal
+        ? getOffchainProposalStatusView({
+            type: rawOffchainProposal.type,
+            start: rawOffchainProposal.start,
+            end: rawOffchainProposal.end,
+            scores: offchainScores,
+            choices: offchainChoices,
+          })
+        : null,
+    [rawOffchainProposal, offchainScores, offchainChoices],
+  );
+
   const { data: userOffchainVoteData } = useVotesOffchainByProposalId(
     offchainDaoKey,
     offchainProposalId,
@@ -145,9 +161,11 @@ export const ProposalSection = ({
     },
   );
 
-  const apiOffchainVoteChoice = (
-    userOffchainVoteData?.items?.[0]?.choice ?? []
-  ).filter((c): c is string => c != null);
+  const userOffchainVote = userOffchainVoteData?.items?.[0] ?? null;
+
+  const apiOffchainVoteChoice = (userOffchainVote?.choice ?? []).filter(
+    (c): c is string => c != null,
+  );
   const apiOffchainVoteLabel =
     apiOffchainVoteChoice.length > 0
       ? getOffchainVoteFullLabel(apiOffchainVoteChoice, offchainChoices)
@@ -179,38 +197,35 @@ export const ProposalSection = ({
     [queryClient, offchainDaoKey, offchainProposalId],
   );
 
-  const adaptedOffchainProposal: ProposalViewData | null = rawOffchainProposal
-    ? {
-        id: rawOffchainProposal.id,
-        daoId: daoId as string,
-        txHash: null,
-        proposerAccountId: rawOffchainProposal.author as `0x${string}`,
-        title: rawOffchainProposal.title,
-        description: rawOffchainProposal.body ?? "",
-        quorum: "0",
-        timestamp: rawOffchainProposal.created,
-        status: getOffchainProposalStatus(
-          rawOffchainProposal.state,
-          rawOffchainProposal.type,
-          offchainScores,
-        ),
-        forVotes: "0",
-        againstVotes: "0",
-        abstainVotes: "0",
-        startTimestamp: rawOffchainProposal.start,
-        endTimestamp: rawOffchainProposal.end,
-        startBlock: 0,
-        endBlock: 0,
-        queuedTimestamp: null,
-        executedTimestamp: null,
-        queuedTxHash: null,
-        executedTxHash: null,
-        calldatas: [],
-        targets: [],
-        values: [],
-        proposalType: null,
-      }
-    : null;
+  const adaptedOffchainProposal: ProposalViewData | null =
+    rawOffchainProposal && offchainStatus
+      ? {
+          id: rawOffchainProposal.id,
+          daoId: daoId as string,
+          txHash: null,
+          proposerAccountId: rawOffchainProposal.author as `0x${string}`,
+          title: rawOffchainProposal.title,
+          description: rawOffchainProposal.body ?? "",
+          quorum: "0",
+          timestamp: rawOffchainProposal.created,
+          status: offchainStatus.status,
+          forVotes: "0",
+          againstVotes: "0",
+          abstainVotes: "0",
+          startTimestamp: rawOffchainProposal.start,
+          endTimestamp: rawOffchainProposal.end,
+          startBlock: 0,
+          endBlock: 0,
+          queuedTimestamp: null,
+          executedTimestamp: null,
+          queuedTxHash: null,
+          executedTxHash: null,
+          calldatas: [],
+          targets: [],
+          values: [],
+          proposalType: null,
+        }
+      : null;
 
   const proposal: ProposalViewData | null = isOffchain
     ? adaptedOffchainProposal
