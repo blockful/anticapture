@@ -55,7 +55,7 @@ interface EnsAvatarProps extends Omit<
   showEfpStats?: boolean;
   /** Render ENS social record links (from enrichment data) below the tags. */
   showSocials?: boolean;
-  /** Extra line rendered under the name, inside the name column. The avatar
+  /** Extra line rendered under the name, inside the name column, so the avatar
    *  stays vertically centered against the whole (name + subtitle) block. */
   subtitle?: ReactNode;
 }

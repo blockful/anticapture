@@ -450,7 +450,7 @@ export const TokenHolders = ({
               ) : activity && activity.totalProposals > 0 ? (
                 <span
                   className={cn(
-                    "justify-start text-xs font-normal",
+                    "block text-left text-xs font-normal",
                     isInactive ? "text-warning" : "text-secondary",
                   )}
                 >
