@@ -29,6 +29,8 @@ const DeleteKeyButton = ({
     <Button
       variant="ghost"
       size="md"
+      // 44px touch target on mobile, compact on desktop
+      className="min-h-11 min-w-11 lg:min-h-0 lg:min-w-0"
       aria-label={`Delete ${apiKey.label}`}
       onClick={() => onDelete(apiKey)}
     >
