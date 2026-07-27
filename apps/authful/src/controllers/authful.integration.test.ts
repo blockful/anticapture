@@ -207,25 +207,28 @@ describe("authful app", () => {
       expect(items.every((t) => t.tenant === "user:abc")).toBe(true);
     });
 
-    it("lists recently active user token ids without leaking ops tenants", async () => {
+    it("lists active user token usage without leaking stale or ops tokens", async () => {
       const active = await mint({ tenant: "user:abc" });
       const stale = await mint({ tenant: "user:def" });
       const ops = await mint({ tenant: "uniswap" });
       // Daily-active is derived from per-request usage records (written on
       // every request, incl. Gateful cache hits), not tokens.lastUsedAt.
       await db.insert(tokenUsageDaily).values([
-        { tokenId: active.id, day: "2026-07-27", count: 1 },
+        { tokenId: active.id, day: "2026-07-26", count: 2 },
+        { tokenId: active.id, day: "2026-07-27", count: 7 },
         { tokenId: stale.id, day: "2026-07-20", count: 1 },
-        { tokenId: ops.id, day: "2026-07-27", count: 1 },
+        { tokenId: ops.id, day: "2026-07-27", count: 9 },
       ]);
 
       const res = await app.request(
-        "/tokens/active?since=2026-07-27T03%3A00%3A00.000Z",
+        "/tokens/active?since=2026-07-26T03%3A00%3A00.000Z",
         { headers: provisioningHeaders },
       );
 
       expect(res.status).toBe(200);
-      await expect(res.json()).resolves.toEqual({ tokenIds: [active.id] });
+      await expect(res.json()).resolves.toEqual({
+        items: [{ tokenId: active.id, count: 9 }],
+      });
     });
 
     it("revokes its own user:* token", async () => {

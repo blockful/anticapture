@@ -73,9 +73,11 @@ export const ListActiveTokensQuerySchema = z
   })
   .openapi("ListActiveTokensQuery");
 
-export const ActiveTokenIdsResponseSchema = z
-  .object({ tokenIds: z.array(z.uuid()) })
-  .openapi("ActiveTokenIdsResponse");
+export const ActiveTokenUsageResponseSchema = z
+  .object({
+    items: z.array(TokenUsageSchema.pick({ tokenId: true, count: true })),
+  })
+  .openapi("ActiveTokenUsageResponse");
 
 export const MintTokenBodySchema = z
   .object({

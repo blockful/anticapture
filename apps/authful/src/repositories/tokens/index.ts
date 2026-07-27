@@ -22,6 +22,7 @@ export type DBToken = typeof tokens.$inferSelect;
 export type NewToken = typeof tokens.$inferInsert;
 export type TokenUsage = typeof tokenUsageDaily.$inferSelect;
 export type TokenUsageIncrement = TokenUsage;
+export type ActiveTokenUsage = Pick<TokenUsage, "tokenId" | "count">;
 
 export class TokensRepository {
   constructor(private readonly db: AuthfulDrizzle) {}
@@ -51,14 +52,19 @@ export class TokensRepository {
       .orderBy(desc(tokens.createdAt));
   }
 
-  async listUserTokenIdsUsedSince(since: Date): Promise<string[]> {
+  async listUserTokenUsageSince(since: Date): Promise<ActiveTokenUsage[]> {
     // Derive from per-request usage records, not tokens.lastUsedAt: Gateful
     // caches validation verdicts for 30s and only refreshes lastUsedAt on an
     // uncached validation, so a user's sole request of the day can land on a
     // cache hit and never bump lastUsedAt. tokenUsageDaily is written on every
     // request (day granularity is enough for a daily-active metric).
-    const rows = await this.db
-      .selectDistinct({ id: tokens.id })
+    return this.db
+      .select({
+        tokenId: tokens.id,
+        count: sql<number>`coalesce(sum(${tokenUsageDaily.count}), 0)`.mapWith(
+          Number,
+        ),
+      })
       .from(tokens)
       .innerJoin(tokenUsageDaily, eq(tokenUsageDaily.tokenId, tokens.id))
       .where(
@@ -67,8 +73,8 @@ export class TokensRepository {
           gte(tokenUsageDaily.day, utcDay(since)),
         ),
       )
+      .groupBy(tokens.id)
       .orderBy(tokens.id);
-    return rows.map(({ id }) => id);
   }
 
   async create(token: NewToken): Promise<DBToken> {

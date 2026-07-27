@@ -1,3 +1,8 @@
 [deploy]
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
+
+# PR environments inherit Grafana's admin credentials from dev, but use basic
+# authentication so every ephemeral callback URL need not be registered with Google.
+[environments.pr.deploy]
+startCommand = "/bin/sh -c 'export GF_AUTH_GOOGLE_ENABLED=false GF_AUTH_DISABLE_LOGIN_FORM=false GF_AUTH_BASIC_ENABLED=true; exec /run.sh'"

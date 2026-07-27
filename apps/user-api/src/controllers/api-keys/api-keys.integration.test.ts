@@ -61,7 +61,7 @@ describe("api-keys + Authful brokering integration", () => {
     revoke: ReturnType<typeof vi.fn>;
     listByTenant: ReturnType<typeof vi.fn>;
     usageByTenant: ReturnType<typeof vi.fn>;
-    activeTokenIds: ReturnType<typeof vi.fn>;
+    activeTokenUsage: ReturnType<typeof vi.fn>;
   } = {
     mint: vi.fn(async (tenant: string) => ({
       id: crypto.randomUUID(),
@@ -70,7 +70,7 @@ describe("api-keys + Authful brokering integration", () => {
     revoke: vi.fn(async () => undefined),
     listByTenant: vi.fn(async () => []),
     usageByTenant: vi.fn(async () => []),
-    activeTokenIds: vi.fn(async () => []),
+    activeTokenUsage: vi.fn(async () => []),
   };
 
   beforeAll(async () => {

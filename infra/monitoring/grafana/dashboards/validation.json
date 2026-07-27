@@ -131,6 +131,62 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "id": 5,
+      "title": "Tokens and usage by login method",
+      "description": "Current live tokens and API requests recorded today, grouped by account login method.",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "short", "decimals": 0 },
+        "overrides": []
+      },
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "expr": "max by (login_method) (user_api_login_method_tokens)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{login_method}}",
+          "refId": "A"
+        },
+        {
+          "expr": "max by (login_method) (user_api_login_method_usage_today)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{login_method}}",
+          "refId": "B"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "login_method": 0,
+              "Value #A": 1,
+              "Value #B": 2
+            },
+            "renameByName": {
+              "login_method": "Login method",
+              "Value #A": "Tokens",
+              "Value #B": "Usage today"
+            }
+          }
+        }
+      ]
     }
   ]
 }

@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { tokenValidationRequestTotal } from "@/metrics";
 import { USER_TENANT_PREFIX } from "@/middlewares/token-auth";
 import type {
+  ActiveTokenUsage,
   DBToken,
   TokensRepository,
   TokenUsage,
@@ -144,7 +145,7 @@ export class TokensService {
     return this.repo.listUsageByTenant(tenant);
   }
 
-  async activeUserTokenIds(since: Date): Promise<string[]> {
-    return this.repo.listUserTokenIdsUsedSince(since);
+  async activeUserTokenUsage(since: Date): Promise<ActiveTokenUsage[]> {
+    return this.repo.listUserTokenUsageSince(since);
   }
 }

@@ -1,7 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
-  ActiveTokenIdsResponseSchema,
+  ActiveTokenUsageResponseSchema,
   ErrorResponseSchema,
   ListActiveTokensQuerySchema,
   ListTokenUsageQuerySchema,
@@ -26,16 +26,17 @@ export function tokensController(app: Hono, service: TokensService) {
   app.openapi(
     createRoute({
       method: "get",
-      operationId: "listActiveUserTokenIds",
+      operationId: "listActiveUserTokenUsage",
       path: "/tokens/active",
-      summary: "List recently used user-tenant token ids",
+      summary: "List recently used user-tenant tokens and request counts",
       tags: ["tokens"],
       request: { query: ListActiveTokensQuerySchema },
       responses: {
         200: {
-          description: "User-tenant token ids used since the requested instant",
+          description:
+            "User-tenant tokens used since the requested instant, with request counts",
           content: {
-            "application/json": { schema: ActiveTokenIdsResponseSchema },
+            "application/json": { schema: ActiveTokenUsageResponseSchema },
           },
         },
       },
@@ -43,7 +44,7 @@ export function tokensController(app: Hono, service: TokensService) {
     async (c) => {
       const { since } = c.req.valid("query");
       return c.json(
-        { tokenIds: await service.activeUserTokenIds(new Date(since)) },
+        { items: await service.activeUserTokenUsage(new Date(since)) },
         200,
       );
     },

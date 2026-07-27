@@ -13,27 +13,42 @@ const dataSource: MetricsDataSource = {
   counts: async () => ({
     accountsTotal: 9,
     keysLive: 4,
+    liveTokens: {
+      wallet: 2,
+      google: 1,
+      email: 1,
+    },
   }),
-  newestKeysForActiveTokenIds: async () => [
+  keysForActiveTokenIds: async () => [
     {
+      tokenId: "wallet-token",
       userId: "one",
       createdAt: new Date(NOW.getTime() - 12 * HOUR),
+      loginMethod: "wallet",
     },
     {
+      tokenId: "google-token",
       userId: "two",
       createdAt: new Date(NOW.getTime() - 3 * DAY),
+      loginMethod: "google",
     },
     {
+      tokenId: "email-token",
       userId: "three",
       createdAt: new Date(NOW.getTime() - 10 * DAY),
+      loginMethod: "email",
     },
     {
+      tokenId: "older-wallet-token",
       userId: "four",
       createdAt: new Date(NOW.getTime() - 60 * DAY),
+      loginMethod: "wallet",
     },
     {
+      tokenId: "oldest-wallet-token",
       userId: "four",
       createdAt: new Date(NOW.getTime() - 90 * DAY),
+      loginMethod: "wallet",
     },
   ],
 };
@@ -43,7 +58,12 @@ describe("validation metrics snapshot", () => {
     const service = new MetricsSnapshotService(
       dataSource,
       {
-        activeTokenIds: async () => ["00000000-0000-4000-8000-000000000001"],
+        activeTokenUsage: async () => [
+          { tokenId: "wallet-token", count: 12 },
+          { tokenId: "google-token", count: 8 },
+          { tokenId: "email-token", count: 3 },
+          { tokenId: "older-wallet-token", count: 5 },
+        ],
       },
       () => NOW,
     );
@@ -59,6 +79,11 @@ describe("validation metrics snapshot", () => {
         "7-30d": 1,
         "30d+": 1,
       },
+      loginMethods: {
+        wallet: { tokens: 2, usage: 17 },
+        google: { tokens: 1, usage: 8 },
+        email: { tokens: 1, usage: 3 },
+      },
     });
   });
 
@@ -68,9 +93,9 @@ describe("validation metrics snapshot", () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => (release = resolve));
     const service = new MetricsSnapshotService(
-      { ...dataSource, newestKeysForActiveTokenIds: async () => [] },
+      { ...dataSource, keysForActiveTokenIds: async () => [] },
       {
-        activeTokenIds: async () => {
+        activeTokenUsage: async () => {
           inFlight += 1;
           peak = Math.max(peak, inFlight);
           await gate;
@@ -93,20 +118,33 @@ describe("validation metrics snapshot", () => {
     const service = new MetricsSnapshotService(
       {
         ...dataSource,
-        newestKeysForActiveTokenIds: async () => [
-          { userId: "one-day", createdAt: new Date(NOW.getTime() - DAY) },
+        keysForActiveTokenIds: async () => [
           {
-            userId: "seven-days",
-            createdAt: new Date(NOW.getTime() - 7 * DAY),
+            tokenId: "one-day",
+            userId: "one-day",
+            createdAt: new Date(NOW.getTime() - DAY),
+            loginMethod: "wallet",
           },
           {
+            tokenId: "seven-days",
+            userId: "seven-days",
+            createdAt: new Date(NOW.getTime() - 7 * DAY),
+            loginMethod: "google",
+          },
+          {
+            tokenId: "thirty-days",
             userId: "thirty-days",
             createdAt: new Date(NOW.getTime() - 30 * DAY),
+            loginMethod: "email",
           },
         ],
       },
       {
-        activeTokenIds: async () => ["00000000-0000-4000-8000-000000000001"],
+        activeTokenUsage: async () => [
+          { tokenId: "one-day", count: 1 },
+          { tokenId: "seven-days", count: 1 },
+          { tokenId: "thirty-days", count: 1 },
+        ],
       },
       () => NOW,
     );
@@ -129,9 +167,9 @@ describe("validation metrics snapshot", () => {
     async (_, now, since) => {
       let requestedSince: Date | undefined;
       const service = new MetricsSnapshotService(
-        { ...dataSource, newestKeysForActiveTokenIds: async () => [] },
+        { ...dataSource, keysForActiveTokenIds: async () => [] },
         {
-          activeTokenIds: async (value) => {
+          activeTokenUsage: async (value) => {
             requestedSince = value;
             return [];
           },
