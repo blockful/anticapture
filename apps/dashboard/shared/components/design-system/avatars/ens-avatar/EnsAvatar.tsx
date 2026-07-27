@@ -3,6 +3,7 @@
 import type { ImageProps } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Fragment, useState } from "react";
 import Blockies from "react-blockies";
 import type { Address } from "viem";
@@ -54,6 +55,9 @@ interface EnsAvatarProps extends Omit<
   showEfpStats?: boolean;
   /** Render ENS social record links (from enrichment data) below the tags. */
   showSocials?: boolean;
+  /** Extra line rendered under the name, inside the name column. The avatar
+   *  stays vertically centered against the whole (name + subtitle) block. */
+  subtitle?: ReactNode;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -101,6 +105,7 @@ export const EnsAvatar = ({
   maxVisibleTags,
   showEfpStats = false,
   showSocials = false,
+  subtitle,
   ...imageProps
 }: EnsAvatarProps) => {
   const { data, isLoading } = useGetAddress(address ?? "0x", {
@@ -443,6 +448,8 @@ export const EnsAvatar = ({
                 )}
               </div>
             )}
+
+        {subtitle}
       </div>
     </div>
   );

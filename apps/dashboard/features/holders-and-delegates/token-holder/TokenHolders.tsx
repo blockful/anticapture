@@ -437,32 +437,29 @@ export const TokenHolders = ({
           activity.votedProposals === 0;
 
         return (
-          <div className="flex flex-col justify-center gap-0.5">
-            <EnsAvatar
-              address={delegate as Address}
-              size="sm"
-              variant="rounded"
-            />
-            {isActivityLoadingFor(delegate) ? (
-              <SkeletonRow
-                parentClassName="flex animate-pulse pl-8"
-                className="h-3 w-16"
-              />
-            ) : (
-              activity &&
-              activity.totalProposals > 0 && (
+          <EnsAvatar
+            address={delegate as Address}
+            size="sm"
+            variant="rounded"
+            subtitle={
+              isActivityLoadingFor(delegate) ? (
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="h-3 w-16"
+                />
+              ) : activity && activity.totalProposals > 0 ? (
                 <span
                   className={cn(
-                    "pl-8 text-xs font-normal",
+                    "justify-start text-xs font-normal",
                     isInactive ? "text-warning" : "text-secondary",
                   )}
                 >
                   Voted {activity.votedProposals}/{activity.totalProposals}
                   {isInactive ? " (Inactive)" : ""}
                 </span>
-              )
-            )}
-          </div>
+              ) : undefined
+            }
+          />
         );
       },
       meta: {
