@@ -104,56 +104,55 @@ export const OffchainResultsCard = ({
       )}
 
       {/* Elections routinely run 15+ candidates, so the list is capped and
-          scrolls rather than pushing the sidebar off screen. The cap is ~7 rows
-          (28px each plus a 12px gap), which clears the designed 6-row card
-          without a scrollbar. Padding stays outside the scroll container so it
-          does not eat into that budget. */}
-      <div className="p-4">
-        <div className="scrollbar-custom flex max-h-[280px] flex-col gap-3 overflow-y-auto overflow-x-hidden">
-          {rows.map(({ label, score }, position) => {
-            const percent = total > 0 ? (score / total) * 100 : 0;
-            // No leading highlight while concealed — it would reveal the winner.
-            const isLeading = !isConcealed && position === 0 && score > 0;
-            return (
-              <div key={label + position} className="flex flex-col gap-1">
-                <div className="flex items-center justify-between gap-2 text-[14px] leading-5">
-                  <div className="flex min-w-0 items-center gap-2">
-                    {!isConcealed && (
-                      <p className="text-dimmed shrink-0 font-medium">
-                        {position + 1}
-                      </p>
-                    )}
-                    <p className="text-primary truncate">{label}</p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <p className="text-secondary whitespace-nowrap">
-                      {isConcealed ? "–" : formatNumberUserReadable(score)}
-                    </p>
-                    <p
-                      className={cn(
-                        "w-11 text-right font-medium",
-                        isLeading ? "text-link" : "text-primary",
-                      )}
-                    >
-                      {isConcealed ? "–" : `${percent.toFixed(1)}%`}
-                    </p>
-                  </div>
-                </div>
-                <div className="bg-surface-contrast flex h-1 w-full items-start">
+          scrolls rather than pushing the sidebar off screen. Padding lives
+          inside the scroll container so the scrollbar tracks the card edge
+          instead of floating inset; the cap accounts for it — ~7 rows (28px
+          each plus a 12px gap) plus the 32px of padding — which leaves the
+          designed 6-row card comfortably unscrolled. */}
+      <div className="scrollbar-custom flex max-h-[300px] flex-col gap-3 overflow-y-auto overflow-x-hidden p-4">
+        {rows.map(({ label, score }, position) => {
+          const percent = total > 0 ? (score / total) * 100 : 0;
+          // No leading highlight while concealed — it would reveal the winner.
+          const isLeading = !isConcealed && position === 0 && score > 0;
+          return (
+            <div key={label + position} className="flex flex-col gap-1">
+              <div className="flex items-center justify-between gap-2 text-[14px] leading-5">
+                <div className="flex min-w-0 items-center gap-2">
                   {!isConcealed && (
-                    <div
-                      className={cn(
-                        "h-1",
-                        isLeading ? "bg-highlight" : "bg-primary",
-                      )}
-                      style={{ width: `${percent}%` }}
-                    />
+                    <p className="text-dimmed shrink-0 font-medium">
+                      {position + 1}
+                    </p>
                   )}
+                  <p className="text-primary truncate">{label}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <p className="text-secondary whitespace-nowrap">
+                    {isConcealed ? "–" : formatNumberUserReadable(score)}
+                  </p>
+                  <p
+                    className={cn(
+                      "w-11 text-right font-medium",
+                      isLeading ? "text-link" : "text-primary",
+                    )}
+                  >
+                    {isConcealed ? "–" : `${percent.toFixed(1)}%`}
+                  </p>
                 </div>
               </div>
-            );
-          })}
-        </div>
+              <div className="bg-surface-contrast flex h-1 w-full items-start">
+                {!isConcealed && (
+                  <div
+                    className={cn(
+                      "h-1",
+                      isLeading ? "bg-highlight" : "bg-primary",
+                    )}
+                    style={{ width: `${percent}%` }}
+                  />
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
