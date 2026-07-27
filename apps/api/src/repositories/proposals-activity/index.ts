@@ -118,7 +118,6 @@ export class DrizzleProposalsActivityRepository {
     orderBy: OrderByField,
     orderDirection: OrderDirection,
     userVoteFilter?: VoteFilter,
-    proposalStatusIn?: string[],
   ): Promise<{
     proposals: DbProposalWithVote[];
     totalCount: number;
@@ -141,15 +140,6 @@ export class DrizzleProposalsActivityRepository {
           break;
       }
     }
-
-    // Build the proposal status filter. Statuses are compared uppercased so
-    // the filter is resilient to how each indexer cases the stored status.
-    const statusFilterCondition = proposalStatusIn?.length
-      ? sql` AND UPPER(p.status) IN (${sql.join(
-          proposalStatusIn.map((status) => sql`${status.toUpperCase()}`),
-          sql.raw(", "),
-        )})`
-      : sql``;
 
     // Build the ORDER BY clause
     let orderByClause = "";
@@ -176,7 +166,6 @@ export class DrizzleProposalsActivityRepository {
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         AND UPPER(p.status) <> 'CANCELED'
         ${sql.raw(voteFilterCondition)}
-        ${statusFilterCondition}
       ${sql.raw(orderByClause)}
       LIMIT ${limit} OFFSET ${skip}
     `;
@@ -189,7 +178,6 @@ export class DrizzleProposalsActivityRepository {
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         AND UPPER(p.status) <> 'CANCELED'
         ${sql.raw(voteFilterCondition)}
-        ${statusFilterCondition}
     `;
 
     const [result, countResult] = await Promise.all([

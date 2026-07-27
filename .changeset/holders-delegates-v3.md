@@ -6,13 +6,12 @@
 
 Holders & Delegates v3 (DEV-562, DEV-476)
 
-API: new endpoints backing the module — `GET /:dao/voting-powers/inactive-summary`
+API: new endpoints backing the module. `GET /:dao/voting-powers/inactive-summary`
 (delegated VP parked with inactive delegates), `GET /:dao/accounts/:address/delegators/historical`
 (former delegators with VP impact, start/end and redelegation target), and
 `GET /:dao/addresses/labels` (per-DAO treasury/vesting labels). Adds an optional
-`address` filter to `GET /:dao/feed/events` and an optional `proposalStatusIn`
-filter to `GET /:dao/proposals-activity`. Gateful re-exposes the expanded surface
-through its aggregated OpenAPI spec (no gateway code change).
+`address` filter to `GET /:dao/feed/events`. Gateful re-exposes the expanded
+surface through its aggregated OpenAPI spec (no gateway code change).
 
 Dashboard: value min/max filters on the Delegates and Token Holders tables;
 Delegates as the default tab and the sidebar renamed to "Stakeholders"; larger

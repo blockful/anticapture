@@ -2,7 +2,6 @@
 
 import type {
   ProposalActivityResponse,
-  ProposalActivityStatusListEnumKey,
   ProposalsActivityPathParamsDaoEnumKey,
   ProposalsActivityQueryParams,
   ProposalsActivityQueryParamsOrderByEnumKey,
@@ -20,7 +19,6 @@ interface UseProposalsActivityParams {
   orderBy?: ProposalsActivityQueryParamsOrderByEnumKey;
   orderDirection?: "asc" | "desc";
   userVoteFilter?: ProposalsActivityQueryParamsUserVoteFilterEnumKey | null;
-  proposalStatusIn?: ProposalActivityStatusListEnumKey[] | null;
   limit: number;
 }
 
@@ -40,10 +38,8 @@ export const useProposalsActivity = ({
   orderBy,
   orderDirection,
   userVoteFilter,
-  proposalStatusIn,
   limit,
 }: UseProposalsActivityParams) => {
-  const statusKey = proposalStatusIn?.join(",") ?? "";
   const params = useMemo<ProposalsActivityQueryParams>(
     () => ({
       address,
@@ -52,23 +48,8 @@ export const useProposalsActivity = ({
       ...(orderBy ? { orderBy } : {}),
       ...(orderDirection ? { orderDirection } : {}),
       ...(userVoteFilter ? { userVoteFilter } : {}),
-      ...(statusKey
-        ? {
-            proposalStatusIn: statusKey.split(
-              ",",
-            ) as ProposalActivityStatusListEnumKey[],
-          }
-        : {}),
     }),
-    [
-      address,
-      limit,
-      fromDate,
-      orderBy,
-      orderDirection,
-      userVoteFilter,
-      statusKey,
-    ],
+    [address, limit, fromDate, orderBy, orderDirection, userVoteFilter],
   );
 
   const {

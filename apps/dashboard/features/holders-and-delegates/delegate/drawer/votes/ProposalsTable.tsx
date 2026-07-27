@@ -56,9 +56,6 @@ interface ProposalsTableProps {
   userVoteFilter?: string;
   onUserVoteFilterChange?: (filter: string) => void;
   userVoteFilterOptions?: FilterOption[];
-  proposalStatusFilter?: string;
-  onProposalStatusFilterChange?: (filter: string) => void;
-  proposalStatusFilterOptions?: FilterOption[];
   orderBy?: string;
   orderDirection?: "asc" | "desc";
   onSortChange?: (field: string, direction: "asc" | "desc") => void;
@@ -75,9 +72,6 @@ export const ProposalsTable = ({
   userVoteFilter,
   onUserVoteFilterChange,
   userVoteFilterOptions,
-  proposalStatusFilter,
-  onProposalStatusFilterChange,
-  proposalStatusFilterOptions,
   orderBy,
   orderDirection,
   onSortChange,
@@ -235,13 +229,6 @@ export const ProposalsTable = ({
       header: () => (
         <div className="flex items-center gap-2 whitespace-nowrap font-medium">
           Final Result
-          {proposalStatusFilterOptions && onProposalStatusFilterChange && (
-            <CategoriesFilter
-              options={proposalStatusFilterOptions}
-              selectedValue={proposalStatusFilter || "all"}
-              onValueChange={onProposalStatusFilterChange}
-            />
-          )}
         </div>
       ),
     },
