@@ -8,6 +8,31 @@ import type { OffchainProposal, OffchainVote } from "@/repository/schema";
 
 const PAGE_SIZE = 1000;
 
+const PROPOSAL_FIELDS = `
+  id
+  author
+  title
+  body
+  discussion
+  type
+  start
+  end
+  state
+  created
+  updated
+  link
+  flagged
+  scores
+  choices
+  network
+  snapshot
+  strategies {
+    name
+    network
+    params
+  }
+`;
+
 const PROPOSALS_QUERY = `
   query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
     proposals(
@@ -16,28 +41,18 @@ const PROPOSALS_QUERY = `
       orderBy: "created"
       orderDirection: asc
     ) {
-      id
-      author
-      title
-      body
-      discussion
-      type
-      start
-      end
-      state
-      created
-      updated
-      link
-      flagged
-      scores
-      choices
-      network
-      snapshot
-      strategies {
-        name
-        network
-        params
-      }
+      ${PROPOSAL_FIELDS}
+    }
+  }
+`;
+
+// Re-reads specific proposals regardless of the forward-only cursor. Shutter
+// proposals reveal their tally after voting closes, by which point the cursor
+// has already moved past them, so without this their scores stay at zero.
+const PROPOSALS_BY_IDS_QUERY = `
+  query ($ids: [String]!, $pageSize: Int!) {
+    proposals(where: { id_in: $ids } first: $pageSize) {
+      ${PROPOSAL_FIELDS}
     }
   }
 `;
@@ -61,6 +76,18 @@ const PROPOSAL_IDS_QUERY = `
   }
 `;
 
+const VOTE_FIELDS = `
+  id
+  voter
+  proposal {
+    id
+  }
+  choice
+  vp
+  reason
+  created
+`;
+
 const VOTES_QUERY = `
   query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
     votes(
@@ -69,15 +96,22 @@ const VOTES_QUERY = `
       orderBy: "created"
       orderDirection: asc
     ) {
-      id
-      voter
-      proposal {
-        id
-      }
-      choice
-      vp
-      reason
-      created
+      ${VOTE_FIELDS}
+    }
+  }
+`;
+
+// Same reason as PROPOSALS_BY_IDS_QUERY: a Shutter vote is first ingested with
+// its choice still encrypted, and the reveal rewrites it in place on Snapshot.
+const VOTES_BY_PROPOSAL_IDS_QUERY = `
+  query ($ids: [String]!, $cursor: Int!, $pageSize: Int!) {
+    votes(
+      where: { proposal_in: $ids, created_gt: $cursor }
+      first: $pageSize
+      orderBy: "created"
+      orderDirection: asc
+    ) {
+      ${VOTE_FIELDS}
     }
   }
 `;
@@ -184,6 +218,52 @@ export class SnapshotProvider implements DataProvider {
         : null;
 
     return { data: votes, nextCursor };
+  }
+
+  async fetchProposalsByIds(ids: string[]): Promise<OffchainProposal[]> {
+    if (ids.length === 0) return [];
+
+    const response = await this.query<{
+      proposals: z.input<typeof rawProposalSchema>[];
+    }>(PROPOSALS_BY_IDS_QUERY, { ids, pageSize: PAGE_SIZE });
+
+    return response.proposals.map((p) =>
+      offchainProposalSchema(this.spaceId).parse(p),
+    );
+  }
+
+  async fetchVotesByProposalIds(ids: string[]): Promise<OffchainVote[]> {
+    if (ids.length === 0) return [];
+
+    const votes: OffchainVote[] = [];
+    let cursor = 0;
+
+    // Paginated: a single proposal can hold more than PAGE_SIZE votes.
+    while (true) {
+      const response = await this.query<{
+        votes: z.input<typeof rawVoteSchema>[];
+      }>(VOTES_BY_PROPOSAL_IDS_QUERY, {
+        ids,
+        cursor,
+        pageSize: PAGE_SIZE,
+      });
+
+      if (response.votes.length === 0) break;
+
+      const page = response.votes.map((v) =>
+        toOffchainVote(this.spaceId).parse(v),
+      );
+      votes.push(...page);
+
+      if (page.length < PAGE_SIZE) break;
+
+      const lastCreated = page[page.length - 1]!.created;
+      // Guard the same shared-second edge case as fetchProposalIdsSince: if a
+      // whole page lands on one second, step past it rather than loop forever.
+      cursor = lastCreated === page[0]!.created ? lastCreated + 1 : lastCreated;
+    }
+
+    return votes;
   }
 
   private async query<T>(

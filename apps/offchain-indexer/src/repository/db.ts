@@ -1,9 +1,38 @@
-import { eq, gte, inArray, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 
 import type { Repository } from "@/repository/db.interface";
 import type { OffchainProposal, OffchainVote } from "@/repository/schema";
 import * as schema from "@/repository/schema";
+
+// Shared by the cursor-advancing sync and the out-of-band reveal re-read, so a
+// re-read overwrites exactly the same columns the normal path would.
+const PROPOSAL_UPDATE_SET = {
+  author: sql`excluded.author`,
+  title: sql`excluded.title`,
+  body: sql`excluded.body`,
+  discussion: sql`excluded.discussion`,
+  type: sql`excluded.type`,
+  start: sql`excluded.start`,
+  end: sql`excluded."end"`,
+  state: sql`excluded.state`,
+  created: sql`excluded.created`,
+  updated: sql`excluded.updated`,
+  link: sql`excluded.link`,
+  flagged: sql`excluded.flagged`,
+  scores: sql`excluded.scores`,
+  choices: sql`excluded.choices`,
+  network: sql`excluded.network`,
+  snapshot: sql`excluded.snapshot`,
+  strategies: sql`excluded.strategies`,
+};
+
+const VOTE_UPDATE_SET = {
+  choice: sql`excluded.choice`,
+  vp: sql`excluded.vp`,
+  reason: sql`excluded.reason`,
+  created: sql`excluded.created`,
+};
 
 export class DrizzleRepository implements Repository {
   constructor(readonly db: PgDatabase<PgQueryResultHKT, typeof schema>) {}
@@ -52,6 +81,55 @@ export class DrizzleRepository implements Repository {
     });
   }
 
+  async getRevealPendingProposalIds(
+    since: number,
+    now: number,
+  ): Promise<string[]> {
+    const rows = await this.db
+      .select({ id: schema.proposals.id, scores: schema.proposals.scores })
+      .from(schema.proposals)
+      .where(
+        and(
+          gte(schema.proposals.created, since),
+          lte(schema.proposals.end, now),
+        ),
+      );
+
+    // Filtered here rather than in SQL: summing a jsonb array server-side buys
+    // nothing over a bounded window and reads far worse.
+    return rows
+      .filter(
+        (row) =>
+          (row.scores ?? []).reduce((sum, score) => sum + (score ?? 0), 0) ===
+          0,
+      )
+      .map((row) => row.id);
+  }
+
+  async upsertProposals(proposals: OffchainProposal[]): Promise<void> {
+    if (proposals.length === 0) return;
+
+    await this.db
+      .insert(schema.proposals)
+      .values(proposals)
+      .onConflictDoUpdate({
+        target: schema.proposals.id,
+        set: PROPOSAL_UPDATE_SET,
+      });
+  }
+
+  async upsertVotes(votes: OffchainVote[]): Promise<void> {
+    if (votes.length === 0) return;
+
+    await this.db
+      .insert(schema.votes)
+      .values(votes)
+      .onConflictDoUpdate({
+        target: [schema.votes.proposalId, schema.votes.voter],
+        set: VOTE_UPDATE_SET,
+      });
+  }
+
   async saveProposals(
     proposals: OffchainProposal[],
     cursor: string,
@@ -59,31 +137,10 @@ export class DrizzleRepository implements Repository {
     if (proposals.length === 0) return;
 
     await this.db.transaction(async (tx) => {
-      await tx
-        .insert(schema.proposals)
-        .values(proposals)
-        .onConflictDoUpdate({
-          target: schema.proposals.id,
-          set: {
-            author: sql`excluded.author`,
-            title: sql`excluded.title`,
-            body: sql`excluded.body`,
-            discussion: sql`excluded.discussion`,
-            type: sql`excluded.type`,
-            start: sql`excluded.start`,
-            end: sql`excluded."end"`,
-            state: sql`excluded.state`,
-            created: sql`excluded.created`,
-            updated: sql`excluded.updated`,
-            link: sql`excluded.link`,
-            flagged: sql`excluded.flagged`,
-            scores: sql`excluded.scores`,
-            choices: sql`excluded.choices`,
-            network: sql`excluded.network`,
-            snapshot: sql`excluded.snapshot`,
-            strategies: sql`excluded.strategies`,
-          },
-        });
+      await tx.insert(schema.proposals).values(proposals).onConflictDoUpdate({
+        target: schema.proposals.id,
+        set: PROPOSAL_UPDATE_SET,
+      });
 
       await tx
         .insert(schema.syncStatus)
@@ -111,12 +168,7 @@ export class DrizzleRepository implements Repository {
         .values(votes)
         .onConflictDoUpdate({
           target: [schema.votes.proposalId, schema.votes.voter],
-          set: {
-            choice: sql`excluded.choice`,
-            vp: sql`excluded.vp`,
-            reason: sql`excluded.reason`,
-            created: sql`excluded.created`,
-          },
+          set: VOTE_UPDATE_SET,
         });
 
       await tx

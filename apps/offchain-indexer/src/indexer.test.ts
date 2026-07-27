@@ -39,22 +39,39 @@ function makeVote(overrides?: Partial<OffchainVote>): OffchainVote {
   };
 }
 
-function createSimpleRepository(): Repository & {
+function createSimpleRepository(options?: {
+  revealPendingIds?: string[];
+}): Repository & {
   cursors: Map<string, string | null>;
   savedProposals: OffchainProposal[];
   savedVotes: OffchainVote[];
   proposalIds: string[];
+  upsertedProposals: OffchainProposal[];
+  upsertedVotes: OffchainVote[];
 } {
   const cursors = new Map<string, string | null>();
   const savedProposals: OffchainProposal[] = [];
   const savedVotes: OffchainVote[] = [];
   const proposalIds: string[] = [];
+  const upsertedProposals: OffchainProposal[] = [];
+  const upsertedVotes: OffchainVote[] = [];
 
   return {
     cursors,
     savedProposals,
     savedVotes,
     proposalIds,
+    upsertedProposals,
+    upsertedVotes,
+    getRevealPendingProposalIds: vi.fn(
+      async () => options?.revealPendingIds ?? [],
+    ),
+    upsertProposals: vi.fn(async (proposals: OffchainProposal[]) => {
+      upsertedProposals.push(...proposals);
+    }),
+    upsertVotes: vi.fn(async (votes: OffchainVote[]) => {
+      upsertedVotes.push(...votes);
+    }),
     getLastCursor: vi.fn(async (entity: string) => cursors.get(entity) ?? null),
     resetCursor: vi.fn(async (entity: string) => {
       cursors.delete(entity);
@@ -94,8 +111,12 @@ function createSimpleProvider(options?: {
   failProposals?: boolean;
   failProposalIds?: boolean;
   failVotes?: boolean;
+  revealedProposals?: OffchainProposal[];
+  revealedVotes?: OffchainVote[];
 }): DataProvider {
   return {
+    fetchProposalsByIds: vi.fn(async () => options?.revealedProposals ?? []),
+    fetchVotesByProposalIds: vi.fn(async () => options?.revealedVotes ?? []),
     fetchProposals: vi.fn(async () => {
       if (options?.failProposals) throw new Error("Proposals fetch failed");
       return {
@@ -181,6 +202,52 @@ describe("Indexer", () => {
     await vi.advanceTimersByTimeAsync(0);
 
     expect(repo.saveProposals).toHaveBeenCalledWith(proposals, "1700000200");
+
+    void promise;
+  });
+
+  it("re-reads a reveal-pending proposal and its votes without moving cursors", async () => {
+    const repo = createSimpleRepository({ revealPendingIds: ["p-shutter"] });
+    const revealed = makeProposal({
+      id: "p-shutter",
+      state: "closed",
+      scores: [400, 100],
+    });
+    const revealedVotes = [
+      makeVote({ proposalId: "p-shutter", voter: "0xaaa" }),
+    ];
+    const provider = createSimpleProvider({
+      revealedProposals: [revealed],
+      revealedVotes,
+    });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(provider.fetchProposalsByIds).toHaveBeenCalledWith(["p-shutter"]);
+    expect(provider.fetchVotesByProposalIds).toHaveBeenCalledWith([
+      "p-shutter",
+    ]);
+    // The revealed tally replaces the zeros, and this out-of-band re-read must
+    // not advance either sync cursor.
+    expect(repo.upsertedProposals).toEqual([revealed]);
+    expect(repo.upsertedVotes).toEqual(revealedVotes);
+    expect(repo.cursors.get("votes")).toBeUndefined();
+
+    void promise;
+  });
+
+  it("skips the reveal re-read when no proposal has a zero tally", async () => {
+    const repo = createSimpleRepository({ revealPendingIds: [] });
+    const provider = createSimpleProvider();
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(provider.fetchProposalsByIds).not.toHaveBeenCalled();
+    expect(provider.fetchVotesByProposalIds).not.toHaveBeenCalled();
 
     void promise;
   });

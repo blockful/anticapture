@@ -9,4 +9,12 @@ export interface Repository {
   deleteProposals(ids: string[]): Promise<void>;
   saveProposals(proposals: OffchainProposal[], cursor: string): Promise<void>;
   saveVotes(votes: OffchainVote[], cursor: string): Promise<void>;
+  /**
+   * Closed proposals in the window whose tally is still all zeros — the
+   * signature of a Shutter proposal awaiting (or missing) its reveal.
+   */
+  getRevealPendingProposalIds(since: number, now: number): Promise<string[]>;
+  /** Upserts without touching the sync cursor, for out-of-band re-reads. */
+  upsertProposals(proposals: OffchainProposal[]): Promise<void>;
+  upsertVotes(votes: OffchainVote[]): Promise<void>;
 }
