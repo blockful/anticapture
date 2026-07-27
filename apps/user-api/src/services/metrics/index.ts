@@ -10,7 +10,6 @@ export type AgeBucket = (typeof AGE_BUCKETS)[number];
 export type MetricsSnapshot = {
   accountsTotal: number;
   keysLive: number;
-  keysCreatedTotal: number;
   activeUsers: Record<AgeBucket, number>;
 };
 
@@ -30,18 +29,16 @@ export class DatabaseMetricsDataSource implements MetricsDataSource {
   constructor(private readonly db: UserApiDrizzle) {}
 
   async counts(): Promise<Counts> {
-    const [accounts, liveKeys, createdKeys] = await Promise.all([
+    const [accounts, liveKeys] = await Promise.all([
       this.db.select({ value: count() }).from(user),
       this.db
         .select({ value: count() })
         .from(userApiKeys)
         .where(isNull(userApiKeys.revokedAt)),
-      this.db.select({ value: count() }).from(userApiKeys),
     ]);
     return {
       accountsTotal: accounts[0]?.value ?? 0,
       keysLive: liveKeys[0]?.value ?? 0,
-      keysCreatedTotal: createdKeys[0]?.value ?? 0,
     };
   }
 
@@ -95,9 +92,9 @@ export class MetricsSnapshotService {
   private current: MetricsSnapshot = {
     accountsTotal: 0,
     keysLive: 0,
-    keysCreatedTotal: 0,
     activeUsers: emptyActiveUsers(),
   };
+  private refreshing = false;
 
   constructor(
     private readonly dataSource: MetricsDataSource,
@@ -110,26 +107,34 @@ export class MetricsSnapshotService {
   }
 
   async refresh(): Promise<void> {
-    const now = this.now();
-    // Publish DB-derived counts before touching Authful: if Authful is down we
-    // must not leave keysCreatedTotal at 0 and then have it jump to the
-    // lifetime count on recovery (breaks the increase(...[1d]) dashboard query).
-    const counts = await this.dataSource.counts();
-    this.current = { ...this.current, ...counts };
+    // Serialize: a refresh slower than the 60s interval must not overlap with
+    // the next tick, or a stale response could clobber a newer snapshot and a
+    // stalled Authful could pile up in-flight fetches once a minute.
+    if (this.refreshing) return;
+    this.refreshing = true;
+    try {
+      const now = this.now();
+      // Publish DB-derived counts before touching Authful: if Authful is down
+      // the account/key gauges must not stay stuck at their initial zeros.
+      const counts = await this.dataSource.counts();
+      this.current = { ...this.current, ...counts };
 
-    const tokenIds = await this.authful.activeTokenIds(saoPauloMidnight(now));
-    const keys = await this.dataSource.newestKeysForActiveTokenIds(tokenIds);
-    const newestKeyByUser = new Map<string, Date>();
-    for (const key of keys) {
-      const current = newestKeyByUser.get(key.userId);
-      if (!current || key.createdAt > current) {
-        newestKeyByUser.set(key.userId, key.createdAt);
+      const tokenIds = await this.authful.activeTokenIds(saoPauloMidnight(now));
+      const keys = await this.dataSource.newestKeysForActiveTokenIds(tokenIds);
+      const newestKeyByUser = new Map<string, Date>();
+      for (const key of keys) {
+        const current = newestKeyByUser.get(key.userId);
+        if (!current || key.createdAt > current) {
+          newestKeyByUser.set(key.userId, key.createdAt);
+        }
       }
+      const activeUsers = emptyActiveUsers();
+      for (const createdAt of newestKeyByUser.values()) {
+        activeUsers[ageBucket(now.getTime() - createdAt.getTime())] += 1;
+      }
+      this.current = { ...this.current, activeUsers };
+    } finally {
+      this.refreshing = false;
     }
-    const activeUsers = emptyActiveUsers();
-    for (const createdAt of newestKeyByUser.values()) {
-      activeUsers[ageBucket(now.getTime() - createdAt.getTime())] += 1;
-    }
-    this.current = { ...this.current, activeUsers };
   }
 }

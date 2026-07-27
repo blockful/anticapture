@@ -15,6 +15,15 @@ export const httpRequestDuration = meter.createHistogram(
   },
 );
 
+// Monotonic: incremented once per successful key creation. Deriving this from
+// a live row count would decrement when a user account is deleted (the
+// userApiKeys FK cascades), which Prometheus reads as a counter reset and turns
+// into a false spike in increase(user_api_keys_created_total[1d]).
+export const keysCreatedTotal = meter.createCounter(
+  "user_api_keys_created_total",
+  { description: "Total user API keys created" },
+);
+
 export const registerValidationMetrics = (
   service: MetricsSnapshotService,
 ): void => {
@@ -28,13 +37,6 @@ export const registerValidationMetrics = (
       description: "Current non-revoked user API keys",
     })
     .addCallback((result) => result.observe(service.snapshot().keysLive));
-  meter
-    .createObservableCounter("user_api_keys_created_total", {
-      description: "Total user API keys created",
-    })
-    .addCallback((result) =>
-      result.observe(service.snapshot().keysCreatedTotal),
-    );
   meter
     .createObservableGauge("user_api_active_users", {
       description: "Today's active users bucketed by newest key age",

@@ -13,7 +13,6 @@ const dataSource: MetricsDataSource = {
   counts: async () => ({
     accountsTotal: 9,
     keysLive: 4,
-    keysCreatedTotal: 6,
   }),
   newestKeysForActiveTokenIds: async () => [
     {
@@ -54,7 +53,6 @@ describe("validation metrics snapshot", () => {
     expect(service.snapshot()).toEqual({
       accountsTotal: 9,
       keysLive: 4,
-      keysCreatedTotal: 6,
       activeUsers: {
         "0-1d": 1,
         "1-7d": 1,
@@ -62,6 +60,33 @@ describe("validation metrics snapshot", () => {
         "30d+": 1,
       },
     });
+  });
+
+  it("skips a refresh while one is already in flight", async () => {
+    let inFlight = 0;
+    let peak = 0;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const service = new MetricsSnapshotService(
+      { ...dataSource, newestKeysForActiveTokenIds: async () => [] },
+      {
+        activeTokenIds: async () => {
+          inFlight += 1;
+          peak = Math.max(peak, inFlight);
+          await gate;
+          inFlight -= 1;
+          return [];
+        },
+      },
+      () => NOW,
+    );
+
+    const first = service.refresh();
+    await service.refresh(); // second tick returns immediately, no overlap
+    release();
+    await first;
+
+    expect(peak).toBe(1);
   });
 
   it("assigns exact age boundaries to the older bucket", async () => {
