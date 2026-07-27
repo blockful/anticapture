@@ -12,6 +12,7 @@ interface UseDelegatesActivityParams {
   daoId: DaoIdEnum;
   addresses: string[];
   fromDate?: number;
+  toDate?: number;
 }
 
 // Fetches proposals-activity per delegate address (deduped by React Query's
@@ -20,6 +21,7 @@ export const useDelegatesActivity = ({
   daoId,
   addresses,
   fromDate,
+  toDate,
 }: UseDelegatesActivityParams) => {
   const queryClient = useQueryClient();
 
@@ -44,7 +46,7 @@ export const useDelegatesActivity = ({
     setActivities(new Map());
     setLoadingAddresses(new Set());
     setSettledAddresses(new Set());
-  }, [fromDate, daoId]);
+  }, [fromDate, toDate, daoId]);
 
   useEffect(() => {
     const uniqueAddresses = [
@@ -63,7 +65,13 @@ export const useDelegatesActivity = ({
           const result = await queryClient.fetchQuery(
             proposalsActivityQueryOptions(
               daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
-              { address: addr, ...(fromDate ? { fromDate } : {}) },
+              {
+                address: addr,
+                ...(fromDate ? { fromDate } : {}),
+                // Both bounds, so "Voted X/Y" counts the same window the period
+                // selector asked for instead of everything up to today.
+                ...(toDate ? { toDate } : {}),
+              },
             ),
           );
           return { address: addr, activity: result ?? null };
@@ -97,6 +105,7 @@ export const useDelegatesActivity = ({
     loadingAddresses,
     queryClient,
     fromDate,
+    toDate,
     daoId,
   ]);
 

@@ -81,10 +81,14 @@ export const useDelegates = ({
   const [loadingActivityAddresses, setLoadingActivityAddresses] = useState<
     Set<string>
   >(() => new Set());
+  const [settledActivityAddresses, setSettledActivityAddresses] = useState<
+    Set<string>
+  >(() => new Set());
 
   useEffect(() => {
     setDelegateActivities(new Map());
     setLoadingActivityAddresses(new Set());
+    setSettledActivityAddresses(new Set());
   }, [orderDirection, address, fromDate, toDate, orderBy]);
 
   const params = useMemo(
@@ -138,7 +142,8 @@ export const useDelegates = ({
 
     const newAddresses = delegateAddresses.filter(
       (addr) =>
-        !delegateActivities.has(addr) && !loadingActivityAddresses.has(addr),
+        !settledActivityAddresses.has(addr) &&
+        !loadingActivityAddresses.has(addr),
     );
     if (newAddresses.length === 0) return;
 
@@ -146,47 +151,59 @@ export const useDelegates = ({
       setLoadingActivityAddresses(
         (prev) => new Set([...prev, ...newAddresses]),
       );
-      try {
-        const activityPromises = newAddresses.map(async (addr) => {
+      // allSettled, so one address failing does not discard the activity of
+      // every other address fetched alongside it.
+      const activities = await Promise.allSettled(
+        newAddresses.map(async (addr) => {
           const result = await queryClient.fetchQuery(
             proposalsActivityQueryOptions(
               daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
-              { address: addr, ...(fromDate ? { fromDate } : {}) },
+              {
+                address: addr,
+                ...(fromDate ? { fromDate } : {}),
+                // Both bounds, so "Voted X/Y" counts the window the period
+                // selector asked for instead of everything up to today.
+                ...(toDate ? { toDate } : {}),
+              },
             ),
           );
           return { address: addr, activity: result ?? null };
-        });
-        const activities = await Promise.all(activityPromises);
-        setDelegateActivities((prev) => {
-          const next = new Map(prev);
-          activities.forEach(({ address: addr, activity }) => {
-            if (activity) {
-              next.set(addr, {
-                totalProposals: activity.totalProposals,
-                votedProposals: activity.votedProposals,
-                neverVoted: activity.neverVoted,
-                avgTimeBeforeEnd: activity.avgTimeBeforeEnd,
-              });
-            }
+        }),
+      );
+      setDelegateActivities((prev) => {
+        const next = new Map(prev);
+        activities.forEach((entry) => {
+          if (entry.status !== "fulfilled" || !entry.value.activity) return;
+          const { address: addr, activity } = entry.value;
+          next.set(addr, {
+            totalProposals: activity.totalProposals,
+            votedProposals: activity.votedProposals,
+            neverVoted: activity.neverVoted,
+            avgTimeBeforeEnd: activity.avgTimeBeforeEnd,
           });
-          return next;
         });
-      } catch (err) {
-        console.error("Error fetching delegate activities:", err);
-      } finally {
-        setLoadingActivityAddresses((prev) => {
-          const next = new Set(prev);
-          newAddresses.forEach((a) => next.delete(a));
-          return next;
-        });
-      }
+        return next;
+      });
+      // Settled means "attempted", success or not. Keying the retry decision on
+      // delegateActivities instead would re-select every failed address as soon
+      // as it left the loading set, and since this effect depends on both sets
+      // that refetches them for as long as the endpoint keeps failing.
+      setSettledActivityAddresses(
+        (prev) => new Set([...prev, ...newAddresses]),
+      );
+      setLoadingActivityAddresses((prev) => {
+        const next = new Set(prev);
+        newAddresses.forEach((a) => next.delete(a));
+        return next;
+      });
     };
     void fetchDelegateActivities();
   }, [
     delegateAddresses,
-    delegateActivities,
+    settledActivityAddresses,
     queryClient,
     fromDate,
+    toDate,
     loadingActivityAddresses,
     skipActivity,
     daoId,

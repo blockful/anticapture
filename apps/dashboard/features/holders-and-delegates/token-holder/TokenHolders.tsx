@@ -202,6 +202,7 @@ export const TokenHolders = ({
     daoId,
     addresses: hasProposalActivity ? delegateAddresses : [],
     fromDate: activityFromDate,
+    toDate,
   });
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
