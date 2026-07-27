@@ -106,6 +106,32 @@ describe("DrizzleProposalsActivityRepository", () => {
       const result = await repository.getFirstVoteTimestamp(VOTER);
       expect(result).toBe(1699000000);
     });
+
+    it("ignores votes on canceled proposals", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "canceled",
+          txHash: "0xtx1",
+          status: "CANCELED",
+        }),
+        createProposal({ id: "active", txHash: "0xtx2", status: "ACTIVE" }),
+      ]);
+      await db.insert(votesOnchain).values([
+        createVote({
+          txHash: "0xvote1",
+          proposalId: "canceled",
+          timestamp: 1699000000n,
+        }),
+        createVote({
+          txHash: "0xvote2",
+          proposalId: "active",
+          timestamp: 1700000000n,
+        }),
+      ]);
+
+      const result = await repository.getFirstVoteTimestamp(VOTER);
+      expect(result).toBe(1700000000);
+    });
   });
 
   describe("getUserVotes", () => {
@@ -260,6 +286,22 @@ describe("DrizzleProposalsActivityRepository", () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]?.id).toBe("proposal-1");
+    });
+
+    it("excludes canceled proposals", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({ id: "active", txHash: "0xtx1", status: "ACTIVE" }),
+        createProposal({
+          id: "canceled",
+          txHash: "0xtx2",
+          status: "CANCELED",
+        }),
+      ]);
+
+      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]?.id).toBe("active");
     });
 
     it("returns empty array when no proposals meet the activityStart threshold", async () => {

@@ -1,8 +1,12 @@
 import { serve } from "@hono/node-server";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
+const serverClose = vi.hoisted(() =>
+  vi.fn((callback: (error?: Error) => void) => callback()),
+);
+
 vi.mock("@hono/node-server", () => ({
-  serve: vi.fn(),
+  serve: vi.fn(() => ({ close: serverClose })),
 }));
 
 vi.mock("./upstream-docs.js", () => ({
@@ -15,6 +19,7 @@ describe("gateful app auth", () => {
   beforeAll(async () => {
     vi.stubEnv("TOKEN_SERVICE_URL", "http://authful:4002");
     vi.stubEnv("TOKEN_SERVICE_API_KEY", "test-key");
+    vi.stubEnv("TOKEN_SERVICE_USAGE_API_KEY", "usage-key");
     vi.stubEnv("PORT", "0");
     vi.stubEnv("REDIS_URL", undefined);
     vi.stubEnv("ADDRESS_ENRICHMENT_API_URL", undefined);
@@ -94,6 +99,7 @@ describe("metrics endpoint auth (GATEFUL_METRICS_TOKEN set)", () => {
     vi.resetModules();
     vi.stubEnv("TOKEN_SERVICE_URL", "http://authful:4002");
     vi.stubEnv("TOKEN_SERVICE_API_KEY", "test-key");
+    vi.stubEnv("TOKEN_SERVICE_USAGE_API_KEY", "usage-key");
     vi.stubEnv("GATEFUL_METRICS_TOKEN", "metrics-secret");
     vi.stubEnv("PORT", "0");
     vi.stubEnv("REDIS_URL", undefined);

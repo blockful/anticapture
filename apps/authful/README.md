@@ -1,19 +1,21 @@
 # Authful
 
-Per-tenant API token issuance and validation for Gateful (DEV-758). Usage is
-observed via Gateful's Prometheus metrics, not persisted here.
+Per-tenant API token issuance, validation, and 30-day daily usage storage for
+Gateful (DEV-758).
 
 Plaintext tokens are **never stored or logged** — only their sha256 hash.
 
 ## Environment
 
-| Variable               | Required        | Description                                                       |
-| ---------------------- | --------------- | ----------------------------------------------------------------- |
-| `DATABASE_URL`         | yes             | Dedicated Postgres (schema `authful`)                             |
-| `ADMIN_API_KEY`        | yes             | Guards `/tokens` (mint/list/revoke), min 16 chars                 |
-| `INTERNAL_API_KEY`     | yes             | Guards `/validate`; shared with Gateful (`TOKEN_SERVICE_API_KEY`) |
-| `PORT`                 | no              | Default `4002`                                                    |
-| `SEED_TOKEN_PLAINTEXT` | CI/preview only | Token seeded on boot in PR previews (min 16 chars) — see below    |
+| Variable               | Required        | Description                                                                                                            |
+| ---------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`         | yes             | Dedicated Postgres (schema `authful`)                                                                                  |
+| `ADMIN_API_KEY`        | yes             | Guards unrestricted `/tokens` operations, min 16 chars                                                                 |
+| `INTERNAL_API_KEY`     | yes             | Guards `/validate`; shared with Gateful as `TOKEN_SERVICE_API_KEY`                                                     |
+| `PROVISIONING_API_KEY` | user keys       | Guards `user:*` token operations and usage reads; shared with the User API as its Authful provisioning credential      |
+| `USAGE_API_KEY`        | usage recording | May only `POST /tokens/usage`; shared with Gateful as `TOKEN_SERVICE_USAGE_API_KEY` (the edge never holds mint/revoke) |
+| `PORT`                 | no              | Default `4002`                                                                                                         |
+| `SEED_TOKEN_PLAINTEXT` | CI/preview only | Token seeded on boot in PR previews (min 16 chars) — see below                                                         |
 
 ## CI / preview seeding
 
@@ -26,7 +28,9 @@ without creating duplicates.
 
 ## Endpoints
 
-- `POST /tokens` · `GET /tokens` · `DELETE /tokens/:id` — admin surface
+- `POST /tokens` · `GET /tokens` · `DELETE /tokens/:id` — token surface
+- `POST /tokens/usage` · `GET /tokens/usage?tenant=...` — daily usage surface;
+  writes require a UUID `idempotencyKey`, and replaying one is a no-op
 - `POST /validate` — internal surface (Gateful)
 - `GET /health` · `GET /metrics` — public · `GET /docs` — Swagger UI
 

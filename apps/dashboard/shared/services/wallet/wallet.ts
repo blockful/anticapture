@@ -10,15 +10,11 @@ import { createWalletClient } from "viem";
 import { createConfig, http } from "wagmi";
 import { mainnet, optimism, scroll } from "wagmi/chains";
 
-const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY;
-
-export const rpcHttpUrl = `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-const rpcOptimismUrl = `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-const rpcScrollUrl = `https://scroll-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+const rpcTransport = (chainId: number) => http(`/api/rpc/${chainId}`);
 
 export const walletClient = createWalletClient({
   chain: mainnet,
-  transport: http(rpcHttpUrl),
+  transport: rpcTransport(mainnet.id),
 });
 
 const projectId =
@@ -50,9 +46,9 @@ const wagmiConfig = createConfig({
   connectors,
   chains: [mainnet, optimism, scroll],
   transports: {
-    [mainnet.id]: http(rpcHttpUrl),
-    [optimism.id]: http(rpcOptimismUrl),
-    [scroll.id]: http(rpcScrollUrl),
+    [mainnet.id]: rpcTransport(mainnet.id),
+    [optimism.id]: rpcTransport(optimism.id),
+    [scroll.id]: rpcTransport(scroll.id),
   },
 });
 

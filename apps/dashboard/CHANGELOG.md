@@ -1,5 +1,21 @@
 # @anticapture/dashboard
 
+## 2.10.0
+
+### Minor Changes
+
+- [#2081](https://github.com/blockful/anticapture/pull/2081) [`dd68b62`](https://github.com/blockful/anticapture/commit/dd68b6246f736a21733db830be9955e96ea77dc7) Thanks [@brunod-e](https://github.com/brunod-e)! - footer now reads About / Docs / Terms of Service / Give Feedback (Docs points to docs.anticapture.com), the API keys page gets a "See our Docs" button and a direct per-row delete button (replacing the options menu), and whitelabel sign-in triggers SIWE directly instead of opening the login modal
+
+- [#2072](https://github.com/blockful/anticapture/pull/2072) [`90a98bc`](https://github.com/blockful/anticapture/commit/90a98bc052455fd28dfdd0fd79351a2a4f815d4c) Thanks [@pikonha](https://github.com/pikonha)! - Add a user-facing 30-day daily request chart for self-service API keys, backed by resilient Gateful usage batching and tenant-scoped Authful storage. Gateful flushes with a new usage-only Authful credential (`USAGE_API_KEY` / `TOKEN_SERVICE_USAGE_API_KEY`) that can only record usage — the internet-facing edge never holds mint/revoke capability.
+
+### Patch Changes
+
+- [#2073](https://github.com/blockful/anticapture/pull/2073) [`ec67a25`](https://github.com/blockful/anticapture/commit/ec67a253f63b85b75085408b60568181b13843f3) Thanks [@pikonha](https://github.com/pikonha)! - Route wallet RPC transports exclusively through a server-side proxy that requires authenticated eRPC configuration without exposing the secret to browsers.
+
+- [#2082](https://github.com/blockful/anticapture/pull/2082) [`4004db5`](https://github.com/blockful/anticapture/commit/4004db5382579c1f08fadf835544dec945b49b23) Thanks [@pikonha](https://github.com/pikonha)! - Show ready-to-copy AI agent connection commands while newly created API keys are still available.
+
+- [#2079](https://github.com/blockful/anticapture/pull/2079) [`f40e9bd`](https://github.com/blockful/anticapture/commit/f40e9bd59f53dcb64ff5ecf34c0cda25e56269bf) Thanks [@pikonha](https://github.com/pikonha)! - fix panel height overflow
+
 ## 2.9.0
 
 ### Minor Changes

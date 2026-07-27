@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
 import {
   afterAll,
+  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -16,7 +17,7 @@ import {
 import { createApp } from "@/app";
 import type { AuthfulDrizzle } from "@/database";
 import * as schema from "@/database/schema";
-import { tokens } from "@/database/schema";
+import { tokenUsageBatches, tokenUsageDaily, tokens } from "@/database/schema";
 import { tokenValidationRequestTotal } from "@/metrics";
 import { TokensRepository } from "@/repositories/tokens";
 import { TokensService, hashToken } from "@/services/tokens";
@@ -24,6 +25,7 @@ import { TokensService, hashToken } from "@/services/tokens";
 const ADMIN_KEY = "test-admin-key-0123456789";
 const INTERNAL_KEY = "test-internal-key-0123456789";
 const PROVISIONING_KEY = "test-provisioning-key-0123456789";
+const USAGE_KEY = "test-usage-key-0123456789";
 
 const adminHeaders = {
   Authorization: `Bearer ${ADMIN_KEY}`,
@@ -35,6 +37,10 @@ const internalHeaders = {
 };
 const provisioningHeaders = {
   Authorization: `Bearer ${PROVISIONING_KEY}`,
+  "Content-Type": "application/json",
+};
+const usageHeaders = {
+  Authorization: `Bearer ${USAGE_KEY}`,
   "Content-Type": "application/json",
 };
 
@@ -56,6 +62,7 @@ describe("authful app", () => {
       adminApiKey: ADMIN_KEY,
       internalApiKey: INTERNAL_KEY,
       provisioningApiKey: PROVISIONING_KEY,
+      usageApiKey: USAGE_KEY,
     });
   });
 
@@ -64,6 +71,8 @@ describe("authful app", () => {
   });
 
   beforeEach(async () => {
+    await db.delete(tokenUsageBatches);
+    await db.delete(tokenUsageDaily);
     await db.delete(tokens);
   });
 
@@ -325,6 +334,186 @@ describe("authful app", () => {
       expect(items[0]!.id).toBe(minted.id);
       expect(items[0]!.token).toBeUndefined();
       expect(items[0]!.tokenHash).toBeUndefined();
+    });
+  });
+
+  describe("token usage", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-07-20T12:00:00.000Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("upserts duplicate increments and ignores unknown token ids", async () => {
+      const minted = await mint({ tenant: "user:abc" });
+      const day = new Date().toISOString().slice(0, 10);
+      const idempotencyKey = crypto.randomUUID();
+
+      const res = await app.request("/tokens/usage", {
+        method: "POST",
+        headers: provisioningHeaders,
+        body: JSON.stringify({
+          idempotencyKey,
+          items: [
+            { tokenId: minted.id, day, count: 2 },
+            { tokenId: minted.id, day, count: 3 },
+            { tokenId: crypto.randomUUID(), day, count: 99 },
+            { tokenId: minted.id, day: "2099-01-01", count: 99 },
+          ],
+        }),
+      });
+      expect(res.status).toBe(204);
+
+      const second = await app.request("/tokens/usage", {
+        method: "POST",
+        headers: provisioningHeaders,
+        body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
+          items: [{ tokenId: minted.id, day, count: 4 }],
+        }),
+      });
+      expect(second.status).toBe(204);
+
+      const rows = await db.select().from(tokenUsageDaily);
+      expect(rows).toEqual([{ tokenId: minted.id, day, count: 9 }]);
+    });
+
+    it("applies a usage batch exactly once when its request is replayed", async () => {
+      const minted = await mint({ tenant: "user:abc" });
+      const day = new Date().toISOString().slice(0, 10);
+      const body = JSON.stringify({
+        idempotencyKey: crypto.randomUUID(),
+        items: [{ tokenId: minted.id, day, count: 5 }],
+      });
+
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const res = await app.request("/tokens/usage", {
+          method: "POST",
+          headers: usageHeaders,
+          body,
+        });
+        expect(res.status).toBe(204);
+      }
+
+      expect(await db.select().from(tokenUsageDaily)).toEqual([
+        { tokenId: minted.id, day, count: 5 },
+      ]);
+      expect(await db.select().from(tokenUsageBatches)).toHaveLength(1);
+    });
+
+    it("scopes reads by tenant and returns only the last 30 days", async () => {
+      const own = await mint({ tenant: "user:abc", name: "own" });
+      const other = await mint({ tenant: "user:def", name: "other" });
+      const today = new Date().toISOString().slice(0, 10);
+      const oldDate = new Date();
+      oldDate.setUTCDate(oldDate.getUTCDate() - 30);
+      const oldDay = oldDate.toISOString().slice(0, 10);
+      await db.insert(tokenUsageDaily).values([
+        { tokenId: own.id, day: today, count: 7 },
+        { tokenId: own.id, day: oldDay, count: 8 },
+        { tokenId: other.id, day: today, count: 9 },
+      ]);
+
+      const res = await app.request("/tokens/usage?tenant=user%3Aabc", {
+        headers: provisioningHeaders,
+      });
+      expect(res.status).toBe(200);
+      await expect(res.json()).resolves.toEqual({
+        items: [{ tokenId: own.id, day: today, count: 7 }],
+      });
+    });
+
+    it("prunes rows older than the retention boundary on write", async () => {
+      const minted = await mint({ tenant: "user:abc" });
+      const staleDate = new Date();
+      staleDate.setUTCDate(staleDate.getUTCDate() - 31);
+      const staleDay = staleDate.toISOString().slice(0, 10);
+      const today = new Date().toISOString().slice(0, 10);
+      await db
+        .insert(tokenUsageDaily)
+        .values({ tokenId: minted.id, day: staleDay, count: 10 });
+
+      const res = await app.request("/tokens/usage", {
+        method: "POST",
+        headers: provisioningHeaders,
+        body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
+          items: [{ tokenId: minted.id, day: today, count: 1 }],
+        }),
+      });
+      expect(res.status).toBe(204);
+
+      const rows = await db.select().from(tokenUsageDaily);
+      expect(rows).toEqual([{ tokenId: minted.id, day: today, count: 1 }]);
+    });
+
+    it("prevents provisioning scope from recording or reading ops usage", async () => {
+      const minted = await mint({ tenant: "uniswap" });
+      const day = new Date().toISOString().slice(0, 10);
+
+      const post = await app.request("/tokens/usage", {
+        method: "POST",
+        headers: provisioningHeaders,
+        body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
+          items: [{ tokenId: minted.id, day, count: 5 }],
+        }),
+      });
+      expect(post.status).toBe(204);
+      expect(await db.select().from(tokenUsageDaily)).toEqual([]);
+
+      const get = await app.request("/tokens/usage?tenant=uniswap", {
+        headers: provisioningHeaders,
+      });
+      expect(get.status).toBe(403);
+    });
+
+    it("records user:* usage with the usage key but ignores ops tenants", async () => {
+      const own = await mint({ tenant: "user:abc" });
+      const ops = await mint({ tenant: "uniswap", name: "ops" });
+      const day = new Date().toISOString().slice(0, 10);
+
+      const res = await app.request("/tokens/usage", {
+        method: "POST",
+        headers: usageHeaders,
+        body: JSON.stringify({
+          idempotencyKey: crypto.randomUUID(),
+          items: [
+            { tokenId: own.id, day, count: 5 },
+            { tokenId: ops.id, day, count: 9 },
+          ],
+        }),
+      });
+      expect(res.status).toBe(204);
+      expect(await db.select().from(tokenUsageDaily)).toEqual([
+        { tokenId: own.id, day, count: 5 },
+      ]);
+    });
+
+    it("forbids the usage key from everything but recording usage", async () => {
+      const minted = await mint({ tenant: "user:abc" });
+
+      const attempts = [
+        app.request("/tokens", {
+          method: "POST",
+          headers: usageHeaders,
+          body: JSON.stringify({ tenant: "user:abc", name: "self-service" }),
+        }),
+        app.request("/tokens?tenant=user%3Aabc", { headers: usageHeaders }),
+        app.request("/tokens/usage?tenant=user%3Aabc", {
+          headers: usageHeaders,
+        }),
+        app.request(`/tokens/${minted.id}`, {
+          method: "DELETE",
+          headers: usageHeaders,
+        }),
+      ];
+      for (const res of await Promise.all(attempts)) {
+        expect(res.status).toBe(403);
+      }
     });
   });
 

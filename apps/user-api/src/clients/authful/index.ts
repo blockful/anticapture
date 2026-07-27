@@ -8,16 +8,23 @@ export type MintedToken = {
   token: string; // plaintext, returned exactly once by Authful
 };
 
-export type TokenUsage = {
+export type TokenMetadata = {
   id: string;
   lastUsedAt: string | null;
+};
+
+export type TokenUsage = {
+  tokenId: string;
+  day: string;
+  count: number;
 };
 
 export interface AuthfulClient {
   mint(tenant: string, name: string): Promise<MintedToken>;
   revoke(tokenId: string): Promise<void>;
   /** Token metadata for a single tenant (used to surface lastUsedAt). */
-  listByTenant(tenant: string): Promise<TokenUsage[]>;
+  listByTenant(tenant: string): Promise<TokenMetadata[]>;
+  usageByTenant(tenant: string): Promise<TokenUsage[]>;
 }
 
 export class AuthfulHttpClient implements AuthfulClient {
@@ -67,7 +74,7 @@ export class AuthfulHttpClient implements AuthfulClient {
     }
   }
 
-  async listByTenant(tenant: string): Promise<TokenUsage[]> {
+  async listByTenant(tenant: string): Promise<TokenMetadata[]> {
     const res = await fetch(
       `${this.baseUrl}/tokens?tenant=${encodeURIComponent(tenant)}`,
       { headers: this.headers() },
@@ -79,5 +86,17 @@ export class AuthfulHttpClient implements AuthfulClient {
       items: { id: string; lastUsedAt: string | null }[];
     };
     return body.items.map((t) => ({ id: t.id, lastUsedAt: t.lastUsedAt }));
+  }
+
+  async usageByTenant(tenant: string): Promise<TokenUsage[]> {
+    const res = await fetch(
+      `${this.baseUrl}/tokens/usage?tenant=${encodeURIComponent(tenant)}`,
+      { headers: this.headers() },
+    );
+    if (!res.ok) {
+      throw new Error(`authful usage list failed: ${res.status}`);
+    }
+    const body = (await res.json()) as { items: TokenUsage[] };
+    return body.items;
   }
 }

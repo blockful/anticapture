@@ -44,6 +44,40 @@ test.describe("Panel page", () => {
     await expect(thead.getByText("Active Tokens in Governance")).toBeVisible();
   });
 
+  test("keeps the Monitored DAOs table above the footer in a short viewport", async ({
+    goto,
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1920, height: 640 });
+    await page.route("**/api/user/api/auth/get-session", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "null",
+      }),
+    );
+    await goto("/");
+
+    const tableContainer = page.locator("table").first().locator("..");
+    const footer = page.locator("footer");
+    await expect(tableContainer).toBeVisible({ timeout: 15_000 });
+    await expect(footer).toBeVisible();
+
+    const tableBox = await tableContainer.boundingBox();
+    const footerBox = await footer.boundingBox();
+
+    expect(tableBox).not.toBeNull();
+    expect(footerBox).not.toBeNull();
+    expect(tableBox!.y + tableBox!.height).toBeLessThanOrEqual(footerBox!.y);
+    await expect
+      .poll(() =>
+        tableContainer.evaluate(
+          (element) => element.scrollHeight > element.clientHeight,
+        ),
+      )
+      .toBe(true);
+  });
+
   test("sortable column headers respond to clicks", async ({ goto, page }) => {
     await goto("/");
     await expect(page.locator("table").first()).toBeVisible({

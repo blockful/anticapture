@@ -20,6 +20,13 @@ export type CreatedApiKey = {
 
 export type ApiKeyWithUsage = ApiKeyRow & { lastUsedAt: string | null };
 
+export type ApiKeyDailyUsage = {
+  keyId: string;
+  label: string;
+  day: string;
+  count: number;
+};
+
 export class ApiKeysService {
   constructor(
     private readonly repo: ApiKeysRepository,
@@ -83,6 +90,20 @@ export class ApiKeysService {
       ...row,
       lastUsedAt: usage.get(row.authfulTokenId) ?? null,
     }));
+  }
+
+  async usage(userId: string): Promise<ApiKeyDailyUsage[]> {
+    const tenant = `${USER_TENANT_PREFIX}${userId}`;
+    const [keys, usage] = await Promise.all([
+      this.repo.listActiveByUser(userId),
+      this.authful.usageByTenant(tenant).catch(() => []),
+    ]);
+    const keysByTokenId = new Map(keys.map((key) => [key.authfulTokenId, key]));
+
+    return usage.flatMap(({ tokenId, day, count }) => {
+      const key = keysByTokenId.get(tokenId);
+      return key ? [{ keyId: key.id, label: key.label, day, count }] : [];
+    });
   }
 
   /**

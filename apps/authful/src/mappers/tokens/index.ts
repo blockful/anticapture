@@ -28,6 +28,43 @@ export const ListTokensQuerySchema = z
   })
   .openapi("ListTokensQuery");
 
+export const TokenUsageSchema = z
+  .object({
+    tokenId: z.uuid(),
+    day: z.iso.date(),
+    count: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  })
+  .openapi("TokenUsage");
+
+export const RecordTokenUsageBodySchema = z
+  .object({
+    idempotencyKey: z.uuid().openapi({
+      description:
+        "Stable batch identifier. Replaying the same batch is a no-op.",
+    }),
+    items: z
+      .array(
+        TokenUsageSchema.extend({
+          count: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+        }),
+      )
+      .max(10_000),
+  })
+  .openapi("RecordTokenUsageBody");
+
+export const ListTokenUsageQuerySchema = z
+  .object({
+    tenant: z
+      .string()
+      .min(1)
+      .openapi({ description: "Tenant whose token usage should be returned." }),
+  })
+  .openapi("ListTokenUsageQuery");
+
+export const TokenUsageListResponseSchema = z
+  .object({ items: z.array(TokenUsageSchema) })
+  .openapi("TokenUsageListResponse");
+
 export const MintTokenBodySchema = z
   .object({
     tenant: z.string().min(1),

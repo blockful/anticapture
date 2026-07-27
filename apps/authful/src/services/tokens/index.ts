@@ -2,7 +2,12 @@ import { createHash, randomBytes } from "node:crypto";
 
 import { tokenValidationRequestTotal } from "@/metrics";
 import { USER_TENANT_PREFIX } from "@/middlewares/token-auth";
-import type { DBToken, TokensRepository } from "@/repositories/tokens";
+import type {
+  DBToken,
+  TokensRepository,
+  TokenUsage,
+  TokenUsageIncrement,
+} from "@/repositories/tokens";
 
 export const TOKEN_PREFIX = "act_";
 
@@ -125,5 +130,17 @@ export class TokensService {
       name: token.name,
       rateLimitPerMin: token.rateLimitPerMin,
     };
+  }
+
+  async recordUsage(
+    idempotencyKey: string,
+    items: TokenUsageIncrement[],
+    options: { requireTenantPrefix?: string } = {},
+  ): Promise<void> {
+    await this.repo.incrementUsage(idempotencyKey, items, options);
+  }
+
+  async usageByTenant(tenant: string): Promise<TokenUsage[]> {
+    return this.repo.listUsageByTenant(tenant);
   }
 }

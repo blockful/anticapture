@@ -16,7 +16,17 @@ export type UserApiKey = {
 /** Create returns the plaintext exactly once — never retrievable again. */
 export type CreatedApiKey = UserApiKey & { token: string };
 
+export type UserApiKeyUsage = {
+  keyId: string;
+  label: string;
+  day: string;
+  count: number;
+};
+
 export const listApiKeys = () => request<{ items: UserApiKey[] }>(BASE);
+
+export const fetchApiKeyUsage = () =>
+  request<{ items: UserApiKeyUsage[] }>(`${BASE}/usage`);
 
 export const createApiKey = (label: string) =>
   request<CreatedApiKey>(BASE, {

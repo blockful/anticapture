@@ -15,6 +15,19 @@ export const ApiKeyListResponseSchema = z
   .object({ items: z.array(ApiKeySchema) })
   .openapi("ApiKeyListResponse");
 
+export const ApiKeyUsageSchema = z
+  .object({
+    keyId: z.uuid(),
+    label: z.string(),
+    day: z.iso.date(),
+    count: z.number().int().nonnegative(),
+  })
+  .openapi("ApiKeyUsage");
+
+export const ApiKeyUsageListResponseSchema = z
+  .object({ items: z.array(ApiKeyUsageSchema) })
+  .openapi("ApiKeyUsageListResponse");
+
 export const CreateApiKeyBodySchema = z
   .object({ label: z.string().min(1).max(100) })
   .openapi("CreateApiKeyBody");
