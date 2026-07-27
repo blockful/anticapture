@@ -1,11 +1,10 @@
 "use client";
 
 import { Settings } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/shared/components";
 import { CodeBlock } from "@/shared/components/design-system/code-block/CodeBlock";
-import { Combobox } from "@/shared/components/design-system/combobox";
 import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
 import { cn } from "@/shared/utils/cn";
@@ -50,10 +49,10 @@ type ClientName = keyof typeof CLIENTS;
 const KEY_PLACEHOLDER = "<YOUR_API_KEY>";
 
 /**
- * "Connect your AI agent" — pick a client, pick a key, copy one command.
+ * "Connect your AI agent" — pick a client and copy one command.
  * Plaintext tokens only exist in memory for keys created this session
- * (`sessionTokens`); for those the command embeds the real key (truncated on
- * screen, full on copy). Otherwise the placeholder is used.
+ * (`sessionTokens`); the newest such key is embedded in the command (truncated
+ * on screen, full on copy). Otherwise the placeholder is used.
  */
 export const ConnectAgentSection = ({
   keys,
@@ -65,12 +64,6 @@ export const ConnectAgentSection = ({
   lastCreated: { id: string; label: string } | null;
 }) => {
   const [client, setClient] = useState<ClientName>("Claude Code");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  // A key created in this session becomes the selected one.
-  useEffect(() => {
-    if (lastCreated) setSelectedId(lastCreated.id);
-  }, [lastCreated]);
 
   // A just-created key may not be in `keys` yet (the invalidated list is
   // still refetching, or that refetch failed) — synthesize it so the copied
@@ -91,7 +84,7 @@ export const ConnectAgentSection = ({
       : keys;
 
   const selected =
-    knownKeys.find((k) => k.id === selectedId) ??
+    knownKeys.find((k) => k.id === lastCreated?.id) ??
     knownKeys.find((k) => sessionTokens[k.id]) ??
     knownKeys[0] ??
     null;
@@ -107,31 +100,25 @@ export const ConnectAgentSection = ({
       <SectionTitle
         icon={<Settings className="text-primary size-5" />}
         title="Connect your AI agent"
-        description="Pick your tool and run one command in your terminal. Your key is already in it."
+        description={
+          token
+            ? "Pick your tool and run one command in your terminal. Your key is already in it."
+            : "Pick your tool, replace the API key placeholder, and run the command in your terminal."
+        }
       />
 
       <div className="flex w-full flex-col gap-3">
-        <div className="flex w-full items-center justify-between gap-2">
-          <div className="flex gap-2">
-            {(Object.keys(CLIENTS) as ClientName[]).map((name) => (
-              <Button
-                key={name}
-                size="sm"
-                variant={name === client ? "primary" : "outline"}
-                onClick={() => setClient(name)}
-              >
-                {name}
-              </Button>
-            ))}
-          </div>
-
-          {selected && (
-            <Combobox
-              items={knownKeys.map((k) => ({ value: k.id, label: k.label }))}
-              value={selected.id}
-              onValueChange={setSelectedId}
-            />
-          )}
+        <div className="flex gap-2">
+          {(Object.keys(CLIENTS) as ClientName[]).map((name) => (
+            <Button
+              key={name}
+              size="sm"
+              variant={name === client ? "primary" : "outline"}
+              onClick={() => setClient(name)}
+            >
+              {name}
+            </Button>
+          ))}
         </div>
 
         {/* On-screen the key is redacted; the copied command carries the
