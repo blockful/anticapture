@@ -13,6 +13,7 @@ import { useState, useCallback, useMemo, useRef } from "react";
 import { useAccount } from "wagmi";
 
 import { GovernanceActionModal } from "@/features/governance/components/modals/GovernanceActionModal";
+import { OffchainVotedModal } from "@/features/governance/components/modals/OffchainVotedModal";
 import { OffchainVotingModal } from "@/features/governance/components/modals/OffchainVotingModal";
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
@@ -39,6 +40,10 @@ import {
   normalizeScores,
 } from "@/features/governance/utils/offchainProposal";
 import { getOffchainVoteFullLabel } from "@/features/governance/utils/offchainVoteLabel";
+import {
+  deriveOffchainVoteWeights,
+  getOffchainVoteChoiceLabels,
+} from "@/features/governance/utils/offchainVoteWeights";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { ProposalHeaderProvider } from "@/features/governance/context/ProposalHeaderContext";
 import { Button } from "@/shared/components";
@@ -68,6 +73,7 @@ export const ProposalSection = ({
   const [localOffchainVoteLabel, setLocalOffchainVoteLabel] = useState<
     string | null
   >(null);
+  const [isChangingVote, setIsChangingVote] = useState(false);
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
@@ -180,6 +186,32 @@ export const ProposalSection = ({
 
   const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
   const offchainVoteLabel = localOffchainVoteLabel ?? apiOffchainVoteLabel;
+
+  // Read-only first for a wallet that already voted, unless it asked to change.
+  const showVotedModal =
+    offchainHasVoted && !!userOffchainVote && !isChangingVote;
+
+  const votedWeights = useMemo(
+    () =>
+      rawOffchainProposal
+        ? deriveOffchainVoteWeights(
+            apiOffchainVoteChoice,
+            offchainChoices,
+            rawOffchainProposal.type,
+          )
+        : null,
+    [apiOffchainVoteChoice, offchainChoices, rawOffchainProposal],
+  );
+
+  const votedChoiceLabels = useMemo(
+    () => getOffchainVoteChoiceLabels(apiOffchainVoteChoice, offchainChoices),
+    [apiOffchainVoteChoice, offchainChoices],
+  );
+
+  const closeOffchainModals = useCallback(() => {
+    setIsVotingModalOpen(false);
+    setIsChangingVote(false);
+  }, []);
 
   const queryClient = useQueryClient();
 
@@ -360,10 +392,27 @@ export const ProposalSection = ({
             </>
           )}
 
-          {isOffchain && rawOffchainProposal && (
+          {/* A wallet that already voted lands on the read-only state first and
+              opts into the ballot through "Change vote". */}
+          {isOffchain && rawOffchainProposal && showVotedModal && (
+            <OffchainVotedModal
+              isOpen={isVotingModalOpen}
+              onClose={closeOffchainModals}
+              onChangeVote={() => setIsChangingVote(true)}
+              choices={offchainChoices}
+              weights={votedWeights}
+              choiceLabels={votedChoiceLabels}
+              votedAt={userOffchainVote?.created ?? 0}
+              votingPower={userOffchainVote?.vp ?? 0}
+              tokenSymbol={daoEnum}
+              comment={userOffchainVote?.reason}
+            />
+          )}
+
+          {isOffchain && rawOffchainProposal && !showVotedModal && (
             <OffchainVotingModal
               isOpen={isVotingModalOpen}
-              onClose={() => setIsVotingModalOpen(false)}
+              onClose={closeOffchainModals}
               proposal={rawOffchainProposal}
               hasVoted={offchainHasVoted}
               onVoteSuccess={handleOffchainVoteSuccess}
