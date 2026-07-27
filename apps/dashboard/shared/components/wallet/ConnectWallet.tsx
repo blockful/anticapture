@@ -8,7 +8,7 @@ import Image from "next/image";
 import { Button } from "@/shared/components";
 import { SessionAccountButton } from "@/shared/components/auth/SessionAccountButton";
 import { Tooltip } from "@/shared/components/design-system/tooltips";
-import { useSession } from "@/shared/services/auth/client";
+import { useAuthSession } from "@/shared/services/auth/useAuthSession";
 import { cn } from "@/shared/utils";
 
 const Jazzicon = dynamic(
@@ -25,7 +25,7 @@ export const ConnectWallet = ({
   label?: string;
   className?: string;
 }) => {
-  const { data: session } = useSession();
+  const { data: session } = useAuthSession();
   return (
     <ConnectButton.Custom>
       {({

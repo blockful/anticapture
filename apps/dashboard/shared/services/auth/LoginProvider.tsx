@@ -12,11 +12,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 
 import { LoginModal } from "@/shared/components/auth/LoginModal";
 import { authClient, useSession } from "@/shared/services/auth/client";
+import { isWalletSessionStale } from "@/shared/services/auth/walletSession";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type OpenLoginOptions = {
@@ -71,21 +71,19 @@ export function LoginProvider({
   // on-chain (vote, delegate, publish) works from the connection alone, so
   // nothing here disconnects the wallet and nothing re-opens the sign-in
   // modal on its own. Signing in is always something the user asks for.
+  //
+  // Sign-out is the cleanup, not the gate. It is a request: it can be in
+  // flight, and it can fail. What actually keeps the old account safe is
+  // `isWalletSessionStale`, which every session-backed surface reads through
+  // `useAuthSession` and which is true from the render the mismatch appears.
   useEffect(() => {
-    if (authFlowActive || !session || !isAddress(session.user.name)) return;
-    const sessionAddress = session.user.name.toLowerCase();
-
-    if (walletStatus === "disconnected") {
-      void authClient.signOut();
-      return;
-    }
-    if (
-      walletStatus === "connected" &&
-      address &&
-      address.toLowerCase() !== sessionAddress
-    ) {
-      void authClient.signOut();
-    }
+    if (authFlowActive || !session) return;
+    const stale = isWalletSessionStale({
+      sessionUserName: session.user.name,
+      walletStatus,
+      address,
+    });
+    if (stale) void authClient.signOut();
   }, [authFlowActive, session, walletStatus, address]);
 
   const handleOpenChange = useCallback((open: boolean) => {
