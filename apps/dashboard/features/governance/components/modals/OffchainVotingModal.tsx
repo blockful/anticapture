@@ -1,6 +1,7 @@
 "use client";
 
 import type { OffchainProposal } from "@anticapture/client";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -16,6 +17,8 @@ import { useVoteOnOffchainProposal } from "@/features/governance/hooks/useVoteOn
 import { normalizeChoices } from "@/features/governance/utils/offchainProposal";
 import { getOffchainVoteUiType } from "@/features/governance/utils/offchainVotingType";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
+import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { formatNumberUserReadable } from "@/shared/utils";
 
@@ -40,6 +43,9 @@ export const OffchainVotingModal = ({
   const [comment, setComment] = useState<string>("");
 
   const { address } = useAccount();
+  const { daoId } = useParams<{ daoId: string }>();
+  // DAO ids double as the governance token symbol across the dashboard (UNI, ENS, ...).
+  const tokenSymbol = daoId?.toUpperCase() ?? "";
   const { vote, isPending: isVoting } = useVoteOnOffchainProposal();
   const strategies = useMemo(
     () =>
@@ -189,7 +195,6 @@ export const OffchainVotingModal = ({
             choices={choices}
             value={value as Record<string, number> | null}
             onChange={setValue}
-            maxTotal={votingPower}
           />
         );
       default:
@@ -254,26 +259,22 @@ export const OffchainVotingModal = ({
         )}
         {!isVpLoading && !vpError && (
           <p className="text-primary text-[14px]">
-            {formatNumberUserReadable(votingPower)}
+            {formatNumberUserReadable(votingPower)} {tokenSymbol}
           </p>
         )}
       </div>
 
-      {/* Vote options */}
-      <div className="flex flex-col items-start gap-[6px] p-4 text-left">
-        <p className="font-inter text-primary text-[12px] font-medium">
-          Your vote
-        </p>
-        <div className="w-full">{renderVoteOptions()}</div>
+      {/* Vote options — each ballot renders its own "Your vote" label row so it
+          can place a selection counter or remaining-allocation chip beside it. */}
+      <div className="flex flex-col items-start p-4 text-left">
+        {renderVoteOptions()}
       </div>
 
       {/* Comment — omitted for shutter proposals: a plaintext reason would
             reveal the encrypted vote before the proposal closes. */}
       {isPrivacyLoading ? (
         <div className="flex flex-col gap-[6px] p-4">
-          <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-            Comment <span className="text-secondary">(optional)</span>
-          </p>
+          <FormLabel>Comment (optional)</FormLabel>
           <p className="text-secondary text-[14px]">Loading...</p>
         </div>
       ) : isShutter ? (
@@ -285,11 +286,12 @@ export const OffchainVotingModal = ({
         </div>
       ) : (
         <div className="flex flex-col gap-[6px] p-4">
-          <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-            Comment <span className="text-secondary">(optional)</span>
-          </p>
-          <textarea
-            className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
+          <FormLabel htmlFor="offchain-vote-comment">
+            Comment (optional)
+          </FormLabel>
+          <Textarea
+            id="offchain-vote-comment"
+            className="h-[100px]"
             placeholder="Enter your comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
