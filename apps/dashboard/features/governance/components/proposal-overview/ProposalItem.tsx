@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
 
+import { OffchainProposalBadge } from "@/features/governance/components/proposal-overview/OffchainProposalBadge";
 import { ProposalSourceBadge } from "@/features/governance/components/proposal-overview/ProposalSourceBadge";
 import type { OffchainProposalItem as OffchainProposalData } from "@/features/governance/hooks/useOffchainProposals";
 import type { Proposal } from "@/features/governance/types";
@@ -287,7 +288,11 @@ export const ProposalItem = ({
   }, [offchainProposal?.scores, offchainProposal?.choices, offchainProposal]);
 
   if (offchainProposal) {
-    const { status } = getOffchainProposalStatusView({
+    const {
+      status,
+      offchainStatus,
+      winner: offchainWinner,
+    } = getOffchainProposalStatusView({
       type: offchainProposal.type ?? "single-choice",
       start: offchainProposal.start,
       end: offchainProposal.end,
@@ -328,9 +333,10 @@ export const ProposalItem = ({
           <h3 className="text-primary">{offchainProposal.title}</h3>
           <div className="font-inter text-secondary flex flex-wrap items-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
             <ProposalSourceBadge source="offchain" />
-            <p className={getTextStatusColor(status)}>
-              {getStatusText(status)}
-            </p>
+            <OffchainProposalBadge
+              status={offchainStatus}
+              winner={offchainWinner}
+            />
             <BulletDivider />
             <p>{timeText}</p>
             <BulletDivider />

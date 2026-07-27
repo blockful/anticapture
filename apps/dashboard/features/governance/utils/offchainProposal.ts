@@ -37,6 +37,8 @@ export const getOffchainProposalStatusView = (
   input: OffchainProposalStatusViewInput,
 ): {
   status: ProposalStatus;
+  /** The off-chain status itself, for components that render its own badge. */
+  offchainStatus: OffchainProposalStatus;
   winner: OffchainProposalStatusResult["winner"];
 } => {
   const { status, winner } = deriveOffchainStatus({
@@ -49,7 +51,11 @@ export const getOffchainProposalStatusView = (
     quorumType: input.quorumType,
   });
 
-  return { status: STATUS_TO_PROPOSAL_STATUS[status], winner };
+  return {
+    status: STATUS_TO_PROPOSAL_STATUS[status],
+    offchainStatus: status,
+    winner,
+  };
 };
 
 export const normalizeChoices = (
