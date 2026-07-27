@@ -22,7 +22,7 @@ export const PAGES_CONSTANTS = {
       "Takes into account the maximum cost and the minimum profit possible. If it looks bad, it's bad. If it looks good, it's better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other forms beyond direct buying and selling assets.",
   },
   holdersAndDelegates: {
-    title: "Holders & Delegates",
+    title: "Stakeholders",
     navTitle: "Stakeholders",
     page: "holders-and-delegates",
     description:

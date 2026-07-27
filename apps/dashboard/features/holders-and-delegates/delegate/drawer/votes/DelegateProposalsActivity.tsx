@@ -152,7 +152,7 @@ export const DelegateProposalsActivity = ({
           />
           <MetricCard
             icon={<Check className="size-3.5" />}
-            title="Yes Rate"
+            title="For Rate"
             value={yesRateValue}
           />
           <MetricCard

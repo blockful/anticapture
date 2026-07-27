@@ -73,7 +73,7 @@ export const FormerDelegatorsTable = ({
     {
       accessorKey: "vpImpact",
       header: () => (
-        <span className="text-table-header flex w-full justify-end">
+        <span className="text-table-header flex w-full justify-start">
           VP Impact
         </span>
       ),

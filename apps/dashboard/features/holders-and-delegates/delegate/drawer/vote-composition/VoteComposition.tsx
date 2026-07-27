@@ -124,7 +124,7 @@ export const VoteComposition = ({
           {view === "current" ? (
             !currentVotingPower ? (
               <SkeletonRow
-                parentClassName="flex animate-pulse"
+                parentClassName="flex justify-start animate-pulse"
                 className="h-6 w-24"
               />
             ) : (
