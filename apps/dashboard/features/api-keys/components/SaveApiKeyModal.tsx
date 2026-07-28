@@ -26,18 +26,21 @@ export const SaveApiKeyModal = ({
       open={open}
       onOpenChange={onOpenChange}
       title="Save your API key"
-      description={`This is the only time "${label}" is shown. Save it or connect your AI agent now — you can't retrieve it again.`}
+      description="This is the only time your key is shown. Save it or connect your AI agent now. You can't retrieve it again."
       confirmLabel="I've saved it"
       onConfirm={() => onOpenChange(false)}
-      className="max-w-3xl"
       bodyClassName="max-h-[70vh] overflow-y-auto"
     >
       <div className="flex flex-col gap-6">
-        <CodeBlock code={token} codeClassName="break-all" />
+        <div className="flex flex-col gap-2">
+          <p className="text-primary text-sm font-medium">Key</p>
+          <CodeBlock code={token} codeClassName="break-all" />
+        </div>
         <ConnectAgentSection
           keys={[]}
           sessionTokens={{ created: token }}
           lastCreated={{ id: "created", label }}
+          variant="modal"
         />
       </div>
     </Modal>
