@@ -74,6 +74,9 @@ export const StackedBarChart = ({
       },
     },
     legend: {
+      // Scroll instead of wrapping: on narrow screens a plain legend wraps to
+      // multiple rows and overflows the fixed grid reserve into the x-axis.
+      type: "scroll" as const,
       bottom: 0,
       left: 0,
       icon: "roundRect",
@@ -83,6 +86,12 @@ export const StackedBarChart = ({
       textStyle: {
         fontFamily: CHART_FONT_FAMILY,
         fontSize: 14,
+        color: theme.legendTextColor,
+      },
+      pageIconColor: theme.legendTextColor,
+      pageIconInactiveColor: theme.gridLineColor,
+      pageTextStyle: {
+        fontFamily: CHART_FONT_FAMILY,
         color: theme.legendTextColor,
       },
     },
