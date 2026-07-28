@@ -1,12 +1,12 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { Inbox, Info } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { BlankSlate } from "@/shared/components/design-system/blank-slate";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
 import { Select } from "@/shared/components/design-system/form/fields/select/Select";
-import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
 
@@ -75,27 +75,21 @@ export const UsageSection = ({
           <span className="text-secondary hidden text-sm font-medium lg:inline">
             Key
           </span>
-          <SegmentedControl
-            items={filterOptions}
-            value={activeKeyId}
-            size="sm"
-            onValueChange={setSelectedKeyId}
-            className="hidden max-w-full overflow-x-auto lg:inline-flex"
-          />
+          {/* Long key names are truncated by the Select's own ellipsis. */}
           <Select
             items={filterOptions}
             value={activeKeyId}
             onValueChange={setSelectedKeyId}
             aria-label="Filter usage by API key"
-            className="w-36 lg:hidden"
+            className="w-36 max-w-48 lg:w-auto lg:min-w-36"
           />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="bg-surface-raised h-[300px] w-full animate-pulse rounded" />
+        <div className="bg-surface-raised h-[200px] w-full animate-pulse rounded" />
       ) : isError ? (
-        <div className="flex h-[300px] w-full flex-col items-center justify-center gap-1 text-center">
+        <div className="flex h-[200px] w-full flex-col items-center justify-center gap-1 text-center">
           <p className="text-primary text-sm font-medium">Usage unavailable</p>
           <p className="text-secondary text-sm">Try refreshing the page.</p>
         </div>
@@ -107,12 +101,15 @@ export const UsageSection = ({
           xAxisLabelInterval={(index) => index % 5 === 0 || index === 29}
           xAxisLabelFormatter={(value) => value}
           tooltipTotalLabel="Total"
-          height={300}
+          height={200}
         />
       ) : (
-        <div className="flex h-[300px] w-full items-center justify-center">
-          <p className="text-secondary text-sm">No requests yet</p>
-        </div>
+        <BlankSlate
+          variant="title"
+          icon={Inbox}
+          title="No requests yet"
+          description="Requests made with your API keys will appear here."
+        />
       )}
     </Card>
   );
