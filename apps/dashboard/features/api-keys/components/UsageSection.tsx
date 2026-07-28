@@ -53,7 +53,8 @@ export const UsageSection = ({
   );
 
   return (
-    <Card className="p-4">
+    // On mobile the chart sits directly on the page (no card chrome/padding).
+    <Card className="lg:bg-surface-default border-0 bg-transparent p-0 lg:border lg:p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5">
           <p className="text-secondary text-sm font-medium">
