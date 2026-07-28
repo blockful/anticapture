@@ -1,5 +1,11 @@
 # @anticapture/gateful
 
+## 1.5.0
+
+### Minor Changes
+
+- [#2072](https://github.com/blockful/anticapture/pull/2072) [`90a98bc`](https://github.com/blockful/anticapture/commit/90a98bc052455fd28dfdd0fd79351a2a4f815d4c) Thanks [@pikonha](https://github.com/pikonha)! - Add a user-facing 30-day daily request chart for self-service API keys, backed by resilient Gateful usage batching and tenant-scoped Authful storage. Gateful flushes with a new usage-only Authful credential (`USAGE_API_KEY` / `TOKEN_SERVICE_USAGE_API_KEY`) that can only record usage — the internet-facing edge never holds mint/revoke capability.
+
 ## 1.4.0
 
 ### Minor Changes
