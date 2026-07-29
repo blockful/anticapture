@@ -79,9 +79,8 @@ export class FeedService {
     const result: Partial<Record<FeedEventType, bigint>> = {};
 
     for (const [type, levels] of Object.entries(daoThresholds)) {
-      // ALL keeps an entry per type with a zero floor rather than returning an
-      // empty map: the repository derives which types to match from these keys,
-      // so dropping them would also drop the `type` filter.
+      // ALL keeps an entry per type with a zero floor instead of an empty map:
+      // the repository derives the `type` filter from these keys.
       result[type as FeedEventType] =
         relevance === FeedRelevanceFilter.ALL ? 0n : levels[relevance];
     }

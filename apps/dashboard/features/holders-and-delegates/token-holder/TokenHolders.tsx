@@ -171,10 +171,9 @@ export const TokenHolders = ({
     ? Array(DEFAULT_ITEMS_PER_PAGE).fill({} as TokenHolderTableData)
     : (tableData ?? []);
 
-  // Memoized on the inputs rather than recomputed per render: this value keys
-  // the per-delegate activity cache and the banner query, and a bare Date.now()
-  // changes on every render that crosses a second boundary, which would discard
-  // both caches and refetch continuously.
+  // Memoized because this value keys the per-delegate activity cache and the
+  // banner query: a bare Date.now() changes on every render that crosses a
+  // second boundary, discarding both caches and refetching continuously.
   const activityFromDate = useMemo(
     () =>
       fromDate ??
@@ -192,8 +191,7 @@ export const TokenHolders = ({
     [tableData],
   );
 
-  // AAVE's API registers no proposal endpoints, so everything derived from
-  // proposal activity has to stay off there: asking for it returns 404 per
+  // AAVE's API registers no proposal endpoints: proposals-activity 404s per
   // delegate, and /voting-powers/inactive-summary falls through to the
   // /voting-powers/{address} param route and 400s.
   const hasProposalActivity = daoId !== DaoIdEnum.AAVE;

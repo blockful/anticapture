@@ -19,11 +19,10 @@ export interface BalanceHistoryGraphItem {
 }
 
 /**
- * Balances at the two edges of the selected period, read straight from the API
- * instead of from the rows the graph plots. The graph query hides sub-token
- * transfers and keeps only the newest 1,000 rows, so its first row is not the
- * period's opening balance for an active account: a limit-1 lookup on either
- * side of the boundary is.
+ * Balances at the two edges of the period, read from their own limit-1 lookups
+ * rather than from the plotted rows: those hide sub-token transfers and keep
+ * only the newest 1,000, so for an active account they cover a suffix of the
+ * period and their first row is not its opening balance.
  */
 export function useBalanceHistoryBoundaries(
   accountId: string,
@@ -33,8 +32,8 @@ export function useBalanceHistoryBoundaries(
   const { decimals } = daoConfig[daoId];
   const dao = daoId.toLowerCase() as HistoricalBalancesPathParamsDaoEnumKey;
 
-  // The last transfer strictly before the period: its running balance is what
-  // the address held when the period opened. No row means it held nothing.
+  // The last transfer strictly before the period carries the opening balance as
+  // its running total. No row means the address held nothing.
   const { data: openingData, isLoading: openingLoading } =
     useHistoricalBalances(
       dao,

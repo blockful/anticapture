@@ -10,16 +10,14 @@ import { cn } from "@/shared/utils/cn";
 
 interface DrawerAddressButtonProps {
   address: Address;
-  // Which kind of profile the clicked address stands for in its column, e.g. a
-  // "Delegate" cell is a delegate even inside a token holder drawer. Required
-  // so every table states it instead of silently inheriting the open drawer's
-  // tabs.
+  // Which kind of profile the address stands for in its column: a "Delegate"
+  // cell is a delegate even inside a token holder drawer.
   entityType: EntityType;
   nameClassName?: string;
 }
 
-// Any address rendered inside the profile drawer is clickable: it closes the
-// current drawer and opens the profile of the clicked address (DEV-562 item 1).
+// Any address rendered inside the profile drawer is clickable: it re-points the
+// drawer at the profile of the clicked address.
 export const DrawerAddressButton = ({
   address,
   entityType,
@@ -28,18 +26,13 @@ export const DrawerAddressButton = ({
   const setDrawerAddress = useQueryState("drawerAddress")[1];
   const setDrawerTab = useQueryState("drawerTab")[1];
   const setTabAddress = useQueryState("tabAddress")[1];
-  // Same channel the drawer's activity feed uses to re-point the drawer at
-  // another kind of profile. The override is recorded against the clicked
-  // address, so it cannot leak onto whatever address is opened next.
   const { setDrawerEntity } = useDrawerEntityOverride();
 
   return (
     <button
       type="button"
-      // Clamped to the cell: a button is inline-block, so without this it is
-      // sized by its content and long names (an ENS record can be a 42 char
-      // address plus ".eth") overflow into the next column instead of being
-      // truncated.
+      // Clamped to the cell: a button is inline-block, so without this long
+      // names overflow into the next column instead of being truncated.
       className="min-w-0 max-w-full cursor-pointer"
       onClick={(e) => {
         e.stopPropagation();
@@ -55,8 +48,8 @@ export const DrawerAddressButton = ({
         variant="rounded"
         isDashed={true}
         nameClassName={cn("hover:border-primary", nameClassName)}
-        // This button is already the interactive element; the tooltip would add
-        // a nested button, a second tab stop and the wrong accessible name.
+        // This button is already the interactive element; the tooltip trigger
+        // would nest a second button inside it.
         withDetailsTooltip={false}
       />
     </button>

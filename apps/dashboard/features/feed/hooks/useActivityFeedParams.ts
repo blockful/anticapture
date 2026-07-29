@@ -51,9 +51,8 @@ export function useActivityFeedParams() {
   const setFilters = useCallback(
     (newFilters: FeedEventsQueryParams) => {
       setOrderDirection(newFilters.orderDirection ?? "desc");
-      // The API accepts values this page does not model (e.g. "ALL", which the
-      // drawer feed uses), so keep only the tiers offered here and let anything
-      // else fall back to the default.
+      // The API accepts values this page does not model ("ALL", used by the
+      // drawer feed), so keep only the tiers offered here.
       const tiers: string[] = Object.values(feedRelevanceEnum);
       setRelevance(
         newFilters.relevance && tiers.includes(newFilters.relevance)

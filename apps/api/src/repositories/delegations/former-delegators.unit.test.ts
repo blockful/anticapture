@@ -287,9 +287,8 @@ describe("FormerDelegatorsRepository", () => {
     expect(result).toEqual({ items: [], totalCount: 0 });
   });
 
-  // DAOs with partial delegation (SCR) write one row per delegatee out of a
-  // single DelegateChanged, all sharing the transaction hash, log index and
-  // timestamp.
+  // Partial delegation DAOs (SCR) write one row per delegatee out of a single
+  // DelegateChanged, all sharing the transaction hash, log index and timestamp.
   describe("partial delegation", () => {
     const splitDelegation = (
       transactionHash: string,

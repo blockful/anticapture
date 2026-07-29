@@ -116,7 +116,6 @@ export const VoteComposition = ({
 
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
-      {/* Summary at the left, view selector at the right, on one line */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-col gap-0.5">
           <span className="text-secondary text-alternative-xs font-mono font-medium uppercase">
@@ -135,10 +134,9 @@ export const VoteComposition = ({
             )
           ) : (
             <span className="text-primary text-md font-normal">
-              {/* The sum can only cover the pages already fetched, while the
-                  count comes from the API and covers every former delegator.
-                  Claim a total only once there is nothing left to load, so the
-                  two numbers can never contradict each other. */}
+              {/* The sum only covers the pages already fetched while the count
+                  covers every former delegator, so claim a total only once
+                  there is nothing left to load. */}
               {!formerHasMorePages &&
                 `${formatNumberUserReadable(formerTotalVpLost)} across `}
               {formerTotalCount}{" "}
@@ -194,7 +192,6 @@ export const VoteComposition = ({
                 </div>
 
                 <div className="flex w-full flex-col gap-6">
-                  {/* Delegators */}
                   <div className="hidden flex-col gap-2 lg:flex">
                     <p className="text-secondary text-alternative-xs font-mono font-medium uppercase">
                       Delegators

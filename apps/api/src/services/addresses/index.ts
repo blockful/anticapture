@@ -4,9 +4,8 @@ import { NonCirculatingAddresses, TreasuryAddresses } from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { AddressLabelItem, AddressLabelsResponse } from "@/mappers";
 
-// Labels that reference vesting (e.g. "Vesting Address", "treasuryVester",
-// "Foundation Vesting Wallet") are categorized as vesting; everything else is
-// treasury.
+// Any label mentioning vesting ("Vesting Address", "treasuryVester") is a
+// vesting address; everything else counts as treasury.
 const categorize = (label: string): AddressLabelItem["category"] =>
   label.toLowerCase().includes("vest") ? "vesting" : "treasury";
 

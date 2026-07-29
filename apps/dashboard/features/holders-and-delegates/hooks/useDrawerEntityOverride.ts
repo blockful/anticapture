@@ -4,14 +4,11 @@ import { useQueryState } from "nuqs";
 
 import type { EntityType } from "@/shared/types/entities";
 
-// The profile drawer takes its entity type from whoever opened it, but an
-// address clicked inside the drawer can stand for the other kind of profile, so
-// the clicked type has to survive in the URL. It is recorded together with the
-// address it belongs to, as `<entityType>:<address>`, so it self-invalidates:
-// any path that re-points `drawerAddress` without touching this param simply
-// stops matching and the drawer falls back to its own entity type. That beats
-// clearing the param in every cleanup path, which silently breaks again the
-// next time someone adds one.
+// An address clicked inside the drawer can stand for the other kind of profile,
+// so the clicked type has to survive in the URL. Stored as
+// `<entityType>:<address>` to self-invalidate: any path that re-points
+// `drawerAddress` without touching this param stops matching, so the drawer
+// falls back to its own entity type without every cleanup path clearing it.
 const DRAWER_ENTITY_PARAM = "drawerEntity";
 
 const isEntityType = (value: string): value is EntityType =>

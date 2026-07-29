@@ -752,9 +752,7 @@ describe("FeedRepository", () => {
       });
 
       // A partial delegation (SCR) writes one row per delegatee out of a single
-      // DelegateChanged, all sharing the transaction hash and log index. The
-      // enriched metadata has to describe the delegatee the feed was filtered
-      // by, not whichever sibling row happened to be read last.
+      // DelegateChanged, all sharing the transaction hash and log index.
       it("keeps the delegation row matching the filtered address when one event has several", async () => {
         const SPLIT_A = "0x1111111111111111111111111111111111111111";
         const SPLIT_B = "0x2222222222222222222222222222222222222222";
@@ -808,8 +806,7 @@ describe("FeedRepository", () => {
       });
 
       // Filtering by the delegator matches every sibling row, so the primary
-      // row is arbitrary and cannot be the whole answer: `delegatees` has to
-      // carry the full split. The same holds for an unfiltered feed.
+      // row is arbitrary and `delegatees` has to carry the full split.
       it("lists every delegatee of a split event, filtered or not", async () => {
         const SPLIT_A = "0x2222222222222222222222222222222222222222";
         const SPLIT_B = "0x1111111111111111111111111111111111111111";

@@ -32,9 +32,6 @@ interface DrawerActivityFeedProps {
   daoId: DaoIdEnum;
 }
 
-// Recent activity feed scoped to a single address, shown inside the profile
-// drawer (DEV-562 item 3). Reuses the shared event renderer and the new
-// `address` filter on GET /:dao/feed/events.
 export const DrawerActivityFeed = ({
   address,
   daoId,
@@ -62,8 +59,7 @@ export const DrawerActivityFeed = ({
       limit: 20,
       orderDirection,
       // Always sent explicitly: the API reads a missing `relevance` as MEDIUM,
-      // whose value thresholds would hide most of the address's activity.
-      // "ALL" drops the threshold and returns every tier at once.
+      // whose thresholds would hide most of the address's activity.
       relevance: relevance as FeedEventsQueryParamsRelevanceEnumKey,
     },
     // An empty address would be rejected with a 400 while the drawer closes.
@@ -82,10 +78,9 @@ export const DrawerActivityFeed = ({
       ([entry]) => {
         if (entry.isIntersecting && !isFetchingNextPage) fetchNextPage();
       },
-      // The list scrolls inside its own container, so that container has to be
-      // the root: against the viewport the sentinel sits exactly on the
-      // container's clipped edge and never registers as visible, which left
-      // the feed stuck on its first page.
+      // The scroll container has to be the root: against the viewport the
+      // sentinel sits on its clipped edge and never registers as visible,
+      // leaving the feed stuck on its first page.
       { root: scrollRef.current, rootMargin: "0px 0px 200px 0px" },
     );
     observer.observe(node);
@@ -99,8 +94,7 @@ export const DrawerActivityFeed = ({
   const { setDrawerEntity } = useDrawerEntityOverride();
 
   // Clicking a delegate from a token-holder drawer has to open the delegate
-  // profile, so the clicked entity type travels with the clicked address
-  // instead of the drawer keeping the tabs it happened to be showing.
+  // profile, so the clicked entity type travels with the clicked address.
   const handleRowClick = (clicked: string, clickedEntityType: EntityType) => {
     setDrawerTab(null);
     setDrawerEntity(clickedEntityType, clicked);
@@ -109,7 +103,6 @@ export const DrawerActivityFeed = ({
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
-      {/* Filters */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <span className="text-secondary text-xs font-medium">Date</span>
@@ -139,7 +132,6 @@ export const DrawerActivityFeed = ({
         </div>
       </div>
 
-      {/* Timeline */}
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="flex flex-col gap-4 pl-5">

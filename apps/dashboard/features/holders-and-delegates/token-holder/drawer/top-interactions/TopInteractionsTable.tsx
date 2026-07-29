@@ -91,10 +91,9 @@ export const TopInteractionsTable = ({
     return BigInt(Math.floor(Number(parseUnits("1", decimals)) / priceUsd));
   }, [tokenData?.price, decimals]);
 
-  // "Hide dust" is enforced by the query, not after the fact. Filtering a page
-  // client-side can empty it out entirely, and an empty table renders its
-  // empty state without the infinite-scroll sentinel, so the non-dust rows on
-  // later pages would stay unreachable.
+  // "Hide dust" is enforced by the query, not client-side: filtering a page
+  // after the fact can empty it out, and an empty table renders its empty state
+  // without the infinite-scroll sentinel, stranding the later pages.
   const minAmount = useMemo(() => {
     const userMin = filterVariables.minAmount
       ? BigInt(filterVariables.minAmount)
@@ -131,12 +130,8 @@ export const TopInteractionsTable = ({
   const isDust = (volume: number) =>
     dustThresholdRawUnits > 0n && volume < Number(dustThresholdRawUnits);
 
-  // Rendered even with no rows: "Hide dust" defaults to on and is enforced by
-  // the query, so an address whose every interaction is under $1 comes back
-  // empty, and the switch lives in the table's footer. Bailing out here would
-  // take the only way to turn the filter back off with it. The copy has to name
-  // the filter that emptied the page, or the default reads as "this address
-  // never interacted with anyone".
+  // The copy has to name the filter that emptied the page, or an address whose
+  // every interaction is under $1 reads as one that never interacted at all.
   const emptyState: { emptyTitle?: string; emptyDescription?: string } =
     currentAddressFilter || isFilterActive
       ? {
@@ -428,9 +423,8 @@ export const TopInteractionsTable = ({
           );
         }
         const priceUsd = Number(tokenData?.price) || 0;
-        // The price comes from its own query. Falling back to 0 would render a
-        // confident "$0" on every row while it is still in flight or if it
-        // failed, so show nothing until there is a real price to multiply by.
+        // The price comes from its own query, so show nothing until there is a
+        // real one: defaulting to 0 renders a confident "$0" on every row.
         if (priceUsd <= 0) {
           return (
             <div className="text-secondary flex w-full items-center justify-end text-sm">

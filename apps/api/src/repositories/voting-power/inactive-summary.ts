@@ -7,12 +7,10 @@ export class InactiveVotingPowerSummaryRepository {
   constructor(private readonly db: Drizzle) {}
 
   /**
-   * Aggregates, in a single query, the total delegated voting power and the
-   * share held by delegates that cast zero votes on proposals whose voting
-   * period falls within the window. Window semantics mirror the
+   * Total delegated voting power and the share held by delegates that cast zero
+   * votes in the window, in a single query. Window semantics mirror the
    * proposals-activity service: a proposal is in the window when its voting
-   * period (creation timestamp plus the DAO voting period) overlaps
-   * [fromDate, toDate].
+   * period (creation timestamp plus the DAO voting period) overlaps it.
    */
   async getInactiveDelegatedVotingPowerSummary(
     votingPeriodSeconds: number,

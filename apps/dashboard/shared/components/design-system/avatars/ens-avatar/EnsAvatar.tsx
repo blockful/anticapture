@@ -61,8 +61,7 @@ interface EnsAvatarProps extends Omit<
   /**
    * Wrap the avatar in the address details tooltip. Turn this off when the
    * avatar already sits inside an interactive element: the tooltip trigger is
-   * itself a button, and a button inside a button is invalid HTML that adds a
-   * second tab stop and hands the accessible name to the tooltip.
+   * itself a button, and nesting buttons is invalid HTML.
    */
   withDetailsTooltip?: boolean;
 }

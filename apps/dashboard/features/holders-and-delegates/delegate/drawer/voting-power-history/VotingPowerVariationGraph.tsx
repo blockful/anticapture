@@ -199,10 +199,9 @@ export const VotingPowerVariationGraph = ({
     );
   }
 
-  // Net voting-power change across the whole selected period. The boundaries
-  // come from their own limit-1 lookups (see useDelegateVotingPowerBoundaries):
-  // the plotted rows are capped at 1,000 and hide low-importance deltas, so for
-  // an active delegate they cover only a suffix of the period.
+  // Net change across the whole period, so the boundaries come from their own
+  // limit-1 lookups (see useDelegateVotingPowerBoundaries) rather than the
+  // plotted rows, which cover only a suffix of it for an active delegate.
   const netChange = endingVotingPower - startingVotingPower;
 
   // Custom dot component to show each transfer/delegation point

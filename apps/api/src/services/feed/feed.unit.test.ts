@@ -248,8 +248,8 @@ describe("FeedService", () => {
         createFeedEvent({ type: "VOTE", value: parseEther("1"), logIndex: 0 }),
       ];
 
-      // ALL zeroes the value floor but must keep one threshold entry per type,
-      // since the repository derives the type filter from those keys.
+      // ALL zeroes the value floor but keeps one entry per type, since the
+      // repository derives the type filter from those keys.
       const thresholds: Partial<Record<FeedEventType, bigint>> = {};
       const spyRepo = {
         items: simpleRepo.items,

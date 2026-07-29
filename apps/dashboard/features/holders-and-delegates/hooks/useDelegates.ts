@@ -85,11 +85,9 @@ export const useDelegates = ({
     Set<string>
   >(() => new Set());
 
-  // Requests already in flight when the selection changes settle after the
-  // reset below, and their counts belong to the previous selection. Each
-  // selection gets a generation; a response is only merged while its own
-  // generation is still current. `daoId` is part of it because switching DAOs
-  // invalidates these counts just as a new range does.
+  // Requests in flight when the selection changes settle after the reset below,
+  // carrying the previous selection's counts. Each selection gets a generation
+  // and a response is only merged while its own generation is current.
   const activityGeneration = `${daoId}:${orderDirection}:${orderBy ?? ""}:${
     address ?? ""
   }:${fromDate ?? ""}:${toDate ?? ""}`;
@@ -163,8 +161,7 @@ export const useDelegates = ({
       setLoadingActivityAddresses(
         (prev) => new Set([...prev, ...newAddresses]),
       );
-      // allSettled, so one address failing does not discard the activity of
-      // every other address fetched alongside it.
+      // One address failing must not discard the activity of the others.
       const activities = await Promise.allSettled(
         newAddresses.map(async (addr) => {
           const result = await queryClient.fetchQuery(
@@ -173,8 +170,8 @@ export const useDelegates = ({
               {
                 address: addr,
                 ...(fromDate ? { fromDate } : {}),
-                // Both bounds, so "Voted X/Y" counts the window the period
-                // selector asked for instead of everything up to today.
+                // Both bounds, so "Voted X/Y" counts the selected window
+                // instead of everything up to today.
                 ...(toDate ? { toDate } : {}),
               },
             ),
@@ -199,10 +196,9 @@ export const useDelegates = ({
         });
         return next;
       });
-      // Settled means "attempted", success or not. Keying the retry decision on
+      // Settled means "attempted", success or not. Keying this on
       // delegateActivities instead would re-select every failed address as soon
-      // as it left the loading set, and since this effect depends on both sets
-      // that refetches them for as long as the endpoint keeps failing.
+      // as it left the loading set, refetching it in a loop.
       setSettledActivityAddresses(
         (prev) => new Set([...prev, ...newAddresses]),
       );

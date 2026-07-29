@@ -91,7 +91,7 @@ export const BalanceHistoryTable = ({
     { value: "smallest-first", label: "Smallest first" },
   ];
 
-  // Filter options for transaction type (API still speaks buy/sell)
+  // The API still speaks buy/sell for these
   const typeFilterOptions: FilterOption[] = [
     { value: "all", label: "All Transactions" },
     { value: "buy", label: "In" },
@@ -126,8 +126,7 @@ export const BalanceHistoryTable = ({
 
   const isInitialLoading = loading && (!transfers || transfers.length === 0);
 
-  // Known vesting contract addresses for this DAO, used to relabel incoming
-  // transfers from a vesting contract as "Vested" (DEV-562 item 6 / #10).
+  // Incoming transfers from one of these are relabeled "Vested".
   const { data: addressLabels } = useAddressLabels(
     daoId.toLowerCase() as AddressLabelsPathParamsDaoEnumKey,
   );

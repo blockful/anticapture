@@ -32,20 +32,17 @@ export const useDelegatesActivity = ({
     () => new Set(),
   );
   // Addresses whose fetch already settled, successfully or not. `activities`
-  // alone cannot play this role: a rejected (or empty) response leaves no entry
-  // there, and since this effect depends on both sets, releasing the address
-  // from `loadingAddresses` would immediately re-select it and refetch it in a
-  // loop for as long as the endpoint keeps failing.
+  // alone cannot play this role: a rejected response leaves no entry there, so
+  // releasing the address from `loadingAddresses` would refetch it in a loop.
   const [settledAddresses, setSettledAddresses] = useState<Set<string>>(
     () => new Set(),
   );
 
   const addressesKey = addresses.join(",");
 
-  // Requests already in flight when the range or the DAO changes settle after
-  // the reset below, and their counts belong to the previous selection. Each
-  // selection gets a generation; a response is only merged while its own
-  // generation is still the current one.
+  // Requests in flight when the range or the DAO changes settle after the reset
+  // below, carrying the previous selection's counts. Each selection gets a
+  // generation and a response is only merged while its own is current.
   const generation = `${daoId}:${fromDate ?? ""}:${toDate ?? ""}`;
   const currentGeneration = useRef(generation);
 
@@ -77,8 +74,8 @@ export const useDelegatesActivity = ({
               {
                 address: addr,
                 ...(fromDate ? { fromDate } : {}),
-                // Both bounds, so "Voted X/Y" counts the same window the period
-                // selector asked for instead of everything up to today.
+                // Both bounds, so "Voted X/Y" counts the selected window
+                // instead of everything up to today.
                 ...(toDate ? { toDate } : {}),
               },
             ),

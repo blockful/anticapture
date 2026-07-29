@@ -171,15 +171,11 @@ export class FeedRepository {
   }
 
   /**
-   * One key can hold several delegation rows: DAOs with partial delegation
-   * write one row per delegatee out of a single `DelegateChanged` (SCR does
-   * this), and every row shares the transaction hash and log index. Keeping
-   * only the last row would render a delegate unrelated to the address the
-   * feed was filtered by, so when an address filter is active the row that
-   * mentions it wins. Without a filter the first row is kept, which is what
-   * an unscoped feed already showed. This picks the primary row only; the other
-   * rows of the event travel in `delegatees` via `groupDelegationsByKey`, so
-   * none of them is dropped.
+   * Picks the primary row per event key. Partial delegation DAOs (SCR) write
+   * one row per delegatee out of a single `DelegateChanged`, all sharing the
+   * transaction hash and log index, so when an address filter is active the row
+   * mentioning it wins instead of an unrelated sibling. Siblings are not
+   * dropped: `groupDelegationsByKey` carries them in `delegatees`.
    */
   private indexDelegationsByKey(
     delegations: DelegationRow[],
@@ -204,12 +200,10 @@ export class FeedRepository {
   }
 
   /**
-   * All delegation rows of an event, keyed the same way, ordered by delegate
-   * address ascending. The primary row alone cannot describe a split event: an
-   * unfiltered feed would render one arbitrary delegatee, and a feed filtered
-   * by the delegator matches every sibling row, so picking one silently drops
-   * the rest. Sorted rather than left in row order because the database gives
-   * no ordering guarantee, and the rendered list has to be stable.
+   * Every delegation row of an event, keyed the same way: the primary row alone
+   * cannot describe a split, so the whole set travels with it. Sorted by
+   * delegate address because the database guarantees no row order and the
+   * rendered list has to be stable.
    */
   private groupDelegationsByKey(
     delegations: DelegationRow[],
@@ -266,9 +260,9 @@ export class FeedRepository {
           delegate: d.delegateAccountId,
           previousDelegate: d.previousDelegate,
           amount: d.delegatedValue.toString(),
-          // Only a split carries the array: a lone delegatee is already fully
-          // described by `delegate` and `amount`, and consumers read the
-          // absence of `delegatees` as "not a split".
+          // Only a split carries the array: a lone delegatee is already
+          // described by `delegate` and `amount`, and consumers read a missing
+          // `delegatees` as "not a split".
           ...(siblings.length > 1
             ? {
                 delegatees: siblings.map((s) => ({
@@ -436,14 +430,11 @@ export class FeedRepository {
       .where(where);
   }
 
-  // The feed_event table has no account column; addresses live in the source
-  // tables each event type is derived from. Match with EXISTS lookups keyed
-  // by (tx_hash, log_index), which the source tables index. Comparisons are
-  // lowercased on both sides so the filter works regardless of whether the
-  // source table stores checksummed or lowercase addresses. Outer feed_event
-  // columns use Drizzle column refs so they follow whatever alias the query
-  // builder assigns; the source tables are inlined as raw SQL with explicit
-  // aliases (see the proposerVotingPower note above).
+  // feed_event has no account column, so addresses are matched in the source
+  // table each event type is derived from, keyed by (tx_hash, log_index).
+  // Lowercased on both sides because source tables may store checksummed
+  // addresses. feed_event columns use Drizzle refs so they follow whatever
+  // alias the query builder assigns (see the proposerVotingPower note above).
   private buildAddressFilter(address: string): SQL {
     const addr = address.toLowerCase();
     return sql`(

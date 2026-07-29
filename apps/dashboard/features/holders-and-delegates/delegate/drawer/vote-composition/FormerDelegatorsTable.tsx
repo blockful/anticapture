@@ -26,8 +26,6 @@ interface FormerDelegatorRow {
   redelegatedTo: Address | null;
 }
 
-// Addresses that used to delegate to this delegate but have since moved their
-// voting power elsewhere (DEV-562 item 9 / #14).
 export const FormerDelegatorsTable = ({
   address,
   daoId,
@@ -155,8 +153,7 @@ export const FormerDelegatorsTable = ({
         onLoadMore={fetchNextPage}
         withDownloadCSV
         csvFilename="former-delegators.csv"
-        // Without this a failed request is indistinguishable from a delegate
-        // who genuinely never lost a delegator.
+        // A failed request must not read as a delegate who never lost one.
         error={error as Error | null}
         emptyTitle="No former delegators"
         emptyDescription="No addresses have moved their delegation away from this delegate."

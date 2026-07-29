@@ -40,8 +40,7 @@ export class InactiveVotingPowerSummaryService {
         toDate,
       );
 
-    // A delegate can only be inactive when at least one proposal existed in
-    // the window.
+    // A delegate can only be inactive once a proposal existed in the window.
     const inactiveDelegatedVotingPower =
       summary.totalProposals === 0 ? 0n : summary.inactiveDelegatedVotingPower;
 

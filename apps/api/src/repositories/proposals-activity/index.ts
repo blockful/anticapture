@@ -48,10 +48,9 @@ export class DrizzleProposalsActivityRepository {
   constructor(private readonly db: Drizzle) {}
 
   /**
-   * Upper bound of the activity window. Keyed on the proposal's own timestamp
-   * (when it opened) rather than its end, so a bounded period reports the
-   * proposals the delegate could vote on inside it instead of everything
-   * created up to today. Omitted entirely when no upper bound was requested.
+   * Upper bound of the activity window, keyed on the proposal's own timestamp
+   * rather than its end, so a bounded period reports the proposals the delegate
+   * could vote on inside it instead of everything created up to today.
    */
   private activityEndCondition(
     activityEnd: number | undefined,

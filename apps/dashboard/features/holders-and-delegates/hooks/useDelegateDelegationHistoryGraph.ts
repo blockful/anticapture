@@ -26,11 +26,10 @@ export interface UseDelegateDelegationHistoryGraphResult {
 }
 
 /**
- * Voting power at the two edges of the selected period, read straight from the
- * API instead of from the rows the graph plots. The graph query hides
- * low-importance deltas and keeps only the newest 1,000 rows, so its first row
- * is not the period's opening voting power for an active delegate: a limit-1
- * lookup on either side of the boundary is, and it ignores the display filter.
+ * Voting power at the two edges of the period, read from their own limit-1
+ * lookups rather than from the plotted rows: those hide low-importance deltas
+ * and keep only the newest 1,000, so for an active delegate they cover a suffix
+ * of the period and their first row is not its opening voting power.
  */
 export function useDelegateVotingPowerBoundaries(
   accountId: string,
@@ -42,8 +41,8 @@ export function useDelegateVotingPowerBoundaries(
   const dao =
     daoId.toLowerCase() as HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey;
 
-  // The last event strictly before the period: its running voting power is what
-  // the delegate held when the period opened. No row means it held none.
+  // The last event strictly before the period carries the opening voting power
+  // as its running total. No row means the delegate held none.
   const { data: openingData } = useHistoricalVotingPowerByAccountId(
     dao,
     accountId,

@@ -58,19 +58,15 @@ export class FormerDelegatorsRepository {
   }
 
   /**
-   * Former delegators are delegators that delegated to the queried address in
-   * the past but whose latest delegation event points somewhere else. A
-   * gaps-and-islands pass groups each delegator's delegation events into
-   * stints of consecutive events towards the queried address; the event right
-   * after the last stint is the move-away event, so a delegator with such an
-   * event no longer delegates to the queried address.
+   * A gaps-and-islands pass groups each delegator's events into stints of
+   * consecutive delegations towards the queried address; the event right after
+   * the last stint is the move-away event, so a delegator with one is former.
    *
-   * Rows are collapsed per source event before being sequenced. DAOs with
-   * partial delegation write one row per delegatee out of a single
-   * `DelegateChanged` (SCR does this), and every row shares the transaction
-   * hash, log index and timestamp. Sequencing those rows individually would
-   * order concurrent delegates arbitrarily and read each one as a move away
-   * from its own sibling, reporting a still-active delegate as former.
+   * Rows are collapsed per source event before being sequenced: partial
+   * delegation DAOs (SCR) write one row per delegatee out of a single
+   * `DelegateChanged`, all sharing the transaction hash, log index and
+   * timestamp, and sequencing them individually would read each one as a move
+   * away from its own sibling.
    */
   private buildFormerDelegatorsCte(address: Address) {
     return sql`

@@ -40,17 +40,13 @@ export const HoldersAndDelegatesDrawer = ({
   withVotes = true,
 }: HoldersAndDelegatesDrawerProps) => {
   // Clicking an address inside the drawer can re-point it at a different kind
-  // of profile, so the entity type has to be able to outlive the prop the
-  // opener passed. The override only counts while it still belongs to the
-  // address on screen: parents that close the drawer by clearing
-  // `drawerAddress` alone leave a stale override behind, and this makes it
-  // stale-by-construction rather than relying on every one of them to clean up.
+  // of profile, so the entity type has to outlive the prop the opener passed.
+  // The override only counts while it still belongs to the address on screen.
   const { drawerEntityFor, clearDrawerEntity } = useDrawerEntityOverride();
   const entityType = drawerEntityFor(address) ?? initialEntityType;
 
-  // The per-address feed is served by GET /:dao/feed/events, which only the
-  // DAO APIs that register `feed()` expose. Without this the tab would render a
-  // permanent error state for those DAOs (AAVE, for one).
+  // Only DAO APIs that register `feed()` serve GET /:dao/feed/events. Without
+  // this the tab renders a permanent error state for the others (AAVE, so far).
   const hasActivityFeed = Boolean(daoConfigByDaoId[daoId]?.activityFeed);
 
   const activityTab = hasActivityFeed
@@ -156,9 +152,9 @@ export const HoldersAndDelegatesDrawer = ({
     cleanupFilters();
   };
 
-  // A shared URL can name a tab this drawer does not have: `activity` on a DAO
-  // without a feed, `votes` when withVotes is false, or a tab belonging to the
-  // other entity type. Fall back to the first tab instead of an empty body.
+  // A shared URL can name a tab this drawer does not have (`activity` on a DAO
+  // without a feed, a tab of the other entity type), so fall back to the first
+  // one instead of rendering an empty body.
   const renderTabContent = (tabId: string) => {
     const tabs = entities[entityType].tabs;
     return (tabs.find((tab) => tab.id === tabId) ?? tabs[0])?.content;
@@ -168,8 +164,8 @@ export const HoldersAndDelegatesDrawer = ({
     onClose();
     setActiveTab(null);
     cleanupFilters();
-    // Not load bearing (the override is ignored once the address changes), just
-    // keeps the URL from carrying a dead param around.
+    // Not load bearing (the override self-invalidates), just keeps the URL from
+    // carrying a dead param around.
     clearDrawerEntity();
   };
 

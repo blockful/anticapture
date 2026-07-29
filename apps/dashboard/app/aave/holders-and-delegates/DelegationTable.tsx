@@ -48,11 +48,9 @@ interface DelegateTableData {
 }
 
 /**
- * AAVE's own delegates table. It is deliberately a reduced version of the
- * shared `Delegates` component: the AAVE API registers no proposal endpoints,
- * so the quorum percentage, the activity ring, the inactive states and the
- * average vote timing have no data to render here. Address and value filtering
- * are shared with the main table; anything proposal-derived is not.
+ * Deliberately a reduced version of the shared `Delegates` component: the AAVE
+ * API registers no proposal endpoints, so the quorum percentage, the activity
+ * ring, the inactive states and the average vote timing have no data here.
  */
 export function DelegationTable({ days }: { days: TimeInterval }) {
   const pageLimit: number = 20;

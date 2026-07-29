@@ -86,10 +86,9 @@ export const TopInteractions = ({
 
   const variant = netBalanceChange >= 0 ? "positive" : "negative";
 
-  // This query carries no filters, so an empty result is the address having no
-  // interactions at all, as opposed to the table's own query coming back empty
-  // because "Hide dust" or a column filter is on. Only this case gets the blank
-  // slate; the table keeps its (filtered) empty state and its footer switch.
+  // This query carries no filters, so an empty result means no interactions at
+  // all. Only that case gets the blank slate: the table's own query can come
+  // back empty from "Hide dust" and keeps its filtered empty state instead.
   const hasNoInteractions = !topFive || topFive.length === 0;
 
   return (

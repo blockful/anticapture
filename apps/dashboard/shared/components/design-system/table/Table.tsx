@@ -324,10 +324,9 @@ export const Table = <TData, TValue>({
                                 stickyFirstColumn &&
                                 "bg-surface-background sticky-border-r sticky left-0 z-20 lg:relative lg:bg-transparent",
                               rowSizeVariants[size],
-                              // border-separate tables do not paint <tr> borders,
-                              // so row dividers live on the cells. A pseudo
-                              // element is used so the line spans the full cell
-                              // width, ignoring the horizontal cell padding.
+                              // border-separate tables do not paint <tr>
+                              // borders, so dividers live on the cells, as a
+                              // pseudo element to ignore the cell padding.
                               withRowBorders &&
                                 "after:bg-light-dark relative after:absolute after:inset-x-0 after:bottom-0 after:h-px after:content-['']",
                               colMeta?.columnClassName,

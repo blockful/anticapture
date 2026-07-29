@@ -534,8 +534,8 @@ export const Delegates = ({
         } | null;
 
         // Timing comes from the same per-row proposals activity as the Activity
-        // column, so it has to wait on that request too. Without this guard the
-        // cell renders "-" (the no-data value) while the data is still loading.
+        // column, so without this guard the cell renders "-" (the no-data
+        // value) while that request is still in flight.
         if (isActivityLoadingFor(row.original.address) || loading) {
           return (
             <div className="flex items-center justify-start">

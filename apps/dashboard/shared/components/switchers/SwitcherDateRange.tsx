@@ -75,9 +75,8 @@ export const SwitcherDateRange = ({
   const handleRangeSelect = (range: DateRange | undefined) => {
     setPendingRange(range);
     // react-day-picker answers the very first click with `from` equal to `to`,
-    // so an equal pair here cannot be told apart from a deliberate single-day
-    // range. Only a completed multi-day range auto-applies; one day is
-    // confirmed with Apply below, which is what makes it selectable at all.
+    // so an equal pair cannot be told apart from a deliberate single-day range.
+    // Only multi-day ranges auto-apply; a single day is confirmed with Apply.
     if (
       range?.from &&
       range?.to &&

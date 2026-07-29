@@ -11,8 +11,6 @@ interface InactiveDelegatesBannerProps {
   toDate?: number;
 }
 
-// Alert banner summarizing how much delegated voting power sits with delegates
-// that did not vote within the selected period (DEV-562 item 5 / #9).
 export const InactiveDelegatesBanner = ({
   daoId,
   fromDate,
@@ -29,8 +27,6 @@ export const InactiveDelegatesBanner = ({
   const percentage = data ? Number(data.inactivePercentage) : 0;
   const totalProposals = data ? Number(data.totalProposals) : 0;
 
-  // Nothing meaningful to warn about when there were no proposals in the
-  // window or no VP is parked with inactive delegates.
   if (!data || totalProposals === 0 || percentage <= 0) return null;
 
   return (

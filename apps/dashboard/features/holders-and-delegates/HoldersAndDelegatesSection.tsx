@@ -68,9 +68,8 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   // `from`/`to` as address filters, and it clears them on every tab change.
   const [fromParam, setFromParam] = useQueryState("rangeFrom");
   const [toParam, setToParam] = useQueryState("rangeTo");
-  // Enum parsed, not a plain string: a stale or hand-edited `?tab=foo` would
-  // otherwise reach `tabComponentMap`, miss every key and render an empty
-  // section body. Unknown values fall back to the default tab.
+  // Enum parsed, not a plain string: a stale `?tab=foo` would otherwise reach
+  // `tabComponentMap`, miss every key and render an empty section body.
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
     parseAsStringEnum<TabId>([...TAB_IDS]).withDefault(DEFAULT_TAB),
