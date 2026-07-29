@@ -128,14 +128,31 @@ export const TopInteractionsTable = ({
     setIsMounted(true);
   }, []);
 
-  if (!interactions || interactions.length === 0) {
-    return null;
-  }
-
   const isDust = (volume: number) =>
     dustThresholdRawUnits > 0n && volume < Number(dustThresholdRawUnits);
 
-  const tableData = interactions.map((interaction) => {
+  // Rendered even with no rows: "Hide dust" defaults to on and is enforced by
+  // the query, so an address whose every interaction is under $1 comes back
+  // empty, and the switch lives in the table's footer. Bailing out here would
+  // take the only way to turn the filter back off with it. The copy has to name
+  // the filter that emptied the page, or the default reads as "this address
+  // never interacted with anyone".
+  const emptyState: { emptyTitle?: string; emptyDescription?: string } =
+    currentAddressFilter || isFilterActive
+      ? {
+          emptyTitle: "No interactions match these filters",
+          emptyDescription:
+            "Clear the address or value filter to see more interactions.",
+        }
+      : hideDust
+        ? {
+            emptyTitle: "Only dust interactions",
+            emptyDescription:
+              'Every interaction with this address is worth less than $1. Turn off "Hide dust" to see them.',
+          }
+        : {};
+
+  const tableData = (interactions ?? []).map((interaction) => {
     return {
       address: interaction?.accountId,
       volume: Number(interaction?.totalVolume) || 0,
@@ -445,6 +462,7 @@ export const TopInteractionsTable = ({
         withDownloadCSV={true}
         csvFilename="top-interactions.csv"
         error={error}
+        {...emptyState}
         hasMore={hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}

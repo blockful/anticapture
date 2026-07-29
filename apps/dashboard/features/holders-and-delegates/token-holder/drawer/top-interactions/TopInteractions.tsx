@@ -86,9 +86,15 @@ export const TopInteractions = ({
 
   const variant = netBalanceChange >= 0 ? "positive" : "negative";
 
+  // This query carries no filters, so an empty result is the address having no
+  // interactions at all, as opposed to the table's own query coming back empty
+  // because "Hide dust" or a column filter is on. Only this case gets the blank
+  // slate; the table keeps its (filtered) empty state and its footer switch.
+  const hasNoInteractions = !topFive || topFive.length === 0;
+
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
-      {!topFive || (topFive.length === 0 && !loadingVotingPowerData) ? (
+      {hasNoInteractions && !loadingVotingPowerData ? (
         <BlankSlate
           variant="default"
           icon={Inbox}
@@ -175,9 +181,11 @@ export const TopInteractions = ({
           </div>
         </div>
       )}
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden">
-        <TopInteractionsTable address={address} daoId={daoId} />
-      </div>
+      {(!hasNoInteractions || loadingVotingPowerData) && (
+        <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden">
+          <TopInteractionsTable address={address} daoId={daoId} />
+        </div>
+      )}
     </div>
   );
 };
