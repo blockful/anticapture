@@ -228,6 +228,20 @@ export const ProposalSection = ({
     return <ProposalSectionSkeleton />;
   }
 
+  if (error && !isProposalNotFoundError(error)) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-5 py-12">
+        <BlankSlate
+          variant="default"
+          icon={AlertOctagon}
+          title="Unable to load proposal"
+          description={error.message}
+          className="max-w-xl"
+        />
+      </div>
+    );
+  }
+
   if (isProposalNotFoundError(error) || !proposal) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-5 py-12">
@@ -236,20 +250,6 @@ export const ProposalSection = ({
           icon={AlertOctagon}
           title="Proposal not found"
           description="The proposal wasn't found."
-          className="max-w-xl"
-        />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center px-5 py-12">
-        <BlankSlate
-          variant="default"
-          icon={AlertOctagon}
-          title="Unable to load proposal"
-          description={error.message}
           className="max-w-xl"
         />
       </div>
