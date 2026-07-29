@@ -56,6 +56,8 @@ function buildOffchainProposal(id: string): OffchainProposal {
     link: "",
     network: "1",
     scores: [],
+    scoresTotal: 0,
+    quorum: 0,
     snapshot: null,
     spaceId: "ens.eth",
     start: 1,

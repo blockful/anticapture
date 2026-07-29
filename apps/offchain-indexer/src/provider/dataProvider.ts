@@ -30,6 +30,44 @@ const PROPOSALS_QUERY = `
       link
       flagged
       scores
+      scores_total
+      quorum
+      choices
+      network
+      snapshot
+      strategies {
+        name
+        network
+        params
+      }
+    }
+  }
+`;
+
+const PROPOSALS_BY_IDS_QUERY = `
+  query ($ids: [String!]!, $pageSize: Int!) {
+    proposals(
+      where: { id_in: $ids }
+      first: $pageSize
+      orderBy: "created"
+      orderDirection: asc
+    ) {
+      id
+      author
+      title
+      body
+      discussion
+      type
+      start
+      end
+      state
+      created
+      updated
+      link
+      flagged
+      scores
+      scores_total
+      quorum
       choices
       network
       snapshot
@@ -120,6 +158,21 @@ export class SnapshotProvider implements DataProvider {
         : null;
 
     return { data: proposals, nextCursor };
+  }
+
+  async fetchProposalsByIds(ids: string[]): Promise<OffchainProposal[]> {
+    if (ids.length === 0) return [];
+
+    const response = await this.query<{
+      proposals: z.input<typeof rawProposalSchema>[];
+    }>(PROPOSALS_BY_IDS_QUERY, {
+      ids,
+      pageSize: ids.length,
+    });
+
+    return response.proposals.map((p) =>
+      offchainProposalSchema(this.spaceId).parse(p),
+    );
   }
 
   async fetchProposalIdsSince(since: number): Promise<string[]> {
