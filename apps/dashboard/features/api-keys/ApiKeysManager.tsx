@@ -9,8 +9,8 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
 import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
-import { useSession } from "@/shared/services/auth/client";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useAuthSession } from "@/shared/services/auth/useAuthSession";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
 
 import { ApiKeysTable } from "./components/ApiKeysTable";
@@ -21,7 +21,7 @@ import { UsageSection } from "./components/UsageSection";
 import { useApiKeys } from "./hooks/useApiKeys";
 
 export const ApiKeysManager = () => {
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending } = useAuthSession();
   const { openLogin } = useLogin();
   const isAuthed = !isPending && !!session;
   const userId = session?.user.id ?? null;
@@ -49,11 +49,16 @@ export const ApiKeysManager = () => {
   const [toDelete, setToDelete] = useState<UserApiKey | null>(null);
 
   // Plaintexts belong to exactly one account: a sign-out or a different user
-  // signing in must never inherit (or copy) the previous user's tokens.
+  // signing in must never inherit (or copy) the previous user's tokens. A
+  // create or delete the user is halfway through belongs to that account too.
+  // Both modals live outside the `isAuthed` branch, so they are closed here
+  // rather than left open to submit against whoever holds the session now.
   useEffect(() => {
     setSessionTokens({});
     setLastCreated(null);
     setCreated(null);
+    setCreateOpen(false);
+    setToDelete(null);
   }, [userId]);
 
   const handleCreate = (label: string) => {

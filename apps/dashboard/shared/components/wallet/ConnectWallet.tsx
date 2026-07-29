@@ -8,8 +8,7 @@ import Image from "next/image";
 import { Button } from "@/shared/components";
 import { SessionAccountButton } from "@/shared/components/auth/SessionAccountButton";
 import { Tooltip } from "@/shared/components/design-system/tooltips";
-import { useSession } from "@/shared/services/auth/client";
-import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useAuthSession } from "@/shared/services/auth/useAuthSession";
 import { cn } from "@/shared/utils";
 
 const Jazzicon = dynamic(
@@ -26,8 +25,7 @@ export const ConnectWallet = ({
   label?: string;
   className?: string;
 }) => {
-  const { openLogin } = useLogin();
-  const { data: session } = useSession();
+  const { data: session } = useAuthSession();
   return (
     <ConnectButton.Custom>
       {({
@@ -35,6 +33,7 @@ export const ConnectWallet = ({
         chain,
         openAccountModal,
         openChainModal,
+        openConnectModal,
         authenticationStatus,
         mounted,
       }) => {
@@ -68,9 +67,12 @@ export const ConnectWallet = ({
                     />
                   );
                 }
+                // Connecting is not signing in: this opens the wallet picker
+                // and nothing else. The sign-in modal is raised by the
+                // surfaces that actually need a session (drafts, API keys).
                 return (
                   <Button
-                    onClick={() => openLogin()}
+                    onClick={openConnectModal}
                     type="button"
                     variant="outline"
                     className={cn(className, "text-primary!")}

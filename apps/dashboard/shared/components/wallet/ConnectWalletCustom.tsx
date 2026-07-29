@@ -23,8 +23,8 @@ export const ConnectWalletCustom = ({
   label?: string;
   className?: string;
 }) => {
-  // Voting needs a wallet to sign; a signed-in email/Google user connects
-  // one directly (session kept), a signed-out user goes through sign-in.
+  // Voting needs a wallet to sign the transaction, nothing more: the picker
+  // opens directly, with no sign-in step. See useWalletPrompt.
   const { promptWalletConnection } = useWalletPrompt();
   return (
     <ConnectButton.Custom>

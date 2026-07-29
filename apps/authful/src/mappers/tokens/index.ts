@@ -65,6 +65,20 @@ export const TokenUsageListResponseSchema = z
   .object({ items: z.array(TokenUsageSchema) })
   .openapi("TokenUsageListResponse");
 
+export const ListActiveTokensQuerySchema = z
+  .object({
+    since: z.iso.datetime().openapi({
+      description: "Return user-tenant tokens used at or after this instant.",
+    }),
+  })
+  .openapi("ListActiveTokensQuery");
+
+export const ActiveTokenUsageResponseSchema = z
+  .object({
+    items: z.array(TokenUsageSchema.pick({ tokenId: true, count: true })),
+  })
+  .openapi("ActiveTokenUsageResponse");
+
 export const MintTokenBodySchema = z
   .object({
     tenant: z.string().min(1),

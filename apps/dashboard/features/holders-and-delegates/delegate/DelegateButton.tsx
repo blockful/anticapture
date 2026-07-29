@@ -61,8 +61,7 @@ export const DelegateButton = ({
 
   useEffect(() => {
     if (!waitingForConnection) return;
-    // Whichever prompt is up (sign-in modal — including its RainbowKit
-    // hand-off — or the direct connect modal), keep waiting.
+    // Keep waiting while the wallet picker is up.
     if (promptOpen) return;
 
     if (isConnected) {
@@ -76,9 +75,9 @@ export const DelegateButton = ({
 
   const handleClick = () => {
     if (!isConnected) {
-      // Signed out → sign-in modal (connecting IS signing in); signed in
-      // without a wallet (email/Google) → RainbowKit directly, keeping the
-      // session. See useWalletPrompt.
+      // Delegating is an on-chain transaction, so it only needs a connected
+      // wallet: the picker opens directly, with no sign-in step and no
+      // message to sign. See useWalletPrompt.
       setWaitingForConnection(true);
       promptWalletConnection();
     } else {

@@ -42,14 +42,15 @@ export const ModalHeader = ({
         )}
       </div>
 
-      {/* Close button */}
+      {/* Close button — small: this header only renders on desktop (mobile
+          modals use the Drawer), so no 44px touch target is needed. */}
       <DialogPrimitive.Close asChild>
         <IconButton
           variant="ghost"
           size="sm"
           icon={X}
           aria-label="Close"
-          className="-m-2 size-11"
+          className="-m-1"
         />
       </DialogPrimitive.Close>
     </div>

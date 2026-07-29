@@ -19,12 +19,15 @@ export type TokenUsage = {
   count: number;
 };
 
+export type ActiveTokenUsage = Pick<TokenUsage, "tokenId" | "count">;
+
 export interface AuthfulClient {
   mint(tenant: string, name: string): Promise<MintedToken>;
   revoke(tokenId: string): Promise<void>;
   /** Token metadata for a single tenant (used to surface lastUsedAt). */
   listByTenant(tenant: string): Promise<TokenMetadata[]>;
   usageByTenant(tenant: string): Promise<TokenUsage[]>;
+  activeTokenUsage(since: Date): Promise<ActiveTokenUsage[]>;
 }
 
 export class AuthfulHttpClient implements AuthfulClient {
@@ -97,6 +100,18 @@ export class AuthfulHttpClient implements AuthfulClient {
       throw new Error(`authful usage list failed: ${res.status}`);
     }
     const body = (await res.json()) as { items: TokenUsage[] };
+    return body.items;
+  }
+
+  async activeTokenUsage(since: Date): Promise<ActiveTokenUsage[]> {
+    const res = await fetch(
+      `${this.baseUrl}/tokens/active?since=${encodeURIComponent(since.toISOString())}`,
+      { headers: this.headers() },
+    );
+    if (!res.ok) {
+      throw new Error(`authful active token list failed: ${res.status}`);
+    }
+    const body = (await res.json()) as { items: ActiveTokenUsage[] };
     return body.items;
   }
 }
