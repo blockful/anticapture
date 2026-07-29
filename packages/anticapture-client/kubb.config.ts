@@ -11,8 +11,8 @@ import { pluginZod } from "@kubb/plugin-zod";
 import {
   EthereumGenerator,
   generatedFormatTypes,
-  mapEthereumFormatFakers,
   mapEthereumFormatTypes,
+  mapEthereumFormatFakers,
 } from "./src/generators";
 import { resolveGatefulOpenApiSpecUrl } from "./src/gateful-openapi-spec";
 
