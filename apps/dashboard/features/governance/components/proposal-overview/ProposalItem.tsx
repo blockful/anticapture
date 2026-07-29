@@ -4,6 +4,7 @@ import { CheckCircle2, CircleMinus, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useMemo } from "react";
+import type { ReactNode } from "react";
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
 
@@ -204,6 +205,78 @@ const ProposalVoterBadge = ({
   );
 };
 
+type VoteProgressSegment = {
+  key: string;
+  percentage: number | string;
+  value: number;
+  className: string;
+};
+
+type ProposalQuorumProgressProps = {
+  segments: VoteProgressSegment[];
+  quorumPercentage: number;
+  quorumLabel: string;
+  quorumMarkerLabel: string;
+  tooltipContent: ReactNode;
+};
+
+const ProposalQuorumProgress = ({
+  segments,
+  quorumPercentage,
+  quorumLabel,
+  quorumMarkerLabel,
+  tooltipContent,
+}: ProposalQuorumProgressProps) => {
+  const showQuorumMarker = quorumPercentage < 100;
+
+  return (
+    <Tooltip
+      asChild
+      disableMobileClick
+      triggerClassName="w-full"
+      tooltipContent={tooltipContent}
+    >
+      <div className="flex min-h-7 w-full flex-col justify-center pt-1">
+        <div className="flex w-full items-center justify-center gap-2 py-1.5">
+          <div className="bg-surface-hover relative flex h-1.5 w-full overflow-visible">
+            {segments.map((segment) => (
+              <div
+                key={segment.key}
+                style={{ width: `${segment.percentage}%` }}
+                className={cn(
+                  segment.className,
+                  "h-full transition-[width] duration-300",
+                  segment.value > 0 && "min-w-[2px]",
+                )}
+              />
+            ))}
+            {showQuorumMarker && (
+              <div
+                aria-label={quorumMarkerLabel}
+                className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-3.5 w-[3px] -translate-y-1/2 outline-2"
+                style={{ left: `${quorumPercentage}%` }}
+              />
+            )}
+          </div>
+        </div>
+        <div className="relative flex h-4 w-full">
+          {showQuorumMarker && (
+            <div
+              style={{
+                left: `${quorumPercentage}%`,
+                transform: `translateX(-${quorumPercentage}%)`,
+              }}
+              className="font-inter text-secondary absolute flex h-4 items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
+            >
+              {quorumLabel}
+            </div>
+          )}
+        </div>
+      </div>
+    </Tooltip>
+  );
+};
+
 export const ProposalItem = ({
   proposal,
   offchainProposal,
@@ -294,6 +367,34 @@ export const ProposalItem = ({
       String(offchainProposal.end),
     );
     const encodedId = encodeURIComponent(offchainProposal.id);
+    const offchainQuorum = offchainProposal.quorum ?? 0;
+    const offchainQuorumPercentage =
+      totalOffchainVotes > 0 ? (offchainQuorum / totalOffchainVotes) * 100 : 0;
+    const hasOffchainQuorumMarker =
+      isBasic && offchainQuorum > 0 && offchainQuorumPercentage < 100;
+    const offchainBarTooltip = (
+      <div className="flex flex-col gap-0.5 text-xs">
+        <span>
+          For: {formatNumberUserReadable(offchainForVotes)} (
+          {offchainForPercentage.toFixed(0)}%)
+        </span>
+        <span>
+          Against: {formatNumberUserReadable(offchainAgainstVotes)} (
+          {offchainAgainstPercentage.toFixed(0)}%)
+        </span>
+        <span>
+          Abstain: {formatNumberUserReadable(offchainAbstainVotes)} (
+          {offchainAbstainPercentage.toFixed(0)}%)
+        </span>
+        {offchainQuorum > 0 && (
+          <span>
+            Quorum: {formatNumberUserReadable(totalOffchainVotes)} /{" "}
+            {formatNumberUserReadable(offchainQuorum)}
+            {totalOffchainVotes >= offchainQuorum ? " · Reached" : ""}
+          </span>
+        )}
+      </div>
+    );
 
     return (
       <Link
@@ -359,53 +460,34 @@ export const ProposalItem = ({
               </div>
             </div>
 
-            <Tooltip
-              asChild
-              disableMobileClick
-              triggerClassName="w-full"
-              tooltipContent={
-                <div className="flex flex-col gap-0.5 text-xs">
-                  <span>
-                    For: {formatNumberUserReadable(offchainForVotes)} (
-                    {offchainForPercentage.toFixed(0)}%)
-                  </span>
-                  <span>
-                    Against: {formatNumberUserReadable(offchainAgainstVotes)} (
-                    {offchainAgainstPercentage.toFixed(0)}%)
-                  </span>
-                  <span>
-                    Abstain: {formatNumberUserReadable(offchainAbstainVotes)} (
-                    {offchainAbstainPercentage.toFixed(0)}%)
-                  </span>
-                </div>
+            <ProposalQuorumProgress
+              segments={[
+                {
+                  key: "for",
+                  percentage: offchainForPercentage,
+                  value: offchainForVotes,
+                  className: "bg-success",
+                },
+                {
+                  key: "against",
+                  percentage: offchainAgainstPercentage,
+                  value: offchainAgainstVotes,
+                  className: "bg-error",
+                },
+                {
+                  key: "abstain",
+                  percentage: offchainAbstainPercentage,
+                  value: offchainAbstainVotes,
+                  className: "bg-secondary",
+                },
+              ]}
+              quorumPercentage={
+                hasOffchainQuorumMarker ? offchainQuorumPercentage : 100
               }
-            >
-              <div className="flex w-full items-center justify-center gap-2">
-                <div className="bg-surface-hover relative flex h-1 w-full overflow-hidden">
-                  <div
-                    style={{ width: `${offchainForPercentage}%` }}
-                    className={cn(
-                      "bg-success h-full transition-[width] duration-300",
-                      offchainForVotes > 0 && "min-w-[2px]",
-                    )}
-                  />
-                  <div
-                    style={{ width: `${offchainAgainstPercentage}%` }}
-                    className={cn(
-                      "bg-error h-full transition-[width] duration-300",
-                      offchainAgainstVotes > 0 && "min-w-[2px]",
-                    )}
-                  />
-                  <div
-                    style={{ width: `${offchainAbstainPercentage}%` }}
-                    className={cn(
-                      "bg-secondary h-full transition-[width] duration-300",
-                      offchainAbstainVotes > 0 && "min-w-[2px]",
-                    )}
-                  />
-                </div>
-              </div>
-            </Tooltip>
+              quorumLabel={`Quorum: ${formatNumberUserReadable(offchainQuorum)}`}
+              quorumMarkerLabel="Snapshot quorum marker"
+              tooltipContent={offchainBarTooltip}
+            />
           </div>
         ) : (
           <div className="font-inter text-secondary flex w-full shrink-0 flex-col items-end justify-center not-italic lg:w-[220px]">
@@ -528,61 +610,32 @@ export const ProposalItem = ({
               </div>
             </div>
           </div>
-          <Tooltip
-            asChild
-            disableMobileClick
-            triggerClassName="w-full"
+          <ProposalQuorumProgress
+            segments={[
+              {
+                key: "for",
+                percentage: proposal!.votes.forPercentage,
+                value: forVotesNum,
+                className: "bg-success",
+              },
+              {
+                key: "against",
+                percentage: proposal!.votes.againstPercentage,
+                value: againstVotesNum,
+                className: "bg-error",
+              },
+              {
+                key: "abstain",
+                percentage: proposal!.votes.abstainPercentage,
+                value: abstainVotesNum,
+                className: "bg-secondary",
+              },
+            ]}
+            quorumPercentage={quorumPercentage}
+            quorumLabel={`Quorum: ${formatNumberUserReadable(Number(proposal!.quorum))}`}
+            quorumMarkerLabel="Governor quorum marker"
             tooltipContent={onchainBarTooltip}
-          >
-            <div className="flex w-full items-center justify-center gap-2">
-              <div className="bg-surface-hover relative flex h-1 w-full overflow-hidden">
-                <div
-                  style={{ width: `${proposal!.votes.forPercentage}%` }}
-                  className={cn(
-                    "bg-success h-full transition-[width] duration-300",
-                    forVotesNum > 0 && "min-w-[2px]",
-                  )}
-                />
-                <div
-                  style={{ width: `${proposal!.votes.againstPercentage}%` }}
-                  className={cn(
-                    "bg-error h-full transition-[width] duration-300",
-                    againstVotesNum > 0 && "min-w-[2px]",
-                  )}
-                />
-                <div
-                  style={{ width: `${proposal!.votes.abstainPercentage}%` }}
-                  className={cn(
-                    "bg-secondary h-full transition-[width] duration-300",
-                    abstainVotesNum > 0 && "min-w-[2px]",
-                  )}
-                />
-
-                {quorumPercentage < 100 && (
-                  <div
-                    className="bg-primary outline-surface-default absolute left-1/2 top-1/2 h-2 w-[2px] -translate-y-1/2 outline-2"
-                    style={{ left: `${quorumPercentage}%` }}
-                  />
-                )}
-              </div>
-            </div>
-          </Tooltip>
-          <div className="relative flex w-full">
-            {quorumPercentage < 100 && (
-              <>
-                <div
-                  style={{
-                    left: `${quorumPercentage}%`,
-                    transform: `translateX(-${quorumPercentage}%)`,
-                  }}
-                  className="font-inter text-secondary absolute flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium not-italic leading-4"
-                >
-                  Quorum: {formatNumberUserReadable(Number(proposal!.quorum))}
-                </div>
-                <div className="h-4 w-full"></div>
-              </>
-            )}
-          </div>
+          />
         </div>
       ) : (
         <div className="flex w-full shrink-0 items-center justify-end lg:w-[220px]">

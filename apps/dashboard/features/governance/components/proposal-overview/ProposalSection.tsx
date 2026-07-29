@@ -7,7 +7,7 @@ import {
   votesOffchainByProposalIdQueryKey,
 } from "@anticapture/client/hooks";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowRight } from "lucide-react";
+import { AlertOctagon, ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState, useCallback, useMemo, useRef } from "react";
 import { useAccount } from "wagmi";
@@ -32,6 +32,7 @@ import type {
   ProposalDetails,
   ProposalViewData,
 } from "@/features/governance/types";
+import { isProposalNotFoundError } from "@/features/governance/utils/proposalErrors";
 import {
   getOffchainProposalStatus,
   normalizeChoices,
@@ -41,6 +42,7 @@ import { getOffchainVoteFullLabel } from "@/features/governance/utils/offchainVo
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { ProposalHeaderProvider } from "@/features/governance/context/ProposalHeaderContext";
 import { Button } from "@/shared/components";
+import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -226,12 +228,32 @@ export const ProposalSection = ({
     return <ProposalSectionSkeleton />;
   }
 
-  if (error) {
-    return <div className="text-primary p-4">Error: {error.message}</div>;
+  if (isProposalNotFoundError(error) || !proposal) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-5 py-12">
+        <BlankSlate
+          variant="default"
+          icon={AlertOctagon}
+          title="Proposal not found"
+          description="The proposal wasn't found."
+          className="max-w-xl"
+        />
+      </div>
+    );
   }
 
-  if (!proposal) {
-    return <div className="text-primary p-4">Proposal not found</div>;
+  if (error) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-5 py-12">
+        <BlankSlate
+          variant="default"
+          icon={AlertOctagon}
+          title="Unable to load proposal"
+          description={error.message}
+          className="max-w-xl"
+        />
+      </div>
+    );
   }
 
   const supportValue =
