@@ -9,8 +9,6 @@ export const getProposalStatus = (status: string): ProposalStatus => {
       return ProposalStatus.ONGOING;
     case "succeeded":
       return ProposalStatus.SUCCEEDED;
-    case "passed":
-      return ProposalStatus.PASSED;
     case "executed":
       return ProposalStatus.EXECUTED;
     case "defeated":
