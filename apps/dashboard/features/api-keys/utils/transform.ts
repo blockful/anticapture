@@ -1,21 +1,10 @@
+import { getChartSeriesColors } from "@/shared/components/design-system/charts/chart-theme";
 import type {
   UserApiKey,
   UserApiKeyUsage,
 } from "@/shared/services/user-api/apiKeysClient";
 
 const WINDOW_DAYS = 30;
-const SERIES_COLORS = [
-  "#0080bc",
-  "#15803d",
-  "#f472b6",
-  "#ca8a04",
-  "#7c3aed",
-  "#0f766e",
-  "#dc2626",
-  "#4f46e5",
-  "#65a30d",
-  "#c2410c",
-];
 
 const dayFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -58,11 +47,9 @@ export const transformApiKeyUsage = (
     counts.set(bucket, (counts.get(bucket) ?? 0) + row.count);
   }
 
+  const palette = getChartSeriesColors();
   const colorByKey = new Map(
-    keys.map(({ id }, index) => [
-      id,
-      SERIES_COLORS[index % SERIES_COLORS.length]!,
-    ]),
+    keys.map(({ id }, index) => [id, palette[index % palette.length]!]),
   );
   const series = visibleKeys.map((key) => ({
     name:

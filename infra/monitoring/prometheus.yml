@@ -47,13 +47,6 @@ scrape_configs:
     static_configs:
       - targets: ["${POSTGRES_EXPORTER_ENDPOINT}"]
 
-  - job_name: anticapture-railway-exporter
-    metrics_path: "/metrics"
-    scrape_interval: 60s
-    scrape_timeout: 45s
-    static_configs:
-      - targets: ["${RAILWAY_EXPORTER_ENDPOINT}"]
-
   - job_name: tempo
     metrics_path: "/metrics"
     scrape_interval: 15s

@@ -91,11 +91,20 @@ export const LoginModal = ({
   // wagmi reports the new connection (a connect cancels the timer via deps).
   // Whitelabel has no chooser behind the wallet picker, so dismissing it
   // cancels the sign-in outright instead of revealing a one-button modal.
+  // Dismissing the picker is a deliberate cancel, but a picker that never made
+  // it on screen (connector not ready) must not silently close the whitelabel's
+  // only sign-in method — it falls back to the visible connect/retry button.
+  const [pickerSeen, setPickerSeen] = useState(false);
+  useEffect(() => {
+    if (!open) setPickerSeen(false);
+    else if (connectModalOpen) setPickerSeen(true);
+  }, [open, connectModalOpen]);
+
   useEffect(() => {
     if (connectModalOpen || isConnected || siweStatus !== "connecting") return;
     const timer = setTimeout(() => {
       siweReset();
-      if (isWhitelabel) handleOpenChange(false);
+      if (isWhitelabel && pickerSeen) handleOpenChange(false);
     }, 500);
     return () => clearTimeout(timer);
   }, [
@@ -104,6 +113,7 @@ export const LoginModal = ({
     siweStatus,
     siweReset,
     isWhitelabel,
+    pickerSeen,
     handleOpenChange,
   ]);
 

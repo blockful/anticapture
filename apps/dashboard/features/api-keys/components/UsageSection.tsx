@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
+import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
@@ -81,18 +82,13 @@ export const UsageSection = ({
             onValueChange={setSelectedKeyId}
             className="hidden max-w-full overflow-x-auto lg:inline-flex"
           />
-          <select
+          <Select
+            items={filterOptions}
             value={activeKeyId}
-            onChange={(event) => setSelectedKeyId(event.target.value)}
+            onValueChange={setSelectedKeyId}
             aria-label="Filter usage by API key"
-            className="border-border-default bg-surface-default text-primary rounded-base border px-2 py-1 text-xs font-medium lg:hidden"
-          >
-            {filterOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            className="w-36 lg:hidden"
+          />
         </div>
       </div>
 
