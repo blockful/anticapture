@@ -4,6 +4,7 @@ import { CalendarIcon, CheckIcon, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { Calendar } from "@/shared/components/ui/calendar";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import {
@@ -35,6 +36,18 @@ const formatOption = (option: DatePeriod) => {
   return option.toUpperCase();
 };
 
+const formatDay = (date: Date) =>
+  date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+const formatRangeLabel = (from: Date, to?: Date) =>
+  !to || from.getTime() === to.getTime()
+    ? formatDay(from)
+    : `${formatDay(from)} to ${formatDay(to)}`;
+
 export const SwitcherDateRange = ({
   selected,
   onSelectPeriod,
@@ -61,6 +74,10 @@ export const SwitcherDateRange = ({
 
   const handleRangeSelect = (range: DateRange | undefined) => {
     setPendingRange(range);
+    // react-day-picker answers the very first click with `from` equal to `to`,
+    // so an equal pair here cannot be told apart from a deliberate single-day
+    // range. Only a completed multi-day range auto-applies; one day is
+    // confirmed with Apply below, which is what makes it selectable at all.
     if (
       range?.from &&
       range?.to &&
@@ -69,6 +86,15 @@ export const SwitcherDateRange = ({
       onSelectCustomRange({ from: range.from, to: range.to });
       setIsCalendarOpen(false);
     }
+  };
+
+  const applyPendingRange = () => {
+    if (!pendingRange?.from) return;
+    onSelectCustomRange({
+      from: pendingRange.from,
+      to: pendingRange.to ?? pendingRange.from,
+    });
+    setIsCalendarOpen(false);
   };
 
   const now = new Date();
@@ -108,6 +134,21 @@ export const SwitcherDateRange = ({
             range_middle: "bg-surface-contrast text-primary rounded-none",
           }}
         />
+        <div className="border-light-dark flex items-center justify-between gap-3 border-t p-3">
+          <span className="text-secondary text-xs">
+            {pendingRange?.from
+              ? formatRangeLabel(pendingRange.from, pendingRange.to)
+              : "Pick a day or a range"}
+          </span>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={!pendingRange?.from}
+            onClick={applyPendingRange}
+          >
+            Apply
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );

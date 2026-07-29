@@ -750,6 +750,62 @@ describe("FeedRepository", () => {
         expect(result.items).toHaveLength(0);
         expect(result.totalCount).toBe(0);
       });
+
+      // A partial delegation (SCR) writes one row per delegatee out of a single
+      // DelegateChanged, all sharing the transaction hash and log index. The
+      // enriched metadata has to describe the delegatee the feed was filtered
+      // by, not whichever sibling row happened to be read last.
+      it("keeps the delegation row matching the filtered address when one event has several", async () => {
+        const SPLIT_A = "0x1111111111111111111111111111111111111111";
+        const SPLIT_B = "0x2222222222222222222222222222222222222222";
+
+        await db.insert(feedEvent).values(
+          createFeedEvent({
+            txHash: "0xsplit",
+            logIndex: 0,
+            type: "DELEGATION",
+          }),
+        );
+        await db.insert(delegation).values([
+          {
+            transactionHash: "0xsplit",
+            daoId: "UNI",
+            delegateAccountId: SPLIT_A,
+            delegatorAccountId: DELEGATOR,
+            previousDelegate: null,
+            delegatedValue: 40n,
+            timestamp: 1700000000n,
+            logIndex: 0,
+          },
+          {
+            transactionHash: "0xsplit",
+            daoId: "UNI",
+            delegateAccountId: SPLIT_B,
+            delegatorAccountId: DELEGATOR,
+            previousDelegate: null,
+            delegatedValue: 60n,
+            timestamp: 1700000000n,
+            logIndex: 0,
+          },
+        ]);
+
+        const metadataFor = async (address: string) => {
+          const result = await repository.getFeedEvents(
+            defaultFeedParams({ address: address as `0x${string}` }),
+            defaultThresholds(),
+          );
+          return result.items.find((i) => i.txHash === "0xsplit")?.metadata;
+        };
+
+        expect(await metadataFor(SPLIT_A)).toMatchObject({
+          delegate: SPLIT_A,
+          amount: "40",
+        });
+        expect(await metadataFor(SPLIT_B)).toMatchObject({
+          delegate: SPLIT_B,
+          amount: "60",
+        });
+      });
     });
   });
 });

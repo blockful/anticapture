@@ -317,6 +317,49 @@ describe("DrizzleProposalsActivityRepository", () => {
 
       expect(result).toHaveLength(0);
     });
+
+    it("excludes proposals that only open after activityEnd", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "inside",
+          txHash: "0xtx1",
+          timestamp: 1699900000n,
+        }),
+        createProposal({
+          id: "after",
+          txHash: "0xtx2",
+          timestamp: 1700200000n,
+        }),
+      ]);
+
+      const result = await repository.getProposals(
+        DaoIdEnum.UNI,
+        0,
+        100000,
+        1700000000,
+      );
+
+      expect(result.map((p) => p.id)).toEqual(["inside"]);
+    });
+
+    it("keeps every proposal after activityStart when no activityEnd is given", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "inside",
+          txHash: "0xtx1",
+          timestamp: 1699900000n,
+        }),
+        createProposal({
+          id: "after",
+          txHash: "0xtx2",
+          timestamp: 1700200000n,
+        }),
+      ]);
+
+      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000);
+
+      expect(result).toHaveLength(2);
+    });
   });
 
   describe("getProposalsWithVotesAndPagination", () => {
@@ -363,6 +406,26 @@ describe("DrizzleProposalsActivityRepository", () => {
         "proposal-3",
       ]);
       expect(result.totalCount).toBe(3);
+    });
+
+    it("drops proposals opened after activityEnd from the page and the count", async () => {
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        1699800000,
+      );
+
+      expect(result.proposals.map((p) => p.proposal.id)).toEqual([
+        "proposal-2",
+        "proposal-3",
+      ]);
+      expect(result.totalCount).toBe(2);
     });
   });
 });

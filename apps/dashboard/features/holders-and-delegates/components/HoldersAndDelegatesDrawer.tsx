@@ -1,6 +1,11 @@
 "use client";
 
-import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+import {
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
 
 import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
 import { DrawerActivityFeed } from "@/features/holders-and-delegates/components/DrawerActivityFeed";
@@ -17,6 +22,7 @@ import {
   DrawerHeader,
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
+import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { EntityType } from "@/shared/types/entities";
 
@@ -32,11 +38,41 @@ interface HoldersAndDelegatesDrawerProps {
 export const HoldersAndDelegatesDrawer = ({
   isOpen,
   onClose,
-  entityType,
+  entityType: initialEntityType,
   address,
   daoId,
   withVotes = true,
 }: HoldersAndDelegatesDrawerProps) => {
+  // Clicking an address inside the drawer's activity feed can re-point it at a
+  // different kind of profile, so the entity type has to be able to outlive the
+  // prop the opener passed. It is cleared again when the drawer closes.
+  const [entityOverride, setEntityOverride] = useQueryState(
+    "drawerEntity",
+    parseAsStringEnum<EntityType>(["delegate", "tokenHolder"]),
+  );
+  const entityType = entityOverride ?? initialEntityType;
+
+  // The per-address feed is served by GET /:dao/feed/events, which only the
+  // DAO APIs that register `feed()` expose. Without this the tab would render a
+  // permanent error state for those DAOs (AAVE, for one).
+  const hasActivityFeed = Boolean(daoConfigByDaoId[daoId]?.activityFeed);
+
+  const activityTab = hasActivityFeed
+    ? [
+        {
+          id: "activity",
+          label: "Activity",
+          content: (
+            <DrawerActivityFeed
+              address={address}
+              daoId={daoId}
+              onEntityTypeChange={setEntityOverride}
+            />
+          ),
+        },
+      ]
+    : [];
+
   const entities = {
     delegate: {
       title: "Delegate Profile",
@@ -62,11 +98,7 @@ export const HoldersAndDelegatesDrawer = ({
           label: "Delegation History",
           content: <VotingPowerHistory accountId={address} daoId={daoId} />,
         },
-        {
-          id: "activity",
-          label: "Activity",
-          content: <DrawerActivityFeed address={address} daoId={daoId} />,
-        },
+        ...activityTab,
       ],
     },
     tokenHolder: {
@@ -87,11 +119,7 @@ export const HoldersAndDelegatesDrawer = ({
           label: "Balance History",
           content: <BalanceHistory accountId={address} daoId={daoId} />,
         },
-        {
-          id: "activity",
-          label: "Activity",
-          content: <DrawerActivityFeed address={address} daoId={daoId} />,
-        },
+        ...activityTab,
       ],
     },
   };
@@ -138,14 +166,21 @@ export const HoldersAndDelegatesDrawer = ({
     cleanupFilters();
   };
 
+  // A shared URL can name a tab this drawer does not have: `activity` on a DAO
+  // without a feed, `votes` when withVotes is false, or a tab belonging to the
+  // other entity type. Fall back to the first tab instead of an empty body.
   const renderTabContent = (tabId: string) => {
-    return entities[entityType].tabs.find((tab) => tab.id === tabId)?.content;
+    const tabs = entities[entityType].tabs;
+    return (tabs.find((tab) => tab.id === tabId) ?? tabs[0])?.content;
   };
 
   const handleCloseDrawer = () => {
     onClose();
     setActiveTab(null);
     cleanupFilters();
+    // Otherwise the next drawer opened from a table would inherit the entity
+    // type of whatever was last clicked in the feed.
+    setEntityOverride(null);
   };
 
   const titleContent = (

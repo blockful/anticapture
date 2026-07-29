@@ -3,7 +3,7 @@
 import type { ProposalsActivityPathParamsDaoEnumKey } from "@anticapture/client";
 import { proposalsActivityQueryOptions } from "@anticapture/client/hooks";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ProposalsActivity } from "@/features/holders-and-delegates/hooks/useDelegates";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -42,11 +42,19 @@ export const useDelegatesActivity = ({
 
   const addressesKey = addresses.join(",");
 
+  // Requests already in flight when the range or the DAO changes settle after
+  // the reset below, and their counts belong to the previous selection. Each
+  // selection gets a generation; a response is only merged while its own
+  // generation is still the current one.
+  const generation = `${daoId}:${fromDate ?? ""}:${toDate ?? ""}`;
+  const currentGeneration = useRef(generation);
+
   useEffect(() => {
+    currentGeneration.current = generation;
     setActivities(new Map());
     setLoadingAddresses(new Set());
     setSettledAddresses(new Set());
-  }, [fromDate, toDate, daoId]);
+  }, [generation]);
 
   useEffect(() => {
     const uniqueAddresses = [
@@ -58,6 +66,7 @@ export const useDelegatesActivity = ({
     if (newAddresses.length === 0) return;
 
     const fetchActivities = async () => {
+      const requestGeneration = generation;
       setLoadingAddresses((prev) => new Set([...prev, ...newAddresses]));
       // One address failing must not discard the activity of the others.
       const results = await Promise.allSettled(
@@ -77,6 +86,9 @@ export const useDelegatesActivity = ({
           return { address: addr, activity: result ?? null };
         }),
       );
+      // The reset effect already cleared this generation's state; merging now
+      // would put the previous range's counts back on the rows.
+      if (currentGeneration.current !== requestGeneration) return;
       setActivities((prev) => {
         const next = new Map(prev);
         results.forEach((result) => {
@@ -107,6 +119,7 @@ export const useDelegatesActivity = ({
     fromDate,
     toDate,
     daoId,
+    generation,
   ]);
 
   const activityFor = useCallback(

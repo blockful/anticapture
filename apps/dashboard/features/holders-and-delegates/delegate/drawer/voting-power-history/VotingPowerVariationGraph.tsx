@@ -16,7 +16,10 @@ import {
 import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import type { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
-import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
+import {
+  useDelegateDelegationHistoryGraph,
+  useDelegateVotingPowerBoundaries,
+} from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
 import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -111,6 +114,14 @@ export const VotingPowerVariationGraph = ({
       filterLowImportance,
     );
 
+  const { startingVotingPower, endingVotingPower } =
+    useDelegateVotingPowerBoundaries(
+      accountId,
+      daoId,
+      fromTimestamp,
+      toTimestamp,
+    );
+
   const extendedChartData = useMemo(
     () => [
       {
@@ -188,13 +199,10 @@ export const VotingPowerVariationGraph = ({
     );
   }
 
-  // Net voting-power change across the selected period: ending voting power
-  // minus the voting power held just before the first event in the window.
-  const startingVotingPower =
-    (delegationHistory[0]?.votingPower ?? 0) -
-    (delegationHistory[0]?.delta ?? 0);
-  const endingVotingPower =
-    delegationHistory[delegationHistory.length - 1]?.votingPower ?? 0;
+  // Net voting-power change across the whole selected period. The boundaries
+  // come from their own limit-1 lookups (see useDelegateVotingPowerBoundaries):
+  // the plotted rows are capped at 1,000 and hide low-importance deltas, so for
+  // an active delegate they cover only a suffix of the period.
   const netChange = endingVotingPower - startingVotingPower;
 
   // Custom dot component to show each transfer/delegation point

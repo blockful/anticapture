@@ -17,6 +17,7 @@ const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 export interface ProposalActivityRequest {
   address: Address;
   fromDate?: number;
+  toDate?: number;
   daoId: DaoIdEnum;
   skip?: number;
   limit?: number;
@@ -71,6 +72,7 @@ export interface ProposalsActivityRepository {
     daoId: DaoIdEnum,
     activityStart: number,
     votingPeriodSeconds: number,
+    activityEnd?: number,
   ): Promise<DbProposal[]>;
 
   getUserVotes(
@@ -88,6 +90,7 @@ export interface ProposalsActivityRepository {
     orderBy: OrderByField,
     orderDirection: OrderDirection,
     userVoteFilter?: VoteFilter,
+    activityEnd?: number,
   ): Promise<{
     proposals: DbProposalWithVote[];
     totalCount: number;
@@ -103,6 +106,7 @@ export class ProposalsActivityService {
   async getProposalsActivity({
     address,
     fromDate,
+    toDate,
     daoId,
     skip = 0,
     limit = 10,
@@ -140,6 +144,7 @@ export class ProposalsActivityService {
         orderBy,
         orderDirection,
         userVoteFilter,
+        toDate,
       );
 
     if (proposalsWithVotes.length === 0) {
@@ -192,6 +197,7 @@ export class ProposalsActivityService {
       daoId,
       activityStart,
       votingPeriodSeconds,
+      toDate,
     );
     const allUserVotes = await this.repository.getUserVotes(
       address,

@@ -94,13 +94,14 @@ export class FeedRepository {
       this.db.$count(feedEvent, where),
     ]);
 
-    const items = await this.enrichWithMetadata(rows);
+    const items = await this.enrichWithMetadata(rows, address);
 
     return { items, totalCount };
   }
 
   private async enrichWithMetadata(
     rows: DBFeedEvent[],
+    address?: string,
   ): Promise<EnrichedFeedEvent[]> {
     if (rows.length === 0) return [];
 
@@ -143,9 +144,7 @@ export class FeedRepository {
         this.fetchProposals(extendedProposalIds),
       ]);
 
-    const delegationByKey = new Map(
-      delegations.map((d) => [`${d.transactionHash}:${d.logIndex}`, d]),
-    );
+    const delegationByKey = this.indexDelegationsByKey(delegations, address);
     const transferByKey = new Map(
       transfers.map((t) => [`${t.transactionHash}:${t.logIndex}`, t]),
     );
@@ -167,6 +166,45 @@ export class FeedRepository {
         proposalById,
       }),
     }));
+  }
+
+  /**
+   * One key can hold several delegation rows: DAOs with partial delegation
+   * write one row per delegatee out of a single `DelegateChanged` (SCR does
+   * this), and every row shares the transaction hash and log index. Keeping
+   * only the last row would render a delegate unrelated to the address the
+   * feed was filtered by, so when an address filter is active the row that
+   * mentions it wins. Without a filter the first row is kept, which is what
+   * an unscoped feed already showed.
+   */
+  private indexDelegationsByKey(
+    delegations: DelegationRow[],
+    address?: string,
+  ): Map<string, DelegationRow> {
+    const addr = address?.toLowerCase();
+    const byKey = new Map<string, DelegationRow>();
+
+    for (const d of delegations) {
+      const key = `${d.transactionHash}:${d.logIndex}`;
+      const current = byKey.get(key);
+      if (!current) {
+        byKey.set(key, d);
+        continue;
+      }
+      if (addr && !this.delegationMentions(current, addr)) {
+        if (this.delegationMentions(d, addr)) byKey.set(key, d);
+      }
+    }
+
+    return byKey;
+  }
+
+  private delegationMentions(d: DelegationRow, lowercasedAddress: string) {
+    return (
+      d.delegatorAccountId.toLowerCase() === lowercasedAddress ||
+      d.delegateAccountId.toLowerCase() === lowercasedAddress ||
+      d.previousDelegate?.toLowerCase() === lowercasedAddress
+    );
   }
 
   private buildMetadata(

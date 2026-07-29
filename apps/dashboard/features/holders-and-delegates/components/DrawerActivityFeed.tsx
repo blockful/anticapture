@@ -29,6 +29,9 @@ const RELEVANCE_OPTIONS: {
 interface DrawerActivityFeedProps {
   address: string;
   daoId: DaoIdEnum;
+  // The feed knows whether a clicked address is a delegate or a token holder;
+  // the owning drawer holds the entity type, so it is handed back up here.
+  onEntityTypeChange?: (entityType: EntityType) => void;
 }
 
 // Recent activity feed scoped to a single address, shown inside the profile
@@ -37,6 +40,7 @@ interface DrawerActivityFeedProps {
 export const DrawerActivityFeed = ({
   address,
   daoId,
+  onEntityTypeChange,
 }: DrawerActivityFeedProps) => {
   const [orderDirection, setOrderDirection] = useQueryState(
     "feedOrder",
@@ -96,8 +100,12 @@ export const DrawerActivityFeed = ({
     useQueryState("drawerTab")[1],
   ];
 
-  const handleRowClick = (clicked: string, _entityType: EntityType) => {
+  // Clicking a delegate from a token-holder drawer has to open the delegate
+  // profile, so the clicked entity type travels with the address instead of the
+  // drawer keeping the tabs it happened to be showing.
+  const handleRowClick = (clicked: string, clickedEntityType: EntityType) => {
     setDrawerTab(null);
+    onEntityTypeChange?.(clickedEntityType);
     setDrawerAddress(clicked);
   };
 

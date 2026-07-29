@@ -16,7 +16,10 @@ import {
 import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import type { BalanceHistoryGraphItem } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
-import { useBalanceHistoryGraph } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
+import {
+  useBalanceHistoryBoundaries,
+  useBalanceHistoryGraph,
+} from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
 import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -103,6 +106,12 @@ export const BalanceHistoryVariationGraph = ({
     error,
   } = useBalanceHistoryGraph(accountId, daoId, fromDate);
 
+  const { startingBalance, endingBalance } = useBalanceHistoryBoundaries(
+    accountId,
+    daoId,
+    fromDate,
+  );
+
   if (loading) {
     return (
       <div className="w-full">
@@ -177,10 +186,10 @@ export const BalanceHistoryVariationGraph = ({
     },
   ];
 
-  // Net balance change across the selected period: ending balance minus the
-  // balance the address held just before the first transfer in the window.
-  const startingBalance = extendedChartData[0]?.balance ?? 0;
-  const endingBalance = balanceHistory[balanceHistory.length - 1]?.balance ?? 0;
+  // Net balance change across the whole selected period. The boundaries come
+  // from their own limit-1 lookups (see useBalanceHistoryBoundaries): the
+  // plotted rows are capped at 1,000 and hide sub-token transfers, so for an
+  // active account they cover only a suffix of the period.
   const netChange = endingBalance - startingBalance;
 
   // Custom dot component to show each transfer/delegation point

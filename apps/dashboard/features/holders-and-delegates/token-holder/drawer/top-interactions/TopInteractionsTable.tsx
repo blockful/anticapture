@@ -78,6 +78,35 @@ export const TopInteractionsTable = ({
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
 
+  const { data: tokenData } = useToken(
+    daoId.toLowerCase() as TokenPathParamsDaoEnumKey,
+    { currency: "usd" },
+  );
+
+  // raw token units worth $1 at the current spot price; interactions whose
+  // total volume is below this are flagged (and hidden) as dust
+  const dustThresholdRawUnits = useMemo(() => {
+    const priceUsd = Number(tokenData?.price) || 0;
+    if (priceUsd <= 0) return 0n;
+    return BigInt(Math.floor(Number(parseUnits("1", decimals)) / priceUsd));
+  }, [tokenData?.price, decimals]);
+
+  // "Hide dust" is enforced by the query, not after the fact. Filtering a page
+  // client-side can empty it out entirely, and an empty table renders its
+  // empty state without the infinite-scroll sentinel, so the non-dust rows on
+  // later pages would stay unreachable.
+  const minAmount = useMemo(() => {
+    const userMin = filterVariables.minAmount
+      ? BigInt(filterVariables.minAmount)
+      : 0n;
+    // `minAmount` is exclusive server-side, so one below the threshold keeps
+    // rows worth exactly $1, matching `isDust`.
+    const dustMin =
+      hideDust && dustThresholdRawUnits > 0n ? dustThresholdRawUnits - 1n : 0n;
+    const effective = userMin > dustMin ? userMin : dustMin;
+    return effective > 0n ? effective.toString() : null;
+  }, [filterVariables.minAmount, hideDust, dustThresholdRawUnits]);
+
   const {
     interactions,
     loading,
@@ -91,22 +120,9 @@ export const TopInteractionsTable = ({
     filterAddress: currentAddressFilter ?? undefined,
     sortBy,
     sortDirection,
-    filterVariables,
+    filterVariables: { minAmount, maxAmount: filterVariables.maxAmount },
     limit: 10,
   });
-
-  const { data: tokenData } = useToken(
-    daoId.toLowerCase() as TokenPathParamsDaoEnumKey,
-    { currency: "usd" },
-  );
-
-  // raw token units worth $1 at the current spot price; interactions whose
-  // total volume is below this are flagged (and hidden) as dust
-  const dustThresholdRawUnits = useMemo(() => {
-    const priceUsd = Number(tokenData?.price) || 0;
-    if (priceUsd <= 0) return 0;
-    return Number(parseUnits("1", decimals)) / priceUsd;
-  }, [tokenData?.price, decimals]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -117,18 +133,16 @@ export const TopInteractionsTable = ({
   }
 
   const isDust = (volume: number) =>
-    dustThresholdRawUnits > 0 && volume < dustThresholdRawUnits;
+    dustThresholdRawUnits > 0n && volume < Number(dustThresholdRawUnits);
 
-  const tableData = interactions
-    .map((interaction) => {
-      return {
-        address: interaction?.accountId,
-        volume: Number(interaction?.totalVolume) || 0,
-        balanceChange: Number(interaction?.amountTransferred) || 0,
-        totalInteractions: Number(interaction?.transferCount) || 0,
-      };
-    })
-    .filter((row) => !hideDust || !isDust(row.volume));
+  const tableData = interactions.map((interaction) => {
+    return {
+      address: interaction?.accountId,
+      volume: Number(interaction?.totalVolume) || 0,
+      balanceChange: Number(interaction?.amountTransferred) || 0,
+      totalInteractions: Number(interaction?.transferCount) || 0,
+    };
+  });
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || null);

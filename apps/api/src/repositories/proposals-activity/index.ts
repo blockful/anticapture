@@ -47,6 +47,20 @@ export type OrderDirection = "asc" | "desc";
 export class DrizzleProposalsActivityRepository {
   constructor(private readonly db: Drizzle) {}
 
+  /**
+   * Upper bound of the activity window. Keyed on the proposal's own timestamp
+   * (when it opened) rather than its end, so a bounded period reports the
+   * proposals the delegate could vote on inside it instead of everything
+   * created up to today. Omitted entirely when no upper bound was requested.
+   */
+  private activityEndCondition(
+    activityEnd: number | undefined,
+    timestampColumn: string,
+  ) {
+    if (activityEnd === undefined) return sql.raw("");
+    return sql` AND ${sql.raw(timestampColumn)} <= ${activityEnd}`;
+  }
+
   async getFirstVoteTimestamp(address: Address): Promise<number | null> {
     // Only consider votes on non-canceled proposals so activityStart matches
     // the activity scope (canceled proposals are excluded from the metrics).
@@ -72,13 +86,15 @@ export class DrizzleProposalsActivityRepository {
     daoId: DaoIdEnum,
     activityStart: number,
     votingPeriodSeconds: number,
+    activityEnd?: number,
   ): Promise<DbProposal[]> {
     const query = sql`
-      SELECT id, dao_id, proposer_account_id, description, start_block, end_block, 
+      SELECT id, dao_id, proposer_account_id, description, start_block, end_block,
              timestamp, status, for_votes, against_votes, abstain_votes,
              (timestamp + ${votingPeriodSeconds}) as proposal_end_timestamp
       FROM proposals_onchain
       WHERE (timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+        ${this.activityEndCondition(activityEnd, "timestamp")}
         AND UPPER(status) <> 'CANCELED'
       ORDER BY timestamp DESC
     `;
@@ -118,6 +134,7 @@ export class DrizzleProposalsActivityRepository {
     orderBy: OrderByField,
     orderDirection: OrderDirection,
     userVoteFilter?: VoteFilter,
+    activityEnd?: number,
   ): Promise<{
     proposals: DbProposalWithVote[];
     totalCount: number;
@@ -164,6 +181,7 @@ export class DrizzleProposalsActivityRepository {
       FROM proposals_onchain p
       LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+        ${this.activityEndCondition(activityEnd, "p.timestamp")}
         AND UPPER(p.status) <> 'CANCELED'
         ${sql.raw(voteFilterCondition)}
       ${sql.raw(orderByClause)}
@@ -176,6 +194,7 @@ export class DrizzleProposalsActivityRepository {
       FROM proposals_onchain p
       LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
+        ${this.activityEndCondition(activityEnd, "p.timestamp")}
         AND UPPER(p.status) <> 'CANCELED'
         ${sql.raw(voteFilterCondition)}
     `;

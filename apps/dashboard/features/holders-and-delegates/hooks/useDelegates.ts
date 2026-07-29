@@ -12,7 +12,7 @@ import {
   useVotingPowersInfinite,
 } from "@anticapture/client/hooks";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useRef, useState, useEffect } from "react";
 
 import type { DaoIdEnum } from "@/shared/types/daos";
 
@@ -85,11 +85,22 @@ export const useDelegates = ({
     Set<string>
   >(() => new Set());
 
+  // Requests already in flight when the selection changes settle after the
+  // reset below, and their counts belong to the previous selection. Each
+  // selection gets a generation; a response is only merged while its own
+  // generation is still current. `daoId` is part of it because switching DAOs
+  // invalidates these counts just as a new range does.
+  const activityGeneration = `${daoId}:${orderDirection}:${orderBy ?? ""}:${
+    address ?? ""
+  }:${fromDate ?? ""}:${toDate ?? ""}`;
+  const currentActivityGeneration = useRef(activityGeneration);
+
   useEffect(() => {
+    currentActivityGeneration.current = activityGeneration;
     setDelegateActivities(new Map());
     setLoadingActivityAddresses(new Set());
     setSettledActivityAddresses(new Set());
-  }, [orderDirection, address, fromDate, toDate, orderBy]);
+  }, [activityGeneration]);
 
   const params = useMemo(
     () => ({
@@ -148,6 +159,7 @@ export const useDelegates = ({
     if (newAddresses.length === 0) return;
 
     const fetchDelegateActivities = async () => {
+      const requestGeneration = activityGeneration;
       setLoadingActivityAddresses(
         (prev) => new Set([...prev, ...newAddresses]),
       );
@@ -170,6 +182,9 @@ export const useDelegates = ({
           return { address: addr, activity: result ?? null };
         }),
       );
+      // The reset effect already cleared this generation's state; merging now
+      // would put the previous selection's counts back on the rows.
+      if (currentActivityGeneration.current !== requestGeneration) return;
       setDelegateActivities((prev) => {
         const next = new Map(prev);
         activities.forEach((entry) => {
@@ -207,6 +222,7 @@ export const useDelegates = ({
     loadingActivityAddresses,
     skipActivity,
     daoId,
+    activityGeneration,
   ]);
 
   const finalData = useMemo(() => {

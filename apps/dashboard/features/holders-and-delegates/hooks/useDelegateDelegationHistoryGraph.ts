@@ -25,6 +25,60 @@ export interface UseDelegateDelegationHistoryGraphResult {
   error: unknown;
 }
 
+/**
+ * Voting power at the two edges of the selected period, read straight from the
+ * API instead of from the rows the graph plots. The graph query hides
+ * low-importance deltas and keeps only the newest 1,000 rows, so its first row
+ * is not the period's opening voting power for an active delegate: a limit-1
+ * lookup on either side of the boundary is, and it ignores the display filter.
+ */
+export function useDelegateVotingPowerBoundaries(
+  accountId: string,
+  daoId: DaoIdEnum,
+  fromTimestamp?: number,
+  toTimestamp?: number,
+): { startingVotingPower: number; endingVotingPower: number } {
+  const { decimals } = daoConfig[daoId];
+  const dao =
+    daoId.toLowerCase() as HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey;
+
+  // The last event strictly before the period: its running voting power is what
+  // the delegate held when the period opened. No row means it held none.
+  const { data: openingData } = useHistoricalVotingPowerByAccountId(
+    dao,
+    accountId,
+    {
+      limit: 1,
+      orderDirection: "desc",
+      ...(fromTimestamp ? { toDate: fromTimestamp - 1 } : {}),
+    },
+    { query: { enabled: Boolean(accountId && fromTimestamp) } },
+  );
+
+  const { data: closingData } = useHistoricalVotingPowerByAccountId(
+    dao,
+    accountId,
+    {
+      limit: 1,
+      orderDirection: "desc",
+      ...(toTimestamp ? { toDate: toTimestamp } : {}),
+    },
+    { query: { enabled: Boolean(accountId) } },
+  );
+
+  const toTokens = (raw?: bigint | string | number) =>
+    raw === undefined
+      ? 0
+      : Number(formatUnits(BigInt(raw.toString()), decimals));
+
+  return {
+    startingVotingPower: fromTimestamp
+      ? toTokens(openingData?.items?.[0]?.votingPower)
+      : 0,
+    endingVotingPower: toTokens(closingData?.items?.[0]?.votingPower),
+  };
+}
+
 export function useDelegateDelegationHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,
