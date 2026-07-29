@@ -49,6 +49,13 @@ export const OffchainProposalResponseSchema = z
       description: "Whether the proposal was flagged by Snapshot.",
     }),
     scores: z.array(z.number()),
+    scoresTotal: z.number().openapi({
+      description:
+        "Total voting power counted by Snapshot for quorum evaluation.",
+    }),
+    quorum: z.number().openapi({
+      description: "Snapshot quorum threshold for the proposal.",
+    }),
     choices: z.array(z.string()),
     network: z.string(),
     snapshot: z.number().nullable(),
@@ -86,6 +93,8 @@ export const OffchainProposalMapper = {
       link: p.link,
       flagged: p.flagged,
       scores: p.scores,
+      scoresTotal: p.scoresTotal,
+      quorum: p.quorum,
       choices: p.choices,
       network: p.network,
       snapshot: p.snapshot,

@@ -4,6 +4,8 @@ import type { Repository } from "@/repository/db.interface";
 import type { OffchainProposal } from "@/repository/schema";
 
 const ACTIVE_STATES = new Set(["pending", "active"]);
+const PROPOSAL_METADATA_BACKFILL_BATCH_SIZE = 100;
+const PROPOSAL_METADATA_BACKFILL_ENTITY = "proposal_metadata_backfill";
 
 // Only reconcile (and delete) proposals created within this window. Bounds both
 // the Snapshot fetch and the DB scan so reconciliation can't overwhelm either.
@@ -12,6 +14,7 @@ const RECONCILE_WINDOW_SECONDS = 14 * 24 * 60 * 60;
 export class Indexer {
   private proposalsCursor: string | null = null;
   private votesCursor: string | null = null;
+  private proposalMetadataBackfillCursor: string | null = null;
 
   constructor(
     private readonly repository: Repository,
@@ -32,11 +35,16 @@ export class Indexer {
 
     this.proposalsCursor = await this.repository.getLastCursor("proposals");
     this.votesCursor = await this.repository.getLastCursor("votes");
+    this.proposalMetadataBackfillCursor = await this.repository.getLastCursor(
+      PROPOSAL_METADATA_BACKFILL_ENTITY,
+    );
 
     logger.info(
       {
         proposalsCursor: this.proposalsCursor ?? "none",
         votesCursor: this.votesCursor ?? "none",
+        proposalMetadataBackfillCursor:
+          this.proposalMetadataBackfillCursor ?? "none",
       },
       "loaded cursors",
     );
@@ -61,6 +69,12 @@ export class Indexer {
       await this.reconcileProposals();
     } catch (err) {
       logger.error({ err }, "error reconciling proposals - will retry");
+    }
+
+    try {
+      await this.backfillProposalMetadata();
+    } catch (err) {
+      logger.error({ err }, "error backfilling proposal metadata - will retry");
     }
 
     try {
@@ -108,6 +122,25 @@ export class Indexer {
     logger.info(
       { count: deletedIds.length, ids: deletedIds },
       "removed proposals deleted from snapshot",
+    );
+  }
+
+  private async backfillProposalMetadata(): Promise<void> {
+    const { ids, nextCursor } =
+      await this.repository.getProposalMetadataBackfillBatch(
+        this.proposalMetadataBackfillCursor,
+        PROPOSAL_METADATA_BACKFILL_BATCH_SIZE,
+      );
+
+    if (!nextCursor) return;
+
+    const proposals = await this.provider.fetchProposalsByIds(ids);
+    await this.repository.saveProposalMetadataBackfill(proposals, nextCursor);
+    this.proposalMetadataBackfillCursor = nextCursor;
+
+    logger.info(
+      { count: proposals.length, scanned: ids.length, cursor: nextCursor },
+      "backfilled proposal metadata",
     );
   }
 

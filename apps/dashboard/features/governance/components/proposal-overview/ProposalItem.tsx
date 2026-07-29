@@ -272,13 +272,16 @@ export const ProposalItem = ({
       offchainAbstainPercentage: abstainItem?.percentage ?? 0,
       leadingChoice: leading,
     };
-  }, [offchainProposal?.scores, offchainProposal?.choices, offchainProposal]);
+  }, [offchainProposal]);
 
   if (offchainProposal) {
     const status = getOffchainProposalStatus(
       offchainProposal.state,
       offchainProposal.type ?? "single-choice",
       offchainScores,
+      offchainProposal.scoresTotal,
+      offchainProposal.quorum,
+      offchainProposal.end,
     );
     const isBasic = offchainProposal.type === "basic";
     const timeText = getTimeText(

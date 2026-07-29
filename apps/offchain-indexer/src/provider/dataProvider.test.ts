@@ -87,6 +87,8 @@ describe("SnapshotProvider", () => {
           link: "https://snapshot.org/#/ens.eth/proposal/proposal-1",
           flagged: false,
           scores: [],
+          scoresTotal: 0,
+          quorum: 0,
           choices: [],
           network: "",
           snapshot: null,
@@ -136,7 +138,9 @@ describe("SnapshotProvider", () => {
         id: "proposal-1",
         link: "",
         network: "",
+        quorum: 0,
         scores: [],
+        scoresTotal: 0,
         snapshot: null,
         spaceId: "ens.eth",
         start: 1700000000,
@@ -146,6 +150,113 @@ describe("SnapshotProvider", () => {
         type: "single-choice",
         updated: 1700000000,
       });
+    });
+
+    it("should map Snapshot quorum fields", async () => {
+      mockGraphQL({
+        proposals: [
+          makeProposal({
+            scores: [5347713.99, 0, 1813.59],
+            scores_total: 5349527,
+            quorum: 10000000,
+          }),
+        ],
+      });
+
+      const result = await provider.fetchProposals(null);
+
+      expect(result.data[0]).toStrictEqual({
+        author: "0x1111111111111111111111111111111111111111",
+        body: "Some body",
+        choices: [],
+        created: 1700000000,
+        discussion: "https://discuss.ens.domains/t/1",
+        end: 1700100000,
+        flagged: false,
+        id: "proposal-1",
+        link: "https://snapshot.org/#/ens.eth/proposal/proposal-1",
+        network: "",
+        quorum: 10000000,
+        scores: [5347713.99, 0, 1813.59],
+        scoresTotal: 5349527,
+        snapshot: null,
+        spaceId: "ens.eth",
+        start: 1700000000,
+        state: "closed",
+        strategies: [],
+        title: "Test Proposal",
+        type: "single-choice",
+        updated: 1700000100,
+      });
+    });
+  });
+
+  describe("fetchProposalsByIds", () => {
+    it("should fetch and map proposals by Snapshot ids", async () => {
+      const seenIds: unknown[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            query: string;
+            variables: { ids: string[] };
+          };
+          seenIds.push(body.variables.ids);
+          expect(body.query).toContain("id_in");
+          return HttpResponse.json({
+            data: {
+              proposals: [
+                makeProposal({
+                  id: "proposal-1",
+                  scores: [10, 1],
+                  scores_total: 11,
+                  quorum: 10,
+                }),
+              ],
+            },
+          });
+        }),
+      );
+
+      const result = await provider.fetchProposalsByIds(["proposal-1"]);
+
+      expect(seenIds).toStrictEqual([["proposal-1"]]);
+      expect(result).toStrictEqual([
+        {
+          author: "0x1111111111111111111111111111111111111111",
+          body: "Some body",
+          choices: [],
+          created: 1700000000,
+          discussion: "https://discuss.ens.domains/t/1",
+          end: 1700100000,
+          flagged: false,
+          id: "proposal-1",
+          link: "https://snapshot.org/#/ens.eth/proposal/proposal-1",
+          network: "",
+          quorum: 10,
+          scores: [10, 1],
+          scoresTotal: 11,
+          snapshot: null,
+          spaceId: "ens.eth",
+          start: 1700000000,
+          state: "closed",
+          strategies: [],
+          title: "Test Proposal",
+          type: "single-choice",
+          updated: 1700000100,
+        },
+      ]);
+    });
+
+    it("should not call Snapshot when no ids are provided", async () => {
+      server.use(
+        http.post(ENDPOINT, () => {
+          throw new Error("unexpected Snapshot request");
+        }),
+      );
+
+      const result = await provider.fetchProposalsByIds([]);
+
+      expect(result).toStrictEqual([]);
     });
   });
 
