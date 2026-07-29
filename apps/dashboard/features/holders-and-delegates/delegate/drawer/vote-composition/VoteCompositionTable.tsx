@@ -92,7 +92,10 @@ export const VoteCompositionTable = ({
         const addressValue: string = row.original.address;
         return (
           <div className="flex w-full items-center gap-2">
-            <DrawerAddressButton address={addressValue as Address} />
+            <DrawerAddressButton
+              address={addressValue as Address}
+              entityType="tokenHolder"
+            />
             <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
               <CopyAndPasteButton
                 textToCopy={addressValue as `0x${string}`}

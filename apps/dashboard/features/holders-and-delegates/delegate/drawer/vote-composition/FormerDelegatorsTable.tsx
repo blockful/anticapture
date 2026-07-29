@@ -72,7 +72,10 @@ export const FormerDelegatorsTable = ({
         isLoading ? (
           <SkeletonRow className="h-5 w-28" />
         ) : (
-          <DrawerAddressButton address={row.original.address} />
+          <DrawerAddressButton
+            address={row.original.address}
+            entityType="tokenHolder"
+          />
         ),
       meta: { columnClassName: "w-48" },
     },
@@ -131,7 +134,7 @@ export const FormerDelegatorsTable = ({
         if (isLoading) return <SkeletonRow className="h-5 w-28" />;
         const to = row.original.redelegatedTo;
         return to ? (
-          <DrawerAddressButton address={to} />
+          <DrawerAddressButton address={to} entityType="delegate" />
         ) : (
           <span className="text-secondary text-sm">-</span>
         );

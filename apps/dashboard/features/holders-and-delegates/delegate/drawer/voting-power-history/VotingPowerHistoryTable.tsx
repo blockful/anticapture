@@ -349,6 +349,7 @@ export const VotingPowerHistoryTable = ({
             <div className="overflow-truncate flex max-w-24 items-center gap-2">
               <DrawerAddressButton
                 address={delegatorAddress}
+                entityType="tokenHolder"
                 nameClassName={cn(
                   "truncate max-w-[125px]",
                   delegatorAddress === accountId
@@ -435,6 +436,7 @@ export const VotingPowerHistoryTable = ({
             <div className="max-w-35 flex items-center gap-2 overflow-hidden">
               <DrawerAddressButton
                 address={delegateAddress}
+                entityType="delegate"
                 nameClassName={cn(
                   "truncate max-w-[125px]",
                   delegateAddress === accountId

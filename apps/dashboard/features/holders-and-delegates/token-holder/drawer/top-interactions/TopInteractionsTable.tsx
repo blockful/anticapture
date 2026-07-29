@@ -183,7 +183,10 @@ export const TopInteractionsTable = ({
         const addressValue: string = row.getValue("address");
         return (
           <div className="flex w-full items-center gap-2">
-            <DrawerAddressButton address={addressValue as Address} />
+            <DrawerAddressButton
+              address={addressValue as Address}
+              entityType="tokenHolder"
+            />
             {isDust(row.original.volume) && (
               <BadgeStatus variant="dimmed">Dust</BadgeStatus>
             )}

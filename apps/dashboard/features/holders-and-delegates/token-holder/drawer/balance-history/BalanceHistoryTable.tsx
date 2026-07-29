@@ -378,6 +378,7 @@ export const BalanceHistoryTable = ({
             <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
               <DrawerAddressButton
                 address={fromAddress as `0x${string}`}
+                entityType="tokenHolder"
                 nameClassName={cn(
                   "text-secondary truncate max-w-[120px]",
                   fromAddress === accountId && "text-primary",
@@ -447,6 +448,7 @@ export const BalanceHistoryTable = ({
             <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
               <DrawerAddressButton
                 address={toAddress as `0x${string}`}
+                entityType="tokenHolder"
                 nameClassName={cn(
                   "text-secondary truncate max-w-[120px]",
                   toAddress === accountId && "text-primary",

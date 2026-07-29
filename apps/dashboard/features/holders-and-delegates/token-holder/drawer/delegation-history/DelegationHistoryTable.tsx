@@ -149,7 +149,10 @@ export const DelegationHistoryTable = ({
         const addressValue: string = row.getValue("address");
         return (
           <div className="flex w-full items-center gap-2">
-            <DrawerAddressButton address={addressValue as Address} />
+            <DrawerAddressButton
+              address={addressValue as Address}
+              entityType="delegate"
+            />
             <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
               <CopyAndPasteButton
                 textToCopy={addressValue as `0x${string}`}
