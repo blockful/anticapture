@@ -1,8 +1,9 @@
 "use client";
 
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
 import type { Address } from "viem";
 
+import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import type { EntityType } from "@/shared/types/entities";
 import { cn } from "@/shared/utils/cn";
@@ -28,12 +29,9 @@ export const DrawerAddressButton = ({
   const setDrawerTab = useQueryState("drawerTab")[1];
   const setTabAddress = useQueryState("tabAddress")[1];
   // Same channel the drawer's activity feed uses to re-point the drawer at
-  // another kind of profile; HoldersAndDelegatesDrawer reads it as an override
-  // of the entity type its opener passed and clears it on close.
-  const setDrawerEntity = useQueryState(
-    "drawerEntity",
-    parseAsStringEnum<EntityType>(["delegate", "tokenHolder"]),
-  )[1];
+  // another kind of profile. The override is recorded against the clicked
+  // address, so it cannot leak onto whatever address is opened next.
+  const { setDrawerEntity } = useDrawerEntityOverride();
 
   return (
     <button
@@ -47,7 +45,7 @@ export const DrawerAddressButton = ({
         e.stopPropagation();
         setTabAddress(null);
         setDrawerTab(null);
-        setDrawerEntity(entityType);
+        setDrawerEntity(entityType, address);
         setDrawerAddress(address);
       }}
     >

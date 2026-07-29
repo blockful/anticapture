@@ -16,3 +16,4 @@ export { useDelegationHistory } from "@/features/holders-and-delegates/hooks/use
 export { useBalanceHistoryGraph } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
 export type { BalanceHistoryGraphItem } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
 export { useProposalsActivity } from "@/features/holders-and-delegates/hooks/useProposalsActivity";
+export { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";

@@ -1,14 +1,10 @@
 "use client";
 
-import {
-  parseAsString,
-  parseAsStringEnum,
-  useQueryState,
-  useQueryStates,
-} from "nuqs";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 
 import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
 import { DrawerActivityFeed } from "@/features/holders-and-delegates/components/DrawerActivityFeed";
+import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
@@ -43,14 +39,14 @@ export const HoldersAndDelegatesDrawer = ({
   daoId,
   withVotes = true,
 }: HoldersAndDelegatesDrawerProps) => {
-  // Clicking an address inside the drawer's activity feed can re-point it at a
-  // different kind of profile, so the entity type has to be able to outlive the
-  // prop the opener passed. It is cleared again when the drawer closes.
-  const [entityOverride, setEntityOverride] = useQueryState(
-    "drawerEntity",
-    parseAsStringEnum<EntityType>(["delegate", "tokenHolder"]),
-  );
-  const entityType = entityOverride ?? initialEntityType;
+  // Clicking an address inside the drawer can re-point it at a different kind
+  // of profile, so the entity type has to be able to outlive the prop the
+  // opener passed. The override only counts while it still belongs to the
+  // address on screen: parents that close the drawer by clearing
+  // `drawerAddress` alone leave a stale override behind, and this makes it
+  // stale-by-construction rather than relying on every one of them to clean up.
+  const { drawerEntityFor, clearDrawerEntity } = useDrawerEntityOverride();
+  const entityType = drawerEntityFor(address) ?? initialEntityType;
 
   // The per-address feed is served by GET /:dao/feed/events, which only the
   // DAO APIs that register `feed()` expose. Without this the tab would render a
@@ -62,13 +58,7 @@ export const HoldersAndDelegatesDrawer = ({
         {
           id: "activity",
           label: "Activity",
-          content: (
-            <DrawerActivityFeed
-              address={address}
-              daoId={daoId}
-              onEntityTypeChange={setEntityOverride}
-            />
-          ),
+          content: <DrawerActivityFeed address={address} daoId={daoId} />,
         },
       ]
     : [];
@@ -178,9 +168,9 @@ export const HoldersAndDelegatesDrawer = ({
     onClose();
     setActiveTab(null);
     cleanupFilters();
-    // Otherwise the next drawer opened from a table would inherit the entity
-    // type of whatever was last clicked in the feed.
-    setEntityOverride(null);
+    // Not load bearing (the override is ignored once the address changes), just
+    // keeps the URL from carrying a dead param around.
+    clearDrawerEntity();
   };
 
   const titleContent = (

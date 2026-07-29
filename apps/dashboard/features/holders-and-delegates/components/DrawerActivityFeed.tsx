@@ -9,6 +9,7 @@ import { useFeedEventsInfinite } from "@anticapture/client/hooks";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 
+import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control";
 import { FeedEventItem } from "@/shared/components/feed/FeedEventItem";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
@@ -29,9 +30,6 @@ const RELEVANCE_OPTIONS: {
 interface DrawerActivityFeedProps {
   address: string;
   daoId: DaoIdEnum;
-  // The feed knows whether a clicked address is a delegate or a token holder;
-  // the owning drawer holds the entity type, so it is handed back up here.
-  onEntityTypeChange?: (entityType: EntityType) => void;
 }
 
 // Recent activity feed scoped to a single address, shown inside the profile
@@ -40,7 +38,6 @@ interface DrawerActivityFeedProps {
 export const DrawerActivityFeed = ({
   address,
   daoId,
-  onEntityTypeChange,
 }: DrawerActivityFeedProps) => {
   const [orderDirection, setOrderDirection] = useQueryState(
     "feedOrder",
@@ -99,13 +96,14 @@ export const DrawerActivityFeed = ({
     useQueryState("drawerAddress")[1],
     useQueryState("drawerTab")[1],
   ];
+  const { setDrawerEntity } = useDrawerEntityOverride();
 
   // Clicking a delegate from a token-holder drawer has to open the delegate
-  // profile, so the clicked entity type travels with the address instead of the
-  // drawer keeping the tabs it happened to be showing.
+  // profile, so the clicked entity type travels with the clicked address
+  // instead of the drawer keeping the tabs it happened to be showing.
   const handleRowClick = (clicked: string, clickedEntityType: EntityType) => {
     setDrawerTab(null);
-    onEntityTypeChange?.(clickedEntityType);
+    setDrawerEntity(clickedEntityType, clicked);
     setDrawerAddress(clicked);
   };
 
