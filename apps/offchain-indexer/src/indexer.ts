@@ -135,11 +135,38 @@ export class Indexer {
     if (!nextCursor) return;
 
     const proposals = await this.provider.fetchProposalsByIds(ids);
-    await this.repository.saveProposalMetadataBackfill(proposals, nextCursor);
-    this.proposalMetadataBackfillCursor = nextCursor;
+    const proposalById = new Map(
+      proposals.map((proposal) => [proposal.id, proposal]),
+    );
+    let cursor = this.proposalMetadataBackfillCursor;
+
+    for (const id of ids) {
+      const proposal = proposalById.get(id);
+      if (!proposal) break;
+
+      cursor = `${proposal.created}:${id}`;
+    }
+
+    if (ids.every((id) => proposalById.has(id))) {
+      cursor = nextCursor;
+    }
+
+    if (
+      cursor === this.proposalMetadataBackfillCursor &&
+      proposals.length === 0
+    ) {
+      return;
+    }
+
+    const cursorForSave = cursor ?? "0:";
+    await this.repository.saveProposalMetadataBackfill(
+      proposals,
+      cursorForSave,
+    );
+    this.proposalMetadataBackfillCursor = cursor;
 
     logger.info(
-      { count: proposals.length, scanned: ids.length, cursor: nextCursor },
+      { count: proposals.length, scanned: ids.length, cursor: cursorForSave },
       "backfilled proposal metadata",
     );
   }

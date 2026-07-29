@@ -17,13 +17,13 @@ export const getOffchainProposalStatus = (
 
   const quorumValue = quorum ?? 0;
   if (quorumValue > 0 && (scoresTotal ?? 0) < quorumValue) {
-    return ProposalStatus.NO_QUORUM;
+    return ProposalStatus.DEFEATED;
   }
 
   const for_ = scores[0] ?? 0;
   const against = scores[1] ?? 0;
 
-  if (for_ > against) return ProposalStatus.SUCCEEDED;
+  if (for_ > against) return ProposalStatus.PASSED;
   return ProposalStatus.DEFEATED;
 };
 

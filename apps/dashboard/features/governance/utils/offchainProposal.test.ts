@@ -30,10 +30,10 @@ describe("getOffchainProposalStatus", () => {
       NOW_SECONDS,
     );
 
-    expect(status).toBe(ProposalStatus.SUCCEEDED);
+    expect(status).toBe(ProposalStatus.PASSED);
   });
 
-  it("returns no quorum when Snapshot quorum was not reached", () => {
+  it("returns defeated when Snapshot quorum was not reached", () => {
     const status = getOffchainProposalStatus(
       "closed",
       "basic",
@@ -44,10 +44,10 @@ describe("getOffchainProposalStatus", () => {
       NOW_SECONDS,
     );
 
-    expect(status).toBe(ProposalStatus.NO_QUORUM);
+    expect(status).toBe(ProposalStatus.DEFEATED);
   });
 
-  it("returns succeeded instead of executed for passed Snapshot temp checks", () => {
+  it("returns passed instead of an on-chain queue state for passed Snapshot proposals", () => {
     const status = getOffchainProposalStatus(
       "closed",
       "basic",
@@ -58,7 +58,7 @@ describe("getOffchainProposalStatus", () => {
       NOW_SECONDS,
     );
 
-    expect(status).toBe(ProposalStatus.SUCCEEDED);
+    expect(status).toBe(ProposalStatus.PASSED);
   });
 
   it("returns defeated when quorum is reached but against wins", () => {
