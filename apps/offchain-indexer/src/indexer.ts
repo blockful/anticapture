@@ -9,6 +9,7 @@ const PROPOSAL_METADATA_BACKFILL_ENTITY = "proposal_metadata_backfill";
 
 // Only reconcile (and delete) proposals created within this window. Bounds both
 // the Snapshot fetch and the DB scan so reconciliation can't overwhelm either.
+// (backfillProposalMetadata below covers the rest of history separately.)
 const RECONCILE_WINDOW_SECONDS = 14 * 24 * 60 * 60;
 
 export class Indexer {
@@ -125,6 +126,9 @@ export class Indexer {
     );
   }
 
+  // Walks every proposal by (created, id) cursor, across all history — not
+  // windowed like reconcileProposals above — and deletes rows Snapshot no
+  // longer returns for the batch, cascading to their votes.
   private async backfillProposalMetadata(): Promise<void> {
     const { ids, nextCursor } =
       await this.repository.getProposalMetadataBackfillBatch(
