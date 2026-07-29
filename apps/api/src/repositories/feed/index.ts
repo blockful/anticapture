@@ -145,6 +145,7 @@ export class FeedRepository {
       ]);
 
     const delegationByKey = this.indexDelegationsByKey(delegations, address);
+    const delegationsByKey = this.groupDelegationsByKey(delegations);
     const transferByKey = new Map(
       transfers.map((t) => [`${t.transactionHash}:${t.logIndex}`, t]),
     );
@@ -160,6 +161,7 @@ export class FeedRepository {
       ...row,
       metadata: this.buildMetadata(row, {
         delegationByKey,
+        delegationsByKey,
         transferByKey,
         voteByKey,
         proposalByTxHash,
@@ -175,7 +177,9 @@ export class FeedRepository {
    * only the last row would render a delegate unrelated to the address the
    * feed was filtered by, so when an address filter is active the row that
    * mentions it wins. Without a filter the first row is kept, which is what
-   * an unscoped feed already showed.
+   * an unscoped feed already showed. This picks the primary row only; the other
+   * rows of the event travel in `delegatees` via `groupDelegationsByKey`, so
+   * none of them is dropped.
    */
   private indexDelegationsByKey(
     delegations: DelegationRow[],
@@ -199,6 +203,38 @@ export class FeedRepository {
     return byKey;
   }
 
+  /**
+   * All delegation rows of an event, keyed the same way, ordered by delegate
+   * address ascending. The primary row alone cannot describe a split event: an
+   * unfiltered feed would render one arbitrary delegatee, and a feed filtered
+   * by the delegator matches every sibling row, so picking one silently drops
+   * the rest. Sorted rather than left in row order because the database gives
+   * no ordering guarantee, and the rendered list has to be stable.
+   */
+  private groupDelegationsByKey(
+    delegations: DelegationRow[],
+  ): Map<string, DelegationRow[]> {
+    const byKey = new Map<string, DelegationRow[]>();
+
+    for (const d of delegations) {
+      const key = `${d.transactionHash}:${d.logIndex}`;
+      const group = byKey.get(key);
+      if (group) group.push(d);
+      else byKey.set(key, [d]);
+    }
+
+    for (const group of byKey.values()) {
+      group.sort((a, b) => {
+        const left = a.delegateAccountId.toLowerCase();
+        const right = b.delegateAccountId.toLowerCase();
+        if (left === right) return 0;
+        return left < right ? -1 : 1;
+      });
+    }
+
+    return byKey;
+  }
+
   private delegationMentions(d: DelegationRow, lowercasedAddress: string) {
     return (
       d.delegatorAccountId.toLowerCase() === lowercasedAddress ||
@@ -211,6 +247,7 @@ export class FeedRepository {
     row: DBFeedEvent,
     lookups: {
       delegationByKey: Map<string, DelegationRow>;
+      delegationsByKey: Map<string, DelegationRow[]>;
       transferByKey: Map<string, TransferRow>;
       voteByKey: Map<string, VoteRow>;
       proposalByTxHash: Map<string, ProposalRow>;
@@ -222,12 +259,24 @@ export class FeedRepository {
       case FeedEventType.DELEGATION: {
         const d = lookups.delegationByKey.get(key);
         if (!d) return null;
+        const siblings = lookups.delegationsByKey.get(key) ?? [d];
         const meta: DelegationMeta = {
           kind: FeedEventType.DELEGATION,
           delegator: d.delegatorAccountId,
           delegate: d.delegateAccountId,
           previousDelegate: d.previousDelegate,
           amount: d.delegatedValue.toString(),
+          // Only a split carries the array: a lone delegatee is already fully
+          // described by `delegate` and `amount`, and consumers read the
+          // absence of `delegatees` as "not a split".
+          ...(siblings.length > 1
+            ? {
+                delegatees: siblings.map((s) => ({
+                  delegate: s.delegateAccountId,
+                  amount: s.delegatedValue.toString(),
+                })),
+              }
+            : {}),
         };
         return meta;
       }

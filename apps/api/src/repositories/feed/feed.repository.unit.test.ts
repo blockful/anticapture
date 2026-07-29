@@ -806,6 +806,94 @@ describe("FeedRepository", () => {
           amount: "60",
         });
       });
+
+      // Filtering by the delegator matches every sibling row, so the primary
+      // row is arbitrary and cannot be the whole answer: `delegatees` has to
+      // carry the full split. The same holds for an unfiltered feed.
+      it("lists every delegatee of a split event, filtered or not", async () => {
+        const SPLIT_A = "0x2222222222222222222222222222222222222222";
+        const SPLIT_B = "0x1111111111111111111111111111111111111111";
+
+        await db.insert(feedEvent).values(
+          createFeedEvent({
+            txHash: "0xsplit",
+            logIndex: 0,
+            type: "DELEGATION",
+          }),
+        );
+        // Inserted with the higher address first so a passing assertion proves
+        // the ascending sort, not the row order.
+        await db.insert(delegation).values([
+          {
+            transactionHash: "0xsplit",
+            daoId: "UNI",
+            delegateAccountId: SPLIT_A,
+            delegatorAccountId: DELEGATOR,
+            previousDelegate: null,
+            delegatedValue: 60n,
+            timestamp: 1700000000n,
+            logIndex: 0,
+          },
+          {
+            transactionHash: "0xsplit",
+            daoId: "UNI",
+            delegateAccountId: SPLIT_B,
+            delegatorAccountId: DELEGATOR,
+            previousDelegate: null,
+            delegatedValue: 40n,
+            timestamp: 1700000000n,
+            logIndex: 0,
+          },
+        ]);
+
+        const splitMetadataFor = async (address?: string) => {
+          const result = await repository.getFeedEvents(
+            defaultFeedParams(
+              address ? { address: address as `0x${string}` } : {},
+            ),
+            defaultThresholds(),
+          );
+          return result.items.find((i) => i.txHash === "0xsplit")?.metadata;
+        };
+
+        const expectedDelegatees = [
+          { delegate: SPLIT_B, amount: "40" },
+          { delegate: SPLIT_A, amount: "60" },
+        ];
+
+        expect(await splitMetadataFor(DELEGATOR)).toMatchObject({
+          delegator: DELEGATOR,
+          delegatees: expectedDelegatees,
+        });
+        expect(await splitMetadataFor()).toMatchObject({
+          delegatees: expectedDelegatees,
+        });
+        // The per-delegatee filter still selects its own row as the primary one.
+        expect(await splitMetadataFor(SPLIT_B)).toMatchObject({
+          delegate: SPLIT_B,
+          amount: "40",
+          delegatees: expectedDelegatees,
+        });
+      });
+
+      it("omits delegatees for a single-delegatee event", async () => {
+        const result = await repository.getFeedEvents(
+          defaultFeedParams({ address: DELEGATOR as `0x${string}` }),
+          defaultThresholds(),
+        );
+        const metadata = result.items.find(
+          (i) => i.txHash === "0xd1",
+        )?.metadata;
+
+        expect(metadata).toEqual({
+          kind: FeedEventType.DELEGATION,
+          delegator: DELEGATOR,
+          delegate: DELEGATE,
+          previousDelegate: PREVIOUS_DELEGATE,
+          amount: "100",
+        });
+        expect(metadata).not.toHaveProperty("delegatees");
+      });
     });
   });
 });

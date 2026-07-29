@@ -158,20 +158,42 @@ export const FeedTransferMetadataSchema = z
     description: "Metadata payload for a TRANSFER feed event.",
   });
 
+export const FeedDelegationSplitSchema = z
+  .object({
+    delegate: z.string().openapi({ description: "Delegate address." }),
+    amount: z.string().openapi({
+      description:
+        "Voting power delegated to this delegate, as a decimal string.",
+      format: "bigint",
+    }),
+  })
+  .openapi("FeedDelegationSplit", {
+    description:
+      "One delegatee of a delegation event that split voting power across several delegates.",
+  });
+
 export const FeedDelegationMetadataSchema = z
   .object({
     kind: z.literal(FeedEventType.DELEGATION).openapi({
       description: "Discriminator identifying the metadata variant.",
     }),
     delegator: z.string().openapi({ description: "Delegator address." }),
-    delegate: z.string().openapi({ description: "New delegate address." }),
-    previousDelegate: z
-      .string()
-      .nullable()
-      .openapi({ description: "Previous delegate address, when known." }),
+    delegate: z.string().openapi({
+      description:
+        "New delegate address. On a split delegation this is the primary delegatee: the one matching the `address` filter when the feed is filtered, otherwise the first delegatee of the event. Read `delegatees` for the full list.",
+    }),
+    previousDelegate: z.string().nullable().openapi({
+      description:
+        "Previous delegate address, when known. Taken from the primary delegatee's row.",
+    }),
     amount: z.string().openapi({
-      description: "Delegated voting power, as a decimal string.",
+      description:
+        "Voting power delegated to `delegate`, as a decimal string. On a split delegation this is the primary delegatee's share, not the event total.",
       format: "bigint",
+    }),
+    delegatees: z.array(FeedDelegationSplitSchema).optional().openapi({
+      description:
+        "Every delegatee of the event, ordered by delegate address ascending. Present only when the event split voting power across more than one delegatee, as partial delegation does; absence means a single delegatee, already fully described by `delegate` and `amount`.",
     }),
   })
   .openapi("FeedDelegationMetadata", {
