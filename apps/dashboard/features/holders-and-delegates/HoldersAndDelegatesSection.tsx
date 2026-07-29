@@ -2,7 +2,7 @@
 
 import { UserCheck } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { parseAsString, useQueryState } from "nuqs";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import type { ReactElement } from "react";
 import { useMemo } from "react";
 
@@ -26,7 +26,11 @@ import {
 } from "@/shared/utils/whitelabel";
 import daoConfigByDaoId from "@/shared/dao-config";
 
-type TabId = "tokenHolders" | "delegates";
+const TAB_IDS = ["delegates", "tokenHolders"] as const;
+
+type TabId = (typeof TAB_IDS)[number];
+
+const DEFAULT_TAB: TabId = "delegates";
 
 const TABS = [
   { value: "delegates", label: "Delegates" },
@@ -64,9 +68,12 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   // `from`/`to` as address filters, and it clears them on every tab change.
   const [fromParam, setFromParam] = useQueryState("rangeFrom");
   const [toParam, setToParam] = useQueryState("rangeTo");
+  // Enum parsed, not a plain string: a stale or hand-edited `?tab=foo` would
+  // otherwise reach `tabComponentMap`, miss every key and render an empty
+  // section body. Unknown values fall back to the default tab.
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsString.withDefault("delegates"),
+    parseAsStringEnum<TabId>([...TAB_IDS]).withDefault(DEFAULT_TAB),
   );
 
   // clean up filters when switching tabs
@@ -120,7 +127,6 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
 
   // Map from tab ID to tab component
   const tabs = TABS;
-  const defaultTab = "delegates";
 
   const tabComponentMap: Record<TabId, ReactElement> = {
     tokenHolders: (
@@ -147,7 +153,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
           <div className="flex w-full items-center justify-between">
             <PillTabGroup
               tabs={tabs}
-              activeTab={activeTab ?? defaultTab}
+              activeTab={activeTab}
               onTabChange={(value) => handleTabChange(value as TabId)}
             />
             <SwitcherDateRange
@@ -165,7 +171,7 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               }}
             />
           </div>
-          {tabComponentMap[activeTab as TabId]}
+          {tabComponentMap[activeTab]}
         </SubSectionsContainer>
       </TheSectionLayout>
     </div>
