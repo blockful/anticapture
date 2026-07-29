@@ -226,8 +226,9 @@ describe("Indexer", () => {
     void promise;
   });
 
-  it("should not advance metadata backfill cursor past missing Snapshot proposals", async () => {
+  it("should delete missing Snapshot proposals and advance metadata backfill cursor", async () => {
     const repo = createSimpleRepository();
+    repo.proposalIds.push("p-old", "p-missing", "p-newer");
     repo.metadataBackfillIds.push("p-old", "p-missing", "p-newer");
     const oldProposal = makeProposal({
       id: "p-old",
@@ -244,6 +245,7 @@ describe("Indexer", () => {
       quorum: 10_000_000,
     });
     const provider = createSimpleProvider({
+      proposalIds: ["p-old", "p-missing", "p-newer"],
       proposalsById: [oldProposal, newerProposal],
     });
     const indexer = new Indexer(repo, provider, 60_000);
@@ -258,18 +260,21 @@ describe("Indexer", () => {
     ]);
     expect(repo.saveProposalMetadataBackfill).toHaveBeenCalledWith(
       [oldProposal, newerProposal],
-      "1700000000:p-old",
+      "1700000200:p-newer",
     );
+    expect(repo.deleteProposals).toHaveBeenCalledWith(["p-missing"]);
+    expect(repo.proposalIds).toStrictEqual(["p-old", "p-newer"]);
     expect(repo.cursors.get("proposal_metadata_backfill")).toBe(
-      "1700000000:p-old",
+      "1700000200:p-newer",
     );
 
     void promise;
   });
 
-  it("should keep metadata backfill cursor unchanged when every Snapshot proposal is missing", async () => {
+  it("should delete all-missing Snapshot proposals and advance metadata backfill cursor", async () => {
     const repo = createSimpleRepository();
     repo.cursors.set("proposal_metadata_backfill", "1700000000:p-old");
+    repo.proposalIds.push("p-missing");
     repo.metadataBackfillIds.push("p-missing");
     const provider = createSimpleProvider({ proposalsById: [] });
     const indexer = new Indexer(repo, provider, 60_000);
@@ -278,9 +283,14 @@ describe("Indexer", () => {
     await vi.advanceTimersByTimeAsync(0);
 
     expect(provider.fetchProposalsByIds).toHaveBeenCalledWith(["p-missing"]);
-    expect(repo.saveProposalMetadataBackfill).not.toHaveBeenCalled();
+    expect(repo.deleteProposals).toHaveBeenCalledWith(["p-missing"]);
+    expect(repo.saveProposalMetadataBackfill).toHaveBeenCalledWith(
+      [],
+      "1700000000:p-missing",
+    );
+    expect(repo.proposalIds).toStrictEqual([]);
     expect(repo.cursors.get("proposal_metadata_backfill")).toBe(
-      "1700000000:p-old",
+      "1700000000:p-missing",
     );
 
     void promise;
