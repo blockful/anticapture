@@ -338,9 +338,9 @@ export const ProposalCreationForm = ({
 
   const handlePreviewPublish = () => {
     if (!address) {
-      // Publishing needs a wallet to sign. Signed out → sign-in modal;
-      // signed in without a wallet (email/Google) → RainbowKit directly,
-      // keeping the session. See useWalletPrompt.
+      // Publishing is an on-chain transaction, so it only needs a connected
+      // wallet: the picker opens directly, with no sign-in step. Saving and
+      // sharing drafts stay session-gated below. See useWalletPrompt.
       setPendingAction("publish");
       promptWalletConnection();
       return;

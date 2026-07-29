@@ -14,7 +14,7 @@ import {
   writeDrafts,
   type NewDraftInput,
 } from "@/features/create-proposal/utils/draftStorage";
-import { useSession } from "@/shared/services/auth/client";
+import { useAuthSession } from "@/shared/services/auth/useAuthSession";
 import {
   createDraft,
   deleteDraft as deleteDraftRequest,
@@ -49,7 +49,7 @@ const toDraft = (d: UserApiDraft): ProposalDraft => ({
 });
 
 export const useDrafts = (daoId: string): UseDraftsReturn => {
-  const { data: session, isPending: isSessionPending } = useSession();
+  const { data: session, isPending: isSessionPending } = useAuthSession();
   const { address } = useAccount();
   const [drafts, setDrafts] = useState<ProposalDraft[]>([]);
   const [isLoading, setIsLoading] = useState(false);
