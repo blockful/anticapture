@@ -17,7 +17,7 @@ export const getOffchainProposalStatus = (
 
   const quorumValue = quorum ?? 0;
   if (quorumValue > 0 && (scoresTotal ?? 0) < quorumValue) {
-    return ProposalStatus.DEFEATED;
+    return ProposalStatus.NO_QUORUM;
   }
 
   const for_ = scores[0] ?? 0;
