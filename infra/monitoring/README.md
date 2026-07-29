@@ -35,6 +35,17 @@ Grafana provisions a single consolidated dashboard from
 cache, eRPC, resources). It uses the existing Prometheus datasource UID,
 `prometheus`.
 
+`grafana/dashboards/validation.json` provisions the restricted User API
+Validation dashboard. Its per-user table includes email addresses or wallet
+addresses as Prometheus labels, so keep both the User API `/metrics` bearer
+token and Grafana authentication enabled outside local development.
+
+PR preview environments disable Google OAuth and expose Grafana's username and
+password login form. They inherit `GF_SECURITY_ADMIN_USER` and
+`GF_SECURITY_ADMIN_PASSWORD` from the source Railway environment; keep those
+credentials configured there rather than committing them. Persistent
+environments continue using their configured authentication provider.
+
 The standalone `infra/erpc/Dockerfile.monitoring` image is legacy. Use this
 unified monitoring stack for the normal Anticapture Railway deployment.
 

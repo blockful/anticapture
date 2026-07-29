@@ -55,7 +55,10 @@ export const ApiKeysTable = ({
         accessorKey: "label",
         header: "Name",
         cell: ({ row }) => (
-          <span className="text-primary text-sm font-medium">
+          <span
+            className="text-primary max-w-70 block truncate text-sm font-medium"
+            title={row.original.label}
+          >
             {row.original.label}
           </span>
         ),

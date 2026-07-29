@@ -9,6 +9,7 @@ import {
   CreatedApiKeyResponseSchema,
 } from "@/mappers/api-keys";
 import { ErrorResponseSchema, unauthorizedResponses } from "@/mappers/errors";
+import { keysCreatedTotal } from "@/metrics";
 import { sessionAuth } from "@/middlewares/session";
 import type { ApiKeyRow } from "@/repositories/api-keys";
 import {
@@ -123,6 +124,7 @@ export function apiKeysController(
       const { id: userId } = c.get("sessionUser");
       try {
         const { key, plaintext } = await service.create(userId, label);
+        keysCreatedTotal.add(1);
         return c.json(
           CreatedApiKeyResponseSchema.parse({
             ...toResponse(key),

@@ -30,4 +30,4 @@ for dao in $DAOS; do
 EOF
 done
 
-exec /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=15d --web.enable-lifecycle --web.enable-remote-write-receiver "$@"
+exec /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=180d --storage.tsdb.retention.size=40GB --web.enable-lifecycle --web.enable-remote-write-receiver "$@"

@@ -1,7 +1,7 @@
 "use client";
 
 import { Settings } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/shared/components";
 import { CodeBlock } from "@/shared/components/design-system/code-block/CodeBlock";
@@ -49,19 +49,50 @@ type ClientName = keyof typeof CLIENTS;
 const KEY_PLACEHOLDER = "<YOUR_API_KEY>";
 
 /**
- * "Connect your AI agent" — pick a client and copy one command.
+ * Smoothly animates to the content's natural height when it changes (the
+ * per-client snippets have different line counts, so switching tabs resizes
+ * the code block).
+ */
+const AnimatedHeight = ({ children }: { children: React.ReactNode }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number>();
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => setHeight(el.offsetHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      className="overflow-hidden transition-[height] duration-300 ease-in-out"
+      style={{ height }}
+    >
+      <div ref={contentRef}>{children}</div>
+    </div>
+  );
+};
+
+/**
+ * "MCP" — connect an AI agent: pick a client and copy one command.
  * Plaintext tokens only exist in memory for keys created this session
  * (`sessionTokens`); the newest such key is embedded in the command (truncated
  * on screen, full on copy). Otherwise the placeholder is used.
+ * The `modal` variant renders a compact title and drops the last-call status
+ * line (inside SaveApiKeyModal the key was created seconds ago).
  */
 export const ConnectAgentSection = ({
   keys,
   sessionTokens,
   lastCreated,
+  variant = "section",
 }: {
   keys: UserApiKey[];
   sessionTokens: Record<string, string>;
   lastCreated: { id: string; label: string } | null;
+  variant?: "section" | "modal";
 }) => {
   const [client, setClient] = useState<ClientName>("Claude Code");
 
@@ -95,17 +126,24 @@ export const ConnectAgentSection = ({
   const shownKey = token ? `${token.slice(0, 12)}…` : KEY_PLACEHOLDER;
   const copiedKey = token ?? KEY_PLACEHOLDER;
 
+  const description = token
+    ? "Connect your AI agent: pick your tool and run one command in your terminal. Your key is already in it."
+    : "Connect your AI agent: pick your tool, replace the API key placeholder, and run the command in your terminal.";
+
   return (
     <div className="flex w-full flex-col gap-6">
-      <SectionTitle
-        icon={<Settings className="text-primary size-5" />}
-        title="Connect your AI agent"
-        description={
-          token
-            ? "Pick your tool and run one command in your terminal. Your key is already in it."
-            : "Pick your tool, replace the API key placeholder, and run the command in your terminal."
-        }
-      />
+      {variant === "modal" ? (
+        <div className="flex flex-col gap-1">
+          <p className="text-primary text-sm font-medium">MCP</p>
+          <p className="text-secondary text-sm font-normal">{description}</p>
+        </div>
+      ) : (
+        <SectionTitle
+          icon={<Settings className="text-primary size-5" />}
+          title="MCP"
+          description={description}
+        />
+      )}
 
       <div className="flex w-full flex-col gap-3">
         <div className="flex gap-2">
@@ -123,13 +161,15 @@ export const ConnectAgentSection = ({
 
         {/* On-screen the key is redacted; the copied command carries the
             full plaintext so it works as-is. */}
-        <CodeBlock
-          code={CLIENTS[client](shownKey)}
-          copyText={CLIENTS[client](copiedKey)}
-          className="min-h-[84px]"
-        />
+        <AnimatedHeight>
+          <CodeBlock
+            code={CLIENTS[client](shownKey)}
+            copyText={CLIENTS[client](copiedKey)}
+            className="min-h-[84px]"
+          />
+        </AnimatedHeight>
 
-        {selected && (
+        {variant === "section" && selected && (
           <div className="flex items-center gap-2">
             <span
               className={cn(
