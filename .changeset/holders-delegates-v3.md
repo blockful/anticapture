@@ -12,7 +12,12 @@ API: new endpoints backing the module. `GET /:dao/voting-powers/inactive-summary
 `GET /:dao/addresses/labels` (per-DAO treasury/vesting labels). Adds an optional
 `address` filter to `GET /:dao/feed/events`, and an optional `toDate` upper bound
 to `GET /:dao/proposals-activity` so a bounded period counts only the proposals
-inside it. Feed DELEGATION metadata gains an optional `delegatees` array of
+inside it. On AAVE, `fromValue`/`toValue` on `GET /:dao/voting-powers` now filter the
+delegated voting power alone instead of the combined total (delegated power plus
+the account's own balance), matching both the `votingPower` ordering on the same
+endpoint and every other DAO's behavior, so the range a client asks for matches
+the delegation figure it renders.
+Feed DELEGATION metadata gains an optional `delegatees` array of
 `{ delegate, amount }`, present only when the source event split voting power
 across more than one delegatee (partial delegation, as SCR does), ordered by
 delegate address ascending; `delegate`/`amount` stay as they were and describe

@@ -35,6 +35,15 @@ import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
 
+const parseRawAmount = (value: string | null): bigint | undefined => {
+  if (!value) return undefined;
+  try {
+    return BigInt(value);
+  } catch {
+    return undefined;
+  }
+};
+
 export const TopInteractionsTable = ({
   address,
   daoId,
@@ -91,20 +100,23 @@ export const TopInteractionsTable = ({
     return BigInt(Math.floor(Number(parseUnits("1", decimals)) / priceUsd));
   }, [tokenData?.price, decimals]);
 
+  // These come from the URL, so a stale or hand-edited `?minAmount=1.5` has to
+  // be ignored instead of throwing while the drawer renders.
+  const userMinAmount = parseRawAmount(filterVariables.minAmount);
+  const userMaxAmount = parseRawAmount(filterVariables.maxAmount);
+
   // "Hide dust" is enforced by the query, not client-side: filtering a page
   // after the fact can empty it out, and an empty table renders its empty state
   // without the infinite-scroll sentinel, stranding the later pages.
   const minAmount = useMemo(() => {
-    const userMin = filterVariables.minAmount
-      ? BigInt(filterVariables.minAmount)
-      : 0n;
+    const userMin = userMinAmount ?? 0n;
     // `minAmount` is exclusive server-side, so one below the threshold keeps
     // rows worth exactly $1, matching `isDust`.
     const dustMin =
       hideDust && dustThresholdRawUnits > 0n ? dustThresholdRawUnits - 1n : 0n;
     const effective = userMin > dustMin ? userMin : dustMin;
     return effective > 0n ? effective.toString() : null;
-  }, [filterVariables.minAmount, hideDust, dustThresholdRawUnits]);
+  }, [userMinAmount, hideDust, dustThresholdRawUnits]);
 
   const {
     interactions,
@@ -119,7 +131,10 @@ export const TopInteractionsTable = ({
     filterAddress: currentAddressFilter ?? undefined,
     sortBy,
     sortDirection,
-    filterVariables: { minAmount, maxAmount: filterVariables.maxAmount },
+    filterVariables: {
+      minAmount,
+      maxAmount: userMaxAmount?.toString() ?? null,
+    },
     limit: 10,
   });
 
