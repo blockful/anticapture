@@ -89,12 +89,18 @@ export const ProposalSection = ({
   const daoEnum = (daoId as string).toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
 
-  // Clear optimistic vote state when the viewer or proposal changes to prevent
-  // a previous session's label from bleeding into a new wallet or proposal.
-  const prevVoteKeyRef = useRef(`${address ?? ""}:${offchainProposalId}`);
-  if (prevVoteKeyRef.current !== `${address ?? ""}:${offchainProposalId}`) {
-    prevVoteKeyRef.current = `${address ?? ""}:${offchainProposalId}`;
+  // Clear optimistic vote state when the viewer or proposal changes: every field
+  // below describes one wallet's vote on one proposal, so a leftover signedAt
+  // would keep the indexing chip spinning and leftover optimisticScores would be
+  // added on top of the next proposal's tally.
+  const voteKey = `${address ?? ""}:${offchainProposalId}`;
+  const prevVoteKeyRef = useRef(voteKey);
+  if (prevVoteKeyRef.current !== voteKey) {
+    prevVoteKeyRef.current = voteKey;
     if (localOffchainVoteLabel !== null) setLocalOffchainVoteLabel(null);
+    if (optimisticScores !== null) setOptimisticScores(null);
+    if (signedAt !== null) setSignedAt(null);
+    if (isChangingVote) setIsChangingVote(false);
   }
 
   const handleAddressClick = useCallback((addr: string) => {
