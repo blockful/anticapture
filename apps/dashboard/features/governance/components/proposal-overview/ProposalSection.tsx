@@ -322,8 +322,11 @@ export const ProposalSection = ({
       replacedVoteRef.current = voteFingerprint(userOffchainVote);
       setLocalOffchainVoteLabel(voteLabel);
       // Held until the indexer reflects the vote, so the tally moves the moment
-      // the signature returns instead of after the next poll.
-      setOptimisticScores(optimisticScores);
+      // the signature returns instead of after the next poll. Never on a
+      // revote: the indexed scores still carry this wallet's previous ballot
+      // and the delta only describes the new one, so adding it would count the
+      // voter twice — and could name the wrong leader — until indexing lands.
+      setOptimisticScores(userOffchainVote ? null : optimisticScores);
       setSignedAt(Date.now());
       // Refetch votes (badge + table) and proposal scores so the UI reflects
       // the new vote without requiring a manual page reload.
