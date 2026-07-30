@@ -35,9 +35,13 @@ interface OffchainVotingModalProps {
   /**
    * `optimisticScores` carries the voter's power on the choices they just
    * picked, aligned with the proposal's choices, so the results card can show
-   * the vote before the indexer has it.
+   * the vote before the indexer has it. Null when the ballot type's tally can't
+   * be predicted locally (see computeOptimisticScores).
    */
-  onVoteSuccess?: (voteLabel: string, optimisticScores: number[]) => void;
+  onVoteSuccess?: (
+    voteLabel: string,
+    optimisticScores: number[] | null,
+  ) => void;
 }
 
 export const OffchainVotingModal = ({
@@ -135,11 +139,15 @@ export const OffchainVotingModal = ({
 
   /**
    * The voter's power spread over the choices they picked, so the results card
-   * can add it on top of the indexed tally. Weighted and quadratic split it by
-   * their allocation; every other type applies the full power to each pick,
-   * which is how Snapshot itself tallies approval and ranked ballots.
+   * can add it on top of the indexed tally. Null for ballot types whose scores
+   * are not a sum of voter contributions — ranked/Copeland recomputes rounds of
+   * eliminations or pairwise duels, and quadratic aggregates square roots and
+   * renormalizes — where any local delta would publish a wrong tally and
+   * possibly a wrong winner. Those wait for the indexer instead.
    */
-  const computeOptimisticScores = (): number[] => {
+  const computeOptimisticScores = (): number[] | null => {
+    if (voteUiType === "ranked-choice" || voteUiType === "quadratic")
+      return null;
     const delta = choices.map(() => 0);
     if (!value) return delta;
 
