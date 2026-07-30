@@ -22,11 +22,9 @@ export const PAGES_CONSTANTS = {
       "Takes into account the maximum cost and the minimum profit possible. If it looks bad, it's bad. If it looks good, it's better, but it does not represent 100% safety. Remember that both getting votes and causing damage can take other forms beyond direct buying and selling assets.",
   },
   holdersAndDelegates: {
-    // The sidebar entry reads "Stakeholders"; this heading deliberately does
-    // not follow it.
-    title: "Holders & Delegates",
+    title: "Stakeholders",
     navTitle: "Stakeholders",
-    page: "holders-and-delegates",
+    page: "stakeholders",
     description:
       "Explore top token holders and high-power delegates. Click on any row to view more details.",
   },

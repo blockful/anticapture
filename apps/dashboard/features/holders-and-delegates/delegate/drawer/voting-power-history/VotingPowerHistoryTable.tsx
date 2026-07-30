@@ -298,7 +298,9 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-24",
+        // wide enough for the "Delegator Balance Decrease" subtitle, which
+        // otherwise bleeds into the delegator column
+        columnClassName: "w-32",
       },
     },
     {
@@ -361,12 +363,13 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="group flex items-center gap-3">
-            <div className="overflow-truncate flex max-w-24 items-center gap-2">
+            <div className="flex max-w-40 items-center gap-2 overflow-hidden">
               <DrawerAddressButton
                 address={delegatorAddress}
                 entityType="tokenHolder"
+                addressChars={6}
                 nameClassName={cn(
-                  "truncate max-w-[125px]",
+                  "truncate max-w-[140px]",
                   delegatorAddress === accountId
                     ? "text-primary"
                     : "text-secondary",
@@ -388,7 +391,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-24",
+        columnClassName: "w-32",
       },
     },
     {
@@ -448,12 +451,12 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="group flex items-center justify-between gap-3">
-            <div className="max-w-35 flex items-center gap-2 overflow-hidden">
+            <div className="flex max-w-40 items-center gap-2 overflow-hidden">
               <DrawerAddressButton
                 address={delegateAddress}
                 entityType="delegate"
                 nameClassName={cn(
-                  "truncate max-w-[125px]",
+                  "truncate max-w-[140px]",
                   delegateAddress === accountId
                     ? "text-primary"
                     : "text-secondary",
@@ -483,7 +486,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-26",
+        columnClassName: "w-32",
       },
     },
   ];
@@ -498,7 +501,6 @@ export const VotingPowerHistoryTable = ({
             : delegationHistory
         }
         size="sm"
-        mobileTableFixed={true}
         hasMore={hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}

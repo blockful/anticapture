@@ -14,6 +14,8 @@ interface DrawerAddressButtonProps {
   // cell is a delegate even inside a token holder drawer.
   entityType: EntityType;
   nameClassName?: string;
+  // Chars kept on each side of the "..." when there's no ENS name to show instead.
+  addressChars?: number;
 }
 
 // Any address rendered inside the profile drawer is clickable: it re-points the
@@ -22,6 +24,7 @@ export const DrawerAddressButton = ({
   address,
   entityType,
   nameClassName,
+  addressChars,
 }: DrawerAddressButtonProps) => {
   const setDrawerAddress = useQueryState("drawerAddress")[1];
   const setDrawerTab = useQueryState("drawerTab")[1];
@@ -47,6 +50,7 @@ export const DrawerAddressButton = ({
         size="sm"
         variant="rounded"
         isDashed={true}
+        addressChars={addressChars}
         nameClassName={cn("hover:border-primary", nameClassName)}
         // This button is already the interactive element; the tooltip trigger
         // would nest a second button inside it.

@@ -30,7 +30,7 @@ const DAO_SUB_ROUTES = [
   "/risk-analysis",
   "/proposals",
   "/token-distribution",
-  "/holders-and-delegates",
+  "/stakeholders",
   "/activity-feed",
   "/resilience-stages",
   "/attack-profitability",

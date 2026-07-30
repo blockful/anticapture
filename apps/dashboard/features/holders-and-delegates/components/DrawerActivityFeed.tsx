@@ -16,6 +16,7 @@ import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { EntityType } from "@/shared/types/entities";
+import { groupFeedEventsByDate } from "@/shared/utils/groupFeedEventsByDate";
 
 const RELEVANCE_OPTIONS: {
   value: FeedEventsQueryParamsRelevanceEnumKey | "ALL";
@@ -67,6 +68,7 @@ export const DrawerActivityFeed = ({
   );
 
   const events = data?.pages ? data.pages.flatMap((page) => page.items) : [];
+  const groupedEvents = groupFeedEventsByDate(events, orderDirection);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -152,13 +154,22 @@ export const DrawerActivityFeed = ({
           />
         ) : (
           <>
-            {events.map((event, index) => (
-              <FeedEventItem
-                key={`${event.txHash}-${event.logIndex}`}
-                event={event}
-                isLast={index === events.length - 1}
-                onRowClick={handleRowClick}
-              />
+            {groupedEvents.map((group) => (
+              <div key={group.date}>
+                <div className="bg-surface-contrast top-0 z-10 mx-0 mb-4 px-5 py-3">
+                  <span className="text-primary font-mono text-xs font-medium uppercase">
+                    {group.label}
+                  </span>
+                </div>
+                {group.events.map((event, index) => (
+                  <FeedEventItem
+                    key={`${event.txHash}-${event.logIndex}`}
+                    event={event}
+                    isLast={index === group.events.length - 1}
+                    onRowClick={handleRowClick}
+                  />
+                ))}
+              </div>
             ))}
             <div ref={sentinelRef} />
             {isFetchingNextPage && (

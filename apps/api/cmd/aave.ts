@@ -21,7 +21,6 @@ import {
   votingPowers,
   delegations,
   delegators,
-  formerDelegators,
   historicalDelegations,
   token,
   accountInteractions,
@@ -39,7 +38,6 @@ import {
   TransfersRepository,
   DelegationsRepository,
   DelegatorsRepository,
-  FormerDelegatorsRepository,
   HistoricalDelegationsRepository,
   AccountBalanceQueryFragments,
   AAVEAccountBalanceRepository,
@@ -57,7 +55,6 @@ import {
   HistoricalDelegationsService,
   DelegationsService,
   DelegatorsService,
-  FormerDelegatorsService,
   CoingeckoService,
   TokenService,
 } from "@/services";
@@ -195,14 +192,6 @@ delegators(
   app,
   wrapWithTracing(
     new DelegatorsService(wrapWithTracing(new DelegatorsRepository(pgClient))),
-  ),
-);
-formerDelegators(
-  app,
-  wrapWithTracing(
-    new FormerDelegatorsService(
-      wrapWithTracing(new FormerDelegatorsRepository(pgClient)),
-    ),
   ),
 );
 historicalBalances(

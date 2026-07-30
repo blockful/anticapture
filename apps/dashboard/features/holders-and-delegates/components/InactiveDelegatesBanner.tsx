@@ -3,6 +3,7 @@
 import { useInactiveVotingPowerSummary } from "@anticapture/client/hooks";
 import type { InactiveVotingPowerSummaryPathParamsDaoEnumKey } from "@anticapture/client";
 import { InlineAlert } from "@/shared/components/design-system/alerts";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 interface InactiveDelegatesBannerProps {
@@ -33,15 +34,15 @@ export const InactiveDelegatesBanner = ({
     <InlineAlert
       variant="warning"
       text={
-        <span className="flex flex-col gap-0.5">
-          <span className="text-primary text-sm font-medium">
-            {Math.round(percentage)}% of delegated voting power is assigned to
-            inactive delegates.
-          </span>
-          <span className="text-secondary text-xs font-normal">
-            Inactive = no votes cast in the selected period. Flagged rows below
-            indicate holders whose delegate has not participated recently.
-          </span>
+        <span className="text-primary text-sm font-medium">
+          {Math.round(percentage)}% of delegated voting power is assigned to{" "}
+          <Tooltip
+            tooltipContent="No votes cast in the selected period."
+            triggerClassName="underline decoration-dashed underline-offset-2 cursor-help"
+          >
+            inactive
+          </Tooltip>{" "}
+          delegates.
         </span>
       }
     />

@@ -48,6 +48,8 @@ interface EnsAvatarProps extends Omit<
   containerClassName?: string;
   isDashed?: boolean;
   showFullAddress?: boolean;
+  // Chars kept on each side of the "..." when falling back to a shortened address.
+  addressChars?: number;
   showTags?: boolean;
   showCopyAddress?: boolean;
   maxVisibleTags?: number;
@@ -105,6 +107,7 @@ export const EnsAvatar = ({
   nameClassName,
   containerClassName,
   showFullAddress = false,
+  addressChars,
   isDashed = false,
   showTags = false,
   showCopyAddress = false,
@@ -162,7 +165,8 @@ export const EnsAvatar = ({
     if (entity && label) return truncate(`${entity} · ${label}`);
     if (entity) return truncate(entity);
     if (label) return truncate(label);
-    if (address) return showFullAddress ? address : formatAddress(address);
+    if (address)
+      return showFullAddress ? address : formatAddress(address, addressChars);
     return "Unknown";
   };
 

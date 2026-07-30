@@ -98,12 +98,14 @@ export const VoteComposition = ({
 
   // Summary for the "Former Delegators" view. Shares the same query key as
   // FormerDelegatorsTable, so this only reads from cache (no extra request).
+  // AAVE's API doesn't register this endpoint, so the toggle is hidden below
+  // and `view` can never become "former" for it.
   const { data: formerData, hasNextPage: formerHasMorePages } =
     useFormerDelegatorsInfinite(
       daoId.toLowerCase() as FormerDelegatorsPathParamsDaoEnumKey,
       address,
       { limit: 20, orderDirection: "desc" },
-      { query: { getNextPageParam, enabled: view === "former" } },
+      { query: { getNextPageParam, enabled: !isAave && view === "former" } },
     );
   const formerRows = (formerData?.pages ?? []).flatMap((page) => page.items);
   const formerTotalCount =
@@ -144,14 +146,16 @@ export const VoteComposition = ({
             </span>
           )}
         </div>
-        <SegmentedControl
-          value={view}
-          onValueChange={(value) => setView(value as "current" | "former")}
-          items={[
-            { value: "current", label: "Current Delegators" },
-            { value: "former", label: "Former Delegators" },
-          ]}
-        />
+        {!isAave && (
+          <SegmentedControl
+            value={view}
+            onValueChange={(value) => setView(value as "current" | "former")}
+            items={[
+              { value: "current", label: "Current Delegators" },
+              { value: "former", label: "Former Delegators" },
+            ]}
+          />
+        )}
       </div>
       {view === "former" ? (
         <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
