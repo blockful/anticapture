@@ -18,10 +18,15 @@ export interface Repository {
   ): Promise<void>;
   saveVotes(votes: OffchainVote[], cursor: string): Promise<void>;
   /**
-   * Closed proposals in the window whose tally is still all zeros — the
-   * signature of a Shutter proposal awaiting (or missing) its reveal.
+   * Proposals whose voting ended between `endedSince` and `now` and whose tally
+   * is still all zeros — the signature of a Shutter proposal awaiting (or
+   * missing) its reveal. Windowed on `end` rather than `created` so a proposal
+   * that ran for longer than the window is still picked up once it closes.
    */
-  getRevealPendingProposalIds(since: number, now: number): Promise<string[]>;
+  getRevealPendingProposalIds(
+    endedSince: number,
+    now: number,
+  ): Promise<string[]>;
   /** Upserts without touching the sync cursor, for out-of-band re-reads. */
   upsertProposals(proposals: OffchainProposal[]): Promise<void>;
   upsertVotes(votes: OffchainVote[]): Promise<void>;

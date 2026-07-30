@@ -105,16 +105,18 @@ export class Indexer {
    * moved past it. Without this pass its scores and its encrypted vote choices
    * are never re-read, so a closed Shutter election shows 0 / 0.0% forever.
    *
-   * Runs every cycle over the same bounded window as reconcileProposals. A
-   * zero-tally proposal with genuinely no votes is re-read cheaply and stays
-   * zero, so no state is needed to tell the two apart.
+   * Runs every cycle over proposals that *ended* inside the window. Bounding on
+   * `end` rather than `created` matters: a proposal opened long before it closes
+   * would otherwise never be selected after its reveal. A zero-tally proposal
+   * with genuinely no votes is re-read cheaply and stays zero, so no state is
+   * needed to tell the two apart.
    */
   private async reconcileRevealedProposals(): Promise<void> {
     const now = Math.floor(Date.now() / 1000);
-    const since = now - RECONCILE_WINDOW_SECONDS;
+    const endedSince = now - RECONCILE_WINDOW_SECONDS;
 
     const pendingIds = await this.repository.getRevealPendingProposalIds(
-      since,
+      endedSince,
       now,
     );
 

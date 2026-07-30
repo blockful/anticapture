@@ -314,6 +314,59 @@ describe("DrizzleRepository", () => {
       expect(ids).toStrictEqual(["recent"]);
     });
 
+    describe("getRevealPendingProposalIds", () => {
+      const NOW = 1700200000;
+      const ENDED_SINCE = NOW - 14 * 24 * 60 * 60;
+
+      it("should select a closed proposal whose tally is still all zeros", async () => {
+        await repo.saveProposals(
+          [
+            createProposal({ id: "pending", end: NOW - 60, scores: [0, 0] }),
+            createProposal({ id: "revealed", end: NOW - 60, scores: [400, 1] }),
+          ],
+          "cursor-1",
+        );
+
+        const ids = await repo.getRevealPendingProposalIds(ENDED_SINCE, NOW);
+
+        expect(ids).toStrictEqual(["pending"]);
+      });
+
+      // The window is on `end`, not `created`: a proposal that ran longer than
+      // the window still needs its reveal re-read once voting closes.
+      it("should select a long-running proposal created before the window but ended inside it", async () => {
+        await repo.saveProposals(
+          [
+            createProposal({
+              id: "long-running",
+              created: ENDED_SINCE - 365 * 24 * 60 * 60,
+              end: NOW - 3600,
+              scores: [0],
+            }),
+          ],
+          "cursor-1",
+        );
+
+        const ids = await repo.getRevealPendingProposalIds(ENDED_SINCE, NOW);
+
+        expect(ids).toStrictEqual(["long-running"]);
+      });
+
+      it("should exclude proposals still open and proposals that ended before the window", async () => {
+        await repo.saveProposals(
+          [
+            createProposal({ id: "open", end: NOW + 3600, scores: [0] }),
+            createProposal({ id: "stale", end: ENDED_SINCE - 1, scores: [0] }),
+          ],
+          "cursor-1",
+        );
+
+        const ids = await repo.getRevealPendingProposalIds(ENDED_SINCE, NOW);
+
+        expect(ids).toStrictEqual([]);
+      });
+    });
+
     it("should delete proposals and their votes", async () => {
       await repo.saveProposals(
         [createProposal({ id: "prop-1" }), createProposal({ id: "prop-2" })],

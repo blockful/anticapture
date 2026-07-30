@@ -111,10 +111,13 @@ const VOTES_QUERY = `
 
 // Same reason as PROPOSALS_BY_IDS_QUERY: a Shutter vote is first ingested with
 // its choice still encrypted, and the reveal rewrites it in place on Snapshot.
+// created_gte (not created_gt) for the same reason as PROPOSAL_IDS_QUERY: an
+// exclusive cursor drops votes that share the last returned vote's `created`
+// second but didn't fit on that page. The caller de-dupes the overlap.
 const VOTES_BY_PROPOSAL_IDS_QUERY = `
   query ($ids: [String]!, $cursor: Int!, $pageSize: Int!) {
     votes(
-      where: { proposal_in: $ids, created_gt: $cursor }
+      where: { proposal_in: $ids, created_gte: $cursor }
       first: $pageSize
       orderBy: "created"
       orderDirection: asc
@@ -243,7 +246,12 @@ export class SnapshotProvider implements DataProvider {
   async fetchVotesByProposalIds(ids: string[]): Promise<OffchainVote[]> {
     if (ids.length === 0) return [];
 
-    const votes: OffchainVote[] = [];
+    // De-duped because the created_gte cursor re-reads the boundary second on
+    // every page, so the last vote of a full page always comes back on the next
+    // one. Keyed on (proposalId, voter), the votes table's primary key, so a
+    // revote seen twice mid-walk collapses to its latest version, matching what
+    // the upsert would do anyway.
+    const votesByKey = new Map<string, OffchainVote>();
     let cursor = 0;
 
     // Paginated: a single proposal can hold more than PAGE_SIZE votes.
@@ -261,17 +269,20 @@ export class SnapshotProvider implements DataProvider {
       const page = response.votes.map((v) =>
         toOffchainVote(this.spaceId).parse(v),
       );
-      votes.push(...page);
+      for (const vote of page) {
+        votesByKey.set(`${vote.proposalId}:${vote.voter}`, vote);
+      }
 
       if (page.length < PAGE_SIZE) break;
 
       const lastCreated = page[page.length - 1]!.created;
       // Guard the same shared-second edge case as fetchProposalIdsSince: if a
       // whole page lands on one second, step past it rather than loop forever.
+      // Cost is any overflow past PAGE_SIZE votes cast in that single second.
       cursor = lastCreated === page[0]!.created ? lastCreated + 1 : lastCreated;
     }
 
-    return votes;
+    return [...votesByKey.values()];
   }
 
   private async query<T>(

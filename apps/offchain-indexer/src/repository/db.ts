@@ -108,15 +108,18 @@ export class DrizzleRepository implements Repository {
   }
 
   async getRevealPendingProposalIds(
-    since: number,
+    endedSince: number,
     now: number,
   ): Promise<string[]> {
+    // Bounded on `end`, not `created`: the reveal happens when voting closes, so
+    // a proposal opened months before it ends (long-running or scheduled) would
+    // fall outside a created-based window by the time it needs re-reading.
     const rows = await this.db
       .select({ id: schema.proposals.id, scores: schema.proposals.scores })
       .from(schema.proposals)
       .where(
         and(
-          gte(schema.proposals.created, since),
+          gte(schema.proposals.end, endedSince),
           lte(schema.proposals.end, now),
         ),
       );
