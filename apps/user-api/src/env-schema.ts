@@ -78,16 +78,4 @@ export const envSchema = z
           "AUTHFUL_URL and AUTHFUL_PROVISIONING_API_KEY must be set together",
       });
     }
-    if (
-      data.AUTHFUL_URL &&
-      data.AUTHFUL_PROVISIONING_API_KEY &&
-      !data.USER_API_METRICS_TOKEN
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["USER_API_METRICS_TOKEN"],
-        message:
-          "USER_API_METRICS_TOKEN is required when Authful provisioning is enabled",
-      });
-    }
   });

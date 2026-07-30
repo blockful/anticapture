@@ -12,30 +12,20 @@ const BASE_ENV = {
 };
 
 describe("user API environment", () => {
+  // The metrics token gates /metrics and the per-user gauges at wiring time
+  // (index.ts), not at boot: an environment provisioned before the token
+  // existed must still start, just without the validation dashboard.
   it.each([
     ["missing", undefined],
     ["blank", ""],
-  ])(
-    "rejects Authful provisioning with a %s metrics token",
-    (_case, metricsToken) => {
-      const result = envSchema.safeParse({
-        ...BASE_ENV,
-        USER_API_METRICS_TOKEN: metricsToken,
-      });
+  ])("boots Authful provisioning with a %s metrics token", (_case, token) => {
+    const result = envSchema.safeParse({
+      ...BASE_ENV,
+      USER_API_METRICS_TOKEN: token,
+    });
 
-      if (result.success) {
-        throw new Error("expected environment validation to fail");
-      }
-      expect(result.error.issues).toEqual([
-        {
-          code: "custom",
-          path: ["USER_API_METRICS_TOKEN"],
-          message:
-            "USER_API_METRICS_TOKEN is required when Authful provisioning is enabled",
-        },
-      ]);
-    },
-  );
+    expect(result.success).toBe(true);
+  });
 
   it("accepts Authful provisioning with protected metrics", () => {
     const result = envSchema.safeParse({
