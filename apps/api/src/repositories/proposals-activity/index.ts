@@ -71,6 +71,17 @@ export class DrizzleProposalsActivityRepository {
     return this.activityEndCondition(activityEnd, "v.timestamp");
   }
 
+  /**
+   * Lower bound of the same window, on the vote. A proposal whose voting period
+   * overlaps the period start is in scope, but a vote cast on it before that
+   * start happened outside the period and must not read as activity inside it.
+   * With no `fromDate` the caller passes the address's first vote, which no vote
+   * can precede, so the bound is a no-op there.
+   */
+  private voteStartCondition(activityStart: number, timestampColumn: string) {
+    return sql` AND ${sql.raw(timestampColumn)} >= ${activityStart}`;
+  }
+
   async getFirstVoteTimestamp(address: Address): Promise<number | null> {
     // Only consider votes on non-canceled proposals so activityStart matches
     // the activity scope (canceled proposals are excluded from the metrics).
@@ -117,6 +128,7 @@ export class DrizzleProposalsActivityRepository {
     address: Address,
     daoId: DaoIdEnum,
     proposalIds: string[],
+    activityStart: number,
     activityEnd?: number,
   ): Promise<DbVote[]> {
     if (proposalIds.length === 0) return [];
@@ -130,6 +142,7 @@ export class DrizzleProposalsActivityRepository {
           proposalIds.map((id) => sql`${id}`),
           sql.raw(", "),
         )})
+        ${this.voteStartCondition(activityStart, "timestamp")}
         ${this.activityEndCondition(activityEnd, "timestamp")}
     `;
 
@@ -191,7 +204,7 @@ export class DrizzleProposalsActivityRepository {
         p.*,
         v.tx_hash as vote_id, v.voter_account_id, v.proposal_id, v.support, v.voting_power, v.reason, v.timestamp as vote_timestamp
       FROM proposals_onchain p
-      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}${this.voteEndCondition(activityEnd)}
+      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}${this.voteStartCondition(activityStart, "v.timestamp")}${this.voteEndCondition(activityEnd)}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         ${this.activityEndCondition(activityEnd, "p.timestamp")}
         AND UPPER(p.status) <> 'CANCELED'
@@ -204,7 +217,7 @@ export class DrizzleProposalsActivityRepository {
     const countQuery = sql`
       SELECT COUNT(*) as total_count
       FROM proposals_onchain p
-      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}${this.voteEndCondition(activityEnd)}
+      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}${this.voteStartCondition(activityStart, "v.timestamp")}${this.voteEndCondition(activityEnd)}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         ${this.activityEndCondition(activityEnd, "p.timestamp")}
         AND UPPER(p.status) <> 'CANCELED'

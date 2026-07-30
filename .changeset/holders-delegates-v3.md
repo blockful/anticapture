@@ -16,7 +16,10 @@ inside it. Both `GET /:dao/proposals-activity` and
 `GET /:dao/voting-powers/inactive-summary` also bound the vote by `toDate`: a
 proposal that opens near the end of the period stays votable after it, so a vote
 cast later no longer counts as activity inside a period that closed before the
-vote existed. The proposal is still listed, with no vote attached. On AAVE, `fromValue`/`toValue` on `GET /:dao/voting-powers` now filter the
+vote existed. The proposal is still listed, with no vote attached. The same bound
+applies at the other end: a proposal whose voting period overlaps `fromDate` is
+in scope, but a vote cast on it before that date happened outside the period and
+no longer counts as activity inside it either. On AAVE, `fromValue`/`toValue` on `GET /:dao/voting-powers` now filter the
 delegated voting power alone instead of the combined total (delegated power plus
 the account's own balance), matching both the `votingPower` ordering on the same
 endpoint and every other DAO's behavior, so the range a client asks for matches

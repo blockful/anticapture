@@ -164,11 +164,13 @@ describe("InactiveVotingPowerSummaryRepository", () => {
         txHash: "0xvoteA",
         voterAccountId: DELEGATE_A,
         proposalId: "proposal-old",
+        timestamp: 50000n,
       }),
       createVote({
         txHash: "0xvoteB",
         voterAccountId: DELEGATE_B,
         proposalId: "proposal-window",
+        timestamp: 550000n,
       }),
     ]);
 
@@ -244,6 +246,47 @@ describe("InactiveVotingPowerSummaryRepository", () => {
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
       undefined,
+      50000,
+    );
+
+    expect(result.inactiveDelegatedVotingPower).toBe(0n);
+  });
+
+  it("ignores votes cast before fromDate on a proposal that overlaps the window", async () => {
+    await db
+      .insert(accountPower)
+      .values(createAccountPower({ accountId: DELEGATE_A, votingPower: 500n }));
+    // Votable over [1000, 101000], so it overlaps a window starting at 50000.
+    await db
+      .insert(proposalsOnchain)
+      .values(createProposal({ id: "proposal-1", timestamp: 1000n }));
+    await db
+      .insert(votesOnchain)
+      .values(createVote({ voterAccountId: DELEGATE_A, timestamp: 20000n }));
+
+    const result = await repository.getInactiveDelegatedVotingPowerSummary(
+      VOTING_PERIOD_SECONDS,
+      50000,
+    );
+
+    expect(result.totalProposals).toBe(1);
+    // The only vote predates the window, so the delegate cast nothing inside it.
+    expect(result.inactiveDelegatedVotingPower).toBe(500n);
+  });
+
+  it("counts votes cast at or after fromDate as active", async () => {
+    await db
+      .insert(accountPower)
+      .values(createAccountPower({ accountId: DELEGATE_A, votingPower: 500n }));
+    await db
+      .insert(proposalsOnchain)
+      .values(createProposal({ id: "proposal-1", timestamp: 1000n }));
+    await db
+      .insert(votesOnchain)
+      .values(createVote({ voterAccountId: DELEGATE_A, timestamp: 50000n }));
+
+    const result = await repository.getInactiveDelegatedVotingPowerSummary(
+      VOTING_PERIOD_SECONDS,
       50000,
     );
 

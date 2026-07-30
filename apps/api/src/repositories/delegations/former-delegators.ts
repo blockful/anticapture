@@ -67,6 +67,14 @@ export class FormerDelegatorsRepository {
    * `DelegateChanged`, all sharing the transaction hash, log index and
    * timestamp, and sequencing them individually would read each one as a move
    * away from its own sibling.
+   *
+   * Events are sequenced by (timestamp, log_index), which is a chronological
+   * order only while no two blocks share a timestamp: `log_index` restarts in
+   * every block, so same-second blocks could be interleaved and the wrong event
+   * read as the move-away one. Every chain indexed today has a block time of two
+   * seconds or more (Ethereum, Optimism, Scroll), so the tie cannot happen. A
+   * sub-second chain would need a block number carried on `delegations` and
+   * sequenced ahead of `log_index`.
    */
   private buildFormerDelegatorsCte(address: Address) {
     return sql`

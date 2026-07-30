@@ -24,6 +24,11 @@ export class InactiveVotingPowerSummaryRepository {
     // Proposals that open near the end of the window stay votable past it, so a
     // vote cast after `toDate` must not count as activity inside the window.
     const voteToFilter = toDate ? sql` AND v.timestamp <= ${toDate}` : sql``;
+    // Mirror image: a proposal whose voting period overlaps `fromDate` can also
+    // have been voted on before it, and that vote is outside the window too.
+    const voteFromFilter = fromDate
+      ? sql` AND v.timestamp >= ${fromDate}`
+      : sql``;
 
     const query = sql`
       WITH window_proposals AS (
@@ -39,7 +44,7 @@ export class InactiveVotingPowerSummaryRepository {
             SELECT 1
             FROM votes_onchain v
             WHERE v.voter_account_id = ap.account_id
-              AND v.proposal_id IN (SELECT id FROM window_proposals)${voteToFilter}
+              AND v.proposal_id IN (SELECT id FROM window_proposals)${voteFromFilter}${voteToFilter}
           )
         ), 0)::text AS inactive_delegated_voting_power
       FROM account_power ap
