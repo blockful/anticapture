@@ -97,11 +97,15 @@ export interface DaoOverviewConfig {
   };
   securityCouncil?: {
     isActive: boolean;
+    /** Card heading (rendered uppercase). Defaults to "Security Council". */
+    label?: string;
     vetoCouncilAddress: string;
     multisig: {
       threshold: number;
       signers: number;
       externalLink: string;
+      /** Tooltip next to the multisig link. Falls back to a generated description. */
+      description?: string;
     };
     expiration: {
       date: string;

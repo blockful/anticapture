@@ -12,6 +12,7 @@ import {
   GovernanceImplementationEnum,
   RiskAreaEnum,
 } from "@/shared/types/enums";
+import { calculateMonthsBefore } from "@/shared/utils/calculateMonthsBefore";
 
 export const COMP: DaoConfiguration = {
   name: "Compound",
@@ -47,6 +48,30 @@ export const COMP: DaoConfiguration = {
       logic: "For",
       quorumCalculation: QUORUM_CALCULATION_TYPES.COMPOUND,
       proposalThreshold: "25K $COMP",
+    },
+    securityCouncil: {
+      isActive: true,
+      label: "Proposal Guardian",
+      // CompoundGovernor.proposalGuardian() -> Compound Community Multisig,
+      // expiry 1898467200 (2030-02-28 00:00:00 UTC), last extended 2026-02-19.
+      vetoCouncilAddress: "0xbbf3f1421D886E9b2c5D716B5192aC998af2012c",
+      multisig: {
+        threshold: 5,
+        signers: 9,
+        externalLink:
+          "https://app.safe.global/home?safe=eth:0xbbf3f1421D886E9b2c5D716B5192aC998af2012c",
+        description:
+          "The Proposal Guardian is the Compound Community Multisig, with nine signers needing five signatures to cancel a proposal on the Governor contract.",
+      },
+      expiration: {
+        startDate: "February 19, 2026",
+        date: "February 28, 2030",
+        timestamp: 1898467200,
+        alertExpiration: calculateMonthsBefore({
+          monthsBeforeTimestamp: 3,
+          timestamp: 1898467200,
+        }),
+      },
     },
   },
   attackProfitability: {
@@ -158,7 +183,7 @@ export const COMP: DaoConfiguration = {
         currentSetting:
           "Compound has the Proposal Guardian, a multisig responsible for canceling malicious proposals.",
         impact:
-          "The Security Council can protect the DAO from malicious proposals by canceling them after the 4/8 multisig approval.",
+          "The Security Council can protect the DAO from malicious proposals by canceling them after the 5/9 multisig approval.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
         nextStep:
