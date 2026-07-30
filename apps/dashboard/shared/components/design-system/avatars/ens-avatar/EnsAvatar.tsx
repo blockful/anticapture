@@ -198,6 +198,7 @@ export const EnsAvatar = ({
             className="object-cover"
             onError={handleImageError}
             {...imageProps}
+            unoptimized
           />
         </div>
       );
