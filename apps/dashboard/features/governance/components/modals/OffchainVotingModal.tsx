@@ -114,19 +114,16 @@ export const OffchainVotingModal = ({
     const nowSeconds = Date.now() / 1000;
     if (nowSeconds < proposal.start || nowSeconds >= proposal.end) return false;
     if (voteUiType === "approval") return (value as number[]).length > 0;
-    if (voteUiType === "weighted") {
+    // Both allocation ballots render the same control, which clamps at 100 and
+    // tells the voter the total must equal 100% — so both gate on that. Snapshot
+    // normalizes either type's weights, so only their ratios matter and nothing
+    // expressible is lost.
+    if (voteUiType === "weighted" || voteUiType === "quadratic") {
       const total = Object.values(value as Record<string, number>).reduce(
         (a, b) => a + b,
         0,
       );
       return total === 100;
-    }
-    if (voteUiType === "quadratic") {
-      const total = Object.values(value as Record<string, number>).reduce(
-        (a, b) => a + b,
-        0,
-      );
-      return total > 0;
     }
     return true;
   })();
