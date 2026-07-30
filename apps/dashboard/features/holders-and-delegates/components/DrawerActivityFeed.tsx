@@ -6,7 +6,7 @@ import type {
   FeedEventsQueryParamsRelevanceEnumKey,
 } from "@anticapture/client";
 import { useFeedEventsInfinite } from "@anticapture/client/hooks";
-import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 
 import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
@@ -18,8 +18,10 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import type { EntityType } from "@/shared/types/entities";
 import { groupFeedEventsByDate } from "@/shared/utils/groupFeedEventsByDate";
 
+type RelevanceOption = FeedEventsQueryParamsRelevanceEnumKey | "ALL";
+
 const RELEVANCE_OPTIONS: {
-  value: FeedEventsQueryParamsRelevanceEnumKey | "ALL";
+  value: RelevanceOption;
   label: string;
 }[] = [
   { value: "ALL", label: "All" },
@@ -27,6 +29,8 @@ const RELEVANCE_OPTIONS: {
   { value: "MEDIUM", label: "Medium" },
   { value: "LOW", label: "Low" },
 ];
+
+const RELEVANCE_VALUES = RELEVANCE_OPTIONS.map((option) => option.value);
 
 interface DrawerActivityFeedProps {
   address: string;
@@ -41,9 +45,12 @@ export const DrawerActivityFeed = ({
     "feedOrder",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
   );
+  // Enum parsed, not a plain string: the API rejects any other value with a 400,
+  // so a stale `?feedRelevance=foo` would leave this tab stuck on an error state
+  // until the query string was cleared by hand.
   const [relevance, setRelevance] = useQueryState(
     "feedRelevance",
-    parseAsString.withDefault("ALL"),
+    parseAsStringEnum<RelevanceOption>(RELEVANCE_VALUES).withDefault("ALL"),
   );
 
   const {
@@ -125,7 +132,7 @@ export const DrawerActivityFeed = ({
           <SegmentedControl
             size="sm"
             value={relevance}
-            onValueChange={setRelevance}
+            onValueChange={(value) => setRelevance(value as RelevanceOption)}
             items={RELEVANCE_OPTIONS.map((opt) => ({
               value: opt.value,
               label: opt.label,

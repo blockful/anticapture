@@ -2,7 +2,7 @@
 
 import { UserCheck } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import type { ReactElement } from "react";
 import { useMemo } from "react";
 
@@ -39,6 +39,14 @@ const TABS = [
 
 const DAY_IN_SECONDS = 24 * 60 * 60;
 
+// Every value the period switcher can hold: the presets plus its two synthetic
+// options.
+const PERIOD_VALUES: string[] = [
+  ...Object.values(TimeInterval),
+  MAX_PERIOD,
+  CUSTOM_PERIOD,
+];
+
 const parseDateParam = (value: string | null): Date | undefined => {
   if (!value) return undefined;
   const parsed = new Date(`${value}T00:00:00`);
@@ -60,9 +68,12 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoId]));
 
   const defaultDays = TimeInterval.NINETY_DAYS;
-  const [days, setDays] = useQueryState(
+  // Enum parsed, not a plain string: a stale `?days=foo` would otherwise reach
+  // the switcher as a selected value while the tables silently fell back to the
+  // default period.
+  const [daysParam, setDays] = useQueryState(
     "days",
-    parseAsString.withDefault(defaultDays),
+    parseAsStringEnum(PERIOD_VALUES).withDefault(defaultDays),
   );
   // Namespaced on purpose: the drawer's Balance History tab already owns plain
   // `from`/`to` as address filters, and it clears them on every tab change.
@@ -104,6 +115,12 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     }),
     [fromParam, toParam],
   );
+
+  // `custom` only means something alongside a valid range: on its own it would
+  // read as Custom in the switcher while the tables used the default period.
+  const hasCustomRange = Boolean(customRange.from && customRange.to);
+  const days =
+    daysParam === CUSTOM_PERIOD && !hasCustomRange ? defaultDays : daysParam;
 
   const { fromDate, toDate } = useMemo(() => {
     if (days === MAX_PERIOD) return { fromDate: undefined, toDate: undefined };
