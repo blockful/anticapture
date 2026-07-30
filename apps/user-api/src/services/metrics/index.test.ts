@@ -202,10 +202,10 @@ describe("validation metrics snapshot", () => {
   });
 
   it.each([
-    ["23:30 GMT-3", "2026-07-28T02:30:00.000Z", "2026-07-27T03:00:00.000Z"],
-    ["00:30 GMT-3", "2026-07-28T03:30:00.000Z", "2026-07-28T03:00:00.000Z"],
+    ["23:30 UTC", "2026-07-27T23:30:00.000Z", "2026-07-27T00:00:00.000Z"],
+    ["00:30 UTC", "2026-07-28T00:30:00.000Z", "2026-07-28T00:00:00.000Z"],
   ])(
-    "requests activity since the correct midnight at %s",
+    "requests activity since UTC midnight at %s, matching the usage buckets",
     async (_, now, since) => {
       let requestedSince: Date | undefined;
       const service = new MetricsSnapshotService(
