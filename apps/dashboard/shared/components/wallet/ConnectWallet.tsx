@@ -111,11 +111,15 @@ export const ConnectWallet = ({
                   >
                     {account.ensAvatar ? (
                       <div className="relative size-6 overflow-hidden rounded-full">
+                        {/* The ENS avatar text record is owner-controlled and
+                            can point at any host, so it can't be covered by the
+                            next.config remotePatterns allowlist. */}
                         <Image
                           src={account.ensAvatar}
                           alt={account.displayName || "ENS Avatar"}
                           fill
                           className="object-cover"
+                          unoptimized
                         />
                       </div>
                     ) : (
