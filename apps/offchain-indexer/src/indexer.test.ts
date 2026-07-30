@@ -388,6 +388,30 @@ describe("Indexer", () => {
     void promise;
   });
 
+  it("keeps the reveal retryable when the vote write fails", async () => {
+    const repo = createSimpleRepository({ revealPendingIds: ["p-shutter"] });
+    repo.upsertVotes = vi.fn(async () => {
+      throw new Error("vote batch too large");
+    });
+    const provider = createSimpleProvider({
+      revealedProposals: [
+        makeProposal({ id: "p-shutter", state: "closed", scores: [400, 100] }),
+      ],
+      revealedVotes: [makeVote({ proposalId: "p-shutter", voter: "0xaaa" })],
+    });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    // Persisting the revealed tally is what drops the proposal out of
+    // getRevealPendingProposalIds, so it must not land while the votes are
+    // missing — otherwise the next pass never re-reads the encrypted choices.
+    expect(repo.upsertedProposals).toEqual([]);
+
+    void promise;
+  });
+
   it("skips the reveal re-read when no proposal has a zero tally", async () => {
     const repo = createSimpleRepository({ revealPendingIds: [] });
     const provider = createSimpleProvider();

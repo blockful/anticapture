@@ -128,9 +128,12 @@ export class Indexer {
     ]);
 
     // Upserted without advancing either cursor: this is an out-of-band re-read,
-    // not progress through the timeline.
-    await this.repository.upsertProposals(proposals);
+    // not progress through the timeline. Votes first, because writing the
+    // revealed tally is what removes the proposal from getRevealPendingProposalIds:
+    // if the vote write then failed, the reveal would never be retried and the
+    // encrypted choices would stay stale forever.
     await this.repository.upsertVotes(votes);
+    await this.repository.upsertProposals(proposals);
 
     const revealed = proposals.filter(
       (proposal) =>
