@@ -206,6 +206,50 @@ describe("InactiveVotingPowerSummaryRepository", () => {
     expect(result.totalProposals).toBe(1);
   });
 
+  it("ignores votes cast after toDate on a proposal opened inside the window", async () => {
+    await db
+      .insert(accountPower)
+      .values(createAccountPower({ accountId: DELEGATE_A, votingPower: 500n }));
+    // Opens inside the window, still votable after it ends.
+    await db
+      .insert(proposalsOnchain)
+      .values(createProposal({ id: "proposal-1", timestamp: 1000n }));
+    await db
+      .insert(votesOnchain)
+      .values(createVote({ voterAccountId: DELEGATE_A, timestamp: 90000n }));
+
+    const result = await repository.getInactiveDelegatedVotingPowerSummary(
+      VOTING_PERIOD_SECONDS,
+      undefined,
+      50000,
+    );
+
+    expect(result.totalProposals).toBe(1);
+    // The only vote landed after the window closed, so the delegate was
+    // inactive for the period the user selected.
+    expect(result.inactiveDelegatedVotingPower).toBe(500n);
+  });
+
+  it("counts votes cast inside the window as active", async () => {
+    await db
+      .insert(accountPower)
+      .values(createAccountPower({ accountId: DELEGATE_A, votingPower: 500n }));
+    await db
+      .insert(proposalsOnchain)
+      .values(createProposal({ id: "proposal-1", timestamp: 1000n }));
+    await db
+      .insert(votesOnchain)
+      .values(createVote({ voterAccountId: DELEGATE_A, timestamp: 40000n }));
+
+    const result = await repository.getInactiveDelegatedVotingPowerSummary(
+      VOTING_PERIOD_SECONDS,
+      undefined,
+      50000,
+    );
+
+    expect(result.inactiveDelegatedVotingPower).toBe(0n);
+  });
+
   it("reports zero proposals when none fall inside the window", async () => {
     await db
       .insert(accountPower)

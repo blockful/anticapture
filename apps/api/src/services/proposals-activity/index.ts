@@ -79,6 +79,7 @@ export interface ProposalsActivityRepository {
     address: Address,
     daoId: DaoIdEnum,
     proposalIds: string[],
+    activityEnd?: number,
   ): Promise<DbVote[]>;
 
   getProposalsWithVotesAndPagination(
@@ -203,6 +204,7 @@ export class ProposalsActivityService {
       address,
       daoId,
       allProposals.map((p: DbProposal) => p.id),
+      toDate,
     );
     const analytics = this.calculateAnalytics(allProposals, allUserVotes);
 

@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 
-import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
@@ -32,9 +32,13 @@ function AavePageContent() {
     "days",
     parseAsStringEnum(Object.values(TimeInterval)).withDefault(defaultDays),
   );
+  // Enum parsed like the shared section: a stale `?tab=foo` would otherwise
+  // render Token Holders with neither tab button highlighted.
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsString.withDefault("tokenHolders"),
+    parseAsStringEnum<TabId>(["tokenHolders", "delegates"]).withDefault(
+      "tokenHolders",
+    ),
   );
 
   const setDrawerAddress = useQueryState("drawerAddress")[1];
@@ -88,7 +92,7 @@ function AavePageContent() {
                         key={tab.id}
                         id={tab.id}
                         label={tab.label}
-                        activeTab={activeTab as TabId}
+                        activeTab={activeTab}
                         setActiveTab={handleTabChange}
                       />
                     ))}

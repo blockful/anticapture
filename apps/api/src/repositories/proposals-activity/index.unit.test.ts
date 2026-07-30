@@ -261,6 +261,66 @@ describe("DrizzleProposalsActivityRepository", () => {
       const ids = result.map((v) => v.id).sort();
       expect(ids).toEqual(["0xvote1", "0xvote2", "0xvote3"]);
     });
+
+    it("excludes votes cast after activityEnd", async () => {
+      await db
+        .insert(proposalsOnchain)
+        .values(createProposal({ id: "proposal-1", timestamp: 1699700000n }));
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-1",
+          timestamp: 1699900000n,
+        }),
+      );
+
+      const votes = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        1699800000,
+      );
+
+      expect(votes).toEqual([]);
+    });
+
+    it("keeps votes cast at or before activityEnd", async () => {
+      await db
+        .insert(proposalsOnchain)
+        .values(createProposal({ id: "proposal-1", timestamp: 1699700000n }));
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-1",
+          timestamp: 1699800000n,
+        }),
+      );
+
+      const votes = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        1699800000,
+      );
+
+      expect(votes).toHaveLength(1);
+    });
+
+    it("keeps every vote when no activityEnd is given", async () => {
+      await db
+        .insert(proposalsOnchain)
+        .values(createProposal({ id: "proposal-1", timestamp: 1699700000n }));
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-1",
+          timestamp: 1699900000n,
+        }),
+      );
+
+      const votes = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, [
+        "proposal-1",
+      ]);
+
+      expect(votes).toHaveLength(1);
+    });
   });
 
   describe("getProposals", () => {
@@ -426,6 +486,62 @@ describe("DrizzleProposalsActivityRepository", () => {
         "proposal-3",
       ]);
       expect(result.totalCount).toBe(2);
+    });
+
+    it("keeps the proposal but drops a vote cast after activityEnd", async () => {
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-3",
+          timestamp: 1699900000n,
+        }),
+      );
+
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        1699800000,
+      );
+
+      const proposal3 = result.proposals.find(
+        (p) => p.proposal.id === "proposal-3",
+      );
+      // The proposal opened inside the window, so it stays listed; the vote
+      // landed after the window closed, so it must not be attached.
+      expect(proposal3).toBeDefined();
+      expect(proposal3!.userVote).toBeNull();
+      expect(result.totalCount).toBe(2);
+    });
+
+    it("keeps a vote cast inside the window attached to its proposal", async () => {
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-3",
+          timestamp: 1699750000n,
+        }),
+      );
+
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        1699800000,
+      );
+
+      const proposal3 = result.proposals.find(
+        (p) => p.proposal.id === "proposal-3",
+      );
+      expect(proposal3!.userVote).not.toBeNull();
     });
   });
 });

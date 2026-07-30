@@ -74,17 +74,32 @@ export const VotingPowerHistoryTable = ({
     { value: "smallest-first", label: "Smallest first" },
   ];
 
-  // low importance filter hides deltas below 1 whole token unless the user
-  // sets an explicit minimum in the amount filter
-  const effectiveFilterVariables = useMemo(
-    () => ({
+  // The low importance switch hides deltas below 1 whole token. It takes the
+  // larger of its floor and any user minimum rather than deferring to the user
+  // value: a minimum under 1 token would otherwise bring sub-token rows back
+  // while the switch still reads as on. Turning the switch off is the way to
+  // see them. `fromValue` comes from the URL, so an unparseable value is
+  // ignored instead of silently defeating the floor.
+  const effectiveFilterVariables = useMemo(() => {
+    const lowImportanceFloor = filterLowImportance
+      ? parseUnits("1", decimals)
+      : 0n;
+    let userMin = 0n;
+    try {
+      userMin = filterVariables.fromValue
+        ? BigInt(filterVariables.fromValue)
+        : 0n;
+    } catch {
+      userMin = 0n;
+    }
+    const effectiveMin =
+      userMin > lowImportanceFloor ? userMin : lowImportanceFloor;
+
+    return {
       ...filterVariables,
-      fromValue:
-        filterVariables.fromValue ||
-        (filterLowImportance ? parseUnits("1", decimals).toString() : null),
-    }),
-    [filterVariables, filterLowImportance, decimals],
-  );
+      fromValue: effectiveMin > 0n ? effectiveMin.toString() : null,
+    };
+  }, [filterVariables, filterLowImportance, decimals]);
 
   const {
     delegationHistory,

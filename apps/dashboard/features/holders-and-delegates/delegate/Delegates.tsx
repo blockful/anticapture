@@ -36,6 +36,7 @@ import type { DaoPathParamsDaoEnumKey } from "@anticapture/client";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { parseAsAddress } from "@/shared/utils/parseAsAddress";
 
 type ActivityStatus = "inactive" | "neverVoted" | "noProposals";
 
@@ -100,7 +101,13 @@ export const Delegates = ({
 }: DelegatesProps) => {
   const pageLimit: number = 20;
 
-  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
+  // Validated like the Token Holders tab does: a stale or hand-edited
+  // `?drawerAddress=foo` would otherwise open the drawer on a value every
+  // address query below rejects.
+  const [drawerAddress, setDrawerAddress] = useQueryState(
+    "drawerAddress",
+    parseAsAddress,
+  );
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
   const [sortOrder, setSortOrder] = useQueryState(

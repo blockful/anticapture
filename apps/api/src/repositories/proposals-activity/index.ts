@@ -60,6 +60,17 @@ export class DrizzleProposalsActivityRepository {
     return sql` AND ${sql.raw(timestampColumn)} <= ${activityEnd}`;
   }
 
+  /**
+   * Same bound applied to the vote itself. A proposal opened just before the
+   * period ends stays votable after it, so without this a vote cast later would
+   * count as activity inside a period that closed before the vote existed. It
+   * belongs in the LEFT JOIN's ON clause, never in WHERE, so the proposal is
+   * still listed with no vote attached.
+   */
+  private voteEndCondition(activityEnd: number | undefined) {
+    return this.activityEndCondition(activityEnd, "v.timestamp");
+  }
+
   async getFirstVoteTimestamp(address: Address): Promise<number | null> {
     // Only consider votes on non-canceled proposals so activityStart matches
     // the activity scope (canceled proposals are excluded from the metrics).
@@ -106,6 +117,7 @@ export class DrizzleProposalsActivityRepository {
     address: Address,
     daoId: DaoIdEnum,
     proposalIds: string[],
+    activityEnd?: number,
   ): Promise<DbVote[]> {
     if (proposalIds.length === 0) return [];
 
@@ -118,6 +130,7 @@ export class DrizzleProposalsActivityRepository {
           proposalIds.map((id) => sql`${id}`),
           sql.raw(", "),
         )})
+        ${this.activityEndCondition(activityEnd, "timestamp")}
     `;
 
     const result = await this.db.execute<DbVote>(query);
@@ -178,7 +191,7 @@ export class DrizzleProposalsActivityRepository {
         p.*,
         v.tx_hash as vote_id, v.voter_account_id, v.proposal_id, v.support, v.voting_power, v.reason, v.timestamp as vote_timestamp
       FROM proposals_onchain p
-      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
+      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}${this.voteEndCondition(activityEnd)}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         ${this.activityEndCondition(activityEnd, "p.timestamp")}
         AND UPPER(p.status) <> 'CANCELED'
@@ -191,7 +204,7 @@ export class DrizzleProposalsActivityRepository {
     const countQuery = sql`
       SELECT COUNT(*) as total_count
       FROM proposals_onchain p
-      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}
+      LEFT JOIN votes_onchain v ON p.id = v.proposal_id AND v.voter_account_id = ${address}${this.voteEndCondition(activityEnd)}
       WHERE (p.timestamp + ${votingPeriodSeconds}) >= ${activityStart}
         ${this.activityEndCondition(activityEnd, "p.timestamp")}
         AND UPPER(p.status) <> 'CANCELED'
