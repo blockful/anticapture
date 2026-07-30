@@ -1,5 +1,55 @@
 # @anticapture/dashboard
 
+## 2.11.0
+
+### Minor Changes
+
+- [#2087](https://github.com/blockful/anticapture/pull/2087) [`6bedeb2`](https://github.com/blockful/anticapture/commit/6bedeb2b27f5d763c8ee11eb0aa6a01c74549951) Thanks [@brunod-e](https://github.com/brunod-e)! - Rework the off-chain (Snapshot) proposal experience.
+
+  Each vote type now renders its own purpose-built ballot: single choice and basic
+  radio rows, an approval ballot with an "N of M selected" counter, a weighted
+  ballot with per-option steppers, colored allocation dots, a stacked allocation
+  bar and a running total that must reach 100% before voting, and a ranked ballot
+  with drag-to-reorder plus keyboard-accessible chevrons. Option lists longer than
+  8 entries get a filter input and a fixed-height scroll area. The single-choice
+  ballot can also show a live impact preview: a per-option bar, voting power and
+  share, with the shift the vote would cause on the selected row.
+
+  Adds the off-chain current-results card: ranked per-option tallies with the
+  leading option highlighted, shutter-aware encrypted and reveal-pending states
+  that show dashes instead of zeros, and an optimistic-vote chip that reports
+  indexing progress after a vote is signed.
+
+  Off-chain statuses are now derived on their own terms instead of borrowing the
+  on-chain enum, so a Snapshot vote can no longer read "Executed". Basic
+  proposals resolve to a quorum-aware Passed or Rejected, every other vote type
+  closes with its winner surfaced, and Active is visually distinct from Passed.
+
+- [#2086](https://github.com/blockful/anticapture/pull/2086) [`bcd09f1`](https://github.com/blockful/anticapture/commit/bcd09f177254c1583018ac621f986359f741cd35) Thanks [@brunod-e](https://github.com/brunod-e)! - connecting a wallet no longer signs you in: delegating, voting and publishing a proposal open the wallet picker directly and ask for no SIWE signature, on both Anticapture and whitelabel. A connected wallet without a session is now a valid state (it used to be force-disconnected), and the header connect button opens the wallet picker instead of the login modal. The sign-in modal is still reached from the surfaces that need a server session, such as proposal drafts and API keys. Switching to a different wallet account also takes effect immediately: drafts, API keys and the account chip stop treating the previous account as signed in from that moment, instead of staying usable until the sign-out request comes back
+
+### Patch Changes
+
+- [#2085](https://github.com/blockful/anticapture/pull/2085) [`7ad2cee`](https://github.com/blockful/anticapture/commit/7ad2cee9e347d775420668d5f2cd14678f790bbd) Thanks [@pikonha](https://github.com/pikonha)! - API keys page UX review fixes (ClickUp 86ajr888u): the save-key modal keeps
+  the default modal width (same as the create step), drops the key name and the
+  em-dash from its description, titles the token block "Key" with a same-size
+  "MCP" title below it, and no longer shows the "waiting for the first call"
+  status. Switching the client tab animates the code block height. The keys
+  table truncates long names with an ellipsis, the usage key switcher is now a
+  dropdown with a max width (truncating long names), the empty usage state uses
+  the BlankSlate component, and the usage section is shorter. The connect
+  section is titled "MCP" with "connect your AI agent" moved into the
+  description, and the modal close button is the small version. Long key
+  names are truncated in the usage chart tooltip and legend, and the
+  stacked-bar-chart legend scrolls instead of wrapping so it no longer
+  overflows into the x-axis on mobile.
+
+- [#2095](https://github.com/blockful/anticapture/pull/2095) [`45bf07e`](https://github.com/blockful/anticapture/commit/45bf07efeda51efa0625f36ec3ad35b60448bd7e) Thanks [@pikonha](https://github.com/pikonha)! - Cut 12.7k lines of mocked chart datasets out of the client bundle: delete the unreferenced token-distribution dataset and load the attack-profitability dataset dynamically, only when the research-pending blur is active. Replace the wildcard `next/image` `remotePatterns` with an explicit host allowlist and drop the deprecated `domains` key.
+
+- [#2091](https://github.com/blockful/anticapture/pull/2091) [`6aed140`](https://github.com/blockful/anticapture/commit/6aed1407371c81f075a408992b2ff2a86b97c6c5) Thanks [@pikonha](https://github.com/pikonha)! - Fix Snapshot proposal statuses by indexing quorum data and deriving no-quorum, stale-active, and
+  passed states correctly, so Snapshot proposals no longer show on-chain queue states.
+- Updated dependencies [[`6aed140`](https://github.com/blockful/anticapture/commit/6aed1407371c81f075a408992b2ff2a86b97c6c5)]:
+  - @anticapture/client@2.0.1
+
 ## 2.10.0
 
 ### Minor Changes
