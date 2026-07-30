@@ -9,7 +9,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertOctagon, ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useAccount } from "wagmi";
 
 import { GovernanceActionModal } from "@/features/governance/components/modals/GovernanceActionModal";
@@ -56,6 +56,20 @@ import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCus
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 
+/** How often to re-ask the API for a vote Snapshot has already accepted. */
+const VOTE_INDEXING_POLL_MS = 5_000;
+
+/**
+ * Identity of the indexed vote a submission replaces. Snapshot votes carry no
+ * id, and a revote overwrites the previous one, so "the API returned a vote" is
+ * not enough to call a replacement indexed — it has to differ from the vote
+ * that was already there.
+ */
+const voteFingerprint = (
+  vote?: { created: number; choice?: Array<string | null> } | null,
+): string =>
+  vote ? `${vote.created}:${(vote.choice ?? []).join(",")}` : "no-vote";
+
 interface ProposalSectionProps {
   isOffchain?: boolean;
   isWhitelabel?: boolean;
@@ -95,8 +109,12 @@ export const ProposalSection = ({
   // added on top of the next proposal's tally.
   const voteKey = `${address ?? ""}:${offchainProposalId}`;
   const prevVoteKeyRef = useRef(voteKey);
+  // Fingerprint of the vote the pending submission replaces, captured at
+  // signature time (see voteFingerprint).
+  const replacedVoteRef = useRef(voteFingerprint(null));
   if (prevVoteKeyRef.current !== voteKey) {
     prevVoteKeyRef.current = voteKey;
+    replacedVoteRef.current = voteFingerprint(null);
     if (localOffchainVoteLabel !== null) setLocalOffchainVoteLabel(null);
     if (optimisticScores !== null) setOptimisticScores(null);
     if (signedAt !== null) setSignedAt(null);
@@ -187,7 +205,18 @@ export const ProposalSection = ({
       orderDirection: "desc",
     },
     {
-      query: { enabled: !!isOffchain && !!offchainProposalId && !!address },
+      query: {
+        enabled: !!isOffchain && !!offchainProposalId && !!address,
+        // Snapshot accepts a vote before our indexer has ingested it, so the
+        // single refetch fired at signature time usually still returns the
+        // pre-vote state. Poll until the submitted vote actually shows up.
+        refetchInterval: (query) =>
+          signedAt !== null &&
+          voteFingerprint(query.state.data?.items?.[0]) ===
+            replacedVoteRef.current
+            ? VOTE_INDEXING_POLL_MS
+            : false,
+      },
     },
   );
 
@@ -204,15 +233,20 @@ export const ProposalSection = ({
   const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
   const offchainVoteLabel = localOffchainVoteLabel ?? apiOffchainVoteLabel;
 
-  // The vote counts as indexed once the API returns it for this wallet, which
-  // flips the chip to "Indexed" and stops applying the optimistic delta.
+  // The vote counts as indexed once the API returns a vote other than the one
+  // the submission replaced, which flips the chip to "Indexed" and stops
+  // applying the optimistic delta. Comparing against the replaced vote matters
+  // for revotes: the old vote is already indexed, so any returned vote would
+  // otherwise read as the new one and restore the previous tally on screen.
+  const isVoteIndexed =
+    voteFingerprint(userOffchainVote) !== replacedVoteRef.current;
   const {
     status: indexingStatus,
     isFading: isIndexingChipFading,
     isOptimistic,
   } = useOffchainVoteIndexing({
     signedAt,
-    isIndexed: !!apiOffchainVoteLabel,
+    isIndexed: isVoteIndexed,
   });
 
   // Dropped the moment the indexer has the vote, otherwise the delta would be
@@ -265,8 +299,27 @@ export const ProposalSection = ({
 
   const queryClient = useQueryClient();
 
+  // The tally is refetched again the moment the vote lands: the invalidation at
+  // signature time races the indexer and usually loses.
+  useEffect(() => {
+    if (signedAt === null || !isVoteIndexed) return;
+    void queryClient.invalidateQueries({
+      queryKey: offchainProposalByIdQueryKey(
+        offchainDaoKey,
+        offchainProposalId,
+      ),
+    });
+  }, [
+    signedAt,
+    isVoteIndexed,
+    queryClient,
+    offchainDaoKey,
+    offchainProposalId,
+  ]);
+
   const handleOffchainVoteSuccess = useCallback(
-    (voteLabel: string, optimisticScores: number[]) => {
+    (voteLabel: string, optimisticScores: number[] | null) => {
+      replacedVoteRef.current = voteFingerprint(userOffchainVote);
       setLocalOffchainVoteLabel(voteLabel);
       // Held until the indexer reflects the vote, so the tally moves the moment
       // the signature returns instead of after the next poll.
@@ -287,7 +340,7 @@ export const ProposalSection = ({
         ),
       });
     },
-    [queryClient, offchainDaoKey, offchainProposalId],
+    [queryClient, offchainDaoKey, offchainProposalId, userOffchainVote],
   );
 
   const adaptedOffchainProposal: ProposalViewData | null =
