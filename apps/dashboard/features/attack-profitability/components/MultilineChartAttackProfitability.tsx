@@ -254,7 +254,9 @@ export const MultilineChartAttackProfitability = ({
   }, [chartData, mocked, setCsvData]);
 
   const isLoading =
-    isLoadingDaoTokenPriceHistoricalData || isLoadingTimeSeriesData;
+    isLoadingDaoTokenPriceHistoricalData ||
+    isLoadingTimeSeriesData ||
+    (mocked && mockedDatasets === null);
 
   if (isLoading) {
     return (
