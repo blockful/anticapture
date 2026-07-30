@@ -195,6 +195,8 @@ export class MetricsSnapshotService {
     users: [],
   };
   private refreshing = false;
+  /** UTC day the published usage/activeUsers belong to, as an epoch ms. */
+  private usageDay: number | null = null;
 
   constructor(
     private readonly dataSource: MetricsDataSource,
@@ -215,11 +217,17 @@ export class MetricsSnapshotService {
     try {
       const now = this.now();
       const since = utcMidnight(now);
+      // Daily figures are only carried over while the day they were measured in
+      // is still current: past midnight an unreachable Authful must report zero
+      // rather than keep republishing yesterday's counts as today's.
+      const sameDay = this.usageDay === since.getTime();
       // Publish DB-derived counts before touching Authful: if Authful is down
       // the account/key gauges must not stay stuck at their initial zeros.
       const counts = await this.dataSource.counts();
       const previousUsageByUserId = new Map(
-        this.current.users.map(({ userId, usage }) => [userId, usage]),
+        sameDay
+          ? this.current.users.map(({ userId, usage }) => [userId, usage])
+          : [],
       );
       const users = counts.users.map((userMetrics) => ({
         ...userMetrics,
@@ -229,6 +237,7 @@ export class MetricsSnapshotService {
         ...this.current,
         accountsTotal: counts.accountsTotal,
         keysLive: counts.keysLive,
+        activeUsers: sameDay ? this.current.activeUsers : emptyActiveUsers(),
         users,
       };
 
@@ -268,6 +277,7 @@ export class MetricsSnapshotService {
           usage: usageByUserId.get(userMetrics.userId) ?? 0,
         })),
       };
+      this.usageDay = since.getTime();
     } finally {
       this.refreshing = false;
     }
