@@ -1,7 +1,5 @@
 "use client";
 
-import { ArrowUp } from "lucide-react";
-
 import { RadioIndicator } from "@/shared/components/design-system/form/fields";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -56,6 +54,11 @@ export const SingleChoiceOptions = ({
           : score;
         const percent =
           projectedTotal > 0 ? (projectedScore / projectedTotal) * 100 : 0;
+        // Split the bar so the voter sees their power as a green segment stacked
+        // on top of the already-indexed share, instead of one opaque total.
+        const currentPercent =
+          projectedTotal > 0 ? (score / projectedTotal) * 100 : 0;
+        const gainPercent = percent - currentPercent;
 
         return (
           <label
@@ -82,16 +85,16 @@ export const SingleChoiceOptions = ({
               <>
                 <div className="bg-surface-contrast flex h-1 w-[152px] shrink-0 items-start">
                   <div
-                    className="bg-primary h-1"
-                    style={{ width: `${percent}%` }}
+                    className="bg-primary h-1 transition-[width] duration-300"
+                    style={{ width: `${currentPercent}%` }}
                   />
+                  {gainPercent > 0 && (
+                    <div
+                      className="bg-success h-1 transition-[width] duration-300"
+                      style={{ width: `${gainPercent}%` }}
+                    />
+                  )}
                 </div>
-                {checked && liveImpact.votingPower > 0 && (
-                  <span className="text-success font-inter flex shrink-0 items-center gap-1 text-[14px] leading-[20px]">
-                    <ArrowUp className="size-3.5" aria-hidden="true" />
-                    {formatNumberUserReadable(liveImpact.votingPower)}
-                  </span>
-                )}
                 <span className="text-secondary font-inter shrink-0 whitespace-nowrap text-[14px] font-normal leading-[20px]">
                   {formatNumberUserReadable(projectedScore)}
                 </span>

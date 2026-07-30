@@ -207,7 +207,8 @@ export const Quadratic: Story = {
 
 /**
  * Frame 09 — live impact preview on the single-choice ballot: per-row bar, voting
- * power and share, with a green delta on the selected row. The frame's own
+ * power and share. The selected row's bar carries a green segment sized to the
+ * voter's power, so the delta reads off the bar itself. The frame's own
  * numbers show only 3 rows of a longer list, so they do not sum to 100%; these
  * are self-consistent so the projection math is checkable.
  */
