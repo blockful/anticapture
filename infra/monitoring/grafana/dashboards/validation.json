@@ -5,14 +5,14 @@
   "schemaVersion": 38,
   "version": 1,
   "refresh": "30s",
-  "timezone": "America/Sao_Paulo",
+  "timezone": "utc",
   "tags": ["anticapture", "user-api", "validation"],
   "time": { "from": "now-30d", "to": "now" },
   "panels": [
     {
       "id": 1,
       "title": "People using it",
-      "description": "All registered accounts and callers active today (GMT-3).",
+      "description": "All registered accounts and callers active today (UTC — the day boundary Authful's usage buckets use).",
       "type": "stat",
       "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
