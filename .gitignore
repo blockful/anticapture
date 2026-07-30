@@ -157,4 +157,7 @@ apps/gateful/openapi/gateful.json
 # Local planning/spec artifacts (superpowers) — not part of the repo
 docs/superpowers/
 
+# Browser-automation debugging output (page snapshots, screenshots)
+.playwright-mcp/
+
 .work/
