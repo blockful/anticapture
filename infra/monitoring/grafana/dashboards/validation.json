@@ -61,7 +61,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(tenant_requests_total{tenant=\"user:*\"}[1d]))",
+          "expr": "sum(increase(tenant_requests_total{tenant=~\"user:.*\"}[1d]))",
           "legendFormat": "Calls",
           "refId": "A"
         }
