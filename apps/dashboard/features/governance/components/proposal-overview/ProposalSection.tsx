@@ -233,6 +233,17 @@ export const ProposalSection = ({
   const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
   const offchainVoteLabel = localOffchainVoteLabel ?? apiOffchainVoteLabel;
 
+  // The indexed ballot the next submission would replace, so the ballot's
+  // live-impact preview can subtract it instead of stacking on top. Snapshot
+  // models `choice` as 1-based indices; only single-index ballots draw the
+  // preview, so anything else stays null.
+  const previousOffchainVote = (() => {
+    if (!userOffchainVote || apiOffchainVoteChoice.length !== 1) return null;
+    const choice = Number(apiOffchainVoteChoice[0]);
+    if (!Number.isFinite(choice)) return null;
+    return { choice, votingPower: userOffchainVote.vp ?? 0 };
+  })();
+
   // The vote counts as indexed once the API returns a vote other than the one
   // the submission replaced, which flips the chip to "Indexed" and stops
   // applying the optimistic delta. Comparing against the replaced vote matters
@@ -550,6 +561,7 @@ export const ProposalSection = ({
               onClose={closeOffchainModals}
               proposal={rawOffchainProposal}
               hasVoted={offchainHasVoted}
+              previousVote={previousOffchainVote}
               onVoteSuccess={handleOffchainVoteSuccess}
             />
           )}

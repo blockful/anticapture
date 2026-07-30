@@ -33,6 +33,12 @@ interface OffchainVotingModalProps {
   proposal: OffchainProposal;
   hasVoted?: boolean;
   /**
+   * The wallet's indexed ballot, for revotes: the live-impact preview has to
+   * replace it rather than stack on top of it. Single-index ballots only, which
+   * is the only type that renders the preview.
+   */
+  previousVote?: { choice: number; votingPower: number } | null;
+  /**
    * `optimisticScores` carries the voter's power on the choices they just
    * picked, aligned with the proposal's choices, so the results card can show
    * the vote before the indexer has it. Null when the ballot type's tally can't
@@ -49,6 +55,7 @@ export const OffchainVotingModal = ({
   onClose,
   proposal,
   hasVoted = false,
+  previousVote = null,
   onVoteSuccess,
 }: OffchainVotingModalProps) => {
   const [value, setValue] = useState<VoteChoice | null>(null);
@@ -216,7 +223,11 @@ export const OffchainVotingModal = ({
             liveImpact={
               isShutter
                 ? null
-                : { scores: normalizeScores(proposal.scores), votingPower }
+                : {
+                    scores: normalizeScores(proposal.scores),
+                    votingPower,
+                    previous: previousVote,
+                  }
             }
           />
         );

@@ -19,7 +19,34 @@ export interface LiveImpactPreview {
   scores: number[];
   /** The connected wallet's voting power, i.e. the shift its vote would cause. */
   votingPower: number;
+  /**
+   * The wallet's already-indexed ballot, when this is a revote. Its power is
+   * part of `scores`, so the preview has to take it back out and model a
+   * replacement — otherwise the old choice keeps its share and the voter is
+   * counted twice in the denominator.
+   */
+  previous?: { choice: number; votingPower: number } | null;
 }
+
+/**
+ * The tally the preview projects from: this wallet's already-indexed ballot
+ * taken back out, so a revote replaces its power instead of adding a second
+ * copy of it. Identical to the indexed scores for a first vote.
+ */
+export const liveImpactBaseline = ({
+  scores,
+  previous,
+}: Pick<LiveImpactPreview, "scores" | "previous">): {
+  scores: number[];
+  total: number;
+} => {
+  const base = scores.map((score, index) =>
+    previous?.choice === index + 1
+      ? Math.max(0, score - previous.votingPower)
+      : score,
+  );
+  return { scores: base, total: base.reduce((sum, score) => sum + score, 0) };
+};
 
 interface SingleChoiceOptionsProps {
   choices: string[];
@@ -34,10 +61,11 @@ export const SingleChoiceOptions = ({
   onChange,
   liveImpact = null,
 }: SingleChoiceOptionsProps) => {
+  const baseline = liveImpact ? liveImpactBaseline(liveImpact) : null;
+
   // Projected totals: the selected option gains the voter's power, so the
   // denominator grows too and every other row's share dips accordingly.
-  const currentTotal =
-    liveImpact?.scores.reduce((sum, score) => sum + score, 0) ?? 0;
+  const currentTotal = baseline?.total ?? 0;
   const projectedTotal =
     liveImpact && value !== null
       ? currentTotal + liveImpact.votingPower
@@ -48,7 +76,7 @@ export const SingleChoiceOptions = ({
       options={toBallotOptions(choices)}
       renderRow={({ choice, label }) => {
         const checked = value === choice;
-        const score = liveImpact?.scores[choice - 1] ?? 0;
+        const score = baseline?.scores[choice - 1] ?? 0;
         const projectedScore = checked
           ? score + (liveImpact?.votingPower ?? 0)
           : score;
