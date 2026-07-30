@@ -13,7 +13,7 @@ import { TimeInterval } from "@/shared/types/enums";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
-import { DelegationTable } from "@/app/aave/holders-and-delegates/DelegationTable";
+import { DelegationTable } from "@/app/aave/stakeholders/DelegationTable";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";

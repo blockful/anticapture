@@ -57,6 +57,10 @@ const nextConfig = {
         destination: "/whitelabel/:daoId/stakeholders",
         permanent: true,
       },
+      // Also covers /aave/holders-and-delegates. AAVE needs its own
+      // implementation (multi-token balances, no proposal activity), so it keeps
+      // a static app/aave/stakeholders route: static segments win over the
+      // [daoId] one, and the specialized page stays reachable.
       {
         source: "/:daoId/holders-and-delegates",
         destination: "/:daoId/stakeholders",
