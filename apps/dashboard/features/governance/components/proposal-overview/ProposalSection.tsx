@@ -530,6 +530,7 @@ export const ProposalSection = ({
               isOpen={isVotingModalOpen}
               onClose={closeOffchainModals}
               onChangeVote={() => setIsChangingVote(true)}
+              canChangeVote={offchainStatus?.offchainStatus === "active"}
               choices={offchainChoices}
               weights={votedWeights}
               choiceLabels={votedChoiceLabels}

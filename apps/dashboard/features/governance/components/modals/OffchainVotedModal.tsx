@@ -11,6 +11,11 @@ interface OffchainVotedModalProps {
   onClose: () => void;
   /** Opens the interactive ballot so the voter can replace this vote. */
   onChangeVote: () => void;
+  /**
+   * False once voting has closed: Snapshot rejects a late vote, so the ballot
+   * must not be offered at all.
+   */
+  canChangeVote: boolean;
   choices: string[];
   /**
    * Per-choice share as percentages, aligned with `choices`. Null for ballots
@@ -31,6 +36,7 @@ export const OffchainVotedModal = ({
   isOpen,
   onClose,
   onChangeVote,
+  canChangeVote,
   choices,
   weights,
   choiceLabels,
@@ -52,10 +58,14 @@ export const OffchainVotedModal = ({
         if (!open) onClose();
       }}
       title="Your Vote"
-      description="You can change your vote until the proposal closes."
+      description={
+        canChangeVote
+          ? "You can change your vote until the proposal closes."
+          : "Voting has closed, so this vote is final."
+      }
       cancelLabel="Close"
-      confirmLabel="Change vote"
-      onConfirm={onChangeVote}
+      confirmLabel={canChangeVote ? "Change vote" : undefined}
+      onConfirm={canChangeVote ? onChangeVote : undefined}
       className="flex max-h-[75dvh] flex-col"
       bodyClassName="min-h-0 overflow-y-auto p-0"
     >

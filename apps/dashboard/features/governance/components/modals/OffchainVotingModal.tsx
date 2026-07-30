@@ -102,6 +102,10 @@ export const OffchainVotingModal = ({
 
   const isVoteEnabled = (() => {
     if (!value || !address || isVoting || isPrivacyLoading) return false;
+    // Snapshot rejects anything outside the voting window; don't invite a
+    // signature that can only fail.
+    const nowSeconds = Date.now() / 1000;
+    if (nowSeconds < proposal.start || nowSeconds >= proposal.end) return false;
     if (voteUiType === "approval") return (value as number[]).length > 0;
     if (voteUiType === "weighted") {
       const total = Object.values(value as Record<string, number>).reduce(

@@ -32,6 +32,7 @@ export const VotedModal: Story = {
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
           onChangeVote={() => setIsOpen(false)}
+          canChangeVote
           choices={[
             "USDC reserve",
             "ETH staking",
@@ -61,6 +62,7 @@ export const VotedModalRanked: Story = {
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
           onChangeVote={() => setIsOpen(false)}
+          canChangeVote
           choices={["Security audits", "Grants round 4", "Protocol R&D"]}
           weights={null}
           choiceLabels={["Grants round 4", "Security audits", "Protocol R&D"]}
