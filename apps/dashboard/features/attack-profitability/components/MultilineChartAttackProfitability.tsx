@@ -2,7 +2,7 @@
 
 import Lottie from "lottie-react";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Data } from "react-csv/lib/core";
 import {
   CartesianGrid,
@@ -25,7 +25,6 @@ import { ResearchPendingChartBlur } from "@/shared/components/charts/ResearchPen
 import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWatermark";
 import type { ChartConfig } from "@/shared/components/ui/chart";
 import { ChartContainer } from "@/shared/components/ui/chart";
-import { mockedAttackProfitabilityDatasets } from "@/shared/constants/mocked-data/mocked-attack-profitability-datasets";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type {
   TokenMetricItem,
@@ -93,6 +92,26 @@ export const MultilineChartAttackProfitability = ({
     [timeSeriesData],
   );
 
+  const [mockedDatasets, setMockedDatasets] = useState<Record<
+    string,
+    MultilineChartDataSetPoint[]
+  > | null>(null);
+
+  useEffect(() => {
+    if (!mocked || mockedDatasets !== null) return;
+    let mounted = true;
+    import("@/shared/constants/mocked-data/mocked-attack-profitability-datasets")
+      .then((m) => {
+        if (mounted) setMockedDatasets(m.mockedAttackProfitabilityDatasets);
+      })
+      .catch(() => {
+        if (mounted) setMockedDatasets({});
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [mocked, mockedDatasets]);
+
   const quorumValue = Number(
     formatUnits(daoData?.quorum || 0n, daoConfig.decimals),
   );
@@ -121,7 +140,7 @@ export const MultilineChartAttackProfitability = ({
 
     let datasets: Record<string, MultilineChartDataSetPoint[]> = {};
     if (mocked) {
-      datasets = mockedAttackProfitabilityDatasets;
+      datasets = mockedDatasets ?? {};
     } else {
       const nonZeroLiquidTreasuryData = liquidTreasuryData.filter(
         (item) => item.value > 0,
@@ -213,6 +232,7 @@ export const MultilineChartAttackProfitability = ({
     filterData,
     chartConfig,
     mocked,
+    mockedDatasets,
     quorumValue,
     daoTokenPriceHistoricalData,
     liquidTreasuryData,
