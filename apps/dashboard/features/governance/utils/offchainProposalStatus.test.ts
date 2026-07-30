@@ -137,6 +137,21 @@ describe("getOffchainProposalStatus", () => {
     );
   });
 
+  it("approval, uses scoresTotal as the turnout denominator", () => {
+    // Every voter approved two of the three options, so the scores sum to twice
+    // the voting power that actually took part.
+    const result = getOffchainProposalStatus({
+      type: "approval",
+      start: START,
+      end: END,
+      choices: ["Alpha", "Beta", "Gamma"],
+      scores: [100, 60, 40],
+      scoresTotal: 100,
+      now: AFTER_END,
+    });
+    expect(result.winner).toEqual({ label: "Alpha", percent: 100 });
+  });
+
   it("omits the winner when a closed proposal has no votes", () => {
     const result = getOffchainProposalStatus({
       type: "approval",

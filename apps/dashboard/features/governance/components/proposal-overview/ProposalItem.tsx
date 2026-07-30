@@ -369,6 +369,7 @@ export const ProposalItem = ({
       start: offchainProposal.start,
       end: offchainProposal.end,
       scores: offchainScores,
+      scoresTotal: offchainProposal.scoresTotal,
       choices: offchainProposal.choices ?? [],
       quorum: offchainProposal.quorum,
     });

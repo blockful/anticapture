@@ -30,6 +30,13 @@ export interface OffchainProposalStatusInput {
   end: number;
   /** Per-choice voting power, aligned with `choices`. */
   scores: number[];
+  /**
+   * Snapshot's `scores_total`: the distinct voting power that took part. It is
+   * the turnout denominator, and only equals the sum of `scores` for ballots
+   * where each voter backs a single choice — on an approval vote a voter's
+   * power lands on every option they approve, so summing double-counts it.
+   */
+  scoresTotal?: number;
   choices: string[];
   /**
    * Space quorum. Undefined or 0 means the space sets no quorum, so the
@@ -51,8 +58,7 @@ export interface OffchainProposalStatusResult {
   winner?: { label: string; percent: number };
 }
 
-const resolveWinner = (choices: string[], scores: number[]) => {
-  const total = scores.reduce((sum, score) => sum + score, 0);
+const resolveWinner = (choices: string[], scores: number[], total: number) => {
   if (total <= 0) return undefined;
 
   let bestIndex = 0;
@@ -71,6 +77,7 @@ export const getOffchainProposalStatus = ({
   start,
   end,
   scores,
+  scoresTotal,
   choices,
   quorum,
   quorumType,
@@ -81,14 +88,19 @@ export const getOffchainProposalStatus = ({
   if (nowSeconds < start) return { status: "pending" };
   if (nowSeconds < end) return { status: "active" };
 
+  // Falls back to the sum for proposals indexed before scores_total existed.
+  const total =
+    scoresTotal && scoresTotal > 0
+      ? scoresTotal
+      : scores.reduce((sum, score) => sum + score, 0);
+
   // Voting has ended.
   if (!isBasicVote(type)) {
-    return { status: "closed", winner: resolveWinner(choices, scores) };
+    return { status: "closed", winner: resolveWinner(choices, scores, total) };
   }
 
   const forVotes = scores[FOR] ?? 0;
   const againstVotes = scores[AGAINST] ?? 0;
-  const total = scores.reduce((sum, score) => sum + score, 0);
   const hasQuorum = quorum !== undefined && quorum > 0;
 
   // Rejection-type quorum: reaching it is what rejects the proposal.

@@ -163,6 +163,7 @@ export const ProposalSection = ({
             start: rawOffchainProposal.start,
             end: rawOffchainProposal.end,
             scores: offchainScores,
+            scoresTotal: rawOffchainProposal.scoresTotal,
             choices: offchainChoices,
             quorum: rawOffchainProposal.quorum,
           })

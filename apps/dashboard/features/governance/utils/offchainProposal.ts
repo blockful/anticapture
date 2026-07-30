@@ -22,6 +22,8 @@ export interface OffchainProposalStatusViewInput {
   start: number;
   end: number;
   scores: Array<number | null>;
+  /** Snapshot's `scores_total` — the turnout denominator. */
+  scoresTotal?: number;
   choices: Array<string | null>;
   quorum?: number;
   quorumType?: string | null;
@@ -46,6 +48,7 @@ export const getOffchainProposalStatusView = (
     start: input.start,
     end: input.end,
     scores: normalizeScores(input.scores),
+    scoresTotal: input.scoresTotal,
     choices: normalizeChoices(input.choices),
     quorum: input.quorum,
     quorumType: input.quorumType,
