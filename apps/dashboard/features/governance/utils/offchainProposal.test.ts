@@ -1,91 +1,103 @@
 import { ProposalStatus } from "@/features/governance/types";
 
-import { getOffchainProposalStatus } from "./offchainProposal";
+import { getOffchainProposalStatusView } from "./offchainProposal";
 
-const NOW_SECONDS = 1_800_000_000;
+const CLOSED_WINDOW = { start: 1_000, end: 2_000 };
 
-describe("getOffchainProposalStatus", () => {
-  it("returns ongoing only for active proposals that have not ended", () => {
-    const status = getOffchainProposalStatus(
-      "active",
-      "basic",
-      [1, 0],
-      1,
-      0,
-      NOW_SECONDS + 1,
-      NOW_SECONDS,
-    );
+describe("getOffchainProposalStatusView", () => {
+  const basicClosed = (scores: number[]) =>
+    getOffchainProposalStatusView({
+      type: "basic",
+      ...CLOSED_WINDOW,
+      scores,
+      choices: ["For", "Against", "Abstain"],
+    });
 
-    expect(status).toBe(ProposalStatus.ONGOING);
-  });
-
-  it("does not keep stale active proposals ongoing after end time", () => {
-    const status = getOffchainProposalStatus(
-      "active",
-      "basic",
-      [1, 0],
-      1,
-      0,
-      NOW_SECONDS - 1,
-      NOW_SECONDS,
-    );
-
+  // The regression this replaces: a passing Snapshot basic vote used to map to
+  // ProposalStatus.EXECUTED, which rendered as "Executed" on a proposal that
+  // was never executed anywhere.
+  it("maps a passing basic proposal to PASSED, never EXECUTED", () => {
+    const { status } = basicClosed([70, 30, 0]);
     expect(status).toBe(ProposalStatus.PASSED);
+    expect(status).not.toBe(ProposalStatus.EXECUTED);
   });
 
-  it("returns no quorum when Snapshot quorum was not reached", () => {
-    const status = getOffchainProposalStatus(
-      "closed",
-      "basic",
-      [5_347_713.99, 0, 1_813.59],
-      5_349_527,
-      10_000_000,
-      NOW_SECONDS - 1,
-      NOW_SECONDS,
-    );
-
-    expect(status).toBe(ProposalStatus.NO_QUORUM);
+  it("maps a failing basic proposal to REJECTED", () => {
+    expect(basicClosed([30, 70, 0]).status).toBe(ProposalStatus.REJECTED);
   });
 
-  it("returns passed instead of an on-chain queue state for passed Snapshot proposals", () => {
-    const status = getOffchainProposalStatus(
-      "closed",
-      "basic",
-      [10_000_001, 0],
-      10_000_001,
-      10_000_000,
-      NOW_SECONDS - 1,
-      NOW_SECONDS,
-    );
-
-    expect(status).toBe(ProposalStatus.PASSED);
-  });
-
-  it("returns defeated when quorum is reached but against wins", () => {
-    const status = getOffchainProposalStatus(
-      "closed",
-      "basic",
-      [1, 2],
-      3,
-      1,
-      NOW_SECONDS - 1,
-      NOW_SECONDS,
-    );
-
-    expect(status).toBe(ProposalStatus.DEFEATED);
-  });
-
-  it("keeps non-basic closed proposals closed", () => {
-    const status = getOffchainProposalStatus(
-      "closed",
-      "single-choice",
-      [3, 1],
-      4,
-      1,
-      NOW_SECONDS - 1,
-      NOW_SECONDS,
-    );
-
+  it("maps non-basic vote types to CLOSED and surfaces the winner", () => {
+    const { status, winner } = getOffchainProposalStatusView({
+      type: "approval",
+      ...CLOSED_WINDOW,
+      scores: [10, 60, 30],
+      choices: ["Alpha", "Beta", "Gamma"],
+    });
     expect(status).toBe(ProposalStatus.CLOSED);
+    expect(winner).toEqual({ label: "Beta", percent: 60 });
+  });
+
+  it("maps an open proposal to ONGOING and an unstarted one to PENDING", () => {
+    const now = Date.now();
+    expect(
+      getOffchainProposalStatusView({
+        type: "basic",
+        start: Math.floor(now / 1000) - 10,
+        end: Math.floor(now / 1000) + 10_000,
+        scores: [1, 0, 0],
+        choices: ["For", "Against", "Abstain"],
+      }).status,
+    ).toBe(ProposalStatus.ONGOING);
+
+    expect(
+      getOffchainProposalStatusView({
+        type: "basic",
+        start: Math.floor(now / 1000) + 10_000,
+        end: Math.floor(now / 1000) + 20_000,
+        scores: [0, 0, 0],
+        choices: ["For", "Against", "Abstain"],
+      }).status,
+    ).toBe(ProposalStatus.PENDING);
+  });
+
+  // Derived from the voting window alone, never from Snapshot's `state` string,
+  // so a proposal Snapshot still reports as "active" past its end time settles
+  // to its real outcome instead of staying ongoing.
+  it("settles a proposal whose end time has passed", () => {
+    expect(basicClosed([1, 0, 0]).status).toBe(ProposalStatus.PASSED);
+  });
+
+  // Quorum-aware: a basic ballot that wins on For/Against but misses the space
+  // quorum is rejected, not passed.
+  it("rejects a basic proposal that misses quorum", () => {
+    const { status } = getOffchainProposalStatusView({
+      type: "basic",
+      ...CLOSED_WINDOW,
+      scores: [5_347_713.99, 0, 1_813.59],
+      choices: ["For", "Against", "Abstain"],
+      quorum: 10_000_000,
+    });
+    expect(status).toBe(ProposalStatus.REJECTED);
+  });
+
+  it("passes a basic proposal that clears quorum", () => {
+    const { status } = getOffchainProposalStatusView({
+      type: "basic",
+      ...CLOSED_WINDOW,
+      scores: [10_000_001, 0, 0],
+      choices: ["For", "Against", "Abstain"],
+      quorum: 10_000_000,
+    });
+    expect(status).toBe(ProposalStatus.PASSED);
+  });
+
+  it("tolerates null entries in scores and choices", () => {
+    const { status } = getOffchainProposalStatusView({
+      type: "basic",
+      ...CLOSED_WINDOW,
+      scores: [70, null, null],
+      choices: ["For", null, "Abstain"],
+    });
+    expect(status).toBe(ProposalStatus.PASSED);
   });
 });

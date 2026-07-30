@@ -86,6 +86,66 @@ export class Indexer {
         "error syncing votes - will retry",
       );
     }
+
+    try {
+      await this.reconcileRevealedProposals();
+    } catch (err) {
+      logger.error(
+        { err },
+        "error reconciling revealed proposals - will retry",
+      );
+    }
+  }
+
+  /**
+   * Re-reads closed proposals whose tally is still all zeros.
+   *
+   * Both sync passes are forward-only on `created`, and a Shutter proposal only
+   * reveals its votes after voting closes — by which point the cursors have
+   * moved past it. Without this pass its scores and its encrypted vote choices
+   * are never re-read, so a closed Shutter election shows 0 / 0.0% forever.
+   *
+   * Runs every cycle over proposals that *ended* inside the window. Bounding on
+   * `end` rather than `created` matters: a proposal opened long before it closes
+   * would otherwise never be selected after its reveal. A zero-tally proposal
+   * with genuinely no votes is re-read cheaply and stays zero, so no state is
+   * needed to tell the two apart.
+   */
+  private async reconcileRevealedProposals(): Promise<void> {
+    const now = Math.floor(Date.now() / 1000);
+    const endedSince = now - RECONCILE_WINDOW_SECONDS;
+
+    const pendingIds = await this.repository.getRevealPendingProposalIds(
+      endedSince,
+      now,
+    );
+
+    if (pendingIds.length === 0) return;
+
+    const [proposals, votes] = await Promise.all([
+      this.provider.fetchProposalsByIds(pendingIds),
+      this.provider.fetchVotesByProposalIds(pendingIds),
+    ]);
+
+    // Upserted without advancing either cursor: this is an out-of-band re-read,
+    // not progress through the timeline.
+    await this.repository.upsertProposals(proposals);
+    await this.repository.upsertVotes(votes);
+
+    const revealed = proposals.filter(
+      (proposal) =>
+        (proposal.scores ?? []).reduce((sum, score) => sum + (score ?? 0), 0) >
+        0,
+    );
+
+    logger.info(
+      {
+        checked: pendingIds.length,
+        revealed: revealed.length,
+        votes: votes.length,
+      },
+      "reconciled reveal-pending proposals",
+    );
   }
 
   private async syncProposals(): Promise<void> {

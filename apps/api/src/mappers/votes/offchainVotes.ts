@@ -47,11 +47,37 @@ export const OffchainVoteChoiceSchema = z
     items: { type: "string", nullable: false },
   });
 
+/**
+ * Per-choice weights, for the ballots that have them.
+ *
+ * Weighted and quadratic votes are stored as `{choiceIndex: weight}`. Reducing
+ * that to `choice` keeps the indices but drops the weights, so a voter's split
+ * could not be shown back to them. This preserves the values alongside it.
+ * Every other vote type stores a number or an array and has no weights.
+ */
+export const OffchainVoteWeightsSchema = z
+  .preprocess((val) => {
+    if (typeof val !== "object" || val === null || Array.isArray(val)) {
+      return null;
+    }
+    const entries = Object.entries(val).map(
+      ([choice, weight]) => [choice, Number(weight)] as const,
+    );
+    if (entries.some(([, weight]) => !Number.isFinite(weight))) return null;
+    return Object.fromEntries(entries);
+  }, z.record(z.string(), z.number()).nullable())
+  .openapi("SnapshotVoteWeights", {
+    type: "object",
+    description:
+      "Per-choice weights for weighted and quadratic votes, keyed by 1-indexed choice. Null for vote types that carry no weights.",
+  });
+
 export const OffchainVoteResponseSchema = z
   .object({
     voter: z.string().openapi({ format: "ethereum-address" }),
     proposalId: z.string(),
     choice: OffchainVoteChoiceSchema,
+    weights: OffchainVoteWeightsSchema,
     vp: z.coerce.number(),
     reason: z.string(),
     created: z.number().int(),

@@ -43,6 +43,9 @@ export class OffchainVoteRepository {
           voter: offchainVotes.voter,
           proposalId: offchainVotes.proposalId,
           choice: offchainVotes.choice,
+          // Same column, read a second way: `choice` keeps the picked indices,
+          // `weights` keeps the per-choice values weighted ballots carry.
+          weights: offchainVotes.choice,
           vp: offchainVotes.vp,
           reason: offchainVotes.reason,
           created: offchainVotes.created,
@@ -109,6 +112,9 @@ export class OffchainVoteRepository {
           voter: offchainVotes.voter,
           proposalId: offchainVotes.proposalId,
           choice: offchainVotes.choice,
+          // Same column, read a second way: `choice` keeps the picked indices,
+          // `weights` keeps the per-choice values weighted ballots carry.
+          weights: offchainVotes.choice,
           vp: offchainVotes.vp,
           reason: offchainVotes.reason,
           created: offchainVotes.created,

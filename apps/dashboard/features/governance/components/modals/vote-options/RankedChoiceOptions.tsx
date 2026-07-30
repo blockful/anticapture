@@ -1,10 +1,12 @@
 "use client";
 
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import { cn } from "@/shared/utils/cn";
+
+import { BallotSection, ballotRowClassName } from "./BallotSection";
 
 interface RankedChoiceOptionsProps {
   choices: string[];
@@ -16,66 +18,99 @@ export const RankedChoiceOptions = ({
   choices,
   onChange,
 }: RankedChoiceOptionsProps) => {
-  // rankedChoices holds choice indices (0-based) in ranked order
+  // 0-based choice indices held in ranked order.
   const [rankedIndices, setRankedIndices] = useState<number[]>(
     choices.map((_, i) => i),
   );
+  const [draggedPosition, setDraggedPosition] = useState<number | null>(null);
 
   useEffect(() => {
-    // Emit 1-indexed choices in ranked order
+    // Emit 1-indexed choices in ranked order.
     onChange(rankedIndices.map((i) => i + 1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rankedIndices]);
 
-  const moveUp = (position: number) => {
-    if (position === 0) return;
-    const next = [...rankedIndices];
-    [next[position - 1], next[position]] = [next[position], next[position - 1]];
-    setRankedIndices(next);
-  };
-
-  const moveDown = (position: number) => {
-    if (position === rankedIndices.length - 1) return;
-    const next = [...rankedIndices];
-    [next[position], next[position + 1]] = [next[position + 1], next[position]];
-    setRankedIndices(next);
+  const move = (from: number, to: number) => {
+    if (to < 0 || to >= rankedIndices.length || from === to) return;
+    setRankedIndices((current) => {
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved!);
+      return next;
+    });
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      {rankedIndices.map((choiceIndex, position) => (
-        <div
-          key={choiceIndex}
-          className={cn(
-            "border-border-default flex items-start gap-2 border px-[10px] py-2 text-left",
-          )}
-        >
-          <span className="text-secondary font-inter w-5 shrink-0 text-left text-[14px] font-normal not-italic leading-[20px]">
-            {position + 1}
-          </span>
-          <span className="font-inter text-primary min-w-0 flex-1 text-left text-[14px] font-normal not-italic leading-[20px]">
-            {choices[choiceIndex]}
-          </span>
-          <div className="flex shrink-0 items-center gap-1 self-center">
-            <IconButton
-              icon={ChevronUp}
-              variant="ghost"
-              size="sm"
-              disabled={position === 0}
-              onClick={() => moveUp(position)}
-              aria-label="Move up"
+    <BallotSection
+      options={rankedIndices.map((choiceIndex) => ({
+        choice: choiceIndex + 1,
+        label: choices[choiceIndex] ?? `Choice ${choiceIndex + 1}`,
+      }))}
+      // Ranking is an ordering, not a selection: filtering rows away would hide
+      // positions the voter still has to place.
+      enableFilter={false}
+      helper={
+        <p className="text-dimmed font-inter text-[12px] font-normal not-italic leading-[18px]">
+          Drag to reorder — all options must be ranked
+        </p>
+      }
+      renderRow={({ choice, label }) => {
+        // Rank comes from the ranked array, not the rendered position, so it stays
+        // correct while the list is filtered.
+        const position = rankedIndices.indexOf(choice - 1);
+        const isDragged = draggedPosition === position;
+        return (
+          <div
+            draggable
+            onDragStart={() => setDraggedPosition(position)}
+            onDragEnd={() => setDraggedPosition(null)}
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (draggedPosition === null || draggedPosition === position)
+                return;
+              move(draggedPosition, position);
+              setDraggedPosition(position);
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              setDraggedPosition(null);
+            }}
+            className={cn(
+              ballotRowClassName(isDragged),
+              "cursor-grab py-[6px] pl-[10px] pr-[6px] active:cursor-grabbing",
+            )}
+          >
+            <GripVertical
+              className="text-dimmed size-3.5 shrink-0"
+              aria-hidden="true"
             />
-            <IconButton
-              icon={ChevronDown}
-              variant="ghost"
-              size="sm"
-              disabled={position === rankedIndices.length - 1}
-              onClick={() => moveDown(position)}
-              aria-label="Move down"
-            />
+            <span className="border-border-contrast text-secondary font-inter flex size-5 shrink-0 items-center justify-center border text-[12px] font-normal not-italic leading-4">
+              {position + 1}
+            </span>
+            <span className="font-inter text-primary min-w-0 flex-1 text-left text-[14px] font-normal not-italic leading-[20px]">
+              {label}
+            </span>
+            <div className="flex shrink-0 items-center gap-1">
+              <IconButton
+                icon={ChevronUp}
+                variant="ghost"
+                size="sm"
+                disabled={position === 0}
+                onClick={() => move(position, position - 1)}
+                aria-label={`Move ${label} up`}
+              />
+              <IconButton
+                icon={ChevronDown}
+                variant="ghost"
+                size="sm"
+                disabled={position === rankedIndices.length - 1}
+                onClick={() => move(position, position + 1)}
+                aria-label={`Move ${label} down`}
+              />
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        );
+      }}
+    />
   );
 };

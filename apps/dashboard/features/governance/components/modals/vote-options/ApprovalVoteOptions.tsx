@@ -3,6 +3,12 @@
 import { Checkbox } from "@/shared/components/design-system/form/fields/checkbox/Checkbox";
 import { cn } from "@/shared/utils/cn";
 
+import {
+  BallotSection,
+  ballotRowClassName,
+  toBallotOptions,
+} from "./BallotSection";
+
 interface ApprovalVoteOptionsProps {
   choices: string[];
   value: number[] | null;
@@ -25,16 +31,20 @@ export const ApprovalVoteOptions = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      {choices.map((label, index) => {
-        const choice = index + 1;
+    <BallotSection
+      options={toBallotOptions(choices)}
+      labelSlot={
+        <span className="text-secondary font-inter text-[12px] font-normal not-italic leading-[18px]">
+          {selected.length} of {choices.length} selected
+        </span>
+      }
+      renderRow={({ choice, label }) => {
         const checked = selected.includes(choice);
         return (
           <label
-            key={choice}
             className={cn(
-              "hover:bg-surface-contrast flex cursor-pointer items-center gap-2 border px-[10px] py-2 transition-colors duration-300",
-              checked ? "border-highlight" : "border-border-default",
+              ballotRowClassName(checked),
+              "hover:bg-surface-contrast cursor-pointer px-[10px] py-2",
             )}
           >
             <Checkbox
@@ -46,7 +56,7 @@ export const ApprovalVoteOptions = ({
             </span>
           </label>
         );
-      })}
-    </div>
+      }}
+    />
   );
 };

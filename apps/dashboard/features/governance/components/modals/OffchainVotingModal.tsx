@@ -1,6 +1,7 @@
 "use client";
 
 import type { OffchainProposal } from "@anticapture/client";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -13,9 +14,14 @@ import { WeightedVoteOptions } from "@/features/governance/components/modals/vot
 import { useOffchainProposalPrivacy } from "@/features/governance/hooks/useOffchainProposalPrivacy";
 import { useOffchainVotingPower } from "@/features/governance/hooks/useOffchainVotingPower";
 import { useVoteOnOffchainProposal } from "@/features/governance/hooks/useVoteOnOffchainProposal";
-import { normalizeChoices } from "@/features/governance/utils/offchainProposal";
+import {
+  normalizeChoices,
+  normalizeScores,
+} from "@/features/governance/utils/offchainProposal";
 import { getOffchainVoteUiType } from "@/features/governance/utils/offchainVotingType";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
+import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { formatNumberUserReadable } from "@/shared/utils";
 
@@ -26,7 +32,12 @@ interface OffchainVotingModalProps {
   onClose: () => void;
   proposal: OffchainProposal;
   hasVoted?: boolean;
-  onVoteSuccess?: (voteLabel: string) => void;
+  /**
+   * `optimisticScores` carries the voter's power on the choices they just
+   * picked, aligned with the proposal's choices, so the results card can show
+   * the vote before the indexer has it.
+   */
+  onVoteSuccess?: (voteLabel: string, optimisticScores: number[]) => void;
 }
 
 export const OffchainVotingModal = ({
@@ -40,6 +51,9 @@ export const OffchainVotingModal = ({
   const [comment, setComment] = useState<string>("");
 
   const { address } = useAccount();
+  const { daoId } = useParams<{ daoId: string }>();
+  // DAO ids double as the governance token symbol across the dashboard (UNI, ENS, ...).
+  const tokenSymbol = daoId?.toUpperCase() ?? "";
   const { vote, isPending: isVoting } = useVoteOnOffchainProposal();
   const strategies = useMemo(
     () =>
@@ -119,6 +133,37 @@ export const OffchainVotingModal = ({
       .join(", ");
   };
 
+  /**
+   * The voter's power spread over the choices they picked, so the results card
+   * can add it on top of the indexed tally. Weighted and quadratic split it by
+   * their allocation; every other type applies the full power to each pick,
+   * which is how Snapshot itself tallies approval and ranked ballots.
+   */
+  const computeOptimisticScores = (): number[] => {
+    const delta = choices.map(() => 0);
+    if (!value) return delta;
+
+    if (typeof value === "number") {
+      if (value - 1 in delta) delta[value - 1] = votingPower;
+      return delta;
+    }
+
+    if (Array.isArray(value)) {
+      for (const choice of value) {
+        if (choice - 1 in delta) delta[choice - 1] = votingPower;
+      }
+      return delta;
+    }
+
+    const total = Object.values(value).reduce((sum, w) => sum + w, 0);
+    if (total <= 0) return delta;
+    for (const [index, weight] of Object.entries(value)) {
+      const position = Number(index) - 1;
+      if (position in delta) delta[position] = (votingPower * weight) / total;
+    }
+    return delta;
+  };
+
   const handleVote = async () => {
     if (!address || !value) return;
     try {
@@ -130,7 +175,7 @@ export const OffchainVotingModal = ({
         reason: comment,
       });
       showCustomToast("Vote submitted successfully!", "success");
-      onVoteSuccess?.(computeVoteLabel());
+      onVoteSuccess?.(computeVoteLabel(), computeOptimisticScores());
       onClose();
     } catch (err) {
       const message =
@@ -155,6 +200,12 @@ export const OffchainVotingModal = ({
             choices={choices}
             value={value as number | null}
             onChange={setValue}
+            // Shutter ballots conceal the tally, so a preview would leak it.
+            liveImpact={
+              isShutter
+                ? null
+                : { scores: normalizeScores(proposal.scores), votingPower }
+            }
           />
         );
       case "approval":
@@ -189,7 +240,6 @@ export const OffchainVotingModal = ({
             choices={choices}
             value={value as Record<string, number> | null}
             onChange={setValue}
-            maxTotal={votingPower}
           />
         );
       default:
@@ -239,63 +289,61 @@ export const OffchainVotingModal = ({
       className="flex max-h-[75dvh] flex-col"
       bodyClassName="min-h-0 overflow-y-auto p-0"
     >
-      {/* Voting Power */}
-      <div className="flex flex-col gap-[6px] p-4">
-        <p className="font-inter text-primary text-[12px] font-medium">
-          Your voting power
-        </p>
-        {isVpLoading && (
-          <p className="text-secondary text-[14px]">Loading...</p>
-        )}
-        {!isVpLoading && vpError && (
-          <p className="text-secondary text-[14px]">
-            Unable to fetch voting power
+      {/* One padded body with a 16px gap between sections, matching the frames.
+          Padding per section would stack into 32px gaps. */}
+      <div className="flex flex-col gap-4 p-4">
+        <div className="flex flex-col gap-[6px]">
+          <p className="font-inter text-primary text-[12px] font-medium">
+            Your voting power
           </p>
-        )}
-        {!isVpLoading && !vpError && (
-          <p className="text-primary text-[14px]">
-            {formatNumberUserReadable(votingPower)}
-          </p>
-        )}
-      </div>
-
-      {/* Vote options */}
-      <div className="flex flex-col items-start gap-[6px] p-4 text-left">
-        <p className="font-inter text-primary text-[12px] font-medium">
-          Your vote
-        </p>
-        <div className="w-full">{renderVoteOptions()}</div>
-      </div>
-
-      {/* Comment — omitted for shutter proposals: a plaintext reason would
-            reveal the encrypted vote before the proposal closes. */}
-      {isPrivacyLoading ? (
-        <div className="flex flex-col gap-[6px] p-4">
-          <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-            Comment <span className="text-secondary">(optional)</span>
-          </p>
-          <p className="text-secondary text-[14px]">Loading...</p>
+          {isVpLoading && (
+            <p className="text-secondary text-[14px]">Loading...</p>
+          )}
+          {!isVpLoading && vpError && (
+            <p className="text-secondary text-[14px]">
+              Unable to fetch voting power
+            </p>
+          )}
+          {!isVpLoading && !vpError && (
+            <p className="text-primary text-[14px]">
+              {formatNumberUserReadable(votingPower)} {tokenSymbol}
+            </p>
+          )}
         </div>
-      ) : isShutter ? (
-        <div className="flex flex-col gap-[6px] p-4">
+
+        {/* Each ballot renders its own "Your vote" label row so it can place a
+            selection counter or remaining-allocation chip beside it. */}
+        <div className="flex flex-col items-start text-left">
+          {renderVoteOptions()}
+        </div>
+
+        {/* Comment — omitted for shutter proposals: a plaintext reason would
+            reveal the encrypted vote before the proposal closes. */}
+        {isPrivacyLoading ? (
+          <div className="flex flex-col gap-[6px]">
+            <FormLabel>Comment (optional)</FormLabel>
+            <p className="text-secondary text-[14px]">Loading...</p>
+          </div>
+        ) : isShutter ? (
           <p className="text-secondary font-inter text-[12px] not-italic leading-4">
             Votes on this proposal are encrypted until it closes, so comments
             are disabled.
           </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-[6px] p-4">
-          <p className="font-inter text-primary text-[12px] font-medium not-italic leading-4">
-            Comment <span className="text-secondary">(optional)</span>
-          </p>
-          <textarea
-            className="border-border-default text-primary flex h-[100px] w-full items-start gap-2.5 self-stretch rounded-md border bg-transparent px-2.5 py-2 text-[14px] focus:outline-none"
-            placeholder="Enter your comment"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </div>
-      )}
+        ) : (
+          <div className="flex flex-col gap-[6px]">
+            <FormLabel htmlFor="offchain-vote-comment">
+              Comment (optional)
+            </FormLabel>
+            <Textarea
+              id="offchain-vote-comment"
+              className="h-[100px]"
+              placeholder="Enter your comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+          </div>
+        )}
+      </div>
     </Modal>
   );
 };

@@ -2,29 +2,69 @@
 
 import { RadioIndicator } from "@/shared/components/design-system/form/fields";
 import { cn } from "@/shared/utils/cn";
+import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+
+import {
+  BallotSection,
+  ballotRowClassName,
+  toBallotOptions,
+} from "./BallotSection";
+
+/**
+ * Live impact preview. Only single choice has a designed frame for this, so the
+ * other ballots deliberately ship without per-row results.
+ */
+export interface LiveImpactPreview {
+  /** Current indexed voting power per choice, aligned with `choices`. */
+  scores: number[];
+  /** The connected wallet's voting power, i.e. the shift its vote would cause. */
+  votingPower: number;
+}
 
 interface SingleChoiceOptionsProps {
   choices: string[];
   value: number | null;
   onChange: (choice: number) => void;
+  liveImpact?: LiveImpactPreview | null;
 }
 
 export const SingleChoiceOptions = ({
   choices,
   value,
   onChange,
+  liveImpact = null,
 }: SingleChoiceOptionsProps) => {
+  // Projected totals: the selected option gains the voter's power, so the
+  // denominator grows too and every other row's share dips accordingly.
+  const currentTotal =
+    liveImpact?.scores.reduce((sum, score) => sum + score, 0) ?? 0;
+  const projectedTotal =
+    liveImpact && value !== null
+      ? currentTotal + liveImpact.votingPower
+      : currentTotal;
+
   return (
-    <div className="flex flex-col gap-2">
-      {choices.map((label, index) => {
-        const choice = index + 1;
+    <BallotSection
+      options={toBallotOptions(choices)}
+      renderRow={({ choice, label }) => {
         const checked = value === choice;
+        const score = liveImpact?.scores[choice - 1] ?? 0;
+        const projectedScore = checked
+          ? score + (liveImpact?.votingPower ?? 0)
+          : score;
+        const percent =
+          projectedTotal > 0 ? (projectedScore / projectedTotal) * 100 : 0;
+        // Split the bar so the voter sees their power as a green segment stacked
+        // on top of the already-indexed share, instead of one opaque total.
+        const currentPercent =
+          projectedTotal > 0 ? (score / projectedTotal) * 100 : 0;
+        const gainPercent = percent - currentPercent;
+
         return (
           <label
-            key={choice}
             className={cn(
-              "hover:bg-surface-contrast group flex cursor-pointer items-center gap-2 border px-[10px] py-2 transition-colors duration-300",
-              checked ? "border-highlight" : "border-border-default",
+              ballotRowClassName(checked),
+              "hover:bg-surface-contrast group cursor-pointer px-[10px] py-2",
             )}
           >
             <RadioIndicator
@@ -32,12 +72,40 @@ export const SingleChoiceOptions = ({
               checked={checked}
               onChange={() => onChange(choice)}
             />
-            <span className="font-inter text-primary text-[14px] font-normal not-italic leading-[20px]">
+            <span
+              className={cn(
+                "font-inter text-primary text-[14px] font-normal not-italic leading-[20px]",
+                liveImpact && "min-w-0 flex-1 truncate",
+              )}
+            >
               {label}
             </span>
+
+            {liveImpact && (
+              <>
+                <div className="bg-surface-contrast flex h-1 w-[152px] shrink-0 items-start">
+                  <div
+                    className="bg-primary h-1 transition-[width] duration-300"
+                    style={{ width: `${currentPercent}%` }}
+                  />
+                  {gainPercent > 0 && (
+                    <div
+                      className="bg-success h-1 transition-[width] duration-300"
+                      style={{ width: `${gainPercent}%` }}
+                    />
+                  )}
+                </div>
+                <span className="text-secondary font-inter shrink-0 whitespace-nowrap text-[14px] font-normal leading-[20px]">
+                  {formatNumberUserReadable(projectedScore)}
+                </span>
+                <span className="text-primary font-inter w-11 shrink-0 text-right text-[14px] font-medium leading-[20px]">
+                  {percent.toFixed(1)}%
+                </span>
+              </>
+            )}
           </label>
         );
-      })}
-    </div>
+      }}
+    />
   );
 };

@@ -387,6 +387,79 @@ describe("SnapshotProvider", () => {
     });
   });
 
+  describe("fetchVotesByProposalIds", () => {
+    const voter = (i: number) => `0x${i.toString(16).padStart(40, "0")}`;
+
+    it("should skip the request when no ids are given", async () => {
+      await expect(provider.fetchVotesByProposalIds([])).resolves.toStrictEqual(
+        [],
+      );
+    });
+
+    it("should query inclusively at the cursor (created_gte)", async () => {
+      const cursors: unknown[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            query: string;
+            variables: { cursor: number };
+          };
+          cursors.push(body.variables.cursor);
+          expect(body.query).toContain("created_gte");
+          expect(body.query).not.toContain("created_gt:");
+          return HttpResponse.json({ data: { votes: [makeVote()] } });
+        }),
+      );
+
+      const result = await provider.fetchVotesByProposalIds(["proposal-1"]);
+
+      expect(cursors[0]).toBe(0);
+      expect(result).toHaveLength(1);
+    });
+
+    // A full page ending on a shared `created` second must not drop the revealed
+    // votes cast in that same second that spilled onto the next page. The
+    // handler filters the way Snapshot does, honouring whichever operator the
+    // query sends, so an exclusive cursor really loses the sibling here.
+    it("should not skip votes sharing the last created second across a page boundary", async () => {
+      // 999 votes on distinct seconds, then two sharing 1700000999, the second
+      // of which cannot fit on a 1000-row page.
+      const all = Array.from({ length: 1001 }, (_, i) =>
+        makeVote({
+          id: `vote-${i}`,
+          voter: voter(i + 1),
+          created: i < 999 ? 1700000000 + i : 1700000999,
+        }),
+      );
+
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            query: string;
+            variables: { cursor: number; pageSize: number };
+          };
+          const { cursor, pageSize } = body.variables;
+          const inclusive = body.query.includes("created_gte");
+          const votes = all
+            .filter((vote) =>
+              inclusive ? vote.created >= cursor : vote.created > cursor,
+            )
+            .slice(0, pageSize);
+          return HttpResponse.json({ data: { votes } });
+        }),
+      );
+
+      const result = await provider.fetchVotesByProposalIds(["proposal-1"]);
+
+      // Both votes on the shared second survive, and the boundary vote re-read
+      // by the inclusive cursor is de-duped rather than counted twice.
+      expect(result).toHaveLength(1001);
+      expect(result.filter((vote) => vote.created === 1700000999)).toHaveLength(
+        2,
+      );
+    });
+  });
+
   describe("error handling", () => {
     it("should throw on HTTP error", async () => {
       server.use(

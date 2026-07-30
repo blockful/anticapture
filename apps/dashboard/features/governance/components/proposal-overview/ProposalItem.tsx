@@ -8,13 +8,14 @@ import type { ReactNode } from "react";
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
 
+import { OffchainProposalBadge } from "@/features/governance/components/proposal-overview/OffchainProposalBadge";
 import { ProposalSourceBadge } from "@/features/governance/components/proposal-overview/ProposalSourceBadge";
 import type { OffchainProposalItem as OffchainProposalData } from "@/features/governance/hooks/useOffchainProposals";
 import type { Proposal } from "@/features/governance/types";
 import { ProposalState, ProposalStatus } from "@/features/governance/types";
 import { getTimeText } from "@/features/governance/utils/getTimeText";
 import {
-  getOffchainProposalStatus,
+  getOffchainProposalStatusView,
   normalizeChoices,
   normalizeScores,
 } from "@/features/governance/utils/offchainProposal";
@@ -57,6 +58,8 @@ export const getTextStatusColor = (status: ProposalStatus) => {
     case ProposalStatus.SUCCEEDED:
       return "text-success";
     case ProposalStatus.EXPIRED:
+      return "text-error";
+    case ProposalStatus.REJECTED:
       return "text-error";
     case ProposalStatus.NO_QUORUM:
       return "text-secondary";
@@ -118,6 +121,8 @@ export const getBackgroundStatusColor = (status: ProposalStatus) => {
       return "bg-surface-opacity-success";
     case ProposalStatus.EXPIRED:
       return "bg-surface-opacity-error";
+    case ProposalStatus.REJECTED:
+      return "bg-surface-opacity-error";
     case ProposalStatus.NO_QUORUM:
       return "bg-surface-opacity";
     case ProposalStatus.CLOSED:
@@ -149,6 +154,8 @@ export const getStatusText = (status: ProposalStatus) => {
       return "Pending Queue";
     case ProposalStatus.EXPIRED:
       return "Expired";
+    case ProposalStatus.REJECTED:
+      return "Rejected";
     case ProposalStatus.NO_QUORUM:
       return "No Quorum";
     case ProposalStatus.CLOSED:
@@ -353,14 +360,18 @@ export const ProposalItem = ({
   }, [offchainProposal]);
 
   if (offchainProposal) {
-    const status = getOffchainProposalStatus(
-      offchainProposal.state,
-      offchainProposal.type ?? "single-choice",
-      offchainScores,
-      offchainProposal.scoresTotal,
-      offchainProposal.quorum,
-      offchainProposal.end,
-    );
+    const {
+      status,
+      offchainStatus,
+      winner: offchainWinner,
+    } = getOffchainProposalStatusView({
+      type: offchainProposal.type ?? "single-choice",
+      start: offchainProposal.start,
+      end: offchainProposal.end,
+      scores: offchainScores,
+      choices: offchainProposal.choices ?? [],
+      quorum: offchainProposal.quorum,
+    });
     const isBasic = offchainProposal.type === "basic";
     const timeText = getTimeText(
       String(offchainProposal.start),
@@ -423,9 +434,10 @@ export const ProposalItem = ({
           <h3 className="text-primary">{offchainProposal.title}</h3>
           <div className="font-inter text-secondary flex flex-wrap items-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
             <ProposalSourceBadge source="offchain" />
-            <p className={getTextStatusColor(status)}>
-              {getStatusText(status)}
-            </p>
+            <OffchainProposalBadge
+              status={offchainStatus}
+              winner={offchainWinner}
+            />
             <BulletDivider />
             <p>{timeText}</p>
             <BulletDivider />
