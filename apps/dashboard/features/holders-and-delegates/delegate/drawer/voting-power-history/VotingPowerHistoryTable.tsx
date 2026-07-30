@@ -369,7 +369,7 @@ export const VotingPowerHistoryTable = ({
                 entityType="tokenHolder"
                 addressChars={6}
                 nameClassName={cn(
-                  "truncate max-w-[140px]",
+                  "max-w-[140px]",
                   delegatorAddress === accountId
                     ? "text-primary"
                     : "text-secondary",
@@ -456,7 +456,7 @@ export const VotingPowerHistoryTable = ({
                 address={delegateAddress}
                 entityType="delegate"
                 nameClassName={cn(
-                  "truncate max-w-[140px]",
+                  "max-w-[140px]",
                   delegateAddress === accountId
                     ? "text-primary"
                     : "text-secondary",

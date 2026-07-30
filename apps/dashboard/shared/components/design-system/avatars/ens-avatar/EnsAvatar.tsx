@@ -150,27 +150,37 @@ export const EnsAvatar = ({
 
   const finalAlt = alt || ens?.name || address || "Avatar";
 
-  const getDisplayName = () => {
+  // A shortened address is already an ellipsized string ("0x1234...abcd"), so
+  // clipping it with CSS on top renders a second ellipsis ("0x1234...ab…", six
+  // dots). Names carry no such marker, so only they are safe to clip.
+  const getDisplayName = (): { name: string; isShortenedAddress: boolean } => {
     const truncate = (name: string) => {
       if (showFullAddress || name.length <= TRUNCATE_ADDRESS_LENGTH)
         return name;
       return `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`;
     };
 
-    if (ens?.name) return ens.name;
+    const asName = (name: string) => ({ name, isShortenedAddress: false });
+
+    if (ens?.name) return asName(ens.name);
 
     const entity = arkham?.entity;
     const label = arkham?.label;
 
-    if (entity && label) return truncate(`${entity} · ${label}`);
-    if (entity) return truncate(entity);
-    if (label) return truncate(label);
+    if (entity && label) return asName(truncate(`${entity} · ${label}`));
+    if (entity) return asName(truncate(entity));
+    if (label) return asName(truncate(label));
     if (address)
-      return showFullAddress ? address : formatAddress(address, addressChars);
-    return "Unknown";
+      return showFullAddress
+        ? asName(address)
+        : {
+            name: formatAddress(address, addressChars),
+            isShortenedAddress: true,
+          };
+    return asName("Unknown");
   };
 
-  const displayName = getDisplayName();
+  const { name: displayName, isShortenedAddress } = getDisplayName();
   const isLoadingName = loading || (isLoading && !address);
   const isResolvingData = !!address && isLoading;
 
@@ -331,7 +341,10 @@ export const EnsAvatar = ({
       ) : (
         <span
           className={cn(
-            "text-primary inline-block overflow-hidden truncate whitespace-nowrap",
+            "text-primary inline-block overflow-hidden whitespace-nowrap",
+            // Shortened addresses clip without an ellipsis; callers must not
+            // add `truncate` back or the second ellipsis returns.
+            isShortenedAddress ? "text-clip" : "text-ellipsis",
             showTags ? "text-lg font-medium" : "text-sm",
             hasProfileExtras && "leading-tight",
             isDashed && "border-b border-dashed border-[#3F3F46]",
