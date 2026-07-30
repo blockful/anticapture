@@ -22,6 +22,8 @@ const createMockProposal = (
   link: "",
   flagged: false,
   scores: [],
+  scoresTotal: 0,
+  quorum: 0,
   choices: [],
   network: "",
   snapshot: null,

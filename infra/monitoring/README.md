@@ -35,6 +35,17 @@ Grafana provisions a single consolidated dashboard from
 cache, eRPC, resources). It uses the existing Prometheus datasource UID,
 `prometheus`.
 
+`grafana/dashboards/validation.json` provisions the restricted User API
+Validation dashboard. Its per-user table includes email addresses or wallet
+addresses as Prometheus labels, so keep both the User API `/metrics` bearer
+token and Grafana authentication enabled outside local development.
+
+PR preview environments disable Google OAuth and expose Grafana's username and
+password login form. They inherit `GF_SECURITY_ADMIN_USER` and
+`GF_SECURITY_ADMIN_PASSWORD` from the source Railway environment; keep those
+credentials configured there rather than committing them. Persistent
+environments continue using their configured authentication provider.
+
 The standalone `infra/erpc/Dockerfile.monitoring` image is legacy. Use this
 unified monitoring stack for the normal Anticapture Railway deployment.
 
@@ -70,29 +81,21 @@ endpoint is also the Railway health check.
 
 ## Railway RAM and egress metrics
 
-Railway platform metrics need a separate API-backed exporter because service
-process metrics do not include container limits or public-network egress.
-Deploy a service from this directory with:
+Not collected. A `railway-exporter` service (an API-backed exporter, since
+process metrics carry no container limits or public-network egress) ran here
+until 2026-07-27 and never produced a single `railway_service_*` sample in
+either environment — its account-level `RAILWAY_API_KEY` was rejected for the
+whole retained history, so the only visible effect was a permanently firing
+critical alert. Removed rather than left red. Railway's own dashboard still
+shows per-service CPU/RAM/egress; what is gone is _alerting_ on them.
 
-- Dockerfile: `Dockerfile.railway-exporter`
-- Railway config: `railway-exporter.railway.toml`
-- `RAILWAY_API_KEY`: an account-level read token
-- `ENVIRONMENT_TARGETS`: comma-separated `projectId:environmentId` pairs
-- `PORT`: `9090`
+If you reinstate it, the blocker to solve first is the token: it must be scoped
+to the **workspace**, not to a personal account, or the Railway GraphQL API
+answers `Not Authorized`.
 
-The build pins `MykalMachon/railway-prometheus-exporter` to commit
-`ec3ea2243a6d82ab60b64b460eb959cbfc117e07`. Set this variable on Prometheus:
+The consolidated dashboard adds eRPC cache and PostgreSQL panels. Prometheus
+alerts when:
 
-```text
-RAILWAY_EXPORTER_ENDPOINT=${{<railway-exporter-service>.RAILWAY_PRIVATE_DOMAIN}}:9090
-```
-
-The consolidated dashboard adds eRPC cache, PostgreSQL, Railway RAM, RAM-limit,
-and public-egress panels. Prometheus alerts when:
-
-- Railway collection is stale for 5 minutes;
-- a service stays above 85% RAM for 10 minutes;
-- a service exceeds 5 GB public egress in an hour;
 - PostgreSQL is unreachable, stays above 80% of `max_connections`, or reports a deadlock;
 - eRPC cache hit rate stays below 50% under active traffic or cache operations fail.
 

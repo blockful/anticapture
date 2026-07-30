@@ -29,6 +29,8 @@ const DeleteKeyButton = ({
     <Button
       variant="ghost"
       size="md"
+      // 44px touch target on mobile, compact on desktop
+      className="min-h-11 min-w-11 lg:min-h-0 lg:min-w-0"
       aria-label={`Delete ${apiKey.label}`}
       onClick={() => onDelete(apiKey)}
     >
@@ -53,7 +55,10 @@ export const ApiKeysTable = ({
         accessorKey: "label",
         header: "Name",
         cell: ({ row }) => (
-          <span className="text-primary text-sm font-medium">
+          <span
+            className="text-primary max-w-70 block truncate text-sm font-medium"
+            title={row.original.label}
+          >
             {row.original.label}
           </span>
         ),

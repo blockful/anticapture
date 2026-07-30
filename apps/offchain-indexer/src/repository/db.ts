@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 
 import type { Repository } from "@/repository/db.interface";
@@ -21,6 +21,8 @@ const PROPOSAL_UPDATE_SET = {
   link: sql`excluded.link`,
   flagged: sql`excluded.flagged`,
   scores: sql`excluded.scores`,
+  scoresTotal: sql`excluded.scores_total`,
+  quorum: sql`excluded.quorum`,
   choices: sql`excluded.choices`,
   network: sql`excluded.network`,
   snapshot: sql`excluded.snapshot`,
@@ -66,6 +68,30 @@ export class DrizzleRepository implements Repository {
       .where(gte(schema.proposals.created, since));
 
     return rows.map((row) => row.id);
+  }
+
+  async getProposalMetadataBackfillBatch(
+    cursor: string | null,
+    limit: number,
+  ): Promise<{ ids: string[]; nextCursor: string | null }> {
+    const cursorParts = cursor?.split(":") ?? [];
+    const createdCursor = cursorParts[0] ?? "0";
+    const idCursor = cursorParts[1] ?? "";
+    const createdCursorInt = parseInt(createdCursor, 10);
+    const rows = await this.db
+      .select({ id: schema.proposals.id, created: schema.proposals.created })
+      .from(schema.proposals)
+      .where(
+        sql`(${schema.proposals.created} > ${createdCursorInt} OR (${schema.proposals.created} = ${createdCursorInt} AND ${schema.proposals.id} > ${idCursor}))`,
+      )
+      .orderBy(asc(schema.proposals.created), asc(schema.proposals.id))
+      .limit(limit);
+    const lastRow = rows.at(-1);
+
+    return {
+      ids: rows.map((row) => row.id),
+      nextCursor: lastRow ? `${lastRow.created}:${lastRow.id}` : null,
+    };
   }
 
   async deleteProposals(ids: string[]): Promise<void> {
@@ -146,6 +172,58 @@ export class DrizzleRepository implements Repository {
         .insert(schema.syncStatus)
         .values({
           entity: "proposals",
+          lastCursor: cursor,
+          lastSyncedAt: Math.floor(Date.now() / 1000),
+        })
+        .onConflictDoUpdate({
+          target: schema.syncStatus.entity,
+          set: {
+            lastCursor: cursor,
+            lastSyncedAt: Math.floor(Date.now() / 1000),
+          },
+        });
+    });
+  }
+
+  async saveProposalMetadataBackfill(
+    proposals: OffchainProposal[],
+    cursor: string,
+  ): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      if (proposals.length > 0) {
+        await tx
+          .insert(schema.proposals)
+          .values(proposals)
+          .onConflictDoUpdate({
+            target: schema.proposals.id,
+            set: {
+              author: sql`excluded.author`,
+              title: sql`excluded.title`,
+              body: sql`excluded.body`,
+              discussion: sql`excluded.discussion`,
+              type: sql`excluded.type`,
+              start: sql`excluded.start`,
+              end: sql`excluded."end"`,
+              state: sql`excluded.state`,
+              created: sql`excluded.created`,
+              updated: sql`excluded.updated`,
+              link: sql`excluded.link`,
+              flagged: sql`excluded.flagged`,
+              scores: sql`excluded.scores`,
+              scoresTotal: sql`excluded.scores_total`,
+              quorum: sql`excluded.quorum`,
+              choices: sql`excluded.choices`,
+              network: sql`excluded.network`,
+              snapshot: sql`excluded.snapshot`,
+              strategies: sql`excluded.strategies`,
+            },
+          });
+      }
+
+      await tx
+        .insert(schema.syncStatus)
+        .values({
+          entity: "proposal_metadata_backfill",
           lastCursor: cursor,
           lastSyncedAt: Math.floor(Date.now() / 1000),
         })

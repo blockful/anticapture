@@ -35,6 +35,8 @@ const createProposal = (
   link: "",
   flagged: false,
   scores: [],
+  scoresTotal: 0,
+  quorum: 0,
   choices: [],
   ...overrides,
 });
@@ -55,6 +57,8 @@ const BASE_PROPOSAL_ITEM = {
   link: "",
   flagged: false,
   scores: [],
+  scoresTotal: 0,
+  quorum: 0,
   choices: [],
   network: "",
   snapshot: null,

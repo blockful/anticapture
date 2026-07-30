@@ -22,6 +22,13 @@ function makeProposal(overrides?: Partial<OffchainProposal>): OffchainProposal {
     updated: 1700000000,
     link: "",
     flagged: false,
+    scores: [],
+    scoresTotal: 0,
+    quorum: 0,
+    choices: [],
+    network: "",
+    snapshot: null,
+    strategies: [],
     ...overrides,
   };
 }
@@ -48,6 +55,7 @@ function createSimpleRepository(options?: {
   proposalIds: string[];
   upsertedProposals: OffchainProposal[];
   upsertedVotes: OffchainVote[];
+  metadataBackfillIds: string[];
 } {
   const cursors = new Map<string, string | null>();
   const savedProposals: OffchainProposal[] = [];
@@ -55,6 +63,7 @@ function createSimpleRepository(options?: {
   const proposalIds: string[] = [];
   const upsertedProposals: OffchainProposal[] = [];
   const upsertedVotes: OffchainVote[] = [];
+  const metadataBackfillIds: string[] = [];
 
   return {
     cursors,
@@ -63,6 +72,7 @@ function createSimpleRepository(options?: {
     proposalIds,
     upsertedProposals,
     upsertedVotes,
+    metadataBackfillIds,
     getRevealPendingProposalIds: vi.fn(
       async () => options?.revealPendingIds ?? [],
     ),
@@ -78,11 +88,28 @@ function createSimpleRepository(options?: {
     }),
     clearProposals: vi.fn(async () => {
       savedProposals.length = 0;
+      metadataBackfillIds.length = 0;
     }),
     clearVotes: vi.fn(async () => {
       savedVotes.length = 0;
     }),
     getProposalIdsSince: vi.fn(async () => proposalIds),
+    getProposalMetadataBackfillBatch: vi.fn(
+      async (cursor: string | null, limit: number) => {
+        const cursorId = cursor?.split(":")[1] ?? "";
+        const cursorIndex = cursorId
+          ? metadataBackfillIds.indexOf(cursorId) + 1
+          : 0;
+        const ids = metadataBackfillIds.slice(cursorIndex, cursorIndex + limit);
+        const nextIndex = cursorIndex + ids.length - 1;
+        const nextCreated = 1700000000 + nextIndex * 100;
+        return {
+          ids,
+          nextCursor:
+            ids.length > 0 ? `${nextCreated}:${ids[ids.length - 1]}` : null,
+        };
+      },
+    ),
     deleteProposals: vi.fn(async (ids: string[]) => {
       for (const id of ids) {
         const index = proposalIds.indexOf(id);
@@ -93,6 +120,12 @@ function createSimpleRepository(options?: {
       async (proposals: OffchainProposal[], cursor: string) => {
         savedProposals.push(...proposals);
         cursors.set("proposals", cursor);
+      },
+    ),
+    saveProposalMetadataBackfill: vi.fn(
+      async (proposals: OffchainProposal[], cursor: string) => {
+        savedProposals.push(...proposals);
+        cursors.set("proposal_metadata_backfill", cursor);
       },
     ),
     saveVotes: vi.fn(async (votes: OffchainVote[], cursor: string) => {
@@ -108,14 +141,15 @@ function createSimpleProvider(options?: {
   votes?: OffchainVote[];
   proposalsNextCursor?: string | null;
   votesNextCursor?: string | null;
+  proposalsById?: OffchainProposal[];
   failProposals?: boolean;
+  failProposalsById?: boolean;
   failProposalIds?: boolean;
   failVotes?: boolean;
   revealedProposals?: OffchainProposal[];
   revealedVotes?: OffchainVote[];
 }): DataProvider {
   return {
-    fetchProposalsByIds: vi.fn(async () => options?.revealedProposals ?? []),
     fetchVotesByProposalIds: vi.fn(async () => options?.revealedVotes ?? []),
     fetchProposals: vi.fn(async () => {
       if (options?.failProposals) throw new Error("Proposals fetch failed");
@@ -129,6 +163,14 @@ function createSimpleProvider(options?: {
         throw new Error("Proposal id fetch failed");
       }
       return options?.proposalIds ?? ["p-1"];
+    }),
+    // Backs both the metadata backfill (proposalsById) and the reveal re-read
+    // (revealedProposals); each test exercises one of the two.
+    fetchProposalsByIds: vi.fn(async () => {
+      if (options?.failProposalsById) {
+        throw new Error("Proposal metadata fetch failed");
+      }
+      return options?.proposalsById ?? options?.revealedProposals ?? [];
     }),
     fetchVotes: vi.fn(async () => {
       if (options?.failVotes) throw new Error("Votes fetch failed");
@@ -161,9 +203,117 @@ describe("Indexer", () => {
 
     expect(repo.getLastCursor).toHaveBeenCalledWith("proposals");
     expect(repo.getLastCursor).toHaveBeenCalledWith("votes");
+    expect(repo.getLastCursor).toHaveBeenCalledWith(
+      "proposal_metadata_backfill",
+    );
     expect(provider.fetchProposals).toHaveBeenCalledWith("1700000000");
     expect(provider.fetchProposalIdsSince).toHaveBeenCalled();
     expect(provider.fetchVotes).toHaveBeenCalledWith("1700000050");
+
+    void promise;
+  });
+
+  it("should backfill existing proposal metadata without resetting proposal or vote cursors", async () => {
+    const repo = createSimpleRepository();
+    repo.cursors.set("proposals", "1700000000");
+    repo.cursors.set("votes", "1700000050");
+    repo.metadataBackfillIds.push("p-old");
+    const hydratedProposal = makeProposal({
+      id: "p-old",
+      scores: [5_347_713.99, 0, 1_813.59],
+      scoresTotal: 5_349_527,
+      quorum: 10_000_000,
+    });
+    const provider = createSimpleProvider({
+      proposalsById: [hydratedProposal],
+    });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(provider.fetchProposals).toHaveBeenCalledWith("1700000000");
+    expect(provider.fetchVotes).toHaveBeenCalledWith("1700000050");
+    expect(provider.fetchProposalsByIds).toHaveBeenCalledWith(["p-old"]);
+    expect(repo.saveProposalMetadataBackfill).toHaveBeenCalledWith(
+      [hydratedProposal],
+      "1700000000:p-old",
+    );
+    expect(repo.cursors.get("proposals")).toBe("1700000000");
+    expect(repo.cursors.get("votes")).toBe("1700000050");
+    expect(repo.cursors.get("proposal_metadata_backfill")).toBe(
+      "1700000000:p-old",
+    );
+
+    void promise;
+  });
+
+  it("should delete missing Snapshot proposals and advance metadata backfill cursor", async () => {
+    const repo = createSimpleRepository();
+    repo.proposalIds.push("p-old", "p-missing", "p-newer");
+    repo.metadataBackfillIds.push("p-old", "p-missing", "p-newer");
+    const oldProposal = makeProposal({
+      id: "p-old",
+      created: 1700000000,
+      scores: [5_347_713.99, 0, 1_813.59],
+      scoresTotal: 5_349_527,
+      quorum: 10_000_000,
+    });
+    const newerProposal = makeProposal({
+      id: "p-newer",
+      created: 1700000100,
+      scores: [10_000_001, 0],
+      scoresTotal: 10_000_001,
+      quorum: 10_000_000,
+    });
+    const provider = createSimpleProvider({
+      proposalIds: ["p-old", "p-missing", "p-newer"],
+      proposalsById: [oldProposal, newerProposal],
+    });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(provider.fetchProposalsByIds).toHaveBeenCalledWith([
+      "p-old",
+      "p-missing",
+      "p-newer",
+    ]);
+    expect(repo.saveProposalMetadataBackfill).toHaveBeenCalledWith(
+      [oldProposal, newerProposal],
+      "1700000200:p-newer",
+    );
+    expect(repo.deleteProposals).toHaveBeenCalledWith(["p-missing"]);
+    expect(repo.proposalIds).toStrictEqual(["p-old", "p-newer"]);
+    expect(repo.cursors.get("proposal_metadata_backfill")).toBe(
+      "1700000200:p-newer",
+    );
+
+    void promise;
+  });
+
+  it("should delete all-missing Snapshot proposals and advance metadata backfill cursor", async () => {
+    const repo = createSimpleRepository();
+    repo.cursors.set("proposal_metadata_backfill", "1700000000:p-old");
+    repo.proposalIds.push("p-missing");
+    repo.metadataBackfillIds.push("p-missing");
+    const provider = createSimpleProvider({ proposalsById: [] });
+    const indexer = new Indexer(repo, provider, 60_000);
+
+    const promise = indexer.start(false);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(provider.fetchProposalsByIds).toHaveBeenCalledWith(["p-missing"]);
+    expect(repo.deleteProposals).toHaveBeenCalledWith(["p-missing"]);
+    expect(repo.saveProposalMetadataBackfill).toHaveBeenCalledWith(
+      [],
+      "1700000000:p-missing",
+    );
+    expect(repo.proposalIds).toStrictEqual([]);
+    expect(repo.cursors.get("proposal_metadata_backfill")).toBe(
+      "1700000000:p-missing",
+    );
 
     void promise;
   });

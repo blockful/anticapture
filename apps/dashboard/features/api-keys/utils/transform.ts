@@ -1,21 +1,10 @@
+import { getChartSeriesColors } from "@/shared/components/design-system/charts/chart-theme";
 import type {
   UserApiKey,
   UserApiKeyUsage,
 } from "@/shared/services/user-api/apiKeysClient";
 
 const WINDOW_DAYS = 30;
-const SERIES_COLORS = [
-  "#0080bc",
-  "#15803d",
-  "#f472b6",
-  "#ca8a04",
-  "#7c3aed",
-  "#0f766e",
-  "#dc2626",
-  "#4f46e5",
-  "#65a30d",
-  "#c2410c",
-];
 
 const dayFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -24,6 +13,14 @@ const dayFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 const toUtcDay = (date: Date): string => date.toISOString().slice(0, 10);
+
+// Long key names would stretch the chart tooltip off screen.
+const MAX_LABEL_LENGTH = 24;
+
+const truncateLabel = (label: string): string =>
+  label.length > MAX_LABEL_LENGTH
+    ? `${label.slice(0, MAX_LABEL_LENGTH)}…`
+    : label;
 
 const buildDays = (today: Date): string[] => {
   const end = new Date(
@@ -47,9 +44,12 @@ export const transformApiKeyUsage = (
     selectedKeyId === "all"
       ? keys
       : keys.filter(({ id }) => id === selectedKeyId);
+  // Count duplicates on the truncated form: distinct names that collapse to
+  // the same truncated label also need the id suffix to stay tellable apart.
   const labelCounts = new Map<string, number>();
   for (const key of keys) {
-    labelCounts.set(key.label, (labelCounts.get(key.label) ?? 0) + 1);
+    const label = truncateLabel(key.label);
+    labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);
   }
 
   const counts = new Map<string, number>();
@@ -58,20 +58,21 @@ export const transformApiKeyUsage = (
     counts.set(bucket, (counts.get(bucket) ?? 0) + row.count);
   }
 
+  const palette = getChartSeriesColors();
   const colorByKey = new Map(
-    keys.map(({ id }, index) => [
-      id,
-      SERIES_COLORS[index % SERIES_COLORS.length]!,
-    ]),
+    keys.map(({ id }, index) => [id, palette[index % palette.length]!]),
   );
-  const series = visibleKeys.map((key) => ({
-    name:
-      labelCounts.get(key.label) === 1
-        ? key.label
-        : `${key.label} (${key.id.slice(0, 6)})`,
-    data: days.map((day) => counts.get(`${key.id}:${day}`) ?? 0),
-    color: colorByKey.get(key.id)!,
-  }));
+  const series = visibleKeys.map((key) => {
+    const label = truncateLabel(key.label);
+    return {
+      name:
+        labelCounts.get(label) === 1
+          ? label
+          : `${label} (${key.id.slice(0, 6)})`,
+      data: days.map((day) => counts.get(`${key.id}:${day}`) ?? 0),
+      color: colorByKey.get(key.id)!,
+    };
+  });
 
   return {
     xAxisLabels: days.map((day) =>

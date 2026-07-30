@@ -60,6 +60,37 @@ describe("getOffchainProposalStatusView", () => {
     ).toBe(ProposalStatus.PENDING);
   });
 
+  // Derived from the voting window alone, never from Snapshot's `state` string,
+  // so a proposal Snapshot still reports as "active" past its end time settles
+  // to its real outcome instead of staying ongoing.
+  it("settles a proposal whose end time has passed", () => {
+    expect(basicClosed([1, 0, 0]).status).toBe(ProposalStatus.PASSED);
+  });
+
+  // Quorum-aware: a basic ballot that wins on For/Against but misses the space
+  // quorum is rejected, not passed.
+  it("rejects a basic proposal that misses quorum", () => {
+    const { status } = getOffchainProposalStatusView({
+      type: "basic",
+      ...CLOSED_WINDOW,
+      scores: [5_347_713.99, 0, 1_813.59],
+      choices: ["For", "Against", "Abstain"],
+      quorum: 10_000_000,
+    });
+    expect(status).toBe(ProposalStatus.REJECTED);
+  });
+
+  it("passes a basic proposal that clears quorum", () => {
+    const { status } = getOffchainProposalStatusView({
+      type: "basic",
+      ...CLOSED_WINDOW,
+      scores: [10_000_001, 0, 0],
+      choices: ["For", "Against", "Abstain"],
+      quorum: 10_000_000,
+    });
+    expect(status).toBe(ProposalStatus.PASSED);
+  });
+
   it("tolerates null entries in scores and choices", () => {
     const { status } = getOffchainProposalStatusView({
       type: "basic",

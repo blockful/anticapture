@@ -23,6 +23,8 @@ const PROPOSAL_FIELDS = `
   link
   flagged
   scores
+  scores_total
+  quorum
   choices
   network
   snapshot
@@ -48,10 +50,16 @@ const PROPOSALS_QUERY = `
 
 // Re-reads specific proposals regardless of the forward-only cursor. Shutter
 // proposals reveal their tally after voting closes, by which point the cursor
-// has already moved past them, so without this their scores stay at zero.
+// has already moved past them, so without this their scores stay at zero. Also
+// backs the metadata backfill, which walks proposals in batches by id.
 const PROPOSALS_BY_IDS_QUERY = `
-  query ($ids: [String]!, $pageSize: Int!) {
-    proposals(where: { id_in: $ids } first: $pageSize) {
+  query ($ids: [String!]!, $pageSize: Int!) {
+    proposals(
+      where: { id_in: $ids }
+      first: $pageSize
+      orderBy: "created"
+      orderDirection: asc
+    ) {
       ${PROPOSAL_FIELDS}
     }
   }

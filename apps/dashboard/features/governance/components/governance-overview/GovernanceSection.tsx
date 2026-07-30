@@ -48,8 +48,8 @@ import {
   getTimeText,
 } from "@/features/governance/utils";
 import { TheSectionLayout } from "@/shared/components";
-import { useSession } from "@/shared/services/auth/client";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useAuthSession } from "@/shared/services/auth/useAuthSession";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { Select } from "@/shared/components/design-system/form/fields/select/Select";
@@ -134,7 +134,7 @@ export const GovernanceSection = () => {
   const router = useRouter();
   // Drafts are platform-account data: gates run on the session (email and
   // Google authors have no wallet), not on the wallet connection.
-  const { data: session, isPending: isSessionPending } = useSession();
+  const { data: session, isPending: isSessionPending } = useAuthSession();
   const hasSession = !!session;
   const { openLogin } = useLogin();
 

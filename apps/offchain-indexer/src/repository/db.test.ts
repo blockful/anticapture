@@ -25,6 +25,8 @@ function createProposal(
     link: "",
     flagged: false,
     scores: [],
+    scoresTotal: 0,
+    quorum: 0,
     choices: [],
     network: "",
     snapshot: null,
@@ -98,6 +100,50 @@ describe("DrizzleRepository", () => {
     expect(cursor).toBe("cursor-42");
   });
 
+  it("should get proposal metadata backfill batches after the cursor", async () => {
+    await repo.saveProposals(
+      [
+        createProposal({ id: "old", created: 1000 }),
+        createProposal({ id: "middle", created: 2000 }),
+        createProposal({ id: "new", created: 3000 }),
+      ],
+      "cursor-1",
+    );
+
+    const result = await repo.getProposalMetadataBackfillBatch("1000:old", 2);
+
+    expect(result).toStrictEqual({
+      ids: ["middle", "new"],
+      nextCursor: "3000:new",
+    });
+  });
+
+  it("should not skip proposal metadata backfill rows sharing a created timestamp", async () => {
+    await repo.saveProposals(
+      [
+        createProposal({ id: "a", created: 1000 }),
+        createProposal({ id: "b", created: 1000 }),
+        createProposal({ id: "c", created: 1000 }),
+      ],
+      "cursor-1",
+    );
+
+    const first = await repo.getProposalMetadataBackfillBatch(null, 2);
+    const second = await repo.getProposalMetadataBackfillBatch(
+      first.nextCursor,
+      2,
+    );
+
+    expect(first).toStrictEqual({
+      ids: ["a", "b"],
+      nextCursor: "1000:b",
+    });
+    expect(second).toStrictEqual({
+      ids: ["c"],
+      nextCursor: "1000:c",
+    });
+  });
+
   describe("proposals", () => {
     it("should save the proposals", async () => {
       const proposal = createProposal({ id: "prop-1", title: "Test Proposal" });
@@ -117,7 +163,9 @@ describe("DrizzleRepository", () => {
           id: "prop-1",
           link: "",
           network: "",
+          quorum: 0,
           scores: [],
+          scoresTotal: 0,
           snapshot: null,
           spaceId: "ens.eth",
           start: 1700000000,
@@ -152,6 +200,9 @@ describe("DrizzleRepository", () => {
         id: "prop-1",
         title: "Updated Title",
         state: "closed",
+        scores: [10, 1],
+        scoresTotal: 11,
+        quorum: 10,
       });
       await repo.saveProposals([updated], "cursor-2");
 
@@ -168,7 +219,9 @@ describe("DrizzleRepository", () => {
           id: "prop-1",
           link: "",
           network: "",
-          scores: [],
+          quorum: 10,
+          scores: [10, 1],
+          scoresTotal: 11,
           snapshot: null,
           spaceId: "ens.eth",
           start: 1700000000,
@@ -179,6 +232,58 @@ describe("DrizzleRepository", () => {
           updated: 1700000000,
         },
       ]);
+    });
+
+    it("should upsert proposal metadata backfill without changing proposal cursor", async () => {
+      await repo.saveProposals(
+        [createProposal({ id: "prop-1", title: "Original Title" })],
+        "proposal-cursor",
+      );
+
+      await repo.saveProposalMetadataBackfill(
+        [
+          createProposal({
+            id: "prop-1",
+            title: "Backfilled Title",
+            state: "closed",
+            scores: [5_347_713.99, 0, 1_813.59],
+            scoresTotal: 5_349_527,
+            quorum: 10_000_000,
+          }),
+        ],
+        "metadata-cursor",
+      );
+
+      const rows = await db.select().from(schema.proposals);
+      expect(rows).toStrictEqual([
+        {
+          author: "0x1234",
+          body: "Proposal body",
+          choices: [],
+          created: 1700000000,
+          discussion: "",
+          end: 1700100000,
+          flagged: false,
+          id: "prop-1",
+          link: "",
+          network: "",
+          quorum: 10_000_000,
+          scores: [5_347_713.99, 0, 1_813.59],
+          scoresTotal: 5_349_527,
+          snapshot: null,
+          spaceId: "ens.eth",
+          start: 1700000000,
+          state: "closed",
+          strategies: [],
+          title: "Backfilled Title",
+          type: "single-choice",
+          updated: 1700000000,
+        },
+      ]);
+      expect(await repo.getLastCursor("proposals")).toBe("proposal-cursor");
+      expect(await repo.getLastCursor("proposal_metadata_backfill")).toBe(
+        "metadata-cursor",
+      );
     });
 
     it("should get proposal ids created at or after the cutoff", async () => {

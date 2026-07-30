@@ -84,6 +84,59 @@ test.describe("Governance page (/ens/proposals)", () => {
     await expect(proposalLink.locator("h3")).not.toHaveText("");
   });
 
+  test("shows Snapshot quorum identifier on proposal progress bar", async ({
+    goto,
+    page,
+  }) => {
+    await page.route(
+      /\/api\/gateful\/ens\/offchain\/proposals(\?.*)?$/,
+      async (route) => {
+        await route.fulfill({
+          contentType: "application/json",
+          body: JSON.stringify({
+            items: [
+              {
+                id: "snapshot-quorum-marker",
+                spaceId: "ens.eth",
+                author: "0x0000000000000000000000000000000000000001",
+                title: "Snapshot quorum marker proposal",
+                body: "",
+                discussion: "",
+                type: "basic",
+                start: 1767225600,
+                end: 1798761600,
+                state: "active",
+                created: 1767225600,
+                updated: 1767225600,
+                link: "https://snapshot.box/#/s:ens.eth/proposal/snapshot-quorum-marker",
+                flagged: false,
+                scores: [60, 20, 10],
+                scoresTotal: 90,
+                quorum: 45,
+                choices: ["For", "Against", "Abstain"],
+                network: "1",
+                snapshot: null,
+                strategies: [],
+              },
+            ],
+            totalCount: 1,
+          }),
+        });
+      },
+    );
+
+    await goto("/ens/proposals?source=snapshot");
+
+    const proposalLink = await waitForProposalLink(page);
+    await expect(proposalLink).toContainText("Snapshot quorum marker proposal");
+    await expect(
+      proposalLink.getByLabel("Snapshot quorum marker"),
+    ).toBeVisible();
+    await expect(proposalLink).toContainText("Quorum: 45");
+    await proposalLink.getByText("Quorum: 45").hover();
+    await expect(page.getByText("For: 60 (67%)").last()).toBeVisible();
+  });
+
   test("New Proposal button triggers wallet connect when disconnected", async ({
     goto,
     page,
@@ -122,6 +175,27 @@ test.describe("Governance page (/ens/proposals)", () => {
         new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
       );
     }
+  });
+
+  test("shows a stable not-found state for a missing proposal", async ({
+    goto,
+    page,
+  }) => {
+    await page.route(
+      "**/api/gateful/ens/proposals/not-found-proposal",
+      (route) =>
+        route.fulfill({
+          status: 404,
+          contentType: "application/json",
+          body: JSON.stringify({ message: "Proposal not found" }),
+        }),
+    );
+
+    await goto("/ens/proposals/not-found-proposal");
+
+    await expect(page.getByText("Proposal not found")).toBeVisible();
+    await expect(page.getByText("The proposal wasn't found.")).toBeVisible();
+    await expect(page.getByTestId("route-error-fallback")).not.toBeVisible();
   });
 
   test("infinite scroll loads more proposals when available", async ({
