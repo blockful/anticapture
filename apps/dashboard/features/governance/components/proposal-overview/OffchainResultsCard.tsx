@@ -18,10 +18,46 @@ type ShutterPhase = "none" | "encrypted" | "reveal-pending";
 const SHUTTER_TOOLTIP =
   "Shutter encrypts every ballot until voting ends, so no one can see the running tally while the vote is live.";
 
+/**
+ * Turnout figures behind the bars.
+ *
+ * `total` is the percentage denominator and `isTallyEmpty` the reveal signal —
+ * both deliberately read `scoresTotal` rather than the sum of `scores`, which
+ * over-counts voters on approval ballots and can't tell an unrevealed Shutter
+ * tally from one that legitimately drew no votes.
+ */
+export const summarizeOffchainTally = ({
+  scores,
+  scoresTotal,
+  optimisticVotingPower = 0,
+}: {
+  scores: number[];
+  scoresTotal: number;
+  optimisticVotingPower?: number;
+}): { indexedTotal: number; total: number; isTallyEmpty: boolean } => {
+  const indexedTotal =
+    scoresTotal > 0
+      ? scoresTotal
+      : scores.reduce((sum, score) => sum + score, 0);
+  return {
+    indexedTotal,
+    // The just-signed voter is added once, however many choices they touched.
+    total: indexedTotal + optimisticVotingPower,
+    isTallyEmpty: scores.every((score) => !score),
+  };
+};
+
 interface OffchainResultsCardProps {
   choices: string[];
   /** Indexed per-choice voting power, aligned with `choices`. */
   scores: number[];
+  /**
+   * Snapshot's `scores_total`: the distinct voting power that took part, i.e.
+   * the turnout denominator. Not the sum of `scores` — on an approval ballot a
+   * voter's full power lands on every option they approved, so summing counts
+   * them once per approval. Falls back to the sum when absent.
+   */
+  scoresTotal?: number;
   /** Voting close timestamp, in Unix seconds. */
   end: number;
   isShutter?: boolean;
@@ -31,6 +67,8 @@ interface OffchainResultsCardProps {
    * immediately with no blind window.
    */
   optimisticScores?: number[] | null;
+  /** The just-signed voter's power, which the turnout denominator has to gain. */
+  optimisticVotingPower?: number;
   indexingStatus?: OffchainVoteIndexingStatus;
   isIndexingChipFading?: boolean;
   className?: string;
@@ -39,9 +77,11 @@ interface OffchainResultsCardProps {
 export const OffchainResultsCard = ({
   choices,
   scores,
+  scoresTotal = 0,
   end,
   isShutter = false,
   optimisticScores = null,
+  optimisticVotingPower = 0,
   indexingStatus = "idle",
   isIndexingChipFading = false,
   className,
@@ -53,15 +93,22 @@ export const OffchainResultsCard = ({
     );
   }, [choices, scores, optimisticScores]);
 
-  const total = effectiveScores.reduce((sum, score) => sum + score, 0);
+  const { indexedTotal, total, isTallyEmpty } = summarizeOffchainTally({
+    scores,
+    scoresTotal,
+    optimisticVotingPower: optimisticScores ? optimisticVotingPower : 0,
+  });
 
   const shutterPhase: ShutterPhase = useMemo(() => {
     if (!isShutter) return "none";
     const hasClosed = Date.now() >= end * 1000;
     if (!hasClosed) return "encrypted";
-    // Once the reveal lands the tally is non-zero and the card renders normally.
-    return total > 0 ? "none" : "reveal-pending";
-  }, [isShutter, end, total]);
+    // Shutter conceals the tally, not the turnout: `scores` stays zeroed until
+    // the reveal while scores_total keeps accruing. So a zeroed tally is only
+    // pending decryption when someone actually voted — a closed proposal with
+    // no turnout had no votes to reveal and renders normally.
+    return isTallyEmpty && indexedTotal > 0 ? "reveal-pending" : "none";
+  }, [isShutter, end, isTallyEmpty, indexedTotal]);
 
   const isConcealed = shutterPhase !== "none";
 

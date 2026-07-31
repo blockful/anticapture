@@ -458,6 +458,37 @@ describe("SnapshotProvider", () => {
         2,
       );
     });
+
+    // A burst of more than a full page of votes on one second must keep
+    // paginating (via skip) instead of stepping past the second: votes dropped
+    // here keep their encrypted choice forever, because the reveal write makes
+    // the tally nonzero and the proposal stops being reveal-pending.
+    it("should keep paginating through a same-second vote burst larger than a page", async () => {
+      const all = Array.from({ length: 1500 }, (_, i) =>
+        makeVote({
+          id: `vote-${i}`,
+          voter: voter(i + 1),
+          created: i < 1400 ? 1700000999 : 1700001000,
+        }),
+      );
+
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            variables: { cursor: number; skip: number; pageSize: number };
+          };
+          const { cursor, skip, pageSize } = body.variables;
+          const votes = all
+            .filter((vote) => vote.created >= cursor)
+            .slice(skip, skip + pageSize);
+          return HttpResponse.json({ data: { votes } });
+        }),
+      );
+
+      const result = await provider.fetchVotesByProposalIds(["proposal-1"]);
+
+      expect(result).toHaveLength(1500);
+    });
   });
 
   describe("error handling", () => {
