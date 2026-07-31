@@ -24,7 +24,10 @@ export const WHITELABEL_NAV_ITEMS = [
   },
   {
     label: "Stakeholders",
-    page: WHITELABEL_ROUTES.holdersAndDelegates,
+    // The page itself, not the legacy slug that redirects to it: the sidebar
+    // marks the active item by comparing the pathname to this href, so the old
+    // one both missed the highlight and sent the click through the redirect.
+    page: WHITELABEL_ROUTES.stakeholders,
     icon: Users,
     enabled: (daoId: DaoIdEnum) => !!daoConfigByDaoId[daoId].dataTables,
   },
