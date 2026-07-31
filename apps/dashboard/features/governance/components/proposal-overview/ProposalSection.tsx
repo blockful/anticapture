@@ -93,9 +93,12 @@ export const ProposalSection = ({
     string | null
   >(null);
   const [isChangingVote, setIsChangingVote] = useState(false);
-  const [optimisticScores, setOptimisticScores] = useState<number[] | null>(
-    null,
-  );
+  // The just-signed ballot: per-choice delta plus the turnout it adds, held
+  // until the indexer reflects it.
+  const [optimisticVote, setOptimisticVote] = useState<{
+    scores: number[];
+    votingPower: number;
+  } | null>(null);
   const [signedAt, setSignedAt] = useState<number | null>(null);
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
@@ -105,7 +108,7 @@ export const ProposalSection = ({
 
   // Clear optimistic vote state when the viewer or proposal changes: every field
   // below describes one wallet's vote on one proposal, so a leftover signedAt
-  // would keep the indexing chip spinning and leftover optimisticScores would be
+  // would keep the indexing chip spinning and a leftover optimisticVote would be
   // added on top of the next proposal's tally.
   const voteKey = `${address ?? ""}:${offchainProposalId}`;
   const prevVoteKeyRef = useRef(voteKey);
@@ -116,7 +119,7 @@ export const ProposalSection = ({
     prevVoteKeyRef.current = voteKey;
     replacedVoteRef.current = voteFingerprint(null);
     if (localOffchainVoteLabel !== null) setLocalOffchainVoteLabel(null);
-    if (optimisticScores !== null) setOptimisticScores(null);
+    if (optimisticVote !== null) setOptimisticVote(null);
     if (signedAt !== null) setSignedAt(null);
     if (isChangingVote) setIsChangingVote(false);
   }
@@ -262,7 +265,7 @@ export const ProposalSection = ({
 
   // Dropped the moment the indexer has the vote, otherwise the delta would be
   // counted twice on top of the now-indexed tally.
-  const pendingScores = isOptimistic ? optimisticScores : null;
+  const pendingVote = isOptimistic ? optimisticVote : null;
 
   // Read-only first for a wallet that already voted, unless it asked to change.
   const showVotedModal =
@@ -329,7 +332,10 @@ export const ProposalSection = ({
   ]);
 
   const handleOffchainVoteSuccess = useCallback(
-    (voteLabel: string, optimisticScores: number[] | null) => {
+    (
+      voteLabel: string,
+      optimistic: { scores: number[]; votingPower: number } | null,
+    ) => {
       replacedVoteRef.current = voteFingerprint(userOffchainVote);
       setLocalOffchainVoteLabel(voteLabel);
       // Held until the indexer reflects the vote, so the tally moves the moment
@@ -337,7 +343,7 @@ export const ProposalSection = ({
       // revote: the indexed scores still carry this wallet's previous ballot
       // and the delta only describes the new one, so adding it would count the
       // voter twice — and could name the wrong leader — until indexing lands.
-      setOptimisticScores(userOffchainVote ? null : optimisticScores);
+      setOptimisticVote(userOffchainVote ? null : optimistic);
       setSignedAt(Date.now());
       // Refetch votes (badge + table) and proposal scores so the UI reflects
       // the new vote without requiring a manual page reload.
@@ -475,8 +481,12 @@ export const ProposalSection = ({
                 decimals={isOffchain ? 0 : decimals}
                 offchainChoices={isOffchain ? offchainChoices : undefined}
                 offchainScores={isOffchain ? offchainScores : undefined}
+                offchainScoresTotal={
+                  isOffchain ? rawOffchainProposal?.scoresTotal : undefined
+                }
                 isShutter={isShutter}
-                optimisticScores={pendingScores}
+                optimisticScores={pendingVote?.scores ?? null}
+                optimisticVotingPower={pendingVote?.votingPower}
                 indexingStatus={indexingStatus}
                 isIndexingChipFading={isIndexingChipFading}
               />

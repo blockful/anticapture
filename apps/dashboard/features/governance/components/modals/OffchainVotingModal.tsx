@@ -39,14 +39,15 @@ interface OffchainVotingModalProps {
    */
   previousVote?: { choice: number; votingPower: number } | null;
   /**
-   * `optimisticScores` carries the voter's power on the choices they just
-   * picked, aligned with the proposal's choices, so the results card can show
-   * the vote before the indexer has it. Null when the ballot type's tally can't
-   * be predicted locally (see computeOptimisticScores).
+   * `scores` carries the voter's power on the choices they just picked, aligned
+   * with the proposal's choices, and `votingPower` the turnout that ballot adds,
+   * so the results card can show the vote before the indexer has it. Null when
+   * the ballot type's tally can't be predicted locally (see
+   * computeOptimisticScores).
    */
   onVoteSuccess?: (
     voteLabel: string,
-    optimisticScores: number[] | null,
+    optimistic: { scores: number[]; votingPower: number } | null,
   ) => void;
 }
 
@@ -191,7 +192,11 @@ export const OffchainVotingModal = ({
         reason: comment,
       });
       showCustomToast("Vote submitted successfully!", "success");
-      onVoteSuccess?.(computeVoteLabel(), computeOptimisticScores());
+      const optimisticScores = computeOptimisticScores();
+      onVoteSuccess?.(
+        computeVoteLabel(),
+        optimisticScores && { scores: optimisticScores, votingPower },
+      );
       onClose();
     } catch (err) {
       const message =

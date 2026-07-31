@@ -67,10 +67,14 @@ interface ProposalInfoSectionProps {
   decimals: number;
   offchainChoices?: string[];
   offchainScores?: number[];
+  /** Snapshot's `scores_total` — the turnout denominator for the results card. */
+  offchainScoresTotal?: number;
   /** Shutter proposals conceal the tally, so the card shows dashes, not zeros. */
   isShutter?: boolean;
   /** Just-signed vote, applied on top of the tally until the indexer catches up. */
   optimisticScores?: number[] | null;
+  /** That vote's voting power, which turnout has to gain along with the bars. */
+  optimisticVotingPower?: number;
   indexingStatus?: OffchainVoteIndexingStatus;
   isIndexingChipFading?: boolean;
 }
@@ -80,8 +84,10 @@ export const ProposalInfoSection = ({
   decimals,
   offchainChoices,
   offchainScores,
+  offchainScoresTotal,
   isShutter = false,
   optimisticScores = null,
+  optimisticVotingPower,
   indexingStatus,
   isIndexingChipFading,
 }: ProposalInfoSectionProps) => {
@@ -96,9 +102,11 @@ export const ProposalInfoSection = ({
         <OffchainResultsCard
           choices={offchainChoices}
           scores={offchainScores}
+          scoresTotal={offchainScoresTotal}
           end={Number(proposal.endTimestamp)}
           isShutter={isShutter}
           optimisticScores={optimisticScores}
+          optimisticVotingPower={optimisticVotingPower}
           indexingStatus={indexingStatus}
           isIndexingChipFading={isIndexingChipFading}
           className="border-0"
