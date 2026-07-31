@@ -104,7 +104,12 @@ export interface DaoOverviewConfig {
       threshold: number;
       signers: number;
       externalLink: string;
-      /** Tooltip next to the multisig link. Falls back to a generated description. */
+      /**
+       * Tooltip next to the multisig link. Falls back to a generated
+       * description that assumes cancellation happens on the Timelock, so set
+       * this explicitly whenever the cancellation path is somewhere else
+       * (Compound's guardian, for instance, cancels on the Governor).
+       */
       description?: string;
     };
     expiration: {

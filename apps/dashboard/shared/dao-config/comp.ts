@@ -178,12 +178,12 @@ export const COMP: DaoConfiguration = {
             GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
         requirements: [
-          "The Compound Security Council needs to raise the threshold to 75% for approvals on their multisig to be considered Low Risk.",
+          "The Compound Proposal Guardian needs to raise the threshold to 75% for approvals on their multisig to be considered Low Risk.",
         ],
         currentSetting:
           "Compound has the Proposal Guardian, a multisig responsible for canceling malicious proposals.",
         impact:
-          "The Security Council can protect the DAO from malicious proposals by canceling them after the 5/9 multisig approval.",
+          "The Proposal Guardian can protect the DAO from malicious proposals by canceling them after the 5/9 multisig approval.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
         nextStep:
@@ -241,7 +241,7 @@ export const COMP: DaoConfiguration = {
         currentSetting:
           "There is a veto strategy controlled by the Compound DAO.",
         impact:
-          "Compound can veto malicious proposals with the Security Council.",
+          "Compound can veto malicious proposals with the Proposal Guardian.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VETO_STRATEGY],
         nextStep: "The parameter is in its lowest-risk condition.",
