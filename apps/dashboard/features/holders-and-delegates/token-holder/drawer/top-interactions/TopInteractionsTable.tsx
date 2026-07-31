@@ -384,10 +384,15 @@ export const TopInteractionsTable = ({
       },
     },
     {
-      accessorKey: "totalInteractions",
+      // The volume in fiat, so it sorts by volume: keyed on the transfer count
+      // it once rendered, the control would order rows by a number this column
+      // does not show.
+      id: "totalValue",
+      accessorFn: (row) => row.volume,
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortDirection === "desc" ? "asc" : "desc";
+          setSortBy("volume");
           setSortDirection(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
 
@@ -399,9 +404,9 @@ export const TopInteractionsTable = ({
 
         return (
           <div className="flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
-            <Tooltip tooltipContent="Value of everything transferred between the two addresses, at the current token price. Sorting is by how many transactions they had with the holder.">
+            <Tooltip tooltipContent="Value of everything transferred between the two addresses, in both directions, at the current token price.">
               <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                Total Interactions
+                Total Value (USD)
               </h4>
             </Tooltip>
             <Button
@@ -414,12 +419,14 @@ export const TopInteractionsTable = ({
                 props={{
                   className: "size-4",
                 }}
+                // Only claims a direction while the rows really are ordered by
+                // this column: the default order is by transfer count.
                 activeState={
-                  sortDirection === "asc"
-                    ? ArrowState.UP
-                    : sortDirection === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
+                  sortBy !== "volume"
+                    ? ArrowState.DEFAULT
+                    : sortDirection === "asc"
+                      ? ArrowState.UP
+                      : ArrowState.DOWN
                 }
               />
             </Button>
