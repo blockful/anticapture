@@ -1,5 +1,20 @@
 # @anticapture/gateful
 
+## 1.6.0
+
+### Minor Changes
+
+- [#2087](https://github.com/blockful/anticapture/pull/2087) [`989b5e5`](https://github.com/blockful/anticapture/commit/989b5e5a9a8f307a920f9922941945afb33c5b01) Thanks [@brunod-e](https://github.com/brunod-e)! - Expose per-choice weights on off-chain votes. Weighted and quadratic ballots are
+  stored as `{choiceIndex: weight}`, but the response reduced that to the choice
+  indices and discarded the weights, so a voter's split could not be read back.
+  Off-chain votes now also carry a `weights` object, null for vote types that have
+  no weights. `choice` is unchanged.
+
+### Patch Changes
+
+- [#2091](https://github.com/blockful/anticapture/pull/2091) [`6aed140`](https://github.com/blockful/anticapture/commit/6aed1407371c81f075a408992b2ff2a86b97c6c5) Thanks [@pikonha](https://github.com/pikonha)! - Fix Snapshot proposal statuses by indexing quorum data and deriving no-quorum, stale-active, and
+  passed states correctly, so Snapshot proposals no longer show on-chain queue states.
+
 ## 1.5.0
 
 ### Minor Changes

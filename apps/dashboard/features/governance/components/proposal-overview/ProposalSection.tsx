@@ -9,17 +9,20 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertOctagon, ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useAccount } from "wagmi";
 
 import { GovernanceActionModal } from "@/features/governance/components/modals/GovernanceActionModal";
+import { OffchainVotedModal } from "@/features/governance/components/modals/OffchainVotedModal";
 import { OffchainVotingModal } from "@/features/governance/components/modals/OffchainVotingModal";
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import {
   getVoteText,
+  type OffchainVoteIndicator,
   ProposalHeader,
 } from "@/features/governance/components/proposal-overview/ProposalHeader";
+import { OffchainVotedChip } from "@/features/governance/components/proposal-overview/OffchainVotedChip";
 import { ProposalInfoSection } from "@/features/governance/components/proposal-overview/ProposalInfoSection";
 import { ProposalSectionSkeleton } from "@/features/governance/components/proposal-overview/ProposalSectionSkeleton";
 import { ProposalStatusSection } from "@/features/governance/components/proposal-overview/ProposalStatusSection";
@@ -27,6 +30,8 @@ import { TabsSection } from "@/features/governance/components/proposal-overview/
 import { TitleSection } from "@/features/governance/components/proposal-overview/TitleSection";
 import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import { useOffchainProposal } from "@/features/governance/hooks/useOffchainProposal";
+import { useOffchainProposalPrivacy } from "@/features/governance/hooks/useOffchainProposalPrivacy";
+import { useOffchainVoteIndexing } from "@/features/governance/hooks/useOffchainVoteIndexing";
 import { useProposal } from "@/features/governance/hooks/useProposal";
 import type {
   ProposalDetails,
@@ -34,11 +39,15 @@ import type {
 } from "@/features/governance/types";
 import { isProposalNotFoundError } from "@/features/governance/utils/proposalErrors";
 import {
-  getOffchainProposalStatus,
+  getOffchainProposalStatusView,
   normalizeChoices,
   normalizeScores,
 } from "@/features/governance/utils/offchainProposal";
 import { getOffchainVoteFullLabel } from "@/features/governance/utils/offchainVoteLabel";
+import {
+  deriveOffchainVoteWeights,
+  getOffchainVoteChoiceLabels,
+} from "@/features/governance/utils/offchainVoteWeights";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { ProposalHeaderProvider } from "@/features/governance/context/ProposalHeaderContext";
 import { Button } from "@/shared/components";
@@ -46,6 +55,20 @@ import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankS
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import daoConfig from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
+
+/** How often to re-ask the API for a vote Snapshot has already accepted. */
+const VOTE_INDEXING_POLL_MS = 5_000;
+
+/**
+ * Identity of the indexed vote a submission replaces. Snapshot votes carry no
+ * id, and a revote overwrites the previous one, so "the API returned a vote" is
+ * not enough to call a replacement indexed — it has to differ from the vote
+ * that was already there.
+ */
+const voteFingerprint = (
+  vote?: { created: number; choice?: Array<string | null> } | null,
+): string =>
+  vote ? `${vote.created}:${(vote.choice ?? []).join(",")}` : "no-vote";
 
 interface ProposalSectionProps {
   isOffchain?: boolean;
@@ -69,18 +92,33 @@ export const ProposalSection = ({
   const [localOffchainVoteLabel, setLocalOffchainVoteLabel] = useState<
     string | null
   >(null);
+  const [isChangingVote, setIsChangingVote] = useState(false);
+  const [optimisticScores, setOptimisticScores] = useState<number[] | null>(
+    null,
+  );
+  const [signedAt, setSignedAt] = useState<number | null>(null);
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
   const daoEnum = (daoId as string).toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
 
-  // Clear optimistic vote state when the viewer or proposal changes to prevent
-  // a previous session's label from bleeding into a new wallet or proposal.
-  const prevVoteKeyRef = useRef(`${address ?? ""}:${offchainProposalId}`);
-  if (prevVoteKeyRef.current !== `${address ?? ""}:${offchainProposalId}`) {
-    prevVoteKeyRef.current = `${address ?? ""}:${offchainProposalId}`;
+  // Clear optimistic vote state when the viewer or proposal changes: every field
+  // below describes one wallet's vote on one proposal, so a leftover signedAt
+  // would keep the indexing chip spinning and leftover optimisticScores would be
+  // added on top of the next proposal's tally.
+  const voteKey = `${address ?? ""}:${offchainProposalId}`;
+  const prevVoteKeyRef = useRef(voteKey);
+  // Fingerprint of the vote the pending submission replaces, captured at
+  // signature time (see voteFingerprint).
+  const replacedVoteRef = useRef(voteFingerprint(null));
+  if (prevVoteKeyRef.current !== voteKey) {
+    prevVoteKeyRef.current = voteKey;
+    replacedVoteRef.current = voteFingerprint(null);
     if (localOffchainVoteLabel !== null) setLocalOffchainVoteLabel(null);
+    if (optimisticScores !== null) setOptimisticScores(null);
+    if (signedAt !== null) setSignedAt(null);
+    if (isChangingVote) setIsChangingVote(false);
   }
 
   const handleAddressClick = useCallback((addr: string) => {
@@ -133,6 +171,30 @@ export const ProposalSection = ({
     [rawOffchainProposal?.choices],
   );
 
+  // Derived once here so the status, its winner copy, and the results card all
+  // agree instead of each recomputing the outcome.
+  const offchainStatus = useMemo(
+    () =>
+      rawOffchainProposal
+        ? getOffchainProposalStatusView({
+            type: rawOffchainProposal.type,
+            start: rawOffchainProposal.start,
+            end: rawOffchainProposal.end,
+            scores: offchainScores,
+            scoresTotal: rawOffchainProposal.scoresTotal,
+            choices: offchainChoices,
+            quorum: rawOffchainProposal.quorum,
+          })
+        : null,
+    [rawOffchainProposal, offchainScores, offchainChoices],
+  );
+
+  // Shutter proposals conceal the running tally, so the results card must render
+  // dashes rather than the zeros a closed encrypted election used to show.
+  const { isShutter } = useOffchainProposalPrivacy(offchainProposalId, {
+    enabled: isOffchain && !!offchainProposalId,
+  });
+
   const { data: userOffchainVoteData } = useVotesOffchainByProposalId(
     offchainDaoKey,
     offchainProposalId,
@@ -143,13 +205,26 @@ export const ProposalSection = ({
       orderDirection: "desc",
     },
     {
-      query: { enabled: !!isOffchain && !!offchainProposalId && !!address },
+      query: {
+        enabled: !!isOffchain && !!offchainProposalId && !!address,
+        // Snapshot accepts a vote before our indexer has ingested it, so the
+        // single refetch fired at signature time usually still returns the
+        // pre-vote state. Poll until the submitted vote actually shows up.
+        refetchInterval: (query) =>
+          signedAt !== null &&
+          voteFingerprint(query.state.data?.items?.[0]) ===
+            replacedVoteRef.current
+            ? VOTE_INDEXING_POLL_MS
+            : false,
+      },
     },
   );
 
-  const apiOffchainVoteChoice = (
-    userOffchainVoteData?.items?.[0]?.choice ?? []
-  ).filter((c): c is string => c != null);
+  const userOffchainVote = userOffchainVoteData?.items?.[0] ?? null;
+
+  const apiOffchainVoteChoice = (userOffchainVote?.choice ?? []).filter(
+    (c): c is string => c != null,
+  );
   const apiOffchainVoteLabel =
     apiOffchainVoteChoice.length > 0
       ? getOffchainVoteFullLabel(apiOffchainVoteChoice, offchainChoices)
@@ -158,11 +233,112 @@ export const ProposalSection = ({
   const offchainHasVoted = !!localOffchainVoteLabel || !!apiOffchainVoteLabel;
   const offchainVoteLabel = localOffchainVoteLabel ?? apiOffchainVoteLabel;
 
+  // The indexed ballot the next submission would replace, so the ballot's
+  // live-impact preview can subtract it instead of stacking on top. Snapshot
+  // models `choice` as 1-based indices; only single-index ballots draw the
+  // preview, so anything else stays null.
+  const previousOffchainVote = (() => {
+    if (!userOffchainVote || apiOffchainVoteChoice.length !== 1) return null;
+    const choice = Number(apiOffchainVoteChoice[0]);
+    if (!Number.isFinite(choice)) return null;
+    return { choice, votingPower: userOffchainVote.vp ?? 0 };
+  })();
+
+  // The vote counts as indexed once the API returns a vote other than the one
+  // the submission replaced, which flips the chip to "Indexed" and stops
+  // applying the optimistic delta. Comparing against the replaced vote matters
+  // for revotes: the old vote is already indexed, so any returned vote would
+  // otherwise read as the new one and restore the previous tally on screen.
+  const isVoteIndexed =
+    voteFingerprint(userOffchainVote) !== replacedVoteRef.current;
+  const {
+    status: indexingStatus,
+    isFading: isIndexingChipFading,
+    isOptimistic,
+  } = useOffchainVoteIndexing({
+    signedAt,
+    isIndexed: isVoteIndexed,
+  });
+
+  // Dropped the moment the indexer has the vote, otherwise the delta would be
+  // counted twice on top of the now-indexed tally.
+  const pendingScores = isOptimistic ? optimisticScores : null;
+
+  // Read-only first for a wallet that already voted, unless it asked to change.
+  const showVotedModal =
+    offchainHasVoted && !!userOffchainVote && !isChangingVote;
+
+  const votedWeights = useMemo(
+    () =>
+      rawOffchainProposal
+        ? deriveOffchainVoteWeights(
+            apiOffchainVoteChoice,
+            offchainChoices,
+            rawOffchainProposal.type,
+          )
+        : null,
+    [apiOffchainVoteChoice, offchainChoices, rawOffchainProposal],
+  );
+
+  const votedChoiceLabels = useMemo(
+    () => getOffchainVoteChoiceLabels(apiOffchainVoteChoice, offchainChoices),
+    [apiOffchainVoteChoice, offchainChoices],
+  );
+
+  const closeOffchainModals = useCallback(() => {
+    setIsVotingModalOpen(false);
+    setIsChangingVote(false);
+  }, []);
+
+  // Feeds the "You voted" chip: only once the indexed vote is available, since
+  // the tooltip quotes its voting power and date.
+  const offchainVoteIndicator = useMemo(
+    () =>
+      userOffchainVote
+        ? {
+            votingPower: userOffchainVote.vp ?? 0,
+            votedAt: userOffchainVote.created,
+            tokenSymbol: daoEnum,
+            onOpen: () => {
+              setIsChangingVote(false);
+              setIsVotingModalOpen(true);
+            },
+          }
+        : undefined,
+    [userOffchainVote, daoEnum],
+  );
+
   const queryClient = useQueryClient();
 
+  // The tally is refetched again the moment the vote lands: the invalidation at
+  // signature time races the indexer and usually loses.
+  useEffect(() => {
+    if (signedAt === null || !isVoteIndexed) return;
+    void queryClient.invalidateQueries({
+      queryKey: offchainProposalByIdQueryKey(
+        offchainDaoKey,
+        offchainProposalId,
+      ),
+    });
+  }, [
+    signedAt,
+    isVoteIndexed,
+    queryClient,
+    offchainDaoKey,
+    offchainProposalId,
+  ]);
+
   const handleOffchainVoteSuccess = useCallback(
-    (voteLabel: string) => {
+    (voteLabel: string, optimisticScores: number[] | null) => {
+      replacedVoteRef.current = voteFingerprint(userOffchainVote);
       setLocalOffchainVoteLabel(voteLabel);
+      // Held until the indexer reflects the vote, so the tally moves the moment
+      // the signature returns instead of after the next poll. Never on a
+      // revote: the indexed scores still carry this wallet's previous ballot
+      // and the delta only describes the new one, so adding it would count the
+      // voter twice — and could name the wrong leader — until indexing lands.
+      setOptimisticScores(userOffchainVote ? null : optimisticScores);
+      setSignedAt(Date.now());
       // Refetch votes (badge + table) and proposal scores so the UI reflects
       // the new vote without requiring a manual page reload.
       void queryClient.invalidateQueries({
@@ -178,44 +354,38 @@ export const ProposalSection = ({
         ),
       });
     },
-    [queryClient, offchainDaoKey, offchainProposalId],
+    [queryClient, offchainDaoKey, offchainProposalId, userOffchainVote],
   );
 
-  const adaptedOffchainProposal: ProposalViewData | null = rawOffchainProposal
-    ? {
-        id: rawOffchainProposal.id,
-        daoId: daoId as string,
-        txHash: null,
-        proposerAccountId: rawOffchainProposal.author as `0x${string}`,
-        title: rawOffchainProposal.title,
-        description: rawOffchainProposal.body ?? "",
-        quorum: String(rawOffchainProposal.quorum),
-        timestamp: rawOffchainProposal.created,
-        status: getOffchainProposalStatus(
-          rawOffchainProposal.state,
-          rawOffchainProposal.type,
-          offchainScores,
-          rawOffchainProposal.scoresTotal,
-          rawOffchainProposal.quorum,
-          rawOffchainProposal.end,
-        ),
-        forVotes: "0",
-        againstVotes: "0",
-        abstainVotes: "0",
-        startTimestamp: rawOffchainProposal.start,
-        endTimestamp: rawOffchainProposal.end,
-        startBlock: 0,
-        endBlock: 0,
-        queuedTimestamp: null,
-        executedTimestamp: null,
-        queuedTxHash: null,
-        executedTxHash: null,
-        calldatas: [],
-        targets: [],
-        values: [],
-        proposalType: null,
-      }
-    : null;
+  const adaptedOffchainProposal: ProposalViewData | null =
+    rawOffchainProposal && offchainStatus
+      ? {
+          id: rawOffchainProposal.id,
+          daoId: daoId as string,
+          txHash: null,
+          proposerAccountId: rawOffchainProposal.author as `0x${string}`,
+          title: rawOffchainProposal.title,
+          description: rawOffchainProposal.body ?? "",
+          quorum: String(rawOffchainProposal.quorum),
+          timestamp: rawOffchainProposal.created,
+          status: offchainStatus.status,
+          forVotes: "0",
+          againstVotes: "0",
+          abstainVotes: "0",
+          startTimestamp: rawOffchainProposal.start,
+          endTimestamp: rawOffchainProposal.end,
+          startBlock: 0,
+          endBlock: 0,
+          queuedTimestamp: null,
+          executedTimestamp: null,
+          queuedTxHash: null,
+          executedTxHash: null,
+          calldatas: [],
+          targets: [],
+          values: [],
+          proposalType: null,
+        }
+      : null;
 
   const proposal: ProposalViewData | null = isOffchain
     ? adaptedOffchainProposal
@@ -289,6 +459,7 @@ export const ProposalSection = ({
           offchainProposalType={
             isOffchain ? (rawOffchainProposal?.type ?? null) : undefined
           }
+          offchainVote={isOffchain ? offchainVoteIndicator : undefined}
         />
         <div className="mx-auto w-full">
           <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
@@ -304,6 +475,10 @@ export const ProposalSection = ({
                 decimals={isOffchain ? 0 : decimals}
                 offchainChoices={isOffchain ? offchainChoices : undefined}
                 offchainScores={isOffchain ? offchainScores : undefined}
+                isShutter={isShutter}
+                optimisticScores={pendingScores}
+                indexingStatus={indexingStatus}
+                isIndexingChipFading={isIndexingChipFading}
               />
               <ProposalStatusSection
                 proposal={proposal}
@@ -362,12 +537,31 @@ export const ProposalSection = ({
             </>
           )}
 
-          {isOffchain && rawOffchainProposal && (
+          {/* A wallet that already voted lands on the read-only state first and
+              opts into the ballot through "Change vote". */}
+          {isOffchain && rawOffchainProposal && showVotedModal && (
+            <OffchainVotedModal
+              isOpen={isVotingModalOpen}
+              onClose={closeOffchainModals}
+              onChangeVote={() => setIsChangingVote(true)}
+              canChangeVote={offchainStatus?.offchainStatus === "active"}
+              choices={offchainChoices}
+              weights={votedWeights}
+              choiceLabels={votedChoiceLabels}
+              votedAt={userOffchainVote?.created ?? 0}
+              votingPower={userOffchainVote?.vp ?? 0}
+              tokenSymbol={daoEnum}
+              comment={userOffchainVote?.reason}
+            />
+          )}
+
+          {isOffchain && rawOffchainProposal && !showVotedModal && (
             <OffchainVotingModal
               isOpen={isVotingModalOpen}
-              onClose={() => setIsVotingModalOpen(false)}
+              onClose={closeOffchainModals}
               proposal={rawOffchainProposal}
               hasVoted={offchainHasVoted}
+              previousVote={previousOffchainVote}
               onVoteSuccess={handleOffchainVoteSuccess}
             />
           )}
@@ -385,6 +579,7 @@ export const ProposalSection = ({
           offchainHasVoted={offchainHasVoted}
           offchainVoteLabel={offchainVoteLabel}
           offchainProposalType={rawOffchainProposal?.type ?? null}
+          offchainVote={offchainVoteIndicator}
         />
       </div>
     </ProposalHeaderProvider>
@@ -403,6 +598,7 @@ const MobileBottomBar = ({
   offchainHasVoted,
   offchainVoteLabel,
   offchainProposalType,
+  offchainVote,
 }: {
   isOffchain: boolean;
   address: string | undefined;
@@ -415,6 +611,7 @@ const MobileBottomBar = ({
   offchainHasVoted?: boolean;
   offchainVoteLabel?: string | null;
   offchainProposalType?: string | null;
+  offchainVote?: OffchainVoteIndicator;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
 
@@ -428,6 +625,7 @@ const MobileBottomBar = ({
             <MobileOffchainVotedBadge
               label={offchainVoteLabel ?? null}
               proposalType={offchainProposalType}
+              vote={offchainVote}
             />
             {isOngoing && (
               <Button className="flex w-full" onClick={onVoteClick}>
@@ -506,10 +704,27 @@ const MobileVotedBadge = ({ vote }: { vote: number }) => {
 const MobileOffchainVotedBadge = ({
   label,
   proposalType,
+  vote,
 }: {
   label: string | null;
   proposalType?: string | null;
+  vote?: OffchainVoteIndicator;
 }) => {
+  if (label && vote) {
+    return (
+      <div className="flex w-full items-center justify-center">
+        <OffchainVotedChip
+          voteLabel={label}
+          proposalType={proposalType}
+          votingPower={vote.votingPower}
+          tokenSymbol={vote.tokenSymbol}
+          votedAt={vote.votedAt}
+          onClick={vote.onOpen}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full items-center justify-center gap-2">
       <p className="text-secondary text-[12px] font-medium leading-4">

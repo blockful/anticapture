@@ -1,5 +1,11 @@
 # @anticapture/user-api
 
+## 0.3.0
+
+### Minor Changes
+
+- [#2085](https://github.com/blockful/anticapture/pull/2085) [`b85c215`](https://github.com/blockful/anticapture/commit/b85c21516e01cfe4e6a2ab487b34529be8e8a0d1) Thanks [@pikonha](https://github.com/pikonha)! - Add user API validation metrics with per-user email or wallet identifiers, login method, live token count, and request usage.
+
 ## 0.2.0
 
 ### Minor Changes

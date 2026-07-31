@@ -83,6 +83,9 @@ export const WhitelabelConnectWallet = ({
                       src={account.ensAvatar}
                       alt={account.displayName || "ENS Avatar"}
                       fill
+                      // ENS avatars resolve to arbitrary hosts (IPFS/NFT gateways), which
+                      // the optimizer allowlist cannot enumerate.
+                      unoptimized
                       className="object-cover"
                     />
                   </div>

@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import type { Address } from "viem";
 
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
+import { OffchainVotedChip } from "@/features/governance/components/proposal-overview/OffchainVotedChip";
 import { BadgeStatus, Button } from "@/shared/components";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
@@ -29,6 +30,17 @@ interface ProposalHeaderProps {
   offchainHasVoted?: boolean;
   offchainVoteLabel?: string | null;
   offchainProposalType?: string | null;
+  offchainVote?: OffchainVoteIndicator;
+}
+
+/** Detail the "You voted" chip needs beyond the label: tooltip data + its action. */
+export interface OffchainVoteIndicator {
+  votingPower: number;
+  /** Vote timestamp, in Unix seconds. */
+  votedAt: number;
+  tokenSymbol: string;
+  /** Opens the read-only voted modal. */
+  onOpen: () => void;
 }
 
 const ProposalHeaderAction = ({
@@ -40,6 +52,7 @@ const ProposalHeaderAction = ({
   offchainHasVoted,
   offchainVoteLabel,
   offchainProposalType,
+  offchainVote,
   daoId,
 }: {
   address: string | undefined;
@@ -50,6 +63,7 @@ const ProposalHeaderAction = ({
   offchainHasVoted?: boolean;
   offchainVoteLabel?: string | null;
   offchainProposalType?: string | null;
+  offchainVote?: OffchainVoteIndicator;
   daoId: string;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
@@ -69,6 +83,7 @@ const ProposalHeaderAction = ({
             <OffchainVotedBadge
               label={offchainVoteLabel ?? null}
               proposalType={offchainProposalType}
+              vote={offchainVote}
             />
             {isOngoing && (
               <Button
@@ -206,6 +221,7 @@ export const ProposalHeader = ({
   offchainHasVoted,
   offchainVoteLabel,
   offchainProposalType,
+  offchainVote,
 }: ProposalHeaderProps) => {
   const pathname = usePathname();
   const supportValue =
@@ -280,6 +296,9 @@ export const ProposalHeader = ({
                 offchainProposalType={
                   snapshotLink !== undefined ? offchainProposalType : undefined
                 }
+                offchainVote={
+                  snapshotLink !== undefined ? offchainVote : undefined
+                }
                 daoId={daoId}
               />
               {snapshotLink === undefined && (
@@ -313,6 +332,7 @@ export const ProposalHeader = ({
                 offchainHasVoted={offchainHasVoted}
                 offchainVoteLabel={offchainVoteLabel}
                 offchainProposalType={offchainProposalType}
+                offchainVote={offchainVote}
                 daoId={daoId}
               />
             </>
@@ -370,10 +390,27 @@ const VotedBadge = ({ vote }: { vote: number }) => {
 const OffchainVotedBadge = ({
   label,
   proposalType,
+  vote,
 }: {
   label: string | null;
   proposalType?: string | null;
+  vote?: OffchainVoteIndicator;
 }) => {
+  // With the vote detail available this is the designed chip: one green pill
+  // carrying the choice, a tooltip, and a way into the read-only modal.
+  if (label && vote) {
+    return (
+      <OffchainVotedChip
+        voteLabel={label}
+        proposalType={proposalType}
+        votingPower={vote.votingPower}
+        tokenSymbol={vote.tokenSymbol}
+        votedAt={vote.votedAt}
+        onClick={vote.onOpen}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col items-end">
       <p className="text-secondary flex items-center gap-2 text-[12px] font-medium leading-[16px]">

@@ -28,8 +28,7 @@ const apiKeysService = authfulClient
   : undefined;
 
 // Per-user gauges contain email or wallet identifiers. Keep them entirely
-// unregistered unless /metrics is protected, even if env validation is later
-// relaxed or bypassed by another entry point.
+// unregistered unless /metrics is protected.
 const metricsService =
   authfulClient && env.USER_API_METRICS_TOKEN
     ? new MetricsSnapshotService(
@@ -37,6 +36,12 @@ const metricsService =
         authfulClient,
       )
     : undefined;
+
+if (authfulClient && !metricsService) {
+  logger.warn(
+    "USER_API_METRICS_TOKEN unset: /metrics and the per-user validation gauges stay disabled",
+  );
+}
 
 const app = createApp({
   db,

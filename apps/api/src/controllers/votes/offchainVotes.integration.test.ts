@@ -24,6 +24,9 @@ const FULL_VOTE_ITEM = {
   voter: VOTER,
   proposalId: "proposal-1",
   choice: ["1"],
+  // The stored choice is `{ "1": 1 }`, so `choice` keeps the index and
+  // `weights` keeps the value a weighted ballot would carry.
+  weights: { "1": 1 },
   vp: 100,
   reason: "",
   created: 1700000000,

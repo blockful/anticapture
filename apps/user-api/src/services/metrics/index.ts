@@ -170,18 +170,14 @@ const emptyActiveUsers = (): Record<AgeBucket, number> => ({
   "30d+": 0,
 });
 
-const saoPauloMidnight = (now: Date): Date => {
-  // ponytail: fixed -03:00; switch to a tz library if Brazil reinstates DST
-  const local = new Date(now.getTime() - 3 * 60 * 60 * 1_000);
-  return new Date(
-    Date.UTC(
-      local.getUTCFullYear(),
-      local.getUTCMonth(),
-      local.getUTCDate(),
-      3,
-    ),
-  );
-};
+/**
+ * Authful stores usage in UTC-day buckets, so the activity day has to be the
+ * UTC day too: asking for any other midnight (a São Paulo one, say) still
+ * returns whole UTC buckets and silently folds the previous local evening into
+ * "today". The dashboard's day is therefore UTC.
+ */
+const utcMidnight = (now: Date): Date =>
+  new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
 const ageBucket = (ageMs: number): AgeBucket => {
   const days = Math.max(0, ageMs) / (24 * 60 * 60 * 1_000);
@@ -199,6 +195,8 @@ export class MetricsSnapshotService {
     users: [],
   };
   private refreshing = false;
+  /** UTC day the published usage/activeUsers belong to, as an epoch ms. */
+  private usageDay: number | null = null;
 
   constructor(
     private readonly dataSource: MetricsDataSource,
@@ -218,11 +216,18 @@ export class MetricsSnapshotService {
     this.refreshing = true;
     try {
       const now = this.now();
+      const since = utcMidnight(now);
+      // Daily figures are only carried over while the day they were measured in
+      // is still current: past midnight an unreachable Authful must report zero
+      // rather than keep republishing yesterday's counts as today's.
+      const sameDay = this.usageDay === since.getTime();
       // Publish DB-derived counts before touching Authful: if Authful is down
       // the account/key gauges must not stay stuck at their initial zeros.
       const counts = await this.dataSource.counts();
       const previousUsageByUserId = new Map(
-        this.current.users.map(({ userId, usage }) => [userId, usage]),
+        sameDay
+          ? this.current.users.map(({ userId, usage }) => [userId, usage])
+          : [],
       );
       const users = counts.users.map((userMetrics) => ({
         ...userMetrics,
@@ -232,10 +237,11 @@ export class MetricsSnapshotService {
         ...this.current,
         accountsTotal: counts.accountsTotal,
         keysLive: counts.keysLive,
+        activeUsers: sameDay ? this.current.activeUsers : emptyActiveUsers(),
         users,
       };
 
-      const usage = await this.authful.activeTokenUsage(saoPauloMidnight(now));
+      const usage = await this.authful.activeTokenUsage(since);
       const keys = await this.dataSource.keysForActiveTokenIds(
         usage.map(({ tokenId }) => tokenId),
       );
@@ -271,6 +277,7 @@ export class MetricsSnapshotService {
           usage: usageByUserId.get(userMetrics.userId) ?? 0,
         })),
       };
+      this.usageDay = since.getTime();
     } finally {
       this.refreshing = false;
     }

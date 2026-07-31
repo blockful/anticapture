@@ -31,10 +31,13 @@ export enum ProposalStatus {
   QUEUED = "queued",
   PENDING_EXECUTION = "pending_execution",
   SUCCEEDED = "succeeded",
-  PASSED = "passed",
   EXPIRED = "expired",
   NO_QUORUM = "no_quorum",
   CLOSED = "closed",
+  // Off-chain (Snapshot) outcomes for basic ballots. Distinct from EXECUTED,
+  // which has no meaning off-chain and used to leak into Snapshot proposals.
+  PASSED = "passed",
+  REJECTED = "rejected",
 }
 
 export enum ProposalState {

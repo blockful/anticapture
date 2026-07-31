@@ -202,10 +202,10 @@ describe("validation metrics snapshot", () => {
   });
 
   it.each([
-    ["23:30 GMT-3", "2026-07-28T02:30:00.000Z", "2026-07-27T03:00:00.000Z"],
-    ["00:30 GMT-3", "2026-07-28T03:30:00.000Z", "2026-07-28T03:00:00.000Z"],
+    ["23:30 UTC", "2026-07-27T23:30:00.000Z", "2026-07-27T00:00:00.000Z"],
+    ["00:30 UTC", "2026-07-28T00:30:00.000Z", "2026-07-28T00:00:00.000Z"],
   ])(
-    "requests activity since the correct midnight at %s",
+    "requests activity since UTC midnight at %s, matching the usage buckets",
     async (_, now, since) => {
       let requestedSince: Date | undefined;
       const service = new MetricsSnapshotService(
@@ -224,4 +224,44 @@ describe("validation metrics snapshot", () => {
       expect(requestedSince?.toISOString()).toBe(since);
     },
   );
+
+  it("drops retained daily figures once the activity day rolls over", async () => {
+    let now = NOW;
+    let authfulUp = true;
+    const service = new MetricsSnapshotService(
+      dataSource,
+      {
+        activeTokenUsage: async () => {
+          if (!authfulUp) throw new Error("authful unavailable");
+          return [{ tokenId: "wallet-token", count: 12 }];
+        },
+      },
+      () => now,
+    );
+
+    await service.refresh();
+    expect(
+      service.snapshot().users.find((u) => u.userId === "one")?.usage,
+    ).toBe(12);
+
+    // Same day, Authful down: yesterday's figure is still today's best answer.
+    authfulUp = false;
+    await service.refresh().catch(() => {});
+    expect(
+      service.snapshot().users.find((u) => u.userId === "one")?.usage,
+    ).toBe(12);
+
+    // Next day, still down: the stale count must not be republished as today's.
+    now = new Date(NOW.getTime() + DAY);
+    await service.refresh().catch(() => {});
+    expect(
+      service.snapshot().users.find((u) => u.userId === "one")?.usage,
+    ).toBe(0);
+    expect(service.snapshot().activeUsers).toEqual({
+      "0-1d": 0,
+      "1-7d": 0,
+      "7-30d": 0,
+      "30d+": 0,
+    });
+  });
 });
