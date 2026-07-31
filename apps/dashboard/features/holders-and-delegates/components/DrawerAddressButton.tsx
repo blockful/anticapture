@@ -4,6 +4,7 @@ import { useQueryState } from "nuqs";
 import type { Address } from "viem";
 
 import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
+import { useDrawerNavigation } from "@/features/holders-and-delegates/hooks/useDrawerNavigation";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import type { EntityType } from "@/shared/types/entities";
 import { cn } from "@/shared/utils/cn";
@@ -30,6 +31,9 @@ export const DrawerAddressButton = ({
   const setDrawerTab = useQueryState("drawerTab")[1];
   const setTabAddress = useQueryState("tabAddress")[1];
   const { setDrawerEntity } = useDrawerEntityOverride();
+  // `drawerAddress` re-points the owners that read it from the URL; the drawer
+  // itself covers the ones holding the address in local state.
+  const navigation = useDrawerNavigation();
 
   return (
     <button
@@ -43,6 +47,7 @@ export const DrawerAddressButton = ({
         setDrawerTab(null);
         setDrawerEntity(entityType, address);
         setDrawerAddress(address);
+        navigation?.repoint(address);
       }}
     >
       <EnsAvatar

@@ -10,6 +10,7 @@ import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 
 import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
+import { useDrawerNavigation } from "@/features/holders-and-delegates/hooks/useDrawerNavigation";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control";
 import { FeedEventItem } from "@/shared/components/feed/FeedEventItem";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
@@ -101,6 +102,9 @@ export const DrawerActivityFeed = ({
     useQueryState("drawerTab")[1],
   ];
   const { setDrawerEntity } = useDrawerEntityOverride();
+  // `drawerAddress` re-points the owners that read it from the URL; the drawer
+  // itself covers the ones holding the address in local state.
+  const navigation = useDrawerNavigation();
 
   // Clicking a delegate from a token-holder drawer has to open the delegate
   // profile, so the clicked entity type travels with the clicked address.
@@ -108,6 +112,7 @@ export const DrawerActivityFeed = ({
     setDrawerTab(null);
     setDrawerEntity(clickedEntityType, clicked);
     setDrawerAddress(clicked);
+    navigation?.repoint(clicked);
   };
 
   return (
