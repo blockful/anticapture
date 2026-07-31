@@ -70,11 +70,13 @@ const PROPOSALS_BY_IDS_QUERY = `
 // would drop live proposals created exactly at `since` and cause reconciliation
 // to delete them. Pagination also advances with created_gte and de-dupes by id,
 // so proposals sharing a `created` second across a page boundary aren't skipped.
+// `skip` walks the overflow when a whole page lands on one second.
 const PROPOSAL_IDS_QUERY = `
-  query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
+  query ($spaceId: String!, $cursor: Int!, $skip: Int!, $pageSize: Int!) {
     proposals(
       where: { space: $spaceId, created_gte: $cursor }
       first: $pageSize
+      skip: $skip
       orderBy: "created"
       orderDirection: asc
     ) {
@@ -113,12 +115,14 @@ const VOTES_QUERY = `
 // its choice still encrypted, and the reveal rewrites it in place on Snapshot.
 // created_gte (not created_gt) for the same reason as PROPOSAL_IDS_QUERY: an
 // exclusive cursor drops votes that share the last returned vote's `created`
-// second but didn't fit on that page. The caller de-dupes the overlap.
+// second but didn't fit on that page. The caller de-dupes the overlap, and
+// pages deeper into a shared second with `skip` instead of stepping past it.
 const VOTES_BY_PROPOSAL_IDS_QUERY = `
-  query ($ids: [String]!, $cursor: Int!, $pageSize: Int!) {
+  query ($ids: [String]!, $cursor: Int!, $skip: Int!, $pageSize: Int!) {
     votes(
       where: { proposal_in: $ids, created_gte: $cursor }
       first: $pageSize
+      skip: $skip
       orderBy: "created"
       orderDirection: asc
     ) {
@@ -170,6 +174,7 @@ export class SnapshotProvider implements DataProvider {
   async fetchProposalIdsSince(since: number): Promise<string[]> {
     const ids = new Set<string>();
     let cursor = since;
+    let skip = 0;
 
     while (true) {
       const response = await this.query<{
@@ -177,6 +182,7 @@ export class SnapshotProvider implements DataProvider {
       }>(PROPOSAL_IDS_QUERY, {
         spaceId: this.spaceId,
         cursor,
+        skip,
         pageSize: PAGE_SIZE,
       });
 
@@ -192,15 +198,15 @@ export class SnapshotProvider implements DataProvider {
         response.proposals[response.proposals.length - 1]!.created;
 
       // created_gte re-fetches the boundary second (Set de-dupes), so a full page
-      // that ends on a shared `created` second keeps its later proposals. If the
-      // whole page shares one second, advancing by +1 avoids an infinite loop at
-      // the cost of dropping any overflow past PAGE_SIZE in that single second —
-      // acceptable: >1000 proposals in one second is not a real Snapshot space.
-      // ponytail: +1 fallback bounds the loop; revisit only if such spaces exist.
-      cursor =
-        lastCreated === response.proposals[0]!.created
-          ? lastCreated + 1
-          : lastCreated;
+      // that ends on a shared `created` second keeps its later proposals. When the
+      // whole page shares one second, `created` cannot advance without dropping
+      // the rest of that second, so page deeper into it with `skip` instead.
+      if (lastCreated === response.proposals[0]!.created) {
+        skip += PAGE_SIZE;
+      } else {
+        cursor = lastCreated;
+        skip = 0;
+      }
     }
 
     return [...ids];
@@ -253,6 +259,7 @@ export class SnapshotProvider implements DataProvider {
     // the upsert would do anyway.
     const votesByKey = new Map<string, OffchainVote>();
     let cursor = 0;
+    let skip = 0;
 
     // Paginated: a single proposal can hold more than PAGE_SIZE votes.
     while (true) {
@@ -261,6 +268,7 @@ export class SnapshotProvider implements DataProvider {
       }>(VOTES_BY_PROPOSAL_IDS_QUERY, {
         ids,
         cursor,
+        skip,
         pageSize: PAGE_SIZE,
       });
 
@@ -276,10 +284,16 @@ export class SnapshotProvider implements DataProvider {
       if (page.length < PAGE_SIZE) break;
 
       const lastCreated = page[page.length - 1]!.created;
-      // Guard the same shared-second edge case as fetchProposalIdsSince: if a
-      // whole page lands on one second, step past it rather than loop forever.
-      // Cost is any overflow past PAGE_SIZE votes cast in that single second.
-      cursor = lastCreated === page[0]!.created ? lastCreated + 1 : lastCreated;
+      // Same shared-second handling as fetchProposalIdsSince: a burst of more
+      // than PAGE_SIZE votes on one second must not be skipped — a reveal that
+      // lost them would persist their encrypted choices forever, since the
+      // proposal leaves getRevealPendingProposalIds once its tally is nonzero.
+      if (lastCreated === page[0]!.created) {
+        skip += PAGE_SIZE;
+      } else {
+        cursor = lastCreated;
+        skip = 0;
+      }
     }
 
     return [...votesByKey.values()];
