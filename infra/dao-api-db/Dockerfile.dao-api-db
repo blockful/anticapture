@@ -1,0 +1,13 @@
+FROM ghcr.io/railwayapp-templates/postgres-ssl:16
+
+# The base image's ENTRYPOINT (wrapper.sh) sets up SSL certs and pgbackrest, so
+# we don't replace it — entrypoint.dao-api-db.sh derives a couple of settings from
+# the container's memory limit and then execs wrapper.sh with them appended.
+COPY entrypoint.dao-api-db.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Declaring ENTRYPOINT in a derived image resets the base image's CMD to empty,
+# so it has to be repeated verbatim. This is what `ps` shows in a running
+# stock DB container: `wrapper.sh postgres --port=5432`.
+CMD ["postgres", "--port=5432"]

@@ -1,0 +1,10 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "infra/dao-api-db/Dockerfile.dao-api-db"
+
+[deploy]
+# No healthcheckPath: Postgres speaks the wire protocol, not HTTP, so Railway's
+# HTTP probe would never pass. Liveness is covered by postgres-exporter's pg_up,
+# which feeds the PostgreSQLUnavailable alert in infra/monitoring/alerts.yml.
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
