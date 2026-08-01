@@ -1,4 +1,14 @@
-FROM ghcr.io/railwayapp-templates/postgres-ssl:16
+# The fleet spans three Postgres majors (16 x8, 17 x4, 18 x5), so the version
+# has to come from the service, not the file. Railway exposes service variables
+# as build args, so each DB service sets PG_MAJOR to match the major that
+# initialised its volume.
+#
+# Deliberately no default: an unset PG_MAJOR fails the *build*, which leaves the
+# currently-running container serving. A wrong default would instead build fine
+# and then crashloop on "database files are incompatible with server" — a louder
+# failure at a much worse moment.
+ARG PG_MAJOR
+FROM ghcr.io/railwayapp-templates/postgres-ssl:${PG_MAJOR}
 
 # The base image's ENTRYPOINT (wrapper.sh) sets up SSL certs and pgbackrest, so
 # we don't replace it — entrypoint.dao-api-db.sh derives a couple of settings from
