@@ -48,8 +48,13 @@ jobs:
           # outright; skipping is the behaviour this gate had before.
           changed=0
           if [ -n "${BEFORE}" ] && [ "${BEFORE}" != "0000000000000000000000000000000000000000" ]; then
-            if gh api --paginate "repos/${REPO}/compare/${BEFORE}...${SHA}" \
-              --jq '.files[].filename' | grep -qE '^(apps|infra)/api/'; then
+            # Fetch first, match second. Inside `if`, a failing gh api (rate
+            # limit, permissions, outage) would just read as "no API change"
+            # and skip the gate exactly when a release needs it; as its own
+            # command, set -e fails the step instead.
+            files=$(gh api --paginate "repos/${REPO}/compare/${BEFORE}...${SHA}" \
+              --jq '.files[].filename')
+            if printf '%s\n' "${files}" | grep -qE '^(apps|infra)/api/'; then
               changed=1
             fi
           fi

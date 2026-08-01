@@ -6,7 +6,23 @@ import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry"
 
 const HEALTH_PROBE_TIMEOUT_MS = 3_000;
 
+// Which upstream this is. The deploy gate needs it to tell a DAO API — whose
+// OpenAPI schemas gateful merges into /docs/json, and which must therefore be
+// on the release before the SDK is generated — from upstreams that merely have
+// to be reachable.
+const UpstreamKindSchema = z.enum([
+  "dao-api",
+  "relayer",
+  "address-enrichment",
+  "token-service",
+  // Defensive: probeTarget catches its own failures, so this is only reachable
+  // if the probe promise itself rejects. Reported as down, which already fails
+  // the whole response.
+  "unknown",
+]);
+
 const UpstreamStatusSchema = z.object({
+  kind: UpstreamKindSchema,
   status: z.enum(["ok", "down"]),
   circuit: z.enum(["CLOSED", "OPEN", "HALF_OPEN"]),
   nextRetryIn: z.number().int().optional(),
@@ -64,8 +80,10 @@ type ProbeTarget = {
   name: string;
   baseUrl: string;
   circuitKey: string;
+  kind: UpstreamKind;
 };
 
+type UpstreamKind = z.infer<typeof UpstreamKindSchema>;
 type UpstreamStatus = z.infer<typeof UpstreamStatusSchema>;
 type HealthResponse = z.infer<typeof HealthResponseSchema>;
 
@@ -84,7 +102,7 @@ function buildProbeTargets(opts: HealthOptions): ProbeTarget[] {
   const targets: ProbeTarget[] = [];
 
   for (const [dao, baseUrl] of opts.daoApis) {
-    targets.push({ name: dao, baseUrl, circuitKey: dao });
+    targets.push({ name: dao, baseUrl, circuitKey: dao, kind: "dao-api" });
   }
 
   for (const [dao, baseUrl] of opts.daoRelayers) {
@@ -92,6 +110,7 @@ function buildProbeTargets(opts: HealthOptions): ProbeTarget[] {
       name: `relayer:${dao}`,
       baseUrl,
       circuitKey: `relayer:${dao}`,
+      kind: "relayer",
     });
   }
 
@@ -100,6 +119,7 @@ function buildProbeTargets(opts: HealthOptions): ProbeTarget[] {
       name: "address-enrichment",
       baseUrl: opts.addressEnrichmentUrl,
       circuitKey: "address-enrichment",
+      kind: "address-enrichment",
     });
   }
 
@@ -111,6 +131,7 @@ function buildProbeTargets(opts: HealthOptions): ProbeTarget[] {
       name: "authful",
       baseUrl: opts.tokenServiceUrl,
       circuitKey: "authful",
+      kind: "token-service",
     });
   }
 
@@ -147,7 +168,12 @@ async function probeTarget(
   if (breaker.state === "OPEN") {
     return [
       target.name,
-      { status: "down", ...buildCircuit(breaker), error: "circuit open" },
+      {
+        kind: target.kind,
+        status: "down",
+        ...buildCircuit(breaker),
+        error: "circuit open",
+      },
     ];
   }
 
@@ -165,6 +191,7 @@ async function probeTarget(
     return [
       target.name,
       {
+        kind: target.kind,
         status: "ok",
         ...buildCircuit(breaker),
         ...(commit ? { commit } : {}),
@@ -174,6 +201,7 @@ async function probeTarget(
     return [
       target.name,
       {
+        kind: target.kind,
         status: "down",
         ...buildCircuit(breaker),
         error: err instanceof Error ? err.message : "health probe failed",
@@ -199,6 +227,7 @@ export function health(
       return [
         "unknown",
         {
+          kind: "unknown",
           status: "down",
           circuit: "CLOSED",
           error: "health probe failed",

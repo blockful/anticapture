@@ -65,18 +65,24 @@ export const fetchGatefulHealth = async (
   };
 };
 
-// Upstreams still serving a different commit than the one we're waiting for.
+// Upstreams not yet serving the commit we're waiting for.
 //
 // Gateful builds /docs/json by merging the DAO APIs' specs live on every
 // request, so gateful reporting the new commit says nothing about the schemas
-// it will serve — the DAO APIs redeploy on their own (slower) schedule. An
-// upstream that reports no commit is skipped, not treated as stale: relayers,
-// address enrichment and authful don't report one, and neither does a DAO API
-// deployed before this field existed. Skipping them keeps the gate from
-// deadlocking on services this release never rebuilds.
+// it will serve — the DAO APIs redeploy on their own (slower) schedule.
+//
+// A DAO API is stale unless it reports exactly this commit: the caller only
+// asks for this check when the release rebuilds them, so "no commit reported"
+// means the previous release is still up (it predates the field), not that
+// there is nothing to wait for. Every other upstream kind — relayers, address
+// enrichment, authful — never reports a commit and only has to be reachable.
 export const staleUpstreams = (health, expectedSha) =>
   Object.entries(health.body?.upstreams ?? {})
-    .filter(([, upstream]) => upstream?.commit && upstream.commit !== expectedSha)
+    .filter(([, upstream]) =>
+      upstream?.kind === "dao-api"
+        ? upstream.commit !== expectedSha
+        : upstream?.commit && upstream.commit !== expectedSha,
+    )
     .map(([name]) => name);
 
 export const isGatefulReady = (health, expectedSha, requireUpstreamCommit) => {

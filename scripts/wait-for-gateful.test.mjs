@@ -66,8 +66,8 @@ test("isGatefulReady waits for upstream commits only when required", () => {
     body: {
       commit: "new",
       upstreams: {
-        ens: { status: "ok", commit: "old" },
-        uni: { status: "ok", commit: "new" },
+        ens: { kind: "dao-api", status: "ok", commit: "old" },
+        uni: { kind: "dao-api", status: "ok", commit: "new" },
       },
     },
   };
@@ -77,18 +77,34 @@ test("isGatefulReady waits for upstream commits only when required", () => {
   assert.deepEqual(staleUpstreams(health, "new"), ["ens"]);
 });
 
-test("upstreams that report no commit never block the gate", () => {
-  // Relayers, address enrichment and authful report none, and neither does a
-  // DAO API deployed before the field existed. Blocking on them would stall
-  // every release that doesn't rebuild them.
+test("a DAO API reporting no commit is stale, not exempt", () => {
+  // The rollout case: the field ships in the same release, so the still-old
+  // API omits it. Reading that as "nothing to wait for" would reproduce the
+  // race this gate exists to prevent.
+  const health = {
+    status: 200,
+    body: {
+      commit: "new",
+      upstreams: { ens: { kind: "dao-api", status: "ok" } },
+    },
+  };
+
+  assert.equal(isGatefulReady(health, "new", true), false);
+  assert.deepEqual(staleUpstreams(health, "new"), ["ens"]);
+});
+
+test("upstreams that aren't DAO APIs never block the gate", () => {
+  // Relayers, address enrichment and authful report no commit and only have
+  // to be reachable — waiting on them would stall releases that never
+  // rebuild them.
   const health = {
     status: 200,
     body: {
       commit: "new",
       upstreams: {
-        "relayer:ens": { status: "ok" },
-        authful: { status: "ok" },
-        ens: { status: "ok", commit: "new" },
+        "relayer:ens": { kind: "relayer", status: "ok" },
+        authful: { kind: "token-service", status: "ok" },
+        ens: { kind: "dao-api", status: "ok", commit: "new" },
       },
     },
   };
@@ -101,11 +117,11 @@ test("waitForGateful polls until every upstream serves the commit", async () => 
   const responses = [
     jsonResponse(200, {
       commit: "new",
-      upstreams: { ens: { status: "ok", commit: "old" } },
+      upstreams: { ens: { kind: "dao-api", status: "ok", commit: "old" } },
     }),
     jsonResponse(200, {
       commit: "new",
-      upstreams: { ens: { status: "ok", commit: "new" } },
+      upstreams: { ens: { kind: "dao-api", status: "ok", commit: "new" } },
     }),
   ];
   let nowMs = 0;
