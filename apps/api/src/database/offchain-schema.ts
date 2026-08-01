@@ -18,6 +18,8 @@ export const offchainProposals = snapshotSchema.table("proposals", (d) => ({
   link: d.text().notNull().default(""),
   flagged: d.boolean().notNull().default(false),
   scores: d.jsonb().$type<number[]>().notNull().default([]),
+  scoresTotal: d.doublePrecision("scores_total").notNull().default(0),
+  quorum: d.doublePrecision().notNull().default(0),
   choices: d.jsonb().$type<string[]>().notNull().default([]),
   network: d.text().notNull().default(""),
   snapshot: d.integer(),

@@ -1,0 +1,2 @@
+ALTER TABLE "snapshot"."proposals" ADD COLUMN "scores_total" double precision DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE "snapshot"."proposals" ADD COLUMN "quorum" double precision DEFAULT 0 NOT NULL;

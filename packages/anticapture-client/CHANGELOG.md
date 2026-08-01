@@ -1,5 +1,12 @@
 # @anticapture/client
 
+## 2.0.1
+
+### Patch Changes
+
+- [#2091](https://github.com/blockful/anticapture/pull/2091) [`6aed140`](https://github.com/blockful/anticapture/commit/6aed1407371c81f075a408992b2ff2a86b97c6c5) Thanks [@pikonha](https://github.com/pikonha)! - Fix Snapshot proposal statuses by indexing quorum data and deriving no-quorum, stale-active, and
+  passed states correctly, so Snapshot proposals no longer show on-chain queue states.
+
 ## 2.0.0
 
 ### Major Changes

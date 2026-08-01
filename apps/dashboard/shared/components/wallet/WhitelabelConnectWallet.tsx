@@ -7,7 +7,6 @@ import Image from "next/image";
 
 import { Button } from "@/shared/components";
 import { VotingPowerBadge } from "@/shared/components/wallet/VotingPowerBadge";
-import { useLogin } from "@/shared/services/auth/LoginProvider";
 import { cn } from "@/shared/utils";
 
 const Jazzicon = dynamic(
@@ -22,7 +21,6 @@ export const WhitelabelConnectWallet = ({
 }: {
   className?: string;
 }) => {
-  const { openLogin } = useLogin();
   return (
     <ConnectButton.Custom>
       {({
@@ -30,6 +28,7 @@ export const WhitelabelConnectWallet = ({
         chain,
         openAccountModal,
         openChainModal,
+        openConnectModal,
         authenticationStatus,
         mounted,
       }) => {
@@ -52,9 +51,13 @@ export const WhitelabelConnectWallet = ({
             })}
             className="flex items-center"
           >
+            {/* Whitelabel exists to delegate and vote, both of which settle
+                on-chain: the button connects a wallet and asks for no
+                signature. Drafting a proposal is the one session-gated flow
+                here, and it raises the sign-in modal on its own. */}
             {!connected ? (
               <Button
-                onClick={() => openLogin()}
+                onClick={openConnectModal}
                 type="button"
                 variant="outline"
                 size="md"
@@ -80,6 +83,9 @@ export const WhitelabelConnectWallet = ({
                       src={account.ensAvatar}
                       alt={account.displayName || "ENS Avatar"}
                       fill
+                      // ENS avatars resolve to arbitrary hosts (IPFS/NFT gateways), which
+                      // the optimizer allowlist cannot enumerate.
+                      unoptimized
                       className="object-cover"
                     />
                   </div>

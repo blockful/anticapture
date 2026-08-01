@@ -1,21 +1,64 @@
 import { ProposalStatus } from "@/features/governance/types";
+import {
+  getOffchainProposalStatus as deriveOffchainStatus,
+  type OffchainProposalStatus,
+  type OffchainProposalStatusResult,
+} from "@/features/governance/utils/offchainProposalStatus";
 
-export const getOffchainProposalStatus = (
-  state: string,
-  type: string,
-  scores: Array<number | null>,
-): ProposalStatus => {
-  if (state === "active") return ProposalStatus.ONGOING;
-  if (state === "pending") return ProposalStatus.PENDING;
+/** Off-chain statuses have no on-chain equivalent for passed/rejected. */
+const STATUS_TO_PROPOSAL_STATUS: Record<
+  OffchainProposalStatus,
+  ProposalStatus
+> = {
+  pending: ProposalStatus.PENDING,
+  active: ProposalStatus.ONGOING,
+  passed: ProposalStatus.PASSED,
+  rejected: ProposalStatus.REJECTED,
+  closed: ProposalStatus.CLOSED,
+};
 
-  // Non-basic proposals (elections, polls, etc.): voting concluded = closed
-  if (type !== "basic") return ProposalStatus.CLOSED;
+export interface OffchainProposalStatusViewInput {
+  type: string;
+  start: number;
+  end: number;
+  scores: Array<number | null>;
+  /** Snapshot's `scores_total` — the turnout denominator. */
+  scoresTotal?: number;
+  choices: Array<string | null>;
+  quorum?: number;
+  quorumType?: string | null;
+}
 
-  const for_ = scores[0] ?? 0;
-  const against = scores[1] ?? 0;
+/**
+ * Page-facing off-chain status. Delegates the derivation to the shared
+ * quorum-aware logic and maps it onto the view enum, so a Snapshot proposal can
+ * never render as "Executed" — which is what this used to return whenever a
+ * basic ballot had more For than Against.
+ */
+export const getOffchainProposalStatusView = (
+  input: OffchainProposalStatusViewInput,
+): {
+  status: ProposalStatus;
+  /** The off-chain status itself, for components that render its own badge. */
+  offchainStatus: OffchainProposalStatus;
+  winner: OffchainProposalStatusResult["winner"];
+} => {
+  const { status, winner } = deriveOffchainStatus({
+    type: input.type,
+    start: input.start,
+    end: input.end,
+    scores: normalizeScores(input.scores),
+    scoresTotal: input.scoresTotal,
+    choices: normalizeChoices(input.choices),
+    quorum: input.quorum,
+    quorumType: input.quorumType,
+  });
 
-  if (for_ > against) return ProposalStatus.EXECUTED;
-  return ProposalStatus.DEFEATED;
+  return {
+    status: STATUS_TO_PROPOSAL_STATUS[status],
+    offchainStatus: status,
+    winner,
+  };
 };
 
 export const normalizeChoices = (

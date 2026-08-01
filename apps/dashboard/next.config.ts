@@ -4,16 +4,12 @@ const nextConfig = {
   transpilePackages: ["@anticapture/client"],
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**",
-      },
-      {
-        protocol: "http",
-        hostname: "**",
-      },
+      { protocol: "https", hostname: "euc.li" },
+      { protocol: "https", hostname: "ensdata.net" },
+      { protocol: "https", hostname: "static.ricmoo.com" },
+      { protocol: "https", hostname: "www.ricmoo.com" },
+      { protocol: "https", hostname: "raw.githubusercontent.com" },
     ],
-    domains: ["euc.li", "ensdata.net", "static.ricmoo.com", "www.ricmoo.com"],
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

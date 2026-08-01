@@ -4,14 +4,18 @@ import type { Repository } from "@/repository/db.interface";
 import type { OffchainProposal } from "@/repository/schema";
 
 const ACTIVE_STATES = new Set(["pending", "active"]);
+const PROPOSAL_METADATA_BACKFILL_BATCH_SIZE = 100;
+const PROPOSAL_METADATA_BACKFILL_ENTITY = "proposal_metadata_backfill";
 
 // Only reconcile (and delete) proposals created within this window. Bounds both
 // the Snapshot fetch and the DB scan so reconciliation can't overwhelm either.
+// (backfillProposalMetadata below covers the rest of history separately.)
 const RECONCILE_WINDOW_SECONDS = 14 * 24 * 60 * 60;
 
 export class Indexer {
   private proposalsCursor: string | null = null;
   private votesCursor: string | null = null;
+  private proposalMetadataBackfillCursor: string | null = null;
 
   constructor(
     private readonly repository: Repository,
@@ -32,11 +36,16 @@ export class Indexer {
 
     this.proposalsCursor = await this.repository.getLastCursor("proposals");
     this.votesCursor = await this.repository.getLastCursor("votes");
+    this.proposalMetadataBackfillCursor = await this.repository.getLastCursor(
+      PROPOSAL_METADATA_BACKFILL_ENTITY,
+    );
 
     logger.info(
       {
         proposalsCursor: this.proposalsCursor ?? "none",
         votesCursor: this.votesCursor ?? "none",
+        proposalMetadataBackfillCursor:
+          this.proposalMetadataBackfillCursor ?? "none",
       },
       "loaded cursors",
     );
@@ -64,6 +73,12 @@ export class Indexer {
     }
 
     try {
+      await this.backfillProposalMetadata();
+    } catch (err) {
+      logger.error({ err }, "error backfilling proposal metadata - will retry");
+    }
+
+    try {
       await this.syncVotes();
     } catch (err) {
       logger.error(
@@ -71,6 +86,69 @@ export class Indexer {
         "error syncing votes - will retry",
       );
     }
+
+    try {
+      await this.reconcileRevealedProposals();
+    } catch (err) {
+      logger.error(
+        { err },
+        "error reconciling revealed proposals - will retry",
+      );
+    }
+  }
+
+  /**
+   * Re-reads closed proposals whose tally is still all zeros.
+   *
+   * Both sync passes are forward-only on `created`, and a Shutter proposal only
+   * reveals its votes after voting closes — by which point the cursors have
+   * moved past it. Without this pass its scores and its encrypted vote choices
+   * are never re-read, so a closed Shutter election shows 0 / 0.0% forever.
+   *
+   * Runs every cycle over proposals that *ended* inside the window. Bounding on
+   * `end` rather than `created` matters: a proposal opened long before it closes
+   * would otherwise never be selected after its reveal. A zero-tally proposal
+   * with genuinely no votes is re-read cheaply and stays zero, so no state is
+   * needed to tell the two apart.
+   */
+  private async reconcileRevealedProposals(): Promise<void> {
+    const now = Math.floor(Date.now() / 1000);
+    const endedSince = now - RECONCILE_WINDOW_SECONDS;
+
+    const pendingIds = await this.repository.getRevealPendingProposalIds(
+      endedSince,
+      now,
+    );
+
+    if (pendingIds.length === 0) return;
+
+    const [proposals, votes] = await Promise.all([
+      this.provider.fetchProposalsByIds(pendingIds),
+      this.provider.fetchVotesByProposalIds(pendingIds),
+    ]);
+
+    // Upserted without advancing either cursor: this is an out-of-band re-read,
+    // not progress through the timeline. Votes first, because writing the
+    // revealed tally is what removes the proposal from getRevealPendingProposalIds:
+    // if the vote write then failed, the reveal would never be retried and the
+    // encrypted choices would stay stale forever.
+    await this.repository.upsertVotes(votes);
+    await this.repository.upsertProposals(proposals);
+
+    const revealed = proposals.filter(
+      (proposal) =>
+        (proposal.scores ?? []).reduce((sum, score) => sum + (score ?? 0), 0) >
+        0,
+    );
+
+    logger.info(
+      {
+        checked: pendingIds.length,
+        revealed: revealed.length,
+        votes: votes.length,
+      },
+      "reconciled reveal-pending proposals",
+    );
   }
 
   private async syncProposals(): Promise<void> {
@@ -108,6 +186,42 @@ export class Indexer {
     logger.info(
       { count: deletedIds.length, ids: deletedIds },
       "removed proposals deleted from snapshot",
+    );
+  }
+
+  // Walks every proposal by (created, id) cursor, across all history — not
+  // windowed like reconcileProposals above — and deletes rows Snapshot no
+  // longer returns for the batch, cascading to their votes.
+  private async backfillProposalMetadata(): Promise<void> {
+    const { ids, nextCursor } =
+      await this.repository.getProposalMetadataBackfillBatch(
+        this.proposalMetadataBackfillCursor,
+        PROPOSAL_METADATA_BACKFILL_BATCH_SIZE,
+      );
+
+    if (!nextCursor) return;
+
+    const proposals = await this.provider.fetchProposalsByIds(ids);
+    const proposalById = new Map(
+      proposals.map((proposal) => [proposal.id, proposal]),
+    );
+    const missingIds = ids.filter((id) => !proposalById.has(id));
+
+    if (missingIds.length > 0) {
+      await this.repository.deleteProposals(missingIds);
+    }
+
+    await this.repository.saveProposalMetadataBackfill(proposals, nextCursor);
+    this.proposalMetadataBackfillCursor = nextCursor;
+
+    logger.info(
+      {
+        count: proposals.length,
+        deleted: missingIds.length,
+        scanned: ids.length,
+        cursor: nextCursor,
+      },
+      "backfilled proposal metadata",
     );
   }
 

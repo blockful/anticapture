@@ -12,11 +12,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { isAddress } from "viem";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount } from "wagmi";
 
 import { LoginModal } from "@/shared/components/auth/LoginModal";
 import { authClient, useSession } from "@/shared/services/auth/client";
+import { isWalletSessionStale } from "@/shared/services/auth/walletSession";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type OpenLoginOptions = {
@@ -42,10 +42,9 @@ export function LoginProvider({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession();
   const { status: walletStatus, address } = useAccount();
   const { connectModalOpen } = useConnectModal();
-  const { disconnect } = useDisconnect();
   const [isOpen, setIsOpen] = useState(false);
   // Where to land after sign-in (login-gated pages pass their own route).
   // Cleared when the modal is dismissed without authenticating.
@@ -56,45 +55,36 @@ export function LoginProvider({
     setIsOpen(true);
   }, []);
 
-  // Wallet ⟷ session coherence. Both effects stand down while the sign-in
-  // modal OR RainbowKit's connect modal is up: the ceremony legitimately
-  // passes through connected-without-a-session and must never be yanked
-  // mid-flight.
+  // Wallet ⟷ session coherence. Stands down while the sign-in modal OR
+  // RainbowKit's connect modal is up: the ceremony legitimately passes
+  // through connected-without-a-session and must never be yanked mid-flight.
   const authFlowActive = isOpen || connectModalOpen;
 
-  // 1. Wallet-born sessions (SIWE stores the wallet address as the user
-  //    name) are bound to that wallet: disconnected — now or on a later
-  //    visit — means signed out, and switching to a DIFFERENT account in
-  //    the wallet signs the old session out and asks for a fresh SIWE, so
-  //    on-chain actions and the platform identity can't diverge.
-  //    Email/Google sessions are wallet-independent.
+  // Wallet-born sessions (SIWE stores the wallet address as the user name)
+  // stay bound to that wallet: disconnecting it, now or on a later visit,
+  // means signed out, and switching to a DIFFERENT account signs the old
+  // session out, so on-chain actions and the platform identity can't diverge.
+  // Email/Google sessions are wallet-independent.
+  //
+  // The reverse does NOT hold: a connected wallet without a session is a
+  // perfectly valid state. Connecting is not signing in, and everything
+  // on-chain (vote, delegate, publish) works from the connection alone, so
+  // nothing here disconnects the wallet and nothing re-opens the sign-in
+  // modal on its own. Signing in is always something the user asks for.
+  //
+  // Sign-out is the cleanup, not the gate. It is a request: it can be in
+  // flight, and it can fail. What actually keeps the old account safe is
+  // `isWalletSessionStale`, which every session-backed surface reads through
+  // `useAuthSession` and which is true from the render the mismatch appears.
   useEffect(() => {
-    if (authFlowActive || !session || !isAddress(session.user.name)) return;
-    const sessionAddress = session.user.name.toLowerCase();
-
-    if (walletStatus === "disconnected") {
-      void authClient.signOut();
-      return;
-    }
-    if (
-      walletStatus === "connected" &&
-      address &&
-      address.toLowerCase() !== sessionAddress
-    ) {
-      void authClient.signOut();
-      openLogin();
-    }
-  }, [authFlowActive, session, walletStatus, address, openLogin]);
-
-  // 2. And the reverse: a connected wallet with no session reads as "logged
-  //    in" in the header while every gated surface asks to sign in. Losing
-  //    the session (expiry, sign-out, or an abandoned ceremony) disconnects
-  //    the wallet too.
-  useEffect(() => {
-    if (authFlowActive || isPending || session) return;
-    if (walletStatus !== "connected") return;
-    disconnect();
-  }, [authFlowActive, isPending, session, walletStatus, disconnect]);
+    if (authFlowActive || !session) return;
+    const stale = isWalletSessionStale({
+      sessionUserName: session.user.name,
+      walletStatus,
+      address,
+    });
+    if (stale) void authClient.signOut();
+  }, [authFlowActive, session, walletStatus, address]);
 
   const handleOpenChange = useCallback((open: boolean) => {
     setIsOpen(open);

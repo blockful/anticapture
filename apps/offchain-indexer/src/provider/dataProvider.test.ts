@@ -87,6 +87,8 @@ describe("SnapshotProvider", () => {
           link: "https://snapshot.org/#/ens.eth/proposal/proposal-1",
           flagged: false,
           scores: [],
+          scoresTotal: 0,
+          quorum: 0,
           choices: [],
           network: "",
           snapshot: null,
@@ -106,6 +108,22 @@ describe("SnapshotProvider", () => {
 
       expect(result.data).toHaveLength(1000);
       expect(result.nextCursor).toBe("1700000999");
+    });
+
+    it("should query inclusively at the cursor (created_gte)", async () => {
+      const queries: string[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+          queries.push(body.query);
+          return HttpResponse.json({ data: { proposals: [makeProposal()] } });
+        }),
+      );
+
+      await provider.fetchProposals("1700000000");
+
+      expect(queries[0]).toContain("created_gte");
+      expect(queries[0]).not.toContain("created_gt:");
     });
 
     it("should default missing fields with fallbacks", async () => {
@@ -136,7 +154,9 @@ describe("SnapshotProvider", () => {
         id: "proposal-1",
         link: "",
         network: "",
+        quorum: 0,
         scores: [],
+        scoresTotal: 0,
         snapshot: null,
         spaceId: "ens.eth",
         start: 1700000000,
@@ -146,6 +166,113 @@ describe("SnapshotProvider", () => {
         type: "single-choice",
         updated: 1700000000,
       });
+    });
+
+    it("should map Snapshot quorum fields", async () => {
+      mockGraphQL({
+        proposals: [
+          makeProposal({
+            scores: [5347713.99, 0, 1813.59],
+            scores_total: 5349527,
+            quorum: 10000000,
+          }),
+        ],
+      });
+
+      const result = await provider.fetchProposals(null);
+
+      expect(result.data[0]).toStrictEqual({
+        author: "0x1111111111111111111111111111111111111111",
+        body: "Some body",
+        choices: [],
+        created: 1700000000,
+        discussion: "https://discuss.ens.domains/t/1",
+        end: 1700100000,
+        flagged: false,
+        id: "proposal-1",
+        link: "https://snapshot.org/#/ens.eth/proposal/proposal-1",
+        network: "",
+        quorum: 10000000,
+        scores: [5347713.99, 0, 1813.59],
+        scoresTotal: 5349527,
+        snapshot: null,
+        spaceId: "ens.eth",
+        start: 1700000000,
+        state: "closed",
+        strategies: [],
+        title: "Test Proposal",
+        type: "single-choice",
+        updated: 1700000100,
+      });
+    });
+  });
+
+  describe("fetchProposalsByIds", () => {
+    it("should fetch and map proposals by Snapshot ids", async () => {
+      const seenIds: unknown[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            query: string;
+            variables: { ids: string[] };
+          };
+          seenIds.push(body.variables.ids);
+          expect(body.query).toContain("id_in");
+          return HttpResponse.json({
+            data: {
+              proposals: [
+                makeProposal({
+                  id: "proposal-1",
+                  scores: [10, 1],
+                  scores_total: 11,
+                  quorum: 10,
+                }),
+              ],
+            },
+          });
+        }),
+      );
+
+      const result = await provider.fetchProposalsByIds(["proposal-1"]);
+
+      expect(seenIds).toStrictEqual([["proposal-1"]]);
+      expect(result).toStrictEqual([
+        {
+          author: "0x1111111111111111111111111111111111111111",
+          body: "Some body",
+          choices: [],
+          created: 1700000000,
+          discussion: "https://discuss.ens.domains/t/1",
+          end: 1700100000,
+          flagged: false,
+          id: "proposal-1",
+          link: "https://snapshot.org/#/ens.eth/proposal/proposal-1",
+          network: "",
+          quorum: 10,
+          scores: [10, 1],
+          scoresTotal: 11,
+          snapshot: null,
+          spaceId: "ens.eth",
+          start: 1700000000,
+          state: "closed",
+          strategies: [],
+          title: "Test Proposal",
+          type: "single-choice",
+          updated: 1700000100,
+        },
+      ]);
+    });
+
+    it("should not call Snapshot when no ids are provided", async () => {
+      server.use(
+        http.post(ENDPOINT, () => {
+          throw new Error("unexpected Snapshot request");
+        }),
+      );
+
+      const result = await provider.fetchProposalsByIds([]);
+
+      expect(result).toStrictEqual([]);
     });
   });
 
@@ -172,8 +299,14 @@ describe("SnapshotProvider", () => {
     });
 
     it("should return nextCursor after fetching all votes", async () => {
+      // Distinct voters: (proposalId, voter) is the votes primary key, and the
+      // provider de-dupes on it, so repeating one voter isn't a real page.
       const votes = Array.from({ length: 1000 }, (_, i) =>
-        makeVote({ id: `v-${i}`, created: 1700000000 + i }),
+        makeVote({
+          id: `v-${i}`,
+          voter: `0x${(i + 1).toString(16).padStart(40, "0")}`,
+          created: 1700000000 + i,
+        }),
       );
       mockGraphQL({ votes });
 
@@ -181,6 +314,51 @@ describe("SnapshotProvider", () => {
 
       expect(result.data).toHaveLength(1000);
       expect(result.nextCursor).toBe("1700000999");
+    });
+
+    // The sync cursor is a `created` second, so an exclusive filter drops every
+    // vote sharing the last page's final second — the common case, since votes
+    // arrive in bursts. Re-reading the boundary is free: writes upsert.
+    it("should query inclusively at the cursor (created_gte)", async () => {
+      const queries: string[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+          queries.push(body.query);
+          return HttpResponse.json({ data: { votes: [makeVote()] } });
+        }),
+      );
+
+      await provider.fetchVotes("1700000050");
+
+      expect(queries[0]).toContain("created_gte");
+      expect(queries[0]).not.toContain("created_gt:");
+    });
+
+    it("should page through a full page that lands on a single created second", async () => {
+      const all = Array.from({ length: 1500 }, (_, i) =>
+        makeVote({
+          id: `v-${i}`,
+          voter: `0x${(i + 1).toString(16).padStart(40, "0")}`,
+          created: 1700000000,
+        }),
+      );
+
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            variables: { skip: number; pageSize: number };
+          };
+          const { skip, pageSize } = body.variables;
+          return HttpResponse.json({
+            data: { votes: all.slice(skip, skip + pageSize) },
+          });
+        }),
+      );
+
+      const result = await provider.fetchVotes(null);
+
+      expect(result.data).toHaveLength(1500);
     });
 
     it("should default missing vp and reason", async () => {
@@ -273,6 +451,110 @@ describe("SnapshotProvider", () => {
       expect(result).toContain("proposal-sibling");
       // Re-fetched boundary row must be de-duped, not duplicated.
       expect(new Set(result).size).toBe(result.length);
+    });
+  });
+
+  describe("fetchVotesByProposalIds", () => {
+    const voter = (i: number) => `0x${i.toString(16).padStart(40, "0")}`;
+
+    it("should skip the request when no ids are given", async () => {
+      await expect(provider.fetchVotesByProposalIds([])).resolves.toStrictEqual(
+        [],
+      );
+    });
+
+    it("should query inclusively at the cursor (created_gte)", async () => {
+      const cursors: unknown[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            query: string;
+            variables: { cursor: number };
+          };
+          cursors.push(body.variables.cursor);
+          expect(body.query).toContain("created_gte");
+          expect(body.query).not.toContain("created_gt:");
+          return HttpResponse.json({ data: { votes: [makeVote()] } });
+        }),
+      );
+
+      const result = await provider.fetchVotesByProposalIds(["proposal-1"]);
+
+      expect(cursors[0]).toBe(0);
+      expect(result).toHaveLength(1);
+    });
+
+    // A full page ending on a shared `created` second must not drop the revealed
+    // votes cast in that same second that spilled onto the next page. The
+    // handler filters the way Snapshot does, honouring whichever operator the
+    // query sends, so an exclusive cursor really loses the sibling here.
+    it("should not skip votes sharing the last created second across a page boundary", async () => {
+      // 999 votes on distinct seconds, then two sharing 1700000999, the second
+      // of which cannot fit on a 1000-row page.
+      const all = Array.from({ length: 1001 }, (_, i) =>
+        makeVote({
+          id: `vote-${i}`,
+          voter: voter(i + 1),
+          created: i < 999 ? 1700000000 + i : 1700000999,
+        }),
+      );
+
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            query: string;
+            variables: { cursor: number; pageSize: number };
+          };
+          const { cursor, pageSize } = body.variables;
+          const inclusive = body.query.includes("created_gte");
+          const votes = all
+            .filter((vote) =>
+              inclusive ? vote.created >= cursor : vote.created > cursor,
+            )
+            .slice(0, pageSize);
+          return HttpResponse.json({ data: { votes } });
+        }),
+      );
+
+      const result = await provider.fetchVotesByProposalIds(["proposal-1"]);
+
+      // Both votes on the shared second survive, and the boundary vote re-read
+      // by the inclusive cursor is de-duped rather than counted twice.
+      expect(result).toHaveLength(1001);
+      expect(result.filter((vote) => vote.created === 1700000999)).toHaveLength(
+        2,
+      );
+    });
+
+    // A burst of more than a full page of votes on one second must keep
+    // paginating (via skip) instead of stepping past the second: votes dropped
+    // here keep their encrypted choice forever, because the reveal write makes
+    // the tally nonzero and the proposal stops being reveal-pending.
+    it("should keep paginating through a same-second vote burst larger than a page", async () => {
+      const all = Array.from({ length: 1500 }, (_, i) =>
+        makeVote({
+          id: `vote-${i}`,
+          voter: voter(i + 1),
+          created: i < 1400 ? 1700000999 : 1700001000,
+        }),
+      );
+
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            variables: { cursor: number; skip: number; pageSize: number };
+          };
+          const { cursor, skip, pageSize } = body.variables;
+          const votes = all
+            .filter((vote) => vote.created >= cursor)
+            .slice(skip, skip + pageSize);
+          return HttpResponse.json({ data: { votes } });
+        }),
+      );
+
+      const result = await provider.fetchVotesByProposalIds(["proposal-1"]);
+
+      expect(result).toHaveLength(1500);
     });
   });
 

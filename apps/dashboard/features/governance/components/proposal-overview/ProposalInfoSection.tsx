@@ -8,10 +8,11 @@ import {
 } from "lucide-react";
 import { formatUnits } from "viem";
 
+import { OffchainResultsCard } from "@/features/governance/components/proposal-overview/OffchainResultsCard";
+import type { OffchainVoteIndexingStatus } from "@/features/governance/hooks/useOffchainVoteIndexing";
 import { ProposalInfoText } from "@/features/governance/components/proposal-overview/ProposalInfoText";
 import type { ProposalViewData } from "@/features/governance/types";
 import { getTimeLeftText } from "@/features/governance/utils";
-import { getOffchainChoiceColor } from "@/features/governance/utils/offchainChoiceColor";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { formatNumberUserReadable } from "@/shared/utils";
@@ -61,27 +62,21 @@ const VotingProgressBar = ({
   );
 };
 
-const ChoiceIcon = ({ label, color }: { label: string; color: string }) => {
-  const lower = label.toLowerCase();
-  if (lower === "for")
-    return <CheckCircle2 className="text-success size-3.5 shrink-0" />;
-  if (lower === "against")
-    return <XCircle className="text-error size-3.5 shrink-0" />;
-  if (lower === "abstain")
-    return <CircleMinus className="text-secondary size-3.5 shrink-0" />;
-  return (
-    <div
-      className="size-2 shrink-0 rounded-[2px]"
-      style={{ backgroundColor: color }}
-    />
-  );
-};
-
 interface ProposalInfoSectionProps {
   proposal: ProposalViewData;
   decimals: number;
   offchainChoices?: string[];
   offchainScores?: number[];
+  /** Snapshot's `scores_total` — the turnout denominator for the results card. */
+  offchainScoresTotal?: number;
+  /** Shutter proposals conceal the tally, so the card shows dashes, not zeros. */
+  isShutter?: boolean;
+  /** Just-signed vote, applied on top of the tally until the indexer catches up. */
+  optimisticScores?: number[] | null;
+  /** That vote's voting power, which turnout has to gain along with the bars. */
+  optimisticVotingPower?: number;
+  indexingStatus?: OffchainVoteIndexingStatus;
+  isIndexingChipFading?: boolean;
 }
 
 export const ProposalInfoSection = ({
@@ -89,6 +84,12 @@ export const ProposalInfoSection = ({
   decimals,
   offchainChoices,
   offchainScores,
+  offchainScoresTotal,
+  isShutter = false,
+  optimisticScores = null,
+  optimisticVotingPower,
+  indexingStatus,
+  isIndexingChipFading,
 }: ProposalInfoSectionProps) => {
   const timeLeftText = getTimeLeftText(proposal.endTimestamp);
 
@@ -96,93 +97,20 @@ export const ProposalInfoSection = ({
     offchainChoices !== undefined && offchainScores !== undefined;
 
   if (isOffchain) {
-    const totalVotes = offchainScores.reduce((sum, s) => sum + s, 0);
-    const quorumNum = Number(proposal.quorum);
-
-    const choiceItems = offchainChoices.map((label, i) => {
-      const score = offchainScores[i] ?? 0;
-      const percentage = totalVotes > 0 ? (score / totalVotes) * 100 : 0;
-      const color = getOffchainChoiceColor(label, i);
-      return { label, score, percentage, color };
-    });
-
     return (
       <div className="border-border-default flex w-full flex-col border lg:w-[420px]">
-        <div className="flex w-full flex-col p-3 lg:w-[420px]">
-          <ProposalInfoText className="pb-4">
-            <BarChart4 className="text-secondary size-4" /> Current Results
-          </ProposalInfoText>
-
-          <div className="scrollbar-custom flex max-h-[240px] flex-col gap-3 overflow-y-auto overflow-x-hidden lg:w-full">
-            {choiceItems.map((item) => (
-              <div key={item.label} className="flex w-full flex-col">
-                <div className="flex items-start gap-2 text-left">
-                  <div className="flex h-5 shrink-0 items-center">
-                    <ChoiceIcon label={item.label} color={item.color} />
-                  </div>
-                  <Tooltip
-                    asChild
-                    triggerClassName="min-w-0 flex-1 text-left"
-                    tooltipContent={item.label}
-                    className="text-left"
-                  >
-                    <p className="text-primary font-inter line-clamp-2 text-left text-[14px] font-normal not-italic leading-[20px]">
-                      {item.label}
-                    </p>
-                  </Tooltip>
-                </div>
-
-                <div className="flex items-center gap-2 pl-4">
-                  <div className="bg-surface-contrast relative h-1 min-w-0 flex-1">
-                    <div
-                      className="absolute h-full"
-                      style={{
-                        width: `${item.percentage}%`,
-                        backgroundColor: item.color,
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-2">
-                    <p className="text-primary font-inter w-12 text-left text-[14px] font-normal not-italic leading-[20px]">
-                      {formatNumberUserReadable(item.score, 0)}
-                    </p>
-                    <p className="text-primary font-inter w-12 text-left text-[14px] font-normal not-italic leading-[20px]">
-                      {item.percentage.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {quorumNum > 0 && (
-            <>
-              <div className="w-full py-3">
-                <div className="border-surface-default w-full border-b border-dashed" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="text-secondary size-3.5" />
-                <p className="text-secondary font-mono text-[13px] font-medium uppercase not-italic leading-[20px] tracking-[0.78px]">
-                  Quorum
-                </p>
-                <BulletDivider />
-                <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
-                  {formatNumberUserReadable(totalVotes)} /{" "}
-                  {formatNumberUserReadable(quorumNum)}
-                </p>
-                {totalVotes >= quorumNum && (
-                  <div className="bg-surface-opacity-success flex items-center gap-1 rounded-full px-[6px] py-[2px]">
-                    <Check className="text-success size-3.5" />
-                    <p className="text-success font-inter text-[12px] font-medium not-italic leading-4">
-                      Reached
-                    </p>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
+        <OffchainResultsCard
+          choices={offchainChoices}
+          scores={offchainScores}
+          scoresTotal={offchainScoresTotal}
+          end={Number(proposal.endTimestamp)}
+          isShutter={isShutter}
+          optimisticScores={optimisticScores}
+          optimisticVotingPower={optimisticVotingPower}
+          indexingStatus={indexingStatus}
+          isIndexingChipFading={isIndexingChipFading}
+          className="border-0"
+        />
 
         {proposal.status.toLowerCase() === "ongoing" && (
           <VotingProgressBar
