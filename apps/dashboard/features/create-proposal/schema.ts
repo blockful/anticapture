@@ -70,7 +70,7 @@ export const ProposalFormSchema = z
           return false;
         }
       }, "Must be a valid URL"),
-    body: z.string().min(1, "Required").max(10_000, "10,000 character limit"),
+    body: z.string().min(1, "Required"),
     actions: z
       .array(ProposalActionSchema)
       .min(1, "At least one action is required"),

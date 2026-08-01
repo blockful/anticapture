@@ -263,12 +263,7 @@ export const ProposalCreationForm = ({
   const filledCount =
     (hasTitle ? 1 : 0) + (hasBody ? 1 : 0) + (hasActions ? 1 : 0);
   const canPublish =
-    hasTitle &&
-    hasBody &&
-    hasActions &&
-    !!address &&
-    form.formState.isValid &&
-    (values.body?.length ?? 0) <= 10_000;
+    hasTitle && hasBody && hasActions && !!address && form.formState.isValid;
 
   const stashPendingDraft = () => {
     try {

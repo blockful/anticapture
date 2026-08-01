@@ -31,10 +31,10 @@ describe("ProposalFormSchema", () => {
     ).toBe(false);
   });
 
-  test("rejects body over 10,000 chars", () => {
+  test("accepts body over 10,000 chars", () => {
     expect(
       ProposalFormSchema.safeParse({ ...valid, body: "a".repeat(10_001) })
         .success,
-    ).toBe(false);
+    ).toBe(true);
   });
 });
