@@ -5,6 +5,7 @@ import {
   isGatefulReady,
   resolveExpectedGatefulSha,
   resolveGatefulBaseUrl,
+  staleUpstreams,
   waitForGateful,
 } from "./wait-for-gateful.mjs";
 
@@ -55,6 +56,76 @@ test("isGatefulReady requires the matching commit when expected", () => {
     isGatefulReady({ status: 503, body: { commit: "abc" } }, "abc"),
     false,
   );
+});
+
+// The failure this guards: gateful on the new commit, ens-api 11s behind it,
+// codegen reading the previous release's merged spec.
+test("isGatefulReady waits for upstream commits only when required", () => {
+  const health = {
+    status: 200,
+    body: {
+      commit: "new",
+      upstreams: {
+        ens: { status: "ok", commit: "old" },
+        uni: { status: "ok", commit: "new" },
+      },
+    },
+  };
+
+  assert.equal(isGatefulReady(health, "new", true), false);
+  assert.equal(isGatefulReady(health, "new", false), true);
+  assert.deepEqual(staleUpstreams(health, "new"), ["ens"]);
+});
+
+test("upstreams that report no commit never block the gate", () => {
+  // Relayers, address enrichment and authful report none, and neither does a
+  // DAO API deployed before the field existed. Blocking on them would stall
+  // every release that doesn't rebuild them.
+  const health = {
+    status: 200,
+    body: {
+      commit: "new",
+      upstreams: {
+        "relayer:ens": { status: "ok" },
+        authful: { status: "ok" },
+        ens: { status: "ok", commit: "new" },
+      },
+    },
+  };
+
+  assert.equal(isGatefulReady(health, "new", true), true);
+  assert.deepEqual(staleUpstreams(health, "new"), []);
+});
+
+test("waitForGateful polls until every upstream serves the commit", async () => {
+  const responses = [
+    jsonResponse(200, {
+      commit: "new",
+      upstreams: { ens: { status: "ok", commit: "old" } },
+    }),
+    jsonResponse(200, {
+      commit: "new",
+      upstreams: { ens: { status: "ok", commit: "new" } },
+    }),
+  ];
+  let nowMs = 0;
+
+  const result = await waitForGateful({
+    baseUrl: "https://gateful.example.com",
+    expectedSha: "new",
+    requireUpstreamCommit: true,
+    timeoutMs: 100,
+    intervalMs: 10,
+    fetchImpl: async () => responses.shift(),
+    sleepImpl: async (ms) => {
+      nowMs += ms;
+    },
+    now: () => nowMs,
+    logger: { log: () => undefined },
+  });
+
+  assert.equal(result.ready, true);
+  assert.equal(result.attempt, 2);
 });
 
 test("waitForGateful polls until the expected commit is live", async () => {

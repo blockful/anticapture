@@ -11,6 +11,11 @@ const UpstreamStatusSchema = z.object({
   circuit: z.enum(["CLOSED", "OPEN", "HALF_OPEN"]),
   nextRetryIn: z.number().int().optional(),
   error: z.string().optional(),
+  // Absent for upstreams that don't report one. `status: "ok"` says an
+  // upstream answers; this says which release is answering — the DAO APIs
+  // own the schemas merged into /docs/json, so a deploy gate that only sees
+  // gateful's own commit can still read the previous release's spec.
+  commit: z.string().optional(),
 });
 
 const HealthResponseSchema = z.object({
@@ -112,6 +117,22 @@ function buildProbeTargets(opts: HealthOptions): ProbeTarget[] {
   return targets;
 }
 
+// A probe body that isn't JSON, or carries no commit, is not a failure: the
+// upstream answered, which is what `status` reports. Only the commit is lost.
+async function readUpstreamCommit(res: Response): Promise<string | undefined> {
+  try {
+    const body: unknown = await res.json();
+    const commit =
+      typeof body === "object" && body !== null
+        ? (body as { commit?: unknown }).commit
+        : undefined;
+
+    return typeof commit === "string" && commit ? commit : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function probeTarget(
   target: ProbeTarget,
   registry: CircuitBreakerRegistry,
@@ -139,11 +160,14 @@ async function probeTarget(
       throw new Error(`${target.name} /health returned ${res.status}`);
     }
 
+    const commit = await readUpstreamCommit(res);
+
     return [
       target.name,
       {
         status: "ok",
         ...buildCircuit(breaker),
+        ...(commit ? { commit } : {}),
       },
     ];
   } catch (err) {

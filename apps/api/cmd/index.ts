@@ -190,7 +190,11 @@ const pgClient = drizzle({
   casing: "snake_case",
 });
 
-health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
+health(
+  app,
+  new HealthService(new HealthRepositoryImpl(pgClient), daoClient),
+  env.RAILWAY_GIT_COMMIT_SHA,
+);
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;

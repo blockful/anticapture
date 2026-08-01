@@ -28,6 +28,34 @@ jobs:
         id: author
         run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
 
+      # Gateful merges the DAO APIs' OpenAPI specs into its own on every
+      # /docs/json request, so waiting on gateful's commit alone is not enough
+      # when this release changes those schemas: gateful can be up-to-date
+      # while the DAO APIs (a slower, separately watched build) still serve the
+      # previous spec. Mirror Railway's watchPatterns for the DAO API service
+      # to know whether to wait for them too.
+      - name: Detect DAO API changes
+        id: dao-api
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # Unknown base (new branch / force push): fall back to not waiting.
+          # Waiting on APIs that may never rebuild would block the deploy
+          # outright; skipping is the behaviour this gate had before.
+          changed=0
+          if [ -n "${BEFORE}" ] && [ "${BEFORE}" != "0000000000000000000000000000000000000000" ]; then
+            if gh api --paginate "repos/${REPO}/compare/${BEFORE}...${SHA}" \
+              --jq '.files[].filename' | grep -qE '^(apps|infra)/api/'; then
+              changed=1
+            fi
+          fi
+          echo "changed=${changed}" >> "$GITHUB_OUTPUT"
+          echo "DAO API rebuild expected: ${changed}"
+
       # `vercel deploy` builds the dashboard, which runs @anticapture/client
       # codegen against the live gateful spec. Wait for gateful to serve this
       # exact commit first, or codegen races the redeploy and fails with
@@ -37,6 +65,7 @@ jobs:
         env:
           ANTICAPTURE_API_URL: ${{ secrets.GATEFUL_URL }}
           EXPECTED_GATEFUL_SHA: ${{ github.sha }}
+          REQUIRE_UPSTREAM_COMMIT: ${{ steps.dao-api.outputs.changed }}
 
       - name: Deploy to Vercel
         env:

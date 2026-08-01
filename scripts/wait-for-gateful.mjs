@@ -65,7 +65,21 @@ export const fetchGatefulHealth = async (
   };
 };
 
-export const isGatefulReady = (health, expectedSha) => {
+// Upstreams still serving a different commit than the one we're waiting for.
+//
+// Gateful builds /docs/json by merging the DAO APIs' specs live on every
+// request, so gateful reporting the new commit says nothing about the schemas
+// it will serve — the DAO APIs redeploy on their own (slower) schedule. An
+// upstream that reports no commit is skipped, not treated as stale: relayers,
+// address enrichment and authful don't report one, and neither does a DAO API
+// deployed before this field existed. Skipping them keeps the gate from
+// deadlocking on services this release never rebuilds.
+export const staleUpstreams = (health, expectedSha) =>
+  Object.entries(health.body?.upstreams ?? {})
+    .filter(([, upstream]) => upstream?.commit && upstream.commit !== expectedSha)
+    .map(([name]) => name);
+
+export const isGatefulReady = (health, expectedSha, requireUpstreamCommit) => {
   if (health.status !== 200) {
     return false;
   }
@@ -74,12 +88,19 @@ export const isGatefulReady = (health, expectedSha) => {
     return true;
   }
 
-  return health.body?.commit === expectedSha;
+  if (health.body?.commit !== expectedSha) {
+    return false;
+  }
+
+  return requireUpstreamCommit
+    ? staleUpstreams(health, expectedSha).length === 0
+    : true;
 };
 
 export const waitForGateful = async ({
   baseUrl,
   expectedSha,
+  requireUpstreamCommit = false,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   intervalMs = DEFAULT_INTERVAL_MS,
   requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
@@ -105,7 +126,7 @@ export const waitForGateful = async ({
       );
       lastError = undefined;
 
-      if (isGatefulReady(lastHealth, expectedSha)) {
+      if (isGatefulReady(lastHealth, expectedSha, requireUpstreamCommit)) {
         logger.log(
           expectedSha
             ? `Gateful ready after attempt ${attempt}: commit ${expectedSha}`
@@ -115,9 +136,15 @@ export const waitForGateful = async ({
         return { ready: true, attempt, lastHealth };
       }
 
+      const stale = requireUpstreamCommit
+        ? staleUpstreams(lastHealth, expectedSha)
+        : [];
+
       logger.log(
         `attempt ${attempt}: HTTP ${lastHealth.status}, commit ${
           lastHealth.body?.commit ?? "<missing>"
+        }${
+          stale.length > 0 ? `, stale upstreams: ${stale.join(", ")}` : ""
         }; waiting for ${expectedSha}`,
       );
     } catch (error) {
@@ -151,9 +178,16 @@ const main = async () => {
     DEFAULT_REQUEST_TIMEOUT_MS,
   );
 
+  // Set by the caller when the release rebuilds the DAO APIs (i.e. it touched
+  // the paths Railway watches for them). Off otherwise: services this release
+  // doesn't rebuild keep serving an older commit forever, and waiting on them
+  // would block every deploy that leaves them alone.
+  const requireUpstreamCommit = process.env.REQUIRE_UPSTREAM_COMMIT === "1";
+
   const result = await waitForGateful({
     baseUrl,
     expectedSha,
+    requireUpstreamCommit,
     timeoutMs,
     intervalMs,
     requestTimeoutMs,
@@ -185,6 +219,13 @@ const main = async () => {
       : String(result.lastError)
     : `last health: HTTP ${result.lastHealth?.status ?? "<none>"}, commit ${
         result.lastHealth?.body?.commit ?? "<missing>"
+      }${
+        requireUpstreamCommit && result.lastHealth
+          ? `, stale upstreams: ${
+              staleUpstreams(result.lastHealth, expectedSha).join(", ") ||
+              "<none>"
+            }`
+          : ""
       }`;
 
   throw new Error(

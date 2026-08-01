@@ -18,6 +18,10 @@
       "passThroughEnv": ["*"]
     },
     "codegen": {
+      // Never cached: the real input is the live gateful spec, which no hash
+      // can see. A run that raced an API deploy would otherwise be replayed
+      // on every retry of that commit, and the retry would never refetch.
+      "cache": false,
       "inputs": [
         "kubb.config.ts",
         "src/**",
