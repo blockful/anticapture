@@ -110,6 +110,22 @@ describe("SnapshotProvider", () => {
       expect(result.nextCursor).toBe("1700000999");
     });
 
+    it("should query inclusively at the cursor (created_gte)", async () => {
+      const queries: string[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+          queries.push(body.query);
+          return HttpResponse.json({ data: { proposals: [makeProposal()] } });
+        }),
+      );
+
+      await provider.fetchProposals("1700000000");
+
+      expect(queries[0]).toContain("created_gte");
+      expect(queries[0]).not.toContain("created_gt:");
+    });
+
     it("should default missing fields with fallbacks", async () => {
       mockGraphQL({
         proposals: [
@@ -283,8 +299,14 @@ describe("SnapshotProvider", () => {
     });
 
     it("should return nextCursor after fetching all votes", async () => {
+      // Distinct voters: (proposalId, voter) is the votes primary key, and the
+      // provider de-dupes on it, so repeating one voter isn't a real page.
       const votes = Array.from({ length: 1000 }, (_, i) =>
-        makeVote({ id: `v-${i}`, created: 1700000000 + i }),
+        makeVote({
+          id: `v-${i}`,
+          voter: `0x${(i + 1).toString(16).padStart(40, "0")}`,
+          created: 1700000000 + i,
+        }),
       );
       mockGraphQL({ votes });
 
@@ -292,6 +314,51 @@ describe("SnapshotProvider", () => {
 
       expect(result.data).toHaveLength(1000);
       expect(result.nextCursor).toBe("1700000999");
+    });
+
+    // The sync cursor is a `created` second, so an exclusive filter drops every
+    // vote sharing the last page's final second — the common case, since votes
+    // arrive in bursts. Re-reading the boundary is free: writes upsert.
+    it("should query inclusively at the cursor (created_gte)", async () => {
+      const queries: string[] = [];
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as { query: string };
+          queries.push(body.query);
+          return HttpResponse.json({ data: { votes: [makeVote()] } });
+        }),
+      );
+
+      await provider.fetchVotes("1700000050");
+
+      expect(queries[0]).toContain("created_gte");
+      expect(queries[0]).not.toContain("created_gt:");
+    });
+
+    it("should page through a full page that lands on a single created second", async () => {
+      const all = Array.from({ length: 1500 }, (_, i) =>
+        makeVote({
+          id: `v-${i}`,
+          voter: `0x${(i + 1).toString(16).padStart(40, "0")}`,
+          created: 1700000000,
+        }),
+      );
+
+      server.use(
+        http.post(ENDPOINT, async ({ request }) => {
+          const body = (await request.json()) as {
+            variables: { skip: number; pageSize: number };
+          };
+          const { skip, pageSize } = body.variables;
+          return HttpResponse.json({
+            data: { votes: all.slice(skip, skip + pageSize) },
+          });
+        }),
+      );
+
+      const result = await provider.fetchVotes(null);
+
+      expect(result.data).toHaveLength(1500);
     });
 
     it("should default missing vp and reason", async () => {
