@@ -42,6 +42,13 @@
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
+      // `generated/**` is gitignored, so it is not in the default input set:
+      // this build (and the dashboard's, through it) would otherwise hash the
+      // same on a retry of a commit whose codegen raced an API deploy, and
+      // turbo would restore the dist built from the stale spec over the freshly
+      // generated one. Listing it explicitly makes the spec visible to the
+      // hash, so the cache still hits when the spec really is unchanged.
+      "inputs": ["$TURBO_DEFAULT$", "generated/**"],
       "outputs": ["dist/**"]
     },
     "@anticapture/client-docs#build": {

@@ -32,4 +32,10 @@ Authful contributes no merged schemas and only has to be reachable.
 
 `@anticapture/client#codegen` is also no longer cached by turbo: its real input
 is a live URL no hash can see, so the poisoned output above was replayed on
-every retry of that commit and no re-run could ever fix it.
+every retry of that commit and no re-run could ever fix it. Re-running it was
+not enough on its own, though — `generated/**` is gitignored and so was absent
+from `@anticapture/client#build`'s input set, leaving that build (and the
+dashboard's, which hashes it in turn) identical across a retry and free to
+restore a `dist` compiled from the stale spec over the freshly generated one.
+Listing `generated/**` explicitly puts the spec back in the hash, without
+giving up the cache when the spec genuinely has not moved.
