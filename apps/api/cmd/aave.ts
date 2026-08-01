@@ -134,7 +134,11 @@ const pgClient = drizzle(env.DATABASE_URL, {
   casing: "snake_case",
 });
 
-health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
+health(
+  app,
+  new HealthService(new HealthRepositoryImpl(pgClient), daoClient),
+  env.RAILWAY_GIT_COMMIT_SHA,
+);
 
 const daoCache = new DaoCache();
 

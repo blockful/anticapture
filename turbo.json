@@ -18,6 +18,10 @@
       "passThroughEnv": ["*"]
     },
     "codegen": {
+      // Never cached: the real input is the live gateful spec, which no hash
+      // can see. A run that raced an API deploy would otherwise be replayed
+      // on every retry of that commit, and the retry would never refetch.
+      "cache": false,
       "inputs": [
         "kubb.config.ts",
         "src/**",
@@ -38,6 +42,14 @@
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
+      // Not cached, for the same reason `codegen` isn't: tsup runs with
+      // `dts: true`, so the spec fetched at runtime is compiled into `dist`,
+      // and no hash can see it. Declaring `generated/**` as an input does not
+      // work — turbo hashes inputs before the run, and `generated/` is
+      // gitignored, so on a fresh checkout it is empty at that moment and the
+      // glob contributes nothing. A retry would re-run codegen and then
+      // restore the dist built from the stale spec straight over it.
+      "cache": false,
       "outputs": ["dist/**"]
     },
     "@anticapture/client-docs#build": {
