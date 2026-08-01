@@ -65,27 +65,37 @@ export const fetchGatefulHealth = async (
   };
 };
 
-// Upstreams not yet serving the commit we're waiting for.
+// DAO APIs not yet serving the release whose schemas we're about to read.
 //
 // Gateful builds /docs/json by merging the DAO APIs' specs live on every
 // request, so gateful reporting the new commit says nothing about the schemas
-// it will serve — the DAO APIs redeploy on their own (slower) schedule.
+// it will serve — the DAO APIs rebuild only when a push touches their watched
+// paths, and take longer when it does.
 //
-// A DAO API is stale unless it reports exactly this commit: the caller only
-// asks for this check when the release rebuilds them, so "no commit reported"
-// means the previous release is still up (it predates the field), not that
-// there is nothing to wait for. Every other upstream kind — relayers, address
-// enrichment, authful — never reports a commit and only has to be reachable.
-export const staleUpstreams = (health, expectedSha) =>
+// `expectedUpstreamShas` is therefore NOT this deploy's commit. It is the last
+// commit that rebuilt the DAO APIs, plus everything after it — "that commit or
+// newer", because Railway stamps a service with the head of the push that
+// rebuilt it, which is a later commit whenever a push carries more than one.
+// On a release that doesn't touch the APIs the set starts before HEAD and they
+// already satisfy it; on one that does, only the new release satisfies it. It
+// also survives a superseding push: a non-API push landing on top of an API
+// push still resolves to that API push, so the gate keeps waiting for it
+// rather than concluding there is nothing to wait for.
+//
+// A DAO API reporting no commit is stale, not exempt — that is the previous
+// release still answering, from before this field existed. Other upstream
+// kinds (relayers, address enrichment, authful) contribute no schemas that
+// codegen can miss and only have to be reachable.
+export const staleUpstreams = (health, expectedUpstreamShas = []) =>
   Object.entries(health.body?.upstreams ?? {})
-    .filter(([, upstream]) =>
-      upstream?.kind === "dao-api"
-        ? upstream.commit !== expectedSha
-        : upstream?.commit && upstream.commit !== expectedSha,
+    .filter(
+      ([, upstream]) =>
+        upstream?.kind === "dao-api" &&
+        !expectedUpstreamShas.includes(upstream.commit),
     )
     .map(([name]) => name);
 
-export const isGatefulReady = (health, expectedSha, requireUpstreamCommit) => {
+export const isGatefulReady = (health, expectedSha, expectedUpstreamShas) => {
   if (health.status !== 200) {
     return false;
   }
@@ -98,15 +108,15 @@ export const isGatefulReady = (health, expectedSha, requireUpstreamCommit) => {
     return false;
   }
 
-  return requireUpstreamCommit
-    ? staleUpstreams(health, expectedSha).length === 0
+  return expectedUpstreamShas?.length
+    ? staleUpstreams(health, expectedUpstreamShas).length === 0
     : true;
 };
 
 export const waitForGateful = async ({
   baseUrl,
   expectedSha,
-  requireUpstreamCommit = false,
+  expectedUpstreamShas,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   intervalMs = DEFAULT_INTERVAL_MS,
   requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
@@ -132,7 +142,7 @@ export const waitForGateful = async ({
       );
       lastError = undefined;
 
-      if (isGatefulReady(lastHealth, expectedSha, requireUpstreamCommit)) {
+      if (isGatefulReady(lastHealth, expectedSha, expectedUpstreamShas)) {
         logger.log(
           expectedSha
             ? `Gateful ready after attempt ${attempt}: commit ${expectedSha}`
@@ -142,15 +152,19 @@ export const waitForGateful = async ({
         return { ready: true, attempt, lastHealth };
       }
 
-      const stale = requireUpstreamCommit
-        ? staleUpstreams(lastHealth, expectedSha)
+      const stale = expectedUpstreamShas?.length
+        ? staleUpstreams(lastHealth, expectedUpstreamShas)
         : [];
 
       logger.log(
         `attempt ${attempt}: HTTP ${lastHealth.status}, commit ${
           lastHealth.body?.commit ?? "<missing>"
         }${
-          stale.length > 0 ? `, stale upstreams: ${stale.join(", ")}` : ""
+          stale.length > 0
+            ? `, DAO APIs behind ${expectedUpstreamShas.at(-1)}: ${stale.join(
+                ", ",
+              )}`
+            : ""
         }; waiting for ${expectedSha}`,
       );
     } catch (error) {
@@ -184,16 +198,20 @@ const main = async () => {
     DEFAULT_REQUEST_TIMEOUT_MS,
   );
 
-  // Set by the caller when the release rebuilds the DAO APIs (i.e. it touched
-  // the paths Railway watches for them). Off otherwise: services this release
-  // doesn't rebuild keep serving an older commit forever, and waiting on them
-  // would block every deploy that leaves them alone.
-  const requireUpstreamCommit = process.env.REQUIRE_UPSTREAM_COMMIT === "1";
+  // Commits a DAO API may report — the one that last rebuilt them, and every
+  // commit after it (see staleUpstreams). Unset means "don't check them",
+  // which is what PR previews do.
+  const expectedUpstreamShas = (
+    readNonEmptyValue(process.env.EXPECTED_UPSTREAM_SHAS) ?? ""
+  )
+    .split(",")
+    .map((sha) => sha.trim())
+    .filter(Boolean);
 
   const result = await waitForGateful({
     baseUrl,
     expectedSha,
-    requireUpstreamCommit,
+    expectedUpstreamShas,
     timeoutMs,
     intervalMs,
     requestTimeoutMs,
@@ -226,10 +244,11 @@ const main = async () => {
     : `last health: HTTP ${result.lastHealth?.status ?? "<none>"}, commit ${
         result.lastHealth?.body?.commit ?? "<missing>"
       }${
-        requireUpstreamCommit && result.lastHealth
-          ? `, stale upstreams: ${
-              staleUpstreams(result.lastHealth, expectedSha).join(", ") ||
-              "<none>"
+        expectedUpstreamShas.length > 0 && result.lastHealth
+          ? `, DAO APIs behind ${expectedUpstreamShas.at(-1)}: ${
+              staleUpstreams(result.lastHealth, expectedUpstreamShas).join(
+                ", ",
+              ) || "<none>"
             }`
           : ""
       }`;

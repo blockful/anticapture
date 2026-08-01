@@ -12,15 +12,17 @@ it would serve: on #2093 gateful reported the new commit at 14:33:54, codegen
 read the spec at 14:34:23, and `ens-api` only came up at 14:34:34 — the
 dashboard build failed on a field the API hadn't started advertising yet.
 
-The DAO API now reports its running commit on `/health`, gateful passes it
-through as `upstreams.<dao>.commit` alongside an `upstreams.<name>.kind`, and
-`scripts/wait-for-gateful.mjs` waits for every `dao-api` upstream to report the
-release when `REQUIRE_UPSTREAM_COMMIT=1`. A DAO API that reports no commit
-counts as stale — that is the previous release still answering — while
-relayers, address enrichment and authful only have to be reachable. The flag is
-set by the deploy workflow only when the release touches the paths Railway
-watches to rebuild those APIs, so releases that leave them alone are not
-blocked.
+The DAO API now reports its running commit on `/health`, and gateful passes it
+through as `upstreams.<dao>.commit` alongside an `upstreams.<name>.kind`.
+`scripts/wait-for-gateful.mjs` then holds the deploy until every `dao-api`
+upstream reports a commit in `EXPECTED_UPSTREAM_SHAS` — the last commit that
+touched the paths Railway watches to rebuild those APIs, plus everything after
+it. Expressing it as "that commit or newer" rather than "does this push change
+the API" keeps the gate correct when a non-API push supersedes an in-flight API
+push, and when a push carries more than one commit. A DAO API reporting no
+commit counts as stale (the previous release is still answering); relayers,
+address enrichment and authful contribute no schemas and only have to be
+reachable.
 
 `@anticapture/client#codegen` is also no longer cached by turbo: its real input
 is a live URL no hash can see, so the poisoned output above was replayed on

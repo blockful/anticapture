@@ -18,6 +18,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Full history: the DAO API commit resolved below can be many
+          # releases back, and a shallow clone would silently resolve to
+          # nothing and skip the gate.
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,37 +34,32 @@ jobs:
         run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
 
       # Gateful merges the DAO APIs' OpenAPI specs into its own on every
-      # /docs/json request, so waiting on gateful's commit alone is not enough
-      # when this release changes those schemas: gateful can be up-to-date
-      # while the DAO APIs (a slower, separately watched build) still serve the
-      # previous spec. Mirror Railway's watchPatterns for the DAO API service
-      # to know whether to wait for them too.
-      - name: Detect DAO API changes
+      # /docs/json request, so waiting on gateful's commit alone is not enough:
+      # gateful can be up-to-date while the DAO APIs (a slower, separately
+      # watched build) still serve the previous spec.
+      - name: Resolve the commit the DAO APIs should be serving
         id: dao-api
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BEFORE: ${{ github.event.before }}
-          REPO: ${{ github.repository }}
-          SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          # Unknown base (new branch / force push): fall back to not waiting.
-          # Waiting on APIs that may never rebuild would block the deploy
-          # outright; skipping is the behaviour this gate had before.
-          changed=0
-          if [ -n "${BEFORE}" ] && [ "${BEFORE}" != "0000000000000000000000000000000000000000" ]; then
-            # Fetch first, match second. Inside `if`, a failing gh api (rate
-            # limit, permissions, outage) would just read as "no API change"
-            # and skip the gate exactly when a release needs it; as its own
-            # command, set -e fails the step instead.
-            files=$(gh api --paginate "repos/${REPO}/compare/${BEFORE}...${SHA}" \
-              --jq '.files[].filename')
-            if printf '%s\n' "${files}" | grep -qE '^(apps|infra)/api/'; then
-              changed=1
-            fi
-          fi
-          echo "changed=${changed}" >> "$GITHUB_OUTPUT"
-          echo "DAO API rebuild expected: ${changed}"
+          # The newest commit on this branch that touched the paths Railway
+          # watches to rebuild the DAO API service — i.e. the newest commit
+          # those APIs can be running. First-parent, because that is the diff
+          # Railway itself sees for a push to this branch.
+          #
+          # Deliberately not "did THIS push change the API": a non-API push
+          # landing while an API push is still deploying (concurrency cancels
+          # the earlier waiter) would answer "no" and skip the gate while the
+          # APIs still serve the pre-release spec. Resolving the commit instead
+          # of a yes/no keeps pointing at that API push until it is live.
+          api_sha=$(git log --first-parent -1 --format=%H -- apps/api infra/api)
+          # That commit *or newer*, as a set. Railway stamps a service with the
+          # head of the push that rebuilt it, which is only the same commit
+          # when the push carried exactly one commit — a rebase-merge or a
+          # multi-commit push stamps the head instead, and demanding equality
+          # would wait for a rebuild that already happened.
+          shas="$(git rev-list --first-parent "${api_sha}..HEAD" | tr '\n' ',')${api_sha}"
+          echo "shas=${shas}" >> "$GITHUB_OUTPUT"
+          echo "DAO APIs must be serving ${api_sha} or newer"
 
       # `vercel deploy` builds the dashboard, which runs @anticapture/client
       # codegen against the live gateful spec. Wait for gateful to serve this
@@ -70,7 +70,7 @@ jobs:
         env:
           ANTICAPTURE_API_URL: ${{ secrets.GATEFUL_URL }}
           EXPECTED_GATEFUL_SHA: ${{ github.sha }}
-          REQUIRE_UPSTREAM_COMMIT: ${{ steps.dao-api.outputs.changed }}
+          EXPECTED_UPSTREAM_SHAS: ${{ steps.dao-api.outputs.shas }}
 
       - name: Deploy to Vercel
         env:
