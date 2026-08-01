@@ -65,37 +65,40 @@ export const fetchGatefulHealth = async (
   };
 };
 
-// DAO APIs not yet serving the release whose schemas we're about to read.
+// Upstreams not yet serving the release whose schemas we're about to read.
 //
-// Gateful builds /docs/json by merging the DAO APIs' specs live on every
-// request, so gateful reporting the new commit says nothing about the schemas
-// it will serve — the DAO APIs rebuild only when a push touches their watched
-// paths, and take longer when it does.
+// Gateful builds /docs/json by merging its upstreams' specs live on every
+// request — DAO APIs, the relayer and address enrichment all contribute paths
+// and schemas (see mergeUpstreamDocs). So gateful reporting the new commit
+// says nothing about the spec it will serve: those services rebuild only when
+// a push touches their own watched paths, and take longer when it does.
 //
-// `expectedUpstreamShas` is therefore NOT this deploy's commit. It is the last
-// commit that rebuilt the DAO APIs, plus everything after it — "that commit or
-// newer", because Railway stamps a service with the head of the push that
-// rebuilt it, which is a later commit whenever a push carries more than one.
-// On a release that doesn't touch the APIs the set starts before HEAD and they
-// already satisfy it; on one that does, only the new release satisfies it. It
-// also survives a superseding push: a non-API push landing on top of an API
-// push still resolves to that API push, so the gate keeps waiting for it
-// rather than concluding there is nothing to wait for.
+// `expectedShasByKind` maps an upstream kind to the commits it may report: the
+// last commit that touched that service's watched paths, plus everything after
+// it. "That commit or newer", because Railway stamps a service with the head
+// of the push that rebuilt it, which is a later commit whenever a push carries
+// more than one. A release that doesn't touch a service resolves to a commit
+// it already satisfies; one that does resolves to the release itself. It also
+// survives a superseding push: a push that leaves a service alone still
+// resolves to the last push that changed it, so the gate keeps waiting for
+// that one rather than concluding there is nothing to wait for.
 //
-// A DAO API reporting no commit is stale, not exempt — that is the previous
-// release still answering, from before this field existed. Other upstream
-// kinds (relayers, address enrichment, authful) contribute no schemas that
-// codegen can miss and only have to be reachable.
-export const staleUpstreams = (health, expectedUpstreamShas = []) =>
+// An upstream reporting no commit is stale, not exempt — that is the previous
+// release still answering, from before it reported one. That can't deadlock:
+// teaching a service to report its commit necessarily touches its own watched
+// paths, so the release that adds it is also the release that rebuilds it.
+//
+// A kind absent from the map (authful, whose spec is not merged) is not
+// checked at all; it only has to be reachable.
+export const staleUpstreams = (health, expectedShasByKind = {}) =>
   Object.entries(health.body?.upstreams ?? {})
-    .filter(
-      ([, upstream]) =>
-        upstream?.kind === "dao-api" &&
-        !expectedUpstreamShas.includes(upstream.commit),
-    )
+    .filter(([, upstream]) => {
+      const accepted = expectedShasByKind[upstream?.kind];
+      return accepted?.length ? !accepted.includes(upstream.commit) : false;
+    })
     .map(([name]) => name);
 
-export const isGatefulReady = (health, expectedSha, expectedUpstreamShas) => {
+export const isGatefulReady = (health, expectedSha, expectedShasByKind) => {
   if (health.status !== 200) {
     return false;
   }
@@ -108,15 +111,13 @@ export const isGatefulReady = (health, expectedSha, expectedUpstreamShas) => {
     return false;
   }
 
-  return expectedUpstreamShas?.length
-    ? staleUpstreams(health, expectedUpstreamShas).length === 0
-    : true;
+  return staleUpstreams(health, expectedShasByKind).length === 0;
 };
 
 export const waitForGateful = async ({
   baseUrl,
   expectedSha,
-  expectedUpstreamShas,
+  expectedShasByKind,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   intervalMs = DEFAULT_INTERVAL_MS,
   requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
@@ -142,7 +143,7 @@ export const waitForGateful = async ({
       );
       lastError = undefined;
 
-      if (isGatefulReady(lastHealth, expectedSha, expectedUpstreamShas)) {
+      if (isGatefulReady(lastHealth, expectedSha, expectedShasByKind)) {
         logger.log(
           expectedSha
             ? `Gateful ready after attempt ${attempt}: commit ${expectedSha}`
@@ -152,18 +153,14 @@ export const waitForGateful = async ({
         return { ready: true, attempt, lastHealth };
       }
 
-      const stale = expectedUpstreamShas?.length
-        ? staleUpstreams(lastHealth, expectedUpstreamShas)
-        : [];
+      const stale = staleUpstreams(lastHealth, expectedShasByKind);
 
       logger.log(
         `attempt ${attempt}: HTTP ${lastHealth.status}, commit ${
           lastHealth.body?.commit ?? "<missing>"
         }${
           stale.length > 0
-            ? `, DAO APIs behind ${expectedUpstreamShas.at(-1)}: ${stale.join(
-                ", ",
-              )}`
+            ? `, upstreams still on an older release: ${stale.join(", ")}`
             : ""
         }; waiting for ${expectedSha}`,
       );
@@ -198,20 +195,16 @@ const main = async () => {
     DEFAULT_REQUEST_TIMEOUT_MS,
   );
 
-  // Commits a DAO API may report — the one that last rebuilt them, and every
-  // commit after it (see staleUpstreams). Unset means "don't check them",
-  // which is what PR previews do.
-  const expectedUpstreamShas = (
-    readNonEmptyValue(process.env.EXPECTED_UPSTREAM_SHAS) ?? ""
-  )
-    .split(",")
-    .map((sha) => sha.trim())
-    .filter(Boolean);
+  // {kind: [sha, ...]} — the commits each upstream kind may report (see
+  // staleUpstreams). Unset means "check nothing", which is what PR previews do.
+  const expectedShasByKind = JSON.parse(
+    readNonEmptyValue(process.env.EXPECTED_UPSTREAM_SHAS) ?? "{}",
+  );
 
   const result = await waitForGateful({
     baseUrl,
     expectedSha,
-    expectedUpstreamShas,
+    expectedShasByKind,
     timeoutMs,
     intervalMs,
     requestTimeoutMs,
@@ -244,11 +237,10 @@ const main = async () => {
     : `last health: HTTP ${result.lastHealth?.status ?? "<none>"}, commit ${
         result.lastHealth?.body?.commit ?? "<missing>"
       }${
-        expectedUpstreamShas.length > 0 && result.lastHealth
-          ? `, DAO APIs behind ${expectedUpstreamShas.at(-1)}: ${
-              staleUpstreams(result.lastHealth, expectedUpstreamShas).join(
-                ", ",
-              ) || "<none>"
+        result.lastHealth
+          ? `, upstreams still on an older release: ${
+              staleUpstreams(result.lastHealth, expectedShasByKind).join(", ") ||
+              "<none>"
             }`
           : ""
       }`;

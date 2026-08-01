@@ -60,7 +60,7 @@ test("isGatefulReady requires the matching commit when expected", () => {
 
 // The failure this guards: gateful on the new commit, ens-api 11s behind it,
 // codegen reading the previous release's merged spec.
-test("isGatefulReady checks DAO APIs only when upstream shas are given", () => {
+test("isGatefulReady checks a kind only when shas are given for it", () => {
   const health = {
     status: 200,
     body: {
@@ -72,9 +72,9 @@ test("isGatefulReady checks DAO APIs only when upstream shas are given", () => {
     },
   };
 
-  assert.equal(isGatefulReady(health, "new", ["new"]), false);
-  assert.equal(isGatefulReady(health, "new", []), true);
-  assert.deepEqual(staleUpstreams(health, ["new"]), ["ens"]);
+  assert.equal(isGatefulReady(health, "new", { "dao-api": ["new"] }), false);
+  assert.equal(isGatefulReady(health, "new", {}), true);
+  assert.deepEqual(staleUpstreams(health, { "dao-api": ["new"] }), ["ens"]);
 });
 
 test("a DAO API reporting no commit is stale, not exempt", () => {
@@ -89,8 +89,8 @@ test("a DAO API reporting no commit is stale, not exempt", () => {
     },
   };
 
-  assert.equal(isGatefulReady(health, "new", ["new"]), false);
-  assert.deepEqual(staleUpstreams(health, ["new"]), ["ens"]);
+  assert.equal(isGatefulReady(health, "new", { "dao-api": ["new"] }), false);
+  assert.deepEqual(staleUpstreams(health, { "dao-api": ["new"] }), ["ens"]);
 });
 
 test("a release that doesn't rebuild the DAO APIs passes on their older commit", () => {
@@ -105,7 +105,7 @@ test("a release that doesn't rebuild the DAO APIs passes on their older commit",
     },
   };
 
-  assert.equal(isGatefulReady(health, "head", ["head", "api-push"]), true);
+  assert.equal(isGatefulReady(health, "head", { "dao-api": ["head", "api-push"] }), true);
 });
 
 test("a non-API push superseding an in-flight API push still waits", () => {
@@ -127,28 +127,44 @@ test("a non-API push superseding an in-flight API push still waits", () => {
     },
   };
 
-  assert.equal(isGatefulReady(deploying, "B", ["B", "A"]), false);
-  assert.equal(isGatefulReady(settled, "B", ["B", "A"]), true);
+  assert.equal(isGatefulReady(deploying, "B", { "dao-api": ["B", "A"] }), false);
+  assert.equal(isGatefulReady(settled, "B", { "dao-api": ["B", "A"] }), true);
 });
 
-test("upstreams that aren't DAO APIs never block the gate", () => {
-  // Relayers, address enrichment and authful report no commit and only have
-  // to be reachable — waiting on them would stall releases that never
-  // rebuild them.
+test("every spec-contributing upstream is gated, on its own commit", () => {
+  // The relayer and address enrichment also merge paths and schemas into
+  // /docs/json, and each rebuilds on its own watch paths — so each is checked
+  // against its own release, not the DAO APIs'. Authful contributes no spec
+  // and is absent from the map, so it only has to be reachable.
+  const expected = {
+    "dao-api": ["head", "api-push"],
+    relayer: ["head", "relayer-push"],
+    "address-enrichment": ["head", "enrichment-push"],
+  };
   const health = {
     status: 200,
     body: {
-      commit: "new",
+      commit: "head",
       upstreams: {
-        "relayer:ens": { kind: "relayer", status: "ok" },
+        ens: { kind: "dao-api", status: "ok", commit: "api-push" },
+        "relayer:ens": { kind: "relayer", status: "ok", commit: "head" },
+        "address-enrichment": {
+          kind: "address-enrichment",
+          status: "ok",
+          commit: "enrichment-push",
+        },
         authful: { kind: "token-service", status: "ok" },
-        ens: { kind: "dao-api", status: "ok", commit: "new" },
       },
     },
   };
 
-  assert.equal(isGatefulReady(health, "new", ["new"]), true);
-  assert.deepEqual(staleUpstreams(health, ["new"]), []);
+  assert.deepEqual(staleUpstreams(health, expected), []);
+  assert.equal(isGatefulReady(health, "head", expected), true);
+
+  const behind = structuredClone(health);
+  behind.body.upstreams["relayer:ens"].commit = "before-relayer-push";
+  assert.deepEqual(staleUpstreams(behind, expected), ["relayer:ens"]);
+  assert.equal(isGatefulReady(behind, "head", expected), false);
 });
 
 test("waitForGateful polls until every DAO API serves the commit", async () => {
@@ -167,7 +183,7 @@ test("waitForGateful polls until every DAO API serves the commit", async () => {
   const result = await waitForGateful({
     baseUrl: "https://gateful.example.com",
     expectedSha: "new",
-    expectedUpstreamShas: ["new"],
+    expectedShasByKind: { "dao-api": ["new"] },
     timeoutMs: 100,
     intervalMs: 10,
     fetchImpl: async () => responses.shift(),
