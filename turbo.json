@@ -42,13 +42,14 @@
     },
     "@anticapture/client#build": {
       "dependsOn": ["codegen"],
-      // `generated/**` is gitignored, so it is not in the default input set:
-      // this build (and the dashboard's, through it) would otherwise hash the
-      // same on a retry of a commit whose codegen raced an API deploy, and
-      // turbo would restore the dist built from the stale spec over the freshly
-      // generated one. Listing it explicitly makes the spec visible to the
-      // hash, so the cache still hits when the spec really is unchanged.
-      "inputs": ["$TURBO_DEFAULT$", "generated/**"],
+      // Not cached, for the same reason `codegen` isn't: tsup runs with
+      // `dts: true`, so the spec fetched at runtime is compiled into `dist`,
+      // and no hash can see it. Declaring `generated/**` as an input does not
+      // work — turbo hashes inputs before the run, and `generated/` is
+      // gitignored, so on a fresh checkout it is empty at that moment and the
+      // glob contributes nothing. A retry would re-run codegen and then
+      // restore the dist built from the stale spec straight over it.
+      "cache": false,
       "outputs": ["dist/**"]
     },
     "@anticapture/client-docs#build": {
