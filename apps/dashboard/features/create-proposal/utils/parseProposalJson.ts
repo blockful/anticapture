@@ -1,3 +1,4 @@
+import { isHex } from "viem";
 import { z } from "zod";
 
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
@@ -82,6 +83,32 @@ const ProposalJsonSchema = z
           code: z.ZodIssueCode.custom,
           message: 'needs either "functionName" or "calldata"',
           path: ["actions", index],
+        });
+      }
+
+      // Same rule as the custom-action modal. Without it a string like
+      // "transfer(1)" satisfies ProposalFormSchema (which only checks that
+      // calldata is non-empty), the form goes publishable, and encodeActions
+      // casts it straight to Hex — so the paste only fails once the user is
+      // already signing.
+      if (
+        hasCalldata &&
+        !(isHex(action.calldata!) && action.calldata!.length % 2 === 0)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "must be 0x-prefixed hex with an even number of characters",
+          path: ["actions", index, "calldata"],
+        });
+      }
+
+      // encodeActions runs BigInt(value), which throws on anything that isn't
+      // a plain integer (notably "1e18").
+      if (action.value !== undefined && !/^\d+$/.test(action.value)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "must be a whole number of wei",
+          path: ["actions", index, "value"],
         });
       }
 
