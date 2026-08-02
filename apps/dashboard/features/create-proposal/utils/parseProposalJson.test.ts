@@ -260,6 +260,140 @@ describe("parseProposalJson", () => {
       expect(result.error).toContain("functionName");
     });
 
+    describe("abi-backed calls", () => {
+      const setValueAbi = [
+        {
+          type: "function",
+          name: "setValue",
+          stateMutability: "nonpayable",
+          inputs: [
+            { name: "who", type: "address" },
+            { name: "value", type: "uint256" },
+          ],
+          outputs: [],
+        },
+      ];
+
+      const customAction = (overrides: Record<string, unknown>) =>
+        JSON.stringify({
+          actions: [
+            {
+              type: "custom",
+              contractAddress: "0x3333333333333333333333333333333333333333",
+              abi: setValueAbi,
+              ...overrides,
+            },
+          ],
+        });
+
+      it("accepts a call whose function and args line up", () => {
+        const result = parseProposalJson(
+          customAction({
+            functionName: "setValue(address,uint256)",
+            args: ["vitalik.eth", 42],
+          }),
+        );
+
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.value.actions?.[0]).toMatchObject({
+          functionName: "setValue(address,uint256)",
+          args: ["vitalik.eth", "42"],
+        });
+      });
+
+      it("accepts the bare function name, like encodeActions does", () => {
+        const result = parseProposalJson(
+          customAction({
+            functionName: "setValue",
+            args: ["0x1111111111111111111111111111111111111111", "1"],
+          }),
+        );
+
+        expect(result.ok).toBe(true);
+      });
+
+      it("rejects a function that isn't in the abi", () => {
+        const result = parseProposalJson(
+          customAction({ functionName: "missing()", args: [] }),
+        );
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("actions[0].functionName");
+        expect(result.error).toContain("missing()");
+      });
+
+      it("rejects too few args for the function", () => {
+        const result = parseProposalJson(
+          customAction({ functionName: "setValue(address,uint256)", args: [] }),
+        );
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("actions[0].args");
+        expect(result.error).toContain("takes 2, got 0");
+      });
+
+      it("rejects omitted args entirely", () => {
+        const result = parseProposalJson(
+          customAction({ functionName: "setValue(address,uint256)" }),
+        );
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("takes 2, got 0");
+      });
+
+      it("rejects too many args", () => {
+        const result = parseProposalJson(
+          customAction({
+            functionName: "setValue(address,uint256)",
+            args: ["0x1111111111111111111111111111111111111111", "1", "2"],
+          }),
+        );
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("takes 2, got 3");
+      });
+
+      it("rejects an arg that doesn't fit its solidity type", () => {
+        const result = parseProposalJson(
+          customAction({
+            functionName: "setValue(address,uint256)",
+            args: ["not-an-address", "1"],
+          }),
+        );
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("actions[0].args[0]");
+        expect(result.error).toContain("address");
+      });
+
+      it("rejects a blank arg", () => {
+        const result = parseProposalJson(
+          customAction({
+            functionName: "setValue(address,uint256)",
+            args: ["0x1111111111111111111111111111111111111111", "  "],
+          }),
+        );
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("actions[0].args[1]");
+      });
+
+      it("skips the abi checks when raw calldata is supplied", () => {
+        const result = parseProposalJson(
+          customAction({ functionName: "missing()", calldata: "0xa9059cbb" }),
+        );
+
+        expect(result.ok).toBe(true);
+      });
+    });
+
     it("rejects a functionName without an abi to encode it against", () => {
       const result = parseProposalJson(
         JSON.stringify({

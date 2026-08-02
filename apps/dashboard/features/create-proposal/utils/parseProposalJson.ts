@@ -1,8 +1,13 @@
-import { isHex } from "viem";
+import { isHex, toFunctionSignature, type Abi, type AbiFunction } from "viem";
 import { z } from "zod";
 
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
+import {
+  argsToTrees,
+  buildEmpty,
+} from "@/features/create-proposal/utils/argTree";
 import { parseAbiStrict } from "@/features/create-proposal/utils/fetchAbi";
+import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
 
 type FormAction = ProposalFormValues["actions"][number];
 
@@ -62,6 +67,57 @@ const ActionImportSchema = z.discriminatedUnion("type", [
   CustomImportSchema,
 ]);
 
+/**
+ * Checks that an ABI-backed call is actually encodable, so the failure lands on
+ * the paste instead of on `encodeActions` while the user is publishing: there,
+ * a missing function throws outright and a wrong argument count blows up inside
+ * viem. Matching mirrors encodeActions (full signature or bare name) so both
+ * sides resolve the same overload, and each argument is held to the same
+ * `isArgComplete` bar the custom-action modal uses to release its Confirm.
+ */
+const checkAbiCall = (
+  ctx: z.RefinementCtx,
+  index: number,
+  abi: Abi,
+  functionName: string,
+  args: string[],
+) => {
+  const fn = abi.find(
+    (item): item is AbiFunction =>
+      item.type === "function" &&
+      (toFunctionSignature(item) === functionName ||
+        item.name === functionName),
+  );
+
+  if (!fn) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `"${functionName}" is not a function in this action's abi`,
+      path: ["actions", index, "functionName"],
+    });
+    return;
+  }
+
+  if (args.length !== fn.inputs.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `${toFunctionSignature(fn)} takes ${fn.inputs.length}, got ${args.length}`,
+      path: ["actions", index, "args"],
+    });
+    return;
+  }
+
+  const trees = argsToTrees(fn.inputs, args);
+  fn.inputs.forEach((input, i) => {
+    if (isArgComplete(input, trees[i] ?? buildEmpty(input))) return;
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `is not a valid ${input.type}`,
+      path: ["actions", index, "args", i],
+    });
+  });
+};
+
 // Unknown keys are stripped rather than rejected, so a saved draft (which
 // carries `id`, `daoId`, timestamps) can be pasted in as-is.
 const ProposalJsonSchema = z
@@ -112,7 +168,9 @@ const ProposalJsonSchema = z
         });
       }
 
-      if (action.abi !== undefined && parseAbiStrict(action.abi) === null) {
+      const abi = action.abi === undefined ? null : parseAbiStrict(action.abi);
+
+      if (action.abi !== undefined && abi === null) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "must be an array of ABI items",
@@ -120,13 +178,21 @@ const ProposalJsonSchema = z
         });
       }
 
-      if (hasFunctionName && !hasCalldata && action.abi === undefined) {
+      // Raw calldata wins in encodeActions, so the ABI path is only checked
+      // when there is none.
+      if (hasCalldata || !hasFunctionName) return;
+
+      if (action.abi === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: 'is required when "functionName" is used',
           path: ["actions", index, "abi"],
         });
+        return;
       }
+      if (abi === null) return;
+
+      checkAbiCall(ctx, index, abi, action.functionName!, action.args ?? []);
     });
   });
 
