@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FileJson } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import Link from "next/link";
@@ -19,6 +19,7 @@ import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
@@ -53,6 +54,8 @@ import { PublishModal } from "@/features/create-proposal/components/modals/Publi
 import { ProposalSubmittedModal } from "@/features/create-proposal/components/modals/ProposalSubmittedModal";
 import { SubmissionFailedModal } from "@/features/create-proposal/components/modals/SubmissionFailedModal";
 import { InsufficientVPModal } from "@/features/create-proposal/components/modals/InsufficientVPModal";
+import { ImportJsonModal } from "@/features/create-proposal/components/modals/ImportJsonModal";
+import type { ParsedProposalJson } from "@/features/create-proposal/utils/parseProposalJson";
 import type {
   CustomAction,
   ERC20TransferAction,
@@ -213,6 +216,7 @@ export const ProposalCreationForm = ({
   const [submittedOpen, setSubmittedOpen] = useState(false);
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
   // Email/Google sign-in leaves the page, so a dirty form would be lost on
@@ -471,6 +475,27 @@ export const ProposalCreationForm = ({
     }
   };
 
+  // Field-by-field setValue rather than form.reset: the imported content is
+  // unsaved, so the dirty flag (and with it NavigationGuard) has to stay armed.
+  const handleImportJson = (imported: ParsedProposalJson) => {
+    const options = { shouldDirty: true, shouldValidate: true } as const;
+    if (imported.title !== undefined) {
+      form.setValue("title", imported.title, options);
+    }
+    if (imported.discussionUrl !== undefined) {
+      form.setValue("discussionUrl", imported.discussionUrl, options);
+    }
+    if (imported.body !== undefined) {
+      form.setValue("body", imported.body, options);
+      // MDXEditor only reads `markdown` on mount, so remount it on the new body.
+      setBodyVersion((v) => v + 1);
+    }
+    if (imported.actions !== undefined) {
+      form.setValue("actions", imported.actions, options);
+    }
+    showCustomToast("Proposal fields imported", "success");
+  };
+
   const openEditForAction = (index: number) => {
     const action = values.actions[index];
     if (!action) return;
@@ -659,6 +684,21 @@ export const ProposalCreationForm = ({
               />
             )}
 
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-secondary text-xs">
+                Already have this proposal as JSON? Import it to fill the form.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setImportOpen(true)}
+                className="shrink-0"
+              >
+                <FileJson className="size-3.5" />
+                Import JSON
+              </Button>
+            </div>
+
             <div className="flex w-full flex-col gap-1">
               <FormLabel isRequired>Title</FormLabel>
               <Input
@@ -731,6 +771,11 @@ export const ProposalCreationForm = ({
         </>
       )}
 
+      <ImportJsonModal
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImport={handleImportJson}
+      />
       <AddTransferModal
         open={transferOpen}
         onOpenChange={(o) => {

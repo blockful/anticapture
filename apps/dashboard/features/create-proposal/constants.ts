@@ -38,6 +38,47 @@ export const SUGGESTED_TRANSFER_TOKENS: Partial<
   ],
 };
 
+/** Reference document shown in (and loadable from) the Import JSON modal. */
+export const PROPOSAL_JSON_EXAMPLE = `{
+  "title": "Fund the developer grants program",
+  "discussionUrl": "https://discuss.ens.domains/t/example",
+  "body": "## Synopsis\\n\\nWhat this proposal does.",
+  "actions": [
+    {
+      "type": "eth-transfer",
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "amount": "1.5"
+    },
+    {
+      "type": "erc20-transfer",
+      "recipient": "vitalik.eth",
+      "tokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "amount": "25000",
+      "decimals": 6
+    },
+    {
+      "type": "custom",
+      "contractAddress": "0x2222222222222222222222222222222222222222",
+      "abi": [
+        {
+          "type": "function",
+          "name": "setValue",
+          "stateMutability": "nonpayable",
+          "inputs": [{ "name": "value", "type": "uint256" }],
+          "outputs": []
+        }
+      ],
+      "functionName": "setValue(uint256)",
+      "args": ["42"]
+    },
+    {
+      "type": "custom",
+      "contractAddress": "0x3333333333333333333333333333333333333333",
+      "calldata": "0xa9059cbb"
+    }
+  ]
+}`;
+
 export const BODY_PLACEHOLDER = `## Synopsis
 
 State what the proposal does in one sentence.
