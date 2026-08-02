@@ -1,18 +1,16 @@
-import { PROPOSAL_JSON_EXAMPLE } from "@/features/create-proposal/constants";
+import { PROPOSAL_JSON_PLACEHOLDER } from "@/features/create-proposal/constants";
 import { parseProposalJson } from "@/features/create-proposal/utils/parseProposalJson";
 
 describe("parseProposalJson", () => {
-  it("parses the documented example shown in the modal", () => {
-    const result = parseProposalJson(PROPOSAL_JSON_EXAMPLE);
+  // Keeps the format hint users copy from in step with what the parser takes.
+  it("parses the placeholder shown in the modal", () => {
+    const result = parseProposalJson(PROPOSAL_JSON_PLACEHOLDER);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.title).toBe("Fund the developer grants program");
-    expect(result.value.discussionUrl).toBe(
-      "https://discuss.ens.domains/t/example",
-    );
+    expect(result.value.title).toBe("Proposal title");
     expect(result.value.body).toContain("## Synopsis");
-    expect(result.value.actions).toHaveLength(4);
+    expect(result.value.actions).toHaveLength(2);
   });
 
   it("fills only the fields the document carries", () => {

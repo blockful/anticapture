@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
-import { PROPOSAL_JSON_EXAMPLE } from "@/features/create-proposal/constants";
+import { PROPOSAL_JSON_PLACEHOLDER } from "@/features/create-proposal/constants";
 import {
   parseProposalJson,
   type ParsedProposalJson,
@@ -18,19 +17,23 @@ interface ImportJsonModalProps {
   onImport: (values: ParsedProposalJson) => void;
 }
 
-const FIELD_DOCS: { name: string; description: string }[] = [
-  { name: "title", description: "string, the proposal title." },
-  {
-    name: "discussionUrl",
-    description: "string, an http(s) link to the forum thread.",
-  },
-  { name: "body", description: "string, the description, in markdown." },
-  {
-    name: "actions",
-    description:
-      'array, where each item is an "eth-transfer", "erc20-transfer" or "custom" action.',
-  },
-];
+const Code = ({ children }: { children: React.ReactNode }) => (
+  <code className="text-primary font-mono">{children}</code>
+);
+
+// Keep the prose short: a line break right after a <code> swallows the space
+// that follows it, so each entry has to fit on one line.
+const Field = ({
+  name,
+  children,
+}: {
+  name: string;
+  children: React.ReactNode;
+}) => (
+  <li>
+    <Code>{name}</Code> {children}
+  </li>
+);
 
 export const ImportJsonModal = ({
   open,
@@ -91,8 +94,10 @@ export const ImportJsonModal = ({
               setText(e.target.value);
               setError(null);
             }}
-            placeholder='{ "title": "…", "body": "…", "actions": [] }'
-            className="min-h-40 font-mono text-xs"
+            placeholder={PROPOSAL_JSON_PLACEHOLDER}
+            // Capped so a long paste (or a drag on the native resize grip)
+            // can't push the footer off screen.
+            className="max-h-64 min-h-44 resize-y overflow-y-auto font-mono text-xs"
             error={Boolean(error)}
             spellCheck={false}
             aria-label="Proposal JSON"
@@ -101,48 +106,36 @@ export const ImportJsonModal = ({
             <span className="text-error text-xs">{error}</span>
           ) : (
             <span className="text-secondary text-xs">
-              Only the fields present in the JSON are replaced. Everything else
-              stays as you left it.
+              Every field is optional, and only the ones present are replaced.
+              Recipients take an address or ENS, and amounts are human-readable
+              rather than wei.
             </span>
           )}
         </div>
 
-        <div className="border-border-default bg-surface-contrast/40 rounded-base flex flex-col gap-2 border p-3">
-          <div className="flex items-center justify-between gap-2">
-            <FormLabel>Expected format</FormLabel>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setText(PROPOSAL_JSON_EXAMPLE);
-                setError(null);
-              }}
-            >
-              Use example
-            </Button>
-          </div>
-          <ul className="text-secondary flex flex-col gap-1 text-xs">
-            {FIELD_DOCS.map((field) => (
-              <li key={field.name}>
-                <code className="text-primary font-mono">{field.name}</code>{" "}
-                {field.description}
-              </li>
-            ))}
-          </ul>
-          <p className="text-secondary text-xs">
-            Every field is optional. Amounts are human-readable (
-            <code className="text-primary font-mono">&quot;1.5&quot;</code>, not
-            wei), and an ERC-20 transfer must declare the token&apos;s{" "}
-            <code className="text-primary font-mono">decimals</code>. A custom
-            action needs either{" "}
-            <code className="text-primary font-mono">functionName</code> plus
-            its <code className="text-primary font-mono">abi</code>, or raw{" "}
-            <code className="text-primary font-mono">calldata</code>.
-          </p>
-          <pre className="border-border-default bg-surface-default text-secondary rounded-base max-h-56 overflow-auto border p-2 font-mono text-[11px] leading-relaxed">
-            {PROPOSAL_JSON_EXAMPLE}
-          </pre>
-        </div>
+        <ul className="text-secondary flex flex-col gap-1 text-xs">
+          <Field name="title">the proposal title.</Field>
+          <Field name="discussionUrl">
+            an http(s) link to the forum thread.
+          </Field>
+          <Field name="body">the description, in markdown.</Field>
+          <Field name="actions">
+            one entry per action, keyed by <Code>type</Code>:
+            <ul className="mt-1 flex flex-col gap-1 pl-4">
+              <Field name="eth-transfer">
+                <Code>recipient</Code> and <Code>amount</Code> in ETH.
+              </Field>
+              <Field name="erc20-transfer">
+                also <Code>tokenAddress</Code> and <Code>decimals</Code>.
+              </Field>
+              <Field name="custom">
+                <Code>contractAddress</Code>, then either{" "}
+                <Code>functionName</Code> with <Code>abi</Code> and{" "}
+                <Code>args</Code>, or raw <Code>calldata</Code>.
+              </Field>
+            </ul>
+          </Field>
+        </ul>
       </div>
     </Modal>
   );
