@@ -3,7 +3,11 @@ import { isAddress } from "viem";
 
 import { isEnsAddress } from "@/shared/utils/ens";
 
-const addressOrEnsSchema = z
+// Exported so the JSON import path can hold a pasted action to exactly the
+// rules the form enforces. They must not drift: an action the import accepts
+// but the form rejects only shows up as a Publish button that never enables,
+// since action rows render no field errors.
+export const addressOrEnsSchema = z
   .string()
   .min(1, "Required")
   .refine((v) => {
@@ -11,12 +15,12 @@ const addressOrEnsSchema = z
     return isAddress(trimmed) || isEnsAddress(trimmed);
   }, "Must be a valid address or ENS name");
 
-const strictAddressSchema = z
+export const strictAddressSchema = z
   .string()
   .min(1, "Required")
   .refine((v) => isAddress(v.trim()), "Must be a valid Ethereum address");
 
-const positiveDecimalAmountSchema = z
+export const positiveDecimalAmountSchema = z
   .string()
   .min(1, "Required")
   .refine((v) => /^\d+(\.\d+)?$/.test(v.trim()), "Must be a valid number")

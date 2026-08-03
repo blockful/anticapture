@@ -83,7 +83,10 @@ describe("parseProposalJson", () => {
       ]);
     });
 
-    it("requires decimals on an ERC-20 transfer", () => {
+    // Left undecided here on purpose: resolveImportedDecimals settles it
+    // against the token contract, since a pasted value would silently rescale
+    // the transfer.
+    it("leaves an omitted decimals undefined rather than guessing", () => {
       const result = parseProposalJson(
         JSON.stringify({
           actions: [
@@ -97,9 +100,93 @@ describe("parseProposalJson", () => {
         }),
       );
 
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.actions?.[0]).not.toHaveProperty("decimals");
+    });
+
+    it("rejects a token address that isn't an address", () => {
+      const result = parseProposalJson(
+        JSON.stringify({
+          actions: [
+            {
+              type: "erc20-transfer",
+              recipient: "vitalik.eth",
+              // The form requires a concrete address here, and the decimals
+              // lookup needs one too.
+              tokenAddress: "usdc.eth",
+              amount: "1",
+              decimals: 6,
+            },
+          ],
+        }),
+      );
+
       expect(result.ok).toBe(false);
       if (result.ok) return;
-      expect(result.error).toContain("actions[0].decimals");
+      expect(result.error).toContain("actions[0].tokenAddress");
+    });
+
+    // Everything below would otherwise clear the import and then fail
+    // ProposalFormSchema, which leaves Publish disabled with no visible reason:
+    // action rows render no field errors.
+    it.each([
+      ["a recipient that is neither address nor ENS", { recipient: "banana" }],
+      ["an amount that isn't a number", { amount: "a lot" }],
+      ["a zero amount", { amount: "0" }],
+      ["a negative amount", { amount: "-1" }],
+    ])("rejects %s", (_label, overrides) => {
+      const result = parseProposalJson(
+        JSON.stringify({
+          actions: [
+            {
+              type: "eth-transfer",
+              recipient: "vitalik.eth",
+              amount: "1.5",
+              ...overrides,
+            },
+          ],
+        }),
+      );
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error).toContain("actions[0]");
+    });
+
+    it("rejects a contract address that is neither address nor ENS", () => {
+      const result = parseProposalJson(
+        JSON.stringify({
+          actions: [
+            {
+              type: "custom",
+              contractAddress: "not-a-contract",
+              calldata: "0xa9059cbb",
+            },
+          ],
+        }),
+      );
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error).toContain("actions[0].contractAddress");
+    });
+
+    it("accepts a hex value, which BigInt() handles", () => {
+      const result = parseProposalJson(
+        JSON.stringify({
+          actions: [
+            {
+              type: "custom",
+              contractAddress: "0x3333333333333333333333333333333333333333",
+              calldata: "0xa9059cbb",
+              value: "0xde0b6b3a7640000",
+            },
+          ],
+        }),
+      );
+
+      expect(result.ok).toBe(true);
     });
 
     it("normalizes a custom action's optional fields", () => {
@@ -384,6 +471,43 @@ describe("parseProposalJson", () => {
         if (result.ok) return;
         expect(result.error).toContain("actions[0].args[1]");
       });
+
+      // parseAbiStrict only guarantees a string `type`, so these survive it and
+      // used to reach viem's formatter, which throws and takes the whole import
+      // dialog down instead of showing a paste error.
+      it.each([
+        ["no name", { type: "function", inputs: [], outputs: [] }],
+        ["no inputs", { type: "function", name: "setValue", outputs: [] }],
+        [
+          "a non-string name",
+          { type: "function", name: 42, inputs: [], outputs: [] },
+        ],
+      ])(
+        "reports an abi function entry with %s instead of throwing",
+        (_label, malformed) => {
+          const run = () =>
+            parseProposalJson(
+              JSON.stringify({
+                actions: [
+                  {
+                    type: "custom",
+                    contractAddress:
+                      "0x3333333333333333333333333333333333333333",
+                    abi: [...setValueAbi, malformed],
+                    functionName: "setValue(address,uint256)",
+                    args: ["vitalik.eth", "1"],
+                  },
+                ],
+              }),
+            );
+
+          expect(run).not.toThrow();
+          const result = run();
+          expect(result.ok).toBe(false);
+          if (result.ok) return;
+          expect(result.error).toContain("actions[0].abi");
+        },
+      );
 
       it("skips the abi checks when raw calldata is supplied", () => {
         const result = parseProposalJson(

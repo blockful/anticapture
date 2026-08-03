@@ -1,20 +1,34 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { erc20Abi } from "viem";
+import { usePublicClient } from "wagmi";
 
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
+import daoConfig from "@/shared/dao-config";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { PROPOSAL_JSON_PLACEHOLDER } from "@/features/create-proposal/constants";
+import type { ProposalFormValues } from "@/features/create-proposal/schema";
+import { parseProposalJson } from "@/features/create-proposal/utils/parseProposalJson";
 import {
-  parseProposalJson,
-  type ParsedProposalJson,
-} from "@/features/create-proposal/utils/parseProposalJson";
+  needsDecimalsLookup,
+  resolveImportedDecimals,
+} from "@/features/create-proposal/utils/resolveImportedDecimals";
+
+export type ImportedProposal = {
+  title?: string;
+  discussionUrl?: string;
+  body?: string;
+  actions?: ProposalFormValues["actions"];
+};
 
 interface ImportJsonModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImport: (values: ParsedProposalJson) => void;
+  onImport: (values: ImportedProposal) => void;
 }
 
 const Code = ({ children }: { children: React.ReactNode }) => (
@@ -40,8 +54,14 @@ export const ImportJsonModal = ({
   onOpenChange,
   onImport,
 }: ImportJsonModalProps) => {
+  const { daoId: daoIdParam } = useParams<{ daoId: string }>();
+  const daoIdEnum = (daoIdParam ?? "").toUpperCase() as DaoIdEnum;
+  const chainId = daoConfig[daoIdEnum]?.daoOverview?.chain?.id;
+  const publicClient = usePublicClient(chainId ? { chainId } : undefined);
+
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isResolving, setIsResolving] = useState(false);
 
   // Start from a clean sheet on every open: a previous failed paste hanging
   // around next to a stale error reads as if the import already ran.
@@ -49,21 +69,64 @@ export const ImportJsonModal = ({
     if (!open) return;
     setText("");
     setError(null);
+    setIsResolving(false);
   }, [open]);
 
   const close = () => {
     setText("");
     setError(null);
+    setIsResolving(false);
     onOpenChange(false);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const result = parseProposalJson(text);
     if (!result.ok) {
       setError(result.error);
       return;
     }
-    onImport(result.value);
+
+    const pending = result.value.actions;
+    let actions: ProposalFormValues["actions"] | undefined;
+
+    if (pending) {
+      // Only ERC-20 transfers need the chain, so a document without one still
+      // imports offline. Their decimals decide how the amount is scaled at
+      // publish, so they come from the token rather than from the paste.
+      const needsChain = needsDecimalsLookup(pending);
+      if (needsChain && !publicClient) {
+        setError(
+          "No RPC client available to read the token decimals. Reconnect your wallet and try again.",
+        );
+        return;
+      }
+
+      if (needsChain) setIsResolving(true);
+      const resolved = await resolveImportedDecimals(
+        pending,
+        async (tokenAddress) => {
+          // Unreachable past the guard above, which only lets a document
+          // through when there is a client to read every ERC-20 it carries.
+          if (!publicClient) throw new Error("No RPC client");
+          return Number(
+            await publicClient.readContract({
+              abi: erc20Abi,
+              address: tokenAddress as `0x${string}`,
+              functionName: "decimals",
+            }),
+          );
+        },
+      );
+      if (needsChain) setIsResolving(false);
+
+      if (!resolved.ok) {
+        setError(resolved.error);
+        return;
+      }
+      actions = resolved.actions;
+    }
+
+    onImport({ ...result.value, actions });
     close();
   };
 
@@ -82,8 +145,11 @@ export const ImportJsonModal = ({
       cancelLabel="Cancel"
       confirmLabel="Apply"
       onCancel={close}
-      onConfirm={handleConfirm}
-      isConfirmDisabled={text.trim().length === 0}
+      onConfirm={() => {
+        void handleConfirm();
+      }}
+      isConfirmDisabled={text.trim().length === 0 || isResolving}
+      isConfirmLoading={isResolving}
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
@@ -126,7 +192,8 @@ export const ImportJsonModal = ({
                 <Code>recipient</Code> and <Code>amount</Code> in ETH.
               </Field>
               <Field name="erc20-transfer">
-                also <Code>tokenAddress</Code> and <Code>decimals</Code>.
+                also <Code>tokenAddress</Code>, whose <Code>decimals</Code> are
+                read from the token.
               </Field>
               <Field name="custom">
                 <Code>contractAddress</Code>, then either{" "}

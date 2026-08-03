@@ -54,8 +54,10 @@ import { PublishModal } from "@/features/create-proposal/components/modals/Publi
 import { ProposalSubmittedModal } from "@/features/create-proposal/components/modals/ProposalSubmittedModal";
 import { SubmissionFailedModal } from "@/features/create-proposal/components/modals/SubmissionFailedModal";
 import { InsufficientVPModal } from "@/features/create-proposal/components/modals/InsufficientVPModal";
-import { ImportJsonModal } from "@/features/create-proposal/components/modals/ImportJsonModal";
-import type { ParsedProposalJson } from "@/features/create-proposal/utils/parseProposalJson";
+import {
+  ImportJsonModal,
+  type ImportedProposal,
+} from "@/features/create-proposal/components/modals/ImportJsonModal";
 import type {
   CustomAction,
   ERC20TransferAction,
@@ -477,7 +479,7 @@ export const ProposalCreationForm = ({
 
   // Field-by-field setValue rather than form.reset: the imported content is
   // unsaved, so the dirty flag (and with it NavigationGuard) has to stay armed.
-  const handleImportJson = (imported: ParsedProposalJson) => {
+  const handleImportJson = (imported: ImportedProposal) => {
     const options = { shouldDirty: true, shouldValidate: true } as const;
     if (imported.title !== undefined) {
       form.setValue("title", imported.title, options);

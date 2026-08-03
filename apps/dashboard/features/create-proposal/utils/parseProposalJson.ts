@@ -1,7 +1,12 @@
 import { isHex, toFunctionSignature, type Abi, type AbiFunction } from "viem";
 import { z } from "zod";
 
-import type { ProposalFormValues } from "@/features/create-proposal/schema";
+import {
+  addressOrEnsSchema,
+  positiveDecimalAmountSchema,
+  strictAddressSchema,
+  type ProposalFormValues,
+} from "@/features/create-proposal/schema";
 import {
   argsToTrees,
   buildEmpty,
@@ -10,6 +15,22 @@ import { parseAbiStrict } from "@/features/create-proposal/utils/fetchAbi";
 import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
 
 type FormAction = ProposalFormValues["actions"][number];
+type Erc20FormAction = Extract<FormAction, { type: "erc20-transfer" }>;
+
+/**
+ * An ERC-20 transfer straight out of the document, before its decimals are
+ * confirmed against the token contract. A pasted `decimals` is a claim about
+ * someone else's contract, and `encodeActions` feeds it to `parseUnits`, so
+ * believing it would let "1 USDC" encode as 1e18 base units while the row still
+ * reads 1. `resolveImportedDecimals` settles it against the chain.
+ */
+export type PendingErc20Transfer = Omit<Erc20FormAction, "decimals"> & {
+  decimals?: number;
+};
+
+export type PendingAction =
+  | Exclude<FormAction, { type: "erc20-transfer" }>
+  | PendingErc20Transfer;
 
 /**
  * The fields an imported JSON can carry. Everything is optional: a partial
@@ -19,7 +40,7 @@ export type ParsedProposalJson = {
   title?: string;
   discussionUrl?: string;
   body?: string;
-  actions?: FormAction[];
+  actions?: PendingAction[];
 };
 
 export type ParseProposalJsonResult =
@@ -31,29 +52,36 @@ const numericString = z
   .union([z.string(), z.number()])
   .transform((value) => String(value).trim());
 
+// Held to the form's own rules rather than a parallel set. An action that
+// clears the import but not ProposalFormSchema would leave Publish disabled
+// with nothing on screen to explain why, since action rows show no errors.
+const recipient = z.string().trim().pipe(addressOrEnsSchema);
+const tokenAddress = z.string().trim().pipe(strictAddressSchema);
+const amount = numericString.pipe(positiveDecimalAmountSchema);
+
 const EthTransferImportSchema = z.object({
   type: z.literal("eth-transfer"),
-  recipient: z.string().trim().min(1, "Required"),
-  amount: numericString,
+  recipient,
+  amount,
 });
 
 const Erc20TransferImportSchema = z.object({
   type: z.literal("erc20-transfer"),
-  recipient: z.string().trim().min(1, "Required"),
-  tokenAddress: z.string().trim().min(1, "Required"),
-  amount: numericString,
-  // Deliberately required: defaulting to 18 would silently scale a USDC
-  // transfer by 12 orders of magnitude.
-  decimals: z.number().int().nonnegative(),
+  recipient,
+  tokenAddress,
+  amount,
+  // Optional: read from the token contract at import time. A supplied value is
+  // treated as an assertion and checked, never trusted.
+  decimals: z.number().int().nonnegative().optional(),
 });
 
 // `abi` stays `unknown` here so a malformed ABI produces a readable message
 // from the outer superRefine instead of a wall of zod union errors. The
-// function/calldata cross-field rule lives there too, keeping this a plain
+// function/calldata cross-field rules live there too, keeping this a plain
 // ZodObject so the discriminated union below accepts it.
 const CustomImportSchema = z.object({
   type: z.literal("custom"),
-  contractAddress: z.string().trim().min(1, "Required"),
+  contractAddress: z.string().trim().pipe(addressOrEnsSchema),
   abi: z.unknown().optional(),
   functionName: z.string().trim().optional(),
   args: z.array(numericString).optional(),
@@ -66,6 +94,25 @@ const ActionImportSchema = z.discriminatedUnion("type", [
   Erc20TransferImportSchema,
   CustomImportSchema,
 ]);
+
+/**
+ * `parseAbiStrict` only guarantees each entry has a string `type`, so a
+ * `{ "type": "function" }` with no name or inputs survives it. viem's
+ * formatters assume both exist and throw on the way past.
+ */
+const isWellFormedFunction = (item: Abi[number]): item is AbiFunction =>
+  item.type === "function" &&
+  typeof (item as { name?: unknown }).name === "string" &&
+  Array.isArray((item as { inputs?: unknown }).inputs);
+
+/** Never throws: an exotic input type still reaches viem's formatter. */
+const signatureOf = (fn: AbiFunction): string | null => {
+  try {
+    return toFunctionSignature(fn);
+  } catch {
+    return null;
+  }
+};
 
 /**
  * Checks that an ABI-backed call is actually encodable, so the failure lands on
@@ -82,12 +129,25 @@ const checkAbiCall = (
   functionName: string,
   args: string[],
 ) => {
-  const fn = abi.find(
-    (item): item is AbiFunction =>
-      item.type === "function" &&
-      (toFunctionSignature(item) === functionName ||
-        item.name === functionName),
-  );
+  // Rejected wholesale rather than skipped: the ABI is stored on the action as
+  // pasted, and encodeActions walks the same array at publish time.
+  if (
+    abi.some((item) => item.type === "function" && !isWellFormedFunction(item))
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'has a "function" entry without a name or inputs',
+      path: ["actions", index, "abi"],
+    });
+    return;
+  }
+
+  const fn = abi
+    .filter(isWellFormedFunction)
+    .find(
+      (item) =>
+        signatureOf(item) === functionName || item.name === functionName,
+    );
 
   if (!fn) {
     ctx.addIssue({
@@ -101,7 +161,7 @@ const checkAbiCall = (
   if (args.length !== fn.inputs.length) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: `${toFunctionSignature(fn)} takes ${fn.inputs.length}, got ${args.length}`,
+      message: `${signatureOf(fn) ?? fn.name} takes ${fn.inputs.length}, got ${args.length}`,
       path: ["actions", index, "args"],
     });
     return;
@@ -145,7 +205,7 @@ const ProposalJsonSchema = z
       // Same rule as the custom-action modal. Without it a string like
       // "transfer(1)" satisfies ProposalFormSchema (which only checks that
       // calldata is non-empty), the form goes publishable, and encodeActions
-      // casts it straight to Hex — so the paste only fails once the user is
+      // casts it straight to Hex, so the paste only fails once the user is
       // already signing.
       if (
         hasCalldata &&
@@ -158,9 +218,12 @@ const ProposalJsonSchema = z
         });
       }
 
-      // encodeActions runs BigInt(value), which throws on anything that isn't
-      // a plain integer (notably "1e18").
-      if (action.value !== undefined && !/^\d+$/.test(action.value)) {
+      // encodeActions runs BigInt(value), which takes decimal or 0x hex and
+      // throws on anything else ("1e18" being the easy mistake).
+      if (
+        action.value !== undefined &&
+        !/^(\d+|0x[0-9a-fA-F]+)$/.test(action.value)
+      ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "must be a whole number of wei",
@@ -178,8 +241,8 @@ const ProposalJsonSchema = z
         });
       }
 
-      // Raw calldata wins in encodeActions, so the ABI path is only checked
-      // when there is none.
+      // Raw calldata wins in encodeActions, which returns before it ever walks
+      // the ABI, so the call is only checked when there is none.
       if (hasCalldata || !hasFunctionName) return;
 
       if (action.abi === undefined) {
@@ -198,7 +261,7 @@ const ProposalJsonSchema = z
 
 type ImportedAction = z.infer<typeof ActionImportSchema>;
 
-const toFormAction = (action: ImportedAction): FormAction => {
+const toPendingAction = (action: ImportedAction): PendingAction => {
   if (action.type !== "custom") return action;
 
   // Validated in superRefine above; spread to the mutable array the
@@ -229,7 +292,8 @@ const formatIssue = (issue: z.ZodIssue): string => {
 /**
  * Parses a pasted proposal document into form values. Validation is strict on
  * the fields it recognizes (they go straight into a form that can publish an
- * on-chain transaction) and lenient about everything else.
+ * on-chain transaction) and lenient about everything else. ERC-20 decimals are
+ * the one thing it can't settle offline; see `resolveImportedDecimals`.
  */
 export const parseProposalJson = (text: string): ParseProposalJsonResult => {
   const trimmed = text.trim();
@@ -280,6 +344,11 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
 
   return {
     ok: true,
-    value: { title, discussionUrl, body, actions: actions?.map(toFormAction) },
+    value: {
+      title,
+      discussionUrl,
+      body,
+      actions: actions?.map(toPendingAction),
+    },
   };
 };
