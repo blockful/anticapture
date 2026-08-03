@@ -9,7 +9,11 @@ Holders & Delegates v3 (DEV-562, DEV-476)
 API: new endpoints backing the module. `GET /:dao/voting-powers/inactive-summary`
 (delegated VP parked with inactive delegates), `GET /:dao/accounts/:address/delegators/historical`
 (former delegators with VP impact, start/end and redelegation target), and
-`GET /:dao/addresses/labels` (per-DAO treasury/vesting labels). Adds an optional
+`GET /:dao/addresses/labels` (per-DAO treasury/vesting labels, where an unlock
+contract whose label does not mention vesting is classified by address so the
+dashboard can still relabel its transfers as a vesting unlock; contracts whose
+outgoing transfers are not unlocks, such as airdrop distributors and staking
+vaults, stay out). Adds an optional
 `address` filter to `GET /:dao/feed/events`, and an optional `toDate` upper bound
 to `GET /:dao/proposals-activity` so a bounded period counts only the proposals
 inside it. That upper bound is keyed on when a proposal's voting opens (creation

@@ -42,7 +42,10 @@ describe("AddressLabelsService", () => {
     });
   });
 
-  it("includes non-circulating addresses", () => {
+  // The dashboard only relabels an incoming transfer as a vesting unlock when
+  // the source address comes back as `vesting`, so an unlock contract whose
+  // label does not say "vest" has to be classified by address.
+  it("classifies an unlock contract whose label omits vesting as vesting", () => {
     const service = new AddressLabelsService(DaoIdEnum.ENS);
 
     const { items } = service.getAddressLabels();
@@ -50,6 +53,38 @@ describe("AddressLabelsService", () => {
     expect(items).toContainEqual({
       address: NonCirculatingAddresses[DaoIdEnum.ENS]["Token Timelock"],
       label: "Token Timelock",
+      category: "vesting",
+    });
+  });
+
+  it("classifies ZK allocations as vesting and its distributors as treasury", () => {
+    const service = new AddressLabelsService(DaoIdEnum.ZK);
+
+    const { items } = service.getAddressLabels();
+
+    expect(items).toContainEqual({
+      address: NonCirculatingAddresses[DaoIdEnum.ZK]["Matter Labs Allocation"],
+      label: "Matter Labs Allocation",
+      category: "vesting",
+    });
+    // A transfer out of a distributor is an airdrop claim, not an unlock.
+    expect(items).toContainEqual({
+      address:
+        NonCirculatingAddresses[DaoIdEnum.ZK]["Initial Merkle Distributor"],
+      label: "Initial Merkle Distributor",
+      category: "treasury",
+    });
+  });
+
+  it("keeps a staking vault out of vesting", () => {
+    const service = new AddressLabelsService(DaoIdEnum.TORN);
+
+    const { items } = service.getAddressLabels();
+
+    // Transfers out return a staker their own deposit.
+    expect(items).toContainEqual({
+      address: NonCirculatingAddresses[DaoIdEnum.TORN].vault,
+      label: "vault",
       category: "treasury",
     });
   });
