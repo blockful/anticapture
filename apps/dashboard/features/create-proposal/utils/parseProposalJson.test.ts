@@ -290,8 +290,22 @@ describe("parseProposalJson", () => {
       });
     });
 
-    it("accepts the bare function name, like encodeActions does", () => {
-      expectOk(parse(abiCall({ functionName: "setValue" })));
+    // Accepted the way encodeActions accepts it, but stored normalized: the
+    // edit modal matches its select on full signatures only, so a bare name
+    // would leave the imported row unable to hydrate.
+    it("accepts a bare function name and stores the full signature", () => {
+      expect(
+        expectOk(parse(abiCall({ functionName: "setValue" }))).actions?.[0],
+      ).toMatchObject({ functionName: "setValue(address,uint256)" });
+    });
+
+    // A string parameter carries its whitespace into the calldata, and the
+    // manual form keeps it verbatim, so trimming here would make an imported
+    // value encode differently from the same value typed in.
+    it("keeps whitespace inside a string arg", () => {
+      expect(
+        expectOk(parse(callTaking("string", "  urgent  "))).actions?.[0],
+      ).toMatchObject({ args: ["  urgent  "] });
     });
 
     it("rejects a functionName with no abi to encode it against", () => {

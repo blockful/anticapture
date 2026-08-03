@@ -78,6 +78,18 @@ const quotedFigure = z
   })
   .trim();
 
+/**
+ * The same rule minus the trim, for arguments. A `string` parameter carries its
+ * whitespace into the calldata, and the manual form keeps it verbatim, so
+ * trimming here would make an imported `"  urgent  "` encode differently from
+ * the identical value typed in. Numeric and address arguments are trimmed
+ * downstream by their own validators either way.
+ */
+const quotedArg = z.string({
+  invalid_type_error:
+    "must be quoted: a JSON number can silently change the value",
+});
+
 // Held to the form's own rules rather than a parallel set. An action that
 // clears the import but not ProposalFormSchema would leave Publish disabled
 // with nothing on screen to explain why, since action rows show no errors.
@@ -110,7 +122,7 @@ const CustomImportSchema = z.object({
   contractAddress: z.string().trim().pipe(addressOrEnsSchema),
   abi: z.unknown().optional(),
   functionName: z.string().trim().optional(),
-  args: z.array(quotedFigure).optional(),
+  args: z.array(quotedArg).optional(),
   calldata: z.string().trim().optional(),
   value: quotedFigure.optional(),
 });
@@ -234,6 +246,23 @@ const signatureOf = (fn: AbiFunction): string | null => {
 };
 
 /**
+ * Resolves a pasted `functionName` against an ABI the way `encodeActions` does,
+ * by full signature or bare name, so validation and encoding never disagree
+ * about which overload was meant. Malformed entries are skipped rather than
+ * dereferenced, and `signatureOf` swallows a formatter throw.
+ */
+const findAbiFunction = (
+  abi: Abi,
+  functionName: string,
+): AbiFunction | undefined =>
+  abi
+    .filter(isWellFormedFunction)
+    .find(
+      (item) =>
+        signatureOf(item) === functionName || item.name === functionName,
+    );
+
+/**
  * Checks that an ABI-backed call is actually encodable, so the failure lands on
  * the paste instead of on `encodeActions` while the user is publishing: there,
  * a missing function throws outright and a wrong argument count blows up inside
@@ -261,12 +290,7 @@ const checkAbiCall = (
     return;
   }
 
-  const fn = abi
-    .filter(isWellFormedFunction)
-    .find(
-      (item) =>
-        signatureOf(item) === functionName || item.name === functionName,
-    );
+  const fn = findAbiFunction(abi, functionName);
 
   if (!fn) {
     ctx.addIssue({
@@ -444,11 +468,20 @@ const toPendingAction = (action: ImportedAction): PendingAction => {
   const abi =
     action.abi === undefined ? [] : [...(parseAbiStrict(action.abi) ?? [])];
 
+  // A bare name is accepted on the way in, but stored as the full signature:
+  // the edit modal matches its function select on signatures alone, so a bare
+  // name would leave an imported row unable to hydrate its function or args.
+  const pastedName = action.functionName ?? "";
+  const matched = pastedName ? findAbiFunction(abi, pastedName) : undefined;
+  const functionName = matched
+    ? (signatureOf(matched) ?? pastedName)
+    : pastedName;
+
   return {
     type: "custom",
     contractAddress: action.contractAddress,
     abi,
-    functionName: action.functionName ?? "",
+    functionName,
     args: action.args ?? [],
     ...(action.calldata ? { calldata: action.calldata } : {}),
     ...(action.value !== undefined ? { value: action.value } : {}),

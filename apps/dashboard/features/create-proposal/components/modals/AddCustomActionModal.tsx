@@ -375,6 +375,12 @@ export const AddCustomActionModal = ({
   };
 
   const handleConfirm = () => {
+    // This form has no ETH value field, so an action that carries one (a JSON
+    // import can) has to be handed back untouched. Rebuilding without it would
+    // turn a payable call into a 0 wei one on nothing more than an edit.
+    const payableValue =
+      initialValue?.value !== undefined ? { value: initialValue.value } : {};
+
     if (mode === "fetch") {
       if (!abi || !functionName) return;
       onSubmit({
@@ -383,6 +389,7 @@ export const AddCustomActionModal = ({
         abi,
         functionName,
         args,
+        ...payableValue,
       });
     } else {
       onSubmit({
@@ -392,6 +399,7 @@ export const AddCustomActionModal = ({
         functionName: "",
         args: [],
         calldata,
+        ...payableValue,
       });
     }
     resetAll();
