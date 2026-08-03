@@ -17,6 +17,8 @@ import {
   argsToTrees,
   buildEmpty,
   parseArrayType,
+  treesToArgs,
+  type ArgValue,
 } from "@/features/create-proposal/utils/argTree";
 import { parseAbiStrict } from "@/features/create-proposal/utils/fetchAbi";
 import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
@@ -202,6 +204,37 @@ const holdsUnquotedNumber = (value: unknown): boolean => {
 
 const componentsOf = (param: AbiParameter): readonly AbiParameter[] =>
   (param as { components?: readonly AbiParameter[] }).components ?? [];
+
+/**
+ * Trims every scalar leaf except `string`.
+ *
+ * `validateSolidityArg` trims before it checks, so `" true "` reads as a valid
+ * bool, but `encodeActions` converts only an exact `"true"` and viem measures
+ * `bytes32` including the spaces. Storing the untrimmed text left the form
+ * publishable and the publish failing.
+ *
+ * `string` is the deliberate exception: its whitespace is part of the value and
+ * the manual form keeps it, so trimming would make an imported `"  urgent  "`
+ * encode differently from the same value typed in.
+ */
+const trimScalarLeaves = (param: AbiParameter, value: ArgValue): ArgValue => {
+  const array = parseArrayType(param.type);
+  if (array) {
+    if (!Array.isArray(value)) return value;
+    const element = { ...param, type: array.elementType } as AbiParameter;
+    return value.map((item) => trimScalarLeaves(element, item));
+  }
+
+  if (param.type === "tuple") {
+    if (!Array.isArray(value)) return value;
+    return componentsOf(param).map((component, index) =>
+      trimScalarLeaves(component, value[index] ?? ""),
+    );
+  }
+
+  if (typeof value !== "string") return value;
+  return param.type === "string" ? value : value.trim();
+};
 
 /**
  * A tuple has to hold exactly its declared fields.
@@ -591,12 +624,26 @@ const toPendingAction = (action: ImportedAction): PendingAction => {
       ? (signatureOf(lookup.fn) ?? pastedName)
       : pastedName;
 
+  // Normalized against the resolved parameters, which is the only place the
+  // types are known. Without a function to measure them against, the arguments
+  // are stored as pasted; the calldata path doesn't read them.
+  const pastedArgs = action.args ?? [];
+  const inputs = lookup?.kind === "found" ? lookup.fn.inputs : undefined;
+  const args = inputs
+    ? treesToArgs(
+        inputs,
+        argsToTrees(inputs, pastedArgs).map((tree, index) =>
+          trimScalarLeaves(inputs[index], tree),
+        ),
+      )
+    : pastedArgs;
+
   return {
     type: "custom",
     contractAddress: action.contractAddress,
     abi,
     functionName,
-    args: action.args ?? [],
+    args,
     ...(action.calldata ? { calldata: action.calldata } : {}),
   };
 };
