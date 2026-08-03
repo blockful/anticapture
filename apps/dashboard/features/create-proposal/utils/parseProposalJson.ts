@@ -1,4 +1,10 @@
-import { isHex, toFunctionSignature, type Abi, type AbiFunction } from "viem";
+import {
+  isHex,
+  toFunctionSignature,
+  type Abi,
+  type AbiFunction,
+  type AbiParameter,
+} from "viem";
 import { z } from "zod";
 
 import {
@@ -49,21 +55,30 @@ export type ParseProposalJsonResult =
   | { ok: false; error: string };
 
 /**
- * JSON authors write amounts as `"1.5"` or `1.5`; the form stores strings.
+ * Whether a JSON number is still the number that was written. JSON.parse runs
+ * before any validation here, and a double can't hold every decimal literal:
+ * `1000000000000000001` arrives as `1000000000000000000`, and
+ * `0.123456789123456789` as `0.12345678912345678`. Both look perfectly ordinary
+ * afterwards, and these figures become exact on-chain amounts.
  *
- * Past 2^53 a JSON number is no longer the number that was written: JSON.parse
- * rounds `1000000000000000001` to `1000000000000000000` before anything here
- * runs, and the result is a clean-looking integer that encodes the wrong wei
- * amount. Quoting is the only way to carry those exactly, so unquoted ones are
- * refused rather than silently rounded.
+ * Integers are trusted up to 2^53, where they are still exact. Anything else
+ * has to round-trip through 15 significant digits, the most a double carries
+ * faithfully. Quoting sidesteps the whole problem, so that's what the message
+ * asks for.
  */
+const survivesJson = (value: number): boolean => {
+  if (!Number.isFinite(value)) return false;
+  if (Number.isSafeInteger(value)) return true;
+  if (Math.abs(value) > Number.MAX_SAFE_INTEGER) return false;
+  return Number(value.toPrecision(15)) === value;
+};
+
+/** JSON authors write amounts as `"1.5"` or `1.5`; the form stores strings. */
 const numericString = z
   .union([z.string(), z.number()])
   .superRefine((value, ctx) => {
     if (typeof value !== "number") return;
-    if (Number.isFinite(value) && Math.abs(value) <= Number.MAX_SAFE_INTEGER) {
-      return;
-    }
+    if (survivesJson(value)) return;
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message:
@@ -171,14 +186,51 @@ const isCompositeType = (type: string): boolean =>
  * the same text and encodes the rounded figure.
  */
 const holdsUnsafeNumber = (value: unknown): boolean => {
-  if (typeof value === "number") {
-    return !Number.isFinite(value) || Math.abs(value) > Number.MAX_SAFE_INTEGER;
-  }
+  if (typeof value === "number") return !survivesJson(value);
   if (Array.isArray(value)) return value.some(holdsUnsafeNumber);
   if (typeof value === "object" && value !== null) {
     return Object.values(value).some(holdsUnsafeNumber);
   }
   return false;
+};
+
+/**
+ * The subset of the ABI grammar viem's encoder actually implements.
+ *
+ * Left out on purpose: `function`, `fixed`/`ufixed` and out-of-range widths
+ * like `bytes33` are legal ABI but throw in `encodeAbiParameters`, so they can
+ * only fail mid-publish. Nonsense widths such as `uint257`, and a broken
+ * suffix like `uint256[abc]`, are worse than a throw: viem matches them on
+ * `startsWith("uint")` and quietly encodes something the declared type never
+ * described.
+ */
+const isEncodableElementary = (type: string): boolean => {
+  if (type === "address" || type === "bool" || type === "string") return true;
+  if (type === "bytes") return true;
+
+  const fixedBytes = /^bytes(\d+)$/.exec(type);
+  if (fixedBytes) {
+    const size = Number(fixedBytes[1]);
+    return size >= 1 && size <= 32;
+  }
+
+  const integer = /^u?int(\d*)$/.exec(type);
+  if (integer) {
+    if (integer[1] === "") return true; // bare `int`/`uint` means 256
+    const bits = Number(integer[1]);
+    return bits >= 8 && bits <= 256 && bits % 8 === 0;
+  }
+
+  return false;
+};
+
+/** Recurses through tuple components; array suffixes are peeled off first. */
+const isEncodableParam = (param: AbiParameter): boolean => {
+  const element = elementTypeOf(param.type);
+  if (element !== "tuple") return isEncodableElementary(element);
+  const components = (param as { components?: readonly AbiParameter[] })
+    .components;
+  return (components ?? []).every(isEncodableParam);
 };
 
 /** Never throws: an exotic input type still reaches viem's formatter. */
@@ -230,6 +282,21 @@ const checkAbiCall = (
       code: z.ZodIssueCode.custom,
       message: `"${functionName}" is not a function in this action's abi`,
       path: ["actions", index, "functionName"],
+    });
+    return;
+  }
+
+  // Scoped to the selected function: encodeActions only ever encodes this one,
+  // so an exotic type sitting in some unrelated entry of a real contract's ABI
+  // is none of our business.
+  const unencodable = fn.inputs.filter((input) => !isEncodableParam(input));
+  if (unencodable.length > 0) {
+    unencodable.forEach((input) => {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `declares "${input.type}" for ${input.name || "an argument"}, which isn't an encodable ABI type`,
+        path: ["actions", index, "abi"],
+      });
     });
     return;
   }

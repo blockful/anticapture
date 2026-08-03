@@ -154,6 +154,42 @@ describe("parseProposalJson", () => {
       expect(result.error).toContain("actions[0]");
     });
 
+    // JSON.parse drops the last digit of this before the schema sees it, and
+    // the amount becomes an exact on-chain figure.
+    it("rejects an unquoted amount with more digits than a double holds", () => {
+      const result = parseProposalJson(
+        '{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":0.123456789123456789}]}',
+      );
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error).toContain("actions[0].amount");
+      expect(result.error).toContain("precision");
+    });
+
+    it("takes the same amount quoted", () => {
+      const result = parseProposalJson(
+        '{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":"0.123456789123456789"}]}',
+      );
+
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.actions?.[0]).toMatchObject({
+        amount: "0.123456789123456789",
+      });
+    });
+
+    it.each([1.5, 0.1, 100, 9007199254740991])(
+      "still takes %p unquoted, which a double carries exactly",
+      (amount) => {
+        const result = parseProposalJson(
+          `{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":${amount}}]}`,
+        );
+
+        expect(result.ok).toBe(true);
+      },
+    );
+
     it("rejects a contract address that is neither address nor ENS", () => {
       const result = parseProposalJson(
         JSON.stringify({
@@ -679,6 +715,123 @@ describe("parseProposalJson", () => {
         expect(result.ok).toBe(false);
         if (result.ok) return;
         expect(result.error).toContain("actions[0].abi");
+      });
+
+      // bytes33, function and fixed all throw in viem's encoder; uint257 and
+      // uint256[abc] are worse, since viem matches them on startsWith("uint")
+      // and encodes something the declared type never described.
+      it.each([
+        ["an out-of-range integer width", "uint257"],
+        ["an unaligned integer width", "uint7"],
+        ["an out-of-range bytes width", "bytes33"],
+        ["a broken array suffix", "uint256[abc]"],
+        ["a type viem cannot encode", "function"],
+        ["a fixed-point type", "fixed128x18"],
+        ["a nonsense type", "notAType"],
+      ])("rejects an abi input declaring %s", (_label, type) => {
+        const result = parseProposalJson(
+          JSON.stringify({
+            actions: [
+              {
+                type: "custom",
+                contractAddress: "0x3333333333333333333333333333333333333333",
+                abi: [
+                  {
+                    type: "function",
+                    name: "odd",
+                    stateMutability: "nonpayable",
+                    inputs: [{ name: "value", type }],
+                    outputs: [],
+                  },
+                ],
+                functionName: "odd",
+                args: ["1"],
+              },
+            ],
+          }),
+        );
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("actions[0].abi");
+        expect(result.error).toContain(type);
+      });
+
+      it.each([
+        ["address", "vitalik.eth"],
+        ["bool", "true"],
+        ["string", "hello"],
+        ["bytes", "0xdeadbeef"],
+        [
+          "bytes32",
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+        ],
+        ["uint", "1"],
+        ["uint8", "255"],
+        ["uint256", "1"],
+        ["int128", "-1"],
+        ["uint256[]", "[]"],
+        ["uint256[2]", "[1, 2]"],
+        ["address[][]", "[]"],
+      ])("accepts %s", (type, arg) => {
+        const result = parseProposalJson(
+          JSON.stringify({
+            actions: [
+              {
+                type: "custom",
+                contractAddress: "0x3333333333333333333333333333333333333333",
+                abi: [
+                  {
+                    type: "function",
+                    name: "fine",
+                    stateMutability: "nonpayable",
+                    inputs: [{ name: "value", type }],
+                    outputs: [],
+                  },
+                ],
+                functionName: "fine",
+                args: [arg],
+              },
+            ],
+          }),
+        );
+
+        expect(result.ok).toBe(true);
+      });
+
+      // Only the called function matters, so a real contract's ABI isn't
+      // refused over an exotic entry nobody is invoking.
+      it("ignores an unencodable type in a function it isn't calling", () => {
+        const result = parseProposalJson(
+          JSON.stringify({
+            actions: [
+              {
+                type: "custom",
+                contractAddress: "0x3333333333333333333333333333333333333333",
+                abi: [
+                  {
+                    type: "function",
+                    name: "exotic",
+                    stateMutability: "nonpayable",
+                    inputs: [{ name: "cb", type: "function" }],
+                    outputs: [],
+                  },
+                  {
+                    type: "function",
+                    name: "plain",
+                    stateMutability: "nonpayable",
+                    inputs: [{ name: "value", type: "uint256" }],
+                    outputs: [],
+                  },
+                ],
+                functionName: "plain",
+                args: ["1"],
+              },
+            ],
+          }),
+        );
+
+        expect(result.ok).toBe(true);
       });
 
       it("accepts a tuple input that declares its components", () => {
