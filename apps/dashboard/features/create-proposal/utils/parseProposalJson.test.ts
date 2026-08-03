@@ -4,6 +4,13 @@ import {
   type ParseProposalJsonResult,
 } from "@/features/create-proposal/utils/parseProposalJson";
 
+/*
+ * Whether an action is publishable is ProposalFormSchema's business, covered by
+ * validateCustomAction.test. What's tested here is what reading a document can
+ * get wrong: JSON's lossiness with numbers, an ETH value the form can't show,
+ * and decimals only the token contract can settle.
+ */
+
 const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 const CONTRACT = "0x3333333333333333333333333333333333333333";
 
@@ -55,29 +62,6 @@ const abiOf = (inputs: unknown[], name = "call") => [
     outputs: [],
   },
 ];
-
-/** A well-formed `setValue(address,uint256)` call, for overriding one part of. */
-const abiCall = (overrides: Record<string, unknown> = {}) =>
-  custom({
-    abi: abiOf(
-      [
-        { name: "who", type: "address" },
-        { name: "value", type: "uint256" },
-      ],
-      "setValue",
-    ),
-    functionName: "setValue(address,uint256)",
-    args: ["vitalik.eth", "1"],
-    ...overrides,
-  });
-
-/** A one-argument call, for exercising a single parameter type. */
-const callTaking = (type: string, arg: string) =>
-  custom({
-    abi: abiOf([{ name: "value", type }], "fine"),
-    functionName: "fine",
-    args: [arg],
-  });
 
 describe("parseProposalJson", () => {
   describe("the document", () => {
@@ -153,45 +137,13 @@ describe("parseProposalJson", () => {
 
       expect(error.split("; ")).toHaveLength(3);
     });
+
+    it("rejects an unknown action type", () => {
+      expectRejected(parse({ type: "bridge" }), "actions[0].type");
+    });
   });
 
-  describe("transfers", () => {
-    it("accepts an ETH transfer", () => {
-      expect(expectOk(parse(eth())).actions).toEqual([
-        { type: "eth-transfer", recipient: "vitalik.eth", amount: "1.5" },
-      ]);
-    });
-
-    // Left undecided here on purpose: resolveImportedDecimals settles it
-    // against the token contract, since a pasted value would silently rescale
-    // the transfer.
-    it("leaves an omitted decimals undefined rather than guessing", () => {
-      expect(expectOk(parse(erc20())).actions?.[0]).not.toHaveProperty(
-        "decimals",
-      );
-    });
-
-    // The form requires a concrete address here, and the decimals lookup needs
-    // one too.
-    it("rejects a token address that isn't an address", () => {
-      expectRejected(
-        parse(erc20({ tokenAddress: "usdc.eth" })),
-        "actions[0].tokenAddress",
-      );
-    });
-
-    // These would otherwise clear the import and then fail ProposalFormSchema,
-    // which leaves Publish disabled with no visible reason: action rows render
-    // no field errors.
-    it.each([
-      ["a recipient that is neither address nor ENS", { recipient: "banana" }],
-      ["an amount that isn't a number", { amount: "a lot" }],
-      ["a zero amount", { amount: "0" }],
-      ["a negative amount", { amount: "-1" }],
-    ])("rejects %s", (_label, overrides) => {
-      expectRejected(parse(eth(overrides)), "actions[0]");
-    });
-
+  describe("figures", () => {
     // Spliced in as raw text rather than written as TS numbers: the compiler
     // rounds them exactly like JSON.parse does, and eslint's
     // no-loss-of-precision flags them for that reason. By the time the schema
@@ -218,56 +170,119 @@ describe("parseProposalJson", () => {
         expectOk(parse(eth({ amount: "0.123456789123456789" }))).actions?.[0],
       ).toMatchObject({ amount: "0.123456789123456789" });
     });
+
+    // The composite is JSON too, so an unquoted leaf is already rewritten
+    // before anything can inspect it, exactly as at the top level.
+    describe("inside a composite arg", () => {
+      const withArg = (arg: string) =>
+        parse(
+          custom({
+            abi: abiOf([{ name: "values", type: "uint256[]" }], "setMany"),
+            functionName: "setMany",
+            args: [arg],
+          }),
+        );
+
+      it.each([
+        ["a plain number", "[1, 2, 3]"],
+        ["a lossy number", "[1000000000000000001]"],
+      ])("rejects %s leaf", (_label, arg) => {
+        expectRejected(withArg(arg), "actions[0].args[0]", "quote its numbers");
+      });
+
+      it("takes the same leaves quoted", () => {
+        expectOk(withArg('["1", "2", "3"]'));
+      });
+    });
   });
 
-  describe("custom actions", () => {
-    it("rejects a contract address that is neither address nor ENS", () => {
-      expectRejected(
-        parse(custom({ contractAddress: "nope", calldata: "0xa9059cbb" })),
-        "actions[0].contractAddress",
+  describe("transfers", () => {
+    it("accepts an ETH transfer", () => {
+      expect(expectOk(parse(eth())).actions).toEqual([
+        { type: "eth-transfer", recipient: "vitalik.eth", amount: "1.5" },
+      ]);
+    });
+
+    // Left undecided here on purpose: resolveImportedDecimals settles it
+    // against the token contract, since a pasted value would silently rescale
+    // the transfer.
+    it("leaves an omitted decimals undefined rather than guessing", () => {
+      expect(expectOk(parse(erc20())).actions?.[0]).not.toHaveProperty(
+        "decimals",
       );
     });
 
-    it("rejects one with neither functionName nor calldata", () => {
-      expectRejected(parse(custom()), "functionName");
+    // Stricter than the other addresses because this one is called, not just
+    // stored: the decimals lookup has nothing to read from an ENS name.
+    it("rejects a token address that isn't an address", () => {
+      expectRejected(
+        parse(erc20({ tokenAddress: "usdc.eth" })),
+        "actions[0].tokenAddress",
+      );
+    });
+  });
+
+  describe("custom actions", () => {
+    it("fills the unused fields of a calldata-only action", () => {
+      expect(
+        expectOk(parse(custom({ calldata: "0xa9059cbb" }))).actions,
+      ).toEqual([
+        {
+          type: "custom",
+          contractAddress: CONTRACT,
+          abi: [],
+          functionName: "",
+          args: [],
+          calldata: "0xa9059cbb",
+        },
+      ]);
     });
 
-    describe("calldata", () => {
-      it("accepts a calldata-only action, filling the unused fields", () => {
-        expect(
-          expectOk(parse(custom({ calldata: "0xa9059cbb" }))).actions,
-        ).toEqual([
-          {
-            type: "custom",
-            contractAddress: CONTRACT,
-            abi: [],
-            functionName: "",
-            args: [],
-            calldata: "0xa9059cbb",
-          },
-        ]);
-      });
+    // Accepted the way the encoder accepts it, but stored normalized: the edit
+    // modal matches its select on full signatures only, so a bare name would
+    // leave the imported row unable to hydrate.
+    it("stores a bare function name as the full signature", () => {
+      const value = expectOk(
+        parse(
+          custom({
+            abi: abiOf([{ name: "value", type: "uint256" }], "setValue"),
+            functionName: "setValue",
+            args: ["1"],
+          }),
+        ),
+      );
 
-      // ProposalFormSchema only checks that calldata is non-empty, so without
-      // this the form goes publishable and encodeActions casts the string
-      // straight to Hex: the paste would only fail once the user is signing.
-      it.each([
-        ["a function signature", "transfer(address,uint256)"],
-        ["a non-hex string", "not calldata"],
-        ["hex without the 0x prefix", "a9059cbb"],
-        ["an odd number of characters", "0xa9059cb"],
-      ])("rejects calldata that is %s", (_label, calldata) => {
-        expectRejected(parse(custom({ calldata })), "actions[0].calldata");
+      expect(value.actions?.[0]).toMatchObject({
+        functionName: "setValue(uint256)",
       });
+    });
 
-      it("accepts a bare 0x, the empty-calldata form viem produces", () => {
-        expectOk(parse(custom({ calldata: "0x" })));
-      });
+    // Normalizing scalar text is argTree's job, on the way to the encoder, so a
+    // second opinion here would be one more thing to keep in step.
+    it("stores args exactly as pasted", () => {
+      const value = expectOk(
+        parse(
+          custom({
+            abi: abiOf([{ name: "flag", type: "bool" }], "setFlag"),
+            functionName: "setFlag",
+            args: [" true "],
+          }),
+        ),
+      );
+
+      expect(value.actions?.[0]).toMatchObject({ args: [" true "] });
+    });
+
+    it("rejects an abi that isn't an array", () => {
+      expectRejected(
+        parse(custom({ abi: "not an abi", functionName: "f" })),
+        "actions[0].abi",
+      );
     });
 
     // Nothing in the form shows or edits an ETH value, so importing one leaves
-    // funds on a call the author can't review or clear. Refused by name rather
-    // than stripped as an unknown key: dropping a declared value quietly would
+    // funds on a call the author can't review. Refused by name rather than
+    // stripped as an unknown key: dropping a declared value quietly would
     // publish 0 wei instead of what the document asked for.
     it.each([
       ["a wei amount", "1000000000000000000"],
@@ -279,361 +294,5 @@ describe("parseProposalJson", () => {
         "isn't supported yet",
       );
     });
-  });
-
-  describe("abi-backed calls", () => {
-    it("accepts a call whose function and args line up", () => {
-      expect(expectOk(parse(abiCall())).actions?.[0]).toMatchObject({
-        functionName: "setValue(address,uint256)",
-        args: ["vitalik.eth", "1"],
-      });
-    });
-
-    // Accepted the way encodeActions accepts it, but stored normalized: the
-    // edit modal matches its select on full signatures only, so a bare name
-    // would leave the imported row unable to hydrate.
-    it("accepts a bare function name and stores the full signature", () => {
-      expect(
-        expectOk(parse(abiCall({ functionName: "setValue" }))).actions?.[0],
-      ).toMatchObject({ functionName: "setValue(address,uint256)" });
-    });
-
-    // The modal keeps view and pure out of its function list, so an imported
-    // one could never be selected there or hydrated on edit.
-    it.each(["view", "pure"])("rejects a %s function", (stateMutability) => {
-      expectRejected(
-        parse(
-          custom({
-            abi: [
-              {
-                type: "function",
-                name: "balanceOf",
-                stateMutability,
-                inputs: [{ name: "who", type: "address" }],
-                outputs: [{ name: "", type: "uint256" }],
-              },
-            ],
-            functionName: "balanceOf(address)",
-            args: ["vitalik.eth"],
-          }),
-        ),
-        "actions[0].functionName",
-        "only reads state",
-      );
-    });
-
-    it("accepts a function with no stateMutability, as the modal does", () => {
-      expectOk(
-        parse(
-          custom({
-            abi: [
-              {
-                type: "function",
-                name: "legacy",
-                inputs: [{ name: "value", type: "uint256" }],
-                outputs: [],
-              },
-            ],
-            functionName: "legacy(uint256)",
-            args: ["1"],
-          }),
-        ),
-      );
-    });
-
-    describe("overloads", () => {
-      // uint accepts 0x hex, so an address-like arg validates against
-      // foo(uint256) just as well as foo(address). A bare name can't say which
-      // was meant, and picking the first would publish that selector.
-      const overloaded = (functionName: string) =>
-        custom({
-          abi: [
-            ...abiOf([{ name: "a", type: "uint256" }], "foo"),
-            ...abiOf([{ name: "a", type: "address" }], "foo"),
-          ],
-          functionName,
-          args: ["0x1111111111111111111111111111111111111111"],
-        });
-
-      it("rejects a bare name that several functions share", () => {
-        expectRejected(
-          parse(overloaded("foo")),
-          "actions[0].functionName",
-          "foo(uint256)",
-          "foo(address)",
-        );
-      });
-
-      it.each(["foo(uint256)", "foo(address)"])("takes %s", (signature) => {
-        expect(
-          expectOk(parse(overloaded(signature))).actions?.[0],
-        ).toMatchObject({ functionName: signature });
-      });
-    });
-
-    // Stored as pasted: argTree normalizes scalar text on the way to the
-    // encoder, so a second opinion here would be one more thing to keep in
-    // step. encodeActions.test covers the normalization itself.
-    it("stores args exactly as pasted", () => {
-      expect(
-        expectOk(parse(callTaking("bool", " true "))).actions?.[0],
-      ).toMatchObject({ args: [" true "] });
-    });
-
-    // A string parameter carries its whitespace into the calldata, and the
-    // manual form keeps it verbatim, so trimming here would make an imported
-    // value encode differently from the same value typed in.
-    it("keeps whitespace inside a string arg", () => {
-      expect(
-        expectOk(parse(callTaking("string", "  urgent  "))).actions?.[0],
-      ).toMatchObject({ args: ["  urgent  "] });
-    });
-
-    it("rejects a functionName with no abi to encode it against", () => {
-      expectRejected(
-        parse(custom({ functionName: "setValue(uint256)", args: ["1"] })),
-        "actions[0].abi",
-      );
-    });
-
-    it("rejects a malformed abi", () => {
-      expectRejected(parse(abiCall({ abi: "not an abi" })), "actions[0].abi");
-    });
-
-    it("rejects a function that isn't in the abi", () => {
-      expectRejected(
-        parse(abiCall({ functionName: "missing()", args: [] })),
-        "actions[0].functionName",
-        "missing()",
-      );
-    });
-
-    it.each([
-      ["too few", []],
-      ["too many", ["vitalik.eth", "1", "2"]],
-      ["none at all", undefined],
-    ])("rejects %s args for the function", (_label, args) => {
-      expectRejected(parse(abiCall({ args })), "actions[0].args", "takes 2");
-    });
-
-    it.each([
-      ["one that doesn't fit its solidity type", ["not-an-address", "1"]],
-      ["a blank one", ["vitalik.eth", "  "]],
-    ])("rejects %s", (_label, args) => {
-      expectRejected(parse(abiCall({ args })), "actions[0].args");
-    });
-
-    it("rejects an unquoted arg, and takes it quoted", () => {
-      expectRejected(
-        parseProposalJson(
-          `{"actions":[${JSON.stringify(abiCall()).replace('"1"', "1000000000000000001")}]}`,
-        ),
-        "actions[0].args[1]",
-        "quoted",
-      );
-      expectOk(
-        parse(abiCall({ args: ["vitalik.eth", "1000000000000000001"] })),
-      );
-    });
-
-    it("skips every abi check when raw calldata is supplied", () => {
-      expectOk(
-        parse(abiCall({ functionName: "missing()", calldata: "0xa9059cbb" })),
-      );
-    });
-
-    describe("malformed entries", () => {
-      // parseAbiStrict only guarantees a string `type`, so these survive it and
-      // used to reach viem's formatter (or parseArrayType's `.match`), which
-      // throws and takes the whole import dialog down instead of reporting a
-      // bad paste. The bare function name is the way in: it skips the
-      // signature formatter that was already guarded.
-      it.each([
-        ["no name", { type: "function", inputs: [], outputs: [] }],
-        ["no inputs", { type: "function", name: "setValue", outputs: [] }],
-        [
-          "a non-string name",
-          { type: "function", name: 42, inputs: [], outputs: [] },
-        ],
-        [
-          "an input with no type",
-          { type: "function", name: "x", inputs: [{}], outputs: [] },
-        ],
-      ])(
-        "reports a function entry with %s instead of throwing",
-        (_label, entry) => {
-          const run = () =>
-            parse(
-              abiCall({
-                abi: [...abiOf([], "setValue"), entry],
-                functionName: "setValue",
-                args: [],
-              }),
-            );
-
-          expect(run).not.toThrow();
-          expectRejected(run(), "actions[0].abi");
-        },
-      );
-    });
-
-    describe("parameter types", () => {
-      // bytes33, function and fixed all throw in viem's encoder; uint257 and
-      // uint256[abc] are worse, since viem matches them on startsWith("uint")
-      // and encodes something the declared type never described.
-      it.each([
-        ["an out-of-range integer width", "uint257"],
-        ["an unaligned integer width", "uint7"],
-        ["an out-of-range bytes width", "bytes33"],
-        ["a broken array suffix", "uint256[abc]"],
-        ["a type viem cannot encode", "function"],
-        ["a nonsense type", "notAType"],
-      ])("rejects %s", (_label, type) => {
-        expectRejected(parse(callTaking(type, "1")), "actions[0].abi", type);
-      });
-
-      it.each([
-        ["address", "vitalik.eth"],
-        ["bool", "true"],
-        ["bytes", "0xdeadbeef"],
-        ["uint", "1"],
-        ["int128", "-1"],
-        ["uint256[]", "[]"],
-      ])("accepts %s", (type, arg) => {
-        expectOk(parse(callTaking(type, arg)));
-      });
-
-      // encodeActions throws on a tuple whose components are missing, so the
-      // ABI has to declare them for the action to be encodable at all.
-      it.each([
-        ["a bare tuple", "tuple"],
-        ["a tuple array", "tuple[]"],
-      ])("rejects %s with no components", (_label, type) => {
-        expectRejected(parse(callTaking(type, "[]")), "actions[0].abi");
-      });
-
-      it("accepts a tuple that declares its components", () => {
-        expectOk(
-          parse(
-            custom({
-              abi: abiOf(
-                [
-                  {
-                    name: "data",
-                    type: "tuple",
-                    components: [
-                      { name: "who", type: "address" },
-                      { name: "value", type: "uint256" },
-                    ],
-                  },
-                ],
-                "setStruct",
-              ),
-              functionName: "setStruct",
-              args: ['["vitalik.eth", "1"]'],
-            }),
-          ),
-        );
-      });
-
-      // Only the called function matters, so a real contract's ABI isn't
-      // refused over an exotic entry nobody is invoking.
-      it("ignores an unencodable type in a function it isn't calling", () => {
-        expectOk(
-          parse(
-            custom({
-              abi: [
-                ...abiOf([{ name: "cb", type: "function" }], "exotic"),
-                ...abiOf([{ name: "value", type: "uint256" }], "plain"),
-              ],
-              functionName: "plain",
-              args: ["1"],
-            }),
-          ),
-        );
-      });
-    });
-
-    describe("composite args", () => {
-      const withArg = (arg: string) => parse(callTaking("uint256[]", arg));
-
-      it("accepts a JSON array with quoted leaves", () => {
-        expectOk(withArg('["1", "2", "3"]'));
-      });
-
-      // storageToArg swallows the parse error and hands back an empty array,
-      // which isArgComplete calls complete; encodeActions then re-parses the
-      // original text at publish and throws.
-      it.each([
-        ["isn't JSON", "not json", "must be a JSON array"],
-        ["is JSON but not an array", '{"nope":1}', "must be a JSON array"],
-      ])("rejects a composite arg that %s", (_label, arg, fragment) => {
-        expectRejected(withArg(arg), "actions[0].args[0]", fragment);
-      });
-
-      // The composite is JSON too, so an unquoted leaf is already rewritten
-      // before it can be inspected, exactly as at the top level.
-      it.each([
-        ["a plain number", "[1, 2, 3]"],
-        ["a lossy number", "[1000000000000000001]"],
-      ])("rejects %s leaf", (_label, arg) => {
-        expectRejected(withArg(arg), "actions[0].args[0]", "quote its numbers");
-      });
-
-      // isArgComplete walks the declared components, so anything past them is
-      // never looked at, and encodeActions maps components only: the extra
-      // value vanishes from the calldata without a word.
-      describe("tuple field counts", () => {
-        const pair = (type: string, arg: string) =>
-          parse(
-            custom({
-              abi: abiOf(
-                [
-                  {
-                    name: "data",
-                    type,
-                    components: [
-                      { name: "who", type: "address" },
-                      { name: "value", type: "uint256" },
-                    ],
-                  },
-                ],
-                "setPair",
-              ),
-              functionName: "setPair",
-              args: [arg],
-            }),
-          );
-
-        it("accepts a tuple with exactly its components", () => {
-          expectOk(pair("tuple", '["vitalik.eth", "1"]'));
-        });
-
-        it.each([
-          ["one field too many", '["vitalik.eth", "1", "unexpected"]'],
-          ["one field short", '["vitalik.eth"]'],
-        ])("rejects a tuple with %s", (_label, arg) => {
-          expectRejected(pair("tuple", arg), "actions[0].args[0]");
-        });
-
-        it("rejects an over-filled tuple nested in an array", () => {
-          expectRejected(
-            pair(
-              "tuple[]",
-              '[["vitalik.eth", "1"], ["vitalik.eth", "1", "x"]]',
-            ),
-            "actions[0].args[0]",
-          );
-        });
-      });
-
-      it("still rejects an array whose elements don't fit the type", () => {
-        expectRejected(withArg('["not a number"]'), "actions[0].args[0]");
-      });
-    });
-  });
-
-  it("rejects an unknown action type", () => {
-    expectRejected(parse({ type: "bridge" }), "actions[0].type");
   });
 });

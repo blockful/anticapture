@@ -1,25 +1,15 @@
-import {
-  isHex,
-  toFunctionSignature,
-  type Abi,
-  type AbiFunction,
-  type AbiParameter,
-} from "viem";
 import { z } from "zod";
 
 import {
-  addressOrEnsSchema,
-  positiveDecimalAmountSchema,
   strictAddressSchema,
   type ProposalFormValues,
 } from "@/features/create-proposal/schema";
-import {
-  argsToTrees,
-  buildEmpty,
-  parseArrayType,
-} from "@/features/create-proposal/utils/argTree";
+import { parseArrayType } from "@/features/create-proposal/utils/argTree";
 import { parseAbiStrict } from "@/features/create-proposal/utils/fetchAbi";
-import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
+import {
+  findAbiFunction,
+  signatureOf,
+} from "@/features/create-proposal/utils/validateCustomAction";
 
 type FormAction = ProposalFormValues["actions"][number];
 type Erc20FormAction = Extract<FormAction, { type: "erc20-transfer" }>;
@@ -54,6 +44,18 @@ export type ParseProposalJsonResult =
   | { ok: true; value: ParsedProposalJson }
   | { ok: false; error: string };
 
+/*
+ * This file checks what reading a document can get wrong, and what a document
+ * can assert that nothing downstream would question.
+ *
+ * Whether an action is publishable belongs to `ProposalFormSchema`, through
+ * `customActionIssues`, so a pasted action and a hand-built one are held to one
+ * standard and a bad one reports on its row instead of being refused at the
+ * door. What stays here is the part the form can't see: JSON's own lossiness
+ * with numbers, an ETH value nothing in the form can display, and ERC-20
+ * decimals only the token contract can settle.
+ */
+
 /**
  * Every figure that reaches the chain has to arrive quoted.
  *
@@ -62,11 +64,10 @@ export type ParseProposalJsonResult =
  * `1000000000000000001` arrives as `1000000000000000000`,
  * `0.123456789123456789` as `0.12345678912345678`, and
  * `1.000000000000000001` as plain `1`. By then the original text is gone, so no
- * amount of inspecting the parsed value can tell a rounded figure from one that
- * was always round: that last case is indistinguishable from someone simply
- * writing `1`. Guessing here would mean silently moving a different amount of
- * money than the document asked for, so numbers are refused outright and the
- * message says what to do instead.
+ * inspection of the parsed value can tell a rounded figure from one that was
+ * always round: that last case is indistinguishable from someone writing `1`.
+ * Guessing would mean silently moving a different amount of money than the
+ * document asked for, so numbers are refused outright.
  *
  * `decimals` stays a number: it is small, exact, and checked against the token
  * contract anyway.
@@ -78,48 +79,33 @@ const quotedFigure = z
   })
   .trim();
 
-/**
- * The same rule minus the trim, for arguments. A `string` parameter carries its
- * whitespace into the calldata, and the manual form keeps it verbatim, so
- * trimming here would make an imported `"  urgent  "` encode differently from
- * the identical value typed in. Numeric and address arguments are trimmed
- * downstream by their own validators either way.
- */
+/** The same rule without the trim: normalizing scalar text is argTree's job. */
 const quotedArg = z.string({
   invalid_type_error:
     "must be quoted: a JSON number can silently change the value",
 });
 
-// Held to the form's own rules rather than a parallel set. An action that
-// clears the import but not ProposalFormSchema would leave Publish disabled
-// with nothing on screen to explain why, since action rows show no errors.
-const recipient = z.string().trim().pipe(addressOrEnsSchema);
-const tokenAddress = z.string().trim().pipe(strictAddressSchema);
-const amount = quotedFigure.pipe(positiveDecimalAmountSchema);
-
 const EthTransferImportSchema = z.object({
   type: z.literal("eth-transfer"),
-  recipient,
-  amount,
+  recipient: z.string().trim(),
+  amount: quotedFigure,
 });
 
 const Erc20TransferImportSchema = z.object({
   type: z.literal("erc20-transfer"),
-  recipient,
-  tokenAddress,
-  amount,
+  recipient: z.string().trim(),
+  // Strict here, unlike the other addresses: this one isn't only stored, it's
+  // called, and the decimals lookup has nothing to read from an ENS name.
+  tokenAddress: z.string().trim().pipe(strictAddressSchema),
+  amount: quotedFigure,
   // Optional: read from the token contract at import time. A supplied value is
   // treated as an assertion and checked, never trusted.
   decimals: z.number().int().nonnegative().optional(),
 });
 
-// `abi` stays `unknown` here so a malformed ABI produces a readable message
-// from the outer superRefine instead of a wall of zod union errors. The
-// function/calldata cross-field rules live there too, keeping this a plain
-// ZodObject so the discriminated union below accepts it.
 const CustomImportSchema = z.object({
   type: z.literal("custom"),
-  contractAddress: z.string().trim().pipe(addressOrEnsSchema),
+  contractAddress: z.string().trim(),
   abi: z.unknown().optional(),
   functionName: z.string().trim().optional(),
   args: z.array(quotedArg).optional(),
@@ -136,60 +122,14 @@ const ActionImportSchema = z.discriminatedUnion("type", [
   CustomImportSchema,
 ]);
 
-/** The type left after peeling every `[]` or `[k]` off a parameter. */
-const elementTypeOf = (type: string): string => {
-  let current = type;
-  for (
-    let array = parseArrayType(current);
-    array !== null;
-    array = parseArrayType(current)
-  ) {
-    current = array.elementType;
-  }
-  return current;
-};
-
-/**
- * Every parameter needs a string `type` all the way down: `parseArrayType`
- * calls `.match` on it, so a bare `{}` in `inputs` throws a TypeError out of
- * the argument walk below rather than reporting a bad paste.
- *
- * A tuple additionally has to declare its `components`. Without them the
- * completeness walk sees a struct with no fields and calls any `[]` complete,
- * while `encodeActions` refuses the same parameter outright at publish.
- */
-const isWellFormedParam = (param: unknown): boolean => {
-  if (typeof param !== "object" || param === null) return false;
-  const type = (param as { type?: unknown }).type;
-  if (typeof type !== "string") return false;
-
-  const components = (param as { components?: unknown }).components;
-  if (components === undefined) return elementTypeOf(type) !== "tuple";
-  return Array.isArray(components) && components.every(isWellFormedParam);
-};
-
-/**
- * `parseAbiStrict` only guarantees each entry has a string `type`, so a
- * `{ "type": "function" }` with no name, or one whose `inputs` hold empty
- * objects, survives it. viem's formatters and our own argument walk both
- * assume the full shape and throw on the way past.
- */
-const isWellFormedFunction = (item: Abi[number]): item is AbiFunction => {
-  if (item.type !== "function") return false;
-  if (typeof (item as { name?: unknown }).name !== "string") return false;
-  const inputs = (item as { inputs?: unknown }).inputs;
-  return Array.isArray(inputs) && inputs.every(isWellFormedParam);
-};
-
-/** Mirrors argTree's own notion: these args are stored as JSON, not scalars. */
+/** Mirrors argTree: these args are stored as JSON, not as scalars. */
 const isCompositeType = (type: string): boolean =>
   parseArrayType(type) !== null || type.startsWith("tuple");
 
 /**
- * The same rule as `quotedFigure`, one level down. A composite arg is itself
- * JSON, so `"[1.000000000000000001]"` is already `[1]` when it gets here and
- * publish re-parses the identical text: an unquoted leaf is exactly as lossy
- * inside an array as it is outside one.
+ * The quoting rule one level down. A composite arg is itself JSON, so
+ * `"[1.000000000000000001]"` is already `[1]` by the time anything reads it, and
+ * the stored text rounds the same way every time it is parsed again.
  */
 const holdsUnquotedNumber = (value: unknown): boolean => {
   if (typeof value === "number") return true;
@@ -198,295 +138,6 @@ const holdsUnquotedNumber = (value: unknown): boolean => {
     return Object.values(value).some(holdsUnquotedNumber);
   }
   return false;
-};
-
-const componentsOf = (param: AbiParameter): readonly AbiParameter[] =>
-  (param as { components?: readonly AbiParameter[] }).components ?? [];
-
-/**
- * A tuple has to hold exactly its declared fields.
- *
- * `isArgComplete` walks the components, so it never looks past them, and a
- * fixed-size array gets a length check while a tuple gets none. `encodeActions`
- * maps components only, so an extra field is dropped on the way to the calldata
- * and the proposal quietly sends something narrower than the document
- * described. Recurses so tuples nested in arrays, and in other tuples, are
- * covered too.
- */
-const tupleArityError = (
-  param: AbiParameter,
-  value: unknown,
-): string | null => {
-  const array = parseArrayType(param.type);
-  if (array) {
-    // A non-array value here is already reported by the caller.
-    if (!Array.isArray(value)) return null;
-    const element = { ...param, type: array.elementType } as AbiParameter;
-    for (const item of value) {
-      const error = tupleArityError(element, item);
-      if (error) return error;
-    }
-    return null;
-  }
-
-  if (param.type !== "tuple" || !Array.isArray(value)) return null;
-
-  const components = componentsOf(param);
-  if (value.length !== components.length) {
-    return `has a tuple of ${components.length} field${components.length === 1 ? "" : "s"} filled with ${value.length}`;
-  }
-
-  for (const [index, component] of components.entries()) {
-    const error = tupleArityError(component, value[index]);
-    if (error) return error;
-  }
-  return null;
-};
-
-/**
- * The subset of the ABI grammar viem's encoder actually implements.
- *
- * Left out on purpose: `function`, `fixed`/`ufixed` and out-of-range widths
- * like `bytes33` are legal ABI but throw in `encodeAbiParameters`, so they can
- * only fail mid-publish. Nonsense widths such as `uint257`, and a broken
- * suffix like `uint256[abc]`, are worse than a throw: viem matches them on
- * `startsWith("uint")` and quietly encodes something the declared type never
- * described.
- */
-const isEncodableElementary = (type: string): boolean => {
-  if (type === "address" || type === "bool" || type === "string") return true;
-  if (type === "bytes") return true;
-
-  const fixedBytes = /^bytes(\d+)$/.exec(type);
-  if (fixedBytes) {
-    const size = Number(fixedBytes[1]);
-    return size >= 1 && size <= 32;
-  }
-
-  const integer = /^u?int(\d*)$/.exec(type);
-  if (integer) {
-    if (integer[1] === "") return true; // bare `int`/`uint` means 256
-    const bits = Number(integer[1]);
-    return bits >= 8 && bits <= 256 && bits % 8 === 0;
-  }
-
-  return false;
-};
-
-/** Recurses through tuple components; array suffixes are peeled off first. */
-const isEncodableParam = (param: AbiParameter): boolean => {
-  const element = elementTypeOf(param.type);
-  if (element !== "tuple") return isEncodableElementary(element);
-  const components = (param as { components?: readonly AbiParameter[] })
-    .components;
-  return (components ?? []).every(isEncodableParam);
-};
-
-/** Never throws: an exotic input type still reaches viem's formatter. */
-const signatureOf = (fn: AbiFunction): string | null => {
-  try {
-    return toFunctionSignature(fn);
-  } catch {
-    return null;
-  }
-};
-
-type AbiFunctionLookup =
-  | { kind: "found"; fn: AbiFunction }
-  | { kind: "missing" }
-  | { kind: "ambiguous"; signatures: string[] }
-  | { kind: "readOnly"; signature: string };
-
-/**
- * The custom-action modal keeps `view` and `pure` out of its function list, so
- * an imported one could never be selected, let alone hydrated on edit. An older
- * ABI may omit `stateMutability` entirely; that isn't a claim of read-only, and
- * the modal treats it the same way.
- */
-const isStateChanging = (fn: AbiFunction): boolean =>
-  fn.stateMutability !== "view" && fn.stateMutability !== "pure";
-
-/**
- * Resolves a pasted `functionName` against an ABI, by full signature or by bare
- * name. Malformed entries are skipped rather than dereferenced, and
- * `signatureOf` swallows a formatter throw.
- *
- * A bare name shared by several overloads is reported rather than resolved.
- * `encodeActions` would take whichever came first in the array, and the choice
- * is not even narrowed by the arguments: the uint validator accepts 0x hex, so
- * an address-like value satisfies `foo(uint256)` exactly as well as
- * `foo(address)`. Picking one would publish that selector on nothing better
- * than ABI ordering.
- */
-const findAbiFunction = (abi: Abi, functionName: string): AbiFunctionLookup => {
-  const functions = abi.filter(isWellFormedFunction);
-  const named = (item: AbiFunction) =>
-    signatureOf(item) === functionName || item.name === functionName;
-
-  // Only state-changing functions can be selected, so only those can match.
-  const candidates = functions.filter(isStateChanging);
-
-  const bySignature = candidates.find(
-    (item) => signatureOf(item) === functionName,
-  );
-  if (bySignature) return { kind: "found", fn: bySignature };
-
-  const sharingName = candidates.filter((item) => item.name === functionName);
-  if (sharingName.length === 1) return { kind: "found", fn: sharingName[0] };
-  if (sharingName.length > 1) {
-    return {
-      kind: "ambiguous",
-      signatures: sharingName.map((fn) => signatureOf(fn) ?? fn.name),
-    };
-  }
-
-  // Nothing selectable matched. Say which it is: "not in this abi" would be
-  // wrong and confusing when the function is right there, just read-only.
-  const readOnly = functions.find(named);
-  if (readOnly) {
-    return {
-      kind: "readOnly",
-      signature: signatureOf(readOnly) ?? readOnly.name,
-    };
-  }
-  return { kind: "missing" };
-};
-
-/**
- * Checks that an ABI-backed call is actually encodable, so the failure lands on
- * the paste instead of on `encodeActions` while the user is publishing: there,
- * a missing function throws outright and a wrong argument count blows up inside
- * viem. Matching mirrors encodeActions (full signature or bare name) so both
- * sides resolve the same overload, and each argument is held to the same
- * `isArgComplete` bar the custom-action modal uses to release its Confirm.
- */
-const checkAbiCall = (
-  ctx: z.RefinementCtx,
-  index: number,
-  abi: Abi,
-  functionName: string,
-  args: string[],
-) => {
-  // Rejected wholesale rather than skipped: the ABI is stored on the action as
-  // pasted, and encodeActions walks the same array at publish time.
-  if (
-    abi.some((item) => item.type === "function" && !isWellFormedFunction(item))
-  ) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'has a "function" entry without a name or inputs',
-      path: ["actions", index, "abi"],
-    });
-    return;
-  }
-
-  const lookup = findAbiFunction(abi, functionName);
-
-  if (lookup.kind === "missing") {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `"${functionName}" is not a function in this action's abi`,
-      path: ["actions", index, "functionName"],
-    });
-    return;
-  }
-
-  if (lookup.kind === "readOnly") {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `${lookup.signature} only reads state, so it can't be a proposal action`,
-      path: ["actions", index, "functionName"],
-    });
-    return;
-  }
-
-  if (lookup.kind === "ambiguous") {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `"${functionName}" is overloaded here (${lookup.signatures.join(", ")}); name the one you mean in full`,
-      path: ["actions", index, "functionName"],
-    });
-    return;
-  }
-
-  const fn = lookup.fn;
-
-  // Scoped to the selected function: encodeActions only ever encodes this one,
-  // so an exotic type sitting in some unrelated entry of a real contract's ABI
-  // is none of our business.
-  const unencodable = fn.inputs.filter((input) => !isEncodableParam(input));
-  if (unencodable.length > 0) {
-    unencodable.forEach((input) => {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `declares "${input.type}" for ${input.name || "an argument"}, which isn't an encodable ABI type`,
-        path: ["actions", index, "abi"],
-      });
-    });
-    return;
-  }
-
-  if (args.length !== fn.inputs.length) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `${signatureOf(fn) ?? fn.name} takes ${fn.inputs.length}, got ${args.length}`,
-      path: ["actions", index, "args"],
-    });
-    return;
-  }
-
-  // Arrays and tuples are stored as JSON strings. `storageToArg` degrades a
-  // malformed one to an empty container, which `isArgComplete` then accepts as
-  // a complete dynamic array, so the paste lands and `encodeActions` throws at
-  // publish when it JSON.parses the original text. Check the raw string first.
-  const compositeIssues = fn.inputs.flatMap((input, i) => {
-    if (!isCompositeType(input.type)) return [];
-
-    const notAnArray = {
-      index: i,
-      message: `must be a JSON array for ${input.type}`,
-    };
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(args[i]);
-    } catch {
-      return [notAnArray];
-    }
-    if (!Array.isArray(parsed)) return [notAnArray];
-    if (holdsUnquotedNumber(parsed)) {
-      return [
-        {
-          index: i,
-          message:
-            "must quote its numbers: a JSON number can silently change the value",
-        },
-      ];
-    }
-    const arity = tupleArityError(input, parsed);
-    if (arity) return [{ index: i, message: arity }];
-    return [];
-  });
-  if (compositeIssues.length > 0) {
-    compositeIssues.forEach(({ index: i, message }) => {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message,
-        path: ["actions", index, "args", i],
-      });
-    });
-    return;
-  }
-
-  const trees = argsToTrees(fn.inputs, args);
-  fn.inputs.forEach((input, i) => {
-    if (isArgComplete(input, trees[i] ?? buildEmpty(input))) return;
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `is not a valid ${input.type}`,
-      path: ["actions", index, "args", i],
-    });
-  });
 };
 
 // Unknown keys are stripped rather than rejected, so a saved draft (which
@@ -502,38 +153,9 @@ const ProposalJsonSchema = z
     json.actions?.forEach((action, index) => {
       if (action.type !== "custom") return;
 
-      const hasCalldata = Boolean(action.calldata);
-      const hasFunctionName = Boolean(action.functionName);
-
-      if (!hasCalldata && !hasFunctionName) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'needs either "functionName" or "calldata"',
-          path: ["actions", index],
-        });
-      }
-
-      // Same rule as the custom-action modal. Without it a string like
-      // "transfer(1)" satisfies ProposalFormSchema (which only checks that
-      // calldata is non-empty), the form goes publishable, and encodeActions
-      // casts it straight to Hex, so the paste only fails once the user is
-      // already signing.
-      if (
-        hasCalldata &&
-        !(isHex(action.calldata!) && action.calldata!.length % 2 === 0)
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "must be 0x-prefixed hex with an even number of characters",
-          path: ["actions", index, "calldata"],
-        });
-      }
-
-      // No editor supports an ETH value: the custom-action form has no field
-      // for one, and the action row doesn't display it. Accepting one leaves
-      // funds attached to a call the author can neither see nor clear, and
-      // dropping it quietly would publish 0 wei instead. So it's refused,
-      // rather than carried by the import alone.
+      // Nothing in the form supports an ETH value: the custom-action form has
+      // no field for one and the action row doesn't display it. Accepting one
+      // leaves funds attached to a call the author can neither see nor clear.
       if (action.value !== undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -543,31 +165,45 @@ const ProposalJsonSchema = z
         });
       }
 
-      const abi = action.abi === undefined ? null : parseAbiStrict(action.abi);
+      if (action.abi === undefined) return;
 
-      if (action.abi !== undefined && abi === null) {
+      const abi = parseAbiStrict(action.abi);
+      if (abi === null) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "must be an array of ABI items",
           path: ["actions", index, "abi"],
         });
-      }
-
-      // Raw calldata wins in encodeActions, which returns before it ever walks
-      // the ABI, so the call is only checked when there is none.
-      if (hasCalldata || !hasFunctionName) return;
-
-      if (action.abi === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'is required when "functionName" is used',
-          path: ["actions", index, "abi"],
-        });
         return;
       }
-      if (abi === null) return;
 
-      checkAbiCall(ctx, index, abi, action.functionName!, action.args ?? []);
+      // Which args are composite depends on the function, so the quoting rule
+      // needs it resolved. Anything wrong with the call itself is the form's to
+      // report, so a name that doesn't resolve just ends the check here.
+      const lookup = action.functionName
+        ? findAbiFunction(abi, action.functionName)
+        : undefined;
+      if (lookup?.kind !== "found") return;
+
+      lookup.fn.inputs.forEach((input, i) => {
+        const arg = action.args?.[i];
+        if (arg === undefined || !isCompositeType(input.type)) return;
+
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(arg);
+        } catch {
+          return; // malformed JSON is the form's to report
+        }
+        if (!holdsUnquotedNumber(parsed)) return;
+
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "must quote its numbers: a JSON number can silently change the value",
+          path: ["actions", index, "args", i],
+        });
+      });
     });
   });
 
@@ -576,14 +212,12 @@ type ImportedAction = z.infer<typeof ActionImportSchema>;
 const toPendingAction = (action: ImportedAction): PendingAction => {
   if (action.type !== "custom") return action;
 
-  // Validated in superRefine above; spread to the mutable array the
-  // zod-inferred form type expects.
   const abi =
     action.abi === undefined ? [] : [...(parseAbiStrict(action.abi) ?? [])];
 
-  // A bare name is accepted on the way in, but stored as the full signature:
-  // the edit modal matches its function select on signatures alone, so a bare
-  // name would leave an imported row unable to hydrate its function or args.
+  // A bare name is accepted, but stored as the full signature: the edit modal
+  // matches its function select on signatures alone, so a bare name would leave
+  // an imported row unable to hydrate its function or its args.
   const pastedName = action.functionName ?? "";
   const lookup = pastedName ? findAbiFunction(abi, pastedName) : undefined;
   const functionName =
@@ -591,22 +225,19 @@ const toPendingAction = (action: ImportedAction): PendingAction => {
       ? (signatureOf(lookup.fn) ?? pastedName)
       : pastedName;
 
-  // Stored exactly as pasted. Normalizing scalar text is argTree's job, on the
-  // way to the encoder, so validation, the preview and the published calldata
-  // all read it the same way; doing it again here would be a second opinion.
-  const args = action.args ?? [];
-
   return {
     type: "custom",
     contractAddress: action.contractAddress,
     abi,
     functionName,
-    args,
+    // Stored exactly as pasted: normalizing scalar text is argTree's job, on
+    // the way to the encoder.
+    args: action.args ?? [],
     ...(action.calldata ? { calldata: action.calldata } : {}),
   };
 };
 
-/** `actions[1].recipient: Required`, readable enough to fix the paste. */
+/** `actions[1].args[0]: …`, readable enough to fix the paste. */
 const formatIssue = (issue: z.ZodIssue): string => {
   const path = issue.path.reduce<string>((acc, segment) => {
     if (typeof segment === "number") return `${acc}[${segment}]`;
@@ -615,12 +246,7 @@ const formatIssue = (issue: z.ZodIssue): string => {
   return path ? `${path}: ${issue.message}` : issue.message;
 };
 
-/**
- * Parses a pasted proposal document into form values. Validation is strict on
- * the fields it recognizes (they go straight into a form that can publish an
- * on-chain transaction) and lenient about everything else. ERC-20 decimals are
- * the one thing it can't settle offline; see `resolveImportedDecimals`.
- */
+/** Parses a pasted proposal document into form values. */
 export const parseProposalJson = (text: string): ParseProposalJsonResult => {
   const trimmed = text.trim();
   if (!trimmed) {

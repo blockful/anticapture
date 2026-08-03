@@ -23,11 +23,48 @@ interface ActionsListProps {
   onDeleteAction: (index: number) => void;
 }
 
+/**
+ * The first thing wrong inside one action, as `field: message`.
+ *
+ * An action is a nested shape, so its errors arrive nested too, and nothing was
+ * reading them: an invalid action left Publish disabled with no explanation
+ * anywhere on the page. Reporting the first one is enough to act on, and beats
+ * a row listing four complaints about a single paste.
+ */
+const firstErrorIn = (value: unknown, path = ""): string | undefined => {
+  if (!value || typeof value !== "object") return undefined;
+
+  const message = (value as { message?: unknown }).message;
+  if (typeof message === "string" && message) {
+    return path ? `${path}: ${message}` : message;
+  }
+
+  if (Array.isArray(value)) {
+    for (const [index, item] of value.entries()) {
+      const found = firstErrorIn(item, `${path}[${index}]`);
+      if (found) return found;
+    }
+    return undefined;
+  }
+
+  for (const [key, item] of Object.entries(value)) {
+    // RHF hangs its own bookkeeping off the same object.
+    if (key === "ref" || key === "type" || key === "types") continue;
+    const found = firstErrorIn(item, path ? `${path}.${key}` : key);
+    if (found) return found;
+  }
+  return undefined;
+};
+
 export const ActionsList = ({
   onEditAction,
   onDeleteAction,
 }: ActionsListProps) => {
-  const { control, getValues } = useFormContext<ProposalFormValues>();
+  const {
+    control,
+    getValues,
+    formState: { errors },
+  } = useFormContext<ProposalFormValues>();
   const { fields, move, insert } = useFieldArray({ control, name: "actions" });
 
   // Insert an independent deep copy directly after the source row. `getValues`
@@ -72,6 +109,7 @@ export const ActionsList = ({
               onEdit={() => onEditAction(index)}
               onDuplicate={() => handleDuplicate(index)}
               onDelete={() => onDeleteAction(index)}
+              error={firstErrorIn(errors.actions?.[index])}
             />
           ))}
         </div>

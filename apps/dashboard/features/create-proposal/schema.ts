@@ -2,6 +2,7 @@ import { z } from "zod";
 import { isAddress } from "viem";
 
 import { isEnsAddress } from "@/shared/utils/ens";
+import { customActionIssues } from "@/features/create-proposal/utils/validateCustomAction";
 
 // Exported so the JSON import path can hold a pasted action to exactly the
 // rules the form enforces. They must not drift: an action the import accepts
@@ -40,9 +41,9 @@ const ERC20TransferSchema = z.object({
   decimals: z.number().int().nonnegative(),
 });
 
-// `functionName` is required only when `calldata` isn't provided. The
-// cross-field check happens via `superRefine` on the outer form schema below
-// so this object stays a plain `ZodObject` (required for discriminated unions).
+// Cross-field rules (which of functionName/calldata is required, and whether
+// the call is actually encodable) live in the outer `superRefine`, so this
+// stays a plain `ZodObject` as a discriminated union member requires.
 const CustomActionSchema = z.object({
   type: z.literal("custom"),
   contractAddress: addressOrEnsSchema,
@@ -82,16 +83,17 @@ export const ProposalFormSchema = z
   .superRefine((form, ctx) => {
     form.actions.forEach((action, index) => {
       if (action.type !== "custom") return;
-      const hasCalldata =
-        !!action.calldata && action.calldata.trim().length > 0;
-      const hasFunctionName = action.functionName.length > 0;
-      if (!hasCalldata && !hasFunctionName) {
+      // Every entry point lands here: a hand-built action, a JSON paste, and a
+      // draft loaded from the API. Checking the call once, in the form, is what
+      // lets the action row show what's wrong instead of leaving Publish
+      // disabled with no explanation.
+      customActionIssues(action).forEach(({ path, message }) => {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Required",
-          path: ["actions", index, "functionName"],
+          message,
+          path: ["actions", index, ...path],
         });
-      }
+      });
     });
   });
 

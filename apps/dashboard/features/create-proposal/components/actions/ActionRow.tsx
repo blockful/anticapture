@@ -11,6 +11,7 @@ import { Button } from "@/shared/components/design-system/buttons/button/Button"
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
 import type { ProposalAction } from "@/features/create-proposal/types";
 import { BulletDivider } from "@/shared/components/design-system/section";
+import { cn } from "@/shared/utils/cn";
 
 interface ActionRowProps {
   id: string;
@@ -23,6 +24,8 @@ interface ActionRowProps {
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  /** First thing the form found wrong with this action, if anything. */
+  error?: string;
 }
 
 function actionTypeLabel(action: ProposalAction): string {
@@ -64,6 +67,7 @@ export const ActionRow = ({
   onEdit,
   onDuplicate,
   onDelete,
+  error,
 }: ActionRowProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
@@ -92,86 +96,96 @@ export const ActionRow = ({
       style={style}
       {...attributes}
       {...listeners}
-      className="border-border-default bg-surface-default flex items-center gap-2 px-3 py-2"
+      className={cn(
+        "border-border-default bg-surface-default flex flex-col px-3 py-2",
+        error && "bg-error/5",
+      )}
     >
-      <div className="flex flex-col">
-        <IconButton
-          icon={ArrowUp}
+      <div className="flex items-center gap-2">
+        <div className="flex flex-col">
+          <IconButton
+            icon={ArrowUp}
+            variant="ghost"
+            size="sm"
+            aria-label="Move up"
+            disabled={isFirst}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveUp();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="p-0.5"
+          />
+          <IconButton
+            icon={ArrowDown}
+            variant="ghost"
+            size="sm"
+            aria-label="Move down"
+            disabled={isLast}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveDown();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="p-0.5"
+          />
+        </div>
+        <BadgeStatus variant="outline" className="size-5 justify-center px-0">
+          {index + 1}
+        </BadgeStatus>
+        <div className="flex min-w-0 flex-1 flex-col gap-1 lg:flex-row lg:items-center">
+          <span className="text-primary truncate text-sm font-medium">
+            {actionTypeLabel(action)}
+          </span>
+          <BulletDivider className="hidden lg:block" />
+          <span className="text-secondary truncate text-sm">
+            {actionSubtitle(action, tokenSymbol)}
+          </span>
+          <BulletDivider className="hidden lg:block" />
+          <span className="text-secondary truncate text-sm">
+            {actionTarget(action)}
+          </span>
+        </div>
+        <Button
           variant="ghost"
           size="sm"
-          aria-label="Move up"
-          disabled={isFirst}
           onClick={(e) => {
             e.stopPropagation();
-            onMoveUp();
+            onEdit();
           }}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="p-0.5"
-        />
-        <IconButton
-          icon={ArrowDown}
+          aria-label="Edit action"
+        >
+          <Pencil className="size-4" />
+        </Button>
+        <Button
           variant="ghost"
           size="sm"
-          aria-label="Move down"
-          disabled={isLast}
           onClick={(e) => {
             e.stopPropagation();
-            onMoveDown();
+            onDuplicate();
           }}
           onPointerDown={(e) => e.stopPropagation()}
-          className="p-0.5"
-        />
+          aria-label="Duplicate action"
+        >
+          <Copy className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          aria-label="Delete action"
+        >
+          <Trash2 className="size-4" />
+        </Button>
       </div>
-      <BadgeStatus variant="outline" className="size-5 justify-center px-0">
-        {index + 1}
-      </BadgeStatus>
-      <div className="flex min-w-0 flex-1 flex-col gap-1 lg:flex-row lg:items-center">
-        <span className="text-primary truncate text-sm font-medium">
-          {actionTypeLabel(action)}
-        </span>
-        <BulletDivider className="hidden lg:block" />
-        <span className="text-secondary truncate text-sm">
-          {actionSubtitle(action, tokenSymbol)}
-        </span>
-        <BulletDivider className="hidden lg:block" />
-        <span className="text-secondary truncate text-sm">
-          {actionTarget(action)}
-        </span>
-      </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          onEdit();
-        }}
-        aria-label="Edit action"
-      >
-        <Pencil className="size-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDuplicate();
-        }}
-        onPointerDown={(e) => e.stopPropagation()}
-        aria-label="Duplicate action"
-      >
-        <Copy className="size-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        aria-label="Delete action"
-      >
-        <Trash2 className="size-4" />
-      </Button>
+      {error && (
+        // Indented past the reorder controls and the index badge, so it reads as
+        // belonging to this row's summary rather than to the list.
+        <span className="text-error pl-[4.25rem] text-xs">{error}</span>
+      )}
     </div>
   );
 };
