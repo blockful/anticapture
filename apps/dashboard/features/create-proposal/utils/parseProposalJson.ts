@@ -124,7 +124,10 @@ const CustomImportSchema = z.object({
   functionName: z.string().trim().optional(),
   args: z.array(quotedArg).optional(),
   calldata: z.string().trim().optional(),
-  value: quotedFigure.optional(),
+  // Kept in the shape only so it can be refused by name. Unknown keys are
+  // stripped, and silently dropping a declared ETH value would publish 0 wei
+  // instead of what the document asked for.
+  value: z.unknown().optional(),
 });
 
 const ActionImportSchema = z.discriminatedUnion("type", [
@@ -446,15 +449,16 @@ const ProposalJsonSchema = z
         });
       }
 
-      // encodeActions runs BigInt(value), which takes decimal or 0x hex and
-      // throws on anything else ("1e18" being the easy mistake).
-      if (
-        action.value !== undefined &&
-        !/^(\d+|0x[0-9a-fA-F]+)$/.test(action.value)
-      ) {
+      // No editor supports an ETH value: the custom-action form has no field
+      // for one, and the action row doesn't display it. Accepting one leaves
+      // funds attached to a call the author can neither see nor clear, and
+      // dropping it quietly would publish 0 wei instead. So it's refused,
+      // rather than carried by the import alone.
+      if (action.value !== undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "must be a whole number of wei",
+          message:
+            "isn't supported yet: nothing in the form can show or clear an ETH value, so it can't be imported",
           path: ["actions", index, "value"],
         });
       }
@@ -514,7 +518,6 @@ const toPendingAction = (action: ImportedAction): PendingAction => {
     functionName,
     args: action.args ?? [],
     ...(action.calldata ? { calldata: action.calldata } : {}),
-    ...(action.value !== undefined ? { value: action.value } : {}),
   };
 };
 

@@ -265,20 +265,19 @@ describe("parseProposalJson", () => {
       });
     });
 
-    describe("value", () => {
-      const withValue = (value: unknown) =>
-        parse(custom({ calldata: "0xa9059cbb", value }));
-
-      it.each([
-        ["an integer in wei", "1000000000000000000"],
-        ["hex, which BigInt() handles", "0xde0b6b3a7640000"],
-      ])("accepts %s", (_label, value) => {
-        expectOk(withValue(value));
-      });
-
-      it("rejects one BigInt() would throw on", () => {
-        expectRejected(withValue("1e18"), "actions[0].value");
-      });
+    // Nothing in the form shows or edits an ETH value, so importing one leaves
+    // funds on a call the author can't review or clear. Refused by name rather
+    // than stripped as an unknown key: dropping a declared value quietly would
+    // publish 0 wei instead of what the document asked for.
+    it.each([
+      ["a wei amount", "1000000000000000000"],
+      ["zero", "0"],
+    ])("refuses %s in value", (_label, value) => {
+      expectRejected(
+        parse(custom({ calldata: "0xa9059cbb", value })),
+        "actions[0].value",
+        "isn't supported yet",
+      );
     });
   });
 
