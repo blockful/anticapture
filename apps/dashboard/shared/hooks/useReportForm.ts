@@ -19,7 +19,6 @@ export const reportFormSchema = z.object({
     z.string().trim().email("Enter a valid email address."),
     z.literal(""),
   ]),
-  url: z.string().url(),
 });
 
 export type ReportFormValues = z.infer<typeof reportFormSchema>;
@@ -60,7 +59,6 @@ export const useReportForm = ({
       subject: subject ?? "",
       description: "",
       email: "",
-      url: "",
     },
   });
   const mutation = useMutation({ mutationFn: submitReport });

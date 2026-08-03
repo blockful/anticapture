@@ -55,7 +55,13 @@ export const ReportDataModal = ({
   onOpenChange,
 }: ReportDataModalProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { form, mutate, isPending, error } = useReportForm({
+  const {
+    form,
+    mutate,
+    isPending,
+    error,
+    reset: resetMutation,
+  } = useReportForm({
     daoId,
     panel,
     subject,
@@ -68,9 +74,9 @@ export const ReportDataModal = ({
       subject: subject ?? "",
       description: "",
       email: "",
-      url: "",
     });
-  }, [daoId, panel, subject, form]);
+    resetMutation();
+  }, [daoId, panel, subject, form, resetMutation]);
 
   useEffect(() => {
     setIsSubmitted(false);

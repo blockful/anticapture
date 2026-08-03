@@ -8,6 +8,11 @@ const REPORT_LIMIT = 3;
 const REPORT_WINDOW_MS = 60 * 60 * 1000;
 const reportAttempts = new Map<string, number[]>();
 
+// ClickUp "Project" relationship field on the shared Backlog list; every
+// report task must be linked to Anticapture (86ahtje7p) to show up in triage.
+const ANTICAPTURE_PROJECT_FIELD_ID = "c28c5f87-5225-4fbe-a957-2e7bd538ae0d";
+const ANTICAPTURE_PROJECT_TASK_ID = "86ahtje7p";
+
 const reportSchema = z.object({
   daoId: z.string().trim().min(1).max(100),
   panel: z.string().trim().min(1).max(200),
@@ -26,14 +31,12 @@ const isRateLimited = (ip: string, now = Date.now()) => {
   const attempts = (reportAttempts.get(ip) ?? []).filter(
     (timestamp) => now - timestamp < REPORT_WINDOW_MS,
   );
+  reportAttempts.set(ip, attempts);
+  return attempts.length >= REPORT_LIMIT;
+};
 
-  if (attempts.length >= REPORT_LIMIT) {
-    reportAttempts.set(ip, attempts);
-    return true;
-  }
-
-  reportAttempts.set(ip, [...attempts, now]);
-  return false;
+const recordReportAttempt = (ip: string, now = Date.now()) => {
+  reportAttempts.set(ip, [...(reportAttempts.get(ip) ?? []), now]);
 };
 
 const formatDescription = ({
@@ -91,6 +94,12 @@ export const POST = async (request: NextRequest) => {
         body: JSON.stringify({
           name: `[Report] ${payload.daoId.toUpperCase()} — ${payload.panel}${payload.subject ? ` (${payload.subject})` : ""}`,
           markdown_description: formatDescription(payload),
+          custom_fields: [
+            {
+              id: ANTICAPTURE_PROJECT_FIELD_ID,
+              value: { add: [ANTICAPTURE_PROJECT_TASK_ID], rem: [] },
+            },
+          ],
         }),
       },
     );
@@ -103,6 +112,7 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
+    recordReportAttempt(clientIP);
     return NextResponse.json({ message: "Report submitted successfully" });
   } catch (error) {
     if (error instanceof z.ZodError) {

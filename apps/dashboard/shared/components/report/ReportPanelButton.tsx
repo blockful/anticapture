@@ -43,7 +43,7 @@ export const ReportPanelButton = ({
 
   return (
     <>
-      <Tooltip tooltipContent="Report incorrect data">
+      <Tooltip tooltipContent="Report incorrect data" asChild>
         <Button
           variant="ghost"
           size="sm"

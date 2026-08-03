@@ -3,7 +3,8 @@
 import type { VotesByProposalIdQueryResponse } from "@anticapture/client";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import type { Address } from "viem";
 
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
@@ -15,6 +16,8 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
+
+type TabId = "description" | "votes" | "actions";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -209,8 +212,14 @@ export const ProposalHeader = ({
   offchainProposalType,
 }: ProposalHeaderProps) => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const tab = searchParams.get("tab") ?? "description";
+  const allowedTabs: TabId[] =
+    snapshotLink !== undefined
+      ? ["description", "votes"]
+      : ["description", "votes", "actions"];
+  const [tab] = useQueryState(
+    "tab",
+    parseAsStringEnum<TabId>(allowedTabs).withDefault("description"),
+  );
   const supportValue =
     votes?.items[0]?.support != null
       ? Number(votes.items[0].support)
