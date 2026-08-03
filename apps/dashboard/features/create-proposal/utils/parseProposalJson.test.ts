@@ -571,6 +571,53 @@ describe("parseProposalJson", () => {
         expectRejected(withArg(arg), "actions[0].args[0]", "quote its numbers");
       });
 
+      // isArgComplete walks the declared components, so anything past them is
+      // never looked at, and encodeActions maps components only: the extra
+      // value vanishes from the calldata without a word.
+      describe("tuple field counts", () => {
+        const pair = (type: string, arg: string) =>
+          parse(
+            custom({
+              abi: abiOf(
+                [
+                  {
+                    name: "data",
+                    type,
+                    components: [
+                      { name: "who", type: "address" },
+                      { name: "value", type: "uint256" },
+                    ],
+                  },
+                ],
+                "setPair",
+              ),
+              functionName: "setPair",
+              args: [arg],
+            }),
+          );
+
+        it("accepts a tuple with exactly its components", () => {
+          expectOk(pair("tuple", '["vitalik.eth", "1"]'));
+        });
+
+        it.each([
+          ["one field too many", '["vitalik.eth", "1", "unexpected"]'],
+          ["one field short", '["vitalik.eth"]'],
+        ])("rejects a tuple with %s", (_label, arg) => {
+          expectRejected(pair("tuple", arg), "actions[0].args[0]");
+        });
+
+        it("rejects an over-filled tuple nested in an array", () => {
+          expectRejected(
+            pair(
+              "tuple[]",
+              '[["vitalik.eth", "1"], ["vitalik.eth", "1", "x"]]',
+            ),
+            "actions[0].args[0]",
+          );
+        });
+      });
+
       it("still rejects an array whose elements don't fit the type", () => {
         expectRejected(withArg('["not a number"]'), "actions[0].args[0]");
       });

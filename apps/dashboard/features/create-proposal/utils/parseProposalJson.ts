@@ -200,6 +200,49 @@ const holdsUnquotedNumber = (value: unknown): boolean => {
   return false;
 };
 
+const componentsOf = (param: AbiParameter): readonly AbiParameter[] =>
+  (param as { components?: readonly AbiParameter[] }).components ?? [];
+
+/**
+ * A tuple has to hold exactly its declared fields.
+ *
+ * `isArgComplete` walks the components, so it never looks past them, and a
+ * fixed-size array gets a length check while a tuple gets none. `encodeActions`
+ * maps components only, so an extra field is dropped on the way to the calldata
+ * and the proposal quietly sends something narrower than the document
+ * described. Recurses so tuples nested in arrays, and in other tuples, are
+ * covered too.
+ */
+const tupleArityError = (
+  param: AbiParameter,
+  value: unknown,
+): string | null => {
+  const array = parseArrayType(param.type);
+  if (array) {
+    // A non-array value here is already reported by the caller.
+    if (!Array.isArray(value)) return null;
+    const element = { ...param, type: array.elementType } as AbiParameter;
+    for (const item of value) {
+      const error = tupleArityError(element, item);
+      if (error) return error;
+    }
+    return null;
+  }
+
+  if (param.type !== "tuple" || !Array.isArray(value)) return null;
+
+  const components = componentsOf(param);
+  if (value.length !== components.length) {
+    return `has a tuple of ${components.length} field${components.length === 1 ? "" : "s"} filled with ${value.length}`;
+  }
+
+  for (const [index, component] of components.entries()) {
+    const error = tupleArityError(component, value[index]);
+    if (error) return error;
+  }
+  return null;
+};
+
 /**
  * The subset of the ABI grammar viem's encoder actually implements.
  *
@@ -420,6 +463,8 @@ const checkAbiCall = (
         },
       ];
     }
+    const arity = tupleArityError(input, parsed);
+    if (arity) return [{ index: i, message: arity }];
     return [];
   });
   if (compositeIssues.length > 0) {
