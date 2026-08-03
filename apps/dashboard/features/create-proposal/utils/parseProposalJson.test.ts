@@ -298,6 +298,49 @@ describe("parseProposalJson", () => {
       ).toMatchObject({ functionName: "setValue(address,uint256)" });
     });
 
+    // The modal keeps view and pure out of its function list, so an imported
+    // one could never be selected there or hydrated on edit.
+    it.each(["view", "pure"])("rejects a %s function", (stateMutability) => {
+      expectRejected(
+        parse(
+          custom({
+            abi: [
+              {
+                type: "function",
+                name: "balanceOf",
+                stateMutability,
+                inputs: [{ name: "who", type: "address" }],
+                outputs: [{ name: "", type: "uint256" }],
+              },
+            ],
+            functionName: "balanceOf(address)",
+            args: ["vitalik.eth"],
+          }),
+        ),
+        "actions[0].functionName",
+        "only reads state",
+      );
+    });
+
+    it("accepts a function with no stateMutability, as the modal does", () => {
+      expectOk(
+        parse(
+          custom({
+            abi: [
+              {
+                type: "function",
+                name: "legacy",
+                inputs: [{ name: "value", type: "uint256" }],
+                outputs: [],
+              },
+            ],
+            functionName: "legacy(uint256)",
+            args: ["1"],
+          }),
+        ),
+      );
+    });
+
     describe("overloads", () => {
       // uint accepts 0x hex, so an address-like arg validates against
       // foo(uint256) just as well as foo(address). A bare name can't say which

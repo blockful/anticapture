@@ -251,7 +251,17 @@ const signatureOf = (fn: AbiFunction): string | null => {
 type AbiFunctionLookup =
   | { kind: "found"; fn: AbiFunction }
   | { kind: "missing" }
-  | { kind: "ambiguous"; signatures: string[] };
+  | { kind: "ambiguous"; signatures: string[] }
+  | { kind: "readOnly"; signature: string };
+
+/**
+ * The custom-action modal keeps `view` and `pure` out of its function list, so
+ * an imported one could never be selected, let alone hydrated on edit. An older
+ * ABI may omit `stateMutability` entirely; that isn't a claim of read-only, and
+ * the modal treats it the same way.
+ */
+const isStateChanging = (fn: AbiFunction): boolean =>
+  fn.stateMutability !== "view" && fn.stateMutability !== "pure";
 
 /**
  * Resolves a pasted `functionName` against an ABI, by full signature or by bare
@@ -267,20 +277,36 @@ type AbiFunctionLookup =
  */
 const findAbiFunction = (abi: Abi, functionName: string): AbiFunctionLookup => {
   const functions = abi.filter(isWellFormedFunction);
+  const named = (item: AbiFunction) =>
+    signatureOf(item) === functionName || item.name === functionName;
 
-  const bySignature = functions.find(
+  // Only state-changing functions can be selected, so only those can match.
+  const candidates = functions.filter(isStateChanging);
+
+  const bySignature = candidates.find(
     (item) => signatureOf(item) === functionName,
   );
   if (bySignature) return { kind: "found", fn: bySignature };
 
-  const sharingName = functions.filter((item) => item.name === functionName);
-  if (sharingName.length === 0) return { kind: "missing" };
+  const sharingName = candidates.filter((item) => item.name === functionName);
   if (sharingName.length === 1) return { kind: "found", fn: sharingName[0] };
+  if (sharingName.length > 1) {
+    return {
+      kind: "ambiguous",
+      signatures: sharingName.map((fn) => signatureOf(fn) ?? fn.name),
+    };
+  }
 
-  return {
-    kind: "ambiguous",
-    signatures: sharingName.map((fn) => signatureOf(fn) ?? fn.name),
-  };
+  // Nothing selectable matched. Say which it is: "not in this abi" would be
+  // wrong and confusing when the function is right there, just read-only.
+  const readOnly = functions.find(named);
+  if (readOnly) {
+    return {
+      kind: "readOnly",
+      signature: signatureOf(readOnly) ?? readOnly.name,
+    };
+  }
+  return { kind: "missing" };
 };
 
 /**
@@ -317,6 +343,15 @@ const checkAbiCall = (
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `"${functionName}" is not a function in this action's abi`,
+      path: ["actions", index, "functionName"],
+    });
+    return;
+  }
+
+  if (lookup.kind === "readOnly") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `${lookup.signature} only reads state, so it can't be a proposal action`,
       path: ["actions", index, "functionName"],
     });
     return;
