@@ -113,26 +113,32 @@ export const ImportJsonModal = ({
       }
 
       if (needsChain) setIsResolving(true);
-      const resolved = await resolveImportedDecimals(
-        pending,
-        async (tokenAddress) => {
-          // Unreachable past the guard above, which only lets a document
-          // through when there is a client to read every ERC-20 it carries.
-          if (!publicClient) throw new Error("No RPC client");
-          return Number(
-            await publicClient.readContract({
-              abi: erc20Abi,
-              address: tokenAddress as `0x${string}`,
-              functionName: "decimals",
-            }),
-          );
-        },
-      );
-      // Closed or superseded while the chain was answering: this result is for
-      // a paste the user already walked away from.
-      if (attemptRef.current !== attempt) return;
+      let resolved;
+      try {
+        resolved = await resolveImportedDecimals(
+          pending,
+          async (tokenAddress) => {
+            // Unreachable past the guard above, which only lets a document
+            // through when there is a client to read every ERC-20 it carries.
+            if (!publicClient) throw new Error("No RPC client");
+            return Number(
+              await publicClient.readContract({
+                abi: erc20Abi,
+                address: tokenAddress as `0x${string}`,
+                functionName: "decimals",
+              }),
+            );
+          },
+        );
+      } finally {
+        // Cleared before the staleness check below, so an abandoned lookup
+        // can't leave Apply spinning on a paste the user has since edited.
+        if (needsChain) setIsResolving(false);
+      }
 
-      if (needsChain) setIsResolving(false);
+      // Closed, edited or superseded while the chain was answering: this
+      // result is for a paste the user already walked away from.
+      if (attemptRef.current !== attempt) return;
 
       if (!resolved.ok) {
         setError(resolved.error);
@@ -174,6 +180,11 @@ export const ImportJsonModal = ({
           <Textarea
             value={text}
             onChange={(e) => {
+              // Editing abandons whatever is being applied: the textarea stays
+              // live during the decimals read, and without this the in-flight
+              // lookup would still hold the current ticket and land the old
+              // document on the form.
+              attemptRef.current += 1;
               setText(e.target.value);
               setError(null);
             }}
