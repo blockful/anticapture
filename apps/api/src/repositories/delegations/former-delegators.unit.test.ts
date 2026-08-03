@@ -146,7 +146,7 @@ describe("FormerDelegatorsRepository", () => {
     });
   });
 
-  it("uses the last delegated value of the stint as the amount", async () => {
+  it("takes the share from the last event of the stint, not the first", async () => {
     await db.insert(delegation).values([
       createDelegation({
         delegatorAccountId: DELEGATOR_A,
@@ -162,6 +162,7 @@ describe("FormerDelegatorsRepository", () => {
         delegatorAccountId: DELEGATOR_A,
         delegateAccountId: OTHER_DELEGATE,
         previousDelegate: DELEGATE,
+        delegatedValue: 300n,
         timestamp: 3000n,
       }),
     ]);
@@ -177,12 +178,131 @@ describe("FormerDelegatorsRepository", () => {
       {
         delegatorAddress: DELEGATOR_A,
         amount: 300n,
-        redelegatedAmount: 0n,
+        redelegatedAmount: 300n,
         startTimestamp: 1000n,
         endTimestamp: 3000n,
         redelegatedTo: OTHER_DELEGATE,
       },
     ]);
+  });
+
+  // Balances that move while the delegation stands write no `delegations` row,
+  // so the value stored on the last event is stale by the time of the move away
+  // and only the share it represents can be carried forward.
+  it("reports the balance at the move away when it grew while delegated", async () => {
+    await db.insert(delegation).values([
+      createDelegation({
+        delegatorAccountId: DELEGATOR_A,
+        delegatedValue: 100n,
+        timestamp: 1000n,
+      }),
+      createDelegation({
+        delegatorAccountId: DELEGATOR_A,
+        delegateAccountId: OTHER_DELEGATE,
+        previousDelegate: DELEGATE,
+        delegatedValue: 1000n,
+        timestamp: 2000n,
+      }),
+    ]);
+
+    const result = await repository.getFormerDelegators(
+      DELEGATE,
+      0,
+      10,
+      "desc",
+    );
+
+    expect(result.items[0]).toMatchObject({
+      amount: 1000n,
+      redelegatedAmount: 1000n,
+    });
+  });
+
+  it("reports the balance at the move away when it shrank while delegated", async () => {
+    await db.insert(delegation).values([
+      createDelegation({
+        delegatorAccountId: DELEGATOR_A,
+        delegatedValue: 1000n,
+        timestamp: 1000n,
+      }),
+      createDelegation({
+        delegatorAccountId: DELEGATOR_A,
+        delegateAccountId: OTHER_DELEGATE,
+        previousDelegate: DELEGATE,
+        delegatedValue: 100n,
+        timestamp: 2000n,
+      }),
+    ]);
+
+    const result = await repository.getFormerDelegators(
+      DELEGATE,
+      0,
+      10,
+      "desc",
+    );
+
+    expect(result.items[0]).toMatchObject({
+      amount: 100n,
+      redelegatedAmount: 100n,
+    });
+  });
+
+  it("reports no loss when the delegator emptied the balance before moving away", async () => {
+    await db.insert(delegation).values([
+      createDelegation({
+        delegatorAccountId: DELEGATOR_A,
+        delegatedValue: 500n,
+        timestamp: 1000n,
+      }),
+      createDelegation({
+        delegatorAccountId: DELEGATOR_A,
+        delegateAccountId: OTHER_DELEGATE,
+        previousDelegate: DELEGATE,
+        delegatedValue: 0n,
+        timestamp: 2000n,
+      }),
+    ]);
+
+    const result = await repository.getFormerDelegators(
+      DELEGATE,
+      0,
+      10,
+      "desc",
+    );
+
+    expect(result.items[0]).toMatchObject({
+      amount: 0n,
+      redelegatedAmount: 0n,
+    });
+  });
+
+  it("reports no loss when the delegator held nothing during the stint", async () => {
+    await db.insert(delegation).values([
+      createDelegation({
+        delegatorAccountId: DELEGATOR_A,
+        delegatedValue: 0n,
+        timestamp: 1000n,
+      }),
+      createDelegation({
+        delegatorAccountId: DELEGATOR_A,
+        delegateAccountId: OTHER_DELEGATE,
+        previousDelegate: DELEGATE,
+        delegatedValue: 700n,
+        timestamp: 2000n,
+      }),
+    ]);
+
+    const result = await repository.getFormerDelegators(
+      DELEGATE,
+      0,
+      10,
+      "desc",
+    );
+
+    expect(result.items[0]).toMatchObject({
+      amount: 0n,
+      redelegatedAmount: 700n,
+    });
   });
 
   it("sets redelegatedTo to null when the move-away event does not reference the address", async () => {
@@ -234,6 +354,7 @@ describe("FormerDelegatorsRepository", () => {
         delegatorAccountId: DELEGATOR_A,
         delegateAccountId: THIRD_DELEGATE,
         previousDelegate: DELEGATE,
+        delegatedValue: 700n,
         timestamp: 4000n,
       }),
     ]);
@@ -249,7 +370,7 @@ describe("FormerDelegatorsRepository", () => {
       {
         delegatorAddress: DELEGATOR_A,
         amount: 700n,
-        redelegatedAmount: 0n,
+        redelegatedAmount: 700n,
         startTimestamp: 3000n,
         endTimestamp: 4000n,
         redelegatedTo: THIRD_DELEGATE,
@@ -375,6 +496,44 @@ describe("FormerDelegatorsRepository", () => {
         "desc",
       );
       expect(other).toEqual({ items: [], totalCount: 0 });
+    });
+
+    // Rescaling a stale value must carry the fraction this delegate held, not
+    // the whole move-away event: the siblings' part was never its voting power.
+    it("keeps the delegate's fraction when the balance changed while delegated", async () => {
+      await db.insert(delegation).values([
+        // 40% of a 1000 balance
+        ...splitDelegation(
+          `0x${"1".padStart(64, "0")}`,
+          [
+            { delegate: DELEGATE, value: 400n },
+            { delegate: OTHER_DELEGATE, value: 600n },
+          ],
+          1000n,
+        ),
+        // balance doubled to 2000 before the split dropped this delegate
+        ...splitDelegation(
+          `0x${"2".padStart(64, "0")}`,
+          [
+            { delegate: OTHER_DELEGATE, value: 1000n },
+            { delegate: THIRD_DELEGATE, value: 1000n },
+          ],
+          2000n,
+        ),
+      ]);
+
+      const result = await repository.getFormerDelegators(
+        DELEGATE,
+        0,
+        10,
+        "desc",
+      );
+
+      expect(result.items[0]).toMatchObject({
+        // 40% of 2000, not the 2000 the whole event moved
+        amount: 800n,
+        redelegatedAmount: 2000n,
+      });
     });
   });
 

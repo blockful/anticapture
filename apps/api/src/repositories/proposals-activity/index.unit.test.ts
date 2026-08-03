@@ -401,6 +401,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         DaoIdEnum.UNI,
         1699950000,
         100000,
+        0,
       );
 
       expect(result).toHaveLength(1);
@@ -417,7 +418,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         }),
       ]);
 
-      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000);
+      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000, 0);
 
       expect(result).toHaveLength(1);
       expect(result[0]?.id).toBe("active");
@@ -432,6 +433,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         DaoIdEnum.UNI,
         9999999999,
         100,
+        0,
       );
 
       expect(result).toHaveLength(0);
@@ -455,10 +457,38 @@ describe("DrizzleProposalsActivityRepository", () => {
         DaoIdEnum.UNI,
         0,
         100000,
+        0,
         1700000000,
       );
 
       expect(result.map((p) => p.id)).toEqual(["inside"]);
+    });
+
+    it("excludes a proposal created inside the window whose voting opens after it", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "votable",
+          txHash: "0xtx1",
+          timestamp: 1699800000n,
+        }),
+        createProposal({
+          id: "not-open-yet",
+          txHash: "0xtx2",
+          timestamp: 1699990000n,
+        }),
+      ]);
+
+      // 20000s of voting delay: `not-open-yet` is created before activityEnd but
+      // only becomes votable at 1700010000, past the end of the window.
+      const result = await repository.getProposals(
+        DaoIdEnum.UNI,
+        0,
+        100000,
+        20000,
+        1700000000,
+      );
+
+      expect(result.map((p) => p.id)).toEqual(["votable"]);
     });
 
     it("keeps every proposal after activityStart when no activityEnd is given", async () => {
@@ -475,7 +505,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         }),
       ]);
 
-      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000);
+      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000, 0);
 
       expect(result).toHaveLength(2);
     });
@@ -511,6 +541,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         0,
         100000,
         0,
+        0,
         10,
         "timestamp",
         "desc",
@@ -532,6 +563,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         VOTER,
         0,
         100000,
+        0,
         0,
         10,
         "timestamp",
@@ -559,6 +591,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         VOTER,
         0,
         100000,
+        0,
         0,
         10,
         "timestamp",
@@ -593,6 +626,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         1699750000,
         100000,
         0,
+        0,
         10,
         "timestamp",
         "desc",
@@ -603,6 +637,31 @@ describe("DrizzleProposalsActivityRepository", () => {
       );
       expect(proposal3).toBeDefined();
       expect(proposal3!.userVote).toBeNull();
+    });
+
+    // Without the voting delay on the upper bound this proposal is listed with
+    // no vote attached, which reads as a delegate who skipped a proposal they
+    // could not yet vote on.
+    it("drops a proposal whose voting only opens after activityEnd", async () => {
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        150000,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        1699900000,
+      );
+
+      // proposal-1 opens at 1699900000 + 150000, past the window; proposal-2 and
+      // proposal-3 open at 1699950000 and 1699850000 respectively.
+      expect(result.proposals.map((p) => p.proposal.id)).toEqual([
+        "proposal-3",
+      ]);
+      expect(result.totalCount).toBe(1);
     });
 
     it("keeps a vote cast inside the window attached to its proposal", async () => {
@@ -617,6 +676,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         VOTER,
         0,
         100000,
+        0,
         0,
         10,
         "timestamp",

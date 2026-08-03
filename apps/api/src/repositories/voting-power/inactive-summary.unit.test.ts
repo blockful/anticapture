@@ -93,6 +93,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
   it("returns zeros when no data exists", async () => {
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
     );
 
     expect(result).toEqual({
@@ -112,6 +113,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
     );
 
     expect(result.totalDelegatedVotingPower).toBe(1000n);
@@ -131,6 +133,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
     );
 
     expect(result).toEqual({
@@ -176,6 +179,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
       200000,
     );
 
@@ -201,11 +205,34 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
       undefined,
       500000,
     );
 
     expect(result.totalProposals).toBe(1);
+  });
+
+  it("excludes a proposal whose voting only opens after toDate", async () => {
+    await db
+      .insert(accountPower)
+      .values(createAccountPower({ accountId: DELEGATE_A, votingPower: 500n }));
+    // Created before toDate, but a 20000s voting delay only opens it at 60000.
+    await db
+      .insert(proposalsOnchain)
+      .values(createProposal({ id: "proposal-1", timestamp: 40000n }));
+
+    const result = await repository.getInactiveDelegatedVotingPowerSummary(
+      VOTING_PERIOD_SECONDS,
+      20000,
+      undefined,
+      50000,
+    );
+
+    // No proposal was votable inside the window, so no delegate can be called
+    // inactive for it -- counting it would report 100% inactive voting power.
+    expect(result.totalProposals).toBe(0);
+    expect(result.inactiveDelegatedVotingPower).toBe(500n);
   });
 
   it("ignores votes cast after toDate on a proposal opened inside the window", async () => {
@@ -222,6 +249,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
       undefined,
       50000,
     );
@@ -245,6 +273,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
       undefined,
       50000,
     );
@@ -266,6 +295,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
       50000,
     );
 
@@ -287,6 +317,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
       50000,
     );
 
@@ -303,6 +334,7 @@ describe("InactiveVotingPowerSummaryRepository", () => {
 
     const result = await repository.getInactiveDelegatedVotingPowerSummary(
       VOTING_PERIOD_SECONDS,
+      0,
       999999999,
     );
 

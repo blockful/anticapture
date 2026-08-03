@@ -6,6 +6,7 @@ import {
 interface InactiveVotingPowerSummaryRepository {
   getInactiveDelegatedVotingPowerSummary(
     votingPeriodSeconds: number,
+    votingDelaySeconds: number,
     fromDate?: number,
     toDate?: number,
   ): Promise<DBInactiveVotingPowerSummary>;
@@ -32,10 +33,12 @@ export class InactiveVotingPowerSummaryService {
     const votingDelay = await this.daoClient.getVotingDelay();
     const votingPeriodSeconds =
       Number(votingPeriodBlocks + votingDelay) * this.blockTime;
+    const votingDelaySeconds = Number(votingDelay) * this.blockTime;
 
     const summary =
       await this.repository.getInactiveDelegatedVotingPowerSummary(
         votingPeriodSeconds,
+        votingDelaySeconds,
         fromDate,
         toDate,
       );

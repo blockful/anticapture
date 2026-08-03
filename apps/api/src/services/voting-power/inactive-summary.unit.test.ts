@@ -32,9 +32,11 @@ describe("InactiveVotingPowerSummaryService", () => {
 
     await service.getInactiveVotingPowerSummary(100, 200);
 
-    // (votingPeriod + votingDelay) * blockTime = (100 + 20) * 12
+    // window length (votingPeriod + votingDelay) * blockTime = (100 + 20) * 12,
+    // and the delay on its own = 20 * 12, for the voting-start upper bound
     expect(getInactiveDelegatedVotingPowerSummary).toHaveBeenCalledWith(
       1440,
+      240,
       100,
       200,
     );

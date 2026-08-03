@@ -145,7 +145,24 @@ export class FormerDelegatorsRepository {
       former_delegators AS (
         SELECT
           ls.delegator AS delegator_address,
-          last_event.target_value::text AS amount,
+          -- Voting power the queried address actually lost at the move away.
+          -- target_value alone is a snapshot of the delegator's balance back
+          -- when they last delegated here: balances that move while the
+          -- delegation stands write no delegations row, so the snapshot goes
+          -- stale and would under- or over-state the loss. What survives a
+          -- balance change is the share of the balance this address held, so
+          -- the stale value is rescaled onto the balance the move-away event
+          -- carries. Full-delegation DAOs hold the whole balance, making the
+          -- share 1 and the loss the move-away value; partial delegation (SCR)
+          -- keeps its fraction instead of claiming the sibling delegates' part.
+          CASE
+            WHEN last_event.event_value = 0 THEN 0
+            ELSE FLOOR(
+              last_event.target_value::numeric
+                * move_event.event_value::numeric
+                / last_event.event_value::numeric
+            )
+          END::text AS amount,
           move_event.event_value::text AS redelegated_amount,
           ls.start_timestamp::text AS start_timestamp,
           move_event.timestamp::text AS end_timestamp,

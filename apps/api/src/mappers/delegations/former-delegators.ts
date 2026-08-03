@@ -42,7 +42,7 @@ export const FormerDelegatorItemSchema = z
   .object({
     delegatorAddress: AddressSchema.openapi({ format: "ethereum-address" }),
     amount: bigintAsStringField(
-      "Last delegated amount while delegating to the queried address, encoded as a decimal string.",
+      "Voting power the queried address lost when the delegator moved away: the share of the delegator's balance held by this address, applied to the balance at the move-away event. Encoded as a decimal string.",
     ),
     redelegatedAmount: bigintAsStringField(
       "Delegated amount at the move-away event (the delegator's value once they left the queried address), encoded as a decimal string.",

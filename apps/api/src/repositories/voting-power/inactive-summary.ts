@@ -14,13 +14,21 @@ export class InactiveVotingPowerSummaryRepository {
    */
   async getInactiveDelegatedVotingPowerSummary(
     votingPeriodSeconds: number,
+    votingDelaySeconds: number,
     fromDate?: number,
     toDate?: number,
   ): Promise<DBInactiveVotingPowerSummary> {
     const fromFilter = fromDate
       ? sql` AND (timestamp + ${votingPeriodSeconds}) >= ${fromDate}`
       : sql``;
-    const toFilter = toDate ? sql` AND timestamp <= ${toDate}` : sql``;
+    // Keyed on when voting opens, not on creation: a proposal created inside the
+    // window whose voting only opens after it takes no vote in the window, so
+    // counting it would report every delegate as inactive on a proposal none of
+    // them could vote on yet -- and when it is the only proposal in the window,
+    // the `totalProposals === 0` guard downstream no longer catches it.
+    const toFilter = toDate
+      ? sql` AND (timestamp + ${votingDelaySeconds}) <= ${toDate}`
+      : sql``;
     // Proposals that open near the end of the window stay votable past it, so a
     // vote cast after `toDate` must not count as activity inside the window.
     const voteToFilter = toDate ? sql` AND v.timestamp <= ${toDate}` : sql``;

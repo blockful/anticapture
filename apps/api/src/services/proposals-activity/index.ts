@@ -72,6 +72,7 @@ export interface ProposalsActivityRepository {
     daoId: DaoIdEnum,
     activityStart: number,
     votingPeriodSeconds: number,
+    votingDelaySeconds: number,
     activityEnd?: number,
   ): Promise<DbProposal[]>;
 
@@ -87,6 +88,7 @@ export interface ProposalsActivityRepository {
     address: Address,
     activityStart: number,
     votingPeriodSeconds: number,
+    votingDelaySeconds: number,
     skip: number,
     limit: number,
     orderBy: OrderByField,
@@ -129,8 +131,13 @@ export class ProposalsActivityService {
     const votingPeriodBlocks = await this.daoClient.getVotingPeriod();
     const votingDelay = await this.daoClient.getVotingDelay();
 
+    // The window length spans the whole life of a proposal, delay included, so
+    // its lower bound catches every proposal still votable at `fromDate`. The
+    // delay travels on its own as well, because the upper bound has to key on
+    // when voting opens rather than on when the proposal was created.
     const votingPeriodSeconds =
       Number(votingPeriodBlocks + votingDelay) * blockTime;
+    const votingDelaySeconds = Number(votingDelay) * blockTime;
 
     const activityStart =
       fromDate && fromDate > firstVoteTimestamp ? fromDate : firstVoteTimestamp;
@@ -141,6 +148,7 @@ export class ProposalsActivityService {
         address,
         activityStart,
         votingPeriodSeconds,
+        votingDelaySeconds,
         skip,
         limit,
         orderBy,
@@ -199,6 +207,7 @@ export class ProposalsActivityService {
       daoId,
       activityStart,
       votingPeriodSeconds,
+      votingDelaySeconds,
       toDate,
     );
     const allUserVotes = await this.repository.getUserVotes(
