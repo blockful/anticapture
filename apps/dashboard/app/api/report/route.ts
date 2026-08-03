@@ -27,16 +27,32 @@ const getClientIP = (request: NextRequest) => {
   return realIP && isIP(realIP) ? realIP : null;
 };
 
-const isRateLimited = (ip: string, now = Date.now()) => {
+// Reserves a slot synchronously (no await in between check and write, so
+// concurrent requests on the same instance can't all observe an empty
+// bucket) and returns whether the caller is over the limit. Roll back with
+// releaseReportAttempt if the request fails after reserving.
+const reserveReportAttempt = (ip: string, now = Date.now()) => {
   const attempts = (reportAttempts.get(ip) ?? []).filter(
     (timestamp) => now - timestamp < REPORT_WINDOW_MS,
   );
-  reportAttempts.set(ip, attempts);
-  return attempts.length >= REPORT_LIMIT;
+
+  if (attempts.length >= REPORT_LIMIT) {
+    reportAttempts.set(ip, attempts);
+    return { limited: true as const };
+  }
+
+  const reserved = now;
+  reportAttempts.set(ip, [...attempts, reserved]);
+  return { limited: false as const, reserved };
 };
 
-const recordReportAttempt = (ip: string, now = Date.now()) => {
-  reportAttempts.set(ip, [...(reportAttempts.get(ip) ?? []), now]);
+const releaseReportAttempt = (ip: string, reserved: number) => {
+  reportAttempts.set(
+    ip,
+    (reportAttempts.get(ip) ?? []).filter(
+      (timestamp) => timestamp !== reserved,
+    ),
+  );
 };
 
 const formatDescription = ({
@@ -58,13 +74,16 @@ const formatDescription = ({
   ].join("\n");
 
 export const POST = async (request: NextRequest) => {
+  // Railway supplies x-real-ip. A shared fallback bucket still protects the
+  // public endpoint if a deployment is temporarily missing that header.
+  const clientIP = getClientIP(request) ?? "unknown";
+  let reservedAt: number | undefined;
+
   try {
     const payload = reportSchema.parse(await request.json());
 
-    // Railway supplies x-real-ip. A shared fallback bucket still protects the
-    // public endpoint if a deployment is temporarily missing that header.
-    const clientIP = getClientIP(request) ?? "unknown";
-    if (isRateLimited(clientIP)) {
+    const reservation = reserveReportAttempt(clientIP);
+    if (reservation.limited) {
       return NextResponse.json(
         {
           error:
@@ -73,11 +92,13 @@ export const POST = async (request: NextRequest) => {
         { status: 429 },
       );
     }
+    reservedAt = reservation.reserved;
 
     const token = process.env.CLICKUP_API_TOKEN;
     const listId = process.env.CLICKUP_REPORT_LIST_ID;
     if (!token || !listId) {
       console.error("ClickUp report integration is not configured");
+      releaseReportAttempt(clientIP, reservedAt);
       return NextResponse.json(
         {
           error: "Reports are temporarily unavailable. Please try again later.",
@@ -106,15 +127,17 @@ export const POST = async (request: NextRequest) => {
 
     if (!clickUpResponse.ok) {
       console.error("ClickUp report creation failed", clickUpResponse.status);
+      releaseReportAttempt(clientIP, reservedAt);
       return NextResponse.json(
         { error: "We couldn't submit your report. Please try again shortly." },
         { status: 502 },
       );
     }
 
-    recordReportAttempt(clientIP);
     return NextResponse.json({ message: "Report submitted successfully" });
   } catch (error) {
+    if (reservedAt !== undefined) releaseReportAttempt(clientIP, reservedAt);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation failed", details: error.errors },
