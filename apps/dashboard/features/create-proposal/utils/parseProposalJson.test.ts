@@ -371,28 +371,13 @@ describe("parseProposalJson", () => {
       });
     });
 
-    // validateSolidityArg trims before it checks, so " true " reads as a valid
-    // bool, while encodeActions converts only an exact "true" and viem measures
-    // bytes32 including the spaces. Storing the pasted text left the form
-    // publishable and the publish failing.
-    describe("scalar whitespace", () => {
-      it.each([
-        ["bool", " true ", "true"],
-        ["uint256", " 42 ", "42"],
-        ["bytes32", ` 0x${"11".repeat(32)} `, `0x${"11".repeat(32)}`],
-        ["address", " vitalik.eth ", "vitalik.eth"],
-      ])("trims a %s arg before storing", (type, pasted, stored) => {
-        expect(
-          expectOk(parse(callTaking(type, pasted))).actions?.[0],
-        ).toMatchObject({ args: [stored] });
-      });
-
-      it("trims a scalar nested in an array", () => {
-        expect(
-          expectOk(parse(callTaking("bool[]", '[" true ", "false"]')))
-            .actions?.[0],
-        ).toMatchObject({ args: ['["true","false"]'] });
-      });
+    // Stored as pasted: argTree normalizes scalar text on the way to the
+    // encoder, so a second opinion here would be one more thing to keep in
+    // step. encodeActions.test covers the normalization itself.
+    it("stores args exactly as pasted", () => {
+      expect(
+        expectOk(parse(callTaking("bool", " true "))).actions?.[0],
+      ).toMatchObject({ args: [" true "] });
     });
 
     // A string parameter carries its whitespace into the calldata, and the

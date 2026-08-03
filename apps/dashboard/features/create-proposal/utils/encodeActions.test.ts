@@ -146,4 +146,104 @@ describe("encodeActions", () => {
       /Function "missing\(\)" not found/,
     );
   });
+
+  // The publish path and the modal's live preview now run the same conversion,
+  // via argTree, so anything validation accepts encodes the same either way.
+  describe("arg conversion", () => {
+    const CONTRACT = "0x3333333333333333333333333333333333333333";
+    const abiWith = (type: string): Abi =>
+      [
+        {
+          type: "function",
+          name: "f",
+          stateMutability: "nonpayable",
+          inputs: [{ name: "a", type }],
+          outputs: [],
+        },
+      ] as Abi;
+
+    const encodeOne = (type: string, arg: string) =>
+      encodeActions(
+        [
+          {
+            type: "custom",
+            contractAddress: CONTRACT,
+            abi: abiWith(type),
+            functionName: "f",
+            args: [arg],
+          } as ProposalAction,
+        ],
+        passthrough,
+      );
+
+    // validateSolidityArg trims before it checks, so these read as valid and
+    // used to throw here, leaving the form publishable and the publish broken.
+    test.each([
+      ["bool", " true ", "true"],
+      ["bytes32", ` 0x${"11".repeat(32)} `, `0x${"11".repeat(32)}`],
+      ["uint256", " 42 ", "42"],
+    ])(
+      "normalizes a %s arg the way validation reads it",
+      async (type, padded, tidy) => {
+        const [loose, exact] = await Promise.all([
+          encodeOne(type, padded),
+          encodeOne(type, tidy),
+        ]);
+        expect(loose.calldatas).toEqual(exact.calldatas);
+      },
+    );
+
+    test("keeps whitespace inside a string arg", async () => {
+      const { calldatas } = await encodeOne("string", "  urgent  ");
+      expect(calldatas[0]).toBe(
+        encodeFunctionData({
+          abi: abiWith("string"),
+          functionName: "f",
+          args: ["  urgent  "],
+        }),
+      );
+    });
+
+    test("takes a JSON bool array written with real booleans", async () => {
+      const { calldatas } = await encodeOne("bool[]", "[true, false]");
+      expect(calldatas[0]).toBe(
+        encodeFunctionData({
+          abi: abiWith("bool[]"),
+          functionName: "f",
+          args: [[true, false]],
+        }),
+      );
+    });
+
+    test("still refuses a fixed array of the wrong length", async () => {
+      await expect(encodeOne("uint256[2]", '["1"]')).rejects.toThrow();
+    });
+
+    test("resolves an ENS name nested inside an array", async () => {
+      const resolver = makeAddressResolver(async (name) =>
+        name === "vitalik.eth"
+          ? "0x1111111111111111111111111111111111111111"
+          : null,
+      );
+      const { calldatas } = await encodeActions(
+        [
+          {
+            type: "custom",
+            contractAddress: CONTRACT,
+            abi: abiWith("address[]"),
+            functionName: "f",
+            args: ['["vitalik.eth"]'],
+          } as ProposalAction,
+        ],
+        resolver,
+      );
+      expect(calldatas[0]).toBe(
+        encodeFunctionData({
+          abi: abiWith("address[]"),
+          functionName: "f",
+          args: [["0x1111111111111111111111111111111111111111"]],
+        }),
+      );
+    });
+  });
 });
