@@ -11,7 +11,6 @@ const createRequest = (ip: string, overrides = {}) =>
     headers: { "content-type": "application/json", "x-real-ip": ip },
     body: JSON.stringify({
       daoId: "ens",
-      section: "token-distribution",
       panel: "Token distribution",
       description: "The displayed supply is stale.",
       email: "reporter@example.com",
@@ -86,5 +85,25 @@ describe("POST /api/report", () => {
     await expect(response.json()).resolves.toEqual({
       error: "We couldn't submit your report. Please try again shortly.",
     });
+  });
+
+  it("includes subject in ClickUp title when provided", async () => {
+    (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(
+      new Response("{}", { status: 200 }),
+    );
+
+    const response = await POST(
+      createRequest("203.0.113.4", { subject: "0xabc123" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://api.clickup.com/api/v2/list/901327958573/task",
+      expect.objectContaining({
+        body: expect.stringContaining(
+          "[Report] ENS — Token distribution (0xabc123)",
+        ),
+      }),
+    );
   });
 });

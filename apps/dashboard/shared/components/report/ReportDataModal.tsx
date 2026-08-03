@@ -1,7 +1,5 @@
 "use client";
 
-import { Flag } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -14,13 +12,8 @@ import {
 } from "@/shared/components/design-system/form/Form";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
-import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
-import {
-  getReportPanels,
-  getReportSection,
-} from "@/shared/constants/report-panels";
 import {
   type ReportFormValues,
   useReportForm,
@@ -28,6 +21,8 @@ import {
 
 type ReportDataModalProps = {
   daoId: string;
+  panel: string;
+  subject?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -54,38 +49,28 @@ const getErrorMessage = (error: unknown) => {
 /** The public data-quality report flow for the current DAO section, as a controlled modal. */
 export const ReportDataModal = ({
   daoId,
+  panel,
+  subject,
   open,
   onOpenChange,
 }: ReportDataModalProps) => {
-  const pathname = usePathname();
-  const section = getReportSection(pathname);
-  const url =
-    typeof window === "undefined"
-      ? "https://anticapture.com"
-      : window.location.href;
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { form, mutate, isPending, error } = useReportForm({
     daoId,
-    section,
-    url,
+    panel,
+    subject,
   });
-  const panels = getReportPanels(section).map((label) => ({
-    label,
-    value: label,
-  }));
-  const isOverview = section === "overview";
-  const defaultPanel = isOverview ? panels[0].value : "";
 
   const resetReportForm = useCallback(() => {
     form.reset({
       daoId,
-      section,
-      panel: defaultPanel,
+      panel,
+      subject: subject ?? "",
       description: "",
       email: "",
-      url,
+      url: "",
     });
-  }, [daoId, defaultPanel, form, section, url]);
+  }, [daoId, panel, subject, form]);
 
   useEffect(() => {
     setIsSubmitted(false);
@@ -131,26 +116,10 @@ export const ReportDataModal = ({
             className="space-y-4"
             onSubmit={form.handleSubmit(handleSubmit)}
           >
-            <FormField
-              control={form.control}
-              name="panel"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Which panel is incorrect?</FormLabel>
-                  <FormControl>
-                    <Select
-                      items={panels}
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      placeholder="Choose a panel"
-                      disabled={isOverview}
-                      aria-label="Which panel is incorrect?"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="text-secondary text-sm">
+              <span className="font-medium">Reporting:</span> {panel}
+              {subject && <span className="text-primary"> ({subject})</span>}
+            </div>
             <FormField
               control={form.control}
               name="description"
@@ -209,30 +178,5 @@ export const ReportDataModal = ({
         </Form>
       )}
     </Modal>
-  );
-};
-
-type ReportDataButtonProps = {
-  daoId: string;
-};
-
-/** Floating trigger + modal for the public data-quality report flow. Used where there's no help dropdown to nest the option into (e.g. whitelabel). */
-export const ReportDataButton = ({ daoId }: ReportDataButtonProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-30 shadow-lg"
-        data-testid="report-data-button"
-      >
-        <Flag className="size-4" aria-hidden />
-        Report incorrect data
-      </Button>
-      <ReportDataModal daoId={daoId} open={isOpen} onOpenChange={setIsOpen} />
-    </>
   );
 };

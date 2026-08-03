@@ -12,7 +12,6 @@ import {
   Calendar,
   BookOpen,
   HelpCircle,
-  Flag,
   X,
   MessageCircle,
 } from "lucide-react";
@@ -21,22 +20,12 @@ import { useState } from "react";
 
 import { BadgeIcon } from "@/shared/components/design-system/badges";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
-import { ReportDataModal } from "@/shared/components/ReportDataButton";
-import { ALL_DAOS, type DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 
 interface HelpPopoverProps {
   className?: string;
   isWhitelabel?: boolean;
 }
-
-/** Extracts the DAO id from a `/{daoId}/...` route, or null outside a DAO route. */
-const getRouteDaoId = (pathname: string | null) => {
-  const segment = pathname?.match(/^\/([^/]+)/)?.[1];
-  return segment && ALL_DAOS.includes(segment.toUpperCase() as DaoIdEnum)
-    ? segment.toLowerCase()
-    : null;
-};
 
 type HelpLinkKey = "calendly" | "framework" | "faq";
 
@@ -96,10 +85,8 @@ const LinkButton = ({ link }: { link: HelpLink }) => {
 
 export const HelpPopover = ({ className, isWhitelabel }: HelpPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isReportOpen, setIsReportOpen] = useState(false);
   const pathname = usePathname();
   const isCreateProposal = pathname?.includes("/proposals/new");
-  const daoId = getRouteDaoId(pathname);
 
   if (isWhitelabel) return null;
 
@@ -165,32 +152,9 @@ export const HelpPopover = ({ className, isWhitelabel }: HelpPopoverProps) => {
             {HELP_LINK_CONFIG.map((link) => (
               <LinkButton key={link.key} link={link} />
             ))}
-
-            {daoId && (
-              <Button
-                variant="outline"
-                size="md"
-                className="justify-start"
-                data-testid="report-data-button"
-                onClick={() => {
-                  setIsOpen(false);
-                  setIsReportOpen(true);
-                }}
-              >
-                <Flag className="size-3.5" />
-                Report incorrect data
-              </Button>
-            )}
           </PopoverContent>
         </PopoverPortal>
       </Popover>
-      {daoId && (
-        <ReportDataModal
-          daoId={daoId}
-          open={isReportOpen}
-          onOpenChange={setIsReportOpen}
-        />
-      )}
     </div>
   );
 };

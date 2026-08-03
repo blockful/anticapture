@@ -16,6 +16,7 @@ import {
   DrawerHeader,
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type EntityType = "delegate" | "tokenHolder";
@@ -169,27 +170,34 @@ export const HoldersAndDelegatesDrawer = ({
     </>
   );
 
-  const delegateAction =
-    entityType === "delegate" ? (
-      <>
-        {/* Desktop */}
-        <div className="hidden lg:block">
-          <DelegateButton
-            delegateAddress={address as `0x${string}`}
-            daoId={daoId}
-            size="md"
-          />
-        </div>
-        {/* Mobile */}
-        <div className="block lg:hidden">
-          <DelegateButton
-            delegateAddress={address as `0x${string}`}
-            daoId={daoId}
-            size="sm"
-          />
-        </div>
-      </>
-    ) : undefined;
+  const currentTabLabel =
+    entities[entityType].tabs.find((tab) => tab.id === activeTab)?.label ?? "";
+
+  const delegateAction = (
+    <div className="flex items-center gap-2">
+      {entityType === "delegate" && (
+        <>
+          {/* Desktop */}
+          <div className="hidden lg:block">
+            <DelegateButton
+              delegateAddress={address as `0x${string}`}
+              daoId={daoId}
+              size="md"
+            />
+          </div>
+          {/* Mobile */}
+          <div className="block lg:hidden">
+            <DelegateButton
+              delegateAddress={address as `0x${string}`}
+              daoId={daoId}
+              size="sm"
+            />
+          </div>
+        </>
+      )}
+      <ReportPanelButton panel={currentTabLabel} subject={address} />
+    </div>
+  );
 
   return (
     <DrawerRoot open={isOpen} onOpenChange={handleCloseDrawer}>

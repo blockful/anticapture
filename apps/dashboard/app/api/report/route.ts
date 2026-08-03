@@ -4,16 +4,14 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getReportPanels } from "@/shared/constants/report-panels";
-
 const REPORT_LIMIT = 3;
 const REPORT_WINDOW_MS = 60 * 60 * 1000;
 const reportAttempts = new Map<string, number[]>();
 
 const reportSchema = z.object({
   daoId: z.string().trim().min(1).max(100),
-  section: z.string().trim().min(1).max(100),
   panel: z.string().trim().min(1).max(200),
+  subject: z.string().trim().max(200).optional(),
   description: z.string().trim().min(3).max(5000),
   email: z.union([z.string().trim().email(), z.literal("")]).optional(),
   url: z.string().url().max(2000),
@@ -59,12 +57,6 @@ const formatDescription = ({
 export const POST = async (request: NextRequest) => {
   try {
     const payload = reportSchema.parse(await request.json());
-    if (!getReportPanels(payload.section).includes(payload.panel as never)) {
-      return NextResponse.json(
-        { error: "Invalid panel selected" },
-        { status: 400 },
-      );
-    }
 
     // Railway supplies x-real-ip. A shared fallback bucket still protects the
     // public endpoint if a deployment is temporarily missing that header.
@@ -97,7 +89,7 @@ export const POST = async (request: NextRequest) => {
         method: "POST",
         headers: { Authorization: token, "content-type": "application/json" },
         body: JSON.stringify({
-          name: `[Report] ${payload.daoId.toUpperCase()} — ${payload.panel}`,
+          name: `[Report] ${payload.daoId.toUpperCase()} — ${payload.panel}${payload.subject ? ` (${payload.subject})` : ""}`,
           markdown_description: formatDescription(payload),
         }),
       },

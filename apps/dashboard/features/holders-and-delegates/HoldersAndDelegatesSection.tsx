@@ -11,6 +11,7 @@ import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-gr
 import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { SwitcherDate } from "@/shared/components";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
@@ -97,10 +98,17 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               activeTab={activeTab ?? defaultTab}
               onTabChange={(value) => handleTabChange(value as TabId)}
             />
-            <SwitcherDate
-              defaultValue={days || defaultDays}
-              setTimeInterval={setDays}
-            />
+            <div className="flex items-center gap-2">
+              <SwitcherDate
+                defaultValue={days || defaultDays}
+                setTimeInterval={setDays}
+              />
+              <ReportPanelButton
+                panel={
+                  activeTab === "delegates" ? "Delegates" : "Token Holders"
+                }
+              />
+            </div>
           </div>
           {tabComponentMap[activeTab as TabId]}
         </SubSectionsContainer>

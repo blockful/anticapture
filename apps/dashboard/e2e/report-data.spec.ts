@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures";
 
 test.describe("Data report", () => {
-  test("submits a report from a DAO section", async ({ goto, page }) => {
+  test("submits a report from a panel flag icon", async ({ goto, page }) => {
     await goto("/ens/token-distribution");
     await page.route("**/api/report", async (route) => {
       await route.fulfill({
@@ -10,12 +10,7 @@ test.describe("Data report", () => {
       });
     });
 
-    await page.getByRole("button", { name: "Help" }).click();
-    await page.getByTestId("report-data-button").click();
-    await page
-      .getByRole("combobox", { name: "Which panel is incorrect?" })
-      .click();
-    await page.getByRole("option", { name: "Token distribution" }).click();
+    await page.getByTestId("report-panel-button").click();
     await page
       .getByLabel("What looks incorrect?")
       .fill("The displayed supply is stale.");
@@ -37,12 +32,7 @@ test.describe("Data report", () => {
       });
     });
 
-    await page.getByRole("button", { name: "Help" }).click();
-    await page.getByTestId("report-data-button").click();
-    await page
-      .getByRole("combobox", { name: "Which panel is incorrect?" })
-      .click();
-    await page.getByRole("option", { name: "Token distribution" }).click();
+    await page.getByTestId("report-panel-button").click();
     await page
       .getByLabel("What looks incorrect?")
       .fill("The displayed supply is stale.");
@@ -55,40 +45,35 @@ test.describe("Data report", () => {
     ).toBeVisible();
   });
 
-  test("submits current section context after sidebar navigation", async ({
+  test("submits correct panel name when switching tabs", async ({
     goto,
     page,
   }) => {
-    await goto("/ens");
-    let reportPayload: Record<string, string> | null = null;
+    await goto("/ens/holders-and-delegates");
+    let reportPayload: Record<string, unknown> | null = null;
     await page.route("**/api/report", async (route) => {
-      reportPayload = route.request().postDataJSON() as Record<string, string>;
+      reportPayload = route.request().postDataJSON() as Record<string, unknown>;
       await route.fulfill({
         contentType: "application/json",
         body: JSON.stringify({ message: "Report submitted successfully" }),
       });
     });
 
-    await page.getByRole("link", { name: /token distribution/i }).click();
-    await page.getByRole("button", { name: "Help" }).click();
-    await page.getByTestId("report-data-button").click();
-    await page
-      .getByRole("combobox", { name: "Which panel is incorrect?" })
-      .click();
-    await page.getByRole("option", { name: "Token distribution" }).click();
+    await page.getByRole("button", { name: "Delegates" }).click();
+    await page.getByTestId("report-panel-button").click();
     await page
       .getByLabel("What looks incorrect?")
-      .fill("The displayed supply is stale.");
+      .fill("Delegate data looks wrong.");
     await page.getByRole("button", { name: "Submit report" }).click();
 
     await expect(page.getByText("Report received")).toBeVisible();
-    expect(reportPayload).toEqual({
+    expect(reportPayload).toMatchObject({
       daoId: "ens",
-      section: "token-distribution",
-      panel: "Token distribution",
-      description: "The displayed supply is stale.",
+      panel: "Delegates",
+      description: "Delegate data looks wrong.",
       email: "",
-      url: "http://localhost:3000/ens/token-distribution",
     });
+    expect(reportPayload).not.toHaveProperty("section");
+    expect(reportPayload).toHaveProperty("url");
   });
 });

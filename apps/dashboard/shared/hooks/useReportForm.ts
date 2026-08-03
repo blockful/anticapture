@@ -8,8 +8,8 @@ import { z } from "zod";
 
 export const reportFormSchema = z.object({
   daoId: z.string().min(1),
-  section: z.string().min(1),
-  panel: z.string().min(1, "Choose the affected panel."),
+  panel: z.string().min(1),
+  subject: z.string().trim().max(200).optional(),
   description: z
     .string()
     .trim()
@@ -24,24 +24,43 @@ export const reportFormSchema = z.object({
 
 export type ReportFormValues = z.infer<typeof reportFormSchema>;
 
-type UseReportFormParams = Pick<ReportFormValues, "daoId" | "section" | "url">;
+type UseReportFormParams = {
+  daoId: string;
+  panel: string;
+  subject?: string;
+};
 
 const submitReport = async (data: ReportFormValues) => {
-  const response = await axios.post<{ message: string }>("/api/report", data);
+  // Capture URL at submission time to avoid the nuqs query-string bug
+  const payload = {
+    ...data,
+    url:
+      typeof window === "undefined"
+        ? "https://anticapture.com"
+        : window.location.href,
+  };
+  const response = await axios.post<{ message: string }>(
+    "/api/report",
+    payload,
+  );
   return response.data;
 };
 
 /** Manages validation and submission for a public dashboard data report. */
-export const useReportForm = ({ daoId, section, url }: UseReportFormParams) => {
+export const useReportForm = ({
+  daoId,
+  panel,
+  subject,
+}: UseReportFormParams) => {
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
     defaultValues: {
       daoId,
-      section,
-      panel: "",
+      panel,
+      subject: subject ?? "",
       description: "",
       email: "",
-      url,
+      url: "",
     },
   });
   const mutation = useMutation({ mutationFn: submitReport });

@@ -15,6 +15,7 @@ import {
   SubSectionsContainer,
 } from "@/shared/components/design-system/section";
 import { PillTabGroup } from "@/shared/components/design-system/tabs/pill-tab-group/PillTabGroup";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
 export const ServiceProvidersSection = () => {
@@ -35,21 +36,24 @@ export const ServiceProvidersSection = () => {
       icon={<Building2 className="section-layout-icon" />}
       description={PAGES_CONSTANTS.serviceProviders.description ?? ""}
       headerAction={
-        <a
-          href={UPDATE_STATUS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full lg:w-auto"
-        >
-          <Button
-            variant="primary"
-            size="md"
-            className="w-full whitespace-nowrap lg:w-auto"
+        <div className="flex items-center gap-2">
+          <a
+            href={UPDATE_STATUS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full lg:w-auto"
           >
-            <Pencil className="size-3.5" />
-            Update report status
-          </Button>
-        </a>
+            <Button
+              variant="primary"
+              size="md"
+              className="w-full whitespace-nowrap lg:w-auto"
+            >
+              <Pencil className="size-3.5" />
+              Update report status
+            </Button>
+          </a>
+          <ReportPanelButton panel="Service Providers" />
+        </div>
       }
     >
       {isError ? (
