@@ -1,5 +1,13 @@
 # @anticapture/offchain-indexer
 
+## 1.1.3
+
+### Patch Changes
+
+- [#2093](https://github.com/blockful/anticapture/pull/2093) [`a8ff095`](https://github.com/blockful/anticapture/commit/a8ff09574d94a73b944db87c37587daf96a4891a) Thanks [@pikonha](https://github.com/pikonha)! - Stop the proposal and vote sync streams from dropping rows at a page boundary that falls inside a `created` second. Both queries now filter with `created_gte` (writes upsert, so re-reading the boundary is idempotent) and page deeper with `skip` when a whole page lands on one second — the only case where the cursor cannot advance without losing rows. The four copies of that pagination logic now share one helper.
+
+- [#2084](https://github.com/blockful/anticapture/pull/2084) [`36c4f58`](https://github.com/blockful/anticapture/commit/36c4f589702100fb4a5b16c3611ee04a427023c2) Thanks [@brunod-e](https://github.com/brunod-e)! - Keep paginating through same-second bursts when re-reading Snapshot proposals and votes: a page that lands entirely on one `created` second now advances with `skip` instead of stepping to the next second, which silently dropped every row past the first page — leaving revealed Shutter votes stuck with their encrypted choices.
+
 ## 1.1.2
 
 ### Patch Changes

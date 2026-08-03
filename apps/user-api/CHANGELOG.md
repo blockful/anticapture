@@ -1,5 +1,18 @@
 # @anticapture/user-api
 
+## 0.3.1
+
+### Patch Changes
+
+- [#2084](https://github.com/blockful/anticapture/pull/2084) [`ff22247`](https://github.com/blockful/anticapture/commit/ff222472634dd5532d7716067cbbb34f8ad67485) Thanks [@brunod-e](https://github.com/brunod-e)! - Address PR review findings: keep the optimistic off-chain tally applied until
+  the replacement vote is actually indexed (and poll for it), drop optimistic
+  scores for ranked/quadratic ballots whose tally can't be predicted locally, use
+  Snapshot's `scores_total` as the turnout denominator for approval winners, stop
+  offering "Change vote" once voting has closed, render ENS avatars unoptimized so
+  arbitrary avatar hosts still load, align the validation metrics' activity day
+  with Authful's UTC usage buckets, drop retained daily figures at the day
+  boundary, and stop requiring `USER_API_METRICS_TOKEN` at boot.
+
 ## 0.3.0
 
 ### Minor Changes

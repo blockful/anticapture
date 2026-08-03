@@ -35,11 +35,16 @@ const PROPOSAL_FIELDS = `
   }
 `;
 
+// created_gte (not created_gt) so a page boundary that falls inside a `created`
+// second doesn't drop the rows sharing that second which didn't fit on the page.
+// Re-reading the boundary second is free: every write path upserts. `skip` pages
+// deeper into a second that fills a whole page, where the cursor cannot advance.
 const PROPOSALS_QUERY = `
-  query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
+  query ($spaceId: String!, $cursor: Int!, $skip: Int!, $pageSize: Int!) {
     proposals(
-      where: { space: $spaceId, created_gt: $cursor }
+      where: { space: $spaceId, created_gte: $cursor }
       first: $pageSize
+      skip: $skip
       orderBy: "created"
       orderDirection: asc
     ) {
@@ -98,11 +103,15 @@ const VOTE_FIELDS = `
   created
 `;
 
+// created_gte + skip for the same reason as PROPOSALS_QUERY above: with an
+// exclusive cursor, every page boundary that lands mid-second silently loses the
+// rest of that second — the common case here, since votes arrive in bursts.
 const VOTES_QUERY = `
-  query ($spaceId: String!, $cursor: Int!, $pageSize: Int!) {
+  query ($spaceId: String!, $cursor: Int!, $skip: Int!, $pageSize: Int!) {
     votes(
-      where: { space: $spaceId, created_gt: $cursor }
+      where: { space: $spaceId, created_gte: $cursor }
       first: $pageSize
+      skip: $skip
       orderBy: "created"
       orderDirection: asc
     ) {
@@ -149,64 +158,39 @@ export class SnapshotProvider implements DataProvider {
   async fetchProposals(
     cursor: string | null,
   ): Promise<{ data: OffchainProposal[]; nextCursor: string | null }> {
-    const cursorInt = cursor ? parseInt(cursor, 10) : 0;
-
-    const response = await this.query<{
-      proposals: z.input<typeof rawProposalSchema>[];
-    }>(PROPOSALS_QUERY, {
-      spaceId: this.spaceId,
-      cursor: cursorInt,
-      pageSize: PAGE_SIZE,
-    });
-
-    const proposals: OffchainProposal[] = response.proposals.map((p) =>
-      offchainProposalSchema(this.spaceId).parse(p),
+    const { rows, lastCreated, full } = await this.fetchPage(
+      PROPOSALS_QUERY,
+      "proposals",
+      { spaceId: this.spaceId, cursor: cursor ? parseInt(cursor, 10) : 0 },
+      (raw: z.input<typeof rawProposalSchema>) =>
+        offchainProposalSchema(this.spaceId).parse(raw),
+      (proposal) => proposal.id,
     );
 
-    const nextCursor =
-      proposals.length >= PAGE_SIZE
-        ? String(proposals[proposals.length - 1]!.created)
-        : null;
-
-    return { data: proposals, nextCursor };
+    return { data: rows, nextCursor: full ? String(lastCreated) : null };
   }
 
   async fetchProposalIdsSince(since: number): Promise<string[]> {
     const ids = new Set<string>();
     let cursor = since;
-    let skip = 0;
 
+    // Walks to the end: the caller diffs the full live set against the DB, so a
+    // partial answer would delete proposals that do exist. The Set absorbs the
+    // boundary second each step re-reads.
     while (true) {
-      const response = await this.query<{
-        proposals: { id: string; created: number }[];
-      }>(PROPOSAL_IDS_QUERY, {
-        spaceId: this.spaceId,
-        cursor,
-        skip,
-        pageSize: PAGE_SIZE,
-      });
+      const { rows, lastCreated, full } = await this.fetchPage(
+        PROPOSAL_IDS_QUERY,
+        "proposals",
+        { spaceId: this.spaceId, cursor },
+        (raw: { id: string; created: number }) => raw,
+        (proposal) => proposal.id,
+      );
 
-      if (response.proposals.length === 0) break;
+      for (const proposal of rows) ids.add(proposal.id);
 
-      for (const proposal of response.proposals) {
-        ids.add(proposal.id);
-      }
+      if (!full) break;
 
-      if (response.proposals.length < PAGE_SIZE) break;
-
-      const lastCreated =
-        response.proposals[response.proposals.length - 1]!.created;
-
-      // created_gte re-fetches the boundary second (Set de-dupes), so a full page
-      // that ends on a shared `created` second keeps its later proposals. When the
-      // whole page shares one second, `created` cannot advance without dropping
-      // the rest of that second, so page deeper into it with `skip` instead.
-      if (lastCreated === response.proposals[0]!.created) {
-        skip += PAGE_SIZE;
-      } else {
-        cursor = lastCreated;
-        skip = 0;
-      }
+      cursor = lastCreated!;
     }
 
     return [...ids];
@@ -215,26 +199,16 @@ export class SnapshotProvider implements DataProvider {
   async fetchVotes(
     cursor: string | null,
   ): Promise<{ data: OffchainVote[]; nextCursor: string | null }> {
-    const cursorInt = cursor ? parseInt(cursor, 10) : 0;
-
-    const response = await this.query<{
-      votes: z.input<typeof rawVoteSchema>[];
-    }>(VOTES_QUERY, {
-      spaceId: this.spaceId,
-      cursor: cursorInt,
-      pageSize: PAGE_SIZE,
-    });
-
-    const votes: OffchainVote[] = response.votes.map((v) =>
-      toOffchainVote(this.spaceId).parse(v),
+    const { rows, lastCreated, full } = await this.fetchPage(
+      VOTES_QUERY,
+      "votes",
+      { spaceId: this.spaceId, cursor: cursor ? parseInt(cursor, 10) : 0 },
+      (raw: z.input<typeof rawVoteSchema>) =>
+        toOffchainVote(this.spaceId).parse(raw),
+      (vote) => `${vote.proposalId}:${vote.voter}`,
     );
 
-    const nextCursor =
-      votes.length >= PAGE_SIZE
-        ? String(votes[votes.length - 1]!.created)
-        : null;
-
-    return { data: votes, nextCursor };
+    return { data: rows, nextCursor: full ? String(lastCreated) : null };
   }
 
   async fetchProposalsByIds(ids: string[]): Promise<OffchainProposal[]> {
@@ -259,44 +233,81 @@ export class SnapshotProvider implements DataProvider {
     // the upsert would do anyway.
     const votesByKey = new Map<string, OffchainVote>();
     let cursor = 0;
+
+    // Walks to the end: a single proposal can hold more than PAGE_SIZE votes, and
+    // a vote missed here keeps its encrypted choice forever — writing the revealed
+    // tally is what drops the proposal from getRevealPendingProposalIds.
+    while (true) {
+      const { rows, lastCreated, full } = await this.fetchPage(
+        VOTES_BY_PROPOSAL_IDS_QUERY,
+        "votes",
+        { ids, cursor },
+        (raw: z.input<typeof rawVoteSchema>) =>
+          toOffchainVote(this.spaceId).parse(raw),
+        (vote) => `${vote.proposalId}:${vote.voter}`,
+      );
+
+      for (const vote of rows) {
+        votesByKey.set(`${vote.proposalId}:${vote.voter}`, vote);
+      }
+
+      if (!full) break;
+
+      cursor = lastCreated!;
+    }
+
+    return [...votesByKey.values()];
+  }
+
+  /**
+   * Reads one page at `cursor`, then keeps paging with `skip` while the whole
+   * page sits on a single `created` second.
+   *
+   * Every query here filters with created_gte, so the caller can advance to
+   * `lastCreated` without dropping rows that share that second. The one case
+   * that breaks is a page filled entirely by one second: `lastCreated` equals
+   * where we started, so stepping to it makes no progress and stepping past it
+   * drops the overflow. `skip` walks that second instead.
+   *
+   * Rows are de-duped by `key`: Postgres rejects a batch upsert that touches the
+   * same row twice, and Snapshot's ordering within a shared second isn't
+   * guaranteed stable across requests. `full` reports whether the last page came
+   * back full — the length of the de-duped result can't answer that.
+   */
+  private async fetchPage<Raw, Row extends { created: number }>(
+    queryString: string,
+    field: "proposals" | "votes",
+    variables: Record<string, unknown>,
+    parse: (raw: Raw) => Row,
+    key: (row: Row) => string,
+  ): Promise<{ rows: Row[]; lastCreated: number | null; full: boolean }> {
+    const rowsByKey = new Map<string, Row>();
+    let lastCreated: number | null = null;
+    let full = false;
     let skip = 0;
 
-    // Paginated: a single proposal can hold more than PAGE_SIZE votes.
     while (true) {
-      const response = await this.query<{
-        votes: z.input<typeof rawVoteSchema>[];
-      }>(VOTES_BY_PROPOSAL_IDS_QUERY, {
-        ids,
-        cursor,
+      const response = await this.query<Record<string, Raw[]>>(queryString, {
+        ...variables,
         skip,
         pageSize: PAGE_SIZE,
       });
 
-      if (response.votes.length === 0) break;
+      const page = (response[field] ?? []).map(parse);
 
-      const page = response.votes.map((v) =>
-        toOffchainVote(this.spaceId).parse(v),
-      );
-      for (const vote of page) {
-        votesByKey.set(`${vote.proposalId}:${vote.voter}`, vote);
-      }
+      if (page.length === 0) break;
 
-      if (page.length < PAGE_SIZE) break;
+      for (const row of page) rowsByKey.set(key(row), row);
 
-      const lastCreated = page[page.length - 1]!.created;
-      // Same shared-second handling as fetchProposalIdsSince: a burst of more
-      // than PAGE_SIZE votes on one second must not be skipped — a reveal that
-      // lost them would persist their encrypted choices forever, since the
-      // proposal leaves getRevealPendingProposalIds once its tally is nonzero.
-      if (lastCreated === page[0]!.created) {
-        skip += PAGE_SIZE;
-      } else {
-        cursor = lastCreated;
-        skip = 0;
-      }
+      lastCreated = page[page.length - 1]!.created;
+      full = page.length >= PAGE_SIZE;
+
+      if (!full || lastCreated !== page[0]!.created) break;
+
+      skip += PAGE_SIZE;
     }
 
-    return [...votesByKey.values()];
+    return { rows: [...rowsByKey.values()], lastCreated, full };
   }
 
   private async query<T>(
