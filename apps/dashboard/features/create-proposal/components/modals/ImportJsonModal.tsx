@@ -1,10 +1,12 @@
 "use client";
 
+import { Upload } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { erc20Abi } from "viem";
 import { usePublicClient } from "wagmi";
 
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
@@ -30,6 +32,9 @@ interface ImportJsonModalProps {
   onOpenChange: (open: boolean) => void;
   onImport: (values: ImportedProposal) => void;
 }
+
+/** Generous next to a real proposal, small enough not to lock up the tab. */
+const MAX_UPLOAD_BYTES = 1_000_000;
 
 const Code = ({ children }: { children: React.ReactNode }) => (
   <code className="text-primary font-mono">{children}</code>
@@ -62,6 +67,8 @@ export const ImportJsonModal = ({
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cancel, Escape and the close button all stay live while decimals are being
   // read, and the lookup keeps running after the sheet is gone. Every attempt
@@ -78,6 +85,7 @@ export const ImportJsonModal = ({
     setText("");
     setError(null);
     setIsResolving(false);
+    setFileName(null);
   }, [open]);
 
   const close = () => {
@@ -85,7 +93,35 @@ export const ImportJsonModal = ({
     setText("");
     setError(null);
     setIsResolving(false);
+    setFileName(null);
     onOpenChange(false);
+  };
+
+  // A file lands in the textarea rather than importing straight away, so the
+  // document is reviewable (and editable) before it touches the form.
+  const loadFile = async (file: File) => {
+    // Same ticket as an edit: replacing the content abandons any read in
+    // flight, and a slow file can't land after the user moved on either.
+    const attempt = ++attemptRef.current;
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError("That file is too large to be a proposal document.");
+      return;
+    }
+
+    let contents: string;
+    try {
+      contents = await file.text();
+    } catch {
+      if (attemptRef.current !== attempt) return;
+      setError("Couldn't read that file.");
+      return;
+    }
+
+    if (attemptRef.current !== attempt) return;
+    setText(contents);
+    setFileName(file.name);
+    setError(null);
   };
 
   const handleConfirm = async () => {
@@ -164,7 +200,7 @@ export const ImportJsonModal = ({
         onOpenChange(o);
       }}
       title="Import JSON"
-      description="Paste a proposal document to fill the form fields."
+      description="Paste or upload a proposal document to fill the form fields."
       cancelLabel="Cancel"
       confirmLabel="Apply"
       onCancel={close}
@@ -187,6 +223,17 @@ export const ImportJsonModal = ({
               attemptRef.current += 1;
               setText(e.target.value);
               setError(null);
+              // The content is the user's now, not the file's.
+              setFileName(null);
+            }}
+            // Without both handlers the browser navigates away to the dropped
+            // file instead of handing it over.
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              const file = e.dataTransfer.files?.[0];
+              if (!file) return;
+              e.preventDefault();
+              void loadFile(file);
             }}
             placeholder={PROPOSAL_JSON_PLACEHOLDER}
             // Capped so a long paste (or a drag on the native resize grip)
@@ -195,6 +242,32 @@ export const ImportJsonModal = ({
             error={Boolean(error)}
             spellCheck={false}
             aria-label="Proposal JSON"
+          />
+          <div className="flex items-center gap-3 pt-0.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-1.5"
+            >
+              <Upload className="size-3.5" />
+              Upload .json
+            </Button>
+            <span className="text-secondary truncate text-xs">
+              {fileName ?? "or drop one into the box above"}
+            </span>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void loadFile(file);
+              // Cleared so picking the same file twice fires onChange again.
+              e.target.value = "";
+            }}
           />
           {error ? (
             <span className="text-error text-xs">{error}</span>
