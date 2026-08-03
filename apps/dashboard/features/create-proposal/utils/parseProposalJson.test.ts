@@ -183,11 +183,16 @@ describe("parseProposalJson", () => {
           }),
         );
 
+      // argTree stringifies whatever it finds, so an unquoted leaf doesn't
+      // fail, it changes: [null] encodes the string "null".
       it.each([
         ["a plain number", "[1, 2, 3]"],
         ["a lossy number", "[1000000000000000001]"],
-      ])("rejects %s leaf", (_label, arg) => {
-        expectRejected(withArg(arg), "actions[0].args[0]", "quote its numbers");
+        ["null", "[null]"],
+        ["a boolean", "[true]"],
+        ["a nested object", '[{"a":"1"}]'],
+      ])("rejects a %s leaf", (_label, arg) => {
+        expectRejected(withArg(arg), "actions[0].args[0]", "must quote");
       });
 
       it("takes the same leaves quoted", () => {

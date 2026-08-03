@@ -21,6 +21,17 @@ export const strictAddressSchema = z
   .min(1, "Required")
   .refine((v) => isAddress(v.trim()), "Must be a valid Ethereum address");
 
+const ETH_DECIMALS = 18;
+
+/**
+ * `parseUnits` rounds an over-precise amount instead of refusing it, so
+ * `0.0000001` of a 6-decimal token becomes 0 base units and the proposal
+ * transfers nothing, while `0.0000009` becomes 1. Nothing downstream notices, so
+ * an amount finer than the asset can hold has to be refused here.
+ */
+const fractionDigits = (amount: string): number =>
+  (amount.trim().split(".")[1] ?? "").length;
+
 export const positiveDecimalAmountSchema = z
   .string()
   .min(1, "Required")
@@ -82,7 +93,18 @@ export const ProposalFormSchema = z
   })
   .superRefine((form, ctx) => {
     form.actions.forEach((action, index) => {
-      if (action.type !== "custom") return;
+      if (action.type !== "custom") {
+        const scale =
+          action.type === "erc20-transfer" ? action.decimals : ETH_DECIMALS;
+        if (fractionDigits(action.amount) > scale) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Has more decimal places than this asset can hold (${scale})`,
+            path: ["actions", index, "amount"],
+          });
+        }
+        return;
+      }
       // Every entry point lands here: a hand-built action, a JSON paste, and a
       // draft loaded from the API. Checking the call once, in the form, is what
       // lets the action row show what's wrong instead of leaving Publish

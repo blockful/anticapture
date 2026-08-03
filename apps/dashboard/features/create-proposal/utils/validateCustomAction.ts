@@ -241,8 +241,28 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
     return [{ path: ["functionName"], message: "Required" }];
   }
 
-  // Raw calldata wins in the encoder, which returns before it ever walks the
-  // ABI, so only the calldata itself matters here.
+  // Checked whatever produces the calldata, because the ABI is stored either
+  // way and the edit modal formats every function in it to fill its select. An
+  // action that publishes fine could still take that dialog down.
+  if (
+    action.abi.some(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        (item as { type?: unknown }).type === "function" &&
+        !isWellFormedFunction(item),
+    )
+  ) {
+    return [
+      {
+        path: ["abi"],
+        message: 'Has a "function" entry without a name or inputs',
+      },
+    ];
+  }
+
+  // Raw calldata wins in the encoder, which returns before it walks the ABI, so
+  // nothing else about the ABI matters once there is calldata.
   if (hasCalldata) {
     const calldata = action.calldata!.trim();
     if (!isHex(calldata) || calldata.length % 2 !== 0) {
@@ -259,25 +279,6 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
   if (action.abi.length === 0) {
     return [
       { path: ["abi"], message: "Required when a function name is used" },
-    ];
-  }
-
-  // Rejected wholesale rather than skipped: the encoder walks the same array,
-  // and the modal's function select formats every entry in it.
-  if (
-    action.abi.some(
-      (item) =>
-        typeof item === "object" &&
-        item !== null &&
-        (item as { type?: unknown }).type === "function" &&
-        !isWellFormedFunction(item),
-    )
-  ) {
-    return [
-      {
-        path: ["abi"],
-        message: 'Has a "function" entry without a name or inputs',
-      },
     ];
   }
 

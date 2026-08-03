@@ -127,17 +127,20 @@ const isCompositeType = (type: string): boolean =>
   parseArrayType(type) !== null || type.startsWith("tuple");
 
 /**
- * The quoting rule one level down. A composite arg is itself JSON, so
- * `"[1.000000000000000001]"` is already `[1]` by the time anything reads it, and
- * the stored text rounds the same way every time it is parsed again.
+ * The quoting rule one level down: inside a composite arg, every leaf has to be
+ * a JSON string.
+ *
+ * A composite is itself JSON, so `"[1.000000000000000001]"` is already `[1]` by
+ * the time anything reads it, and the stored text rounds the same way on every
+ * later parse. The other JSON scalars are no safer: `argTree` stringifies
+ * whatever it finds, so `[null]` sails through and encodes the four-character
+ * string `"null"`, and `[true]` encodes `"true"` even where a `string` was
+ * declared. Quoted leaves are the one form that means what it says.
  */
-const holdsUnquotedNumber = (value: unknown): boolean => {
-  if (typeof value === "number") return true;
-  if (Array.isArray(value)) return value.some(holdsUnquotedNumber);
-  if (typeof value === "object" && value !== null) {
-    return Object.values(value).some(holdsUnquotedNumber);
-  }
-  return false;
+const holdsUnquotedLeaf = (value: unknown): boolean => {
+  if (typeof value === "string") return false;
+  if (Array.isArray(value)) return value.some(holdsUnquotedLeaf);
+  return true;
 };
 
 // Unknown keys are stripped rather than rejected, so a saved draft (which
@@ -195,12 +198,12 @@ const ProposalJsonSchema = z
         } catch {
           return; // malformed JSON is the form's to report
         }
-        if (!holdsUnquotedNumber(parsed)) return;
+        if (!holdsUnquotedLeaf(parsed)) return;
 
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            "must quote its numbers: a JSON number can silently change the value",
+            "must quote every value inside it: JSON numbers, booleans and null all reach the calldata as something else",
           path: ["actions", index, "args", i],
         });
       });

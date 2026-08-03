@@ -61,12 +61,24 @@ describe("customActionIssues", () => {
   });
 
   describe("calldata", () => {
-    it("accepts hex, and skips every abi check", () => {
+    it("accepts hex, and skips the rest of the abi checks", () => {
       expect(
         customActionIssues(
           action({ calldata: "0xa9059cbb", abi: ["garbage"] }),
         ),
       ).toEqual([]);
+    });
+
+    // The ABI is stored either way, and the edit modal formats every function in
+    // it to fill its select: an action that publishes fine can still take that
+    // dialog down.
+    it("still reports a malformed function entry", () => {
+      expectIssue(
+        customActionIssues(
+          action({ calldata: "0xa9059cbb", abi: [{ type: "function" }] }),
+        ),
+        ["abi"],
+      );
     });
 
     it("accepts a bare 0x, the empty-calldata form viem produces", () => {
