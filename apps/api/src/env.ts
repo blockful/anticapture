@@ -51,6 +51,11 @@ const envSchema = z
     REDIS_URL: z.string().optional(),
     PORT: z.coerce.number().default(42069),
 
+    // Injected by Railway. Reported on /health so gateful (and the deploy
+    // gate behind it) can tell which release is actually serving the
+    // OpenAPI schemas gateful merges into its spec.
+    RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
+
     // Revenue (ENS-only) Dune configuration
     REVENUE_DUNE_API_KEY: z.string().optional(),
     REVENUE_DUNE_ACTIONS_QUERY_ID: duneQueryId.optional(),

@@ -126,11 +126,38 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Full history: the per-upstream commits resolved below can be many
+          # releases back, and a shallow clone would resolve to nothing.
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      # Same reasoning as deploy.yaml: gateful merges its upstreams' OpenAPI
+      # into /docs/json live, so a preview whose gateful is up but whose
+      # relayer (or DAO API, or address enrichment) is still deploying serves
+      # an inconsistent spec, and the preview's codegen bakes it in.
+      - name: Resolve the commits each upstream should be serving
+        id: upstreams
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          resolve() {
+            sha=$(git log --first-parent -1 --format=%H "${HEAD_SHA}" -- "$@")
+            printf '%s' "$(git rev-list --first-parent "${sha}..${HEAD_SHA}" | tr '\n' ',')${sha}"
+          }
+          shas=$(jq -cn \
+            --arg dao "$(resolve apps/api infra/api)" \
+            --arg relayer "$(resolve apps/relayer infra/relayer)" \
+            --arg enrichment "$(resolve apps/address-enrichment infra/address-enrichment)" \
+            '{"dao-api": ($dao | split(",")),
+              "relayer": ($relayer | split(",")),
+              "address-enrichment": ($enrichment | split(","))}')
+          echo "shas=${shas}" >> "$GITHUB_OUTPUT"
 
       - name: Wait for preview gateful to be ready
         run: node scripts/wait-for-gateful.mjs
@@ -138,8 +165,11 @@ jobs:
           ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
           # Trusted PRs target their own preview, so wait for the exact PR commit.
           # Untrusted PRs target shared dev Gateful (which serves a different
-          # commit), so only assert reachability — leave the SHA unset.
+          # commit), so only assert reachability — leave the SHA unset. The
+          # upstream check rides along with it: the script skips it entirely
+          # when there is no expected gateful commit.
           EXPECTED_GATEFUL_SHA: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && github.event.pull_request.head.sha || '' }}
+          EXPECTED_UPSTREAM_SHAS: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && steps.upstreams.outputs.shas || '' }}
 
   deploy-vercel-preview:
     name: Deploy Vercel preview
