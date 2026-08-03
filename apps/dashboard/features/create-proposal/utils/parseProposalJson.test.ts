@@ -509,6 +509,125 @@ describe("parseProposalJson", () => {
         },
       );
 
+      // JSON.parse has already rounded these by the time the schema sees them,
+      // so the rounded value looks like a perfectly good integer.
+      it("rejects an arg past the precision of a JSON number", () => {
+        const result = parseProposalJson(
+          `{"actions":[{"type":"custom","contractAddress":"0x3333333333333333333333333333333333333333","abi":${JSON.stringify(setValueAbi)},"functionName":"setValue(address,uint256)","args":["vitalik.eth",1000000000000000001]}]}`,
+        );
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("actions[0].args[1]");
+        expect(result.error).toContain("precision");
+      });
+
+      it("takes the same figure quoted, which survives JSON.parse intact", () => {
+        const result = parseProposalJson(
+          `{"actions":[{"type":"custom","contractAddress":"0x3333333333333333333333333333333333333333","abi":${JSON.stringify(setValueAbi)},"functionName":"setValue(address,uint256)","args":["vitalik.eth","1000000000000000001"]}]}`,
+        );
+
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.value.actions?.[0]).toMatchObject({
+          args: ["vitalik.eth", "1000000000000000001"],
+        });
+      });
+
+      // parseArrayType calls .match on the type, so a bare {} used to throw a
+      // TypeError straight out of safeParse.
+      it("reports an abi input with no type instead of throwing", () => {
+        const run = () =>
+          parseProposalJson(
+            JSON.stringify({
+              actions: [
+                {
+                  type: "custom",
+                  contractAddress: "0x3333333333333333333333333333333333333333",
+                  abi: [
+                    {
+                      type: "function",
+                      name: "mystery",
+                      stateMutability: "nonpayable",
+                      inputs: [{}],
+                      outputs: [],
+                    },
+                  ],
+                  // The bare name skips the signature formatter, which is where
+                  // the guard used to sit.
+                  functionName: "mystery",
+                  args: ["1"],
+                },
+              ],
+            }),
+          );
+
+        expect(run).not.toThrow();
+        const result = run();
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("actions[0].abi");
+      });
+
+      describe("composite args", () => {
+        const arrayAbi = [
+          {
+            type: "function",
+            name: "setMany",
+            stateMutability: "nonpayable",
+            inputs: [{ name: "values", type: "uint256[]" }],
+            outputs: [],
+          },
+        ];
+
+        const withArgs = (args: unknown[]) =>
+          parseProposalJson(
+            JSON.stringify({
+              actions: [
+                {
+                  type: "custom",
+                  contractAddress: "0x3333333333333333333333333333333333333333",
+                  abi: arrayAbi,
+                  functionName: "setMany(uint256[])",
+                  args,
+                },
+              ],
+            }),
+          );
+
+        it("accepts a JSON array string", () => {
+          expect(withArgs(["[1, 2, 3]"]).ok).toBe(true);
+        });
+
+        // storageToArg swallows the parse error and hands back an empty array,
+        // which isArgComplete calls complete; encodeActions then re-parses the
+        // original text at publish and throws.
+        it("rejects a composite arg that isn't JSON", () => {
+          const result = withArgs(["not json"]);
+
+          expect(result.ok).toBe(false);
+          if (result.ok) return;
+          expect(result.error).toContain("actions[0].args[0]");
+          expect(result.error).toContain("must be a JSON array");
+        });
+
+        it("rejects a composite arg that is JSON but not an array", () => {
+          const result = withArgs(['{"nope":1}']);
+
+          expect(result.ok).toBe(false);
+          if (result.ok) return;
+          expect(result.error).toContain("must be a JSON array");
+        });
+
+        it("still rejects an array whose elements don't fit the type", () => {
+          const result = withArgs(['["not a number"]']);
+
+          expect(result.ok).toBe(false);
+          if (result.ok) return;
+          expect(result.error).toContain("actions[0].args[0]");
+        });
+      });
+
       it("skips the abi checks when raw calldata is supplied", () => {
         const result = parseProposalJson(
           customAction({ functionName: "missing()", calldata: "0xa9059cbb" }),

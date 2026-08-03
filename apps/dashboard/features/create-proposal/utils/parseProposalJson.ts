@@ -10,6 +10,7 @@ import {
 import {
   argsToTrees,
   buildEmpty,
+  parseArrayType,
 } from "@/features/create-proposal/utils/argTree";
 import { parseAbiStrict } from "@/features/create-proposal/utils/fetchAbi";
 import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
@@ -47,9 +48,28 @@ export type ParseProposalJsonResult =
   | { ok: true; value: ParsedProposalJson }
   | { ok: false; error: string };
 
-/** JSON authors write amounts as `"1.5"` or `1.5`; the form stores strings. */
+/**
+ * JSON authors write amounts as `"1.5"` or `1.5`; the form stores strings.
+ *
+ * Past 2^53 a JSON number is no longer the number that was written: JSON.parse
+ * rounds `1000000000000000001` to `1000000000000000000` before anything here
+ * runs, and the result is a clean-looking integer that encodes the wrong wei
+ * amount. Quoting is the only way to carry those exactly, so unquoted ones are
+ * refused rather than silently rounded.
+ */
 const numericString = z
   .union([z.string(), z.number()])
+  .superRefine((value, ctx) => {
+    if (typeof value !== "number") return;
+    if (Number.isFinite(value) && Math.abs(value) <= Number.MAX_SAFE_INTEGER) {
+      return;
+    }
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message:
+        "is past the precision of a JSON number; write it as a quoted string",
+    });
+  })
   .transform((value) => String(value).trim());
 
 // Held to the form's own rules rather than a parallel set. An action that
@@ -96,14 +116,34 @@ const ActionImportSchema = z.discriminatedUnion("type", [
 ]);
 
 /**
- * `parseAbiStrict` only guarantees each entry has a string `type`, so a
- * `{ "type": "function" }` with no name or inputs survives it. viem's
- * formatters assume both exist and throw on the way past.
+ * Every parameter needs a string `type` all the way down: `parseArrayType`
+ * calls `.match` on it, so a bare `{}` in `inputs` throws a TypeError out of
+ * the argument walk below rather than reporting a bad paste.
  */
-const isWellFormedFunction = (item: Abi[number]): item is AbiFunction =>
-  item.type === "function" &&
-  typeof (item as { name?: unknown }).name === "string" &&
-  Array.isArray((item as { inputs?: unknown }).inputs);
+const isWellFormedParam = (param: unknown): boolean => {
+  if (typeof param !== "object" || param === null) return false;
+  if (typeof (param as { type?: unknown }).type !== "string") return false;
+  const components = (param as { components?: unknown }).components;
+  if (components === undefined) return true;
+  return Array.isArray(components) && components.every(isWellFormedParam);
+};
+
+/**
+ * `parseAbiStrict` only guarantees each entry has a string `type`, so a
+ * `{ "type": "function" }` with no name, or one whose `inputs` hold empty
+ * objects, survives it. viem's formatters and our own argument walk both
+ * assume the full shape and throw on the way past.
+ */
+const isWellFormedFunction = (item: Abi[number]): item is AbiFunction => {
+  if (item.type !== "function") return false;
+  if (typeof (item as { name?: unknown }).name !== "string") return false;
+  const inputs = (item as { inputs?: unknown }).inputs;
+  return Array.isArray(inputs) && inputs.every(isWellFormedParam);
+};
+
+/** Mirrors argTree's own notion: these args are stored as JSON, not scalars. */
+const isCompositeType = (type: string): boolean =>
+  parseArrayType(type) !== null || type.startsWith("tuple");
 
 /** Never throws: an exotic input type still reaches viem's formatter. */
 const signatureOf = (fn: AbiFunction): string | null => {
@@ -163,6 +203,29 @@ const checkAbiCall = (
       code: z.ZodIssueCode.custom,
       message: `${signatureOf(fn) ?? fn.name} takes ${fn.inputs.length}, got ${args.length}`,
       path: ["actions", index, "args"],
+    });
+    return;
+  }
+
+  // Arrays and tuples are stored as JSON strings. `storageToArg` degrades a
+  // malformed one to an empty container, which `isArgComplete` then accepts as
+  // a complete dynamic array, so the paste lands and `encodeActions` throws at
+  // publish when it JSON.parses the original text. Check the raw string first.
+  const malformed = fn.inputs.flatMap((input, i) => {
+    if (!isCompositeType(input.type)) return [];
+    try {
+      return Array.isArray(JSON.parse(args[i])) ? [] : [i];
+    } catch {
+      return [i];
+    }
+  });
+  if (malformed.length > 0) {
+    malformed.forEach((i) => {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `must be a JSON array for ${fn.inputs[i].type}`,
+        path: ["actions", index, "args", i],
+      });
     });
     return;
   }

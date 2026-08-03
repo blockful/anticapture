@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { erc20Abi } from "viem";
 import { usePublicClient } from "wagmi";
 
@@ -63,16 +63,25 @@ export const ImportJsonModal = ({
   const [error, setError] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
 
+  // Cancel, Escape and the close button all stay live while decimals are being
+  // read, and the lookup keeps running after the sheet is gone. Every attempt
+  // takes a ticket; a resolved lookup whose ticket is no longer current is
+  // dropped, so a cancelled paste (or the previous one, after a reopen) can't
+  // land on the form later.
+  const attemptRef = useRef(0);
+
   // Start from a clean sheet on every open: a previous failed paste hanging
   // around next to a stale error reads as if the import already ran.
   useEffect(() => {
     if (!open) return;
+    attemptRef.current += 1;
     setText("");
     setError(null);
     setIsResolving(false);
   }, [open]);
 
   const close = () => {
+    attemptRef.current += 1;
     setText("");
     setError(null);
     setIsResolving(false);
@@ -80,6 +89,8 @@ export const ImportJsonModal = ({
   };
 
   const handleConfirm = async () => {
+    const attempt = ++attemptRef.current;
+
     const result = parseProposalJson(text);
     if (!result.ok) {
       setError(result.error);
@@ -117,6 +128,10 @@ export const ImportJsonModal = ({
           );
         },
       );
+      // Closed or superseded while the chain was answering: this result is for
+      // a paste the user already walked away from.
+      if (attemptRef.current !== attempt) return;
+
       if (needsChain) setIsResolving(false);
 
       if (!resolved.ok) {
@@ -133,10 +148,12 @@ export const ImportJsonModal = ({
   return (
     <Modal
       open={open}
+      // Routed through close() so dismissing with Escape or the X voids an
+      // in-flight decimals lookup the same way Cancel does.
       onOpenChange={(o) => {
         if (!o) {
-          setText("");
-          setError(null);
+          close();
+          return;
         }
         onOpenChange(o);
       }}
