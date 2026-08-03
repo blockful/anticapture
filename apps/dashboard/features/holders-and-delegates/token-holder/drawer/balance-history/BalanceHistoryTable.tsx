@@ -374,7 +374,11 @@ export const BalanceHistoryTable = ({
 
         return (
           <div className="group flex w-full items-center justify-between gap-3">
-            <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
+            {/* The avatar and the (always laid out) hover copy button each take
+                32px of this cap, so at max-w-40 the address was left with 96px
+                — under the ~101px a shortened address needs. It clips without
+                an ellipsis, so the shortfall read as a truncated character. */}
+            <div className="text-primary flex max-w-48 items-center gap-2 overflow-hidden">
               <DrawerAddressButton
                 address={fromAddress as `0x${string}`}
                 entityType="tokenHolder"
@@ -422,7 +426,12 @@ export const BalanceHistoryTable = ({
     {
       accessorKey: "toAddress",
       meta: {
-        columnClassName: "w-52",
+        // Wider than the From column on purpose: this cell ends in the
+        // explorer-link button instead of From's 16px arrow, and with equal
+        // widths the table's auto layout took those extra pixels out of the
+        // address — which clips without an ellipsis, so it read as a
+        // truncated character.
+        columnClassName: "w-64",
       },
       cell: ({ row }) => {
         const toAddress = row.getValue("toAddress") as string;
@@ -443,8 +452,12 @@ export const BalanceHistoryTable = ({
         }
 
         return (
-          <div className="group flex w-full items-center justify-between gap-3">
-            <div className="text-primary flex max-w-40 items-center gap-2 overflow-hidden">
+          <div className="group flex w-full items-center justify-between gap-1">
+            {/* The avatar and the (always laid out) hover copy button each take
+                32px of this cap, so at max-w-40 the address was left with 96px
+                — under the ~101px a shortened address needs. It clips without
+                an ellipsis, so the shortfall read as a truncated character. */}
+            <div className="text-primary flex max-w-48 items-center gap-2 overflow-hidden">
               <DrawerAddressButton
                 address={toAddress as `0x${string}`}
                 entityType="tokenHolder"
@@ -466,6 +479,7 @@ export const BalanceHistoryTable = ({
               </div>
             </div>
             <a
+              className="shrink-0"
               href={`${daoConfigByDaoId[daoId].daoOverview.chain.blockExplorers?.default.url}/tx/${row.original.id}`}
               target="_blank"
               rel="noopener noreferrer"

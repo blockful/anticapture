@@ -118,7 +118,10 @@ export const VoteComposition = ({
 
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
-      <div className="flex items-center justify-between gap-2">
+      {/* Reversed on mobile so the selector sits above the figure it labels:
+          side by side there, "Total VP Lost / N addresses" wraps to three
+          lines and squeezes the selector against the drawer edge. */}
+      <div className="flex flex-col-reverse gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-0.5">
           <span className="text-secondary text-alternative-xs font-mono font-medium uppercase">
             {view === "current" ? "Current Voting Power" : "Total VP Lost"}
