@@ -619,6 +619,22 @@ describe("parseProposalJson", () => {
           expect(result.error).toContain("must be a JSON array");
         });
 
+        // Same rounding as a bare numeric arg, one level down: JSON.parse
+        // flattens the leaf before anything inspects it, and publish re-parses
+        // the original text and encodes the rounded figure.
+        it("rejects an unsafe number nested inside the array", () => {
+          const result = withArgs(["[1000000000000000001]"]);
+
+          expect(result.ok).toBe(false);
+          if (result.ok) return;
+          expect(result.error).toContain("actions[0].args[0]");
+          expect(result.error).toContain("precision");
+        });
+
+        it("takes the same figure quoted inside the array", () => {
+          expect(withArgs(['["1000000000000000001"]']).ok).toBe(true);
+        });
+
         it("still rejects an array whose elements don't fit the type", () => {
           const result = withArgs(['["not a number"]']);
 
@@ -626,6 +642,78 @@ describe("parseProposalJson", () => {
           if (result.ok) return;
           expect(result.error).toContain("actions[0].args[0]");
         });
+      });
+
+      // encodeActions throws on a tuple whose components are missing, so the
+      // ABI has to declare them for the action to be encodable at all.
+      it.each([
+        ["a bare tuple", "tuple"],
+        ["a tuple array", "tuple[]"],
+      ])("rejects %s input with no components", (_label, type) => {
+        const run = () =>
+          parseProposalJson(
+            JSON.stringify({
+              actions: [
+                {
+                  type: "custom",
+                  contractAddress: "0x3333333333333333333333333333333333333333",
+                  abi: [
+                    {
+                      type: "function",
+                      name: "setStruct",
+                      stateMutability: "nonpayable",
+                      inputs: [{ name: "data", type }],
+                      outputs: [],
+                    },
+                  ],
+                  // Bare name again: the signature formatter is bypassed.
+                  functionName: "setStruct",
+                  args: ["[]"],
+                },
+              ],
+            }),
+          );
+
+        expect(run).not.toThrow();
+        const result = run();
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.error).toContain("actions[0].abi");
+      });
+
+      it("accepts a tuple input that declares its components", () => {
+        const result = parseProposalJson(
+          JSON.stringify({
+            actions: [
+              {
+                type: "custom",
+                contractAddress: "0x3333333333333333333333333333333333333333",
+                abi: [
+                  {
+                    type: "function",
+                    name: "setStruct",
+                    stateMutability: "nonpayable",
+                    inputs: [
+                      {
+                        name: "data",
+                        type: "tuple",
+                        components: [
+                          { name: "who", type: "address" },
+                          { name: "value", type: "uint256" },
+                        ],
+                      },
+                    ],
+                    outputs: [],
+                  },
+                ],
+                functionName: "setStruct",
+                args: ['["vitalik.eth", "1"]'],
+              },
+            ],
+          }),
+        );
+
+        expect(result.ok).toBe(true);
       });
 
       it("skips the abi checks when raw calldata is supplied", () => {

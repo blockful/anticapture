@@ -115,16 +115,35 @@ const ActionImportSchema = z.discriminatedUnion("type", [
   CustomImportSchema,
 ]);
 
+/** The type left after peeling every `[]` or `[k]` off a parameter. */
+const elementTypeOf = (type: string): string => {
+  let current = type;
+  for (
+    let array = parseArrayType(current);
+    array !== null;
+    array = parseArrayType(current)
+  ) {
+    current = array.elementType;
+  }
+  return current;
+};
+
 /**
  * Every parameter needs a string `type` all the way down: `parseArrayType`
  * calls `.match` on it, so a bare `{}` in `inputs` throws a TypeError out of
  * the argument walk below rather than reporting a bad paste.
+ *
+ * A tuple additionally has to declare its `components`. Without them the
+ * completeness walk sees a struct with no fields and calls any `[]` complete,
+ * while `encodeActions` refuses the same parameter outright at publish.
  */
 const isWellFormedParam = (param: unknown): boolean => {
   if (typeof param !== "object" || param === null) return false;
-  if (typeof (param as { type?: unknown }).type !== "string") return false;
+  const type = (param as { type?: unknown }).type;
+  if (typeof type !== "string") return false;
+
   const components = (param as { components?: unknown }).components;
-  if (components === undefined) return true;
+  if (components === undefined) return elementTypeOf(type) !== "tuple";
   return Array.isArray(components) && components.every(isWellFormedParam);
 };
 
@@ -144,6 +163,23 @@ const isWellFormedFunction = (item: Abi[number]): item is AbiFunction => {
 /** Mirrors argTree's own notion: these args are stored as JSON, not scalars. */
 const isCompositeType = (type: string): boolean =>
   parseArrayType(type) !== null || type.startsWith("tuple");
+
+/**
+ * The same precision trap as `numericString`, one level down. A leaf inside a
+ * composite arg is written as JSON too, so `[1000000000000000001]` is already
+ * `[1000000000000000000]` by the time it is inspected, and publish re-parses
+ * the same text and encodes the rounded figure.
+ */
+const holdsUnsafeNumber = (value: unknown): boolean => {
+  if (typeof value === "number") {
+    return !Number.isFinite(value) || Math.abs(value) > Number.MAX_SAFE_INTEGER;
+  }
+  if (Array.isArray(value)) return value.some(holdsUnsafeNumber);
+  if (typeof value === "object" && value !== null) {
+    return Object.values(value).some(holdsUnsafeNumber);
+  }
+  return false;
+};
 
 /** Never throws: an exotic input type still reaches viem's formatter. */
 const signatureOf = (fn: AbiFunction): string | null => {
@@ -211,19 +247,37 @@ const checkAbiCall = (
   // malformed one to an empty container, which `isArgComplete` then accepts as
   // a complete dynamic array, so the paste lands and `encodeActions` throws at
   // publish when it JSON.parses the original text. Check the raw string first.
-  const malformed = fn.inputs.flatMap((input, i) => {
+  const compositeIssues = fn.inputs.flatMap((input, i) => {
     if (!isCompositeType(input.type)) return [];
+
+    const notAnArray = {
+      index: i,
+      message: `must be a JSON array for ${input.type}`,
+    };
+
+    let parsed: unknown;
     try {
-      return Array.isArray(JSON.parse(args[i])) ? [] : [i];
+      parsed = JSON.parse(args[i]);
     } catch {
-      return [i];
+      return [notAnArray];
     }
+    if (!Array.isArray(parsed)) return [notAnArray];
+    if (holdsUnsafeNumber(parsed)) {
+      return [
+        {
+          index: i,
+          message:
+            "holds a number past the precision of a JSON number; write it as a quoted string",
+        },
+      ];
+    }
+    return [];
   });
-  if (malformed.length > 0) {
-    malformed.forEach((i) => {
+  if (compositeIssues.length > 0) {
+    compositeIssues.forEach(({ index: i, message }) => {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `must be a JSON array for ${fn.inputs[i].type}`,
+        message,
         path: ["actions", index, "args", i],
       });
     });
