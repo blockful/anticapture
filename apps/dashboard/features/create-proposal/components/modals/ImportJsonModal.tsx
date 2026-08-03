@@ -201,8 +201,9 @@ export const ImportJsonModal = ({
           ) : (
             <span className="text-secondary text-xs">
               Every field is optional, and only the ones present are replaced.
-              Recipients take an address or ENS, and amounts are human-readable
-              rather than wei.
+              Recipients take an address or ENS, amounts are human-readable
+              rather than wei, and every figure has to be quoted so JSON
+              can&apos;t round it.
             </span>
           )}
         </div>

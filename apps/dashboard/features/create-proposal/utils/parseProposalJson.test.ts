@@ -59,14 +59,14 @@ describe("parseProposalJson", () => {
   });
 
   describe("actions", () => {
-    it("accepts an ETH transfer and stringifies a numeric amount", () => {
+    it("accepts an ETH transfer", () => {
       const result = parseProposalJson(
         JSON.stringify({
           actions: [
             {
               type: "eth-transfer",
               recipient: "0x1111111111111111111111111111111111111111",
-              amount: 1.5,
+              amount: "1.5",
             },
           ],
         }),
@@ -154,20 +154,30 @@ describe("parseProposalJson", () => {
       expect(result.error).toContain("actions[0]");
     });
 
-    // JSON.parse drops the last digit of this before the schema sees it, and
-    // the amount becomes an exact on-chain figure.
-    it("rejects an unquoted amount with more digits than a double holds", () => {
+    // JSON.parse has already rewritten these by the time the schema runs, and
+    // the original text is gone, so a number is refused outright rather than
+    // inspected: 1.000000000000000001 is simply 1 here, indistinguishable from
+    // someone writing 1.
+    // The literals are spliced in as raw text rather than written as TS
+    // numbers: the compiler would round them the same way JSON.parse does, and
+    // eslint's no-loss-of-precision would flag them for exactly that reason.
+    it.each([
+      ["a fraction beyond a double", "0.123456789123456789"],
+      ["a fraction that collapses to an integer", "1.000000000000000001"],
+      ["an integer past 2^53", "1000000000000000001"],
+      ["a value a double does carry exactly", "1.5"],
+    ])("rejects %s written unquoted", (_label, literal) => {
       const result = parseProposalJson(
-        '{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":0.123456789123456789}]}',
+        `{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":${literal}}]}`,
       );
 
       expect(result.ok).toBe(false);
       if (result.ok) return;
       expect(result.error).toContain("actions[0].amount");
-      expect(result.error).toContain("precision");
+      expect(result.error).toContain("quoted");
     });
 
-    it("takes the same amount quoted", () => {
+    it("takes the full-precision amount quoted", () => {
       const result = parseProposalJson(
         '{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":"0.123456789123456789"}]}',
       );
@@ -178,17 +188,6 @@ describe("parseProposalJson", () => {
         amount: "0.123456789123456789",
       });
     });
-
-    it.each([1.5, 0.1, 100, 9007199254740991])(
-      "still takes %p unquoted, which a double carries exactly",
-      (amount) => {
-        const result = parseProposalJson(
-          `{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":${amount}}]}`,
-        );
-
-        expect(result.ok).toBe(true);
-      },
-    );
 
     it("rejects a contract address that is neither address nor ENS", () => {
       const result = parseProposalJson(
@@ -242,7 +241,7 @@ describe("parseProposalJson", () => {
                 },
               ],
               functionName: "setValue(uint256)",
-              args: [42],
+              args: ["42"],
             },
           ],
         }),
@@ -413,7 +412,7 @@ describe("parseProposalJson", () => {
         const result = parseProposalJson(
           customAction({
             functionName: "setValue(address,uint256)",
-            args: ["vitalik.eth", 42],
+            args: ["vitalik.eth", "42"],
           }),
         );
 
@@ -547,7 +546,7 @@ describe("parseProposalJson", () => {
 
       // JSON.parse has already rounded these by the time the schema sees them,
       // so the rounded value looks like a perfectly good integer.
-      it("rejects an arg past the precision of a JSON number", () => {
+      it("rejects an unquoted arg", () => {
         const result = parseProposalJson(
           `{"actions":[{"type":"custom","contractAddress":"0x3333333333333333333333333333333333333333","abi":${JSON.stringify(setValueAbi)},"functionName":"setValue(address,uint256)","args":["vitalik.eth",1000000000000000001]}]}`,
         );
@@ -555,7 +554,7 @@ describe("parseProposalJson", () => {
         expect(result.ok).toBe(false);
         if (result.ok) return;
         expect(result.error).toContain("actions[0].args[1]");
-        expect(result.error).toContain("precision");
+        expect(result.error).toContain("quoted");
       });
 
       it("takes the same figure quoted, which survives JSON.parse intact", () => {
@@ -631,8 +630,19 @@ describe("parseProposalJson", () => {
             }),
           );
 
-        it("accepts a JSON array string", () => {
-          expect(withArgs(["[1, 2, 3]"]).ok).toBe(true);
+        it("accepts a JSON array string with quoted leaves", () => {
+          expect(withArgs(['["1", "2", "3"]']).ok).toBe(true);
+        });
+
+        // Same reasoning as a bare arg: the composite is JSON too, so an
+        // unquoted leaf is already rewritten before it can be inspected.
+        it("rejects an unquoted number inside the array", () => {
+          const result = withArgs(["[1, 2, 3]"]);
+
+          expect(result.ok).toBe(false);
+          if (result.ok) return;
+          expect(result.error).toContain("actions[0].args[0]");
+          expect(result.error).toContain("quote its numbers");
         });
 
         // storageToArg swallows the parse error and hands back an empty array,
@@ -655,16 +665,13 @@ describe("parseProposalJson", () => {
           expect(result.error).toContain("must be a JSON array");
         });
 
-        // Same rounding as a bare numeric arg, one level down: JSON.parse
-        // flattens the leaf before anything inspects it, and publish re-parses
-        // the original text and encodes the rounded figure.
-        it("rejects an unsafe number nested inside the array", () => {
+        it("rejects a lossy number nested inside the array", () => {
           const result = withArgs(["[1000000000000000001]"]);
 
           expect(result.ok).toBe(false);
           if (result.ok) return;
           expect(result.error).toContain("actions[0].args[0]");
-          expect(result.error).toContain("precision");
+          expect(result.error).toContain("quote its numbers");
         });
 
         it("takes the same figure quoted inside the array", () => {
@@ -771,7 +778,7 @@ describe("parseProposalJson", () => {
         ["uint256", "1"],
         ["int128", "-1"],
         ["uint256[]", "[]"],
-        ["uint256[2]", "[1, 2]"],
+        ["uint256[2]", '["1", "2"]'],
         ["address[][]", "[]"],
       ])("accepts %s", (type, arg) => {
         const result = parseProposalJson(

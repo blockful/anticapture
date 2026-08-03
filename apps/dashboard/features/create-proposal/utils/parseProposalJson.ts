@@ -55,44 +55,35 @@ export type ParseProposalJsonResult =
   | { ok: false; error: string };
 
 /**
- * Whether a JSON number is still the number that was written. JSON.parse runs
- * before any validation here, and a double can't hold every decimal literal:
- * `1000000000000000001` arrives as `1000000000000000000`, and
- * `0.123456789123456789` as `0.12345678912345678`. Both look perfectly ordinary
- * afterwards, and these figures become exact on-chain amounts.
+ * Every figure that reaches the chain has to arrive quoted.
  *
- * Integers are trusted up to 2^53, where they are still exact. Anything else
- * has to round-trip through 15 significant digits, the most a double carries
- * faithfully. Quoting sidesteps the whole problem, so that's what the message
- * asks for.
+ * A JSON number is not the number that was written. `JSON.parse` runs before
+ * anything here and a double can't hold every decimal literal:
+ * `1000000000000000001` arrives as `1000000000000000000`,
+ * `0.123456789123456789` as `0.12345678912345678`, and
+ * `1.000000000000000001` as plain `1`. By then the original text is gone, so no
+ * amount of inspecting the parsed value can tell a rounded figure from one that
+ * was always round: that last case is indistinguishable from someone simply
+ * writing `1`. Guessing here would mean silently moving a different amount of
+ * money than the document asked for, so numbers are refused outright and the
+ * message says what to do instead.
+ *
+ * `decimals` stays a number: it is small, exact, and checked against the token
+ * contract anyway.
  */
-const survivesJson = (value: number): boolean => {
-  if (!Number.isFinite(value)) return false;
-  if (Number.isSafeInteger(value)) return true;
-  if (Math.abs(value) > Number.MAX_SAFE_INTEGER) return false;
-  return Number(value.toPrecision(15)) === value;
-};
-
-/** JSON authors write amounts as `"1.5"` or `1.5`; the form stores strings. */
-const numericString = z
-  .union([z.string(), z.number()])
-  .superRefine((value, ctx) => {
-    if (typeof value !== "number") return;
-    if (survivesJson(value)) return;
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message:
-        "is past the precision of a JSON number; write it as a quoted string",
-    });
+const quotedFigure = z
+  .string({
+    invalid_type_error:
+      "must be quoted: a JSON number can silently change the value",
   })
-  .transform((value) => String(value).trim());
+  .trim();
 
 // Held to the form's own rules rather than a parallel set. An action that
 // clears the import but not ProposalFormSchema would leave Publish disabled
 // with nothing on screen to explain why, since action rows show no errors.
 const recipient = z.string().trim().pipe(addressOrEnsSchema);
 const tokenAddress = z.string().trim().pipe(strictAddressSchema);
-const amount = numericString.pipe(positiveDecimalAmountSchema);
+const amount = quotedFigure.pipe(positiveDecimalAmountSchema);
 
 const EthTransferImportSchema = z.object({
   type: z.literal("eth-transfer"),
@@ -119,9 +110,9 @@ const CustomImportSchema = z.object({
   contractAddress: z.string().trim().pipe(addressOrEnsSchema),
   abi: z.unknown().optional(),
   functionName: z.string().trim().optional(),
-  args: z.array(numericString).optional(),
+  args: z.array(quotedFigure).optional(),
   calldata: z.string().trim().optional(),
-  value: numericString.optional(),
+  value: quotedFigure.optional(),
 });
 
 const ActionImportSchema = z.discriminatedUnion("type", [
@@ -180,16 +171,16 @@ const isCompositeType = (type: string): boolean =>
   parseArrayType(type) !== null || type.startsWith("tuple");
 
 /**
- * The same precision trap as `numericString`, one level down. A leaf inside a
- * composite arg is written as JSON too, so `[1000000000000000001]` is already
- * `[1000000000000000000]` by the time it is inspected, and publish re-parses
- * the same text and encodes the rounded figure.
+ * The same rule as `quotedFigure`, one level down. A composite arg is itself
+ * JSON, so `"[1.000000000000000001]"` is already `[1]` when it gets here and
+ * publish re-parses the identical text: an unquoted leaf is exactly as lossy
+ * inside an array as it is outside one.
  */
-const holdsUnsafeNumber = (value: unknown): boolean => {
-  if (typeof value === "number") return !survivesJson(value);
-  if (Array.isArray(value)) return value.some(holdsUnsafeNumber);
+const holdsUnquotedNumber = (value: unknown): boolean => {
+  if (typeof value === "number") return true;
+  if (Array.isArray(value)) return value.some(holdsUnquotedNumber);
   if (typeof value === "object" && value !== null) {
-    return Object.values(value).some(holdsUnsafeNumber);
+    return Object.values(value).some(holdsUnquotedNumber);
   }
   return false;
 };
@@ -329,12 +320,12 @@ const checkAbiCall = (
       return [notAnArray];
     }
     if (!Array.isArray(parsed)) return [notAnArray];
-    if (holdsUnsafeNumber(parsed)) {
+    if (holdsUnquotedNumber(parsed)) {
       return [
         {
           index: i,
           message:
-            "holds a number past the precision of a JSON number; write it as a quoted string",
+            "must quote its numbers: a JSON number can silently change the value",
         },
       ];
     }
