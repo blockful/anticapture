@@ -5,8 +5,9 @@ import {
 } from "@/features/create-proposal/utils/resolveImportedDecimals";
 
 const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+const DAI = "0x6b175474e89094c44da98b954eedeac495271d0f";
 
-const erc20 = (overrides: Partial<PendingAction> = {}): PendingAction =>
+const erc20 = (overrides: Record<string, unknown> = {}) =>
   ({
     type: "erc20-transfer",
     recipient: "0x1111111111111111111111111111111111111111",
@@ -21,6 +22,8 @@ const ethTransfer: PendingAction = {
   amount: "1.5",
 };
 
+const reads = (decimals: number) => async () => decimals;
+
 describe("needsDecimalsLookup", () => {
   it("is false without an ERC-20 transfer, so no RPC is required", () => {
     expect(needsDecimalsLookup([ethTransfer])).toBe(false);
@@ -34,7 +37,7 @@ describe("needsDecimalsLookup", () => {
 
 describe("resolveImportedDecimals", () => {
   it("fills decimals from the token when the document omits them", async () => {
-    const result = await resolveImportedDecimals([erc20()], async () => 6);
+    const result = await resolveImportedDecimals([erc20()], reads(6));
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -46,8 +49,8 @@ describe("resolveImportedDecimals", () => {
 
   it("accepts a supplied value the token agrees with", async () => {
     const result = await resolveImportedDecimals(
-      [erc20({ decimals: 6 } as Partial<PendingAction>)],
-      async () => 6,
+      [erc20({ decimals: 6 })],
+      reads(6),
     );
 
     expect(result.ok).toBe(true);
@@ -57,8 +60,8 @@ describe("resolveImportedDecimals", () => {
   // units, a million times the amount the row displays.
   it("rejects a supplied value the token disagrees with", async () => {
     const result = await resolveImportedDecimals(
-      [erc20({ decimals: 18 } as Partial<PendingAction>)],
-      async () => 6,
+      [erc20({ decimals: 18 })],
+      reads(6),
     );
 
     expect(result.ok).toBe(false);
@@ -67,29 +70,23 @@ describe("resolveImportedDecimals", () => {
     expect(result.error).toContain("reports 6, not 18");
   });
 
-  it("reports which action failed when the read throws", async () => {
-    const result = await resolveImportedDecimals(
-      [ethTransfer, erc20()],
+  it.each([
+    [
+      "the read throws",
       async () => {
         throw new Error("execution reverted");
       },
-    );
+      "couldn't read decimals",
+    ],
+    ["the contract answers with nonsense", reads(Number.NaN), "tokenAddress"],
+  ])("refuses the import when %s", async (_label, read, fragment) => {
+    const result = await resolveImportedDecimals([ethTransfer, erc20()], read);
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.error).toContain("actions[1].tokenAddress");
-    expect(result.error).toContain("couldn't read decimals");
-  });
-
-  it("rejects a contract that answers with something unusable", async () => {
-    const result = await resolveImportedDecimals(
-      [erc20()],
-      async () => Number.NaN,
-    );
-
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.error).toContain("actions[0].tokenAddress");
+    // Points at the offending action, not the first one.
+    expect(result.error).toContain("actions[1]");
+    expect(result.error).toContain(fragment);
   });
 
   it("passes other action types through untouched and never reads", async () => {
@@ -112,9 +109,8 @@ describe("resolveImportedDecimals", () => {
   });
 
   it("resolves each transfer against its own token", async () => {
-    const dai = "0x6b175474e89094c44da98b954eedeac495271d0f";
     const result = await resolveImportedDecimals(
-      [erc20(), erc20({ tokenAddress: dai } as Partial<PendingAction>)],
+      [erc20(), erc20({ tokenAddress: DAI })],
       async (token) => (token === USDC ? 6 : 18),
     );
 
