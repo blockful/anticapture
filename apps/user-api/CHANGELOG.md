@@ -1,5 +1,30 @@
 # @anticapture/user-api
 
+## 0.3.1
+
+### Patch Changes
+
+- [#2084](https://github.com/blockful/anticapture/pull/2084) [`ff22247`](https://github.com/blockful/anticapture/commit/ff222472634dd5532d7716067cbbb34f8ad67485) Thanks [@brunod-e](https://github.com/brunod-e)! - Address PR review findings: keep the optimistic off-chain tally applied until
+  the replacement vote is actually indexed (and poll for it), drop optimistic
+  scores for ranked/quadratic ballots whose tally can't be predicted locally, use
+  Snapshot's `scores_total` as the turnout denominator for approval winners, stop
+  offering "Change vote" once voting has closed, render ENS avatars unoptimized so
+  arbitrary avatar hosts still load, align the validation metrics' activity day
+  with Authful's UTC usage buckets, drop retained daily figures at the day
+  boundary, and stop requiring `USER_API_METRICS_TOKEN` at boot.
+
+## 0.3.0
+
+### Minor Changes
+
+- [#2085](https://github.com/blockful/anticapture/pull/2085) [`b85c215`](https://github.com/blockful/anticapture/commit/b85c21516e01cfe4e6a2ab487b34529be8e8a0d1) Thanks [@pikonha](https://github.com/pikonha)! - Add user API validation metrics with per-user email or wallet identifiers, login method, live token count, and request usage.
+
+## 0.2.0
+
+### Minor Changes
+
+- [#2072](https://github.com/blockful/anticapture/pull/2072) [`90a98bc`](https://github.com/blockful/anticapture/commit/90a98bc052455fd28dfdd0fd79351a2a4f815d4c) Thanks [@pikonha](https://github.com/pikonha)! - Add a user-facing 30-day daily request chart for self-service API keys, backed by resilient Gateful usage batching and tenant-scoped Authful storage. Gateful flushes with a new usage-only Authful credential (`USAGE_API_KEY` / `TOKEN_SERVICE_USAGE_API_KEY`) that can only record usage — the internet-facing edge never holds mint/revoke capability.
+
 ## 0.1.0
 
 ### Minor Changes

@@ -2,6 +2,7 @@ import { collectPrometheusMetrics } from "@anticapture/observability";
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { sql } from "drizzle-orm";
 import { bodyLimit } from "hono/body-limit";
+import { bearerAuth } from "hono/bearer-auth";
 
 import { forwardedHost, type AuthResolver } from "@/auth";
 import { apiKeysController } from "@/controllers/api-keys";
@@ -21,6 +22,7 @@ export type AppConfig = {
   // Present only when Authful provisioning is configured — the API-key surface
   // stays absent otherwise (env-gated, like Google / magic link).
   apiKeysService?: ApiKeysService;
+  metricsToken?: string;
 };
 
 export function createApp({
@@ -28,6 +30,7 @@ export function createApp({
   authResolver,
   draftsService,
   apiKeysService,
+  metricsToken,
 }: AppConfig): Hono {
   const app = new Hono();
 
@@ -50,6 +53,9 @@ export function createApp({
     }
   });
 
+  if (metricsToken) {
+    app.use("/metrics", bearerAuth({ token: metricsToken }));
+  }
   app.get("/metrics", async (c) => {
     const { body, contentType } = await collectPrometheusMetrics(exporter);
     return c.body(body, 200, { "Content-Type": contentType });

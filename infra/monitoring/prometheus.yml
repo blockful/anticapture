@@ -29,6 +29,15 @@ scrape_configs:
     static_configs:
       - targets: ["${AUTHFUL_ENDPOINT}"]
 
+  - job_name: anticapture-user-api
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    authorization:
+      type: Bearer
+      credentials: "${USER_API_METRICS_TOKEN}"
+    static_configs:
+      - targets: ["${USER_API_ENDPOINT}"]
+
   - job_name: anticapture-relayer
     metrics_path: "/metrics"
     scrape_interval: 15s
@@ -40,6 +49,12 @@ scrape_configs:
     scrape_interval: 15s
     static_configs:
       - targets: ["${ERPC_METRICS_ENDPOINT}"]
+
+  - job_name: anticapture-postgres-exporter
+    metrics_path: "/metrics"
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["${POSTGRES_EXPORTER_ENDPOINT}"]
 
   - job_name: tempo
     metrics_path: "/metrics"

@@ -35,5 +35,69 @@ Grafana provisions a single consolidated dashboard from
 cache, eRPC, resources). It uses the existing Prometheus datasource UID,
 `prometheus`.
 
+`grafana/dashboards/validation.json` provisions the restricted User API
+Validation dashboard. Its per-user table includes email addresses or wallet
+addresses as Prometheus labels, so keep both the User API `/metrics` bearer
+token and Grafana authentication enabled outside local development.
+
+PR preview environments disable Google OAuth and expose Grafana's username and
+password login form. They inherit `GF_SECURITY_ADMIN_USER` and
+`GF_SECURITY_ADMIN_PASSWORD` from the source Railway environment; keep those
+credentials configured there rather than committing them. Persistent
+environments continue using their configured authentication provider.
+
 The standalone `infra/erpc/Dockerfile.monitoring` image is legacy. Use this
 unified monitoring stack for the normal Anticapture Railway deployment.
+
+## Alert lifecycle
+
+Every Prometheus rule keeps a fired alert active for 15 minutes after its
+condition last matches. This recovery grace prevents brief metric gaps or
+short-lived improvements from immediately producing a resolved notification.
+The rule's `for` duration still controls how long a condition must persist
+before its initial firing notification.
+
+## PostgreSQL metrics
+
+Deploy a PostgreSQL exporter service from this directory with:
+
+- Dockerfile: `Dockerfile.postgres-exporter`
+- Railway config: `postgres-exporter.railway.toml`
+- `DATA_SOURCE_NAME`: the monitored database's private `DATABASE_URL`. To monitor
+  several Postgres instances from the same exporter, comma-separate their URLs;
+  each instance's metrics carry a `server` label and the PostgreSQL alerts group
+  by it.
+
+The exporter user needs `CONNECT` plus access to PostgreSQL statistics views.
+For a dedicated least-privilege user on PostgreSQL 10+, grant `pg_monitor`.
+Then set this variable on Prometheus:
+
+```text
+POSTGRES_EXPORTER_ENDPOINT=${{<postgres-exporter-service>.RAILWAY_PRIVATE_DOMAIN}}:9187
+```
+
+The exporter image is pinned to `postgres-exporter` v0.20.1. Its `/metrics`
+endpoint is also the Railway health check.
+
+## Railway RAM and egress metrics
+
+Not collected. A `railway-exporter` service (an API-backed exporter, since
+process metrics carry no container limits or public-network egress) ran here
+until 2026-07-27 and never produced a single `railway_service_*` sample in
+either environment — its account-level `RAILWAY_API_KEY` was rejected for the
+whole retained history, so the only visible effect was a permanently firing
+critical alert. Removed rather than left red. Railway's own dashboard still
+shows per-service CPU/RAM/egress; what is gone is _alerting_ on them.
+
+If you reinstate it, the blocker to solve first is the token: it must be scoped
+to the **workspace**, not to a personal account, or the Railway GraphQL API
+answers `Not Authorized`.
+
+The consolidated dashboard adds eRPC cache and PostgreSQL panels. Prometheus
+alerts when:
+
+- PostgreSQL is unreachable, stays above 80% of `max_connections`, or reports a deadlock;
+- eRPC cache hit rate stays below 50% under active traffic or cache operations fail.
+
+These thresholds are intentionally cost/availability guardrails. Tune them in
+`alerts.yml` after observing a full production traffic cycle.

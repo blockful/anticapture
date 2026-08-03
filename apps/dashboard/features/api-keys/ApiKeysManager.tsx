@@ -1,6 +1,6 @@
 "use client";
 
-import { Code, KeyRound, Plus } from "lucide-react";
+import { BookOpen, Code, KeyRound, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/shared/components";
@@ -9,8 +9,8 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
 import { Skeleton } from "@/shared/components/design-system/skeleton/Skeleton";
-import { useSession } from "@/shared/services/auth/client";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
+import { useAuthSession } from "@/shared/services/auth/useAuthSession";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
 
 import { ApiKeysTable } from "./components/ApiKeysTable";
@@ -21,7 +21,7 @@ import { UsageSection } from "./components/UsageSection";
 import { useApiKeys } from "./hooks/useApiKeys";
 
 export const ApiKeysManager = () => {
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending } = useAuthSession();
   const { openLogin } = useLogin();
   const isAuthed = !isPending && !!session;
   const userId = session?.user.id ?? null;
@@ -49,11 +49,16 @@ export const ApiKeysManager = () => {
   const [toDelete, setToDelete] = useState<UserApiKey | null>(null);
 
   // Plaintexts belong to exactly one account: a sign-out or a different user
-  // signing in must never inherit (or copy) the previous user's tokens.
+  // signing in must never inherit (or copy) the previous user's tokens. A
+  // create or delete the user is halfway through belongs to that account too.
+  // Both modals live outside the `isAuthed` branch, so they are closed here
+  // rather than left open to submit against whoever holds the session now.
   useEffect(() => {
     setSessionTokens({});
     setLastCreated(null);
     setCreated(null);
+    setCreateOpen(false);
+    setToDelete(null);
   }, [userId]);
 
   const handleCreate = (label: string) => {
@@ -104,22 +109,33 @@ export const ApiKeysManager = () => {
   return (
     <div className="flex w-full flex-col gap-6 p-5">
       <div className="flex flex-col gap-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row">
           <SectionTitle
             icon={<Code className="text-primary size-5" />}
             title="API Keys"
             description="Query Anticapture from Claude, Cursor, or Codex. Just ask in natural language."
           />
-          <Button
-            variant="primary"
-            size="md"
-            className="shrink-0"
-            // Anyone can browse the page; actions are what prompt sign-in.
-            onClick={() => (isAuthed ? setCreateOpen(true) : openLogin())}
-          >
-            <Plus className="size-3.5" />
-            Create key
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button variant="outline" size="md" asChild>
+              <a
+                href="https://docs.anticapture.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <BookOpen className="size-3.5" />
+                See our Docs
+              </a>
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              // Anyone can browse the page; actions are what prompt sign-in.
+              onClick={() => (isAuthed ? setCreateOpen(true) : openLogin())}
+            >
+              <Plus className="size-3.5" />
+              Create key
+            </Button>
+          </div>
         </div>
 
         {isPending || isLoading ? (
@@ -180,18 +196,17 @@ export const ApiKeysManager = () => {
         open={!!toDelete}
         onOpenChange={(open) => !open && setToDelete(null)}
         title="Delete API key?"
-        description={
-          toDelete
-            ? `This permanently deletes "${toDelete.label}". Any agent using it stops working right away. This can't be undone.`
-            : ""
-        }
         confirmLabel="Delete key"
         cancelLabel="Cancel"
         confirmVariant="destructive"
         isConfirmLoading={revoke.isPending}
         onConfirm={handleDelete}
       >
-        <div className="p-4" />
+        <span className="text-secondary text-sm">
+          {toDelete
+            ? `This permanently deletes "${toDelete.label}". Any agent using it stops working right away. This can't be undone.`
+            : ""}
+        </span>
       </Modal>
     </div>
   );

@@ -18,6 +18,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Full history: the DAO API commit resolved below can be many
+          # releases back, and a shallow clone would silently resolve to
+          # nothing and skip the gate.
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,6 +33,41 @@ jobs:
         id: author
         run: echo "name=$(git log -1 --format='%an')" >> "$GITHUB_OUTPUT"
 
+      # Gateful merges its upstreams' OpenAPI specs into its own on every
+      # /docs/json request, so waiting on gateful's commit alone is not enough:
+      # gateful can be up-to-date while a DAO API, the relayer or address
+      # enrichment (slower, separately watched builds) still serves the
+      # previous spec.
+      - name: Resolve the commits each upstream should be serving
+        id: upstreams
+        run: |
+          set -euo pipefail
+          # For each service whose OpenAPI gateful merges into /docs/json: the
+          # newest commit that touched the paths Railway watches to rebuild it,
+          # plus every commit after that. First-parent, because that is the
+          # diff Railway itself sees for a push to this branch.
+          #
+          # Deliberately not "did THIS push change the service": a push that
+          # leaves it alone while an earlier push is still deploying it
+          # (concurrency cancels the earlier waiter) would answer "no" and skip
+          # the gate while the old spec is still being served. And "or newer"
+          # rather than an exact commit, because Railway stamps a service with
+          # the head of the push that rebuilt it — the same commit only when
+          # that push carried exactly one.
+          resolve() {
+            sha=$(git log --first-parent -1 --format=%H -- "$@")
+            printf '%s' "$(git rev-list --first-parent "${sha}..HEAD" | tr '\n' ',')${sha}"
+          }
+          shas=$(jq -cn \
+            --arg dao "$(resolve apps/api infra/api)" \
+            --arg relayer "$(resolve apps/relayer infra/relayer)" \
+            --arg enrichment "$(resolve apps/address-enrichment infra/address-enrichment)" \
+            '{"dao-api": ($dao | split(",")),
+              "relayer": ($relayer | split(",")),
+              "address-enrichment": ($enrichment | split(","))}')
+          echo "shas=${shas}" >> "$GITHUB_OUTPUT"
+          echo "${shas}" | jq -r 'to_entries[] | "\(.key) must be serving \(.value[-1]) or newer"'
+
       # `vercel deploy` builds the dashboard, which runs @anticapture/client
       # codegen against the live gateful spec. Wait for gateful to serve this
       # exact commit first, or codegen races the redeploy and fails with
@@ -37,6 +77,7 @@ jobs:
         env:
           ANTICAPTURE_API_URL: ${{ secrets.GATEFUL_URL }}
           EXPECTED_GATEFUL_SHA: ${{ github.sha }}
+          EXPECTED_UPSTREAM_SHAS: ${{ steps.upstreams.outputs.shas }}
 
       - name: Deploy to Vercel
         env:

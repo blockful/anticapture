@@ -1,5 +1,6 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
+import { env } from "@/env";
 import { HealthResponseSchema } from "@/schemas/health";
 
 export function health(app: Hono) {
@@ -19,6 +20,10 @@ export function health(app: Hono) {
         },
       },
     }),
-    async (c) => c.json({ status: "ok" as const }, 200),
+    async (c) =>
+      c.json(
+        { status: "ok" as const, commit: env.RAILWAY_GIT_COMMIT_SHA },
+        200,
+      ),
   );
 }

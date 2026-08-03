@@ -1,7 +1,9 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
 import {
+  ActiveTokenUsageResponseSchema,
   ErrorResponseSchema,
+  ListActiveTokensQuerySchema,
   ListTokenUsageQuerySchema,
   ListTokensQuerySchema,
   MintTokenBodySchema,
@@ -21,6 +23,33 @@ const forbiddenResponse = {
 };
 
 export function tokensController(app: Hono, service: TokensService) {
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "listActiveUserTokenUsage",
+      path: "/tokens/active",
+      summary: "List recently used user-tenant tokens and request counts",
+      tags: ["tokens"],
+      request: { query: ListActiveTokensQuerySchema },
+      responses: {
+        200: {
+          description:
+            "User-tenant tokens used since the requested instant, with request counts",
+          content: {
+            "application/json": { schema: ActiveTokenUsageResponseSchema },
+          },
+        },
+      },
+    }),
+    async (c) => {
+      const { since } = c.req.valid("query");
+      return c.json(
+        { items: await service.activeUserTokenUsage(new Date(since)) },
+        200,
+      );
+    },
+  );
+
   app.openapi(
     createRoute({
       method: "post",

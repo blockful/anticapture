@@ -1,11 +1,12 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { Inbox, Info } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { BlankSlate } from "@/shared/components/design-system/blank-slate";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
-import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
+import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { UserApiKey } from "@/shared/services/user-api/apiKeysClient";
 
@@ -52,7 +53,8 @@ export const UsageSection = ({
   );
 
   return (
-    <Card className="p-4">
+    // On mobile the chart sits directly on the page (no card chrome/padding).
+    <Card className="lg:bg-surface-default border-0 bg-transparent p-0 lg:border lg:p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5">
           <p className="text-secondary text-sm font-medium">
@@ -74,32 +76,21 @@ export const UsageSection = ({
           <span className="text-secondary hidden text-sm font-medium lg:inline">
             Key
           </span>
-          <SegmentedControl
+          {/* Long key names are truncated by the Select's own ellipsis. */}
+          <Select
             items={filterOptions}
             value={activeKeyId}
-            size="sm"
             onValueChange={setSelectedKeyId}
-            className="hidden max-w-full overflow-x-auto lg:inline-flex"
-          />
-          <select
-            value={activeKeyId}
-            onChange={(event) => setSelectedKeyId(event.target.value)}
             aria-label="Filter usage by API key"
-            className="border-border-default bg-surface-default text-primary rounded-base border px-2 py-1 text-xs font-medium lg:hidden"
-          >
-            {filterOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            className="w-36 max-w-48 lg:w-auto lg:min-w-36"
+          />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="bg-surface-raised h-[300px] w-full animate-pulse rounded" />
+        <div className="bg-surface-raised h-[200px] w-full animate-pulse rounded" />
       ) : isError ? (
-        <div className="flex h-[300px] w-full flex-col items-center justify-center gap-1 text-center">
+        <div className="flex h-[200px] w-full flex-col items-center justify-center gap-1 text-center">
           <p className="text-primary text-sm font-medium">Usage unavailable</p>
           <p className="text-secondary text-sm">Try refreshing the page.</p>
         </div>
@@ -111,12 +102,15 @@ export const UsageSection = ({
           xAxisLabelInterval={(index) => index % 5 === 0 || index === 29}
           xAxisLabelFormatter={(value) => value}
           tooltipTotalLabel="Total"
-          height={300}
+          height={200}
         />
       ) : (
-        <div className="flex h-[300px] w-full items-center justify-center">
-          <p className="text-secondary text-sm">No requests yet</p>
-        </div>
+        <BlankSlate
+          variant="title"
+          icon={Inbox}
+          title="No requests yet"
+          description="Requests made with your API keys will appear here."
+        />
       )}
     </Card>
   );

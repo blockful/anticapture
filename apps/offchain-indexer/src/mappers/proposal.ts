@@ -41,6 +41,14 @@ export const rawProposalSchema = z.object({
     .array(z.number())
     .nullish()
     .transform((val) => val ?? []),
+  scores_total: z
+    .number()
+    .nullish()
+    .transform((val) => val ?? 0),
+  quorum: z
+    .number()
+    .nullish()
+    .transform((val) => val ?? 0),
   choices: z
     .array(z.string())
     .nullish()
@@ -66,8 +74,13 @@ export const rawProposalSchema = z.object({
 });
 
 export const offchainProposalSchema = (spaceId: string) =>
-  rawProposalSchema.transform((raw) => ({
-    ...raw,
-    spaceId,
-    updated: raw.updated ?? raw.created,
-  }));
+  rawProposalSchema.transform((raw) => {
+    const { scores_total: scoresTotal, ...proposal } = raw;
+
+    return {
+      ...proposal,
+      spaceId,
+      scoresTotal,
+      updated: raw.updated ?? raw.created,
+    };
+  });

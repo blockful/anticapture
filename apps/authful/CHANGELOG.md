@@ -1,5 +1,17 @@
 # @anticapture/authful
 
+## 0.6.0
+
+### Minor Changes
+
+- [#2085](https://github.com/blockful/anticapture/pull/2085) [`b85c215`](https://github.com/blockful/anticapture/commit/b85c21516e01cfe4e6a2ab487b34529be8e8a0d1) Thanks [@pikonha](https://github.com/pikonha)! - Add user API validation metrics with per-user email or wallet identifiers, login method, live token count, and request usage.
+
+## 0.5.0
+
+### Minor Changes
+
+- [#2072](https://github.com/blockful/anticapture/pull/2072) [`90a98bc`](https://github.com/blockful/anticapture/commit/90a98bc052455fd28dfdd0fd79351a2a4f815d4c) Thanks [@pikonha](https://github.com/pikonha)! - Add a user-facing 30-day daily request chart for self-service API keys, backed by resilient Gateful usage batching and tenant-scoped Authful storage. Gateful flushes with a new usage-only Authful credential (`USAGE_API_KEY` / `TOKEN_SERVICE_USAGE_API_KEY`) that can only record usage — the internet-facing edge never holds mint/revoke capability.
+
 ## 0.4.0
 
 ### Minor Changes

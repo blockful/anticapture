@@ -11,10 +11,18 @@ const HealthResponseSchema = z.object({
   upstreams: z.record(
     z.string(),
     z.object({
+      kind: z.enum([
+        "dao-api",
+        "relayer",
+        "address-enrichment",
+        "token-service",
+        "unknown",
+      ]),
       status: z.enum(["ok", "down"]),
       circuit: z.enum(["CLOSED", "OPEN", "HALF_OPEN"]),
       nextRetryIn: z.number().int().optional(),
       error: z.string().optional(),
+      commit: z.string().optional(),
     }),
   ),
 });
@@ -62,9 +70,13 @@ describe("gateway health route", () => {
       status: "ok",
       commit: "abc123",
       upstreams: {
-        ens: { status: "ok", circuit: "CLOSED" },
-        "relayer:ens": { status: "ok", circuit: "CLOSED" },
-        "address-enrichment": { status: "ok", circuit: "CLOSED" },
+        ens: { kind: "dao-api", status: "ok", circuit: "CLOSED" },
+        "relayer:ens": { kind: "relayer", status: "ok", circuit: "CLOSED" },
+        "address-enrichment": {
+          kind: "address-enrichment",
+          status: "ok",
+          circuit: "CLOSED",
+        },
       },
     });
     expect(fetch).toHaveBeenCalledWith("http://api.example/health", {
@@ -79,6 +91,46 @@ describe("gateway health route", () => {
         signal: expect.any(AbortSignal),
       },
     );
+  });
+
+  // The deploy gate reads this: gateful serves DAO API schemas in /docs/json,
+  // so "which release answered" has to travel with "did it answer".
+  it("surfaces the commit a DAO API reports, and copes without one", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation((url: string) =>
+          Promise.resolve(
+            url.includes("api.example")
+              ? new Response(
+                  JSON.stringify({ database: "ok", commit: "sha-1" }),
+                )
+              : new Response("pong"),
+          ),
+        ),
+    );
+
+    const { app } = appWithHealth({
+      daoApis: new Map([["ens", "http://api.example"]]),
+      daoRelayers: new Map([["ens", "http://relayer.example"]]),
+    });
+
+    const body = await readHealthResponse(await app.request("/health"));
+
+    // `kind` is what lets the deploy gate demand a commit from DAO APIs while
+    // exempting everything else.
+    expect(body.upstreams.ens).toEqual({
+      kind: "dao-api",
+      status: "ok",
+      circuit: "CLOSED",
+      commit: "sha-1",
+    });
+    expect(body.upstreams["relayer:ens"]).toEqual({
+      kind: "relayer",
+      status: "ok",
+      circuit: "CLOSED",
+    });
   });
 
   it("returns degraded when a DAO API returns an error", async () => {

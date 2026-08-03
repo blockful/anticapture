@@ -14,6 +14,10 @@ const envSchema = z.object({
   ANTICAPTURE_API_URL: z.string().url().optional(),
   ENS_CACHE_TTL_MINUTES: z.coerce.number().default(60),
   PORT: z.coerce.number().default(3001),
+  // Injected by Railway. Reported on /health so gateful — which merges this
+  // service's OpenAPI paths and schemas into its own spec — can tell which
+  // release is answering. See scripts/wait-for-gateful.mjs.
+  RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
