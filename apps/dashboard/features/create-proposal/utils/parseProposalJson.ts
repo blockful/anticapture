@@ -245,22 +245,40 @@ const signatureOf = (fn: AbiFunction): string | null => {
   }
 };
 
+type AbiFunctionLookup =
+  | { kind: "found"; fn: AbiFunction }
+  | { kind: "missing" }
+  | { kind: "ambiguous"; signatures: string[] };
+
 /**
- * Resolves a pasted `functionName` against an ABI the way `encodeActions` does,
- * by full signature or bare name, so validation and encoding never disagree
- * about which overload was meant. Malformed entries are skipped rather than
- * dereferenced, and `signatureOf` swallows a formatter throw.
+ * Resolves a pasted `functionName` against an ABI, by full signature or by bare
+ * name. Malformed entries are skipped rather than dereferenced, and
+ * `signatureOf` swallows a formatter throw.
+ *
+ * A bare name shared by several overloads is reported rather than resolved.
+ * `encodeActions` would take whichever came first in the array, and the choice
+ * is not even narrowed by the arguments: the uint validator accepts 0x hex, so
+ * an address-like value satisfies `foo(uint256)` exactly as well as
+ * `foo(address)`. Picking one would publish that selector on nothing better
+ * than ABI ordering.
  */
-const findAbiFunction = (
-  abi: Abi,
-  functionName: string,
-): AbiFunction | undefined =>
-  abi
-    .filter(isWellFormedFunction)
-    .find(
-      (item) =>
-        signatureOf(item) === functionName || item.name === functionName,
-    );
+const findAbiFunction = (abi: Abi, functionName: string): AbiFunctionLookup => {
+  const functions = abi.filter(isWellFormedFunction);
+
+  const bySignature = functions.find(
+    (item) => signatureOf(item) === functionName,
+  );
+  if (bySignature) return { kind: "found", fn: bySignature };
+
+  const sharingName = functions.filter((item) => item.name === functionName);
+  if (sharingName.length === 0) return { kind: "missing" };
+  if (sharingName.length === 1) return { kind: "found", fn: sharingName[0] };
+
+  return {
+    kind: "ambiguous",
+    signatures: sharingName.map((fn) => signatureOf(fn) ?? fn.name),
+  };
+};
 
 /**
  * Checks that an ABI-backed call is actually encodable, so the failure lands on
@@ -290,9 +308,9 @@ const checkAbiCall = (
     return;
   }
 
-  const fn = findAbiFunction(abi, functionName);
+  const lookup = findAbiFunction(abi, functionName);
 
-  if (!fn) {
+  if (lookup.kind === "missing") {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `"${functionName}" is not a function in this action's abi`,
@@ -300,6 +318,17 @@ const checkAbiCall = (
     });
     return;
   }
+
+  if (lookup.kind === "ambiguous") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `"${functionName}" is overloaded here (${lookup.signatures.join(", ")}); name the one you mean in full`,
+      path: ["actions", index, "functionName"],
+    });
+    return;
+  }
+
+  const fn = lookup.fn;
 
   // Scoped to the selected function: encodeActions only ever encodes this one,
   // so an exotic type sitting in some unrelated entry of a real contract's ABI
@@ -472,10 +501,11 @@ const toPendingAction = (action: ImportedAction): PendingAction => {
   // the edit modal matches its function select on signatures alone, so a bare
   // name would leave an imported row unable to hydrate its function or args.
   const pastedName = action.functionName ?? "";
-  const matched = pastedName ? findAbiFunction(abi, pastedName) : undefined;
-  const functionName = matched
-    ? (signatureOf(matched) ?? pastedName)
-    : pastedName;
+  const lookup = pastedName ? findAbiFunction(abi, pastedName) : undefined;
+  const functionName =
+    lookup?.kind === "found"
+      ? (signatureOf(lookup.fn) ?? pastedName)
+      : pastedName;
 
   return {
     type: "custom",

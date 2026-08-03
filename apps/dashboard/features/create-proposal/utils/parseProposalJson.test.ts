@@ -299,6 +299,36 @@ describe("parseProposalJson", () => {
       ).toMatchObject({ functionName: "setValue(address,uint256)" });
     });
 
+    describe("overloads", () => {
+      // uint accepts 0x hex, so an address-like arg validates against
+      // foo(uint256) just as well as foo(address). A bare name can't say which
+      // was meant, and picking the first would publish that selector.
+      const overloaded = (functionName: string) =>
+        custom({
+          abi: [
+            ...abiOf([{ name: "a", type: "uint256" }], "foo"),
+            ...abiOf([{ name: "a", type: "address" }], "foo"),
+          ],
+          functionName,
+          args: ["0x1111111111111111111111111111111111111111"],
+        });
+
+      it("rejects a bare name that several functions share", () => {
+        expectRejected(
+          parse(overloaded("foo")),
+          "actions[0].functionName",
+          "foo(uint256)",
+          "foo(address)",
+        );
+      });
+
+      it.each(["foo(uint256)", "foo(address)"])("takes %s", (signature) => {
+        expect(
+          expectOk(parse(overloaded(signature))).actions?.[0],
+        ).toMatchObject({ functionName: signature });
+      });
+    });
+
     // A string parameter carries its whitespace into the calldata, and the
     // manual form keeps it verbatim, so trimming here would make an imported
     // value encode differently from the same value typed in.
