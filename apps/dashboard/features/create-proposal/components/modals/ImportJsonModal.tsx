@@ -65,7 +65,14 @@ export const ImportJsonModal = ({
   const publicClient = usePublicClient(chainId ? { chainId } : undefined);
 
   const [text, setText] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  // Tagged by scope: an upload failure belongs beside the file button, a
+  // content failure beneath the textarea. One untagged slot painted the
+  // textarea as invalid whenever a file was rejected, even though the pasted
+  // document sitting in it was fine, and still the thing Apply would import.
+  const [error, setError] = useState<{
+    scope: "file" | "content";
+    message: string;
+  } | null>(null);
   const [isResolving, setIsResolving] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,7 +112,10 @@ export const ImportJsonModal = ({
     const attempt = ++attemptRef.current;
 
     if (file.size > MAX_UPLOAD_BYTES) {
-      setError("That file is too large to be a proposal document.");
+      setError({
+        scope: "file",
+        message: "That file is too large to be a proposal document.",
+      });
       return;
     }
 
@@ -114,7 +124,7 @@ export const ImportJsonModal = ({
       contents = await file.text();
     } catch {
       if (attemptRef.current !== attempt) return;
-      setError("Couldn't read that file.");
+      setError({ scope: "file", message: "Couldn't read that file." });
       return;
     }
 
@@ -129,7 +139,7 @@ export const ImportJsonModal = ({
 
     const result = parseProposalJson(text);
     if (!result.ok) {
-      setError(result.error);
+      setError({ scope: "content", message: result.error });
       return;
     }
 
@@ -142,9 +152,11 @@ export const ImportJsonModal = ({
       // publish, so they come from the token rather than from the paste.
       const needsChain = needsDecimalsLookup(pending);
       if (needsChain && !publicClient) {
-        setError(
-          "No RPC client available to read the token decimals. Reconnect your wallet and try again.",
-        );
+        setError({
+          scope: "content",
+          message:
+            "No RPC client available to read the token decimals. Reconnect your wallet and try again.",
+        });
         return;
       }
 
@@ -177,7 +189,7 @@ export const ImportJsonModal = ({
       if (attemptRef.current !== attempt) return;
 
       if (!resolved.ok) {
-        setError(resolved.error);
+        setError({ scope: "content", message: resolved.error });
         return;
       }
       actions = resolved.actions;
@@ -239,7 +251,7 @@ export const ImportJsonModal = ({
             // Capped so a long paste (or a drag on the native resize grip)
             // can't push the footer off screen.
             className="max-h-64 min-h-44 resize-y overflow-y-auto font-mono text-xs"
-            error={Boolean(error)}
+            error={error?.scope === "content"}
             spellCheck={false}
             aria-label="Proposal JSON"
           />
@@ -253,9 +265,18 @@ export const ImportJsonModal = ({
               <Upload className="size-3.5" />
               Upload .json
             </Button>
-            <span className="text-secondary truncate text-xs">
-              {fileName ?? "or drop one into the box above"}
-            </span>
+            {/* A rejected file says so here, next to the button that picked it.
+                Reported on the textarea it would mark content that is still
+                perfectly valid, and still applicable, as the thing at fault. */}
+            {error?.scope === "file" ? (
+              <span className="text-error truncate text-xs">
+                {error.message}
+              </span>
+            ) : (
+              <span className="text-secondary truncate text-xs">
+                {fileName ?? "or drop one into the box above"}
+              </span>
+            )}
           </div>
           <input
             ref={fileInputRef}
@@ -269,8 +290,8 @@ export const ImportJsonModal = ({
               e.target.value = "";
             }}
           />
-          {error ? (
-            <span className="text-error text-xs">{error}</span>
+          {error?.scope === "content" ? (
+            <span className="text-error text-xs">{error.message}</span>
           ) : (
             <span className="text-secondary text-xs">
               Every field is optional, and only the ones present are replaced.
