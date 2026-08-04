@@ -71,10 +71,11 @@ export class FormerDelegatorsRepository {
    * Events are sequenced by (timestamp, log_index), which is a chronological
    * order only while no two blocks share a timestamp: `log_index` restarts in
    * every block, so same-second blocks could be interleaved and the wrong event
-   * read as the move-away one. Every chain indexed today has a block time of two
-   * seconds or more (Ethereum, Optimism, Scroll), so the tie cannot happen. A
-   * sub-second chain would need a block number carried on `delegations` and
-   * sequenced ahead of `log_index`.
+   * read as the move-away one. Ethereum, Optimism and Scroll all have block
+   * times of two seconds or more, so the tie cannot happen there; Arbitrum
+   * (0.25s, `lib/constants.ts`) can produce same-second blocks, and its former
+   * delegators can be misread until `delegations` carries a block number that
+   * is sequenced ahead of `log_index` — an indexer schema change and a reindex.
    */
   private buildFormerDelegatorsCte(address: Address) {
     return sql`

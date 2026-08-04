@@ -34,11 +34,11 @@ function AavePageContent() {
     parseAsStringEnum(Object.values(TimeInterval)).withDefault(defaultDays),
   );
   // Enum parsed like the shared section: a stale `?tab=foo` would otherwise
-  // render Token Holders with neither tab button highlighted.
+  // render Delegates with neither tab button highlighted.
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
     parseAsStringEnum<TabId>(["tokenHolders", "delegates"]).withDefault(
-      "tokenHolders",
+      "delegates",
     ),
   );
 

@@ -78,8 +78,8 @@ export function useDelegateDelegationHistory({
         ? { fromValue: filterVariables.fromValue }
         : {}),
       ...(filterVariables?.toValue ? { toValue: filterVariables.toValue } : {}),
-      ...(fromDate ? { fromDate } : {}),
-      ...(toDate ? { toDate } : {}),
+      ...(fromDate != null ? { fromDate } : {}),
+      ...(toDate != null ? { toDate } : {}),
     }),
     [limit, orderBy, orderDirection, filterVariables, fromDate, toDate],
   );

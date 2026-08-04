@@ -82,6 +82,7 @@ export const TopInteractions = ({
     chartConfig,
     netBalanceChange,
     loading: loadingVotingPowerData,
+    error: interactionsError,
   } = useAccountInteractionsData({ daoId, address });
 
   const variant = netBalanceChange >= 0 ? "positive" : "negative";
@@ -89,7 +90,10 @@ export const TopInteractions = ({
   // This query carries no filters, so an empty result means no interactions at
   // all. Only that case gets the blank slate: the table's own query can come
   // back empty from "Hide dust" and keeps its filtered empty state instead.
-  const hasNoInteractions = !topFive || topFive.length === 0;
+  // A failed request also comes back empty, and the blank slate would hide the
+  // table that renders the error, so only a successful empty result counts.
+  const hasNoInteractions =
+    !interactionsError && (!topFive || topFive.length === 0);
 
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-4">
