@@ -26,7 +26,10 @@ import { useWalletPrompt } from "@/shared/services/auth/useWalletPrompt";
 import { getDraft } from "@/shared/services/user-api/draftsClient";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
-import { BODY_PLACEHOLDER } from "@/features/create-proposal/constants";
+import {
+  BODY_CHAR_LIMIT,
+  BODY_PLACEHOLDER,
+} from "@/features/create-proposal/constants";
 import {
   ProposalFormSchema,
   type ProposalFormValues,
@@ -263,12 +266,13 @@ export const ProposalCreationForm = ({
   const filledCount =
     (hasTitle ? 1 : 0) + (hasBody ? 1 : 0) + (hasActions ? 1 : 0);
   const canPublish =
-    hasTitle &&
-    hasBody &&
-    hasActions &&
-    !!address &&
-    form.formState.isValid &&
-    (values.body?.length ?? 0) <= 10_000;
+    hasTitle && hasBody && hasActions && !!address && form.formState.isValid;
+
+  // The drafts endpoint rejects bodies past BODY_CHAR_LIMIT, and neither Save
+  // Draft nor Share runs schema validation before POSTing — without this the
+  // request fails with the generic "Could not save draft".
+  const isBodyOverLimit = (values.body?.length ?? 0) > BODY_CHAR_LIMIT;
+  const bodyOverLimitMessage = `Description is over the ${BODY_CHAR_LIMIT.toLocaleString()} character limit`;
 
   const stashPendingDraft = () => {
     try {
@@ -279,6 +283,10 @@ export const ProposalCreationForm = ({
   };
 
   const handleShare = async () => {
+    if (isBodyOverLimit) {
+      showCustomToast(bodyOverLimitMessage, "error");
+      return;
+    }
     // Persist before sharing when unsaved or dirty, so the link isn't stale.
     let id = currentDraftId;
     if (!id || form.formState.isDirty) {
@@ -365,6 +373,10 @@ export const ProposalCreationForm = ({
   ]);
 
   const handleSaveDraft = async (options?: { navigateToDrafts?: boolean }) => {
+    if (isBodyOverLimit) {
+      showCustomToast(bodyOverLimitMessage, "error");
+      return;
+    }
     // Saving is session-gated now, not wallet-gated: prompt sign-in when there
     // is no session (the user may be connected but not authenticated).
     if (drafts.needsAuth) {
