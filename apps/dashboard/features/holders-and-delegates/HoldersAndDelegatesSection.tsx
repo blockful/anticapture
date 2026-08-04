@@ -25,6 +25,7 @@ import {
   isWhitelabelDao,
 } from "@/shared/utils/whitelabel";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 
 const TAB_IDS = ["delegates", "tokenHolders"] as const;
 
@@ -192,6 +193,9 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
                 setToParam(toDateParam(to));
                 setDays(CUSTOM_PERIOD);
               }}
+            />
+            <ReportPanelButton
+              panel={activeTab === "delegates" ? "Delegates" : "Token Holders"}
             />
           </div>
           {tabComponentMap[activeTab]}

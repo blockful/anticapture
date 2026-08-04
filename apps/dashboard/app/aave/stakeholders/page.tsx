@@ -8,6 +8,7 @@ import { TabButton } from "@/features/holders-and-delegates/components/TabButton
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
 import { Footer } from "@/shared/components/design-system/footer";
 import { SwitcherDate } from "@/shared/components";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
@@ -97,10 +98,19 @@ function AavePageContent() {
                       />
                     ))}
                   </div>
-                  <SwitcherDate
-                    defaultValue={days || defaultDays}
-                    setTimeInterval={setDays}
-                  />
+                  <div className="flex items-center gap-2">
+                    <SwitcherDate
+                      defaultValue={days || defaultDays}
+                      setTimeInterval={setDays}
+                    />
+                    <ReportPanelButton
+                      panel={
+                        activeTab === "delegates"
+                          ? "Delegates"
+                          : "Token Holders"
+                      }
+                    />
+                  </div>
                 </div>
                 {activeTab === "delegates" ? (
                   <DelegationTable days={days || defaultDays} />

@@ -21,9 +21,12 @@ import {
   DrawerHeader,
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { EntityType } from "@/shared/types/entities";
+
+import { getRenderableDrawerTab } from "./drawerTabs";
 
 interface HoldersAndDelegatesDrawerProps {
   isOpen: boolean;
@@ -177,11 +180,11 @@ export const HoldersAndDelegatesDrawer = ({
 
   // A shared URL can name a tab this drawer does not have (`activity` on a DAO
   // without a feed, a tab of the other entity type), so fall back to the first
-  // one instead of rendering an empty body.
-  const renderTabContent = (tabId: string) => {
-    const tabs = entities[entityType].tabs;
-    return (tabs.find((tab) => tab.id === tabId) ?? tabs[0])?.content;
-  };
+  // one instead of rendering an empty body or an unlabeled report action.
+  const currentTab = getRenderableDrawerTab(
+    entities[entityType].tabs,
+    activeTab,
+  );
 
   const handleCloseDrawer = () => {
     onClose();
@@ -230,27 +233,31 @@ export const HoldersAndDelegatesDrawer = ({
     </>
   );
 
-  const delegateAction =
-    entityType === "delegate" ? (
-      <>
-        {/* Desktop */}
-        <div className="hidden lg:block">
-          <DelegateButton
-            delegateAddress={address as `0x${string}`}
-            daoId={daoId}
-            size="md"
-          />
-        </div>
-        {/* Mobile */}
-        <div className="block lg:hidden">
-          <DelegateButton
-            delegateAddress={address as `0x${string}`}
-            daoId={daoId}
-            size="sm"
-          />
-        </div>
-      </>
-    ) : undefined;
+  const delegateAction = (
+    <div className="flex items-center gap-2">
+      {entityType === "delegate" && (
+        <>
+          {/* Desktop */}
+          <div className="hidden lg:block">
+            <DelegateButton
+              delegateAddress={address as `0x${string}`}
+              daoId={daoId}
+              size="md"
+            />
+          </div>
+          {/* Mobile */}
+          <div className="block lg:hidden">
+            <DelegateButton
+              delegateAddress={address as `0x${string}`}
+              daoId={daoId}
+              size="sm"
+            />
+          </div>
+        </>
+      )}
+      <ReportPanelButton panel={currentTab.label} subject={address} />
+    </div>
+  );
 
   return (
     <DrawerNavigationContext.Provider value={navigation}>
@@ -261,11 +268,11 @@ export const HoldersAndDelegatesDrawer = ({
             title={titleContent}
             onClose={handleCloseDrawer}
             tabs={entities[entityType].tabs}
-            activeTab={activeTab}
+            activeTab={currentTab.id}
             onTabChange={handleTabChange}
             action={delegateAction}
           />
-          <DrawerBody>{renderTabContent(activeTab)}</DrawerBody>
+          <DrawerBody>{currentTab.content}</DrawerBody>
         </DrawerContent>
       </DrawerRoot>
     </DrawerNavigationContext.Provider>

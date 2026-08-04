@@ -4,17 +4,21 @@ import type { VotesByProposalIdQueryResponse } from "@anticapture/client";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import type { Address } from "viem";
 
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import { OffchainVotedChip } from "@/features/governance/components/proposal-overview/OffchainVotedChip";
 import { BadgeStatus, Button } from "@/shared/components";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
+
+type TabId = "description" | "votes" | "actions";
 
 interface ProposalHeaderProps {
   daoId: string;
@@ -224,6 +228,14 @@ export const ProposalHeader = ({
   offchainVote,
 }: ProposalHeaderProps) => {
   const pathname = usePathname();
+  const allowedTabs: TabId[] =
+    snapshotLink !== undefined
+      ? ["description", "votes"]
+      : ["description", "votes", "actions"];
+  const [tab] = useQueryState(
+    "tab",
+    parseAsStringEnum<TabId>(allowedTabs).withDefault("description"),
+  );
   const supportValue =
     votes?.items[0]?.support != null
       ? Number(votes.items[0].support)
@@ -233,6 +245,8 @@ export const ProposalHeader = ({
     pathname,
     isOffchain: snapshotLink !== undefined,
   });
+
+  const proposalId = pathname.split("/").pop() ?? "";
 
   return (
     <div className="text-primary bg-surface-background border-border-default sticky z-20 flex h-[65px] w-full shrink-0 items-center justify-between gap-6 border-b px-5 py-2 lg:top-0">
@@ -272,6 +286,7 @@ export const ProposalHeader = ({
         </div>
 
         <div className="flex items-center gap-4">
+          <ReportPanelButton panel={`Proposal — ${tab}`} subject={proposalId} />
           {isWhitelabel ? (
             <>
               {address && (

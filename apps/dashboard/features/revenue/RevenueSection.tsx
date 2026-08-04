@@ -1,4 +1,5 @@
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 
 import { KpiRow } from "@/features/revenue/components/KpiRow";
 import { MonthlyRevenueChart } from "@/features/revenue/components/MonthlyRevenueChart";
@@ -15,6 +16,7 @@ export const RevenueSection = () => {
       title="Revenue"
       description="Protocol financial health: revenue, registrations, and name retention."
       hideDivider
+      headerAction={<ReportPanelButton panel="Revenue" />}
     >
       <div className="flex flex-col gap-4 pb-8">
         {/* Section 1 — Revenue Summary */}
