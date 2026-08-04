@@ -18,6 +18,53 @@ export interface BalanceHistoryGraphItem {
   logIndex: number;
 }
 
+/**
+ * Balances at the two edges of the period, read from their own limit-1 lookups
+ * rather than from the plotted rows: those hide sub-token transfers and keep
+ * only the newest 1,000, so for an active account they cover a suffix of the
+ * period and their first row is not its opening balance.
+ */
+export function useBalanceHistoryBoundaries(
+  accountId: string,
+  daoId: DaoIdEnum,
+  fromDate?: number,
+): { startingBalance: number; endingBalance: number; isLoading: boolean } {
+  const { decimals } = daoConfig[daoId];
+  const dao = daoId.toLowerCase() as HistoricalBalancesPathParamsDaoEnumKey;
+
+  // The last transfer strictly before the period carries the opening balance as
+  // its running total. No row means the address held nothing.
+  const { data: openingData, isLoading: openingLoading } =
+    useHistoricalBalances(
+      dao,
+      accountId,
+      {
+        toDate: fromDate ? fromDate - 1 : undefined,
+        limit: 1,
+        orderBy: "timestamp",
+        orderDirection: "desc",
+      },
+      { query: { enabled: Boolean(accountId && fromDate) } },
+    );
+
+  const { data: closingData, isLoading: closingLoading } =
+    useHistoricalBalances(
+      dao,
+      accountId,
+      { limit: 1, orderBy: "timestamp", orderDirection: "desc" },
+      { query: { enabled: Boolean(accountId) } },
+    );
+
+  const toBalance = (raw?: bigint | string) =>
+    raw === undefined ? 0 : Number(formatUnits(BigInt(raw), decimals));
+
+  return {
+    startingBalance: fromDate ? toBalance(openingData?.items?.[0]?.balance) : 0,
+    endingBalance: toBalance(closingData?.items?.[0]?.balance),
+    isLoading: (fromDate ? openingLoading : false) || closingLoading,
+  };
+}
+
 export function useBalanceHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,

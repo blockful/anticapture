@@ -1,6 +1,7 @@
 "use client";
 
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { parseAsBoolean, parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import {
   CartesianGrid,
@@ -15,7 +16,10 @@ import {
 import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import type { DelegationHistoryGraphItem } from "@/features/holders-and-delegates/hooks";
-import { useDelegateDelegationHistoryGraph } from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
+import {
+  useDelegateDelegationHistoryGraph,
+  useDelegateVotingPowerBoundaries,
+} from "@/features/holders-and-delegates/hooks/useDelegateDelegationHistoryGraph";
 import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -23,6 +27,7 @@ import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWater
 import { ChartContainer } from "@/shared/components/ui/chart";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import {
+  cn,
   timestampToReadableDate,
   formatNumberUserReadable,
 } from "@/shared/utils";
@@ -90,6 +95,10 @@ export const VotingPowerVariationGraph = ({
     "selectedPeriod",
     parseAsStringEnum<TimePeriod>(["30d", "90d", "all"]).withDefault("all"),
   );
+  const [filterLowImportance] = useQueryState(
+    "lowImportance",
+    parseAsBoolean.withDefault(true),
+  );
 
   const { fromTimestamp, toTimestamp } = useMemo(
     () => getTimestampRangeFromPeriod(selectedPeriod),
@@ -98,6 +107,15 @@ export const VotingPowerVariationGraph = ({
 
   const { delegationHistory, loading, error } =
     useDelegateDelegationHistoryGraph(
+      accountId,
+      daoId,
+      fromTimestamp,
+      toTimestamp,
+      filterLowImportance,
+    );
+
+  const { startingVotingPower, endingVotingPower } =
+    useDelegateVotingPowerBoundaries(
       accountId,
       daoId,
       fromTimestamp,
@@ -130,7 +148,7 @@ export const VotingPowerVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="loading"
-          title="VOTING POWER VARIATION"
+          title="Voting Power Change"
           headerContent={
             <TimePeriodSwitcher
               value={selectedPeriod}
@@ -148,7 +166,7 @@ export const VotingPowerVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="error"
-          title="VOTING POWER VARIATION"
+          title="Voting Power Change"
           errorMessage="Error loading data"
           headerContent={
             <TimePeriodSwitcher
@@ -167,7 +185,7 @@ export const VotingPowerVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="no-data"
-          title="VOTING POWER VARIATION"
+          title="Voting Power Change"
           noDataMessage="No voting power data available"
           headerContent={
             <TimePeriodSwitcher
@@ -180,6 +198,11 @@ export const VotingPowerVariationGraph = ({
       </div>
     );
   }
+
+  // Net change across the whole period, so the boundaries come from their own
+  // limit-1 lookups (see useDelegateVotingPowerBoundaries) rather than the
+  // plotted rows, which cover only a suffix of it for an active delegate.
+  const netChange = endingVotingPower - startingVotingPower;
 
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
@@ -201,10 +224,25 @@ export const VotingPowerVariationGraph = ({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between">
-        <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
-          VOTING POWER VARIATION
-        </h3>
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
+            Voting Power Change
+          </h3>
+          <span
+            className={cn(
+              "text-md flex items-center gap-1 font-normal",
+              netChange >= 0 ? "text-success" : "text-error",
+            )}
+          >
+            {netChange >= 0 ? (
+              <ArrowUp className="size-4" />
+            ) : (
+              <ArrowDown className="size-4" />
+            )}
+            {formatNumberUserReadable(Math.abs(netChange))}
+          </span>
+        </div>
         <TimePeriodSwitcher
           value={selectedPeriod}
           setTimePeriod={setSelectedPeriod}

@@ -1,6 +1,5 @@
 import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 
-import { CardDescription } from "@/shared/components/ui/card";
 import { cn } from "@/shared/utils/cn";
 
 import type { InlineAlertProps } from "@/shared/components/design-system/alerts/types";
@@ -41,12 +40,12 @@ export const InlineAlert = ({
         className,
       )}
     >
-      <CardDescription className="rounded-base flex w-full items-center gap-2 p-2">
+      <div className="rounded-base flex w-full items-center gap-2 p-2">
         <div className="mt-0.5 lg:mt-0">{mapVariant[variant].icon}</div>
-        <p className={cn("text-sm font-normal", mapVariant[variant].color)}>
+        <div className={cn("text-sm font-normal", mapVariant[variant].color)}>
           {text}
-        </p>
-      </CardDescription>
+        </div>
+      </div>
     </div>
   );
 };

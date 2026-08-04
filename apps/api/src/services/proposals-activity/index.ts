@@ -17,6 +17,7 @@ const FINAL_PROPOSAL_STATUSES = ["EXECUTED", "DEFEATED", "CANCELED", "EXPIRED"];
 export interface ProposalActivityRequest {
   address: Address;
   fromDate?: number;
+  toDate?: number;
   daoId: DaoIdEnum;
   skip?: number;
   limit?: number;
@@ -71,23 +72,29 @@ export interface ProposalsActivityRepository {
     daoId: DaoIdEnum,
     activityStart: number,
     votingPeriodSeconds: number,
+    votingDelaySeconds: number,
+    activityEnd?: number,
   ): Promise<DbProposal[]>;
 
   getUserVotes(
     address: Address,
     daoId: DaoIdEnum,
     proposalIds: string[],
+    activityStart: number,
+    activityEnd?: number,
   ): Promise<DbVote[]>;
 
   getProposalsWithVotesAndPagination(
     address: Address,
     activityStart: number,
     votingPeriodSeconds: number,
+    votingDelaySeconds: number,
     skip: number,
     limit: number,
     orderBy: OrderByField,
     orderDirection: OrderDirection,
     userVoteFilter?: VoteFilter,
+    activityEnd?: number,
   ): Promise<{
     proposals: DbProposalWithVote[];
     totalCount: number;
@@ -103,6 +110,7 @@ export class ProposalsActivityService {
   async getProposalsActivity({
     address,
     fromDate,
+    toDate,
     daoId,
     skip = 0,
     limit = 10,
@@ -123,8 +131,13 @@ export class ProposalsActivityService {
     const votingPeriodBlocks = await this.daoClient.getVotingPeriod();
     const votingDelay = await this.daoClient.getVotingDelay();
 
+    // The window length spans the whole life of a proposal, delay included, so
+    // its lower bound catches every proposal still votable at `fromDate`. The
+    // delay travels on its own as well, because the upper bound has to key on
+    // when voting opens rather than on when the proposal was created.
     const votingPeriodSeconds =
       Number(votingPeriodBlocks + votingDelay) * blockTime;
+    const votingDelaySeconds = Number(votingDelay) * blockTime;
 
     const activityStart =
       fromDate && fromDate > firstVoteTimestamp ? fromDate : firstVoteTimestamp;
@@ -135,11 +148,13 @@ export class ProposalsActivityService {
         address,
         activityStart,
         votingPeriodSeconds,
+        votingDelaySeconds,
         skip,
         limit,
         orderBy,
         orderDirection,
         userVoteFilter,
+        toDate,
       );
 
     if (proposalsWithVotes.length === 0) {
@@ -192,11 +207,15 @@ export class ProposalsActivityService {
       daoId,
       activityStart,
       votingPeriodSeconds,
+      votingDelaySeconds,
+      toDate,
     );
     const allUserVotes = await this.repository.getUserVotes(
       address,
       daoId,
       allProposals.map((p: DbProposal) => p.id),
+      activityStart,
+      toDate,
     );
     const analytics = this.calculateAnalytics(allProposals, allUserVotes);
 

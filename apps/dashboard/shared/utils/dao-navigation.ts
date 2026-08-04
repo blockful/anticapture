@@ -9,7 +9,7 @@ export type DaoFeaturePage = "/" | DaoFeaturePageSlug;
 
 const FEATURE_PAGE_SET = new Set<DaoFeaturePage>([
   "/",
-  "holders-and-delegates",
+  "stakeholders",
   "proposals",
   "activity-feed",
   "service-providers",
@@ -26,7 +26,7 @@ export const isFeatureEnabledForDao = (
   switch (featurePage) {
     case "/":
       return daoConfig.overviewPage !== false && !!daoConfig.daoOverview;
-    case "holders-and-delegates":
+    case "stakeholders":
       return !!daoConfig.dataTables;
     case "proposals":
       return !!daoConfig.governancePage;
@@ -66,6 +66,10 @@ export const getCurrentDaoFeaturePage = (
   const section = pathSegments[1];
   if (!section || section === currentDaoSlug) {
     return "/";
+  }
+
+  if (section === "holders-and-delegates") {
+    return "stakeholders";
   }
 
   if (FEATURE_PAGE_SET.has(section as DaoFeaturePage)) {

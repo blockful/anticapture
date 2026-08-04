@@ -21,13 +21,13 @@ test.describe("Mobile smoke tests", () => {
     });
   });
 
-  test("Holders & Delegates (/ens/holders-and-delegates) renders heading on mobile", async ({
+  test("Stakeholders (/ens/stakeholders) renders heading on mobile", async ({
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
     await expect(
-      page.locator("h4").filter({ hasText: "Holders & Delegates" }),
+      page.locator("h4").filter({ hasText: "Stakeholders" }),
     ).toBeVisible({ timeout: 15_000 });
   });
 

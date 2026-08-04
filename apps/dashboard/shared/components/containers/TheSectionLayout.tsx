@@ -7,7 +7,6 @@ import { getDateRange, cn } from "@/shared/utils";
 interface TheSectionLayoutProps {
   icon?: ReactNode;
   title: string;
-  subtitle?: string;
   description?: string;
   infoText?: string;
   days?: string;

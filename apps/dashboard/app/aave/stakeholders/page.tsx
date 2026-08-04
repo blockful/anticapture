@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 
-import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 
 import { TabButton } from "@/features/holders-and-delegates/components/TabButton";
 import { TokenHolders } from "@/features/holders-and-delegates/token-holder";
@@ -14,7 +14,7 @@ import { TimeInterval } from "@/shared/types/enums";
 import { HeaderDAOSidebar, HeaderSidebar, StickyPageHeader } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
 
-import { DelegationTable } from "@/app/aave/holders-and-delegates/DelegationTable";
+import { DelegationTable } from "@/app/aave/stakeholders/DelegationTable";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
@@ -33,21 +33,29 @@ function AavePageContent() {
     "days",
     parseAsStringEnum(Object.values(TimeInterval)).withDefault(defaultDays),
   );
+  // Enum parsed like the shared section: a stale `?tab=foo` would otherwise
+  // render Token Holders with neither tab button highlighted.
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsString.withDefault("tokenHolders"),
+    parseAsStringEnum<TabId>(["tokenHolders", "delegates"]).withDefault(
+      "tokenHolders",
+    ),
   );
 
   const setDrawerAddress = useQueryState("drawerAddress")[1];
   const setCurrentAddressFilter = useQueryState("address")[1];
   const setSortOrder = useQueryState("sort")[1];
   const setSortBy = useQueryState("sortBy")[1];
+  const setMinValue = useQueryState("minValue")[1];
+  const setMaxValue = useQueryState("maxValue")[1];
 
   const cleanupFilters = () => {
     setDrawerAddress(null);
     setCurrentAddressFilter(null);
     setSortOrder(null);
     setSortBy(null);
+    setMinValue(null);
+    setMaxValue(null);
   };
 
   const handleTabChange = (tab: TabId) => {
@@ -74,7 +82,6 @@ function AavePageContent() {
           <div className="w-full flex-1">
             <TheSectionLayout
               title={PAGES_CONSTANTS.holdersAndDelegates.title}
-              subtitle={"Holders & Delegates"}
               icon={<UserCheck className="section-layout-icon" />}
               description={PAGES_CONSTANTS.holdersAndDelegates.description}
             >
@@ -86,7 +93,7 @@ function AavePageContent() {
                         key={tab.id}
                         id={tab.id}
                         label={tab.label}
-                        activeTab={activeTab as TabId}
+                        activeTab={activeTab}
                         setActiveTab={handleTabChange}
                       />
                     ))}

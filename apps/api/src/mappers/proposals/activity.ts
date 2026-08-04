@@ -21,6 +21,11 @@ export const ProposalActivityRequestSchema = z
     fromDate: unixTimestampQueryParam(
       "Lower bound for proposal timestamps, in Unix seconds.",
     ),
+    toDate: unixTimestampQueryParam(
+      "Upper bound for proposal timestamps, in Unix seconds. Proposals that " +
+        "only open after this instant are excluded, so a bounded period " +
+        "reports the votes cast inside it instead of everything up to today.",
+    ),
     skip: paginationSkipQueryParam(
       "Number of proposal activity records to skip.",
     ),

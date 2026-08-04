@@ -68,8 +68,10 @@ interface DataTableProps<TData, TValue> {
   onRowClick?: (row: TData) => void;
   size?: "default" | "sm";
   stickyFirstColumn?: boolean;
+  withRowBorders?: boolean;
   withDownloadCSV?: boolean;
   csvFilename?: string;
+  footerActions?: ReactNode;
   withSorting?: boolean;
   wrapperClassName?: string;
   enableExpanding?: boolean;
@@ -104,8 +106,10 @@ export const Table = <TData, TValue>({
   onRowClick,
   size = "default",
   stickyFirstColumn = false,
+  withRowBorders = false,
   withDownloadCSV = false,
   csvFilename,
+  footerActions,
   withSorting = false,
   wrapperClassName,
   enableExpanding = false,
@@ -260,7 +264,10 @@ export const Table = <TData, TValue>({
                     <TableRow
                       key={row.id}
                       className={cn(
-                        "group border-transparent transition-colors duration-300",
+                        "group transition-colors duration-300",
+                        withRowBorders
+                          ? "border-light-dark"
+                          : "border-transparent",
                         (onRowClick || rowHref) &&
                           !disableRowClick?.(row.original)
                           ? "hover:bg-surface-contrast cursor-pointer"
@@ -317,6 +324,11 @@ export const Table = <TData, TValue>({
                                 stickyFirstColumn &&
                                 "bg-surface-background sticky-border-r sticky left-0 z-20 lg:relative lg:bg-transparent",
                               rowSizeVariants[size],
+                              // border-separate tables do not paint <tr>
+                              // borders, so dividers live on the cells, as a
+                              // pseudo element to ignore the cell padding.
+                              withRowBorders &&
+                                "after:bg-light-dark relative after:absolute after:inset-x-0 after:bottom-0 after:h-px after:content-['']",
                               colMeta?.columnClassName,
                             )}
                           >
@@ -405,22 +417,31 @@ export const Table = <TData, TValue>({
           )}
         </TableBody>
       </TableContainer>
-      {withDownloadCSV && data.length > 0 && isMounted && (
-        <p className="text-secondary mt-2 flex font-mono text-[13px] tracking-wider">
-          [DOWNLOAD AS{" "}
-          <CSVLink
-            data={formatCsvData(data)}
-            filename={csvFilename ?? "table-data.csv"}
-            className={cn(
-              defaultLinkVariants({ variant: "highlight" }),
-              "pl-2",
-            )}
-            separator=";"
-          >
-            CSV <DownloadIcon className="size-3.5" />
-          </CSVLink>
-          ]
-        </p>
+      {(footerActions || (withDownloadCSV && data.length > 0 && isMounted)) && (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          {withDownloadCSV && data.length > 0 && isMounted ? (
+            <p className="text-secondary flex font-mono text-[13px] tracking-wider">
+              [DOWNLOAD AS{" "}
+              <CSVLink
+                data={formatCsvData(data)}
+                filename={csvFilename ?? "table-data.csv"}
+                className={cn(
+                  defaultLinkVariants({ variant: "highlight" }),
+                  "pl-2",
+                )}
+                separator=";"
+              >
+                CSV <DownloadIcon className="size-3.5" />
+              </CSVLink>
+              ]
+            </p>
+          ) : (
+            <span />
+          )}
+          {footerActions && (
+            <div className="flex items-center">{footerActions}</div>
+          )}
+        </div>
       )}
     </div>
   );

@@ -13,6 +13,7 @@ import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalances,
+  addressLabels,
   dao,
   historicalBalances,
   historicalVotingPower,
@@ -46,6 +47,7 @@ import {
 import { AAVEVotingPowerRepository } from "@/repositories/voting-power/aave";
 import {
   AccountBalanceService,
+  AddressLabelsService,
   DaoService,
   HealthService,
   HistoricalBalancesService,
@@ -218,6 +220,7 @@ transfers(
   ),
 );
 dao(app, daoService);
+addressLabels(app, new AddressLabelsService(env.DAO_ID));
 docs(app);
 
 serve(

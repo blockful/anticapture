@@ -24,7 +24,6 @@ import {
   type FeedTransferMetadata,
   type FeedDelegationMetadata,
 } from "@anticapture/client";
-import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
@@ -32,6 +31,7 @@ import { DividerDefault } from "@/shared/components/design-system/divider/Divide
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import type { EntityType } from "@/shared/types/entities";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getDaoProposalPath } from "@/shared/utils/whitelabel";

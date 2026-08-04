@@ -26,7 +26,7 @@ export const HeaderNavMobile = () => {
     },
     {
       page: PAGES_CONSTANTS.holdersAndDelegates.page,
-      title: PAGES_CONSTANTS.holdersAndDelegates.title,
+      title: PAGES_CONSTANTS.holdersAndDelegates.navTitle,
       enabled: !!daoConfig.dataTables,
     },
     {

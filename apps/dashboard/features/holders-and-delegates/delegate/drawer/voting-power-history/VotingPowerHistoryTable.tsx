@@ -10,6 +10,7 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
+import { useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits, isAddressEqual, parseUnits, zeroAddress } from "viem";
 
@@ -18,7 +19,8 @@ import { useDelegateDelegationHistory } from "@/features/holders-and-delegates/h
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
+import { Switch } from "@/shared/components/design-system/switch/Switch";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components/FilterSort";
@@ -62,11 +64,42 @@ export const VotingPowerHistoryTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
+  const [filterLowImportance, setFilterLowImportance] = useQueryState(
+    "lowImportance",
+    parseAsBoolean.withDefault(true),
+  );
 
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
     { value: "smallest-first", label: "Smallest first" },
   ];
+
+  // The low importance switch hides deltas below 1 whole token. It takes the
+  // larger of its floor and any user minimum rather than deferring to the user
+  // value: a minimum under 1 token would otherwise bring sub-token rows back
+  // while the switch still reads as on. Turning the switch off is the way to
+  // see them. `fromValue` comes from the URL, so an unparseable value is
+  // ignored instead of silently defeating the floor.
+  const effectiveFilterVariables = useMemo(() => {
+    const lowImportanceFloor = filterLowImportance
+      ? parseUnits("1", decimals)
+      : 0n;
+    let userMin = 0n;
+    try {
+      userMin = filterVariables.fromValue
+        ? BigInt(filterVariables.fromValue)
+        : 0n;
+    } catch {
+      userMin = 0n;
+    }
+    const effectiveMin =
+      userMin > lowImportanceFloor ? userMin : lowImportanceFloor;
+
+    return {
+      ...filterVariables,
+      fromValue: effectiveMin > 0n ? effectiveMin.toString() : null,
+    };
+  }, [filterVariables, filterLowImportance, decimals]);
 
   const {
     delegationHistory,
@@ -80,7 +113,7 @@ export const VotingPowerHistoryTable = ({
     daoId,
     orderBy: sortBy,
     orderDirection: sortDirection,
-    filterVariables,
+    filterVariables: effectiveFilterVariables,
     fromTimestamp,
     toTimestamp,
     limit,
@@ -265,7 +298,9 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-24",
+        // wide enough for the "Delegator Balance Decrease" subtitle, which
+        // otherwise bleeds into the delegator column
+        columnClassName: "w-32",
       },
     },
     {
@@ -328,14 +363,13 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="group flex items-center gap-3">
-            <div className="overflow-truncate flex max-w-24 items-center gap-2">
-              <EnsAvatar
+            <div className="flex max-w-40 items-center gap-2 overflow-hidden">
+              <DrawerAddressButton
                 address={delegatorAddress}
-                size="sm"
-                variant="rounded"
-                showName={true}
+                entityType="tokenHolder"
+                addressChars={6}
                 nameClassName={cn(
-                  "truncate max-w-[125px]",
+                  "max-w-[140px]",
                   delegatorAddress === accountId
                     ? "text-primary"
                     : "text-secondary",
@@ -357,7 +391,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-24",
+        columnClassName: "w-32",
       },
     },
     {
@@ -417,14 +451,12 @@ export const VotingPowerHistoryTable = ({
 
         return (
           <div className="group flex items-center justify-between gap-3">
-            <div className="max-w-35 flex items-center gap-2 overflow-hidden">
-              <EnsAvatar
+            <div className="flex max-w-40 items-center gap-2 overflow-hidden">
+              <DrawerAddressButton
                 address={delegateAddress}
-                size="sm"
-                variant="rounded"
-                showName={true}
+                entityType="delegate"
                 nameClassName={cn(
-                  "truncate max-w-[125px]",
+                  "max-w-[140px]",
                   delegateAddress === accountId
                     ? "text-primary"
                     : "text-secondary",
@@ -454,7 +486,7 @@ export const VotingPowerHistoryTable = ({
         );
       },
       meta: {
-        columnClassName: "w-26",
+        columnClassName: "w-32",
       },
     },
   ];
@@ -469,12 +501,18 @@ export const VotingPowerHistoryTable = ({
             : delegationHistory
         }
         size="sm"
-        mobileTableFixed={true}
         hasMore={hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
         withDownloadCSV={true}
         csvFilename="voting-power-history.csv"
+        footerActions={
+          <Switch
+            checked={filterLowImportance}
+            onCheckedChange={setFilterLowImportance}
+            label="Filter low importance"
+          />
+        }
         error={error}
         fillHeight
       />
