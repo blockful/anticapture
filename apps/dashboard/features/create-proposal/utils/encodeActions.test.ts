@@ -13,6 +13,30 @@ import {
 
 const passthrough = makeAddressResolver(async () => null);
 
+describe("makeAddressResolver", () => {
+  // Matched strictly, a miscased address isn't recognized as an address and
+  // falls through to the ENS branch, which fails with "Could not resolve ENS
+  // name 0x39D3…", at publish, for a document the form already accepted.
+  const miscased = "0x39D3F4633dE1F5E2a1e2f4d3fD6d1AAf2E9c8b71";
+  const checksummed = "0x39D3f4633de1F5E2A1E2f4D3fD6D1AAF2E9C8B71";
+
+  test("normalizes a miscased address instead of treating it as a name", async () => {
+    const resolve = makeAddressResolver(async () => {
+      throw new Error("ENS lookup should not be reached for an address");
+    });
+    await expect(resolve(miscased)).resolves.toBe(checksummed);
+  });
+
+  test("still routes an actual name through ENS", async () => {
+    const resolve = makeAddressResolver(async () => checksummed);
+    await expect(resolve("vitalik.eth")).resolves.toBe(checksummed);
+  });
+
+  test("refuses something that is neither", async () => {
+    await expect(passthrough(miscased.slice(0, -1))).rejects.toThrow();
+  });
+});
+
 describe("encodeActions", () => {
   test("eth-transfer → target=recipient, value=wei, calldata=0x", async () => {
     const actions: ProposalAction[] = [

@@ -12,14 +12,23 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import { ActionRow } from "@/features/create-proposal/components/actions/ActionRow";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
-import { cloneAction } from "@/features/create-proposal/utils/cloneAction";
+import type { ProposalAction } from "@/features/create-proposal/types";
+
+/** One row as the field array holds it: the action, plus the id it is keyed on. */
+export type ActionField = ProposalFormValues["actions"][number] & {
+  id: string;
+};
 
 interface ActionsListProps {
+  /** Rows straight from the form's field array, ids included. */
+  fields: ActionField[];
+  onMove: (from: number, to: number) => void;
   onEditAction: (index: number) => void;
+  onDuplicateAction: (index: number) => void;
   onDeleteAction: (index: number) => void;
 }
 
@@ -57,22 +66,15 @@ const firstErrorIn = (value: unknown, path = ""): string | undefined => {
 };
 
 export const ActionsList = ({
+  fields,
+  onMove,
   onEditAction,
+  onDuplicateAction,
   onDeleteAction,
 }: ActionsListProps) => {
   const {
-    control,
-    getValues,
     formState: { errors },
   } = useFormContext<ProposalFormValues>();
-  const { fields, move, insert } = useFieldArray({ control, name: "actions" });
-
-  // Insert an independent deep copy directly after the source row. `getValues`
-  // returns the raw action (without RHF's internal field id) and `insert` mints
-  // a fresh id for the copy.
-  const handleDuplicate = (index: number) => {
-    insert(index + 1, cloneAction(getValues(`actions.${index}`)));
-  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -82,7 +84,7 @@ export const ActionsList = ({
     if (!over || active.id === over.id) return;
     const from = fields.findIndex((f) => f.id === active.id);
     const to = fields.findIndex((f) => f.id === over.id);
-    if (from >= 0 && to >= 0) move(from, to);
+    if (from >= 0 && to >= 0) onMove(from, to);
   };
 
   return (
@@ -101,13 +103,13 @@ export const ActionsList = ({
               key={field.id}
               id={field.id}
               index={index}
-              action={field}
+              action={field as ProposalAction}
               isFirst={index === 0}
               isLast={index === fields.length - 1}
-              onMoveUp={() => move(index, index - 1)}
-              onMoveDown={() => move(index, index + 1)}
+              onMoveUp={() => onMove(index, index - 1)}
+              onMoveDown={() => onMove(index, index + 1)}
               onEdit={() => onEditAction(index)}
-              onDuplicate={() => handleDuplicate(index)}
+              onDuplicate={() => onDuplicateAction(index)}
               onDelete={() => onDeleteAction(index)}
               error={firstErrorIn(errors.actions?.[index])}
             />

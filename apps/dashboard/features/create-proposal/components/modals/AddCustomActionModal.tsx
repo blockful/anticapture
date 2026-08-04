@@ -4,7 +4,6 @@ import { ArrowLeft, ArrowRight, Upload } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   encodeFunctionData,
-  isAddress,
   isHex,
   toFunctionSelector,
   toFunctionSignature,
@@ -24,6 +23,7 @@ import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import daoConfig from "@/shared/dao-config";
+import { isAddressLike } from "@/shared/utils/address";
 import { fetchAddressFromEnsName, isEnsAddress } from "@/shared/utils/ens";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { CustomAction } from "@/features/create-proposal/types";
@@ -189,7 +189,7 @@ export const AddCustomActionModal = ({
 
   const isAddressValid =
     contractAddress.trim() === "" ||
-    isAddress(contractAddress.trim()) ||
+    isAddressLike(contractAddress) ||
     isEnsAddress(contractAddress.trim());
 
   const functions = useMemo<AbiFunction[]>(() => {
@@ -235,7 +235,7 @@ export const AddCustomActionModal = ({
     if (mode !== "fetch") return;
     const v = contractAddress.trim();
     if (!v) return;
-    const isRawAddress = isAddress(v, { strict: false });
+    const isRawAddress = isAddressLike(v);
     const isEns = isEnsAddress(v);
     if (!isRawAddress && !isEns) return;
     setIsFetchingAbi(true);

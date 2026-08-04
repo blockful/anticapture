@@ -1,5 +1,6 @@
-import { isAddress, type AbiParameter } from "viem";
+import { type AbiParameter } from "viem";
 
+import { isAddressLike } from "@/shared/utils/address";
 import { isEnsAddress } from "@/shared/utils/ens";
 import {
   parseArrayType,
@@ -88,7 +89,7 @@ export function validateSolidityArg(
       return null;
     }
     case "address":
-      return !isAddress(v, { strict: false }) && !isEnsAddress(v)
+      return !isAddressLike(v) && !isEnsAddress(v)
         ? "Must be a valid address or ENS name"
         : null;
     case "bytes_dynamic":

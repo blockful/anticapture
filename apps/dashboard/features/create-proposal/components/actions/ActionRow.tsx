@@ -3,14 +3,16 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ArrowDown, ArrowUp, Copy, Pencil, Trash2 } from "lucide-react";
-import { erc20Abi, isAddress } from "viem";
+import { erc20Abi } from "viem";
 import { useReadContract } from "wagmi";
 
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { ProposalAction } from "@/features/create-proposal/types";
 import { BulletDivider } from "@/shared/components/design-system/section";
+import { isAddressLike, toChecksumAddress } from "@/shared/utils/address";
 import { cn } from "@/shared/utils/cn";
 
 interface ActionRowProps {
@@ -37,7 +39,7 @@ function actionTypeLabel(action: ProposalAction): string {
 /** Shortens a 0x address to the conventional 0xabcd…1234 form. Pass through
  *  any value that isn't a hex address (e.g. an ENS name) unchanged. */
 function truncateAddress(value: string): string {
-  if (!isAddress(value)) return value;
+  if (!isAddressLike(value)) return value;
   return `${value.slice(0, 6)}…${value.slice(-4)}`;
 }
 
@@ -79,9 +81,11 @@ export const ActionRow = ({
   // Resolve the ERC-20 symbol at render-time so the summary shows e.g.
   // "100 USDC" instead of "100 ERC-20". We only read when the address looks
   // valid so wagmi doesn't fire requests for in-progress input.
+  // Checksummed before it reaches wagmi: the query key is the address as given,
+  // so two rows holding the same token in different casing would each fetch.
   const erc20Address =
-    action.type === "erc20-transfer" && isAddress(action.tokenAddress)
-      ? (action.tokenAddress as `0x${string}`)
+    action.type === "erc20-transfer" && isAddressLike(action.tokenAddress)
+      ? toChecksumAddress(action.tokenAddress)
       : undefined;
   const { data: tokenSymbol } = useReadContract({
     abi: erc20Abi,
@@ -146,40 +150,48 @@ export const ActionRow = ({
             {actionTarget(action)}
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          aria-label="Edit action"
-        >
-          <Pencil className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDuplicate();
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
-          aria-label="Duplicate action"
-        >
-          <Copy className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          aria-label="Delete action"
-        >
-          <Trash2 className="size-4" />
-        </Button>
+        <Tooltip asChild disableMobileClick tooltipContent="Edit">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            aria-label="Edit action"
+          >
+            <Pencil className="size-4" />
+          </Button>
+        </Tooltip>
+        {/* Named, because the copy glyph reads as "copy to clipboard" and
+            invites repeat clicks that each add another action. */}
+        <Tooltip asChild disableMobileClick tooltipContent="Duplicate">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label="Duplicate action"
+          >
+            <Copy className="size-4" />
+          </Button>
+        </Tooltip>
+        <Tooltip asChild disableMobileClick tooltipContent="Delete">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            aria-label="Delete action"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </Tooltip>
       </div>
       {error && (
         // Indented past the reorder controls and the index badge, so it reads as

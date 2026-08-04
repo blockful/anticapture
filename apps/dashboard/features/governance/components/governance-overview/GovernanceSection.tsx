@@ -9,7 +9,7 @@ import {
   useOffchainSearchProposals,
   useSearchProposals,
 } from "@anticapture/client/hooks";
-import { Building2, Landmark, MessageSquare, Plus, Search } from "lucide-react";
+import { Building2, Landmark, MessageSquare, Search } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import {
@@ -31,6 +31,12 @@ import {
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
 import { canCreateProposalForDao } from "@/features/create-proposal/constants";
+import { NewProposalMenu } from "@/features/create-proposal/components/NewProposalMenu";
+import { ImportJsonModal } from "@/features/create-proposal/components/modals/ImportJsonModal";
+import {
+  stashImportedProposal,
+  type ImportedProposal,
+} from "@/features/create-proposal/utils/importHandoff";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import {
   useOffchainProposals,
@@ -152,6 +158,7 @@ export const GovernanceSection = () => {
     ]).withDefault("all"),
   );
 
+  const [importOpen, setImportOpen] = useState(false);
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
   const {
     drafts,
@@ -362,12 +369,30 @@ export const GovernanceSection = () => {
     return () => observer.disconnect();
   }, [handleLoadMore, isSearchActive]);
 
-  const handleNewProposal = () => {
+  const goToNewProposal = () => {
+    const target = `${basePath}/proposals/new`;
     if (!hasSession) {
-      openLogin({ redirectTo: `${basePath}/proposals/new` });
-    } else {
-      router.push(`${basePath}/proposals/new`);
+      openLogin({ redirectTo: target });
+      return;
     }
+    router.push(target);
+  };
+
+  /**
+   * The import happens here, before the form exists.
+   *
+   * Opening the dialog on this page rather than after navigating means the author
+   * never sees an empty form flash behind it, and a cancelled import leaves them
+   * where they started instead of on a blank proposal they did not ask for. The
+   * parsed values are handed to the form through sessionStorage, which also
+   * carries them through the sign-in gate below.
+   */
+  const handleImported = (values: ImportedProposal) => {
+    if (!stashImportedProposal(daoId, values)) {
+      showCustomToast("Could not carry the import to the form", "error");
+      return;
+    }
+    goToNewProposal();
   };
 
   const forumLink = daoConfig[daoIdEnum]?.forumLink;
@@ -388,20 +413,28 @@ export const GovernanceSection = () => {
         </Button>
       )}
       {canCreateProposal && (
-        <Button
-          variant="primary"
-          size="md"
-          onClick={handleNewProposal}
-          className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
-          data-umami-event="proposal_create_click"
-          data-umami-event-dao={daoId}
-          data-ph-event="proposal_create_click"
-          data-ph-source="governance_overview"
-          data-ph-dao={daoId}
-        >
-          <Plus className="size-4" />
-          New Proposal
-        </Button>
+        <NewProposalMenu
+          onCreateNew={goToNewProposal}
+          onImportJson={() => setImportOpen(true)}
+          triggerProps={{
+            "data-umami-event": "proposal_create_click",
+            "data-umami-event-dao": daoId,
+            "data-ph-event": "proposal_create_click",
+            "data-ph-source": "governance_overview",
+            "data-ph-dao": daoId,
+          }}
+        />
+      )}
+      {/* Mounted beside the trigger rather than in the page body: the dialog
+          portals out anyway, and the header is rendered from more than one branch
+          below, so this is the one place it is guaranteed to exist wherever the
+          menu that opens it does. */}
+      {canCreateProposal && (
+        <ImportJsonModal
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          onImport={handleImported}
+        />
       )}
     </div>
   );

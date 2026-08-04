@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { isAddress } from "viem";
 
+import { isAddressLike } from "@/shared/utils/address";
 import { isEnsAddress } from "@/shared/utils/ens";
 import { customActionIssues } from "@/features/create-proposal/utils/validateCustomAction";
 
@@ -13,13 +13,13 @@ export const addressOrEnsSchema = z
   .min(1, "Required")
   .refine((v) => {
     const trimmed = v.trim();
-    return isAddress(trimmed) || isEnsAddress(trimmed);
+    return isAddressLike(trimmed) || isEnsAddress(trimmed);
   }, "Must be a valid address or ENS name");
 
 export const strictAddressSchema = z
   .string()
   .min(1, "Required")
-  .refine((v) => isAddress(v.trim()), "Must be a valid Ethereum address");
+  .refine((v) => isAddressLike(v), "Must be a valid Ethereum address");
 
 const ETH_DECIMALS = 18;
 

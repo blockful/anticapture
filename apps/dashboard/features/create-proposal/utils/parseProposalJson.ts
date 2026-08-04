@@ -4,8 +4,17 @@ import {
   strictAddressSchema,
   type ProposalFormValues,
 } from "@/features/create-proposal/schema";
-import { parseArrayType } from "@/features/create-proposal/utils/argTree";
 import { parseAbiStrict } from "@/features/create-proposal/utils/fetchAbi";
+import {
+  convertImportedArg,
+  convertUntypedArg,
+  type ImportedArgIssue,
+} from "@/features/create-proposal/utils/importedArgs";
+import {
+  formatJsonPath,
+  lineFromParseError,
+  scanJsonSource,
+} from "@/features/create-proposal/utils/scanJsonSource";
 import {
   findAbiFunction,
   signatureOf,
@@ -40,9 +49,25 @@ export type ParsedProposalJson = {
   actions?: PendingAction[];
 };
 
+/**
+ * One thing wrong with the document, located precisely enough to fix.
+ *
+ * The path is the document's own path, not a paraphrase, so a problem inside a
+ * tuple reads `actions[9].args[0].durations.total`. The line and the literal come
+ * from the raw text, because neither survives `JSON.parse`.
+ */
+export type ImportIssue = {
+  path: (string | number)[];
+  message: string;
+  /** 1-based, when the text could be walked. */
+  line?: number;
+  /** The figure as written, when the value was an unquoted number. */
+  numberLiteral?: string;
+};
+
 export type ParseProposalJsonResult =
   | { ok: true; value: ParsedProposalJson }
-  | { ok: false; error: string };
+  | { ok: false; issues: ImportIssue[] };
 
 /*
  * This file checks what reading a document can get wrong, and what a document
@@ -52,8 +77,9 @@ export type ParseProposalJsonResult =
  * `customActionIssues`, so a pasted action and a hand-built one are held to one
  * standard and a bad one reports on its row instead of being refused at the
  * door. What stays here is the part the form can't see: JSON's own lossiness
- * with numbers, an ETH value nothing in the form can display, and ERC-20
- * decimals only the token contract can settle.
+ * with numbers, the translation from a document's arg shapes into the form's,
+ * an ETH value nothing in the form can display, and ERC-20 decimals only the
+ * token contract can settle.
  */
 
 /**
@@ -79,12 +105,6 @@ const quotedFigure = z
   })
   .trim();
 
-/** The same rule without the trim: normalizing scalar text is argTree's job. */
-const quotedArg = z.string({
-  invalid_type_error:
-    "must be quoted: a JSON number can silently change the value",
-});
-
 const EthTransferImportSchema = z.object({
   type: z.literal("eth-transfer"),
   recipient: z.string().trim(),
@@ -108,7 +128,11 @@ const CustomImportSchema = z.object({
   contractAddress: z.string().trim(),
   abi: z.unknown().optional(),
   functionName: z.string().trim().optional(),
-  args: z.array(quotedArg).optional(),
+  // Deliberately unconstrained here. An arg's legal shape depends on the type
+  // its ABI declares: a string for most, a real boolean for `bool`, a real
+  // array or keyed object for a composite, so it can only be judged once the
+  // function is resolved. `convertImportedArg` does that, below.
+  args: z.array(z.unknown()).optional(),
   calldata: z.string().trim().optional(),
   // Kept in the shape only so it can be refused by name. Unknown keys are
   // stripped, and silently dropping a declared ETH value would publish 0 wei
@@ -122,164 +146,178 @@ const ActionImportSchema = z.discriminatedUnion("type", [
   CustomImportSchema,
 ]);
 
-/** Mirrors argTree: these args are stored as JSON, not as scalars. */
-const isCompositeType = (type: string): boolean =>
-  parseArrayType(type) !== null || type.startsWith("tuple");
-
-/**
- * The quoting rule one level down: inside a composite arg, every leaf has to be
- * a JSON string.
- *
- * A composite is itself JSON, so `"[1.000000000000000001]"` is already `[1]` by
- * the time anything reads it, and the stored text rounds the same way on every
- * later parse. The other JSON scalars are no safer: `argTree` stringifies
- * whatever it finds, so `[null]` sails through and encodes the four-character
- * string `"null"`, and `[true]` encodes `"true"` even where a `string` was
- * declared. Quoted leaves are the one form that means what it says.
- */
-const holdsUnquotedLeaf = (value: unknown): boolean => {
-  if (typeof value === "string") return false;
-  if (Array.isArray(value)) return value.some(holdsUnquotedLeaf);
-  return true;
-};
-
 // Unknown keys are stripped rather than rejected, so a saved draft (which
 // carries `id`, `daoId`, timestamps) can be pasted in as-is.
-const ProposalJsonSchema = z
-  .object({
-    title: z.string().optional(),
-    discussionUrl: z.string().optional(),
-    body: z.string().optional(),
-    actions: z.array(ActionImportSchema).optional(),
-  })
-  .superRefine((json, ctx) => {
-    json.actions?.forEach((action, index) => {
-      if (action.type !== "custom") return;
-
-      // Nothing in the form supports an ETH value: the custom-action form has
-      // no field for one and the action row doesn't display it. Accepting one
-      // leaves funds attached to a call the author can neither see nor clear.
-      if (action.value !== undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "isn't supported yet: nothing in the form can show or clear an ETH value, so it can't be imported",
-          path: ["actions", index, "value"],
-        });
-      }
-
-      if (action.abi === undefined) return;
-
-      const abi = parseAbiStrict(action.abi);
-      if (abi === null) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "must be an array of ABI items",
-          path: ["actions", index, "abi"],
-        });
-        return;
-      }
-
-      // Which args are composite depends on the function, so the quoting rule
-      // needs it resolved. Anything wrong with the call itself is the form's to
-      // report, so a name that doesn't resolve just ends the check here.
-      const lookup = action.functionName
-        ? findAbiFunction(abi, action.functionName)
-        : undefined;
-      if (lookup?.kind !== "found") return;
-
-      lookup.fn.inputs.forEach((input, i) => {
-        const arg = action.args?.[i];
-        if (arg === undefined || !isCompositeType(input.type)) return;
-
-        let parsed: unknown;
-        try {
-          parsed = JSON.parse(arg);
-        } catch {
-          return; // malformed JSON is the form's to report
-        }
-        if (!holdsUnquotedLeaf(parsed)) return;
-
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "must quote every value inside it: JSON numbers, booleans and null all reach the calldata as something else",
-          path: ["actions", index, "args", i],
-        });
-      });
-    });
-  });
+const ProposalJsonSchema = z.object({
+  title: z.string().optional(),
+  discussionUrl: z.string().optional(),
+  body: z.string().optional(),
+  actions: z.array(ActionImportSchema).optional(),
+});
 
 type ImportedAction = z.infer<typeof ActionImportSchema>;
+type ImportedCustomAction = Extract<ImportedAction, { type: "custom" }>;
 
-const toPendingAction = (action: ImportedAction): PendingAction => {
-  if (action.type !== "custom") return action;
-
+/**
+ * Converts one custom action's args, and reports what the ABI says about them.
+ *
+ * The function is resolved once, here, and used for both jobs: deciding each
+ * arg's legal shape and storing the full signature. A name that doesn't resolve
+ * isn't reported, because that belongs to the form on the action's own row, but its
+ * args still have to be stored, so they go through the ABI-less conversion.
+ */
+const convertCustomAction = (
+  action: ImportedCustomAction,
+  index: number,
+): { action: PendingAction; issues: ImportIssue[] } => {
   const abi =
     action.abi === undefined ? [] : [...(parseAbiStrict(action.abi) ?? [])];
+  const pastedName = action.functionName ?? "";
+  const lookup = pastedName ? findAbiFunction(abi, pastedName) : undefined;
+  const fn = lookup?.kind === "found" ? lookup.fn : undefined;
 
   // A bare name is accepted, but stored as the full signature: the edit modal
   // matches its function select on signatures alone, so a bare name would leave
   // an imported row unable to hydrate its function or its args.
-  const pastedName = action.functionName ?? "";
-  const lookup = pastedName ? findAbiFunction(abi, pastedName) : undefined;
-  const functionName =
-    lookup?.kind === "found"
-      ? (signatureOf(lookup.fn) ?? pastedName)
-      : pastedName;
+  const functionName = fn ? (signatureOf(fn) ?? pastedName) : pastedName;
+
+  const supplied = action.args ?? [];
+  const issues: ImportIssue[] = [];
+  const args: string[] = [];
+
+  // Walk the args the document supplied, not the ABI's inputs: a count mismatch
+  // is the form's to report (it says which signature expected how many), and
+  // dropping the extras here would hide it.
+  supplied.forEach((value, argIndex) => {
+    const input = fn?.inputs[argIndex];
+    const result = input
+      ? convertImportedArg(input, value)
+      : convertUntypedArg(value);
+
+    if (result.ok) {
+      args.push(result.storage);
+      return;
+    }
+    // Keep the slot filled so later args stay at their own indexes.
+    args.push("");
+    issues.push(
+      ...result.issues.map((issue: ImportedArgIssue) => ({
+        path: ["actions", index, "args", argIndex, ...issue.path],
+        message: issue.message,
+      })),
+    );
+  });
 
   return {
-    type: "custom",
-    contractAddress: action.contractAddress,
-    abi,
-    functionName,
-    // Stored exactly as pasted: normalizing scalar text is argTree's job, on
-    // the way to the encoder.
-    args: action.args ?? [],
-    ...(action.calldata ? { calldata: action.calldata } : {}),
+    action: {
+      type: "custom",
+      contractAddress: action.contractAddress,
+      abi,
+      functionName,
+      args,
+      ...(action.calldata ? { calldata: action.calldata } : {}),
+    },
+    issues,
   };
 };
 
+/** Everything about an action that the document itself can get wrong. */
+const convertAction = (
+  action: ImportedAction,
+  index: number,
+): { action: PendingAction; issues: ImportIssue[] } => {
+  if (action.type !== "custom") return { action, issues: [] };
+
+  const issues: ImportIssue[] = [];
+
+  // Nothing in the form supports an ETH value: the custom-action form has no
+  // field for one and the action row doesn't display it. Accepting one leaves
+  // funds attached to a call the author can neither see nor clear.
+  if (action.value !== undefined) {
+    issues.push({
+      path: ["actions", index, "value"],
+      message:
+        "isn't supported yet: nothing in the form can show or clear an ETH value, so it can't be imported",
+    });
+  }
+
+  if (action.abi !== undefined && parseAbiStrict(action.abi) === null) {
+    issues.push({
+      path: ["actions", index, "abi"],
+      message: "must be an array of ABI items",
+    });
+  }
+
+  const converted = convertCustomAction(action, index);
+  return { action: converted.action, issues: [...issues, ...converted.issues] };
+};
+
 /** `actions[1].args[0]: …`, readable enough to fix the paste. */
-const formatIssue = (issue: z.ZodIssue): string => {
-  const path = issue.path.reduce<string>((acc, segment) => {
-    if (typeof segment === "number") return `${acc}[${segment}]`;
-    return acc ? `${acc}.${segment}` : String(segment);
-  }, "");
+export const formatImportIssue = (issue: ImportIssue): string => {
+  const path = formatJsonPath(issue.path);
   return path ? `${path}: ${issue.message}` : issue.message;
 };
 
 /** Parses a pasted proposal document into form values. */
 export const parseProposalJson = (text: string): ParseProposalJsonResult => {
-  const trimmed = text.trim();
-  if (!trimmed) {
-    return { ok: false, error: "Paste the proposal JSON first." };
+  // Deliberately not trimmed: every line number below counts from the start of
+  // what the user actually pasted, and trimming a leading blank line would shift
+  // all of them by one.
+  if (!text.trim()) {
+    return {
+      ok: false,
+      issues: [{ path: [], message: "Paste the proposal JSON first." }],
+    };
   }
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(trimmed);
-  } catch {
+    parsed = JSON.parse(text);
+  } catch (error) {
     return {
       ok: false,
-      error:
-        "This isn't valid JSON. Check for a missing comma, quote, or bracket.",
+      issues: [
+        {
+          path: [],
+          message:
+            "This isn't valid JSON. Check for a missing comma, quote, or bracket.",
+          line: lineFromParseError(text, error),
+        },
+      ],
     };
   }
 
   if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
     return {
       ok: false,
-      error:
-        'Expected a JSON object with "title", "discussionUrl", "body" or "actions".',
+      issues: [
+        {
+          path: [],
+          message:
+            'Expected a JSON object with "title", "discussionUrl", "body" or "actions".',
+        },
+      ],
     };
   }
+
+  const sources = scanJsonSource(text);
+  const locate = (issue: ImportIssue): ImportIssue => {
+    const source = sources.get(formatJsonPath(issue.path));
+    if (!source) return issue;
+    return {
+      ...issue,
+      line: source.line,
+      ...(source.numberLiteral ? { numberLiteral: source.numberLiteral } : {}),
+    };
+  };
 
   const result = ProposalJsonSchema.safeParse(parsed);
   if (!result.success) {
     return {
       ok: false,
-      error: result.error.issues.slice(0, 3).map(formatIssue).join("; "),
+      issues: result.error.issues.map((issue) =>
+        locate({ path: [...issue.path], message: issue.message }),
+      ),
     };
   }
 
@@ -292,9 +330,20 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
   ) {
     return {
       ok: false,
-      error:
-        'No known fields found. Use "title", "discussionUrl", "body" or "actions".',
+      issues: [
+        {
+          path: [],
+          message:
+            'No known fields found. Use "title", "discussionUrl", "body" or "actions".',
+        },
+      ],
     };
+  }
+
+  const converted = actions?.map(convertAction);
+  const issues = converted?.flatMap((c) => c.issues) ?? [];
+  if (issues.length > 0) {
+    return { ok: false, issues: issues.map(locate) };
   }
 
   return {
@@ -303,7 +352,7 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
       title,
       discussionUrl,
       body,
-      actions: actions?.map(toPendingAction),
+      actions: converted?.map((c) => c.action),
     },
   };
 };

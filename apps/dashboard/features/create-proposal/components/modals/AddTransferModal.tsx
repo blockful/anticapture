@@ -4,7 +4,7 @@ import { Coins } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { erc20Abi, formatUnits, isAddress } from "viem";
+import { erc20Abi, formatUnits } from "viem";
 import { useBalance, usePublicClient, useReadContracts } from "wagmi";
 
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
@@ -12,6 +12,7 @@ import { Input } from "@/shared/components/design-system/form/fields/input/Input
 import { RadioCard } from "@/shared/components/design-system/form/fields/radio-card/RadioCard";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import daoConfig from "@/shared/dao-config";
+import { isAddressLike } from "@/shared/utils/address";
 import { isEnsAddress } from "@/shared/utils/ens";
 
 import { useEthPrice } from "@/shared/hooks/useEthPrice";
@@ -101,7 +102,7 @@ export const AddTransferModal = ({
 
   const tokenAddressTrimmed = tokenAddress.trim();
   const isErc20WithAddress =
-    tokenType === "erc20" && isAddress(tokenAddressTrimmed);
+    tokenType === "erc20" && isAddressLike(tokenAddressTrimmed);
 
   const { data: ethBalance } = useBalance({
     address: treasuryAddress,
@@ -186,17 +187,17 @@ export const AddTransferModal = ({
   const recipientTrimmed = recipient.trim();
   const recipientIsValid =
     recipientTrimmed !== "" &&
-    (isAddress(recipientTrimmed) || isEnsAddress(recipientTrimmed));
+    (isAddressLike(recipientTrimmed) || isEnsAddress(recipientTrimmed));
   const recipientError =
     recipientTouched && recipientTrimmed !== "" && !recipientIsValid;
   const tokenAddressError =
     tokenAddressTouched &&
     tokenAddress.trim() !== "" &&
-    !isAddress(tokenAddress.trim());
+    !isAddressLike(tokenAddress);
   const recipientValid = recipientIsValid;
   const tokenAddressValid =
     tokenType === "eth" ||
-    (tokenAddress.trim() !== "" && isAddress(tokenAddress.trim()));
+    (tokenAddress.trim() !== "" && isAddressLike(tokenAddress));
 
   const amountTrimmed = amount.trim();
   const amountIsValid =

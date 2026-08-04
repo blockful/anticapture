@@ -10,6 +10,8 @@ import {
   MDXEditor,
   Separator,
   StrikeThroughSupSubToggles,
+  codeBlockPlugin,
+  codeMirrorPlugin,
   diffSourcePlugin,
   headingsPlugin,
   linkDialogPlugin,
@@ -122,6 +124,27 @@ export const BodyField = ({ version = 0 }: BodyFieldProps) => {
                 linkPlugin(),
                 linkDialogPlugin(),
                 tablePlugin(),
+                // Required, not optional. With no plugin claiming the `code`
+                // mdast node, a body holding a fenced block puts the editor in
+                // its failure state, "Parsing of the following markdown
+                // structure failed: {"type":"code","name":"N/A"}", and the
+                // author can only edit in source mode. Real proposals quote
+                // calldata and JSON constantly, and an imported body carries
+                // whatever fences the document had.
+                codeBlockPlugin({ defaultCodeBlockLanguage: "" }),
+                codeMirrorPlugin({
+                  // The empty key is the fallback for a fence with no language,
+                  // which is most of them. Anything else in the map is resolved
+                  // through @codemirror/language-data on demand.
+                  codeBlockLanguages: {
+                    "": "Plain text",
+                    json: "JSON",
+                    js: "JavaScript",
+                    ts: "TypeScript",
+                    solidity: "Solidity",
+                    bash: "Shell",
+                  },
+                }),
                 markdownShortcutPlugin(),
                 diffSourcePlugin({
                   viewMode: mode === "markdown" ? "source" : "rich-text",

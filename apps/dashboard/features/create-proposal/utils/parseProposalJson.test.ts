@@ -1,5 +1,6 @@
 import { PROPOSAL_JSON_PLACEHOLDER } from "@/features/create-proposal/constants";
 import {
+  formatImportIssue,
   parseProposalJson,
   type ParseProposalJsonResult,
 } from "@/features/create-proposal/utils/parseProposalJson";
@@ -17,9 +18,13 @@ const CONTRACT = "0x3333333333333333333333333333333333333333";
 const parse = (...actions: unknown[]) =>
   parseProposalJson(JSON.stringify({ actions }));
 
+/** Every issue on one line, the way a reviewer reads them. */
+const reasons = (result: ParseProposalJsonResult) =>
+  result.ok ? "" : result.issues.map(formatImportIssue).join("; ");
+
 const expectOk = (result: ParseProposalJsonResult) => {
   if (!result.ok)
-    throw new Error(`expected a valid document, got: ${result.error}`);
+    throw new Error(`expected a valid document, got: ${reasons(result)}`);
   return result.value;
 };
 
@@ -28,8 +33,9 @@ const expectRejected = (
   ...fragments: string[]
 ) => {
   if (result.ok) throw new Error("expected a rejection, got a valid document");
-  fragments.forEach((fragment) => expect(result.error).toContain(fragment));
-  return result.error;
+  const text = reasons(result);
+  fragments.forEach((fragment) => expect(text).toContain(fragment));
+  return text;
 };
 
 const eth = (overrides: Record<string, unknown> = {}) => ({
@@ -65,24 +71,58 @@ const abiOf = (inputs: unknown[], name = "call") => [
 
 describe("parseProposalJson", () => {
   describe("the document", () => {
-    // The placeholder is a shape hint, not a document: it puts "0x…" where real
-    // values go, so it can't be parsed. Guard its structure instead, so a typo
-    // there can't quietly teach the wrong format.
-    it("keeps the modal's format hint in step with what it reads", () => {
-      const hint = JSON.parse(PROPOSAL_JSON_PLACEHOLDER) as {
-        actions: { type: string }[];
-      };
+    /*
+     * A shape hint, not a document: it puts "0x..." where real values go. The
+     * import dialog opens with it already in the field, so it is the first thing
+     * an author sees about the format and the thing they edit into a real
+     * proposal. A typo in it teaches the wrong shape silently.
+     */
+    describe("the format hint", () => {
+      // MOD-8 supplies this text exactly, wrapping included, because the wrapping
+      // is the point: it renders with `white-space: pre`, so the line breaks are
+      // the author's and not the browser's.
+      it("is the text the design specifies, wrapping included", () => {
+        expect(PROPOSAL_JSON_PLACEHOLDER).toBe(
+          `{
+  "title": "Proposal title",
+  "discussionUrl": "https://discuss...",
+  "body": "## Synopsis\\n\\nMarkdown description.",
+  "actions": [
+    {"type": "eth-transfer", "recipient": "0x...", "amount": "600"},
+    {"type": "erc20-transfer", "tokenAddress": "0x...",
+     "recipient": "0x...", "amount": "480000"},
+    {"type": "custom", "contractAddress": "0x...",
+     "calldata": "0x..."}
+  ]
+}`,
+        );
+      });
 
-      expect(Object.keys(hint)).toEqual([
-        "title",
-        "discussionUrl",
-        "body",
-        "actions",
-      ]);
-      expect(hint.actions.map((a) => a.type)).toEqual([
-        "eth-transfer",
-        "custom",
-      ]);
+      it("is valid JSON carrying the fields the parser reads", () => {
+        const hint = JSON.parse(PROPOSAL_JSON_PLACEHOLDER) as {
+          actions: { type: string }[];
+        };
+        expect(Object.keys(hint)).toEqual([
+          "title",
+          "discussionUrl",
+          "body",
+          "actions",
+        ]);
+        expect(hint.actions.map((a) => a.type)).toEqual([
+          "eth-transfer",
+          "erc20-transfer",
+          "custom",
+        ]);
+      });
+
+      // MOD-8 describes its longest line as 66 characters; the text it supplies is
+      // 68 at the eth-transfer line, and the text is what ships. The bound is here
+      // to catch a new line that overflows, not to relitigate the existing ones.
+      it("stays inside the width it was wrapped for", () => {
+        PROPOSAL_JSON_PLACEHOLDER.split("\n").forEach((line) => {
+          expect(line.length).toBeLessThanOrEqual(68);
+        });
+      });
     });
 
     it("fills only the fields it carries", () => {
@@ -128,14 +168,17 @@ describe("parseProposalJson", () => {
       expectRejected(parseProposalJson(input), fragment);
     });
 
-    it("reports at most three issues", () => {
+    // Every issue, not the first three. The status row leads with the count
+    // ("3 problems · first on line 7"), and a capped list would have made that
+    // count wrong for exactly the documents it matters on.
+    it("reports every issue it found", () => {
       const error = expectRejected(
         parseProposalJson(
           JSON.stringify({ title: 1, body: 2, discussionUrl: 3, actions: 4 }),
         ),
       );
 
-      expect(error.split("; ")).toHaveLength(3);
+      expect(error.split("; ")).toHaveLength(4);
     });
 
     it("rejects an unknown action type", () => {
@@ -171,10 +214,10 @@ describe("parseProposalJson", () => {
       ).toMatchObject({ amount: "0.123456789123456789" });
     });
 
-    // The composite is JSON too, so an unquoted leaf is already rewritten
-    // before anything can inspect it, exactly as at the top level.
+    // A composite arg is written as JSON, so the quoting rule applies to every
+    // leaf inside it for the same reason it applies at the top level.
     describe("inside a composite arg", () => {
-      const withArg = (arg: string) =>
+      const withArg = (arg: unknown) =>
         parse(
           custom({
             abi: abiOf([{ name: "values", type: "uint256[]" }], "setMany"),
@@ -183,20 +226,51 @@ describe("parseProposalJson", () => {
           }),
         );
 
-      // argTree stringifies whatever it finds, so an unquoted leaf doesn't
-      // fail, it changes: [null] encodes the string "null".
       it.each([
-        ["a plain number", "[1, 2, 3]"],
-        ["a lossy number", "[1000000000000000001]"],
-        ["null", "[null]"],
-        ["a boolean", "[true]"],
-        ["a nested object", '[{"a":"1"}]'],
-      ])("rejects a %s leaf", (_label, arg) => {
-        expectRejected(withArg(arg), "actions[0].args[0]", "must quote");
+        ["a plain number", [1, 2, 3], "actions[0].args[0][0]"],
+        ["null", [null], "actions[0].args[0][0]"],
+        ["a boolean", [true], "actions[0].args[0][0]"],
+        ["a nested object", [{ a: "1" }], "actions[0].args[0][0]"],
+        // Only the offending leaf is named, not the whole argument.
+        ["a number after good leaves", ["1", "2", 3], "actions[0].args[0][2]"],
+      ])("rejects %s leaf, at its own path", (_label, arg, path) => {
+        expectRejected(withArg(arg), path);
+      });
+
+      // Spliced as raw text, like the top-level figures above: written as a TS
+      // literal the compiler rounds it before the test can pass it in.
+      it("rejects a leaf whose digits a double can't hold", () => {
+        const abi = JSON.stringify(
+          abiOf([{ name: "values", type: "uint256[]" }], "setMany"),
+        );
+        expectRejected(
+          parseProposalJson(
+            `{"actions":[{"type":"custom","contractAddress":"${CONTRACT}","abi":${abi},"functionName":"setMany","args":[[1000000000000000001]]}]}`,
+          ),
+          "actions[0].args[0][0]",
+          "quoted",
+        );
       });
 
       it("takes the same leaves quoted", () => {
-        expectOk(withArg('["1", "2", "3"]'));
+        expect(expectOk(withArg(["1", "2", "3"])).actions?.[0]).toMatchObject({
+          args: ['["1","2","3"]'],
+        });
+      });
+
+      it("keeps a nested array nested", () => {
+        const value = expectOk(
+          parse(
+            custom({
+              abi: abiOf([{ name: "grid", type: "uint256[][]" }], "setGrid"),
+              functionName: "setGrid",
+              args: [[["1", "2"], ["3"]]],
+            }),
+          ),
+        );
+        expect(value.actions?.[0]).toMatchObject({
+          args: ['[["1","2"],["3"]]'],
+        });
       });
     });
   });
@@ -298,6 +372,157 @@ describe("parseProposalJson", () => {
         "actions[0].value",
         "isn't supported yet",
       );
+    });
+  });
+
+  /*
+   * A tuple is unavoidable in real governance calls (Sablier streams, Governor
+   * `propose`, most Safe module functions), so the document has to be able to
+   * express one, in either shape JSON offers for it: an object keyed by component
+   * name, or an array in component order.
+   *
+   * The form stores tuples positionally, so the keyed form is reordered here.
+   * That reordering is the only reason this conversion needs the ABI.
+   */
+  describe("tuple args", () => {
+    const durations = {
+      name: "durations",
+      type: "tuple",
+      components: [
+        { name: "cliff", type: "uint256" },
+        { name: "total", type: "uint256" },
+      ],
+    };
+
+    const stream = (args: unknown[]) =>
+      parse(
+        custom({
+          abi: abiOf([durations], "createStream"),
+          functionName: "createStream",
+          args,
+        }),
+      );
+
+    it("takes a tuple keyed by component name", () => {
+      expect(
+        expectOk(stream([{ cliff: "100", total: "500" }])).actions?.[0],
+      ).toMatchObject({ args: ['["100","500"]'] });
+    });
+
+    it("takes the same tuple as an array in component order", () => {
+      expect(expectOk(stream([["100", "500"]])).actions?.[0]).toMatchObject({
+        args: ['["100","500"]'],
+      });
+    });
+
+    it("reorders a keyed tuple into component order", () => {
+      // Written back to front on purpose: the stored form must still be
+      // cliff-then-total, because that is what the encoder maps.
+      expect(
+        expectOk(stream([{ total: "500", cliff: "100" }])).actions?.[0],
+      ).toMatchObject({ args: ['["100","500"]'] });
+    });
+
+    it("names the field that is missing", () => {
+      expectRejected(
+        stream([{ cliff: "100" }]),
+        "actions[0].args[0].total: Required",
+      );
+    });
+
+    // The encoder maps components only, so an extra field is dropped on the way
+    // to the calldata and the proposal sends something narrower than intended.
+    it("names a field the tuple doesn't declare", () => {
+      expectRejected(
+        stream([{ cliff: "100", total: "500", bonus: "1" }]),
+        "actions[0].args[0].bonus",
+      );
+    });
+
+    it("rejects a tuple given the wrong number of positional fields", () => {
+      expectRejected(stream([["100", "500", "900"]]), "actions[0].args[0]");
+    });
+
+    // VAL-6, verbatim: an imprecise path cost about a week of back-and-forth on
+    // a document that was already correct.
+    it("points inside a nested tuple, not at the argument", () => {
+      const nested = {
+        name: "schedule",
+        type: "tuple",
+        components: [{ ...durations }],
+      };
+      const text = expectRejected(
+        parse(
+          custom({
+            abi: abiOf([nested], "createStream"),
+            functionName: "createStream",
+            args: [{ durations: { cliff: "1", total: 2 } }],
+          }),
+        ),
+      );
+      expect(text).toContain("actions[0].args[0].durations.total");
+      expect(text).toContain("must be quoted");
+    });
+
+    it("takes a real boolean where the abi declares bool", () => {
+      const value = expectOk(
+        parse(
+          custom({
+            abi: abiOf([{ name: "on", type: "bool" }], "setOn"),
+            functionName: "setOn",
+            args: [true],
+          }),
+        ),
+      );
+      expect(value.actions?.[0]).toMatchObject({ args: ["true"] });
+    });
+
+    it("refuses a keyed tuple it has no abi to order", () => {
+      expectRejected(
+        parse(custom({ functionName: "mystery", args: [{ cliff: "1" }] })),
+        "actions[0].args[0]",
+      );
+    });
+  });
+
+  /*
+   * Line numbers and the literal as written. Both are gone after JSON.parse, and
+   * both are what makes "Line 7 · unquoted number 480000 must be quoted" say
+   * anything at all.
+   */
+  describe("locating a problem in the text", () => {
+    const document = `{
+  "title": "Proposal title",
+  "actions": [
+    {"type": "eth-transfer", "recipient": "vitalik.eth", "amount": "600"},
+    {"type": "erc20-transfer",
+     "recipient": "vitalik.eth",
+     "tokenAddress": "${USDC}",
+     "amount": 480000}
+  ]
+}`;
+
+    it("reports the line the figure was written on", () => {
+      const result = parseProposalJson(document);
+      if (result.ok) throw new Error("expected a rejection");
+      expect(result.issues[0]).toMatchObject({
+        line: 8,
+        numberLiteral: "480000",
+      });
+    });
+
+    it("keeps digits the parsed double already lost", () => {
+      const result = parseProposalJson(
+        '{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":1000000000000000000001}]}',
+      );
+      if (result.ok) throw new Error("expected a rejection");
+      expect(result.issues[0].numberLiteral).toBe("1000000000000000000001");
+    });
+
+    it("counts from the start of what was pasted, blank lines included", () => {
+      const result = parseProposalJson(`\n\n${document}`);
+      if (result.ok) throw new Error("expected a rejection");
+      expect(result.issues[0].line).toBe(10);
     });
   });
 });

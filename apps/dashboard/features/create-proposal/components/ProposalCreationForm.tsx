@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, FileJson } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import Link from "next/link";
 import {
   useParams,
@@ -19,7 +19,6 @@ import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getWhitelabelBasePath } from "@/shared/utils/whitelabel";
-import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
@@ -45,6 +44,7 @@ import { DraftViewToggle } from "@/features/create-proposal/components/preview/D
 import { DraftPreview } from "@/features/create-proposal/components/preview/DraftPreview";
 import { draftPreviewCopy } from "@/features/create-proposal/utils/draftThresholdCopy";
 import { getRecipientPublishState } from "@/features/create-proposal/utils/recipientPublishState";
+import { cloneAction } from "@/features/create-proposal/utils/cloneAction";
 import { ActionsList } from "@/features/create-proposal/components/actions/ActionsList";
 import { ActionsPlaceholderCard } from "@/features/create-proposal/components/actions/ActionsPlaceholderCard";
 import { AddTransferModal } from "@/features/create-proposal/components/modals/AddTransferModal";
@@ -55,9 +55,9 @@ import { ProposalSubmittedModal } from "@/features/create-proposal/components/mo
 import { SubmissionFailedModal } from "@/features/create-proposal/components/modals/SubmissionFailedModal";
 import { InsufficientVPModal } from "@/features/create-proposal/components/modals/InsufficientVPModal";
 import {
-  ImportJsonModal,
+  takeImportedProposal,
   type ImportedProposal,
-} from "@/features/create-proposal/components/modals/ImportJsonModal";
+} from "@/features/create-proposal/utils/importHandoff";
 import type {
   CustomAction,
   ERC20TransferAction,
@@ -128,6 +128,26 @@ export const ProposalCreationForm = ({
     defaultValues: DEFAULTS,
     mode: "onChange",
   });
+
+  // Every mutation of the list goes through here, and nowhere else.
+  //
+  // The rows are keyed on the ids this hook mints, and the errors beside them
+  // are keyed on array index. `setValue("actions", …)` moves the values without
+  // telling the field array, so after deleting a row the ids and the errors
+  // stayed where they were and the deleted action's error appeared on the row
+  // that took its place, while the row itself refused to disappear.
+  const actionsArray = useFieldArray({
+    control: form.control,
+    name: "actions",
+  });
+
+  // The resolver validates the whole form, so a mutation has to ask for it: the
+  // field array updates values without revalidating, and Publish reads
+  // formState.isValid.
+  const revalidateActions = () => {
+    void form.trigger("actions");
+  };
+
   const hydratedDraftIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -218,7 +238,6 @@ export const ProposalCreationForm = ({
   const [submittedOpen, setSubmittedOpen] = useState(false);
   const [failedOpen, setFailedOpen] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
-  const [importOpen, setImportOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
   // Email/Google sign-in leaves the page, so a dirty form would be lost on
@@ -455,22 +474,19 @@ export const ProposalCreationForm = ({
   const addAction = (
     action: EthTransferAction | ERC20TransferAction | CustomAction,
   ) => {
-    form.setValue("actions", [...values.actions, toFormAction(action)], {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    actionsArray.append(toFormAction(action));
+    revalidateActions();
   };
 
   const submitAction = (
     action: EthTransferAction | ERC20TransferAction | CustomAction,
   ) => {
     if (editActionIndex !== null) {
-      const next = [...values.actions];
-      next[editActionIndex] = toFormAction(action);
-      form.setValue("actions", next, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+      // `update` rather than a whole-array write, so the row re-renders on the
+      // edited values: the rows read from the field array's own snapshot, which
+      // a setValue on the array name doesn't refresh.
+      actionsArray.update(editActionIndex, toFormAction(action));
+      revalidateActions();
       setEditActionIndex(null);
     } else {
       addAction(action);
@@ -479,7 +495,7 @@ export const ProposalCreationForm = ({
 
   // Field-by-field setValue rather than form.reset: the imported content is
   // unsaved, so the dirty flag (and with it NavigationGuard) has to stay armed.
-  const handleImportJson = (imported: ImportedProposal) => {
+  const applyImportedProposal = (imported: ImportedProposal) => {
     const options = { shouldDirty: true, shouldValidate: true } as const;
     if (imported.title !== undefined) {
       form.setValue("title", imported.title, options);
@@ -493,9 +509,43 @@ export const ProposalCreationForm = ({
       setBodyVersion((v) => v + 1);
     }
     if (imported.actions !== undefined) {
+      // Both calls, deliberately. `replace` mints fresh row ids so the rendered
+      // rows match the imported list, and the `setValue` that follows is what
+      // arms the dirty flag NavigationGuard reads: a field-array write compares
+      // against defaultValues, which would call an import that lands an empty
+      // list on an empty default "unchanged". The values written are identical,
+      // so the ids `replace` just minted stay valid.
+      actionsArray.replace(imported.actions);
       form.setValue("actions", imported.actions, options);
     }
     showCustomToast("Proposal fields imported", "success");
+  };
+
+  /**
+   * Picks up an import that ran on the proposals list.
+   *
+   * Skipped entirely when the URL names a draft: that content is the draft's, and
+   * the hydration effect above is what fills it. Reading the handoff clears it, so
+   * a reload lands on a clean form rather than re-applying an import the author
+   * has since edited. The ref keeps the double-invoked effect in development from
+   * announcing the same import twice.
+   */
+  const importAppliedRef = useRef(false);
+  useEffect(() => {
+    if (draftId || importAppliedRef.current) return;
+    const imported = takeImportedProposal(daoId);
+    if (!imported) return;
+    importAppliedRef.current = true;
+    applyImportedProposal(imported);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [daoId, draftId]);
+
+  // An independent deep copy, inserted directly after the source row.
+  const duplicateAction = (index: number) => {
+    const source = form.getValues(`actions.${index}`);
+    if (!source) return;
+    actionsArray.insert(index + 1, cloneAction(source));
+    revalidateActions();
   };
 
   const openEditForAction = (index: number) => {
@@ -686,21 +736,6 @@ export const ProposalCreationForm = ({
               />
             )}
 
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-secondary text-xs">
-                Already have this proposal as JSON? Import it to fill the form.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setImportOpen(true)}
-                className="shrink-0"
-              >
-                <FileJson className="size-3.5" />
-                Import JSON
-              </Button>
-            </div>
-
             <div className="flex w-full flex-col gap-1">
               <FormLabel isRequired>Title</FormLabel>
               <Input
@@ -747,9 +782,15 @@ export const ProposalCreationForm = ({
                 </span>
               </div>
               <div className="flex flex-col gap-3">
-                {values.actions.length > 0 && (
+                {actionsArray.fields.length > 0 && (
                   <ActionsList
+                    fields={actionsArray.fields}
+                    onMove={(from, to) => {
+                      actionsArray.move(from, to);
+                      revalidateActions();
+                    }}
                     onEditAction={openEditForAction}
+                    onDuplicateAction={duplicateAction}
                     onDeleteAction={(i) => setDeleteActionIndex(i)}
                   />
                 )}
@@ -773,11 +814,6 @@ export const ProposalCreationForm = ({
         </>
       )}
 
-      <ImportJsonModal
-        open={importOpen}
-        onOpenChange={setImportOpen}
-        onImport={handleImportJson}
-      />
       <AddTransferModal
         open={transferOpen}
         onOpenChange={(o) => {
@@ -802,12 +838,12 @@ export const ProposalCreationForm = ({
         onOpenChange={(o) => !o && setDeleteActionIndex(null)}
         onConfirm={() => {
           if (deleteActionIndex !== null) {
-            const next = [...values.actions];
-            next.splice(deleteActionIndex, 1);
-            form.setValue("actions", next, {
-              shouldDirty: true,
-              shouldValidate: true,
-            });
+            // `remove` shifts the row ids and the errors together. Splicing the
+            // values with setValue left both behind, so an invalid action's
+            // error reappeared on whichever row moved up into its index and the
+            // row appeared undeletable.
+            actionsArray.remove(deleteActionIndex);
+            revalidateActions();
           }
           setDeleteActionIndex(null);
         }}

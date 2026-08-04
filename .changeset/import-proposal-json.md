@@ -2,4 +2,4 @@
 "@anticapture/dashboard": minor
 ---
 
-Add an Import JSON button to the create proposal form.
+Import a proposal from JSON when creating one.

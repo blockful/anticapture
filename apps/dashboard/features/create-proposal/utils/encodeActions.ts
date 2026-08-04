@@ -1,13 +1,13 @@
 import {
   encodeFunctionData,
   erc20Abi,
-  isAddress,
   parseEther,
   parseUnits,
   toFunctionSignature,
   type AbiFunction,
   type Hex,
 } from "viem";
+import { isAddressLike, toChecksumAddress } from "@/shared/utils/address";
 import {
   argsToTrees,
   resolveAddressesInTrees,
@@ -106,7 +106,12 @@ export const makeAddressResolver = (
 ): AddressResolver => {
   return async (input) => {
     const trimmed = input.trim();
-    if (isAddress(trimmed)) return trimmed;
+    // Checksum-agnostic, and normalized on the way out. Matched strictly, a
+    // miscased address isn't recognized as an address at all and falls through
+    // to the ENS branch, which fails with "Could not resolve ENS name 0x39D3…"
+    // for something that was never a name, mid-publish, after the form
+    // accepted it.
+    if (isAddressLike(trimmed)) return toChecksumAddress(trimmed);
     const resolved = await getEnsAddress(trimmed);
     if (!resolved) throw new Error(`Could not resolve ENS name "${trimmed}"`);
     return resolved;
