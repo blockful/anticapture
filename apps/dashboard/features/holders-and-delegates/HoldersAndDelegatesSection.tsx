@@ -47,6 +47,12 @@ const PERIOD_VALUES: string[] = [
   CUSTOM_PERIOD,
 ];
 
+// MAX sends an explicit floor instead of omitting one. The balances endpoint
+// reads a missing `fromDate` as its own 90-day default, so omitting it left the
+// Token Holders table reporting 90-day changes while the control said MAX. Every
+// endpoint reached from here treats 0 as no lower bound, which is what MAX means.
+const ALL_TIME_FROM_DATE = 0;
+
 const parseDateParam = (value: string | null): Date | undefined => {
   if (!value) return undefined;
   const parsed = new Date(`${value}T00:00:00`);
@@ -123,7 +129,8 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     daysParam === CUSTOM_PERIOD && !hasCustomRange ? defaultDays : daysParam;
 
   const { fromDate, toDate } = useMemo(() => {
-    if (days === MAX_PERIOD) return { fromDate: undefined, toDate: undefined };
+    if (days === MAX_PERIOD)
+      return { fromDate: ALL_TIME_FROM_DATE, toDate: undefined };
     if (days === CUSTOM_PERIOD && customRange.from && customRange.to) {
       return {
         fromDate: Math.floor(customRange.from.getTime() / 1000),
