@@ -95,6 +95,38 @@ describe("customActionIssues", () => {
     ])("rejects calldata that is %s", (_label, calldata) => {
       expectIssue(customActionIssues(action({ calldata })), ["calldata"]);
     });
+
+    // The encoder returns on the calldata before it reads the ABI, while the
+    // action row's subtitle is the functionName. Accepting both publishes bytes
+    // the row never showed.
+    describe("mixed with an ABI call", () => {
+      it("rejects a function name alongside valid calldata", () => {
+        expectIssue(
+          customActionIssues(call({ calldata: "0xa9059cbb" })),
+          ["calldata"],
+          "keep either",
+        );
+      });
+
+      // The name doesn't have to resolve for the mix to mislead: the row shows
+      // whatever string was pasted.
+      it("rejects a bare function name alongside valid calldata", () => {
+        expectIssue(
+          customActionIssues(
+            action({ calldata: "0x", functionName: "transfer" }),
+          ),
+          ["calldata"],
+          "keep either",
+        );
+      });
+
+      it("takes whitespace as absent, not as a second half", () => {
+        expect(
+          customActionIssues(action({ calldata: "0x", functionName: "   " })),
+        ).toEqual([]);
+        expect(customActionIssues(call({ calldata: "   " }))).toEqual([]);
+      });
+    });
   });
 
   describe("resolving the function", () => {

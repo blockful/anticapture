@@ -241,6 +241,33 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
     return [{ path: ["functionName"], message: "Required" }];
   }
 
+  /**
+   * The two ways of describing a call are exclusive, and the import spec says as
+   * much: "either functionName with abi and args, or raw calldata. Not both, not
+   * neither".
+   *
+   * Accepting both would publish something other than what the form shows. The
+   * encoder returns on the calldata before it looks at the ABI, while the action
+   * row's subtitle is the `functionName`, so a row reading
+   * `transfer(address,uint256)` could carry arbitrary bytes. Comparing the two
+   * instead of refusing them would be worse: it would have to re-encode the args
+   * to know they agree, and the mismatch it found would still leave no way to
+   * tell which half the author meant.
+   *
+   * Reported on `calldata` because that is the half that silently wins. The
+   * custom-action modal only ever emits one of the two, so this is reachable
+   * only from a paste or an API draft.
+   */
+  if (hasCalldata && hasFunctionName) {
+    return [
+      {
+        path: ["calldata"],
+        message:
+          "Can't be combined with a function name; keep either the raw calldata or the ABI call",
+      },
+    ];
+  }
+
   // Checked whatever produces the calldata, because the ABI is stored either
   // way and the edit modal formats every function in it to fill its select. An
   // action that publishes fine could still take that dialog down.
