@@ -192,7 +192,7 @@ export const ENS: DaoConfiguration = {
             GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
         currentSetting:
-          "ENS has a Security Council, managed by a 4/8 multisig, whose authority to cancel proposals must be renewed every two years (and will expire in July 2026).",
+          "ENS has a Security Council, managed by a 5/8 multisig, whose authority to cancel proposals must be renewed every two years (and will expire in July 2028).",
         impact: "ENS can veto malicious proposals with the Security Council.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
