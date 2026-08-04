@@ -5,10 +5,18 @@ import { POST } from "./route";
 const originalFetch = global.fetch;
 const originalEnvironment = { ...process.env };
 
-const createRequest = (ip: string, overrides = {}) =>
+const createRequest = (
+  ip: string,
+  overrides = {},
+  headers: Record<string, string> = {},
+) =>
   new NextRequest("http://localhost:3000/api/report", {
     method: "POST",
-    headers: { "content-type": "application/json", "x-real-ip": ip },
+    headers: {
+      "content-type": "application/json",
+      "x-real-ip": ip,
+      ...headers,
+    },
     body: JSON.stringify({
       daoId: "ens",
       panel: "Token distribution",
@@ -18,6 +26,12 @@ const createRequest = (ip: string, overrides = {}) =>
       ...overrides,
     }),
   });
+
+type ClientIPTestCase = {
+  name: string;
+  ip: string;
+  headers: Record<string, string>;
+};
 
 describe("POST /api/report", () => {
   beforeEach(() => {
@@ -105,5 +119,37 @@ describe("POST /api/report", () => {
         ),
       }),
     );
+  });
+
+  it.each<ClientIPTestCase>([
+    {
+      name: "Railway real IP",
+      ip: "203.0.113.5",
+      headers: { "x-real-ip": "203.0.113.5" },
+    },
+    {
+      name: "Vercel forwarded IP",
+      ip: "",
+      headers: { "x-forwarded-for": "203.0.113.6, 10.0.0.2" },
+    },
+    {
+      name: "valid forwarded IP after malformed real IP",
+      ip: "not-an-ip",
+      headers: {
+        "x-real-ip": "not-an-ip",
+        "x-forwarded-for": "203.0.113.7",
+      },
+    },
+  ])("rate-limits by $name", async ({ ip, headers }) => {
+    (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(
+      new Response("{}", { status: 200 }),
+    );
+
+    await POST(createRequest(ip, {}, headers));
+    await POST(createRequest(ip, {}, headers));
+    await POST(createRequest(ip, {}, headers));
+    const response = await POST(createRequest(ip, {}, headers));
+
+    expect(response.status).toBe(429);
   });
 });

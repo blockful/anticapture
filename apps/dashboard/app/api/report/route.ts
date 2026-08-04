@@ -6,7 +6,12 @@ import { z } from "zod";
 
 const REPORT_LIMIT = 3;
 const REPORT_WINDOW_MS = 60 * 60 * 1000;
-const reportAttempts = new Map<string, number[]>();
+type ReportAttempt = {
+  id: string;
+  timestamp: number;
+};
+
+const reportAttempts = new Map<string, ReportAttempt[]>();
 
 // ClickUp "Project" relationship field on the shared Backlog list; every
 // report task must be linked to Anticapture (86ahtje7p) to show up in triage.
@@ -24,7 +29,14 @@ const reportSchema = z.object({
 
 const getClientIP = (request: NextRequest) => {
   const realIP = request.headers.get("x-real-ip")?.trim();
-  return realIP && isIP(realIP) ? realIP : null;
+  if (realIP && isIP(realIP)) return realIP;
+
+  const forwardedIP = request.headers
+    .get("x-forwarded-for")
+    ?.split(",")
+    .at(0)
+    ?.trim();
+  return forwardedIP && isIP(forwardedIP) ? forwardedIP : null;
 };
 
 // Reserves a slot synchronously (no await in between check and write, so
@@ -33,7 +45,7 @@ const getClientIP = (request: NextRequest) => {
 // releaseReportAttempt if the request fails after reserving.
 const reserveReportAttempt = (ip: string, now = Date.now()) => {
   const attempts = (reportAttempts.get(ip) ?? []).filter(
-    (timestamp) => now - timestamp < REPORT_WINDOW_MS,
+    (attempt) => now - attempt.timestamp < REPORT_WINDOW_MS,
   );
 
   if (attempts.length >= REPORT_LIMIT) {
@@ -41,16 +53,19 @@ const reserveReportAttempt = (ip: string, now = Date.now()) => {
     return { limited: true as const };
   }
 
-  const reserved = now;
+  const reserved = {
+    id: crypto.randomUUID(),
+    timestamp: now,
+  };
   reportAttempts.set(ip, [...attempts, reserved]);
   return { limited: false as const, reserved };
 };
 
-const releaseReportAttempt = (ip: string, reserved: number) => {
+const releaseReportAttempt = (ip: string, reserved: ReportAttempt) => {
   reportAttempts.set(
     ip,
     (reportAttempts.get(ip) ?? []).filter(
-      (timestamp) => timestamp !== reserved,
+      (attempt) => attempt.id !== reserved.id,
     ),
   );
 };
@@ -74,10 +89,9 @@ const formatDescription = ({
   ].join("\n");
 
 export const POST = async (request: NextRequest) => {
-  // Railway supplies x-real-ip. A shared fallback bucket still protects the
-  // public endpoint if a deployment is temporarily missing that header.
+  // Railway supplies x-real-ip; Vercel supplies x-forwarded-for.
   const clientIP = getClientIP(request) ?? "unknown";
-  let reservedAt: number | undefined;
+  let reservedAttempt: ReportAttempt | undefined;
 
   try {
     const payload = reportSchema.parse(await request.json());
@@ -92,13 +106,13 @@ export const POST = async (request: NextRequest) => {
         { status: 429 },
       );
     }
-    reservedAt = reservation.reserved;
+    reservedAttempt = reservation.reserved;
 
     const token = process.env.CLICKUP_API_TOKEN;
     const listId = process.env.CLICKUP_REPORT_LIST_ID;
     if (!token || !listId) {
       console.error("ClickUp report integration is not configured");
-      releaseReportAttempt(clientIP, reservedAt);
+      releaseReportAttempt(clientIP, reservedAttempt);
       return NextResponse.json(
         {
           error: "Reports are temporarily unavailable. Please try again later.",
@@ -127,7 +141,7 @@ export const POST = async (request: NextRequest) => {
 
     if (!clickUpResponse.ok) {
       console.error("ClickUp report creation failed", clickUpResponse.status);
-      releaseReportAttempt(clientIP, reservedAt);
+      releaseReportAttempt(clientIP, reservedAttempt);
       return NextResponse.json(
         { error: "We couldn't submit your report. Please try again shortly." },
         { status: 502 },
@@ -136,7 +150,7 @@ export const POST = async (request: NextRequest) => {
 
     return NextResponse.json({ message: "Report submitted successfully" });
   } catch (error) {
-    if (reservedAt !== undefined) releaseReportAttempt(clientIP, reservedAt);
+    if (reservedAttempt) releaseReportAttempt(clientIP, reservedAttempt);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
