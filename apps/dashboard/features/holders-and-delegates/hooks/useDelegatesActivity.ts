@@ -73,10 +73,12 @@ export const useDelegatesActivity = ({
               daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
               {
                 address: addr,
-                ...(fromDate ? { fromDate } : {}),
+                // `!= null`, not truthy: MAX sends `fromDate: 0` as an
+                // explicit all-time floor and it has to reach the API.
+                ...(fromDate != null ? { fromDate } : {}),
                 // Both bounds, so "Voted X/Y" counts the selected window
                 // instead of everything up to today.
-                ...(toDate ? { toDate } : {}),
+                ...(toDate != null ? { toDate } : {}),
               },
             ),
           );

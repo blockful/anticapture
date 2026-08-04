@@ -20,8 +20,8 @@ export const InactiveDelegatesBanner = ({
   const { data } = useInactiveVotingPowerSummary(
     daoId.toLowerCase() as InactiveVotingPowerSummaryPathParamsDaoEnumKey,
     {
-      ...(fromDate ? { fromDate } : {}),
-      ...(toDate ? { toDate } : {}),
+      ...(fromDate != null ? { fromDate } : {}),
+      ...(toDate != null ? { toDate } : {}),
     },
   );
 

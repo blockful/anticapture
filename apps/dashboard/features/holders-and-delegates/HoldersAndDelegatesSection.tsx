@@ -180,23 +180,27 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
               activeTab={activeTab}
               onTabChange={(value) => handleTabChange(value as TabId)}
             />
-            <SwitcherDateRange
-              selected={days}
-              onSelectPeriod={(period) => {
-                setFromParam(null);
-                setToParam(null);
-                setDays(period);
-              }}
-              customRange={customRange}
-              onSelectCustomRange={({ from, to }) => {
-                setFromParam(toDateParam(from));
-                setToParam(toDateParam(to));
-                setDays(CUSTOM_PERIOD);
-              }}
-            />
-            <ReportPanelButton
-              panel={activeTab === "delegates" ? "Delegates" : "Token Holders"}
-            />
+            <div className="flex items-center gap-2">
+              <SwitcherDateRange
+                selected={days}
+                onSelectPeriod={(period) => {
+                  setFromParam(null);
+                  setToParam(null);
+                  setDays(period);
+                }}
+                customRange={customRange}
+                onSelectCustomRange={({ from, to }) => {
+                  setFromParam(toDateParam(from));
+                  setToParam(toDateParam(to));
+                  setDays(CUSTOM_PERIOD);
+                }}
+              />
+              <ReportPanelButton
+                panel={
+                  activeTab === "delegates" ? "Delegates" : "Token Holders"
+                }
+              />
+            </div>
           </div>
           {tabComponentMap[activeTab]}
         </SubSectionsContainer>

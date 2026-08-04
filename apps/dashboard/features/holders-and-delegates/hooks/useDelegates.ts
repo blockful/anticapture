@@ -105,8 +105,10 @@ export const useDelegates = ({
       orderDirection,
       ...(orderBy ? { orderBy } : {}),
       limit,
-      ...(fromDate ? { fromDate } : {}),
-      ...(toDate ? { toDate } : {}),
+      // `!= null`, not truthy: MAX sends `fromDate: 0` as an explicit all-time
+      // floor, and dropping it would let the endpoint apply its own default.
+      ...(fromDate != null ? { fromDate } : {}),
+      ...(toDate != null ? { toDate } : {}),
       ...(address ? { addresses: [address] } : {}),
       ...(fromValue ? { fromValue } : {}),
       ...(toValue ? { toValue } : {}),
@@ -169,10 +171,10 @@ export const useDelegates = ({
               daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
               {
                 address: addr,
-                ...(fromDate ? { fromDate } : {}),
+                ...(fromDate != null ? { fromDate } : {}),
                 // Both bounds, so "Voted X/Y" counts the selected window
                 // instead of everything up to today.
-                ...(toDate ? { toDate } : {}),
+                ...(toDate != null ? { toDate } : {}),
               },
             ),
           );
