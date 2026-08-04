@@ -1,5 +1,108 @@
 # @anticapture/api
 
+## 1.8.0
+
+### Minor Changes
+
+- [#2084](https://github.com/blockful/anticapture/pull/2084) [`3af2f54`](https://github.com/blockful/anticapture/commit/3af2f542ad10c1e944f76510d8c65d46ab910654) Thanks [@brunod-e](https://github.com/brunod-e)! - `GET /:dao/feed/events` accepts `relevance=ALL`, which drops the value threshold and returns every event instead of only those at or above a tier. The relevance tiers are cumulative value floors (LOW already includes MEDIUM and HIGH), so there was previously no way to ask for events below the LOW floor. Omitting the param still defaults to MEDIUM, so existing consumers are unaffected.
+
+- [#2084](https://github.com/blockful/anticapture/pull/2084) [`4e59732`](https://github.com/blockful/anticapture/commit/4e59732daf40b800986ab9ec42a10127b29465f4) Thanks [@brunod-e](https://github.com/brunod-e)! - Holders & Delegates v3 (DEV-562, DEV-476)
+
+  API: new endpoints backing the module. `GET /:dao/voting-powers/inactive-summary`
+  (delegated VP parked with inactive delegates), `GET /:dao/accounts/:address/delegators/historical`
+  (former delegators with VP impact, start/end and redelegation target), and
+  `GET /:dao/addresses/labels` (per-DAO treasury/vesting labels, where an unlock
+  contract whose label does not mention vesting is classified by address so the
+  dashboard can still relabel its transfers as a vesting unlock; contracts whose
+  outgoing transfers are not unlocks, such as airdrop distributors and staking
+  vaults, stay out). Adds an optional
+  `address` filter to `GET /:dao/feed/events`, and an optional `toDate` upper bound
+  to `GET /:dao/proposals-activity` so a bounded period counts only the proposals
+  inside it. That upper bound is keyed on when a proposal's voting opens (creation
+  plus the DAO voting delay), not on when it was created, so on DAOs with a
+  non-zero voting delay a proposal created inside the period whose voting only
+  opens after it no longer counts: no vote could land in the window, and counting
+  it marked delegates inactive on proposals they could not yet vote on. On
+  `GET /:dao/voting-powers/inactive-summary` that also keeps `totalProposals` at
+  zero when the window holds nothing votable, instead of reporting every delegate
+  as inactive. Both `GET /:dao/proposals-activity` and
+  `GET /:dao/voting-powers/inactive-summary` also bound the vote by `toDate`: a
+  proposal that opens near the end of the period stays votable after it, so a vote
+  cast later no longer counts as activity inside a period that closed before the
+  vote existed. The proposal is still listed, with no vote attached. The same bound
+  applies at the other end: a proposal whose voting period overlaps `fromDate` is
+  in scope, but a vote cast on it before that date happened outside the period and
+  no longer counts as activity inside it either. On
+  `GET /:dao/accounts/:address/delegators/historical`, `amount` reports the voting
+  power the queried address actually lost at the move away rather than the value
+  stored on the last delegation event: balances that move while a delegation stands
+  write no delegation row, so that value is a stale snapshot, and the share it
+  represented is instead applied to the balance the move-away event carries. Full
+  delegation therefore reports the whole balance moved, and partial delegation
+  (SCR) keeps its fraction rather than claiming the sibling delegates' part. On AAVE, `fromValue`/`toValue` on `GET /:dao/voting-powers` now filter the
+  delegated voting power alone instead of the combined total (delegated power plus
+  the account's own balance), matching both the `votingPower` ordering on the same
+  endpoint and every other DAO's behavior, so the range a client asks for matches
+  the delegation figure it renders.
+  Feed DELEGATION metadata gains an optional `delegatees` array of
+  `{ delegate, amount }`, present only when the source event split voting power
+  across more than one delegatee (partial delegation, as SCR does), ordered by
+  delegate address ascending; `delegate`/`amount` stay as they were and describe
+  the primary delegatee, so existing consumers are unaffected. Gateful re-exposes
+  the expanded surface through its aggregated OpenAPI spec (no gateway code
+  change).
+
+  Dashboard: value min/max filters on the Delegates and Token Holders tables;
+  Delegates as the default tab and the sidebar renamed to "Stakeholders"; larger
+  rows with bottom borders and a continuous activity ring; voting power shown as a
+  percentage of quorum; inactive-delegate flagging and 0/0 activity states
+  ("Inactive" / "No proposals" / "Never voted"); the inactive-VP alert banner on
+  Token Holders; clickable addresses that re-point the drawer everywhere; a
+  per-address Activity tab in the drawer, on the DAOs that serve the activity
+  feed; Buy/Sell relabeled to In / Out / Vested;
+  a dust badge and "Hide dust" switch on Top Interactions; a "Filter low importance"
+  toggle and "All time" range on Voting Power History; a MAX option and a custom
+  calendar range on the time selector, single days included; and a Former
+  Delegators view in the
+  delegate profile.
+
+### Patch Changes
+
+- [#2098](https://github.com/blockful/anticapture/pull/2098) [`002b33c`](https://github.com/blockful/anticapture/commit/002b33ca39cd7e2aaa5373732fe02aa09a25dd93) Thanks [@pikonha](https://github.com/pikonha)! - Stop the production dashboard build from generating its SDK against the
+  previous release's OpenAPI spec.
+
+  Gateful merges the DAO APIs' specs into `/docs/json` on every request, so the
+  deploy gate waiting for gateful's own commit proved nothing about the schemas
+  it would serve: on [#2093](https://github.com/blockful/anticapture/issues/2093) gateful reported the new commit at 14:33:54, codegen
+  read the spec at 14:34:23, and `ens-api` only came up at 14:34:34 — the
+  dashboard build failed on a field the API hadn't started advertising yet.
+
+  Every service whose OpenAPI gateful merges into `/docs/json` — the DAO APIs,
+  the relayer and address enrichment — now reports its running commit on
+  `/health`, and gateful passes it through as `upstreams.<name>.commit` alongside
+  an `upstreams.<name>.kind`. `scripts/wait-for-gateful.mjs` then holds the
+  deploy until each of them reports a commit listed for its kind in
+  `EXPECTED_UPSTREAM_SHAS`: the last commit that touched the paths Railway
+  watches to rebuild that service, plus everything after it.
+
+  Expressing it as "that commit or newer" per service, rather than "does this
+  push change the API", keeps the gate correct when a push that leaves a service
+  alone supersedes an in-flight push that changed it, and when a push carries
+  more than one commit. An upstream reporting no commit counts as stale — the
+  previous release is still answering — which cannot deadlock, because teaching a
+  service to report its commit necessarily touches its own watched paths.
+  Authful contributes no merged schemas and only has to be reachable.
+
+  `@anticapture/client#codegen` is also no longer cached by turbo: its real input
+  is a live URL no hash can see, so the poisoned output above was replayed on
+  every retry of that commit and no re-run could ever fix it. `#build` had to go
+  with it: tsup runs with `dts: true`, so that same unhashable spec is compiled
+  into `dist`, and a retry that re-ran codegen would restore the stale `dist`
+  straight over the freshly generated output. Declaring `generated/**` as an
+  input does not close this — turbo hashes inputs before the run, and the
+  directory is gitignored, so on a fresh checkout it is still empty at the moment
+  the hash is taken.
+
 ## 1.7.0
 
 ### Minor Changes
