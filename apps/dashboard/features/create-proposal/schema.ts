@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isAddress } from "viem";
 
+import { BODY_CHAR_LIMIT } from "@/features/create-proposal/constants";
 import { isEnsAddress } from "@/shared/utils/ens";
 
 const addressOrEnsSchema = z
@@ -70,7 +71,10 @@ export const ProposalFormSchema = z
           return false;
         }
       }, "Must be a valid URL"),
-    body: z.string().min(1, "Required"),
+    body: z
+      .string()
+      .min(1, "Required")
+      .max(BODY_CHAR_LIMIT, "100,000 character limit"),
     actions: z
       .array(ProposalActionSchema)
       .min(1, "At least one action is required"),

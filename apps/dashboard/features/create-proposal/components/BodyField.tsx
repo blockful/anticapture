@@ -44,6 +44,10 @@ const markdownHighlightStyle = HighlightStyle.define([
 const sourceViewExtensions = [syntaxHighlighting(markdownHighlightStyle)];
 
 import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
+import {
+  BODY_CHAR_LIMIT,
+  BODY_WARNING_THRESHOLD,
+} from "@/features/create-proposal/constants";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
 
 type Mode = "visual" | "markdown";
@@ -56,6 +60,13 @@ export const BodyField = ({ version = 0 }: BodyFieldProps) => {
   const { control, watch } = useFormContext<ProposalFormValues>();
   const body = watch("body") ?? "";
   const [mode, setMode] = useState<Mode>("visual");
+
+  const counterColor =
+    body.length > BODY_CHAR_LIMIT
+      ? "text-error"
+      : body.length >= BODY_WARNING_THRESHOLD
+        ? "text-warning"
+        : "text-secondary";
 
   return (
     <div className="flex w-full flex-col gap-1">
@@ -154,8 +165,8 @@ export const BodyField = ({ version = 0 }: BodyFieldProps) => {
           )}
         />
       </div>
-      <p className="text-secondary text-xs">
-        {body.length.toLocaleString()} characters
+      <p className={`${counterColor} text-xs`}>
+        {body.length.toLocaleString()} / {BODY_CHAR_LIMIT.toLocaleString()}
       </p>
     </div>
   );
