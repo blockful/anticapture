@@ -4,23 +4,23 @@ import { Activity, Filter, Loader2, Newspaper } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
 import { ActivityFeedFiltersDrawer } from "@/features/feed/components/ActivityFeedFilters";
-import { FeedEventItem } from "@/features/feed/components/FeedEventItem";
 import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton";
 import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
 import { getActivityFeedRenderState } from "@/features/feed/utils/activityFeedRenderState";
-import type { EntityType } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FetchErrorState } from "@/shared/components/errors/FetchErrorState";
+import { FeedEventItem } from "@/shared/components/feed/FeedEventItem";
 import {
   SubSectionsContainer,
   BulletDivider,
 } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import { useDaoId } from "@/shared/providers/DaoIdProvider";
+import type { EntityType } from "@/shared/types/entities";
 import { cn } from "@/shared/utils/cn";
 
 export const ActivityFeedSection = ({ feedDaoId }: { feedDaoId: string }) => {

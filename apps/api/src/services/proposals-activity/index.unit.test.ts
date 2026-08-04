@@ -20,6 +20,8 @@ const VOTER_ADDRESS = "0x1111111111111111111111111111111111111111" as Address;
 
 function createStubRepo(): ProposalsActivityRepository & {
   lastActivityStart: number | null;
+  lastVotingPeriodSeconds: number | null;
+  lastVotingDelaySeconds: number | null;
   firstVoteTs: number | null;
   proposals: DbProposal[];
   votes: DbVote[];
@@ -27,6 +29,8 @@ function createStubRepo(): ProposalsActivityRepository & {
 } {
   const stub = {
     lastActivityStart: null as number | null,
+    lastVotingPeriodSeconds: null as number | null,
+    lastVotingDelaySeconds: null as number | null,
     firstVoteTs: null as number | null,
     proposals: [] as DbProposal[],
     votes: [] as DbVote[],
@@ -37,6 +41,7 @@ function createStubRepo(): ProposalsActivityRepository & {
       _daoId: DaoIdEnum,
       _activityStart: number,
       _votingPeriodSeconds: number,
+      _votingDelaySeconds: number,
     ) => stub.proposals,
     getUserVotes: async (
       _address: Address,
@@ -46,7 +51,8 @@ function createStubRepo(): ProposalsActivityRepository & {
     getProposalsWithVotesAndPagination: async (
       _addr: Address,
       activityStart: number,
-      _votingPeriodSeconds: number,
+      votingPeriodSeconds: number,
+      votingDelaySeconds: number,
       _skip: number,
       _limit: number,
       _orderBy: OrderByField,
@@ -54,6 +60,8 @@ function createStubRepo(): ProposalsActivityRepository & {
       _userVoteFilter?: VoteFilter,
     ) => {
       stub.lastActivityStart = activityStart;
+      stub.lastVotingPeriodSeconds = votingPeriodSeconds;
+      stub.lastVotingDelaySeconds = votingDelaySeconds;
       return stub.paginationResult;
     },
   };
@@ -145,6 +153,17 @@ describe("ProposalsActivityService", () => {
         avgTimeBeforeEnd: 0,
         proposals: [],
       });
+    });
+
+    it("forwards the voting delay apart from the whole window length", async () => {
+      repo.firstVoteTs = 1699000000;
+
+      await service.getProposalsActivity(defaultRequest);
+
+      // votingPeriod 40320 + votingDelay 2, at a 12s block time
+      expect(repo.lastVotingPeriodSeconds).toBe(40322 * 12);
+      // the delay alone, so the window's upper bound can key on voting start
+      expect(repo.lastVotingDelaySeconds).toBe(2 * 12);
     });
 
     it("should return proposals with user votes and analytics", async () => {

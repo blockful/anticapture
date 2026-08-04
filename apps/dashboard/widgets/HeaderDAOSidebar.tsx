@@ -63,8 +63,8 @@ export const HeaderDAOSidebar = () => {
               <ButtonHeaderSidebar
                 page={PAGES_CONSTANTS.holdersAndDelegates.page}
                 icon={UserCheck}
-                label={PAGES_CONSTANTS.holdersAndDelegates.title}
-                key={PAGES_CONSTANTS.holdersAndDelegates.title}
+                label={PAGES_CONSTANTS.holdersAndDelegates.navTitle}
+                key={PAGES_CONSTANTS.holdersAndDelegates.navTitle}
                 isCollapsed={isCollapsed}
               />
             )}

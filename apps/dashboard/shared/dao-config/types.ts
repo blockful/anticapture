@@ -141,7 +141,7 @@ export type AttackExposureConfig = {
 
 /** Feature page slugs — the set of pages a DAO can enable. */
 export type DaoFeaturePageSlug =
-  | "holders-and-delegates"
+  | "stakeholders"
   | "proposals"
   | "activity-feed"
   | "service-providers"

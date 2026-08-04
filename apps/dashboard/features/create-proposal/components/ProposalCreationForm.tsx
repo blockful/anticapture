@@ -801,7 +801,7 @@ export const ProposalCreationForm = ({
         onOpenChange={setInsufficientOpen}
         currentVp={currentVpText}
         requiredVp={thresholdFormatted ?? "—"}
-        onFindDelegate={() => router.push(`${basePath}/holders-and-delegates`)}
+        onFindDelegate={() => router.push(`${basePath}/stakeholders`)}
         onViewDraft={() => {
           setInsufficientOpen(false);
           router.push(`${basePath}/proposals?tab=drafts`);

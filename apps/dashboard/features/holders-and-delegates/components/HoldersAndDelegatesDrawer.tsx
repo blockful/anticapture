@@ -1,8 +1,13 @@
 "use client";
 
 import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+import { useMemo, useState } from "react";
 
 import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
+import { DrawerActivityFeed } from "@/features/holders-and-delegates/components/DrawerActivityFeed";
+import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
+import type { DrawerNavigation } from "@/features/holders-and-delegates/hooks/useDrawerNavigation";
+import { DrawerNavigationContext } from "@/features/holders-and-delegates/hooks/useDrawerNavigation";
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
@@ -16,9 +21,9 @@ import {
   DrawerHeader,
   DrawerRoot,
 } from "@/shared/components/design-system/drawer";
+import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-
-export type EntityType = "delegate" | "tokenHolder";
+import type { EntityType } from "@/shared/types/entities";
 
 interface HoldersAndDelegatesDrawerProps {
   isOpen: boolean;
@@ -32,11 +37,51 @@ interface HoldersAndDelegatesDrawerProps {
 export const HoldersAndDelegatesDrawer = ({
   isOpen,
   onClose,
-  entityType,
-  address,
+  entityType: initialEntityType,
+  address: ownerAddress,
   daoId,
   withVotes = true,
 }: HoldersAndDelegatesDrawerProps) => {
+  // Owners are free to keep the drawer's address in local state instead of the
+  // URL (the DAO overview chart and the activity feed do), so a re-point from
+  // inside the drawer is tracked here as well. It is dropped as soon as the
+  // owner supplies a different address, which is what re-points the URL-driven
+  // owners, so the two never disagree.
+  const [repointedAddress, setRepointedAddress] = useState<string | null>(null);
+  const [lastOwnerAddress, setLastOwnerAddress] = useState(ownerAddress);
+  if (ownerAddress !== lastOwnerAddress) {
+    setLastOwnerAddress(ownerAddress);
+    setRepointedAddress(null);
+  }
+  const address = repointedAddress ?? ownerAddress;
+
+  // Clicking an address inside the drawer can re-point it at a different kind
+  // of profile, so the entity type has to outlive the prop the opener passed.
+  // The override only counts while it still belongs to the address on screen.
+  const { drawerEntityFor, clearDrawerEntity } = useDrawerEntityOverride();
+  const entityType = drawerEntityFor(address) ?? initialEntityType;
+
+  const navigation = useMemo<DrawerNavigation>(
+    () => ({
+      repoint: (next: string) => setRepointedAddress(next),
+    }),
+    [],
+  );
+
+  // Only DAO APIs that register `feed()` serve GET /:dao/feed/events. Without
+  // this the tab renders a permanent error state for the others (AAVE, so far).
+  const hasActivityFeed = Boolean(daoConfigByDaoId[daoId]?.activityFeed);
+
+  const activityTab = hasActivityFeed
+    ? [
+        {
+          id: "activity",
+          label: "Activity",
+          content: <DrawerActivityFeed address={address} daoId={daoId} />,
+        },
+      ]
+    : [];
+
   const entities = {
     delegate: {
       title: "Delegate Profile",
@@ -54,14 +99,15 @@ export const HoldersAndDelegatesDrawer = ({
           : []),
         {
           id: "voteComposition",
-          label: "Vote Composition",
+          label: "Voting Power",
           content: <VoteComposition address={address} daoId={daoId} />,
         },
         {
           id: "votingPowerHistory",
-          label: "Voting Power History",
+          label: "Delegation History",
           content: <VotingPowerHistory accountId={address} daoId={daoId} />,
         },
+        ...activityTab,
       ],
     },
     tokenHolder: {
@@ -82,6 +128,7 @@ export const HoldersAndDelegatesDrawer = ({
           label: "Balance History",
           content: <BalanceHistory accountId={address} daoId={daoId} />,
         },
+        ...activityTab,
       ],
     },
   };
@@ -103,6 +150,8 @@ export const HoldersAndDelegatesDrawer = ({
   const setSelectedPeriod = useQueryState("selectedPeriod")[1];
   const setTypeFilter = useQueryState("type")[1];
   const setTabAddress = useQueryState("tabAddress")[1];
+  const setFeedOrder = useQueryState("feedOrder")[1];
+  const setFeedRelevance = useQueryState("feedRelevance")[1];
 
   const cleanupFilters = () => {
     setSortOrder(null);
@@ -117,6 +166,8 @@ export const HoldersAndDelegatesDrawer = ({
     setSelectedPeriod(null);
     setTypeFilter(null);
     setTabAddress(null);
+    setFeedOrder(null);
+    setFeedRelevance(null);
   };
 
   const handleTabChange = (tabId: string) => {
@@ -124,14 +175,24 @@ export const HoldersAndDelegatesDrawer = ({
     cleanupFilters();
   };
 
+  // A shared URL can name a tab this drawer does not have (`activity` on a DAO
+  // without a feed, a tab of the other entity type), so fall back to the first
+  // one instead of rendering an empty body.
   const renderTabContent = (tabId: string) => {
-    return entities[entityType].tabs.find((tab) => tab.id === tabId)?.content;
+    const tabs = entities[entityType].tabs;
+    return (tabs.find((tab) => tab.id === tabId) ?? tabs[0])?.content;
   };
 
   const handleCloseDrawer = () => {
     onClose();
     setActiveTab(null);
     cleanupFilters();
+    // Owners that reopen on the address they were already holding produce no
+    // prop change, so a stale re-point would survive into the next opening.
+    setRepointedAddress(null);
+    // Not load bearing (the override self-invalidates), just keeps the URL from
+    // carrying a dead param around.
+    clearDrawerEntity();
   };
 
   const titleContent = (
@@ -192,19 +253,21 @@ export const HoldersAndDelegatesDrawer = ({
     ) : undefined;
 
   return (
-    <DrawerRoot open={isOpen} onOpenChange={handleCloseDrawer}>
-      <DrawerContent>
-        <DrawerHeader
-          subtitle={entities[entityType].title}
-          title={titleContent}
-          onClose={handleCloseDrawer}
-          tabs={entities[entityType].tabs}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          action={delegateAction}
-        />
-        <DrawerBody>{renderTabContent(activeTab)}</DrawerBody>
-      </DrawerContent>
-    </DrawerRoot>
+    <DrawerNavigationContext.Provider value={navigation}>
+      <DrawerRoot open={isOpen} onOpenChange={handleCloseDrawer}>
+        <DrawerContent>
+          <DrawerHeader
+            subtitle={entities[entityType].title}
+            title={titleContent}
+            onClose={handleCloseDrawer}
+            tabs={entities[entityType].tabs}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            action={delegateAction}
+          />
+          <DrawerBody>{renderTabContent(activeTab)}</DrawerBody>
+        </DrawerContent>
+      </DrawerRoot>
+    </DrawerNavigationContext.Provider>
   );
 };

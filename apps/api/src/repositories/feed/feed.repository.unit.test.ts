@@ -13,7 +13,7 @@ import {
   votesOnchain,
   votingPowerHistory,
 } from "@/database/schema";
-import { FeedEventType, FeedRelevance } from "@/lib/constants";
+import { FeedEventType, FeedRelevanceFilter } from "@/lib/constants";
 import { FeedRequest } from "@/mappers";
 
 import { FeedRepository } from ".";
@@ -27,7 +27,7 @@ const defaultFeedParams = (
   limit: 10,
   orderBy: "timestamp",
   orderDirection: "desc",
-  relevance: FeedRelevance.MEDIUM,
+  relevance: FeedRelevanceFilter.MEDIUM,
   ...overrides,
 });
 
@@ -591,6 +591,306 @@ describe("FeedRepository", () => {
       expect(result.items).toHaveLength(2);
       const types = result.items.map((i) => i.type).sort();
       expect(types).toEqual(["DELEGATION", "VOTE"]);
+    });
+
+    describe("address filter", () => {
+      const DELEGATOR = "0xAaAaAAAaaAaAAaAaAaAAAAAaAAAAaaAAAAaAaAA1";
+      const DELEGATE = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBb2";
+      const PREVIOUS_DELEGATE = "0xCcccCcCCcCCCCCcCcCcccCcCCCcCccccccCCCCc3";
+      const SENDER = "0xdDDDddDdDdddDDdDDDDdDDDDDDDddDDdDdDdDDd4";
+      const RECIPIENT = "0xEEEeEEEeeEeEeeEEEEeeeeEEeEeeeEEeEEeeEeE5";
+      const VOTER = "0xFFffFfFffFFFfffffFfFFFfFfffFfFFFFffFFF6";
+      const PROPOSER = "0x1234123412341234123412341234123412341234";
+
+      beforeEach(async () => {
+        await db.insert(feedEvent).values([
+          createFeedEvent({ txHash: "0xd1", logIndex: 0, type: "DELEGATION" }),
+          createFeedEvent({ txHash: "0xt1", logIndex: 0, type: "TRANSFER" }),
+          createFeedEvent({ txHash: "0xv1", logIndex: 0, type: "VOTE" }),
+          createFeedEvent({ txHash: "0xp1", logIndex: 0, type: "PROPOSAL" }),
+          createFeedEvent({
+            txHash: "0xe1",
+            logIndex: 0,
+            type: "PROPOSAL_EXTENDED",
+            proposalId: "prop-1",
+          }),
+        ]);
+        await db.insert(delegation).values({
+          transactionHash: "0xd1",
+          daoId: "UNI",
+          delegateAccountId: DELEGATE,
+          delegatorAccountId: DELEGATOR,
+          previousDelegate: PREVIOUS_DELEGATE,
+          delegatedValue: 100n,
+          timestamp: 1700000000n,
+          logIndex: 0,
+        });
+        await db.insert(transfer).values({
+          transactionHash: "0xt1",
+          daoId: "UNI",
+          tokenId: "token",
+          amount: 100n,
+          fromAccountId: SENDER,
+          toAccountId: RECIPIENT,
+          timestamp: 1700000000n,
+          logIndex: 0,
+        });
+        await db.insert(votesOnchain).values({
+          txHash: "0xv1",
+          daoId: "UNI",
+          voterAccountId: VOTER,
+          proposalId: "prop-1",
+          support: "1",
+          votingPower: 100n,
+          timestamp: 1700000000n,
+          logIndex: 0,
+        });
+        await db.insert(proposalsOnchain).values({
+          id: "prop-1",
+          txHash: "0xp1",
+          daoId: "UNI",
+          proposerAccountId: PROPOSER,
+          targets: [],
+          values: [],
+          signatures: [],
+          calldatas: [],
+          startBlock: 1,
+          endBlock: 2,
+          title: "Proposal",
+          description: "Proposal",
+          timestamp: 1700000000n,
+          endTimestamp: 1700100000n,
+          status: "ACTIVE",
+        });
+      });
+
+      const getFilteredTxHashes = async (address: string) => {
+        const result = await repository.getFeedEvents(
+          defaultFeedParams({ address: address as `0x${string}` }),
+          defaultThresholds(),
+        );
+        return {
+          txHashes: result.items.map((i) => i.txHash).sort(),
+          totalCount: result.totalCount,
+        };
+      };
+
+      it("matches delegation events by delegator, delegate, and previous delegate", async () => {
+        expect(await getFilteredTxHashes(DELEGATOR)).toEqual({
+          txHashes: ["0xd1"],
+          totalCount: 1,
+        });
+        expect(await getFilteredTxHashes(DELEGATE)).toEqual({
+          txHashes: ["0xd1"],
+          totalCount: 1,
+        });
+        expect(await getFilteredTxHashes(PREVIOUS_DELEGATE)).toEqual({
+          txHashes: ["0xd1"],
+          totalCount: 1,
+        });
+      });
+
+      it("matches transfer events by sender and recipient", async () => {
+        expect(await getFilteredTxHashes(SENDER)).toEqual({
+          txHashes: ["0xt1"],
+          totalCount: 1,
+        });
+        expect(await getFilteredTxHashes(RECIPIENT)).toEqual({
+          txHashes: ["0xt1"],
+          totalCount: 1,
+        });
+      });
+
+      it("matches vote events by voter", async () => {
+        expect(await getFilteredTxHashes(VOTER)).toEqual({
+          txHashes: ["0xv1"],
+          totalCount: 1,
+        });
+      });
+
+      it("matches proposal and proposal-extended events by proposer", async () => {
+        expect(await getFilteredTxHashes(PROPOSER)).toEqual({
+          txHashes: ["0xe1", "0xp1"],
+          totalCount: 2,
+        });
+      });
+
+      it("matches case-insensitively regardless of stored casing", async () => {
+        expect(
+          await getFilteredTxHashes(
+            DELEGATOR.toUpperCase().replace("0X", "0x"),
+          ),
+        ).toEqual({
+          txHashes: ["0xd1"],
+          totalCount: 1,
+        });
+        expect(await getFilteredTxHashes(VOTER.toLowerCase())).toEqual({
+          txHashes: ["0xv1"],
+          totalCount: 1,
+        });
+      });
+
+      it("returns nothing for an address not present in any event", async () => {
+        expect(
+          await getFilteredTxHashes(
+            "0x9999999999999999999999999999999999999999",
+          ),
+        ).toEqual({ txHashes: [], totalCount: 0 });
+      });
+
+      it("combines with the type filter", async () => {
+        const result = await repository.getFeedEvents(
+          defaultFeedParams({
+            address: DELEGATOR as `0x${string}`,
+            type: [FeedEventType.TRANSFER],
+          }),
+          defaultThresholds(),
+        );
+
+        expect(result.items).toHaveLength(0);
+        expect(result.totalCount).toBe(0);
+      });
+
+      // A partial delegation (SCR) writes one row per delegatee out of a single
+      // DelegateChanged, all sharing the transaction hash and log index.
+      it("keeps the delegation row matching the filtered address when one event has several", async () => {
+        const SPLIT_A = "0x1111111111111111111111111111111111111111";
+        const SPLIT_B = "0x2222222222222222222222222222222222222222";
+
+        await db.insert(feedEvent).values(
+          createFeedEvent({
+            txHash: "0xsplit",
+            logIndex: 0,
+            type: "DELEGATION",
+          }),
+        );
+        await db.insert(delegation).values([
+          {
+            transactionHash: "0xsplit",
+            daoId: "UNI",
+            delegateAccountId: SPLIT_A,
+            delegatorAccountId: DELEGATOR,
+            previousDelegate: null,
+            delegatedValue: 40n,
+            timestamp: 1700000000n,
+            logIndex: 0,
+          },
+          {
+            transactionHash: "0xsplit",
+            daoId: "UNI",
+            delegateAccountId: SPLIT_B,
+            delegatorAccountId: DELEGATOR,
+            previousDelegate: null,
+            delegatedValue: 60n,
+            timestamp: 1700000000n,
+            logIndex: 0,
+          },
+        ]);
+
+        const metadataFor = async (address: string) => {
+          const result = await repository.getFeedEvents(
+            defaultFeedParams({ address: address as `0x${string}` }),
+            defaultThresholds(),
+          );
+          return result.items.find((i) => i.txHash === "0xsplit")?.metadata;
+        };
+
+        expect(await metadataFor(SPLIT_A)).toMatchObject({
+          delegate: SPLIT_A,
+          amount: "40",
+        });
+        expect(await metadataFor(SPLIT_B)).toMatchObject({
+          delegate: SPLIT_B,
+          amount: "60",
+        });
+      });
+
+      // Filtering by the delegator matches every sibling row, so the primary
+      // row is arbitrary and `delegatees` has to carry the full split.
+      it("lists every delegatee of a split event, filtered or not", async () => {
+        const SPLIT_A = "0x2222222222222222222222222222222222222222";
+        const SPLIT_B = "0x1111111111111111111111111111111111111111";
+
+        await db.insert(feedEvent).values(
+          createFeedEvent({
+            txHash: "0xsplit",
+            logIndex: 0,
+            type: "DELEGATION",
+          }),
+        );
+        // Inserted with the higher address first so a passing assertion proves
+        // the ascending sort, not the row order.
+        await db.insert(delegation).values([
+          {
+            transactionHash: "0xsplit",
+            daoId: "UNI",
+            delegateAccountId: SPLIT_A,
+            delegatorAccountId: DELEGATOR,
+            previousDelegate: null,
+            delegatedValue: 60n,
+            timestamp: 1700000000n,
+            logIndex: 0,
+          },
+          {
+            transactionHash: "0xsplit",
+            daoId: "UNI",
+            delegateAccountId: SPLIT_B,
+            delegatorAccountId: DELEGATOR,
+            previousDelegate: null,
+            delegatedValue: 40n,
+            timestamp: 1700000000n,
+            logIndex: 0,
+          },
+        ]);
+
+        const splitMetadataFor = async (address?: string) => {
+          const result = await repository.getFeedEvents(
+            defaultFeedParams(
+              address ? { address: address as `0x${string}` } : {},
+            ),
+            defaultThresholds(),
+          );
+          return result.items.find((i) => i.txHash === "0xsplit")?.metadata;
+        };
+
+        const expectedDelegatees = [
+          { delegate: SPLIT_B, amount: "40" },
+          { delegate: SPLIT_A, amount: "60" },
+        ];
+
+        expect(await splitMetadataFor(DELEGATOR)).toMatchObject({
+          delegator: DELEGATOR,
+          delegatees: expectedDelegatees,
+        });
+        expect(await splitMetadataFor()).toMatchObject({
+          delegatees: expectedDelegatees,
+        });
+        // The per-delegatee filter still selects its own row as the primary one.
+        expect(await splitMetadataFor(SPLIT_B)).toMatchObject({
+          delegate: SPLIT_B,
+          amount: "40",
+          delegatees: expectedDelegatees,
+        });
+      });
+
+      it("omits delegatees for a single-delegatee event", async () => {
+        const result = await repository.getFeedEvents(
+          defaultFeedParams({ address: DELEGATOR as `0x${string}` }),
+          defaultThresholds(),
+        );
+        const metadata = result.items.find(
+          (i) => i.txHash === "0xd1",
+        )?.metadata;
+
+        expect(metadata).toEqual({
+          kind: FeedEventType.DELEGATION,
+          delegator: DELEGATOR,
+          delegate: DELEGATE,
+          previousDelegate: PREVIOUS_DELEGATE,
+          amount: "100",
+        });
+        expect(metadata).not.toHaveProperty("delegatees");
+      });
     });
   });
 });
