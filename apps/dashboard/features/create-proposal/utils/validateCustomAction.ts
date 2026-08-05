@@ -384,10 +384,11 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
   if (compositeIssues.length > 0) return compositeIssues;
 
   // Validated with the converter the encoder uses, not the forgiving one.
-  // `storageToArg` hands back the empty container for a leaf the ABI can't hold,
-  // such as `[{}]` for a `string[]`, and an empty dynamic array reads as
-  // complete, so the action would pass here and then throw in `encodeActions` on
-  // the same arg. Whatever this accepts, `argsToTreesStrict` can encode.
+  // `storageToArgForDisplay` hands back the empty container for a leaf the ABI
+  // can't hold, such as `[{}]` for a `string[]`, and an empty dynamic array
+  // reads as complete, so the action would pass here and then throw in
+  // `encodeActions` on the same arg. Whatever this accepts, `argsToTrees` can
+  // encode.
   return fn.inputs.flatMap<ActionIssue>((input, i) => {
     const invalid = [
       { path: ["args", i], message: `Is not a valid ${input.type}` },
