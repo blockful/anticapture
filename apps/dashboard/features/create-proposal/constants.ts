@@ -45,17 +45,11 @@ export const SUGGESTED_TRANSFER_TOKENS: Partial<
 };
 
 /**
- * The document the import textarea starts out holding.
- *
- * It is the field's initial value rather than its placeholder, so an author can
- * select it, copy it, or edit it in place. Placeholder text can be read but never
- * touched, which made it the one part of the format nobody could take with them.
- *
- * Hand-wrapped, and shown with `white-space: pre`. Soft-wrapping breaks
- * `"recipient":` away from its value and destroys the shape the hint exists to
- * demonstrate, so the line breaks are chosen here instead: a continuation line
- * sits one space inside the brace, which keeps a wrapped action reading as one
- * object. The longest line is 66 characters.
+ * The document the import textarea starts out holding — the field's initial value
+ * rather than its placeholder, so an author can select, copy, or edit it in place.
+ * Hand-wrapped and shown with `white-space: pre`: soft-wrapping breaks `"recipient":`
+ * away from its value, so a continuation line sits one space inside the brace to keep
+ * a wrapped action reading as one object. Longest line is 66 characters.
  */
 export const PROPOSAL_JSON_PLACEHOLDER = `{
   "title": "Proposal title",
@@ -71,16 +65,11 @@ export const PROPOSAL_JSON_PLACEHOLDER = `{
 }`;
 
 /**
- * The worked example inside the copyable spec, kept separate so it can be
- * validated on its own.
- *
- * Every address here is a keccak-derived placeholder, deliberately not a real
- * contract. An earlier draft used real USDC and the real ENS registry, and a
- * model will happily carry a real address into generated output where nobody
- * reviewing a diff notices a correct-looking address in the right slot.
- *
- * `parseProposalJson` is run over this in `importSpec.test.ts`: the spec claims
- * the example is valid, so a change that makes it invalid has to fail.
+ * The worked example inside the copyable spec, kept separate so it can be validated
+ * on its own. Every address is a keccak-derived placeholder, deliberately not a real
+ * contract: a model will happily carry a real address into generated output, where
+ * nobody reviewing a diff notices a correct-looking one in the right slot.
+ * `importSpec.test.ts` parses this, since the spec claims the example is valid.
  */
 export const PROPOSAL_IMPORT_EXAMPLE = `{
   "title": "Proposal title",
@@ -102,13 +91,10 @@ export const PROPOSAL_IMPORT_EXAMPLE = `{
 }`;
 
 /**
- * Exactly what the "Copy spec for AI" button puts on the clipboard.
- *
- * The version stamp is load-bearing: someone will paste this into a model six
- * months from now, and the stamp is how we find out whether a malformed import
- * came from a stale spec. So is the first instruction, without which models wrap
- * their output in prose and code fences and the author pastes back something that
- * will not parse.
+ * Exactly what the "Copy spec for AI" button puts on the clipboard. The version stamp
+ * is how we find out whether a malformed import came from a stale spec pasted months
+ * later. So is the first instruction: without it models wrap their output in prose and
+ * code fences, and the author pastes back something that will not parse.
  */
 export const PROPOSAL_IMPORT_SPEC = `Anticapture: proposal import format (v1, 2026-08)
 

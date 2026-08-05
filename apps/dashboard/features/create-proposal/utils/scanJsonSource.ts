@@ -13,15 +13,10 @@ export const formatJsonPath = (path: readonly (string | number)[]): string =>
 export type NumberSource = { line: number; literal: string };
 
 /**
- * Every unquoted number in the document, by path, with the line it sits on and
- * the digits as written.
- *
- * `JSON.parse` loses both: `1000000000000000001` arrives as `...000` and there is
- * no position to report. Numbers are the only values worth tracking, since they
- * are the only ones the parser rejects for being unquoted.
- *
- * Advisory only. Anything unexpected yields an empty map, so a missing entry
- * costs a nicer message rather than a wrong one.
+ * Every unquoted number in the document, by path, with its line and the digits as
+ * written — `JSON.parse` loses both, since `1000000000000000001` arrives as `...000`
+ * with no position to report. Advisory only: anything unexpected yields an empty
+ * map, so a missing entry costs a nicer message rather than a wrong one.
  */
 export const scanJsonNumbers = (text: string): Map<string, NumberSource> => {
   const found = new Map<string, NumberSource>();

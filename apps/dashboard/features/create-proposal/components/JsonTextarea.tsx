@@ -5,15 +5,10 @@ import { useRef, type Ref } from "react";
 import { cn } from "@/shared/utils/cn";
 
 /**
- * A textarea that can carry a line-number gutter, for callers whose messages cite
- * a line.
- *
- * Two things keep the numbers honest, and both are load-bearing. The content must
- * not soft-wrap, so that one line of text is one line on screen; it is rendered
- * `whitespace-pre` and scrolls sideways instead, which the format hint needs
- * anyway since wrapping breaks `"recipient":` away from its value. And the two
- * columns must share an explicit `leading-5` and the same vertical padding, or
- * they inherit different line heights and drift further apart with every line.
+ * A textarea that can carry a line-number gutter, for callers whose messages cite a
+ * line. Two things keep the numbers honest: the content must not soft-wrap, so it is
+ * `whitespace-pre` and scrolls sideways, and the two columns must share an explicit
+ * `leading-5` and the same vertical padding, or they drift apart with every line.
  */
 
 type JsonTextareaProps = {

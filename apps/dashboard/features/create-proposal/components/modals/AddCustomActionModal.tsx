@@ -310,14 +310,11 @@ export const AddCustomActionModal = ({
   );
 
   /**
-   * The args as the encoder would read them, or null when one of them is not
-   * something the ABI can hold.
-   *
-   * Both the Add button below and the calldata preview are answers about what
-   * would be published, so neither can be built on the forgiving conversion:
-   * that one reports a malformed `uint256[]` as `[]`, which `isArgComplete`
-   * accepts and viem encodes happily, so this step would offer to save an action
-   * the publish path then refuses.
+   * The args as the encoder would read them, or null when one is not something the
+   * ABI can hold. The Add button and the calldata preview are both answers about what
+   * would be published, so neither can use the forgiving conversion: it reports a
+   * malformed `uint256[]` as `[]`, which `isArgComplete` accepts and viem encodes, so
+   * this step would offer to save an action the publish path then refuses.
    */
   const encodableTrees = useMemo<ArgValue[] | null>(() => {
     if (!selectedFn) return null;

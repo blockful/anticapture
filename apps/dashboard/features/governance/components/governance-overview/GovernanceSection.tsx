@@ -372,11 +372,9 @@ export const GovernanceSection = () => {
   const goToNewProposal = () => {
     const target = `${basePath}/proposals/new`;
     if (!hasSession) {
-      // An import stashes before this runs, because a sign-in can leave the page
-      // and the values have to survive it. Dismissing the sign-in is the author
-      // saying they are not going to the form, which makes that stash void: left
-      // behind, the next "Create new" in this tab drains it and fills a form
-      // that was asked to be blank.
+      // An import has already stashed by now. Dismissing means the form is not
+      // being reached, so that stash is void — left behind, the next "Create new"
+      // drains it into a blank proposal.
       openLogin({
         redirectTo: target,
         onDismiss: () => clearImportedProposal(daoId),
@@ -387,17 +385,11 @@ export const GovernanceSection = () => {
   };
 
   /**
-   * The import happens here, before the form exists.
-   *
-   * Opening the dialog on this page rather than after navigating means the author
-   * never sees an empty form flash behind it, and a cancelled import leaves them
-   * where they started instead of on a blank proposal they did not ask for. The
-   * parsed values are handed to the form through sessionStorage, which also
-   * carries them through the sign-in gate below.
-   *
-   * Reports whether the values were taken: storage can refuse them, and the
-   * dialog closes only on a true, so a refused import keeps the author there
-   * with their document instead of clearing it behind the toast.
+   * The import happens here, before the form exists, so the author never sees an
+   * empty form flash behind the dialog and a cancelled import leaves them where they
+   * started. Reports whether the values were taken: storage can refuse them, and the
+   * dialog closes only on a true, so a refused import keeps the author there with
+   * their document instead of clearing it behind the toast.
    */
   const handleImported = (values: ImportedProposal): boolean => {
     if (!stashImportedProposal(daoId, values)) {

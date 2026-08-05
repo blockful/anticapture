@@ -534,13 +534,10 @@ export const ProposalCreationForm = ({
   };
 
   /**
-   * Picks up an import that ran on the proposals list.
-   *
-   * Skipped entirely when the URL names a draft: that content is the draft's, and
-   * the hydration effect above is what fills it. Reading the handoff clears it, so
-   * a reload lands on a clean form rather than re-applying an import the author
-   * has since edited. The ref keeps the double-invoked effect in development from
-   * announcing the same import twice.
+   * Picks up an import that ran on the proposals list. Skipped when the URL names a
+   * draft: that content is the draft's, and the hydration effect above fills it.
+   * Reading the handoff clears it, so a reload lands on a clean form. The ref keeps
+   * development's double-invoked effect from announcing the same import twice.
    */
   const importAppliedRef = useRef(false);
   useEffect(() => {

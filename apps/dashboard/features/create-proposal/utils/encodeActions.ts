@@ -75,16 +75,11 @@ export const encodeActions = async (
         `Function "${action.functionName}" not found in the action's ABI.`,
       );
     }
-    // The same conversion the modal's live preview runs, with ENS resolution
-    // layered on as a pass over the tree. Publishing calldata that differs from
-    // the calldata the author previewed would be the worst kind of surprise, so
-    // there is deliberately only one implementation of it.
-    //
-    // The strict variant, though: the preview may degrade a half-typed array to
-    // an empty one, but encoding it that way would publish a call the action row
-    // never described. Actions reaching here from a shared or API draft haven't
-    // necessarily passed `ProposalFormSchema`, so this is the last place a
-    // malformed composite arg can be caught, and it fails closed.
+    // The conversion the modal's live preview runs, with ENS resolution layered on,
+    // so previewed and published calldata cannot diverge. The strict variant though:
+    // the preview may degrade a half-typed array to an empty one, and an action from
+    // a shared or API draft never passed `ProposalFormSchema`, so this is the last
+    // place a malformed composite arg can be caught.
     const resolvedArgs = treesToEncodeValues(
       fn.inputs,
       await resolveAddressesInTrees(

@@ -12,17 +12,11 @@ export type ResolveDecimalsResult =
 
 /**
  * Settles the `decimals` of every imported ERC-20 transfer against the token
- * contract, the way the add-transfer modal does before it builds an action.
- *
- * A pasted `decimals` is a claim about a contract the user doesn't control, and
- * `encodeActions` hands it straight to `parseUnits`. Trusting it lets an import
- * of `{ amount: "1", decimals: 18 }` against USDC display as a 1 token transfer
- * while encoding 1e18 base units, a million times the intended payment, with
- * nothing on screen showing the difference. So the value is only ever accepted
- * when the contract agrees; when it's absent, the contract supplies it.
- *
- * Actions of other types pass through untouched, so a document with no ERC-20
- * transfer never needs an RPC round trip.
+ * contract. A pasted `decimals` is a claim about a contract the author doesn't
+ * control, and `encodeActions` hands it straight to `parseUnits`: `{ amount: "1",
+ * decimals: 18 }` against USDC displays as 1 token and encodes 1e18 base units. So
+ * it is accepted only when the contract agrees, and supplied by it when absent.
+ * Other action types pass through, so no ERC-20 transfer means no RPC round trip.
  */
 export const resolveImportedDecimals = async (
   actions: PendingAction[],

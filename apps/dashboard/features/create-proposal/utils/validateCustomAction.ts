@@ -43,13 +43,10 @@ const componentsOf = (param: AbiParameter): readonly AbiParameter[] =>
   (param as { components?: readonly AbiParameter[] }).components ?? [];
 
 /**
- * Every parameter needs a string `type` all the way down: `parseArrayType`
- * calls `.match` on it, so a bare `{}` in `inputs` throws a TypeError out of the
- * argument walk below rather than being reported.
- *
- * A tuple additionally has to declare its `components`. Without them the
- * completeness walk sees a struct with no fields and calls any `[]` complete,
- * while the encoder has nothing to map the values onto.
+ * Every parameter needs a string `type` all the way down: `parseArrayType` calls
+ * `.match` on it, so a bare `{}` in `inputs` throws instead of being reported. A
+ * tuple also has to declare `components`, or the completeness walk sees a struct
+ * with no fields and calls any `[]` complete.
  */
 const isWellFormedParam = (param: unknown): boolean => {
   if (typeof param !== "object" || param === null) return false;
@@ -88,14 +85,11 @@ export const signatureOf = (fn: AbiFunction): string | null => {
 };
 
 /**
- * The subset of the ABI grammar viem's encoder actually implements.
- *
- * Left out on purpose: `function`, `fixed`/`ufixed` and out-of-range widths like
- * `bytes33` are legal ABI but throw in `encodeAbiParameters`, so they can only
- * fail mid-publish. Nonsense widths such as `uint257`, and a broken suffix like
- * `uint256[abc]`, are worse than a throw: viem matches them on
- * `startsWith("uint")` and quietly encodes something the declared type never
- * described.
+ * The subset of the ABI grammar viem's encoder actually implements. `function`,
+ * `fixed`/`ufixed` and out-of-range widths like `bytes33` are legal ABI but throw
+ * in `encodeAbiParameters`, so they only fail mid-publish. Nonsense widths like
+ * `uint257` are worse: viem matches them on `startsWith("uint")` and quietly
+ * encodes something the declared type never described.
  */
 const isEncodableElementary = (type: string): boolean => {
   if (type === "address" || type === "bool" || type === "string") return true;
@@ -125,13 +119,10 @@ const isEncodableParam = (param: AbiParameter): boolean => {
 };
 
 /**
- * A tuple has to hold exactly its declared fields.
- *
- * `isArgComplete` walks the components, so it never looks past them, and a
- * fixed-size array gets a length check while a tuple gets none. The encoder maps
- * components only, so an extra field is dropped on the way to the calldata and
- * the proposal quietly sends something narrower than intended. Recurses so
- * tuples nested in arrays, and in other tuples, are covered too.
+ * A tuple has to hold exactly its declared fields. `isArgComplete` walks the
+ * components and never looks past them, and the encoder maps components only, so
+ * an extra field is dropped on the way to the calldata. Recurses, so tuples nested
+ * in arrays and in other tuples are covered.
  */
 const tupleArityError = (
   param: AbiParameter,
@@ -179,14 +170,10 @@ const isStateChanging = (fn: AbiFunction): boolean =>
   fn.stateMutability !== "view" && fn.stateMutability !== "pure";
 
 /**
- * Resolves a `functionName` against an ABI, by full signature or by bare name.
- * Malformed entries are skipped rather than dereferenced.
- *
- * A bare name shared by several overloads is reported rather than resolved. The
- * encoder would take whichever came first in the array, and the choice is not
- * even narrowed by the arguments: the uint validator accepts 0x hex, so an
- * address-like value satisfies `foo(uint256)` exactly as well as `foo(address)`.
- * Picking one would publish that selector on nothing better than ABI ordering.
+ * Resolves a `functionName` against an ABI, by full signature or bare name, skipping
+ * malformed entries. A bare name shared by overloads is reported, not resolved: the
+ * args don't narrow the choice either, since the uint validator accepts 0x hex, so
+ * an address satisfies `foo(uint256)` as well as `foo(address)`.
  */
 export const findAbiFunction = (
   abi: readonly unknown[],
@@ -226,12 +213,9 @@ export const findAbiFunction = (
 
 /**
  * Everything that has to be true for a custom action to produce the calldata it
- * claims, checked wherever an action comes from.
- *
- * The form owns this rather than the JSON import, because it is the one place
- * every action passes through: a paste, a hand-built action, and a draft loaded
- * from the API all land here. Left to the import alone, a draft could carry a
- * broken call that only surfaced when someone pressed Publish.
+ * claims. The form owns this rather than the JSON import because it is the one place
+ * every action passes through — a paste, a hand-built action, and an API draft all
+ * land here.
  */
 export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
   const hasCalldata = Boolean(action.calldata?.trim());
@@ -242,21 +226,11 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
   }
 
   /**
-   * The two ways of describing a call are exclusive, and the import spec says as
-   * much: "either functionName with abi and args, or raw calldata. Not both, not
-   * neither".
-   *
-   * Accepting both would publish something other than what the form shows. The
-   * encoder returns on the calldata before it looks at the ABI, while the action
-   * row's subtitle is the `functionName`, so a row reading
-   * `transfer(address,uint256)` could carry arbitrary bytes. Comparing the two
-   * instead of refusing them would be worse: it would have to re-encode the args
-   * to know they agree, and the mismatch it found would still leave no way to
-   * tell which half the author meant.
-   *
-   * Reported on `calldata` because that is the half that silently wins. The
-   * custom-action modal only ever emits one of the two, so this is reachable
-   * only from a paste or an API draft.
+   * The two ways of describing a call are exclusive. Accepting both would publish
+   * something other than what the form shows: the encoder returns on the calldata
+   * before it looks at the ABI, while the row's subtitle is the `functionName`, so a
+   * row reading `transfer(address,uint256)` could carry arbitrary bytes. Reported on
+   * `calldata`, the half that silently wins.
    */
   if (hasCalldata && hasFunctionName) {
     return [

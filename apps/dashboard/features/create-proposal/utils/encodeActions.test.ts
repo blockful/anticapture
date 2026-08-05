@@ -410,11 +410,8 @@ describe("encodeActions", () => {
       });
     });
 
-    // The same failure as a mismatched tuple, one level up: the stored args and
-    // the selected function can drift apart in a draft that never passed
-    // `ProposalFormSchema`, and mapping over the ABI's inputs alone would paper
-    // over it — a missing arg read as "", an extra one dropped — and publish
-    // calldata the action row never described.
+    // A mismatched tuple one level up: mapping over the ABI's inputs alone papers
+    // over it, reading a missing arg as "" and dropping an extra one.
     describe("an arg count the function doesn't take fails closed", () => {
       const callWithArgs = (args: string[]) =>
         encodeActions(

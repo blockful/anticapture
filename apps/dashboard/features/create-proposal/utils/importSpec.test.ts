@@ -8,16 +8,11 @@ import {
 } from "@/features/create-proposal/utils/parseProposalJson";
 
 /*
- * SPEC-6 asks for the payload to be generated in CI from the schema plus the
- * example, on the grounds that maintaining the text by hand is how the help text
- * and the parser drifted apart in the first place.
- *
- * Generating the FIELDS prose from a zod schema would mean annotating the schema
- * with the prose, which puts the same sentences in a different file rather than
- * deriving them. What actually drifted was never the prose: it was the claim that
- * the example is valid, and the claim that a tuple can be written as a keyed
- * object. Both of those are executable, so they are tested here instead, and the
- * example lives in one place that both the spec and this test read.
+ * SPEC-6 asks for the payload to be generated in CI from the schema plus the example.
+ * Deriving the FIELDS prose from zod would mean annotating the schema with that prose,
+ * which just moves the sentences. What actually drifted was executable: the claim that
+ * the example is valid, and that a tuple can be keyed. Both are tested here, and the
+ * example lives in one place the spec and this test both read.
  */
 
 const reasons = (text: string) => {

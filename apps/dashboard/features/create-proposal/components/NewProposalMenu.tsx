@@ -9,17 +9,11 @@ import { itemStatusStyles } from "@/shared/components/design-system/combobox/sty
 import { cn } from "@/shared/utils/cn";
 
 /**
- * The two ways to start a proposal, behind the New Proposal button.
- *
- * The import used to be a button sitting on the creation form, which is one step
- * too late: by then the author has an empty form in front of them and importing
- * replaces what they are looking at. Choosing it here makes it a way of starting,
- * which is what it is.
- *
- * Built on the Popover primitive rather than the Combobox, which is a select: it
- * shows its current value in the trigger, and these two options are actions with
- * nothing selected between them. The item styling is borrowed from the combobox
- * so the two menus look like one system.
+ * The two ways to start a proposal, behind the New Proposal button. The import used
+ * to live on the creation form, one step too late: by then the author has an empty
+ * form in front of them and importing replaces it. Popover rather than Combobox,
+ * which is a select — these are actions, with nothing selected between them. Item
+ * styling is borrowed from the combobox so the two menus look like one system.
  */
 
 type NewProposalMenuProps = {

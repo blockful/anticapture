@@ -6,15 +6,13 @@ import {
 } from "@/features/create-proposal/utils/importHandoff";
 
 /*
- * The import runs on the proposals list and the form it fills is another route,
- * so these values cross a navigation, and sometimes a sign-in round trip that
- * lands in a different tab entirely. What matters is that they arrive once,
- * arrive for the right DAO, arrive in whatever context the sign-in came back in,
- * and never arrive twice or long after the fact.
+ * These values cross a navigation and sometimes a sign-in that comes back in a
+ * different tab. What matters: they arrive once, for the right DAO, in whatever
+ * context the sign-in landed in, and never twice or long after the fact.
  */
 
 /** Same shape draftStorage.test uses, installed as the global the module reads. */
-function createMemoryStorage(): Storage {
+const createMemoryStorage = (): Storage => {
   const data = new Map<string, string>();
   return {
     get length() {
@@ -30,7 +28,7 @@ function createMemoryStorage(): Storage {
       data.set(k, v);
     },
   };
-}
+};
 
 const proposal: ImportedProposal = {
   title: "Fund the thing",
@@ -120,12 +118,8 @@ describe("the import handoff", () => {
     expect(localStorage.getItem(KEY)).toBeNull();
   });
 
-  /*
-   * The whole reason this is `localStorage`: the magic-link sign-in mails an
-   * absolute URL back to the form, and following it from a mail client opens a
-   * context that never saw the tab which wrote the stash. Under `sessionStorage`
-   * the author signed in and got a blank form with their document gone.
-   */
+  // The whole reason this is `localStorage`: the magic link comes back in a context
+  // that never saw the tab which wrote the stash.
   it("is readable from a context that never wrote it", () => {
     stashImportedProposal("ens", proposal);
     const carried = localStorage.getItem(KEY);
@@ -139,10 +133,8 @@ describe("the import handoff", () => {
     expect(takeImportedProposal("ens")).toEqual(proposal);
   });
 
-  /*
-   * Surviving tab closes is what makes an expiry necessary. Without it a stash
-   * nobody followed through on would fill a form in a session days later.
-   */
+  // Surviving tab closes is what makes an expiry necessary: without it a stash
+  // nobody followed through on fills a form days later.
   describe("a stash that sat too long", () => {
     const writtenAt = (ms: number) =>
       localStorage.setItem(KEY, JSON.stringify({ at: ms, values: proposal }));
@@ -172,13 +164,8 @@ describe("the import handoff", () => {
     expect(takeImportedProposal("ens")).toEqual({ actions: [] });
   });
 
-  /*
-   * The stash is written before the navigation, because a sign-in can leave the
-   * page. So an author who imports while signed out and then dismisses the
-   * sign-in has staged something for a route they never reached, and it has to be
-   * dropped: it used to outlive the attempt and fill the next "Create new" in the
-   * tab with the document they walked away from.
-   */
+  // Importing while signed out and then dismissing the sign-in stages something for
+  // a route never reached, which used to fill the next "Create new" in the tab.
   describe("abandoning the handoff", () => {
     it("drops a stash whose navigation never happened", () => {
       stashImportedProposal("ens", proposal);

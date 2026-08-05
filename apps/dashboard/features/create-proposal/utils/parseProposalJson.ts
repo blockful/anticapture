@@ -70,33 +70,20 @@ export type ParseProposalJsonResult =
   | { ok: false; issues: ImportIssue[] };
 
 /*
- * This file checks what reading a document can get wrong, and what a document
- * can assert that nothing downstream would question.
- *
- * Whether an action is publishable belongs to `ProposalFormSchema`, through
- * `customActionIssues`, so a pasted action and a hand-built one are held to one
- * standard and a bad one reports on its row instead of being refused at the
- * door. What stays here is the part the form can't see: JSON's own lossiness
- * with numbers, the translation from a document's arg shapes into the form's,
- * an ETH value nothing in the form can display, and ERC-20 decimals only the
- * token contract can settle.
+ * This file checks what reading a document can get wrong. Whether an action is
+ * publishable belongs to `ProposalFormSchema` via `customActionIssues`, so a pasted
+ * action and a hand-built one are held to one standard. What stays here is what the
+ * form can't see: JSON's lossiness with numbers, the translation from a document's
+ * arg shapes into the form's, an ETH value the form can't display, and ERC-20
+ * decimals only the token contract can settle.
  */
 
 /**
- * Every figure that reaches the chain has to arrive quoted.
- *
- * A JSON number is not the number that was written. `JSON.parse` runs before
- * anything here and a double can't hold every decimal literal:
- * `1000000000000000001` arrives as `1000000000000000000`,
- * `0.123456789123456789` as `0.12345678912345678`, and
- * `1.000000000000000001` as plain `1`. By then the original text is gone, so no
- * inspection of the parsed value can tell a rounded figure from one that was
- * always round: that last case is indistinguishable from someone writing `1`.
- * Guessing would mean silently moving a different amount of money than the
- * document asked for, so numbers are refused outright.
- *
- * `decimals` stays a number: it is small, exact, and checked against the token
- * contract anyway.
+ * Every figure that reaches the chain has to arrive quoted. A double can't hold every
+ * decimal literal, and `JSON.parse` runs first: `1000000000000000001` arrives as
+ * `...000` and `1.000000000000000001` as plain `1`, by which point the original text
+ * is gone and a rounded figure is indistinguishable from one that was always round.
+ * `decimals` stays a number: small, exact, and checked against the contract anyway.
  */
 const quotedFigure = z
   .string({

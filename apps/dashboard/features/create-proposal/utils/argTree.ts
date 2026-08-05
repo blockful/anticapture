@@ -67,15 +67,10 @@ const describeLeaf = (value: unknown): string => {
 
 /**
  * Walks a parsed composite against the param that has to hold it, turning JSON
- * scalars into the string leaves the UI edits and refusing everything else.
- *
- * Blindly stringifying leaves is what has to be avoided here: `String(null)` is
- * `"null"` and `String({})` is `"[object Object]"`, both of which read as a
- * filled-in leaf to `customActionIssues`, so an action from a shared or API
- * draft that never passed `ProposalFormSchema` could publish calldata carrying
- * a value nobody wrote. Shape is checked with it, since a list where the ABI
- * says a value goes (or a value where it says a list) describes a different
- * call than the row does.
+ * scalars into string leaves and refusing everything else. Stringifying blindly is
+ * what has to be avoided: `String(null)` is `"null"` and `String({})` is
+ * `"[object Object]"`, both of which read as filled-in to `customActionIssues`.
+ * Shape is checked too, since a list where the ABI wants a value is a different call.
  */
 const coerceStrict = (
   param: AbiParameter,
@@ -135,18 +130,12 @@ export const argToStorage = (param: AbiParameter, value: ArgValue): string => {
 };
 
 /**
- * Parses a stored arg string into an editable tree, refusing anything a
- * composite param can't hold: a blank, unparseable JSON, JSON that isn't an
- * array, a tuple that isn't exactly its declared components, a leaf that is not
- * a JSON scalar, and a leaf whose shape contradicts the ABI parameter.
- *
- * This is the conversion. `storageToArgForDisplay` is this same function with the
- * rejection swallowed, so there is one implementation and the two cannot drift.
- * Anything deciding whether an action is complete, previewing its calldata, or
- * encoding it has to come through here: the forgiving variant reports a malformed
- * `uint256[]` as `[]`, which encodes to perfectly valid calldata for an empty
- * array, so a draft that bypassed `ProposalFormSchema` would publish a call that
- * doesn't match the row describing it, with nothing to see anywhere.
+ * Parses a stored arg string into an editable tree, refusing anything a composite
+ * param can't hold: a blank, unparseable JSON, JSON that isn't an array, a tuple
+ * that isn't its declared components, and a leaf whose shape contradicts the param.
+ * Anything judging completeness, previewing calldata, or encoding comes through
+ * here — the forgiving variant reports a malformed `uint256[]` as `[]`, which
+ * encodes to valid calldata for an empty array.
  */
 export const storageToArg = (param: AbiParameter, stored: string): ArgValue => {
   if (!isComposite(param.type)) return stored;
@@ -171,15 +160,10 @@ export const storageToArg = (param: AbiParameter, stored: string): ArgValue => {
 };
 
 /**
- * `storageToArg` with the rejection swallowed, for rendering only.
- *
- * A malformed composite degrades to the empty container so an editor still has a
- * tree to draw while someone is mid-edit. The name says "for display" because
- * that is the only thing this answer is good for: anything deciding whether an
- * action is complete, previewing its calldata, or encoding it has to use
- * `storageToArg` instead. Every bug in this file's history came from a caller
- * reaching for the forgiving variant to answer one of those questions, so the
- * plain name is the safe one and this is the one that has to be asked for.
+ * `storageToArg` with the rejection swallowed, for rendering only: a malformed
+ * composite degrades to the empty container so an editor has a tree to draw
+ * mid-edit. Every bug in this file's history came from a caller reaching for this
+ * to judge completeness, preview, or encode — those use `storageToArg`.
  */
 export const storageToArgForDisplay = (
   param: AbiParameter,
@@ -200,16 +184,10 @@ export const argsToTreesForDisplay = (
   inputs.map((input, i) => storageToArgForDisplay(input, args[i] ?? ""));
 
 /**
- * Throws on a composite arg the stored string never described, rather than
- * quietly handing back an empty container.
- *
- * The count is part of that description. Mapping over the ABI's inputs alone
- * reads a missing arg as `""` and drops an extra one, so a stored action whose
- * args and function drifted apart — an imported or API draft that never passed
- * `ProposalFormSchema` — would publish calldata the row never described:
- * `setMessage(string)` with `args: []` would encode an empty string instead of
- * failing. Same reasoning as the tuple arity check in `coerceStrict`, one level
- * up.
+ * Throws on a composite arg the stored string never described, rather than quietly
+ * handing back an empty container. The count too: mapping over the ABI's inputs
+ * alone reads a missing arg as `""` and drops an extra one, so `setMessage(string)`
+ * with `args: []` would encode an empty string instead of failing.
  */
 export const argsToTrees = (
   inputs: readonly AbiParameter[],
@@ -280,14 +258,10 @@ export const treesToEncodeValues = (
   );
 
 /**
- * Replaces every `address` leaf with the address it resolves to, leaving the
- * tree otherwise untouched.
- *
- * Publishing needs ENS names turned into addresses, which the preview doesn't
- * (it only renders once the addresses are already concrete). Doing it as a pass
- * over the tree keeps that the only difference between them: both then run the
- * same `treesToEncodeValues`, so the calldata a user previews is the calldata
- * that gets published.
+ * Replaces every `address` leaf with the address it resolves to, leaving the tree
+ * otherwise untouched. Publishing needs ENS names resolved and the preview doesn't;
+ * doing it as a pass keeps that the only difference, so both run the same
+ * `treesToEncodeValues` and the previewed calldata is the published calldata.
  */
 export const resolveAddressLeaves = async (
   param: AbiParameter,

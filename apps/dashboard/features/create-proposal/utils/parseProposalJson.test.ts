@@ -376,13 +376,10 @@ describe("parseProposalJson", () => {
   });
 
   /*
-   * A tuple is unavoidable in real governance calls (Sablier streams, Governor
-   * `propose`, most Safe module functions), so the document has to be able to
-   * express one, in either shape JSON offers for it: an object keyed by component
-   * name, or an array in component order.
-   *
-   * The form stores tuples positionally, so the keyed form is reordered here.
-   * That reordering is the only reason this conversion needs the ABI.
+   * Tuples are unavoidable in real governance calls (Sablier streams, Governor
+   * `propose`, Safe modules), so a document can express one in either JSON shape:
+   * keyed by component name, or an array in component order. The form stores them
+   * positionally, so the keyed form is reordered — the only reason this needs the ABI.
    */
   describe("tuple args", () => {
     const durations = {
