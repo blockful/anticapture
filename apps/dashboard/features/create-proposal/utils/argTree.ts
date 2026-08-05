@@ -72,14 +72,47 @@ export const argToStorage = (param: AbiParameter, value: ArgValue): string => {
   return JSON.stringify(value);
 };
 
-/** Parses a stored arg string into an editable tree. Composites are JSON; a
- *  blank or malformed composite degrades to the empty container. */
-export const storageToArg = (param: AbiParameter, stored: string): ArgValue => {
+/**
+ * Parses a stored arg string into an editable tree, refusing anything a
+ * composite param can't hold: a blank, unparseable JSON, or JSON that isn't an
+ * array. This is the conversion; `storageToArg` is the same one with a fallback
+ * bolted on, so the two can't drift.
+ *
+ * Whoever is going to encode has to use this variant. `storageToArg` reports a
+ * malformed `uint256[]` as `[]`, which encodes to perfectly valid calldata for
+ * an empty array, so a draft that bypassed `ProposalFormSchema` would publish a
+ * call that doesn't match the row describing it, with nothing to see anywhere.
+ */
+export const storageToArgStrict = (
+  param: AbiParameter,
+  stored: string,
+): ArgValue => {
   if (!isComposite(param.type)) return stored;
+
   const trimmed = (stored ?? "").trim();
-  if (!trimmed) return buildEmpty(param);
+  const subject = param.name ? `Argument "${param.name}"` : "Argument";
+  const reject = (): never => {
+    throw new Error(
+      `${subject} must be a JSON array for ${param.type}, got ${trimmed || "nothing"}.`,
+    );
+  };
+
+  let parsed: unknown;
   try {
-    return coerce(JSON.parse(trimmed));
+    parsed = JSON.parse(trimmed);
+  } catch {
+    return reject();
+  }
+  if (!Array.isArray(parsed)) return reject();
+  return coerce(parsed);
+};
+
+/** Parses a stored arg string into an editable tree. Composites are JSON; a
+ *  blank or malformed composite degrades to the empty container, so the modal's
+ *  live preview keeps rendering while someone is mid-edit. */
+export const storageToArg = (param: AbiParameter, stored: string): ArgValue => {
+  try {
+    return storageToArgStrict(param, stored);
   } catch {
     return buildEmpty(param);
   }
@@ -89,6 +122,14 @@ export const argsToTrees = (
   inputs: readonly AbiParameter[],
   args: readonly string[],
 ): ArgValue[] => inputs.map((input, i) => storageToArg(input, args[i] ?? ""));
+
+/** `argsToTrees` for the encode path: throws on a composite arg the stored
+ *  string never described, rather than encoding an empty container. */
+export const argsToTreesStrict = (
+  inputs: readonly AbiParameter[],
+  args: readonly string[],
+): ArgValue[] =>
+  inputs.map((input, i) => storageToArgStrict(input, args[i] ?? ""));
 
 export const treesToArgs = (
   inputs: readonly AbiParameter[],

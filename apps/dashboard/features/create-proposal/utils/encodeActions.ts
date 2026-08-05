@@ -9,7 +9,7 @@ import {
 } from "viem";
 import { isAddressLike, toChecksumAddress } from "@/shared/utils/address";
 import {
-  argsToTrees,
+  argsToTreesStrict,
   resolveAddressesInTrees,
   treesToEncodeValues,
 } from "@/features/create-proposal/utils/argTree";
@@ -79,11 +79,17 @@ export const encodeActions = async (
     // layered on as a pass over the tree. Publishing calldata that differs from
     // the calldata the author previewed would be the worst kind of surprise, so
     // there is deliberately only one implementation of it.
+    //
+    // The strict variant, though: the preview may degrade a half-typed array to
+    // an empty one, but encoding it that way would publish a call the action row
+    // never described. Actions reaching here from a shared or API draft haven't
+    // necessarily passed `ProposalFormSchema`, so this is the last place a
+    // malformed composite arg can be caught, and it fails closed.
     const resolvedArgs = treesToEncodeValues(
       fn.inputs,
       await resolveAddressesInTrees(
         fn.inputs,
-        argsToTrees(fn.inputs, action.args),
+        argsToTreesStrict(fn.inputs, action.args),
         resolve,
       ),
     );

@@ -2,6 +2,7 @@ import {
   encodeActions,
   makeAddressResolver,
 } from "@/features/create-proposal/utils/encodeActions";
+import { argsToTrees } from "@/features/create-proposal/utils/argTree";
 import type { ProposalAction } from "@/features/create-proposal/types";
 import {
   parseEther,
@@ -241,6 +242,79 @@ describe("encodeActions", () => {
 
     test("still refuses a fixed array of the wrong length", async () => {
       await expect(encodeOne("uint256[2]", '["1"]')).rejects.toThrow();
+    });
+
+    // A shared or API draft is rendered straight from stored data, so it can
+    // reach the encoder without passing ProposalFormSchema. The forgiving
+    // conversion reads a malformed composite as an empty container, which
+    // encodes to entirely valid calldata for an empty array: the publish would
+    // succeed and send a call the action row never described.
+    describe("malformed composite args fail closed", () => {
+      test.each([
+        ["unparseable text", "not json"],
+        ["JSON that isn't an array", '"42"'],
+        ["JSON null", "null"],
+        ["nothing at all", ""],
+      ])("refuses a uint256[] arg holding %s", async (_case, arg) => {
+        await expect(encodeOne("uint256[]", arg)).rejects.toThrow(
+          /must be a JSON array for uint256\[\]/,
+        );
+      });
+
+      test("refuses a malformed tuple arg", async () => {
+        const tupleAbi = [
+          {
+            type: "function",
+            name: "f",
+            stateMutability: "nonpayable",
+            inputs: [
+              {
+                name: "order",
+                type: "tuple",
+                components: [
+                  { name: "id", type: "uint256" },
+                  { name: "owner", type: "address" },
+                ],
+              },
+            ],
+            outputs: [],
+          },
+        ] as Abi;
+        await expect(
+          encodeActions(
+            [
+              {
+                type: "custom",
+                contractAddress: CONTRACT,
+                abi: tupleAbi,
+                functionName: "f",
+                args: ["not json"],
+              } as ProposalAction,
+            ],
+            passthrough,
+          ),
+        ).rejects.toThrow(/must be a JSON array for tuple/);
+      });
+
+      // What the malformed arg used to encode as, so the regression is legible:
+      // this is the calldata the refusals above would otherwise have published.
+      test("an explicitly empty array is still encodable", async () => {
+        const { calldatas } = await encodeOne("uint256[]", "[]");
+        expect(calldatas[0]).toBe(
+          encodeFunctionData({
+            abi: abiWith("uint256[]"),
+            functionName: "f",
+            args: [[]],
+          }),
+        );
+      });
+
+      // The other side of the same coin: the modal's live preview has to keep
+      // rendering while an array is half-typed, so its conversion stays lenient.
+      test("the live preview conversion still degrades instead of throwing", () => {
+        const inputs = [{ name: "a", type: "uint256[]" }] as const;
+        expect(argsToTrees(inputs, ["not json"])).toEqual([[]]);
+      });
     });
 
     test("resolves an ENS name nested inside an array", async () => {
