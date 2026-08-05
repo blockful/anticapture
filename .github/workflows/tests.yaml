@@ -424,6 +424,24 @@ jobs:
           flags: api
           fail_ci_if_error: false
 
+  dao-api-db-entrypoint:
+    name: DAO API DB entrypoint self-test
+    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # The entrypoint derives max_connections and effective_cache_size from the
+      # container's own cgroup limit, so a wrong derivation silently mis-provisions
+      # every DAO database at once — and the tiers it keys off are not visible from
+      # the repo. The script ships assertions for the four fleet tiers, both clamp
+      # boundaries and both fallback paths; this runs them on every PR instead of
+      # relying on someone remembering to.
+      - name: Run entrypoint self-test
+        run: bash infra/dao-api-db/entrypoint.dao-api-db.sh --self-test
+
   # dashboard-e2e:
   #   name: Dashboard E2E
   #   needs: wait-for-gateful
