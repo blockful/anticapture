@@ -33,6 +33,24 @@ export const stashImportedProposal = (
   }
 };
 
+/**
+ * Drops a pending import without reading it, for a handoff whose navigation
+ * never happened.
+ *
+ * The stash is written before the route is reached, because a sign-in can leave
+ * the page entirely, so whoever staged it owns undoing it when the author turns
+ * back. Left behind, it outlives the attempt: the next visit to the form in this
+ * tab drains it, and an author who asked for a blank proposal gets the document
+ * they walked away from.
+ */
+export const clearImportedProposal = (daoId: string): void => {
+  try {
+    sessionStorage.removeItem(keyFor(daoId));
+  } catch {
+    // Nothing to undo: a storage that refuses this refused the write too.
+  }
+};
+
 /** Reads the pending import and clears it, so a reload cannot re-apply an import
  *  the author has since edited away. */
 export const takeImportedProposal = (

@@ -22,6 +22,17 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 export type OpenLoginOptions = {
   /** Route to navigate to once the user authenticates. */
   redirectTo?: string;
+  /**
+   * Ran when the author dismisses the modal, so a caller that staged something
+   * for the post-sign-in route can undo it.
+   *
+   * Dismissal is the only close that runs it. Sign-in completion closes the
+   * modal through the effect below, which drops this first, and a flow that
+   * leaves the page (magic link, OAuth) never closes it at all — that tab
+   * unloads with the staging still valid, which is the whole reason staging
+   * outlives this component.
+   */
+  onDismiss?: () => void;
 };
 
 type LoginContextValue = {
@@ -50,8 +61,13 @@ export function LoginProvider({
   // Cleared when the modal is dismissed without authenticating.
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
+  // Held in a ref, and dropped as soon as it runs or the flow completes, so a
+  // later opening can never run the previous caller's undo.
+  const onDismissRef = useRef<(() => void) | null>(null);
+
   const openLogin = useCallback((options?: OpenLoginOptions) => {
     setRedirectTo(options?.redirectTo ?? null);
+    onDismissRef.current = options?.onDismiss ?? null;
     setIsOpen(true);
   }, []);
 
@@ -86,9 +102,20 @@ export function LoginProvider({
     if (stale) void authClient.signOut();
   }, [authFlowActive, session, walletStatus, address]);
 
+  // Whatever is still in the ref by the time this runs is an undo nobody
+  // claimed, so it runs unconditionally. Deliberately not gated on there being
+  // no session: this component reads `useSession` while its callers gate on
+  // `useAuthSession`, and the two disagree for a stale wallet session — which
+  // this modal being open actively keeps alive, since `authFlowActive` stands
+  // the sign-out effect down. Gating here would skip the undo in exactly the
+  // case the caller was signed out from. Completion clears the ref itself.
   const handleOpenChange = useCallback((open: boolean) => {
     setIsOpen(open);
-    if (!open) setRedirectTo(null);
+    if (open) return;
+    setRedirectTo(null);
+    const onDismiss = onDismissRef.current;
+    onDismissRef.current = null;
+    onDismiss?.();
   }, []);
 
   // Sign-in completion: a session for a NEW user appearing while the modal
@@ -104,6 +131,8 @@ export function LoginProvider({
       setIsOpen(false);
       if (redirectTo) router.push(redirectTo);
       setRedirectTo(null);
+      // The staging this guarded is being used, so there is nothing to undo.
+      onDismissRef.current = null;
     }
     prevUserId.current = userId;
   }, [session, isOpen, redirectTo, router]);

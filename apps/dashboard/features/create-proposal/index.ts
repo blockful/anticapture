@@ -13,6 +13,7 @@ export { DeleteDraftModal } from "@/features/create-proposal/components/modals/D
 export { NewProposalMenu } from "@/features/create-proposal/components/NewProposalMenu";
 export { ImportJsonModal } from "@/features/create-proposal/components/modals/ImportJsonModal";
 export {
+  clearImportedProposal,
   stashImportedProposal,
   type ImportedProposal,
 } from "@/features/create-proposal/utils/importHandoff";

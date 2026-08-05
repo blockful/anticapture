@@ -28,6 +28,7 @@ import {
   DeleteDraftModal,
   ImportJsonModal,
   NewProposalMenu,
+  clearImportedProposal,
   stashImportedProposal,
   useDrafts,
   type ImportedProposal,
@@ -370,7 +371,15 @@ export const GovernanceSection = () => {
   const goToNewProposal = () => {
     const target = `${basePath}/proposals/new`;
     if (!hasSession) {
-      openLogin({ redirectTo: target });
+      // An import stashes before this runs, because a sign-in can leave the page
+      // and the values have to survive it. Dismissing the sign-in is the author
+      // saying they are not going to the form, which makes that stash void: left
+      // behind, the next "Create new" in this tab drains it and fills a form
+      // that was asked to be blank.
+      openLogin({
+        redirectTo: target,
+        onDismiss: () => clearImportedProposal(daoId),
+      });
       return;
     }
     router.push(target);

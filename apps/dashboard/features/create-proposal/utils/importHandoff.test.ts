@@ -1,4 +1,5 @@
 import {
+  clearImportedProposal,
   stashImportedProposal,
   takeImportedProposal,
   type ImportedProposal,
@@ -115,8 +116,41 @@ describe("the import handoff", () => {
     expect(takeImportedProposal("ens")).toEqual({ actions: [] });
   });
 
+  /*
+   * The stash is written before the navigation, because a sign-in can leave the
+   * page. So an author who imports while signed out and then dismisses the
+   * sign-in has staged something for a route they never reached, and it has to be
+   * dropped: it used to outlive the attempt and fill the next "Create new" in the
+   * tab with the document they walked away from.
+   */
+  describe("abandoning the handoff", () => {
+    it("drops a stash whose navigation never happened", () => {
+      stashImportedProposal("ens", proposal);
+      clearImportedProposal("ens");
+      expect(takeImportedProposal("ens")).toBeNull();
+    });
+
+    it("normalizes the id the same way the write did", () => {
+      stashImportedProposal("ENS", proposal);
+      clearImportedProposal("EnS");
+      expect(takeImportedProposal("ens")).toBeNull();
+    });
+
+    it("leaves another DAO's pending import alone", () => {
+      stashImportedProposal("ens", proposal);
+      stashImportedProposal("shu", proposal);
+      clearImportedProposal("ens");
+      expect(takeImportedProposal("ens")).toBeNull();
+      expect(takeImportedProposal("shu")).toEqual(proposal);
+    });
+
+    it("is a no-op when nothing is pending", () => {
+      expect(() => clearImportedProposal("ens")).not.toThrow();
+    });
+  });
+
   describe("when storage is unavailable", () => {
-    const refuse = (method: "getItem" | "setItem") => {
+    const refuse = (method: "getItem" | "setItem" | "removeItem") => {
       const storage = createMemoryStorage();
       storage[method] = () => {
         throw new Error("blocked");
@@ -134,6 +168,14 @@ describe("the import handoff", () => {
     it("reads nothing on a refused read", () => {
       refuse("getItem");
       expect(takeImportedProposal("ens")).toBeNull();
+    });
+
+    // Ran from a dismiss handler, where throwing would take the modal's close
+    // with it. A storage that refuses this refused the write too, so there is
+    // nothing staged to leak.
+    it("swallows a refused clear", () => {
+      refuse("removeItem");
+      expect(() => clearImportedProposal("ens")).not.toThrow();
     });
   });
 });
