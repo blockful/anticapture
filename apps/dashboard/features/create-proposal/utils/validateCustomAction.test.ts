@@ -18,7 +18,6 @@ const action = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-/** A well-formed `setValue(address,uint256)` call, for overriding one part of. */
 const call = (overrides: Record<string, unknown> = {}) =>
   action({
     abi: abiOf(
@@ -33,7 +32,6 @@ const call = (overrides: Record<string, unknown> = {}) =>
     ...overrides,
   });
 
-/** A one-argument call, for exercising a single parameter type. */
 const callTaking = (type: string, arg: string) =>
   action({
     abi: abiOf([{ name: "value", type }], "fine"),
@@ -51,6 +49,8 @@ const expectIssue = (
   if (fragment) expect(issues[0].message).toContain(fragment);
 };
 
+/* The rules every entry point is held to. The JSON import runs these rather than
+ * restating them, so this file is where they are specified. */
 describe("customActionIssues", () => {
   it("passes a well-formed call", () => {
     expect(customActionIssues(call())).toEqual([]);
@@ -69,9 +69,6 @@ describe("customActionIssues", () => {
       ).toEqual([]);
     });
 
-    // The ABI is stored either way, and the edit modal formats every function in
-    // it to fill its select: an action that publishes fine can still take that
-    // dialog down.
     it("still reports a malformed function entry", () => {
       expectIssue(
         customActionIssues(
@@ -85,8 +82,6 @@ describe("customActionIssues", () => {
       expect(customActionIssues(action({ calldata: "0x" }))).toEqual([]);
     });
 
-    // Without this the calldata is cast straight to Hex on the way to the
-    // chain, so the paste only failed once the user was already signing.
     it.each([
       ["a function signature", "transfer(address,uint256)"],
       ["a non-hex string", "not calldata"],
@@ -96,9 +91,6 @@ describe("customActionIssues", () => {
       expectIssue(customActionIssues(action({ calldata })), ["calldata"]);
     });
 
-    // The encoder returns on the calldata before it reads the ABI, while the
-    // action row's subtitle is the functionName. Accepting both publishes bytes
-    // the row never showed.
     describe("mixed with an ABI call", () => {
       it("rejects a function name alongside valid calldata", () => {
         expectIssue(
@@ -108,8 +100,6 @@ describe("customActionIssues", () => {
         );
       });
 
-      // The name doesn't have to resolve for the mix to mislead: the row shows
-      // whatever string was pasted.
       it("rejects a bare function name alongside valid calldata", () => {
         expectIssue(
           customActionIssues(
@@ -151,8 +141,6 @@ describe("customActionIssues", () => {
       );
     });
 
-    // The modal keeps view and pure out of its function list, so one of those
-    // could never be selected there or hydrated on edit.
     it.each(["view", "pure"])("rejects a %s function", (stateMutability) => {
       expectIssue(
         customActionIssues(
@@ -189,9 +177,6 @@ describe("customActionIssues", () => {
       ).toEqual([]);
     });
 
-    // uint accepts 0x hex, so an address-like arg satisfies foo(uint256) just
-    // as well as foo(address): a bare name can't say which was meant, and
-    // picking the first would publish that selector.
     describe("overloads", () => {
       const overloaded = (functionName: string) =>
         action({
@@ -215,9 +200,6 @@ describe("customActionIssues", () => {
     });
   });
 
-  // An ABI array only guarantees a string `type`, so these survive it and used
-  // to reach viem's formatter, or parseArrayType's `.match`, and throw. The bare
-  // function name is the way in: it skips the signature formatter.
   describe("malformed entries", () => {
     it.each([
       ["no name", { type: "function", inputs: [], outputs: [] }],
@@ -245,9 +227,6 @@ describe("customActionIssues", () => {
   });
 
   describe("parameter types", () => {
-    // bytes33, function and fixed throw in viem's encoder; uint257 and
-    // uint256[abc] are worse, since viem matches them on startsWith("uint") and
-    // encodes something the declared type never described.
     it.each([
       ["an out-of-range integer width", "uint257"],
       ["an unaligned integer width", "uint7"],
@@ -271,8 +250,6 @@ describe("customActionIssues", () => {
       expect(customActionIssues(callTaking(type, arg))).toEqual([]);
     });
 
-    // Only the called function matters, so a real contract's ABI isn't refused
-    // over an exotic entry nobody is invoking.
     it("ignores an unencodable type in a function it isn't calling", () => {
       expect(
         customActionIssues(
@@ -288,8 +265,6 @@ describe("customActionIssues", () => {
       ).toEqual([]);
     });
 
-    // The encoder throws on a tuple whose components are missing, so the ABI has
-    // to declare them for the action to be encodable at all.
     it.each([
       ["a bare tuple", "tuple"],
       ["a tuple array", "tuple[]"],
@@ -321,9 +296,6 @@ describe("customActionIssues", () => {
         expect(withArg('["1", "2"]')).toEqual([]);
       });
 
-      // storageToArg swallows the parse error and hands back an empty array,
-      // which isArgComplete calls complete, so the action looked ready and the
-      // encoder threw on the original text.
       it.each([
         ["isn't JSON", "not json"],
         ["is JSON but not an array", '{"nope":1}'],
@@ -331,16 +303,10 @@ describe("customActionIssues", () => {
         expectIssue(withArg(arg), ["args", 0], "must be a JSON array");
       });
 
-      // Named at the element, not at the argument: with a hundred-entry array the
-      // index is the whole message.
       it("rejects an array whose elements don't fit the type", () => {
         expectIssue(withArg('["not a number"]'), ["args", 0, 0]);
       });
 
-      // The arg parses as a JSON array, so the shape checks above pass it, and
-      // then storageToArg degrades the leaf the ABI can't hold to the empty
-      // container, which counts as a complete dynamic array. Validation used to
-      // accept the action while encodeActions threw on that very same arg.
       it.each([
         ["an object leaf", "[{}]"],
         ["a null leaf", "[null]"],
@@ -349,9 +315,6 @@ describe("customActionIssues", () => {
         expectIssue(withArg(arg), ["args", 0]);
       });
 
-      // isArgComplete walks the declared components, so anything past them is
-      // never looked at, and the encoder maps components only: the extra value
-      // vanishes from the calldata without a word.
       describe("tuple field counts", () => {
         const pair = (type: string, arg: string) =>
           customActionIssues(
@@ -385,8 +348,6 @@ describe("customActionIssues", () => {
           expectIssue(pair("tuple", arg), ["args", 0]);
         });
 
-        // The arity check skips a non-array entry, leaving the leaf-shape
-        // refusal as the only thing standing between this and the encoder.
         it("rejects an object where an array wants a tuple", () => {
           expectIssue(pair("tuple[]", "[{}]"), ["args", 0]);
         });

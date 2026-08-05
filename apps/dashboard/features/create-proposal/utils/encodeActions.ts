@@ -75,11 +75,9 @@ export const encodeActions = async (
         `Function "${action.functionName}" not found in the action's ABI.`,
       );
     }
-    // The conversion the modal's live preview runs, with ENS resolution layered on,
-    // so previewed and published calldata cannot diverge. The strict variant though:
-    // the preview may degrade a half-typed array to an empty one, and an action from
-    // a shared or API draft never passed `ProposalFormSchema`, so this is the last
-    // place a malformed composite arg can be caught.
+    // The strict variant of the conversion the preview runs: the preview may degrade a
+    // half-typed array to an empty one, and an action from a shared or API draft never
+    // passed `ProposalFormSchema`, so this is the last place to catch a malformed arg.
     const resolvedArgs = treesToEncodeValues(
       fn.inputs,
       await resolveAddressesInTrees(
@@ -107,11 +105,9 @@ export const makeAddressResolver = (
 ): AddressResolver => {
   return async (input) => {
     const trimmed = input.trim();
-    // Checksum-agnostic, and normalized on the way out. Matched strictly, a
-    // miscased address isn't recognized as an address at all and falls through
-    // to the ENS branch, which fails with "Could not resolve ENS name 0x39D3…"
-    // for something that was never a name, mid-publish, after the form
-    // accepted it.
+    // Checksum-agnostic: matched strictly, a miscased address falls through to the ENS
+    // branch and fails with `Could not resolve ENS name 0x39D3…` mid-publish, for
+    // something that was never a name and that the form accepted.
     if (isAddressLike(trimmed)) return toChecksumAddress(trimmed);
     const resolved = await getEnsAddress(trimmed);
     if (!resolved) throw new Error(`Could not resolve ENS name "${trimmed}"`);

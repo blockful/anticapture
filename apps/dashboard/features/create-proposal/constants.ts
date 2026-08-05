@@ -2,12 +2,6 @@ import { type Address, getAddress } from "viem";
 
 import { DaoIdEnum } from "@/shared/types/daos";
 
-/**
- * Mirrors `BODY_MAX` in the user-api drafts mapper
- * (`apps/user-api/src/mappers/drafts/index.ts`). Draft save and share both
- * POST the body to that endpoint, which rejects anything longer — keep the two
- * in sync so the form fails with a field error instead of a generic toast.
- */
 export const BODY_CHAR_LIMIT = 100_000;
 export const BODY_WARNING_THRESHOLD = 95_000;
 
@@ -44,13 +38,6 @@ export const SUGGESTED_TRANSFER_TOKENS: Partial<
   ],
 };
 
-/**
- * The document the import textarea starts out holding — the field's initial value
- * rather than its placeholder, so an author can select, copy, or edit it in place.
- * Hand-wrapped and shown with `white-space: pre`: soft-wrapping breaks `"recipient":`
- * away from its value, so a continuation line sits one space inside the brace to keep
- * a wrapped action reading as one object. Longest line is 66 characters.
- */
 export const PROPOSAL_JSON_PLACEHOLDER = `{
   "title": "Proposal title",
   "discussionUrl": "https://discuss...",
@@ -64,13 +51,6 @@ export const PROPOSAL_JSON_PLACEHOLDER = `{
   ]
 }`;
 
-/**
- * The worked example inside the copyable spec, kept separate so it can be validated
- * on its own. Every address is a keccak-derived placeholder, deliberately not a real
- * contract: a model will happily carry a real address into generated output, where
- * nobody reviewing a diff notices a correct-looking one in the right slot.
- * `importSpec.test.ts` parses this, since the spec claims the example is valid.
- */
 export const PROPOSAL_IMPORT_EXAMPLE = `{
   "title": "Proposal title",
   "discussionUrl": "https://discuss...",
@@ -90,12 +70,6 @@ export const PROPOSAL_IMPORT_EXAMPLE = `{
   ]
 }`;
 
-/**
- * Exactly what the "Copy spec for AI" button puts on the clipboard. The version stamp
- * is how we find out whether a malformed import came from a stale spec pasted months
- * later. So is the first instruction: without it models wrap their output in prose and
- * code fences, and the author pastes back something that will not parse.
- */
 export const PROPOSAL_IMPORT_SPEC = `Anticapture: proposal import format (v1, 2026-08)
 
 Return a single JSON object and nothing else. No prose, no markdown fences.

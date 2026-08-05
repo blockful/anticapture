@@ -3,21 +3,16 @@ import type { PendingAction } from "@/features/create-proposal/utils/parsePropos
 
 type FormAction = ProposalFormValues["actions"][number];
 
-/** Reads `decimals()` off an ERC-20. Rejects when the call fails. */
 export type DecimalsReader = (tokenAddress: string) => Promise<number>;
 
 export type ResolveDecimalsResult =
   | { ok: true; actions: FormAction[] }
   | { ok: false; error: string };
 
-/**
- * Settles the `decimals` of every imported ERC-20 transfer against the token
- * contract. A pasted `decimals` is a claim about a contract the author doesn't
- * control, and `encodeActions` hands it straight to `parseUnits`: `{ amount: "1",
- * decimals: 18 }` against USDC displays as 1 token and encodes 1e18 base units. So
- * it is accepted only when the contract agrees, and supplied by it when absent.
- * Other action types pass through, so no ERC-20 transfer means no RPC round trip.
- */
+/** Settles every imported ERC-20 transfer's `decimals` against the token contract.
+ *  A pasted value goes straight to `parseUnits`: `{ amount: "1", decimals: 18 }`
+ *  against USDC displays as 1 token and encodes 1e18 base units. So it is accepted
+ *  only when the contract agrees, and supplied by it when absent. */
 export const resolveImportedDecimals = async (
   actions: PendingAction[],
   readDecimals: DecimalsReader,
@@ -60,6 +55,5 @@ export const resolveImportedDecimals = async (
   return { ok: true, actions: resolved };
 };
 
-/** True when the document needs an RPC round trip to be importable. */
 export const needsDecimalsLookup = (actions: PendingAction[]): boolean =>
   actions.some((action) => action.type === "erc20-transfer");

@@ -5,14 +5,9 @@ import { isAddressLike } from "@/shared/utils/address";
 import { isEnsAddress } from "@/shared/utils/ens";
 import { customActionIssues } from "@/features/create-proposal/utils/validateCustomAction";
 
-/*
- * The rules, in one place, for every entry point.
- *
- * The JSON import reuses what is here rather than restating it. An action the
- * import accepts but the form rejects surfaces only as a Publish button that
- * never enables — action rows draw no field errors — so the two cannot be allowed
- * to drift, and the way to guarantee that is for there to be one of them.
- */
+/* The rules, in one place, for every entry point. An action the import accepts but
+ * the form rejects surfaces only as a Publish button that never enables — action
+ * rows draw no field errors — so there has to be one of them. */
 export const addressOrEnsSchema = z
   .string()
   .min(1, "Required")
@@ -28,17 +23,12 @@ export const strictAddressSchema = z
 
 export const ETH_DECIMALS = 18;
 
-/**
- * `parseUnits` rounds an over-precise amount instead of refusing it, so
- * `0.0000001` of a 6-decimal token becomes 0 base units and the proposal
- * transfers nothing, while `0.0000009` becomes 1. Nothing downstream notices, so
- * an amount finer than the asset can hold has to be refused here.
- */
 const fractionDigits = (amount: string): number =>
   (amount.trim().split(".")[1] ?? "").length;
 
-/** Exported so an ETH transfer can be held to this in the import dialog too,
- *  where the scale is known without asking a contract. */
+/** `parseUnits` rounds an over-precise amount instead of refusing it: `0.0000001`
+ *  of a 6-decimal token becomes 0 base units and the proposal transfers nothing,
+ *  while `0.0000009` becomes 1. Nothing downstream notices. */
 export const amountPrecisionError = (
   amount: string,
   scale: number,
@@ -67,9 +57,6 @@ const ERC20TransferSchema = z.object({
   decimals: z.number().int().nonnegative(),
 });
 
-// A discriminated union member has to be a plain `ZodObject`, so the cross-field
-// rules (which of functionName/calldata is required, and whether the call is
-// actually encodable) are attached to the unions below instead.
 const CustomActionSchema = z.object({
   type: z.literal("custom"),
   contractAddress: addressOrEnsSchema,
@@ -80,15 +67,8 @@ const CustomActionSchema = z.object({
   value: z.string().optional(),
 });
 
-/**
- * Whether a custom action describes the call it claims to.
- *
- * Attached to the action rather than to the form, which is what lets the import
- * dialog hold a pasted action to it before the form exists. It used to hang off
- * `ProposalFormSchema` alone, so a paste with a function name that isn't in its
- * ABI was accepted by the import and only turned up later, on the creation page,
- * as a Publish button that would not enable.
- */
+/** Attached to the action, not the form, which is what lets the import dialog hold
+ *  a pasted action to it before the form exists. */
 const refineCustomAction = (
   action: z.infer<typeof CustomActionSchema>,
   ctx: z.RefinementCtx,
@@ -108,15 +88,8 @@ export const ProposalActionSchema = z
     if (action.type === "custom") refineCustomAction(action, ctx);
   });
 
-/**
- * The same actions, with an ERC-20 transfer's `decimals` still open.
- *
- * Derived from the form's own members rather than written again, because the
- * import used to carry a parallel set of action schemas that had to be kept in
- * step by hand. The one genuine difference is `decimals`: a pasted value is a
- * claim about someone else's contract, so the import settles it against the token
- * before it hands anything over, and until then the field is absent.
- */
+/** The form's own members, with `decimals` left open: a pasted value is a claim
+ *  about someone else's contract, settled against the token before handoff. */
 export const PendingProposalActionSchema = z
   .discriminatedUnion("type", [
     EthTransferSchema,
@@ -158,11 +131,9 @@ export const ProposalFormSchema = z
       .array(ProposalActionSchema)
       .min(1, "At least one action is required"),
   })
-  // Only what needs the whole action to be settled first. A transfer's precision
-  // depends on the scale of the asset, and an ERC-20's scale is only known once
-  // `decimals` is filled in — which for an imported action happens after the
-  // token contract has been read. Everything else about an action is checked by
-  // `ProposalActionSchema` itself, so the import sees it too.
+  // Only what needs the whole action settled first: an ERC-20's scale is known only
+  // once `decimals` is filled in. Everything else lives on `ProposalActionSchema`,
+  // so the import sees it too.
   .superRefine((form, ctx) => {
     form.actions.forEach((action, index) => {
       if (action.type === "custom") return;

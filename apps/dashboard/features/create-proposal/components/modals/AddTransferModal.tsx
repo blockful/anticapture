@@ -69,7 +69,6 @@ export const AddTransferModal = ({
   const [tokenAddressTouched, setTokenAddressTouched] = useState(false);
   const [recipientTouched, setRecipientTouched] = useState(false);
 
-  // Re-hydrate fields whenever the modal opens with a new initialValue
   useEffect(() => {
     if (!open) return;
     setDecimalsError(null);
@@ -95,8 +94,6 @@ export const AddTransferModal = ({
     governanceChainId ? { chainId: governanceChainId } : undefined,
   );
 
-  // The timelock is the treasury that actually pays when the proposal executes,
-  // so balances/limits are measured against it — not the author's wallet.
   const treasuryAddress =
     daoConfig[daoIdEnum]?.daoOverview?.contracts?.timelock;
 
@@ -137,7 +134,6 @@ export const AddTransferModal = ({
 
   const suggestedTokens = SUGGESTED_TRANSFER_TOKENS[daoIdEnum] ?? [];
 
-  // Available treasury balance for the selected asset (human-readable).
   const available = useMemo<{
     formatted: string;
     symbol: string;

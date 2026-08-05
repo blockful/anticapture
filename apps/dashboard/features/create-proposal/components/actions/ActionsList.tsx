@@ -18,13 +18,11 @@ import { ActionRow } from "@/features/create-proposal/components/actions/ActionR
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
 import type { ProposalAction } from "@/features/create-proposal/types";
 
-/** One row as the field array holds it: the action, plus the id it is keyed on. */
 export type ActionField = ProposalFormValues["actions"][number] & {
   id: string;
 };
 
 interface ActionsListProps {
-  /** Rows straight from the form's field array, ids included. */
   fields: ActionField[];
   onMove: (from: number, to: number) => void;
   onEditAction: (index: number) => void;
@@ -32,14 +30,6 @@ interface ActionsListProps {
   onDeleteAction: (index: number) => void;
 }
 
-/**
- * The first thing wrong inside one action, as `field: message`.
- *
- * An action is a nested shape, so its errors arrive nested too, and nothing was
- * reading them: an invalid action left Publish disabled with no explanation
- * anywhere on the page. Reporting the first one is enough to act on, and beats
- * a row listing four complaints about a single paste.
- */
 const firstErrorIn = (value: unknown, path = ""): string | undefined => {
   if (!value || typeof value !== "object") return undefined;
 
@@ -57,7 +47,6 @@ const firstErrorIn = (value: unknown, path = ""): string | undefined => {
   }
 
   for (const [key, item] of Object.entries(value)) {
-    // RHF hangs its own bookkeeping off the same object.
     if (key === "ref" || key === "type" || key === "types") continue;
     const found = firstErrorIn(item, path ? `${path}.${key}` : key);
     if (found) return found;

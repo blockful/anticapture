@@ -40,38 +40,18 @@ import {
 interface ImportJsonModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /**
-   * Takes the parsed document, and says whether it took it.
-   *
-   * Handing the values off can fail: the caller may be stashing them in browser
-   * storage, which can be blocked or full. Returning false keeps the dialog open
-   * on the document the author pasted, so nothing is lost while the caller
-   * reports what went wrong.
-   */
   onImport: (values: ImportedProposal) => boolean;
 }
 
-/** Generous next to a real proposal, small enough not to lock up the tab. */
 const MAX_UPLOAD_BYTES = 1_000_000;
 
-/**
- * Long enough that the reader stops typing before the row moves.
- *
- * Validation runs on every change, so there is no Validate button and no
- * validation-only step. Too short and the row flickers through the half-typed
- * states of a paste being edited; too long and it feels like it is not watching.
- */
 const VALIDATE_DEBOUNCE_MS = 300;
 
-/** `Valid · 3 actions`: the count is the one thing a reader can check at a
- *  glance against their own document. */
 const describeValid = (actionCount: number | undefined): string =>
   actionCount === undefined
     ? "Valid"
     : `Valid · ${actionCount} action${actionCount === 1 ? "" : "s"}`;
 
-/** One problem: `Line 7 · actions[0].amount: Must be greater than 0`. Several:
- *  `3 problems · first on line 7 · actions[0].amount: …`. */
 const describeIssues = (issues: readonly ImportIssue[]): string => {
   const [first] = issues;
   if (!first) return "";
@@ -84,19 +64,11 @@ const describeIssues = (issues: readonly ImportIssue[]): string => {
   return `${issues.length} problems${where} · ${what}`;
 };
 
-/** What the status row is currently saying. */
 type ValidationState =
   | { kind: "idle" }
   | { kind: "valid"; actionCount: number | undefined }
   | { kind: "invalid"; issues: ImportIssue[] };
 
-/**
- * One line under the textarea, at a reserved height so nothing shifts when a real
- * message arrives.
- *
- * These icons draw their glyph with strokes and ship with the fill turned off, so
- * the colour has to go on the stroke. Binding the fill gives a solid square.
- */
 const StatusRow = ({
   tone,
   icon: Icon,
@@ -129,7 +101,6 @@ const ValidationStatus = ({ state }: { state: ValidationState }) => {
     );
   }
 
-  // "Not validated yet" reads as success on a quick scan, so it stays quiet.
   return (
     <StatusRow tone="text-secondary" icon={CircleDashed}>
       Not validated yet.
@@ -137,14 +108,6 @@ const ValidationStatus = ({ state }: { state: ValidationState }) => {
   );
 };
 
-/**
- * A copy action that confirms itself by swapping its icon for a couple of
- * seconds.
- *
- * No toast: toasts inside a dialog stack badly and can be clipped, and the
- * confirmation belongs next to the thing that was clicked. The label never
- * changes either, so the button doesn't resize under the cursor.
- */
 const CopyButton = ({ label, value }: { label: string; value: string }) => {
   const [hasCopied, setHasCopied] = useState(false);
 
@@ -158,9 +121,6 @@ const CopyButton = ({ label, value }: { label: string; value: string }) => {
     try {
       await navigator.clipboard.writeText(value);
     } catch {
-      // Clipboard access can be refused. This is a convenience, so a refusal
-      // simply leaves the icon alone rather than raising an error the author
-      // can do nothing about.
       return;
     }
     setHasCopied(true);
@@ -193,25 +153,17 @@ export const ImportJsonModal = ({
   const chainId = daoConfig[daoIdEnum]?.daoOverview?.chain?.id;
   const publicClient = usePublicClient(chainId ? { chainId } : undefined);
 
-  // Starts holding the template so it can be copied and edited in place.
   const [text, setText] = useState(PROPOSAL_JSON_PLACEHOLDER);
   const [validation, setValidation] = useState<ValidationState>({
     kind: "idle",
   });
 
-  /**
-   * The template, still untouched.
-   *
-   * Treated as nothing having been entered yet, because that is what it is. The
-   * template carries `"0x..."` where addresses go, so validating it would open
-   * the dialog on an error about a document the author never wrote, and Import
-   * would offer to act on it.
-   */
+  // The untouched template carries "0x..." where addresses go, so validating it would
+  // open the dialog on an error about a document the author never wrote.
   const isUntouched = text === PROPOSAL_JSON_PLACEHOLDER;
   // Tagged by scope: an upload failure belongs beside the file button, a content
-  // failure beneath the textarea. One untagged slot painted the textarea as
-  // invalid whenever a file was rejected, even though the pasted document sitting
-  // in it was fine, and still the thing Import would take.
+  // failure beneath the textarea. One untagged slot painted the textarea as invalid
+  // whenever a file was rejected, even though the pasted document in it was fine.
   const [error, setError] = useState<{
     scope: "file" | "content";
     message: string;
@@ -221,10 +173,9 @@ export const ImportJsonModal = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Cancel, Escape and the close button all stay live while decimals are being
-  // read, and the lookup keeps running after the sheet is gone. Every attempt
-  // takes a ticket; a resolved lookup whose ticket is no longer current is
-  // dropped, so a cancelled paste (or the previous one, after a reopen) can't
+  // Cancel, Escape and the close button stay live while decimals are being read, and
+  // the lookup keeps running after the sheet is gone. Every attempt takes a ticket; a
+  // result whose ticket is no longer current is dropped, so a cancelled paste cannot
   // land on the form later.
   const attemptRef = useRef(0);
 
@@ -236,16 +187,12 @@ export const ImportJsonModal = ({
     setFileName(null);
   };
 
-  // Start from a clean sheet on every open: a previous failed paste hanging
-  // around next to a stale error reads as if the import already ran.
   useEffect(() => {
     if (!open) return;
     attemptRef.current += 1;
     clear();
   }, [open]);
 
-  // Validation on a debounce, and only here: the Import handler reads the same
-  // parser, so the row and the button can't disagree about a document.
   useEffect(() => {
     if (text === PROPOSAL_JSON_PLACEHOLDER || !text.trim()) {
       setValidation({ kind: "idle" });
@@ -269,19 +216,12 @@ export const ImportJsonModal = ({
   };
 
   const replaceText = (next: string) => {
-    // Editing abandons whatever is being imported: the textarea stays live
-    // during the decimals read, and without this the in-flight lookup would
-    // still hold the current ticket and land the old document on the form.
     attemptRef.current += 1;
     setText(next);
     setError(null);
   };
 
-  // A file lands in the textarea rather than importing straight away, so the
-  // document is reviewable (and editable) before it touches the form.
   const loadFile = async (file: File) => {
-    // Same ticket as an edit: replacing the content abandons any read in
-    // flight, and a slow file can't land after the user moved on either.
     const attempt = ++attemptRef.current;
 
     if (file.size > MAX_UPLOAD_BYTES) {
@@ -307,13 +247,8 @@ export const ImportJsonModal = ({
     setError(null);
   };
 
-  /**
-   * Selects the line the first problem is on, and scrolls it into view.
-   *
-   * MOD-14: Import stays enabled while the document is invalid, because a greyed
-   * out button says nothing about what is wrong. Pressing it has to do something,
-   * and the useful something is going to the problem.
-   */
+  /** MOD-14: Import stays enabled while the document is invalid, because a greyed out
+   *  button says nothing about what is wrong. Pressing it goes to the first problem. */
   const focusFirstIssue = (issues: readonly ImportIssue[]) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -322,7 +257,6 @@ export const ImportJsonModal = ({
     if (!line) return;
     const { start, end } = rangeOfLine(text, line);
     textarea.setSelectionRange(start, end);
-    // Selecting alone doesn't scroll a long document to the selection.
     const lineHeight =
       textarea.scrollHeight / Math.max(1, text.split("\n").length);
     textarea.scrollTop = Math.max(0, (line - 2) * lineHeight);
@@ -342,9 +276,6 @@ export const ImportJsonModal = ({
     let actions: ProposalFormValues["actions"] | undefined;
 
     if (pending) {
-      // Only ERC-20 transfers need the chain, so a document without one still
-      // imports offline. Their decimals decide how the amount is scaled at
-      // publish, so they come from the token rather than from the paste.
       const needsChain = needsDecimalsLookup(pending);
       if (needsChain && !publicClient) {
         setError({
@@ -361,8 +292,6 @@ export const ImportJsonModal = ({
         resolved = await resolveImportedDecimals(
           pending,
           async (tokenAddress) => {
-            // Unreachable past the guard above, which only lets a document
-            // through when there is a client to read every ERC-20 it carries.
             if (!publicClient) throw new Error("No RPC client");
             return Number(
               await publicClient.readContract({
@@ -374,13 +303,9 @@ export const ImportJsonModal = ({
           },
         );
       } finally {
-        // Cleared before the staleness check below, so an abandoned lookup
-        // can't leave Import spinning on a paste the user has since edited.
         if (needsChain) setIsResolving(false);
       }
 
-      // Closed, edited or superseded while the chain was answering: this
-      // result is for a paste the user already walked away from.
       if (attemptRef.current !== attempt) return;
 
       if (!resolved.ok) {
@@ -390,10 +315,6 @@ export const ImportJsonModal = ({
       actions = resolved.actions;
     }
 
-    // Closing clears the textarea, so it waits for the handoff to say it took
-    // the document. A refused import leaves the dialog exactly as it was, with
-    // the paste still in it and the caller's own message on screen, rather than
-    // wiping a hand-written proposal that nothing received.
     if (!onImport({ ...result.value, actions })) return;
     close();
   };
@@ -401,8 +322,6 @@ export const ImportJsonModal = ({
   return (
     <Modal
       open={open}
-      // Routed through close() so dismissing with Escape or the X voids an
-      // in-flight decimals lookup the same way Cancel does.
       onOpenChange={(o) => {
         if (!o) {
           close();
@@ -418,9 +337,6 @@ export const ImportJsonModal = ({
       onConfirm={() => {
         void handleConfirm();
       }}
-      // Enabled while the document is invalid, on purpose: pressing it goes to
-      // the first problem. Only an untouched template, an empty box and an
-      // in-flight lookup disable it.
       isConfirmDisabled={isUntouched || text.trim().length === 0 || isResolving}
       isConfirmLoading={isResolving}
     >
@@ -473,20 +389,14 @@ export const ImportJsonModal = ({
             value={text}
             onChange={(next) => {
               replaceText(next);
-              // The content is the user's now, not the file's.
               setFileName(null);
             }}
             placeholder={PROPOSAL_JSON_PLACEHOLDER}
-            // Paste is the primary path, so the box is tall enough to read a
-            // real document in.
             className="h-60"
-            // Opted in here because the status row below cites line numbers.
             showLineNumbers
             hasError={
               error?.scope === "content" || validation.kind === "invalid"
             }
-            // The line the status row is naming, marked in the gutter so the
-            // number in the message and the number on screen agree.
             errorLine={
               validation.kind === "invalid"
                 ? validation.issues.find((issue) => issue.line)?.line
@@ -502,7 +412,6 @@ export const ImportJsonModal = ({
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) void loadFile(file);
-              // Cleared so picking the same file twice fires onChange again.
               e.target.value = "";
             }}
           />

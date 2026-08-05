@@ -48,7 +48,6 @@ export function getArgPlaceholder(abiType: string): string {
   }
 }
 
-/** Validates a single scalar leaf value. Returns an error message or null. */
 export function validateSolidityArg(
   abiType: string,
   value: string,
@@ -100,9 +99,3 @@ export function validateSolidityArg(
       return null;
   }
 }
-
-/*
- * `isArgComplete` used to live here, walking the parameter tree a second time to
- * answer as a boolean what `argIssues` now answers with a reason. It moved to
- * `argIssues.ts`, where the walk is, and is still exported from there.
- */

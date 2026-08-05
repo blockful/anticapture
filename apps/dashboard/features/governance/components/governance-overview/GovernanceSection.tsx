@@ -113,7 +113,6 @@ const toGovernanceProposal = (
       against: againstVotes.toFixed(2),
       abstain: abstainVotes.toFixed(2),
       total: total.toFixed(2),
-      // Keep precision for bar widths; consumers round for display
       forPercentage: forPercentage.toFixed(2),
       againstPercentage: againstPercentage.toFixed(2),
       abstainPercentage: abstainPercentage.toFixed(2),
@@ -138,8 +137,6 @@ export const GovernanceSection = () => {
   const canCreateProposal = canCreateProposalForDao(daoIdEnum);
   const { decimals } = daoConfig[daoIdEnum];
   const router = useRouter();
-  // Drafts are platform-account data: gates run on the session (email and
-  // Google authors have no wallet), not on the wallet connection.
   const { data: session, isPending: isSessionPending } = useAuthSession();
   const hasSession = !!session;
   const { openLogin } = useLogin();
@@ -235,8 +232,6 @@ export const GovernanceSection = () => {
     return tabs;
   }, [canCreateProposal, hasSession]);
 
-  // DAOs without offchain proposals ignore the source filter — otherwise a
-  // stale ?source=snapshot in the URL would render an empty, unrecoverable list
   const effectiveSource = hasOffchain ? sourceFilter : "all";
   const showOnchain = effectiveSource !== "snapshot";
   const showOffchain = hasOffchain && effectiveSource !== "governor";
@@ -248,9 +243,6 @@ export const GovernanceSection = () => {
     (showOnchain && isOnchainPaginationLoading) ||
     (showOffchain && isOffchainPaginationLoading);
 
-  // Both sources are paginated independently, so the merged list is only
-  // chronologically safe down to the older of the two loaded frontiers —
-  // items below that line could still interleave with unfetched pages.
   const mergedProposals = useMemo<MergedProposalItem[]>(() => {
     const onchainList = showOnchain
       ? isSearchActive
@@ -334,8 +326,6 @@ export const GovernanceSection = () => {
   ]);
 
   useEffect(() => {
-    // Only reset after the session RESOLVES signed-out — resetting during the
-    // initial pending state would eat a legitimate ?tab=drafts deep link.
     if (
       activeTab === "drafts" &&
       (!canCreateProposal || (!isSessionPending && !hasSession))
@@ -372,9 +362,6 @@ export const GovernanceSection = () => {
   const goToNewProposal = () => {
     const target = `${basePath}/proposals/new`;
     if (!hasSession) {
-      // An import has already stashed by now. Dismissing means the form is not
-      // being reached, so that stash is void — left behind, the next "Create new"
-      // drains it into a blank proposal.
       openLogin({
         redirectTo: target,
         onDismiss: () => clearImportedProposal(daoId),
@@ -384,13 +371,6 @@ export const GovernanceSection = () => {
     router.push(target);
   };
 
-  /**
-   * The import happens here, before the form exists, so the author never sees an
-   * empty form flash behind the dialog and a cancelled import leaves them where they
-   * started. Reports whether the values were taken: storage can refuse them, and the
-   * dialog closes only on a true, so a refused import keeps the author there with
-   * their document instead of clearing it behind the toast.
-   */
   const handleImported = (values: ImportedProposal): boolean => {
     if (!stashImportedProposal(daoId, values)) {
       showCustomToast("Could not carry the import to the form", "error");

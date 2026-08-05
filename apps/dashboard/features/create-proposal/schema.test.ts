@@ -52,9 +52,6 @@ describe("ProposalFormSchema", () => {
     ).toBe(false);
   });
 
-  // viem's isAddress validates the EIP-55 checksum by default, which rejected
-  // addresses that name a real account purely because the casing didn't encode
-  // their own hash, which is the shape a pasted or generated address arrives in.
   describe("address casing", () => {
     const withRecipient = (recipient: string) =>
       ProposalFormSchema.safeParse({
@@ -62,8 +59,6 @@ describe("ProposalFormSchema", () => {
         actions: [{ ...valid.actions[0], recipient }],
       });
 
-    // The address from the review screenshot, reported as "Must be a valid
-    // address or ENS name" while being a perfectly good address.
     const miscased = "0x39D3F4633dE1F5E2a1e2f4d3fD6d1AAf2E9c8b71";
 
     test.each([
@@ -83,8 +78,6 @@ describe("ProposalFormSchema", () => {
     });
   });
 
-  // parseUnits rounds instead of refusing, so 0.0000001 of a 6-decimal token
-  // becomes 0 base units and the transfer moves nothing, silently.
   describe("amount precision", () => {
     const withAmount = (action: Record<string, unknown>) =>
       ProposalFormSchema.safeParse({

@@ -22,8 +22,6 @@ const identityResolver = async (v: string) => v as `0x${string}`;
 const ADDR_A = "0x1111111111111111111111111111111111111111";
 const ADDR_B = "0x2222222222222222222222222222222222222222";
 
-// Re-parse composite JSON so comparisons ignore incidental whitespace and the
-// number-vs-string representation of scalar leaves.
 const normalize = (stored: string): unknown => {
   const t = stored.trim();
   if (t.startsWith("[") || t.startsWith("{")) {
@@ -131,8 +129,6 @@ describe("storage <-> tree round-trip", () => {
     expect(tree).toEqual(["1", "2", "3"]);
   });
 
-  // The display conversion is the one that forgives, so it is the one asked
-  // here. `storageToArg` itself refuses, which is covered below.
   it("falls back to empty container for malformed composite storage", () => {
     expect(
       storageToArgForDisplay({ type: "uint256[]" } as never, "not json"),
@@ -145,10 +141,6 @@ describe("storage <-> tree round-trip", () => {
     ).toThrow();
   });
 
-  // A tuple short of its components is malformed like any other, so the display
-  // conversion degrades it to the empty struct rather than padding it out. The
-  // padded tree is what used to reach the encoder as a real empty field, and the
-  // modal that hydrates through here writes full-arity tuples back anyway.
   it("degrades a tuple short of its components to the empty struct", () => {
     const param = {
       type: "tuple",
@@ -180,7 +172,6 @@ describe("argsToTrees / treesToArgs (top-level)", () => {
     const trees = argsToTrees(fn.inputs, args);
     const back = treesToArgs(fn.inputs, trees as ArgValue[]);
 
-    // Encoding through the existing pipeline must be byte-identical (AC8).
     const make = (a: string[]): CustomAction => ({
       type: "custom",
       contractAddress: ADDR_A,

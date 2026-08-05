@@ -25,15 +25,9 @@ describe("formatJsonPath", () => {
 });
 
 describe("parseJsonDocument", () => {
+  // The reason this file exists. Spliced as raw text: written as TS literals the
+  // compiler rounds them first.
   describe("numbers", () => {
-    /*
-     * The reason this file exists. `JSON.parse` hands back a double, so
-     * `1000000000000000001` arrives as `…000` and `1.000000000000000001` as plain
-     * `1` — and every figure in a proposal ends up at `parseUnits` or the ABI
-     * encoder, both of which take text.
-     *
-     * Spliced as raw text: written as TS literals the compiler rounds them first.
-     */
     test.each([
       ["an integer past 2^53", "1000000000000000001"],
       ["a fraction a double collapses", "1.000000000000000001"],
@@ -62,7 +56,6 @@ describe("parseJsonDocument", () => {
   });
 
   describe("lines", () => {
-    // Laid out so the amount lands on line 8, as the status row claims.
     const document = `{
   "title": "Proposal title",
   "actions": [
@@ -100,11 +93,6 @@ describe("parseJsonDocument", () => {
   });
 
   describe("refusals", () => {
-    /*
-     * A pasted proposal is meant to be machine-generated, so a comment or a
-     * trailing comma is refused rather than tolerated: accepting one here would
-     * take a document that other tools will reject.
-     */
     test.each([
       ["a missing value", '{"a":}', 1],
       ["a trailing comma", '{"a":1,}', 1],

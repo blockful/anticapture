@@ -78,7 +78,6 @@ export const BodyField = ({ version = 0 }: BodyFieldProps) => {
           "[&_.mdxeditor-toolbar]:rounded-base! [&_.mdxeditor-toolbar]:!mb-2 [&_.mdxeditor-toolbar]:!bg-transparent [&_.mdxeditor-toolbar]:!px-0 [&_.mdxeditor-toolbar]:!py-0",
           "[&_.mdxeditor-root-contenteditable]:max-h-100 md:[&_.mdxeditor-root-contenteditable]:max-h-150 [&_.mdxeditor-root-contenteditable]:overflow-y-auto",
           "[&_.cm-editor]:min-h-75 [&_.cm-editor]:max-h-100 [&_.cm-scroller]:min-h-75 [&_.cm-scroller]:max-h-100 md:[&_.cm-editor]:min-h-130 md:[&_.cm-editor]:max-h-150 md:[&_.cm-scroller]:min-h-130 md:[&_.cm-scroller]:max-h-150",
-          // Markdown source view (CodeMirror) — match the dashboard theme
           "[&_.cm-editor]:bg-surface-background [&_.cm-editor]:text-primary",
           "[&_.cm-scroller]:bg-surface-background",
           "[&_.cm-content]:bg-surface-background [&_.cm-content]:text-primary [&_.cm-content]:caret-primary",
@@ -93,7 +92,6 @@ export const BodyField = ({ version = 0 }: BodyFieldProps) => {
           "[&_.tok-comment]:text-secondary [&_.tok-comment]:italic",
           "[&_.tok-number]:text-warning [&_.tok-bool]:text-warning [&_.tok-atom]:text-warning",
           "[&_.tok-punctuation]:text-secondary [&_.tok-meta]:text-secondary",
-          // Heading styles for Visual Editor content (mdxeditor content area)
           "[&_.mdxeditor-root-contenteditable_h1]:mb-3 [&_.mdxeditor-root-contenteditable_h1]:mt-4 [&_.mdxeditor-root-contenteditable_h1]:text-2xl [&_.mdxeditor-root-contenteditable_h1]:font-semibold",
           "[&_.mdxeditor-root-contenteditable_h2]:mb-2 [&_.mdxeditor-root-contenteditable_h2]:mt-4 [&_.mdxeditor-root-contenteditable_h2]:text-xl [&_.mdxeditor-root-contenteditable_h2]:font-semibold",
           "[&_.mdxeditor-root-contenteditable_h3]:mb-2 [&_.mdxeditor-root-contenteditable_h3]:mt-3 [&_.mdxeditor-root-contenteditable_h3]:text-lg [&_.mdxeditor-root-contenteditable_h3]:font-semibold",
@@ -124,18 +122,8 @@ export const BodyField = ({ version = 0 }: BodyFieldProps) => {
                 linkPlugin(),
                 linkDialogPlugin(),
                 tablePlugin(),
-                // Required, not optional. With no plugin claiming the `code`
-                // mdast node, a body holding a fenced block puts the editor in
-                // its failure state, "Parsing of the following markdown
-                // structure failed: {"type":"code","name":"N/A"}", and the
-                // author can only edit in source mode. Real proposals quote
-                // calldata and JSON constantly, and an imported body carries
-                // whatever fences the document had.
                 codeBlockPlugin({ defaultCodeBlockLanguage: "" }),
                 codeMirrorPlugin({
-                  // The empty key is the fallback for a fence with no language,
-                  // which is most of them. Anything else in the map is resolved
-                  // through @codemirror/language-data on demand.
                   codeBlockLanguages: {
                     "": "Plain text",
                     json: "JSON",

@@ -1,9 +1,3 @@
-/**
- * What this feature offers the rest of the app. Anything a proposal list needs
- * to start a proposal, or to show the drafts of one, belongs here: outside
- * callers import from this entry point rather than reaching down into
- * `components/` or `utils/`, so the internal layout stays ours to move.
- */
 export * from "@/features/create-proposal/types";
 export * from "@/features/create-proposal/schema";
 export { useDrafts } from "@/features/create-proposal/hooks/useDrafts";

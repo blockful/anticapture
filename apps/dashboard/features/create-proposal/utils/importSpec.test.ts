@@ -7,14 +7,6 @@ import {
   parseProposalJson,
 } from "@/features/create-proposal/utils/parseProposalJson";
 
-/*
- * SPEC-6 asks for the payload to be generated in CI from the schema plus the example.
- * Deriving the FIELDS prose from zod would mean annotating the schema with that prose,
- * which just moves the sentences. What actually drifted was executable: the claim that
- * the example is valid, and that a tuple can be keyed. Both are tested here, and the
- * example lives in one place the spec and this test both read.
- */
-
 const reasons = (text: string) => {
   const result = parseProposalJson(text);
   return result.ok ? "" : result.issues.map(formatImportIssue).join("; ");
@@ -33,17 +25,12 @@ describe("the copyable spec", () => {
     expect(PROPOSAL_IMPORT_SPEC).toMatch(/\(v\d+, \d{4}-\d{2}\)/);
   });
 
-  // Without this line models wrap their output in prose and code fences, and the
-  // author pastes back something that will not parse.
   it("opens with the instruction that keeps the output parseable", () => {
     expect(PROPOSAL_IMPORT_SPEC).toContain(
       "Return a single JSON object and nothing else",
     );
   });
 
-  // SPEC-5: the example withheld the abi/args branch while it was broken, so
-  // models were only ever taught the calldata form. Now that composite args
-  // work, the example has to show it.
   it("shows the abi and args branch, not only raw calldata", () => {
     const example = JSON.parse(PROPOSAL_IMPORT_EXAMPLE) as {
       actions: Record<string, unknown>[];
@@ -53,8 +40,6 @@ describe("the copyable spec", () => {
     expect(custom.some((a) => "abi" in a && "args" in a)).toBe(true);
   });
 
-  // The rules are what a model reads; each of these is enforced by the parser,
-  // so a rule that stops being true has to stop being claimed.
   it.each([
     ["the quoting rule", "Every figure must be a quoted string"],
     ["the wei warning", "Amounts are human-readable, never wei"],
@@ -65,13 +50,9 @@ describe("the copyable spec", () => {
     ],
     ["the placeholder warning", "Addresses below are placeholders"],
   ])("states %s", (_label, sentence) => {
-    // The payload is hand-wrapped, so a rule can straddle a line break.
     expect(PROPOSAL_IMPORT_SPEC.replace(/\s+/g, " ")).toContain(sentence);
   });
 
-  // Every address in the example is keccak-derived on purpose. A model will
-  // carry a real one straight into generated output, where a correct-looking
-  // address in the right slot passes review.
   it("uses no real, well-known contract address", () => {
     const realContracts = [
       "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // USDC

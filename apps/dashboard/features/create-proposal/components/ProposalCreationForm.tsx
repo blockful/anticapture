@@ -68,11 +68,6 @@ import type {
   ProposalAction,
 } from "@/features/create-proposal/types";
 
-/**
- * Normalizes a ProposalAction for use in RHF form state.
- * The `Abi` type from viem is `readonly (AbiItem)[]`, but the Zod-inferred
- * form type expects a mutable `any[]`. We spread to get a mutable copy.
- */
 function toFormAction(
   action: ProposalAction,
 ): ProposalFormValues["actions"][number] {
@@ -123,7 +118,6 @@ export const ProposalCreationForm = ({
     "view",
     parseAsStringEnum<"editor" | "preview">(["editor", "preview"]),
   );
-  // A shared link (has draftId) defaults to Preview; a new proposal to Editor.
   const view = viewParam ?? (draftId ? "preview" : "editor");
 
   const form = useForm<ProposalFormValues>({
@@ -132,21 +126,11 @@ export const ProposalCreationForm = ({
     mode: "onChange",
   });
 
-  // Every mutation of the list goes through here, and nowhere else.
-  //
-  // The rows are keyed on the ids this hook mints, and the errors beside them
-  // are keyed on array index. `setValue("actions", …)` moves the values without
-  // telling the field array, so after deleting a row the ids and the errors
-  // stayed where they were and the deleted action's error appeared on the row
-  // that took its place, while the row itself refused to disappear.
   const actionsArray = useFieldArray({
     control: form.control,
     name: "actions",
   });
 
-  // The resolver validates the whole form, so a mutation has to ask for it: the
-  // field array updates values without revalidating, and Publish reads
-  // formState.isValid.
   const revalidateActions = () => {
     void form.trigger("actions");
   };
@@ -165,7 +149,6 @@ export const ProposalCreationForm = ({
         body: d.body,
         actions: d.actions.map(toFormAction),
       });
-      // Locally-owned draft has no shared author.
       setSharedAuthor(undefined);
       setCurrentDraftId(draftId);
       setBodyVersion((v) => v + 1);
@@ -176,7 +159,6 @@ export const ProposalCreationForm = ({
 
     if (drafts.isLoading) return;
 
-    // Guards against an out-of-order response overwriting the form.
     let cancelled = false;
 
     void getDraft(draftId)
@@ -184,14 +166,8 @@ export const ProposalCreationForm = ({
         if (cancelled) return;
         hydratedDraftIdRef.current = draftId;
         if (!shared) return;
-        // A draft link belongs to one DAO: refuse content prepared for
-        // another one (stale or crafted cross-DAO links would otherwise be
-        // previewed — and publishable — under this route's DAO).
         if (shared.daoId !== daoId) {
           showCustomToast("This draft belongs to another DAO", "error");
-          // The URL's draftId must not stay armed as the save target: a
-          // later Save Draft would overwrite the foreign-DAO draft with
-          // this route's form content.
           setCurrentDraftId(undefined);
           return;
         }
@@ -202,9 +178,6 @@ export const ProposalCreationForm = ({
           body: shared.body,
           actions: shared.actions.map((a) => toFormAction(a as ProposalAction)),
         });
-        // Ownership is derived server-side from the session (works for
-        // wallet- and email/Google-authored drafts alike), not by comparing
-        // the author against the connected wallet.
         setCurrentDraftId(shared.isOwner ? draftId : undefined);
         setBodyVersion((v) => v + 1);
         setHydratedDraftId(draftId);
@@ -217,7 +190,6 @@ export const ProposalCreationForm = ({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftId, drafts.drafts, drafts.isLoading]);
 
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>(
@@ -226,7 +198,6 @@ export const ProposalCreationForm = ({
   const [sharedAuthor, setSharedAuthor] = useState<string | undefined>(
     undefined,
   );
-  // The draftId whose content is loaded into the form (gates Edit/fork).
   const [hydratedDraftId, setHydratedDraftId] = useState<string | undefined>(
     undefined,
   );
@@ -243,11 +214,6 @@ export const ProposalCreationForm = ({
   const [insufficientOpen, setInsufficientOpen] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
-  // Email/Google sign-in leaves the page, so a dirty form would be lost on
-  // the auth round-trip. Save Draft stashes the values before opening the
-  // login modal; back on the page the stash is restored — after any shared
-  // draft hydrated, so the user's newer edits win — and cleared. The in-page
-  // SIWE path restores a byte-identical form, a visual no-op.
   const pendingDraftStashKey = `anticapture:pending-draft:${daoId}`;
   useEffect(() => {
     let raw: string | null = null;
@@ -264,19 +230,16 @@ export const ProposalCreationForm = ({
       });
       setBodyVersion((v) => v + 1);
     } catch {
-      // corrupted stash — drop it
+      // A corrupt stash is dropped, not surfaced: the form is usable without it.
     } finally {
       try {
         sessionStorage.removeItem(pendingDraftStashKey);
       } catch {
-        // ignore
+        // Storage that refuses this refused the write too.
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingDraftStashKey, draftId, hydratedDraftId]);
-  // Publish deferred while a disconnected user connects, resumed once ready.
   const [pendingAction, setPendingAction] = useState<"publish" | null>(null);
-  // Ref so rapid clicks see an in-flight save before state commits.
   const isSavingDraftRef = useRef(false);
 
   const draftContentLoaded = !draftId || hydratedDraftId === draftId;
@@ -293,9 +256,6 @@ export const ProposalCreationForm = ({
   const canPublish =
     hasTitle && hasBody && hasActions && !!address && form.formState.isValid;
 
-  // The drafts endpoint rejects bodies past BODY_CHAR_LIMIT, and neither Save
-  // Draft nor Share runs schema validation before POSTing — without this the
-  // request fails with the generic "Could not save draft".
   const isBodyOverLimit = (values.body?.length ?? 0) > BODY_CHAR_LIMIT;
   const bodyOverLimitMessage = `Description is over the ${BODY_CHAR_LIMIT.toLocaleString()} character limit`;
 
@@ -303,7 +263,7 @@ export const ProposalCreationForm = ({
     try {
       sessionStorage.setItem(pendingDraftStashKey, JSON.stringify(values));
     } catch {
-      // Storage can be blocked; the in-page SIWE path still preserves the form.
+      // Best effort: a refused stash costs the round trip, not the draft.
     }
   };
 
@@ -312,16 +272,13 @@ export const ProposalCreationForm = ({
       showCustomToast(bodyOverLimitMessage, "error");
       return;
     }
-    // Persist before sharing when unsaved or dirty, so the link isn't stale.
     let id = currentDraftId;
     if (!id || form.formState.isDirty) {
-      // Session-gated like Save Draft — email/Google authors have no wallet.
       if (drafts.needsAuth) {
         stashPendingDraft();
         openLogin();
         return;
       }
-      // Guard against duplicate creates from rapid clicks (shared with Save Draft).
       if (isSavingDraftRef.current) return;
       isSavingDraftRef.current = true;
       setIsSavingDraft(true);
@@ -358,10 +315,7 @@ export const ProposalCreationForm = ({
   };
 
   const handleEditCopy = () => {
-    // Forking the blank default form would lose the shared content.
     if (!draftContentLoaded) return;
-    // Edit doesn't persist: drop the draftId and open a new prefilled form
-    // (RHF state survives the query-only nav). Saved only via Save Draft.
     setSharedAuthor(undefined);
     setCurrentDraftId(undefined);
     hydratedDraftIdRef.current = undefined;
@@ -371,9 +325,6 @@ export const ProposalCreationForm = ({
 
   const handlePreviewPublish = () => {
     if (!address) {
-      // Publishing is an on-chain transaction, so it only needs a connected
-      // wallet: the picker opens directly, with no sign-in step. Saving and
-      // sharing drafts stay session-gated below. See useWalletPrompt.
       setPendingAction("publish");
       promptWalletConnection();
       return;
@@ -381,14 +332,11 @@ export const ProposalCreationForm = ({
     handlePublishClick();
   };
 
-  // Resume a deferred publish only once VP, threshold, and draft hydration are
-  // all ready (each reads 0n/blank while loading and would mis-decide).
   useEffect(() => {
     if (!address || pendingAction !== "publish") return;
     if (vp.isLoading || isLoadingThreshold || !draftContentLoaded) return;
     setPendingAction(null);
     handlePublishClick();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     address,
     pendingAction,
@@ -402,17 +350,11 @@ export const ProposalCreationForm = ({
       showCustomToast(bodyOverLimitMessage, "error");
       return;
     }
-    // Saving is session-gated now, not wallet-gated: prompt sign-in when there
-    // is no session (the user may be connected but not authenticated).
     if (drafts.needsAuth) {
-      // Stash the form first: the email/Google paths leave the page, and the
-      // restore effect above brings the content back after the round-trip.
       stashPendingDraft();
-      // storage blocked — the in-page SIWE path still preserves the form
       openLogin();
       return;
     }
-    // Guard against duplicate creates while a save is in flight.
     if (isSavingDraftRef.current) return;
     isSavingDraftRef.current = true;
     setIsSavingDraft(true);
@@ -446,11 +388,8 @@ export const ProposalCreationForm = ({
   };
 
   const handlePublishClick = () => {
-    // Validate here too — the resume path calls this directly.
     if (!canPublish) return;
-    // Stale form values until the current draftId hydrates; don't publish them.
     if (!draftContentLoaded) return;
-    // VP/threshold read 0n while loading; wait before comparing.
     if (vp.isLoading || isLoadingThreshold) {
       showCustomToast(
         "Still checking your voting power — try again in a moment.",
@@ -467,7 +406,6 @@ export const ProposalCreationForm = ({
     setPublishOpen(true);
   };
 
-  // Transition publish → submitted/failed
   useEffect(() => {
     if (publisher.isReceiptSuccess) {
       setPublishOpen(false);
@@ -494,9 +432,6 @@ export const ProposalCreationForm = ({
     action: EthTransferAction | ERC20TransferAction | CustomAction,
   ) => {
     if (editActionIndex !== null) {
-      // `update` rather than a whole-array write, so the row re-renders on the
-      // edited values: the rows read from the field array's own snapshot, which
-      // a setValue on the array name doesn't refresh.
       actionsArray.update(editActionIndex, toFormAction(action));
       revalidateActions();
       setEditActionIndex(null);
@@ -505,8 +440,6 @@ export const ProposalCreationForm = ({
     }
   };
 
-  // Field-by-field setValue rather than form.reset: the imported content is
-  // unsaved, so the dirty flag (and with it NavigationGuard) has to stay armed.
   const applyImportedProposal = (imported: ImportedProposal) => {
     const options = { shouldDirty: true, shouldValidate: true } as const;
     if (imported.title !== undefined) {
@@ -517,28 +450,15 @@ export const ProposalCreationForm = ({
     }
     if (imported.body !== undefined) {
       form.setValue("body", imported.body, options);
-      // MDXEditor only reads `markdown` on mount, so remount it on the new body.
       setBodyVersion((v) => v + 1);
     }
     if (imported.actions !== undefined) {
-      // Both calls, deliberately. `replace` mints fresh row ids so the rendered
-      // rows match the imported list, and the `setValue` that follows is what
-      // arms the dirty flag NavigationGuard reads: a field-array write compares
-      // against defaultValues, which would call an import that lands an empty
-      // list on an empty default "unchanged". The values written are identical,
-      // so the ids `replace` just minted stay valid.
       actionsArray.replace(imported.actions);
       form.setValue("actions", imported.actions, options);
     }
     showCustomToast("Proposal fields imported", "success");
   };
 
-  /**
-   * Picks up an import that ran on the proposals list. Skipped when the URL names a
-   * draft: that content is the draft's, and the hydration effect above fills it.
-   * Reading the handoff clears it, so a reload lands on a clean form. The ref keeps
-   * development's double-invoked effect from announcing the same import twice.
-   */
   const importAppliedRef = useRef(false);
   useEffect(() => {
     if (draftId || importAppliedRef.current) return;
@@ -546,10 +466,8 @@ export const ProposalCreationForm = ({
     if (!imported) return;
     importAppliedRef.current = true;
     applyImportedProposal(imported);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [daoId, draftId]);
 
-  // An independent deep copy, inserted directly after the source row.
   const duplicateAction = (index: number) => {
     const source = form.getValues(`actions.${index}`);
     if (!source) return;
@@ -592,19 +510,12 @@ export const ProposalCreationForm = ({
     return formatNumberUserReadable(numeric, 0);
   }, [currentVpText]);
 
-  // The drafts list is session-scoped (the User API returns only the session
-  // user's drafts), so a draft present in it is owned — no wallet comparison
-  // needed, and it holds for email/Google authors who have no wallet.
   const ownedDraft = draftId ? drafts.getDraft(draftId) : undefined;
   const ownsDraft = Boolean(ownedDraft);
   const isRecipient = Boolean(draftId) && !drafts.isLoading && !ownsDraft;
-  // Editor only for a new proposal or an owned draft (no load-dependent flash).
   const canShowEditor = !draftId || ownsDraft;
   const authorAddress = sharedAuthor ?? address ?? "";
 
-  // Once ownership resolves (e.g. an author connects on their own share link),
-  // adopt the draftId so saves update the existing draft instead of creating a
-  // duplicate.
   useEffect(() => {
     if (ownsDraft && draftId && currentDraftId !== draftId) {
       setCurrentDraftId(draftId);
@@ -635,10 +546,6 @@ export const ProposalCreationForm = ({
       )
     : draftPreviewCopy({ role: "author" });
 
-  // Recipients can only ever see the Preview — they have no editor access.
-  // Gated on draftContentLoaded so a not-yet-resolved ownership check (drafts
-  // still loading on mount) can't misclassify an owner as a recipient and
-  // force their own draft into Preview.
   useEffect(() => {
     if (isRecipient && draftContentLoaded && view !== "preview") {
       void setView("preview");
@@ -719,8 +626,6 @@ export const ProposalCreationForm = ({
           onEdit={handleEditCopy}
           editDisabled={!draftContentLoaded}
           isWhitelabelRoute={isWhitelabelRoute}
-          // Enabled while disconnected (to open the wallet); once connected,
-          // block an invalid form, a loading threshold, or below-threshold.
           publishDisabled={
             Boolean(address) &&
             (isLoadingThreshold ||
@@ -847,10 +752,6 @@ export const ProposalCreationForm = ({
         onOpenChange={(o) => !o && setDeleteActionIndex(null)}
         onConfirm={() => {
           if (deleteActionIndex !== null) {
-            // `remove` shifts the row ids and the errors together. Splicing the
-            // values with setValue left both behind, so an invalid action's
-            // error reappeared on whichever row moved up into its index and the
-            // row appeared undeletable.
             actionsArray.remove(deleteActionIndex);
             revalidateActions();
           }

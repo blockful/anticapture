@@ -26,7 +26,6 @@ interface ActionRowProps {
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
-  /** First thing the form found wrong with this action, if anything. */
   error?: string;
 }
 
@@ -36,8 +35,6 @@ function actionTypeLabel(action: ProposalAction): string {
   return "Custom";
 }
 
-/** Shortens a 0x address to the conventional 0xabcd…1234 form. Pass through
- *  any value that isn't a hex address (e.g. an ENS name) unchanged. */
 function truncateAddress(value: string): string {
   if (!isAddressLike(value)) return value;
   return `${value.slice(0, 6)}…${value.slice(-4)}`;
@@ -78,11 +75,6 @@ export const ActionRow = ({
     transition,
   };
 
-  // Resolve the ERC-20 symbol at render-time so the summary shows e.g.
-  // "100 USDC" instead of "100 ERC-20". We only read when the address looks
-  // valid so wagmi doesn't fire requests for in-progress input.
-  // Checksummed before it reaches wagmi: the query key is the address as given,
-  // so two rows holding the same token in different casing would each fetch.
   const erc20Address =
     action.type === "erc20-transfer" && isAddressLike(action.tokenAddress)
       ? toChecksumAddress(action.tokenAddress)
@@ -194,8 +186,6 @@ export const ActionRow = ({
         </Tooltip>
       </div>
       {error && (
-        // Indented past the reorder controls and the index badge, so it reads as
-        // belonging to this row's summary rather than to the list.
         <span className="text-error pl-[4.25rem] text-xs">{error}</span>
       )}
     </div>

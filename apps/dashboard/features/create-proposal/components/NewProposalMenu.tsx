@@ -8,28 +8,13 @@ import { Button } from "@/shared/components/design-system/buttons/button/Button"
 import { itemStatusStyles } from "@/shared/components/design-system/combobox/styles";
 import { cn } from "@/shared/utils/cn";
 
-/**
- * The two ways to start a proposal, behind the New Proposal button. The import used
- * to live on the creation form, one step too late: by then the author has an empty
- * form in front of them and importing replaces it. Popover rather than Combobox,
- * which is a select — these are actions, with nothing selected between them. Item
- * styling is borrowed from the combobox so the two menus look like one system.
- */
-
 type NewProposalMenuProps = {
   onCreateNew: () => void;
   onImportJson: () => void;
-  /**
-   * Forwarded to the trigger, which is where the analytics attributes live.
-   *
-   * `data-*` keys are spelled out because JSX accepts them on an element without
-   * being declared, but an object literal assigned to a typed prop does not.
-   */
   triggerProps?: React.ComponentProps<typeof Button> &
     Partial<Record<`data-${string}`, string | undefined>>;
 };
 
-/** Just the label. Two options this plain need nothing explaining them. */
 const MenuItem = ({
   label,
   onSelect,
@@ -42,8 +27,6 @@ const MenuItem = ({
     role="menuitem"
     onClick={onSelect}
     className={cn(
-      // The same padding and type as a combobox item, so the two menus in the
-      // app read as one system.
       "flex w-full items-center px-3 py-2 text-left",
       "text-primary text-sm font-normal leading-5",
       itemStatusStyles.default,
@@ -91,8 +74,6 @@ export const NewProposalMenu = ({
         sideOffset={4}
         className={cn(
           "flex flex-col",
-          // Sized to the labels now that nothing sits under them. Wide enough
-          // that the two rows don't look cramped against the trigger above.
           "min-w-40 py-1",
           "bg-surface-contrast",
           "border-border-contrast rounded-base border",

@@ -56,8 +56,6 @@ describe("resolveImportedDecimals", () => {
     expect(result.ok).toBe(true);
   });
 
-  // The bug this exists for: 1 USDC declared at 18 decimals encodes 1e18 base
-  // units, a million times the amount the row displays.
   it("rejects a supplied value the token disagrees with", async () => {
     const result = await resolveImportedDecimals(
       [erc20({ decimals: 18 })],
@@ -84,7 +82,6 @@ describe("resolveImportedDecimals", () => {
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    // Points at the offending action, not the first one.
     expect(result.error).toContain("actions[1]");
     expect(result.error).toContain(fragment);
   });

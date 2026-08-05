@@ -6,15 +6,6 @@ import {
 } from "@/features/create-proposal/utils/argIssues";
 import type { ArgValue } from "@/features/create-proposal/utils/argTree";
 
-/*
- * The single answer to "can this argument be encoded as what it claims to be".
- *
- * It replaced three: a boolean `isArgComplete` for the editor, a `tupleArityError`
- * that re-walked the tree for a better arity message, and the JSON import's own
- * pass on the way to building a tree. The tests here are the contract all three
- * callers now share.
- */
-
 const param = (type: string, extra: Record<string, unknown> = {}) =>
   ({ name: "value", type, ...extra }) as AbiParameter;
 
@@ -25,6 +16,9 @@ const messages = (p: AbiParameter, value: ArgValue) =>
     (issue) => `${issue.path.join(".")}: ${issue.message}`,
   );
 
+/* Replaced three passes that answered the same question and disagreed: a boolean
+ * `isArgComplete`, a `tupleArityError` that re-walked for a better message, and the
+ * JSON import's own pass. This is the contract all three callers now share. */
 describe("argIssues", () => {
   describe("leaves", () => {
     it("accepts a value its type can hold", () => {
@@ -84,11 +78,6 @@ describe("argIssues", () => {
       expect(argIssues(durations, ["100", "500"])).toEqual([]);
     });
 
-    /*
-     * Both halves matter: an extra entry is dropped on the way to the encoder, and
-     * a missing one used to be filled in with "", which encodes as a real
-     * zero-length field the document never described.
-     */
     test.each([
       [["100"], ": has 2 fields for tuple but was given 1"],
       [["100", "500", "900"], ": has 2 fields for tuple but was given 3"],
@@ -96,7 +85,6 @@ describe("argIssues", () => {
       expect(messages(durations, value)).toEqual([expected]);
     });
 
-    // The reason the path carries names: `args[0].2.1` would say nothing.
     it("names children after the components the abi names", () => {
       expect(messages(durations, ["100", ""])).toEqual(["total: Required"]);
     });

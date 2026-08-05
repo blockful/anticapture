@@ -15,9 +15,6 @@ import {
 const passthrough = makeAddressResolver(async () => null);
 
 describe("makeAddressResolver", () => {
-  // Matched strictly, a miscased address isn't recognized as an address and
-  // falls through to the ENS branch, which fails with "Could not resolve ENS
-  // name 0x39D3…", at publish, for a document the form already accepted.
   const miscased = "0x39D3F4633dE1F5E2a1e2f4d3fD6d1AAf2E9c8b71";
   const checksummed = "0x39D3f4633de1F5E2A1E2f4D3fD6D1AAF2E9C8B71";
 
@@ -131,7 +128,6 @@ describe("encodeActions", () => {
         type: "custom",
         contractAddress: "0x5555555555555555555555555555555555555555",
         abi: overloadedAbi,
-        // The picker stores the full signature so overloads stay distinct.
         functionName: "execute(address,uint256)",
         args: ["0x6666666666666666666666666666666666666666", "42"],
       },
@@ -172,8 +168,6 @@ describe("encodeActions", () => {
     );
   });
 
-  // The publish path and the modal's live preview now run the same conversion,
-  // via argTree, so anything validation accepts encodes the same either way.
   describe("arg conversion", () => {
     const CONTRACT = "0x3333333333333333333333333333333333333333";
     const abiWith = (type: string): Abi =>
@@ -201,8 +195,6 @@ describe("encodeActions", () => {
         passthrough,
       );
 
-    // validateSolidityArg trims before it checks, so these read as valid and
-    // used to throw here, leaving the form publishable and the publish broken.
     test.each([
       ["bool", " true ", "true"],
       ["bytes32", ` 0x${"11".repeat(32)} `, `0x${"11".repeat(32)}`],
@@ -244,11 +236,6 @@ describe("encodeActions", () => {
       await expect(encodeOne("uint256[2]", '["1"]')).rejects.toThrow();
     });
 
-    // A shared or API draft is rendered straight from stored data, so it can
-    // reach the encoder without passing ProposalFormSchema. The forgiving
-    // conversion reads a malformed composite as an empty container, which
-    // encodes to entirely valid calldata for an empty array: the publish would
-    // succeed and send a call the action row never described.
     describe("malformed composite args fail closed", () => {
       test.each([
         ["unparseable text", "not json"],
@@ -296,8 +283,6 @@ describe("encodeActions", () => {
         ).rejects.toThrow(/must be a JSON array for tuple/);
       });
 
-      // What the malformed arg used to encode as, so the regression is legible:
-      // this is the calldata the refusals above would otherwise have published.
       test("an explicitly empty array is still encodable", async () => {
         const { calldatas } = await encodeOne("uint256[]", "[]");
         expect(calldatas[0]).toBe(
@@ -309,10 +294,6 @@ describe("encodeActions", () => {
         );
       });
 
-      // Stringifying a leaf is the same failure one level down: `String(null)`
-      // is "null" and `String({})` is "[object Object]", both of which pass as
-      // a filled-in `string` leaf, so the publish would have carried a value
-      // nobody wrote instead of failing closed.
       test.each([
         ["a null element", "string[]", "[null]"],
         ["an object element", "string[]", "[{}]"],
@@ -321,8 +302,6 @@ describe("encodeActions", () => {
         await expect(encodeOne(type, arg)).rejects.toThrow(/expects a value/);
       });
 
-      // A leaf sitting where the ABI says a list goes, and the reverse: both
-      // describe a different call than the action row does.
       test("refuses a nested list where the element is a scalar", async () => {
         await expect(encodeOne("uint256[]", "[[1]]")).rejects.toThrow(
           /expects a value/,
@@ -367,9 +346,6 @@ describe("encodeActions", () => {
         ).rejects.toThrow(/has 1 field for tuple but was given 2/);
       });
 
-      // The other direction, and the worse one: a missing field used to be
-      // filled in with "", so a draft that omitted `memo` published calldata
-      // carrying an empty string nobody wrote.
       test("refuses a tuple carrying fewer entries than it has components", async () => {
         const tupleAbi = [
           {
@@ -402,16 +378,12 @@ describe("encodeActions", () => {
         ).rejects.toThrow(/has 1 field for tuple but was given 0/);
       });
 
-      // The other side of the same coin: the modal's live preview has to keep
-      // rendering while an array is half-typed, so its conversion stays lenient.
       test("the live preview conversion still degrades instead of throwing", () => {
         const inputs = [{ name: "a", type: "uint256[]" }] as const;
         expect(argsToTreesForDisplay(inputs, ["not json"])).toEqual([[]]);
       });
     });
 
-    // A mismatched tuple one level up: mapping over the ABI's inputs alone papers
-    // over it, reading a missing arg as "" and dropping an extra one.
     describe("an arg count the function doesn't take fails closed", () => {
       const callWithArgs = (args: string[]) =>
         encodeActions(

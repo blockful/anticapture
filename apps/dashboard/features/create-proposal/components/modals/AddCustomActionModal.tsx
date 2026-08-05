@@ -65,9 +65,6 @@ const bundledAbisByAddress = (daoId: string): Record<string, Abi> => {
   if (!bundledGovernorAbi) return {};
   const governor = daoConfig[daoIdEnum]?.daoOverview?.contracts?.governor;
   if (!governor) return {};
-  // Validate the bundled JSON once at the boundary rather than casting it
-  // straight through. If the import is ever corrupted this returns null and
-  // we fall through to the remote fetch path below.
   const validated = parseAbiStrict(bundledGovernorAbi);
   if (!validated) return {};
   return { [governor.toLowerCase()]: validated };
@@ -85,10 +82,6 @@ const lookupAbi = (daoId: string, address: string): Promise<Abi | null> => {
 const parseAbiJson = (text: string): Abi | null => {
   try {
     const parsed: unknown = JSON.parse(text);
-    // Accept either a bare ABI array or a Hardhat/Foundry-style artifact
-    // object with an `abi` field. Validate the array with zod so malformed
-    // items are rejected at the boundary instead of blowing up later inside
-    // viem encoders.
     if (Array.isArray(parsed)) {
       return parseAbiStrict(parsed);
     }
@@ -121,7 +114,6 @@ export const AddCustomActionModal = ({
   );
   const [mode, setMode] = useState<ConfigMode>(initialMode);
 
-  // Fetch-ABI flow
   const [abiText, setAbiText] = useState(
     initialValue && initialValue.abi.length > 0
       ? JSON.stringify(initialValue.abi, null, 2)
@@ -132,21 +124,17 @@ export const AddCustomActionModal = ({
   const [isManualAbiEntry, setIsManualAbiEntry] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Calldata flow
   const [calldata, setCalldata] = useState(initialValue?.calldata ?? "");
 
-  // Step 2
   const [functionName, setFunctionName] = useState(
     initialValue?.functionName ?? "",
   );
   const [args, setArgs] = useState<string[]>(initialValue?.args ?? []);
   const [addressTouched, setAddressTouched] = useState(false);
 
-  // Calldata field: shows the live encoded calldata and accepts a pasted blob to decode.
   const [calldataField, setCalldataField] = useState("");
   const [decodeError, setDecodeError] = useState<string | null>(null);
 
-  // Re-hydrate whenever the modal opens
   useEffect(() => {
     if (!open) return;
     setStep(1);
@@ -302,20 +290,11 @@ export const AddCustomActionModal = ({
     isAddressValid &&
     (mode === "fetch" ? Boolean(abi) : isCalldataValid);
 
-  // For drawing the inputs only, so a malformed stored arg still renders as an
-  // empty field to fill in rather than blanking the step.
   const argTrees = useMemo<ArgValue[]>(
     () => (selectedFn ? argsToTreesForDisplay(selectedFn.inputs, args) : []),
     [selectedFn, args],
   );
 
-  /**
-   * The args as the encoder would read them, or null when one is not something the
-   * ABI can hold. The Add button and the calldata preview are both answers about what
-   * would be published, so neither can use the forgiving conversion: it reports a
-   * malformed `uint256[]` as `[]`, which `isArgComplete` accepts and viem encodes, so
-   * this step would offer to save an action the publish path then refuses.
-   */
   const encodableTrees = useMemo<ArgValue[] | null>(() => {
     if (!selectedFn) return null;
     try {
@@ -335,8 +314,6 @@ export const AddCustomActionModal = ({
   const step2Ready =
     mode === "fetch" ? Boolean(functionName) && allArgsFilled : isCalldataValid;
 
-  // Live calldata preview (form -> hex). Best-effort: only encodes once every
-  // field is concrete (addresses must already be 0x — ENS resolves at publish).
   const encodedPreview = useMemo<string | null>(() => {
     if (mode !== "fetch" || !selectedFn || !allArgsFilled) return null;
     try {
@@ -350,7 +327,6 @@ export const AddCustomActionModal = ({
     }
   }, [mode, selectedFn, allArgsFilled, encodableTrees]);
 
-  // Mirror the live encoded output into the field as the form changes.
   useEffect(() => {
     if (encodedPreview) setCalldataField(encodedPreview);
   }, [encodedPreview]);
@@ -359,7 +335,6 @@ export const AddCustomActionModal = ({
   const calldataFieldIsEncoded =
     encodedPreview !== null && trimmedCalldataField === encodedPreview;
 
-  // Decode a pasted calldata blob into the function + args.
   const handleDecode = () => {
     const data = trimmedCalldataField;
     if (!isHex(data) || data.length < 10) {
@@ -386,7 +361,6 @@ export const AddCustomActionModal = ({
     }
   };
 
-  // Clear the field and the function/args it was driving.
   const handleClearCalldata = () => {
     setCalldataField("");
     setFunctionName("");
