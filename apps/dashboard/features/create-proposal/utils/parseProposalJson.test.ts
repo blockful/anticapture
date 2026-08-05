@@ -6,10 +6,14 @@ import {
 } from "@/features/create-proposal/utils/parseProposalJson";
 
 /*
- * Whether an action is publishable is ProposalFormSchema's business, covered by
- * validateCustomAction.test. What's tested here is what reading a document can
- * get wrong: JSON's lossiness with numbers, an ETH value the form can't show,
- * and decimals only the token contract can settle.
+ * Reading a document, in three parts.
+ *
+ * Two are this parser's own: the transport shape, and the translation of a
+ * document's arg shapes into what the form stores. The third is the form's rules,
+ * which it runs rather than restates — `validateCustomAction.test` is where those
+ * are specified, and "the form's rules, in the dialog" below only checks that the
+ * import really does reach them, since the whole point is that a paste cannot be
+ * accepted here and refused there.
  */
 
 const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
@@ -163,9 +167,18 @@ describe("parseProposalJson", () => {
       ["text that isn't JSON", "{ title: nope }", "valid JSON"],
       ["a top-level array", "[]", "Expected a JSON object"],
       ["an object with no known field", '{"foo":"bar"}', "No known fields"],
-      ["a wrongly typed title", '{"title":42}', "title:"],
+      ["a title that isn't text", '{"title":true}', "title:"],
     ])("rejects %s", (_label, input, fragment) => {
       expectRejected(parseProposalJson(input), fragment);
+    });
+
+    // A consequence of reading every figure as the text it was written as: a
+    // number where text belongs arrives as that text. Harmless, and visible —
+    // the title field shows "42" — so it is taken rather than refused.
+    it("reads a numeric title as the digits it was written as", () => {
+      expect(expectOk(parseProposalJson('{"title":42}'))).toMatchObject({
+        title: "42",
+      });
     });
 
     // Every issue, not the first three. The status row leads with the count
@@ -174,7 +187,12 @@ describe("parseProposalJson", () => {
     it("reports every issue it found", () => {
       const error = expectRejected(
         parseProposalJson(
-          JSON.stringify({ title: 1, body: 2, discussionUrl: 3, actions: 4 }),
+          JSON.stringify({
+            title: true,
+            body: true,
+            discussionUrl: true,
+            actions: true,
+          }),
         ),
       );
 
@@ -187,25 +205,32 @@ describe("parseProposalJson", () => {
   });
 
   describe("figures", () => {
-    // Spliced in as raw text rather than written as TS numbers: the compiler
-    // rounds them exactly like JSON.parse does, and eslint's
-    // no-loss-of-precision flags them for that reason. By the time the schema
-    // runs the original text is gone, so a number is refused outright:
-    // 1.000000000000000001 is simply 1 here, indistinguishable from someone
-    // writing 1.
+    /*
+     * The document is read with every number kept as the text it was written as,
+     * so an unquoted figure is neither refused nor rounded.
+     *
+     * `JSON.parse` could manage neither: it hands back a double, and by the time
+     * a schema runs, `1.000000000000000001` is simply `1`, indistinguishable from
+     * someone writing `1`. Refusing every unquoted number was the previous answer
+     * to that, which made the author do the parser's job.
+     *
+     * Spliced in as raw text rather than written as TS numbers: the compiler
+     * rounds them exactly like `JSON.parse` does, which is what eslint's
+     * no-loss-of-precision flags them for.
+     */
     it.each([
       ["a fraction beyond a double", "0.123456789123456789"],
       ["a fraction that collapses to an integer", "1.000000000000000001"],
       ["an integer past 2^53", "1000000000000000001"],
-      ["even a figure a double carries exactly", "1.5"],
-    ])("rejects %s written unquoted", (_label, literal) => {
-      expectRejected(
-        parseProposalJson(
-          `{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":${literal}}]}`,
-        ),
-        "actions[0].amount",
-        "quoted",
-      );
+      ["a figure a double carries exactly", "1.5"],
+    ])("keeps %s written unquoted, digit for digit", (_label, literal) => {
+      expect(
+        expectOk(
+          parseProposalJson(
+            `{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":${literal}}]}`,
+          ),
+        ).actions?.[0],
+      ).toMatchObject({ amount: literal });
     });
 
     it("takes the same figure quoted", () => {
@@ -214,8 +239,20 @@ describe("parseProposalJson", () => {
       ).toMatchObject({ amount: "0.123456789123456789" });
     });
 
-    // A composite arg is written as JSON, so the quoting rule applies to every
-    // leaf inside it for the same reason it applies at the top level.
+    // The rules the form enforces still apply to what was read: reading a figure
+    // faithfully is not the same as accepting it.
+    it("still holds an unquoted figure to the form's own rule", () => {
+      expectRejected(
+        parseProposalJson(
+          '{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":0}]}',
+        ),
+        "actions[0].amount",
+        "greater than 0",
+      );
+    });
+
+    // A composite arg is written as JSON, so every leaf inside it is read the
+    // same way the top-level figures are.
     describe("inside a composite arg", () => {
       const withArg = (arg: unknown) =>
         parse(
@@ -227,29 +264,37 @@ describe("parseProposalJson", () => {
         );
 
       it.each([
-        ["a plain number", [1, 2, 3], "actions[0].args[0][0]"],
         ["null", [null], "actions[0].args[0][0]"],
+        // `bool` is the one type whose JSON form isn't text, and this isn't it.
         ["a boolean", [true], "actions[0].args[0][0]"],
         ["a nested object", [{ a: "1" }], "actions[0].args[0][0]"],
-        // Only the offending leaf is named, not the whole argument.
-        ["a number after good leaves", ["1", "2", 3], "actions[0].args[0][2]"],
       ])("rejects %s leaf, at its own path", (_label, arg, path) => {
         expectRejected(withArg(arg), path);
       });
 
+      it.each([
+        ["a plain number", [1, 2, 3]],
+        // Mixed on purpose: quoted and unquoted leaves are stored identically.
+        ["a number after quoted leaves", ["1", "2", 3]],
+      ])("takes %s leaf, as the text it was written as", (_label, arg) => {
+        expect(expectOk(withArg(arg)).actions?.[0]).toMatchObject({
+          args: ['["1","2","3"]'],
+        });
+      });
+
       // Spliced as raw text, like the top-level figures above: written as a TS
       // literal the compiler rounds it before the test can pass it in.
-      it("rejects a leaf whose digits a double can't hold", () => {
+      it("keeps a leaf whose digits a double can't hold", () => {
         const abi = JSON.stringify(
           abiOf([{ name: "values", type: "uint256[]" }], "setMany"),
         );
-        expectRejected(
-          parseProposalJson(
-            `{"actions":[{"type":"custom","contractAddress":"${CONTRACT}","abi":${abi},"functionName":"setMany","args":[[1000000000000000001]]}]}`,
-          ),
-          "actions[0].args[0][0]",
-          "quoted",
-        );
+        expect(
+          expectOk(
+            parseProposalJson(
+              `{"actions":[{"type":"custom","contractAddress":"${CONTRACT}","abi":${abi},"functionName":"setMany","args":[[1000000000000000001]]}]}`,
+            ),
+          ).actions?.[0],
+        ).toMatchObject({ args: ['["1000000000000000001"]'] });
       });
 
       it("takes the same leaves quoted", () => {
@@ -376,6 +421,98 @@ describe("parseProposalJson", () => {
   });
 
   /*
+   * The form's own rules, reported in the dialog.
+   *
+   * Each of these used to pass the import and turn up on the creation page
+   * instead, as a Publish button that would not enable — action rows draw no
+   * field errors, so there was nothing on screen saying why. They are caught here
+   * now not because the import restates them, but because `ProposalActionSchema`
+   * owns them and the import runs it.
+   */
+  describe("the form's rules, in the dialog", () => {
+    const setValueAbi = abiOf([{ name: "value", type: "uint256" }], "setValue");
+
+    it.each([
+      [
+        "a function that isn't in the abi",
+        custom({ abi: setValueAbi, functionName: "mystery", args: [] }),
+        "is not a function in this ABI",
+      ],
+      [
+        "a function name with no abi to resolve it",
+        custom({ functionName: "setValue", args: ["1"] }),
+        "Required when a function name is used",
+      ],
+      [
+        "raw calldata and a function name at once",
+        custom({
+          abi: setValueAbi,
+          functionName: "setValue",
+          args: ["1"],
+          calldata: "0xa9059cbb",
+        }),
+        "Can't be combined with a function name",
+      ],
+      [
+        "the wrong number of args for the signature",
+        custom({
+          abi: setValueAbi,
+          functionName: "setValue",
+          args: ["1", "2"],
+        }),
+        "takes 1, got 2",
+      ],
+      [
+        "a read-only function",
+        custom({
+          abi: [
+            {
+              type: "function",
+              name: "peek",
+              stateMutability: "view",
+              inputs: [],
+              outputs: [],
+            },
+          ],
+          functionName: "peek",
+          args: [],
+        }),
+        "only reads state",
+      ],
+      [
+        "a contract address that is neither an address nor an ENS name",
+        custom({ contractAddress: "not-an-address", calldata: "0x00" }),
+        "Must be a valid address or ENS name",
+      ],
+      [
+        "an arg its declared type can't hold",
+        custom({ abi: setValueAbi, functionName: "setValue", args: ["nope"] }),
+        "Must be a non-negative integer",
+      ],
+    ])("rejects %s", (_label, action, fragment) => {
+      expectRejected(parse(action), fragment);
+    });
+
+    it.each([
+      ["a recipient that is neither an address nor an ENS name", "not-a-name"],
+      ["an empty recipient", ""],
+    ])("rejects a transfer with %s", (_label, recipient) => {
+      expectRejected(parse(eth({ recipient })), "actions[0].recipient");
+    });
+
+    // The ERC-20 half of this cannot be checked yet — the scale depends on
+    // `decimals`, which the token contract has not been read for at this point —
+    // so it stays with Publish. ETH's scale is known without asking anyone.
+    it("rejects an ETH amount finer than 18 decimals", () => {
+      expectRejected(
+        parse(eth({ amount: `0.${"0".repeat(18)}1` })),
+        "actions[0].amount",
+        "more decimal places",
+      );
+    });
+  });
+
+  /*
    * Tuples are unavoidable in real governance calls (Sablier streams, Governor
    * `propose`, Safe modules), so a document can express one in either JSON shape:
    * keyed by component name, or an array in component order. The form stores them
@@ -453,12 +590,11 @@ describe("parseProposalJson", () => {
           custom({
             abi: abiOf([nested], "createStream"),
             functionName: "createStream",
-            args: [{ durations: { cliff: "1", total: 2 } }],
+            args: [{ durations: { cliff: "1", total: null } }],
           }),
         ),
       );
       expect(text).toContain("actions[0].args[0].durations.total");
-      expect(text).toContain("must be quoted");
     });
 
     it("takes a real boolean where the abi declares bool", () => {
@@ -483,9 +619,13 @@ describe("parseProposalJson", () => {
   });
 
   /*
-   * Line numbers and the literal as written. Both are gone after JSON.parse, and
-   * both are what makes "Line 7 · unquoted number 480000 must be quoted" say
-   * anything at all.
+   * The line a problem sits on, which `JSON.parse` cannot report for a value it
+   * has already parsed. It is what makes the status row's
+   * "Line 8 · actions[1].amount: …" say anything at all, and the gutter mark in
+   * the textarea agree with it.
+   *
+   * Available for any path, not only for figures: the document is read into a
+   * syntax tree, and every value in it remembers where it was written.
    */
   describe("locating a problem in the text", () => {
     const document = `{
@@ -495,31 +635,29 @@ describe("parseProposalJson", () => {
     {"type": "erc20-transfer",
      "recipient": "vitalik.eth",
      "tokenAddress": "${USDC}",
-     "amount": 480000}
+     "amount": -480000}
   ]
 }`;
 
-    it("reports the line the figure was written on", () => {
+    it("reports the line the offending value was written on", () => {
       const result = parseProposalJson(document);
       if (result.ok) throw new Error("expected a rejection");
       expect(result.issues[0]).toMatchObject({
+        path: ["actions", 1, "amount"],
         line: 8,
-        numberLiteral: "480000",
       });
-    });
-
-    it("keeps digits the parsed double already lost", () => {
-      const result = parseProposalJson(
-        '{"actions":[{"type":"eth-transfer","recipient":"vitalik.eth","amount":1000000000000000000001}]}',
-      );
-      if (result.ok) throw new Error("expected a rejection");
-      expect(result.issues[0].numberLiteral).toBe("1000000000000000000001");
     });
 
     it("counts from the start of what was pasted, blank lines included", () => {
       const result = parseProposalJson(`\n\n${document}`);
       if (result.ok) throw new Error("expected a rejection");
       expect(result.issues[0].line).toBe(10);
+    });
+
+    it("reports a line for a document that isn't JSON at all", () => {
+      const result = parseProposalJson('{\n  "title": "x",\n  "body" nope\n}');
+      if (result.ok) throw new Error("expected a rejection");
+      expect(result.issues[0].line).toBe(3);
     });
   });
 });

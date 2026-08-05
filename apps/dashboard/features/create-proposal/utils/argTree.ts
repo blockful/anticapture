@@ -28,26 +28,86 @@ export const parseArrayType = (type: string): ArrayInfo | null => {
 const getComponents = (param: AbiParameter): readonly AbiParameter[] =>
   (param as { components?: readonly AbiParameter[] }).components ?? [];
 
+/**
+ * What a parameter is, decided once.
+ *
+ * Every walk over an `AbiParameter` starts with the same three-way question — is
+ * it an array, a tuple, or a leaf — and each answer needs the same follow-up: the
+ * element parameter for an array, the components for a tuple. Written out at each
+ * call site, that preamble was copied into ten functions across four files, and
+ * the copies drifted: some treated bare `tuple` as an array, some forgot that an
+ * array of tuples has to carry the base tuple's components down to its elements.
+ * Asking here means there is one answer.
+ */
+export type ParamShape =
+  | { kind: "array"; element: AbiParameter; length: number | null }
+  | { kind: "tuple"; components: readonly AbiParameter[] }
+  | { kind: "leaf"; type: string };
+
+export const shapeOf = (param: AbiParameter): ParamShape => {
+  const array = parseArrayType(param.type);
+  if (array) {
+    return {
+      kind: "array",
+      // Keeps the base tuple's `components`, so `tuple[]` elements stay
+      // describable.
+      element: { ...param, type: array.elementType } as AbiParameter,
+      length: array.length,
+    };
+  }
+  if (param.type === "tuple") {
+    return { kind: "tuple", components: getComponents(param) };
+  }
+  return { kind: "leaf", type: param.type };
+};
+
 const isComposite = (type: string): boolean =>
   parseArrayType(type) !== null || type === "tuple" || type.startsWith("tuple");
 
-/** The AbiParameter describing one element of an array param (keeps the base
- *  tuple's `components`). */
-const elementParam = (param: AbiParameter, elementType: string): AbiParameter =>
-  ({ ...param, type: elementType }) as AbiParameter;
+/**
+ * How many entries a container must hold, or null when it is free to hold any
+ * number. A dynamic array is the only unbounded one.
+ */
+export const expectedLength = (shape: ParamShape): number | null => {
+  if (shape.kind === "tuple") return shape.components.length;
+  if (shape.kind === "array") return shape.length;
+  return null;
+};
+
+/**
+ * The one place a container's declared size is compared with what it was given.
+ *
+ * Both halves matter and both were getting missed: an extra entry is dropped on
+ * the way to the encoder, and a missing one used to be filled in with `""`, which
+ * encodes as a real zero-length field the document never described. Either way
+ * the calldata says something other than the row showing it.
+ */
+export const arityError = (
+  param: AbiParameter,
+  shape: ParamShape,
+  count: number,
+): string | null => {
+  const expected = expectedLength(shape);
+  if (expected === null || expected === count) return null;
+  if (shape.kind === "tuple") {
+    const fields = expected === 1 ? "field" : "fields";
+    return `has ${expected} ${fields} for ${param.type} but was given ${count}`;
+  }
+  const entries = expected === 1 ? "entry" : "entries";
+  return `must hold exactly ${expected} ${entries} for ${param.type}, not ${count}`;
+};
 
 /** Builds the empty value for a param: "" for scalars, [] for dynamic arrays,
  *  k empties for fixed arrays, one empty per component for tuples. */
 export const buildEmpty = (param: AbiParameter): ArgValue => {
-  const arr = parseArrayType(param.type);
-  if (arr) {
-    if (arr.length === null) return [];
-    const child = elementParam(param, arr.elementType);
-    return Array.from({ length: arr.length }, () => buildEmpty(child));
+  const shape = shapeOf(param);
+  if (shape.kind === "array") {
+    if (shape.length === null) return [];
+    return Array.from({ length: shape.length }, () =>
+      buildEmpty(shape.element),
+    );
   }
-  if (param.type === "tuple") {
-    return getComponents(param).map((c) => buildEmpty(c));
-  }
+  if (shape.kind === "tuple") return shape.components.map(buildEmpty);
   return "";
 };
 
@@ -77,32 +137,24 @@ const coerceStrict = (
   value: unknown,
   subject: string,
 ): ArgValue => {
-  const arr = parseArrayType(param.type);
-  const composite = arr !== null || param.type === "tuple";
+  const shape = shapeOf(param);
 
-  if (composite) {
+  if (shape.kind !== "leaf") {
     if (!Array.isArray(value)) {
       throw new Error(
         `${subject} must be a JSON array for ${param.type}, got ${describeLeaf(value)}.`,
       );
     }
-    if (arr) {
-      const child = elementParam(param, arr.elementType);
-      return value.map((item) => coerceStrict(child, item, subject));
+    // Shared with the form's validator and the JSON import, so a tuple filled
+    // with the wrong number of fields is refused in the same words wherever it
+    // is noticed.
+    const arity = arityError(param, shape, value.length);
+    if (arity) throw new Error(`${subject} ${arity}.`);
+
+    if (shape.kind === "array") {
+      return value.map((item) => coerceStrict(shape.element, item, subject));
     }
-    // A tuple keeps its component order, and has to arrive holding exactly its
-    // components. An extra entry the ABI has no component for would be dropped
-    // on the way to the encoder; a missing one used to be filled in with "",
-    // which encodes as a real zero-length field the stored action never
-    // described. Both publish calldata that says something other than the row
-    // showing it, so the count has to match rather than be made to match.
-    const components = getComponents(param);
-    if (value.length !== components.length) {
-      throw new Error(
-        `${subject} has ${value.length} entries for a ${param.type} of ${components.length}.`,
-      );
-    }
-    return components.map((component, i) =>
+    return shape.components.map((component, i) =>
       coerceStrict(component, value[i], subject),
     );
   }
@@ -220,17 +272,15 @@ export const treeToEncodeValue = (
   param: AbiParameter,
   value: ArgValue,
 ): unknown => {
-  const arr = parseArrayType(param.type);
-  if (arr) {
-    const child = elementParam(param, arr.elementType);
+  const shape = shapeOf(param);
+  if (shape.kind === "array") {
     return (Array.isArray(value) ? value : []).map((v) =>
-      treeToEncodeValue(child, v),
+      treeToEncodeValue(shape.element, v),
     );
   }
-  if (param.type === "tuple") {
-    const components = getComponents(param);
+  if (shape.kind === "tuple") {
     const items = Array.isArray(value) ? value : [];
-    return components.map((c, i) => treeToEncodeValue(c, items[i] ?? ""));
+    return shape.components.map((c, i) => treeToEncodeValue(c, items[i] ?? ""));
   }
   if (typeof value !== "string") return value;
 
@@ -268,26 +318,24 @@ export const resolveAddressLeaves = async (
   value: ArgValue,
   resolve: (nameOrAddress: string) => Promise<`0x${string}`>,
 ): Promise<ArgValue> => {
-  const arr = parseArrayType(param.type);
-  if (arr) {
-    const child = elementParam(param, arr.elementType);
-    const items = Array.isArray(value) ? value : [];
+  const shape = shapeOf(param);
+  const items = Array.isArray(value) ? value : [];
+
+  if (shape.kind === "array") {
     return Promise.all(
-      items.map((v) => resolveAddressLeaves(child, v, resolve)),
+      items.map((v) => resolveAddressLeaves(shape.element, v, resolve)),
     );
   }
 
-  if (param.type === "tuple") {
-    const components = getComponents(param);
-    const items = Array.isArray(value) ? value : [];
+  if (shape.kind === "tuple") {
     return Promise.all(
-      components.map((c, i) =>
+      shape.components.map((c, i) =>
         resolveAddressLeaves(c, items[i] ?? "", resolve),
       ),
     );
   }
 
-  if (param.type !== "address" || typeof value !== "string") return value;
+  if (shape.type !== "address" || typeof value !== "string") return value;
   return resolve(value);
 };
 
@@ -305,20 +353,18 @@ export const resolveAddressesInTrees = (
 /** Converts a viem-decoded value into our string-leaved ArgValue, mapping
  *  decoded tuples (objects or arrays) back to positional component order. */
 const decodedToArgValue = (param: AbiParameter, decoded: unknown): ArgValue => {
-  const arr = parseArrayType(param.type);
-  if (arr) {
-    const child = elementParam(param, arr.elementType);
+  const shape = shapeOf(param);
+  if (shape.kind === "array") {
     return ((decoded as unknown[]) ?? []).map((d) =>
-      decodedToArgValue(child, d),
+      decodedToArgValue(shape.element, d),
     );
   }
-  if (param.type === "tuple") {
-    const components = getComponents(param);
+  if (shape.kind === "tuple") {
     if (Array.isArray(decoded)) {
-      return components.map((c, i) => decodedToArgValue(c, decoded[i]));
+      return shape.components.map((c, i) => decodedToArgValue(c, decoded[i]));
     }
     const obj = (decoded ?? {}) as Record<string, unknown>;
-    return components.map((c) => decodedToArgValue(c, obj[c.name ?? ""]));
+    return shape.components.map((c) => decodedToArgValue(c, obj[c.name ?? ""]));
   }
   return scalarToString(decoded);
 };

@@ -328,11 +328,13 @@ describe("customActionIssues", () => {
         ["isn't JSON", "not json"],
         ["is JSON but not an array", '{"nope":1}'],
       ])("rejects a composite that %s", (_label, arg) => {
-        expectIssue(withArg(arg), ["args", 0], "Must be a JSON array");
+        expectIssue(withArg(arg), ["args", 0], "must be a JSON array");
       });
 
+      // Named at the element, not at the argument: with a hundred-entry array the
+      // index is the whole message.
       it("rejects an array whose elements don't fit the type", () => {
-        expectIssue(withArg('["not a number"]'), ["args", 0]);
+        expectIssue(withArg('["not a number"]'), ["args", 0, 0]);
       });
 
       // The arg parses as a JSON array, so the shape checks above pass it, and

@@ -1,22 +1,18 @@
-import {
-  isHex,
-  toFunctionSignature,
-  type AbiFunction,
-  type AbiParameter,
-} from "viem";
+import { isHex, toFunctionSignature, type AbiFunction } from "viem";
 
 import {
-  parseArrayType,
+  isEncodableParam,
+  isWellFormedFunction,
+} from "@/features/create-proposal/utils/abiSchema";
+import { argIssues } from "@/features/create-proposal/utils/argIssues";
+import type { Issue } from "@/features/create-proposal/utils/issues";
+import {
   storageToArg,
   type ArgValue,
 } from "@/features/create-proposal/utils/argTree";
-import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
 
-/** Where the problem is, relative to the action, and what it is. */
-export type ActionIssue = {
-  path: (string | number)[];
-  message: string;
-};
+/** Relative to the action: `args[0].durations.total`, `functionName`, `abi`. */
+export type ActionIssue = Issue;
 
 /** The shape every entry point produces: a custom action as the form stores it. */
 type CustomActionLike = {
@@ -26,55 +22,6 @@ type CustomActionLike = {
   calldata?: string;
 };
 
-/** The type left after peeling every `[]` or `[k]` off a parameter. */
-const elementTypeOf = (type: string): string => {
-  let current = type;
-  for (
-    let array = parseArrayType(current);
-    array !== null;
-    array = parseArrayType(current)
-  ) {
-    current = array.elementType;
-  }
-  return current;
-};
-
-const componentsOf = (param: AbiParameter): readonly AbiParameter[] =>
-  (param as { components?: readonly AbiParameter[] }).components ?? [];
-
-/**
- * Every parameter needs a string `type` all the way down: `parseArrayType` calls
- * `.match` on it, so a bare `{}` in `inputs` throws instead of being reported. A
- * tuple also has to declare `components`, or the completeness walk sees a struct
- * with no fields and calls any `[]` complete.
- */
-const isWellFormedParam = (param: unknown): boolean => {
-  if (typeof param !== "object" || param === null) return false;
-  const type = (param as { type?: unknown }).type;
-  if (typeof type !== "string") return false;
-
-  const components = (param as { components?: unknown }).components;
-  if (components === undefined) return elementTypeOf(type) !== "tuple";
-  return Array.isArray(components) && components.every(isWellFormedParam);
-};
-
-/**
- * An ABI array can hold a `{ "type": "function" }` with no name, or one whose
- * `inputs` are empty objects. viem's formatters and the argument walk both
- * assume the full shape and throw on the way past.
- */
-const isWellFormedFunction = (item: unknown): item is AbiFunction => {
-  if (typeof item !== "object" || item === null) return false;
-  if ((item as { type?: unknown }).type !== "function") return false;
-  if (typeof (item as { name?: unknown }).name !== "string") return false;
-  const inputs = (item as { inputs?: unknown }).inputs;
-  return Array.isArray(inputs) && inputs.every(isWellFormedParam);
-};
-
-/** Mirrors argTree: these args are stored as JSON, not as scalars. */
-const isCompositeType = (type: string): boolean =>
-  parseArrayType(type) !== null || type.startsWith("tuple");
-
 /** Never throws: an exotic input type still reaches viem's formatter. */
 export const signatureOf = (fn: AbiFunction): string | null => {
   try {
@@ -82,76 +29,6 @@ export const signatureOf = (fn: AbiFunction): string | null => {
   } catch {
     return null;
   }
-};
-
-/**
- * The subset of the ABI grammar viem's encoder actually implements. `function`,
- * `fixed`/`ufixed` and out-of-range widths like `bytes33` are legal ABI but throw
- * in `encodeAbiParameters`, so they only fail mid-publish. Nonsense widths like
- * `uint257` are worse: viem matches them on `startsWith("uint")` and quietly
- * encodes something the declared type never described.
- */
-const isEncodableElementary = (type: string): boolean => {
-  if (type === "address" || type === "bool" || type === "string") return true;
-  if (type === "bytes") return true;
-
-  const fixedBytes = /^bytes(\d+)$/.exec(type);
-  if (fixedBytes) {
-    const size = Number(fixedBytes[1]);
-    return size >= 1 && size <= 32;
-  }
-
-  const integer = /^u?int(\d*)$/.exec(type);
-  if (integer) {
-    if (integer[1] === "") return true; // bare `int`/`uint` means 256
-    const bits = Number(integer[1]);
-    return bits >= 8 && bits <= 256 && bits % 8 === 0;
-  }
-
-  return false;
-};
-
-/** Recurses through tuple components; array suffixes are peeled off first. */
-const isEncodableParam = (param: AbiParameter): boolean => {
-  const element = elementTypeOf(param.type);
-  if (element !== "tuple") return isEncodableElementary(element);
-  return componentsOf(param).every(isEncodableParam);
-};
-
-/**
- * A tuple has to hold exactly its declared fields. `isArgComplete` walks the
- * components and never looks past them, and the encoder maps components only, so
- * an extra field is dropped on the way to the calldata. Recurses, so tuples nested
- * in arrays and in other tuples are covered.
- */
-const tupleArityError = (
-  param: AbiParameter,
-  value: unknown,
-): string | null => {
-  const array = parseArrayType(param.type);
-  if (array) {
-    // A non-array value here is already reported by the caller.
-    if (!Array.isArray(value)) return null;
-    const element = { ...param, type: array.elementType } as AbiParameter;
-    for (const item of value) {
-      const error = tupleArityError(element, item);
-      if (error) return error;
-    }
-    return null;
-  }
-
-  if (param.type !== "tuple" || !Array.isArray(value)) return null;
-
-  const components = componentsOf(param);
-  if (value.length !== components.length) {
-    return `has a tuple of ${components.length} field${components.length === 1 ? "" : "s"} filled with ${value.length}`;
-  }
-
-  for (const [index, component] of components.entries()) {
-    const error = tupleArityError(component, value[index]);
-    if (error) return error;
-  }
-  return null;
 };
 
 export type AbiFunctionLookup =
@@ -211,6 +88,14 @@ export const findAbiFunction = (
   return { kind: "missing" };
 };
 
+const isFunctionEntry = (item: unknown): boolean =>
+  typeof item === "object" &&
+  item !== null &&
+  (item as { type?: unknown }).type === "function";
+
+const messageOf = (error: unknown): string =>
+  error instanceof Error ? error.message : "could not be read";
+
 /**
  * Everything that has to be true for a custom action to produce the calldata it
  * claims. The form owns this rather than the JSON import because it is the one place
@@ -247,17 +132,14 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
   // action that publishes fine could still take that dialog down.
   if (
     action.abi.some(
-      (item) =>
-        typeof item === "object" &&
-        item !== null &&
-        (item as { type?: unknown }).type === "function" &&
-        !isWellFormedFunction(item),
+      (item) => isFunctionEntry(item) && !isWellFormedFunction(item),
     )
   ) {
     return [
       {
         path: ["abi"],
-        message: 'Has a "function" entry without a name or inputs',
+        message:
+          'Has a "function" entry without a name, or with a malformed input',
       },
     ];
   }
@@ -332,48 +214,22 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
     ];
   }
 
-  // Arrays and tuples are stored as JSON strings, and the strict check below
-  // refuses every malformed one. This pass runs first only to name the two
-  // failures worth naming, text that isn't a JSON array and a tuple filled with
-  // the wrong number of fields, instead of the generic "is not a valid T".
-  const compositeIssues = fn.inputs.flatMap<ActionIssue>((input, i) => {
-    if (!isCompositeType(input.type)) return [];
-
-    const notAnArray = {
-      path: ["args", i],
-      message: `Must be a JSON array for ${input.type}`,
-    };
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(action.args[i]);
-    } catch {
-      return [notAnArray];
-    }
-    if (!Array.isArray(parsed)) return [notAnArray];
-
-    const arity = tupleArityError(input, parsed);
-    return arity ? [{ path: ["args", i], message: arity }] : [];
-  });
-  if (compositeIssues.length > 0) return compositeIssues;
-
-  // Validated with the converter the encoder uses, not the forgiving one.
-  // `storageToArgForDisplay` hands back the empty container for a leaf the ABI
-  // can't hold, such as `[{}]` for a `string[]`, and an empty dynamic array
-  // reads as complete, so the action would pass here and then throw in
-  // `encodeActions` on the same arg. Whatever this accepts, `argsToTrees` can
-  // encode.
+  /*
+   * Read with the strict converter, then judged by `argIssues` — the same pair the
+   * JSON import and the editor go through, so an action cannot be accepted in one
+   * place and refused in another.
+   *
+   * Reported at the exact leaf, `args[0].durations.total` and not `args[0]`. What
+   * to do with that precision is the caller's: the import dialog prints the path,
+   * and the form, whose action rows draw no per-field errors, only counts them.
+   */
   return fn.inputs.flatMap<ActionIssue>((input, i) => {
-    const invalid = [
-      { path: ["args", i], message: `Is not a valid ${input.type}` },
-    ];
-
     let tree: ArgValue;
     try {
       tree = storageToArg(input, action.args[i] ?? "");
-    } catch {
-      return invalid;
+    } catch (error) {
+      return [{ path: ["args", i], message: messageOf(error) }];
     }
-    return isArgComplete(input, tree) ? [] : invalid;
+    return argIssues(input, tree, ["args", i]);
   });
 };

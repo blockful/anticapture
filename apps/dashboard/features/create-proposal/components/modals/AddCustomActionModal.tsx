@@ -41,7 +41,7 @@ import {
   treesToEncodeValues,
   type ArgValue,
 } from "@/features/create-proposal/utils/argTree";
-import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
+import { isArgComplete } from "@/features/create-proposal/utils/argIssues";
 import ensGovernorAbi from "@/abis/ens-governor.json";
 
 type Step = 1 | 2;

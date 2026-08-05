@@ -1,11 +1,5 @@
-import { type AbiParameter } from "viem";
-
 import { isAddressLike } from "@/shared/utils/address";
 import { isEnsAddress } from "@/shared/utils/ens";
-import {
-  parseArrayType,
-  type ArgValue,
-} from "@/features/create-proposal/utils/argTree";
 
 export type AbiTypeCategory =
   | "bool"
@@ -107,34 +101,8 @@ export function validateSolidityArg(
   }
 }
 
-const getComponents = (param: AbiParameter): readonly AbiParameter[] =>
-  (param as { components?: readonly AbiParameter[] }).components ?? [];
-
-/**
- * Recursively checks whether an argument value tree is complete and valid:
- * every scalar leaf is non-empty and passes `validateSolidityArg`; arrays honor
- * their fixed length (an empty dynamic array is valid); tuples require every
- * component complete.
+/*
+ * `isArgComplete` used to live here, walking the parameter tree a second time to
+ * answer as a boolean what `argIssues` now answers with a reason. It moved to
+ * `argIssues.ts`, where the walk is, and is still exported from there.
  */
-export const isArgComplete = (
-  param: AbiParameter,
-  value: ArgValue,
-): boolean => {
-  const arr = parseArrayType(param.type);
-  if (arr) {
-    if (!Array.isArray(value)) return false;
-    if (arr.length !== null && value.length !== arr.length) return false;
-    const child = { ...param, type: arr.elementType } as AbiParameter;
-    return value.every((v) => isArgComplete(child, v));
-  }
-  if (param.type === "tuple") {
-    if (!Array.isArray(value)) return false;
-    return getComponents(param).every((c, i) =>
-      isArgComplete(c, value[i] ?? ""),
-    );
-  }
-  if (typeof value !== "string") return false;
-  return (
-    value.trim().length > 0 && validateSolidityArg(param.type, value) === null
-  );
-};

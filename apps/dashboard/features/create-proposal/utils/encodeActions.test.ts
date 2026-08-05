@@ -364,7 +364,7 @@ describe("encodeActions", () => {
             ],
             passthrough,
           ),
-        ).rejects.toThrow(/2 entries for a tuple of 1/);
+        ).rejects.toThrow(/has 1 field for tuple but was given 2/);
       });
 
       // The other direction, and the worse one: a missing field used to be
@@ -399,7 +399,7 @@ describe("encodeActions", () => {
             ],
             passthrough,
           ),
-        ).rejects.toThrow(/0 entries for a tuple of 1/);
+        ).rejects.toThrow(/has 1 field for tuple but was given 0/);
       });
 
       // The other side of the same coin: the modal's live preview has to keep

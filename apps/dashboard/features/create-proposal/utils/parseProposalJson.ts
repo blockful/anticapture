@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 import {
-  strictAddressSchema,
+  amountPrecisionError,
+  bodySchema,
+  discussionUrlSchema,
+  ETH_DECIMALS,
+  PendingProposalActionSchema,
+  titleSchema,
   type ProposalFormValues,
 } from "@/features/create-proposal/schema";
 import { parseAbiStrict } from "@/features/create-proposal/utils/fetchAbi";
@@ -10,11 +15,11 @@ import {
   convertUntypedArg,
   type ImportedArgIssue,
 } from "@/features/create-proposal/utils/importedArgs";
+import type { Issue } from "@/features/create-proposal/utils/issues";
 import {
   formatJsonPath,
-  lineFromParseError,
-  scanJsonNumbers,
-} from "@/features/create-proposal/utils/scanJsonSource";
+  parseJsonDocument,
+} from "@/features/create-proposal/utils/jsonSource";
 import {
   findAbiFunction,
   signatureOf,
@@ -53,16 +58,13 @@ export type ParsedProposalJson = {
  * One thing wrong with the document, located precisely enough to fix.
  *
  * The path is the document's own path, not a paraphrase, so a problem inside a
- * tuple reads `actions[9].args[0].durations.total`. The line and the literal come
- * from the raw text, because neither survives `JSON.parse`.
+ * tuple reads `actions[9].args[0].durations.total`. The line comes from the
+ * syntax tree, which is why the document is read through `parseJsonDocument`
+ * rather than `JSON.parse`.
  */
-export type ImportIssue = {
-  path: (string | number)[];
-  message: string;
-  /** 1-based, when the text could be walked. */
+export type ImportIssue = Issue & {
+  /** 1-based, when the value could be located in the text. */
   line?: number;
-  /** The figure as written, when the value was an unquoted number. */
-  numberLiteral?: string;
 };
 
 export type ParseProposalJsonResult =
@@ -70,90 +72,89 @@ export type ParseProposalJsonResult =
   | { ok: false; issues: ImportIssue[] };
 
 /*
- * This file checks what reading a document can get wrong. Whether an action is
- * publishable belongs to `ProposalFormSchema` via `customActionIssues`, so a pasted
- * action and a hand-built one are held to one standard. What stays here is what the
- * form can't see: JSON's lossiness with numbers, the translation from a document's
- * arg shapes into the form's, an ETH value the form can't display, and ERC-20
- * decimals only the token contract can settle.
+ * Reading a pasted proposal happens in three steps, and only the first two are
+ * this file's own.
+ *
+ * 1. Transport — which keys the document carries and what JSON kind each holds.
+ *    Unknown keys are stripped rather than rejected, so a saved draft (which
+ *    carries `id`, `daoId`, timestamps) pastes in unchanged.
+ * 2. Translation — a document's arg shapes rewritten as the form stores them, in
+ *    `importedArgs`. Needs the ABI, so the function is resolved here.
+ * 3. Rules — whether any of it is publishable. Not defined here: the schemas and
+ *    `customActionIssues` in `schema.ts` are what the form itself runs, and they
+ *    are called from `ruleIssues` below. The import used to restate a subset of
+ *    them, which meant a paste could be accepted here and then sit on the form
+ *    with Publish disabled and nothing on screen explaining why.
  */
 
-/**
- * Every figure that reaches the chain has to arrive quoted. A double can't hold every
- * decimal literal, and `JSON.parse` runs first: `1000000000000000001` arrives as
- * `...000` and `1.000000000000000001` as plain `1`, by which point the original text
- * is gone and a rounded figure is indistinguishable from one that was always round.
- * `decimals` stays a number: small, exact, and checked against the contract anyway.
- */
-const quotedFigure = z
-  .string({
-    invalid_type_error:
-      "must be quoted: a JSON number can silently change the value",
-  })
-  .trim();
+/** Every figure in the document is read as the text it was written as, so text is
+ *  all this needs to accept. */
+const documentText = z.string({ invalid_type_error: "must be text" });
 
-const EthTransferImportSchema = z.object({
+/** `decimals` is the one field the form wants as a number. */
+const documentDecimals = z
+  .string()
+  .regex(/^\d+$/, "must be a whole number")
+  .transform(Number);
+
+const EthTransferTransport = z.object({
   type: z.literal("eth-transfer"),
-  recipient: z.string().trim(),
-  amount: quotedFigure,
+  recipient: documentText.trim(),
+  amount: documentText.trim(),
 });
 
-const Erc20TransferImportSchema = z.object({
+const Erc20TransferTransport = z.object({
   type: z.literal("erc20-transfer"),
-  recipient: z.string().trim(),
-  // Strict here, unlike the other addresses: this one isn't only stored, it's
-  // called, and the decimals lookup has nothing to read from an ENS name.
-  tokenAddress: z.string().trim().pipe(strictAddressSchema),
-  amount: quotedFigure,
+  recipient: documentText.trim(),
+  tokenAddress: documentText.trim(),
+  amount: documentText.trim(),
   // Optional: read from the token contract at import time. A supplied value is
   // treated as an assertion and checked, never trusted.
-  decimals: z.number().int().nonnegative().optional(),
+  decimals: documentDecimals.optional(),
 });
 
-const CustomImportSchema = z.object({
+const CustomTransport = z.object({
   type: z.literal("custom"),
-  contractAddress: z.string().trim(),
+  contractAddress: documentText.trim(),
   abi: z.unknown().optional(),
-  functionName: z.string().trim().optional(),
+  functionName: documentText.trim().optional(),
   // Deliberately unconstrained here. An arg's legal shape depends on the type
-  // its ABI declares: a string for most, a real boolean for `bool`, a real
-  // array or keyed object for a composite, so it can only be judged once the
-  // function is resolved. `convertImportedArg` does that, below.
+  // its ABI declares: text for most, a real boolean for `bool`, a real array or
+  // keyed object for a composite, so it can only be judged once the function is
+  // resolved. `convertImportedArg` does that, below.
   args: z.array(z.unknown()).optional(),
-  calldata: z.string().trim().optional(),
+  calldata: documentText.trim().optional(),
   // Kept in the shape only so it can be refused by name. Unknown keys are
   // stripped, and silently dropping a declared ETH value would publish 0 wei
   // instead of what the document asked for.
   value: z.unknown().optional(),
 });
 
-const ActionImportSchema = z.discriminatedUnion("type", [
-  EthTransferImportSchema,
-  Erc20TransferImportSchema,
-  CustomImportSchema,
+const ActionTransport = z.discriminatedUnion("type", [
+  EthTransferTransport,
+  Erc20TransferTransport,
+  CustomTransport,
 ]);
 
-// Unknown keys are stripped rather than rejected, so a saved draft (which
-// carries `id`, `daoId`, timestamps) can be pasted in as-is.
-const ProposalJsonSchema = z.object({
-  title: z.string().optional(),
-  discussionUrl: z.string().optional(),
-  body: z.string().optional(),
-  actions: z.array(ActionImportSchema).optional(),
+const ProposalJsonTransport = z.object({
+  title: documentText.optional(),
+  discussionUrl: documentText.optional(),
+  body: documentText.optional(),
+  actions: z.array(ActionTransport).optional(),
 });
 
-type ImportedAction = z.infer<typeof ActionImportSchema>;
+type ImportedAction = z.infer<typeof ActionTransport>;
 type ImportedCustomAction = Extract<ImportedAction, { type: "custom" }>;
 
 /**
- * Converts one custom action's args, and reports what the ABI says about them.
+ * Translates one custom action's args, and stores the full signature.
  *
  * The function is resolved once, here, and used for both jobs: deciding each
- * arg's legal shape and storing the full signature. A name that doesn't resolve
- * isn't reported, because that belongs to the form on the action's own row, but its
- * args still have to be stored, so they go through the ABI-less conversion.
+ * arg's legal shape and naming the function. A name that doesn't resolve isn't
+ * reported here — `customActionIssues` says so, in the words the form uses — but
+ * its args still have to be stored, so they go through the ABI-less translation.
  */
-const convertCustomAction = (
+const translateCustomAction = (
   action: ImportedCustomAction,
   index: number,
 ): { action: PendingAction; issues: ImportIssue[] } => {
@@ -173,8 +174,8 @@ const convertCustomAction = (
   const args: string[] = [];
 
   // Walk the args the document supplied, not the ABI's inputs: a count mismatch
-  // is the form's to report (it says which signature expected how many), and
-  // dropping the extras here would hide it.
+  // is `customActionIssues`' to report (it says which signature expected how
+  // many), and dropping the extras here would hide it.
   supplied.forEach((value, argIndex) => {
     const input = fn?.inputs[argIndex];
     const result = input
@@ -208,8 +209,9 @@ const convertCustomAction = (
   };
 };
 
-/** Everything about an action that the document itself can get wrong. */
-const convertAction = (
+/** Rewrites one action in the form's shape, reporting only what stops it from
+ *  being representable at all. */
+const translateAction = (
   action: ImportedAction,
   index: number,
 ): { action: PendingAction; issues: ImportIssue[] } => {
@@ -235,8 +237,52 @@ const convertAction = (
     });
   }
 
-  const converted = convertCustomAction(action, index);
-  return { action: converted.action, issues: [...issues, ...converted.issues] };
+  const translated = translateCustomAction(action, index);
+  return {
+    action: translated.action,
+    issues: [...issues, ...translated.issues],
+  };
+};
+
+/** Runs one of the form's own schemas and re-roots its issues at `path`. */
+const issuesFor = (
+  schema: z.ZodTypeAny,
+  value: unknown,
+  path: (string | number)[],
+): ImportIssue[] => {
+  const result = schema.safeParse(value);
+  if (result.success) return [];
+  return result.error.issues.map((issue) => ({
+    path: [...path, ...issue.path],
+    message: issue.message,
+  }));
+};
+
+/**
+ * Holds a translated action to exactly what the form holds it to.
+ *
+ * `PendingProposalActionSchema` is the form's action schema with `decimals` left
+ * open, and its `superRefine` counterpart, `customActionIssues`, is reached
+ * through it. Completeness is deliberately not checked: a document may
+ * legitimately carry actions and no title, and the author fills the rest in on
+ * the form. That part stays with Publish.
+ */
+const ruleIssues = (action: PendingAction, index: number): ImportIssue[] => {
+  const issues = issuesFor(PendingProposalActionSchema, action, [
+    "actions",
+    index,
+  ]);
+  if (issues.length > 0) return issues;
+
+  // Known without asking a contract, unlike an ERC-20's, so it can be caught
+  // here rather than at publish.
+  if (action.type === "eth-transfer") {
+    const precision = amountPrecisionError(action.amount, ETH_DECIMALS);
+    return precision
+      ? [{ path: ["actions", index, "amount"], message: precision }]
+      : [];
+  }
+  return [];
 };
 
 /** `actions[1].args[0]: …`, readable enough to fix the paste. */
@@ -247,9 +293,6 @@ export const formatImportIssue = (issue: ImportIssue): string => {
 
 /** Parses a pasted proposal document into form values. */
 export const parseProposalJson = (text: string): ParseProposalJsonResult => {
-  // Deliberately not trimmed: every line number below counts from the start of
-  // what the user actually pasted, and trimming a leading blank line would shift
-  // all of them by one.
   if (!text.trim()) {
     return {
       ok: false,
@@ -257,10 +300,8 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
     };
   }
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch (error) {
+  const parsed = parseJsonDocument(text);
+  if (!parsed.ok) {
     return {
       ok: false,
       issues: [
@@ -268,13 +309,18 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
           path: [],
           message:
             "This isn't valid JSON. Check for a missing comma, quote, or bracket.",
-          line: lineFromParseError(text, error),
+          line: parsed.line,
         },
       ],
     };
   }
 
-  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+  const { value: document, lineOf } = parsed.document;
+  if (
+    document === null ||
+    typeof document !== "object" ||
+    Array.isArray(document)
+  ) {
     return {
       ok: false,
       issues: [
@@ -287,20 +333,22 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
     };
   }
 
-  const numbers = scanJsonNumbers(text);
-  const locate = (issue: ImportIssue): ImportIssue => {
-    const source = numbers.get(formatJsonPath(issue.path));
-    return source
-      ? { ...issue, line: source.line, numberLiteral: source.literal }
-      : issue;
-  };
+  /** Every issue gets the line its value was written on, where there is one. */
+  const locate = (issues: ImportIssue[]): ImportIssue[] =>
+    issues.map((issue) => {
+      const line = lineOf(issue.path);
+      return line === undefined ? issue : { ...issue, line };
+    });
 
-  const result = ProposalJsonSchema.safeParse(parsed);
+  const result = ProposalJsonTransport.safeParse(document);
   if (!result.success) {
     return {
       ok: false,
-      issues: result.error.issues.map((issue) =>
-        locate({ path: [...issue.path], message: issue.message }),
+      issues: locate(
+        result.error.issues.map((issue) => ({
+          path: [...issue.path],
+          message: issue.message,
+        })),
       ),
     };
   }
@@ -324,11 +372,25 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
     };
   }
 
-  const converted = actions?.map(convertAction);
-  const issues = converted?.flatMap((c) => c.issues) ?? [];
-  if (issues.length > 0) {
-    return { ok: false, issues: issues.map(locate) };
+  const translated = actions?.map(translateAction);
+
+  // Reported before the rules: a value that could not even be rewritten in the
+  // form's shape would fail every rule downstream, in vaguer words.
+  const translationIssues = translated?.flatMap((t) => t.issues) ?? [];
+  if (translationIssues.length > 0) {
+    return { ok: false, issues: locate(translationIssues) };
   }
+
+  // The fields present, each held to the form's own schema for it.
+  const issues: ImportIssue[] = [
+    ...(title === undefined ? [] : issuesFor(titleSchema, title, ["title"])),
+    ...(discussionUrl === undefined
+      ? []
+      : issuesFor(discussionUrlSchema, discussionUrl, ["discussionUrl"])),
+    ...(body === undefined ? [] : issuesFor(bodySchema, body, ["body"])),
+    ...(translated?.flatMap((t, index) => ruleIssues(t.action, index)) ?? []),
+  ];
+  if (issues.length > 0) return { ok: false, issues: locate(issues) };
 
   return {
     ok: true,
@@ -336,7 +398,7 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
       title,
       discussionUrl,
       body,
-      actions: converted?.map((c) => c.action),
+      actions: translated?.map((t) => t.action),
     },
   };
 };

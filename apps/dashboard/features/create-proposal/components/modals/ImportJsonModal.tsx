@@ -24,7 +24,7 @@ import {
   PROPOSAL_IMPORT_SPEC,
   PROPOSAL_JSON_PLACEHOLDER,
 } from "@/features/create-proposal/constants";
-import { rangeOfLine } from "@/features/create-proposal/utils/scanJsonSource";
+import { rangeOfLine } from "@/features/create-proposal/utils/jsonSource";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
 import type { ImportedProposal } from "@/features/create-proposal/utils/importHandoff";
 import {
@@ -70,20 +70,15 @@ const describeValid = (actionCount: number | undefined): string =>
     ? "Valid"
     : `Valid · ${actionCount} action${actionCount === 1 ? "" : "s"}`;
 
-/** One problem: `Line 7 · unquoted number 480000 must be quoted`. Several:
- *  `3 problems · first on line 7 · unquoted number 480000`. Naming the figure
- *  beats explaining why quoting matters, which does not fit on one line. */
+/** One problem: `Line 7 · actions[0].amount: Must be greater than 0`. Several:
+ *  `3 problems · first on line 7 · actions[0].amount: …`. */
 const describeIssues = (issues: readonly ImportIssue[]): string => {
   const [first] = issues;
   if (!first) return "";
 
-  const what = first.numberLiteral
-    ? `unquoted number ${first.numberLiteral}`
-    : formatImportIssue(first);
-
+  const what = formatImportIssue(first);
   if (issues.length === 1) {
-    const detail = first.numberLiteral ? `${what} must be quoted` : what;
-    return first.line ? `Line ${first.line} · ${detail}` : detail;
+    return first.line ? `Line ${first.line} · ${what}` : what;
   }
   const where = first.line ? ` · first on line ${first.line}` : "";
   return `${issues.length} problems${where} · ${what}`;
