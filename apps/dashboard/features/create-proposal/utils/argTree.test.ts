@@ -135,6 +135,21 @@ describe("storage <-> tree round-trip", () => {
       [],
     );
   });
+
+  // A tuple short of its components is malformed like any other, so the lenient
+  // conversion degrades it to the empty struct rather than padding it out. The
+  // padded tree is what used to reach the encoder as a real empty field, and the
+  // modal that hydrates through here writes full-arity tuples back anyway.
+  it("degrades a tuple short of its components to the empty struct", () => {
+    const param = {
+      type: "tuple",
+      components: [
+        { name: "to", type: "address" },
+        { name: "memo", type: "string" },
+      ],
+    } as never;
+    expect(storageToArg(param, `["${ADDR_A}"]`)).toEqual(["", ""]);
+  });
 });
 
 describe("argsToTrees / treesToArgs (top-level)", () => {

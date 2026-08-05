@@ -367,6 +367,41 @@ describe("encodeActions", () => {
         ).rejects.toThrow(/2 entries for a tuple of 1/);
       });
 
+      // The other direction, and the worse one: a missing field used to be
+      // filled in with "", so a draft that omitted `memo` published calldata
+      // carrying an empty string nobody wrote.
+      test("refuses a tuple carrying fewer entries than it has components", async () => {
+        const tupleAbi = [
+          {
+            type: "function",
+            name: "f",
+            stateMutability: "nonpayable",
+            inputs: [
+              {
+                name: "order",
+                type: "tuple",
+                components: [{ name: "memo", type: "string" }],
+              },
+            ],
+            outputs: [],
+          },
+        ] as Abi;
+        await expect(
+          encodeActions(
+            [
+              {
+                type: "custom",
+                contractAddress: CONTRACT,
+                abi: tupleAbi,
+                functionName: "f",
+                args: ["[]"],
+              } as ProposalAction,
+            ],
+            passthrough,
+          ),
+        ).rejects.toThrow(/0 entries for a tuple of 1/);
+      });
+
       // The other side of the same coin: the modal's live preview has to keep
       // rendering while an array is half-typed, so its conversion stays lenient.
       test("the live preview conversion still degrades instead of throwing", () => {

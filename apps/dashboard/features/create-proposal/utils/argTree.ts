@@ -95,16 +95,20 @@ const coerceStrict = (
       const child = elementParam(param, arr.elementType);
       return value.map((item) => coerceStrict(child, item, subject));
     }
-    // A tuple keeps its component order; extra entries the ABI has no component
-    // for are refused rather than dropped on the way to the encoder.
+    // A tuple keeps its component order, and has to arrive holding exactly its
+    // components. An extra entry the ABI has no component for would be dropped
+    // on the way to the encoder; a missing one used to be filled in with "",
+    // which encodes as a real zero-length field the stored action never
+    // described. Both publish calldata that says something other than the row
+    // showing it, so the count has to match rather than be made to match.
     const components = getComponents(param);
-    if (value.length > components.length) {
+    if (value.length !== components.length) {
       throw new Error(
         `${subject} has ${value.length} entries for a ${param.type} of ${components.length}.`,
       );
     }
     return components.map((component, i) =>
-      i < value.length ? coerceStrict(component, value[i], subject) : "",
+      coerceStrict(component, value[i], subject),
     );
   }
 
@@ -133,9 +137,10 @@ export const argToStorage = (param: AbiParameter, value: ArgValue): string => {
 /**
  * Parses a stored arg string into an editable tree, refusing anything a
  * composite param can't hold: a blank, unparseable JSON, JSON that isn't an
- * array, a leaf that is not a JSON scalar, and a leaf whose shape contradicts
- * the ABI parameter. This is the conversion; `storageToArg` is the same one with
- * a fallback bolted on, so the two can't drift.
+ * array, a tuple that isn't exactly its declared components, a leaf that is not
+ * a JSON scalar, and a leaf whose shape contradicts the ABI parameter. This is
+ * the conversion; `storageToArg` is the same one with a fallback bolted on, so
+ * the two can't drift.
  *
  * Whoever is going to encode has to use this variant. `storageToArg` reports a
  * malformed `uint256[]` as `[]`, which encodes to perfectly valid calldata for
