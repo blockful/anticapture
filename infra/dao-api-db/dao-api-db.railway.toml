@@ -1,6 +1,11 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "infra/dao-api-db/Dockerfile.dao-api-db"
+# Railway watches the whole repo when this is unset, so without it every merge to
+# dev rebuilds and restarts all 17 Postgres services at once. Nothing outside the
+# image's own directory can change what this service runs, and the image is shared
+# by the whole fleet, so the pattern is the same for every DB service.
+watchPatterns = ["infra/dao-api-db/**"]
 
 [deploy]
 # No healthcheckPath: Postgres speaks the wire protocol, not HTTP, so Railway's
