@@ -199,12 +199,30 @@ export const argsToTreesForDisplay = (
 ): ArgValue[] =>
   inputs.map((input, i) => storageToArgForDisplay(input, args[i] ?? ""));
 
-/** Throws on a composite arg the stored string never described, rather than
- *  quietly handing back an empty container. */
+/**
+ * Throws on a composite arg the stored string never described, rather than
+ * quietly handing back an empty container.
+ *
+ * The count is part of that description. Mapping over the ABI's inputs alone
+ * reads a missing arg as `""` and drops an extra one, so a stored action whose
+ * args and function drifted apart — an imported or API draft that never passed
+ * `ProposalFormSchema` — would publish calldata the row never described:
+ * `setMessage(string)` with `args: []` would encode an empty string instead of
+ * failing. Same reasoning as the tuple arity check in `coerceStrict`, one level
+ * up.
+ */
 export const argsToTrees = (
   inputs: readonly AbiParameter[],
   args: readonly string[],
-): ArgValue[] => inputs.map((input, i) => storageToArg(input, args[i] ?? ""));
+): ArgValue[] => {
+  if (args.length !== inputs.length) {
+    const expected = inputs.length === 1 ? "argument" : "arguments";
+    throw new Error(
+      `Expected ${inputs.length} ${expected}, got ${args.length}.`,
+    );
+  }
+  return inputs.map((input, i) => storageToArg(input, args[i] ?? ""));
+};
 
 export const treesToArgs = (
   inputs: readonly AbiParameter[],

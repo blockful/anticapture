@@ -192,6 +192,20 @@ describe("argsToTrees / treesToArgs (top-level)", () => {
     const after = await encodeActions([make(back)], identityResolver);
     expect(after.calldatas[0]).toBe(before.calldatas[0]);
   });
+
+  it("refuses an arg count the inputs don't account for", () => {
+    const inputs = [
+      { name: "amount", type: "uint256" },
+      { name: "to", type: "address" },
+    ] as const;
+
+    expect(() => argsToTrees(inputs, ["100"])).toThrow(
+      /Expected 2 arguments, got 1/,
+    );
+    expect(() => argsToTrees(inputs, ["100", ADDR_B, "extra"])).toThrow(
+      /Expected 2 arguments, got 3/,
+    );
+  });
 });
 
 describe("treesToEncodeValues (live preview)", () => {

@@ -410,6 +410,39 @@ describe("encodeActions", () => {
       });
     });
 
+    // The same failure as a mismatched tuple, one level up: the stored args and
+    // the selected function can drift apart in a draft that never passed
+    // `ProposalFormSchema`, and mapping over the ABI's inputs alone would paper
+    // over it — a missing arg read as "", an extra one dropped — and publish
+    // calldata the action row never described.
+    describe("an arg count the function doesn't take fails closed", () => {
+      const callWithArgs = (args: string[]) =>
+        encodeActions(
+          [
+            {
+              type: "custom",
+              contractAddress: CONTRACT,
+              abi: abiWith("string"),
+              functionName: "f",
+              args,
+            } as ProposalAction,
+          ],
+          passthrough,
+        );
+
+      test("refuses a missing arg instead of encoding an empty string", async () => {
+        await expect(callWithArgs([])).rejects.toThrow(
+          /Expected 1 argument, got 0/,
+        );
+      });
+
+      test("refuses an extra arg instead of dropping it", async () => {
+        await expect(callWithArgs(["hello", "surprise"])).rejects.toThrow(
+          /Expected 1 argument, got 2/,
+        );
+      });
+    });
+
     test("resolves an ENS name nested inside an array", async () => {
       const resolver = makeAddressResolver(async (name) =>
         name === "vitalik.eth"
