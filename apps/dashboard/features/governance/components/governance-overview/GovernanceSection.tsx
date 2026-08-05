@@ -26,17 +26,15 @@ import {
   DraftCard,
   DraftEmptyState,
   DeleteDraftModal,
+  ImportJsonModal,
+  NewProposalMenu,
+  stashImportedProposal,
   useDrafts,
+  type ImportedProposal,
 } from "@/features/create-proposal";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
 import { canCreateProposalForDao } from "@/features/create-proposal/constants";
-import { NewProposalMenu } from "@/features/create-proposal/components/NewProposalMenu";
-import { ImportJsonModal } from "@/features/create-proposal/components/modals/ImportJsonModal";
-import {
-  stashImportedProposal,
-  type ImportedProposal,
-} from "@/features/create-proposal/utils/importHandoff";
 import { ProposalItem } from "@/features/governance/components/proposal-overview/ProposalItem";
 import {
   useOffchainProposals,
