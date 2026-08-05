@@ -59,14 +59,23 @@ export class FeedRepository {
     items: EnrichedFeedEvent[];
     totalCount: number;
   }> {
-    const { skip, limit, orderBy, orderDirection, type, fromDate, toDate } =
-      req;
+    const {
+      skip,
+      limit,
+      orderBy,
+      orderDirection,
+      type,
+      fromDate,
+      toDate,
+      address,
+    } = req;
 
     const relevanceFilter = this.buildRelevanceFilter(type, valueThresholds);
 
     const where = and(
       fromDate ? gte(feedEvent.timestamp, fromDate) : undefined,
       toDate ? lte(feedEvent.timestamp, toDate) : undefined,
+      address ? this.buildAddressFilter(address) : undefined,
       relevanceFilter,
     );
 
@@ -85,13 +94,14 @@ export class FeedRepository {
       this.db.$count(feedEvent, where),
     ]);
 
-    const items = await this.enrichWithMetadata(rows);
+    const items = await this.enrichWithMetadata(rows, address);
 
     return { items, totalCount };
   }
 
   private async enrichWithMetadata(
     rows: DBFeedEvent[],
+    address?: string,
   ): Promise<EnrichedFeedEvent[]> {
     if (rows.length === 0) return [];
 
@@ -134,9 +144,8 @@ export class FeedRepository {
         this.fetchProposals(extendedProposalIds),
       ]);
 
-    const delegationByKey = new Map(
-      delegations.map((d) => [`${d.transactionHash}:${d.logIndex}`, d]),
-    );
+    const delegationByKey = this.indexDelegationsByKey(delegations, address);
+    const delegationsByKey = this.groupDelegationsByKey(delegations);
     const transferByKey = new Map(
       transfers.map((t) => [`${t.transactionHash}:${t.logIndex}`, t]),
     );
@@ -152,6 +161,7 @@ export class FeedRepository {
       ...row,
       metadata: this.buildMetadata(row, {
         delegationByKey,
+        delegationsByKey,
         transferByKey,
         voteByKey,
         proposalByTxHash,
@@ -160,10 +170,78 @@ export class FeedRepository {
     }));
   }
 
+  /**
+   * Picks the primary row per event key. Partial delegation DAOs (SCR) write
+   * one row per delegatee out of a single `DelegateChanged`, all sharing the
+   * transaction hash and log index, so when an address filter is active the row
+   * mentioning it wins instead of an unrelated sibling. Siblings are not
+   * dropped: `groupDelegationsByKey` carries them in `delegatees`.
+   */
+  private indexDelegationsByKey(
+    delegations: DelegationRow[],
+    address?: string,
+  ): Map<string, DelegationRow> {
+    const addr = address?.toLowerCase();
+    const byKey = new Map<string, DelegationRow>();
+
+    for (const d of delegations) {
+      const key = `${d.transactionHash}:${d.logIndex}`;
+      const current = byKey.get(key);
+      if (!current) {
+        byKey.set(key, d);
+        continue;
+      }
+      if (addr && !this.delegationMentions(current, addr)) {
+        if (this.delegationMentions(d, addr)) byKey.set(key, d);
+      }
+    }
+
+    return byKey;
+  }
+
+  /**
+   * Every delegation row of an event, keyed the same way: the primary row alone
+   * cannot describe a split, so the whole set travels with it. Sorted by
+   * delegate address because the database guarantees no row order and the
+   * rendered list has to be stable.
+   */
+  private groupDelegationsByKey(
+    delegations: DelegationRow[],
+  ): Map<string, DelegationRow[]> {
+    const byKey = new Map<string, DelegationRow[]>();
+
+    for (const d of delegations) {
+      const key = `${d.transactionHash}:${d.logIndex}`;
+      const group = byKey.get(key);
+      if (group) group.push(d);
+      else byKey.set(key, [d]);
+    }
+
+    for (const group of byKey.values()) {
+      group.sort((a, b) => {
+        const left = a.delegateAccountId.toLowerCase();
+        const right = b.delegateAccountId.toLowerCase();
+        if (left === right) return 0;
+        return left < right ? -1 : 1;
+      });
+    }
+
+    return byKey;
+  }
+
+  private delegationMentions(d: DelegationRow, lowercasedAddress: string) {
+    return (
+      d.delegatorAccountId.toLowerCase() === lowercasedAddress ||
+      d.delegateAccountId.toLowerCase() === lowercasedAddress ||
+      d.previousDelegate?.toLowerCase() === lowercasedAddress
+    );
+  }
+
   private buildMetadata(
     row: DBFeedEvent,
     lookups: {
       delegationByKey: Map<string, DelegationRow>;
+      delegationsByKey: Map<string, DelegationRow[]>;
       transferByKey: Map<string, TransferRow>;
       voteByKey: Map<string, VoteRow>;
       proposalByTxHash: Map<string, ProposalRow>;
@@ -175,12 +253,24 @@ export class FeedRepository {
       case FeedEventType.DELEGATION: {
         const d = lookups.delegationByKey.get(key);
         if (!d) return null;
+        const siblings = lookups.delegationsByKey.get(key) ?? [d];
         const meta: DelegationMeta = {
           kind: FeedEventType.DELEGATION,
           delegator: d.delegatorAccountId,
           delegate: d.delegateAccountId,
           previousDelegate: d.previousDelegate,
           amount: d.delegatedValue.toString(),
+          // Only a split carries the array: a lone delegatee is already
+          // described by `delegate` and `amount`, and consumers read a missing
+          // `delegatees` as "not a split".
+          ...(siblings.length > 1
+            ? {
+                delegatees: siblings.map((s) => ({
+                  delegate: s.delegateAccountId,
+                  amount: s.delegatedValue.toString(),
+                })),
+              }
+            : {}),
         };
         return meta;
       }
@@ -338,6 +428,54 @@ export class FeedRepository {
       })
       .from(proposalsOnchain)
       .where(where);
+  }
+
+  // feed_event has no account column, so addresses are matched in the source
+  // table each event type is derived from, keyed by (tx_hash, log_index).
+  // Lowercased on both sides because source tables may store checksummed
+  // addresses. feed_event columns use Drizzle refs so they follow whatever
+  // alias the query builder assigns (see the proposerVotingPower note above).
+  private buildAddressFilter(address: string): SQL {
+    const addr = address.toLowerCase();
+    return sql`(
+      (${feedEvent.type} = 'DELEGATION' AND EXISTS (
+        SELECT 1 FROM delegations d
+        WHERE d.transaction_hash = ${feedEvent.txHash}
+          AND d.log_index = ${feedEvent.logIndex}
+          AND (
+            LOWER(d.delegator_account_id) = ${addr}
+            OR LOWER(d.delegate_account_id) = ${addr}
+            OR LOWER(d.previous_delegate) = ${addr}
+          )
+      ))
+      OR (${feedEvent.type} = 'TRANSFER' AND EXISTS (
+        SELECT 1 FROM transfers t
+        WHERE t.transaction_hash = ${feedEvent.txHash}
+          AND t.log_index = ${feedEvent.logIndex}
+          AND (
+            LOWER(t.from_account_id) = ${addr}
+            OR LOWER(t.to_account_id) = ${addr}
+          )
+      ))
+      OR (${feedEvent.type} = 'VOTE' AND EXISTS (
+        SELECT 1 FROM votes_onchain v
+        WHERE v.tx_hash = ${feedEvent.txHash}
+          AND v.log_index = ${feedEvent.logIndex}
+          AND LOWER(v.voter_account_id) = ${addr}
+      ))
+      OR (${feedEvent.type} = 'PROPOSAL' AND EXISTS (
+        SELECT 1 FROM proposals_onchain p
+        WHERE p.tx_hash = ${feedEvent.txHash}
+          AND LOWER(p.proposer_account_id) = ${addr}
+      ))
+      OR (${feedEvent.type} = 'PROPOSAL_EXTENDED'
+        AND ${feedEvent.proposalId} IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM proposals_onchain p
+          WHERE p.id = ${feedEvent.proposalId}
+            AND LOWER(p.proposer_account_id) = ${addr}
+      ))
+    )`;
   }
 
   private buildRelevanceFilter(

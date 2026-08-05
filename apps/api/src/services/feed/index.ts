@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { FeedEventType, FeedRelevance } from "@/lib/constants";
+import {
+  FeedEventType,
+  FeedRelevance,
+  FeedRelevanceFilter,
+} from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
 import {
@@ -32,7 +36,7 @@ export class FeedService {
 
   async getFeedEvents(req: FeedRequest): Promise<FeedResponse> {
     const valueThresholds = this.getValueThresholds(
-      req.relevance ?? FeedRelevance.MEDIUM,
+      req.relevance ?? FeedRelevanceFilter.MEDIUM,
     );
     const response = await this.repo.getFeedEvents(req, valueThresholds);
     return {
@@ -69,13 +73,16 @@ export class FeedService {
   }
 
   private getValueThresholds(
-    relevance: FeedRelevance,
+    relevance: FeedRelevanceFilter,
   ): Partial<Record<FeedEventType, bigint>> {
     const daoThresholds = getDaoRelevanceThreshold(this.daoId);
     const result: Partial<Record<FeedEventType, bigint>> = {};
 
     for (const [type, levels] of Object.entries(daoThresholds)) {
-      result[type as FeedEventType] = levels[relevance];
+      // ALL keeps an entry per type with a zero floor instead of an empty map:
+      // the repository derives the `type` filter from these keys.
+      result[type as FeedEventType] =
+        relevance === FeedRelevanceFilter.ALL ? 0n : levels[relevance];
     }
 
     return result;

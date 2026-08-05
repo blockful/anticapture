@@ -70,7 +70,11 @@ app.onError((err, c) => {
 
 // Health check
 app.get("/health", (c) => {
-  return c.json({ status: "ok", timestamp: new Date().toISOString() });
+  return c.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    commit: env.RAILWAY_GIT_COMMIT_SHA,
+  });
 });
 
 // Register controllers

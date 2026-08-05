@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import type { Address } from "viem";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 
 import {
   useDelegates,
@@ -22,6 +22,8 @@ import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
@@ -32,9 +34,16 @@ import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { useDao } from "@anticapture/client/hooks";
 import type { DaoPathParamsDaoEnumKey } from "@anticapture/client";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { TimeInterval } from "@/shared/types/enums";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import { parseAsAddress } from "@/shared/utils/parseAsAddress";
+
+type ActivityStatus = "inactive" | "neverVoted" | "noProposals";
+
+const AMOUNT_SORT_OPTIONS = [
+  { value: "largest-first", label: "Largest first" },
+  { value: "smallest-first", label: "Smallest first" },
+];
 
 interface DelegateTableData {
   address: string;
@@ -45,12 +54,35 @@ interface DelegateTableData {
   };
   activity?: string | null;
   activityPercentage?: number | null;
+  activityStatus?: ActivityStatus | null;
   delegators: number;
   avgVoteTiming?: { text: string; percentage: number } | null;
 }
 
+const ACTIVITY_STATUS_CONFIG: Record<
+  ActivityStatus,
+  { label: string; className: string; tooltip: string }
+> = {
+  inactive: {
+    label: "Inactive",
+    className: "text-error",
+    tooltip: "This delegate has not voted in the selected period.",
+  },
+  neverVoted: {
+    label: "Never voted",
+    className: "text-secondary",
+    tooltip: "No proposals have been active since this delegate joined.",
+  },
+  noProposals: {
+    label: "No proposals",
+    className: "text-secondary",
+    tooltip: "No proposals were active during this period.",
+  },
+};
+
 interface DelegatesProps {
-  timePeriod?: TimeInterval;
+  fromDate?: number;
+  toDate?: number;
   daoId: DaoIdEnum;
   isWhitelabel?: boolean;
 }
@@ -62,13 +94,20 @@ type DelegateSortKey =
   | "variation";
 
 export const Delegates = ({
-  timePeriod = TimeInterval.THIRTY_DAYS,
+  fromDate,
+  toDate,
   daoId,
   isWhitelabel = false,
 }: DelegatesProps) => {
   const pageLimit: number = 20;
 
-  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
+  // Validated like the Token Holders tab does: a stale or hand-edited
+  // `?drawerAddress=foo` would otherwise open the drawer on a value every
+  // address query below rejects.
+  const [drawerAddress, setDrawerAddress] = useQueryState(
+    "drawerAddress",
+    parseAsAddress,
+  );
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
   const [sortOrder, setSortOrder] = useQueryState(
@@ -84,10 +123,27 @@ export const Delegates = ({
       "variation",
     ]).withDefault("votingPower" as DelegateSortKey),
   );
+  const [minValue, setMinValue] = useQueryState("minValue");
+  const [maxValue, setMaxValue] = useQueryState("maxValue");
   const { decimals } = daoConfig[daoId];
   const { data: daoData } = useDao(
     daoId.toLowerCase() as DaoPathParamsDaoEnumKey,
   );
+
+  // API expects raw token units; URL values are human-readable and user-editable
+  const toRawUnits = (value: string | null): string | undefined => {
+    if (!value) return undefined;
+    try {
+      return parseUnits(value, decimals).toString();
+    } catch {
+      return undefined;
+    }
+  };
+
+  const quorum = useMemo(() => {
+    if (!daoData?.quorum) return 0;
+    return Number(formatUnits(BigInt(daoData.quorum.toString()), decimals));
+  }, [daoData?.quorum, decimals]);
 
   const votingPeriodSeconds = useMemo(() => {
     if (!daoData?.votingPeriod) return 0;
@@ -121,9 +177,12 @@ export const Delegates = ({
     orderBy: orderByMap[sortBy],
     orderDirection: sortOrder,
     daoId,
-    days: timePeriod,
+    fromDate,
+    toDate,
     address: currentAddressFilter || undefined,
     limit: pageLimit,
+    fromValue: toRawUnits(minValue),
+    toValue: toRawUnits(maxValue),
   });
 
   const { isMobile } = useScreenSize();
@@ -165,14 +224,27 @@ export const Delegates = ({
         formatUnits(votingPowerBigInt, decimals),
       );
 
-      const activity = delegate.proposalsActivity
-        ? `${delegate.proposalsActivity.votedProposals}/${delegate.proposalsActivity.totalProposals}`
+      const proposalsActivity = delegate.proposalsActivity;
+
+      const activity = proposalsActivity
+        ? `${proposalsActivity.votedProposals}/${proposalsActivity.totalProposals}`
         : null;
 
-      const activityPercentage = delegate.proposalsActivity
-        ? (delegate.proposalsActivity.votedProposals /
-            delegate.proposalsActivity.totalProposals) *
-          100
+      const activityPercentage =
+        proposalsActivity && proposalsActivity.totalProposals > 0
+          ? (proposalsActivity.votedProposals /
+              proposalsActivity.totalProposals) *
+            100
+          : null;
+
+      const activityStatus: ActivityStatus | null = proposalsActivity
+        ? proposalsActivity.totalProposals > 0
+          ? proposalsActivity.votedProposals === 0
+            ? "inactive"
+            : null
+          : proposalsActivity.neverVoted
+            ? "neverVoted"
+            : "noProposals"
         : null;
 
       const avgVoteTiming = getAvgVoteTimingData(
@@ -195,6 +267,7 @@ export const Delegates = ({
         },
         activity,
         activityPercentage,
+        activityStatus,
         delegators: delegate.delegationsCount,
         avgVoteTiming,
       };
@@ -285,33 +358,53 @@ export const Delegates = ({
           );
         }
 
+        const quorumPercentage = quorum > 0 ? (votingPower / quorum) * 100 : 0;
+
         return (
-          <div className="text-secondary flex w-full items-center justify-end text-end text-sm font-normal">
-            {formatNumberUserReadable(votingPower)}
+          <div className="flex w-full flex-col items-end justify-center text-end">
+            <span className="text-primary text-sm font-normal">
+              {formatNumberUserReadable(votingPower)}
+            </span>
+            {quorumPercentage >= 50 && (
+              <span
+                className={cn(
+                  "text-xs font-normal",
+                  quorumPercentage >= 100 ? "text-error" : "text-warning",
+                )}
+              >
+                {Math.round(quorumPercentage)}% of quorum
+              </span>
+            )}
           </div>
         );
       },
       header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-end p-0"
-          onClick={() => handleSort("votingPower")}
-        >
+        <div className="flex w-full items-center justify-end gap-1.5">
           <h4 className="text-table-header whitespace-nowrap">
             Voting Power ({daoId})
           </h4>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              sortBy === "votingPower"
-                ? sortOrder === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
+          <AmountFilter
+            filterId="delegates-voting-power-filter"
+            sortOptions={AMOUNT_SORT_OPTIONS}
+            onApply={(filterState: AmountFilterState) => {
+              if (filterState.sortOrder) {
+                setSortBy("votingPower");
+                setSortOrder(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+              }
+              setMinValue(filterState.minAmount || null);
+              setMaxValue(filterState.maxAmount || null);
+            }}
+            onReset={() => {
+              setMinValue(null);
+              setMaxValue(null);
+              setSortBy("votingPower");
+              setSortOrder("desc");
+            }}
+            isActive={!!(minValue || maxValue)}
           />
-        </Button>
+        </div>
       ),
       meta: {
         columnClassName: "w-[15%]",
@@ -339,14 +432,18 @@ export const Delegates = ({
         }
 
         return (
-          <div className="grid w-full grid-cols-2 items-center gap-2 text-sm">
-            <span className="text-right tabular-nums">
+          <div className="flex w-full flex-col items-end justify-center text-end text-sm">
+            <span className="text-primary tabular-nums">
               {(variation?.percentageChange || 0) < 0 ? "-" : ""}
               {formatNumberUserReadable(
                 Math.abs(variation?.absoluteChange || 0),
               )}
             </span>
-            <Percentage value={variation?.percentageChange || 0} />
+            <Percentage
+              className="text-xs"
+              iconPosition="right"
+              value={variation?.percentageChange || 0}
+            />
           </div>
         );
       },
@@ -354,7 +451,7 @@ export const Delegates = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-center p-0"
+          className="text-secondary w-full justify-end p-0"
           onClick={handleVariationSort}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -375,14 +472,14 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-[20%]",
+        columnClassName: "w-[16%]",
       },
     },
     {
       accessorKey: "activity",
       cell: ({ row }) => {
         const activity = row.getValue("activity") as string | undefined;
-        const activityPercentage = row.original.activityPercentage;
+        const { activityPercentage, activityStatus } = row.original;
         const addr = row.original.address;
         if (isActivityLoadingFor(addr) || loading) {
           return (
@@ -392,11 +489,38 @@ export const Delegates = ({
           );
         }
 
-        return (
+        const status = activityStatus
+          ? ACTIVITY_STATUS_CONFIG[activityStatus]
+          : null;
+        const [votedCount, totalCount] = (activity || "0/0").split("/");
+
+        const content = (
           <div className="flex items-center justify-start gap-2">
             <ProgressCircle percentage={activityPercentage || 0} />
-            {activity || "0/0"}
+            <div className="flex flex-col items-start justify-center text-left">
+              <span className="text-sm">
+                {Number(totalCount) > 0 ? (
+                  <>
+                    <span className="text-primary">{votedCount}</span>
+                    <span className="text-secondary">/{totalCount}</span>
+                  </>
+                ) : (
+                  <span className="text-secondary">0/0</span>
+                )}
+              </span>
+              {status && (
+                <span className={cn("text-xs font-normal", status.className)}>
+                  {status.label}
+                </span>
+              )}
+            </div>
           </div>
+        );
+
+        return status ? (
+          <Tooltip tooltipContent={status.tooltip}>{content}</Tooltip>
+        ) : (
+          content
         );
       },
       header: () => (
@@ -405,7 +529,7 @@ export const Delegates = ({
         </h4>
       ),
       meta: {
-        columnClassName: "w-16",
+        columnClassName: "w-[11%]",
       },
     },
     {
@@ -416,7 +540,10 @@ export const Delegates = ({
           percentage: number;
         } | null;
 
-        if (loading) {
+        // Timing comes from the same per-row proposals activity as the Activity
+        // column, so without this guard the cell renders "-" (the no-data
+        // value) while that request is still in flight.
+        if (isActivityLoadingFor(row.original.address) || loading) {
           return (
             <div className="flex items-center justify-start">
               <SkeletonRow className="h-5 w-20" />
@@ -453,7 +580,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-[10%]",
+        columnClassName: "w-[16%]",
       },
     },
     {
@@ -496,7 +623,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-18",
+        columnClassName: "w-[12%]",
       },
     },
     ...(isWhitelabel
@@ -540,7 +667,7 @@ export const Delegates = ({
           columns={delegateColumns}
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
-          size="sm"
+          withRowBorders
           hasMore={hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}

@@ -48,6 +48,7 @@ import {
   getTimeText,
 } from "@/features/governance/utils";
 import { TheSectionLayout } from "@/shared/components";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
 import { useAuthSession } from "@/shared/services/auth/useAuthSession";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
@@ -403,6 +404,7 @@ export const GovernanceSection = () => {
           New Proposal
         </Button>
       )}
+      <ReportPanelButton panel="Proposals" />
     </div>
   );
 

@@ -13,6 +13,7 @@ import { fromZodError } from "zod-validation-error";
 import { DaoCache } from "@/cache/dao-cache";
 import {
   accountBalances,
+  addressLabels,
   dao,
   historicalBalances,
   historicalVotingPower,
@@ -46,6 +47,7 @@ import {
 import { AAVEVotingPowerRepository } from "@/repositories/voting-power/aave";
 import {
   AccountBalanceService,
+  AddressLabelsService,
   DaoService,
   HealthService,
   HistoricalBalancesService,
@@ -134,7 +136,11 @@ const pgClient = drizzle(env.DATABASE_URL, {
   casing: "snake_case",
 });
 
-health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
+health(
+  app,
+  new HealthService(new HealthRepositoryImpl(pgClient), daoClient),
+  env.RAILWAY_GIT_COMMIT_SHA,
+);
 
 const daoCache = new DaoCache();
 
@@ -214,6 +220,7 @@ transfers(
   ),
 );
 dao(app, daoService);
+addressLabels(app, new AddressLabelsService(env.DAO_ID));
 docs(app);
 
 serve(

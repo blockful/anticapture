@@ -51,7 +51,14 @@ export function useActivityFeedParams() {
   const setFilters = useCallback(
     (newFilters: FeedEventsQueryParams) => {
       setOrderDirection(newFilters.orderDirection ?? "desc");
-      setRelevance(newFilters.relevance ?? null);
+      // The API accepts values this page does not model ("ALL", used by the
+      // drawer feed), so keep only the tiers offered here.
+      const tiers: string[] = Object.values(feedRelevanceEnum);
+      setRelevance(
+        newFilters.relevance && tiers.includes(newFilters.relevance)
+          ? (newFilters.relevance as FeedRelevance)
+          : null,
+      );
       setFromDate(newFilters.fromDate || null);
       setToDate(newFilters.toDate || null);
       setEventTypes(

@@ -18,3 +18,4 @@ export * from "./votes/offchainNonVoters";
 export * from "./event-relevance";
 export * from "./feed";
 export * from "./revenue";
+export * from "./addresses";

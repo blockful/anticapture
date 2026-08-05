@@ -3,6 +3,7 @@
 import type { ImageProps } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Fragment, useState } from "react";
 import Blockies from "react-blockies";
 import type { Address } from "viem";
@@ -20,6 +21,10 @@ import { cn } from "@/shared/utils/cn";
 import { formatAddress } from "@/shared/utils/formatAddress";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { useGetAddress } from "@anticapture/client/hooks";
+import {
+  ADDRESS_ENRICHMENT_GC_TIME,
+  ADDRESS_ENRICHMENT_STALE_TIME,
+} from "@/shared/constants/api";
 
 const TRUNCATE_ADDRESS_LENGTH = 30;
 
@@ -43,6 +48,8 @@ interface EnsAvatarProps extends Omit<
   containerClassName?: string;
   isDashed?: boolean;
   showFullAddress?: boolean;
+  // Chars kept on each side of the "..." when falling back to a shortened address.
+  addressChars?: number;
   showTags?: boolean;
   showCopyAddress?: boolean;
   maxVisibleTags?: number;
@@ -50,6 +57,15 @@ interface EnsAvatarProps extends Omit<
   showEfpStats?: boolean;
   /** Render ENS social record links (from enrichment data) below the tags. */
   showSocials?: boolean;
+  /** Extra line rendered under the name, inside the name column, so the avatar
+   *  stays vertically centered against the whole (name + subtitle) block. */
+  subtitle?: ReactNode;
+  /**
+   * Wrap the avatar in the address details tooltip. Turn this off when the
+   * avatar already sits inside an interactive element: the tooltip trigger is
+   * itself a button, and nesting buttons is invalid HTML.
+   */
+  withDetailsTooltip?: boolean;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -91,16 +107,23 @@ export const EnsAvatar = ({
   nameClassName,
   containerClassName,
   showFullAddress = false,
+  addressChars,
   isDashed = false,
   showTags = false,
   showCopyAddress = false,
   maxVisibleTags,
   showEfpStats = false,
   showSocials = false,
+  subtitle,
+  withDetailsTooltip = true,
   ...imageProps
 }: EnsAvatarProps) => {
   const { data, isLoading } = useGetAddress(address ?? "0x", {
-    query: { enabled: !!address },
+    query: {
+      enabled: !!address,
+      staleTime: ADDRESS_ENRICHMENT_STALE_TIME,
+      gcTime: ADDRESS_ENRICHMENT_GC_TIME,
+    },
   });
   const arkham = data?.arkham ?? null;
   const ens = data?.ens ?? null;
@@ -127,26 +150,37 @@ export const EnsAvatar = ({
 
   const finalAlt = alt || ens?.name || address || "Avatar";
 
-  const getDisplayName = () => {
+  // A shortened address is already an ellipsized string ("0x1234...abcd"), so
+  // clipping it with CSS on top renders a second ellipsis ("0x1234...ab…", six
+  // dots). Names carry no such marker, so only they are safe to clip.
+  const getDisplayName = (): { name: string; isShortenedAddress: boolean } => {
     const truncate = (name: string) => {
       if (showFullAddress || name.length <= TRUNCATE_ADDRESS_LENGTH)
         return name;
       return `${name.slice(0, TRUNCATE_ADDRESS_LENGTH)}…`;
     };
 
-    if (ens?.name) return ens.name;
+    const asName = (name: string) => ({ name, isShortenedAddress: false });
+
+    if (ens?.name) return asName(ens.name);
 
     const entity = arkham?.entity;
     const label = arkham?.label;
 
-    if (entity && label) return truncate(`${entity} · ${label}`);
-    if (entity) return truncate(entity);
-    if (label) return truncate(label);
-    if (address) return showFullAddress ? address : formatAddress(address);
-    return "Unknown";
+    if (entity && label) return asName(truncate(`${entity} · ${label}`));
+    if (entity) return asName(truncate(entity));
+    if (label) return asName(truncate(label));
+    if (address)
+      return showFullAddress
+        ? asName(address)
+        : {
+            name: formatAddress(address, addressChars),
+            isShortenedAddress: true,
+          };
+    return asName("Unknown");
   };
 
-  const displayName = getDisplayName();
+  const { name: displayName, isShortenedAddress } = getDisplayName();
   const isLoadingName = loading || (isLoading && !address);
   const isResolvingData = !!address && isLoading;
 
@@ -307,7 +341,10 @@ export const EnsAvatar = ({
       ) : (
         <span
           className={cn(
-            "text-primary inline-block overflow-hidden truncate whitespace-nowrap",
+            "text-primary inline-block overflow-hidden whitespace-nowrap",
+            // Shortened addresses clip without an ellipsis; callers must not
+            // add `truncate` back or the second ellipsis returns.
+            isShortenedAddress ? "text-clip" : "text-ellipsis",
             showTags ? "text-lg font-medium" : "text-sm",
             hasProfileExtras && "leading-tight",
             isDashed && "border-b border-dashed border-[#3F3F46]",
@@ -436,11 +473,13 @@ export const EnsAvatar = ({
                 )}
               </div>
             )}
+
+        {subtitle}
       </div>
     </div>
   );
 
-  if (address && !showTags) {
+  if (address && !showTags && withDetailsTooltip) {
     return (
       <>
         <span className="hidden md:contents">

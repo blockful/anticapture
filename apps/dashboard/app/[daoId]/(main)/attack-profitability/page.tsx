@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { AttackProfitabilitySection } from "@/features/attack-profitability";
 import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -54,6 +55,7 @@ export default async function AttackProfitabilityPage({
         title={PAGES_CONSTANTS.attackProfitability.title}
         icon={<Crosshair2Icon className="section-layout-icon" />}
         description={PAGES_CONSTANTS.attackProfitability.description}
+        headerAction={<ReportPanelButton panel="Attack Profitability" />}
       >
         <SubSectionsContainer>
           <AttackProfitabilitySection

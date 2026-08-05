@@ -3,7 +3,7 @@
 import type { HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey } from "@anticapture/client";
 import { useHistoricalVotingPowerByAccountId } from "@anticapture/client/hooks";
 import { useMemo } from "react";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -25,11 +25,65 @@ export interface UseDelegateDelegationHistoryGraphResult {
   error: unknown;
 }
 
+/**
+ * Voting power at the two edges of the period, read from their own limit-1
+ * lookups rather than from the plotted rows: those hide low-importance deltas
+ * and keep only the newest 1,000, so for an active delegate they cover a suffix
+ * of the period and their first row is not its opening voting power.
+ */
+export function useDelegateVotingPowerBoundaries(
+  accountId: string,
+  daoId: DaoIdEnum,
+  fromTimestamp?: number,
+  toTimestamp?: number,
+): { startingVotingPower: number; endingVotingPower: number } {
+  const { decimals } = daoConfig[daoId];
+  const dao =
+    daoId.toLowerCase() as HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey;
+
+  // The last event strictly before the period carries the opening voting power
+  // as its running total. No row means the delegate held none.
+  const { data: openingData } = useHistoricalVotingPowerByAccountId(
+    dao,
+    accountId,
+    {
+      limit: 1,
+      orderDirection: "desc",
+      ...(fromTimestamp ? { toDate: fromTimestamp - 1 } : {}),
+    },
+    { query: { enabled: Boolean(accountId && fromTimestamp) } },
+  );
+
+  const { data: closingData } = useHistoricalVotingPowerByAccountId(
+    dao,
+    accountId,
+    {
+      limit: 1,
+      orderDirection: "desc",
+      ...(toTimestamp ? { toDate: toTimestamp } : {}),
+    },
+    { query: { enabled: Boolean(accountId) } },
+  );
+
+  const toTokens = (raw?: bigint | string | number) =>
+    raw === undefined
+      ? 0
+      : Number(formatUnits(BigInt(raw.toString()), decimals));
+
+  return {
+    startingVotingPower: fromTimestamp
+      ? toTokens(openingData?.items?.[0]?.votingPower)
+      : 0,
+    endingVotingPower: toTokens(closingData?.items?.[0]?.votingPower),
+  };
+}
+
 export function useDelegateDelegationHistoryGraph(
   accountId: string,
   daoId: DaoIdEnum,
   fromTimestamp?: number,
   toTimestamp?: number,
+  filterLowImportance?: boolean,
 ): UseDelegateDelegationHistoryGraphResult {
   const { decimals } = daoConfig[daoId];
 
@@ -37,7 +91,10 @@ export function useDelegateDelegationHistoryGraph(
     daoId.toLowerCase() as HistoricalVotingPowerByAccountIdPathParamsDaoEnumKey,
     accountId,
     {
-      fromValue: "1",
+      // low importance filter hides deltas below 1 whole token
+      fromValue: filterLowImportance
+        ? parseUnits("1", decimals).toString()
+        : "1",
       limit: 1000,
       orderDirection: "desc",
       ...(fromTimestamp ? { fromDate: fromTimestamp } : {}),

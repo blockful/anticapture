@@ -9,17 +9,24 @@ import { useDelegates } from "@/features/holders-and-delegates/hooks/useDelegate
 import { SkeletonRow, TooltipInfo } from "@/shared/components";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { TimeInterval } from "@/shared/types/enums";
 
 export const VotingPowerChartCard = ({ daoId }: { daoId: DaoIdEnum }) => {
+  const fromDate = useMemo(
+    () =>
+      Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[TimeInterval.NINETY_DAYS],
+    [],
+  );
+
   const { data: delegatesData, loading } = useDelegates({
     daoId,
     orderBy: "variation",
     orderDirection: "desc",
     limit: 10,
-    days: TimeInterval.NINETY_DAYS,
+    fromDate,
     skipActivity: true,
   });
 

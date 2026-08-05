@@ -65,7 +65,7 @@ pnpm dashboard test:e2e:headed
 pnpm dashboard test:e2e:ui
 ```
 
-Tests live in `e2e/`. Coverage: Panel (`/`), DAO Overview (`/ens`), Holders & Delegates (`/ens/holders-and-delegates`), Proposals (`/ens/proposals`), Activity Feed (`/ens/activity-feed`), and mobile smoke tests at 390×844.
+Tests live in `e2e/`. Coverage: Panel (`/`), DAO Overview (`/ens`), Stakeholders (`/ens/stakeholders`), Proposals (`/ens/proposals`), Activity Feed (`/ens/activity-feed`), and mobile smoke tests at 390×844.
 
 Live upstream outages or missing ENS data fail clearly rather than silently pass with mocked fallbacks.
 

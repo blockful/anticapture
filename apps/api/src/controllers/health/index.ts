@@ -8,6 +8,10 @@ const LivenessResponseSchema = z
     database: z.enum(["ok", "error"]).openapi({
       description: "Database connectivity status.",
     }),
+    commit: z.string().optional().openapi({
+      description:
+        "Git SHA this API is running. Gateful merges this API's OpenAPI schemas into its own spec, so a deploy that waits only on gateful can still read schemas from the previous API release — this is what makes that observable.",
+    }),
   })
   .openapi("LivenessResponse");
 
@@ -49,7 +53,7 @@ const HealthResponseSchema = z
   })
   .openapi("HealthResponse");
 
-export function health(app: Hono, service: HealthService) {
+export function health(app: Hono, service: HealthService, commitSha?: string) {
   app.openapi(
     createRoute({
       method: "get",
@@ -81,7 +85,10 @@ export function health(app: Hono, service: HealthService) {
     }),
     async (context) => {
       const database = await service.getLiveness();
-      return context.json({ database }, database === "error" ? 503 : 200);
+      return context.json(
+        { database, commit: commitSha },
+        database === "error" ? 503 : 200,
+      );
     },
   );
 
