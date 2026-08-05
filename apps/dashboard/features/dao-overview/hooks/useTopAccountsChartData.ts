@@ -3,6 +3,10 @@
 import { zeroAddress, type Address } from "viem";
 
 import { useGetAddresses } from "@anticapture/client/hooks";
+import {
+  ADDRESS_ENRICHMENT_GC_TIME,
+  ADDRESS_ENRICHMENT_STALE_TIME,
+} from "@/shared/constants/api";
 
 import type { TopAccountChartData } from "@/features/dao-overview/components/TopAccountsChart";
 
@@ -27,7 +31,13 @@ export function useTopAccountsChartData({
 
   const { data } = useGetAddresses(
     { addresses: lookupAddresses },
-    { query: { enabled: lookupAddresses.length > 0 } },
+    {
+      query: {
+        enabled: lookupAddresses.length > 0,
+        staleTime: ADDRESS_ENRICHMENT_STALE_TIME,
+        gcTime: ADDRESS_ENRICHMENT_GC_TIME,
+      },
+    },
   );
 
   const ensNameByAddress: Record<string, string | null | undefined> = {};

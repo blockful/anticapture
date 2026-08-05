@@ -2,8 +2,14 @@ import { type Address, getAddress } from "viem";
 
 import { DaoIdEnum } from "@/shared/types/daos";
 
-export const BODY_CHAR_LIMIT = 10_000;
-export const BODY_WARNING_THRESHOLD = 9_500;
+/**
+ * Mirrors `BODY_MAX` in the user-api drafts mapper
+ * (`apps/user-api/src/mappers/drafts/index.ts`). Draft save and share both
+ * POST the body to that endpoint, which rejects anything longer — keep the two
+ * in sync so the form fails with a field error instead of a generic toast.
+ */
+export const BODY_CHAR_LIMIT = 100_000;
+export const BODY_WARNING_THRESHOLD = 95_000;
 
 export const canCreateProposalForDao = (daoId: DaoIdEnum | null | undefined) =>
   daoId === DaoIdEnum.ENS || daoId === DaoIdEnum.SHU;

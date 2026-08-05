@@ -15,7 +15,7 @@ import type { CustomBarShapeProps } from "@/features/dao-overview/components/Top
 import { CustomBarShape } from "@/features/dao-overview/components/TopAccountsChartBarShape";
 import { CustomTooltip } from "@/features/dao-overview/components/TopAccountsChartTooltip";
 import { useTopAccountsChartData } from "@/features/dao-overview/hooks/useTopAccountsChartData";
-import type { EntityType } from "@/features/holders-and-delegates";
+import type { EntityType } from "@/shared/types/entities";
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import type { DaoIdEnum } from "@/shared/types/daos";
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { BODY_CHAR_LIMIT } from "@/features/create-proposal/constants";
 import { isAddressLike } from "@/shared/utils/address";
 import { isEnsAddress } from "@/shared/utils/ens";
 import { customActionIssues } from "@/features/create-proposal/utils/validateCustomAction";
@@ -86,7 +87,10 @@ export const ProposalFormSchema = z
           return false;
         }
       }, "Must be a valid URL"),
-    body: z.string().min(1, "Required").max(10_000, "10,000 character limit"),
+    body: z
+      .string()
+      .min(1, "Required")
+      .max(BODY_CHAR_LIMIT, "100,000 character limit"),
     actions: z
       .array(ProposalActionSchema)
       .min(1, "At least one action is required"),

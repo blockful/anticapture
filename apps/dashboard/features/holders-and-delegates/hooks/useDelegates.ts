@@ -12,11 +12,9 @@ import {
   useVotingPowersInfinite,
 } from "@anticapture/client/hooks";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useRef, useState, useEffect } from "react";
 
-import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import type { TimeInterval } from "@/shared/types/enums";
 
 export interface ProposalsActivity {
   totalProposals: number;
@@ -51,23 +49,29 @@ interface UseDelegatesResult {
 }
 
 interface UseDelegatesParams {
-  days: TimeInterval;
+  fromDate?: number;
+  toDate?: number;
   daoId: DaoIdEnum;
   address?: string;
   orderBy?: VotingPowersQueryParamsOrderByEnumKey;
   orderDirection?: "asc" | "desc";
   limit?: number;
   skipActivity?: boolean;
+  fromValue?: string;
+  toValue?: string;
 }
 
 export const useDelegates = ({
   daoId,
   orderBy,
   orderDirection = "desc",
-  days,
+  fromDate,
+  toDate,
   address,
   limit = 15,
   skipActivity = false,
+  fromValue,
+  toValue,
 }: UseDelegatesParams): UseDelegatesResult => {
   const queryClient = useQueryClient();
 
@@ -77,25 +81,48 @@ export const useDelegates = ({
   const [loadingActivityAddresses, setLoadingActivityAddresses] = useState<
     Set<string>
   >(() => new Set());
+  const [settledActivityAddresses, setSettledActivityAddresses] = useState<
+    Set<string>
+  >(() => new Set());
 
-  const fromDate = useMemo(() => {
-    return Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days];
-  }, [days]);
+  // Requests in flight when the selection changes settle after the reset below,
+  // carrying the previous selection's counts. Each selection gets a generation
+  // and a response is only merged while its own generation is current.
+  const activityGeneration = `${daoId}:${orderDirection}:${orderBy ?? ""}:${
+    address ?? ""
+  }:${fromDate ?? ""}:${toDate ?? ""}`;
+  const currentActivityGeneration = useRef(activityGeneration);
 
   useEffect(() => {
+    currentActivityGeneration.current = activityGeneration;
     setDelegateActivities(new Map());
     setLoadingActivityAddresses(new Set());
-  }, [orderDirection, address, days, orderBy]);
+    setSettledActivityAddresses(new Set());
+  }, [activityGeneration]);
 
   const params = useMemo(
     () => ({
       orderDirection,
       ...(orderBy ? { orderBy } : {}),
       limit,
-      fromDate,
+      // `!= null`, not truthy: MAX sends `fromDate: 0` as an explicit all-time
+      // floor, and dropping it would let the endpoint apply its own default.
+      ...(fromDate != null ? { fromDate } : {}),
+      ...(toDate != null ? { toDate } : {}),
       ...(address ? { addresses: [address] } : {}),
+      ...(fromValue ? { fromValue } : {}),
+      ...(toValue ? { toValue } : {}),
     }),
-    [orderDirection, orderBy, limit, fromDate, address],
+    [
+      orderDirection,
+      orderBy,
+      limit,
+      fromDate,
+      toDate,
+      address,
+      fromValue,
+      toValue,
+    ],
   );
 
   const {
@@ -126,58 +153,74 @@ export const useDelegates = ({
 
     const newAddresses = delegateAddresses.filter(
       (addr) =>
-        !delegateActivities.has(addr) && !loadingActivityAddresses.has(addr),
+        !settledActivityAddresses.has(addr) &&
+        !loadingActivityAddresses.has(addr),
     );
     if (newAddresses.length === 0) return;
 
     const fetchDelegateActivities = async () => {
+      const requestGeneration = activityGeneration;
       setLoadingActivityAddresses(
         (prev) => new Set([...prev, ...newAddresses]),
       );
-      try {
-        const activityPromises = newAddresses.map(async (addr) => {
+      // One address failing must not discard the activity of the others.
+      const activities = await Promise.allSettled(
+        newAddresses.map(async (addr) => {
           const result = await queryClient.fetchQuery(
             proposalsActivityQueryOptions(
               daoId.toLowerCase() as ProposalsActivityPathParamsDaoEnumKey,
-              { address: addr, fromDate },
+              {
+                address: addr,
+                ...(fromDate != null ? { fromDate } : {}),
+                // Both bounds, so "Voted X/Y" counts the selected window
+                // instead of everything up to today.
+                ...(toDate != null ? { toDate } : {}),
+              },
             ),
           );
           return { address: addr, activity: result ?? null };
-        });
-        const activities = await Promise.all(activityPromises);
-        setDelegateActivities((prev) => {
-          const next = new Map(prev);
-          activities.forEach(({ address: addr, activity }) => {
-            if (activity) {
-              next.set(addr, {
-                totalProposals: activity.totalProposals,
-                votedProposals: activity.votedProposals,
-                neverVoted: activity.neverVoted,
-                avgTimeBeforeEnd: activity.avgTimeBeforeEnd,
-              });
-            }
+        }),
+      );
+      // The reset effect already cleared this generation's state; merging now
+      // would put the previous selection's counts back on the rows.
+      if (currentActivityGeneration.current !== requestGeneration) return;
+      setDelegateActivities((prev) => {
+        const next = new Map(prev);
+        activities.forEach((entry) => {
+          if (entry.status !== "fulfilled" || !entry.value.activity) return;
+          const { address: addr, activity } = entry.value;
+          next.set(addr, {
+            totalProposals: activity.totalProposals,
+            votedProposals: activity.votedProposals,
+            neverVoted: activity.neverVoted,
+            avgTimeBeforeEnd: activity.avgTimeBeforeEnd,
           });
-          return next;
         });
-      } catch (err) {
-        console.error("Error fetching delegate activities:", err);
-      } finally {
-        setLoadingActivityAddresses((prev) => {
-          const next = new Set(prev);
-          newAddresses.forEach((a) => next.delete(a));
-          return next;
-        });
-      }
+        return next;
+      });
+      // Settled means "attempted", success or not. Keying this on
+      // delegateActivities instead would re-select every failed address as soon
+      // as it left the loading set, refetching it in a loop.
+      setSettledActivityAddresses(
+        (prev) => new Set([...prev, ...newAddresses]),
+      );
+      setLoadingActivityAddresses((prev) => {
+        const next = new Set(prev);
+        newAddresses.forEach((a) => next.delete(a));
+        return next;
+      });
     };
     void fetchDelegateActivities();
   }, [
     delegateAddresses,
-    delegateActivities,
+    settledActivityAddresses,
     queryClient,
     fromDate,
+    toDate,
     loadingActivityAddresses,
     skipActivity,
     daoId,
+    activityGeneration,
   ]);
 
   const finalData = useMemo(() => {

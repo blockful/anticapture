@@ -139,6 +139,12 @@ export class AAVEVotingPowerRepository {
       .as("variation");
 
     const combinedPowerSql = sql<bigint>`(COALESCE(${accountPower.votingPower}, 0) + COALESCE(${balanceSubquery.totalBalance}, 0))`;
+    // Delegated voting power on its own, i.e. the combined total minus the
+    // account's own balance. The amount filter targets this, matching both the
+    // `votingPower` ordering below and what consumers render as delegation
+    // received: filtering the combined total would let a large self balance
+    // alone satisfy a minimum, or push a delegated account past a maximum.
+    const delegatedPowerSql = sql<bigint>`COALESCE(${accountPower.votingPower}, 0)`;
     const absoluteChangeSql = sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`;
     const percentageChangeSql = sql<string>`
     CASE
@@ -160,7 +166,7 @@ export class AAVEVotingPowerRepository {
           : orderBy === "total"
             ? combinedPowerSql
             : orderBy === "votingPower"
-              ? sql`COALESCE(${accountPower.votingPower}, 0)`
+              ? delegatedPowerSql
               : orderBy === "balance"
                 ? sql`COALESCE(${balanceSubquery.totalBalance}, 0)`
                 : sql`COALESCE(${accountPower.delegationsCount}, 0)`,
@@ -196,7 +202,7 @@ export class AAVEVotingPowerRepository {
         this.filterToSql(
           addresses,
           amountFilter,
-          combinedPowerSql,
+          delegatedPowerSql,
           sql`${allAccountIds.accountId}`,
         ),
       )
@@ -221,7 +227,7 @@ export class AAVEVotingPowerRepository {
         this.filterToSql(
           addresses,
           amountFilter,
-          combinedPowerSql,
+          delegatedPowerSql,
           sql`${allAccountIds.accountId}`,
         ),
       );
@@ -334,7 +340,7 @@ export class AAVEVotingPowerRepository {
   private filterToSql(
     addresses: Address[],
     amountFilter: AmountFilter,
-    totalVotingPowerSql?: SQL,
+    votingPowerSql?: SQL,
     accountIdSql?: SQL,
   ): SQL | undefined {
     const conditions = [];
@@ -344,15 +350,15 @@ export class AAVEVotingPowerRepository {
         inArray(accountIdSql ?? sql`${accountPower.accountId}`, addresses),
       );
     }
-    if (totalVotingPowerSql) {
+    if (votingPowerSql) {
       if (amountFilter.minAmount) {
         conditions.push(
-          sql`${totalVotingPowerSql} > ${BigInt(amountFilter.minAmount)}`,
+          sql`${votingPowerSql} > ${BigInt(amountFilter.minAmount)}`,
         );
       }
       if (amountFilter.maxAmount) {
         conditions.push(
-          sql`${totalVotingPowerSql} < ${BigInt(amountFilter.maxAmount)}`,
+          sql`${votingPowerSql} < ${BigInt(amountFilter.maxAmount)}`,
         );
       }
     } else {

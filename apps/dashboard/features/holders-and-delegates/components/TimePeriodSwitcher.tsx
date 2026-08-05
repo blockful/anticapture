@@ -90,7 +90,7 @@ export const TimePeriodSwitcher = ({
           <TabsTrigger
             key={period}
             className={cn(
-              "cursor-pointer text-sm font-medium",
+              "cursor-pointer whitespace-nowrap text-sm font-medium",
               isSmall
                 ? "min-w-[60px] px-1.5 py-0.5"
                 : "min-w-[84px] px-3 py-1.5",

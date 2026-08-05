@@ -5,6 +5,7 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 export const WHITELABEL_ROUTES = {
   proposals: "proposals",
   delegates: "delegates",
+  stakeholders: "stakeholders",
   holdersAndDelegates: "holders-and-delegates",
   activityFeed: "activity-feed",
   serviceProviders: "service-providers",
@@ -199,6 +200,7 @@ export const getWhitelabelInternalPath = ({
     "/",
     `/${WHITELABEL_ROUTES.proposals}`,
     `/${WHITELABEL_ROUTES.delegates}`,
+    `/${WHITELABEL_ROUTES.stakeholders}`,
     `/${WHITELABEL_ROUTES.holdersAndDelegates}`,
     `/${WHITELABEL_ROUTES.activityFeed}`,
     `/${WHITELABEL_ROUTES.serviceProviders}`,
@@ -208,6 +210,7 @@ export const getWhitelabelInternalPath = ({
     `/${WHITELABEL_ROUTES.sppAccountability}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.proposals}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.delegates}`,
+    `/${daoSlug}/${WHITELABEL_ROUTES.stakeholders}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.holdersAndDelegates}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.activityFeed}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.serviceProviders}`,

@@ -384,6 +384,52 @@ describe("AAVEVotingPowerRepository", () => {
       expect(result.items[0]!.absoluteChange).toBeDefined();
     });
 
+    it("should apply the amount filter to delegated power, not the combined total", async () => {
+      // Self-held balance only: no delegation received, so a minimum of 500
+      // must exclude it even though the combined total is 2000.
+      await db.insert(accountPower).values(
+        createAccountPowerRow({
+          accountId: TEST_ACCOUNT_1,
+          votingPower: 0n,
+        }),
+      );
+      await db.insert(accountBalance).values(
+        createAccountBalance({
+          accountId: TEST_ACCOUNT_1,
+          tokenId: "aToken",
+          balance: 2000n,
+        }),
+      );
+      // Delegated power of 1000 with a balance that pushes the combined total
+      // over any max the user could set on the delegation received column.
+      await db.insert(accountPower).values(
+        createAccountPowerRow({
+          accountId: TEST_ACCOUNT_2,
+          votingPower: 1000n,
+        }),
+      );
+      await db.insert(accountBalance).values(
+        createAccountBalance({
+          accountId: TEST_ACCOUNT_2,
+          tokenId: "aToken",
+          balance: 9000n,
+        }),
+      );
+
+      const result = await repository.getVotingPowers(
+        0,
+        10,
+        "desc",
+        "votingPower",
+        { minAmount: 500n, maxAmount: 1500n },
+        [],
+      );
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0]!.accountId).toBe(TEST_ACCOUNT_2);
+      expect(result.totalCount).toBe(1);
+    });
+
     it("should return NO BASELINE when previous power was 0 and there is a change", async () => {
       await db.insert(accountPower).values(
         createAccountPowerRow({

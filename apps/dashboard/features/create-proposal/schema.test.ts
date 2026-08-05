@@ -31,9 +31,23 @@ describe("ProposalFormSchema", () => {
     ).toBe(false);
   });
 
-  test("rejects body over 10,000 chars", () => {
+  test("accepts body over 10,000 chars", () => {
     expect(
       ProposalFormSchema.safeParse({ ...valid, body: "a".repeat(10_001) })
+        .success,
+    ).toBe(true);
+  });
+
+  test("accepts body at the 100,000 char draft-storage ceiling", () => {
+    expect(
+      ProposalFormSchema.safeParse({ ...valid, body: "a".repeat(100_000) })
+        .success,
+    ).toBe(true);
+  });
+
+  test("rejects body over the 100,000 char draft-storage ceiling", () => {
+    expect(
+      ProposalFormSchema.safeParse({ ...valid, body: "a".repeat(100_001) })
         .success,
     ).toBe(false);
   });

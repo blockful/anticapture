@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { TokenDistributionSection } from "@/features/token-distribution";
 import { TheSectionLayout } from "@/shared/components";
 import { SubSectionsContainer } from "@/shared/components/design-system/section";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -54,6 +55,7 @@ export default async function TokenDistributionPage({
         title={PAGES_CONSTANTS.tokenDistribution.title}
         icon={<ArrowRightLeft className="section-layout-icon" />}
         description={PAGES_CONSTANTS.tokenDistribution.description}
+        headerAction={<ReportPanelButton panel="Token Distribution" />}
       >
         <SubSectionsContainer>
           <TokenDistributionSection daoId={daoIdEnum} />

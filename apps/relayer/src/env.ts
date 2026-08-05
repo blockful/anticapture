@@ -52,6 +52,11 @@ const envSchema = z.object({
 
   PORT: z.coerce.number().default(3002),
 
+  // Injected by Railway. Reported on /health so gateful — which merges this
+  // service's OpenAPI paths and schemas into its own spec — can tell which
+  // release is answering. See scripts/wait-for-gateful.mjs.
+  RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
+
   OTEL_EXPORTER_OTLP_ENDPOINT: z.url().optional(),
 });
 

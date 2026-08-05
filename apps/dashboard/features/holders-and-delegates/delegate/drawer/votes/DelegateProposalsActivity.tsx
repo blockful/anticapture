@@ -59,8 +59,8 @@ export const DelegateProposalsActivity = ({
   // Filter options for user vote
   const userVoteFilterOptions: FilterOption[] = [
     { value: "all", label: "All Votes" },
-    { value: "yes", label: "For" },
-    { value: "no", label: "Against" },
+    { value: "yes", label: "Yes" },
+    { value: "no", label: "No" },
     { value: "abstain", label: "Abstain" },
     { value: "no_vote", label: "Didn't Vote" },
   ];

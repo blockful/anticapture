@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import {
@@ -15,7 +16,10 @@ import {
 import type { TimePeriod } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import { TimePeriodSwitcher } from "@/features/holders-and-delegates/components/TimePeriodSwitcher";
 import type { BalanceHistoryGraphItem } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
-import { useBalanceHistoryGraph } from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
+import {
+  useBalanceHistoryBoundaries,
+  useBalanceHistoryGraph,
+} from "@/features/holders-and-delegates/hooks/useBalanceHistoryGraph";
 import { getTimestampRangeFromPeriod } from "@/features/holders-and-delegates/utils";
 import { ChartExceptionState } from "@/shared/components";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
@@ -23,6 +27,7 @@ import { AnticaptureWatermark } from "@/shared/components/icons/AnticaptureWater
 import { ChartContainer } from "@/shared/components/ui/chart";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import {
+  cn,
   timestampToReadableDate,
   formatNumberUserReadable,
 } from "@/shared/utils";
@@ -101,12 +106,18 @@ export const BalanceHistoryVariationGraph = ({
     error,
   } = useBalanceHistoryGraph(accountId, daoId, fromDate);
 
+  const { startingBalance, endingBalance } = useBalanceHistoryBoundaries(
+    accountId,
+    daoId,
+    fromDate,
+  );
+
   if (loading) {
     return (
       <div className="w-full">
         <ChartExceptionState
           state="loading"
-          title="BALANCE HISTORY"
+          title="Balance Change"
           headerContent={
             <TimePeriodSwitcher
               value={selectedPeriod}
@@ -124,7 +135,7 @@ export const BalanceHistoryVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="error"
-          title="BALANCE HISTORY"
+          title="Balance Change"
           errorMessage="Error loading data"
           headerContent={
             <TimePeriodSwitcher
@@ -143,7 +154,7 @@ export const BalanceHistoryVariationGraph = ({
       <div className="w-full">
         <ChartExceptionState
           state="no-data"
-          title="BALANCE HISTORY"
+          title="Balance Change"
           noDataMessage="No balance history data found for this address"
           headerContent={
             <TimePeriodSwitcher
@@ -175,6 +186,11 @@ export const BalanceHistoryVariationGraph = ({
     },
   ];
 
+  // Net change across the whole period, so the boundaries come from their own
+  // limit-1 lookups (see useBalanceHistoryBoundaries) rather than the plotted
+  // rows, which cover only a suffix of it for an active account.
+  const netChange = endingBalance - startingBalance;
+
   // Custom dot component to show each transfer/delegation point
   const CustomDot = (props: CustomDotProps) => {
     const { cx, cy, payload } = props;
@@ -203,10 +219,25 @@ export const BalanceHistoryVariationGraph = ({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between">
-        <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
-          BALANCE HISTORY
-        </h3>
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-secondary font-mono text-[13px] font-medium uppercase">
+            Balance Change
+          </h3>
+          <span
+            className={cn(
+              "text-md flex items-center gap-1 font-normal",
+              netChange >= 0 ? "text-success" : "text-error",
+            )}
+          >
+            {netChange >= 0 ? (
+              <ArrowUp className="size-4" />
+            ) : (
+              <ArrowDown className="size-4" />
+            )}
+            {formatNumberUserReadable(Math.abs(netChange))}
+          </span>
+        </div>
         <TimePeriodSwitcher
           value={selectedPeriod}
           setTimePeriod={setSelectedPeriod}
@@ -275,14 +306,14 @@ export const BalanceHistoryVariationGraph = ({
                           <p
                             className={`text-xs ${data.direction === "in" ? "text-success" : data.direction === "out" ? "text-error" : "text-primary"}`}
                           >
-                            {data.direction === "in" ? "Buy" : "Sell"}
+                            {data.direction === "in" ? "In" : "Out"}
                           </p>
                         </p>
                       )}
 
                       {displayAddress && (
                         <p className="text-secondary text-xs">
-                          {data.direction === "in" ? "Buy from" : "Sell to"}:
+                          {data.direction === "in" ? "From" : "To"}:
                         </p>
                       )}
                       {displayAddress && (

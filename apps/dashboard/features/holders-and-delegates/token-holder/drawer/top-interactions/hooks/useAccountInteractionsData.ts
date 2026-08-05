@@ -12,6 +12,10 @@ import type { Address } from "viem";
 import { formatUnits } from "viem";
 
 import { PIE_CHART_COLORS } from "@/features/holders-and-delegates/utils";
+import {
+  ADDRESS_ENRICHMENT_GC_TIME,
+  ADDRESS_ENRICHMENT_STALE_TIME,
+} from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatAddress } from "@/shared/utils/formatAddress";
@@ -112,7 +116,13 @@ export const useAccountInteractionsData = ({
 
   const { data: enrichmentData } = useGetAddresses(
     { addresses: interactionsAddresses },
-    { query: { enabled: interactionsAddresses.length > 0 } },
+    {
+      query: {
+        enabled: interactionsAddresses.length > 0,
+        staleTime: ADDRESS_ENRICHMENT_STALE_TIME,
+        gcTime: ADDRESS_ENRICHMENT_GC_TIME,
+      },
+    },
   );
 
   const ensNameByAddress = useMemo(() => {

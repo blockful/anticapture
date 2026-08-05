@@ -14,6 +14,7 @@ import {
   accountBalanceVariations,
   accountBalances,
   accountInteractions,
+  addressLabels,
   dao,
   delegationPercentage,
   governanceActivity,
@@ -32,7 +33,9 @@ import {
   votingPowers,
   delegations,
   delegators,
+  formerDelegators,
   historicalDelegations,
+  inactiveVotingPowerSummary,
   votes,
   offchainProposals,
   offchainVotes,
@@ -71,7 +74,9 @@ import {
   VotingPowerRepository,
   DelegationsRepository,
   DelegatorsRepository,
+  FormerDelegatorsRepository,
   HistoricalDelegationsRepository,
+  InactiveVotingPowerSummaryRepository,
   VotesRepository,
   FeedRepository,
   AccountBalanceQueryFragments,
@@ -81,6 +86,7 @@ import {
 } from "@/repositories";
 import {
   AccountBalanceService,
+  AddressLabelsService,
   BalanceVariationsService,
   CoingeckoService,
   DaoService,
@@ -98,6 +104,8 @@ import {
   HistoricalDelegationsService,
   DelegationsService,
   DelegatorsService,
+  FormerDelegatorsService,
+  InactiveVotingPowerSummaryService,
   VotesService,
   FeedService,
   OffchainProposalsService,
@@ -190,7 +198,11 @@ const pgClient = drizzle({
   casing: "snake_case",
 });
 
-health(app, new HealthService(new HealthRepositoryImpl(pgClient), daoClient));
+health(
+  app,
+  new HealthService(new HealthRepositoryImpl(pgClient), daoClient),
+  env.RAILWAY_GIT_COMMIT_SHA,
+);
 
 const daoConfig = CONTRACT_ADDRESSES[env.DAO_ID];
 const { blockTime, tokenType } = daoConfig;
@@ -285,6 +297,14 @@ delegators(
     new DelegatorsService(wrapWithTracing(new DelegatorsRepository(pgClient))),
   ),
 );
+formerDelegators(
+  app,
+  wrapWithTracing(
+    new FormerDelegatorsService(
+      wrapWithTracing(new FormerDelegatorsRepository(pgClient)),
+    ),
+  ),
+);
 
 const treasuryService = wrapWithTracing(
   createTreasuryService(
@@ -336,7 +356,20 @@ lastUpdate(app, pgClient);
 delegationPercentage(app, delegationPercentageService);
 historicalVotingPower(app, votingPowerService);
 votingPowerVariations(app, votingPowerService);
+// Registered before votingPowers so the static /voting-powers/inactive-summary
+// path is matched ahead of the /voting-powers/{address} param route.
+inactiveVotingPowerSummary(
+  app,
+  wrapWithTracing(
+    new InactiveVotingPowerSummaryService(
+      wrapWithTracing(new InactiveVotingPowerSummaryRepository(pgClient)),
+      daoClient,
+      blockTime,
+    ),
+  ),
+);
 votingPowers(app, votingPowerService);
+addressLabels(app, new AddressLabelsService(env.DAO_ID));
 accountBalanceVariations(app, balanceVariationsService);
 accountBalances(app, env.DAO_ID, accountBalanceService);
 accountInteractions(

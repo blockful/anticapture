@@ -44,7 +44,7 @@ export const useProposalsActivity = ({
     () => ({
       address,
       limit,
-      ...(fromDate ? { fromDate } : {}),
+      ...(fromDate != null ? { fromDate } : {}),
       ...(orderBy ? { orderBy } : {}),
       ...(orderDirection ? { orderDirection } : {}),
       ...(userVoteFilter ? { userVoteFilter } : {}),

@@ -41,7 +41,9 @@ export const ProgressBar = ({
             <p className="text-error flex-nowrap text-xs font-medium leading-4">
               Danger Zone
             </p>
-            <TooltipInfo text="This means that the Security Council is approaching expiration and it might be good to start the process of renewal." />
+            <TooltipInfo
+              text={`This means that the ${daoOverview.securityCouncil?.label ?? "Security Council"} is approaching expiration and it might be good to start the process of renewal.`}
+            />
           </div>
         )}
 

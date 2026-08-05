@@ -9,20 +9,24 @@ import {
   useQueryState,
   useQueryStates,
 } from "nuqs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Address } from "viem";
 import { formatUnits, parseUnits } from "viem";
+import { useToken } from "@anticapture/client/hooks";
+import type { TokenPathParamsDaoEnumKey } from "@anticapture/client";
 
 import { useAccountInteractionsData } from "@/features/holders-and-delegates/token-holder/drawer/top-interactions/hooks/useAccountInteractionsData";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { Button, SkeletonRow } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
 import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { useAmountFilterStore } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
+import { Switch } from "@/shared/components/design-system/switch/Switch";
 import { percentageVariants } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
@@ -30,6 +34,15 @@ import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn, formatNumberUserReadable } from "@/shared/utils";
+
+const parseRawAmount = (value: string | null): bigint | undefined => {
+  if (!value) return undefined;
+  try {
+    return BigInt(value);
+  } catch {
+    return undefined;
+  }
+};
 
 export const TopInteractionsTable = ({
   address,
@@ -58,6 +71,11 @@ export const TopInteractionsTable = ({
     "active",
     parseAsBoolean.withDefault(false),
   );
+  // dust interactions (< $1 of volume) are hidden by default
+  const [hideDust, setHideDust] = useQueryState(
+    "hideDust",
+    parseAsBoolean.withDefault(true),
+  );
 
   const sortOptions: SortOption[] = [
     { value: "largest-first", label: "Largest first" },
@@ -69,11 +87,41 @@ export const TopInteractionsTable = ({
     daoOverview: { token },
   } = daoConfig[daoId as DaoIdEnum];
 
+  const { data: tokenData } = useToken(
+    daoId.toLowerCase() as TokenPathParamsDaoEnumKey,
+    { currency: "usd" },
+  );
+
+  // raw token units worth $1 at the current spot price; interactions whose
+  // total volume is below this are flagged (and hidden) as dust
+  const dustThresholdRawUnits = useMemo(() => {
+    const priceUsd = Number(tokenData?.price) || 0;
+    if (priceUsd <= 0) return 0n;
+    return BigInt(Math.floor(Number(parseUnits("1", decimals)) / priceUsd));
+  }, [tokenData?.price, decimals]);
+
+  // These come from the URL, so a stale or hand-edited `?minAmount=1.5` has to
+  // be ignored instead of throwing while the drawer renders.
+  const userMinAmount = parseRawAmount(filterVariables.minAmount);
+  const userMaxAmount = parseRawAmount(filterVariables.maxAmount);
+
+  // "Hide dust" is enforced by the query, not client-side: filtering a page
+  // after the fact can empty it out, and an empty table renders its empty state
+  // without the infinite-scroll sentinel, stranding the later pages.
+  const minAmount = useMemo(() => {
+    const userMin = userMinAmount ?? 0n;
+    // `minAmount` is exclusive server-side, so one below the threshold keeps
+    // rows worth exactly $1, matching `isDust`.
+    const dustMin =
+      hideDust && dustThresholdRawUnits > 0n ? dustThresholdRawUnits - 1n : 0n;
+    const effective = userMin > dustMin ? userMin : dustMin;
+    return effective > 0n ? effective.toString() : null;
+  }, [userMinAmount, hideDust, dustThresholdRawUnits]);
+
   const {
     interactions,
     loading,
     error,
-    totalTransfers,
     fetchNextPage,
     fetchingMore,
     hasNextPage,
@@ -83,7 +131,10 @@ export const TopInteractionsTable = ({
     filterAddress: currentAddressFilter ?? undefined,
     sortBy,
     sortDirection,
-    filterVariables,
+    filterVariables: {
+      minAmount,
+      maxAmount: userMaxAmount?.toString() ?? null,
+    },
     limit: 10,
   });
 
@@ -91,11 +142,27 @@ export const TopInteractionsTable = ({
     setIsMounted(true);
   }, []);
 
-  if (!interactions || interactions.length === 0) {
-    return null;
-  }
+  const isDust = (volume: number) =>
+    dustThresholdRawUnits > 0n && volume < Number(dustThresholdRawUnits);
 
-  const tableData = interactions.map((interaction) => {
+  // The copy has to name the filter that emptied the page, or an address whose
+  // every interaction is under $1 reads as one that never interacted at all.
+  const emptyState: { emptyTitle?: string; emptyDescription?: string } =
+    currentAddressFilter || isFilterActive
+      ? {
+          emptyTitle: "No interactions match these filters",
+          emptyDescription:
+            "Clear the address or value filter to see more interactions.",
+        }
+      : hideDust
+        ? {
+            emptyTitle: "Only dust interactions",
+            emptyDescription:
+              'Every interaction with this address is worth less than $1. Turn off "Hide dust" to see them.',
+          }
+        : {};
+
+  const tableData = (interactions ?? []).map((interaction) => {
     return {
       address: interaction?.accountId,
       volume: Number(interaction?.totalVolume) || 0,
@@ -143,11 +210,13 @@ export const TopInteractionsTable = ({
         const addressValue: string = row.getValue("address");
         return (
           <div className="flex w-full items-center gap-2">
-            <EnsAvatar
+            <DrawerAddressButton
               address={addressValue as Address}
-              size="sm"
-              variant="rounded"
+              entityType="tokenHolder"
             />
+            {isDust(row.original.volume) && (
+              <BadgeStatus variant="dimmed">Dust</BadgeStatus>
+            )}
             <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
               <CopyAndPasteButton
                 textToCopy={addressValue as `0x${string}`}
@@ -315,10 +384,15 @@ export const TopInteractionsTable = ({
       },
     },
     {
-      accessorKey: "totalInteractions",
+      // The volume in fiat, so it sorts by volume: keyed on the transfer count
+      // it once rendered, the control would order rows by a number this column
+      // does not show.
+      id: "totalValue",
+      accessorFn: (row) => row.volume,
       header: ({ column }) => {
         const handleSortToggle = () => {
           const newSortOrder = sortDirection === "desc" ? "asc" : "desc";
+          setSortBy("volume");
           setSortDirection(newSortOrder);
           column.toggleSorting(newSortOrder === "desc");
 
@@ -330,9 +404,9 @@ export const TopInteractionsTable = ({
 
         return (
           <div className="flex w-full items-center justify-end gap-1.5 whitespace-nowrap">
-            <Tooltip tooltipContent="Addresses ranked by how many transactions they had with the holder (interaction count).">
+            <Tooltip tooltipContent="Value of everything transferred between the two addresses, in both directions, at the current token price.">
               <h4 className="text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300">
-                Total Interactions
+                Total Value (USD)
               </h4>
             </Tooltip>
             <Button
@@ -345,12 +419,14 @@ export const TopInteractionsTable = ({
                 props={{
                   className: "size-4",
                 }}
+                // Only claims a direction while the rows really are ordered by
+                // this column: the default order is by transfer count.
                 activeState={
-                  sortDirection === "asc"
-                    ? ArrowState.UP
-                    : sortDirection === "desc"
-                      ? ArrowState.DOWN
-                      : ArrowState.DEFAULT
+                  sortBy !== "volume"
+                    ? ArrowState.DEFAULT
+                    : sortDirection === "asc"
+                      ? ArrowState.UP
+                      : ArrowState.DOWN
                 }
               />
             </Button>
@@ -368,11 +444,24 @@ export const TopInteractionsTable = ({
             </div>
           );
         }
-        const totalInteractions: number = row.getValue("totalInteractions");
+        const priceUsd = Number(tokenData?.price) || 0;
+        // The price comes from its own query, so show nothing until there is a
+        // real one: defaulting to 0 renders a confident "$0" on every row.
+        if (priceUsd <= 0) {
+          return (
+            <div className="text-secondary flex w-full items-center justify-end text-sm">
+              -
+            </div>
+          );
+        }
+        const volumeTokens =
+          token === "ERC20"
+            ? Number(row.original.volume) / 10 ** decimals
+            : Number(row.original.volume);
+        const usdValue = volumeTokens * priceUsd;
         return (
           <div className="flex w-full items-center justify-end text-sm">
-            {Number(totalInteractions) || 0} (
-            {((totalInteractions / totalTransfers) * 100).toFixed(2)}%)
+            ${formatNumberUserReadable(usdValue)}
           </div>
         );
       },
@@ -389,9 +478,17 @@ export const TopInteractionsTable = ({
         withDownloadCSV={true}
         csvFilename="top-interactions.csv"
         error={error}
+        {...emptyState}
         hasMore={hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}
+        footerActions={
+          <Switch
+            checked={hideDust}
+            onCheckedChange={setHideDust}
+            label="Hide dust"
+          />
+        }
         fillHeight
       />
     </div>

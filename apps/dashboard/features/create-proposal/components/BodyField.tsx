@@ -189,7 +189,7 @@ export const BodyField = ({ version = 0 }: BodyFieldProps) => {
         />
       </div>
       <p className={`${counterColor} text-xs`}>
-        {body.length} / {BODY_CHAR_LIMIT.toLocaleString()}
+        {body.length.toLocaleString()} / {BODY_CHAR_LIMIT.toLocaleString()}
       </p>
     </div>
   );

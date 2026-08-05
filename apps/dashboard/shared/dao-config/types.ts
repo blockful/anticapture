@@ -97,11 +97,20 @@ export interface DaoOverviewConfig {
   };
   securityCouncil?: {
     isActive: boolean;
+    /** Card heading (rendered uppercase). Defaults to "Security Council". */
+    label?: string;
     vetoCouncilAddress: string;
     multisig: {
       threshold: number;
       signers: number;
       externalLink: string;
+      /**
+       * Tooltip next to the multisig link. Falls back to a generated
+       * description that assumes cancellation happens on the Timelock, so set
+       * this explicitly whenever the cancellation path is somewhere else
+       * (Compound's guardian, for instance, cancels on the Governor).
+       */
+      description?: string;
     };
     expiration: {
       date: string;
@@ -141,7 +150,7 @@ export type AttackExposureConfig = {
 
 /** Feature page slugs — the set of pages a DAO can enable. */
 export type DaoFeaturePageSlug =
-  | "holders-and-delegates"
+  | "stakeholders"
   | "proposals"
   | "activity-feed"
   | "service-providers"
