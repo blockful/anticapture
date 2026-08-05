@@ -309,6 +309,64 @@ describe("encodeActions", () => {
         );
       });
 
+      // Stringifying a leaf is the same failure one level down: `String(null)`
+      // is "null" and `String({})` is "[object Object]", both of which pass as
+      // a filled-in `string` leaf, so the publish would have carried a value
+      // nobody wrote instead of failing closed.
+      test.each([
+        ["a null element", "string[]", "[null]"],
+        ["an object element", "string[]", "[{}]"],
+        ["a null element", "uint256[]", "[1, null]"],
+      ])("refuses %s in a %s arg", async (_case, type, arg) => {
+        await expect(encodeOne(type, arg)).rejects.toThrow(/expects a value/);
+      });
+
+      // A leaf sitting where the ABI says a list goes, and the reverse: both
+      // describe a different call than the action row does.
+      test("refuses a nested list where the element is a scalar", async () => {
+        await expect(encodeOne("uint256[]", "[[1]]")).rejects.toThrow(
+          /expects a value/,
+        );
+      });
+
+      test("refuses a scalar where the element is a list", async () => {
+        await expect(encodeOne("uint256[][]", '["1"]')).rejects.toThrow(
+          /must be a JSON array for uint256\[\]/,
+        );
+      });
+
+      test("refuses a tuple carrying more entries than it has components", async () => {
+        const tupleAbi = [
+          {
+            type: "function",
+            name: "f",
+            stateMutability: "nonpayable",
+            inputs: [
+              {
+                name: "order",
+                type: "tuple",
+                components: [{ name: "id", type: "uint256" }],
+              },
+            ],
+            outputs: [],
+          },
+        ] as Abi;
+        await expect(
+          encodeActions(
+            [
+              {
+                type: "custom",
+                contractAddress: CONTRACT,
+                abi: tupleAbi,
+                functionName: "f",
+                args: ['["1","2"]'],
+              } as ProposalAction,
+            ],
+            passthrough,
+          ),
+        ).rejects.toThrow(/2 entries for a tuple of 1/);
+      });
+
       // The other side of the same coin: the modal's live preview has to keep
       // rendering while an array is half-typed, so its conversion stays lenient.
       test("the live preview conversion still degrades instead of throwing", () => {

@@ -58,10 +58,68 @@ const scalarToString = (value: unknown): string => {
   return typeof value === "string" ? value : String(value);
 };
 
-/** Recursively coerces any parsed/decoded value into a string-leaved ArgValue
- *  so the UI always edits strings, regardless of the source representation. */
-const coerce = (value: unknown): ArgValue =>
-  Array.isArray(value) ? value.map(coerce) : scalarToString(value);
+/** How a rejected leaf is named in the error, without printing its contents. */
+const describeLeaf = (value: unknown): string => {
+  if (value === null) return "null";
+  if (Array.isArray(value)) return "a list";
+  return `a ${typeof value}`;
+};
+
+/**
+ * Walks a parsed composite against the param that has to hold it, turning JSON
+ * scalars into the string leaves the UI edits and refusing everything else.
+ *
+ * Blindly stringifying leaves is what has to be avoided here: `String(null)` is
+ * `"null"` and `String({})` is `"[object Object]"`, both of which read as a
+ * filled-in leaf to `customActionIssues`, so an action from a shared or API
+ * draft that never passed `ProposalFormSchema` could publish calldata carrying
+ * a value nobody wrote. Shape is checked with it, since a list where the ABI
+ * says a value goes (or a value where it says a list) describes a different
+ * call than the row does.
+ */
+const coerceStrict = (
+  param: AbiParameter,
+  value: unknown,
+  subject: string,
+): ArgValue => {
+  const arr = parseArrayType(param.type);
+  const composite = arr !== null || param.type === "tuple";
+
+  if (composite) {
+    if (!Array.isArray(value)) {
+      throw new Error(
+        `${subject} must be a JSON array for ${param.type}, got ${describeLeaf(value)}.`,
+      );
+    }
+    if (arr) {
+      const child = elementParam(param, arr.elementType);
+      return value.map((item) => coerceStrict(child, item, subject));
+    }
+    // A tuple keeps its component order; extra entries the ABI has no component
+    // for are refused rather than dropped on the way to the encoder.
+    const components = getComponents(param);
+    if (value.length > components.length) {
+      throw new Error(
+        `${subject} has ${value.length} entries for a ${param.type} of ${components.length}.`,
+      );
+    }
+    return components.map((component, i) =>
+      i < value.length ? coerceStrict(component, value[i], subject) : "",
+    );
+  }
+
+  if (typeof value === "string") return value;
+  if (
+    typeof value === "number" ||
+    typeof value === "bigint" ||
+    typeof value === "boolean"
+  ) {
+    return scalarToString(value);
+  }
+  throw new Error(
+    `${subject} has ${describeLeaf(value)} where ${param.type} expects a value.`,
+  );
+};
 
 /** Serializes a single top-level arg tree back to its stored string form:
  *  scalars stay as-is; composites become JSON. */
@@ -74,9 +132,10 @@ export const argToStorage = (param: AbiParameter, value: ArgValue): string => {
 
 /**
  * Parses a stored arg string into an editable tree, refusing anything a
- * composite param can't hold: a blank, unparseable JSON, or JSON that isn't an
- * array. This is the conversion; `storageToArg` is the same one with a fallback
- * bolted on, so the two can't drift.
+ * composite param can't hold: a blank, unparseable JSON, JSON that isn't an
+ * array, a leaf that is not a JSON scalar, and a leaf whose shape contradicts
+ * the ABI parameter. This is the conversion; `storageToArg` is the same one with
+ * a fallback bolted on, so the two can't drift.
  *
  * Whoever is going to encode has to use this variant. `storageToArg` reports a
  * malformed `uint256[]` as `[]`, which encodes to perfectly valid calldata for
@@ -103,8 +162,9 @@ export const storageToArgStrict = (
   } catch {
     return reject();
   }
-  if (!Array.isArray(parsed)) return reject();
-  return coerce(parsed);
+  // Shape and leaves both checked against the param, so the only trees that
+  // come out of here are trees the ABI can hold.
+  return coerceStrict(param, parsed, subject);
 };
 
 /** Parses a stored arg string into an editable tree. Composites are JSON; a
