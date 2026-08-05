@@ -22,8 +22,16 @@ export type ImportedProposal = {
  * keeps for the auth round trip works the same way.
  *
  * Scoped per DAO so an import prepared for one can never land on another's form.
+ *
+ * The id is lowercased here rather than at the call sites. A route param carries
+ * whatever case the URL was typed with, so `/ENS/proposals` would otherwise stash
+ * under `ENS` while the form, reached through the normalized lowercase route,
+ * looks under `ens` and finds nothing. That failure is silent: the import
+ * succeeds and the author still lands on an empty form. Normalizing in the one
+ * place both sides go through keeps them in agreement whatever a caller passes.
  */
-const keyFor = (daoId: string) => `anticapture:pending-import:${daoId}`;
+const keyFor = (daoId: string) =>
+  `anticapture:pending-import:${daoId.toLowerCase()}`;
 
 /** Returns false when storage is unavailable, so the caller can say so. */
 export const stashImportedProposal = (

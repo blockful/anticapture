@@ -71,6 +71,38 @@ describe("the import handoff", () => {
     expect(takeImportedProposal("ens")).toBeNull();
   });
 
+  /*
+   * A route param carries whatever case the URL was typed with. The list page
+   * stashes with the raw param, the form reads with a lowercased one, so a visit
+   * to `/ENS/proposals` used to import successfully and then land the author on
+   * an empty form with nothing said.
+   */
+  describe("whatever case the route param arrives in", () => {
+    it("reads a mixed-case stash back with a lowercase id", () => {
+      expect(stashImportedProposal("ENS", proposal)).toBe(true);
+      expect(takeImportedProposal("ens")).toEqual(proposal);
+    });
+
+    it("reads a lowercase stash back with a mixed-case id", () => {
+      expect(stashImportedProposal("ens", proposal)).toBe(true);
+      expect(takeImportedProposal("EnS")).toEqual(proposal);
+    });
+
+    // Still exactly once: the normalized key is what gets cleared.
+    it("still hands them over exactly once across cases", () => {
+      stashImportedProposal("ENS", proposal);
+      expect(takeImportedProposal("ens")).toEqual(proposal);
+      expect(takeImportedProposal("ENS")).toBeNull();
+    });
+
+    // Normalizing must not collapse distinct DAOs into one another.
+    it("keeps one DAO's import off another's form", () => {
+      stashImportedProposal("ENS", proposal);
+      expect(takeImportedProposal("SHU")).toBeNull();
+      expect(takeImportedProposal("ens")).toEqual(proposal);
+    });
+  });
+
   it("drops a corrupted stash instead of throwing", () => {
     sessionStorage.setItem("anticapture:pending-import:ens", "{not json");
     expect(takeImportedProposal("ens")).toBeNull();
