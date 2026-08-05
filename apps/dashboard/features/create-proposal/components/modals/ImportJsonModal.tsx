@@ -43,10 +43,10 @@ interface ImportJsonModalProps {
   /**
    * Takes the parsed document, and says whether it took it.
    *
-   * Handing the values off can fail: the caller may be stashing them in
-   * sessionStorage, which can be blocked or full. Returning false keeps the
-   * dialog open on the document the author pasted, so nothing is lost while
-   * the caller reports what went wrong.
+   * Handing the values off can fail: the caller may be stashing them in browser
+   * storage, which can be blocked or full. Returning false keeps the dialog open
+   * on the document the author pasted, so nothing is lost while the caller
+   * reports what went wrong.
    */
   onImport: (values: ImportedProposal) => boolean;
 }

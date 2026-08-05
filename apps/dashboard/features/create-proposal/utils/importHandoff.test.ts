@@ -7,9 +7,10 @@ import {
 
 /*
  * The import runs on the proposals list and the form it fills is another route,
- * so these values cross a navigation, and sometimes a sign-in round trip. What
- * matters is that they arrive once, arrive for the right DAO, and never arrive
- * twice.
+ * so these values cross a navigation, and sometimes a sign-in round trip that
+ * lands in a different tab entirely. What matters is that they arrive once,
+ * arrive for the right DAO, arrive in whatever context the sign-in came back in,
+ * and never arrive twice or long after the fact.
  */
 
 /** Same shape draftStorage.test uses, installed as the global the module reads. */
@@ -45,7 +46,7 @@ const proposal: ImportedProposal = {
 
 describe("the import handoff", () => {
   beforeEach(() => {
-    (globalThis as { sessionStorage?: Storage }).sessionStorage =
+    (globalThis as { localStorage?: Storage }).localStorage =
       createMemoryStorage();
   });
 
@@ -104,11 +105,66 @@ describe("the import handoff", () => {
     });
   });
 
+  const KEY = "anticapture:pending-import:ens";
+
   it("drops a corrupted stash instead of throwing", () => {
-    sessionStorage.setItem("anticapture:pending-import:ens", "{not json");
+    localStorage.setItem(KEY, "{not json");
     expect(takeImportedProposal("ens")).toBeNull();
     // Already removed, so a reload starts clean rather than failing the same way.
-    expect(sessionStorage.getItem("anticapture:pending-import:ens")).toBeNull();
+    expect(localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("drops a record that isn't the shape it writes", () => {
+    localStorage.setItem(KEY, JSON.stringify({ title: "no wrapper" }));
+    expect(takeImportedProposal("ens")).toBeNull();
+    expect(localStorage.getItem(KEY)).toBeNull();
+  });
+
+  /*
+   * The whole reason this is `localStorage`: the magic-link sign-in mails an
+   * absolute URL back to the form, and following it from a mail client opens a
+   * context that never saw the tab which wrote the stash. Under `sessionStorage`
+   * the author signed in and got a blank form with their document gone.
+   */
+  it("is readable from a context that never wrote it", () => {
+    stashImportedProposal("ens", proposal);
+    const carried = localStorage.getItem(KEY);
+
+    // A brand new browsing context: fresh storage, seeded the way a shared
+    // origin-wide store would already have it.
+    (globalThis as { localStorage?: Storage }).localStorage =
+      createMemoryStorage();
+    localStorage.setItem(KEY, carried!);
+
+    expect(takeImportedProposal("ens")).toEqual(proposal);
+  });
+
+  /*
+   * Surviving tab closes is what makes an expiry necessary. Without it a stash
+   * nobody followed through on would fill a form in a session days later.
+   */
+  describe("a stash that sat too long", () => {
+    const writtenAt = (ms: number) =>
+      localStorage.setItem(KEY, JSON.stringify({ at: ms, values: proposal }));
+
+    it("is refused once it is older than the window", () => {
+      writtenAt(Date.now() - 61 * 60 * 1000);
+      expect(takeImportedProposal("ens")).toBeNull();
+    });
+
+    // Cleared even when refused, or it would be re-refused on every mount for
+    // the life of the browser profile.
+    it("is cleared rather than left to be refused again", () => {
+      writtenAt(Date.now() - 61 * 60 * 1000);
+      takeImportedProposal("ens");
+      expect(localStorage.getItem(KEY)).toBeNull();
+    });
+
+    // A mail round trip has to fit comfortably inside the window.
+    it("still arrives after a plausible mail round trip", () => {
+      writtenAt(Date.now() - 10 * 60 * 1000);
+      expect(takeImportedProposal("ens")).toEqual(proposal);
+    });
   });
 
   it("survives an empty actions list", () => {
@@ -155,7 +211,7 @@ describe("the import handoff", () => {
       storage[method] = () => {
         throw new Error("blocked");
       };
-      (globalThis as { sessionStorage?: Storage }).sessionStorage = storage;
+      (globalThis as { localStorage?: Storage }).localStorage = storage;
     };
 
     // The caller keeps the author in the dialog with their document rather than
