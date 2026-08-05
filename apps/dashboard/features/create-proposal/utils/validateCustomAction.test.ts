@@ -335,6 +335,18 @@ describe("customActionIssues", () => {
         expectIssue(withArg('["not a number"]'), ["args", 0]);
       });
 
+      // The arg parses as a JSON array, so the shape checks above pass it, and
+      // then storageToArg degrades the leaf the ABI can't hold to the empty
+      // container, which counts as a complete dynamic array. Validation used to
+      // accept the action while encodeActions threw on that very same arg.
+      it.each([
+        ["an object leaf", "[{}]"],
+        ["a null leaf", "[null]"],
+        ["a list where a value goes", "[[1]]"],
+      ])("rejects a dynamic composite with %s", (_label, arg) => {
+        expectIssue(withArg(arg), ["args", 0]);
+      });
+
       // isArgComplete walks the declared components, so anything past them is
       // never looked at, and the encoder maps components only: the extra value
       // vanishes from the calldata without a word.
@@ -369,6 +381,12 @@ describe("customActionIssues", () => {
           ["one field short", '["vitalik.eth"]'],
         ])("rejects a tuple with %s", (_label, arg) => {
           expectIssue(pair("tuple", arg), ["args", 0]);
+        });
+
+        // The arity check skips a non-array entry, leaving the leaf-shape
+        // refusal as the only thing standing between this and the encoder.
+        it("rejects an object where an array wants a tuple", () => {
+          expectIssue(pair("tuple[]", "[{}]"), ["args", 0]);
         });
 
         it("rejects an over-filled tuple nested in an array", () => {

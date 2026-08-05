@@ -6,9 +6,9 @@ import {
 } from "viem";
 
 import {
-  argsToTrees,
-  buildEmpty,
   parseArrayType,
+  storageToArgStrict,
+  type ArgValue,
 } from "@/features/create-proposal/utils/argTree";
 import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
 
@@ -358,10 +358,10 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
     ];
   }
 
-  // Arrays and tuples are stored as JSON strings. `storageToArg` degrades a
-  // malformed one to an empty container, which `isArgComplete` then accepts as
-  // a complete dynamic array, so the action looks ready and the encoder throws
-  // on the original text.
+  // Arrays and tuples are stored as JSON strings, and the strict check below
+  // refuses every malformed one. This pass runs first only to name the two
+  // failures worth naming, text that isn't a JSON array and a tuple filled with
+  // the wrong number of fields, instead of the generic "is not a valid T".
   const compositeIssues = fn.inputs.flatMap<ActionIssue>((input, i) => {
     if (!isCompositeType(input.type)) return [];
 
@@ -383,10 +383,22 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
   });
   if (compositeIssues.length > 0) return compositeIssues;
 
-  const trees = argsToTrees(fn.inputs, action.args);
-  return fn.inputs.flatMap<ActionIssue>((input, i) =>
-    isArgComplete(input, trees[i] ?? buildEmpty(input))
-      ? []
-      : [{ path: ["args", i], message: `Is not a valid ${input.type}` }],
-  );
+  // Validated with the converter the encoder uses, not the forgiving one.
+  // `storageToArg` hands back the empty container for a leaf the ABI can't hold,
+  // such as `[{}]` for a `string[]`, and an empty dynamic array reads as
+  // complete, so the action would pass here and then throw in `encodeActions` on
+  // the same arg. Whatever this accepts, `argsToTreesStrict` can encode.
+  return fn.inputs.flatMap<ActionIssue>((input, i) => {
+    const invalid = [
+      { path: ["args", i], message: `Is not a valid ${input.type}` },
+    ];
+
+    let tree: ArgValue;
+    try {
+      tree = storageToArgStrict(input, action.args[i] ?? "");
+    } catch {
+      return invalid;
+    }
+    return isArgComplete(input, tree) ? [] : invalid;
+  });
 };
