@@ -7,7 +7,7 @@ import {
 
 import {
   parseArrayType,
-  storageToArgStrict,
+  storageToArg,
   type ArgValue,
 } from "@/features/create-proposal/utils/argTree";
 import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
@@ -395,7 +395,7 @@ export const customActionIssues = (action: CustomActionLike): ActionIssue[] => {
 
     let tree: ArgValue;
     try {
-      tree = storageToArgStrict(input, action.args[i] ?? "");
+      tree = storageToArg(input, action.args[i] ?? "");
     } catch {
       return invalid;
     }

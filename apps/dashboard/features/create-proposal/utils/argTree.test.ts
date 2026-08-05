@@ -6,6 +6,7 @@ import {
   buildEmpty,
   parseArrayType,
   storageToArg,
+  storageToArgForDisplay,
   argToStorage,
   argsToTrees,
   treesToArgs,
@@ -130,13 +131,21 @@ describe("storage <-> tree round-trip", () => {
     expect(tree).toEqual(["1", "2", "3"]);
   });
 
+  // The display conversion is the one that forgives, so it is the one asked
+  // here. `storageToArg` itself refuses, which is covered below.
   it("falls back to empty container for malformed composite storage", () => {
-    expect(storageToArg({ type: "uint256[]" } as never, "not json")).toEqual(
-      [],
-    );
+    expect(
+      storageToArgForDisplay({ type: "uint256[]" } as never, "not json"),
+    ).toEqual([]);
   });
 
-  // A tuple short of its components is malformed like any other, so the lenient
+  it("refuses that same malformed storage when the answer will be encoded", () => {
+    expect(() =>
+      storageToArg({ type: "uint256[]" } as never, "not json"),
+    ).toThrow();
+  });
+
+  // A tuple short of its components is malformed like any other, so the display
   // conversion degrades it to the empty struct rather than padding it out. The
   // padded tree is what used to reach the encoder as a real empty field, and the
   // modal that hydrates through here writes full-arity tuples back anyway.
@@ -148,7 +157,7 @@ describe("storage <-> tree round-trip", () => {
         { name: "memo", type: "string" },
       ],
     } as never;
-    expect(storageToArg(param, `["${ADDR_A}"]`)).toEqual(["", ""]);
+    expect(storageToArgForDisplay(param, `["${ADDR_A}"]`)).toEqual(["", ""]);
   });
 });
 

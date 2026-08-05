@@ -2,7 +2,7 @@ import {
   encodeActions,
   makeAddressResolver,
 } from "@/features/create-proposal/utils/encodeActions";
-import { argsToTrees } from "@/features/create-proposal/utils/argTree";
+import { argsToTreesForDisplay } from "@/features/create-proposal/utils/argTree";
 import type { ProposalAction } from "@/features/create-proposal/types";
 import {
   parseEther,
@@ -406,7 +406,7 @@ describe("encodeActions", () => {
       // rendering while an array is half-typed, so its conversion stays lenient.
       test("the live preview conversion still degrades instead of throwing", () => {
         const inputs = [{ name: "a", type: "uint256[]" }] as const;
-        expect(argsToTrees(inputs, ["not json"])).toEqual([[]]);
+        expect(argsToTreesForDisplay(inputs, ["not json"])).toEqual([[]]);
       });
     });
 

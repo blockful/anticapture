@@ -34,6 +34,7 @@ import {
 import { ArgInput } from "@/features/create-proposal/components/custom-action/ArgInput";
 import {
   argsToTrees,
+  argsToTreesForDisplay,
   argToStorage,
   buildEmpty,
   decodeCalldataToArgs,
@@ -301,15 +302,37 @@ export const AddCustomActionModal = ({
     isAddressValid &&
     (mode === "fetch" ? Boolean(abi) : isCalldataValid);
 
+  // For drawing the inputs only, so a malformed stored arg still renders as an
+  // empty field to fill in rather than blanking the step.
   const argTrees = useMemo<ArgValue[]>(
-    () => (selectedFn ? argsToTrees(selectedFn.inputs, args) : []),
+    () => (selectedFn ? argsToTreesForDisplay(selectedFn.inputs, args) : []),
     [selectedFn, args],
   );
 
+  /**
+   * The args as the encoder would read them, or null when one of them is not
+   * something the ABI can hold.
+   *
+   * Both the Add button below and the calldata preview are answers about what
+   * would be published, so neither can be built on the forgiving conversion:
+   * that one reports a malformed `uint256[]` as `[]`, which `isArgComplete`
+   * accepts and viem encodes happily, so this step would offer to save an action
+   * the publish path then refuses.
+   */
+  const encodableTrees = useMemo<ArgValue[] | null>(() => {
+    if (!selectedFn) return null;
+    try {
+      return argsToTrees(selectedFn.inputs, args);
+    } catch {
+      return null;
+    }
+  }, [selectedFn, args]);
+
   const allArgsFilled =
     selectedFn !== undefined &&
+    encodableTrees !== null &&
     selectedFn.inputs.every((input, i) =>
-      isArgComplete(input, argTrees[i] ?? buildEmpty(input)),
+      isArgComplete(input, encodableTrees[i] ?? buildEmpty(input)),
     );
 
   const step2Ready =
@@ -323,12 +346,12 @@ export const AddCustomActionModal = ({
       return encodeFunctionData({
         abi: [selectedFn],
         functionName: selectedFn.name,
-        args: treesToEncodeValues(selectedFn.inputs, argTrees),
+        args: treesToEncodeValues(selectedFn.inputs, encodableTrees ?? []),
       });
     } catch {
       return null;
     }
-  }, [mode, selectedFn, allArgsFilled, argTrees]);
+  }, [mode, selectedFn, allArgsFilled, encodableTrees]);
 
   // Mirror the live encoded output into the field as the form changes.
   useEffect(() => {

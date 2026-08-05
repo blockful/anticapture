@@ -9,7 +9,7 @@ import {
 } from "viem";
 import { isAddressLike, toChecksumAddress } from "@/shared/utils/address";
 import {
-  argsToTreesStrict,
+  argsToTrees,
   resolveAddressesInTrees,
   treesToEncodeValues,
 } from "@/features/create-proposal/utils/argTree";
@@ -89,7 +89,7 @@ export const encodeActions = async (
       fn.inputs,
       await resolveAddressesInTrees(
         fn.inputs,
-        argsToTreesStrict(fn.inputs, action.args),
+        argsToTrees(fn.inputs, action.args),
         resolve,
       ),
     );

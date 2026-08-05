@@ -28,10 +28,7 @@ import { rangeOfLine } from "@/features/create-proposal/utils/scanJsonSource";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
 import type { ImportedProposal } from "@/features/create-proposal/utils/importHandoff";
 import {
-  describeImportIssues,
-  describeValidImport,
-} from "@/features/create-proposal/utils/importIssueCopy";
-import {
+  formatImportIssue,
   parseProposalJson,
   type ImportIssue,
 } from "@/features/create-proposal/utils/parseProposalJson";
@@ -66,6 +63,32 @@ const MAX_UPLOAD_BYTES = 1_000_000;
  */
 const VALIDATE_DEBOUNCE_MS = 300;
 
+/** `Valid · 3 actions`: the count is the one thing a reader can check at a
+ *  glance against their own document. */
+const describeValid = (actionCount: number | undefined): string =>
+  actionCount === undefined
+    ? "Valid"
+    : `Valid · ${actionCount} action${actionCount === 1 ? "" : "s"}`;
+
+/** One problem: `Line 7 · unquoted number 480000 must be quoted`. Several:
+ *  `3 problems · first on line 7 · unquoted number 480000`. Naming the figure
+ *  beats explaining why quoting matters, which does not fit on one line. */
+const describeIssues = (issues: readonly ImportIssue[]): string => {
+  const [first] = issues;
+  if (!first) return "";
+
+  const what = first.numberLiteral
+    ? `unquoted number ${first.numberLiteral}`
+    : formatImportIssue(first);
+
+  if (issues.length === 1) {
+    const detail = first.numberLiteral ? `${what} must be quoted` : what;
+    return first.line ? `Line ${first.line} · ${detail}` : detail;
+  }
+  const where = first.line ? ` · first on line ${first.line}` : "";
+  return `${issues.length} problems${where} · ${what}`;
+};
+
 /** What the status row is currently saying. */
 type ValidationState =
   | { kind: "idle" }
@@ -98,7 +121,7 @@ const ValidationStatus = ({ state }: { state: ValidationState }) => {
   if (state.kind === "valid") {
     return (
       <StatusRow tone="text-success" icon={CircleCheck}>
-        {describeValidImport(state.actionCount)}
+        {describeValid(state.actionCount)}
       </StatusRow>
     );
   }
@@ -106,7 +129,7 @@ const ValidationStatus = ({ state }: { state: ValidationState }) => {
   if (state.kind === "invalid") {
     return (
       <StatusRow tone="text-error" icon={CircleAlert}>
-        {describeImportIssues(state.issues)}
+        {describeIssues(state.issues)}
       </StatusRow>
     );
   }

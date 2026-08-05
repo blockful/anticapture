@@ -13,7 +13,7 @@ import {
 import {
   formatJsonPath,
   lineFromParseError,
-  scanJsonSource,
+  scanJsonNumbers,
 } from "@/features/create-proposal/utils/scanJsonSource";
 import {
   findAbiFunction,
@@ -300,15 +300,12 @@ export const parseProposalJson = (text: string): ParseProposalJsonResult => {
     };
   }
 
-  const sources = scanJsonSource(text);
+  const numbers = scanJsonNumbers(text);
   const locate = (issue: ImportIssue): ImportIssue => {
-    const source = sources.get(formatJsonPath(issue.path));
-    if (!source) return issue;
-    return {
-      ...issue,
-      line: source.line,
-      ...(source.numberLiteral ? { numberLiteral: source.numberLiteral } : {}),
-    };
+    const source = numbers.get(formatJsonPath(issue.path));
+    return source
+      ? { ...issue, line: source.line, numberLiteral: source.literal }
+      : issue;
   };
 
   const result = ProposalJsonSchema.safeParse(parsed);

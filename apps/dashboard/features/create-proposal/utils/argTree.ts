@@ -138,19 +138,17 @@ export const argToStorage = (param: AbiParameter, value: ArgValue): string => {
  * Parses a stored arg string into an editable tree, refusing anything a
  * composite param can't hold: a blank, unparseable JSON, JSON that isn't an
  * array, a tuple that isn't exactly its declared components, a leaf that is not
- * a JSON scalar, and a leaf whose shape contradicts the ABI parameter. This is
- * the conversion; `storageToArg` is the same one with a fallback bolted on, so
- * the two can't drift.
+ * a JSON scalar, and a leaf whose shape contradicts the ABI parameter.
  *
- * Whoever is going to encode has to use this variant. `storageToArg` reports a
- * malformed `uint256[]` as `[]`, which encodes to perfectly valid calldata for
- * an empty array, so a draft that bypassed `ProposalFormSchema` would publish a
- * call that doesn't match the row describing it, with nothing to see anywhere.
+ * This is the conversion. `storageToArgForDisplay` is this same function with the
+ * rejection swallowed, so there is one implementation and the two cannot drift.
+ * Anything deciding whether an action is complete, previewing its calldata, or
+ * encoding it has to come through here: the forgiving variant reports a malformed
+ * `uint256[]` as `[]`, which encodes to perfectly valid calldata for an empty
+ * array, so a draft that bypassed `ProposalFormSchema` would publish a call that
+ * doesn't match the row describing it, with nothing to see anywhere.
  */
-export const storageToArgStrict = (
-  param: AbiParameter,
-  stored: string,
-): ArgValue => {
+export const storageToArg = (param: AbiParameter, stored: string): ArgValue => {
   if (!isComposite(param.type)) return stored;
 
   const trimmed = (stored ?? "").trim();
@@ -172,29 +170,41 @@ export const storageToArgStrict = (
   return coerceStrict(param, parsed, subject);
 };
 
-/** Parses a stored arg string into an editable tree. Composites are JSON; a
- *  blank or malformed composite degrades to the empty container, so the modal's
- *  live preview keeps rendering while someone is mid-edit. */
-export const storageToArg = (param: AbiParameter, stored: string): ArgValue => {
+/**
+ * `storageToArg` with the rejection swallowed, for rendering only.
+ *
+ * A malformed composite degrades to the empty container so an editor still has a
+ * tree to draw while someone is mid-edit. The name says "for display" because
+ * that is the only thing this answer is good for: anything deciding whether an
+ * action is complete, previewing its calldata, or encoding it has to use
+ * `storageToArg` instead. Every bug in this file's history came from a caller
+ * reaching for the forgiving variant to answer one of those questions, so the
+ * plain name is the safe one and this is the one that has to be asked for.
+ */
+export const storageToArgForDisplay = (
+  param: AbiParameter,
+  stored: string,
+): ArgValue => {
   try {
-    return storageToArgStrict(param, stored);
+    return storageToArg(param, stored);
   } catch {
     return buildEmpty(param);
   }
 };
 
+/** `argsToTrees` for rendering only. See `storageToArgForDisplay`. */
+export const argsToTreesForDisplay = (
+  inputs: readonly AbiParameter[],
+  args: readonly string[],
+): ArgValue[] =>
+  inputs.map((input, i) => storageToArgForDisplay(input, args[i] ?? ""));
+
+/** Throws on a composite arg the stored string never described, rather than
+ *  quietly handing back an empty container. */
 export const argsToTrees = (
   inputs: readonly AbiParameter[],
   args: readonly string[],
 ): ArgValue[] => inputs.map((input, i) => storageToArg(input, args[i] ?? ""));
-
-/** `argsToTrees` for the encode path: throws on a composite arg the stored
- *  string never described, rather than encoding an empty container. */
-export const argsToTreesStrict = (
-  inputs: readonly AbiParameter[],
-  args: readonly string[],
-): ArgValue[] =>
-  inputs.map((input, i) => storageToArgStrict(input, args[i] ?? ""));
 
 export const treesToArgs = (
   inputs: readonly AbiParameter[],
