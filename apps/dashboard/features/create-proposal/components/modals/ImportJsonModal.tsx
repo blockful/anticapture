@@ -43,7 +43,15 @@ import {
 interface ImportJsonModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImport: (values: ImportedProposal) => void;
+  /**
+   * Takes the parsed document, and says whether it took it.
+   *
+   * Handing the values off can fail: the caller may be stashing them in
+   * sessionStorage, which can be blocked or full. Returning false keeps the
+   * dialog open on the document the author pasted, so nothing is lost while
+   * the caller reports what went wrong.
+   */
+  onImport: (values: ImportedProposal) => boolean;
 }
 
 /** Generous next to a real proposal, small enough not to lock up the tab. */
@@ -364,7 +372,11 @@ export const ImportJsonModal = ({
       actions = resolved.actions;
     }
 
-    onImport({ ...result.value, actions });
+    // Closing clears the textarea, so it waits for the handoff to say it took
+    // the document. A refused import leaves the dialog exactly as it was, with
+    // the paste still in it and the caller's own message on screen, rather than
+    // wiping a hand-written proposal that nothing received.
+    if (!onImport({ ...result.value, actions })) return;
     close();
   };
 

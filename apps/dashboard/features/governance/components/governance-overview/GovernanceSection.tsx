@@ -384,13 +384,18 @@ export const GovernanceSection = () => {
    * where they started instead of on a blank proposal they did not ask for. The
    * parsed values are handed to the form through sessionStorage, which also
    * carries them through the sign-in gate below.
+   *
+   * Reports whether the values were taken: storage can refuse them, and the
+   * dialog closes only on a true, so a refused import keeps the author there
+   * with their document instead of clearing it behind the toast.
    */
-  const handleImported = (values: ImportedProposal) => {
+  const handleImported = (values: ImportedProposal): boolean => {
     if (!stashImportedProposal(daoId, values)) {
       showCustomToast("Could not carry the import to the form", "error");
-      return;
+      return false;
     }
     goToNewProposal();
+    return true;
   };
 
   const forumLink = daoConfig[daoIdEnum]?.forumLink;
