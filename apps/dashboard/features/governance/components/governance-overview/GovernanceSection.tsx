@@ -401,10 +401,17 @@ export const GovernanceSection = () => {
         <NewProposalMenu
           onCreateNew={goToNewProposal}
           onImportJson={() => setImportOpen(true)}
-          triggerProps={{
+          createNewProps={{
             "data-umami-event": "proposal_create_click",
             "data-umami-event-dao": daoId,
             "data-ph-event": "proposal_create_click",
+            "data-ph-source": "governance_overview",
+            "data-ph-dao": daoId,
+          }}
+          importJsonProps={{
+            "data-umami-event": "proposal_import_json_click",
+            "data-umami-event-dao": daoId,
+            "data-ph-event": "proposal_import_json_click",
             "data-ph-source": "governance_overview",
             "data-ph-dao": daoId,
           }}
