@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.13.0
+
+### Minor Changes
+
+- [#2102](https://github.com/blockful/anticapture/pull/2102) [`7236413`](https://github.com/blockful/anticapture/commit/723641373326a4607dbb500eca844948c62603f2) Thanks [@brunod-e](https://github.com/brunod-e)! - Import a proposal from JSON when creating one.
+
 ## 2.12.0
 
 ### Minor Changes
