@@ -4,7 +4,6 @@ import { ArrowLeft, ArrowRight, Upload } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   encodeFunctionData,
-  isAddress,
   isHex,
   toFunctionSelector,
   toFunctionSignature,
@@ -24,6 +23,7 @@ import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
 import daoConfig from "@/shared/dao-config";
+import { isAddressLike } from "@/shared/utils/address";
 import { fetchAddressFromEnsName, isEnsAddress } from "@/shared/utils/ens";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { CustomAction } from "@/features/create-proposal/types";
@@ -34,13 +34,14 @@ import {
 import { ArgInput } from "@/features/create-proposal/components/custom-action/ArgInput";
 import {
   argsToTrees,
+  argsToTreesForDisplay,
   argToStorage,
   buildEmpty,
   decodeCalldataToArgs,
   treesToEncodeValues,
   type ArgValue,
 } from "@/features/create-proposal/utils/argTree";
-import { isArgComplete } from "@/features/create-proposal/utils/validateArg";
+import { isArgComplete } from "@/features/create-proposal/utils/argIssues";
 import ensGovernorAbi from "@/abis/ens-governor.json";
 
 type Step = 1 | 2;
@@ -64,9 +65,6 @@ const bundledAbisByAddress = (daoId: string): Record<string, Abi> => {
   if (!bundledGovernorAbi) return {};
   const governor = daoConfig[daoIdEnum]?.daoOverview?.contracts?.governor;
   if (!governor) return {};
-  // Validate the bundled JSON once at the boundary rather than casting it
-  // straight through. If the import is ever corrupted this returns null and
-  // we fall through to the remote fetch path below.
   const validated = parseAbiStrict(bundledGovernorAbi);
   if (!validated) return {};
   return { [governor.toLowerCase()]: validated };
@@ -84,10 +82,6 @@ const lookupAbi = (daoId: string, address: string): Promise<Abi | null> => {
 const parseAbiJson = (text: string): Abi | null => {
   try {
     const parsed: unknown = JSON.parse(text);
-    // Accept either a bare ABI array or a Hardhat/Foundry-style artifact
-    // object with an `abi` field. Validate the array with zod so malformed
-    // items are rejected at the boundary instead of blowing up later inside
-    // viem encoders.
     if (Array.isArray(parsed)) {
       return parseAbiStrict(parsed);
     }
@@ -120,7 +114,6 @@ export const AddCustomActionModal = ({
   );
   const [mode, setMode] = useState<ConfigMode>(initialMode);
 
-  // Fetch-ABI flow
   const [abiText, setAbiText] = useState(
     initialValue && initialValue.abi.length > 0
       ? JSON.stringify(initialValue.abi, null, 2)
@@ -131,21 +124,17 @@ export const AddCustomActionModal = ({
   const [isManualAbiEntry, setIsManualAbiEntry] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Calldata flow
   const [calldata, setCalldata] = useState(initialValue?.calldata ?? "");
 
-  // Step 2
   const [functionName, setFunctionName] = useState(
     initialValue?.functionName ?? "",
   );
   const [args, setArgs] = useState<string[]>(initialValue?.args ?? []);
   const [addressTouched, setAddressTouched] = useState(false);
 
-  // Calldata field: shows the live encoded calldata and accepts a pasted blob to decode.
   const [calldataField, setCalldataField] = useState("");
   const [decodeError, setDecodeError] = useState<string | null>(null);
 
-  // Re-hydrate whenever the modal opens
   useEffect(() => {
     if (!open) return;
     setStep(1);
@@ -189,7 +178,7 @@ export const AddCustomActionModal = ({
 
   const isAddressValid =
     contractAddress.trim() === "" ||
-    isAddress(contractAddress.trim()) ||
+    isAddressLike(contractAddress) ||
     isEnsAddress(contractAddress.trim());
 
   const functions = useMemo<AbiFunction[]>(() => {
@@ -235,7 +224,7 @@ export const AddCustomActionModal = ({
     if (mode !== "fetch") return;
     const v = contractAddress.trim();
     if (!v) return;
-    const isRawAddress = isAddress(v, { strict: false });
+    const isRawAddress = isAddressLike(v);
     const isEns = isEnsAddress(v);
     if (!isRawAddress && !isEns) return;
     setIsFetchingAbi(true);
@@ -302,35 +291,42 @@ export const AddCustomActionModal = ({
     (mode === "fetch" ? Boolean(abi) : isCalldataValid);
 
   const argTrees = useMemo<ArgValue[]>(
-    () => (selectedFn ? argsToTrees(selectedFn.inputs, args) : []),
+    () => (selectedFn ? argsToTreesForDisplay(selectedFn.inputs, args) : []),
     [selectedFn, args],
   );
 
+  const encodableTrees = useMemo<ArgValue[] | null>(() => {
+    if (!selectedFn) return null;
+    try {
+      return argsToTrees(selectedFn.inputs, args);
+    } catch {
+      return null;
+    }
+  }, [selectedFn, args]);
+
   const allArgsFilled =
     selectedFn !== undefined &&
+    encodableTrees !== null &&
     selectedFn.inputs.every((input, i) =>
-      isArgComplete(input, argTrees[i] ?? buildEmpty(input)),
+      isArgComplete(input, encodableTrees[i] ?? buildEmpty(input)),
     );
 
   const step2Ready =
     mode === "fetch" ? Boolean(functionName) && allArgsFilled : isCalldataValid;
 
-  // Live calldata preview (form -> hex). Best-effort: only encodes once every
-  // field is concrete (addresses must already be 0x — ENS resolves at publish).
   const encodedPreview = useMemo<string | null>(() => {
     if (mode !== "fetch" || !selectedFn || !allArgsFilled) return null;
     try {
       return encodeFunctionData({
         abi: [selectedFn],
         functionName: selectedFn.name,
-        args: treesToEncodeValues(selectedFn.inputs, argTrees),
+        args: treesToEncodeValues(selectedFn.inputs, encodableTrees ?? []),
       });
     } catch {
       return null;
     }
-  }, [mode, selectedFn, allArgsFilled, argTrees]);
+  }, [mode, selectedFn, allArgsFilled, encodableTrees]);
 
-  // Mirror the live encoded output into the field as the form changes.
   useEffect(() => {
     if (encodedPreview) setCalldataField(encodedPreview);
   }, [encodedPreview]);
@@ -339,7 +335,6 @@ export const AddCustomActionModal = ({
   const calldataFieldIsEncoded =
     encodedPreview !== null && trimmedCalldataField === encodedPreview;
 
-  // Decode a pasted calldata blob into the function + args.
   const handleDecode = () => {
     const data = trimmedCalldataField;
     if (!isHex(data) || data.length < 10) {
@@ -366,7 +361,6 @@ export const AddCustomActionModal = ({
     }
   };
 
-  // Clear the field and the function/args it was driving.
   const handleClearCalldata = () => {
     setCalldataField("");
     setFunctionName("");

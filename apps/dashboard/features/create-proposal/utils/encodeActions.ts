@@ -1,77 +1,21 @@
 import {
   encodeFunctionData,
   erc20Abi,
-  isAddress,
   parseEther,
   parseUnits,
   toFunctionSignature,
   type AbiFunction,
-  type AbiParameter,
   type Hex,
 } from "viem";
+import { isAddressLike, toChecksumAddress } from "@/shared/utils/address";
+import {
+  argsToTrees,
+  resolveAddressesInTrees,
+  treesToEncodeValues,
+} from "@/features/create-proposal/utils/argTree";
 import type { ProposalAction } from "@/features/create-proposal/types";
 
 export type AddressResolver = (nameOrAddress: string) => Promise<`0x${string}`>;
-const parseArg = async (
-  type: string,
-  components: readonly AbiParameter[] | undefined,
-  value: unknown,
-  resolve: AddressResolver,
-): Promise<unknown> => {
-  const arrayMatch = type.match(/^(.*)\[(\d*)\]$/);
-  if (arrayMatch) {
-    const elementType = arrayMatch[1];
-    const fixedLength = arrayMatch[2] ? Number(arrayMatch[2]) : null;
-
-    const arr = typeof value === "string" ? JSON.parse(value) : value;
-    if (!Array.isArray(arr)) {
-      throw new Error(`Expected JSON array for type "${type}".`);
-    }
-
-    if (fixedLength !== null && arr.length !== fixedLength) {
-      throw new Error(
-        `Expected array of length ${fixedLength} for type "${type}", got ${arr.length}.`,
-      );
-    }
-
-    return Promise.all(
-      arr.map((item) => parseArg(elementType, components, item, resolve)),
-    );
-  }
-
-  if (type.startsWith("tuple")) {
-    const obj = typeof value === "string" ? JSON.parse(value) : value;
-    if (!Array.isArray(obj) || !components) {
-      throw new Error(`Expected JSON array for tuple type "${type}".`);
-    }
-    return Promise.all(
-      components.map((c, i) =>
-        parseArg(
-          c.type,
-          (c as { components?: readonly AbiParameter[] }).components,
-          obj[i],
-          resolve,
-        ),
-      ),
-    );
-  }
-
-  if (type === "address") {
-    if (typeof value !== "string") {
-      throw new Error(`Expected string for address, got ${typeof value}.`);
-    }
-    return resolve(value);
-  }
-
-  if (type === "bool") {
-    if (typeof value === "boolean") return value;
-    if (value === "true") return true;
-    if (value === "false") return false;
-    throw new Error(`Expected boolean, got "${String(value)}".`);
-  }
-
-  return value;
-};
 
 export const encodeActions = async (
   actions: ProposalAction[],
@@ -131,17 +75,16 @@ export const encodeActions = async (
         `Function "${action.functionName}" not found in the action's ABI.`,
       );
     }
-    const resolvedArgs = await Promise.all(
-      action.args.map((arg, i) => {
-        const input = fn.inputs[i];
-        if (!input) return Promise.resolve(arg);
-        return parseArg(
-          input.type,
-          (input as { components?: readonly AbiParameter[] }).components,
-          arg,
-          resolve,
-        );
-      }),
+    // The strict variant of the conversion the preview runs: the preview may degrade a
+    // half-typed array to an empty one, and an action from a shared or API draft never
+    // passed `ProposalFormSchema`, so this is the last place to catch a malformed arg.
+    const resolvedArgs = treesToEncodeValues(
+      fn.inputs,
+      await resolveAddressesInTrees(
+        fn.inputs,
+        argsToTrees(fn.inputs, action.args),
+        resolve,
+      ),
     );
     targets.push(target);
     values.push(ethValue);
@@ -162,7 +105,10 @@ export const makeAddressResolver = (
 ): AddressResolver => {
   return async (input) => {
     const trimmed = input.trim();
-    if (isAddress(trimmed)) return trimmed;
+    // Checksum-agnostic: matched strictly, a miscased address falls through to the ENS
+    // branch and fails with `Could not resolve ENS name 0x39D3…` mid-publish, for
+    // something that was never a name and that the form accepted.
+    if (isAddressLike(trimmed)) return toChecksumAddress(trimmed);
     const resolved = await getEnsAddress(trimmed);
     if (!resolved) throw new Error(`Could not resolve ENS name "${trimmed}"`);
     return resolved;

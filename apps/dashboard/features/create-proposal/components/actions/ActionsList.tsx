@@ -12,30 +12,58 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import { ActionRow } from "@/features/create-proposal/components/actions/ActionRow";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
-import { cloneAction } from "@/features/create-proposal/utils/cloneAction";
+import type { ProposalAction } from "@/features/create-proposal/types";
+
+export type ActionField = ProposalFormValues["actions"][number] & {
+  id: string;
+};
 
 interface ActionsListProps {
+  fields: ActionField[];
+  onMove: (from: number, to: number) => void;
   onEditAction: (index: number) => void;
+  onDuplicateAction: (index: number) => void;
   onDeleteAction: (index: number) => void;
 }
 
+const firstErrorIn = (value: unknown, path = ""): string | undefined => {
+  if (!value || typeof value !== "object") return undefined;
+
+  const message = (value as { message?: unknown }).message;
+  if (typeof message === "string" && message) {
+    return path ? `${path}: ${message}` : message;
+  }
+
+  if (Array.isArray(value)) {
+    for (const [index, item] of value.entries()) {
+      const found = firstErrorIn(item, `${path}[${index}]`);
+      if (found) return found;
+    }
+    return undefined;
+  }
+
+  for (const [key, item] of Object.entries(value)) {
+    if (key === "ref" || key === "type" || key === "types") continue;
+    const found = firstErrorIn(item, path ? `${path}.${key}` : key);
+    if (found) return found;
+  }
+  return undefined;
+};
+
 export const ActionsList = ({
+  fields,
+  onMove,
   onEditAction,
+  onDuplicateAction,
   onDeleteAction,
 }: ActionsListProps) => {
-  const { control, getValues } = useFormContext<ProposalFormValues>();
-  const { fields, move, insert } = useFieldArray({ control, name: "actions" });
-
-  // Insert an independent deep copy directly after the source row. `getValues`
-  // returns the raw action (without RHF's internal field id) and `insert` mints
-  // a fresh id for the copy.
-  const handleDuplicate = (index: number) => {
-    insert(index + 1, cloneAction(getValues(`actions.${index}`)));
-  };
+  const {
+    formState: { errors },
+  } = useFormContext<ProposalFormValues>();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -45,7 +73,7 @@ export const ActionsList = ({
     if (!over || active.id === over.id) return;
     const from = fields.findIndex((f) => f.id === active.id);
     const to = fields.findIndex((f) => f.id === over.id);
-    if (from >= 0 && to >= 0) move(from, to);
+    if (from >= 0 && to >= 0) onMove(from, to);
   };
 
   return (
@@ -64,14 +92,15 @@ export const ActionsList = ({
               key={field.id}
               id={field.id}
               index={index}
-              action={field}
+              action={field as ProposalAction}
               isFirst={index === 0}
               isLast={index === fields.length - 1}
-              onMoveUp={() => move(index, index - 1)}
-              onMoveDown={() => move(index, index + 1)}
+              onMoveUp={() => onMove(index, index - 1)}
+              onMoveDown={() => onMove(index, index + 1)}
               onEdit={() => onEditAction(index)}
-              onDuplicate={() => handleDuplicate(index)}
+              onDuplicate={() => onDuplicateAction(index)}
               onDelete={() => onDeleteAction(index)}
+              error={firstErrorIn(errors.actions?.[index])}
             />
           ))}
         </div>
