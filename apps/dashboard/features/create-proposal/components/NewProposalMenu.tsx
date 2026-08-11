@@ -8,24 +8,30 @@ import { Button } from "@/shared/components/design-system/buttons/button/Button"
 import { itemStatusStyles } from "@/shared/components/design-system/combobox/styles";
 import { cn } from "@/shared/utils/cn";
 
+type DataProps = Partial<Record<`data-${string}`, string | undefined>>;
+
 type NewProposalMenuProps = {
   onCreateNew: () => void;
   onImportJson: () => void;
-  triggerProps?: React.ComponentProps<typeof Button> &
-    Partial<Record<`data-${string}`, string | undefined>>;
+  // Analytics tags live on the items, not the trigger: tagging the trigger
+  // would fire the event on merely opening the menu.
+  createNewProps?: DataProps;
+  importJsonProps?: DataProps;
 };
 
 const MenuItem = ({
   label,
   onSelect,
+  ...rest
 }: {
   label: string;
   onSelect: () => void;
-}) => (
+} & DataProps) => (
   <button
     type="button"
     role="menuitem"
     onClick={onSelect}
+    {...rest}
     className={cn(
       "flex w-full items-center px-3 py-2 text-left",
       "text-primary text-sm font-normal leading-5",
@@ -40,7 +46,8 @@ const MenuItem = ({
 export const NewProposalMenu = ({
   onCreateNew,
   onImportJson,
-  triggerProps,
+  createNewProps,
+  importJsonProps,
 }: NewProposalMenuProps) => {
   const [open, setOpen] = useState(false);
 
@@ -57,11 +64,7 @@ export const NewProposalMenu = ({
           size="md"
           aria-haspopup="menu"
           aria-expanded={open}
-          {...triggerProps}
-          className={cn(
-            "flex-1 whitespace-nowrap lg:w-fit lg:flex-none",
-            triggerProps?.className,
-          )}
+          className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
         >
           <Plus className="size-4" />
           New Proposal
@@ -81,8 +84,16 @@ export const NewProposalMenu = ({
           "animate-[popover-slide-in_0.15s_ease-out]",
         )}
       >
-        <MenuItem label="Create new" onSelect={choose(onCreateNew)} />
-        <MenuItem label="Import JSON" onSelect={choose(onImportJson)} />
+        <MenuItem
+          label="Create new"
+          onSelect={choose(onCreateNew)}
+          {...createNewProps}
+        />
+        <MenuItem
+          label="Import JSON"
+          onSelect={choose(onImportJson)}
+          {...importJsonProps}
+        />
       </PopoverPrimitive.Content>
     </PopoverPrimitive.Root>
   );

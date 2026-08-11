@@ -38,7 +38,10 @@ const TABS = [
   { value: "tokenHolders", label: "Token Holders" },
 ];
 
-const DAY_IN_SECONDS = 24 * 60 * 60;
+// Last second of `date`'s local calendar day. Day-of-month arithmetic keeps it
+// correct across DST changes, where the local day is 23 or 25 hours long.
+const endOfLocalDay = (date: Date): Date =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, -1);
 
 // Every value the period switcher can hold: the presets plus its two synthetic
 // options.
@@ -135,9 +138,9 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     if (days === CUSTOM_PERIOD && customRange.from && customRange.to) {
       return {
         fromDate: Math.floor(customRange.from.getTime() / 1000),
-        // include the whole end day
-        toDate:
-          Math.floor(customRange.to.getTime() / 1000) + DAY_IN_SECONDS - 1,
+        // Include the whole end day. Next local midnight minus a second, not
+        // +86400s: on DST change days the local day isn't 24h long.
+        toDate: Math.floor(endOfLocalDay(customRange.to).getTime() / 1000),
       };
     }
     const interval = (Object.values(TimeInterval) as string[]).includes(days)

@@ -403,6 +403,8 @@ export const Delegates = ({
               setSortOrder("desc");
             }}
             isActive={!!(minValue || maxValue)}
+            minValue={minValue}
+            maxValue={maxValue}
           />
         </div>
       ),
