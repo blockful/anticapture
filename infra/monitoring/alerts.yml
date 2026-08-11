@@ -103,7 +103,7 @@ groups:
         annotations:
           summary: "[WARNING] eRPC cache hit rate is below 25%"
           description: >
-            eRPC cache hit rate has been {{ printf "%.1f" $value }} for 15 minutes while
+            eRPC cache hit rate has been {{ printf "%.1f" $value }} for 1 hour while
             cache traffic is active. Check finality classification, PostgreSQL health,
             cache policy matching, and whether indexers are requesting identical block bodies.
 

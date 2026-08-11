@@ -11,9 +11,12 @@ route:
   group_interval: 5m
   repeat_interval: 1h
   routes:
-    # ponytail: warnings are informational — re-pinging every hour is what turns one
-    # ongoing condition into a wall of identical Slack messages.
-    - matchers: [severity="warning"]
+    # ponytail: only the cache-hit-rate alert is this chatty — it tracks a baseline
+    # that sits near the threshold, so re-pinging hourly turns one ongoing condition
+    # into a wall of identical Slack messages. Other warnings (ErpcNodefulNoTraffic,
+    # IndexerSyncStale, PostgreSQLHighConnections) still repeat hourly; widen this
+    # matcher per alertname if one of them proves noisy too.
+    - matchers: [alertname="ErpcCacheHitRateLow"]
       receiver: default
       repeat_interval: 12h
 
