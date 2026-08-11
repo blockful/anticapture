@@ -21,3 +21,5 @@ export * from "./votes/offchainNonVoters";
 export * from "./event-relevance";
 export * from "./health";
 export * from "./revenue";
+export * from "./addresses";
+export * from "./voting-power/inactive-summary";

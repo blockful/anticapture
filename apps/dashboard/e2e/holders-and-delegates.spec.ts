@@ -83,25 +83,36 @@ const applyAddressFilter = async (
   await popoverApply.evaluate((el: HTMLElement) => el.click());
 };
 
-test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
-  test("renders Holders & Delegates heading", async ({ goto, page }) => {
+const selectTab = async (page: Page, label: "Delegates" | "Token Holders") => {
+  const tab = page.locator('[role="tab"]').filter({ hasText: label });
+  await expect(tab).toBeVisible({ timeout: 15_000 });
+  if ((await tab.getAttribute("aria-selected")) !== "true") {
+    await tab.click();
+  }
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+};
+
+test.describe("Stakeholders page (/ens/stakeholders)", () => {
+  test("redirects legacy Holders & Delegates URL", async ({ goto, page }) => {
     await goto("/ens/holders-and-delegates");
+    await expect(page).toHaveURL(/\/ens\/stakeholders/);
+  });
+
+  test("renders Stakeholders heading", async ({ goto, page }) => {
+    await goto("/ens/stakeholders");
     await expect(
-      page.locator("h4").filter({ hasText: "Holders & Delegates" }),
+      page.locator("h4").filter({ hasText: "Stakeholders" }),
     ).toBeVisible();
   });
 
-  test("shows Token Holders tab as default", async ({ goto, page }) => {
-    await goto("/ens/holders-and-delegates");
-    const tokenHoldersTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Token Holders" });
-    await expect(tokenHoldersTab).toBeVisible({ timeout: 15_000 });
-    await expect(tokenHoldersTab).toHaveAttribute("aria-selected", "true");
+  test("shows Delegates tab as default", async ({ goto, page }) => {
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Delegates");
   });
 
   test("Token Holders table shows key columns", async ({ goto, page }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Token Holders");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -110,13 +121,9 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
   });
 
   test("switching to Delegates tab updates content", async ({ goto, page }) => {
-    await goto("/ens/holders-and-delegates");
-    const delegatesTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Delegates" });
-    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
-    await delegatesTab.click();
-    await expect(delegatesTab).toHaveAttribute("aria-selected", "true");
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Token Holders");
+    await selectTab(page, "Delegates");
     // Delegates tab shows Voting Power column
     await expect(page.getByText(/Voting Power/).first()).toBeVisible({
       timeout: 15_000,
@@ -124,17 +131,13 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
   });
 
   test("Delegates tab URL reflects tab state", async ({ goto, page }) => {
-    await goto("/ens/holders-and-delegates");
-    const delegatesTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Delegates" });
-    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
-    await delegatesTab.click();
-    await expect(page).toHaveURL(/tab=delegates/);
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Token Holders");
+    await expect(page).toHaveURL(/tab=tokenHolders/);
   });
 
   test("address filter affordance is present", async ({ goto, page }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
     // Address column has a filter popover trigger
     await expect(page.getByText("Address").first()).toBeVisible({
       timeout: 15_000,
@@ -142,7 +145,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
   });
 
   test("opening a holder drawer shows drawer tabs", async ({ goto, page }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Token Holders");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -175,16 +179,17 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       ).toBeHidden();
       return;
     }
-    const cells = rows.first().locator("td");
-    const cellCount = await cells.count();
-    if (cellCount < 3) {
+    const detailsButton = rows.first().getByRole("button", {
+      name: "Details",
+    });
+    if ((await detailsButton.count()) === 0) {
       await expect(
         page.getByText(/we ran into a hiccup/i).first(),
         "holders table rendered an error state",
       ).toBeHidden();
       return;
     }
-    await cells.nth(2).click({ force: true });
+    await detailsButton.click({ force: true });
     await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
     // Check drawer tab labels
     await expect(
@@ -202,12 +207,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
-    const delegatesTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Delegates" });
-    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
-    await delegatesTab.click();
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Delegates");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -235,16 +236,17 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
       ).toBeHidden();
       return;
     }
-    const cells = rows.first().locator("td");
-    const cellCount = await cells.count();
-    if (cellCount < 3) {
+    const detailsButton = rows.first().getByRole("button", {
+      name: "Details",
+    });
+    if ((await detailsButton.count()) === 0) {
       await expect(
         page.getByText(/we ran into a hiccup/i).first(),
         "delegates table rendered an error state",
       ).toBeHidden();
       return;
     }
-    await cells.nth(2).click({ force: true });
+    await detailsButton.click({ force: true });
     await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
     await expect(
       page.locator('[role="tab"]').filter({ hasText: "Vote Composition" }),
@@ -258,7 +260,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Token Holders");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -275,12 +278,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
-    const delegatesTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Delegates" });
-    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
-    await delegatesTab.click();
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Delegates");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -297,7 +296,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Token Holders");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -322,14 +322,18 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Token Holders");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
     const balanceHeader = page
       .locator("table thead")
       .first()
-      .getByRole("button", { name: /^Balance/ });
+      .getByText(/^Balance/)
+      .locator("..")
+      .getByRole("button")
+      .first();
     await expect(balanceHeader).toBeVisible();
     // First click on Token Holders headers can be dropped before React is
     // ready; retry click + URL assertion until one toggle lands.
@@ -343,7 +347,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Token Holders");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -364,19 +369,18 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
-    const delegatesTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Delegates" });
-    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
-    await delegatesTab.click();
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Delegates");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
     const vpHeader = page
       .locator("table thead")
       .first()
-      .getByRole("button", { name: /^Voting Power/ });
+      .getByText(/^Voting Power/)
+      .locator("..")
+      .getByRole("button")
+      .first();
     await expect(vpHeader).toBeVisible();
     await vpHeader.click();
     await expect(page).toHaveURL(/sortBy=votingPower|sort=/, {
@@ -385,12 +389,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
   });
 
   test("Delegates sort by Change cycles sort state", async ({ goto, page }) => {
-    await goto("/ens/holders-and-delegates");
-    const delegatesTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Delegates" });
-    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
-    await delegatesTab.click();
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Delegates");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -409,12 +409,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
-    const delegatesTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Delegates" });
-    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
-    await delegatesTab.click();
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Delegates");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -433,12 +429,8 @@ test.describe("Holders & Delegates page (/ens/holders-and-delegates)", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
-    const delegatesTab = page
-      .locator('[role="tab"]')
-      .filter({ hasText: "Delegates" });
-    await expect(delegatesTab).toBeVisible({ timeout: 15_000 });
-    await delegatesTab.click();
+    await goto("/ens/stakeholders");
+    await selectTab(page, "Delegates");
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });

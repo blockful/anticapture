@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import type { Address } from "viem";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 
 import {
   useDelegates,
@@ -18,14 +18,22 @@ import { Button } from "@/shared/components/design-system/buttons/button/Button"
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+
+const AMOUNT_SORT_OPTIONS = [
+  { value: "largest-first", label: "Largest first" },
+  { value: "smallest-first", label: "Smallest first" },
+];
 
 interface DelegateTableData {
   address: string;
@@ -39,8 +47,18 @@ interface DelegateTableData {
   delegators: number;
 }
 
+/**
+ * Deliberately a reduced version of the shared `Delegates` component: the AAVE
+ * API registers no proposal endpoints, so the quorum percentage, the activity
+ * ring, the inactive states and the average vote timing have no data here.
+ */
 export function DelegationTable({ days }: { days: TimeInterval }) {
   const pageLimit: number = 20;
+
+  const fromDate = useMemo(
+    () => Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days],
+    [days],
+  );
 
   const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
   const [currentAddressFilter, setCurrentAddressFilter] =
@@ -60,8 +78,20 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
       "balance",
     ]).withDefault("votingPower"),
   );
+  const [minValue, setMinValue] = useQueryState("minValue");
+  const [maxValue, setMaxValue] = useQueryState("maxValue");
   const daoId = DaoIdEnum.AAVE;
   const decimals = 18;
+
+  // API expects raw token units; URL values are human-readable and user-editable
+  const toRawUnits = (value: string | null): string | undefined => {
+    if (!value) return undefined;
+    try {
+      return parseUnits(value, decimals).toString();
+    } catch {
+      return undefined;
+    }
+  };
 
   const handleAddressFilterApply = (address: string | undefined) => {
     setCurrentAddressFilter(address || "");
@@ -92,10 +122,12 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
       orderBy: orderByMap[sortBy as DelegateSortKey],
       orderDirection: sortOrder,
       daoId,
-      days,
+      fromDate,
       address: currentAddressFilter || undefined,
       limit: pageLimit,
       skipActivity: true,
+      fromValue: toRawUnits(minValue),
+      toValue: toRawUnits(maxValue),
     });
 
   const { isMobile } = useScreenSize();
@@ -299,26 +331,34 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         );
       },
       header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-end p-0"
-          onClick={() => handleSort("votingPower")}
-        >
+        <div className="flex w-full items-center justify-end gap-1.5">
           <h4 className="text-table-header whitespace-nowrap">
             Delegation received
           </h4>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              sortBy === "votingPower"
-                ? sortOrder === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
+          <AmountFilter
+            filterId="aave-delegates-voting-power-filter"
+            sortOptions={AMOUNT_SORT_OPTIONS}
+            onApply={(filterState: AmountFilterState) => {
+              if (filterState.sortOrder) {
+                setSortBy("votingPower");
+                setSortOrder(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+              }
+              setMinValue(filterState.minAmount || null);
+              setMaxValue(filterState.maxAmount || null);
+            }}
+            onReset={() => {
+              setMinValue(null);
+              setMaxValue(null);
+              setSortBy("votingPower");
+              setSortOrder("desc");
+            }}
+            isActive={!!(minValue || maxValue)}
+            minValue={minValue}
+            maxValue={maxValue}
           />
-        </Button>
+        </div>
       ),
       meta: {
         columnClassName: "w-40",
@@ -477,7 +517,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
           columns={delegateColumns}
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
           onRowClick={(row) => setDrawerAddress(row.address as Address)}
-          size="sm"
+          withRowBorders
           hasMore={hasNextPage}
           isLoadingMore={fetchingMore}
           onLoadMore={fetchNextPage}

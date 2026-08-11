@@ -9,7 +9,7 @@ import {
   useOffchainSearchProposals,
   useSearchProposals,
 } from "@anticapture/client/hooks";
-import { Building2, Landmark, MessageSquare, Plus, Search } from "lucide-react";
+import { Building2, Landmark, MessageSquare, Search } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import {
@@ -26,7 +26,12 @@ import {
   DraftCard,
   DraftEmptyState,
   DeleteDraftModal,
+  ImportJsonModal,
+  NewProposalMenu,
+  clearImportedProposal,
+  stashImportedProposal,
   useDrafts,
+  type ImportedProposal,
 } from "@/features/create-proposal";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { copyDraftShareUrl } from "@/features/create-proposal/utils/draftShareUrl";
@@ -48,6 +53,7 @@ import {
   getTimeText,
 } from "@/features/governance/utils";
 import { TheSectionLayout } from "@/shared/components";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { useLogin } from "@/shared/services/auth/LoginProvider";
 import { useAuthSession } from "@/shared/services/auth/useAuthSession";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
@@ -107,7 +113,6 @@ const toGovernanceProposal = (
       against: againstVotes.toFixed(2),
       abstain: abstainVotes.toFixed(2),
       total: total.toFixed(2),
-      // Keep precision for bar widths; consumers round for display
       forPercentage: forPercentage.toFixed(2),
       againstPercentage: againstPercentage.toFixed(2),
       abstainPercentage: abstainPercentage.toFixed(2),
@@ -132,8 +137,6 @@ export const GovernanceSection = () => {
   const canCreateProposal = canCreateProposalForDao(daoIdEnum);
   const { decimals } = daoConfig[daoIdEnum];
   const router = useRouter();
-  // Drafts are platform-account data: gates run on the session (email and
-  // Google authors have no wallet), not on the wallet connection.
   const { data: session, isPending: isSessionPending } = useAuthSession();
   const hasSession = !!session;
   const { openLogin } = useLogin();
@@ -152,6 +155,7 @@ export const GovernanceSection = () => {
     ]).withDefault("all"),
   );
 
+  const [importOpen, setImportOpen] = useState(false);
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
   const {
     drafts,
@@ -228,8 +232,6 @@ export const GovernanceSection = () => {
     return tabs;
   }, [canCreateProposal, hasSession]);
 
-  // DAOs without offchain proposals ignore the source filter — otherwise a
-  // stale ?source=snapshot in the URL would render an empty, unrecoverable list
   const effectiveSource = hasOffchain ? sourceFilter : "all";
   const showOnchain = effectiveSource !== "snapshot";
   const showOffchain = hasOffchain && effectiveSource !== "governor";
@@ -241,9 +243,6 @@ export const GovernanceSection = () => {
     (showOnchain && isOnchainPaginationLoading) ||
     (showOffchain && isOffchainPaginationLoading);
 
-  // Both sources are paginated independently, so the merged list is only
-  // chronologically safe down to the older of the two loaded frontiers —
-  // items below that line could still interleave with unfetched pages.
   const mergedProposals = useMemo<MergedProposalItem[]>(() => {
     const onchainList = showOnchain
       ? isSearchActive
@@ -327,8 +326,6 @@ export const GovernanceSection = () => {
   ]);
 
   useEffect(() => {
-    // Only reset after the session RESOLVES signed-out — resetting during the
-    // initial pending state would eat a legitimate ?tab=drafts deep link.
     if (
       activeTab === "drafts" &&
       (!canCreateProposal || (!isSessionPending && !hasSession))
@@ -362,12 +359,25 @@ export const GovernanceSection = () => {
     return () => observer.disconnect();
   }, [handleLoadMore, isSearchActive]);
 
-  const handleNewProposal = () => {
+  const goToNewProposal = () => {
+    const target = `${basePath}/proposals/new`;
     if (!hasSession) {
-      openLogin({ redirectTo: `${basePath}/proposals/new` });
-    } else {
-      router.push(`${basePath}/proposals/new`);
+      openLogin({
+        redirectTo: target,
+        onDismiss: () => clearImportedProposal(daoId),
+      });
+      return;
     }
+    router.push(target);
+  };
+
+  const handleImported = (values: ImportedProposal): boolean => {
+    if (!stashImportedProposal(daoId, values)) {
+      showCustomToast("Could not carry the import to the form", "error");
+      return false;
+    }
+    goToNewProposal();
+    return true;
   };
 
   const forumLink = daoConfig[daoIdEnum]?.forumLink;
@@ -388,21 +398,37 @@ export const GovernanceSection = () => {
         </Button>
       )}
       {canCreateProposal && (
-        <Button
-          variant="primary"
-          size="md"
-          onClick={handleNewProposal}
-          className="flex-1 whitespace-nowrap lg:w-fit lg:flex-none"
-          data-umami-event="proposal_create_click"
-          data-umami-event-dao={daoId}
-          data-ph-event="proposal_create_click"
-          data-ph-source="governance_overview"
-          data-ph-dao={daoId}
-        >
-          <Plus className="size-4" />
-          New Proposal
-        </Button>
+        <NewProposalMenu
+          onCreateNew={goToNewProposal}
+          onImportJson={() => setImportOpen(true)}
+          createNewProps={{
+            "data-umami-event": "proposal_create_click",
+            "data-umami-event-dao": daoId,
+            "data-ph-event": "proposal_create_click",
+            "data-ph-source": "governance_overview",
+            "data-ph-dao": daoId,
+          }}
+          importJsonProps={{
+            "data-umami-event": "proposal_import_json_click",
+            "data-umami-event-dao": daoId,
+            "data-ph-event": "proposal_import_json_click",
+            "data-ph-source": "governance_overview",
+            "data-ph-dao": daoId,
+          }}
+        />
       )}
+      {/* Mounted beside the trigger rather than in the page body: the dialog
+          portals out anyway, and the header is rendered from more than one branch
+          below, so this is the one place it is guaranteed to exist wherever the
+          menu that opens it does. */}
+      {canCreateProposal && (
+        <ImportJsonModal
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          onImport={handleImported}
+        />
+      )}
+      <ReportPanelButton panel="Proposals" />
     </div>
   );
 

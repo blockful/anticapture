@@ -2,7 +2,11 @@ import { parseEther } from "viem";
 import { describe, it, expect, beforeEach } from "vitest";
 import { z } from "zod";
 
-import { FeedEventType, FeedRelevance } from "@/lib/constants";
+import {
+  FeedEventType,
+  FeedRelevance,
+  FeedRelevanceFilter,
+} from "@/lib/constants";
 import { DaoIdEnum } from "@/lib/enums";
 import { getDaoRelevanceThreshold } from "@/lib/eventRelevance";
 import {
@@ -36,7 +40,7 @@ const createRequest = (overrides: Partial<FeedRequest> = {}): FeedRequest => ({
   limit: 10,
   orderBy: "timestamp",
   orderDirection: "desc",
-  relevance: FeedRelevance.MEDIUM,
+  relevance: FeedRelevanceFilter.MEDIUM,
   ...overrides,
 });
 
@@ -158,7 +162,7 @@ describe("FeedService", () => {
       ];
 
       const result = await service.getFeedEvents(
-        createRequest({ relevance: FeedRelevance.LOW }),
+        createRequest({ relevance: FeedRelevanceFilter.LOW }),
       );
 
       expect(result.items[0]?.relevance).toBe(FeedRelevance.LOW);
@@ -185,7 +189,7 @@ describe("FeedService", () => {
       ];
 
       const result = await service.getFeedEvents(
-        createRequest({ relevance: FeedRelevance.LOW }),
+        createRequest({ relevance: FeedRelevanceFilter.LOW }),
       );
 
       expect(result.items[0]?.relevance).toBe(FeedRelevance.HIGH);
@@ -208,11 +212,64 @@ describe("FeedService", () => {
       ];
 
       const result = await service.getFeedEvents(
-        createRequest({ relevance: FeedRelevance.MEDIUM }),
+        createRequest({ relevance: FeedRelevanceFilter.MEDIUM }),
       );
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]?.relevance).toBe(FeedRelevance.MEDIUM);
+    });
+
+    it("should keep events below every tier when relevance is ALL", async () => {
+      simpleRepo.items = [
+        createFeedEvent({
+          type: "VOTE",
+          // well under the LOW threshold, so MEDIUM (the default) drops it
+          value: parseEther("1"),
+          logIndex: 0,
+        }),
+        createFeedEvent({
+          type: "VOTE",
+          value: ensThresholds[FeedEventType.VOTE][FeedRelevance.HIGH],
+          logIndex: 1,
+        }),
+      ];
+
+      const result = await service.getFeedEvents(
+        createRequest({ relevance: FeedRelevanceFilter.ALL }),
+      );
+
+      expect(result.items).toHaveLength(2);
+      expect(result.items[0]?.relevance).toBe(FeedRelevance.LOW);
+      expect(result.items[1]?.relevance).toBe(FeedRelevance.HIGH);
+    });
+
+    it("should still scope ALL to the requested event types", async () => {
+      simpleRepo.items = [
+        createFeedEvent({ type: "VOTE", value: parseEther("1"), logIndex: 0 }),
+      ];
+
+      // ALL zeroes the value floor but keeps one entry per type, since the
+      // repository derives the type filter from those keys.
+      const thresholds: Partial<Record<FeedEventType, bigint>> = {};
+      const spyRepo = {
+        items: simpleRepo.items,
+        getFeedEvents: async (
+          _req: FeedRequest,
+          valueThresholds: Partial<Record<FeedEventType, bigint>>,
+        ) => {
+          Object.assign(thresholds, valueThresholds);
+          return { items: simpleRepo.items, totalCount: 1 };
+        },
+      };
+
+      await new FeedService(DaoIdEnum.ENS, spyRepo).getFeedEvents(
+        createRequest({ relevance: FeedRelevanceFilter.ALL }),
+      );
+
+      expect(Object.keys(thresholds).sort()).toEqual(
+        Object.keys(ensThresholds).sort(),
+      );
+      expect(Object.values(thresholds).every((v) => v === 0n)).toBe(true);
     });
 
     it("should use NOUNS thresholds for NOUNS dao", async () => {
@@ -223,7 +280,7 @@ describe("FeedService", () => {
       ];
 
       const result = await nounsService.getFeedEvents(
-        createRequest({ relevance: FeedRelevance.MEDIUM }),
+        createRequest({ relevance: FeedRelevanceFilter.MEDIUM }),
       );
 
       expect(result.items).toHaveLength(2);

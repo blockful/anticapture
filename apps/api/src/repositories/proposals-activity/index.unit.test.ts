@@ -136,7 +136,7 @@ describe("DrizzleProposalsActivityRepository", () => {
 
   describe("getUserVotes", () => {
     it("returns empty array when proposalIds is empty", async () => {
-      const result = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, []);
+      const result = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, [], 0);
       expect(result).toHaveLength(0);
     });
 
@@ -149,9 +149,12 @@ describe("DrizzleProposalsActivityRepository", () => {
           createVote({ txHash: "0xvoteB", voterAccountId: OTHER_VOTER }),
         ]);
 
-      const result = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, [
-        "proposal-1",
-      ]);
+      const result = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        0,
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0]?.id).toBe("0xvoteA");
@@ -177,10 +180,12 @@ describe("DrizzleProposalsActivityRepository", () => {
         }),
       ]);
 
-      const result = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, [
-        "proposal-uni",
-        "proposal-arb",
-      ]);
+      const result = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-uni", "proposal-arb"],
+        0,
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0]?.id).toBe("0xvoteUni");
@@ -200,9 +205,12 @@ describe("DrizzleProposalsActivityRepository", () => {
           createVote({ txHash: "0xvote2", proposalId: "proposal-2" }),
         ]);
 
-      const result = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, [
-        "proposal-1",
-      ]);
+      const result = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        0,
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0]?.id).toBe("0xvote1");
@@ -223,9 +231,12 @@ describe("DrizzleProposalsActivityRepository", () => {
           createVote({ txHash: "0xvote2", proposalId: "proposal-2" }),
         ]);
 
-      const result = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, [
-        hostileId,
-      ]);
+      const result = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        [hostileId],
+        0,
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0]?.proposal_id).toBe(hostileId);
@@ -251,15 +262,123 @@ describe("DrizzleProposalsActivityRepository", () => {
           createVote({ txHash: "0xvote3", proposalId: "proposal-3" }),
         ]);
 
-      const result = await repository.getUserVotes(VOTER, DaoIdEnum.UNI, [
-        "proposal-1",
-        "proposal-2",
-        "proposal-3",
-      ]);
+      const result = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1", "proposal-2", "proposal-3"],
+        0,
+      );
 
       expect(result).toHaveLength(3);
       const ids = result.map((v) => v.id).sort();
       expect(ids).toEqual(["0xvote1", "0xvote2", "0xvote3"]);
+    });
+
+    it("excludes votes cast after activityEnd", async () => {
+      await db
+        .insert(proposalsOnchain)
+        .values(createProposal({ id: "proposal-1", timestamp: 1699700000n }));
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-1",
+          timestamp: 1699900000n,
+        }),
+      );
+
+      const votes = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        0,
+        1699800000,
+      );
+
+      expect(votes).toEqual([]);
+    });
+
+    it("keeps votes cast at or before activityEnd", async () => {
+      await db
+        .insert(proposalsOnchain)
+        .values(createProposal({ id: "proposal-1", timestamp: 1699700000n }));
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-1",
+          timestamp: 1699800000n,
+        }),
+      );
+
+      const votes = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        0,
+        1699800000,
+      );
+
+      expect(votes).toHaveLength(1);
+    });
+
+    it("keeps every vote when no activityEnd is given", async () => {
+      await db
+        .insert(proposalsOnchain)
+        .values(createProposal({ id: "proposal-1", timestamp: 1699700000n }));
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-1",
+          timestamp: 1699900000n,
+        }),
+      );
+
+      const votes = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        0,
+      );
+
+      expect(votes).toHaveLength(1);
+    });
+
+    it("excludes votes cast before activityStart", async () => {
+      await db
+        .insert(proposalsOnchain)
+        .values(createProposal({ id: "proposal-1", timestamp: 1699700000n }));
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-1",
+          timestamp: 1699750000n,
+        }),
+      );
+
+      const votes = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        1699800000,
+      );
+
+      expect(votes).toEqual([]);
+    });
+
+    it("keeps votes cast at or after activityStart", async () => {
+      await db
+        .insert(proposalsOnchain)
+        .values(createProposal({ id: "proposal-1", timestamp: 1699700000n }));
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-1",
+          timestamp: 1699800000n,
+        }),
+      );
+
+      const votes = await repository.getUserVotes(
+        VOTER,
+        DaoIdEnum.UNI,
+        ["proposal-1"],
+        1699800000,
+      );
+
+      expect(votes).toHaveLength(1);
     });
   });
 
@@ -282,6 +401,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         DaoIdEnum.UNI,
         1699950000,
         100000,
+        0,
       );
 
       expect(result).toHaveLength(1);
@@ -298,7 +418,7 @@ describe("DrizzleProposalsActivityRepository", () => {
         }),
       ]);
 
-      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000);
+      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000, 0);
 
       expect(result).toHaveLength(1);
       expect(result[0]?.id).toBe("active");
@@ -313,9 +433,262 @@ describe("DrizzleProposalsActivityRepository", () => {
         DaoIdEnum.UNI,
         9999999999,
         100,
+        0,
       );
 
       expect(result).toHaveLength(0);
+    });
+
+    it("excludes proposals that only open after activityEnd", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "inside",
+          txHash: "0xtx1",
+          timestamp: 1699900000n,
+        }),
+        createProposal({
+          id: "after",
+          txHash: "0xtx2",
+          timestamp: 1700200000n,
+        }),
+      ]);
+
+      const result = await repository.getProposals(
+        DaoIdEnum.UNI,
+        0,
+        100000,
+        0,
+        1700000000,
+      );
+
+      expect(result.map((p) => p.id)).toEqual(["inside"]);
+    });
+
+    it("excludes a proposal created inside the window whose voting opens after it", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "votable",
+          txHash: "0xtx1",
+          timestamp: 1699800000n,
+        }),
+        createProposal({
+          id: "not-open-yet",
+          txHash: "0xtx2",
+          timestamp: 1699990000n,
+        }),
+      ]);
+
+      // 20000s of voting delay: `not-open-yet` is created before activityEnd but
+      // only becomes votable at 1700010000, past the end of the window.
+      const result = await repository.getProposals(
+        DaoIdEnum.UNI,
+        0,
+        100000,
+        20000,
+        1700000000,
+      );
+
+      expect(result.map((p) => p.id)).toEqual(["votable"]);
+    });
+
+    it("keeps every proposal after activityStart when no activityEnd is given", async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "inside",
+          txHash: "0xtx1",
+          timestamp: 1699900000n,
+        }),
+        createProposal({
+          id: "after",
+          txHash: "0xtx2",
+          timestamp: 1700200000n,
+        }),
+      ]);
+
+      const result = await repository.getProposals(DaoIdEnum.UNI, 0, 100000, 0);
+
+      expect(result).toHaveLength(2);
+    });
+  });
+
+  describe("getProposalsWithVotesAndPagination", () => {
+    beforeEach(async () => {
+      await db.insert(proposalsOnchain).values([
+        createProposal({
+          id: "proposal-1",
+          txHash: "0xtx1",
+          status: "EXECUTED",
+          timestamp: 1699900000n,
+        }),
+        createProposal({
+          id: "proposal-2",
+          txHash: "0xtx2",
+          status: "DEFEATED",
+          timestamp: 1699800000n,
+        }),
+        createProposal({
+          id: "proposal-3",
+          txHash: "0xtx3",
+          status: "ACTIVE",
+          timestamp: 1699700000n,
+        }),
+      ]);
+    });
+
+    const getPage = () =>
+      repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        0,
+        0,
+        10,
+        "timestamp",
+        "desc",
+      );
+
+    it("returns the proposal page with a matching total count", async () => {
+      const result = await getPage();
+
+      expect(result.proposals.map((p) => p.proposal.id)).toEqual([
+        "proposal-1",
+        "proposal-2",
+        "proposal-3",
+      ]);
+      expect(result.totalCount).toBe(3);
+    });
+
+    it("drops proposals opened after activityEnd from the page and the count", async () => {
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        0,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        1699800000,
+      );
+
+      expect(result.proposals.map((p) => p.proposal.id)).toEqual([
+        "proposal-2",
+        "proposal-3",
+      ]);
+      expect(result.totalCount).toBe(2);
+    });
+
+    it("keeps the proposal but drops a vote cast after activityEnd", async () => {
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-3",
+          timestamp: 1699900000n,
+        }),
+      );
+
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        0,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        1699800000,
+      );
+
+      const proposal3 = result.proposals.find(
+        (p) => p.proposal.id === "proposal-3",
+      );
+      // The proposal opened inside the window, so it stays listed; the vote
+      // landed after the window closed, so it must not be attached.
+      expect(proposal3).toBeDefined();
+      expect(proposal3!.userVote).toBeNull();
+      expect(result.totalCount).toBe(2);
+    });
+
+    it("keeps the proposal but drops a vote cast before activityStart", async () => {
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-3",
+          timestamp: 1699720000n,
+        }),
+      );
+
+      // proposal-3 opens at 1699700000 and stays votable until 1699800000, so
+      // it overlaps a window starting at 1699750000 even though the vote does
+      // not.
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        1699750000,
+        100000,
+        0,
+        0,
+        10,
+        "timestamp",
+        "desc",
+      );
+
+      const proposal3 = result.proposals.find(
+        (p) => p.proposal.id === "proposal-3",
+      );
+      expect(proposal3).toBeDefined();
+      expect(proposal3!.userVote).toBeNull();
+    });
+
+    // Without the voting delay on the upper bound this proposal is listed with
+    // no vote attached, which reads as a delegate who skipped a proposal they
+    // could not yet vote on.
+    it("drops a proposal whose voting only opens after activityEnd", async () => {
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        150000,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        1699900000,
+      );
+
+      // proposal-1 opens at 1699900000 + 150000, past the window; proposal-2 and
+      // proposal-3 open at 1699950000 and 1699850000 respectively.
+      expect(result.proposals.map((p) => p.proposal.id)).toEqual([
+        "proposal-3",
+      ]);
+      expect(result.totalCount).toBe(1);
+    });
+
+    it("keeps a vote cast inside the window attached to its proposal", async () => {
+      await db.insert(votesOnchain).values(
+        createVote({
+          proposalId: "proposal-3",
+          timestamp: 1699750000n,
+        }),
+      );
+
+      const result = await repository.getProposalsWithVotesAndPagination(
+        VOTER,
+        0,
+        100000,
+        0,
+        0,
+        10,
+        "timestamp",
+        "desc",
+        undefined,
+        1699800000,
+      );
+
+      const proposal3 = result.proposals.find(
+        (p) => p.proposal.id === "proposal-3",
+      );
+      expect(proposal3!.userVote).not.toBeNull();
     });
   });
 });

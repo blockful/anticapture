@@ -20,12 +20,11 @@ import { isWalletSessionStale } from "@/shared/services/auth/walletSession";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export type OpenLoginOptions = {
-  /** Route to navigate to once the user authenticates. */
   redirectTo?: string;
+  onDismiss?: () => void;
 };
 
 type LoginContextValue = {
-  /** Opens the sign-in modal. */
   openLogin: (options?: OpenLoginOptions) => void;
   isOpen: boolean;
 };
@@ -46,36 +45,18 @@ export function LoginProvider({
   const { status: walletStatus, address } = useAccount();
   const { connectModalOpen } = useConnectModal();
   const [isOpen, setIsOpen] = useState(false);
-  // Where to land after sign-in (login-gated pages pass their own route).
-  // Cleared when the modal is dismissed without authenticating.
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
+
+  const onDismissRef = useRef<(() => void) | null>(null);
 
   const openLogin = useCallback((options?: OpenLoginOptions) => {
     setRedirectTo(options?.redirectTo ?? null);
+    onDismissRef.current = options?.onDismiss ?? null;
     setIsOpen(true);
   }, []);
 
-  // Wallet ⟷ session coherence. Stands down while the sign-in modal OR
-  // RainbowKit's connect modal is up: the ceremony legitimately passes
-  // through connected-without-a-session and must never be yanked mid-flight.
   const authFlowActive = isOpen || connectModalOpen;
 
-  // Wallet-born sessions (SIWE stores the wallet address as the user name)
-  // stay bound to that wallet: disconnecting it, now or on a later visit,
-  // means signed out, and switching to a DIFFERENT account signs the old
-  // session out, so on-chain actions and the platform identity can't diverge.
-  // Email/Google sessions are wallet-independent.
-  //
-  // The reverse does NOT hold: a connected wallet without a session is a
-  // perfectly valid state. Connecting is not signing in, and everything
-  // on-chain (vote, delegate, publish) works from the connection alone, so
-  // nothing here disconnects the wallet and nothing re-opens the sign-in
-  // modal on its own. Signing in is always something the user asks for.
-  //
-  // Sign-out is the cleanup, not the gate. It is a request: it can be in
-  // flight, and it can fail. What actually keeps the old account safe is
-  // `isWalletSessionStale`, which every session-backed surface reads through
-  // `useAuthSession` and which is true from the render the mismatch appears.
   useEffect(() => {
     if (authFlowActive || !session) return;
     const stale = isWalletSessionStale({
@@ -88,15 +69,13 @@ export function LoginProvider({
 
   const handleOpenChange = useCallback((open: boolean) => {
     setIsOpen(open);
-    if (!open) setRedirectTo(null);
+    if (open) return;
+    setRedirectTo(null);
+    const onDismiss = onDismissRef.current;
+    onDismissRef.current = null;
+    onDismiss?.();
   }, []);
 
-  // Sign-in completion: a session for a NEW user appearing while the modal
-  // is open (SIWE verify refreshed the store, a magic link opened in this
-  // tab, a gated click that raced session loading, or an email session being
-  // replaced by a SIWE one) closes the modal and honors the redirect.
-  // Keyed by user id, so an already-signed-in user opening the modal (e.g.
-  // to connect a wallet) doesn't get it self-closed.
   const prevUserId = useRef<string | null>(null);
   useEffect(() => {
     const userId = session?.user.id ?? null;
@@ -104,6 +83,7 @@ export function LoginProvider({
       setIsOpen(false);
       if (redirectTo) router.push(redirectTo);
       setRedirectTo(null);
+      onDismissRef.current = null;
     }
     prevUserId.current = userId;
   }, [session, isOpen, redirectTo, router]);

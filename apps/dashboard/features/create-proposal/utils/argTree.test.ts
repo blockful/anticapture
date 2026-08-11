@@ -6,6 +6,7 @@ import {
   buildEmpty,
   parseArrayType,
   storageToArg,
+  storageToArgForDisplay,
   argToStorage,
   argsToTrees,
   treesToArgs,
@@ -21,8 +22,6 @@ const identityResolver = async (v: string) => v as `0x${string}`;
 const ADDR_A = "0x1111111111111111111111111111111111111111";
 const ADDR_B = "0x2222222222222222222222222222222222222222";
 
-// Re-parse composite JSON so comparisons ignore incidental whitespace and the
-// number-vs-string representation of scalar leaves.
 const normalize = (stored: string): unknown => {
   const t = stored.trim();
   if (t.startsWith("[") || t.startsWith("{")) {
@@ -131,9 +130,26 @@ describe("storage <-> tree round-trip", () => {
   });
 
   it("falls back to empty container for malformed composite storage", () => {
-    expect(storageToArg({ type: "uint256[]" } as never, "not json")).toEqual(
-      [],
-    );
+    expect(
+      storageToArgForDisplay({ type: "uint256[]" } as never, "not json"),
+    ).toEqual([]);
+  });
+
+  it("refuses that same malformed storage when the answer will be encoded", () => {
+    expect(() =>
+      storageToArg({ type: "uint256[]" } as never, "not json"),
+    ).toThrow();
+  });
+
+  it("degrades a tuple short of its components to the empty struct", () => {
+    const param = {
+      type: "tuple",
+      components: [
+        { name: "to", type: "address" },
+        { name: "memo", type: "string" },
+      ],
+    } as never;
+    expect(storageToArgForDisplay(param, `["${ADDR_A}"]`)).toEqual(["", ""]);
   });
 });
 
@@ -156,7 +172,6 @@ describe("argsToTrees / treesToArgs (top-level)", () => {
     const trees = argsToTrees(fn.inputs, args);
     const back = treesToArgs(fn.inputs, trees as ArgValue[]);
 
-    // Encoding through the existing pipeline must be byte-identical (AC8).
     const make = (a: string[]): CustomAction => ({
       type: "custom",
       contractAddress: ADDR_A,
@@ -167,6 +182,20 @@ describe("argsToTrees / treesToArgs (top-level)", () => {
     const before = await encodeActions([make(args)], identityResolver);
     const after = await encodeActions([make(back)], identityResolver);
     expect(after.calldatas[0]).toBe(before.calldatas[0]);
+  });
+
+  it("refuses an arg count the inputs don't account for", () => {
+    const inputs = [
+      { name: "amount", type: "uint256" },
+      { name: "to", type: "address" },
+    ] as const;
+
+    expect(() => argsToTrees(inputs, ["100"])).toThrow(
+      /Expected 2 arguments, got 1/,
+    );
+    expect(() => argsToTrees(inputs, ["100", ADDR_B, "extra"])).toThrow(
+      /Expected 2 arguments, got 3/,
+    );
   });
 });
 

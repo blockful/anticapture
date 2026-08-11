@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import type { Address } from "viem";
-import { zeroAddress } from "viem";
+import { parseUnits, zeroAddress } from "viem";
 
 import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
@@ -14,13 +14,15 @@ import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButt
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
+import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
+import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
 import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { useGetAddress } from "@anticapture/client/hooks";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums/TimeInterval";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import {
@@ -30,6 +32,21 @@ import {
   type OrderDirection,
 } from "@anticapture/client";
 import { parseAsAddress } from "@/shared/utils/parseAsAddress";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { useMemo } from "react";
+import { useDelegatesActivity } from "@/features/holders-and-delegates/hooks/useDelegatesActivity";
+import { InactiveDelegatesBanner } from "@/features/holders-and-delegates/components/InactiveDelegatesBanner";
+import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import {
+  ADDRESS_ENRICHMENT_GC_TIME,
+  ADDRESS_ENRICHMENT_STALE_TIME,
+} from "@/shared/constants/api";
+import { cn } from "@/shared/utils/cn";
+
+const AMOUNT_SORT_OPTIONS = [
+  { value: "largest-first", label: "Largest first" },
+  { value: "smallest-first", label: "Smallest first" },
+];
 
 interface TokenHolderTableData {
   address: Address;
@@ -40,7 +57,11 @@ interface TokenHolderTableData {
 
 const TypeCell = ({ address }: { address: Address }) => {
   const { data, isLoading: isArkhamLoading } = useGetAddress(address ?? "0x", {
-    query: { enabled: !!address },
+    query: {
+      enabled: !!address,
+      staleTime: ADDRESS_ENRICHMENT_STALE_TIME,
+      gcTime: ADDRESS_ENRICHMENT_GC_TIME,
+    },
   });
   const isContract = data?.isContract ?? null;
 
@@ -62,10 +83,14 @@ const TypeCell = ({ address }: { address: Address }) => {
 
 export const TokenHolders = ({
   days,
+  fromDate,
+  toDate,
   daoId,
   showTokenName = true,
 }: {
-  days: TimeInterval;
+  days?: TimeInterval;
+  fromDate?: number;
+  toDate?: number;
   daoId: DaoIdEnum;
   showTokenName?: boolean;
 }) => {
@@ -87,20 +112,24 @@ export const TokenHolders = ({
       Object.values(accountBalancesQueryParamsOrderByEnum),
     ).withDefault("balance"),
   );
+  const [minValue, setMinValue] = useQueryState("minValue");
+  const [maxValue, setMaxValue] = useQueryState("maxValue");
+  const { decimals } = daoConfigByDaoId[daoId];
 
   const { isMobile } = useScreenSize();
 
-  const handleAddressFilterApply = (address: string | undefined) => {
-    setCurrentAddressFilter(address || null);
+  // API expects raw token units; URL values are human-readable and user-editable
+  const toRawUnits = (value: string | null): string | undefined => {
+    if (!value) return undefined;
+    try {
+      return parseUnits(value, decimals).toString();
+    } catch {
+      return undefined;
+    }
   };
 
-  const handleSort = (field: AccountBalancesQueryParamsOrderByEnumKey) => {
-    if (orderBy === field) {
-      setOrderDirection(orderDirection === "asc" ? "desc" : "asc");
-    } else {
-      setOrderBy(field);
-      setOrderDirection("desc");
-    }
+  const handleAddressFilterApply = (address: string | undefined) => {
+    setCurrentAddressFilter(address || null);
   };
 
   // Cycles: no-arrow (balance desc) → down-arrow (signed variation desc) → up-arrow (signed variation asc) → both-arrows (variation desc) → no-arrow
@@ -132,11 +161,47 @@ export const TokenHolders = ({
     orderDirection,
     addresses: currentAddressFilter ? [currentAddressFilter] : undefined,
     fromDay: days,
+    fromDate,
+    toDate,
+    fromValue: toRawUnits(minValue),
+    toValue: toRawUnits(maxValue),
   });
 
   const rows = isLoading
     ? Array(DEFAULT_ITEMS_PER_PAGE).fill({} as TokenHolderTableData)
     : (tableData ?? []);
+
+  // Memoized because this value keys the per-delegate activity cache and the
+  // banner query: a bare Date.now() changes on every render that crosses a
+  // second boundary, discarding both caches and refetching continuously.
+  const activityFromDate = useMemo(
+    () =>
+      fromDate ??
+      (days
+        ? Math.floor(Date.now() / 1000) - DAYS_IN_SECONDS[days]
+        : undefined),
+    [fromDate, days],
+  );
+
+  const delegateAddresses = useMemo(
+    () =>
+      (tableData ?? [])
+        .map((row) => row.delegate)
+        .filter((delegate) => delegate && delegate !== zeroAddress),
+    [tableData],
+  );
+
+  // AAVE's API registers no proposal endpoints: proposals-activity 404s per
+  // delegate, and /voting-powers/inactive-summary falls through to the
+  // /voting-powers/{address} param route and 400s.
+  const hasProposalActivity = daoId !== DaoIdEnum.AAVE;
+
+  const { activityFor, isActivityLoadingFor } = useDelegatesActivity({
+    daoId,
+    addresses: hasProposalActivity ? delegateAddresses : [],
+    fromDate: activityFromDate,
+    toDate,
+  });
 
   const tokenHoldersColumns: ColumnDef<TokenHolderTableData>[] = [
     {
@@ -234,26 +299,34 @@ export const TokenHolders = ({
     {
       accessorKey: "balance",
       header: () => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-secondary w-full justify-end p-0"
-          onClick={() => handleSort("balance")}
-        >
+        <div className="flex w-full items-center justify-end gap-1.5">
           <h4 className="text-table-header whitespace-nowrap">
             Balance {!!showTokenName && `(${daoId})`}
           </h4>
-          <ArrowUpDown
-            props={{ className: "size-4" }}
-            activeState={
-              orderBy === "balance"
-                ? orderDirection === "asc"
-                  ? ArrowState.UP
-                  : ArrowState.DOWN
-                : ArrowState.DEFAULT
-            }
+          <AmountFilter
+            filterId="token-holders-balance-filter"
+            sortOptions={AMOUNT_SORT_OPTIONS}
+            onApply={(filterState: AmountFilterState) => {
+              if (filterState.sortOrder) {
+                setOrderBy("balance");
+                setOrderDirection(
+                  filterState.sortOrder === "largest-first" ? "desc" : "asc",
+                );
+              }
+              setMinValue(filterState.minAmount || null);
+              setMaxValue(filterState.maxAmount || null);
+            }}
+            onReset={() => {
+              setMinValue(null);
+              setMaxValue(null);
+              setOrderBy("balance");
+              setOrderDirection("desc");
+            }}
+            isActive={!!(minValue || maxValue)}
+            minValue={minValue}
+            maxValue={maxValue}
           />
-        </Button>
+        </div>
       ),
       cell: ({ row }) => {
         if (isLoading) {
@@ -281,7 +354,7 @@ export const TokenHolders = ({
         <Button
           variant="ghost"
           size="sm"
-          className="text-secondary w-full justify-center p-0"
+          className="text-secondary w-full justify-end p-0"
           onClick={handleVariationSort}
         >
           <h4 className="text-table-header whitespace-nowrap">
@@ -311,7 +384,7 @@ export const TokenHolders = ({
 
         if (isLoading) {
           return (
-            <div className="flex w-full items-center justify-center">
+            <div className="flex w-full items-center justify-end">
               <SkeletonRow
                 className="h-4 w-16"
                 parentClassName="flex animate-pulse"
@@ -321,15 +394,16 @@ export const TokenHolders = ({
         }
 
         return (
-          <div className="grid w-full grid-cols-2 items-center gap-2 overflow-hidden text-sm">
-            <span className="min-w-0 text-right tabular-nums">
+          <div className="flex w-full flex-col items-end justify-center overflow-hidden text-end text-sm">
+            <span className="text-primary min-w-0 tabular-nums">
               {(variation?.percentageChange || 0) < 0 ? "-" : ""}
               {formatNumberUserReadable(
                 Math.abs(variation?.absoluteChange || 0),
               )}
             </span>
             <Percentage
-              className="min-w-0"
+              className="min-w-0 text-xs"
+              iconPosition="right"
               value={variation?.percentageChange || 0}
             />
           </div>
@@ -364,20 +438,44 @@ export const TokenHolders = ({
 
         const delegate: string = row.getValue("delegate");
 
+        if (delegate === zeroAddress) {
+          return (
+            <div className="flex items-center">
+              <BadgeStatus variant={"error"}>{"Not delegated"}</BadgeStatus>
+            </div>
+          );
+        }
+
+        const activity = activityFor(delegate);
+        const isInactive =
+          activity &&
+          activity.totalProposals > 0 &&
+          activity.votedProposals === 0;
+
         return (
-          <div className="flex items-center gap-1.5">
-            {delegate === zeroAddress ? (
-              <div className="flex items-center">
-                <BadgeStatus variant={"error"}>{"Not delegated"}</BadgeStatus>
-              </div>
-            ) : (
-              <EnsAvatar
-                address={delegate as Address}
-                size="sm"
-                variant="rounded"
-              />
-            )}
-          </div>
+          <EnsAvatar
+            address={delegate as Address}
+            size="sm"
+            variant="rounded"
+            subtitle={
+              isActivityLoadingFor(delegate) ? (
+                <SkeletonRow
+                  parentClassName="flex animate-pulse"
+                  className="h-3 w-16"
+                />
+              ) : activity && activity.totalProposals > 0 ? (
+                <span
+                  className={cn(
+                    "block text-left text-xs font-normal",
+                    isInactive ? "text-warning" : "text-secondary",
+                  )}
+                >
+                  Voted {activity.votedProposals}/{activity.totalProposals}
+                  {isInactive ? " (Inactive)" : ""}
+                </span>
+              ) : undefined
+            }
+          />
         );
       },
       meta: {
@@ -388,20 +486,29 @@ export const TokenHolders = ({
 
   return (
     <>
-      <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col text-white">
-        <Table
-          columns={tokenHoldersColumns}
-          data={rows}
-          hasMore={hasNextPage}
-          isLoadingMore={isFetchingNextPage}
-          onLoadMore={fetchNextPage}
-          onRowClick={(row) => setDrawerAddress(row.address)}
-          size="sm"
-          withDownloadCSV={true}
-          csvFilename="token-holders.csv"
-          error={error}
-          fillHeight
-        />
+      <div className="min-h-75 flex h-[calc(100vh-16rem)] w-full flex-col gap-3 text-white">
+        {hasProposalActivity && (
+          <InactiveDelegatesBanner
+            daoId={daoId}
+            fromDate={activityFromDate}
+            toDate={toDate}
+          />
+        )}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <Table
+            columns={tokenHoldersColumns}
+            data={rows}
+            hasMore={hasNextPage}
+            isLoadingMore={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            onRowClick={(row) => setDrawerAddress(row.address)}
+            withRowBorders
+            withDownloadCSV={true}
+            csvFilename="token-holders.csv"
+            error={error}
+            fillHeight
+          />
+        </div>
       </div>
       <HoldersAndDelegatesDrawer
         isOpen={!!drawerAddress}

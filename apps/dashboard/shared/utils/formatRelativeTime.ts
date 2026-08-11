@@ -62,3 +62,18 @@ export function formatFullDate(timestampSeconds: number | string): string {
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+// Formats timestamp in seconds to a compact "MMM D, YY" label (e.g. "Jan 3, 25")
+export function formatShortDate(timestampSeconds: number | string): string {
+  const timestamp =
+    typeof timestampSeconds === "string"
+      ? parseInt(timestampSeconds, 10)
+      : timestampSeconds;
+
+  const date = new Date(timestamp * MILLISECONDS_PER_SECOND);
+  const month = date.toLocaleString("en-US", { month: "short" });
+  const day = date.getDate();
+  const year = String(date.getFullYear()).slice(-2);
+
+  return `${month} ${day}, ${year}`;
+}

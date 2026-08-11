@@ -1,5 +1,95 @@
 # @anticapture/dashboard
 
+## 2.13.2
+
+### Patch Changes
+
+- [#2109](https://github.com/blockful/anticapture/pull/2109) [`12e803e`](https://github.com/blockful/anticapture/commit/12e803ef4d83ac877be1c0cd15a7443d17725ab6) Thanks [@pikonha](https://github.com/pikonha)! - Sync the Token Holders and AAVE delegation amount filters with the URL so shared links show the active range.
+
+## 2.13.1
+
+### Patch Changes
+
+- [#2107](https://github.com/blockful/anticapture/pull/2107) [`c864c11`](https://github.com/blockful/anticapture/commit/c864c11e5e93f9c5698a31af9c24077899151ce9) Thanks [@pikonha](https://github.com/pikonha)! - Fix PR review findings: tag proposal-creation telemetry on the menu items instead of the trigger, keep the delegates amount filter in sync with the URL filter state, and derive the custom range end boundary from local midnight so DST days aren't off by an hour.
+
+## 2.13.0
+
+### Minor Changes
+
+- [#2102](https://github.com/blockful/anticapture/pull/2102) [`7236413`](https://github.com/blockful/anticapture/commit/723641373326a4607dbb500eca844948c62603f2) Thanks [@brunod-e](https://github.com/brunod-e)! - Import a proposal from JSON when creating one.
+
+## 2.12.0
+
+### Minor Changes
+
+- [#2084](https://github.com/blockful/anticapture/pull/2084) [`4e59732`](https://github.com/blockful/anticapture/commit/4e59732daf40b800986ab9ec42a10127b29465f4) Thanks [@brunod-e](https://github.com/brunod-e)! - Holders & Delegates v3 (DEV-562, DEV-476)
+
+  API: new endpoints backing the module. `GET /:dao/voting-powers/inactive-summary`
+  (delegated VP parked with inactive delegates), `GET /:dao/accounts/:address/delegators/historical`
+  (former delegators with VP impact, start/end and redelegation target), and
+  `GET /:dao/addresses/labels` (per-DAO treasury/vesting labels, where an unlock
+  contract whose label does not mention vesting is classified by address so the
+  dashboard can still relabel its transfers as a vesting unlock; contracts whose
+  outgoing transfers are not unlocks, such as airdrop distributors and staking
+  vaults, stay out). Adds an optional
+  `address` filter to `GET /:dao/feed/events`, and an optional `toDate` upper bound
+  to `GET /:dao/proposals-activity` so a bounded period counts only the proposals
+  inside it. That upper bound is keyed on when a proposal's voting opens (creation
+  plus the DAO voting delay), not on when it was created, so on DAOs with a
+  non-zero voting delay a proposal created inside the period whose voting only
+  opens after it no longer counts: no vote could land in the window, and counting
+  it marked delegates inactive on proposals they could not yet vote on. On
+  `GET /:dao/voting-powers/inactive-summary` that also keeps `totalProposals` at
+  zero when the window holds nothing votable, instead of reporting every delegate
+  as inactive. Both `GET /:dao/proposals-activity` and
+  `GET /:dao/voting-powers/inactive-summary` also bound the vote by `toDate`: a
+  proposal that opens near the end of the period stays votable after it, so a vote
+  cast later no longer counts as activity inside a period that closed before the
+  vote existed. The proposal is still listed, with no vote attached. The same bound
+  applies at the other end: a proposal whose voting period overlaps `fromDate` is
+  in scope, but a vote cast on it before that date happened outside the period and
+  no longer counts as activity inside it either. On
+  `GET /:dao/accounts/:address/delegators/historical`, `amount` reports the voting
+  power the queried address actually lost at the move away rather than the value
+  stored on the last delegation event: balances that move while a delegation stands
+  write no delegation row, so that value is a stale snapshot, and the share it
+  represented is instead applied to the balance the move-away event carries. Full
+  delegation therefore reports the whole balance moved, and partial delegation
+  (SCR) keeps its fraction rather than claiming the sibling delegates' part. On AAVE, `fromValue`/`toValue` on `GET /:dao/voting-powers` now filter the
+  delegated voting power alone instead of the combined total (delegated power plus
+  the account's own balance), matching both the `votingPower` ordering on the same
+  endpoint and every other DAO's behavior, so the range a client asks for matches
+  the delegation figure it renders.
+  Feed DELEGATION metadata gains an optional `delegatees` array of
+  `{ delegate, amount }`, present only when the source event split voting power
+  across more than one delegatee (partial delegation, as SCR does), ordered by
+  delegate address ascending; `delegate`/`amount` stay as they were and describe
+  the primary delegatee, so existing consumers are unaffected. Gateful re-exposes
+  the expanded surface through its aggregated OpenAPI spec (no gateway code
+  change).
+
+  Dashboard: value min/max filters on the Delegates and Token Holders tables;
+  Delegates as the default tab and the sidebar renamed to "Stakeholders"; larger
+  rows with bottom borders and a continuous activity ring; voting power shown as a
+  percentage of quorum; inactive-delegate flagging and 0/0 activity states
+  ("Inactive" / "No proposals" / "Never voted"); the inactive-VP alert banner on
+  Token Holders; clickable addresses that re-point the drawer everywhere; a
+  per-address Activity tab in the drawer, on the DAOs that serve the activity
+  feed; Buy/Sell relabeled to In / Out / Vested;
+  a dust badge and "Hide dust" switch on Top Interactions; a "Filter low importance"
+  toggle and "All time" range on Voting Power History; a MAX option and a custom
+  calendar range on the time selector, single days included; and a Former
+  Delegators view in the
+  delegate profile.
+
+- [#2097](https://github.com/blockful/anticapture/pull/2097) [`dd95b49`](https://github.com/blockful/anticapture/commit/dd95b49f054856560f4fe0a6e4175b7e4383ae53) Thanks [@alextnetto](https://github.com/alextnetto)! - Update the ENS Security Council card to the council seated in July 2026 (5/8 multisig, expires July 16, 2028) and add Compound's Proposal Guardian with its expiration
+
+### Patch Changes
+
+- [#2083](https://github.com/blockful/anticapture/pull/2083) [`7d4c104`](https://github.com/blockful/anticapture/commit/7d4c104bfc2250997bae446d99e88502c31d6ec7) Thanks [@pikonha](https://github.com/pikonha)! - Move data inconsistency report trigger from Help dropdown to inline Flag icon in each panel. The panel name is now structurally correct (it's literally where you clicked), removing the need for the dropdown, `report-panels.ts` constants, the `section` field, and the server-side allowlist.
+
+- [#2101](https://github.com/blockful/anticapture/pull/2101) [`db75781`](https://github.com/blockful/anticapture/commit/db75781b4cb59395bd6097c58b18502e7658b5ed) Thanks [@alextnetto](https://github.com/alextnetto)! - Raise the proposal description limit in the create-proposal form from 10,000 to 100,000 characters, matching the ceiling the drafts endpoint already enforces. Long governance proposals are no longer blocked from being published, and the editor footer counter warns as the new limit approaches instead of failing with a generic error.
+
 ## 2.11.1
 
 ### Patch Changes

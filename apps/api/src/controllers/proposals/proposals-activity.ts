@@ -47,6 +47,7 @@ export function proposalsActivity(
       const {
         address,
         fromDate,
+        toDate,
         skip,
         limit,
         orderBy,
@@ -59,6 +60,7 @@ export function proposalsActivity(
       const result = await service.getProposalsActivity({
         address,
         fromDate,
+        toDate,
         daoId,
         skip,
         limit,

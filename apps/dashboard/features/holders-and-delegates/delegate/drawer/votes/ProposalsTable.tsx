@@ -226,7 +226,11 @@ export const ProposalsTable = ({
           </div>
         );
       },
-      header: () => <h4 className="text-table-header">Final Result</h4>,
+      header: () => (
+        <div className="flex items-center gap-2 whitespace-nowrap font-medium">
+          Final Result
+        </div>
+      ),
     },
     {
       accessorKey: "userVote",

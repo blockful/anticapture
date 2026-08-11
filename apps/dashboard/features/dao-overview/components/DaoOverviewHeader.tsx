@@ -5,6 +5,7 @@ import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { EthereumIcon } from "@/shared/components/icons/EthereumIcon";
 import { OPMainnetIcon } from "@/shared/components/icons/OPMainnetIcon";
+import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import type {
   DaoConfiguration,
   DaoOverviewConfig,
@@ -134,6 +135,7 @@ export const DaoOverviewHeader = ({
             Forum
           </DefaultLink>
         )}
+        <ReportPanelButton panel="Overview" />
       </div>
     </div>
   );

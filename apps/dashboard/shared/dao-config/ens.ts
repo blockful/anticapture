@@ -54,20 +54,22 @@ export const ENS: DaoConfiguration = {
     },
     securityCouncil: {
       isActive: true,
-      vetoCouncilAddress: "0x552DF471a4c7Fea11Ea8d7a7b0Acc6989b902a95",
+      // SecurityCouncil contract granted PROPOSER_ROLE on the ENS timelock on
+      // 2026-07-22; expiration() returns 1847389751 (2028-07-16 19:49:11 UTC).
+      vetoCouncilAddress: "0x2acBf518b3759f6e1fA163294eda55bF1d0ae051",
       multisig: {
-        threshold: 4,
+        threshold: 5,
         signers: 8,
         externalLink:
-          "https://app.safe.global/home?safe=eth:0xaA5cD05f6B62C3af58AE9c4F3F7A2aCC2Cdc2Cc7",
+          "https://app.safe.global/home?safe=eth:0x7101B78638e34444F0a5AdE9e1149fbEeC029931",
       },
       expiration: {
-        startDate: "July 1, 2024",
-        date: "July 26 2026",
-        timestamp: 1784919179,
+        startDate: "July 22, 2026",
+        date: "July 16, 2028",
+        timestamp: 1847389751,
         alertExpiration: calculateMonthsBefore({
           monthsBeforeTimestamp: 3,
-          timestamp: 1784919179,
+          timestamp: 1847389751,
         }),
       },
     },
@@ -190,7 +192,7 @@ export const ENS: DaoConfiguration = {
             GovernanceImplementationEnum.SECURITY_COUNCIL
           ].description,
         currentSetting:
-          "ENS has a Security Council, managed by a 4/8 multisig, whose authority to cancel proposals must be renewed every two years (and will expire in July 2026).",
+          "ENS has a Security Council, managed by a 5/8 multisig, whose authority to cancel proposals must be renewed every two years (and will expire in July 2028).",
         impact: "ENS can veto malicious proposals with the Security Council.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.SECURITY_COUNCIL],
