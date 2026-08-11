@@ -6,7 +6,7 @@ import {
   findCalldataReview,
   useCalldataReviews,
 } from "@/features/governance/hooks/useCalldataReview";
-import { BadgeStatus } from "@/shared/components/design-system/badges";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 /**
@@ -29,22 +29,34 @@ export const CalldataReviewedBadge = ({
 
   if (!review) return null;
 
-  const badge = (
-    <BadgeStatus variant="success" iconVariant="success" icon={ShieldCheck}>
-      Calldata reviewed
-    </BadgeStatus>
+  const icon = (
+    <ShieldCheck
+      className="text-success size-4"
+      aria-label="Calldata reviewed"
+    />
   );
 
-  if (!asLink) return badge;
-
   return (
-    <a
-      href={review.url}
-      target="_blank"
-      rel="noreferrer"
-      className="transition-opacity hover:opacity-80"
+    <Tooltip
+      asChild
+      tooltipContent={
+        asLink
+          ? "Calldata reviewed — open the check on GitHub"
+          : "Calldata reviewed"
+      }
     >
-      {badge}
-    </a>
+      {asLink ? (
+        <a
+          href={review.url}
+          target="_blank"
+          rel="noreferrer"
+          className="flex transition-opacity hover:opacity-80"
+        >
+          {icon}
+        </a>
+      ) : (
+        <span className="flex">{icon}</span>
+      )}
+    </Tooltip>
   );
 };

@@ -6,8 +6,8 @@ import axios from "axios";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 const REPO_URL = "https://github.com/blockful/dao-proposals";
-const CONTENTS_URL =
-  "https://api.github.com/repos/blockful/dao-proposals/contents";
+const TREE_URL =
+  "https://api.github.com/repos/blockful/dao-proposals/git/trees/main?recursive=1";
 
 // DAO folders in the dao-proposals repo. DAOs missing here have no reviews.
 const REPO_DAO_DIR: Partial<Record<DaoIdEnum, string>> = {
@@ -51,15 +51,27 @@ export const useCalldataReviews = (daoId: DaoIdEnum) => {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     queryFn: async () => {
-      const { data } = await axios.get<{ name: string; type: string }[]>(
-        `${CONTENTS_URL}/src/${dir}/proposals`,
+      const { data } = await axios.get<{
+        tree: { path: string; type: string }[];
+      }>(TREE_URL);
+
+      // The check itself is the proof, so link the test file, not the folder.
+      // One entry per folder; ep-6-23 names it activeProposal.t.sol instead.
+      const checkFile = new RegExp(
+        `^src/${dir}/proposals/([^/]+)/[^/]+\\.t\\.sol$`,
       );
-      return data
-        .filter((entry) => entry.type === "dir")
-        .map((entry) => ({
-          name: entry.name,
-          url: `${REPO_URL}/tree/main/src/${dir}/proposals/${encodeURIComponent(entry.name)}`,
-        }));
+      const reviews = new Map<string, CalldataReview>();
+
+      for (const entry of data.tree) {
+        const name = entry.type === "blob" && entry.path.match(checkFile)?.[1];
+        if (!name || reviews.has(name)) continue;
+        reviews.set(name, {
+          name,
+          url: `${REPO_URL}/blob/main/${entry.path.split("/").map(encodeURIComponent).join("/")}`,
+        });
+      }
+
+      return [...reviews.values()];
     },
   });
 };
