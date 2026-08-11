@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.13.1
+
+### Patch Changes
+
+- [#2107](https://github.com/blockful/anticapture/pull/2107) [`c864c11`](https://github.com/blockful/anticapture/commit/c864c11e5e93f9c5698a31af9c24077899151ce9) Thanks [@pikonha](https://github.com/pikonha)! - Fix PR review findings: tag proposal-creation telemetry on the menu items instead of the trigger, keep the delegates amount filter in sync with the URL filter state, and derive the custom range end boundary from local midnight so DST days aren't off by an hour.
+
 ## 2.13.0
 
 ### Minor Changes
