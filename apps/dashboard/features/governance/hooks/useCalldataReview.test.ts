@@ -31,18 +31,18 @@ describe("findCalldataReview", () => {
     ).toBeUndefined();
   });
 
-  it("prefers the longest matching slug", () => {
+  it("ignores a partial EP folder", () => {
     expect(
-      findCalldataReview([{ name: "ep-6", url: "short" }, ...reviews], {
+      findCalldataReview([{ name: "ep-6", url: "short" }], {
         id: "0xabc",
         title: "[EP 6.39] Do a thing",
       }),
-    ).toEqual(reviews[0]);
+    ).toBeUndefined();
   });
 
-  it("matches slug folders by title", () => {
+  it("does not match free-form folders on title text alone", () => {
     expect(
       findCalldataReview(reviews, { id: "1", title: "DSR allocation update" }),
-    ).toEqual(reviews[2]);
+    ).toBeUndefined();
   });
 });

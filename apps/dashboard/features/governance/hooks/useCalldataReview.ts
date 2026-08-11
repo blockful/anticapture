@@ -19,32 +19,25 @@ const REPO_DAO_DIR: Partial<Record<DaoIdEnum, string>> = {
 
 export type CalldataReview = { name: string; url: string };
 
-const slug = (value: string) =>
-  value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
 /**
- * Review folders are named either by proposal number ("93 - UNIfication", "67")
- * or by a slug that shows up in the proposal title ("ep-6-39" -> "[EP 6.39] ...").
+ * Only unambiguous identifiers count — this badge is a trust signal, so a folder
+ * whose name merely resembles the title must not claim a review:
+ * - "93 - UNIfication", "67" -> proposal id
+ * - "ep-6-39" -> the "[EP 6.39]" tag ENS proposals carry in their title
+ * Free-form folder names (Shutter's "dsr-allocation") stay unmatched by design.
  */
 export const findCalldataReview = (
   reviews: CalldataReview[],
   proposal: { id: string; title: string },
 ): CalldataReview | undefined => {
-  const title = `-${slug(proposal.title)}-`;
+  const ep = proposal.title.match(/\bEP\s*(\d+)\.(\d+)\b/i);
+  const epFolder = ep && `ep-${ep[1]}-${ep[2]}`;
 
-  return (
-    reviews
-      .filter((review) => {
-        const leadingNumber = review.name.match(/^(\d+)\b/)?.[1];
-        if (leadingNumber) return leadingNumber === proposal.id;
-        return title.includes(`-${slug(review.name)}-`);
-      })
-      // Longest slug wins, so "ep-6" can't shadow "ep-6-39" on "[EP 6.39] ...".
-      .sort((a, b) => b.name.length - a.name.length)[0]
-  );
+  return reviews.find((review) => {
+    const leadingNumber = review.name.match(/^(\d+)\b/)?.[1];
+    if (leadingNumber) return leadingNumber === proposal.id;
+    return review.name.toLowerCase() === epFolder;
+  });
 };
 
 export const useCalldataReviews = (daoId: DaoIdEnum) => {
