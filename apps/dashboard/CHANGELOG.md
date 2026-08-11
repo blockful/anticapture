@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.13.2
+
+### Patch Changes
+
+- [#2109](https://github.com/blockful/anticapture/pull/2109) [`12e803e`](https://github.com/blockful/anticapture/commit/12e803ef4d83ac877be1c0cd15a7443d17725ab6) Thanks [@pikonha](https://github.com/pikonha)! - Sync the Token Holders and AAVE delegation amount filters with the URL so shared links show the active range.
+
 ## 2.13.1
 
 ### Patch Changes
