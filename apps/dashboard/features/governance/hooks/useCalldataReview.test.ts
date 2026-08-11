@@ -31,6 +31,15 @@ describe("findCalldataReview", () => {
     ).toBeUndefined();
   });
 
+  it("prefers the longest matching slug", () => {
+    expect(
+      findCalldataReview([{ name: "ep-6", url: "short" }, ...reviews], {
+        id: "0xabc",
+        title: "[EP 6.39] Do a thing",
+      }),
+    ).toEqual(reviews[0]);
+  });
+
   it("matches slug folders by title", () => {
     expect(
       findCalldataReview(reviews, { id: "1", title: "DSR allocation update" }),

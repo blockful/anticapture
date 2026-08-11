@@ -32,12 +32,20 @@ const slug = (value: string) =>
 export const findCalldataReview = (
   reviews: CalldataReview[],
   proposal: { id: string; title: string },
-): CalldataReview | undefined =>
-  reviews.find((review) => {
-    const leadingNumber = review.name.match(/^(\d+)\b/)?.[1];
-    if (leadingNumber) return leadingNumber === proposal.id;
-    return `-${slug(proposal.title)}-`.includes(`-${slug(review.name)}-`);
-  });
+): CalldataReview | undefined => {
+  const title = `-${slug(proposal.title)}-`;
+
+  return (
+    reviews
+      .filter((review) => {
+        const leadingNumber = review.name.match(/^(\d+)\b/)?.[1];
+        if (leadingNumber) return leadingNumber === proposal.id;
+        return title.includes(`-${slug(review.name)}-`);
+      })
+      // Longest slug wins, so "ep-6" can't shadow "ep-6-39" on "[EP 6.39] ...".
+      .sort((a, b) => b.name.length - a.name.length)[0]
+  );
+};
 
 export const useCalldataReviews = (daoId: DaoIdEnum) => {
   const dir = REPO_DAO_DIR[daoId];
