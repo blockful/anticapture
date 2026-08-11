@@ -39,14 +39,19 @@ export const AmountFilter = ({
   maxValue,
 }: AmountFilterProps) => {
   const store = useAmountFilterStore();
+  // The setters are created once by `create`, so selecting them keeps the effect
+  // deps stable. Depending on the whole store object would re-run the effect on
+  // every write it performs — an update loop.
+  const setMinAmount = useAmountFilterStore((s) => s.setMinAmount);
+  const setMaxAmount = useAmountFilterStore((s) => s.setMaxAmount);
 
   const isControlled = minValue !== undefined || maxValue !== undefined;
 
   useEffect(() => {
     if (!isControlled) return;
-    store.setMinAmount(filterId, minValue ?? "");
-    store.setMaxAmount(filterId, maxValue ?? "");
-  }, [isControlled, store, filterId, minValue, maxValue]);
+    setMinAmount(filterId, minValue ?? "");
+    setMaxAmount(filterId, maxValue ?? "");
+  }, [isControlled, setMinAmount, setMaxAmount, filterId, minValue, maxValue]);
 
   const { minAmount, maxAmount, sortOrder } = store.getState(filterId);
 
