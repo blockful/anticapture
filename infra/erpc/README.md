@@ -41,8 +41,8 @@ in both configs.
 
 | Budget            | Production | Dev/staging | Purpose                                        |
 | ----------------- | ---------: | ----------: | ---------------------------------------------- |
-| `nodeful`         |      800/s |       100/s | Ethereum requests to the self-hosted Reth node |
-| `chainstack`      |      200/s |        30/s | Paid-provider cap and L2 capacity              |
+| `nodeful`         |      700/s |       100/s | Ethereum requests to the self-hosted Reth node |
+| `chainstack`      |      180/s |        30/s | Paid-provider cap and L2 capacity              |
 | `indexer-limit`   |      600/s |       150/s | Aggregate indexer project capacity             |
 | `api-limit`       |    20/s/IP |     20/s/IP | Public API project protection                  |
 | `dashboard-limit` |    20/s/IP |     20/s/IP | Authenticated dashboard protection             |
@@ -55,15 +55,21 @@ budgets independently. What the Reth node actually receives is the **sum** of th
 capacity away from the others rather than configuring a new 200/s of its own.
 
 Railway private networks are per-project, so each consumer project runs its own
-`nodeful` Tailscale proxy plus its own eRPC (built from `erpc.consumer.dev.yaml`)
-and receives a fixed slice:
+`nodeful` Tailscale proxy plus its own eRPC (built from `erpc.consumer.dev.yaml`
+or `erpc.consumer.prod.yaml`) and receives a fixed slice:
 
-| Deployment                  |          Config          | Dev `nodeful` | Dev `chainstack` |
+| Deployment                  |        Dev config        | Dev `nodeful` | Dev `chainstack` |
 | --------------------------- | :----------------------: | ------------: | ---------------: |
 | `anticapture-infra`         |     `erpc.dev.yaml`      |         100/s |             30/s |
 | `thority`                   | `erpc.consumer.dev.yaml` |          50/s |             10/s |
 | `ENS-Incentives`            | `erpc.consumer.dev.yaml` |          50/s |             10/s |
 | **total reaching the node** |                          |     **200/s** |         **50/s** |
+
+| Deployment                  |        Prod config        | Prod `nodeful` | Prod `chainstack` |
+| --------------------------- | :-----------------------: | -------------: | ----------------: |
+| `anticapture-infra`         |     `erpc.prod.yaml`      |          700/s |             180/s |
+| `ENS-Incentives`            | `erpc.consumer.prod.yaml` |          100/s |              20/s |
+| **total reaching the node** |                           |      **800/s** |         **200/s** |
 
 The totals match the pre-split single-deployment budgets, so node load is
 unchanged. A slice is a hard ceiling: a project cannot borrow another's idle
@@ -72,12 +78,18 @@ means changing another to keep the totals fixed — a shared Redis
 `rateLimiters.store` would be the alternative, at the cost of exposing Redis
 across projects.
 
-`indexer-limit` stays at 150/s in `erpc.dev.yaml` even though it now exceeds the
-130/s of upstream capacity behind it; the upstream budgets are the binding
-constraint, and lowering the project budget would only throttle L2 traffic that
-Chainstack still serves.
+`erpc.consumer.prod.yaml` grants 100/s, so promoting a **second** consumer to
+production means cutting anticapture's row again rather than deploying the file
+as-is; otherwise the node sees 900/s. thority currently runs in dev only.
 
-Production keeps the whole 800/s until the consumer stacks are promoted there.
+`indexer-limit` stays at 150/s in `erpc.dev.yaml` (600/s in `erpc.prod.yaml`)
+even though it now exceeds the upstream capacity behind it; the upstream budgets
+are the binding constraint, and lowering the project budget would only throttle
+L2 traffic that Chainstack still serves.
+
+Consumer configs cache in memory only — no `pg-main` connector, so they need no
+`DATABASE_URL`. Add one (see `erpc.prod.yaml`) if a consumer's finalized-block
+reads grow enough to be worth persisting.
 
 `MAX_REQUESTS_PER_SECOND` is a per-indexer, per-instance limit. Keep the sum of
 that value across concurrently running indexer instances below the environment's
