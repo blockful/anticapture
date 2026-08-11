@@ -10,7 +10,14 @@ import { createWalletClient } from "viem";
 import { createConfig, http } from "wagmi";
 import { mainnet, optimism, scroll } from "wagmi/chains";
 
-const rpcTransport = (chainId: number) => http(`/api/rpc/${chainId}`);
+// The RPC proxy path must be absolute in the browser: wagmi hands these
+// transport URLs to the WalletConnect provider's rpcMap, whose HTTP
+// connection rejects relative URLs (breaking every WalletConnect pairing
+// right after session approval). During SSR the transports are never
+// called, so the relative path is fine there.
+const origin = typeof window === "undefined" ? "" : window.location.origin;
+
+const rpcTransport = (chainId: number) => http(`${origin}/api/rpc/${chainId}`);
 
 export const walletClient = createWalletClient({
   chain: mainnet,
