@@ -48,6 +48,37 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Same resolution as deploy.yaml: gateful merges its upstreams' OpenAPI
+      # specs into /docs/json, so gateful being on this commit isn't enough —
+      # a DAO API, the relayer or address enrichment can still serve the old
+      # spec.
+      - name: Resolve the commits each upstream should be serving
+        id: upstreams
+        run: |
+          set -euo pipefail
+          resolve() {
+            sha=$(git log --first-parent -1 --format=%H -- "$@")
+            printf '%s' "$(git rev-list --first-parent "${sha}..HEAD" | tr '\n' ',')${sha}"
+          }
+          shas=$(jq -cn \
+            --arg dao "$(resolve apps/api infra/api)" \
+            --arg relayer "$(resolve apps/relayer infra/relayer)" \
+            --arg enrichment "$(resolve apps/address-enrichment infra/address-enrichment)" \
+            '{"dao-api": ($dao | split(",")),
+              "relayer": ($relayer | split(",")),
+              "address-enrichment": ($enrichment | split(","))}')
+          echo "shas=${shas}" >> "$GITHUB_OUTPUT"
+          echo "${shas}" | jq -r 'to_entries[] | "\(.key) must be serving \(.value[-1]) or newer"'
+
+      # The build below runs client codegen against the live gateful spec;
+      # without this gate it races the redeploy and fails with "fetch failed".
+      - name: Wait for gateful to be ready
+        run: node scripts/wait-for-gateful.mjs
+        env:
+          ANTICAPTURE_API_URL: ${{ secrets.GATEFUL_URL }}
+          EXPECTED_GATEFUL_SHA: ${{ github.sha }}
+          EXPECTED_UPSTREAM_SHAS: ${{ steps.upstreams.outputs.shas }}
+
       - name: Build publishable packages
         # @anticapture/client's build depends on codegen, which fetches the live
         # Gateful OpenAPI spec and throws without ANTICAPTURE_API_URL (same
