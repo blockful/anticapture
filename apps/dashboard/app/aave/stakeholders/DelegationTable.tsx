@@ -355,6 +355,8 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
               setSortOrder("desc");
             }}
             isActive={!!(minValue || maxValue)}
+            minValue={minValue}
+            maxValue={maxValue}
           />
         </div>
       ),

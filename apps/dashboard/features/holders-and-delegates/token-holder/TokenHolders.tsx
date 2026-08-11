@@ -323,6 +323,8 @@ export const TokenHolders = ({
               setOrderDirection("desc");
             }}
             isActive={!!(minValue || maxValue)}
+            minValue={minValue}
+            maxValue={maxValue}
           />
         </div>
       ),
