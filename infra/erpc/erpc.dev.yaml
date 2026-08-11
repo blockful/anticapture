@@ -282,15 +282,19 @@ rateLimiters:
   store:
     driver: memory
   budgets:
+    # Anticapture's slice of the shared node/provider capacity. thority and
+    # ens-incentives run their own eRPC deployments (erpc.consumer.dev.yaml)
+    # with their own in-memory counters, so these numbers are one term in a
+    # sum, not the whole budget. See the split table in README.md.
     - id: nodeful
       rules:
         - method: "*"
-          maxCount: 200
+          maxCount: 100
           period: 1s
     - id: chainstack
       rules:
         - method: "*"
-          maxCount: 50
+          maxCount: 30
           period: 1s
 
     - id: indexer-limit
