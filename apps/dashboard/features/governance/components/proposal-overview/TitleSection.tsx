@@ -2,6 +2,7 @@
 
 import type { Address } from "viem";
 
+import { CalldataReviewedBadge } from "@/features/governance/components/proposal-overview/CalldataReviewedBadge";
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
 import { ProposalSourceBadge } from "@/features/governance/components/proposal-overview/ProposalSourceBadge";
 import type {
@@ -64,6 +65,16 @@ export const TitleSection = ({
       <div className="flex w-full items-center justify-start gap-2">
         {/* Source badge — Snapshot (offchain) or Governor (onchain) */}
         <ProposalSourceBadge source={isOffchain ? "offchain" : "onchain"} />
+
+        {/* Calldata verified in blockful/dao-proposals */}
+        {!isOffchain && (
+          <CalldataReviewedBadge
+            daoId={daoIdKey}
+            proposalId={proposal.id}
+            title={proposal.title ?? ""}
+            asLink
+          />
+        )}
 
         {/* Badge Ongoing Proposal */}
         <ProposalBadge
