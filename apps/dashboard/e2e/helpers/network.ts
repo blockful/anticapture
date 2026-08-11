@@ -1,5 +1,7 @@
 import type { Page } from "playwright/test";
 
+import { BASE_URL } from "./base-url";
+
 /**
  * `/api/gateful/*` is a transparent proxy that forwards the upstream DAO API
  * status verbatim. A 5xx there reflects external data-source health (e.g. a
@@ -23,10 +25,7 @@ export function watch5xxErrors(page: Page): void {
   page.on("response", (response) => {
     const url = response.url();
     const isSameOrigin =
-      url.startsWith("http://localhost") ||
-      url.startsWith(
-        process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
-      );
+      url.startsWith("http://localhost") || url.startsWith(BASE_URL);
     if (isSameOrigin && !isUpstreamProxyPath(url) && response.status() >= 500) {
       throw new Error(`5xx response: ${response.status()} ${url}`);
     }

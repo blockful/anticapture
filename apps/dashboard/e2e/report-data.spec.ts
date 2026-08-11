@@ -49,7 +49,7 @@ test.describe("Data report", () => {
     goto,
     page,
   }) => {
-    await goto("/ens/holders-and-delegates");
+    await goto("/ens/stakeholders");
     let reportPayload: Record<string, unknown> | null = null;
     await page.route("**/api/report", async (route) => {
       reportPayload = route.request().postDataJSON() as Record<string, unknown>;
@@ -59,18 +59,24 @@ test.describe("Data report", () => {
       });
     });
 
-    await page.getByRole("button", { name: "Delegates" }).click();
+    // Delegates is the default tab; switch away so the payload proves the
+    // panel name follows the active tab.
+    const tokenHoldersTab = page.getByRole("tab", { name: "Token Holders" });
+    await expect(tokenHoldersTab).toBeVisible({ timeout: 15_000 });
+    await tokenHoldersTab.click();
+    await expect(tokenHoldersTab).toHaveAttribute("aria-selected", "true");
+
     await page.getByTestId("report-panel-button").click();
     await page
       .getByLabel("What looks incorrect?")
-      .fill("Delegate data looks wrong.");
+      .fill("Token holder data looks wrong.");
     await page.getByRole("button", { name: "Submit report" }).click();
 
     await expect(page.getByText("Report received")).toBeVisible();
     expect(reportPayload).toMatchObject({
       daoId: "ens",
-      panel: "Delegates",
-      description: "Delegate data looks wrong.",
+      panel: "Token Holders",
+      description: "Token holder data looks wrong.",
       email: "",
     });
     expect(reportPayload).not.toHaveProperty("section");

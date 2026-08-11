@@ -84,6 +84,7 @@
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.1",
     "@figma/code-connect": "^1.4.1",
+    "@playwright/test": "^1.62.1",
     "@storybook/addon-designs": "^11.1.0",
     "@storybook/addon-onboarding": "^10.2.0",
     "@storybook/addon-vitest": "^10.2.0",
@@ -97,6 +98,7 @@
     "@types/react-blockies": "^1.4.4",
     "@types/react-csv": "^1.1.10",
     "@types/react-dom": "19.2.3",
+    "checkly": "^8.20.0",
     "dotenv": "^16.6.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",

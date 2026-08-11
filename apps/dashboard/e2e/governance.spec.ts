@@ -40,15 +40,19 @@ const waitForSourceSelect = async (page: Page) => {
 };
 
 test.describe("Governance page (/ens/proposals)", () => {
-  test("renders Proposals heading and description", async ({ goto, page }) => {
-    await goto("/ens/proposals");
-    await expect(
-      page.locator("h4").filter({ hasText: "Proposals" }),
-    ).toBeVisible();
-    await expect(
-      page.locator("text=View and vote on executable proposals"),
-    ).toBeVisible();
-  });
+  test(
+    "renders Proposals heading and description",
+    { tag: "@smoke" },
+    async ({ goto, page }) => {
+      await goto("/ens/proposals");
+      await expect(
+        page.locator("h4").filter({ hasText: "Proposals" }),
+      ).toBeVisible();
+      await expect(
+        page.locator("text=View and vote on executable proposals"),
+      ).toBeVisible();
+    },
+  );
 
   test("shows All Proposals tab as default", async ({ goto, page }) => {
     await goto("/ens/proposals");
@@ -137,7 +141,7 @@ test.describe("Governance page (/ens/proposals)", () => {
     await expect(page.getByText("For: 60 (67%)").last()).toBeVisible();
   });
 
-  test("New Proposal button triggers wallet connect when disconnected", async ({
+  test("New Proposal asks for sign-in when disconnected", async ({
     goto,
     page,
   }) => {
@@ -147,11 +151,11 @@ test.describe("Governance page (/ens/proposals)", () => {
     if (count === 0) return; // DAO doesn't support proposals, skip
     await expect(newProposalBtn).toBeVisible({ timeout: 15_000 });
     await newProposalBtn.click();
-    // Wallet connect modal should open (RainbowKit)
+    await page.getByRole("menuitem", { name: "Create new" }).click();
+    // The dialog renders the title twice (an sr-only copy plus the visible
+    // one), so assert the unique CTA instead.
     await expect(
-      page
-        .locator("text=Connect Wallet")
-        .or(page.locator("text=Connect a Wallet")),
+      page.getByRole("button", { name: "Connect wallet" }),
     ).toBeVisible({ timeout: 10_000 });
   });
 
@@ -193,7 +197,12 @@ test.describe("Governance page (/ens/proposals)", () => {
 
     await goto("/ens/proposals/not-found-proposal");
 
-    await expect(page.getByText("Proposal not found")).toBeVisible();
+    // The query client retries the 404 three times (~7s of backoff) before the
+    // not-found state renders, on top of the dev server compiling the route on
+    // first hit, so this needs far more than the 5s expect default.
+    await expect(page.getByText("Proposal not found")).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(page.getByText("The proposal wasn't found.")).toBeVisible();
     await expect(page.getByTestId("route-error-fallback")).not.toBeVisible();
   });

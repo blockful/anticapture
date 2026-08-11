@@ -1,27 +1,40 @@
 import { test, expect } from "./fixtures";
 
 test.describe("Panel page", () => {
-  test("renders Panel heading and description", async ({ goto, page }) => {
-    await goto("/");
-    await expect(page.locator("h4").filter({ hasText: "Panel" })).toBeVisible();
-    await expect(
-      page.locator("text=Check governance security across DAOs"),
-    ).toBeVisible();
-  });
+  test(
+    "renders Panel heading and description",
+    { tag: "@smoke" },
+    async ({ goto, page }) => {
+      await goto("/");
+      await expect(
+        page.locator("h4").filter({ hasText: "Panel" }),
+      ).toBeVisible();
+      await expect(
+        page.locator("text=Check governance security across DAOs"),
+      ).toBeVisible();
+    },
+  );
 
-  test("renders Monitored DAOs sub-section", async ({ goto, page }) => {
-    await goto("/");
-    await expect(
-      page.locator("p").filter({ hasText: "Monitored DAOs" }),
-    ).toBeVisible({ timeout: 15_000 });
-  });
+  test(
+    "renders Monitored DAOs sub-section",
+    { tag: "@smoke" },
+    async ({ goto, page }) => {
+      await goto("/");
+      await expect(
+        page.locator("p").filter({ hasText: "Monitored DAOs" }),
+      ).toBeVisible({ timeout: 15_000 });
+    },
+  );
 
   test("ENS row links to /ens", async ({ goto, page }) => {
     await goto("/");
     const ensLink = page.locator('a[href="/ens"]').first();
     await expect(ensLink).toBeVisible({ timeout: 15_000 });
     await ensLink.click();
-    await expect(page).toHaveURL("/ens");
+    // First navigation compiles /ens on demand under the dev webServer, so the
+    // URL only commits once the RSC payload resolves — with parallel workers
+    // competing for the compiler this can take tens of seconds.
+    await expect(page).toHaveURL(/\/ens(\?.*)?$/, { timeout: 30_000 });
   });
 
   test("renders all Monitored DAOs table column headers", async ({
