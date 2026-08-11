@@ -97,7 +97,7 @@ The consolidated dashboard adds eRPC cache and PostgreSQL panels. Prometheus
 alerts when:
 
 - PostgreSQL is unreachable, stays above 80% of `max_connections`, or reports a deadlock;
-- eRPC cache hit rate stays below 25% for an hour under active traffic, or cache operations fail.
+- eRPC cache hit rate stays below 50% under active traffic or cache operations fail.
 
 These thresholds are intentionally cost/availability guardrails. Tune them in
 `alerts.yml` after observing a full production traffic cycle.

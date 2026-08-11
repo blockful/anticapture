@@ -10,12 +10,6 @@ route:
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 1h
-  routes:
-    # ponytail: warnings are informational — re-pinging every hour is what turns one
-    # ongoing condition into a wall of identical Slack messages.
-    - matchers: [severity="warning"]
-      receiver: default
-      repeat_interval: 12h
 
 receivers:
   - name: default
