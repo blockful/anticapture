@@ -62,7 +62,7 @@ export const TitleSection = ({
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <div className="flex w-full items-center justify-start gap-2">
+      <div className="flex w-full flex-wrap items-center justify-start gap-2">
         {/* Source badge — Snapshot (offchain) or Governor (onchain) */}
         <ProposalSourceBadge source={isOffchain ? "offchain" : "onchain"} />
 

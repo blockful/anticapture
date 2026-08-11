@@ -30,7 +30,7 @@ export const CalldataReviewedBadge = ({
   if (!review) return null;
 
   const badge = (
-    <BadgeStatus variant="success" icon={ShieldCheck}>
+    <BadgeStatus variant="success" iconVariant="success" icon={ShieldCheck}>
       Calldata reviewed
     </BadgeStatus>
   );
@@ -38,7 +38,12 @@ export const CalldataReviewedBadge = ({
   if (!asLink) return badge;
 
   return (
-    <a href={review.url} target="_blank" rel="noreferrer">
+    <a
+      href={review.url}
+      target="_blank"
+      rel="noreferrer"
+      className="transition-opacity hover:opacity-80"
+    >
       {badge}
     </a>
   );
