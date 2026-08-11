@@ -90,16 +90,18 @@ groups:
               + (sum(rate(erpc_cache_get_success_miss_total{job="anticapture-erpc"}[15m])) or vector(0)),
               0.000001
             )
-          ) < 0.5
+          ) < 0.25
           and
           (sum(rate(erpc_cache_get_success_hit_total{job="anticapture-erpc"}[15m])) or vector(0))
           + (sum(rate(erpc_cache_get_success_miss_total{job="anticapture-erpc"}[15m])) or vector(0)) > 0.1
-        for: 15m
+        # ponytail: 25%/1h, not 50%/15m — steady state sits at 0.4-0.5 because latest/unfinalized
+        # block requests are never cacheable. Raise again only if the baseline actually improves.
+        for: 1h
         keep_firing_for: 15m
         labels:
           severity: warning
         annotations:
-          summary: "[WARNING] eRPC cache hit rate is below 50%"
+          summary: "[WARNING] eRPC cache hit rate is below 25%"
           description: >
             eRPC cache hit rate has been {{ printf "%.1f" $value }} for 15 minutes while
             cache traffic is active. Check finality classification, PostgreSQL health,
