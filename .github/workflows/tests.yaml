@@ -511,11 +511,19 @@ jobs:
 
           candidates=()
           if [ -n "${VERCEL_TOKEN:-}" ]; then
+            envs=$(curl --fail --silent --show-error \
+              --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+              "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env?teamId=${VERCEL_TEAM_ID}&decrypt=true")
+
+            # Metadata only (never values): which environments hold the token
+            # and whether the API can hand its value to an external reader.
+            echo "BLOCKFUL_API_TOKEN entries on the Vercel project:"
+            echo "${envs}" | jq -r '.envs[] | select(.key == "BLOCKFUL_API_TOKEN")
+              | "  type=\(.type) target=\(.target // [] | join(",")) customEnvs=\(.customEnvironmentIds // [] | join(",")) branch=\(.gitBranch // "-") valueReadable=\(.value != null and (.value | length) > 0)"'
+
             while IFS= read -r v; do
               [ -n "${v}" ] && candidates+=("${v}")
-            done < <(curl --fail --silent --show-error \
-              --header "Authorization: Bearer ${VERCEL_TOKEN}" \
-              "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env?teamId=${VERCEL_TEAM_ID}&decrypt=true" \
+            done < <(echo "${envs}" \
               | jq -r '.envs[] | select(.key == "BLOCKFUL_API_TOKEN" and .value != null) | .value' | sort -u)
           fi
           [ -n "${E2E_TOKEN:-}" ] && candidates+=("${E2E_TOKEN}")
