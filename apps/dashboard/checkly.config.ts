@@ -26,7 +26,7 @@ export default defineConfig({
     alertChannels: [SLACK_ALERT_CHANNEL, EMAIL_ALERT_CHANNEL],
     playwrightChecks: [
       {
-        name: "Dashboard smoke (production)",
+        name: "anticapture-dashboard",
         logicalId: "dashboard-smoke-production",
         pwTags: ["@smoke"],
         frequency: Frequency.EVERY_1H,
