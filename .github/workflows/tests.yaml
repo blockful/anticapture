@@ -492,72 +492,88 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
 
-      # Resolve a gateful token that actually authenticates: collect every
-      # BLOCKFUL_API_TOKEN the dashboard's Vercel project holds plus the
-      # E2E_BLOCKFUL_API_TOKEN secret, probe each against the gateway this job
-      # targets, and use the first one that returns 200. Failing here (in
-      # seconds, with a clear message) beats 9 minutes of data specs dying on
-      # 401s — which is exactly how the stale secret manifested.
-      - name: Resolve a working gateful token
+      # Each Vercel environment of the dashboard project holds a coherent pair
+      # of ANTICAPTURE_API_URL + BLOCKFUL_API_TOKEN (a token is only valid for
+      # its own gateway). Read the pairs, probe each environment's token
+      # against that environment's own gateway, and adopt the first pair that
+      # authenticates — custom envs (dev) first, then preview, then production,
+      # then the E2E secret against shared dev as a last resort. Failing here
+      # in seconds with a clear message beats 9 minutes of data specs dying on
+      # 401s, which is how stale token copies used to manifest.
+      - name: Resolve a working gateful environment
         shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           E2E_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
-          GATEFUL_URL: https://dev-gateful.up.railway.app
+          FALLBACK_GATEFUL_URL: https://dev-gateful.up.railway.app
         run: |
           set -euo pipefail
 
-          candidates=()
+          adopt() { # scope_label gateful_url token [user_api_url]
+            echo "::add-mask::${3}"
+            code=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+              --header "Authorization: Bearer ${3}" \
+              "${2}/ens/proposals?limit=1&skip=0" || echo "000")
+            echo "scope ${1} (${2}): HTTP ${code}"
+            if [ "${code}" = "200" ]; then
+              {
+                echo "BLOCKFUL_API_TOKEN=${3}"
+                echo "ANTICAPTURE_API_URL=${2}"
+                [ -n "${4:-}" ] && echo "USER_API_URL=${4}"
+              } >> "${GITHUB_ENV}"
+              echo "Adopted the '${1}' environment."
+              exit 0
+            fi
+          }
+
           if [ -n "${VERCEL_TOKEN:-}" ]; then
             envs=$(curl --fail --silent --show-error \
               --header "Authorization: Bearer ${VERCEL_TOKEN}" \
               "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env?teamId=${VERCEL_TEAM_ID}&decrypt=true")
 
-            # Metadata only (never values): which environments hold the token
-            # and whether the API can hand its value to an external reader.
-            echo "BLOCKFUL_API_TOKEN entries on the Vercel project:"
-            echo "${envs}" | jq -r '.envs[] | select(.key == "BLOCKFUL_API_TOKEN")
-              | "  type=\(.type) target=\(.target // [] | join(",")) customEnvs=\(.customEnvironmentIds // [] | join(",")) branch=\(.gitBranch // "-") valueReadable=\(.value != null and (.value | length) > 0)"'
+            # Scopes in preference order: each custom environment, then the
+            # standard preview and production targets.
+            scopes=$(echo "${envs}" | jq -r '[.envs[].customEnvironmentIds // [] | .[]] | unique | .[]')$'\n'"preview"$'\n'"production"
 
-            while IFS= read -r v; do
-              [ -n "${v}" ] && candidates+=("${v}")
-            done < <(echo "${envs}" \
-              | jq -r '.envs[] | select(.key == "BLOCKFUL_API_TOKEN" and .value != null) | .value' | sort -u)
+            while IFS= read -r scope; do
+              [ -z "${scope}" ] && continue
+              pick() {
+                echo "${envs}" | jq -r --arg key "$1" --arg scope "${scope}" \
+                  '.envs[] | select(.key == $key and .value != null and .value != ""
+                    and (((.customEnvironmentIds // []) | index($scope)) or ((.target // []) | index($scope))))
+                  | .value' | head -1
+              }
+              url=$(pick "ANTICAPTURE_API_URL")
+              token=$(pick "BLOCKFUL_API_TOKEN")
+              user_api=$(pick "USER_API_URL")
+              if [ -n "${url}" ] && [ -n "${token}" ]; then
+                adopt "${scope}" "${url%/}" "${token}" "${user_api}"
+              else
+                echo "scope ${scope}: incomplete pair (url=$([ -n "${url}" ] && echo yes || echo no), token=$([ -n "${token}" ] && echo yes || echo no)); skipping"
+              fi
+            done <<< "${scopes}"
           fi
-          [ -n "${E2E_TOKEN:-}" ] && candidates+=("${E2E_TOKEN}")
 
-          for i in "${!candidates[@]}"; do
-            token="${candidates[$i]}"
-            echo "::add-mask::${token}"
-            code=$(curl --silent --output /dev/null --write-out "%{http_code}" \
-              --header "Authorization: Bearer ${token}" \
-              "${GATEFUL_URL}/ens/proposals?limit=1&skip=0" || echo "000")
-            echo "candidate $((i + 1))/${#candidates[@]}: HTTP ${code}"
-            if [ "${code}" = "200" ]; then
-              echo "BLOCKFUL_API_TOKEN=${token}" >> "${GITHUB_ENV}"
-              echo "Using candidate $((i + 1)) against ${GATEFUL_URL}."
-              exit 0
-            fi
-          done
+          if [ -n "${E2E_TOKEN:-}" ]; then
+            adopt "e2e-secret" "${FALLBACK_GATEFUL_URL}" "${E2E_TOKEN}"
+          fi
 
-          echo "::error::No available gateful token authenticates against ${GATEFUL_URL}. Update the E2E_BLOCKFUL_API_TOKEN repo secret with a valid dev token (gh secret set E2E_BLOCKFUL_API_TOKEN)."
+          echo "::error::No Vercel environment pair or E2E secret authenticates against its gateway. Fix the dashboard project's env pairs on Vercel, or update the E2E_BLOCKFUL_API_TOKEN repo secret (gh secret set E2E_BLOCKFUL_API_TOKEN)."
           exit 1
 
       - name: Run dashboard E2E tests
         run: pnpm dashboard test:e2e
         env:
           CI: "true"
-          # The /api/gateful proxy forwards to this gateway; without it every
-          # data request 500s and the suite exercises an empty dashboard. This
-          # deliberately targets shared dev, NOT the PR's Gateful preview: the
-          # preview stack runs its own authful, so a dev-issued token comes
-          # back 401 there and every data-backed spec fails.
-          ANTICAPTURE_API_URL: https://dev-gateful.up.railway.app
+          # Gateway + token pair adopted by the resolve step above. This is
+          # never the PR's own Gateful preview: the preview stack runs its own
+          # authful, so no token the job can obtain authenticates there.
+          ANTICAPTURE_API_URL: ${{ env.ANTICAPTURE_API_URL }}
           # The /api/user auth/session proxy throws on boot without this, and
           # the resulting same-origin 500s trip the suite's 5xx watcher.
-          USER_API_URL: https://user-api-dev-9002.up.railway.app
+          USER_API_URL: ${{ env.USER_API_URL || 'https://user-api-dev-9002.up.railway.app' }}
           NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
           BLOCKFUL_API_TOKEN: ${{ env.BLOCKFUL_API_TOKEN }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
