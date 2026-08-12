@@ -340,9 +340,6 @@ export const Delegates = ({
           />
         </div>
       ),
-      meta: {
-        columnClassName: "w-40",
-      },
     },
     {
       accessorKey: "votingPower",
@@ -474,7 +471,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-[16%]",
+        columnClassName: isWhitelabel ? "w-[13%]" : "w-[16%]",
       },
     },
     {
@@ -531,7 +528,7 @@ export const Delegates = ({
         </h4>
       ),
       meta: {
-        columnClassName: "w-[11%]",
+        columnClassName: isWhitelabel ? "w-[10%]" : "w-[11%]",
       },
     },
     {
@@ -582,7 +579,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-[16%]",
+        columnClassName: isWhitelabel ? "w-[13%]" : "w-[16%]",
       },
     },
     {
@@ -625,7 +622,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-[12%]",
+        columnClassName: isWhitelabel ? "w-[11%]" : "w-[12%]",
       },
     },
     ...(isWhitelabel
@@ -655,7 +652,7 @@ export const Delegates = ({
             },
             header: () => null,
             meta: {
-              columnClassName: "w-18",
+              columnClassName: "w-24 px-2",
             },
           } satisfies ColumnDef<DelegateTableData>,
         ]
