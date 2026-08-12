@@ -16,6 +16,15 @@ describe("findCalldataReview", () => {
     ).toEqual(reviews[0]);
   });
 
+  it("matches when the title omits the EP prefix", () => {
+    expect(
+      findCalldataReview(reviews, {
+        id: "0xabc",
+        title: "[6.39][Executable] Do a thing",
+      }),
+    ).toEqual(reviews[0]);
+  });
+
   it("matches numbered folders by proposal id", () => {
     expect(
       findCalldataReview(reviews, { id: "93", title: "UNIfication" }),

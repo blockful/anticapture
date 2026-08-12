@@ -23,14 +23,16 @@ export type CalldataReview = { name: string; url: string };
  * Only unambiguous identifiers count — this badge is a trust signal, so a folder
  * whose name merely resembles the title must not claim a review:
  * - "93 - UNIfication", "67" -> proposal id
- * - "ep-6-39" -> the "[EP 6.39]" tag ENS proposals carry in their title
+ * - "ep-6-39" -> the "[EP 6.39]" / "[6.39]" tag ENS proposals carry in their title
+ *   (the "EP" is optional in practice: "[6.48][Executable] ...")
  * Free-form folder names (Shutter's "dsr-allocation") stay unmatched by design.
  */
 export const findCalldataReview = (
   reviews: CalldataReview[],
   proposal: { id: string; title: string },
 ): CalldataReview | undefined => {
-  const ep = proposal.title.match(/\bEP\s*(\d+)\.(\d+)\b/i);
+  // ponytail: the closing bracket is what keeps this from matching stray "1.5"s
+  const ep = proposal.title.match(/(?:EP\s*)?(\d+)\.(\d+)\s*\]/i);
   const epFolder = ep && `ep-${ep[1]}-${ep[2]}`;
 
   return reviews.find((review) => {
