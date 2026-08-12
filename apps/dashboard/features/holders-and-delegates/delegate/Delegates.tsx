@@ -340,9 +340,9 @@ export const Delegates = ({
           />
         </div>
       ),
-      meta: {
-        columnClassName: "w-40",
-      },
+      // No width on purpose: in the fixed table layout the address column is
+      // the only unsized one, so it absorbs all leftover space instead of
+      // splitting it with the whitelabel Delegate column.
     },
     {
       accessorKey: "votingPower",
@@ -474,7 +474,9 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-[16%]",
+        // Narrower on whitelabel so the address column keeps roughly the same
+        // width it has without the extra Delegate button column.
+        columnClassName: isWhitelabel ? "w-[13%]" : "w-[16%]",
       },
     },
     {
@@ -531,7 +533,7 @@ export const Delegates = ({
         </h4>
       ),
       meta: {
-        columnClassName: "w-[11%]",
+        columnClassName: isWhitelabel ? "w-[10%]" : "w-[11%]",
       },
     },
     {
@@ -582,7 +584,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: "w-[16%]",
+        columnClassName: isWhitelabel ? "w-[13%]" : "w-[16%]",
       },
     },
     {
@@ -625,7 +627,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: "w-[12%]",
+        columnClassName: isWhitelabel ? "w-[11%]" : "w-[12%]",
       },
     },
     ...(isWhitelabel
@@ -655,7 +657,10 @@ export const Delegates = ({
             },
             header: () => null,
             meta: {
-              columnClassName: "w-18",
+              // Wide enough for the Delegate button (78px) plus px-2; with
+              // less, the button overflows the table and forces a
+              // horizontal scroll.
+              columnClassName: "w-24 px-2",
             },
           } satisfies ColumnDef<DelegateTableData>,
         ]
