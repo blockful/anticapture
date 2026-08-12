@@ -340,9 +340,6 @@ export const Delegates = ({
           />
         </div>
       ),
-      // No width on purpose: in the fixed table layout the address column is
-      // the only unsized one, so it absorbs all leftover space instead of
-      // splitting it with the whitelabel Delegate column.
     },
     {
       accessorKey: "votingPower",
@@ -474,8 +471,6 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        // Narrower on whitelabel so the address column keeps roughly the same
-        // width it has without the extra Delegate button column.
         columnClassName: isWhitelabel ? "w-[13%]" : "w-[16%]",
       },
     },
@@ -657,9 +652,6 @@ export const Delegates = ({
             },
             header: () => null,
             meta: {
-              // Wide enough for the Delegate button (78px) plus px-2; with
-              // less, the button overflows the table and forces a
-              // horizontal scroll.
               columnClassName: "w-24 px-2",
             },
           } satisfies ColumnDef<DelegateTableData>,
