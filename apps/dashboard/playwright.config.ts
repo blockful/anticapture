@@ -40,6 +40,7 @@ export default defineConfig({
         command: `pnpm dev --port ${E2E_PORT}`,
         url: `http://localhost:${E2E_PORT}`,
         reuseExistingServer: !process.env.CI,
-        timeout: 180_000,
+        // Cold turbopack compile on a 2-core CI runner can exceed 3 minutes.
+        timeout: 300_000,
       },
 });

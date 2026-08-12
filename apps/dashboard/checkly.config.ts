@@ -27,7 +27,7 @@ export default defineConfig({
     playwrightChecks: [
       {
         name: "anticapture-dashboard",
-        logicalId: "dashboard-smoke-production",
+        logicalId: "anticapture-dashboard",
         pwTags: ["@smoke"],
         frequency: Frequency.EVERY_1H,
         locations: ["us-east-1", "eu-west-1"],

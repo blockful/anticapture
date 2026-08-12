@@ -151,12 +151,16 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
     await expect(page).toHaveURL(/\/ens\/stakeholders/);
   });
 
-  test("renders Stakeholders heading", async ({ goto, page }) => {
-    await goto("/ens/stakeholders");
-    await expect(
-      page.locator("h4").filter({ hasText: "Stakeholders" }),
-    ).toBeVisible();
-  });
+  test(
+    "renders Stakeholders heading",
+    { tag: "@smoke" },
+    async ({ goto, page }) => {
+      await goto("/ens/stakeholders");
+      await expect(
+        page.locator("h4").filter({ hasText: "Stakeholders" }),
+      ).toBeVisible();
+    },
+  );
 
   test("shows Delegates tab as default", async ({ goto, page }) => {
     await goto("/ens/stakeholders");
