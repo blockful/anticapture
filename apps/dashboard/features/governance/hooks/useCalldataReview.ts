@@ -43,8 +43,9 @@ export const findCalldataReview = (
 export const useCalldataReviews = (daoId: DaoIdEnum) => {
   const dir = REPO_DAO_DIR[daoId];
 
-  return useQuery<CalldataReview[]>({
-    queryKey: ["calldata-reviews", dir],
+  // One tree fetch for the whole repo, cached DAO-independently and filtered per DAO.
+  return useQuery<string[], Error, CalldataReview[]>({
+    queryKey: ["calldata-reviews"],
     enabled: Boolean(dir),
     staleTime: 3600000,
     gcTime: 3600000,
@@ -55,6 +56,11 @@ export const useCalldataReviews = (daoId: DaoIdEnum) => {
         tree: { path: string; type: string }[];
       }>(TREE_URL);
 
+      return data.tree
+        .filter((entry) => entry.type === "blob")
+        .map((entry) => entry.path);
+    },
+    select: (paths) => {
       // The check itself is the proof, so link the test file, not the folder.
       // One entry per folder; ep-6-23 names it activeProposal.t.sol instead.
       const checkFile = new RegExp(
@@ -62,12 +68,12 @@ export const useCalldataReviews = (daoId: DaoIdEnum) => {
       );
       const reviews = new Map<string, CalldataReview>();
 
-      for (const entry of data.tree) {
-        const name = entry.type === "blob" && entry.path.match(checkFile)?.[1];
+      for (const path of paths) {
+        const name = path.match(checkFile)?.[1];
         if (!name || reviews.has(name)) continue;
         reviews.set(name, {
           name,
-          url: `${REPO_URL}/blob/main/${entry.path.split("/").map(encodeURIComponent).join("/")}`,
+          url: `${REPO_URL}/blob/main/${path.split("/").map(encodeURIComponent).join("/")}`,
         });
       }
 
