@@ -459,7 +459,10 @@ jobs:
   dashboard-e2e:
     name: Dashboard E2E
     needs: [configure-vercel-preview, wait-for-gateful]
-    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    # Trusted authors only: fork PRs get no repository secrets, so
+    # E2E_BLOCKFUL_API_TOKEN is empty there and every external contribution
+    # would fail on the probe below without a single test having run.
+    if: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -522,6 +525,12 @@ jobs:
           # Shared dev services, NOT the PR's own preview stack: previews run
           # their own authful, so the dev-issued e2e token gets 401s there.
           ANTICAPTURE_API_URL: https://dev-gateful.up.railway.app
+          # …but `test:e2e` builds the dashboard, which regenerates
+          # @anticapture/client from the spec. Reading it off dev would omit
+          # any hook this PR adds and break the build before E2E starts, so
+          # point codegen (and only codegen) at the PR's preview gateful —
+          # resolveGatefulOpenApiSpecUrl prefers this over ANTICAPTURE_API_URL.
+          RAILWAY_ENVIRONMENT_NAME: anticapture-pr-${{ github.event.pull_request.number }}
           # The /api/user auth/session proxy throws on boot without this, and
           # the resulting same-origin 500s trip the suite's 5xx watcher.
           USER_API_URL: https://user-api-dev-9002.up.railway.app
