@@ -1,5 +1,15 @@
 # @anticapture/dashboard
 
+## 2.14.0
+
+### Minor Changes
+
+- [#2113](https://github.com/blockful/anticapture/pull/2113) [`e4222eb`](https://github.com/blockful/anticapture/commit/e4222ebaadabacf81b8ad906aac1e0faafd864f0) Thanks [@pikonha](https://github.com/pikonha)! - Mark proposals whose calldata was verified in the blockful/dao-proposals repo with a shield icon, on both the proposals list and the proposal detail page (whitelabel included). The icon links to the proposal's calldata check test file.
+
+### Patch Changes
+
+- [#2116](https://github.com/blockful/anticapture/pull/2116) [`6bd3050`](https://github.com/blockful/anticapture/commit/6bd30500e76e6686f9e427159cbbf105c2cafc4e) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix the whitelabel stakeholders table cutting off the address column.
+
 ## 2.13.2
 
 ### Patch Changes
