@@ -9,6 +9,7 @@ import type { Address } from "viem";
 import { useAccount } from "wagmi";
 
 import { OffchainProposalBadge } from "@/features/governance/components/proposal-overview/OffchainProposalBadge";
+import { CalldataReviewedBadge } from "@/features/governance/components/proposal-overview/CalldataReviewedBadge";
 import { ProposalSourceBadge } from "@/features/governance/components/proposal-overview/ProposalSourceBadge";
 import type { OffchainProposalItem as OffchainProposalData } from "@/features/governance/hooks/useOffchainProposals";
 import type { Proposal } from "@/features/governance/types";
@@ -580,7 +581,14 @@ export const ProposalItem = ({
       />
 
       <div className="flex w-full flex-col items-start justify-between gap-0.5 lg:w-auto">
-        <h3 className="text-primary">{proposal!.title}</h3>
+        <h3 className="text-primary flex flex-wrap items-center gap-1.5">
+          {proposal!.title}
+          <CalldataReviewedBadge
+            daoId={daoId}
+            proposalId={proposal!.id}
+            title={proposal!.title}
+          />
+        </h3>
         <div className="font-inter text-secondary flex flex-wrap items-center gap-2 text-[14px] font-normal not-italic leading-[20px]">
           <ProposalSourceBadge source="onchain" />
           <p className={getTextStatusColor(proposal!.status)}>

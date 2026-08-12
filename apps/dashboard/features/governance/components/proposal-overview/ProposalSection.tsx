@@ -32,6 +32,7 @@ import { useAccountPower } from "@/features/governance/hooks/useAccountPower";
 import { useOffchainProposal } from "@/features/governance/hooks/useOffchainProposal";
 import { useOffchainProposalPrivacy } from "@/features/governance/hooks/useOffchainProposalPrivacy";
 import { useOffchainVoteIndexing } from "@/features/governance/hooks/useOffchainVoteIndexing";
+import { useCalldataReviews } from "@/features/governance/hooks/useCalldataReview";
 import { useProposal } from "@/features/governance/hooks/useProposal";
 import type {
   ProposalDetails,
@@ -86,6 +87,9 @@ export const ProposalSection = ({
 
   const proposalId = rawProposalId as string;
   const offchainProposalId = isOffchain ? decodeURIComponent(proposalId) : "";
+
+  // Fetch the calldata reviews next to the proposal, not after it renders.
+  useCalldataReviews(daoId.toUpperCase() as DaoIdEnum);
 
   const { address } = useAccount();
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
