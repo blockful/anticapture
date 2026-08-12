@@ -48,6 +48,48 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Same resolution as deploy.yaml: gateful merges its upstreams' OpenAPI
+      # specs into /docs/json, so gateful being on this commit isn't enough —
+      # a DAO API, the relayer or address enrichment can still serve the old
+      # spec.
+      - name: Resolve the commits each upstream should be serving
+        id: upstreams
+        run: |
+          set -euo pipefail
+          # Reject lists ("still the previous release"), not accept lists: this
+          # workflow queues rather than cancels, so a push that reaches main
+          # while we wait can redeploy gateful and its upstreams to a commit
+          # this run has never seen. Anything newer serves a spec at least as
+          # new as ours, so accept it instead of timing out on it.
+          #
+          # ponytail: 200-push window — a service more than 200 pushes behind
+          # reads as newer and passes. Compare ancestry via the API if that
+          # ever matters.
+          older() {
+            git rev-list --first-parent -n 201 "$1" | tail -n +2 | paste -sd, -
+          }
+          last() { git log --first-parent -1 --format=%H -- "$@"; }
+          shas=$(jq -cn \
+            --arg dao "$(older "$(last apps/api infra/api)")" \
+            --arg relayer "$(older "$(last apps/relayer infra/relayer)")" \
+            --arg enrichment "$(older "$(last apps/address-enrichment infra/address-enrichment)")" \
+            '{"dao-api": ($dao | split(",")),
+              "relayer": ($relayer | split(",")),
+              "address-enrichment": ($enrichment | split(","))}')
+          echo "stale=${shas}" >> "$GITHUB_OUTPUT"
+          echo "stale-gateful=$(older HEAD)" >> "$GITHUB_OUTPUT"
+          echo "${shas}" | jq -r 'to_entries[] | "\(.key) must be newer than \(.value[0])"'
+
+      # The build below runs client codegen against the live gateful spec;
+      # without this gate it races the redeploy and fails with "fetch failed".
+      - name: Wait for gateful to be ready
+        run: node scripts/wait-for-gateful.mjs
+        env:
+          ANTICAPTURE_API_URL: ${{ secrets.GATEFUL_URL }}
+          EXPECTED_GATEFUL_SHA: ${{ github.sha }}
+          STALE_UPSTREAM_SHAS: ${{ steps.upstreams.outputs.stale }}
+          STALE_GATEFUL_SHAS: ${{ steps.upstreams.outputs.stale-gateful }}
+
       - name: Build publishable packages
         # @anticapture/client's build depends on codegen, which fetches the live
         # Gateful OpenAPI spec and throws without ANTICAPTURE_API_URL (same

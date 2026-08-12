@@ -146,14 +146,16 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          resolve() {
-            sha=$(git log --first-parent -1 --format=%H "${HEAD_SHA}" -- "$@")
-            printf '%s' "$(git rev-list --first-parent "${sha}..${HEAD_SHA}" | tr '\n' ',')${sha}"
+          # Reject lists ("still the previous release"), see deploy.yaml.
+          # ponytail: 200-push window, same ceiling as there.
+          older() {
+            git rev-list --first-parent -n 201 "$1" | tail -n +2 | paste -sd, -
           }
+          last() { git log --first-parent -1 --format=%H "${HEAD_SHA}" -- "$@"; }
           shas=$(jq -cn \
-            --arg dao "$(resolve apps/api infra/api)" \
-            --arg relayer "$(resolve apps/relayer infra/relayer)" \
-            --arg enrichment "$(resolve apps/address-enrichment infra/address-enrichment)" \
+            --arg dao "$(older "$(last apps/api infra/api)")" \
+            --arg relayer "$(older "$(last apps/relayer infra/relayer)")" \
+            --arg enrichment "$(older "$(last apps/address-enrichment infra/address-enrichment)")" \
             '{"dao-api": ($dao | split(",")),
               "relayer": ($relayer | split(",")),
               "address-enrichment": ($enrichment | split(","))}')
@@ -169,7 +171,7 @@ jobs:
           # upstream check rides along with it: the script skips it entirely
           # when there is no expected gateful commit.
           EXPECTED_GATEFUL_SHA: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && github.event.pull_request.head.sha || '' }}
-          EXPECTED_UPSTREAM_SHAS: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && steps.upstreams.outputs.shas || '' }}
+          STALE_UPSTREAM_SHAS: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && steps.upstreams.outputs.shas || '' }}
 
   deploy-vercel-preview:
     name: Deploy Vercel preview
