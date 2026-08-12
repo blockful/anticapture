@@ -497,12 +497,15 @@ jobs:
         env:
           CI: "true"
           # The /api/gateful proxy forwards to this gateway; without it every
-          # data request 500s and the suite exercises an empty dashboard. Uses
-          # the PR's own Gateful preview, same as the typecheck and test jobs.
-          ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+          # data request 500s and the suite exercises an empty dashboard. This
+          # deliberately targets shared dev, NOT the PR's Gateful preview: the
+          # preview stack runs its own authful, so the dev-issued
+          # E2E_BLOCKFUL_API_TOKEN comes back 401 there and every data-backed
+          # spec fails.
+          ANTICAPTURE_API_URL: https://dev-gateful.up.railway.app
           # The /api/user auth/session proxy throws on boot without this, and
           # the resulting same-origin 500s trip the suite's 5xx watcher.
-          USER_API_URL: ${{ needs.configure-vercel-preview.outputs.user_api_url }}
+          USER_API_URL: https://user-api-dev-9002.up.railway.app
           NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
           BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
