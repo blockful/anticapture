@@ -492,39 +492,50 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
 
-      # The dashboard's Vercel project is the source of truth for the gateful
-      # token; reading it at run time avoids a duplicated GitHub secret that
-      # silently rots (the E2E_BLOCKFUL_API_TOKEN copy went stale once already).
-      # Falls back to that secret when the Vercel read fails, e.g. for a
-      # sensitive (write-only) env var.
-      - name: Fetch gateful token from Vercel
+      # Resolve a gateful token that actually authenticates: collect every
+      # BLOCKFUL_API_TOKEN the dashboard's Vercel project holds plus the
+      # E2E_BLOCKFUL_API_TOKEN secret, probe each against the gateway this job
+      # targets, and use the first one that returns 200. Failing here (in
+      # seconds, with a clear message) beats 9 minutes of data specs dying on
+      # 401s — which is exactly how the stale secret manifested.
+      - name: Resolve a working gateful token
         shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          E2E_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
+          GATEFUL_URL: https://dev-gateful.up.railway.app
         run: |
           set -euo pipefail
 
-          if [ -z "${VERCEL_TOKEN:-}" ]; then
-            echo "::warning::Vercel secrets unavailable; using E2E_BLOCKFUL_API_TOKEN."
-            exit 0
+          candidates=()
+          if [ -n "${VERCEL_TOKEN:-}" ]; then
+            while IFS= read -r v; do
+              [ -n "${v}" ] && candidates+=("${v}")
+            done < <(curl --fail --silent --show-error \
+              --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+              "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env?teamId=${VERCEL_TEAM_ID}&decrypt=true" \
+              | jq -r '.envs[] | select(.key == "BLOCKFUL_API_TOKEN" and .value != null) | .value' | sort -u)
           fi
+          [ -n "${E2E_TOKEN:-}" ] && candidates+=("${E2E_TOKEN}")
 
-          value=$(curl --fail --silent --show-error \
-            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
-            "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env?teamId=${VERCEL_TEAM_ID}&decrypt=true" \
-            | jq -r '[.envs[] | select(.key == "BLOCKFUL_API_TOKEN" and .value != null)]
-                     | (map(select(.target | index("preview"))) + .) | .[0].value // empty')
+          for i in "${!candidates[@]}"; do
+            token="${candidates[$i]}"
+            echo "::add-mask::${token}"
+            code=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+              --header "Authorization: Bearer ${token}" \
+              "${GATEFUL_URL}/ens/proposals?limit=1&skip=0" || echo "000")
+            echo "candidate $((i + 1))/${#candidates[@]}: HTTP ${code}"
+            if [ "${code}" = "200" ]; then
+              echo "BLOCKFUL_API_TOKEN=${token}" >> "${GITHUB_ENV}"
+              echo "Using candidate $((i + 1)) against ${GATEFUL_URL}."
+              exit 0
+            fi
+          done
 
-          if [ -z "${value}" ]; then
-            echo "::warning::BLOCKFUL_API_TOKEN not readable from Vercel; using E2E_BLOCKFUL_API_TOKEN."
-            exit 0
-          fi
-
-          echo "::add-mask::${value}"
-          echo "BLOCKFUL_API_TOKEN=${value}" >> "${GITHUB_ENV}"
-          echo "Using the Vercel-sourced gateful token."
+          echo "::error::No available gateful token authenticates against ${GATEFUL_URL}. Update the E2E_BLOCKFUL_API_TOKEN repo secret with a valid dev token (gh secret set E2E_BLOCKFUL_API_TOKEN)."
+          exit 1
 
       - name: Run dashboard E2E tests
         run: pnpm dashboard test:e2e
@@ -540,7 +551,7 @@ jobs:
           # the resulting same-origin 500s trip the suite's 5xx watcher.
           USER_API_URL: https://user-api-dev-9002.up.railway.app
           NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
-          BLOCKFUL_API_TOKEN: ${{ env.BLOCKFUL_API_TOKEN || secrets.E2E_BLOCKFUL_API_TOKEN }}
+          BLOCKFUL_API_TOKEN: ${{ env.BLOCKFUL_API_TOKEN }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
