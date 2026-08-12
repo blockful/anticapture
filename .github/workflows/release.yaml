@@ -65,6 +65,13 @@ jobs:
           # ponytail: 200-push window — a service more than 200 pushes behind
           # reads as newer and passes. Compare ancestry via the API if that
           # ever matters.
+          #
+          # ponytail: accepting a newer gateful also means a release queued
+          # behind a later push publishes that push's schema under its own
+          # version. Pinning to this commit instead would just deadlock — the
+          # spec only exists live, and the superseding push carries no
+          # changesets to publish in its place. Needs a build-time spec
+          # artifact per commit to fix properly.
           older() {
             git rev-list --first-parent -n 201 "$1" | tail -n +2 | paste -sd, -
           }

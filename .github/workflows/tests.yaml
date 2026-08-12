@@ -530,6 +530,12 @@ jobs:
           # any hook this PR adds and break the build before E2E starts, so
           # point codegen (and only codegen) at the PR's preview gateful —
           # resolveGatefulOpenApiSpecUrl prefers this over ANTICAPTURE_API_URL.
+          #
+          # ponytail: codegen and runtime therefore sit on different contracts
+          # — a PR that adds an endpoint and immediately exercises it in a spec
+          # 404s against dev. Closing that needs a preview-issued token (the
+          # preview authful seeds its own from SEED_TOKEN_PLAINTEXT); wire one
+          # into a repo secret and point both at the preview stack if it bites.
           RAILWAY_ENVIRONMENT_NAME: anticapture-pr-${{ github.event.pull_request.number }}
           # The /api/user auth/session proxy throws on boot without this, and
           # the resulting same-origin 500s trip the suite's 5xx watcher.
