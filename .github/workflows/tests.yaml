@@ -492,6 +492,40 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
 
+      # The dashboard's Vercel project is the source of truth for the gateful
+      # token; reading it at run time avoids a duplicated GitHub secret that
+      # silently rots (the E2E_BLOCKFUL_API_TOKEN copy went stale once already).
+      # Falls back to that secret when the Vercel read fails, e.g. for a
+      # sensitive (write-only) env var.
+      - name: Fetch gateful token from Vercel
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "::warning::Vercel secrets unavailable; using E2E_BLOCKFUL_API_TOKEN."
+            exit 0
+          fi
+
+          value=$(curl --fail --silent --show-error \
+            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+            "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env?teamId=${VERCEL_TEAM_ID}&decrypt=true" \
+            | jq -r '[.envs[] | select(.key == "BLOCKFUL_API_TOKEN" and .value != null)]
+                     | (map(select(.target | index("preview"))) + .) | .[0].value // empty')
+
+          if [ -z "${value}" ]; then
+            echo "::warning::BLOCKFUL_API_TOKEN not readable from Vercel; using E2E_BLOCKFUL_API_TOKEN."
+            exit 0
+          fi
+
+          echo "::add-mask::${value}"
+          echo "BLOCKFUL_API_TOKEN=${value}" >> "${GITHUB_ENV}"
+          echo "Using the Vercel-sourced gateful token."
+
       - name: Run dashboard E2E tests
         run: pnpm dashboard test:e2e
         env:
@@ -499,15 +533,14 @@ jobs:
           # The /api/gateful proxy forwards to this gateway; without it every
           # data request 500s and the suite exercises an empty dashboard. This
           # deliberately targets shared dev, NOT the PR's Gateful preview: the
-          # preview stack runs its own authful, so the dev-issued
-          # E2E_BLOCKFUL_API_TOKEN comes back 401 there and every data-backed
-          # spec fails.
+          # preview stack runs its own authful, so a dev-issued token comes
+          # back 401 there and every data-backed spec fails.
           ANTICAPTURE_API_URL: https://dev-gateful.up.railway.app
           # The /api/user auth/session proxy throws on boot without this, and
           # the resulting same-origin 500s trip the suite's 5xx watcher.
           USER_API_URL: https://user-api-dev-9002.up.railway.app
           NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
-          BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
+          BLOCKFUL_API_TOKEN: ${{ env.BLOCKFUL_API_TOKEN || secrets.E2E_BLOCKFUL_API_TOKEN }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
