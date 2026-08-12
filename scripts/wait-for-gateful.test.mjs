@@ -72,9 +72,9 @@ test("isGatefulReady checks a kind only when shas are given for it", () => {
     },
   };
 
-  assert.equal(isGatefulReady(health, "new", { "dao-api": ["new"] }), false);
+  assert.equal(isGatefulReady(health, "new", { "dao-api": ["old"] }), false);
   assert.equal(isGatefulReady(health, "new", {}), true);
-  assert.deepEqual(staleUpstreams(health, { "dao-api": ["new"] }), ["ens"]);
+  assert.deepEqual(staleUpstreams(health, { "dao-api": ["old"] }), ["ens"]);
 });
 
 test("a DAO API reporting no commit is stale, not exempt", () => {
@@ -89,14 +89,14 @@ test("a DAO API reporting no commit is stale, not exempt", () => {
     },
   };
 
-  assert.equal(isGatefulReady(health, "new", { "dao-api": ["new"] }), false);
-  assert.deepEqual(staleUpstreams(health, { "dao-api": ["new"] }), ["ens"]);
+  assert.equal(isGatefulReady(health, "new", { "dao-api": ["old"] }), false);
+  assert.deepEqual(staleUpstreams(health, { "dao-api": ["old"] }), ["ens"]);
 });
 
 test("a release that doesn't rebuild the DAO APIs passes on their older commit", () => {
-  // The APIs sit on the last commit that touched them, which is in the
-  // accepted set — demanding HEAD would wait for a rebuild that is never
-  // going to happen.
+  // The APIs sit on the last commit that touched them, which is not in the
+  // stale set — demanding HEAD would wait for a rebuild that is never going
+  // to happen.
   const health = {
     status: 200,
     body: {
@@ -105,13 +105,16 @@ test("a release that doesn't rebuild the DAO APIs passes on their older commit",
     },
   };
 
-  assert.equal(isGatefulReady(health, "head", { "dao-api": ["head", "api-push"] }), true);
+  assert.equal(
+    isGatefulReady(health, "head", { "dao-api": ["before-api-push"] }),
+    true,
+  );
 });
 
 test("a non-API push superseding an in-flight API push still waits", () => {
   // Push A touches the API, push B doesn't and cancels A's waiter. B resolves
-  // the same accepted set (A and newer), so the gate keeps waiting while the
-  // APIs finish deploying A instead of reading their pre-A spec.
+  // the same stale set (everything before A), so the gate keeps waiting while
+  // the APIs finish deploying A instead of reading their pre-A spec.
   const deploying = {
     status: 200,
     body: {
@@ -127,8 +130,8 @@ test("a non-API push superseding an in-flight API push still waits", () => {
     },
   };
 
-  assert.equal(isGatefulReady(deploying, "B", { "dao-api": ["B", "A"] }), false);
-  assert.equal(isGatefulReady(settled, "B", { "dao-api": ["B", "A"] }), true);
+  assert.equal(isGatefulReady(deploying, "B", { "dao-api": ["pre-A"] }), false);
+  assert.equal(isGatefulReady(settled, "B", { "dao-api": ["pre-A"] }), true);
 });
 
 test("every spec-contributing upstream is gated, on its own commit", () => {
@@ -137,9 +140,9 @@ test("every spec-contributing upstream is gated, on its own commit", () => {
   // against its own release, not the DAO APIs'. Authful contributes no spec
   // and is absent from the map, so it only has to be reachable.
   const expected = {
-    "dao-api": ["head", "api-push"],
-    relayer: ["head", "relayer-push"],
-    "address-enrichment": ["head", "enrichment-push"],
+    "dao-api": ["before-api-push"],
+    relayer: ["before-relayer-push"],
+    "address-enrichment": ["before-enrichment-push"],
   };
   const health = {
     status: 200,
@@ -183,7 +186,7 @@ test("waitForGateful polls until every DAO API serves the commit", async () => {
   const result = await waitForGateful({
     baseUrl: "https://gateful.example.com",
     expectedSha: "new",
-    expectedShasByKind: { "dao-api": ["new"] },
+    staleShasByKind: { "dao-api": ["old"] },
     timeoutMs: 100,
     intervalMs: 10,
     fetchImpl: async () => responses.shift(),
@@ -240,4 +243,27 @@ test("waitForGateful times out on stale commits", async () => {
 
   assert.equal(result.ready, false);
   assert.equal(result.attempt, 2);
+});
+
+test("a deployment newer than this run is ready, not stale", () => {
+  // The queued-release case: a push lands on main while we wait, Railway
+  // redeploys gateful and the APIs to a commit this run has never seen. Its
+  // spec is at least as new as ours, so waiting it out would be a 10-minute
+  // timeout for nothing.
+  const health = {
+    status: 200,
+    body: {
+      commit: "newer-than-head",
+      upstreams: {
+        ens: { kind: "dao-api", status: "ok", commit: "newer-than-head" },
+      },
+    },
+  };
+
+  assert.equal(
+    isGatefulReady(health, "head", { "dao-api": ["pre-head"] }, ["pre-head"]),
+    true,
+  );
+  // Without a reject list (PR previews) gateful's commit stays exact.
+  assert.equal(isGatefulReady(health, "head", {}), false);
 });
