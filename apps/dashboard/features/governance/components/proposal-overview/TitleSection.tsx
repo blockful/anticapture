@@ -66,16 +66,6 @@ export const TitleSection = ({
         {/* Source badge — Snapshot (offchain) or Governor (onchain) */}
         <ProposalSourceBadge source={isOffchain ? "offchain" : "onchain"} />
 
-        {/* Calldata verified in blockful/dao-proposals */}
-        {!isOffchain && (
-          <CalldataReviewedBadge
-            daoId={daoIdKey}
-            proposalId={proposal.id}
-            title={proposal.title ?? ""}
-            asLink
-          />
-        )}
-
         {/* Badge Ongoing Proposal */}
         <ProposalBadge
           status={proposal.status.toLowerCase() as ProposalStatus}
@@ -101,7 +91,17 @@ export const TitleSection = ({
         <h4 className="text-primary text-xl">{proposal?.title}</h4>
       </div>
 
-      <div className="flex w-full items-center justify-start gap-2">
+      <div className="flex w-full flex-wrap items-center justify-start gap-2">
+        {/* Calldata verified in blockful/dao-proposals */}
+        {!isOffchain && (
+          <CalldataReviewedBadge
+            daoId={daoIdKey}
+            proposalId={proposal.id}
+            title={proposal.title ?? ""}
+            withLabel
+          />
+        )}
+
         <DefaultLink
           href={`https://x.com/intent/tweet?text=${encodeURIComponent(twitterText)}`}
           openInNewTab
