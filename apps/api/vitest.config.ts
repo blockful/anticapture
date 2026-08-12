@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    // PGlite-backed suites boot a WASM Postgres in beforeAll; cold CI runners
+    // regularly blow through the 10s default.
+    hookTimeout: 30_000,
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
