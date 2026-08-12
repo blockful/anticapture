@@ -500,6 +500,9 @@ jobs:
           # data request 500s and the suite exercises an empty dashboard. Uses
           # the PR's own Gateful preview, same as the typecheck and test jobs.
           ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+          # The /api/user auth/session proxy throws on boot without this, and
+          # the resulting same-origin 500s trip the suite's 5xx watcher.
+          USER_API_URL: ${{ needs.configure-vercel-preview.outputs.user_api_url }}
           NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
           BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
