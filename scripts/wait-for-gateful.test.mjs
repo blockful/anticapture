@@ -268,24 +268,15 @@ test("a deployment newer than this run is ready, not stale", () => {
   assert.equal(isGatefulReady(health, "head", {}), false);
 });
 
-test("a gateful with no commit is ready, not waited out", () => {
-  // `railway up` from a laptop stamps no SHA. Nothing will ever make that
-  // deployment report one, so demanding a match is a guaranteed timeout.
+test("a gateful with no commit is stale, not ready", () => {
+  // A `railway up` deployment stamps no SHA; the CI deploy replacing it is
+  // still in flight, so its spec is the old one. main() downgrades the
+  // eventual timeout to a warning when no such deploy ever lands.
   const health = { status: 200, body: { commit: null } };
 
-  assert.equal(isGatefulReady(health, "head", {}, ["pre-head"]), true);
-  assert.equal(isGatefulReady(health, "head", {}), true);
+  assert.equal(isGatefulReady(health, "head", {}, ["pre-head"]), false);
+  assert.equal(isGatefulReady(health, "head", {}), false);
 
-  // Its upstreams are still checked: they deploy independently of gateful.
-  const behind = {
-    status: 200,
-    body: {
-      commit: null,
-      upstreams: { ens: { kind: "dao-api", status: "ok", commit: "pre-head" } },
-    },
-  };
-  assert.equal(
-    isGatefulReady(behind, "head", { "dao-api": ["pre-head"] }),
-    false,
-  );
+  // With no expected SHA (untrusted PRs) reachability is still enough.
+  assert.equal(isGatefulReady(health, undefined, {}), true);
 });

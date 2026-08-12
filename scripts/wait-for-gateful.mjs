@@ -116,13 +116,13 @@ export const isGatefulReady = (
 
   const commit = health.body?.commit;
 
-  // A gateful reporting no commit at all was deployed outside git — `railway
-  // up` from a laptop, which stamps no SHA. There is nothing to compare it
-  // against and no push coming that would change that, so waiting is just a
-  // guaranteed timeout: take it as ready (waitForGateful warns) rather than
-  // blocking every release until someone redeploys from CI.
+  // A gateful reporting no commit at all is the previous release still
+  // answering: `railway up` from a laptop stamps no SHA, and the CI deploy
+  // that would replace it is still in flight. Treat it as stale so we keep
+  // waiting instead of handing codegen the old spec. If no such deploy is
+  // coming, main() downgrades the timeout to a warning rather than failing.
   if (!commit) {
-    return staleUpstreams(health, staleShasByKind).length === 0;
+    return false;
   }
 
   // Same reasoning as staleUpstreams: with a reject list, a gateful newer than
@@ -176,12 +176,6 @@ export const waitForGateful = async ({
           staleGatefulShas,
         )
       ) {
-        if (expectedSha && !lastHealth.body?.commit) {
-          logger.log(
-            `::warning::Gateful reports no commit (deployed outside CI?); proceeding without checking it against ${expectedSha}.`,
-          );
-        }
-
         logger.log(
           expectedSha
             ? `Gateful ready after attempt ${attempt}: commit ${
@@ -259,6 +253,21 @@ const main = async () => {
   });
 
   if (result.ready) {
+    return;
+  }
+
+  // Timed out with a healthy gateful that never reported a commit: it was
+  // deployed outside CI (`railway up`), so no push is coming to change that
+  // and failing every release until someone redeploys from CI helps nobody.
+  if (
+    !result.lastError &&
+    result.lastHealth?.status === 200 &&
+    !result.lastHealth.body?.commit &&
+    staleUpstreams(result.lastHealth, staleShasByKind).length === 0
+  ) {
+    console.warn(
+      `::warning::Gateful reports no commit (deployed outside CI?) after ${timeoutMs}ms; proceeding without checking it against ${expectedSha}.`,
+    );
     return;
   }
 
