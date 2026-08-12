@@ -1,23 +1,28 @@
 import { test, expect } from "./fixtures";
 
 test.describe("DAO Overview page (/ens)", () => {
-  test("renders DAO Overview page", async ({ goto, page }) => {
-    await goto("/ens");
-    await expect(page).toHaveURL(/\/ens(\?.*)?$/);
-    await expect(page.locator("h3").filter({ hasText: "ENS" })).toBeVisible({
-      timeout: 15_000,
-    });
-  });
+  // exact: true — proposal cards on the page can also render h3s containing
+  // "ENS", so a substring match hits a strict mode violation with live data.
+  test(
+    "renders DAO Overview page",
+    { tag: "@smoke" },
+    async ({ goto, page }) => {
+      await goto("/ens");
+      await expect(page).toHaveURL(/\/ens(\?.*)?$/);
+      await expect(
+        page.getByRole("heading", { name: "ENS", exact: true }),
+      ).toBeVisible({ timeout: 15_000 });
+    },
+  );
 
   test("renders ENS DAO header with name and metrics", async ({
     goto,
     page,
   }) => {
     await goto("/ens");
-    // ENS name heading
-    await expect(page.locator("h3").filter({ hasText: "ENS" })).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(
+      page.getByRole("heading", { name: "ENS", exact: true }),
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test("shows header metric cards", async ({ goto, page }) => {
@@ -107,9 +112,9 @@ test.describe("DAO Overview page (/ens)", () => {
     page,
   }) => {
     await goto("/ens");
-    await expect(page.locator("h3").filter({ hasText: "ENS" })).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(
+      page.getByRole("heading", { name: "ENS", exact: true }),
+    ).toBeVisible({ timeout: 15_000 });
     // recharts renders into a wrapper div
     const charts = page.locator(
       ".recharts-wrapper, .recharts-responsive-container, svg.recharts-surface",

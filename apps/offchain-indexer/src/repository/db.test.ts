@@ -55,6 +55,8 @@ describe("DrizzleRepository", () => {
   let db: PgliteDatabase<typeof schema>;
   let repo: DrizzleRepository;
 
+  // PGlite boots a WASM Postgres and runs migrations; on a cold, loaded CI
+  // runner that can exceed the default 10s hook timeout.
   beforeAll(async () => {
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     (BigInt.prototype as any).toJSON = function () {
@@ -70,7 +72,7 @@ describe("DrizzleRepository", () => {
     });
 
     repo = new DrizzleRepository(db);
-  });
+  }, 60_000);
 
   afterEach(async () => {
     await client.exec(`

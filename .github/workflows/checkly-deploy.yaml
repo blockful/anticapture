@@ -1,0 +1,48 @@
+name: Checkly deploy
+
+# Keeps the Checkly monitors in sync with the repo. `checkly deploy` is the
+# only sanctioned write path for monitor config: edits made in the Checkly UI
+# are overwritten by the next run of this workflow.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/dashboard/e2e/**"
+      - "apps/dashboard/checkly.config.ts"
+      - "apps/dashboard/playwright.config.ts"
+      - "apps/dashboard/package.json"
+      - ".github/workflows/checkly-deploy.yaml"
+  workflow_dispatch:
+
+jobs:
+  checkly-deploy:
+    name: Deploy Checkly monitors
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
+      CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Guarded so the workflow is a no-op until the Checkly account secrets
+      # are configured on the repo.
+      - name: Deploy checks
+        if: env.CHECKLY_API_KEY != ''
+        working-directory: apps/dashboard
+        run: pnpm exec checkly deploy --force

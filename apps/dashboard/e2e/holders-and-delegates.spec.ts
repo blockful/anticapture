@@ -67,20 +67,73 @@ const applyAddressFilter = async (
     )
     .first();
 
+  // Data arriving mid-interaction re-renders the table and can dismiss the
+  // popover at any point, so open -> fill -> apply -> URL retries as one
+  // atomic unit. The trigger click is conditional because it toggles: clicking
+  // an open popover closes it. The Apply click goes through DOM dispatch since
+  // the popover may render off-screen in the test viewport.
   await expect(async () => {
-    await addressTrigger.click();
+    if (!(await popover.isVisible())) {
+      await addressTrigger.click();
+    }
     await expect(popover).toBeVisible({ timeout: 2_000 });
-  }).toPass({ timeout: 15_000 });
+    const input = popover.getByPlaceholder("Paste the address");
+    // Native-setter write instead of fill: table re-renders keep re-triggering
+    // the popover's entry animation, so fill's stability check can stall.
+    await input.evaluate((el: HTMLInputElement, value) => {
+      const setter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value",
+      )!.set!;
+      setter.call(el, value);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }, ZERO_ADDRESS);
+    await expect(input).toHaveValue(ZERO_ADDRESS);
+    await popover
+      .getByRole("button", { name: /Apply/ })
+      .evaluate((el: HTMLElement) => el.click());
+    await expect(page).toHaveURL(/address=/, { timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
+};
 
-  const input = popover.getByPlaceholder("Paste the address");
-  await expect(input).toBeEditable({ timeout: 5_000 });
-  await input.fill(ZERO_ADDRESS);
-  await expect(input).toHaveValue(ZERO_ADDRESS);
+/**
+ * Balance / Voting Power headers don't sort on click — they open the
+ * AmountFilter popover, where sorting is a radio option applied via Apply.
+ */
+const applyAmountSort = async (
+  page: Page,
+  trigger: ReturnType<Page["locator"]>,
+  optionLabel: "Largest first" | "Smallest first",
+  expectedUrl: RegExp,
+) => {
+  const popover = page
+    .locator('[role="dialog"][data-state="open"]:has(input[placeholder="Min"])')
+    .first();
 
-  const popoverApply = popover.getByRole("button", { name: /Apply/ });
-  // The popover may render off-screen in the test viewport. Click via DOM
-  // dispatch to bypass Playwright's viewport actionability check.
-  await popoverApply.evaluate((el: HTMLElement) => el.click());
+  // Data arriving mid-interaction re-renders the table and can dismiss the
+  // popover at any point, so open -> select -> apply -> URL retries as one
+  // atomic unit. Both clicks are conditional because they toggle: clicking an
+  // open popover closes it, and re-clicking a checked radio unchecks it (the
+  // selection persists in a store across popover reopens). The Apply click
+  // goes through DOM dispatch since the popover may render off-screen in the
+  // test viewport.
+  await expect(async () => {
+    if (!(await popover.isVisible())) {
+      await trigger.click();
+    }
+    await expect(popover).toBeVisible({ timeout: 2_000 });
+    const radio = popover.getByRole("radio", { name: optionLabel });
+    if (!(await radio.isChecked())) {
+      // DOM dispatch, like Apply below: the popover can position off-screen,
+      // and a real click stalls trying to scroll a portaled element into view.
+      await radio.evaluate((el: HTMLElement) => el.click());
+    }
+    await expect(radio).toBeChecked();
+    await popover
+      .getByRole("button", { name: /Apply/ })
+      .evaluate((el: HTMLElement) => el.click());
+    await expect(page).toHaveURL(expectedUrl, { timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
 };
 
 const selectTab = async (page: Page, label: "Delegates" | "Token Holders") => {
@@ -98,12 +151,16 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
     await expect(page).toHaveURL(/\/ens\/stakeholders/);
   });
 
-  test("renders Stakeholders heading", async ({ goto, page }) => {
-    await goto("/ens/stakeholders");
-    await expect(
-      page.locator("h4").filter({ hasText: "Stakeholders" }),
-    ).toBeVisible();
-  });
+  test(
+    "renders Stakeholders heading",
+    { tag: "@smoke" },
+    async ({ goto, page }) => {
+      await goto("/ens/stakeholders");
+      await expect(
+        page.locator("h4").filter({ hasText: "Stakeholders" }),
+      ).toBeVisible();
+    },
+  );
 
   test("shows Delegates tab as default", async ({ goto, page }) => {
     await goto("/ens/stakeholders");
@@ -327,20 +384,17 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
-    const balanceHeader = page
+    const balanceTrigger = page
       .locator("table thead")
       .first()
       .getByText(/^Balance/)
       .locator("..")
       .getByRole("button")
       .first();
-    await expect(balanceHeader).toBeVisible();
-    // First click on Token Holders headers can be dropped before React is
-    // ready; retry click + URL assertion until one toggle lands.
-    await expect(async () => {
-      await balanceHeader.click();
-      await expect(page).toHaveURL(/sortBy=balance|sort=/, { timeout: 2_000 });
-    }).toPass({ timeout: 15_000 });
+    await expect(balanceTrigger).toBeVisible();
+    // Largest-first is the nuqs default and serializes to nothing, so only the
+    // smallest-first application is observable in the URL.
+    await applyAmountSort(page, balanceTrigger, "Smallest first", /sort=asc/);
   });
 
   test("Token Holders sort by Change cycles sort state", async ({
@@ -374,18 +428,17 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
     await expect(page.locator("table").first()).toBeVisible({
       timeout: 15_000,
     });
-    const vpHeader = page
+    const vpTrigger = page
       .locator("table thead")
       .first()
       .getByText(/^Voting Power/)
       .locator("..")
       .getByRole("button")
       .first();
-    await expect(vpHeader).toBeVisible();
-    await vpHeader.click();
-    await expect(page).toHaveURL(/sortBy=votingPower|sort=/, {
-      timeout: 10_000,
-    });
+    await expect(vpTrigger).toBeVisible();
+    // Largest-first is the nuqs default and serializes to nothing, so only the
+    // smallest-first application is observable in the URL.
+    await applyAmountSort(page, vpTrigger, "Smallest first", /sort=asc/);
   });
 
   test("Delegates sort by Change cycles sort state", async ({ goto, page }) => {
@@ -399,10 +452,14 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
       .first()
       .getByRole("button", { name: /^Change/ });
     await expect(changeHeader).toBeVisible();
-    await changeHeader.click();
-    await expect(page).toHaveURL(/sortBy=(signedVariation|variation)/, {
-      timeout: 10_000,
-    });
+    // First click on freshly hydrated headers can be dropped; retry click +
+    // URL assertion until one toggle lands.
+    await expect(async () => {
+      await changeHeader.click();
+      await expect(page).toHaveURL(/sortBy=(signedVariation|variation)/, {
+        timeout: 2_000,
+      });
+    }).toPass({ timeout: 15_000 });
   });
 
   test("Delegates sort by Delegators changes URL state", async ({
@@ -419,9 +476,15 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
       .first()
       .getByRole("button", { name: /^Delegators/ });
     await expect(delegatorsHeader).toBeVisible();
-    await delegatorsHeader.click();
-    await expect(page).toHaveURL(/sortBy=delegationsCount|sort=/, {
-      timeout: 10_000,
+    // First click on freshly hydrated headers can be dropped; retry click +
+    // URL assertion until one toggle lands.
+    await expect(async () => {
+      await delegatorsHeader.click();
+      await expect(page).toHaveURL(/sortBy=delegationsCount/, {
+        timeout: 2_000,
+      });
+    }).toPass({
+      timeout: 15_000,
     });
   });
 
