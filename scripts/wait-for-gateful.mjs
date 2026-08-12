@@ -115,13 +115,21 @@ export const isGatefulReady = (
   }
 
   const commit = health.body?.commit;
+
+  // A gateful reporting no commit at all was deployed outside git — `railway
+  // up` from a laptop, which stamps no SHA. There is nothing to compare it
+  // against and no push coming that would change that, so waiting is just a
+  // guaranteed timeout: take it as ready (waitForGateful warns) rather than
+  // blocking every release until someone redeploys from CI.
+  if (!commit) {
+    return staleUpstreams(health, staleShasByKind).length === 0;
+  }
+
   // Same reasoning as staleUpstreams: with a reject list, a gateful newer than
   // this run counts as ready. Without one (PR previews), exact match only.
   const gatefulOk =
     commit === expectedSha ||
-    (staleGatefulShas.length > 0 &&
-      !!commit &&
-      !staleGatefulShas.includes(commit));
+    (staleGatefulShas.length > 0 && !staleGatefulShas.includes(commit));
 
   if (!gatefulOk) {
     return false;
@@ -168,9 +176,17 @@ export const waitForGateful = async ({
           staleGatefulShas,
         )
       ) {
+        if (expectedSha && !lastHealth.body?.commit) {
+          logger.log(
+            `::warning::Gateful reports no commit (deployed outside CI?); proceeding without checking it against ${expectedSha}.`,
+          );
+        }
+
         logger.log(
           expectedSha
-            ? `Gateful ready after attempt ${attempt}: commit ${expectedSha}`
+            ? `Gateful ready after attempt ${attempt}: commit ${
+                lastHealth.body?.commit ?? "<missing>"
+              }`
             : `Gateful ready after attempt ${attempt}`,
         );
 

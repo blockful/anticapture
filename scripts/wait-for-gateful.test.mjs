@@ -267,3 +267,25 @@ test("a deployment newer than this run is ready, not stale", () => {
   // Without a reject list (PR previews) gateful's commit stays exact.
   assert.equal(isGatefulReady(health, "head", {}), false);
 });
+
+test("a gateful with no commit is ready, not waited out", () => {
+  // `railway up` from a laptop stamps no SHA. Nothing will ever make that
+  // deployment report one, so demanding a match is a guaranteed timeout.
+  const health = { status: 200, body: { commit: null } };
+
+  assert.equal(isGatefulReady(health, "head", {}, ["pre-head"]), true);
+  assert.equal(isGatefulReady(health, "head", {}), true);
+
+  // Its upstreams are still checked: they deploy independently of gateful.
+  const behind = {
+    status: 200,
+    body: {
+      commit: null,
+      upstreams: { ens: { kind: "dao-api", status: "ok", commit: "pre-head" } },
+    },
+  };
+  assert.equal(
+    isGatefulReady(behind, "head", { "dao-api": ["pre-head"] }),
+    false,
+  );
+});
