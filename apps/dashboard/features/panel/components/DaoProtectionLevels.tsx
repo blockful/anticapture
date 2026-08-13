@@ -70,7 +70,7 @@ export const DaoProtectionLevels = () => {
   );
 
   return (
-    <div className="bg-surface-default flex w-full flex-col justify-between gap-3 p-4">
+    <div className="bg-surface-default flex w-full min-w-0 flex-1 flex-col justify-between gap-3 p-4">
       <h3 className="text-primary text-alternative-sm tracking-alternative-sm font-mono font-medium uppercase leading-5">
         Governance risk, right now
       </h3>
