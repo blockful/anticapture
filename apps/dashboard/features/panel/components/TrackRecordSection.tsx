@@ -1,7 +1,7 @@
 import { TestimonialCarousel } from "@/features/panel/components/TestimonialCarousel";
 import { ClickableCard } from "@/shared/components/design-system/cards/clickable-card/ClickableCard";
 import { DaoAvatarIcon } from "@/shared/components/icons/DaoAvatarIcon";
-import { mockedTrackRecordCases } from "@/shared/constants/mocked-data/mocked-track-record";
+import { TRACK_RECORD_CASES } from "@/shared/constants/track-record";
 
 export const TrackRecordSection = () => {
   return (
@@ -11,7 +11,7 @@ export const TrackRecordSection = () => {
       </h2>
 
       <div className="grid gap-2 lg:grid-cols-3">
-        {mockedTrackRecordCases.map(({ daoId, name, description, caseUrl }) => (
+        {TRACK_RECORD_CASES.map(({ daoId, name, description, caseUrl }) => (
           <ClickableCard
             key={name}
             href={caseUrl}
