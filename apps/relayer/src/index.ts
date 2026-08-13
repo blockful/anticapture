@@ -162,8 +162,9 @@ async function main() {
   // --- Routes ---
   relayVote(app, relayService);
   relayDelegate(app, relayService);
-  if (env.ANTICAPTURE_API_URL) {
-    const proposalActions = wrapWithTracing(
+  relayProposal(
+    app,
+    wrapWithTracing(
       new ProposalActionService(
         publicClient,
         signer,
@@ -173,13 +174,8 @@ async function main() {
           minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
         },
       ),
-    );
-    relayProposal(app, proposalActions);
-    logger.info(
-      { anticaptureApiUrl: env.ANTICAPTURE_API_URL },
-      "Proposal queue/execute endpoints enabled",
-    );
-  }
+    ),
+  );
   health(app);
   config(app, {
     minVotingPower: env.MIN_VOTING_POWER,

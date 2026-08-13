@@ -50,9 +50,9 @@ const envSchema = z.object({
     .positive()
     .optional(),
 
-  // When set, exposes POST /relay/queue and /relay/execute, which fetch
-  // proposal execution args from this Anticapture API instance.
-  ANTICAPTURE_API_URL: z.url().optional(),
+  // Anticapture API instance backing POST /relay/queue and /relay/execute,
+  // which fetch proposal execution args from it.
+  ANTICAPTURE_API_URL: z.url(),
 
   PORT: z.coerce.number().default(3002),
 
