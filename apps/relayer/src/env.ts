@@ -50,6 +50,10 @@ const envSchema = z.object({
     .positive()
     .optional(),
 
+  // When set, exposes POST /relay/queue and /relay/execute, which fetch
+  // proposal execution args from this Anticapture API instance.
+  ANTICAPTURE_API_URL: z.url().optional(),
+
   PORT: z.coerce.number().default(3002),
 
   // Injected by Railway. Reported on /health so gateful — which merges this

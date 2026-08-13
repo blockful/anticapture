@@ -50,4 +50,28 @@ export const Errors = {
       "RATE_LIMITER_UNAVAILABLE",
       503,
     ),
+  PROPOSAL_NOT_FOUND: (proposalId: string) =>
+    new RelayError(
+      `Proposal ${proposalId} was not found`,
+      "PROPOSAL_NOT_FOUND",
+      404,
+    ),
+  PROPOSAL_DATA_MISMATCH: (proposalId: string) =>
+    new RelayError(
+      `Proposal data does not hash to the requested proposal id ${proposalId}`,
+      "PROPOSAL_DATA_MISMATCH",
+      422,
+    ),
+  INVALID_PROPOSAL_STATE: (action: string, state: string) =>
+    new RelayError(
+      `Proposal cannot be ${action}d while in state ${state}`,
+      "INVALID_PROPOSAL_STATE",
+      409,
+    ),
+  TIMELOCK_NOT_READY: (eta: bigint) =>
+    new RelayError(
+      `Proposal timelock is not ready; executable at ${eta.toString()} (unix seconds)`,
+      "TIMELOCK_NOT_READY",
+      409,
+    ),
 } as const;
