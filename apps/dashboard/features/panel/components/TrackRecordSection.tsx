@@ -6,7 +6,7 @@ import { TRACK_RECORD_CASES } from "@/shared/constants/track-record";
 export const TrackRecordSection = () => {
   return (
     <div className="flex flex-col gap-2">
-      <h2 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-5 tracking-wider">
+      <h2 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-5 tracking-[0.78px]">
         Track record
       </h2>
 
