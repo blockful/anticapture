@@ -16,7 +16,7 @@ export const ServicesRow = () => {
     <div className="bg-surface-default flex flex-col gap-2 p-3 lg:flex-row lg:items-center lg:justify-between lg:gap-4">
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
         <div className="flex items-center gap-1.5">
-          <BadgeIcon icon={ShieldCheck} variant="dimmed" />
+          <BadgeIcon icon={ShieldCheck} variant="dimmed" iconVariant="dimmed" />
           <h2 className="text-primary text-alternative-xs font-mono font-medium uppercase leading-4 tracking-wider">
             Services by Blockful
           </h2>
