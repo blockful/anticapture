@@ -734,6 +734,9 @@ importers:
 
   apps/relayer:
     dependencies:
+      "@anticapture/client":
+        specifier: workspace:*
+        version: link:../../packages/anticapture-client
       "@anticapture/observability":
         specifier: workspace:*
         version: link:../../packages/observability

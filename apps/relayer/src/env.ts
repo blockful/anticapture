@@ -50,9 +50,10 @@ const envSchema = z.object({
     .positive()
     .optional(),
 
-  // Anticapture API instance backing POST /relay/queue and /relay/execute,
-  // which fetch proposal execution args from it.
+  // Gateful gateway backing POST /relay/queue and /relay/execute, which
+  // fetch proposal execution args from GET /{dao}/proposals/{id}.
   ANTICAPTURE_API_URL: z.url(),
+  ANTICAPTURE_API_KEY: z.string().min(1),
 
   PORT: z.coerce.number().default(3002),
 

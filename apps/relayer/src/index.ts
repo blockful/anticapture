@@ -168,7 +168,13 @@ async function main() {
       new ProposalActionService(
         publicClient,
         signer,
-        wrapWithTracing(new AnticaptureProposalSource(env.ANTICAPTURE_API_URL)),
+        wrapWithTracing(
+          new AnticaptureProposalSource(
+            env.ANTICAPTURE_API_URL,
+            env.DAO_NAME,
+            env.ANTICAPTURE_API_KEY,
+          ),
+        ),
         {
           governorAddress,
           minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
