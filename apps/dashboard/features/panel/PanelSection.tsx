@@ -1,6 +1,7 @@
 import { LatestFindingTicker } from "@/features/panel/components/LatestFindingTicker";
 import { PanelHero } from "@/features/panel/components/PanelHero";
 import { PanelTable } from "@/features/panel/components/PanelTable";
+import { TrackRecordSection } from "@/features/panel/components/TrackRecordSection";
 import {
   SubSection,
   SubSectionsContainer,
@@ -22,6 +23,8 @@ export const PanelSection = () => {
           <PanelTable />
         </SubSection>
       </SubSectionsContainer>
+
+      <TrackRecordSection />
     </div>
   );
 };

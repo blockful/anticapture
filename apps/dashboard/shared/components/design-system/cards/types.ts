@@ -18,4 +18,7 @@ export type ClickableCardProps = {
   isDisabled?: boolean;
   onClick?: () => void;
   className?: string;
+  /** Renders the card as a link instead of a button. Takes precedence over onClick. */
+  href?: string;
+  openInNewTab?: boolean;
 };
