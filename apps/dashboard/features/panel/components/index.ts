@@ -3,5 +3,6 @@ export * from "@/features/panel/components/PanelHero";
 export * from "@/features/panel/components/LatestFindingTicker";
 export * from "@/features/panel/components/TrackRecordSection";
 export * from "@/features/panel/components/UseItNowSection";
+export * from "@/features/panel/components/ServicesRow";
 export * from "@/features/panel/components/DaoProtectionLevels";
 export * from "@/features/panel/components/TooltipCell";
