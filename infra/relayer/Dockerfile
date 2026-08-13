@@ -16,6 +16,14 @@ COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 COPY --from=builder /app/turbo.json turbo.json
+# Codegen resolves the Gateful OpenAPI spec from a URL (there is no committed
+# spec). Railway only exposes these variables to the build when declared as
+# ARGs: PR previews interpolate from RAILWAY_ENVIRONMENT_NAME; dev/production
+# read the Gateful URL from ANTICAPTURE_API_URL.
+# See packages/anticapture-client/src/gateful-openapi-spec.ts.
+ARG RAILWAY_ENVIRONMENT_NAME
+ARG ANTICAPTURE_API_URL
+RUN pnpm --filter @anticapture/client codegen
 RUN pnpm --filter @anticapture/relayer... build
 
 FROM base AS runner
