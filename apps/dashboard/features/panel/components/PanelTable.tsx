@@ -222,8 +222,7 @@ export const PanelTable = () => {
       columns={panelColumns}
       data={allDaos}
       withSorting={true}
-      fillHeight={true}
-      wrapperClassName="min-h-[400px] lg:min-h-0"
+      wrapperClassName="min-h-[400px]"
       stickyFirstColumn={true}
       pinRowsToBottom={(row) => row.isPartiallyIndexed}
       getRowClassName={(row, index, rows) => {

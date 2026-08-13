@@ -8,17 +8,16 @@ import {
 
 export const PanelSection = () => {
   return (
-    <div className="mt-12 flex h-full w-full flex-col gap-5 px-4 py-5 lg:mt-0 lg:min-h-0 lg:gap-2 lg:p-5">
+    <div className="mt-12 flex w-full flex-col gap-5 px-4 py-5 lg:mt-0 lg:gap-2 lg:p-5">
       <PanelHero />
 
       <LatestFindingTicker />
 
-      <SubSectionsContainer className="gap-3 lg:min-h-0 lg:flex-1">
+      <SubSectionsContainer className="gap-3">
         <SubSection
           className="gap-0"
           subsectionTitle={"Monitored DAOs"}
           dateRange=""
-          contentClassName="lg:flex lg:flex-col lg:flex-1 lg:min-h-0"
         >
           <PanelTable />
         </SubSection>
