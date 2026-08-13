@@ -22,7 +22,7 @@ export const TestimonialCarousel = () => {
     );
 
   return (
-    <div className="border-border-default bg-surface-default flex items-center justify-center gap-4 px-3 py-4">
+    <div className="border-border-default bg-surface-default flex items-center justify-center gap-4 border px-3 py-4">
       <IconButton
         icon={ChevronLeft}
         variant="ghost"
