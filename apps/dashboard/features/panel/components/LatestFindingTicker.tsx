@@ -9,7 +9,7 @@ export const LatestFindingTicker = () => {
   return (
     <div className="bg-surface-default flex flex-col gap-2 px-4 py-3 lg:flex-row lg:items-center lg:gap-3.5">
       <div className="flex flex-1 flex-col gap-1 lg:flex-row lg:items-center lg:gap-3.5">
-        <h2 className="text-primary text-alternative-sm shrink-0 font-mono font-medium uppercase leading-5 tracking-[0.78px]">
+        <h2 className="text-primary text-alternative-sm tracking-alternative-sm shrink-0 font-mono font-medium uppercase leading-5">
           Latest finding
         </h2>
         <p className="text-secondary text-sm font-normal leading-5">

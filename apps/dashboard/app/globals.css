@@ -36,7 +36,11 @@
   --font-mono:
     "Roboto Mono", ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Consolas",
     "Liberation Mono", "Courier New", monospace;
+  /* The alternative (mono) styles track at 6% of their size. CSS letter-spacing
+   * takes no percentages, so each size gets its resolved value: wider is the
+   * 12px step (--text-alternative-xs), alternative-sm the 13px one. */
   --tracking-wider: 0.72px;
+  --tracking-alternative-sm: 0.78px;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-scroll-left: scroll-left 20s linear infinite;
