@@ -2,6 +2,7 @@ import { LatestFindingTicker } from "@/features/panel/components/LatestFindingTi
 import { PanelHero } from "@/features/panel/components/PanelHero";
 import { PanelTable } from "@/features/panel/components/PanelTable";
 import { TrackRecordSection } from "@/features/panel/components/TrackRecordSection";
+import { UseItNowSection } from "@/features/panel/components/UseItNowSection";
 import {
   SubSection,
   SubSectionsContainer,
@@ -25,6 +26,8 @@ export const PanelSection = () => {
       </SubSectionsContainer>
 
       <TrackRecordSection />
+
+      <UseItNowSection />
     </div>
   );
 };
