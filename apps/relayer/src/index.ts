@@ -28,6 +28,7 @@ import {
   resolveRelayLimits,
 } from "@/services/guards/rate-limiter";
 import { ChainStateService } from "@/services/chain/chain-state";
+import { ViemGovernorGateway } from "@/services/chain/governor-gateway";
 import { ProposalEnactmentService } from "@/services/proposals/proposal-enactment";
 import { AnticaptureProposalSource } from "@/services/proposals/proposal-source";
 import { RelayService } from "@/services/relay";
@@ -166,7 +167,7 @@ async function main() {
     app,
     wrapWithTracing(
       new ProposalEnactmentService(
-        publicClient,
+        wrapWithTracing(new ViemGovernorGateway(publicClient, governorAddress)),
         signer,
         wrapWithTracing(
           new AnticaptureProposalSource(

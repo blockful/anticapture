@@ -13,6 +13,7 @@ import { governorAbi, ProposalState } from "@/abi/governor";
 import { createLogger } from "@anticapture/observability";
 import { relayProposal } from "@/controllers/relay-proposal";
 import { RelayError } from "@/errors";
+import { ViemGovernorGateway } from "@/services/chain/governor-gateway";
 import { ProposalEnactmentService } from "@/services/proposals/proposal-enactment";
 import type {
   ProposalArgs,
@@ -66,7 +67,7 @@ function createProposalApp(rpcUrl: string) {
   const signer = createLocalSigner(RELAYER_KEY, mainnet, rpcUrl);
 
   const service = new ProposalEnactmentService(
-    publicClient,
+    new ViemGovernorGateway(publicClient, GOVERNOR_ADDRESS),
     signer,
     new StubProposalSource(),
     {

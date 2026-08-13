@@ -12,12 +12,10 @@ import {
 import { governorAbi, ProposalState } from "@/abi/governor";
 import { createLogger } from "@anticapture/observability";
 import { RelayError } from "@/errors";
+import type { GovernorGateway } from "@/services/chain/governor-gateway";
 import { RelayerSigner } from "@/signer/types";
 
-import {
-  ProposalEnactmentService,
-  type EnactmentChainReader,
-} from "./proposal-enactment";
+import { ProposalEnactmentService } from "./proposal-enactment";
 import type { ProposalArgs, ProposalSource } from "./proposal-source";
 
 const silentLogger = createLogger("proposal-enactment-test");
@@ -59,53 +57,33 @@ function createStubSigner() {
   return { signer, sent };
 }
 
-interface StubChainOptions {
-  state?: ProposalState;
-  eta?: bigint;
-  hashedProposalId?: bigint;
-  balance?: bigint;
-  blockTimestamp?: bigint;
-  simulateError?: Error;
-}
-
-function createStubChain(options: StubChainOptions = {}) {
+function createStubGovernor(overrides: Partial<GovernorGateway> = {}) {
   const simulated: { functionName: string }[] = [];
-  const chain: EnactmentChainReader = {
-    readContract: (async ({ functionName }: { functionName: string }) => {
-      switch (functionName) {
-        case "hashProposal":
-          return options.hashedProposalId ?? PROPOSAL_ID;
-        case "state":
-          return options.state ?? ProposalState.Succeeded;
-        case "proposalEta":
-          return options.eta ?? 0n;
-        default:
-          throw new Error(`unexpected read: ${functionName}`);
-      }
-    }) as EnactmentChainReader["readContract"],
-    simulateContract: (async ({ functionName }: { functionName: string }) => {
-      if (options.simulateError) throw options.simulateError;
+  const governor: GovernorGateway = {
+    hashProposal: async () => PROPOSAL_ID,
+    state: async () => ProposalState.Succeeded,
+    proposalEta: async () => 0n,
+    blockTimestamp: async () => NOW,
+    balanceOf: async () => parseEther("1"),
+    simulate: async (functionName) => {
       simulated.push({ functionName });
-      return { request: {}, result: undefined };
-    }) as unknown as EnactmentChainReader["simulateContract"],
-    getBalance: async () => options.balance ?? parseEther("1"),
-    getBlock: (async () => ({
-      timestamp: options.blockTimestamp ?? NOW,
-    })) as EnactmentChainReader["getBlock"],
-    waitForTransactionReceipt: (async () => ({
-      status: "success",
-    })) as unknown as EnactmentChainReader["waitForTransactionReceipt"],
+    },
+    waitForReceipt: async () => {},
+    ...overrides,
   };
-  return { chain, simulated };
+  return { governor, simulated };
 }
 
 function createService(
-  overrides: { chain?: StubChainOptions; source?: ProposalSource } = {},
+  overrides: {
+    governor?: Partial<GovernorGateway>;
+    source?: ProposalSource;
+  } = {},
 ) {
-  const { chain, simulated } = createStubChain(overrides.chain);
+  const { governor, simulated } = createStubGovernor(overrides.governor);
   const { signer, sent } = createStubSigner();
   const service = new ProposalEnactmentService(
-    chain,
+    governor,
     signer,
     overrides.source ?? createStubSource(),
     { governorAddress: GOVERNOR, minBalanceWei: parseEther("0.1").valueOf() },
@@ -131,7 +109,7 @@ async function expectRelayError(
 describe("ProposalEnactmentService.queue", () => {
   it("broadcasts queue() for a succeeded proposal", async () => {
     const { service, sent, simulated } = createService({
-      chain: { state: ProposalState.Succeeded },
+      governor: { state: async () => ProposalState.Succeeded },
     });
 
     const result = await service.queue(PROPOSAL_ID.toString());
@@ -152,7 +130,7 @@ describe("ProposalEnactmentService.queue", () => {
 
   it("rejects when the proposal is not in Succeeded state", async () => {
     const { service, sent } = createService({
-      chain: { state: ProposalState.Active },
+      governor: { state: async () => ProposalState.Active },
     });
 
     await expectRelayError(
@@ -167,7 +145,10 @@ describe("ProposalEnactmentService.queue", () => {
 describe("ProposalEnactmentService.execute", () => {
   it("broadcasts execute() for a queued proposal past its eta", async () => {
     const { service, sent } = createService({
-      chain: { state: ProposalState.Queued, eta: NOW - 1n },
+      governor: {
+        state: async () => ProposalState.Queued,
+        proposalEta: async () => NOW - 1n,
+      },
     });
 
     const result = await service.execute(PROPOSAL_ID.toString());
@@ -187,7 +168,10 @@ describe("ProposalEnactmentService.execute", () => {
 
   it("executes exactly at the eta", async () => {
     const { service } = createService({
-      chain: { state: ProposalState.Queued, eta: NOW },
+      governor: {
+        state: async () => ProposalState.Queued,
+        proposalEta: async () => NOW,
+      },
     });
 
     await expect(service.execute(PROPOSAL_ID.toString())).resolves.toEqual({
@@ -197,7 +181,10 @@ describe("ProposalEnactmentService.execute", () => {
 
   it("rejects before the timelock eta", async () => {
     const { service, sent } = createService({
-      chain: { state: ProposalState.Queued, eta: NOW + 1n },
+      governor: {
+        state: async () => ProposalState.Queued,
+        proposalEta: async () => NOW + 1n,
+      },
     });
 
     await expectRelayError(
@@ -210,7 +197,7 @@ describe("ProposalEnactmentService.execute", () => {
 
   it("rejects when the proposal is not in Queued state", async () => {
     const { service, sent } = createService({
-      chain: { state: ProposalState.Succeeded },
+      governor: { state: async () => ProposalState.Succeeded },
     });
 
     await expectRelayError(
@@ -231,7 +218,7 @@ describe("ProposalEnactmentService guards", () => {
 
   it("rejects when API data does not hash to the requested proposal id", async () => {
     const { service, sent } = createService({
-      chain: { hashedProposalId: PROPOSAL_ID + 1n },
+      governor: { hashProposal: async () => PROPOSAL_ID + 1n },
     });
 
     await expectRelayError(
@@ -244,7 +231,7 @@ describe("ProposalEnactmentService guards", () => {
 
   it("rejects when the relayer balance is below the minimum", async () => {
     const { service, sent } = createService({
-      chain: { balance: parseEther("0.01") },
+      governor: { balanceOf: async () => parseEther("0.01") },
     });
 
     await expectRelayError(
@@ -257,8 +244,10 @@ describe("ProposalEnactmentService guards", () => {
 
   it("propagates simulation reverts without broadcasting", async () => {
     const { service, sent } = createService({
-      chain: {
-        simulateError: new Error("execution reverted: TimelockController"),
+      governor: {
+        simulate: async () => {
+          throw new Error("execution reverted: TimelockController");
+        },
       },
     });
 

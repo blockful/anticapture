@@ -1,24 +1,16 @@
-import {
-  Address,
-  Hash,
-  encodeFunctionData,
-  keccak256,
-  toBytes,
-  type PublicActions,
-} from "viem";
+import { Address, Hash, encodeFunctionData, keccak256, toBytes } from "viem";
 
 import { createLogger, type Logger } from "@anticapture/observability";
 
 import { governorAbi, ProposalState } from "@/abi/governor";
 import { Errors } from "@/errors";
-import type { ChainReader } from "@/services/chain/chain-reader";
+import type {
+  EnactmentCall,
+  GovernorGateway,
+} from "@/services/chain/governor-gateway";
 import { RelayerSigner } from "@/signer/types";
 
-import type { ProposalArgs, ProposalSource } from "./proposal-source";
-
-/** The shared ChainReader plus the extra viem actions enactment needs. */
-export type EnactmentChainReader = ChainReader &
-  Pick<PublicActions, "getBlock" | "waitForTransactionReceipt">;
+import type { ProposalSource } from "./proposal-source";
 
 export interface ProposalEnactmentConfig {
   governorAddress: Address;
@@ -34,7 +26,7 @@ export interface ProposalEnactmentConfig {
  */
 export class ProposalEnactmentService {
   constructor(
-    private chain: EnactmentChainReader,
+    private governor: GovernorGateway,
     private signer: RelayerSigner,
     private source: ProposalSource,
     private config: ProposalEnactmentConfig,
@@ -42,36 +34,30 @@ export class ProposalEnactmentService {
   ) {}
 
   async queue(proposalId: string): Promise<{ txHash: Hash }> {
-    const args = await this.loadVerifiedArgs(proposalId);
+    const call = await this.loadVerifiedCall(proposalId);
 
-    const state = await this.readState(proposalId);
+    const state = await this.governor.state(BigInt(proposalId));
     if (state !== ProposalState.Succeeded) {
       throw Errors.INVALID_PROPOSAL_STATE("queue", ProposalState[state]);
     }
 
-    return this.broadcast(proposalId, "queue", args);
+    return this.broadcast(proposalId, "queue", call);
   }
 
   async execute(proposalId: string): Promise<{ txHash: Hash }> {
-    const args = await this.loadVerifiedArgs(proposalId);
+    const call = await this.loadVerifiedCall(proposalId);
 
-    const state = await this.readState(proposalId);
+    const state = await this.governor.state(BigInt(proposalId));
     if (state !== ProposalState.Queued) {
       throw Errors.INVALID_PROPOSAL_STATE("execute", ProposalState[state]);
     }
 
-    const eta = await this.chain.readContract({
-      address: this.config.governorAddress,
-      abi: governorAbi,
-      functionName: "proposalEta",
-      args: [BigInt(proposalId)],
-    });
-    const { timestamp } = await this.chain.getBlock();
-    if (timestamp < eta) {
+    const eta = await this.governor.proposalEta(BigInt(proposalId));
+    if ((await this.governor.blockTimestamp()) < eta) {
       throw Errors.TIMELOCK_NOT_READY(eta);
     }
 
-    return this.broadcast(proposalId, "execute", args);
+    return this.broadcast(proposalId, "execute", call);
   }
 
   /**
@@ -79,71 +65,49 @@ export class ProposalEnactmentService {
    * proposal id via the governor's hashProposal. This keeps the API as an
    * untrusted convenience: wrong or tampered data can never be broadcast.
    */
-  private async loadVerifiedArgs(proposalId: string): Promise<ProposalArgs> {
+  private async loadVerifiedCall(proposalId: string): Promise<EnactmentCall> {
     const args = await this.source.getProposal(proposalId);
     if (!args) {
       throw Errors.PROPOSAL_NOT_FOUND(proposalId);
     }
 
-    const hashed = await this.chain.readContract({
-      address: this.config.governorAddress,
-      abi: governorAbi,
-      functionName: "hashProposal",
-      args: [
-        args.targets,
-        args.values,
-        args.calldatas,
-        keccak256(toBytes(args.description)),
-      ],
-    });
-    if (hashed !== BigInt(proposalId)) {
+    const call: EnactmentCall = {
+      targets: args.targets,
+      values: args.values,
+      calldatas: args.calldatas,
+      descriptionHash: keccak256(toBytes(args.description)),
+    };
+
+    if ((await this.governor.hashProposal(call)) !== BigInt(proposalId)) {
       throw Errors.PROPOSAL_DATA_MISMATCH(proposalId);
     }
 
-    return args;
-  }
-
-  private async readState(proposalId: string): Promise<ProposalState> {
-    return this.chain.readContract({
-      address: this.config.governorAddress,
-      abi: governorAbi,
-      functionName: "state",
-      args: [BigInt(proposalId)],
-    });
+    return call;
   }
 
   private async broadcast(
     proposalId: string,
     functionName: "queue" | "execute",
-    proposalArgs: ProposalArgs,
+    call: EnactmentCall,
   ): Promise<{ txHash: Hash }> {
     const relayerAddress = await this.signer.getAddress();
 
-    const balance = await this.chain.getBalance({ address: relayerAddress });
+    const balance = await this.governor.balanceOf(relayerAddress);
     if (balance < this.config.minBalanceWei) {
       throw Errors.RELAYER_LOW_BALANCE();
     }
 
-    const args = [
-      proposalArgs.targets,
-      proposalArgs.values,
-      proposalArgs.calldatas,
-      keccak256(toBytes(proposalArgs.description)),
-    ] as const;
-
-    await this.chain.simulateContract({
-      address: this.config.governorAddress,
-      abi: governorAbi,
-      functionName,
-      args,
-      account: relayerAddress,
-    });
+    await this.governor.simulate(functionName, call, relayerAddress);
 
     const txHash = await this.signer.sendTransaction({
       to: this.config.governorAddress,
-      data: encodeFunctionData({ abi: governorAbi, functionName, args }),
+      data: encodeFunctionData({
+        abi: governorAbi,
+        functionName,
+        args: [call.targets, call.values, call.calldatas, call.descriptionHash],
+      }),
     });
-    await this.chain.waitForTransactionReceipt({ hash: txHash });
+    await this.governor.waitForReceipt(txHash);
 
     this.logger.info(
       { proposalId, action: functionName, txHash },
