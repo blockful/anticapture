@@ -1,0 +1,145 @@
+# Shared eRPC config for non-anticapture consumers of the self-hosted Reth node
+# (thority, ens-incentives) in production. One file, one service per project:
+# Railway private networks are per-project, so each consumer runs its own eRPC +
+# nodeful pair and gets its own slice of the node's request budget.
+#
+# Kept separate from erpc.prod.yaml rather than reused, because that config
+# refuses to start without DATABASE_URL (PostgreSQL cache connector) and
+# RPC_SECRET (dashboard auth strategy), and consumers are backend-only: no
+# public API, no dashboard, no secret.
+logLevel: ${LOG_LEVEL:-warn}
+
+server:
+  httpHostV6: "[::]"
+  httpPortV6: 5000
+  listenV6: true
+  maxTimeout: 60s
+  # ponytail: no trustedIPForwarders/trustedIPHeaders. Those exist to recover
+  # browser IPs for perIP budgets; consumers are backend-only, reach eRPC over
+  # the Railway private network, and have no per-IP rule to feed.
+
+metrics:
+  enabled: true
+  hostV4: "0.0.0.0"
+  hostV6: "[::]"
+  port: 4001
+  listenV6: true
+
+projects:
+  # Project id stays `indexer` so consumers only change the host in their
+  # RPC URL, not the path (/indexer/evm/1) or their ERPC_PROJECT var.
+  - id: indexer
+    rateLimitBudget: indexer-limit
+    networks:
+      # Ethereum only: Nodeful serves mainnet, and neither consumer reads L2.
+      - architecture: evm
+        failsafe:
+          - matchMethod: "eth_getLogs|eth_getBlockReceipts"
+            timeout:
+              duration: 45s
+            retry:
+              maxAttempts: 5
+              delay: 500ms
+              backoffMaxDelay: 10s
+              backoffFactor: 1.2
+              jitter: 200ms
+          - matchMethod: "*"
+            timeout:
+              duration: 15s
+            retry:
+              maxAttempts: 3
+            hedge:
+              quantile: 0.95
+              minDelay: 500ms
+              maxDelay: 5s
+              maxCount: 1
+        evm:
+          chainId: 1
+    upstreams:
+      - id: nodeful
+        endpoint: ${NODEFUL_RPC_URL}
+        rateLimitBudget: nodeful
+        autoIgnoreUnsupportedMethods: true
+        evm:
+          getLogsAutoSplittingRangeThreshold: 0
+        jsonRpc:
+          supportsBatch: true
+          batchMaxSize: 50
+          batchMaxWait: 10ms
+        routing:
+          scoreMultipliers:
+            - network: "*"
+              method: "*"
+              overall: 10
+              blockHeadLag: 0
+              errorRate: 2
+              respLatency: 0.5
+              throttledRate: 1
+      - id: chainstack
+        endpoint: chainstack://${CHAINSTACK_API_KEY}?project=PR-494-784
+        rateLimitBudget: chainstack
+        autoIgnoreUnsupportedMethods: true
+        # Fallback tier: eRPC's default selection policy keeps Chainstack out
+        # of rotation until Nodeful is excluded (unhealthy/throttled/lagging)
+        # or cannot serve a method. A score multiplier alone would only re-sort
+        # it, still exposing the paid provider to hedges and failover.
+        tags: ["tier:fallback"]
+
+rateLimiters:
+  store:
+    driver: memory
+  budgets:
+    # Per-consumer slice of the shared node/provider capacity. The rate limiter
+    # is in-memory, so every eRPC deployment holds its own counters: the sum of
+    # this budget across all deployments is what the node actually sees. Keep
+    # the split in infra/erpc/README.md in step with any change here.
+    - id: nodeful
+      rules:
+        - method: "*"
+          maxCount: 100
+          period: 1s
+    - id: chainstack
+      rules:
+        - method: "*"
+          maxCount: 20
+          period: 1s
+    - id: indexer-limit
+      rules:
+        - method: "*"
+          maxCount: 80
+          period: 1s
+
+database:
+  evmJsonRpcCache:
+    connectors:
+      - id: memory-unfinalized
+        driver: memory
+        memory:
+          maxItems: 10000
+          maxTotalSize: 128MB
+          emitMetrics: false
+      - id: memory-realtime
+        driver: memory
+        memory:
+          maxItems: 10000
+          maxTotalSize: 128MB
+          emitMetrics: false
+    policies:
+      # ponytail: memory tiers only, no PostgreSQL connector. Consumer dev
+      # projects have no dedicated cache database; finalized-block caching
+      # buys little at these request volumes. Add a pg-main connector (see
+      # erpc.prod.yaml) if a consumer's traffic grows enough to notice.
+      - connector: memory-unfinalized
+        network: "*"
+        method: eth_getBlockByNumber
+        finality: unfinalized
+        empty: ignore
+        ttl: 10s
+        maxItemSize: 4MB
+      - connector: memory-realtime
+        network: "evm:1"
+        method: eth_getBlockByNumber
+        finality: realtime
+        empty: ignore
+        maxItemSize: 4MB
+        ttl: 12s

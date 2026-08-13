@@ -16,9 +16,11 @@ test.describe("Mobile smoke tests", () => {
 
   test("DAO Overview (/ens) renders on mobile", async ({ goto, page }) => {
     await goto("/ens");
-    await expect(page.locator("h3").filter({ hasText: "ENS" })).toBeVisible({
-      timeout: 15_000,
-    });
+    // exact: true — proposal cards on the page can also render h3s containing
+    // "ENS", so a substring match hits a strict mode violation with live data.
+    await expect(
+      page.getByRole("heading", { name: "ENS", exact: true }),
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test("Stakeholders (/ens/stakeholders) renders heading on mobile", async ({

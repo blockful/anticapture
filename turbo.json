@@ -33,6 +33,7 @@
       "outputs": ["generated/**"],
       "env": [
         "ANTICAPTURE_API_URL",
+        "RAILWAY_ENVIRONMENT_NAME",
         "EXPECTED_GATEFUL_SHA",
         "VERCEL_GIT_COMMIT_SHA",
         "VERCEL_ENV",
@@ -137,8 +138,11 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
+        "PLAYWRIGHT_PORT",
         "ANTICAPTURE_API_URL",
-        "NEXT_PUBLIC_WC_PROJECT_ID",
+        "RAILWAY_ENVIRONMENT_NAME",
+        "USER_API_URL",
+        "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
       ]
     },
@@ -147,8 +151,10 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
+        "PLAYWRIGHT_PORT",
         "ANTICAPTURE_API_URL",
-        "NEXT_PUBLIC_WC_PROJECT_ID",
+        "USER_API_URL",
+        "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
       ]
     },
@@ -158,8 +164,10 @@
       "passThroughEnv": [
         "CI",
         "PLAYWRIGHT_BASE_URL",
+        "PLAYWRIGHT_PORT",
         "ANTICAPTURE_API_URL",
-        "NEXT_PUBLIC_WC_PROJECT_ID",
+        "USER_API_URL",
+        "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
         "BLOCKFUL_API_TOKEN"
       ]
     },

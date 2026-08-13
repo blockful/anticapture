@@ -73,15 +73,14 @@ export const fetchGatefulHealth = async (
 // says nothing about the spec it will serve: those services rebuild only when
 // a push touches their own watched paths, and take longer when it does.
 //
-// `expectedShasByKind` maps an upstream kind to the commits it may report: the
-// last commit that touched that service's watched paths, plus everything after
-// it. "That commit or newer", because Railway stamps a service with the head
-// of the push that rebuilt it, which is a later commit whenever a push carries
-// more than one. A release that doesn't touch a service resolves to a commit
-// it already satisfies; one that does resolves to the release itself. It also
-// survives a superseding push: a push that leaves a service alone still
-// resolves to the last push that changed it, so the gate keeps waiting for
-// that one rather than concluding there is nothing to wait for.
+// `staleShasByKind` maps an upstream kind to the commits that mean "still the
+// previous release": everything strictly older than the last commit that
+// touched that service's watched paths. Stated as a reject list rather than an
+// accept list so that a commit newer than this run — from a push that
+// superseded it while we were waiting — passes instead of blocking until the
+// timeout. Anything else the service may legitimately report also passes:
+// Railway stamps a service with the head of the push that rebuilt it, which is
+// a later commit whenever a push carries more than one.
 //
 // An upstream reporting no commit is stale, not exempt — that is the previous
 // release still answering, from before it reported one. That can't deadlock:
@@ -90,15 +89,23 @@ export const fetchGatefulHealth = async (
 //
 // A kind absent from the map (authful, whose spec is not merged) is not
 // checked at all; it only has to be reachable.
-export const staleUpstreams = (health, expectedShasByKind = {}) =>
+export const staleUpstreams = (health, staleShasByKind = {}) =>
   Object.entries(health.body?.upstreams ?? {})
     .filter(([, upstream]) => {
-      const accepted = expectedShasByKind[upstream?.kind];
-      return accepted?.length ? !accepted.includes(upstream.commit) : false;
+      const stale = staleShasByKind[upstream?.kind];
+      if (!stale?.length) {
+        return false;
+      }
+      return !upstream.commit || stale.includes(upstream.commit);
     })
     .map(([name]) => name);
 
-export const isGatefulReady = (health, expectedSha, expectedShasByKind) => {
+export const isGatefulReady = (
+  health,
+  expectedSha,
+  staleShasByKind,
+  staleGatefulShas = [],
+) => {
   if (health.status !== 200) {
     return false;
   }
@@ -107,17 +114,35 @@ export const isGatefulReady = (health, expectedSha, expectedShasByKind) => {
     return true;
   }
 
-  if (health.body?.commit !== expectedSha) {
+  const commit = health.body?.commit;
+
+  // A gateful reporting no commit at all is the previous release still
+  // answering: `railway up` from a laptop stamps no SHA, and the CI deploy
+  // that would replace it is still in flight. Treat it as stale so we keep
+  // waiting instead of handing codegen the old spec. If no such deploy is
+  // coming, main() downgrades the timeout to a warning rather than failing.
+  if (!commit) {
     return false;
   }
 
-  return staleUpstreams(health, expectedShasByKind).length === 0;
+  // Same reasoning as staleUpstreams: with a reject list, a gateful newer than
+  // this run counts as ready. Without one (PR previews), exact match only.
+  const gatefulOk =
+    commit === expectedSha ||
+    (staleGatefulShas.length > 0 && !staleGatefulShas.includes(commit));
+
+  if (!gatefulOk) {
+    return false;
+  }
+
+  return staleUpstreams(health, staleShasByKind).length === 0;
 };
 
 export const waitForGateful = async ({
   baseUrl,
   expectedSha,
-  expectedShasByKind,
+  staleShasByKind,
+  staleGatefulShas,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   intervalMs = DEFAULT_INTERVAL_MS,
   requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
@@ -143,17 +168,26 @@ export const waitForGateful = async ({
       );
       lastError = undefined;
 
-      if (isGatefulReady(lastHealth, expectedSha, expectedShasByKind)) {
+      if (
+        isGatefulReady(
+          lastHealth,
+          expectedSha,
+          staleShasByKind,
+          staleGatefulShas,
+        )
+      ) {
         logger.log(
           expectedSha
-            ? `Gateful ready after attempt ${attempt}: commit ${expectedSha}`
+            ? `Gateful ready after attempt ${attempt}: commit ${
+                lastHealth.body?.commit ?? "<missing>"
+              }`
             : `Gateful ready after attempt ${attempt}`,
         );
 
         return { ready: true, attempt, lastHealth };
       }
 
-      const stale = staleUpstreams(lastHealth, expectedShasByKind);
+      const stale = staleUpstreams(lastHealth, staleShasByKind);
 
       logger.log(
         `attempt ${attempt}: HTTP ${lastHealth.status}, commit ${
@@ -195,22 +229,45 @@ const main = async () => {
     DEFAULT_REQUEST_TIMEOUT_MS,
   );
 
-  // {kind: [sha, ...]} — the commits each upstream kind may report (see
-  // staleUpstreams). Unset means "check nothing", which is what PR previews do.
-  const expectedShasByKind = JSON.parse(
-    readNonEmptyValue(process.env.EXPECTED_UPSTREAM_SHAS) ?? "{}",
+  // {kind: [sha, ...]} — the commits that mean an upstream kind is still on the
+  // previous release (see staleUpstreams). Unset means "check nothing", which
+  // is what PR previews do.
+  const staleShasByKind = JSON.parse(
+    readNonEmptyValue(process.env.STALE_UPSTREAM_SHAS) ?? "{}",
   );
+  // Same, for gateful's own commit. Unset means exact match on expectedSha.
+  const staleGatefulShas = (
+    readNonEmptyValue(process.env.STALE_GATEFUL_SHAS) ?? ""
+  )
+    .split(",")
+    .filter(Boolean);
 
   const result = await waitForGateful({
     baseUrl,
     expectedSha,
-    expectedShasByKind,
+    staleShasByKind,
+    staleGatefulShas,
     timeoutMs,
     intervalMs,
     requestTimeoutMs,
   });
 
   if (result.ready) {
+    return;
+  }
+
+  // Timed out with a healthy gateful that never reported a commit: it was
+  // deployed outside CI (`railway up`), so no push is coming to change that
+  // and failing every release until someone redeploys from CI helps nobody.
+  if (
+    !result.lastError &&
+    result.lastHealth?.status === 200 &&
+    !result.lastHealth.body?.commit &&
+    staleUpstreams(result.lastHealth, staleShasByKind).length === 0
+  ) {
+    console.warn(
+      `::warning::Gateful reports no commit (deployed outside CI?) after ${timeoutMs}ms; proceeding without checking it against ${expectedSha}.`,
+    );
     return;
   }
 
@@ -239,7 +296,7 @@ const main = async () => {
       }${
         result.lastHealth
           ? `, upstreams still on an older release: ${
-              staleUpstreams(result.lastHealth, expectedShasByKind).join(", ") ||
+              staleUpstreams(result.lastHealth, staleShasByKind).join(", ") ||
               "<none>"
             }`
           : ""

@@ -1,18 +1,19 @@
 import { test, expect } from "./fixtures";
 
 test.describe("Activity Feed page (/ens/activity-feed)", () => {
-  test("renders Activity Feed heading and description", async ({
-    goto,
-    page,
-  }) => {
-    await goto("/ens/activity-feed");
-    await expect(
-      page.locator("h4").filter({ hasText: "Activity Feed" }),
-    ).toBeVisible();
-    await expect(
-      page.locator("text=Surfaces governance activity"),
-    ).toBeVisible();
-  });
+  test(
+    "renders Activity Feed heading and description",
+    { tag: "@smoke" },
+    async ({ goto, page }) => {
+      await goto("/ens/activity-feed");
+      await expect(
+        page.locator("h4").filter({ hasText: "Activity Feed" }),
+      ).toBeVisible();
+      await expect(
+        page.locator("text=Surfaces governance activity"),
+      ).toBeVisible();
+    },
+  );
 
   test("shows Filters button", async ({ goto, page }) => {
     await goto("/ens/activity-feed");

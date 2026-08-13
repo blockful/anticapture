@@ -146,14 +146,16 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          resolve() {
-            sha=$(git log --first-parent -1 --format=%H "${HEAD_SHA}" -- "$@")
-            printf '%s' "$(git rev-list --first-parent "${sha}..${HEAD_SHA}" | tr '\n' ',')${sha}"
+          # Reject lists ("still the previous release"), see deploy.yaml.
+          # ponytail: 200-push window, same ceiling as there.
+          older() {
+            git rev-list --first-parent -n 201 "$1" | tail -n +2 | paste -sd, -
           }
+          last() { git log --first-parent -1 --format=%H "${HEAD_SHA}" -- "$@"; }
           shas=$(jq -cn \
-            --arg dao "$(resolve apps/api infra/api)" \
-            --arg relayer "$(resolve apps/relayer infra/relayer)" \
-            --arg enrichment "$(resolve apps/address-enrichment infra/address-enrichment)" \
+            --arg dao "$(older "$(last apps/api infra/api)")" \
+            --arg relayer "$(older "$(last apps/relayer infra/relayer)")" \
+            --arg enrichment "$(older "$(last apps/address-enrichment infra/address-enrichment)")" \
             '{"dao-api": ($dao | split(",")),
               "relayer": ($relayer | split(",")),
               "address-enrichment": ($enrichment | split(","))}')
@@ -169,7 +171,7 @@ jobs:
           # upstream check rides along with it: the script skips it entirely
           # when there is no expected gateful commit.
           EXPECTED_GATEFUL_SHA: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && github.event.pull_request.head.sha || '' }}
-          EXPECTED_UPSTREAM_SHAS: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && steps.upstreams.outputs.shas || '' }}
+          STALE_UPSTREAM_SHAS: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && steps.upstreams.outputs.shas || '' }}
 
   deploy-vercel-preview:
     name: Deploy Vercel preview
@@ -454,65 +456,107 @@ jobs:
           flags: api
           fail_ci_if_error: false
 
-  # dashboard-e2e:
-  #   name: Dashboard E2E
-  #   needs: wait-for-gateful
-  #   if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 20
+  dashboard-e2e:
+    name: Dashboard E2E
+    needs: [configure-vercel-preview, wait-for-gateful]
+    # Trusted authors only: fork PRs get no repository secrets, so
+    # E2E_BLOCKFUL_API_TOKEN is empty there and every external contribution
+    # would fail on the probe below without a single test having run.
+    if: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-  #     - name: Setup pnpm
-  #       uses: pnpm/action-setup@v4
-  #       with:
-  #         version: 10.10.0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
 
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "20"
-  #         cache: "pnpm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
 
-  #     - name: Install dependencies
-  #       run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-  #     - name: Cache Playwright browsers
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ~/.cache/ms-playwright
-  #         key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-  #         restore-keys: |
-  #           playwright-${{ runner.os }}-
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
 
-  #     - name: Install Playwright browsers
-  #       run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: pnpm --filter @anticapture/dashboard exec playwright install --with-deps chromium
 
-  #     - name: Run dashboard E2E tests
-  #       run: pnpm dashboard test:e2e
-  #       env:
-  #         CI: "true"
-  #         NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
-  #         BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
-  #         TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  #         TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      # Gateful tokens are revocable server-side, so a stale secret used to
+      # surface as 9 minutes of data specs dying on 401s. Probe once up front
+      # and fail in seconds with the actual fix instead. (Reading the token
+      # from Vercel is not an option: the env API returns ciphertext for
+      # encrypted values; only deployments receive plaintext.)
+      - name: Check the gateful token still authenticates
+        shell: bash
+        env:
+          E2E_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
+          GATEFUL_URL: https://dev-gateful.up.railway.app
+        run: |
+          set -euo pipefail
+          code=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+            --header "Authorization: Bearer ${E2E_TOKEN}" \
+            "${GATEFUL_URL}/ens/proposals?limit=1&skip=0" || echo "000")
+          echo "${GATEFUL_URL}: HTTP ${code}"
+          if [ "${code}" != "200" ]; then
+            echo "::error::E2E_BLOCKFUL_API_TOKEN no longer authenticates against ${GATEFUL_URL}. Update it with a valid dev token: gh secret set E2E_BLOCKFUL_API_TOKEN"
+            exit 1
+          fi
 
-  #     - name: Upload Playwright report
-  #       if: failure()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: playwright-report
-  #         path: apps/dashboard/playwright-report
-  #         retention-days: 14
+      - name: Run dashboard E2E tests
+        run: pnpm dashboard test:e2e
+        env:
+          CI: "true"
+          # Shared dev services, NOT the PR's own preview stack: previews run
+          # their own authful, so the dev-issued e2e token gets 401s there.
+          ANTICAPTURE_API_URL: https://dev-gateful.up.railway.app
+          # …but `test:e2e` builds the dashboard, which regenerates
+          # @anticapture/client from the spec. Reading it off dev would omit
+          # any hook this PR adds and break the build before E2E starts, so
+          # point codegen (and only codegen) at the PR's preview gateful —
+          # resolveGatefulOpenApiSpecUrl prefers this over ANTICAPTURE_API_URL.
+          #
+          # ponytail: codegen and runtime therefore sit on different contracts
+          # — a PR that adds an endpoint and immediately exercises it in a spec
+          # 404s against dev. Closing that needs a preview-issued token (the
+          # preview authful seeds its own from SEED_TOKEN_PLAINTEXT); wire one
+          # into a repo secret and point both at the preview stack if it bites.
+          RAILWAY_ENVIRONMENT_NAME: anticapture-pr-${{ github.event.pull_request.number }}
+          # The /api/user auth/session proxy throws on boot without this, and
+          # the resulting same-origin 500s trip the suite's 5xx watcher.
+          USER_API_URL: https://user-api-dev-9002.up.railway.app
+          NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.E2E_NEXT_PUBLIC_WC_PROJECT_ID }}
+          BLOCKFUL_API_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
-  #     - name: Upload Playwright traces
-  #       if: failure()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: playwright-test-results
-  #         path: apps/dashboard/test-results
-  #         retention-days: 14
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/dashboard/playwright-report
+          retention-days: 14
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: apps/dashboard/test-results
+          retention-days: 14

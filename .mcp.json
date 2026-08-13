@@ -1,5 +1,20 @@
 {
   "mcpServers": {
+    "anticapture": {
+      "type": "http",
+      "url": "https://mcp.anticapture.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ANTICAPTURE_MCP_TOKEN}"
+      }
+    },
+    "grafana": {
+      "command": "uvx",
+      "args": ["mcp-grafana"],
+      "env": {
+        "GRAFANA_URL": "https://metrics.anticapture.com",
+        "GRAFANA_SERVICE_ACCOUNT_TOKEN": "${GRAFANA_SERVICE_ACCOUNT_TOKEN}"
+      }
+    },
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"]

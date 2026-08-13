@@ -41,6 +41,7 @@ import {
   useOffchainProposals,
   type OffchainProposalItem,
 } from "@/features/governance/hooks/useOffchainProposals";
+import { useCalldataReviews } from "@/features/governance/hooks/useCalldataReview";
 import { useProposals } from "@/features/governance/hooks/useProposals";
 import {
   isFullProposal,
@@ -136,6 +137,9 @@ export const GovernanceSection = () => {
   const hasOffchain = !!daoConfig[daoIdEnum]?.offchainProposals;
   const canCreateProposal = canCreateProposalForDao(daoIdEnum);
   const { decimals } = daoConfig[daoIdEnum];
+  // Start the review fetch alongside the proposals query instead of when the
+  // first row mounts, so the shield icons are there with the list.
+  useCalldataReviews(daoIdEnum);
   const router = useRouter();
   const { data: session, isPending: isSessionPending } = useAuthSession();
   const hasSession = !!session;
