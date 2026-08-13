@@ -8,7 +8,7 @@ const FRAMEWORK_DOCS_URL =
 
 export const PanelHero = () => {
   return (
-    <div className="flex flex-col items-stretch gap-2 lg:min-h-[186px] lg:flex-row">
+    <div className="flex flex-col items-stretch gap-2 lg:flex-row">
       <div className="bg-surface-default flex min-w-0 flex-1 flex-col justify-between gap-4 p-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-primary text-h3 font-medium">
