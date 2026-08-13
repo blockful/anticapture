@@ -27,6 +27,9 @@ import {
   resolveRelayLimits,
 } from "@/services/guards/rate-limiter";
 import { ChainStateService } from "@/services/chain/chain-state";
+import { RedisKeeperStorage } from "@/repository/keeper-storage";
+import { startKeeperLoop } from "@/services/keeper/keeper-loop";
+import { ProposalLifecycleService } from "@/services/keeper/proposal-lifecycle";
 import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
 import { createLocalSigner } from "@/signer/local-signer";
@@ -108,6 +111,38 @@ async function main() {
       tokenAddress,
     ),
   );
+
+  // --- Proposal lifecycle keeper ---
+  if (env.KEEPER_ENABLED) {
+    const keeperStartBlock = env.KEEPER_START_BLOCK;
+    if (keeperStartBlock === undefined) {
+      // unreachable: the env schema rejects KEEPER_ENABLED without a start block
+      throw new Error("KEEPER_START_BLOCK is required when KEEPER_ENABLED");
+    }
+    const keeperStorage = wrapWithTracing(
+      new RedisKeeperStorage(redis, env.DAO_NAME, governorAddress),
+    );
+    const keeper = wrapWithTracing(
+      new ProposalLifecycleService(publicClient, signer, keeperStorage, {
+        governorAddress,
+        startBlock: keeperStartBlock,
+        queueDelaySeconds: env.KEEPER_QUEUE_DELAY_SECONDS,
+        executionDelaySeconds: env.KEEPER_EXECUTION_DELAY_SECONDS,
+        minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
+        maxBlockRange: env.KEEPER_MAX_BLOCK_RANGE,
+      }),
+    );
+    startKeeperLoop(keeper, env.KEEPER_POLL_INTERVAL_SECONDS * 1000, logger);
+    logger.info(
+      {
+        startBlock: keeperStartBlock.toString(),
+        pollIntervalSeconds: env.KEEPER_POLL_INTERVAL_SECONDS,
+        queueDelaySeconds: env.KEEPER_QUEUE_DELAY_SECONDS,
+        executionDelaySeconds: env.KEEPER_EXECUTION_DELAY_SECONDS,
+      },
+      "Proposal lifecycle keeper started",
+    );
+  }
 
   // --- App ---
   const app = new Hono({
