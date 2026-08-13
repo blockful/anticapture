@@ -5,21 +5,20 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
-import { mockedTestimonials } from "@/shared/constants/mocked-data/mocked-track-record";
+import { TESTIMONIALS } from "@/shared/constants/track-record";
 
 export const TestimonialCarousel = () => {
   const [index, setIndex] = useState(0);
 
-  const testimonial = mockedTestimonials[index];
-  const hasMultiple = mockedTestimonials.length > 1;
+  const testimonial = TESTIMONIALS[index];
+  const hasMultiple = TESTIMONIALS.length > 1;
 
   if (!testimonial) return null;
 
   const goTo = (offset: number) =>
     setIndex(
       (current) =>
-        (current + offset + mockedTestimonials.length) %
-        mockedTestimonials.length,
+        (current + offset + TESTIMONIALS.length) % TESTIMONIALS.length,
     );
 
   return (
