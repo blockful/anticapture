@@ -13,7 +13,7 @@ import { governorAbi, ProposalState } from "@/abi/governor";
 import { createLogger } from "@anticapture/observability";
 import { relayProposal } from "@/controllers/relay-proposal";
 import { RelayError } from "@/errors";
-import { ProposalActionService } from "@/services/proposals/proposal-action";
+import { ProposalEnactmentService } from "@/services/proposals/proposal-enactment";
 import type {
   ProposalArgs,
   ProposalSource,
@@ -65,7 +65,7 @@ function createProposalApp(rpcUrl: string) {
   });
   const signer = createLocalSigner(RELAYER_KEY, mainnet, rpcUrl);
 
-  const service = new ProposalActionService(
+  const service = new ProposalEnactmentService(
     publicClient,
     signer,
     new StubProposalSource(),

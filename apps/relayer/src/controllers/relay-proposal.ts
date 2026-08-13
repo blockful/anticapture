@@ -5,7 +5,7 @@ import {
   RelayProposalResponseSchema,
 } from "@/schemas/relay-proposal";
 import { ErrorResponseSchema } from "@/errors";
-import { ProposalActionService } from "@/services/proposals/proposal-action";
+import { ProposalEnactmentService } from "@/services/proposals/proposal-enactment";
 
 const errorResponses = {
   400: {
@@ -30,7 +30,7 @@ const errorResponses = {
   },
 } as const;
 
-export function relayProposal(app: Hono, service: ProposalActionService) {
+export function relayProposal(app: Hono, service: ProposalEnactmentService) {
   app.openapi(
     createRoute({
       method: "post",

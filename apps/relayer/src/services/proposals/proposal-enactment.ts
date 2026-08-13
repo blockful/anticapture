@@ -19,7 +19,7 @@ import type { ProposalArgs, ProposalSource } from "./proposal-source";
  * Narrow interface covering only the viem actions this service uses.
  * A real PublicClient satisfies this via structural subtyping.
  */
-export type ActionChainReader = Pick<
+export type EnactmentChainReader = Pick<
   PublicActions,
   | "readContract"
   | "simulateContract"
@@ -28,7 +28,7 @@ export type ActionChainReader = Pick<
   | "waitForTransactionReceipt"
 >;
 
-export interface ProposalActionConfig {
+export interface ProposalEnactmentConfig {
   governorAddress: Address;
   /** Below this relayer balance the service refuses to broadcast. */
   minBalanceWei: bigint;
@@ -40,13 +40,13 @@ export interface ProposalActionConfig {
  * timelock eta passes. Proposal args come from an untrusted source and are
  * verified against the governor's hashProposal before anything is signed.
  */
-export class ProposalActionService {
+export class ProposalEnactmentService {
   constructor(
-    private chain: ActionChainReader,
+    private chain: EnactmentChainReader,
     private signer: RelayerSigner,
     private source: ProposalSource,
-    private config: ProposalActionConfig,
-    private logger: Logger = createLogger("relayer-proposal-action"),
+    private config: ProposalEnactmentConfig,
+    private logger: Logger = createLogger("relayer-proposal-enactment"),
   ) {}
 
   async queue(proposalId: string): Promise<{ txHash: Hash }> {

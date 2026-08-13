@@ -28,7 +28,7 @@ import {
   resolveRelayLimits,
 } from "@/services/guards/rate-limiter";
 import { ChainStateService } from "@/services/chain/chain-state";
-import { ProposalActionService } from "@/services/proposals/proposal-action";
+import { ProposalEnactmentService } from "@/services/proposals/proposal-enactment";
 import { AnticaptureProposalSource } from "@/services/proposals/proposal-source";
 import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
@@ -165,7 +165,7 @@ async function main() {
   relayProposal(
     app,
     wrapWithTracing(
-      new ProposalActionService(
+      new ProposalEnactmentService(
         publicClient,
         signer,
         wrapWithTracing(

@@ -15,12 +15,12 @@ import { RelayError } from "@/errors";
 import { RelayerSigner } from "@/signer/types";
 
 import {
-  ProposalActionService,
-  type ActionChainReader,
-} from "./proposal-action";
+  ProposalEnactmentService,
+  type EnactmentChainReader,
+} from "./proposal-enactment";
 import type { ProposalArgs, ProposalSource } from "./proposal-source";
 
-const silentLogger = createLogger("proposal-action-test");
+const silentLogger = createLogger("proposal-enactment-test");
 silentLogger.level = "silent";
 
 const GOVERNOR: Address = "0x323A76393544d5ecca80cd6ef2A560C6a395b7E3";
@@ -112,8 +112,8 @@ function setup(overrides?: { source?: ProposalSource }) {
   const source =
     overrides?.source ??
     new FakeSource({ [PROPOSAL_ID.toString()]: { ...ARGS } });
-  const service = new ProposalActionService(
-    chain as unknown as ActionChainReader,
+  const service = new ProposalEnactmentService(
+    chain as unknown as EnactmentChainReader,
     signer,
     source,
     { governorAddress: GOVERNOR, minBalanceWei: parseEther("0.1").valueOf() },
@@ -136,7 +136,7 @@ async function expectRelayError(
   expect(error?.status).toBe(status);
 }
 
-describe("ProposalActionService.queue", () => {
+describe("ProposalEnactmentService.queue", () => {
   it("broadcasts queue() for a succeeded proposal", async () => {
     const { chain, signer, service } = setup();
     chain.state = ProposalState.Succeeded;
@@ -171,7 +171,7 @@ describe("ProposalActionService.queue", () => {
   });
 });
 
-describe("ProposalActionService.execute", () => {
+describe("ProposalEnactmentService.execute", () => {
   it("broadcasts execute() for a queued proposal past its eta", async () => {
     const { chain, signer, service } = setup();
     chain.state = ProposalState.Queued;
@@ -228,7 +228,7 @@ describe("ProposalActionService.execute", () => {
   });
 });
 
-describe("ProposalActionService guards", () => {
+describe("ProposalEnactmentService guards", () => {
   it("rejects unknown proposals with 404", async () => {
     const { service } = setup({ source: new FakeSource() });
 
