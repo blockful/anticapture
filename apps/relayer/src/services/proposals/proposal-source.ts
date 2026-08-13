@@ -21,17 +21,12 @@ export interface ProposalSource {
 export class AnticaptureProposalSource implements ProposalSource {
   private baseUrl: string;
 
-  constructor(
-    baseUrl: string,
-    private fetchFn: typeof fetch = fetch,
-  ) {
+  constructor(baseUrl: string) {
     this.baseUrl = baseUrl.replace(/\/+$/, "");
   }
 
   async getProposal(proposalId: string): Promise<ProposalArgs | null> {
-    const response = await this.fetchFn(
-      `${this.baseUrl}/proposals/${proposalId}`,
-    );
+    const response = await fetch(`${this.baseUrl}/proposals/${proposalId}`);
 
     if (response.status === 404) return null;
     if (!response.ok) {

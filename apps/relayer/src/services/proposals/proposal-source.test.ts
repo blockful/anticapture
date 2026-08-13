@@ -1,7 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
+import { describe, it, expect, beforeAll, afterEach, afterAll } from "vitest";
 
 import { AnticaptureProposalSource } from "./proposal-source";
 
+const BASE_URL = "https://api.test";
 const PROPOSAL_ID =
   "31309365093913580207991288430108338667724061355449265288906484597789511363394";
 
@@ -15,24 +18,26 @@ const FULL_PROPOSAL_RESPONSE = {
   calldatas: ["0xdeadbeef"],
 };
 
-function fakeFetch(status: number, body: unknown) {
-  return vi.fn(async () => ({
-    ok: status >= 200 && status < 300,
-    status,
-    json: async () => body,
-  })) as unknown as typeof fetch;
+const server = setupServer();
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+function respondWith(status: number, body: unknown) {
+  server.use(
+    http.get(`${BASE_URL}/proposals/${PROPOSAL_ID}`, () =>
+      HttpResponse.json(body as Record<string, unknown>, { status }),
+    ),
+  );
 }
 
 describe("AnticaptureProposalSource", () => {
   it("fetches a proposal by id and returns its execution args", async () => {
-    const fetchFn = fakeFetch(200, FULL_PROPOSAL_RESPONSE);
-    const source = new AnticaptureProposalSource("https://api.test", fetchFn);
+    respondWith(200, FULL_PROPOSAL_RESPONSE);
+    const source = new AnticaptureProposalSource(BASE_URL);
 
     const proposal = await source.getProposal(PROPOSAL_ID);
 
-    expect(fetchFn).toHaveBeenCalledWith(
-      `https://api.test/proposals/${PROPOSAL_ID}`,
-    );
     expect(proposal).toEqual({
       targets: ["0x0000000000000000000000000000000000000001"],
       values: [1000000000000000000n],
@@ -42,30 +47,26 @@ describe("AnticaptureProposalSource", () => {
   });
 
   it("tolerates a trailing slash in the base URL", async () => {
-    const fetchFn = fakeFetch(200, FULL_PROPOSAL_RESPONSE);
-    const source = new AnticaptureProposalSource("https://api.test/", fetchFn);
+    // onUnhandledRequest: "error" makes this strict — an unnormalized base
+    // URL would produce /proposals// and fail the request.
+    respondWith(200, FULL_PROPOSAL_RESPONSE);
+    const source = new AnticaptureProposalSource(`${BASE_URL}/`);
 
-    await source.getProposal(PROPOSAL_ID);
+    const proposal = await source.getProposal(PROPOSAL_ID);
 
-    expect(fetchFn).toHaveBeenCalledWith(
-      `https://api.test/proposals/${PROPOSAL_ID}`,
-    );
+    expect(proposal).not.toBeNull();
   });
 
   it("returns null when the API responds 404", async () => {
-    const source = new AnticaptureProposalSource(
-      "https://api.test",
-      fakeFetch(404, { error: "Proposal not found" }),
-    );
+    respondWith(404, { error: "Proposal not found" });
+    const source = new AnticaptureProposalSource(BASE_URL);
 
     expect(await source.getProposal(PROPOSAL_ID)).toBeNull();
   });
 
   it("throws on other non-OK responses", async () => {
-    const source = new AnticaptureProposalSource(
-      "https://api.test",
-      fakeFetch(500, { error: "boom" }),
-    );
+    respondWith(500, { error: "boom" });
+    const source = new AnticaptureProposalSource(BASE_URL);
 
     await expect(source.getProposal(PROPOSAL_ID)).rejects.toThrow(
       /proposal fetch failed/i,
@@ -73,10 +74,12 @@ describe("AnticaptureProposalSource", () => {
   });
 
   it("throws when the response is missing execution args (lean variant)", async () => {
-    const source = new AnticaptureProposalSource(
-      "https://api.test",
-      fakeFetch(200, { id: PROPOSAL_ID, variant: "lean", status: "SUCCEEDED" }),
-    );
+    respondWith(200, {
+      id: PROPOSAL_ID,
+      variant: "lean",
+      status: "SUCCEEDED",
+    });
+    const source = new AnticaptureProposalSource(BASE_URL);
 
     await expect(source.getProposal(PROPOSAL_ID)).rejects.toThrow(
       /execution args/i,
