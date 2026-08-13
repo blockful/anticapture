@@ -37,89 +37,81 @@ const ARGS: ProposalArgs = {
 const DESCRIPTION_HASH = keccak256(toBytes(ARGS.description));
 const PROPOSAL_ID = 42n;
 
-class FakeSource implements ProposalSource {
-  constructor(private proposals: Record<string, ProposalArgs> = {}) {}
-  async getProposal(proposalId: string): Promise<ProposalArgs | null> {
-    return this.proposals[proposalId] ?? null;
-  }
+function createStubSource(
+  proposals: Record<string, ProposalArgs> = {
+    [PROPOSAL_ID.toString()]: { ...ARGS },
+  },
+): ProposalSource {
+  return {
+    getProposal: async (proposalId) => proposals[proposalId] ?? null,
+  };
 }
 
-class FakeSigner implements RelayerSigner {
-  sent: { to: Address; data: Hex; value?: bigint }[] = [];
-  async getAddress(): Promise<Address> {
-    return RELAYER;
-  }
-  async sendTransaction(tx: {
-    to: Address;
-    data: Hex;
-    value?: bigint;
-  }): Promise<Hash> {
-    this.sent.push(tx);
-    return TX_HASH;
-  }
+function createStubSigner() {
+  const sent: { to: Address; data: Hex; value?: bigint }[] = [];
+  const signer: RelayerSigner = {
+    getAddress: async () => RELAYER,
+    sendTransaction: async (tx) => {
+      sent.push(tx);
+      return TX_HASH;
+    },
+  };
+  return { signer, sent };
 }
 
-class FakeChain {
-  state: ProposalState = ProposalState.Succeeded;
-  eta = 0n;
-  hashedProposalId = PROPOSAL_ID;
-  balance = parseEther("1");
-  blockTimestamp = NOW;
-  simulateError: Error | null = null;
-  simulated: { functionName: string; args: unknown }[] = [];
-
-  async readContract(params: {
-    functionName: string;
-    args?: readonly unknown[];
-  }): Promise<unknown> {
-    switch (params.functionName) {
-      case "hashProposal":
-        return this.hashedProposalId;
-      case "state":
-        return this.state;
-      case "proposalEta":
-        return this.eta;
-      default:
-        throw new Error(`unexpected read: ${params.functionName}`);
-    }
-  }
-
-  async simulateContract(params: {
-    functionName: string;
-    args: unknown;
-  }): Promise<unknown> {
-    if (this.simulateError) throw this.simulateError;
-    this.simulated.push(params);
-    return {};
-  }
-
-  async getBalance(): Promise<bigint> {
-    return this.balance;
-  }
-
-  async getBlock(): Promise<{ timestamp: bigint }> {
-    return { timestamp: this.blockTimestamp };
-  }
-
-  async waitForTransactionReceipt(): Promise<{ status: string }> {
-    return { status: "success" };
-  }
+interface StubChainOptions {
+  state?: ProposalState;
+  eta?: bigint;
+  hashedProposalId?: bigint;
+  balance?: bigint;
+  blockTimestamp?: bigint;
+  simulateError?: Error;
 }
 
-function setup(overrides?: { source?: ProposalSource }) {
-  const chain = new FakeChain();
-  const signer = new FakeSigner();
-  const source =
-    overrides?.source ??
-    new FakeSource({ [PROPOSAL_ID.toString()]: { ...ARGS } });
+function createStubChain(options: StubChainOptions = {}) {
+  const simulated: { functionName: string }[] = [];
+  const chain: EnactmentChainReader = {
+    readContract: (async ({ functionName }: { functionName: string }) => {
+      switch (functionName) {
+        case "hashProposal":
+          return options.hashedProposalId ?? PROPOSAL_ID;
+        case "state":
+          return options.state ?? ProposalState.Succeeded;
+        case "proposalEta":
+          return options.eta ?? 0n;
+        default:
+          throw new Error(`unexpected read: ${functionName}`);
+      }
+    }) as EnactmentChainReader["readContract"],
+    simulateContract: (async ({ functionName }: { functionName: string }) => {
+      if (options.simulateError) throw options.simulateError;
+      simulated.push({ functionName });
+      return { request: {}, result: undefined };
+    }) as unknown as EnactmentChainReader["simulateContract"],
+    getBalance: async () => options.balance ?? parseEther("1"),
+    getBlock: (async () => ({
+      timestamp: options.blockTimestamp ?? NOW,
+    })) as EnactmentChainReader["getBlock"],
+    waitForTransactionReceipt: (async () => ({
+      status: "success",
+    })) as unknown as EnactmentChainReader["waitForTransactionReceipt"],
+  };
+  return { chain, simulated };
+}
+
+function createService(
+  overrides: { chain?: StubChainOptions; source?: ProposalSource } = {},
+) {
+  const { chain, simulated } = createStubChain(overrides.chain);
+  const { signer, sent } = createStubSigner();
   const service = new ProposalEnactmentService(
-    chain as unknown as EnactmentChainReader,
+    chain,
     signer,
-    source,
+    overrides.source ?? createStubSource(),
     { governorAddress: GOVERNOR, minBalanceWei: parseEther("0.1").valueOf() },
     silentLogger,
   );
-  return { chain, signer, source, service };
+  return { service, sent, simulated };
 }
 
 async function expectRelayError(
@@ -138,13 +130,14 @@ async function expectRelayError(
 
 describe("ProposalEnactmentService.queue", () => {
   it("broadcasts queue() for a succeeded proposal", async () => {
-    const { chain, signer, service } = setup();
-    chain.state = ProposalState.Succeeded;
+    const { service, sent, simulated } = createService({
+      chain: { state: ProposalState.Succeeded },
+    });
 
     const result = await service.queue(PROPOSAL_ID.toString());
 
     expect(result).toEqual({ txHash: TX_HASH });
-    expect(signer.sent).toEqual([
+    expect(sent).toEqual([
       {
         to: GOVERNOR,
         data: encodeFunctionData({
@@ -154,33 +147,33 @@ describe("ProposalEnactmentService.queue", () => {
         }),
       },
     ]);
-    expect(chain.simulated).toHaveLength(1);
-    expect(chain.simulated[0]?.functionName).toBe("queue");
+    expect(simulated).toEqual([{ functionName: "queue" }]);
   });
 
   it("rejects when the proposal is not in Succeeded state", async () => {
-    const { chain, signer, service } = setup();
-    chain.state = ProposalState.Active;
+    const { service, sent } = createService({
+      chain: { state: ProposalState.Active },
+    });
 
     await expectRelayError(
       service.queue(PROPOSAL_ID.toString()),
       "INVALID_PROPOSAL_STATE",
       409,
     );
-    expect(signer.sent).toEqual([]);
+    expect(sent).toEqual([]);
   });
 });
 
 describe("ProposalEnactmentService.execute", () => {
   it("broadcasts execute() for a queued proposal past its eta", async () => {
-    const { chain, signer, service } = setup();
-    chain.state = ProposalState.Queued;
-    chain.eta = NOW - 1n;
+    const { service, sent } = createService({
+      chain: { state: ProposalState.Queued, eta: NOW - 1n },
+    });
 
     const result = await service.execute(PROPOSAL_ID.toString());
 
     expect(result).toEqual({ txHash: TX_HASH });
-    expect(signer.sent).toEqual([
+    expect(sent).toEqual([
       {
         to: GOVERNOR,
         data: encodeFunctionData({
@@ -193,9 +186,9 @@ describe("ProposalEnactmentService.execute", () => {
   });
 
   it("executes exactly at the eta", async () => {
-    const { chain, service } = setup();
-    chain.state = ProposalState.Queued;
-    chain.eta = NOW;
+    const { service } = createService({
+      chain: { state: ProposalState.Queued, eta: NOW },
+    });
 
     await expect(service.execute(PROPOSAL_ID.toString())).resolves.toEqual({
       txHash: TX_HASH,
@@ -203,69 +196,75 @@ describe("ProposalEnactmentService.execute", () => {
   });
 
   it("rejects before the timelock eta", async () => {
-    const { chain, signer, service } = setup();
-    chain.state = ProposalState.Queued;
-    chain.eta = NOW + 1n;
+    const { service, sent } = createService({
+      chain: { state: ProposalState.Queued, eta: NOW + 1n },
+    });
 
     await expectRelayError(
       service.execute(PROPOSAL_ID.toString()),
       "TIMELOCK_NOT_READY",
       409,
     );
-    expect(signer.sent).toEqual([]);
+    expect(sent).toEqual([]);
   });
 
   it("rejects when the proposal is not in Queued state", async () => {
-    const { chain, signer, service } = setup();
-    chain.state = ProposalState.Succeeded;
+    const { service, sent } = createService({
+      chain: { state: ProposalState.Succeeded },
+    });
 
     await expectRelayError(
       service.execute(PROPOSAL_ID.toString()),
       "INVALID_PROPOSAL_STATE",
       409,
     );
-    expect(signer.sent).toEqual([]);
+    expect(sent).toEqual([]);
   });
 });
 
 describe("ProposalEnactmentService guards", () => {
   it("rejects unknown proposals with 404", async () => {
-    const { service } = setup({ source: new FakeSource() });
+    const { service } = createService({ source: createStubSource({}) });
 
     await expectRelayError(service.queue("999"), "PROPOSAL_NOT_FOUND", 404);
   });
 
   it("rejects when API data does not hash to the requested proposal id", async () => {
-    const { chain, signer, service } = setup();
-    chain.hashedProposalId = PROPOSAL_ID + 1n;
+    const { service, sent } = createService({
+      chain: { hashedProposalId: PROPOSAL_ID + 1n },
+    });
 
     await expectRelayError(
       service.queue(PROPOSAL_ID.toString()),
       "PROPOSAL_DATA_MISMATCH",
       422,
     );
-    expect(signer.sent).toEqual([]);
+    expect(sent).toEqual([]);
   });
 
   it("rejects when the relayer balance is below the minimum", async () => {
-    const { chain, signer, service } = setup();
-    chain.balance = parseEther("0.01");
+    const { service, sent } = createService({
+      chain: { balance: parseEther("0.01") },
+    });
 
     await expectRelayError(
       service.queue(PROPOSAL_ID.toString()),
       "RELAYER_LOW_BALANCE",
       503,
     );
-    expect(signer.sent).toEqual([]);
+    expect(sent).toEqual([]);
   });
 
   it("propagates simulation reverts without broadcasting", async () => {
-    const { chain, signer, service } = setup();
-    chain.simulateError = new Error("execution reverted: TimelockController");
+    const { service, sent } = createService({
+      chain: {
+        simulateError: new Error("execution reverted: TimelockController"),
+      },
+    });
 
     await expect(service.queue(PROPOSAL_ID.toString())).rejects.toThrow(
       /execution reverted/,
     );
-    expect(signer.sent).toEqual([]);
+    expect(sent).toEqual([]);
   });
 });

@@ -11,22 +11,14 @@ import { createLogger, type Logger } from "@anticapture/observability";
 
 import { governorAbi, ProposalState } from "@/abi/governor";
 import { Errors } from "@/errors";
+import type { ChainReader } from "@/services/chain/chain-reader";
 import { RelayerSigner } from "@/signer/types";
 
 import type { ProposalArgs, ProposalSource } from "./proposal-source";
 
-/**
- * Narrow interface covering only the viem actions this service uses.
- * A real PublicClient satisfies this via structural subtyping.
- */
-export type EnactmentChainReader = Pick<
-  PublicActions,
-  | "readContract"
-  | "simulateContract"
-  | "getBalance"
-  | "getBlock"
-  | "waitForTransactionReceipt"
->;
+/** The shared ChainReader plus the extra viem actions enactment needs. */
+export type EnactmentChainReader = ChainReader &
+  Pick<PublicActions, "getBlock" | "waitForTransactionReceipt">;
 
 export interface ProposalEnactmentConfig {
   governorAddress: Address;
