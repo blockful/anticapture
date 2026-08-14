@@ -16,15 +16,16 @@ COPY --from=builder /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 COPY --from=builder /app/turbo.json turbo.json
-# Codegen resolves the Gateful OpenAPI spec from ANTICAPTURE_API_URL (there is
-# no committed spec); Railway only exposes the variable to the build when
-# declared as an ARG. Deliberately NOT RAILWAY_ENVIRONMENT_NAME: interpolating
-# the same environment's gateful (as infra/mcp-server does) would deadlock
-# fresh PR previews — gateful's health gate requires this relayer to be up
-# before its /docs/json is served, and this build could not finish without it.
+# Codegen fetches the Gateful OpenAPI spec (there is no committed spec) and
+# must use a PUBLIC gateful domain: Railway builders run outside the private
+# network, so the runtime ANTICAPTURE_API_URL (a railway.internal host) is
+# unreachable here. Deliberately NOT the same environment's gateful either
+# (as infra/mcp-server interpolates): gateful's health gate requires this
+# relayer to be up before its own /docs/json is served, so fresh PR previews
+# would deadlock. Override via an ANTICAPTURE_SPEC_URL service variable.
 # See packages/anticapture-client/src/gateful-openapi-spec.ts.
-ARG ANTICAPTURE_API_URL
-RUN pnpm --filter @anticapture/client codegen
+ARG ANTICAPTURE_SPEC_URL=https://dev-gateful.up.railway.app
+RUN ANTICAPTURE_API_URL=$ANTICAPTURE_SPEC_URL pnpm --filter @anticapture/client codegen
 RUN pnpm --filter @anticapture/relayer... build
 
 FROM base AS runner
