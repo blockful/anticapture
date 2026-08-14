@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, User } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -44,9 +45,13 @@ export const TestimonialCarousel = () => {
           &ldquo;{testimonial.quote}&rdquo;
         </p>
         <div className="flex items-center gap-2">
-          <span className="bg-surface-contrast text-secondary flex size-9 shrink-0 items-center justify-center rounded-full">
-            <User className="size-4" />
-          </span>
+          <Image
+            src={testimonial.avatarSrc}
+            alt={testimonial.author}
+            width={36}
+            height={36}
+            className="bg-surface-contrast size-9 shrink-0 rounded-full object-cover"
+          />
           <div className="flex flex-col justify-center">
             <span className="text-primary text-sm font-medium leading-5">
               {testimonial.author}

@@ -11,28 +11,32 @@ export const TrackRecordSection = () => {
       </h2>
 
       <div className="grid gap-2 lg:grid-cols-3">
-        {TRACK_RECORD_CASES.map(({ daoId, name, description, caseUrl }) => (
-          <ClickableCard
-            key={name}
-            href={caseUrl}
-            openInNewTab
-            title={name}
-            description={description}
-            avatar={
-              daoId ? (
-                <DaoAvatarIcon
-                  daoId={daoId}
-                  className="size-icon-sm"
-                  isRounded={true}
-                />
-              ) : (
-                <span className="bg-surface-contrast text-secondary size-icon-sm flex shrink-0 items-center justify-center rounded-full text-xs font-medium">
-                  {name.charAt(0)}
-                </span>
-              )
-            }
-          />
-        ))}
+        {TRACK_RECORD_CASES.map(
+          ({ daoId, icon: Icon, name, description, caseUrl }) => (
+            <ClickableCard
+              key={name}
+              href={caseUrl}
+              openInNewTab
+              title={name}
+              description={description}
+              avatar={
+                daoId ? (
+                  <DaoAvatarIcon
+                    daoId={daoId}
+                    className="size-icon-sm"
+                    isRounded={true}
+                  />
+                ) : Icon ? (
+                  <Icon className="size-icon-sm rounded-full" />
+                ) : (
+                  <span className="bg-surface-contrast text-secondary size-icon-sm flex shrink-0 items-center justify-center rounded-full text-xs font-medium">
+                    {name.charAt(0)}
+                  </span>
+                )
+              }
+            />
+          ),
+        )}
       </div>
 
       <TestimonialCarousel />
