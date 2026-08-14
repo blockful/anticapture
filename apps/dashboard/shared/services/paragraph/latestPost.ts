@@ -7,6 +7,14 @@ const FEED_URL = "https://api.paragraph.com/blogs/rss/@blockful";
 /** Revalidate window for the feed, in seconds. Posts ship a few times a month. */
 const REVALIDATE_SECONDS = 3600;
 
+/**
+ * Deadline for the feed request. The ticker is awaited while the homepage
+ * renders, so a Paragraph host that accepts the connection and then stalls
+ * would hold the whole page open until the transport gives up. Capped so the
+ * publication fallback is reached in about the time a reader would wait.
+ */
+const FEED_TIMEOUT_MS = 3000;
+
 export type ParagraphPost = {
   title: string;
   url: string;
@@ -47,12 +55,14 @@ const readTag = (item: string, tag: string) => {
 
 /**
  * Newest post on the blockful publication. Falls back to the publication index
- * on any transport, status or parse failure — the panel ticker must render.
+ * on any transport, timeout, status or parse failure — the panel ticker must
+ * render.
  */
 export const getLatestParagraphPost = async (): Promise<ParagraphPost> => {
   try {
     const response = await fetch(FEED_URL, {
       next: { revalidate: REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(FEED_TIMEOUT_MS),
     });
 
     if (!response.ok) return PARAGRAPH_PUBLICATION;
