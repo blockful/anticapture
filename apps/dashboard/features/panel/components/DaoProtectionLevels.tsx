@@ -88,6 +88,7 @@ export const DaoProtectionLevels = () => {
             description,
           }) => {
             const count = stageCounts[stage] ?? 0;
+            const countLabel = `${count} DAO${count === 1 ? "" : "s"}`;
 
             return (
               <div key={stage} className="flex items-center gap-3">
@@ -99,15 +100,22 @@ export const DaoProtectionLevels = () => {
                   <Tooltip
                     asChild
                     title={label}
-                    titleRight={`${count} DAO${count === 1 ? "" : "s"}`}
+                    titleRight={countLabel}
                     tooltipContent={
                       <p className="text-secondary text-sm font-normal leading-5">
                         {description}
                       </p>
                     }
                   >
-                    <div
-                      className={cn("h-7 shrink-0", barClassName)}
+                    {/* A button, not a div: the description only exists inside
+                     * the tooltip, so the bar has to be reachable by keyboard. */}
+                    <button
+                      type="button"
+                      aria-label={`${label}, ${countLabel}`}
+                      className={cn(
+                        "h-7 shrink-0 cursor-pointer",
+                        barClassName,
+                      )}
                       style={{
                         width: count
                           ? `calc((100% - ${COUNT_TRACK_WIDTH}) * ${count / busiestStageCount})`
