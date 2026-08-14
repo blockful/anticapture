@@ -1,13 +1,16 @@
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { ElementType } from "react";
 
-const PARAGRAPH_PUBLICATION_URL = "https://paragraph.com/@blockful";
+import { ArbitrumIcon } from "@/shared/components/icons/ArbitrumIcon";
+import { DaoIdEnum } from "@/shared/types/daos";
 
 export type TrackRecordCase = {
   name: string;
   description: string;
   caseUrl: string;
-  /** Set when the DAO ships an icon in the dashboard; the card falls back to an initial otherwise. */
+  /** Set when the DAO ships an icon in the dashboard. */
   daoId?: DaoIdEnum;
+  /** Avatar for cases whose subject is not a monitored DAO (no `daoConfig` entry). */
+  icon?: ElementType;
 };
 
 export type Testimonial = {
@@ -15,12 +18,13 @@ export type Testimonial = {
   author: string;
   role: string;
   sourceUrl: string;
+  /** Profile picture of the account the quote is lifted from. */
+  avatarSrc: string;
 };
 
 /**
- * Case copy is final (Panel v2.1 spec); each card links out to the blog.
- * TODO(DEV-1148): point the Uniswap and Arbitrum cards at their own posts once
- * they are published, and add an Arbitrum icon when design supplies the asset.
+ * Case copy is final (Panel v2.1 spec); each card links to the Paragraph post
+ * that write-up lives in.
  */
 export const TRACK_RECORD_CASES: TrackRecordCase[] = [
   {
@@ -36,13 +40,15 @@ export const TRACK_RECORD_CASES: TrackRecordCase[] = [
     name: "Uniswap",
     description:
       "Anticapture surfaced a low-cost capture path against a multi-billion-dollar treasury, quantified before it could be exploited.",
-    caseUrl: PARAGRAPH_PUBLICATION_URL,
+    caseUrl:
+      "https://paragraph.com/@blockful/thanks-to-tallys-support-uniswap-dao-reached-stage-1-of-gov-se",
   },
   {
+    icon: ArbitrumIcon,
     name: "Arbitrum",
     description:
       "Acquired 14.4M votes in a live stress test, demonstrating how cheaply governance could be swayed before the DAO hardened it.",
-    caseUrl: PARAGRAPH_PUBLICATION_URL,
+    caseUrl: "https://paragraph.com/@blockful/arbitrum-security-council",
   },
 ];
 
@@ -60,12 +66,14 @@ export const TESTIMONIALS: Testimonial[] = [
     author: "Ethereum Foundation",
     role: "@ethereumfndn",
     sourceUrl: "https://x.com/ethereumfndn/status/2044080364717502737",
+    avatarSrc: "/images/testimonials/ethereumfndn.jpg",
   },
   {
     quote: "makes it so easy to see when governance changes",
     author: "Lefteris Karapetsas",
     role: "Researcher and delegate, rotki",
     sourceUrl: "https://x.com/LefterisJP/status/2070613219979174269",
+    avatarSrc: "/images/testimonials/lefterisjp.jpg",
   },
   {
     quote:
@@ -73,17 +81,20 @@ export const TESTIMONIALS: Testimonial[] = [
     author: "@blockbanzai",
     role: "DAO delegate",
     sourceUrl: "https://x.com/blockbanzai/status/1998695381194985712",
+    avatarSrc: "/images/testimonials/blockbanzai.jpg",
   },
   {
     quote: "Blockful is doing the lords work keeping DAOs safe",
     author: "@CupOJoseph",
     role: "Delegate and researcher",
     sourceUrl: "https://x.com/CupOJoseph/status/2034316404988449075",
+    avatarSrc: "/images/testimonials/cupojoseph.jpg",
   },
   {
     quote: "@anticapture reports show ENS governance security improving",
     author: "ENS DAO",
     role: "@ENS_DAO",
     sourceUrl: "https://x.com/ENS_DAO/status/1948046880505479527",
+    avatarSrc: "/images/testimonials/ens-dao.jpg",
   },
 ];
