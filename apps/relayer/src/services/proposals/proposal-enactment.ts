@@ -1,4 +1,11 @@
-import { Hash, encodeFunctionData, keccak256, stringToBytes } from "viem";
+import {
+  BaseError,
+  Hash,
+  InsufficientFundsError,
+  encodeFunctionData,
+  keccak256,
+  stringToBytes,
+} from "viem";
 
 import { createLogger, type Logger } from "@anticapture/observability";
 
@@ -142,7 +149,7 @@ export class ProposalEnactmentService {
       throw err;
     }
 
-    const txHash = await this.signer.sendTransaction({
+    const txHash = await this.sendTransaction({
       to: this.governor.address,
       data: encodeFunctionData({
         abi: governorAbi,
@@ -167,5 +174,27 @@ export class ProposalEnactmentService {
       `proposal ${functionName} broadcast`,
     );
     return { txHash };
+  }
+
+  /**
+   * Wraps the signer so viem's InsufficientFundsError surfaces as a clean
+   * 503 RELAYER_LOW_BALANCE instead of bubbling up as a 500 — the
+   * minBalanceWei guard cannot see the actual gas estimate.
+   */
+  private async sendTransaction(tx: {
+    to: `0x${string}`;
+    data: `0x${string}`;
+  }): Promise<Hash> {
+    try {
+      return await this.signer.sendTransaction(tx);
+    } catch (err) {
+      if (
+        err instanceof BaseError &&
+        err.walk((e) => e instanceof InsufficientFundsError)
+      ) {
+        throw Errors.RELAYER_LOW_BALANCE();
+      }
+      throw err;
+    }
   }
 }

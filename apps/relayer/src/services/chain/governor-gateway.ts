@@ -71,8 +71,11 @@ export type GovernorChainReader = ChainReader &
 
 // Don't hold the HTTP response hostage to viem's 180s default: mainnet
 // inclusion is ~12s, and anything slower is reported as "timeout" (the hash
-// is still returned to the caller).
-const RECEIPT_TIMEOUT_MS = 60_000;
+// is still returned to the caller). Must also stay comfortably below
+// Gateful's 30s proxy budget (apps/gateful/src/proxy/relayer.ts), which
+// covers the whole request — otherwise the gateway aborts and records a
+// circuit-breaker failure for a transaction that was already broadcast.
+const RECEIPT_TIMEOUT_MS = 15_000;
 
 function findRevert(err: unknown) {
   if (!(err instanceof BaseError)) return null;

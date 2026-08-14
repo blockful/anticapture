@@ -3,6 +3,7 @@ import {
   Address,
   Hash,
   Hex,
+  InsufficientFundsError,
   encodeFunctionData,
   keccak256,
   parseEther,
@@ -293,6 +294,29 @@ describe("ProposalEnactmentService guards", () => {
           keccak256(stringToBytes(hexLikeDescription)),
         ],
       }),
+    );
+  });
+
+  it("maps insufficient-funds send failures to RELAYER_LOW_BALANCE", async () => {
+    const { governor } = createStubGovernor();
+    const signer: RelayerSigner = {
+      getAddress: async () => RELAYER,
+      sendTransaction: async () => {
+        throw new InsufficientFundsError();
+      },
+    };
+    const service = new ProposalEnactmentService(
+      governor,
+      signer,
+      createStubSource().source,
+      { minBalanceWei: parseEther("0.1").valueOf() },
+      silentLogger,
+    );
+
+    await expectRelayError(
+      service.queue(PROPOSAL_ID.toString()),
+      "RELAYER_LOW_BALANCE",
+      503,
     );
   });
 
