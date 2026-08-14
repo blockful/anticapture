@@ -1,10 +1,10 @@
 import { ChevronRight } from "lucide-react";
 
 import { DefaultLink } from "@/shared/components/design-system/links/default-link/DefaultLink";
-import { mockedLatestFinding } from "@/shared/constants/mocked-data/mocked-latest-finding";
+import { getLatestParagraphPost } from "@/shared/services/paragraph/latestPost";
 
-export const LatestFindingTicker = () => {
-  const { finding, caseUrl } = mockedLatestFinding;
+export const LatestFindingTicker = async () => {
+  const { title: finding, url: caseUrl } = await getLatestParagraphPost();
 
   return (
     <div className="bg-surface-default flex flex-col gap-2 px-4 py-3 lg:flex-row lg:items-center lg:gap-3.5">
