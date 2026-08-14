@@ -63,7 +63,8 @@ test.describe("Panel page", () => {
     goto,
     page,
   }) => {
-    await page.setViewportSize({ width: 1920, height: 640 });
+    const shortViewport = { width: 1920, height: 640 };
+    await page.setViewportSize(shortViewport);
     await page.route("**/api/user/api/auth/get-session", (route) =>
       route.fulfill({
         status: 200,
@@ -84,11 +85,17 @@ test.describe("Panel page", () => {
     expect(tableBox).not.toBeNull();
     expect(footerBox).not.toBeNull();
     expect(tableBox!.y + tableBox!.height).toBeLessThanOrEqual(footerBox!.y);
+
+    // The table is no longer an inner scroll box: every row lays out at full
+    // height, past the bottom of this viewport, and `main` is what scrolls.
+    await expect
+      .poll(() => tableContainer.evaluate((element) => element.clientHeight))
+      .toBeGreaterThan(shortViewport.height);
     await expect
       .poll(() =>
-        tableContainer.evaluate(
-          (element) => element.scrollHeight > element.clientHeight,
-        ),
+        page
+          .locator("main")
+          .evaluate((element) => element.scrollHeight > element.clientHeight),
       )
       .toBe(true);
   });
