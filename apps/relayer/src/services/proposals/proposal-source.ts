@@ -21,7 +21,7 @@ export interface ProposalSource {
 
 /** Gateful's typed contract is the lowercase DAO id (e.g. "ens"). */
 function isSupportedDao(dao: string): dao is ProposalPathParams["dao"] {
-  return dao in proposalPathParamsDaoEnum;
+  return Object.hasOwn(proposalPathParamsDaoEnum, dao);
 }
 
 /**

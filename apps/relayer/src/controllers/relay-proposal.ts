@@ -17,7 +17,8 @@ const errorResponses = {
     content: { "application/json": { schema: ErrorResponseSchema } },
   },
   409: {
-    description: "Proposal is not in an actionable state",
+    description:
+      "Proposal is not in an actionable state, the simulation reverted, or the broadcast transaction reverted on-chain",
     content: { "application/json": { schema: ErrorResponseSchema } },
   },
   422: {

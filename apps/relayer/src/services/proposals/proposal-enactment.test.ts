@@ -6,13 +6,14 @@ import {
   encodeFunctionData,
   keccak256,
   parseEther,
-  toBytes,
+  stringToBytes,
 } from "viem";
 
 import { governorAbi, ProposalState } from "@/abi/governor";
 import { createLogger } from "@anticapture/observability";
 import { RelayError } from "@/errors";
 import type { GovernorGateway } from "@/services/chain/governor-gateway";
+import { SimulationRevertError } from "@/services/chain/governor-gateway";
 import { RelayerSigner } from "@/signer/types";
 
 import { ProposalEnactmentService } from "./proposal-enactment";
@@ -32,17 +33,22 @@ const ARGS: ProposalArgs = {
   calldatas: ["0xdeadbeef"],
   description: "# Do the thing",
 };
-const DESCRIPTION_HASH = keccak256(toBytes(ARGS.description));
+const DESCRIPTION_HASH = keccak256(stringToBytes(ARGS.description));
 const PROPOSAL_ID = 42n;
 
 function createStubSource(
   proposals: Record<string, ProposalArgs> = {
     [PROPOSAL_ID.toString()]: { ...ARGS },
   },
-): ProposalSource {
-  return {
-    getProposal: async (proposalId) => proposals[proposalId] ?? null,
+) {
+  const fetched: string[] = [];
+  const source: ProposalSource = {
+    getProposal: async (proposalId) => {
+      fetched.push(proposalId);
+      return proposals[proposalId] ?? null;
+    },
   };
+  return { source, fetched };
 }
 
 function createStubSigner() {
@@ -60,15 +66,16 @@ function createStubSigner() {
 function createStubGovernor(overrides: Partial<GovernorGateway> = {}) {
   const simulated: { functionName: string }[] = [];
   const governor: GovernorGateway = {
+    address: GOVERNOR,
     hashProposal: async () => PROPOSAL_ID,
     state: async () => ProposalState.Succeeded,
     proposalEta: async () => 0n,
     blockTimestamp: async () => NOW,
-    balanceOf: async () => parseEther("1"),
+    ethBalance: async () => parseEther("1"),
     simulate: async (functionName) => {
       simulated.push({ functionName });
     },
-    waitForReceipt: async () => {},
+    waitForReceipt: async () => "success",
     ...overrides,
   };
   return { governor, simulated };
@@ -85,8 +92,8 @@ function createService(
   const service = new ProposalEnactmentService(
     governor,
     signer,
-    overrides.source ?? createStubSource(),
-    { governorAddress: GOVERNOR, minBalanceWei: parseEther("0.1").valueOf() },
+    overrides.source ?? createStubSource().source,
+    { minBalanceWei: parseEther("0.1").valueOf() },
     silentLogger,
   );
   return { service, sent, simulated };
@@ -210,10 +217,46 @@ describe("ProposalEnactmentService.execute", () => {
 });
 
 describe("ProposalEnactmentService guards", () => {
-  it("rejects unknown proposals with 404", async () => {
-    const { service } = createService({ source: createStubSource({}) });
+  it("rejects proposals the governor does not know with 404, before touching the API", async () => {
+    const { source, fetched } = createStubSource();
+    const { service } = createService({
+      governor: { state: async () => null },
+      source,
+    });
 
-    await expectRelayError(service.queue("999"), "PROPOSAL_NOT_FOUND", 404);
+    await expectRelayError(
+      service.queue(PROPOSAL_ID.toString()),
+      "PROPOSAL_NOT_FOUND",
+      404,
+    );
+    expect(fetched).toEqual([]);
+  });
+
+  it("checks the on-chain state before fetching from the API", async () => {
+    const { source, fetched } = createStubSource();
+    const { service } = createService({
+      governor: { state: async () => ProposalState.Defeated },
+      source,
+    });
+
+    await expectRelayError(
+      service.queue(PROPOSAL_ID.toString()),
+      "INVALID_PROPOSAL_STATE",
+      409,
+    );
+    expect(fetched).toEqual([]);
+  });
+
+  it("rejects proposals the API does not know with 404", async () => {
+    const { service } = createService({
+      source: createStubSource({}).source,
+    });
+
+    await expectRelayError(
+      service.queue(PROPOSAL_ID.toString()),
+      "PROPOSAL_NOT_FOUND",
+      404,
+    );
   });
 
   it("rejects when API data does not hash to the requested proposal id", async () => {
@@ -229,9 +272,33 @@ describe("ProposalEnactmentService guards", () => {
     expect(sent).toEqual([]);
   });
 
+  it("hashes a description that looks like hex as UTF-8 text", async () => {
+    const hexLikeDescription = "0xdeadbeef";
+    const { service, sent } = createService({
+      source: createStubSource({
+        [PROPOSAL_ID.toString()]: { ...ARGS, description: hexLikeDescription },
+      }).source,
+    });
+
+    await service.queue(PROPOSAL_ID.toString());
+
+    expect(sent[0]?.data).toBe(
+      encodeFunctionData({
+        abi: governorAbi,
+        functionName: "queue",
+        args: [
+          ARGS.targets,
+          ARGS.values,
+          ARGS.calldatas,
+          keccak256(stringToBytes(hexLikeDescription)),
+        ],
+      }),
+    );
+  });
+
   it("rejects when the relayer balance is below the minimum", async () => {
     const { service, sent } = createService({
-      governor: { balanceOf: async () => parseEther("0.01") },
+      governor: { ethBalance: async () => parseEther("0.01") },
     });
 
     await expectRelayError(
@@ -241,19 +308,114 @@ describe("ProposalEnactmentService guards", () => {
     );
     expect(sent).toEqual([]);
   });
+});
 
-  it("propagates simulation reverts without broadcasting", async () => {
+describe("ProposalEnactmentService broadcast outcomes", () => {
+  it("maps simulation reverts to SIMULATION_FAILED without broadcasting", async () => {
     const { service, sent } = createService({
       governor: {
         simulate: async () => {
-          throw new Error("execution reverted: TimelockController");
+          throw new SimulationRevertError(
+            "TimelockController: insufficient balance",
+          );
+        },
+      },
+    });
+
+    const error = await service.queue(PROPOSAL_ID.toString()).then(
+      () => null,
+      (e) => e as RelayError,
+    );
+
+    expect(error).toBeInstanceOf(RelayError);
+    expect(error?.code).toBe("SIMULATION_FAILED");
+    expect(error?.status).toBe(409);
+    expect(error?.message).toContain(
+      "TimelockController: insufficient balance",
+    );
+    expect(sent).toEqual([]);
+  });
+
+  it("propagates non-revert simulation failures untouched", async () => {
+    const { service, sent } = createService({
+      governor: {
+        simulate: async () => {
+          throw new Error("rpc unreachable");
         },
       },
     });
 
     await expect(service.queue(PROPOSAL_ID.toString())).rejects.toThrow(
-      /execution reverted/,
+      /rpc unreachable/,
     );
     expect(sent).toEqual([]);
+  });
+
+  it("rejects with TRANSACTION_REVERTED when the mined transaction reverted", async () => {
+    const { service, sent } = createService({
+      governor: { waitForReceipt: async () => "reverted" },
+    });
+
+    await expectRelayError(
+      service.queue(PROPOSAL_ID.toString()),
+      "TRANSACTION_REVERTED",
+      409,
+    );
+    expect(sent).toHaveLength(1);
+  });
+
+  it("still returns the hash when the receipt wait times out", async () => {
+    const { service } = createService({
+      governor: { waitForReceipt: async () => "timeout" },
+    });
+
+    await expect(service.queue(PROPOSAL_ID.toString())).resolves.toEqual({
+      txHash: TX_HASH,
+    });
+  });
+});
+
+describe("ProposalEnactmentService in-flight dedup", () => {
+  it("joins concurrent duplicate requests into a single broadcast", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { service, sent } = createService({
+      governor: {
+        simulate: async () => {
+          await gate;
+        },
+      },
+    });
+
+    const first = service.queue(PROPOSAL_ID.toString());
+    const second = service.queue(PROPOSAL_ID.toString());
+    release();
+
+    await expect(first).resolves.toEqual({ txHash: TX_HASH });
+    await expect(second).resolves.toEqual({ txHash: TX_HASH });
+    expect(sent).toHaveLength(1);
+  });
+
+  it("releases the in-flight lock once the request settles", async () => {
+    const { service, sent } = createService();
+
+    await service.queue(PROPOSAL_ID.toString());
+    await service.queue(PROPOSAL_ID.toString());
+
+    expect(sent).toHaveLength(2);
+  });
+
+  it("does not join a queue request with an execute request", async () => {
+    const { service } = createService({
+      governor: { state: async () => ProposalState.Succeeded },
+    });
+
+    const queued = service.queue(PROPOSAL_ID.toString());
+    const executed = service.execute(PROPOSAL_ID.toString());
+
+    await expect(queued).resolves.toEqual({ txHash: TX_HASH });
+    await expectRelayError(executed, "INVALID_PROPOSAL_STATE", 409);
   });
 });

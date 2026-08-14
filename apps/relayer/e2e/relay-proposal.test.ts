@@ -59,7 +59,7 @@ class StubProposalSource implements ProposalSource {
 
 type TestClient = ReturnType<typeof createClients>["testClient"];
 
-function createProposalApp(rpcUrl: string) {
+function createProposalApp(rpcUrl: string, source?: ProposalSource) {
   const publicClient = createPublicClient({
     chain: mainnet,
     transport: http(rpcUrl, { timeout: 30_000 }),
@@ -69,11 +69,8 @@ function createProposalApp(rpcUrl: string) {
   const service = new ProposalEnactmentService(
     new ViemGovernorGateway(publicClient, GOVERNOR_ADDRESS),
     signer,
-    new StubProposalSource(),
-    {
-      governorAddress: GOVERNOR_ADDRESS,
-      minBalanceWei: parseEther("0.1").valueOf(),
-    },
+    source ?? new StubProposalSource(),
+    { minBalanceWei: parseEther("0.1").valueOf() },
     silentLogger,
   );
 
@@ -136,13 +133,27 @@ describe("POST /relay/queue + /relay/execute", () => {
     });
   }
 
-  it("returns 404 for a proposal the API does not know", async () => {
+  it("returns 404 for a proposal the governor does not know", async () => {
     app = createProposalApp(rpcUrl);
 
     const { status, body } = await post(app, "/relay/queue", "999");
 
     expect(status).toBe(404);
     expect(body).toMatchObject({ code: "PROPOSAL_NOT_FOUND" });
+  });
+
+  it("rejects tampered API data with 422 via the real hashProposal", async () => {
+    const tampered = new StubProposalSource();
+    tampered.proposals.set(PROPOSAL_ID, {
+      ...PROPOSAL_ARGS,
+      description: `${PROPOSAL_ARGS.description} (tampered)`,
+    });
+    app = createProposalApp(rpcUrl, tampered);
+
+    const { status, body } = await post(app, "/relay/queue", PROPOSAL_ID);
+
+    expect(status).toBe(422);
+    expect(body).toMatchObject({ code: "PROPOSAL_DATA_MISMATCH" });
   });
 
   it("queues a succeeded proposal, then executes it after the timelock", async () => {

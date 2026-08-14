@@ -176,10 +176,7 @@ async function main() {
             env.ANTICAPTURE_API_KEY,
           ),
         ),
-        {
-          governorAddress,
-          minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
-        },
+        { minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI) },
       ),
     ),
   );

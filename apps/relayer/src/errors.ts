@@ -74,4 +74,16 @@ export const Errors = {
       "TIMELOCK_NOT_READY",
       409,
     ),
+  SIMULATION_FAILED: (action: string, reason: string) =>
+    new RelayError(
+      `Simulation of ${action}() reverted: ${reason}`,
+      "SIMULATION_FAILED",
+      409,
+    ),
+  TRANSACTION_REVERTED: (txHash: string) =>
+    new RelayError(
+      `Transaction ${txHash} was mined but reverted on-chain`,
+      "TRANSACTION_REVERTED",
+      409,
+    ),
 } as const;
