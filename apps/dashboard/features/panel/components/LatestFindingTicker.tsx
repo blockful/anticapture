@@ -8,11 +8,13 @@ export const LatestFindingTicker = async () => {
 
   return (
     <div className="bg-surface-default flex flex-col gap-2 px-4 py-3 lg:flex-row lg:items-center lg:gap-3.5">
-      <div className="flex flex-1 flex-col gap-1 lg:flex-row lg:items-center lg:gap-3.5">
+      <div className="flex flex-1 flex-col gap-1 lg:min-w-0 lg:flex-row lg:items-center lg:gap-3.5">
         <h2 className="text-primary text-alternative-sm tracking-alternative-sm shrink-0 font-mono font-medium uppercase leading-5">
           Latest finding
         </h2>
-        <p className="text-secondary text-sm font-normal leading-5">
+        {/* Post titles come from the feed and run long; the design draws this
+         * strip as a single line on desktop, and wraps it on mobile. */}
+        <p className="text-secondary text-sm font-normal leading-5 lg:min-w-0 lg:truncate">
           {finding}
         </p>
       </div>
