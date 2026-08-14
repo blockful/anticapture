@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { TESTIMONIALS } from "@/features/panel/constants/track-record";
 import { IconButton } from "@/shared/components/design-system/buttons/icon-button/IconButton";
-import { TESTIMONIALS } from "@/shared/constants/track-record";
 
 export const TestimonialCarousel = () => {
   const [index, setIndex] = useState(0);

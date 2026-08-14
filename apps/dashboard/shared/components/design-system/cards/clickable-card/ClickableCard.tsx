@@ -48,13 +48,15 @@ export const ClickableCard = ({
     </div>
   );
 
-  if (href) {
+  // A disabled card falls back to the button branch even when it has an href:
+  // an anchor stays focusable and still follows its destination on Enter, so
+  // `pointer-events-none` would only ever hide the state from pointer users.
+  if (href && !isDisabled) {
     return (
       <Link
         href={href}
         target={openInNewTab ? "_blank" : "_self"}
         rel="noopener noreferrer"
-        aria-disabled={isDisabled}
         className={cardClassName}
       >
         {content}
