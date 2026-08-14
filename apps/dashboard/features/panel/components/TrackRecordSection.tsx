@@ -1,7 +1,7 @@
 import { TestimonialCarousel } from "@/features/panel/components/TestimonialCarousel";
+import { TRACK_RECORD_CASES } from "@/features/panel/constants/track-record";
 import { ClickableCard } from "@/shared/components/design-system/cards/clickable-card/ClickableCard";
 import { DaoAvatarIcon } from "@/shared/components/icons/DaoAvatarIcon";
-import { TRACK_RECORD_CASES } from "@/shared/constants/track-record";
 
 export const TrackRecordSection = () => {
   return (

@@ -32,9 +32,7 @@ export const PanelHero = () => {
         </DefaultLink>
       </div>
 
-      <div className="flex min-w-0 flex-1">
-        <DaoProtectionLevels />
-      </div>
+      <DaoProtectionLevels />
     </div>
   );
 };
