@@ -4,8 +4,6 @@ import type { ElementType } from "react";
 import { BadgeIcon } from "@/shared/components/design-system/badges/badge-icon/BadgeIcon";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link/DefaultLink";
 
-const DOCS_URL = "https://docs.anticapture.com";
-
 type FeatureCard = {
   icon: ElementType;
   label: string;
@@ -31,8 +29,8 @@ const FEATURE_CARDS: FeatureCard[] = [
     description:
       "Your AI agent can read every number on this page for free, no key required. Plug Anticapture into Claude, Cursor, or anything that speaks MCP.",
     ctaLabel: "Connect your agent",
-    href: DOCS_URL,
-    openInNewTab: true,
+    href: "/api-keys",
+    openInNewTab: false,
   },
 ];
 
