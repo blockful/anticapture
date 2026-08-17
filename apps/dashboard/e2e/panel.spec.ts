@@ -2,15 +2,17 @@ import { test, expect } from "./fixtures";
 
 test.describe("Panel page", () => {
   test(
-    "renders Panel heading and description",
+    "renders the panel hero heading and description",
     { tag: "@smoke" },
     async ({ goto, page }) => {
       await goto("/");
       await expect(
-        page.locator("h4").filter({ hasText: "Panel" }),
+        page
+          .locator("h1")
+          .filter({ hasText: "See which DAOs could be captured" }),
       ).toBeVisible();
       await expect(
-        page.locator("text=Check governance security across DAOs"),
+        page.locator("text=Live governance-security risk for every DAO"),
       ).toBeVisible();
     },
   );
