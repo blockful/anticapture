@@ -22,15 +22,21 @@ export const ServicesRow = () => {
           </h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-[7px] gap-y-1">
-          {SERVICES.map((service, index) => (
-            <div key={service} className="flex items-center gap-x-[7px]">
-              {index > 0 && <BulletDivider />}
-              <span className="text-secondary text-sm font-normal leading-5">
-                {service}
-              </span>
-            </div>
-          ))}
+        {/* Every label carries a leading bullet and the list is pulled left by
+         * exactly that lead-in (4px bullet + 7px gap) inside an overflow-hidden
+         * wrapper, so a bullet landing at a wrapped line start is clipped away
+         * instead of reading as a list marker. */}
+        <div className="overflow-hidden">
+          <div className="-ml-[11px] flex flex-wrap items-center gap-x-[7px] gap-y-1">
+            {SERVICES.map((service) => (
+              <div key={service} className="flex items-center gap-x-[7px]">
+                <BulletDivider />
+                <span className="text-secondary text-sm font-normal leading-5">
+                  {service}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
