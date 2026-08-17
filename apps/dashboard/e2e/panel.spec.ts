@@ -129,16 +129,20 @@ test.describe("Panel page", () => {
 
       // Metric cells stream in after load and keep growing the page, so the
       // scroll, its precondition, and the header measurement all happen inside
-      // one polled evaluation: scroll `main` (the page scroller) to the
-      // bottom, confirm the table top actually left through the top of the
-      // scrollport, and read where the sticky header rests.
+      // one polled evaluation: park the table top 150px above the scrollport
+      // of `main` (the page scroller) — never "scroll to bottom", sections
+      // after the table would push it entirely off screen — then read where
+      // the sticky header rests.
       const positions = () =>
         page.locator("main").evaluate((main) => {
-          main.scrollTop = main.scrollHeight;
           const table = main.querySelector("table");
           const thead = table?.querySelector("thead");
           if (!table || !thead)
             return { tableTop: NaN, theadTop: NaN, mainOverflowX: NaN };
+          main.scrollTop +=
+            table.getBoundingClientRect().top -
+            main.getBoundingClientRect().top +
+            150;
           return {
             tableTop: table.getBoundingClientRect().top,
             theadTop: thead.getBoundingClientRect().top,
