@@ -13,7 +13,6 @@ export const WHITELABEL_ROUTES = {
   notifications: "notifications",
   governanceSettings: "governance-settings",
   sppAccountability: "spp-accountability",
-  requestFeature: "request-feature",
 } as const;
 
 export type WhitelabelRouteSlug =
@@ -209,7 +208,6 @@ export const getWhitelabelInternalPath = ({
     `/${WHITELABEL_ROUTES.notifications}`,
     `/${WHITELABEL_ROUTES.governanceSettings}`,
     `/${WHITELABEL_ROUTES.sppAccountability}`,
-    `/${WHITELABEL_ROUTES.requestFeature}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.proposals}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.delegates}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.stakeholders}`,
@@ -220,7 +218,6 @@ export const getWhitelabelInternalPath = ({
     `/${daoSlug}/${WHITELABEL_ROUTES.notifications}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.governanceSettings}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.sppAccountability}`,
-    `/${daoSlug}/${WHITELABEL_ROUTES.requestFeature}`,
   ];
 
   const matchedCandidate = candidates.find(

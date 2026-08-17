@@ -131,7 +131,7 @@ export interface AttackProfitabilityConfig {
 export type GovernanceImplementationConfig = GovernanceImplementation;
 
 export interface WhitelabelConfig {
-  /** External override for the "Request feature" button; when absent the button opens the in-app request-feature form */
+  /** External override for the "Request feature" button; when absent the button opens the in-app request-feature drawer */
   requestFeatureLink?: string;
   governanceParameters?: Array<{
     label: string;

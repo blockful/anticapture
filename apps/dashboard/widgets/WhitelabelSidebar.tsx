@@ -61,19 +61,16 @@ export const WhitelabelSidebar = ({
   daoId,
   isCollapsed,
   onToggleCollapse,
+  onRequestFeatureClick,
 }: {
   daoId: DaoIdEnum;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  onRequestFeatureClick: () => void;
 }) => {
   const pathname = usePathname();
   const daoConfig = daoConfigByDaoId[daoId];
   const externalRequestFeatureLink = daoConfig.whitelabel?.requestFeatureLink;
-  const requestFeatureHref = getDaoPagePath({
-    daoId,
-    pathname,
-    page: WHITELABEL_ROUTES.requestFeature,
-  });
 
   const renderNavItems = (
     items: ReadonlyArray<{
@@ -160,8 +157,8 @@ export const WhitelabelSidebar = ({
 
         {/* Footer - pushed to bottom */}
         <div className="mt-auto flex flex-col items-center gap-2.5">
-          <Button variant="outline" asChild className="w-full justify-center">
-            {externalRequestFeatureLink ? (
+          {externalRequestFeatureLink ? (
+            <Button variant="outline" asChild className="w-full justify-center">
               <a
                 href={externalRequestFeatureLink}
                 target="_blank"
@@ -174,19 +171,21 @@ export const WhitelabelSidebar = ({
                 <Sparkles className="size-4" />
                 {!isCollapsed && "Request feature"}
               </a>
-            ) : (
-              <Link
-                href={requestFeatureHref}
-                data-umami-event="feature_request_click"
-                data-umami-event-source="whitelabel_sidebar"
-                data-ph-event="feature_request_click"
-                data-ph-source="whitelabel_sidebar"
-              >
-                <Sparkles className="size-4" />
-                {!isCollapsed && "Request feature"}
-              </Link>
-            )}
-          </Button>
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full justify-center"
+              onClick={onRequestFeatureClick}
+              data-umami-event="feature_request_click"
+              data-umami-event-source="whitelabel_sidebar"
+              data-ph-event="feature_request_click"
+              data-ph-source="whitelabel_sidebar"
+            >
+              <Sparkles className="size-4" />
+              {!isCollapsed && "Request feature"}
+            </Button>
+          )}
 
           {!isCollapsed && (
             <p className="text-dimmed w-full text-center text-xs font-medium leading-4">
