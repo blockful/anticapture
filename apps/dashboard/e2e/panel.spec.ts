@@ -98,6 +98,43 @@ test.describe("Panel page", () => {
       .toBe(true);
   });
 
+  test("keeps the table header pinned while the desktop page scrolls", async ({
+    goto,
+    page,
+  }) => {
+    // Short enough that the table cannot fit the viewport, so scrolling to
+    // the bottom pushes the table top past the top of the scrollport.
+    await page.setViewportSize({ width: 1920, height: 640 });
+    await goto("/");
+
+    const thead = page.locator("table thead").first();
+    await expect(thead).toBeVisible({ timeout: 15_000 });
+
+    // Scroll `main` (the page scroller) to the bottom: the rows leave through
+    // the top while the sticky header must stay pinned to the scrollport.
+    await page.locator("main").evaluate((main) => {
+      main.scrollTop = main.scrollHeight;
+    });
+
+    // The table top must actually be above the scrollport for the header to
+    // have anything to pin against; the footer below the table ensures it.
+    await expect
+      .poll(() =>
+        page
+          .locator("table")
+          .first()
+          .evaluate((table) => table.getBoundingClientRect().top),
+      )
+      .toBeLessThan(0);
+
+    await expect(thead).toBeVisible();
+    const theadBox = await thead.boundingBox();
+    expect(theadBox).not.toBeNull();
+    // Pinned means resting at the top of the scrollport (sticky -top-px).
+    expect(theadBox!.y).toBeGreaterThanOrEqual(-5);
+    expect(theadBox!.y).toBeLessThanOrEqual(5);
+  });
+
   test("sortable column headers respond to clicks", async ({ goto, page }) => {
     await goto("/");
     await expect(page.locator("table").first()).toBeVisible({

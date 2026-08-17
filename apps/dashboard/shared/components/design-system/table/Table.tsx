@@ -54,6 +54,7 @@ type ColumnDef<TData, TValue> = TanstackColumnDef<TData, TValue> & {
 interface DataTableProps<TData, TValue> {
   className?: string;
   columns: ColumnDef<TData, TValue>[];
+  containerClassName?: string;
   customEmptyState?: ReactNode;
   data: TData[];
   disableRowClick?: (row: TData) => boolean;
@@ -92,6 +93,7 @@ interface DataTableProps<TData, TValue> {
 export const Table = <TData, TValue>({
   className,
   columns,
+  containerClassName,
   customEmptyState,
   data,
   disableRowClick,
@@ -215,6 +217,7 @@ export const Table = <TData, TValue>({
         className={cn(
           "text-secondary lg:bg-surface-default bg-transparent",
           fillHeight && "flex h-full flex-col",
+          containerClassName,
         )}
         tableClassName={cn(
           "border-separate border-spacing-0",
