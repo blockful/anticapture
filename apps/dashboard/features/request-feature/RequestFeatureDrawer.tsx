@@ -82,8 +82,12 @@ export const RequestFeatureDrawer = ({
   return (
     <DrawerRoot open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
-        <DrawerHeader title="Request a Feature" onClose={onClose} />
-        <DrawerBody className="overflow-y-auto px-6 py-6">
+        <DrawerHeader
+          subtitle={`${daoConfig.name} governance`}
+          title="Request a Feature"
+          onClose={onClose}
+        />
+        <DrawerBody className="overflow-y-auto p-4">
           <div className="flex flex-col gap-6">
             <p className="text-secondary text-sm leading-5">
               We're committed to building the best possible experience through
@@ -179,22 +183,25 @@ export const RequestFeatureDrawer = ({
                     </FormItem>
                   )}
                 />
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isPending}
-                  loading={isPending}
-                  data-ph-event="feature_request_submitted"
-                  data-ph-source="request_feature_drawer"
-                  data-umami-event="feature_request_submitted"
-                >
-                  Submit request <Sparkles size={16} />
-                </Button>
               </form>
             </Form>
           </div>
         </DrawerBody>
+        <div className="border-border-default flex shrink-0 justify-end gap-2 border-t px-4 py-3">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={isPending}
+            loading={isPending}
+            data-ph-event="feature_request_submitted"
+            data-ph-source="request_feature_drawer"
+            data-umami-event="feature_request_submitted"
+          >
+            Submit request <Sparkles size={16} />
+          </Button>
+        </div>
       </DrawerContent>
     </DrawerRoot>
   );
