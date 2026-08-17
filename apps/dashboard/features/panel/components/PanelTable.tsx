@@ -223,6 +223,11 @@ export const PanelTable = () => {
       data={allDaos}
       withSorting={true}
       wrapperClassName="min-h-[400px]"
+      /* On desktop the page (main) is the scroller, so the container must not
+       * be a scrollport or the sticky header would pin to it and scroll away.
+       * Mobile keeps the inner horizontal scroll: the header never pinned
+       * there, and HeaderMobile is fixed with no offset to pin under. */
+      containerClassName="lg:overflow-visible"
       stickyFirstColumn={true}
       pinRowsToBottom={(row) => row.isPartiallyIndexed}
       getRowClassName={(row, index, rows) => {
