@@ -103,51 +103,63 @@ test.describe("Panel page", () => {
       .toBe(true);
   });
 
-  test("keeps the table header pinned while the desktop page scrolls", async ({
-    goto,
-    page,
-  }) => {
-    await page.setViewportSize(SHORT_DESKTOP_VIEWPORT);
-    await page.route("**/api/user/api/auth/get-session", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: "null",
-      }),
-    );
-    await goto("/");
+  // 1024 exercises the lg band, where the sidebar is up but headers may
+  // wrap; 1920 exercises the roomy layout. The header must pin in both.
+  for (const width of [1024, SHORT_DESKTOP_VIEWPORT.width]) {
+    test(`keeps the table header pinned while the ${width}px desktop page scrolls`, async ({
+      goto,
+      page,
+    }) => {
+      await page.setViewportSize({
+        width,
+        height: SHORT_DESKTOP_VIEWPORT.height,
+      });
+      await page.route("**/api/user/api/auth/get-session", (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: "null",
+        }),
+      );
+      await goto("/");
 
-    await expect(page.locator("table thead").first()).toBeVisible({
-      timeout: 15_000,
-    });
-
-    // Metric cells stream in after load and keep growing the page, so the
-    // scroll, its precondition, and the header measurement all happen inside
-    // one polled evaluation: scroll `main` (the page scroller) to the bottom,
-    // confirm the table top actually left through the top of the scrollport,
-    // and read where the sticky header rests.
-    const positions = () =>
-      page.locator("main").evaluate((main) => {
-        main.scrollTop = main.scrollHeight;
-        const table = main.querySelector("table");
-        const thead = table?.querySelector("thead");
-        if (!table || !thead) return { tableTop: NaN, theadTop: NaN };
-        return {
-          tableTop: table.getBoundingClientRect().top,
-          theadTop: thead.getBoundingClientRect().top,
-        };
+      await expect(page.locator("table thead").first()).toBeVisible({
+        timeout: 15_000,
       });
 
-    await expect
-      .poll(async () => (await positions()).tableTop, { timeout: 15_000 })
-      .toBeLessThan(0);
+      // Metric cells stream in after load and keep growing the page, so the
+      // scroll, its precondition, and the header measurement all happen inside
+      // one polled evaluation: scroll `main` (the page scroller) to the
+      // bottom, confirm the table top actually left through the top of the
+      // scrollport, and read where the sticky header rests.
+      const positions = () =>
+        page.locator("main").evaluate((main) => {
+          main.scrollTop = main.scrollHeight;
+          const table = main.querySelector("table");
+          const thead = table?.querySelector("thead");
+          if (!table || !thead)
+            return { tableTop: NaN, theadTop: NaN, mainOverflowX: NaN };
+          return {
+            tableTop: table.getBoundingClientRect().top,
+            theadTop: thead.getBoundingClientRect().top,
+            mainOverflowX: main.scrollWidth - main.clientWidth,
+          };
+        });
 
-    const { tableTop, theadTop } = await positions();
-    expect(tableTop).toBeLessThan(0);
-    // Pinned means resting at the top of the scrollport (sticky -top-px).
-    expect(theadTop).toBeGreaterThanOrEqual(-2);
-    expect(theadTop).toBeLessThanOrEqual(2);
-  });
+      await expect
+        .poll(async () => (await positions()).tableTop, { timeout: 15_000 })
+        .toBeLessThan(0);
+
+      const { tableTop, theadTop, mainOverflowX } = await positions();
+      expect(tableTop).toBeLessThan(0);
+      // Pinned means resting at the top of the scrollport (sticky -top-px).
+      expect(theadTop).toBeGreaterThanOrEqual(-2);
+      expect(theadTop).toBeLessThanOrEqual(2);
+      // The un-scrollported table must not leak a page-level horizontal
+      // scrollbar; column headers wrap below xl to keep this true.
+      expect(mainOverflowX).toBe(0);
+    });
+  }
 
   test("sortable column headers respond to clicks", async ({ goto, page }) => {
     await goto("/");
