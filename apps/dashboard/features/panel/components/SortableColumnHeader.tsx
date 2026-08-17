@@ -15,7 +15,10 @@ export const TitleUnderlined = ({
   return (
     <h4
       className={cn(
-        "text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300",
+        // lg:max-xl may wrap: the fixed-layout desktop table cannot fit the
+        // longest header on one line there, and un-wrappable text would
+        // overflow the table and leak a page-level horizontal scrollbar.
+        "text-table-header decoration-secondary/20 group-hover:decoration-primary hover:decoration-primary whitespace-nowrap text-right underline decoration-dashed underline-offset-[6px] transition-colors duration-300 lg:max-xl:whitespace-normal",
         className,
       )}
     >
