@@ -18,7 +18,7 @@ const FEATURE_CARDS: FeatureCard[] = [
     icon: Bell,
     label: "Alerts",
     description:
-      "Telegram, Slack, or webhook pings when a DAO you track moves: new proposals on-chain or Snapshot, vote reminders, delegation shifts, results. You choose the triggers.",
+      "Telegram or Slack pings when a DAO you track moves: new proposals on-chain or Snapshot, vote reminders, delegation shifts, results. You choose the triggers.",
     ctaLabel: "Set up alerts",
     href: "/alerts",
     openInNewTab: false,
@@ -27,7 +27,7 @@ const FEATURE_CARDS: FeatureCard[] = [
     icon: Code2,
     label: "API + MCP",
     description:
-      "Your AI agent can read every number on this page for free, no key required. Plug Anticapture into Claude, Cursor, or anything that speaks MCP.",
+      "Give your AI agent live governance data for every DAO on this page, with a free self-service API key. Plug Anticapture into Claude, Cursor, or anything that speaks MCP.",
     ctaLabel: "Connect your agent",
     href: "/api-keys",
     openInNewTab: false,
