@@ -191,13 +191,12 @@ const DISABLED_DAOS = new Set(
     .filter(Boolean),
 );
 
-const withoutDisabled = <T extends string>(daos: readonly T[]): [T, ...T[]] => {
-  const enabled = daos.filter((dao) => !DISABLED_DAOS.has(dao));
-  if (enabled.length === 0) {
-    throw new Error("DISABLED_DAOS disables every DAO; nothing left to serve.");
-  }
-  return enabled as [T, ...T[]];
-};
+// The tuple cast is a lie when a whole subset is disabled, but a safe one:
+// zod v4 accepts an empty enum and then rejects every value, so the affected
+// tools become uncallable instead of the server failing to start. Only an
+// empty DAO_ALL (checked below) is fatal.
+const withoutDisabled = <T extends string>(daos: readonly T[]): [T, ...T[]] =>
+  daos.filter((dao) => !DISABLED_DAOS.has(dao)) as [T, ...T[]];
 
 const DAO_ALL = withoutDisabled([
   "aave",
@@ -225,6 +224,10 @@ const DAO_NO_AAVE = withoutDisabled([
   "uni",
 ] as const);
 const DAO_OFFCHAIN = withoutDisabled(["comp", "ens", "gtc", "uni"] as const);
+
+if (DAO_ALL.length === 0) {
+  throw new Error("DISABLED_DAOS disables every DAO; nothing left to serve.");
+}
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({

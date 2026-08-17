@@ -55,4 +55,14 @@ describe("DISABLED_DAOS", () => {
       "http://api-shu:42069",
     );
   });
+
+  it("ignores a disabled DAO's malformed URL instead of failing startup", () => {
+    const source = {
+      DAO_API_ENS: "http://api-ens:42069",
+      DAO_API_SHU: "not a url",
+    };
+    const map = loadDaoMap("DAO_API_", source, new Set(["shu"]));
+    expect(map.get("ens")).toBe("http://api-ens:42069");
+    expect(map.has("shu")).toBe(false);
+  });
 });

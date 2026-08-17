@@ -73,12 +73,14 @@ export function loadDaoMap(
 
   for (const [key, value] of Object.entries(source)) {
     if (key.startsWith(prefix) && value) {
+      const daoName = key.replace(prefix, "").toLowerCase();
+      // Skip before validating: a disabled DAO's registration is ignored
+      // entirely, so even a stale or malformed URL must not block startup.
+      if (disabledDaos.has(daoName)) continue;
       const parsed = urlSchema.safeParse(value);
       if (!parsed.success) {
         throw new Error(`Invalid URL for ${key}: ${parsed.error.message}`);
       }
-      const daoName = key.replace(prefix, "").toLowerCase();
-      if (disabledDaos.has(daoName)) continue;
       result.set(daoName, parsed.data);
     }
   }
