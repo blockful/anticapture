@@ -63,7 +63,10 @@ export const TestimonialCarousel = () => {
           <div className="flex items-center gap-2">
             <Image
               src={testimonial.avatarSrc}
-              alt={testimonial.author}
+              /* Decorative: the author's name renders right next to it, and
+               * the atomic live region would announce the name twice on
+               * every slide change if the portrait repeated it. */
+              alt=""
               width={36}
               height={36}
               className="bg-surface-contrast size-9 shrink-0 rounded-full object-cover"
