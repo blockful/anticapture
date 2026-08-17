@@ -1,16 +1,22 @@
 import { test, expect } from "./fixtures";
 
+/* Desktop width, but shorter than the table: the layout-sensitive tests below
+ * all need the page to scroll vertically past the table. */
+const SHORT_DESKTOP_VIEWPORT = { width: 1920, height: 640 };
+
 test.describe("Panel page", () => {
   test(
-    "renders Panel heading and description",
+    "renders the panel hero heading and description",
     { tag: "@smoke" },
     async ({ goto, page }) => {
       await goto("/");
       await expect(
-        page.locator("h4").filter({ hasText: "Panel" }),
+        page
+          .locator("h1")
+          .filter({ hasText: "See which DAOs could be captured" }),
       ).toBeVisible();
       await expect(
-        page.locator("text=Check governance security across DAOs"),
+        page.locator("text=Live governance-security risk for every DAO"),
       ).toBeVisible();
     },
   );
@@ -61,8 +67,7 @@ test.describe("Panel page", () => {
     goto,
     page,
   }) => {
-    const shortViewport = { width: 1920, height: 640 };
-    await page.setViewportSize(shortViewport);
+    await page.setViewportSize(SHORT_DESKTOP_VIEWPORT);
     await page.route("**/api/user/api/auth/get-session", (route) =>
       route.fulfill({
         status: 200,
@@ -88,7 +93,7 @@ test.describe("Panel page", () => {
     // height, past the bottom of this viewport, and `main` is what scrolls.
     await expect
       .poll(() => tableContainer.evaluate((element) => element.clientHeight))
-      .toBeGreaterThan(shortViewport.height);
+      .toBeGreaterThan(SHORT_DESKTOP_VIEWPORT.height);
     await expect
       .poll(() =>
         page
@@ -96,6 +101,52 @@ test.describe("Panel page", () => {
           .evaluate((element) => element.scrollHeight > element.clientHeight),
       )
       .toBe(true);
+  });
+
+  test("keeps the table header pinned while the desktop page scrolls", async ({
+    goto,
+    page,
+  }) => {
+    await page.setViewportSize(SHORT_DESKTOP_VIEWPORT);
+    await page.route("**/api/user/api/auth/get-session", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "null",
+      }),
+    );
+    await goto("/");
+
+    await expect(page.locator("table thead").first()).toBeVisible({
+      timeout: 15_000,
+    });
+
+    // Metric cells stream in after load and keep growing the page, so the
+    // scroll, its precondition, and the header measurement all happen inside
+    // one polled evaluation: scroll `main` (the page scroller) to the bottom,
+    // confirm the table top actually left through the top of the scrollport,
+    // and read where the sticky header rests.
+    const positions = () =>
+      page.locator("main").evaluate((main) => {
+        main.scrollTop = main.scrollHeight;
+        const table = main.querySelector("table");
+        const thead = table?.querySelector("thead");
+        if (!table || !thead) return { tableTop: NaN, theadTop: NaN };
+        return {
+          tableTop: table.getBoundingClientRect().top,
+          theadTop: thead.getBoundingClientRect().top,
+        };
+      });
+
+    await expect
+      .poll(async () => (await positions()).tableTop, { timeout: 15_000 })
+      .toBeLessThan(0);
+
+    const { tableTop, theadTop } = await positions();
+    expect(tableTop).toBeLessThan(0);
+    // Pinned means resting at the top of the scrollport (sticky -top-px).
+    expect(theadTop).toBeGreaterThanOrEqual(-2);
+    expect(theadTop).toBeLessThanOrEqual(2);
   });
 
   test("sortable column headers respond to clicks", async ({ goto, page }) => {
