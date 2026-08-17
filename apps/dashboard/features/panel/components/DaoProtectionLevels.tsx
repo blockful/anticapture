@@ -14,7 +14,7 @@ import {
   fieldsToArray,
   getDaoStageFromFields,
 } from "@/shared/dao-config/utils";
-import { DaoIdEnum } from "@/shared/types/daos";
+import { ALL_DAOS } from "@/shared/types/daos";
 import { Stage } from "@/shared/types/enums/Stage";
 
 const chartConfig: ChartConfig = {
@@ -28,7 +28,7 @@ export const DaoProtectionLevels = () => {
   // Calculate stage distribution from real DAO data
   const stageData = useMemo(() => {
     // Get all DAOs
-    const daoIds = Object.values(DaoIdEnum);
+    const daoIds = ALL_DAOS;
 
     // Count DAOs by stage
     const stageCounts = {
@@ -94,7 +94,7 @@ export const DaoProtectionLevels = () => {
 
   // Calculate total monitored DAOs
   const totalMonitored = useMemo(() => {
-    return Object.values(DaoIdEnum).length;
+    return ALL_DAOS.length;
   }, []);
 
   return (

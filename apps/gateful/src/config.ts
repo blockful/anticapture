@@ -39,6 +39,10 @@ export const envSchema = z
     CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
     REDIS_URL: z.string().optional(),
     RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
+    // Comma-separated DAO ids (e.g. "shu" or "shu,torn") whose DAO_API_* /
+    // DAO_RELAYER_* registrations are ignored. Lets an environment keep a
+    // DAO's services running while removing it from the public gateway.
+    DISABLED_DAOS: z.string().optional(),
   })
   .refine((env) => !env.TOKEN_SERVICE_URL || !!env.TOKEN_SERVICE_API_KEY, {
     message: "TOKEN_SERVICE_API_KEY is required when TOKEN_SERVICE_URL is set",
@@ -51,9 +55,18 @@ export const envSchema = z
     },
   );
 
-function loadDaoMap(
+export const parseDisabledDaos = (value: string | undefined): Set<string> =>
+  new Set(
+    (value ?? "")
+      .split(",")
+      .map((dao) => dao.trim().toLowerCase())
+      .filter(Boolean),
+  );
+
+export function loadDaoMap(
   prefix: string,
   source: Record<string, string | undefined> = process.env,
+  disabledDaos: ReadonlySet<string> = new Set(),
 ): Map<string, string> {
   const result = new Map<string, string>();
   const urlSchema = z.url();
@@ -65,6 +78,7 @@ function loadDaoMap(
         throw new Error(`Invalid URL for ${key}: ${parsed.error.message}`);
       }
       const daoName = key.replace(prefix, "").toLowerCase();
+      if (disabledDaos.has(daoName)) continue;
       result.set(daoName, parsed.data);
     }
   }
@@ -73,6 +87,7 @@ function loadDaoMap(
 }
 
 const env = envSchema.parse(process.env);
+const disabledDaos = parseDisabledDaos(env.DISABLED_DAOS);
 
 export const config = {
   port: env.PORT,
@@ -88,8 +103,8 @@ export const config = {
   metricsToken: env.GATEFUL_METRICS_TOKEN,
   redisUrl: env.REDIS_URL,
   commitSha: env.RAILWAY_GIT_COMMIT_SHA,
-  daoApis: loadDaoMap("DAO_API_"),
-  daoRelayers: loadDaoMap("DAO_RELAYER_"),
+  daoApis: loadDaoMap("DAO_API_", process.env, disabledDaos),
+  daoRelayers: loadDaoMap("DAO_RELAYER_", process.env, disabledDaos),
   circuitBreaker: {
     failureThreshold: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
     cooldownMs: env.CIRCUIT_BREAKER_COOLDOWN_MS,

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
-import daoConfigByDaoId from "@/shared/dao-config";
 import { getSiteUrl } from "@/shared/seo/site";
+import { ALL_DAOS } from "@/shared/types/daos";
 
 export function GET() {
   const baseUrl = getSiteUrl();
-  const daoUrls = Object.keys(daoConfigByDaoId)
-    .map((daoId) => `${baseUrl}/${daoId.toLowerCase()}`)
-    .join("\n");
+  const daoUrls = ALL_DAOS.map(
+    (daoId) => `${baseUrl}/${daoId.toLowerCase()}`,
+  ).join("\n");
 
   const body = [
     "# Anticapture",

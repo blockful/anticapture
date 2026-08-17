@@ -6,7 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DaoAvatarIcon } from "@/shared/components/icons";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { ALL_DAOS } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/";
 import { getDaoNavigationPath } from "@/shared/utils/dao-navigation";
 
@@ -79,13 +80,11 @@ export const HeaderDAOSidebarDropdown = ({
 
   const dropdownItemsRef = useRef<DropdownItem[] | null>(null);
   if (!dropdownItemsRef.current) {
-    dropdownItemsRef.current = Object.values(DaoIdEnum).map(
-      (daoIdValue, index) => ({
-        id: index,
-        daoId: daoIdValue,
-        label: daoConfigByDaoId[daoIdValue].name,
-      }),
-    );
+    dropdownItemsRef.current = ALL_DAOS.map((daoIdValue, index) => ({
+      id: index,
+      daoId: daoIdValue,
+      label: daoConfigByDaoId[daoIdValue].name,
+    }));
   }
   const dropdownItems = dropdownItemsRef.current;
 

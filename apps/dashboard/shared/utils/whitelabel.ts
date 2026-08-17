@@ -1,6 +1,6 @@
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { ALL_DAOS, type DaoIdEnum } from "@/shared/types/daos";
 
 export const WHITELABEL_ROUTES = {
   proposals: "proposals",
@@ -18,10 +18,12 @@ export const WHITELABEL_ROUTES = {
 export type WhitelabelRouteSlug =
   (typeof WHITELABEL_ROUTES)[keyof typeof WHITELABEL_ROUTES];
 
-const NORMALIZED_HOSTNAME_TO_DAO_ID = Object.entries(daoConfigByDaoId).reduce(
-  (acc, [daoId, daoConfig]) => {
-    daoConfig.hostnames?.forEach((hostname) => {
-      acc[hostname.toLowerCase()] = daoId as DaoIdEnum;
+// Built from ALL_DAOS (not the raw config map) so a disabled DAO's whitelabel
+// hostname stops resolving along with the rest of its routes.
+const NORMALIZED_HOSTNAME_TO_DAO_ID = ALL_DAOS.reduce(
+  (acc, daoId) => {
+    daoConfigByDaoId[daoId].hostnames?.forEach((hostname) => {
+      acc[hostname.toLowerCase()] = daoId;
     });
 
     return acc;

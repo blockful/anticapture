@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
 
-import daoConfigByDaoId from "@/shared/dao-config";
 import { getSiteUrl } from "@/shared/seo/site";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { ALL_DAOS, type DaoIdEnum } from "@/shared/types/daos";
 import {
   type OffchainProposalsPathParams,
   type ProposalsPathParams,
@@ -132,7 +131,7 @@ export async function getAllProposalPaths(
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteUrl();
-  const daoIds = Object.keys(daoConfigByDaoId).map((id) => id.toLowerCase());
+  const daoIds = ALL_DAOS.map((id) => id.toLowerCase());
 
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
     url: `${baseUrl}${route}`,

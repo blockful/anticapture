@@ -19,7 +19,8 @@ import {
 import { Table } from "@/shared/components/design-system/table/Table";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
+import { ALL_DAOS } from "@/shared/types/daos";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 
 type PanelDao = {
@@ -49,15 +50,13 @@ export const PanelTable = () => {
   const attackProfitabilitySort = useRef<Record<number, number>>({});
   const activeTokensSort = useRef<Record<number, number>>({});
 
-  const allDaos = Object.values(DaoIdEnum)
-    .map((daoId) => ({
-      dao: daoId,
-      isPartiallyIndexed: !daoConfigByDaoId[daoId].governanceImplementation,
-    }))
-    .sort(
-      (daoA, daoB) =>
-        Number(daoA.isPartiallyIndexed) - Number(daoB.isPartiallyIndexed),
-    );
+  const allDaos = ALL_DAOS.map((daoId) => ({
+    dao: daoId,
+    isPartiallyIndexed: !daoConfigByDaoId[daoId].governanceImplementation,
+  })).sort(
+    (daoA, daoB) =>
+      Number(daoA.isPartiallyIndexed) - Number(daoB.isPartiallyIndexed),
+  );
 
   const panelColumns: ColumnDef<PanelDao>[] = [
     {

@@ -181,7 +181,25 @@ import {
 } from "../generated/zod.ts";
 import { Address } from "../generated/models.ts";
 
-const DAO_ALL = [
+// Comma-separated DAO ids (e.g. "shu" or "shu,torn") removed from every MCP
+// tool's accepted `dao` values. The generated handlers stay in place; the DAO
+// just stops being reachable through this server.
+const DISABLED_DAOS = new Set(
+  (process.env.DISABLED_DAOS ?? "")
+    .split(",")
+    .map((dao) => dao.trim().toLowerCase())
+    .filter(Boolean),
+);
+
+const withoutDisabled = <T extends string>(daos: readonly T[]): [T, ...T[]] => {
+  const enabled = daos.filter((dao) => !DISABLED_DAOS.has(dao));
+  if (enabled.length === 0) {
+    throw new Error("DISABLED_DAOS disables every DAO; nothing left to serve.");
+  }
+  return enabled as [T, ...T[]];
+};
+
+const DAO_ALL = withoutDisabled([
   "aave",
   "comp",
   "ens",
@@ -193,8 +211,8 @@ const DAO_ALL = [
   "scr",
   "shu",
   "uni",
-] as const;
-const DAO_NO_AAVE = [
+] as const);
+const DAO_NO_AAVE = withoutDisabled([
   "comp",
   "ens",
   "fluid",
@@ -205,8 +223,8 @@ const DAO_NO_AAVE = [
   "scr",
   "shu",
   "uni",
-] as const;
-const DAO_OFFCHAIN = ["comp", "ens", "gtc", "uni"] as const;
+] as const);
+const DAO_OFFCHAIN = withoutDisabled(["comp", "ens", "gtc", "uni"] as const);
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { envSchema } from "./config";
+import { envSchema, loadDaoMap, parseDisabledDaos } from "./config";
 
 describe("envSchema TOKEN_SERVICE_URL normalization", () => {
   it.each([
@@ -29,5 +29,30 @@ describe("envSchema TOKEN_SERVICE_URL normalization", () => {
         TOKEN_SERVICE_API_KEY: "internal-key",
       }),
     ).toThrow();
+  });
+});
+
+describe("DISABLED_DAOS", () => {
+  it("parses a comma-separated list case-insensitively", () => {
+    expect(parseDisabledDaos(" SHU , torn ")).toEqual(new Set(["shu", "torn"]));
+    expect(parseDisabledDaos(undefined)).toEqual(new Set());
+    expect(parseDisabledDaos("")).toEqual(new Set());
+  });
+
+  it("drops disabled DAOs from the DAO map while keeping the rest", () => {
+    const source = {
+      DAO_API_ENS: "http://api-ens:42069",
+      DAO_API_SHU: "http://api-shu:42069",
+    };
+    const map = loadDaoMap("DAO_API_", source, new Set(["shu"]));
+    expect(map.get("ens")).toBe("http://api-ens:42069");
+    expect(map.has("shu")).toBe(false);
+  });
+
+  it("keeps every registered DAO when nothing is disabled", () => {
+    const source = { DAO_API_SHU: "http://api-shu:42069" };
+    expect(loadDaoMap("DAO_API_", source).get("shu")).toBe(
+      "http://api-shu:42069",
+    );
   });
 });
