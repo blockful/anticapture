@@ -1,5 +1,9 @@
 import { test, expect } from "./fixtures";
 
+/* Desktop width, but shorter than the table: the layout-sensitive tests below
+ * all need the page to scroll vertically past the table. */
+const SHORT_DESKTOP_VIEWPORT = { width: 1920, height: 640 };
+
 test.describe("Panel page", () => {
   test(
     "renders the panel hero heading and description",
@@ -63,8 +67,7 @@ test.describe("Panel page", () => {
     goto,
     page,
   }) => {
-    const shortViewport = { width: 1920, height: 640 };
-    await page.setViewportSize(shortViewport);
+    await page.setViewportSize(SHORT_DESKTOP_VIEWPORT);
     await page.route("**/api/user/api/auth/get-session", (route) =>
       route.fulfill({
         status: 200,
@@ -90,7 +93,7 @@ test.describe("Panel page", () => {
     // height, past the bottom of this viewport, and `main` is what scrolls.
     await expect
       .poll(() => tableContainer.evaluate((element) => element.clientHeight))
-      .toBeGreaterThan(shortViewport.height);
+      .toBeGreaterThan(SHORT_DESKTOP_VIEWPORT.height);
     await expect
       .poll(() =>
         page
@@ -104,37 +107,46 @@ test.describe("Panel page", () => {
     goto,
     page,
   }) => {
-    // Short enough that the table cannot fit the viewport, so scrolling to
-    // the bottom pushes the table top past the top of the scrollport.
-    await page.setViewportSize({ width: 1920, height: 640 });
+    await page.setViewportSize(SHORT_DESKTOP_VIEWPORT);
+    await page.route("**/api/user/api/auth/get-session", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "null",
+      }),
+    );
     await goto("/");
 
-    const thead = page.locator("table thead").first();
-    await expect(thead).toBeVisible({ timeout: 15_000 });
-
-    // Scroll `main` (the page scroller) to the bottom: the rows leave through
-    // the top while the sticky header must stay pinned to the scrollport.
-    await page.locator("main").evaluate((main) => {
-      main.scrollTop = main.scrollHeight;
+    await expect(page.locator("table thead").first()).toBeVisible({
+      timeout: 15_000,
     });
 
-    // The table top must actually be above the scrollport for the header to
-    // have anything to pin against; the footer below the table ensures it.
+    // Metric cells stream in after load and keep growing the page, so the
+    // scroll, its precondition, and the header measurement all happen inside
+    // one polled evaluation: scroll `main` (the page scroller) to the bottom,
+    // confirm the table top actually left through the top of the scrollport,
+    // and read where the sticky header rests.
+    const positions = () =>
+      page.locator("main").evaluate((main) => {
+        main.scrollTop = main.scrollHeight;
+        const table = main.querySelector("table");
+        const thead = table?.querySelector("thead");
+        if (!table || !thead) return { tableTop: NaN, theadTop: NaN };
+        return {
+          tableTop: table.getBoundingClientRect().top,
+          theadTop: thead.getBoundingClientRect().top,
+        };
+      });
+
     await expect
-      .poll(() =>
-        page
-          .locator("table")
-          .first()
-          .evaluate((table) => table.getBoundingClientRect().top),
-      )
+      .poll(async () => (await positions()).tableTop, { timeout: 15_000 })
       .toBeLessThan(0);
 
-    await expect(thead).toBeVisible();
-    const theadBox = await thead.boundingBox();
-    expect(theadBox).not.toBeNull();
+    const { tableTop, theadTop } = await positions();
+    expect(tableTop).toBeLessThan(0);
     // Pinned means resting at the top of the scrollport (sticky -top-px).
-    expect(theadBox!.y).toBeGreaterThanOrEqual(-5);
-    expect(theadBox!.y).toBeLessThanOrEqual(5);
+    expect(theadTop).toBeGreaterThanOrEqual(-2);
+    expect(theadTop).toBeLessThanOrEqual(2);
   });
 
   test("sortable column headers respond to clicks", async ({ goto, page }) => {
