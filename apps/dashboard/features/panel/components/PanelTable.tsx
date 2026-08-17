@@ -225,9 +225,12 @@ export const PanelTable = () => {
       wrapperClassName="min-h-[400px]"
       /* On desktop the page (main) is the scroller, so the container must not
        * be a scrollport or the sticky header would pin to it and scroll away.
-       * Mobile keeps the inner horizontal scroll: the header never pinned
-       * there, and HeaderMobile is fixed with no offset to pin under. */
-      containerClassName="lg:overflow-visible"
+       * xl, not lg: measured at 1024px the table runs 58px wider than the
+       * container and would leak a page-level horizontal scrollbar, so the
+       * 1024-1279px band keeps the inner scroll. Mobile keeps it too: the
+       * header never pinned there, and HeaderMobile is fixed with no
+       * specified offset to pin under. */
+      containerClassName="xl:overflow-visible"
       stickyFirstColumn={true}
       pinRowsToBottom={(row) => row.isPartiallyIndexed}
       getRowClassName={(row, index, rows) => {
