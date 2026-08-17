@@ -12,7 +12,7 @@ const requestFeatureFormSchema = z.object({
 });
 
 const PRIORITY_LABELS: Record<string, string> = {
-  low: "Not blocking — just an idea",
+  low: "Not blocking, just an idea",
   normal: "Would improve my experience",
   high: "Blocking part of my work",
   urgent: "Completely blocking me",
