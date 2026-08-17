@@ -10,7 +10,7 @@ import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelCo
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
-import { getDaoPagePath } from "@/shared/utils/whitelabel";
+import { getDaoPagePath, WHITELABEL_ROUTES } from "@/shared/utils/whitelabel";
 import { WHITELABEL_NAV_ITEMS } from "@/shared/utils/whitelabelNav";
 import { WhitelabelHeader } from "@/widgets/WhitelabelHeader";
 import { WhitelabelHeaderMobile } from "@/widgets/WhitelabelHeaderMobile";
@@ -27,6 +27,12 @@ export const WhitelabelShell = ({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const daoConfig = daoConfigByDaoId[daoId];
+  const externalRequestFeatureLink = daoConfig.whitelabel?.requestFeatureLink;
+  const requestFeatureHref = getDaoPagePath({
+    daoId,
+    pathname,
+    page: WHITELABEL_ROUTES.requestFeature,
+  });
 
   const navItems = useMemo(
     () =>
@@ -95,14 +101,14 @@ export const WhitelabelShell = ({
               })}
             </nav>
 
-            {daoConfig.whitelabel?.requestFeatureLink && (
-              <Button
-                variant="outline"
-                asChild
-                className="mt-4 w-full justify-center"
-              >
+            <Button
+              variant="outline"
+              asChild
+              className="mt-4 w-full justify-center"
+            >
+              {externalRequestFeatureLink ? (
                 <a
-                  href={daoConfig.whitelabel.requestFeatureLink}
+                  href={externalRequestFeatureLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   data-umami-event="feature_request_click"
@@ -112,8 +118,19 @@ export const WhitelabelShell = ({
                 >
                   Request feature
                 </a>
-              </Button>
-            )}
+              ) : (
+                <Link
+                  href={requestFeatureHref}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  data-umami-event="feature_request_click"
+                  data-umami-event-source="whitelabel_shell"
+                  data-ph-event="feature_request_click"
+                  data-ph-source="whitelabel_shell"
+                >
+                  Request feature
+                </Link>
+              )}
+            </Button>
           </div>
         </div>
 
