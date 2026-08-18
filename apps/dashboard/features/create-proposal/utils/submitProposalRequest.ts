@@ -92,6 +92,37 @@ const azoriusProposalCreatedEventAbi = [
   },
 ] as const satisfies Abi;
 
+// Tornado Cash governance: proposals are pre-deployed contracts that the
+// governance contract delegatecalls on execution, so propose takes a single
+// target address and a description instead of action arrays.
+const tornProposeAbi = [
+  {
+    type: "function",
+    name: "propose",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "target", type: "address" },
+      { name: "description", type: "string" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const satisfies Abi;
+
+const tornProposalCreatedEventAbi = [
+  {
+    type: "event",
+    name: "ProposalCreated",
+    inputs: [
+      { indexed: true, name: "proposalId", type: "uint256" },
+      { indexed: true, name: "proposer", type: "address" },
+      { indexed: false, name: "target", type: "address" },
+      { indexed: false, name: "startTime", type: "uint256" },
+      { indexed: false, name: "endTime", type: "uint256" },
+      { indexed: false, name: "description", type: "string" },
+    ],
+  },
+] as const satisfies Abi;
+
 // Gnosis Safe Enum.Operation.Call — the only operation the UI emits.
 const SAFE_OPERATION_CALL = 0;
 
@@ -101,6 +132,9 @@ const AZORIUS_EMPTY_STRATEGY_DATA = "0x" as const;
 
 /** DAOs whose proposals go through an Azorius module rather than an OZ Governor. */
 export const isAzoriusDao = (daoId: DaoIdEnum) => daoId === DaoIdEnum.SHU;
+
+/** DAOs on Tornado Cash's custom stake-to-vote governance. */
+export const isTornadoDao = (daoId: DaoIdEnum) => daoId === DaoIdEnum.TORN;
 
 export interface EncodedActions {
   targets: Address[];
@@ -179,22 +213,43 @@ export const submitProposalRequest = (
     return;
   }
 
+  const description = encodeDescription(title, discussionUrl ?? "", body);
+
+  if (isTornadoDao(daoId)) {
+    // The single action's contract address is the pre-deployed proposal
+    // contract the governance will delegatecall; its calldata is not used
+    // on-chain (execution always calls the target's executeProposal()).
+    if (encoded.targets.length !== 1) {
+      throw new Error(
+        "Tornado Cash proposals delegatecall a single proposal contract; add exactly one action with its address.",
+      );
+    }
+    if ((encoded.values[0] ?? 0n) !== 0n) {
+      throw new Error("Tornado Cash proposals cannot send ETH.");
+    }
+
+    writeContract({
+      address: governorAddress,
+      abi: tornProposeAbi,
+      functionName: "propose",
+      args: [encoded.targets[0], description],
+      chainId,
+    });
+    return;
+  }
+
   writeContract({
     address: governorAddress,
     abi: ozProposeAbi,
     functionName: "propose",
-    args: [
-      encoded.targets,
-      encoded.values,
-      encoded.calldatas,
-      encodeDescription(title, discussionUrl ?? "", body),
-    ],
+    args: [encoded.targets, encoded.values, encoded.calldatas, description],
     chainId,
   });
 };
 
 /** The `ProposalCreated` event ABI matching the DAO's governance mechanism. */
-export const getProposalCreatedEventAbi = (daoId: DaoIdEnum) =>
-  isAzoriusDao(daoId)
-    ? azoriusProposalCreatedEventAbi
-    : ozProposalCreatedEventAbi;
+export const getProposalCreatedEventAbi = (daoId: DaoIdEnum) => {
+  if (isAzoriusDao(daoId)) return azoriusProposalCreatedEventAbi;
+  if (isTornadoDao(daoId)) return tornProposalCreatedEventAbi;
+  return ozProposalCreatedEventAbi;
+};

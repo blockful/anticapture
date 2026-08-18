@@ -73,6 +73,49 @@ describe("voteOnProposal", () => {
     expect(setTransactionhash).toHaveBeenNthCalledWith(2, "");
   });
 
+  it("uses Tornado Cash castVote when the voter has no delegators", async () => {
+    const account = { address: accountAddress } as unknown as Account;
+    const request = { to: governor };
+    const simulateContract = jest.fn().mockResolvedValue({ request });
+    const writeContract = jest.fn().mockResolvedValue(transactionHash);
+    const waitForTransactionReceipt = jest
+      .fn()
+      .mockResolvedValue({ transactionHash });
+    const walletClient = {
+      extend: jest.fn(() => ({
+        simulateContract,
+        writeContract,
+        waitForTransactionReceipt,
+      })),
+    } as unknown as WalletClient;
+
+    const receipt = await voteOnProposal(
+      "against",
+      "42",
+      account,
+      {} as Chain,
+      DaoIdEnum.TORN,
+      walletClient,
+      jest.fn(),
+      undefined,
+      undefined,
+      false,
+      [],
+    );
+
+    // castDelegatedVote reverts with "Can not be empty" on an empty `from`
+    // list, so a voter without delegators must go through castVote.
+    expect(receipt).toEqual({ transactionHash });
+    expect(simulateContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: governor,
+        functionName: "castVote",
+        args: [42n, false],
+        account,
+      }),
+    );
+  });
+
   it("casts governor votes with a void-return ABI (GovernorBravo compat)", async () => {
     const account = { address: accountAddress } as unknown as Account;
     const request = { to: governor };
