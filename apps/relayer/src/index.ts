@@ -17,6 +17,7 @@ import { config } from "@/controllers/config";
 import { health } from "@/controllers/health";
 import { rateLimit } from "@/controllers/rate-limit";
 import { relayDelegate } from "@/controllers/relay-delegate";
+import { relayProposal } from "@/controllers/relay-proposal";
 import { relayVote } from "@/controllers/relay-vote";
 import { env } from "@/env";
 import { RelayError } from "@/errors";
@@ -27,6 +28,9 @@ import {
   resolveRelayLimits,
 } from "@/services/guards/rate-limiter";
 import { ChainStateService } from "@/services/chain/chain-state";
+import { ViemGovernorGateway } from "@/services/chain/governor-gateway";
+import { ProposalEnactmentService } from "@/services/proposals/proposal-enactment";
+import { AnticaptureProposalSource } from "@/services/proposals/proposal-source";
 import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
 import { createLocalSigner } from "@/signer/local-signer";
@@ -159,6 +163,23 @@ async function main() {
   // --- Routes ---
   relayVote(app, relayService);
   relayDelegate(app, relayService);
+  relayProposal(
+    app,
+    wrapWithTracing(
+      new ProposalEnactmentService(
+        wrapWithTracing(new ViemGovernorGateway(publicClient, governorAddress)),
+        signer,
+        wrapWithTracing(
+          new AnticaptureProposalSource(
+            env.ANTICAPTURE_API_URL,
+            env.DAO_NAME,
+            env.ANTICAPTURE_API_KEY,
+          ),
+        ),
+        { minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI) },
+      ),
+    ),
+  );
   health(app);
   config(app, {
     minVotingPower: env.MIN_VOTING_POWER,

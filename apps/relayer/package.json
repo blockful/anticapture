@@ -17,6 +17,7 @@
     "clean": "rm -rf node_modules dist *.tsbuildinfo"
   },
   "dependencies": {
+    "@anticapture/client": "workspace:*",
     "@anticapture/observability": "workspace:*",
     "@hono/node-server": "^1.19.9",
     "@hono/zod-openapi": "^1.2.2",
