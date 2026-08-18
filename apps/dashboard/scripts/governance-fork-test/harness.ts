@@ -880,7 +880,9 @@ const proposeViaDashboard = async (
   const values = [0n];
   const calldatas: Hex[] = [
     isTornado
-      ? "0x"
+      ? // executeProposal() selector: the only action the TORN propose path
+        // accepts, mirroring what governance delegatecalls on execution.
+        "0x373058b8"
       : encodeFunctionData({
           abi: erc20TransferAbi,
           functionName: "transfer",
