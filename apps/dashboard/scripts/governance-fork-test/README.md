@@ -55,20 +55,22 @@ Set `GOV_REAL_TIMING=1` to keep the real windows (expect hours of mining).
 
 ## Supported DAOs
 
-| DAO  | Governor                                  | Propose path                                                                              | Queue/execute                        |
-| ---- | ----------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------ |
-| UNI  | GovernorBravo                             | dashboard (`submitProposalRequest`)                                                       | yes                                  |
-| COMP | OZ v5 Governor (block clock, late quorum) | dashboard                                                                                 | yes                                  |
-| GTC  | OZ Governor (hash ids, named "Bravo")     | dashboard                                                                                 | yes                                  |
-| ENS  | OZ Governor                               | dashboard                                                                                 | yes                                  |
-| TORN | Tornado custom (timestamp)                | direct `propose(target, description)`, the dashboard has no TORN create-proposal path yet | no (delegatecall proposal contracts) |
+| DAO  | Governor                                  | Propose path                               | Queue/execute                      |
+| ---- | ----------------------------------------- | ------------------------------------------ | ---------------------------------- |
+| UNI  | GovernorBravo                             | dashboard (`submitProposalRequest`)        | yes                                |
+| COMP | OZ v5 Governor (block clock, late quorum) | dashboard                                  | yes                                |
+| GTC  | OZ Governor (hash ids, named "Bravo")     | dashboard                                  | yes                                |
+| ENS  | OZ Governor                               | dashboard                                  | yes                                |
+| TORN | Tornado custom (timestamp)                | dashboard (`propose(target, description)`) | execute only (no queue on Tornado) |
 
-TORN voting still goes through the dashboard's `voteOnProposal`; only proposal
-creation and execution are outside the dashboard's current scope.
+TORN proposals delegatecall their target on execution, so the harness gives a
+synthetic proposal contract a single STOP opcode via `setCode` before
+proposing, votes through `voteOnProposal`, and executes through
+`executeProposal` after the execution delay.
 
 A failing DAO is the harness doing its job: it means this branch's dashboard
 cannot run that DAO's governance on-chain. Known gaps at the time of writing:
-UNI proposal creation needs the GovernorBravo propose path
-(`feat/uniswap-whitelabel`), and TORN voting for accounts without delegators
-needs the `castVote` fallback (Tornado whitelabel PR). Both pass on their
-respective branches.
+UNI needs the GovernorBravo propose path (`feat/uniswap-whitelabel`), and TORN
+needs the Tornado whitelabel PR (propose/execute paths and the `castVote`
+fallback for voters without delegators). Both pass on their respective
+branches.

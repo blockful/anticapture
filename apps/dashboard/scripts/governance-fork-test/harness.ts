@@ -107,7 +107,7 @@ export const HARNESS_DAOS: Partial<Record<DaoIdEnum, DaoHarnessConfig>> = {
     quorum: "tornQuorum",
     power: "lockedBalance",
     clock: "seconds",
-    proposeViaDashboard: false,
+    proposeViaDashboard: true,
     supportsAbstain: false,
     queueAndExecute: false,
     timing: "none",
@@ -326,6 +326,13 @@ const tornGovernanceAbi = [
   },
   {
     type: "function",
+    name: "EXECUTION_DELAY",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
     name: "lockedBalance",
     stateMutability: "view",
     inputs: [{ name: "account", type: "address" }],
@@ -378,6 +385,10 @@ const TEST_RECIPIENT: Address = "0x000000000000000000000000000000000000bEEF";
 /* Tornado proposals delegatecall their target on execution, so the target must
  * be a contract; Multicall3 is a harmless stand-in for create+vote testing. */
 const MULTICALL3: Address = "0xcA11bde05977b3631167028862bE2a173976CA11";
+
+/* Synthetic Tornado proposal contract: gets a single STOP opcode via setCode
+ * so the governance delegatecall on execute() succeeds. */
+const TORN_EXEC_TARGET: Address = "0x00000000000000000000000000000000000070ad";
 
 /* ------------------------------------------------------------------ */
 /* Step reporting                                                      */
@@ -844,6 +855,7 @@ interface ProposalContext {
 const proposeViaDashboard = async (
   fork: ForkHandle,
   daoId: DaoIdEnum,
+  config: DaoHarnessConfig,
   governor: Address,
   tokenAddress: Address,
   proposer: Address,
@@ -854,14 +866,26 @@ const proposeViaDashboard = async (
   const discussionUrl = "";
   const description = encodeDescription(title, discussionUrl, body);
 
-  const targets: Address[] = [tokenAddress];
+  const isTornado = config.tally === "tornProposals";
+  if (isTornado) {
+    // Tornado executes proposals by delegatecalling the target, so give the
+    // synthetic proposal contract a single STOP so execution succeeds.
+    await fork.testClient.setCode({
+      address: TORN_EXEC_TARGET,
+      bytecode: "0x00",
+    });
+  }
+
+  const targets: Address[] = [isTornado ? TORN_EXEC_TARGET : tokenAddress];
   const values = [0n];
   const calldatas: Hex[] = [
-    encodeFunctionData({
-      abi: erc20TransferAbi,
-      functionName: "transfer",
-      args: [TEST_RECIPIENT, 0n],
-    }),
+    isTornado
+      ? "0x"
+      : encodeFunctionData({
+          abi: erc20TransferAbi,
+          functionName: "transfer",
+          args: [TEST_RECIPIENT, 0n],
+        }),
   ];
 
   const { writeContract, hashes } = captureWriteContract(fork, proposer);
@@ -894,19 +918,33 @@ const proposeViaDashboard = async (
     eventName: "ProposalCreated",
   });
   const created = events[0];
-  if (
-    !created ||
-    !("proposalId" in created.args) ||
-    !("startBlock" in created.args)
-  ) {
+  if (!created || !("proposalId" in created.args)) {
     throw new StepFailure("no ProposalCreated event found in the receipt");
   }
+  const proposalId = created.args.proposalId;
+
+  // Tornado's event carries startTime/endTime; read the window from the
+  // governor instead so the lifecycle stays timepoint-based.
+  const window =
+    "startBlock" in created.args
+      ? { snapshot: created.args.startBlock, deadline: created.args.endBlock }
+      : await fork.publicClient
+          .readContract({
+            abi: tornGovernanceAbi,
+            address: governor,
+            functionName: "proposals",
+            args: [proposalId],
+          })
+          .then((proposal) => ({
+            snapshot: proposal[2],
+            deadline: proposal[3],
+          }));
 
   return {
-    proposalId: created.args.proposalId,
+    proposalId,
     proposer,
-    snapshot: created.args.startBlock,
-    deadline: created.args.endBlock,
+    snapshot: window.snapshot,
+    deadline: window.deadline,
     description,
     targets,
     values,
@@ -1069,6 +1107,7 @@ export const runDaoLifecycle = async (
           ? await proposeViaDashboard(
               fork,
               daoId,
+              config,
               governor,
               tokenAddress,
               candidate.address,
@@ -1289,10 +1328,53 @@ export const runDaoLifecycle = async (
         );
       }
       pass("state:succeeded", `proposal passed (Tornado state ${finalState})`);
+
+      // Tornado has no queue step: the proposal is Timelocked until
+      // endTime + EXECUTION_DELAY, then executable via execute(proposalId).
+      const executionDelay = await fork.publicClient.readContract({
+        abi: tornGovernanceAbi,
+        address: governor,
+        functionName: "EXECUTION_DELAY",
+      });
+      await advanceTime(fork, Number(executionDelay) + 60);
+      const awaitingState = await readState(
+        fork,
+        governor,
+        proposal.proposalId,
+      );
+      if (awaitingState !== TORN_STATE.AwaitingExecution) {
+        throw new StepFailure(
+          `expected AwaitingExecution(4), got state ${awaitingState}`,
+        );
+      }
+
+      const executeReceipt = await executeProposal(
+        proposal.targets,
+        proposal.values.map((v) => v.toString()),
+        proposal.calldatas,
+        proposal.description,
+        proposal.proposer,
+        daoId,
+        client,
+        () => undefined,
+        proposal.proposalId.toString(),
+      );
+      if (executeReceipt.status !== "success") {
+        throw new StepFailure("Tornado execute transaction reverted");
+      }
+      const executedState = await readState(
+        fork,
+        governor,
+        proposal.proposalId,
+      );
+      if (executedState !== TORN_STATE.Executed) {
+        throw new StepFailure(
+          `expected Executed(5), got state ${executedState}`,
+        );
+      }
       pass(
-        "queue+execute",
-        "skipped: Tornado executes via delegatecall proposal contracts, " +
-          "not through the dashboard",
+        "execute",
+        `proposal Executed via executeProposal after the ${executionDelay}s execution delay`,
       );
       return { daoId, steps, passed: true };
     }
