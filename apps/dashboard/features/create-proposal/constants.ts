@@ -6,7 +6,9 @@ export const BODY_CHAR_LIMIT = 100_000;
 export const BODY_WARNING_THRESHOLD = 95_000;
 
 export const canCreateProposalForDao = (daoId: DaoIdEnum | null | undefined) =>
-  daoId === DaoIdEnum.ENS || daoId === DaoIdEnum.SHU;
+  daoId === DaoIdEnum.ENS ||
+  daoId === DaoIdEnum.SHU ||
+  daoId === DaoIdEnum.GITCOIN;
 
 export interface SuggestedTransferToken {
   symbol: string;
@@ -35,6 +37,13 @@ export const SUGGESTED_TRANSFER_TOKENS: Partial<
     trustWalletToken("DAI", "0x6b175474e89094c44da98b954eedeac495271d0f"),
     trustWalletToken("WETH", "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
     trustWalletToken("ENS", "0xc18360217d8f7ab5e7c516566761ea12ce7f9d72"),
+  ],
+  [DaoIdEnum.GITCOIN]: [
+    trustWalletToken("USDT", "0xdac17f958d2ee523a2206206994597c13d831ec7"),
+    trustWalletToken("USDC", "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
+    trustWalletToken("DAI", "0x6b175474e89094c44da98b954eedeac495271d0f"),
+    trustWalletToken("WETH", "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
+    trustWalletToken("GTC", "0xde30da39c46104798bb5aa3fe8b9e0e1f348163f"),
   ],
 };
 

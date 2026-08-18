@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { GitcoinOgIcon } from "@/shared/og/dao-og-icons";
+import { toAbsoluteUrl } from "@/shared/seo/site";
 import {
   RiskLevel,
   GovernanceImplementationEnum,
@@ -23,6 +24,8 @@ export const GTC: DaoConfiguration = {
   forumLink: "https://gov.gitcoin.co/",
   icon: GitcoinIcon,
   ogIcon: GitcoinOgIcon,
+  hostnames: ["gitcoin.gov.blockful.io"],
+  whitelabel: {},
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -33,8 +36,8 @@ export const GTC: DaoConfiguration = {
       timelock: "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
     },
     govPlatform: {
-      name: "Tally",
-      url: "https://tally.xyz/gov/gitcoin/proposal/",
+      name: "Anticapture",
+      url: toAbsoluteUrl("/gtc/proposals/"),
     },
     cancelFunction:
       "https://etherscan.io/address/0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518#writeContract#F2",
