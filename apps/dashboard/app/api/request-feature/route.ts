@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
 
+import { checkRateLimit } from "@/shared/utils/serverRateLimit";
+
 const requestFeatureFormSchema = z.object({
   email: z.string().email(),
   featureRequest: z.string().min(10),
@@ -18,27 +20,8 @@ const PRIORITY_LABELS: Record<string, string> = {
   urgent: "Completely blocking me",
 };
 
-// Simple in-memory rate limiting (per instance; can be enhanced with Redis)
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT_WINDOW_SECONDS = 60 * 60; // 1 hour
 const RATE_LIMIT_MAX_REQUESTS = 5; // 5 emails per hour per IP
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip);
-
-  if (!record || now > record.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-
-  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return false;
-  }
-
-  record.count++;
-  return true;
-}
 
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -69,7 +52,12 @@ export async function POST(request: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const clientIP = getClientIP(request);
-    if (!checkRateLimit(clientIP)) {
+    const allowed = await checkRateLimit({
+      key: `request-feature:${clientIP}`,
+      windowSeconds: RATE_LIMIT_WINDOW_SECONDS,
+      maxRequests: RATE_LIMIT_MAX_REQUESTS,
+    });
+    if (!allowed) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please try again later." },
         { status: 429 },
