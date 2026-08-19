@@ -1,6 +1,7 @@
 import type { Address, Hex } from "viem";
 
 import {
+  TORN_EXECUTE_PROPOSAL_CALLDATA,
   getProposalCreatedEventAbi,
   isTornadoDao,
   submitProposalRequest,
@@ -9,15 +10,14 @@ import { DaoIdEnum } from "@/shared/types/daos";
 
 const governorAddress: Address = "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce";
 const proposalContract: Address = "0x1111111111111111111111111111111111111111";
+const executeProposalCalldata = TORN_EXECUTE_PROPOSAL_CALLDATA as Hex;
 
 type WriteContractFn = Parameters<typeof submitProposalRequest>[0];
 
 const makeWriteContract = () => {
-  const writeContract = jest.fn();
-  return {
-    writeContract: writeContract as unknown as WriteContractFn,
-    mock: writeContract,
-  };
+  const mock = jest.fn();
+  const writeContract: WriteContractFn = mock;
+  return { writeContract, mock };
 };
 
 const baseParams = {
@@ -35,7 +35,7 @@ describe("submitProposalRequest (Tornado Cash)", () => {
     expect(isTornadoDao(DaoIdEnum.SHU)).toBe(false);
   });
 
-  it("proposes with the single action's address as the proposal contract", () => {
+  it("proposes with the executeProposal() action's address as the proposal contract", () => {
     const { writeContract, mock } = makeWriteContract();
 
     submitProposalRequest(writeContract, {
@@ -44,7 +44,7 @@ describe("submitProposalRequest (Tornado Cash)", () => {
       encoded: {
         targets: [proposalContract],
         values: [0n],
-        calldatas: ["0x" as Hex],
+        calldatas: [executeProposalCalldata],
       },
     });
 
@@ -65,10 +65,29 @@ describe("submitProposalRequest (Tornado Cash)", () => {
         encoded: {
           targets: [proposalContract, governorAddress],
           values: [0n, 0n],
-          calldatas: ["0x" as Hex, "0x" as Hex],
+          calldatas: [executeProposalCalldata, executeProposalCalldata],
         },
       }),
-    ).toThrow(/exactly one action/);
+    ).toThrow(/exactly one custom action/);
+    expect(mock).not.toHaveBeenCalled();
+  });
+
+  it("rejects actions that are not an executeProposal() call", () => {
+    const { writeContract, mock } = makeWriteContract();
+
+    // An erc20 transfer (or any other calldata) would create a proposal whose
+    // delegatecalled execution does not match what the DAO reviewed.
+    expect(() =>
+      submitProposalRequest(writeContract, {
+        ...baseParams,
+        daoId: DaoIdEnum.TORN,
+        encoded: {
+          targets: [proposalContract],
+          values: [0n],
+          calldatas: ["0xa9059cbb" as Hex],
+        },
+      }),
+    ).toThrow(/executeProposal/);
     expect(mock).not.toHaveBeenCalled();
   });
 
@@ -82,7 +101,7 @@ describe("submitProposalRequest (Tornado Cash)", () => {
         encoded: {
           targets: [proposalContract],
           values: [1n],
-          calldatas: ["0x" as Hex],
+          calldatas: [executeProposalCalldata],
         },
       }),
     ).toThrow(/cannot send ETH/);

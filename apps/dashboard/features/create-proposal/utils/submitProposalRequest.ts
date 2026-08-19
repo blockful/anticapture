@@ -108,6 +108,14 @@ const tornProposeAbi = [
   },
 ] as const satisfies Abi;
 
+/**
+ * Selector of executeProposal(), the function Tornado governance delegatecalls
+ * on the proposal contract when a passed proposal is executed. A TORN draft is
+ * only publishable when its single action is exactly this call, so what the
+ * DAO reviews matches what execution will do.
+ */
+export const TORN_EXECUTE_PROPOSAL_CALLDATA = "0x373058b8";
+
 const tornProposalCreatedEventAbi = [
   {
     type: "event",
@@ -217,11 +225,16 @@ export const submitProposalRequest = (
 
   if (isTornadoDao(daoId)) {
     // The single action's contract address is the pre-deployed proposal
-    // contract the governance will delegatecall; its calldata is not used
-    // on-chain (execution always calls the target's executeProposal()).
-    if (encoded.targets.length !== 1) {
+    // contract the governance will delegatecall on execution, which always
+    // calls the target's executeProposal(). Any other action (a transfer, a
+    // different function) would create a proposal whose execution silently
+    // does something else or reverts, so it is rejected before the wallet.
+    if (
+      encoded.targets.length !== 1 ||
+      encoded.calldatas[0]?.toLowerCase() !== TORN_EXECUTE_PROPOSAL_CALLDATA
+    ) {
       throw new Error(
-        "Tornado Cash proposals delegatecall a single proposal contract; add exactly one action with its address.",
+        "Tornado Cash proposals delegatecall a single pre-deployed proposal contract; add exactly one custom action calling executeProposal() on it.",
       );
     }
     if ((encoded.values[0] ?? 0n) !== 0n) {
