@@ -15,7 +15,7 @@ import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCus
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
 
 type TabId = "description" | "votes" | "actions";
@@ -184,7 +184,8 @@ const ProposalExecutionButtons = ({
 }) => {
   if (!address) return null;
 
-  const isShu = daoId.toUpperCase() === DaoIdEnum.SHU;
+  // SHU is disabled in DaoIdEnum, so compare against its raw id.
+  const isShu = daoId.toUpperCase() === "SHU";
 
   return (
     <>
