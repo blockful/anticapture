@@ -13,7 +13,7 @@ export const TORN: DaoConfiguration = {
   name: "Tornado Cash",
   decimals: 18,
   color: {
-    svgColor: "#94FEBF",
+    svgColor: "#3cd294",
     svgBgColor: "#1a1a2e",
   },
   icon: TornadoCashIcon,
