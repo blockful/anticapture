@@ -88,7 +88,15 @@ export const startFork = async ({
   const anvil = findAnvilBinary();
   const rpcUrl = `http://127.0.0.1:${port}`;
 
-  console.log(`  starting anvil fork of ${forkUrl} on :${port} ...`);
+  // Authenticated RPC URLs carry API keys in the path or query string, so
+  // never log the full URL; the host is enough to identify the provider.
+  let forkHost: string;
+  try {
+    forkHost = new URL(forkUrl).host;
+  } catch {
+    forkHost = "<unparseable fork url>";
+  }
+  console.log(`  starting anvil fork of ${forkHost} on :${port} ...`);
   const child = spawn(
     anvil,
     [
@@ -112,7 +120,9 @@ export const startFork = async ({
   });
   child.on("exit", (code) => {
     if (code !== null && code !== 0) {
-      console.error(`  anvil exited with code ${code}: ${stderr.trim()}`);
+      // Anvil connection errors echo the fork URL, so redact it here too.
+      const redacted = stderr.trim().split(forkUrl).join(forkHost);
+      console.error(`  anvil exited with code ${code}: ${redacted}`);
     }
   });
 
