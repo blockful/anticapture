@@ -1,3 +1,6 @@
+import { meetsProposalThreshold } from "@/features/create-proposal/utils/submitProposalRequest";
+import { type DaoIdEnum } from "@/shared/types/daos";
+
 export type RecipientPublishState =
   | "disconnected"
   | "below-threshold"
@@ -10,15 +13,18 @@ export type RecipientPublishState =
  * - otherwise          → "eligible" (Publish active)
  */
 export const getRecipientPublishState = ({
+  daoId,
   address,
   votingPower,
   threshold,
 }: {
+  daoId: DaoIdEnum;
   address: string | undefined;
   votingPower: bigint;
   threshold: bigint;
 }): RecipientPublishState => {
   if (!address) return "disconnected";
-  if (votingPower < threshold) return "below-threshold";
+  if (!meetsProposalThreshold(daoId, votingPower, threshold))
+    return "below-threshold";
   return "eligible";
 };

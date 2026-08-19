@@ -142,6 +142,20 @@ export const isGovernorBravoDao = (daoId: DaoIdEnum) =>
  */
 export const BRAVO_MAX_OPERATIONS = 10;
 
+/**
+ * Whether `votingPower` satisfies the governor's proposal-threshold check.
+ * OZ Governor accepts votes >= proposalThreshold, while GovernorBravo's
+ * `propose` requires the proposer's prior votes to be strictly greater.
+ */
+export const meetsProposalThreshold = (
+  daoId: DaoIdEnum,
+  votingPower: bigint,
+  threshold: bigint,
+) =>
+  isGovernorBravoDao(daoId)
+    ? votingPower > threshold
+    : votingPower >= threshold;
+
 export interface EncodedActions {
   targets: Address[];
   values: bigint[];

@@ -10,6 +10,7 @@ import {
   BRAVO_MAX_OPERATIONS,
   isAzoriusDao,
   isGovernorBravoDao,
+  meetsProposalThreshold,
   submitProposalRequest,
   type EncodedActions,
 } from "@/features/create-proposal/utils/submitProposalRequest";
@@ -63,6 +64,18 @@ describe("isGovernorBravoDao", () => {
       (daoId) => isGovernorBravoDao(daoId) && isAzoriusDao(daoId),
     );
     expect(both).toEqual([]);
+  });
+});
+
+describe("meetsProposalThreshold", () => {
+  test("Bravo requires strictly more than the threshold", () => {
+    expect(meetsProposalThreshold(DaoIdEnum.UNISWAP, 100n, 100n)).toBe(false);
+    expect(meetsProposalThreshold(DaoIdEnum.UNISWAP, 101n, 100n)).toBe(true);
+  });
+
+  test("OZ Governor accepts voting power equal to the threshold", () => {
+    expect(meetsProposalThreshold(DaoIdEnum.ENS, 100n, 100n)).toBe(true);
+    expect(meetsProposalThreshold(DaoIdEnum.ENS, 99n, 100n)).toBe(false);
   });
 });
 
