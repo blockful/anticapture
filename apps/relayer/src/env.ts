@@ -50,6 +50,11 @@ const envSchema = z.object({
     .positive()
     .optional(),
 
+  // Gateful gateway backing POST /relay/queue and /relay/execute, which
+  // fetch proposal execution args from GET /{dao}/proposals/{id}.
+  ANTICAPTURE_API_URL: z.url(),
+  ANTICAPTURE_API_KEY: z.string().min(1),
+
   PORT: z.coerce.number().default(3002),
 
   // Injected by Railway. Reported on /health so gateful — which merges this

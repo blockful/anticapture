@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.14.1
+
+### Patch Changes
+
+- [#2112](https://github.com/blockful/anticapture/pull/2112) [`2bceb82`](https://github.com/blockful/anticapture/commit/2bceb8236d85654972fdfbba9167e2c0fd3c319e) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix WalletConnect pairing by giving the provider an absolute RPC proxy URL.
+
 ## 2.14.0
 
 ### Minor Changes
