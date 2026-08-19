@@ -31,11 +31,17 @@ export function cacheMiddleware(
   redis: CacheStore,
   daoApis: Map<string, string>,
 ) {
+  // Namespace keys by the enabled DAO set: entries cached before a DAO was
+  // disabled (its /{dao}/* responses, or a /daos listing that names it) must
+  // become unreachable on the next deploy rather than surviving until their
+  // upstream max-age (up to an hour) expires.
+  const daoNamespace = [...daoApis.keys()].sort().join(",");
+
   return async (c: Context, next: Next) => {
     // Only cache GET requests.
     if (c.req.method !== "GET") return next();
 
-    const key = c.req.url;
+    const key = `${daoNamespace}|${c.req.url}`;
 
     // Normalize the path to a fixed-cardinality label: "/<dao>/*" keeps the
     // DAO segment (useful for per-DAO cache panels) while collapsing all

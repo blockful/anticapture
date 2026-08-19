@@ -156,4 +156,29 @@ describe("cacheMiddleware", () => {
 
     expect(redis.store.size).toBe(0);
   });
+
+  // -------------------------------------------------------------------------
+  // Enabled DAO set change → cached entries orphaned
+  // -------------------------------------------------------------------------
+
+  it("does not serve entries cached under a different enabled DAO set", async () => {
+    const handler = vi.fn(defaultHandler);
+    const daoApis = new Map([
+      ["ens", "http://ens"],
+      ["shu", "http://shu"],
+    ]);
+    const before = buildApp(redis, handler, daoApis);
+
+    await before.request("/test"); // primes the cache with shu enabled
+    expect(redis.store.size).toBe(1);
+
+    // Same Redis, but shu is now disabled — the old entry must not be a hit.
+    const daoApisWithoutShu = new Map([["ens", "http://ens"]]);
+    const after = buildApp(redis, handler, daoApisWithoutShu);
+
+    const res = await after.request("/test");
+
+    expect((await readResponse(res)).cacheStatus).toBe(null);
+    expect(handler).toHaveBeenCalledTimes(2);
+  });
 });
