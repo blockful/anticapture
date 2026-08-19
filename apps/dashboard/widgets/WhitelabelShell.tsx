@@ -10,6 +10,7 @@ import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelCo
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
+import { RequestFeatureDrawer } from "@/features/request-feature/RequestFeatureDrawer";
 import { getDaoPagePath } from "@/shared/utils/whitelabel";
 import { WHITELABEL_NAV_ITEMS } from "@/shared/utils/whitelabelNav";
 import { WhitelabelHeader } from "@/widgets/WhitelabelHeader";
@@ -26,7 +27,9 @@ export const WhitelabelShell = ({
   const pathname = usePathname();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isRequestFeatureOpen, setIsRequestFeatureOpen] = useState(false);
   const daoConfig = daoConfigByDaoId[daoId];
+  const externalRequestFeatureLink = daoConfig.whitelabel?.requestFeatureLink;
 
   const navItems = useMemo(
     () =>
@@ -47,6 +50,13 @@ export const WhitelabelShell = ({
         daoId={daoId}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((current) => !current)}
+        onRequestFeatureClick={() => setIsRequestFeatureOpen(true)}
+      />
+
+      <RequestFeatureDrawer
+        daoId={daoId}
+        isOpen={isRequestFeatureOpen}
+        onClose={() => setIsRequestFeatureOpen(false)}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -95,14 +105,14 @@ export const WhitelabelShell = ({
               })}
             </nav>
 
-            {daoConfig.whitelabel?.requestFeatureLink && (
+            {externalRequestFeatureLink ? (
               <Button
                 variant="outline"
                 asChild
                 className="mt-4 w-full justify-center"
               >
                 <a
-                  href={daoConfig.whitelabel.requestFeatureLink}
+                  href={externalRequestFeatureLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   data-umami-event="feature_request_click"
@@ -112,6 +122,21 @@ export const WhitelabelShell = ({
                 >
                   Request feature
                 </a>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="mt-4 w-full justify-center"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsRequestFeatureOpen(true);
+                }}
+                data-umami-event="feature_request_click"
+                data-umami-event-source="whitelabel_shell"
+                data-ph-event="feature_request_click"
+                data-ph-source="whitelabel_shell"
+              >
+                Request feature
               </Button>
             )}
           </div>

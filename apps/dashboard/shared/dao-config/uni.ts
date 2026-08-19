@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { UniswapOgIcon } from "@/shared/og/dao-og-icons";
+import { toAbsoluteUrl } from "@/shared/seo/site";
 import { RiskAreaEnum, RiskLevel } from "@/shared/types/enums";
 import { GovernanceImplementationEnum } from "@/shared/types/enums/GovernanceImplementation";
 
@@ -20,6 +21,8 @@ export const UNI: DaoConfiguration = {
   forumLink: "https://gov.uniswap.org/",
   icon: UniswapIcon,
   ogIcon: UniswapOgIcon,
+  hostnames: ["uniswap.gov.blockful.io"],
+  whitelabel: {},
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
@@ -32,8 +35,8 @@ export const UNI: DaoConfiguration = {
       "https://etherscan.io/address/0x1a9C8182C09F50C8318d769245beA52c32BE35BC#writeContract%23F2",
     snapshot: "https://snapshot.box/#/s:uniswapgovernance.eth",
     govPlatform: {
-      name: "Tally",
-      url: "https://tally.xyz/gov/uniswap/proposal/",
+      name: "Anticapture",
+      url: toAbsoluteUrl("/uni/proposals/"),
     },
     rules: {
       delay: true,
@@ -68,20 +71,18 @@ export const UNI: DaoConfiguration = {
             GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ].description,
         currentSetting:
-          "The Uniswap governance interface on tally has a secure HTTPS connection and is signed with DNSSEC.",
+          "The Uniswap governance interface has a secure HTTPS connection and follows web2 standard protections.",
         impact:
-          "The voting interface used has certificates to guarantee its source of content. It is still vulnerable to malicious/mistakenly pushed code by the third party provider.",
+          "The governance interface domain shows the basic security certificates, but without immutable decentralized storage it is not censorship-resistant or verifiable.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[
             GovernanceImplementationEnum.INTERFACE_RESILIENCE
           ],
         nextStep:
-          "The DAO should host an immutable interface for voting, registering it to an ENS like vote.uniswap.eth and made available through .limo, .link or similar.",
+          "The Uniswap governance interface domain should be hosted on IPFS.",
         requirements: [
-          "For maximum security, the DAO should have its frontend reviewed by the DAO or audit and then made verifiably immutable",
-          "A solution could look like a frontend made available on IPFS through eth.limo, with their code hashed and put on chain by the DAO, then verified for subresource integrity",
-          "The governance interface used (Tally) has the standard protections to prevent external tampering with the frontend accessed",
-          "The platform is still exposed to any malicious or compromised actors inside the interface provider team",
+          "For maximum security, the DAO should have its frontend reviewed by the DAO or audit and then made verifiably immutable.",
+          "A solution could look like a frontend made available on IPFS through eth.limo, with their code hashed and put on chain by the DAO, then verified for subresource integrity.",
         ],
       },
       [GovernanceImplementationEnum.ATTACK_PROFITABILITY]: {
