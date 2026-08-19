@@ -3,9 +3,13 @@ import axios from "axios";
 import { z } from "zod";
 
 export const requestFeatureFormSchema = z.object({
-  email: z.string().email(),
-  featureRequest: z.string().min(10),
-  priority: z.enum(["low", "normal", "high", "urgent"]),
+  email: z.string().email("Enter a valid email address."),
+  featureRequest: z
+    .string()
+    .min(10, "Tell us a bit more (at least 10 characters)."),
+  priority: z.enum(["low", "normal", "high", "urgent"], {
+    required_error: "Select how much this is blocking you.",
+  }),
   otherThoughts: z.string().optional(),
 });
 

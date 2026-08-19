@@ -24,6 +24,7 @@ import {
   FormDescription,
   FormField,
   FormItem,
+  FormMessage,
 } from "@/shared/components/design-system/form";
 import {
   FormLabel,
@@ -116,6 +117,7 @@ export const RequestFeatureDrawer = ({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -140,6 +142,7 @@ export const RequestFeatureDrawer = ({
                         The more detail you share, the better we can bring your
                         idea to life.
                       </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -163,6 +166,7 @@ export const RequestFeatureDrawer = ({
                           aria-label="How much is this blocking you today?"
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
