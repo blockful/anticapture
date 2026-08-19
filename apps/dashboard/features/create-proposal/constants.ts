@@ -9,6 +9,7 @@ export const canCreateProposalForDao = (daoId: DaoIdEnum | null | undefined) =>
   daoId === DaoIdEnum.ENS ||
   daoId === DaoIdEnum.SHU ||
   daoId === DaoIdEnum.UNISWAP ||
+  daoId === DaoIdEnum.COMP ||
   daoId === DaoIdEnum.GITCOIN;
 
 export interface SuggestedTransferToken {
@@ -45,6 +46,13 @@ export const SUGGESTED_TRANSFER_TOKENS: Partial<
     trustWalletToken("DAI", "0x6b175474e89094c44da98b954eedeac495271d0f"),
     trustWalletToken("WETH", "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
     trustWalletToken("UNI", "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"),
+  ],
+  [DaoIdEnum.COMP]: [
+    trustWalletToken("USDT", "0xdac17f958d2ee523a2206206994597c13d831ec7"),
+    trustWalletToken("USDC", "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
+    trustWalletToken("DAI", "0x6b175474e89094c44da98b954eedeac495271d0f"),
+    trustWalletToken("WETH", "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"),
+    trustWalletToken("COMP", "0xc00e94cb662c3520282e6f5717214004a7f26888"),
   ],
   [DaoIdEnum.GITCOIN]: [
     trustWalletToken("USDT", "0xdac17f958d2ee523a2206206994597c13d831ec7"),
