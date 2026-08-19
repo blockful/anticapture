@@ -423,8 +423,11 @@ interface Delegate {
 }
 
 const fetchTopDelegates = async (daoId: DaoIdEnum): Promise<Address[]> => {
-  const apiUrl =
-    process.env.ANTICAPTURE_API_URL ?? "https://dev-gateful.up.railway.app";
+  // Gateful's DAO proxy rejects the empty path segment a trailing slash
+  // would produce, so strip it from custom gateway URLs.
+  const apiUrl = (
+    process.env.ANTICAPTURE_API_URL ?? "https://dev-gateful.up.railway.app"
+  ).replace(/\/+$/, "");
   const token = process.env.BLOCKFUL_API_TOKEN;
   const url = `${apiUrl}/${daoId.toLowerCase()}/voting-powers?limit=50&orderBy=votingPower&orderDirection=desc`;
 

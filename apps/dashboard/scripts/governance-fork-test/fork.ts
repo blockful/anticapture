@@ -118,11 +118,12 @@ export const startFork = async ({
   child.stderr?.on("data", (chunk: Buffer) => {
     stderr += chunk.toString();
   });
+  // Anvil connection errors echo the fork URL, so redact stderr before it
+  // reaches any log or error message.
+  const redactedStderr = () => stderr.trim().split(forkUrl).join(forkHost);
   child.on("exit", (code) => {
     if (code !== null && code !== 0) {
-      // Anvil connection errors echo the fork URL, so redact it here too.
-      const redacted = stderr.trim().split(forkUrl).join(forkHost);
-      console.error(`  anvil exited with code ${code}: ${redacted}`);
+      console.error(`  anvil exited with code ${code}: ${redactedStderr()}`);
     }
   });
 
@@ -130,13 +131,13 @@ export const startFork = async ({
     await waitForRpc(rpcUrl, child);
     if (child.exitCode !== null) {
       throw new Error(
-        `anvil exited immediately (port ${port} already in use?): ${stderr.trim()}`,
+        `anvil exited immediately (port ${port} already in use?): ${redactedStderr()}`,
       );
     }
   } catch (error) {
     child.kill();
     throw error instanceof Error && stderr
-      ? new Error(`${error.message}\n${stderr.trim()}`)
+      ? new Error(`${error.message}\n${redactedStderr()}`)
       : error;
   }
 
