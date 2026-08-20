@@ -670,9 +670,11 @@ const MobileBottomBar = ({
       );
     } else if (
       proposalStatus === "pending_execution" ||
-      // Azorius (SHU) proposals are QUEUED while timelocked and
-      // executeProposal reverts until PENDING_EXECUTION
-      (proposalStatus === "queued" && daoId.toUpperCase() !== DaoIdEnum.SHU)
+      // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
+      // timelocked and executing reverts until PENDING_EXECUTION
+      (proposalStatus === "queued" &&
+        daoId.toUpperCase() !== DaoIdEnum.SHU &&
+        daoId.toUpperCase() !== DaoIdEnum.TORN)
     ) {
       content = (
         <Button className="flex w-full" onClick={onExecuteClick}>
