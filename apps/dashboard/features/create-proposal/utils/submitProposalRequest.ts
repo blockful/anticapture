@@ -2,7 +2,7 @@ import { type Abi, type Address, type Hex } from "viem";
 import { type useWriteContract } from "wagmi";
 
 import { encodeDescription } from "@/features/create-proposal/utils/encodeDescription";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 type WriteContractFn = ReturnType<typeof useWriteContract>["writeContract"];
 
@@ -100,7 +100,8 @@ const SAFE_OPERATION_CALL = 0;
 const AZORIUS_EMPTY_STRATEGY_DATA = "0x" as const;
 
 /** DAOs whose proposals go through an Azorius module rather than an OZ Governor. */
-export const isAzoriusDao = (daoId: DaoIdEnum) => daoId === DaoIdEnum.SHU;
+// SHU, the only Azorius DAO, is disabled in DaoIdEnum.
+export const isAzoriusDao = (_daoId: DaoIdEnum) => false;
 
 export interface EncodedActions {
   targets: Address[];

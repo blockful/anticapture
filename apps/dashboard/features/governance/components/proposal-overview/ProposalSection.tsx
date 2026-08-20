@@ -55,7 +55,7 @@ import { Button } from "@/shared/components";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import daoConfig from "@/shared/dao-config";
-import { DaoIdEnum } from "@/shared/types/daos";
+import type { DaoIdEnum } from "@/shared/types/daos";
 
 /** How often to re-ask the API for a vote Snapshot has already accepted. */
 const VOTE_INDEXING_POLL_MS = 5_000;
@@ -661,7 +661,8 @@ const MobileBottomBar = ({
   } else if (address) {
     if (
       proposalStatus === "succeeded" &&
-      daoId.toUpperCase() !== DaoIdEnum.SHU
+      // SHU is disabled in DaoIdEnum, so compare against its raw id.
+      daoId.toUpperCase() !== "SHU"
     ) {
       content = (
         <Button className="flex w-full" onClick={onQueueClick}>
@@ -672,7 +673,7 @@ const MobileBottomBar = ({
       proposalStatus === "pending_execution" ||
       // Azorius (SHU) proposals are QUEUED while timelocked and
       // executeProposal reverts until PENDING_EXECUTION
-      (proposalStatus === "queued" && daoId.toUpperCase() !== DaoIdEnum.SHU)
+      (proposalStatus === "queued" && daoId.toUpperCase() !== "SHU")
     ) {
       content = (
         <Button className="flex w-full" onClick={onExecuteClick}>
