@@ -117,6 +117,9 @@ export const VotingModal = ({
     delegators: tornDelegators,
     loading: isLoadingTornDelegators,
     error: tornDelegatorsError,
+    hasNextPage: hasMoreTornDelegators,
+    fetchNextPage: fetchMoreTornDelegators,
+    fetchingMore: isFetchingMoreTornDelegators,
   } = useDelegators({
     daoId,
     address: address ?? "",
@@ -125,6 +128,32 @@ export const VotingModal = ({
     limit: 1000,
     enabled: isOpen && isTorn && !!address,
   });
+
+  // castDelegatedVote must carry every delegator, so drain the paginated
+  // query; a truncated list would silently omit delegated voting power.
+  useEffect(() => {
+    if (!isOpen || !isTorn || !address) return;
+    if (
+      tornDelegatorsError ||
+      !hasMoreTornDelegators ||
+      isFetchingMoreTornDelegators
+    )
+      return;
+    fetchMoreTornDelegators();
+  }, [
+    isOpen,
+    isTorn,
+    address,
+    tornDelegatorsError,
+    hasMoreTornDelegators,
+    isFetchingMoreTornDelegators,
+    fetchMoreTornDelegators,
+  ]);
+
+  const isTornDelegatorListIncomplete =
+    isLoadingTornDelegators ||
+    isFetchingMoreTornDelegators ||
+    !!hasMoreTornDelegators;
 
   const tornDelegatedVoteAddresses = useMemo(() => {
     if (!isTorn || !address) return undefined;
@@ -193,10 +222,11 @@ export const VotingModal = ({
 
   const handleSubmit = async () => {
     if (!address || !chain || !walletClient) return;
-    // Fail closed: an errored delegator query leaves an empty list that would
-    // otherwise read as a verified solo voter and cast without the delegated
-    // voting power shown for this account.
-    if (isTorn && (isLoadingTornDelegators || tornDelegatorsError)) return;
+    // Fail closed: an errored or still-paginating delegator query leaves a
+    // partial list that would otherwise read as complete and cast without the
+    // delegated voting power shown for this account.
+    if (isTorn && (isTornDelegatorListIncomplete || tornDelegatorsError))
+      return;
     setIsLoading(true);
     const hash = await voteOnProposal(
       vote as "for" | "against" | "abstain",
@@ -223,7 +253,8 @@ export const VotingModal = ({
     !vote ||
     !walletClient ||
     isLoading ||
-    (isTorn && (isLoadingTornDelegators || tornDelegatorsError !== null)) ||
+    (isTorn &&
+      (isTornDelegatorListIncomplete || tornDelegatorsError !== null)) ||
     !rawVotingPower ||
     rawVotingPower === "0";
 
