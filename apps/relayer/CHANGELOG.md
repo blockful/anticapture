@@ -1,5 +1,14 @@
 # @anticapture/relayer
 
+## 1.2.0
+
+### Minor Changes
+
+- [#2122](https://github.com/blockful/anticapture/pull/2122) [`75f1051`](https://github.com/blockful/anticapture/commit/75f10514459d9b4b75b781ec016e66220597e70e) Thanks [@LeonardoVieira1630](https://github.com/LeonardoVieira1630)! - Add POST /relay/queue and /relay/execute endpoints that sponsor the
+  permissionless Governor lifecycle transactions. Proposal args are fetched from
+  the Anticapture API by proposal id and verified trustlessly against the
+  governor's hashProposal before anything is signed.
+
 ## 1.1.2
 
 ### Patch Changes

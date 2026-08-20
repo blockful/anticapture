@@ -1,5 +1,19 @@
 # @anticapture/dashboard
 
+## 2.15.0
+
+### Minor Changes
+
+- [#2135](https://github.com/blockful/anticapture/pull/2135) [`1610f3c`](https://github.com/blockful/anticapture/commit/1610f3c248dfdbf3d90cab08129305448bdf15e3) Thanks [@brunod-e](https://github.com/brunod-e)! - Enable the Compound whitelabel with full governance (create, vote, queue and execute proposals).
+
+- [#2134](https://github.com/blockful/anticapture/pull/2134) [`9ddac26`](https://github.com/blockful/anticapture/commit/9ddac267a56c53325dd622414adbbee0d015fbd0) Thanks [@brunod-e](https://github.com/brunod-e)! - Enable the Gitcoin whitelabel with full governance (create, vote, queue and execute proposals).
+
+- [#2136](https://github.com/blockful/anticapture/pull/2136) [`ae55201`](https://github.com/blockful/anticapture/commit/ae5520130c4f0910f45bd509c1ecc15a4b4d4097) Thanks [@brunod-e](https://github.com/brunod-e)! - Enable the Tornado Cash whitelabel with full governance (create, vote and execute proposals).
+
+### Patch Changes
+
+- [#2136](https://github.com/blockful/anticapture/pull/2136) [`ae55201`](https://github.com/blockful/anticapture/commit/ae5520130c4f0910f45bd509c1ecc15a4b4d4097) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix Tornado Cash voting for accounts without delegators by using castVote instead of castDelegatedVote.
+
 ## 2.14.1
 
 ### Patch Changes
