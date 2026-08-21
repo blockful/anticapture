@@ -1,59 +1,43 @@
-import { BarChart4 } from "lucide-react";
-
-import {
-  PanelTable,
-  DelegatedSupplyHistory,
-  DaoProtectionLevels,
-  TreasuryMonitoring,
-} from "@/features/panel/components";
-import { TheSectionLayout } from "@/shared/components";
-import { Carousel } from "@/shared/components/design-system/carousel/Carousel";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
+import { LatestFindingTicker } from "@/features/panel/components/LatestFindingTicker";
+import { PanelHero } from "@/features/panel/components/PanelHero";
+import { PanelTable } from "@/features/panel/components/PanelTable";
+import { ServicesRow } from "@/features/panel/components/ServicesRow";
+import { TrackRecordSection } from "@/features/panel/components/TrackRecordSection";
+import { UseItNowSection } from "@/features/panel/components/UseItNowSection";
 import {
   SubSection,
   SubSectionsContainer,
 } from "@/shared/components/design-system/section";
-import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
 
 export const PanelSection = () => {
   return (
-    <TheSectionLayout
-      title={PAGES_CONSTANTS.panel.title}
-      icon={<BarChart4 className="section-layout-icon" />}
-      description={PAGES_CONSTANTS.panel.description}
-      className="mt-12 lg:mt-0 lg:min-h-0"
-    >
-      <div className="flex flex-col gap-8 lg:h-full lg:min-h-0 lg:flex-1 lg:gap-2">
-        <div className="lg:hidden">
-          <Carousel
-            slides={[
-              <DaoProtectionLevels key="dao-protection-levels" />,
-              <TreasuryMonitoring key="treasury-monitoring" />,
-              <DelegatedSupplyHistory key="delegated-supply-history" />,
-            ]}
-          />
-        </div>
-        <div className="hidden gap-2 lg:grid lg:grid-cols-3">
-          <DaoProtectionLevels />
-          <TreasuryMonitoring />
-          <DelegatedSupplyHistory />
-        </div>
+    // Figma spaces the three blocks 32px apart and everything inside them 8px
+    // apart, so the inner wrappers hold the tight gap while the page holds the
+    // section rhythm.
+    <div className="mt-12 flex w-full flex-col gap-5 px-4 py-5 lg:mt-0 lg:gap-8 lg:p-5">
+      <div className="flex flex-col gap-5 lg:gap-2">
+        <PanelHero />
 
-        <div className="block lg:hidden">
-          <DividerDefault isHorizontal />
-        </div>
+        <LatestFindingTicker />
 
-        <SubSectionsContainer className="gap-3 lg:min-h-0 lg:flex-1">
+        <SubSectionsContainer className="gap-3">
           <SubSection
             className="gap-0"
             subsectionTitle={"Monitored DAOs"}
             dateRange=""
-            contentClassName="lg:flex lg:flex-col lg:flex-1 lg:min-h-0"
           >
             <PanelTable />
           </SubSection>
         </SubSectionsContainer>
       </div>
-    </TheSectionLayout>
+
+      <TrackRecordSection />
+
+      <div className="flex flex-col gap-5 lg:gap-2">
+        <UseItNowSection />
+
+        <ServicesRow />
+      </div>
+    </div>
   );
 };
