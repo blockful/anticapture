@@ -6,23 +6,30 @@ import { GOVERNANCE_IMPLEMENTATION_CONSTANTS } from "@/shared/constants/governan
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { TornadoCashOgIcon } from "@/shared/og/dao-og-icons";
+import { toAbsoluteUrl } from "@/shared/seo/site";
 import { RiskLevel, GovernanceImplementationEnum } from "@/shared/types/enums";
 
 export const TORN: DaoConfiguration = {
   name: "Tornado Cash",
   decimals: 18,
   color: {
-    svgColor: "#94FEBF",
+    svgColor: "#3cd294",
     svgBgColor: "#1a1a2e",
   },
   icon: TornadoCashIcon,
   ogIcon: TornadoCashOgIcon,
+  hostnames: ["tornado.gov.blockful.io"],
+  whitelabel: {},
   daoOverview: {
     token: "ERC20",
     chain: { ...mainnet, icon: MainnetIcon },
     contracts: {
       governor: "0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce",
       token: "0x77777FeDdddFfC19Ff86DB637967013e6C6A116C",
+    },
+    govPlatform: {
+      name: "Anticapture",
+      url: toAbsoluteUrl("/torn/proposals/"),
     },
     rules: {
       delay: true,
