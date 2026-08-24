@@ -236,7 +236,7 @@ describe("submitProposalRequest (Tornado Cash)", () => {
   it("classifies only TORN as a Tornado DAO", () => {
     expect(isTornadoDao(DaoIdEnum.TORN)).toBe(true);
     expect(isTornadoDao(DaoIdEnum.ENS)).toBe(false);
-    expect(isTornadoDao(DaoIdEnum.UNISWAP)).toBe(false);
+    expect(isTornadoDao(DaoIdEnum.SHU)).toBe(false);
   });
 
   it("proposes with the executeProposal() action's address as the proposal contract", () => {

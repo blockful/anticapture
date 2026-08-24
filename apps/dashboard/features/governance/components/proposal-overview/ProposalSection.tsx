@@ -661,8 +661,7 @@ const MobileBottomBar = ({
   } else if (address) {
     if (
       proposalStatus === "succeeded" &&
-      // SHU is disabled in DaoIdEnum, so compare against its raw id.
-      daoId.toUpperCase() !== "SHU"
+      daoId.toUpperCase() !== DaoIdEnum.SHU
     ) {
       content = (
         <Button className="flex w-full" onClick={onQueueClick}>
@@ -674,7 +673,7 @@ const MobileBottomBar = ({
       // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
       // timelocked and executing reverts until PENDING_EXECUTION
       (proposalStatus === "queued" &&
-        daoId.toUpperCase() !== "SHU" &&
+        daoId.toUpperCase() !== DaoIdEnum.SHU &&
         daoId.toUpperCase() !== DaoIdEnum.TORN)
     ) {
       content = (

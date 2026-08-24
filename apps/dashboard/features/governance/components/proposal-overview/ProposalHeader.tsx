@@ -184,8 +184,7 @@ const ProposalExecutionButtons = ({
 }) => {
   if (!address) return null;
 
-  // SHU is disabled in DaoIdEnum, so compare against its raw id.
-  const isShu = daoId.toUpperCase() === "SHU";
+  const isShu = daoId.toUpperCase() === DaoIdEnum.SHU;
   const isTorn = daoId.toUpperCase() === DaoIdEnum.TORN;
 
   return (

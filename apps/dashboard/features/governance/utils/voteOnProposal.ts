@@ -19,19 +19,18 @@ import {
   mapRelayerError,
 } from "@/shared/utils/gaslessRelayerError";
 
-// SHU is disabled in DaoIdEnum; restore this with the Azorius handler below.
-// const LinearVotingStrategyAbi = [
-//   {
-//     inputs: [
-//       { internalType: "uint32", name: "_proposalId", type: "uint32" },
-//       { internalType: "uint8", name: "_voteType", type: "uint8" },
-//     ],
-//     name: "vote",
-//     outputs: [],
-//     stateMutability: "nonpayable",
-//     type: "function",
-//   },
-// ] as const;
+const LinearVotingStrategyAbi = [
+  {
+    inputs: [
+      { internalType: "uint32", name: "_proposalId", type: "uint32" },
+      { internalType: "uint8", name: "_voteType", type: "uint8" },
+    ],
+    name: "vote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const;
 
 // Shared by OZ Governor (returns uint256) and GovernorBravo (returns void).
 // `outputs` must stay empty: Bravo's castVote returns no data, and declaring a
@@ -95,23 +94,22 @@ type VoteHandler = (
 /**
  * Azorius/Fractal: vote on LinearVotingStrategy. No reason support.
  */
-// SHU is disabled in DaoIdEnum.
-// const azoriusVoteHandler =
-//   (daoId: DaoIdEnum): VoteHandler =>
-//   async (client, params) => {
-//     const address =
-//       daoConfigByDaoId[daoId].daoOverview.contracts.votingStrategy;
-//     if (!address) throw new Error("Voting strategy address not found");
-//
-//     const { request } = await client.simulateContract({
-//       abi: LinearVotingStrategyAbi,
-//       address,
-//       functionName: "vote",
-//       args: [Number(params.proposalId), params.voteNumber],
-//       account: params.account,
-//     });
-//     return client.writeContract(request);
-//   };
+const azoriusVoteHandler =
+  (daoId: DaoIdEnum): VoteHandler =>
+  async (client, params) => {
+    const address =
+      daoConfigByDaoId[daoId].daoOverview.contracts.votingStrategy;
+    if (!address) throw new Error("Voting strategy address not found");
+
+    const { request } = await client.simulateContract({
+      abi: LinearVotingStrategyAbi,
+      address,
+      functionName: "vote",
+      args: [Number(params.proposalId), params.voteNumber],
+      account: params.account,
+    });
+    return client.writeContract(request);
+  };
 
 const TornGovernorVoteAbi = [
   {
@@ -265,9 +263,8 @@ function getVoteHandler(
     return gaslessVoteHandler(daoId);
   }
   switch (daoId) {
-    // SHU is disabled in DaoIdEnum.
-    // case DaoIdEnum.SHU:
-    //   return azoriusVoteHandler(daoId);
+    case DaoIdEnum.SHU:
+      return azoriusVoteHandler(daoId);
     case DaoIdEnum.TORN:
       return tornVoteHandler(daoId);
     default:

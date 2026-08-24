@@ -35,26 +35,25 @@ const TornGovernanceExecuteAbi = [
   },
 ] as const;
 
-// SHU is disabled in DaoIdEnum; restore this with the SHU case below.
-// const AzoriusExecuteAbi = [
-//   {
-//     name: "executeProposal",
-//     type: "function",
-//     stateMutability: "nonpayable",
-//     inputs: [
-//       { internalType: "uint32", name: "_proposalId", type: "uint32" },
-//       { internalType: "address[]", name: "_targets", type: "address[]" },
-//       { internalType: "uint256[]", name: "_values", type: "uint256[]" },
-//       { internalType: "bytes[]", name: "_data", type: "bytes[]" },
-//       {
-//         internalType: "enum Enum.Operation[]",
-//         name: "_operations",
-//         type: "uint8[]",
-//       },
-//     ],
-//     outputs: [],
-//   },
-// ] as const;
+const AzoriusExecuteAbi = [
+  {
+    name: "executeProposal",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { internalType: "uint32", name: "_proposalId", type: "uint32" },
+      { internalType: "address[]", name: "_targets", type: "address[]" },
+      { internalType: "uint256[]", name: "_values", type: "uint256[]" },
+      { internalType: "bytes[]", name: "_data", type: "bytes[]" },
+      {
+        internalType: "enum Enum.Operation[]",
+        name: "_operations",
+        type: "uint8[]",
+      },
+    ],
+    outputs: [],
+  },
+] as const;
 
 export type GovernanceAction = "queue" | "execute";
 
@@ -122,31 +121,30 @@ const submitAction = async (
       hash = await client.writeContract(request);
       break;
     }
-    // SHU is disabled in DaoIdEnum.
-    // case DaoIdEnum.SHU: {
-    //   if (action === "queue") {
-    //     throw new Error("Queue is not supported for Azorius governance (SHU)");
-    //   }
-    //   // Azorius: executeProposal(proposalId, targets, values, data, operations)
-    //   // All operations are Call (0) for standard governance proposals
-    //   const operations = args.targets.map(() => 0);
-    //   const { request } = await client.simulateContract({
-    //     abi: AzoriusExecuteAbi,
-    //     address,
-    //     functionName: "executeProposal",
-    //     args: [
-    //       Number(args.proposalId),
-    //       args.targets,
-    //       args.values,
-    //       args.calldatas,
-    //       operations,
-    //     ],
-    //     account: args.account,
-    //     chain,
-    //   });
-    //   hash = await client.writeContract(request);
-    //   break;
-    // }
+    case DaoIdEnum.SHU: {
+      if (action === "queue") {
+        throw new Error("Queue is not supported for Azorius governance (SHU)");
+      }
+      // Azorius: executeProposal(proposalId, targets, values, data, operations)
+      // All operations are Call (0) for standard governance proposals
+      const operations = args.targets.map(() => 0);
+      const { request } = await client.simulateContract({
+        abi: AzoriusExecuteAbi,
+        address,
+        functionName: "executeProposal",
+        args: [
+          Number(args.proposalId),
+          args.targets,
+          args.values,
+          args.calldatas,
+          operations,
+        ],
+        account: args.account,
+        chain,
+      });
+      hash = await client.writeContract(request);
+      break;
+    }
     default: {
       if (action === "queue") {
         const { request } = await client.simulateContract({
