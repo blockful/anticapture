@@ -8,6 +8,7 @@ export const BODY_WARNING_THRESHOLD = 95_000;
 export const canCreateProposalForDao = (daoId: DaoIdEnum | null | undefined) =>
   daoId === DaoIdEnum.ENS ||
   // daoId === DaoIdEnum.SHU ||
+  daoId === DaoIdEnum.TORN ||
   daoId === DaoIdEnum.COMP ||
   daoId === DaoIdEnum.GITCOIN;
 

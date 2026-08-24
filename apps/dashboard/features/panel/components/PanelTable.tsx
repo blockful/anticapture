@@ -222,8 +222,15 @@ export const PanelTable = () => {
       columns={panelColumns}
       data={allDaos}
       withSorting={true}
-      fillHeight={true}
-      wrapperClassName="min-h-[400px] lg:min-h-0"
+      wrapperClassName="min-h-[400px]"
+      /* On desktop the page (main) is the scroller, so the container must not
+       * be a scrollport or the sticky header would pin to it and scroll away.
+       * Nothing may overflow the fixed-layout table at these widths, or a
+       * page-level horizontal scrollbar leaks: column headers wrap below xl
+       * for exactly that reason (see TitleUnderlined). Mobile keeps the inner
+       * scroll: the header never pinned there, and HeaderMobile is fixed with
+       * no specified offset to pin under. */
+      containerClassName="lg:overflow-visible"
       stickyFirstColumn={true}
       pinRowsToBottom={(row) => row.isPartiallyIndexed}
       getRowClassName={(row, index, rows) => {

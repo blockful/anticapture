@@ -22,6 +22,19 @@ const GovernorBravoAbi = [
   },
 ] as const;
 
+// Tornado Cash governance: execute(proposalId) delegatecalls the proposal
+// contract once the post-voting execution delay has passed. There is no queue
+// step; the timelock is built into the governance contract itself.
+const TornGovernanceExecuteAbi = [
+  {
+    name: "execute",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [],
+  },
+] as const;
+
 // SHU is disabled in DaoIdEnum; restore this with the SHU case below.
 // const AzoriusExecuteAbi = [
 //   {
@@ -85,6 +98,23 @@ const submitAction = async (
         abi: GovernorBravoAbi,
         address,
         functionName: action === "queue" ? "queue" : "execute",
+        args: [BigInt(args.proposalId)],
+        account: args.account,
+        chain,
+      });
+      hash = await client.writeContract(request);
+      break;
+    }
+    case DaoIdEnum.TORN: {
+      if (action === "queue") {
+        throw new Error(
+          "Queue is not supported for Tornado Cash governance (TORN)",
+        );
+      }
+      const { request } = await client.simulateContract({
+        abi: TornGovernanceExecuteAbi,
+        address,
+        functionName: "execute",
         args: [BigInt(args.proposalId)],
         account: args.account,
         chain,

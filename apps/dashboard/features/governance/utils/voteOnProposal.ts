@@ -125,12 +125,28 @@ const TornGovernorVoteAbi = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      { internalType: "uint256", name: "proposalId", type: "uint256" },
+      { internalType: "bool", name: "support", type: "bool" },
+    ],
+    name: "castVote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
 
 /**
- * Tornado Cash (custom stake-to-vote governor): castDelegatedVote(address[],
- * uint256, bool) on the governor. Binary voting — for=true / against=false, no
- * abstain, no reason.
+ * Tornado Cash (custom stake-to-vote governor). Binary voting: for=true /
+ * against=false, no abstain, no reason.
+ *
+ * `from` lists ONLY the accounts that delegated to the voter; the governor
+ * requires delegatedTo[from[i]] == msg.sender and casts the voter's own locked
+ * balance separately. Including the voter (or any self-vote) reverts, since
+ * self-delegation is forbidden. With no delegators the vote must go through
+ * castVote instead: castDelegatedVote reverts with "Can not be empty" on an
+ * empty list.
  */
 const tornVoteHandler =
   (daoId: DaoIdEnum): VoteHandler =>
@@ -139,17 +155,25 @@ const tornVoteHandler =
     if (!address) throw new Error("DAO governance address not found");
     if (params.voteNumber === 2)
       throw new Error("Tornado Cash does not support abstain votes");
-    // `from` lists ONLY the accounts that delegated to the voter — the governor
-    // requires delegatedTo[from[i]] == msg.sender and casts the voter's own
-    // locked balance separately. Including the voter (or any self-vote) reverts,
-    // since self-delegation is forbidden. No delegators => empty list.
     const fromAddresses = params.delegatedVoteAddresses ?? [];
+    const support = params.voteNumber === 1;
+
+    if (fromAddresses.length === 0) {
+      const { request } = await client.simulateContract({
+        abi: TornGovernorVoteAbi,
+        address,
+        functionName: "castVote",
+        args: [BigInt(params.proposalId), support],
+        account: params.account,
+      });
+      return client.writeContract(request);
+    }
 
     const { request } = await client.simulateContract({
       abi: TornGovernorVoteAbi,
       address,
       functionName: "castDelegatedVote",
-      args: [fromAddresses, BigInt(params.proposalId), params.voteNumber === 1],
+      args: [fromAddresses, BigInt(params.proposalId), support],
       account: params.account,
     });
     return client.writeContract(request);

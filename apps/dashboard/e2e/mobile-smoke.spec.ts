@@ -9,9 +9,13 @@ test.describe("Mobile smoke tests", () => {
 
   test("Panel (/) renders heading on mobile", async ({ goto, page }) => {
     await goto("/");
-    await expect(page.locator("h4").filter({ hasText: "Panel" })).toBeVisible({
-      timeout: 15_000,
-    });
+    // Panel v2.1 dropped the "Panel" section title; the hero h1 is the page
+    // heading on every viewport.
+    await expect(
+      page
+        .locator("h1")
+        .filter({ hasText: "See which DAOs could be captured" }),
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test("DAO Overview (/ens) renders on mobile", async ({ goto, page }) => {
