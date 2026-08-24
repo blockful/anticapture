@@ -12,8 +12,9 @@ export const PanelHero = () => {
       <div className="bg-surface-default flex min-w-0 flex-1 flex-col justify-between gap-4 p-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-primary text-h3 font-medium">
-            See which DAOs could be captured, and what it would cost an
-            attacker.
+            See which DAOs could be captured,
+            <br />
+            and what it would cost an attacker.
           </h1>
           <p className="text-secondary text-[15px] font-normal leading-[23px]">
             Live governance-security risk for every DAO we monitor, scored by

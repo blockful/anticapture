@@ -15,8 +15,10 @@ export type TrackRecordCase = {
 
 export type Testimonial = {
   quote: string;
+  /** X display name of the account the quote is lifted from. */
   author: string;
-  role: string;
+  /** X @handle of that account — always rendered below the name. */
+  handle: string;
   sourceUrl: string;
   /** Profile picture of the account the quote is lifted from. */
   avatarSrc: string;
@@ -55,45 +57,45 @@ export const TRACK_RECORD_CASES: TrackRecordCase[] = [
 /**
  * Wording, handles and links come verbatim from the X mentions audit
  * (Growth doc 2ky4wrw9-39373, re-verified Aug 2026); each `sourceUrl` is the
- * tweet the quote was lifted from. Only entries the audit marks as usable
- * social proof belong here — never paraphrase a quote or add one that is not
- * on that doc.
+ * tweet the quote was lifted from, and each `author` is that X account's
+ * display name. Only entries the audit marks as usable social proof belong
+ * here — never paraphrase a quote or add one that is not on that doc.
  */
 export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
       "using the Anticapture dashboard to break down what actually matters in practice",
     author: "Ethereum Foundation",
-    role: "@ethereumfndn",
+    handle: "@ethereumfndn",
     sourceUrl: "https://x.com/ethereumfndn/status/2044080364717502737",
     avatarSrc: "/images/testimonials/ethereumfndn.jpg",
   },
   {
     quote: "makes it so easy to see when governance changes",
     author: "Lefteris Karapetsas",
-    role: "Researcher and delegate, rotki",
+    handle: "@LefterisJP",
     sourceUrl: "https://x.com/LefterisJP/status/2070613219979174269",
     avatarSrc: "/images/testimonials/lefterisjp.jpg",
   },
   {
     quote:
       "Massively impressed by the @blockful_io team's @anticapture dashboard",
-    author: "@blockbanzai",
-    role: "DAO delegate",
+    author: "Hugo M",
+    handle: "@blockbanzai",
     sourceUrl: "https://x.com/blockbanzai/status/1998695381194985712",
     avatarSrc: "/images/testimonials/blockbanzai.jpg",
   },
   {
     quote: "Blockful is doing the lords work keeping DAOs safe",
-    author: "@CupOJoseph",
-    role: "Delegate and researcher",
+    author: "Joseph Schiarizzi",
+    handle: "@CupOJoseph",
     sourceUrl: "https://x.com/CupOJoseph/status/2034316404988449075",
     avatarSrc: "/images/testimonials/cupojoseph.jpg",
   },
   {
     quote: "@anticapture reports show ENS governance security improving",
     author: "ENS DAO",
-    role: "@ENS_DAO",
+    handle: "@ENS_DAO",
     sourceUrl: "https://x.com/ENS_DAO/status/1948046880505479527",
     avatarSrc: "/images/testimonials/ens-dao.jpg",
   },

@@ -76,7 +76,7 @@ export const TestimonialCarousel = () => {
                 {testimonial.author}
               </span>
               <span className="text-secondary text-sm font-normal leading-5">
-                {testimonial.role}
+                {testimonial.handle}
               </span>
             </div>
           </div>
