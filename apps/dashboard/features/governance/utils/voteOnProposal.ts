@@ -19,18 +19,19 @@ import {
   mapRelayerError,
 } from "@/shared/utils/gaslessRelayerError";
 
-const LinearVotingStrategyAbi = [
-  {
-    inputs: [
-      { internalType: "uint32", name: "_proposalId", type: "uint32" },
-      { internalType: "uint8", name: "_voteType", type: "uint8" },
-    ],
-    name: "vote",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-] as const;
+// SHU is disabled in DaoIdEnum; restore this with the Azorius handler below.
+// const LinearVotingStrategyAbi = [
+//   {
+//     inputs: [
+//       { internalType: "uint32", name: "_proposalId", type: "uint32" },
+//       { internalType: "uint8", name: "_voteType", type: "uint8" },
+//     ],
+//     name: "vote",
+//     outputs: [],
+//     stateMutability: "nonpayable",
+//     type: "function",
+//   },
+// ] as const;
 
 // Shared by OZ Governor (returns uint256) and GovernorBravo (returns void).
 // `outputs` must stay empty: Bravo's castVote returns no data, and declaring a
@@ -94,22 +95,23 @@ type VoteHandler = (
 /**
  * Azorius/Fractal: vote on LinearVotingStrategy. No reason support.
  */
-const azoriusVoteHandler =
-  (daoId: DaoIdEnum): VoteHandler =>
-  async (client, params) => {
-    const address =
-      daoConfigByDaoId[daoId].daoOverview.contracts.votingStrategy;
-    if (!address) throw new Error("Voting strategy address not found");
-
-    const { request } = await client.simulateContract({
-      abi: LinearVotingStrategyAbi,
-      address,
-      functionName: "vote",
-      args: [Number(params.proposalId), params.voteNumber],
-      account: params.account,
-    });
-    return client.writeContract(request);
-  };
+// SHU is disabled in DaoIdEnum.
+// const azoriusVoteHandler =
+//   (daoId: DaoIdEnum): VoteHandler =>
+//   async (client, params) => {
+//     const address =
+//       daoConfigByDaoId[daoId].daoOverview.contracts.votingStrategy;
+//     if (!address) throw new Error("Voting strategy address not found");
+//
+//     const { request } = await client.simulateContract({
+//       abi: LinearVotingStrategyAbi,
+//       address,
+//       functionName: "vote",
+//       args: [Number(params.proposalId), params.voteNumber],
+//       account: params.account,
+//     });
+//     return client.writeContract(request);
+//   };
 
 const TornGovernorVoteAbi = [
   {
@@ -123,12 +125,28 @@ const TornGovernorVoteAbi = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      { internalType: "uint256", name: "proposalId", type: "uint256" },
+      { internalType: "bool", name: "support", type: "bool" },
+    ],
+    name: "castVote",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
 
 /**
- * Tornado Cash (custom stake-to-vote governor): castDelegatedVote(address[],
- * uint256, bool) on the governor. Binary voting — for=true / against=false, no
- * abstain, no reason.
+ * Tornado Cash (custom stake-to-vote governor). Binary voting: for=true /
+ * against=false, no abstain, no reason.
+ *
+ * `from` lists ONLY the accounts that delegated to the voter; the governor
+ * requires delegatedTo[from[i]] == msg.sender and casts the voter's own locked
+ * balance separately. Including the voter (or any self-vote) reverts, since
+ * self-delegation is forbidden. With no delegators the vote must go through
+ * castVote instead: castDelegatedVote reverts with "Can not be empty" on an
+ * empty list.
  */
 const tornVoteHandler =
   (daoId: DaoIdEnum): VoteHandler =>
@@ -137,17 +155,25 @@ const tornVoteHandler =
     if (!address) throw new Error("DAO governance address not found");
     if (params.voteNumber === 2)
       throw new Error("Tornado Cash does not support abstain votes");
-    // `from` lists ONLY the accounts that delegated to the voter — the governor
-    // requires delegatedTo[from[i]] == msg.sender and casts the voter's own
-    // locked balance separately. Including the voter (or any self-vote) reverts,
-    // since self-delegation is forbidden. No delegators => empty list.
     const fromAddresses = params.delegatedVoteAddresses ?? [];
+    const support = params.voteNumber === 1;
+
+    if (fromAddresses.length === 0) {
+      const { request } = await client.simulateContract({
+        abi: TornGovernorVoteAbi,
+        address,
+        functionName: "castVote",
+        args: [BigInt(params.proposalId), support],
+        account: params.account,
+      });
+      return client.writeContract(request);
+    }
 
     const { request } = await client.simulateContract({
       abi: TornGovernorVoteAbi,
       address,
       functionName: "castDelegatedVote",
-      args: [fromAddresses, BigInt(params.proposalId), params.voteNumber === 1],
+      args: [fromAddresses, BigInt(params.proposalId), support],
       account: params.account,
     });
     return client.writeContract(request);
@@ -239,8 +265,9 @@ function getVoteHandler(
     return gaslessVoteHandler(daoId);
   }
   switch (daoId) {
-    case DaoIdEnum.SHU:
-      return azoriusVoteHandler(daoId);
+    // SHU is disabled in DaoIdEnum.
+    // case DaoIdEnum.SHU:
+    //   return azoriusVoteHandler(daoId);
     case DaoIdEnum.TORN:
       return tornVoteHandler(daoId);
     default:

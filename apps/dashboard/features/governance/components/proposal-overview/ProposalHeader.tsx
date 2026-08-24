@@ -184,7 +184,9 @@ const ProposalExecutionButtons = ({
 }) => {
   if (!address) return null;
 
-  const isShu = daoId.toUpperCase() === DaoIdEnum.SHU;
+  // SHU is disabled in DaoIdEnum, so compare against its raw id.
+  const isShu = daoId.toUpperCase() === "SHU";
+  const isTorn = daoId.toUpperCase() === DaoIdEnum.TORN;
 
   return (
     <>
@@ -197,9 +199,9 @@ const ProposalExecutionButtons = ({
         </Button>
       )}
       {(proposalStatus === "pending_execution" ||
-        // Azorius (SHU) proposals are QUEUED while timelocked and
-        // executeProposal reverts until PENDING_EXECUTION
-        (proposalStatus === "queued" && !isShu)) && (
+        // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
+        // timelocked and executing reverts until PENDING_EXECUTION
+        (proposalStatus === "queued" && !isShu && !isTorn)) && (
         <Button
           className="hidden lg:flex"
           onClick={() => setIsExecuteModalOpen(true)}

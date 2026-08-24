@@ -2,7 +2,7 @@
 
 import { Check, User2Icon, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { Account, Address } from "viem";
+import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
@@ -113,15 +113,47 @@ export const VotingModal = ({
 
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
-  const { delegators: tornDelegators, loading: isLoadingTornDelegators } =
-    useDelegators({
-      daoId,
-      address: address ?? "",
-      orderBy: "amount",
-      orderDirection: "desc",
-      limit: 1000,
-      enabled: isOpen && isTorn && !!address,
-    });
+  const {
+    delegators: tornDelegators,
+    loading: isLoadingTornDelegators,
+    error: tornDelegatorsError,
+    hasNextPage: hasMoreTornDelegators,
+    fetchNextPage: fetchMoreTornDelegators,
+    fetchingMore: isFetchingMoreTornDelegators,
+  } = useDelegators({
+    daoId,
+    address: address ?? "",
+    orderBy: "amount",
+    orderDirection: "desc",
+    limit: 1000,
+    enabled: isOpen && isTorn && !!address,
+  });
+
+  // castDelegatedVote must carry every delegator, so drain the paginated
+  // query; a truncated list would silently omit delegated voting power.
+  useEffect(() => {
+    if (!isOpen || !isTorn || !address) return;
+    if (
+      tornDelegatorsError ||
+      !hasMoreTornDelegators ||
+      isFetchingMoreTornDelegators
+    )
+      return;
+    fetchMoreTornDelegators();
+  }, [
+    isOpen,
+    isTorn,
+    address,
+    tornDelegatorsError,
+    hasMoreTornDelegators,
+    isFetchingMoreTornDelegators,
+    fetchMoreTornDelegators,
+  ]);
+
+  const isTornDelegatorListIncomplete =
+    isLoadingTornDelegators ||
+    isFetchingMoreTornDelegators ||
+    !!hasMoreTornDelegators;
 
   const tornDelegatedVoteAddresses = useMemo(() => {
     if (!isTorn || !address) return undefined;
@@ -136,9 +168,10 @@ export const VotingModal = ({
         return true;
       });
 
-    // Solo voter (no delegators): send an empty `from`. The TORN governor casts
-    // the voter's own balance separately and reverts on self-delegation, so the
-    // voter's own address must never appear in this list.
+    // `from` lists ONLY accounts that delegated to the voter; the governor
+    // reverts on self-delegation, so the voter's own address must never appear
+    // here. A solo voter (verified empty list) goes through castVote instead,
+    // since castDelegatedVote rejects an empty `from`.
     return addresses;
   }, [address, isTorn, tornDelegators]);
 
@@ -189,11 +222,16 @@ export const VotingModal = ({
 
   const handleSubmit = async () => {
     if (!address || !chain || !walletClient) return;
+    // Fail closed: an errored or still-paginating delegator query leaves a
+    // partial list that would otherwise read as complete and cast without the
+    // delegated voting power shown for this account.
+    if (isTorn && (isTornDelegatorListIncomplete || tornDelegatorsError))
+      return;
     setIsLoading(true);
     const hash = await voteOnProposal(
       vote as "for" | "against" | "abstain",
       proposal?.id as string,
-      address as unknown as Account,
+      { address, type: "json-rpc" },
       chain,
       daoId,
       walletClient,
@@ -215,7 +253,8 @@ export const VotingModal = ({
     !vote ||
     !walletClient ||
     isLoading ||
-    (isTorn && isLoadingTornDelegators) ||
+    (isTorn &&
+      (isTornDelegatorListIncomplete || tornDelegatorsError !== null)) ||
     !rawVotingPower ||
     rawVotingPower === "0";
 
