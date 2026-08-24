@@ -33,7 +33,9 @@ export const TestimonialCarousel = () => {
         icon={ChevronLeft}
         variant="ghost"
         size="md"
-        className="size-9"
+        /* 44px, the minimum touch target: a mobile visitor taps these
+         * repeatedly to cycle the quotes. */
+        className="size-11"
         iconClassName="size-4"
         aria-label="Previous testimonial"
         disabled={!hasMultiple}
@@ -87,7 +89,9 @@ export const TestimonialCarousel = () => {
         icon={ChevronRight}
         variant="ghost"
         size="md"
-        className="size-9"
+        /* 44px, the minimum touch target: a mobile visitor taps these
+         * repeatedly to cycle the quotes. */
+        className="size-11"
         iconClassName="size-4"
         aria-label="Next testimonial"
         disabled={!hasMultiple}

@@ -120,6 +120,7 @@ export const VotingModal = ({
     hasNextPage: hasMoreTornDelegators,
     fetchNextPage: fetchMoreTornDelegators,
     fetchingMore: isFetchingMoreTornDelegators,
+    refetch: refetchTornDelegators,
   } = useDelegators({
     daoId,
     address: address ?? "",
@@ -154,6 +155,16 @@ export const VotingModal = ({
     isLoadingTornDelegators ||
     isFetchingMoreTornDelegators ||
     !!hasMoreTornDelegators;
+
+  // Submit is held back while these are true, so each needs a visible
+  // explanation next to the button: a dead Submit with no reason reads as a
+  // bug to the voter.
+  const showTornDelegatorsError = isTorn && !!address && !!tornDelegatorsError;
+  const showTornDelegatorsLoading =
+    isTorn &&
+    !!address &&
+    !tornDelegatorsError &&
+    isTornDelegatorListIncomplete;
 
   const tornDelegatedVoteAddresses = useMemo(() => {
     if (!isTorn || !address) return undefined;
@@ -380,7 +391,24 @@ export const VotingModal = ({
       )}
 
       {!isSuccess && (
-        <div className="border-border-default flex justify-end gap-2 border-t px-4 py-3">
+        <div className="border-border-default flex items-center justify-end gap-2 border-t px-4 py-3">
+          {!isLoading && showTornDelegatorsError && (
+            <p className="text-error mr-auto text-xs leading-4">
+              Could not load your delegators, so voting is disabled.{" "}
+              <button
+                type="button"
+                onClick={() => refetchTornDelegators()}
+                className="cursor-pointer underline"
+              >
+                Retry
+              </button>
+            </p>
+          )}
+          {!isLoading && showTornDelegatorsLoading && (
+            <p className="text-secondary mr-auto text-xs leading-4">
+              Loading your delegators...
+            </p>
+          )}
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

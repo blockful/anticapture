@@ -1,7 +1,7 @@
 import { test, expect } from "./fixtures";
 
-/* Desktop width, but shorter than the table: the layout-sensitive tests below
- * all need the page to scroll vertically past the table. */
+/* Desktop width, but short: the layout-sensitive tests below all need the
+ * page to scroll vertically past the table. */
 const SHORT_DESKTOP_VIEWPORT = { width: 1920, height: 640 };
 
 test.describe("Panel page", () => {
@@ -89,11 +89,17 @@ test.describe("Panel page", () => {
     expect(footerBox).not.toBeNull();
     expect(tableBox!.y + tableBox!.height).toBeLessThanOrEqual(footerBox!.y);
 
-    // The table is no longer an inner scroll box: every row lays out at full
-    // height, past the bottom of this viewport, and `main` is what scrolls.
+    // The table is no longer an inner scroll box: its container never clips
+    // rows behind its own scrollbar (the row count alone sets its height,
+    // which may be under the viewport height as DAOs come and go), and
+    // `main` is what scrolls.
     await expect
-      .poll(() => tableContainer.evaluate((element) => element.clientHeight))
-      .toBeGreaterThan(SHORT_DESKTOP_VIEWPORT.height);
+      .poll(() =>
+        tableContainer.evaluate(
+          (element) => element.scrollHeight - element.clientHeight,
+        ),
+      )
+      .toBeLessThanOrEqual(0);
     await expect
       .poll(() =>
         page
