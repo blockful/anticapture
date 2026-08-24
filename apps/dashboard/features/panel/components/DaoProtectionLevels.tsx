@@ -73,9 +73,11 @@ export const DaoProtectionLevels = () => {
 
   return (
     <div className="bg-surface-default flex w-full min-w-0 flex-1 flex-col justify-between gap-3.5 p-4">
-      <h3 className="text-primary text-alternative-sm tracking-alternative-sm font-mono font-medium uppercase leading-5">
+      {/* h2, not h3: this is the first heading after the page's h1, so the
+       * document outline must not skip a level. */}
+      <h2 className="text-primary text-alternative-sm tracking-alternative-sm font-mono font-medium uppercase leading-5">
         Governance risk, right now
-      </h3>
+      </h2>
 
       <div className="flex flex-col justify-center gap-3">
         {STAGE_BARS.map(
