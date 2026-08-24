@@ -468,6 +468,43 @@ describe("ProposalEnactmentService in-flight dedup", () => {
     expect(sent).toHaveLength(2);
   });
 
+  it("keeps the lock through a transient settlement poll error", async () => {
+    let settle!: (outcome: ReceiptOutcome) => void;
+    let receiptCalls = 0;
+    const { service, sent } = createService({
+      governor: {
+        waitForReceipt: () => {
+          receiptCalls++;
+          if (receiptCalls === 1)
+            return Promise.resolve<ReceiptOutcome>("timeout");
+          if (receiptCalls === 2)
+            return Promise.reject(new Error("rpc unreachable"));
+          if (receiptCalls === 3)
+            return new Promise<ReceiptOutcome>((resolve) => {
+              settle = resolve;
+            });
+          return Promise.resolve<ReceiptOutcome>("success");
+        },
+      },
+    });
+
+    await service.queue(PROPOSAL_ID.toString());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // The errored poll consumed an attempt but held the lock: the
+    // transaction's status is still unknown, so a repeat must not broadcast.
+    await expect(service.queue(PROPOSAL_ID.toString())).resolves.toEqual({
+      txHash: TX_HASH,
+    });
+    expect(sent).toHaveLength(1);
+
+    settle("success");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    await service.queue(PROPOSAL_ID.toString());
+    expect(sent).toHaveLength(2);
+  });
+
   it("releases the lock when the transaction never settles", async () => {
     const { service, sent } = createService({
       governor: { waitForReceipt: async () => "timeout" },

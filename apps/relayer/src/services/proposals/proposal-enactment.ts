@@ -99,16 +99,22 @@ export class ProposalEnactmentService {
   private async releaseWhenSettled(key: string, txHash: Hash): Promise<void> {
     try {
       for (let attempt = 0; attempt < MAX_SETTLEMENT_WAITS; attempt++) {
-        if ((await this.governor.waitForReceipt(txHash)) !== "timeout") return;
+        // A failed poll leaves the transaction's status unknown, so it only
+        // consumes an attempt: releasing the lock on the first transient RPC
+        // error would reopen the duplicate-broadcast window this hold closes.
+        try {
+          if ((await this.governor.waitForReceipt(txHash)) !== "timeout")
+            return;
+        } catch (err) {
+          this.logger.warn(
+            { key, txHash, err },
+            "settlement wait failed; keeping the enactment lock",
+          );
+        }
       }
       this.logger.warn(
         { key, txHash },
         "transaction still unsettled after extended wait; releasing the enactment lock",
-      );
-    } catch (err) {
-      this.logger.warn(
-        { key, txHash, err },
-        "settlement wait failed; releasing the enactment lock",
       );
     } finally {
       this.inflight.delete(key);
