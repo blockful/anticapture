@@ -27,6 +27,11 @@ export interface ProposalEnactmentConfig {
 
 type EnactmentAction = "queue" | "execute";
 
+// After a receipt timeout the in-flight lock is held through this many extra
+// receipt waits before giving up, so a transaction dropped from the mempool
+// cannot lock its proposal out of enactment forever.
+const MAX_SETTLEMENT_WAITS = 4;
+
 const REQUIRED_STATE: Record<EnactmentAction, ProposalState> = {
   queue: ProposalState.Succeeded,
   execute: ProposalState.Queued,
@@ -69,17 +74,51 @@ export class ProposalEnactmentService {
     const pending = this.inflight.get(key);
     if (pending) return pending;
 
-    const run = this.runEnactment(action, proposalId).finally(() => {
-      this.inflight.delete(key);
-    });
+    const run = this.runEnactment(action, proposalId).then(
+      ({ txHash, settled }) => {
+        if (settled) {
+          this.inflight.delete(key);
+        } else {
+          // Receipt wait timed out: the transaction is still pending and the
+          // chain keeps reporting the proposal as actionable, so the lock
+          // must outlive this request — duplicates join the broadcast
+          // transaction instead of burning gas on a second one.
+          void this.releaseWhenSettled(key, txHash);
+        }
+        return { txHash };
+      },
+      (err) => {
+        this.inflight.delete(key);
+        throw err;
+      },
+    );
     this.inflight.set(key, run);
     return run;
+  }
+
+  private async releaseWhenSettled(key: string, txHash: Hash): Promise<void> {
+    try {
+      for (let attempt = 0; attempt < MAX_SETTLEMENT_WAITS; attempt++) {
+        if ((await this.governor.waitForReceipt(txHash)) !== "timeout") return;
+      }
+      this.logger.warn(
+        { key, txHash },
+        "transaction still unsettled after extended wait; releasing the enactment lock",
+      );
+    } catch (err) {
+      this.logger.warn(
+        { key, txHash, err },
+        "settlement wait failed; releasing the enactment lock",
+      );
+    } finally {
+      this.inflight.delete(key);
+    }
   }
 
   private async runEnactment(
     action: EnactmentAction,
     proposalId: string,
-  ): Promise<{ txHash: Hash }> {
+  ): Promise<{ txHash: Hash; settled: boolean }> {
     // Cheap on-chain guards first: spam against unknown or settled proposals
     // must not amplify into Anticapture API calls.
     const state = await this.governor.state(BigInt(proposalId));
@@ -132,7 +171,7 @@ export class ProposalEnactmentService {
     proposalId: string,
     functionName: EnactmentAction,
     call: EnactmentCall,
-  ): Promise<{ txHash: Hash }> {
+  ): Promise<{ txHash: Hash; settled: boolean }> {
     const relayerAddress = await this.signer.getAddress();
 
     const balance = await this.governor.ethBalance(relayerAddress);
@@ -173,7 +212,7 @@ export class ProposalEnactmentService {
       { proposalId, action: functionName, txHash },
       `proposal ${functionName} broadcast`,
     );
-    return { txHash };
+    return { txHash, settled: outcome === "success" };
   }
 
   /**
