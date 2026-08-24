@@ -22,6 +22,29 @@ const ozProposeAbi = [
   },
 ] as const satisfies Abi;
 
+// GovernorBravo: propose(targets, values, signatures, calldatas, description).
+// The extra `signatures` array is Bravo-only — the Timelock prepends
+// bytes4(keccak256(signature)) to the calldata when an entry is non-empty, so we
+// send empty strings and let `encodeActions` emit the full selector + args.
+const bravoProposeAbi = [
+  {
+    type: "function",
+    name: "propose",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "targets", type: "address[]" },
+      { name: "values", type: "uint256[]" },
+      { name: "signatures", type: "string[]" },
+      { name: "calldatas", type: "bytes[]" },
+      { name: "description", type: "string" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const satisfies Abi;
+
+// Bravo emits the same ProposalCreated shape as an OZ Governor (it only names
+// the first field `id` instead of `proposalId`), so the topic hash — and thus
+// `ozProposalCreatedEventAbi` — covers both.
 const ozProposalCreatedEventAbi = [
   {
     type: "event",
@@ -145,6 +168,96 @@ export const isAzoriusDao = (_daoId: DaoIdEnum) => false;
 /** DAOs on Tornado Cash's custom stake-to-vote governance. */
 export const isTornadoDao = (daoId: DaoIdEnum) => daoId === DaoIdEnum.TORN;
 
+/**
+ * DAOs on a GovernorBravo-style governor. Same classification the queue/execute
+ * path uses (cf. `submitGovernanceAction`); which of them can actually reach
+ * this code is gated separately by `canCreateProposalForDao`.
+ */
+export const isGovernorBravoDao = (daoId: DaoIdEnum) =>
+  daoId === DaoIdEnum.UNISWAP ||
+  daoId === DaoIdEnum.NOUNS ||
+  daoId === DaoIdEnum.LIL_NOUNS;
+
+/**
+ * `proposalMaxOperations()` on every GovernorBravo deployment we support. The
+ * governor reverts past it, so we fail early with a message the form can show
+ * instead of letting the wallet surface a bare revert.
+ */
+export const BRAVO_MAX_OPERATIONS = 10;
+
+/**
+ * Whether `votingPower` satisfies the governor's proposal-threshold check.
+ * OZ Governor accepts votes >= proposalThreshold, while GovernorBravo's
+ * `propose` requires the proposer's prior votes to be strictly greater.
+ */
+export const meetsProposalThreshold = (
+  daoId: DaoIdEnum,
+  votingPower: bigint,
+  threshold: bigint,
+) =>
+  isGovernorBravoDao(daoId)
+    ? votingPower > threshold
+    : votingPower >= threshold;
+
+// The two GovernorBravo views behind its one-live-proposal-per-proposer rule.
+const bravoLiveProposalAbi = [
+  {
+    type: "function",
+    name: "latestProposalIds",
+    stateMutability: "view",
+    inputs: [{ name: "proposer", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "state",
+    stateMutability: "view",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+] as const satisfies Abi;
+
+// GovernorBravo's ProposalState members that `propose` rejects for a proposer
+// who already has one: Pending (0) and Active (1).
+const BRAVO_LIVE_PROPOSAL_STATES: readonly number[] = [0, 1];
+
+export type ReadContractFn = (params: {
+  address: Address;
+  abi: Abi;
+  functionName: string;
+  args: readonly unknown[];
+}) => Promise<unknown>;
+
+/**
+ * GovernorBravo permits one live proposal per proposer: `propose` reverts while
+ * the caller's latest proposal is still Pending or Active. Returns the id of
+ * that live proposal, or null when the proposer is clear to propose.
+ */
+export const findLiveBravoProposal = async (
+  readContract: ReadContractFn,
+  {
+    governorAddress,
+    proposer,
+  }: { governorAddress: Address; proposer: Address },
+): Promise<bigint | null> => {
+  const latestProposalId = (await readContract({
+    address: governorAddress,
+    abi: bravoLiveProposalAbi,
+    functionName: "latestProposalIds",
+    args: [proposer],
+  })) as bigint;
+  if (latestProposalId === 0n) return null;
+
+  const state = (await readContract({
+    address: governorAddress,
+    abi: bravoLiveProposalAbi,
+    functionName: "state",
+    args: [latestProposalId],
+  })) as number;
+
+  return BRAVO_LIVE_PROPOSAL_STATES.includes(state) ? latestProposalId : null;
+};
+
 export interface EncodedActions {
   targets: Address[];
   values: bigint[];
@@ -223,6 +336,29 @@ export const submitProposalRequest = (
   }
 
   const description = encodeDescription(title, discussionUrl ?? "", body);
+
+  if (isGovernorBravoDao(daoId)) {
+    if (encoded.targets.length > BRAVO_MAX_OPERATIONS) {
+      throw new Error(
+        `${daoId} proposals are limited to ${BRAVO_MAX_OPERATIONS} actions; this one has ${encoded.targets.length}.`,
+      );
+    }
+
+    writeContract({
+      address: governorAddress,
+      abi: bravoProposeAbi,
+      functionName: "propose",
+      args: [
+        encoded.targets,
+        encoded.values,
+        encoded.targets.map(() => ""),
+        encoded.calldatas,
+        description,
+      ],
+      chainId,
+    });
+    return;
+  }
 
   if (isTornadoDao(daoId)) {
     // The single action's contract address is the pre-deployed proposal
