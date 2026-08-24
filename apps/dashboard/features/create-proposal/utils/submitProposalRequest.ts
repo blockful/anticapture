@@ -139,7 +139,8 @@ const SAFE_OPERATION_CALL = 0;
 const AZORIUS_EMPTY_STRATEGY_DATA = "0x" as const;
 
 /** DAOs whose proposals go through an Azorius module rather than an OZ Governor. */
-export const isAzoriusDao = (daoId: DaoIdEnum) => daoId === DaoIdEnum.SHU;
+// SHU, the only Azorius DAO, is disabled in DaoIdEnum.
+export const isAzoriusDao = (_daoId: DaoIdEnum) => false;
 
 /** DAOs on Tornado Cash's custom stake-to-vote governance. */
 export const isTornadoDao = (daoId: DaoIdEnum) => daoId === DaoIdEnum.TORN;
