@@ -156,6 +156,65 @@ export const meetsProposalThreshold = (
     ? votingPower > threshold
     : votingPower >= threshold;
 
+// The two GovernorBravo views behind its one-live-proposal-per-proposer rule.
+const bravoLiveProposalAbi = [
+  {
+    type: "function",
+    name: "latestProposalIds",
+    stateMutability: "view",
+    inputs: [{ name: "proposer", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "state",
+    stateMutability: "view",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+] as const satisfies Abi;
+
+// GovernorBravo's ProposalState members that `propose` rejects for a proposer
+// who already has one: Pending (0) and Active (1).
+const BRAVO_LIVE_PROPOSAL_STATES: readonly number[] = [0, 1];
+
+export type ReadContractFn = (params: {
+  address: Address;
+  abi: Abi;
+  functionName: string;
+  args: readonly unknown[];
+}) => Promise<unknown>;
+
+/**
+ * GovernorBravo permits one live proposal per proposer: `propose` reverts while
+ * the caller's latest proposal is still Pending or Active. Returns the id of
+ * that live proposal, or null when the proposer is clear to propose.
+ */
+export const findLiveBravoProposal = async (
+  readContract: ReadContractFn,
+  {
+    governorAddress,
+    proposer,
+  }: { governorAddress: Address; proposer: Address },
+): Promise<bigint | null> => {
+  const latestProposalId = (await readContract({
+    address: governorAddress,
+    abi: bravoLiveProposalAbi,
+    functionName: "latestProposalIds",
+    args: [proposer],
+  })) as bigint;
+  if (latestProposalId === 0n) return null;
+
+  const state = (await readContract({
+    address: governorAddress,
+    abi: bravoLiveProposalAbi,
+    functionName: "state",
+    args: [latestProposalId],
+  })) as number;
+
+  return BRAVO_LIVE_PROPOSAL_STATES.includes(state) ? latestProposalId : null;
+};
+
 export interface EncodedActions {
   targets: Address[];
   values: bigint[];

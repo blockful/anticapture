@@ -8,6 +8,7 @@ import {
 
 import {
   BRAVO_MAX_OPERATIONS,
+  findLiveBravoProposal,
   isAzoriusDao,
   isGovernorBravoDao,
   meetsProposalThreshold,
@@ -162,5 +163,47 @@ describe("submitProposalRequest — OZ Governor", () => {
       encodedFor(BRAVO_MAX_OPERATIONS + 1),
     );
     expect(writeContract).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("findLiveBravoProposal", () => {
+  const PROPOSER = "0x2222222222222222222222222222222222222222" as Address;
+
+  const readContractFor = (latestId: bigint, state?: number) =>
+    jest.fn(async ({ functionName }: { functionName: string }) => {
+      if (functionName === "latestProposalIds") return latestId;
+      if (functionName === "state") return state;
+      throw new Error(`unexpected read: ${functionName}`);
+    });
+
+  const find = (readContract: ReturnType<typeof readContractFor>) =>
+    findLiveBravoProposal(readContract, {
+      governorAddress: GOVERNOR,
+      proposer: PROPOSER,
+    });
+
+  test("returns null for a proposer with no prior proposal", async () => {
+    const readContract = readContractFor(0n);
+    await expect(find(readContract)).resolves.toBeNull();
+    // No proposal id means no `state` lookup.
+    expect(readContract).toHaveBeenCalledTimes(1);
+  });
+
+  test.each([
+    [0, "Pending"],
+    [1, "Active"],
+  ])("returns the proposal id when its state is %i (%s)", async (state) => {
+    await expect(find(readContractFor(42n, state))).resolves.toBe(42n);
+  });
+
+  test.each([
+    [2, "Canceled"],
+    [3, "Defeated"],
+    [4, "Succeeded"],
+    [5, "Queued"],
+    [6, "Expired"],
+    [7, "Executed"],
+  ])("returns null when the latest proposal is %i (%s)", async (state) => {
+    await expect(find(readContractFor(42n, state))).resolves.toBeNull();
   });
 });

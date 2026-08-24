@@ -113,7 +113,7 @@ export const ProposalCreationForm = ({
     isLoading: isLoadingThreshold,
     thresholdFormatted,
   } = useProposalThreshold(daoId);
-  const publisher = usePublishProposal();
+  const publisher = usePublishProposal(daoIdEnum);
 
   const [viewParam, setView] = useQueryState(
     "view",
@@ -403,7 +403,7 @@ export const ProposalCreationForm = ({
       setInsufficientOpen(true);
       return;
     }
-    void publisher.publish(values, daoIdEnum);
+    void publisher.publish(values);
     setPublishOpen(true);
   };
 

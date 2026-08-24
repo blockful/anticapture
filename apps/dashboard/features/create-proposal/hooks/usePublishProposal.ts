@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { normalize } from "viem/ens";
 import { parseEventLogs } from "viem";
 import {
+  useAccount,
   usePublicClient,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -16,14 +17,16 @@ import {
   makeAddressResolver,
 } from "@/features/create-proposal/utils/encodeActions";
 import {
+  findLiveBravoProposal,
   getProposalCreatedEventAbi,
+  isGovernorBravoDao,
   submitProposalRequest,
 } from "@/features/create-proposal/utils/submitProposalRequest";
 import { canCreateProposalForDao } from "@/features/create-proposal/constants";
 import type { ProposalFormValues } from "@/features/create-proposal/schema";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-export const usePublishProposal = () => {
+export const usePublishProposal = (daoIdEnum: DaoIdEnum) => {
   const [resolveError, setResolveError] = useState<Error | null>(null);
   const [isResolving, setIsResolving] = useState(false);
   const [txChainId, setTxChainId] = useState<number | undefined>();
@@ -50,9 +53,15 @@ export const usePublishProposal = () => {
     isReceiptFetchError || (isReceiptMined && receipt?.status === "reverted");
 
   const ensClient = usePublicClient({ chainId: mainnet.id });
+  const { address: proposer } = useAccount();
+
+  const governanceChainId = daoConfigByDaoId[daoIdEnum]?.daoOverview?.chain?.id;
+  const daoClient = usePublicClient(
+    governanceChainId ? { chainId: governanceChainId } : undefined,
+  );
 
   const publish = useCallback(
-    async (form: ProposalFormValues, daoIdEnum: DaoIdEnum) => {
+    async (form: ProposalFormValues) => {
       setResolveError(null);
 
       if (!canCreateProposalForDao(daoIdEnum)) {
@@ -85,6 +94,26 @@ export const usePublishProposal = () => {
       setIsResolving(true);
       let encoded;
       try {
+        // Bravo governors reject a proposer whose latest proposal is still
+        // Pending or Active, so surface that as a form error instead of
+        // letting the wallet fail the transaction. A failed read falls
+        // through: the wallet simulation still enforces the rule on-chain.
+        if (isGovernorBravoDao(daoIdEnum) && proposer && daoClient) {
+          const liveProposalId = await findLiveBravoProposal(
+            (params) => daoClient.readContract(params),
+            { governorAddress, proposer },
+          ).catch(() => null);
+
+          if (liveProposalId !== null) {
+            setResolveError(
+              new Error(
+                `${daoIdEnum} allows one live proposal per address, and your proposal ${liveProposalId} is still pending or active. Wait for its voting to finish before publishing a new one.`,
+              ),
+            );
+            return;
+          }
+        }
+
         encoded = await encodeActions(form.actions, resolver);
       } catch (err) {
         setResolveError(err as Error);
@@ -111,7 +140,7 @@ export const usePublishProposal = () => {
         setResolveError(err as Error);
       }
     },
-    [writeContract, ensClient],
+    [writeContract, ensClient, daoIdEnum, proposer, daoClient],
   );
 
   const reset = useCallback(() => {
