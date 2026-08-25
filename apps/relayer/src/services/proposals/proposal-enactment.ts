@@ -15,6 +15,7 @@ import {
   SimulationRevertError,
   type EnactmentCall,
   type GovernorGateway,
+  type ReceiptOutcome,
 } from "@/services/chain/governor-gateway";
 import { RelayerSigner } from "@/signer/types";
 
@@ -27,9 +28,10 @@ export interface ProposalEnactmentConfig {
 
 type EnactmentAction = "queue" | "execute";
 
-// After a receipt timeout the in-flight lock is held through this many extra
-// receipt waits before giving up, so a transaction dropped from the mempool
-// cannot lock its proposal out of enactment forever.
+// After an unsettled broadcast (receipt timeout or failed poll) the in-flight
+// lock is held through this many extra receipt waits before giving up, so a
+// transaction dropped from the mempool cannot lock its proposal out of
+// enactment forever.
 const MAX_SETTLEMENT_WAITS = 4;
 
 const REQUIRED_STATE: Record<EnactmentAction, ProposalState> = {
@@ -79,8 +81,9 @@ export class ProposalEnactmentService {
         if (settled) {
           this.inflight.delete(key);
         } else {
-          // Receipt wait timed out: the transaction is still pending and the
-          // chain keeps reporting the proposal as actionable, so the lock
+          // The broadcast transaction has not settled (receipt timeout or
+          // failed poll): it may still be pending and the chain keeps
+          // reporting the proposal as actionable, so the lock
           // must outlive this request — duplicates join the broadcast
           // transaction instead of burning gas on a second one.
           void this.releaseWhenSettled(key, txHash);
@@ -203,15 +206,28 @@ export class ProposalEnactmentService {
       }),
     });
 
-    const outcome = await this.governor.waitForReceipt(txHash);
+    let outcome: ReceiptOutcome;
+    try {
+      outcome = await this.governor.waitForReceipt(txHash);
+      if (outcome === "timeout") {
+        this.logger.warn(
+          { proposalId, action: functionName, txHash },
+          "receipt wait timed out; transaction was broadcast",
+        );
+      }
+    } catch (err) {
+      // The transaction is already broadcast, so a failed receipt poll only
+      // leaves its status unknown. Rejecting here would release the in-flight
+      // lock through enact()'s error path and reopen the duplicate-broadcast
+      // window, so report it as unsettled and let the settlement hold decide.
+      this.logger.warn(
+        { proposalId, action: functionName, txHash, err },
+        "receipt wait failed; transaction was broadcast",
+      );
+      outcome = "timeout";
+    }
     if (outcome === "reverted") {
       throw Errors.TRANSACTION_REVERTED(txHash);
-    }
-    if (outcome === "timeout") {
-      this.logger.warn(
-        { proposalId, action: functionName, txHash },
-        "receipt wait timed out; transaction was broadcast",
-      );
     }
 
     this.logger.info(
