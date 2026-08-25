@@ -13,8 +13,7 @@ const TREE_URL =
 const REPO_DAO_DIR: Partial<Record<DaoIdEnum, string>> = {
   [DaoIdEnum.ENS]: "ens",
   [DaoIdEnum.UNISWAP]: "uniswap",
-  // SHU is disabled in DaoIdEnum.
-  // [DaoIdEnum.SHU]: "shutter",
+  [DaoIdEnum.SHU]: "shutter",
   [DaoIdEnum.TORN]: "tornado",
 };
 
