@@ -10,6 +10,7 @@ import { LoadingComponent } from "@/features/governance/components/modals/Loadin
 import { VoteSuccessContent } from "@/features/governance/components/modals/VoteSuccessContent";
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
 import type { ProposalDetails } from "@/features/governance/types";
+import { buildTornDelegatedVoteFrom } from "@/features/governance/utils/tornDelegatedVote";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -169,21 +170,10 @@ export const VotingModal = ({
   const tornDelegatedVoteAddresses = useMemo(() => {
     if (!isTorn || !address) return undefined;
 
-    const seen = new Set<string>();
-    const addresses = tornDelegators
-      .map((delegator) => delegator.delegatorAddress as Address)
-      .filter((delegatorAddress) => {
-        const normalized = delegatorAddress.toLowerCase();
-        if (seen.has(normalized)) return false;
-        seen.add(normalized);
-        return true;
-      });
-
-    // `from` lists ONLY accounts that delegated to the voter; the governor
-    // reverts on self-delegation, so the voter's own address must never appear
-    // here. A solo voter (verified empty list) goes through castVote instead,
-    // since castDelegatedVote rejects an empty `from`.
-    return addresses;
+    return buildTornDelegatedVoteFrom(
+      address,
+      tornDelegators.map((delegator) => delegator.delegatorAddress as Address),
+    );
   }, [address, isTorn, tornDelegators]);
 
   const { minVotingPower } = useRelayerConfig(daoId);
