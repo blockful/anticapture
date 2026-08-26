@@ -468,6 +468,44 @@ describe("ProposalEnactmentService in-flight dedup", () => {
     expect(sent).toHaveLength(2);
   });
 
+  it("keeps duplicates joined when the initial receipt wait throws", async () => {
+    let settle!: (outcome: ReceiptOutcome) => void;
+    let receiptCalls = 0;
+    const { service, sent } = createService({
+      governor: {
+        waitForReceipt: () => {
+          receiptCalls++;
+          if (receiptCalls === 1)
+            return Promise.reject(new Error("rpc unreachable"));
+          if (receiptCalls === 2)
+            return new Promise<ReceiptOutcome>((resolve) => {
+              settle = resolve;
+            });
+          return Promise.resolve<ReceiptOutcome>("success");
+        },
+      },
+    });
+
+    // The transaction was broadcast before the receipt poll failed, so the
+    // caller still gets the hash instead of an error.
+    await expect(service.queue(PROPOSAL_ID.toString())).resolves.toEqual({
+      txHash: TX_HASH,
+    });
+
+    // Its status is unknown, so a repeat joins the broadcast transaction
+    // instead of paying for a second one.
+    await expect(service.queue(PROPOSAL_ID.toString())).resolves.toEqual({
+      txHash: TX_HASH,
+    });
+    expect(sent).toHaveLength(1);
+
+    settle("success");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    await service.queue(PROPOSAL_ID.toString());
+    expect(sent).toHaveLength(2);
+  });
+
   it("keeps the lock through a transient settlement poll error", async () => {
     let settle!: (outcome: ReceiptOutcome) => void;
     let receiptCalls = 0;
