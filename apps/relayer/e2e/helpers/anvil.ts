@@ -18,6 +18,8 @@ export async function startAnvil(options?: {
   port?: number;
   logs?: boolean;
   forkUrl?: string;
+  /** Overrides the shared FORK_BLOCK for suites pinned to specific state. */
+  forkBlockNumber?: number;
 }): Promise<string> {
   const forkUrl = options?.forkUrl ?? process.env["RPC_URL"];
   if (!forkUrl) {
@@ -29,7 +31,7 @@ export async function startAnvil(options?: {
   anvilInstance = Instance.anvil(
     {
       forkUrl,
-      forkBlockNumber: FORK_BLOCK,
+      forkBlockNumber: options?.forkBlockNumber ?? FORK_BLOCK,
       ...(options?.port !== undefined ? { port: options.port } : {}),
     },
     { timeout: 30_000 },

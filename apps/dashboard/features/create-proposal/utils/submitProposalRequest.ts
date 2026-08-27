@@ -22,6 +22,29 @@ const ozProposeAbi = [
   },
 ] as const satisfies Abi;
 
+// GovernorBravo: propose(targets, values, signatures, calldatas, description).
+// The extra `signatures` array is Bravo-only — the Timelock prepends
+// bytes4(keccak256(signature)) to the calldata when an entry is non-empty, so we
+// send empty strings and let `encodeActions` emit the full selector + args.
+const bravoProposeAbi = [
+  {
+    type: "function",
+    name: "propose",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "targets", type: "address[]" },
+      { name: "values", type: "uint256[]" },
+      { name: "signatures", type: "string[]" },
+      { name: "calldatas", type: "bytes[]" },
+      { name: "description", type: "string" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const satisfies Abi;
+
+// Bravo emits the same ProposalCreated shape as an OZ Governor (it only names
+// the first field `id` instead of `proposalId`), so the topic hash — and thus
+// `ozProposalCreatedEventAbi` — covers both.
 const ozProposalCreatedEventAbi = [
   {
     type: "event",
@@ -92,6 +115,45 @@ const azoriusProposalCreatedEventAbi = [
   },
 ] as const satisfies Abi;
 
+// Tornado Cash governance: proposals are pre-deployed contracts that the
+// governance contract delegatecalls on execution, so propose takes a single
+// target address and a description instead of action arrays.
+const tornProposeAbi = [
+  {
+    type: "function",
+    name: "propose",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "target", type: "address" },
+      { name: "description", type: "string" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const satisfies Abi;
+
+/**
+ * Selector of executeProposal(), the function Tornado governance delegatecalls
+ * on the proposal contract when a passed proposal is executed. A TORN draft is
+ * only publishable when its single action is exactly this call, so what the
+ * DAO reviews matches what execution will do.
+ */
+export const TORN_EXECUTE_PROPOSAL_CALLDATA = "0x373058b8";
+
+const tornProposalCreatedEventAbi = [
+  {
+    type: "event",
+    name: "ProposalCreated",
+    inputs: [
+      { indexed: true, name: "proposalId", type: "uint256" },
+      { indexed: true, name: "proposer", type: "address" },
+      { indexed: false, name: "target", type: "address" },
+      { indexed: false, name: "startTime", type: "uint256" },
+      { indexed: false, name: "endTime", type: "uint256" },
+      { indexed: false, name: "description", type: "string" },
+    ],
+  },
+] as const satisfies Abi;
+
 // Gnosis Safe Enum.Operation.Call — the only operation the UI emits.
 const SAFE_OPERATION_CALL = 0;
 
@@ -101,6 +163,99 @@ const AZORIUS_EMPTY_STRATEGY_DATA = "0x" as const;
 
 /** DAOs whose proposals go through an Azorius module rather than an OZ Governor. */
 export const isAzoriusDao = (daoId: DaoIdEnum) => daoId === DaoIdEnum.SHU;
+
+/** DAOs on Tornado Cash's custom stake-to-vote governance. */
+export const isTornadoDao = (daoId: DaoIdEnum) => daoId === DaoIdEnum.TORN;
+
+/**
+ * DAOs on a GovernorBravo-style governor. Same classification the queue/execute
+ * path uses (cf. `submitGovernanceAction`); which of them can actually reach
+ * this code is gated separately by `canCreateProposalForDao`.
+ */
+export const isGovernorBravoDao = (daoId: DaoIdEnum) =>
+  daoId === DaoIdEnum.UNISWAP ||
+  daoId === DaoIdEnum.NOUNS ||
+  daoId === DaoIdEnum.LIL_NOUNS;
+
+/**
+ * `proposalMaxOperations()` on every GovernorBravo deployment we support. The
+ * governor reverts past it, so we fail early with a message the form can show
+ * instead of letting the wallet surface a bare revert.
+ */
+export const BRAVO_MAX_OPERATIONS = 10;
+
+/**
+ * Whether `votingPower` satisfies the governor's proposal-threshold check.
+ * OZ Governor accepts votes >= proposalThreshold, while GovernorBravo's
+ * `propose` requires the proposer's prior votes to be strictly greater.
+ */
+export const meetsProposalThreshold = (
+  daoId: DaoIdEnum,
+  votingPower: bigint,
+  threshold: bigint,
+) =>
+  isGovernorBravoDao(daoId)
+    ? votingPower > threshold
+    : votingPower >= threshold;
+
+// The two GovernorBravo views behind its one-live-proposal-per-proposer rule.
+const bravoLiveProposalAbi = [
+  {
+    type: "function",
+    name: "latestProposalIds",
+    stateMutability: "view",
+    inputs: [{ name: "proposer", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "state",
+    stateMutability: "view",
+    inputs: [{ name: "proposalId", type: "uint256" }],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+] as const satisfies Abi;
+
+// GovernorBravo's ProposalState members that `propose` rejects for a proposer
+// who already has one: Pending (0) and Active (1).
+const BRAVO_LIVE_PROPOSAL_STATES: readonly number[] = [0, 1];
+
+export type ReadContractFn = (params: {
+  address: Address;
+  abi: Abi;
+  functionName: string;
+  args: readonly unknown[];
+}) => Promise<unknown>;
+
+/**
+ * GovernorBravo permits one live proposal per proposer: `propose` reverts while
+ * the caller's latest proposal is still Pending or Active. Returns the id of
+ * that live proposal, or null when the proposer is clear to propose.
+ */
+export const findLiveBravoProposal = async (
+  readContract: ReadContractFn,
+  {
+    governorAddress,
+    proposer,
+  }: { governorAddress: Address; proposer: Address },
+): Promise<bigint | null> => {
+  const latestProposalId = (await readContract({
+    address: governorAddress,
+    abi: bravoLiveProposalAbi,
+    functionName: "latestProposalIds",
+    args: [proposer],
+  })) as bigint;
+  if (latestProposalId === 0n) return null;
+
+  const state = (await readContract({
+    address: governorAddress,
+    abi: bravoLiveProposalAbi,
+    functionName: "state",
+    args: [latestProposalId],
+  })) as number;
+
+  return BRAVO_LIVE_PROPOSAL_STATES.includes(state) ? latestProposalId : null;
+};
 
 export interface EncodedActions {
   targets: Address[];
@@ -179,22 +334,71 @@ export const submitProposalRequest = (
     return;
   }
 
+  const description = encodeDescription(title, discussionUrl ?? "", body);
+
+  if (isGovernorBravoDao(daoId)) {
+    if (encoded.targets.length > BRAVO_MAX_OPERATIONS) {
+      throw new Error(
+        `${daoId} proposals are limited to ${BRAVO_MAX_OPERATIONS} actions; this one has ${encoded.targets.length}.`,
+      );
+    }
+
+    writeContract({
+      address: governorAddress,
+      abi: bravoProposeAbi,
+      functionName: "propose",
+      args: [
+        encoded.targets,
+        encoded.values,
+        encoded.targets.map(() => ""),
+        encoded.calldatas,
+        description,
+      ],
+      chainId,
+    });
+    return;
+  }
+
+  if (isTornadoDao(daoId)) {
+    // The single action's contract address is the pre-deployed proposal
+    // contract the governance will delegatecall on execution, which always
+    // calls the target's executeProposal(). Any other action (a transfer, a
+    // different function) would create a proposal whose execution silently
+    // does something else or reverts, so it is rejected before the wallet.
+    if (
+      encoded.targets.length !== 1 ||
+      encoded.calldatas[0]?.toLowerCase() !== TORN_EXECUTE_PROPOSAL_CALLDATA
+    ) {
+      throw new Error(
+        "Tornado Cash proposals delegatecall a single pre-deployed proposal contract; add exactly one custom action calling executeProposal() on it.",
+      );
+    }
+    if ((encoded.values[0] ?? 0n) !== 0n) {
+      throw new Error("Tornado Cash proposals cannot send ETH.");
+    }
+
+    writeContract({
+      address: governorAddress,
+      abi: tornProposeAbi,
+      functionName: "propose",
+      args: [encoded.targets[0], description],
+      chainId,
+    });
+    return;
+  }
+
   writeContract({
     address: governorAddress,
     abi: ozProposeAbi,
     functionName: "propose",
-    args: [
-      encoded.targets,
-      encoded.values,
-      encoded.calldatas,
-      encodeDescription(title, discussionUrl ?? "", body),
-    ],
+    args: [encoded.targets, encoded.values, encoded.calldatas, description],
     chainId,
   });
 };
 
 /** The `ProposalCreated` event ABI matching the DAO's governance mechanism. */
-export const getProposalCreatedEventAbi = (daoId: DaoIdEnum) =>
-  isAzoriusDao(daoId)
-    ? azoriusProposalCreatedEventAbi
-    : ozProposalCreatedEventAbi;
+export const getProposalCreatedEventAbi = (daoId: DaoIdEnum) => {
+  if (isAzoriusDao(daoId)) return azoriusProposalCreatedEventAbi;
+  if (isTornadoDao(daoId)) return tornProposalCreatedEventAbi;
+  return ozProposalCreatedEventAbi;
+};

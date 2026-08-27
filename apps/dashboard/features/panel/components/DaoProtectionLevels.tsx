@@ -1,14 +1,8 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
 import { useMemo } from "react";
-import { BarChart, Bar, XAxis, Cell, LabelList, Tooltip } from "recharts";
 
-import { DaoProtectionLevelsTooltip } from "@/features/panel/components/tooltips/DaoProtectionLevelsTooltip";
-import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
-import type { ChartConfig } from "@/shared/components/ui/chart";
-import { ChartContainer } from "@/shared/components/ui/chart";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import daoConfigByDaoId from "@/shared/dao-config";
 import {
   fieldsToArray,
@@ -16,164 +10,129 @@ import {
 } from "@/shared/dao-config/utils";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { Stage } from "@/shared/types/enums/Stage";
+import { cn } from "@/shared/utils/cn";
 
-const chartConfig: ChartConfig = {
-  value: {
-    label: "Value",
-    color: "var(--color-primary)",
+/* Bars are sized against the busiest stage. The count rides at the end of the bar,
+ * so the widest bar fills the track less that label and its gap. */
+const EMPTY_BAR_WIDTH = "0.5rem";
+const COUNT_TRACK_WIDTH = "2rem";
+
+const STAGE_BARS = [
+  {
+    stage: Stage.ZERO,
+    label: "Stage 0",
+    riskLevel: "High Risk",
+    labelClassName: "text-error",
+    barClassName: "bg-error",
+    description:
+      "DAOs that have a critical weakness that could let an attacker influence or take over governance",
   },
-} satisfies ChartConfig;
+  {
+    stage: Stage.ONE,
+    label: "Stage 1",
+    riskLevel: "Medium Risk",
+    labelClassName: "text-warning",
+    barClassName: "bg-warning",
+    description:
+      "DAOs that have no critical weaknesses, but still have a medium-risk issue that could affect governance.",
+  },
+  {
+    stage: Stage.TWO,
+    label: "Stage 2",
+    riskLevel: "Low Risk",
+    labelClassName: "text-success",
+    barClassName: "bg-success",
+    description:
+      "DAOs with no significant risks and strong protection against governance attacks.",
+  },
+] as const;
 
 export const DaoProtectionLevels = () => {
-  // Calculate stage distribution from real DAO data
-  const stageData = useMemo(() => {
-    // Get all DAOs
-    const daoIds = Object.values(DaoIdEnum);
+  const stageCounts = useMemo(() => {
+    const counts: Partial<Record<Stage, number>> = {};
 
-    // Count DAOs by stage
-    const stageCounts = {
-      [Stage.ZERO]: 0,
-      [Stage.ONE]: 0,
-      [Stage.TWO]: 0,
-      [Stage.UNKNOWN]: 0,
-      [Stage.NONE]: 0,
-    };
-
-    daoIds.forEach((daoId) => {
+    Object.values(DaoIdEnum).forEach((daoId) => {
       const daoConfig = daoConfigByDaoId[daoId];
-      let stage: Stage;
+      const stage = daoConfig.governanceImplementation
+        ? getDaoStageFromFields({
+            fields: fieldsToArray(daoConfig.governanceImplementation.fields),
+            noStage: daoConfig.noStage,
+          })
+        : Stage.UNKNOWN;
 
-      if (!daoConfig.governanceImplementation) {
-        stage = Stage.UNKNOWN;
-      } else {
-        stage = getDaoStageFromFields({
-          fields: fieldsToArray(daoConfig.governanceImplementation?.fields),
-          noStage: daoConfig.noStage,
-        });
-      }
-
-      stageCounts[stage] = (stageCounts[stage] || 0) + 1;
+      counts[stage] = (counts[stage] ?? 0) + 1;
     });
 
-    // Map to chart data format
-    return [
-      {
-        stage: "Stage 0",
-        value: stageCounts[Stage.ZERO],
-        riskLevel: "High Risk",
-        color: "var(--color-error)",
-        description:
-          "DAOs that have a critical weakness that could let an attacker influence or take over governance",
-      },
-      {
-        stage: "Stage 1",
-        value: stageCounts[Stage.ONE],
-        riskLevel: "Medium Risk",
-        color: "var(--color-warning)",
-        description:
-          "DAOs that have no critical weaknesses, but still have a medium-risk issue that could affect governance.",
-      },
-      {
-        stage: "Stage 2",
-        value: stageCounts[Stage.TWO],
-        riskLevel: "Low Risk",
-        color: "var(--color-success)",
-        description:
-          "DAOs with no significant risks and strong protection against governance attacks.",
-      },
-      {
-        stage: "No Stage",
-        value: stageCounts[Stage.NONE],
-        riskLevel: "Doesn't apply",
-        color: "var(--color-surface-hover)",
-        description:
-          "DAOs that don't qualify for the staging system because they lack autonomous execution and rely on a centralized entity.",
-      },
-    ];
+    return counts;
   }, []);
 
-  // Calculate total monitored DAOs
-  const totalMonitored = useMemo(() => {
-    return Object.values(DaoIdEnum).length;
-  }, []);
+  const busiestStageCount = Math.max(
+    ...STAGE_BARS.map(({ stage }) => stageCounts[stage] ?? 0),
+    1,
+  );
 
   return (
-    <div className="bg-surface-background lg:bg-surface-default flex w-full flex-col gap-2 lg:p-4">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-primary text-alternative-sm font-mono font-medium uppercase leading-5 tracking-wider">
-          DAO Governance Risk Levels
-        </h3>
-        <p className="text-secondary text-sm font-normal leading-5">
-          This platform monitors DAO governance risks and rates them through
-          Anticapture&apos;s Stage system.
-        </p>
-        <DefaultLink
-          href="https://blockful.gitbook.io/anticapture/anticapture/framework"
-          variant="highlight"
-          openInNewTab
-        >
-          Learn the Stage Criteria
-          <ChevronRight className="size-4" />
-        </DefaultLink>
-      </div>
+    <div className="bg-surface-default flex w-full min-w-0 flex-1 flex-col justify-between gap-3.5 p-4">
+      {/* h2, not h3: this is the first heading after the page's h1, so the
+       * document outline must not skip a level. */}
+      <h2 className="text-primary text-alternative-sm tracking-alternative-sm font-mono font-medium uppercase leading-5">
+        Governance risk, right now
+      </h2>
 
-      {/* Status indicators */}
-      <div className="flex w-full flex-col gap-2">
-        <DividerDefault isHorizontal />
-        <div className="border-t-brand flex items-center gap-1.5 border-b-0 border-l-4 border-r-0 border-t-0 pl-3">
-          <p className="text-primary text-alternative-xs font-mono font-medium uppercase leading-4 tracking-wider">
-            {totalMonitored} DAOs monitored by Anticapture
-          </p>
-        </div>
-        <DividerDefault isHorizontal />
-      </div>
+      <div className="flex flex-col justify-center gap-3">
+        {STAGE_BARS.map(
+          ({
+            stage,
+            label,
+            riskLevel,
+            labelClassName,
+            barClassName,
+            description,
+          }) => {
+            const count = stageCounts[stage] ?? 0;
+            const countLabel = `${count} DAO${count === 1 ? "" : "s"}`;
 
-      {/* Bar Chart */}
-      <div className="flex flex-col gap-2">
-        <div className="lg:h-18.75 relative flex h-40 w-full items-end">
-          <ChartContainer className="h-full w-full" config={chartConfig}>
-            <BarChart
-              data={stageData}
-              margin={{ top: 16, right: 0, left: 0, bottom: 0 }}
-            >
-              <XAxis dataKey="stage" hide axisLine={false} tickLine={false} />
-              <Tooltip
-                content={DaoProtectionLevelsTooltip}
-                cursor={false}
-                allowEscapeViewBox={{ x: true, y: true }}
-              />
-              <Bar dataKey="value" radius={[0, 0, 0, 0]} minPointSize={1}>
-                {stageData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-                <LabelList
-                  dataKey="value"
-                  position="top"
-                  className="text-primary text-xs font-medium"
-                  fill="var(--color-primary)"
-                  formatter={(value: number) => value}
-                />
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-        </div>
-
-        {/* Labels */}
-        <div className="flex w-full">
-          {stageData.map((item, index) => (
-            <div
-              key={index}
-              className="flex flex-1 flex-col items-center justify-center"
-            >
-              <p className="text-primary text-xs font-medium leading-4">
-                {item.stage}
-              </p>
-              <p className="text-secondary text-xs font-medium leading-4">
-                {item.riskLevel}
-              </p>
-            </div>
-          ))}
-        </div>
+            return (
+              <div key={stage} className="flex items-center gap-3">
+                <div className="w-22 flex shrink-0 flex-col text-xs font-medium leading-4">
+                  <span className={labelClassName}>{label}</span>
+                  <span className="text-secondary">{riskLevel}</span>
+                </div>
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <Tooltip
+                    asChild
+                    title={label}
+                    titleRight={countLabel}
+                    tooltipContent={
+                      <p className="text-secondary text-sm font-normal leading-5">
+                        {description}
+                      </p>
+                    }
+                  >
+                    {/* A button, not a div: the description only exists inside
+                     * the tooltip, so the bar has to be reachable by keyboard. */}
+                    <button
+                      type="button"
+                      aria-label={`${label}, ${countLabel}`}
+                      className={cn(
+                        "h-7 shrink-0 cursor-pointer",
+                        barClassName,
+                      )}
+                      style={{
+                        width: count
+                          ? `calc((100% - ${COUNT_TRACK_WIDTH}) * ${count / busiestStageCount})`
+                          : EMPTY_BAR_WIDTH,
+                      }}
+                    />
+                  </Tooltip>
+                  <span className="text-primary shrink-0 text-xs font-medium leading-4">
+                    {count}
+                  </span>
+                </div>
+              </div>
+            );
+          },
+        )}
       </div>
     </div>
   );

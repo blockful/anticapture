@@ -1,5 +1,13 @@
 # @anticapture/gateful
 
+## 1.8.0
+
+### Minor Changes
+
+- [#2122](https://github.com/blockful/anticapture/pull/2122) [`add355c`](https://github.com/blockful/anticapture/commit/add355cb093b873c0729631596fc7706125668b8) Thanks [@LeonardoVieira1630](https://github.com/LeonardoVieira1630)! - The public API surface gains POST /{dao}/relay/queue and
+  POST /{dao}/relay/execute, proxied to the relayer's new proposal enactment
+  endpoints and merged into the Gateful OpenAPI spec.
+
 ## 1.7.0
 
 ### Minor Changes

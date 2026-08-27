@@ -1,4 +1,4 @@
-import { getAddress, isAddress, isHex } from "viem";
+import { getAddress, isAddress, isHex, maxUint256 } from "viem";
 import { z } from "@hono/zod-openapi";
 
 export const HexSchema = z
@@ -20,5 +20,9 @@ export const TxHashSchema = HexSchema.refine(
 
 export const DecimalUint256Schema = z
   .string()
+  // uint256 fits in 78 decimal digits; without a cap, BigInt() on an
+  // arbitrarily long digit string is superlinear CPU on anonymous routes.
+  .max(78, "too long for a uint256")
   .regex(/^\d+$/, "must be a non-negative decimal integer")
-  .transform((v) => BigInt(v));
+  .transform((v) => BigInt(v))
+  .refine((v) => v <= maxUint256, "exceeds the uint256 maximum");

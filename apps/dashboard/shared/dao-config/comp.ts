@@ -7,6 +7,7 @@ import { QUORUM_CALCULATION_TYPES } from "@/shared/constants/labels";
 import { RECOMMENDED_SETTINGS } from "@/shared/constants/recommended-settings";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import { CompoundOgIcon } from "@/shared/og/dao-og-icons";
+import { toAbsoluteUrl } from "@/shared/seo/site";
 import {
   RiskLevel,
   GovernanceImplementationEnum,
@@ -24,6 +25,8 @@ export const COMP: DaoConfiguration = {
   forumLink: "https://www.comp.xyz/",
   icon: CompoundIcon,
   ogIcon: CompoundOgIcon,
+  hostnames: ["compound.gov.blockful.io"],
+  whitelabel: {},
 
   daoOverview: {
     token: "ERC20",
@@ -35,8 +38,8 @@ export const COMP: DaoConfiguration = {
       timelock: "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
     },
     govPlatform: {
-      name: "Tally",
-      url: "https://tally.xyz/gov/compound/proposal/",
+      name: "Anticapture",
+      url: toAbsoluteUrl("/comp/proposals/"),
     },
     cancelFunction:
       "https://etherscan.io/address/0x6d903f6003cca6255D85CcA4D3B5E5146dC33925#writeContract#F5",

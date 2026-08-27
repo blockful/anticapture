@@ -47,6 +47,7 @@ import { DraftViewToggle } from "@/features/create-proposal/components/preview/D
 import { DraftPreview } from "@/features/create-proposal/components/preview/DraftPreview";
 import { draftPreviewCopy } from "@/features/create-proposal/utils/draftThresholdCopy";
 import { getRecipientPublishState } from "@/features/create-proposal/utils/recipientPublishState";
+import { meetsProposalThreshold } from "@/features/create-proposal/utils/submitProposalRequest";
 import { cloneAction } from "@/features/create-proposal/utils/cloneAction";
 import { ActionsList } from "@/features/create-proposal/components/actions/ActionsList";
 import { ActionsPlaceholderCard } from "@/features/create-proposal/components/actions/ActionsPlaceholderCard";
@@ -112,7 +113,7 @@ export const ProposalCreationForm = ({
     isLoading: isLoadingThreshold,
     thresholdFormatted,
   } = useProposalThreshold(daoId);
-  const publisher = usePublishProposal();
+  const publisher = usePublishProposal(daoIdEnum);
 
   const [viewParam, setView] = useQueryState(
     "view",
@@ -397,12 +398,12 @@ export const ProposalCreationForm = ({
       );
       return;
     }
-    if (vp.votingPower < threshold) {
+    if (!meetsProposalThreshold(daoIdEnum, vp.votingPower, threshold)) {
       void handleSaveDraft({ navigateToDrafts: false });
       setInsufficientOpen(true);
       return;
     }
-    void publisher.publish(values, daoIdEnum);
+    void publisher.publish(values);
     setPublishOpen(true);
   };
 
@@ -527,6 +528,7 @@ export const ProposalCreationForm = ({
     : "—";
 
   const recipientState = getRecipientPublishState({
+    daoId: daoIdEnum,
     address,
     votingPower: vp.votingPower,
     threshold,
@@ -555,7 +557,9 @@ export const ProposalCreationForm = ({
   const proposalsListHref = `${basePath}/proposals`;
 
   const showInsufficientInline =
-    Boolean(address) && vp.votingPower < threshold && !isLoadingThreshold;
+    Boolean(address) &&
+    !meetsProposalThreshold(daoIdEnum, vp.votingPower, threshold) &&
+    !isLoadingThreshold;
 
   return (
     <FormProvider {...form}>
