@@ -1,5 +1,23 @@
 # @anticapture/relayer
 
+## 1.2.0
+
+### Minor Changes
+
+- [#2122](https://github.com/blockful/anticapture/pull/2122) [`75f1051`](https://github.com/blockful/anticapture/commit/75f10514459d9b4b75b781ec016e66220597e70e) Thanks [@LeonardoVieira1630](https://github.com/LeonardoVieira1630)! - Add POST /relay/queue and /relay/execute endpoints that sponsor the
+  permissionless Governor lifecycle transactions. Proposal args are fetched from
+  the Anticapture API by proposal id and verified trustlessly against the
+  governor's hashProposal before anything is signed.
+
+### Patch Changes
+
+- [#2140](https://github.com/blockful/anticapture/pull/2140) [`580eb0a`](https://github.com/blockful/anticapture/commit/580eb0af6bd8b8ddbf88b1d509070d43f90af7ca) Thanks [@brunod-e](https://github.com/brunod-e)! - Keep queue/execute requests deduplicated while a broadcast transaction is still pending after a receipt timeout.
+
+- [#2142](https://github.com/blockful/anticapture/pull/2142) [`75d0b4e`](https://github.com/blockful/anticapture/commit/75d0b4e5c3f0260631d31b3872a25126d64d4a95) Thanks [@brunod-e](https://github.com/brunod-e)! - Keep the enactment lock held when the post-broadcast receipt wait fails with an RPC error.
+
+- Updated dependencies [[`b02461b`](https://github.com/blockful/anticapture/commit/b02461b64ae44f0fadc2b497ec2363c13d00bf4a)]:
+  - @anticapture/client@2.1.0
+
 ## 1.1.2
 
 ### Patch Changes

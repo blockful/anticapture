@@ -1,5 +1,52 @@
 # @anticapture/dashboard
 
+## 2.15.0
+
+### Minor Changes
+
+- [#2135](https://github.com/blockful/anticapture/pull/2135) [`1610f3c`](https://github.com/blockful/anticapture/commit/1610f3c248dfdbf3d90cab08129305448bdf15e3) Thanks [@brunod-e](https://github.com/brunod-e)! - Enable the Compound whitelabel with full governance (create, vote, queue and execute proposals).
+
+- [#2134](https://github.com/blockful/anticapture/pull/2134) [`9ddac26`](https://github.com/blockful/anticapture/commit/9ddac267a56c53325dd622414adbbee0d015fbd0) Thanks [@brunod-e](https://github.com/brunod-e)! - Enable the Gitcoin whitelabel with full governance (create, vote, queue and execute proposals).
+
+- [#2137](https://github.com/blockful/anticapture/pull/2137) [`1c8f1a1`](https://github.com/blockful/anticapture/commit/1c8f1a15ab65328312044a732e096539463d7c7d) Thanks [@brunod-e](https://github.com/brunod-e)! - Replace the Panel section header with the v2.1 hero: a judgment headline, a subhead explaining the Stage framework, a link to the framework docs, and a "Governance risk, right now" card showing Stage 0/1/2 as horizontal bars with per-stage hover detail. Retires the Treasury Monitoring and Delegated Supply History cards.
+
+- [#2137](https://github.com/blockful/anticapture/pull/2137) [`c24a289`](https://github.com/blockful/anticapture/commit/c24a28943741af09a339a237306088857f26ad16) Thanks [@brunod-e](https://github.com/brunod-e)! - Add the Blockful services row at the foot of the panel, listing the service lines with a link to the contact page.
+
+- [#2137](https://github.com/blockful/anticapture/pull/2137) [`2c87e1e`](https://github.com/blockful/anticapture/commit/2c87e1eb62ab2d1c20b66e2cdda5c0c55c1ab4c4) Thanks [@brunod-e](https://github.com/brunod-e)! - Show every monitored DAO on the panel: the homepage itself now scrolls and the table header stays pinned on desktop.
+
+- [#2137](https://github.com/blockful/anticapture/pull/2137) [`8a21e30`](https://github.com/blockful/anticapture/commit/8a21e306ddf5c947e1608150725b4ed257b0af10) Thanks [@brunod-e](https://github.com/brunod-e)! - Add the "Latest finding" ticker between the panel hero and the Monitored DAOs table. The strip shows the newest post on the blockful Paragraph publication, read server-side from its RSS feed and revalidated hourly, and links out to that post. If the feed is unreachable it falls back to the publication index, so the ticker always renders.
+
+- [#2137](https://github.com/blockful/anticapture/pull/2137) [`388e6b2`](https://github.com/blockful/anticapture/commit/388e6b2d59828c614fb67f5c2d51edd43e74edf1) Thanks [@brunod-e](https://github.com/brunod-e)! - Add the "Track record" section to the panel: three outcome-framed case cards linking to the case write-ups, plus a testimonial carousel carrying the verified quotes from the X mentions audit. `ClickableCard` now accepts an `href` so cards can render as links.
+
+- [#2137](https://github.com/blockful/anticapture/pull/2137) [`02a9a0a`](https://github.com/blockful/anticapture/commit/02a9a0a1387ea6827aea1b4ecd5c32465ff5e294) Thanks [@brunod-e](https://github.com/brunod-e)! - Add the "Use it now" section to the panel and an explainer strip above the channel cards on the alerts page.
+
+- [#2136](https://github.com/blockful/anticapture/pull/2136) [`ae55201`](https://github.com/blockful/anticapture/commit/ae5520130c4f0910f45bd509c1ecc15a4b4d4097) Thanks [@brunod-e](https://github.com/brunod-e)! - Enable the Tornado Cash whitelabel with full governance (create, vote and execute proposals).
+
+- [#2130](https://github.com/blockful/anticapture/pull/2130) [`9ac2df2`](https://github.com/blockful/anticapture/commit/9ac2df290deb2ea7f8d2822d26a8f50c9e8175a0) Thanks [@brunod-e](https://github.com/brunod-e)! - Enable the Uniswap whitelabel with full governance. `uniswap.gov.blockful.io` now
+  resolves to the whitelabel shell, and Uniswap joins ENS and Shutter as a DAO you
+  can draft, publish, vote on, queue and execute proposals for. Proposal creation
+  goes through a new GovernorBravo `propose(targets, values, signatures, calldatas,
+description)` path, which also rejects proposals past the governor's 10-action
+  `proposalMaxOperations` before they reach the wallet.
+
+- [#2130](https://github.com/blockful/anticapture/pull/2130) [`dae9bc8`](https://github.com/blockful/anticapture/commit/dae9bc82c2a28623982f8f29f23f0da1e664b165) Thanks [@brunod-e](https://github.com/brunod-e)! - Add an in-app "Request a Feature" drawer to the whitelabel, opened by the sidebar
+  button whenever a DAO has no external `requestFeatureLink` (like Uniswap).
+
+### Patch Changes
+
+- [#2140](https://github.com/blockful/anticapture/pull/2140) [`0a8f048`](https://github.com/blockful/anticapture/commit/0a8f048052765c8d07b2c4e787260eff3f2a1b58) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix the panel risk heading level and enlarge the testimonial arrows' touch targets.
+
+- [#2141](https://github.com/blockful/anticapture/pull/2141) [`a838517`](https://github.com/blockful/anticapture/commit/a8385173c4f6bb53185ea2386d755245aab36ee7) Thanks [@brunod-e](https://github.com/brunod-e)! - Restore the Shutter DAO in the dashboard DAO list.
+
+- [#2136](https://github.com/blockful/anticapture/pull/2136) [`ae55201`](https://github.com/blockful/anticapture/commit/ae5520130c4f0910f45bd509c1ecc15a4b4d4097) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix Tornado Cash voting for accounts without delegators by using castVote instead of castDelegatedVote.
+
+- [#2142](https://github.com/blockful/anticapture/pull/2142) [`a9deec7`](https://github.com/blockful/anticapture/commit/a9deec7dea199008eae1a647331faffd182f8182) Thanks [@brunod-e](https://github.com/brunod-e)! - Exclude the voter's own address from the Tornado delegated-vote list so castDelegatedVote does not revert.
+
+- [#2140](https://github.com/blockful/anticapture/pull/2140) [`0a8f048`](https://github.com/blockful/anticapture/commit/0a8f048052765c8d07b2c4e787260eff3f2a1b58) Thanks [@brunod-e](https://github.com/brunod-e)! - Show why the Tornado vote submit is disabled while delegators load or fail to load.
+
+- Updated dependencies [[`b02461b`](https://github.com/blockful/anticapture/commit/b02461b64ae44f0fadc2b497ec2363c13d00bf4a)]:
+  - @anticapture/client@2.1.0
+
 ## 2.14.1
 
 ### Patch Changes
