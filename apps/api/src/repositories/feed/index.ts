@@ -11,6 +11,7 @@ import {
   sql,
 } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { getAddress } from "viem";
 import { z } from "zod";
 
 import {
@@ -88,8 +89,13 @@ export class FeedRepository {
 
     const orderByColumn =
       orderBy === "timestamp" ? feedEvent.timestamp : feedEvent.value;
-    const orderByFn =
-      orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn);
+    // With an address filter the qualifying rows are usually far fewer than
+    // the limit, and walking the ordered index until enough matches
+    // accumulate degenerates into a scan of the whole index (15s on UNI).
+    // Sorting by an expression hides the index from the planner, so it
+    // filters first and sorts the small result instead.
+    const sortKey = address ? sql`${orderByColumn} + 0` : orderByColumn;
+    const orderByFn = orderDirection === "asc" ? asc(sortKey) : desc(sortKey);
 
     const [rows, totalCount] = await Promise.all([
       this.db.query.feedEvent.findMany({
@@ -439,19 +445,24 @@ export class FeedRepository {
 
   // feed_event has no account column, so addresses are matched in the source
   // table each event type is derived from, keyed by (tx_hash, log_index).
-  // Lowercased on both sides because source tables may store checksummed
-  // addresses. The subqueries are deliberately uncorrelated: Postgres runs
-  // each one once and hashes the result, instead of probing the source table
-  // for every feed_event row — correlated EXISTS here timed out on large
-  // DAOs. Only the branches for the requested event types are built, so a
-  // type-filtered request never scans the other source tables. feed_event
-  // columns use Drizzle refs so they follow whatever alias the query builder
-  // assigns (see the proposerVotingPower note above).
+  // The subqueries are deliberately uncorrelated: Postgres runs each one once
+  // and hashes the result, instead of probing the source table for every
+  // feed_event row — correlated EXISTS here timed out on large DAOs. Account
+  // columns are compared by plain equality against both address forms the
+  // indexer can write (viem-checksummed or lowercase) rather than
+  // LOWER(column): a LOWER() comparison cannot use the account indexes and
+  // forced a 380k-cost seq scan + per-row rescan of transfers on UNI, where
+  // the indexed form is a ~4k-cost BitmapOr. Only the branches for the
+  // requested event types are built, so a type-filtered request never scans
+  // the other source tables. feed_event columns use Drizzle refs so they
+  // follow whatever alias the query builder assigns (see the
+  // proposerVotingPower note above).
   private buildAddressFilter(
     address: string,
     selectedTypes: FeedEventType[],
   ): SQL | undefined {
-    const addr = address.toLowerCase();
+    const lower = address.toLowerCase();
+    const checksummed = getAddress(lower);
     const types =
       selectedTypes.length > 0
         ? selectedTypes
@@ -462,31 +473,31 @@ export class FeedRepository {
       branches.push(sql`(${feedEvent.type} = 'DELEGATION'
         AND (${feedEvent.txHash}, ${feedEvent.logIndex}) IN (
           SELECT d.transaction_hash, d.log_index FROM delegations d
-          WHERE LOWER(d.delegator_account_id) = ${addr}
-            OR LOWER(d.delegate_account_id) = ${addr}
-            OR LOWER(d.previous_delegate) = ${addr}
+          WHERE d.delegator_account_id IN (${lower}, ${checksummed})
+            OR d.delegate_account_id IN (${lower}, ${checksummed})
+            OR d.previous_delegate IN (${lower}, ${checksummed})
       ))`);
     }
     if (types.includes(FeedEventType.TRANSFER)) {
       branches.push(sql`(${feedEvent.type} = 'TRANSFER'
         AND (${feedEvent.txHash}, ${feedEvent.logIndex}) IN (
           SELECT t.transaction_hash, t.log_index FROM transfers t
-          WHERE LOWER(t.from_account_id) = ${addr}
-            OR LOWER(t.to_account_id) = ${addr}
+          WHERE t.from_account_id IN (${lower}, ${checksummed})
+            OR t.to_account_id IN (${lower}, ${checksummed})
       ))`);
     }
     if (types.includes(FeedEventType.VOTE)) {
       branches.push(sql`(${feedEvent.type} = 'VOTE'
         AND (${feedEvent.txHash}, ${feedEvent.logIndex}) IN (
           SELECT v.tx_hash, v.log_index FROM votes_onchain v
-          WHERE LOWER(v.voter_account_id) = ${addr}
+          WHERE v.voter_account_id IN (${lower}, ${checksummed})
       ))`);
     }
     if (types.includes(FeedEventType.PROPOSAL)) {
       branches.push(sql`(${feedEvent.type} = 'PROPOSAL'
         AND ${feedEvent.txHash} IN (
           SELECT p.tx_hash FROM proposals_onchain p
-          WHERE LOWER(p.proposer_account_id) = ${addr}
+          WHERE p.proposer_account_id IN (${lower}, ${checksummed})
       ))`);
     }
     if (types.includes(FeedEventType.PROPOSAL_EXTENDED)) {
@@ -494,7 +505,7 @@ export class FeedRepository {
         AND ${feedEvent.proposalId} IS NOT NULL
         AND ${feedEvent.proposalId} IN (
           SELECT p.id FROM proposals_onchain p
-          WHERE LOWER(p.proposer_account_id) = ${addr}
+          WHERE p.proposer_account_id IN (${lower}, ${checksummed})
       ))`);
     }
 

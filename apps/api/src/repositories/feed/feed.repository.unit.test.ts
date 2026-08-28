@@ -1,7 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { pushSchema } from "drizzle-kit/api";
 import { drizzle } from "drizzle-orm/pglite";
-import { zeroAddress } from "viem";
+import { getAddress, zeroAddress } from "viem";
 
 import type { Drizzle } from "@/database";
 import * as schema from "@/database/schema";
@@ -594,12 +594,19 @@ describe("FeedRepository", () => {
     });
 
     describe("address filter", () => {
-      const DELEGATOR = "0xAaAaAAAaaAaAAaAaAaAAAAAaAAAAaaAAAAaAaAA1";
-      const DELEGATE = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBb2";
-      const PREVIOUS_DELEGATE = "0xCcccCcCCcCCCCCcCcCcccCcCCCcCccccccCCCCc3";
-      const SENDER = "0xdDDDddDdDdddDDdDDDDdDDDDDDDddDDdDdDdDDd4";
-      const RECIPIENT = "0xEEEeEEEeeEeEeeEEEEeeeeEEeEeeeEEeEEeeEeE5";
-      const VOTER = "0xFFffFfFffFFFfffffFfFFFfFfffFfFFFFffFFF6";
+      // Source tables store viem-checksummed addresses (or, rarely,
+      // lowercase); the filter matches both forms by plain indexed equality.
+      const DELEGATOR = getAddress(
+        "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1",
+      );
+      const DELEGATE = getAddress("0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb2");
+      const PREVIOUS_DELEGATE = getAddress(
+        "0xccccccccccccccccccccccccccccccccccccccc3",
+      );
+      const SENDER = getAddress("0xddddddddddddddddddddddddddddddddddddddd4");
+      // Stored lowercase on purpose: covers the indexer's other storage form.
+      const RECIPIENT = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee5";
+      const VOTER = getAddress("0xfffffffffffffffffffffffffffffffffffffff6");
       const PROPOSER = "0x1234123412341234123412341234123412341234";
 
       beforeEach(async () => {
@@ -715,7 +722,8 @@ describe("FeedRepository", () => {
         });
       });
 
-      it("matches case-insensitively regardless of stored casing", async () => {
+      it("matches either stored form regardless of query casing", async () => {
+        // Stored checksummed, queried uppercase and lowercase.
         expect(
           await getFilteredTxHashes(
             DELEGATOR.toUpperCase().replace("0X", "0x"),
@@ -726,6 +734,11 @@ describe("FeedRepository", () => {
         });
         expect(await getFilteredTxHashes(VOTER.toLowerCase())).toEqual({
           txHashes: ["0xv1"],
+          totalCount: 1,
+        });
+        // Stored lowercase, queried checksummed.
+        expect(await getFilteredTxHashes(getAddress(RECIPIENT))).toEqual({
+          txHashes: ["0xt1"],
           totalCount: 1,
         });
       });
