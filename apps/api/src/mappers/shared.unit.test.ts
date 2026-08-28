@@ -75,6 +75,18 @@ describe("AddressQueryArraySchema", () => {
       AddressQueryArraySchema.parse([SAMPLE_ADDRESS, SAMPLE_ADDRESS_2]),
     ).toEqual([getAddress(SAMPLE_ADDRESS), getAddress(SAMPLE_ADDRESS_2)]);
   });
+
+  it("splits a comma-delimited string into addresses", () => {
+    expect(
+      AddressQueryArraySchema.parse(`${SAMPLE_ADDRESS},${SAMPLE_ADDRESS_2}`),
+    ).toEqual([getAddress(SAMPLE_ADDRESS), getAddress(SAMPLE_ADDRESS_2)]);
+  });
+
+  it("rejects when any comma-delimited element is invalid", () => {
+    expect(() =>
+      AddressQueryArraySchema.parse(`${SAMPLE_ADDRESS},bad`),
+    ).toThrow();
+  });
 });
 
 describe("normalizeQueryArray", () => {

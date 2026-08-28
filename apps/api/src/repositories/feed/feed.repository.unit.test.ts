@@ -730,6 +730,19 @@ describe("FeedRepository", () => {
         });
       });
 
+      it("combines the address filter with a type filter", async () => {
+        const result = await repository.getFeedEvents(
+          defaultFeedParams({
+            address: VOTER as `0x${string}`,
+            type: [FeedEventType.VOTE, FeedEventType.TRANSFER],
+          }),
+          defaultThresholds(),
+        );
+
+        expect(result.items.map((i) => i.txHash)).toEqual(["0xv1"]);
+        expect(result.totalCount).toBe(1);
+      });
+
       it("returns nothing for an address not present in any event", async () => {
         expect(
           await getFilteredTxHashes(

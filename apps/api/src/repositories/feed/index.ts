@@ -70,12 +70,19 @@ export class FeedRepository {
       address,
     } = req;
 
-    const relevanceFilter = this.buildRelevanceFilter(type, valueThresholds);
+    const selectedTypes =
+      type && type.length > 0
+        ? type
+        : (Object.keys(valueThresholds) as FeedEventType[]);
+    const relevanceFilter = this.buildRelevanceFilter(
+      selectedTypes,
+      valueThresholds,
+    );
 
     const where = and(
       fromDate ? gte(feedEvent.timestamp, fromDate) : undefined,
       toDate ? lte(feedEvent.timestamp, toDate) : undefined,
-      address ? this.buildAddressFilter(address) : undefined,
+      address ? this.buildAddressFilter(address, selectedTypes) : undefined,
       relevanceFilter,
     );
 
@@ -433,60 +440,74 @@ export class FeedRepository {
   // feed_event has no account column, so addresses are matched in the source
   // table each event type is derived from, keyed by (tx_hash, log_index).
   // Lowercased on both sides because source tables may store checksummed
-  // addresses. feed_event columns use Drizzle refs so they follow whatever
-  // alias the query builder assigns (see the proposerVotingPower note above).
-  private buildAddressFilter(address: string): SQL {
+  // addresses. The subqueries are deliberately uncorrelated: Postgres runs
+  // each one once and hashes the result, instead of probing the source table
+  // for every feed_event row — correlated EXISTS here timed out on large
+  // DAOs. Only the branches for the requested event types are built, so a
+  // type-filtered request never scans the other source tables. feed_event
+  // columns use Drizzle refs so they follow whatever alias the query builder
+  // assigns (see the proposerVotingPower note above).
+  private buildAddressFilter(
+    address: string,
+    selectedTypes: FeedEventType[],
+  ): SQL | undefined {
     const addr = address.toLowerCase();
-    return sql`(
-      (${feedEvent.type} = 'DELEGATION' AND EXISTS (
-        SELECT 1 FROM delegations d
-        WHERE d.transaction_hash = ${feedEvent.txHash}
-          AND d.log_index = ${feedEvent.logIndex}
-          AND (
-            LOWER(d.delegator_account_id) = ${addr}
+    const types =
+      selectedTypes.length > 0
+        ? selectedTypes
+        : (Object.values(FeedEventType) as FeedEventType[]);
+
+    const branches: SQL[] = [];
+    if (types.includes(FeedEventType.DELEGATION)) {
+      branches.push(sql`(${feedEvent.type} = 'DELEGATION'
+        AND (${feedEvent.txHash}, ${feedEvent.logIndex}) IN (
+          SELECT d.transaction_hash, d.log_index FROM delegations d
+          WHERE LOWER(d.delegator_account_id) = ${addr}
             OR LOWER(d.delegate_account_id) = ${addr}
             OR LOWER(d.previous_delegate) = ${addr}
-          )
-      ))
-      OR (${feedEvent.type} = 'TRANSFER' AND EXISTS (
-        SELECT 1 FROM transfers t
-        WHERE t.transaction_hash = ${feedEvent.txHash}
-          AND t.log_index = ${feedEvent.logIndex}
-          AND (
-            LOWER(t.from_account_id) = ${addr}
+      ))`);
+    }
+    if (types.includes(FeedEventType.TRANSFER)) {
+      branches.push(sql`(${feedEvent.type} = 'TRANSFER'
+        AND (${feedEvent.txHash}, ${feedEvent.logIndex}) IN (
+          SELECT t.transaction_hash, t.log_index FROM transfers t
+          WHERE LOWER(t.from_account_id) = ${addr}
             OR LOWER(t.to_account_id) = ${addr}
-          )
-      ))
-      OR (${feedEvent.type} = 'VOTE' AND EXISTS (
-        SELECT 1 FROM votes_onchain v
-        WHERE v.tx_hash = ${feedEvent.txHash}
-          AND v.log_index = ${feedEvent.logIndex}
-          AND LOWER(v.voter_account_id) = ${addr}
-      ))
-      OR (${feedEvent.type} = 'PROPOSAL' AND EXISTS (
-        SELECT 1 FROM proposals_onchain p
-        WHERE p.tx_hash = ${feedEvent.txHash}
-          AND LOWER(p.proposer_account_id) = ${addr}
-      ))
-      OR (${feedEvent.type} = 'PROPOSAL_EXTENDED'
+      ))`);
+    }
+    if (types.includes(FeedEventType.VOTE)) {
+      branches.push(sql`(${feedEvent.type} = 'VOTE'
+        AND (${feedEvent.txHash}, ${feedEvent.logIndex}) IN (
+          SELECT v.tx_hash, v.log_index FROM votes_onchain v
+          WHERE LOWER(v.voter_account_id) = ${addr}
+      ))`);
+    }
+    if (types.includes(FeedEventType.PROPOSAL)) {
+      branches.push(sql`(${feedEvent.type} = 'PROPOSAL'
+        AND ${feedEvent.txHash} IN (
+          SELECT p.tx_hash FROM proposals_onchain p
+          WHERE LOWER(p.proposer_account_id) = ${addr}
+      ))`);
+    }
+    if (types.includes(FeedEventType.PROPOSAL_EXTENDED)) {
+      branches.push(sql`(${feedEvent.type} = 'PROPOSAL_EXTENDED'
         AND ${feedEvent.proposalId} IS NOT NULL
-        AND EXISTS (
-          SELECT 1 FROM proposals_onchain p
-          WHERE p.id = ${feedEvent.proposalId}
-            AND LOWER(p.proposer_account_id) = ${addr}
-      ))
-    )`;
+        AND ${feedEvent.proposalId} IN (
+          SELECT p.id FROM proposals_onchain p
+          WHERE LOWER(p.proposer_account_id) = ${addr}
+      ))`);
+    }
+
+    return branches.length > 0
+      ? sql`(${sql.join(branches, sql.raw(" OR "))})`
+      : undefined;
   }
 
   private buildRelevanceFilter(
-    types: FeedEventType[] | undefined,
+    selectedTypes: FeedEventType[],
     valueThresholds: Partial<Record<FeedEventType, bigint>>,
   ): SQL | undefined {
     const conditions: SQL[] = [];
-    const selectedTypes =
-      types && types.length > 0
-        ? types
-        : (Object.keys(valueThresholds) as FeedEventType[]);
 
     for (const eventType of selectedTypes) {
       const threshold = valueThresholds[eventType];
