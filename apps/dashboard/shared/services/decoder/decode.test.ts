@@ -14,7 +14,10 @@ import {
 } from "@/shared/services/decoder/__fixtures__/calldata";
 import { createAbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
 import { createUploadedAbiStore } from "@/shared/services/decoder/abi/uploadedStore";
-import { decodeCalldata } from "@/shared/services/decoder/decode";
+import {
+  decodeCalldata,
+  isDegradedDecode,
+} from "@/shared/services/decoder/decode";
 
 // Every external source empty: only known selectors and uploads resolve.
 const offlineResolver = createAbiResolver({
@@ -247,6 +250,28 @@ describe("multicall unpacking", () => {
     ]);
   });
 
+  test("a colliding non-wrapper resolution never enters a wrapper detector", async () => {
+    // Simulate a target whose own ABI resolves the aggregate((address,bytes)[])
+    // selector to an unrelated function: the detector must not run, so the
+    // extractor cannot crash on an argument list with a different shape.
+    const AGGREGATE_SELECTOR = AGGREGATE3_BATCH.slice(0, 10);
+    const collidingFn = parseAbi(["function foo(bytes32 x)"])[0];
+    const collisionResolver = async () => ({
+      source: "verified" as const,
+      fn: collidingFn,
+      signature: "foo(bytes32)",
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: AGGREGATE3_BATCH },
+      collisionResolver,
+    );
+    expect(AGGREGATE_SELECTOR).toBe(node.selector);
+    expect(node.signature).toBe("foo(bytes32)");
+    expect(node.subcalls).toBeUndefined();
+    expect(node.summary).toBeNull();
+  });
+
   test("a lazy nested decode continues from its parent depth", async () => {
     const node = await decodeCalldata(
       { chainId: 1, calldata: USDC_TRANSFER, target: USDC },
@@ -254,6 +279,32 @@ describe("multicall unpacking", () => {
       { startDepth: 3 },
     );
     expect(node.depth).toBe(3);
+  });
+});
+
+describe("isDegradedDecode", () => {
+  test("a full ABI decode is not degraded", async () => {
+    const node = await decode(USDC_TRANSFER, { target: USDC });
+    expect(isDegradedDecode(node)).toBe(false);
+  });
+
+  test("word-guess fallback and errors are degraded", async () => {
+    const guessed = await decode(`0xdeadbeef${"1".padStart(64, "0")}`);
+    expect(isDegradedDecode(guessed)).toBe(true);
+    const malformed = await decode("0xdeadbeef123");
+    expect(isDegradedDecode(malformed)).toBe(true);
+  });
+
+  test("an empty-calldata ETH transfer is not degraded", async () => {
+    const node = await decode("0x", { target: RECIPIENT, value: 1n });
+    expect(isDegradedDecode(node)).toBe(false);
+  });
+
+  test("a degraded nested subcall degrades the whole tree", async () => {
+    const unknownInner = `0xdeadbeef${"1".padStart(64, "0")}` as Hex;
+    const node = await decode(safeExecTransaction(USDC, unknownInner));
+    expect(node.functionName).toBe("execTransaction");
+    expect(isDegradedDecode(node)).toBe(true);
   });
 });
 

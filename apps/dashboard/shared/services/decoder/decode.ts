@@ -240,9 +240,12 @@ const decodeNode = async (
     }
   }
 
-  // 8. Multicall unpacking, bounded by depth and node budget.
+  // 8. Multicall unpacking, bounded by depth and node budget. The detector
+  // must match the RESOLVED signature, not just the selector: a target's own
+  // ABI can resolve a colliding selector to an unrelated function whose args
+  // would crash the wrapper's extractor.
   const detector = getDetector(node.selector);
-  if (detector) {
+  if (detector && node.signature === detector.signature) {
     if (detector.warningsFor) node.warnings.push(...detector.warningsFor(args));
     const extracted = detector.extract(args);
     node.subcalls = [];
@@ -294,6 +297,18 @@ const decodeNode = async (
 
   node.summary = summarize(node);
   return node;
+};
+
+/**
+ * True when any node in the tree fell back past the ABI sources (guessed
+ * words or a decode error). Callers use this to cache such results briefly
+ * instead of forever: a transient Etherscan/OpenChain outage degrades to a
+ * word-guess, and the real decode must be obtainable once the service is back.
+ */
+export const isDegradedDecode = (node: DecodedCall): boolean => {
+  if (node.error !== undefined) return true;
+  if (node.selector !== null && node.abiSource === "none") return true;
+  return node.subcalls?.some(isDegradedDecode) ?? false;
 };
 
 /**

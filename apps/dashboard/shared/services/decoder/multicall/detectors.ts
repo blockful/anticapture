@@ -1,6 +1,7 @@
 import {
   parseAbiItem,
   toFunctionSelector,
+  toFunctionSignature,
   type AbiFunction,
   type Address,
   type Hex,
@@ -25,6 +26,12 @@ export type MulticallDetector = {
     | "timelock-execute"
     | "timelock-executeBatch"
     | "governor-relay";
+  /**
+   * Canonical signature of the wrapper. Callers must only run a detector when
+   * the RESOLVED signature matches: a target's own ABI can resolve a colliding
+   * selector to an unrelated function whose args would crash the extractor.
+   */
+  signature: string;
   /** Verb for the parent summary: "Executes N calls" / "Schedules N calls". */
   verb: "Executes" | "Schedules";
   extract: (args: readonly unknown[]) => ExtractedSubcall[];
@@ -66,7 +73,7 @@ const batch = (
 
 const DETECTOR_DEFINITIONS: Array<{
   signature: string;
-  detector: MulticallDetector;
+  detector: Omit<MulticallDetector, "signature">;
 }> = [
   {
     signature:
@@ -178,10 +185,10 @@ export const getDetector = (selector: Hex): MulticallDetector | null => {
     detectorsBySelector = new Map();
     for (const { signature, detector } of DETECTOR_DEFINITIONS) {
       const fn = parseAbiItem(signature) as AbiFunction;
-      detectorsBySelector.set(
-        toFunctionSelector(fn).toLowerCase() as Hex,
-        detector,
-      );
+      detectorsBySelector.set(toFunctionSelector(fn).toLowerCase() as Hex, {
+        ...detector,
+        signature: toFunctionSignature(fn),
+      });
     }
   }
   return detectorsBySelector.get(selector.toLowerCase() as Hex) ?? null;

@@ -6,10 +6,17 @@ import { isHex, keccak256, type Address, type Hex } from "viem";
 
 import { createAbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
 import type { UploadedAbiStore } from "@/shared/services/decoder/abi/uploadedStore";
-import { decodeCalldata } from "@/shared/services/decoder/decode";
+import {
+  decodeCalldata,
+  isDegradedDecode,
+} from "@/shared/services/decoder/decode";
 import type { DecodedCall } from "@/shared/services/decoder/types";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+// A decode that fell back to guessed words may just have hit an Etherscan or
+// OpenChain outage; keep it fresh only briefly so remounts and window focus
+// can obtain the real decode once the service recovers.
+const DEGRADED_STALE_TIME_MS = 30 * 1000;
 
 /**
  * Calldata never changes for a given hash, so the query key carries a digest
@@ -68,9 +75,15 @@ export const useDecodedCalldata = ({
         { startDepth },
       ),
     enabled: enabled && calldata !== null,
-    staleTime: Infinity,
+    // Calldata is immutable, so a full decode is authoritative forever; only
+    // degraded results (word-guess fallback, decode error) expire.
+    staleTime: (query) =>
+      query.state.data && isDegradedDecode(query.state.data)
+        ? DEGRADED_STALE_TIME_MS
+        : Infinity,
     gcTime: DAY_IN_MS,
     retry: false,
-    refetchOnWindowFocus: false,
+    // Only stale (degraded) decodes ever refetch on focus.
+    refetchOnWindowFocus: true,
   });
 };

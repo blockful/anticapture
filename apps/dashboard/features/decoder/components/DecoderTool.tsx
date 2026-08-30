@@ -12,6 +12,7 @@ import { DecoderInputPanel } from "@/features/decoder/components/DecoderInputPan
 import {
   isValidCalldataInput,
   normalizeCalldataInput,
+  PERMALINK_CALLDATA_LIMIT,
 } from "@/features/decoder/utils/calldataInput";
 import { decoderParsers } from "@/features/decoder/utils/decoderSearchParams";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
@@ -41,6 +42,24 @@ export const DecoderTool = () => {
   const [{ calldata, address, chainId }, setParams] =
     useQueryStates(decoderParsers);
 
+  // Calldata past the permalink limit lives here instead of the URL: request
+  // lines have practical size caps, and a permalink that cannot open is worse
+  // than no permalink. The UI says so next to the copy affordance.
+  const [oversizedCalldata, setOversizedCalldata] = useState<string | null>(
+    null,
+  );
+  const calldataInput = oversizedCalldata ?? calldata;
+
+  const handleCalldataChange = (value: string) => {
+    if (value.length > PERMALINK_CALLDATA_LIMIT) {
+      setOversizedCalldata(value);
+      if (calldata) void setParams({ calldata: "" });
+    } else {
+      setOversizedCalldata(null);
+      void setParams({ calldata: value });
+    }
+  };
+
   // The store version is React state so a new upload re-renders and re-keys
   // the decode query.
   const [, setStoreVersion] = useState(0);
@@ -49,7 +68,7 @@ export const DecoderTool = () => {
     [],
   );
 
-  const normalized = normalizeCalldataInput(calldata);
+  const normalized = normalizeCalldataInput(calldataInput);
   const hasInput = normalized.length > 0;
   const inputValid = !hasInput || isValidCalldataInput(normalized);
   const trimmedAddress = address.trim();
@@ -88,10 +107,16 @@ export const DecoderTool = () => {
           <h1 className="text-primary font-mono text-sm font-medium uppercase leading-5 tracking-wider">
             {"// "}Calldata decoder
           </h1>
-          <CopyRawButton
-            label="copy permalink"
-            getTextToCopy={() => window.location.href}
-          />
+          {oversizedCalldata === null ? (
+            <CopyRawButton
+              label="copy permalink"
+              getTextToCopy={() => window.location.href}
+            />
+          ) : (
+            <span className="text-dimmed font-mono text-xs uppercase leading-4 tracking-wider">
+              permalink unavailable: calldata exceeds the URL limit
+            </span>
+          )}
         </div>
         <p className="text-secondary text-sm">
           Decode any calldata into typed, human-readable parameters. Nested
@@ -100,7 +125,7 @@ export const DecoderTool = () => {
       </div>
 
       <DecoderInputPanel
-        calldata={calldata}
+        calldata={calldataInput}
         address={address}
         chainId={chainId}
         calldataError={
@@ -109,7 +134,7 @@ export const DecoderTool = () => {
             : "Must be 0x-prefixed hex with an even number of characters."
         }
         addressError={addressValid ? null : "Not a valid address."}
-        onCalldataChange={(value) => void setParams({ calldata: value })}
+        onCalldataChange={handleCalldataChange}
         onAddressChange={(value) => void setParams({ address: value })}
         onChainIdChange={(value) => void setParams({ chainId: value })}
         onAbiChange={handleAbiChange}
