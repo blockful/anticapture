@@ -63,7 +63,17 @@ export const AddressChip = ({
     </span>
   );
 
-  const chip = (
+  const avatar = (
+    <EnsAvatar
+      address={address}
+      size={size}
+      variant="square"
+      showName={false}
+      withDetailsTooltip={false}
+    />
+  );
+
+  return (
     <span
       className={cn(
         "bg-surface-default inline-flex max-w-full items-center gap-1.5 border border-transparent px-1 py-0.5",
@@ -71,13 +81,21 @@ export const AddressChip = ({
         className,
       )}
     >
-      <EnsAvatar
-        address={address}
-        size={size}
-        variant="square"
-        showName={false}
-        withDetailsTooltip={false}
-      />
+      {/* The tooltip trigger renders as a <button>, so it may only wrap the
+          avatar: the copy control and the explorer link are interactive
+          themselves and nesting them in a button is invalid HTML. */}
+      <span className="hidden md:contents">
+        <AddressDetailsTooltip
+          address={address}
+          arkhamData={arkham}
+          ens={ens}
+          isContract={isContract}
+          isLoading={isLoading}
+        >
+          {avatar}
+        </AddressDetailsTooltip>
+      </span>
+      <span className="contents md:hidden">{avatar}</span>
       {explorerUrl ? (
         <a
           href={`${explorerUrl}/address/${address}`}
@@ -108,22 +126,5 @@ export const AddressChip = ({
         customTooltipText={{ default: "Copy address", copied: "copied ✓" }}
       />
     </span>
-  );
-
-  return (
-    <>
-      <span className="hidden md:contents">
-        <AddressDetailsTooltip
-          address={address}
-          arkhamData={arkham}
-          ens={ens}
-          isContract={isContract}
-          isLoading={isLoading}
-        >
-          {chip}
-        </AddressDetailsTooltip>
-      </span>
-      <span className="contents md:hidden">{chip}</span>
-    </>
   );
 };
