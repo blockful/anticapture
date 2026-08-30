@@ -337,6 +337,47 @@ describe("multicall unpacking", () => {
     }
   });
 
+  test("unused sibling shares are reclaimed so maxNodes is a total cap", async () => {
+    // One flat transfer plus one two-call inner batch under maxNodes 4: the
+    // whole tree is exactly four subcall nodes, so nothing may be hidden and
+    // no truncation warning may appear anywhere.
+    const MULTICALL3_ABI = parseAbi([
+      "function aggregate3((address target, bool allowFailure, bytes callData)[] calls)",
+    ]);
+    const inner = encodeFunctionData({
+      abi: MULTICALL3_ABI,
+      functionName: "aggregate3",
+      args: [
+        [
+          { target: USDC, allowFailure: false, callData: USDC_TRANSFER },
+          { target: USDC, allowFailure: false, callData: USDC_TRANSFER },
+        ],
+      ],
+    });
+    const outer = encodeFunctionData({
+      abi: MULTICALL3_ABI,
+      functionName: "aggregate3",
+      args: [
+        [
+          { target: USDC, allowFailure: false, callData: USDC_TRANSFER },
+          { target: MULTICALL3, allowFailure: false, callData: inner },
+        ],
+      ],
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: outer },
+      offlineResolver,
+      { maxNodes: 4 },
+    );
+    expect(node.subcalls?.map((s) => s.subcalls?.length ?? 0)).toEqual([0, 2]);
+    const allWarnings = [
+      ...node.warnings,
+      ...(node.subcalls?.flatMap((s) => s.warnings) ?? []),
+    ];
+    expect(allWarnings).toEqual([]);
+  });
+
   test("the node budget caps fan-out", async () => {
     const node = await decodeCalldata(
       { chainId: 1, calldata: AGGREGATE3_BATCH, target: MULTICALL3 },

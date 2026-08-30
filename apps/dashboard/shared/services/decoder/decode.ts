@@ -323,12 +323,13 @@ const decodeNode = async (
     budget.nodesLeft = 0;
     const base = jobCount > 0 ? Math.floor(remaining / jobCount) : 0;
     let extra = jobCount > 0 ? remaining % jobCount : 0;
-    const childBudgets = slots.map((slot) => {
-      if (!("subcall" in slot)) return { nodesLeft: 0 };
+    const shares = slots.map((slot) => {
+      if (!("subcall" in slot)) return 0;
       const share = base + (extra > 0 ? 1 : 0);
       if (extra > 0) extra -= 1;
-      return { nodesLeft: share };
+      return share;
     });
+    const childBudgets = shares.map((share) => ({ nodesLeft: share }));
 
     const decoded = new Array<DecodedCall & { index: number }>(slots.length);
     let cursor = 0;
@@ -359,6 +360,37 @@ const decodeNode = async (
       },
     );
     await Promise.all(workers);
+
+    // Second pass: reclaim unused shares so maxNodes stays a TOTAL cap, not a
+    // per-branch quota. Flat siblings leave their whole share untouched;
+    // children that exhausted theirs are re-decoded sequentially in source
+    // order (deterministic) with the pooled leftovers plus their original
+    // share credited back, since the retry replaces their entire subtree.
+    // Re-decoding is cheap: the resolver memoizes every fetch per instance.
+    let pool = childBudgets.reduce((sum, child) => sum + child.nodesLeft, 0);
+    for (let position = 0; position < slots.length; position++) {
+      if (pool <= 0) break;
+      const slot = slots[position];
+      if (!("subcall" in slot)) continue;
+      if (childBudgets[position].nodesLeft > 0) continue;
+      const retryBudget = { nodesLeft: pool + shares[position] };
+      const child = await decodeNode(
+        {
+          chainId: input.chainId,
+          target: slot.subcall.target,
+          calldata: slot.subcall.calldata,
+          value: slot.subcall.value,
+        },
+        resolveAbi,
+        opts,
+        depth + 1,
+        retryBudget,
+      );
+      decoded[position] = { ...child, index: slot.index };
+      // Whatever the retry did not use returns for the next truncated sibling.
+      pool = retryBudget.nodesLeft;
+    }
+
     node.subcalls = decoded;
   }
 
