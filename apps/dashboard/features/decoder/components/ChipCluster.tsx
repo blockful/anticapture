@@ -4,6 +4,7 @@ import type { AbiSource } from "@/features/decoder/types";
 const ABI_SOURCE_LABEL: Record<Exclude<AbiSource, "none">, string> = {
   verified: "ABI · VERIFIED",
   uploaded: "ABI · UPLOADED",
+  known: "ABI · KNOWN",
   openchain: "ABI · OPENCHAIN",
 };
 

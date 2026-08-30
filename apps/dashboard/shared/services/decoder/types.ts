@@ -1,6 +1,13 @@
 import type { Address, Hex } from "viem";
 
-export type AbiSource = "verified" | "uploaded" | "openchain" | "none";
+export type AbiSource =
+  | "verified"
+  | "uploaded"
+  /** Canonical well-known signature (ERC20, Safe, Multicall3, Timelock…):
+   *  trusted shape, but not proof of what the target actually implements. */
+  | "known"
+  | "openchain"
+  | "none";
 
 export type Humanized =
   | { kind: "duration"; text: string }

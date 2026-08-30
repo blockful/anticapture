@@ -17,7 +17,7 @@ import type { UploadedAbiStore } from "@/shared/services/decoder/abi/uploadedSto
 import type { DecodeWarning } from "@/shared/services/decoder/types";
 
 export type ResolvedAbi = {
-  source: "verified" | "uploaded" | "openchain";
+  source: "verified" | "uploaded" | "known" | "openchain";
   fn: AbiFunction;
   signature: string;
   warning?: DecodeWarning;
@@ -94,7 +94,14 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
       const key = `${ctx.chainId}:${ctx.target.toLowerCase()}`;
       let pending = verifiedAbis.get(key);
       if (!pending) {
-        pending = fetchVerified(ctx.chainId, ctx.target);
+        // Null covers both "not verified" and transport failure, and the two
+        // are indistinguishable here; evict so a later refetch (the hook
+        // expires degraded decodes) can try again instead of replaying the
+        // memoized failure for the resolver's lifetime.
+        pending = fetchVerified(ctx.chainId, ctx.target).then((result) => {
+          if (result === null) verifiedAbis.delete(key);
+          return result;
+        });
         verifiedAbis.set(key, pending);
       }
       abi = await pending;
@@ -119,7 +126,12 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
     const key = ctx.selector.toLowerCase();
     let pending = openchainSignatures.get(key);
     if (!pending) {
-      pending = fetchSignatures(ctx.selector);
+      // An empty list may be a transient OpenChain failure; evict it so the
+      // next resolution retries instead of replaying the failure forever.
+      pending = fetchSignatures(ctx.selector).then((result) => {
+        if (result.length === 0) openchainSignatures.delete(key);
+        return result;
+      });
       openchainSignatures.set(key, pending);
     }
     const signatures = await pending;
@@ -159,7 +171,10 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
     // not fit the canonical shape, fall through to OpenChain instead of
     // presenting a decode error for the wrong function.
     if (!fn || !decodes(fn, ctx.calldata)) return null;
-    return { source: "verified", fn, signature: toFunctionSignature(fn) };
+    // "known", not "verified": a canonical shape is trusted, but it is not
+    // proof of what the target implements, and it may be standing in for a
+    // verified lookup that transiently failed.
+    return { source: "known", fn, signature: toFunctionSignature(fn) };
   };
 
   return async (ctx) => {

@@ -308,6 +308,10 @@ const decodeNode = async (
 export const isDegradedDecode = (node: DecodedCall): boolean => {
   if (node.error !== undefined) return true;
   if (node.selector !== null && node.abiSource === "none") return true;
+  // A known-table decode WITH a target may be standing in for a verified
+  // lookup that transiently failed, so it stays refresh-eligible. Without a
+  // target no verified ABI can ever exist and the canonical shape is final.
+  if (node.abiSource === "known" && node.target !== undefined) return true;
   return node.subcalls?.some(isDegradedDecode) ?? false;
 };
 

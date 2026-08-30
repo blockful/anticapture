@@ -78,9 +78,28 @@ describe("createAbiResolver", () => {
     });
 
     const resolved = await resolver(ctx);
-    expect(resolved?.source).toBe("verified");
+    expect(resolved?.source).toBe("known");
     expect(resolved?.signature).toBe("transfer(address,uint256)");
     expect(fetchSignatures).not.toHaveBeenCalled();
+  });
+
+  test("a failed verified lookup is retried on the next resolution", async () => {
+    // First call fails (null), second succeeds: the resolver must not replay
+    // the memoized failure forever.
+    const fetchVerifiedAbi = jest
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValue([...TRANSFER_ABI]);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi,
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+    });
+
+    const first = await resolver(ctx);
+    expect(first?.source).toBe("known"); // degraded round: canonical fallback
+    const second = await resolver(ctx);
+    expect(second?.source).toBe("verified");
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
   });
 
   test("the target's verified ABI outranks the known table on collisions", async () => {

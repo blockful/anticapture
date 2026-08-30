@@ -73,6 +73,15 @@ describe("humanizeTokenAmount", () => {
   test("fractional amounts trim to 4 digits", () => {
     expect(humanizeTokenAmount(1_234_567n, 6, "USDC").text).toBe("1.2345 USDC");
   });
+
+  test("nonzero dust below display precision never reads as zero", () => {
+    expect(humanizeTokenAmount(1n, 6, "USDC").text).toBe("< 0.0001 USDC");
+    expect(humanizeEtherValue(1n).text).toBe("< 0.0001 ETH");
+  });
+
+  test("an actual zero still reads as zero", () => {
+    expect(humanizeTokenAmount(0n, 6, "USDC").text).toBe("0 USDC");
+  });
 });
 
 describe("humanizeEtherValue", () => {
@@ -97,11 +106,27 @@ describe("humanizeLeaf", () => {
 
   test("duration applies with a name hint", () => {
     const result = humanizeLeaf(
-      { type: "uint256", name: "votingPeriod" },
+      { type: "uint256", name: "gracePeriod" },
       604_800n,
     );
     expect(result?.kind).toBe("duration");
     expect(result?.text).toBe("1 week = 604,800 seconds");
+  });
+
+  test("governor clock params never read as seconds", () => {
+    // votingPeriod/votingDelay are commonly block counts; 5,760 blocks must
+    // not render as "96 minutes = 5,760 seconds".
+    const byName = humanizeLeaf(
+      { type: "uint256", name: "votingPeriod" },
+      5_760n,
+    );
+    expect(byName?.kind ?? "none").not.toBe("duration");
+
+    const bySetter = humanizeLeaf(
+      { type: "uint256", name: "newValue", functionName: "setVotingPeriod" },
+      5_760n,
+    );
+    expect(bySetter?.kind ?? "none").not.toBe("duration");
   });
 
   test("duration applies for known setter functions without a name hint", () => {

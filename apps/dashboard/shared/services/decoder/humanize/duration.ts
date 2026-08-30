@@ -7,13 +7,18 @@ import type { Humanized } from "@/shared/services/decoder/types";
  */
 export const DURATION_NAME_HINT = /delay|duration|period|deadline$|eta$/i;
 
-/** Known setters whose single uint argument is always a duration in seconds. */
-export const DURATION_FUNCTION_HINT = new Set([
-  "updateDelay",
-  "setVotingDelay",
-  "setVotingPeriod",
-  "setDelay",
-]);
+/**
+ * Governor clock parameters (votingDelay, votingPeriod, …) are commonly block
+ * counts, not seconds — the dashboard itself converts them with blockTime.
+ * Rendering "5,760 blocks" as "96 minutes = 5,760 seconds" would be a lie, so
+ * anything voting-scoped is excluded from the seconds humanizer.
+ */
+export const DURATION_NAME_EXCLUDE = /voting/i;
+
+/** Known setters whose single uint argument is always a duration in seconds
+ *  (OZ TimelockController semantics). Governor voting setters stay out: their
+ *  unit depends on the governor's clock mode. */
+export const DURATION_FUNCTION_HINT = new Set(["updateDelay", "setDelay"]);
 
 const UNITS: Array<{ label: string; seconds: bigint }> = [
   { label: "year", seconds: 31_536_000n },

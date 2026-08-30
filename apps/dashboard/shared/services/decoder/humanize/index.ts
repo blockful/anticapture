@@ -1,5 +1,6 @@
 import {
   DURATION_FUNCTION_HINT,
+  DURATION_NAME_EXCLUDE,
   DURATION_NAME_HINT,
   humanizeDuration,
 } from "@/shared/services/decoder/humanize/duration";
@@ -43,10 +44,15 @@ export const humanizeLeaf = (
     if (timestamp) return timestamp;
   }
 
-  const isDurationParam =
-    DURATION_NAME_HINT.test(ctx.name) ||
+  const votingScoped =
+    DURATION_NAME_EXCLUDE.test(ctx.name) ||
     (ctx.functionName !== undefined &&
-      DURATION_FUNCTION_HINT.has(ctx.functionName));
+      DURATION_NAME_EXCLUDE.test(ctx.functionName));
+  const isDurationParam =
+    !votingScoped &&
+    (DURATION_NAME_HINT.test(ctx.name) ||
+      (ctx.functionName !== undefined &&
+        DURATION_FUNCTION_HINT.has(ctx.functionName)));
   if (isDurationParam) {
     const duration = humanizeDuration(value);
     if (duration) return duration;

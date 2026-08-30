@@ -33,7 +33,7 @@ const decode = (
 describe("decodeCalldata basics", () => {
   test("an ERC20 transfer decodes via the known-selector table", async () => {
     const node = await decode(USDC_TRANSFER, { target: USDC });
-    expect(node.abiSource).toBe("verified");
+    expect(node.abiSource).toBe("known");
     expect(node.functionName).toBe("transfer");
     expect(node.signature).toBe("transfer(address,uint256)");
     expect(node.params).toHaveLength(2);
@@ -283,9 +283,34 @@ describe("multicall unpacking", () => {
 });
 
 describe("isDegradedDecode", () => {
-  test("a full ABI decode is not degraded", async () => {
-    const node = await decode(USDC_TRANSFER, { target: USDC });
+  test("an uploaded (or verified) ABI decode is not degraded", async () => {
+    const uploaded = createUploadedAbiStore();
+    uploaded.set([
+      ...parseAbi(["function transfer(address to, uint256 amount)"]),
+    ]);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+      uploaded,
+    });
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: USDC_TRANSFER, target: USDC },
+      resolver,
+    );
+    expect(node.abiSource).toBe("uploaded");
     expect(isDegradedDecode(node)).toBe(false);
+  });
+
+  test("a known-table decode with a target stays refresh-eligible", async () => {
+    // The verified lookup may have transiently failed; the canonical shape is
+    // trusted for display but must not be cached as final.
+    const withTarget = await decode(USDC_TRANSFER, { target: USDC });
+    expect(withTarget.abiSource).toBe("known");
+    expect(isDegradedDecode(withTarget)).toBe(true);
+
+    // Without a target no verified ABI can ever exist: the decode is final.
+    const withoutTarget = await decode(USDC_TRANSFER);
+    expect(isDegradedDecode(withoutTarget)).toBe(false);
   });
 
   test("word-guess fallback and errors are degraded", async () => {
