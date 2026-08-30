@@ -36,7 +36,7 @@ type EtherscanResponse = {
  * - the contract is not verified on Etherscan
  * - the response is malformed
  */
-export const fetchAbi = async (
+export const fetchVerifiedAbi = async (
   chainId: number,
   address: string,
 ): Promise<Abi | null> => {

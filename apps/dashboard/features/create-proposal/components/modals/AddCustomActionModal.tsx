@@ -22,15 +22,11 @@ import { Textarea } from "@/shared/components/design-system/form/fields/textarea
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { Spinner } from "@/shared/components/design-system/spinner/Spinner";
-import daoConfig from "@/shared/dao-config";
 import { isAddressLike } from "@/shared/utils/address";
 import { fetchAddressFromEnsName, isEnsAddress } from "@/shared/utils/ens";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { lookupDaoContractAbi } from "@/shared/services/decoder/abi/bundledAbis";
+import { parseAbiJson } from "@/shared/services/decoder/abi/parseAbiJson";
 import type { CustomAction } from "@/features/create-proposal/types";
-import {
-  fetchAbi,
-  parseAbiStrict,
-} from "@/features/create-proposal/utils/fetchAbi";
 import { ArgInput } from "@/features/create-proposal/components/custom-action/ArgInput";
 import {
   argsToTrees,
@@ -42,14 +38,9 @@ import {
   type ArgValue,
 } from "@/features/create-proposal/utils/argTree";
 import { isArgComplete } from "@/features/create-proposal/utils/argIssues";
-import ensGovernorAbi from "@/abis/ens-governor.json";
 
 type Step = 1 | 2;
 type ConfigMode = "fetch" | "calldata";
-
-const BUNDLED_GOVERNOR_ABIS: Partial<Record<DaoIdEnum, unknown>> = {
-  ENS: ensGovernorAbi,
-};
 
 interface AddCustomActionModalProps {
   open: boolean;
@@ -58,45 +49,6 @@ interface AddCustomActionModalProps {
   onSubmit: (action: CustomAction) => void;
   initialValue?: CustomAction;
 }
-
-const bundledAbisByAddress = (daoId: string): Record<string, Abi> => {
-  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const bundledGovernorAbi = BUNDLED_GOVERNOR_ABIS[daoIdEnum];
-  if (!bundledGovernorAbi) return {};
-  const governor = daoConfig[daoIdEnum]?.daoOverview?.contracts?.governor;
-  if (!governor) return {};
-  const validated = parseAbiStrict(bundledGovernorAbi);
-  if (!validated) return {};
-  return { [governor.toLowerCase()]: validated };
-};
-
-const lookupAbi = (daoId: string, address: string): Promise<Abi | null> => {
-  const bundled = bundledAbisByAddress(daoId)[address.toLowerCase()];
-  if (bundled) return Promise.resolve(bundled);
-  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const chainId = daoConfig[daoIdEnum]?.daoOverview?.chain?.id;
-  if (!chainId) return Promise.resolve(null);
-  return fetchAbi(chainId, address);
-};
-
-const parseAbiJson = (text: string): Abi | null => {
-  try {
-    const parsed: unknown = JSON.parse(text);
-    if (Array.isArray(parsed)) {
-      return parseAbiStrict(parsed);
-    }
-    if (
-      parsed &&
-      typeof parsed === "object" &&
-      Array.isArray((parsed as { abi?: unknown }).abi)
-    ) {
-      return parseAbiStrict((parsed as { abi: unknown[] }).abi);
-    }
-    return null;
-  } catch {
-    return null;
-  }
-};
 
 export const AddCustomActionModal = ({
   open,
@@ -245,7 +197,7 @@ export const AddCustomActionModal = ({
       if (!isRawAddress) {
         setContractAddress(resolved);
       }
-      const found = await lookupAbi(daoId, resolved);
+      const found = await lookupDaoContractAbi(daoId, resolved);
       if (found) {
         setAbiText(JSON.stringify(found, null, 2));
       } else {
