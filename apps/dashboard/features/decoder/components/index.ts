@@ -1,5 +1,6 @@
 export { AddressChip } from "@/features/decoder/components/AddressChip";
 export { ChipCluster } from "@/features/decoder/components/ChipCluster";
+export { CollapsedActionRow } from "@/features/decoder/components/CollapsedActionRow";
 export { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
 export { DecodedActionCard } from "@/features/decoder/components/DecodedActionCard";
 export { DecodedRawToggle } from "@/features/decoder/components/DecodedRawToggle";

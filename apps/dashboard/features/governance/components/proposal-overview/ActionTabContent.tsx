@@ -1,40 +1,32 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo } from "react";
+import { isAddress, type Address } from "viem";
 
+import {
+  CollapsedActionRow,
+  DecodedActionCard,
+  DecoderCardSkeleton,
+} from "@/features/decoder";
+import { useActionExpansion } from "@/features/decoder/hooks/useActionExpansion";
+import { buildCollapsedRowLabel } from "@/features/decoder/utils/collapsedRowLabel";
 import { ProposalActionsInfoCard } from "@/features/governance/components/proposal-overview/ProposalActionsInfoCard";
-import { useDecodeCalldata } from "@/features/governance/hooks/useDecodeCalldata";
 import type { ProposalDetails } from "@/features/governance/types";
-import { Button } from "@/shared/components";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
-import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { useDecodedCalldata } from "@/shared/hooks/useDecodedCalldata";
+import { useDelayedFlag } from "@/shared/hooks/useDelayedFlag";
+import { useTokenMeta } from "@/shared/hooks/useTokenMeta";
+import { applyTokenMeta, collectTokenHints } from "@/shared/services/decoder";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
-const ETH_ADDRESS_REGEX = /(0x[0-9a-fA-F]{40})(?![0-9a-fA-F])/g;
-
-const isEthAddress = (segment: string) => /^0x[0-9a-fA-F]{40}$/.test(segment);
-
-const CalldataWithEns = ({ text }: { text: string }) => {
-  const segments = text.split(ETH_ADDRESS_REGEX).filter(Boolean);
-
-  return (
-    <>
-      {segments.map((segment, i) =>
-        isEthAddress(segment) ? (
-          <EnsAvatar
-            key={`ens-${i}`}
-            address={segment as `0x${string}`}
-            showAvatar={false}
-            nameClassName="text-secondary font-mono text-sm font-normal not-italic leading-5"
-          />
-        ) : (
-          <span key={`text-${i}`}>{segment}</span>
-        ),
-      )}
-    </>
-  );
+const toBigInt = (value: string | null): bigint | undefined => {
+  if (value == null) return undefined;
+  try {
+    return BigInt(value);
+  } catch {
+    return undefined;
+  }
 };
 
 export const ActionsTabContent = ({
@@ -44,9 +36,10 @@ export const ActionsTabContent = ({
 }) => {
   const { daoId } = useParams<{ daoId: string }>();
   const daoIdKey = daoId?.toUpperCase() as DaoIdEnum;
+  const daoChain = daoConfigByDaoId[daoIdKey]?.daoOverview?.chain;
   const blockExplorerUrl =
-    daoConfigByDaoId[daoIdKey]?.daoOverview?.chain?.blockExplorers?.default
-      ?.url ?? "https://etherscan.io";
+    daoChain?.blockExplorers?.default?.url ?? "https://etherscan.io";
+  const chainId = daoChain?.id ?? 1;
 
   const targets = proposal.targets ?? [];
   const values = proposal.values ?? [];
@@ -61,6 +54,10 @@ export const ActionsTabContent = ({
       values[index] != null &&
       (calldatas[index] ?? null) != null,
   );
+
+  const { isExpanded, toggle } = useActionExpansion({
+    storageKey: `decoder:actions:${proposal.id || "draft"}`,
+  });
 
   return (
     <div className="text-primary flex flex-col gap-3 py-4 lg:p-4">
@@ -77,115 +74,105 @@ export const ActionsTabContent = ({
             target={targets[index] ?? null}
             value={values[index] ?? null}
             calldata={calldatas[index] ?? null}
+            chainId={chainId}
             blockExplorerUrl={blockExplorerUrl}
+            expanded={isExpanded(index)}
+            onToggle={() => toggle(index)}
           />
         ))
       )}
     </div>
   );
 };
+
 interface ActionItemProps {
   target: string | null;
   value: string | null;
   calldata: string | null;
   index: number;
+  chainId: number;
   blockExplorerUrl: string;
+  expanded: boolean;
+  onToggle: () => void;
 }
+
 const ActionItem = ({
   target,
   value,
   calldata,
   index,
+  chainId,
   blockExplorerUrl,
+  expanded,
+  onToggle,
 }: ActionItemProps) => {
-  const [isDecoded, setIsDecoded] = useState(true);
+  const validTarget =
+    target && isAddress(target) ? (target as Address) : undefined;
 
-  const { data: decodedCalldata, isLoading } = useDecodeCalldata({
-    calldata,
-    enabled: isDecoded,
+  // The decode itself is cheap and cached forever per calldata hash; only the
+  // heavy card UI is gated behind expansion.
+  const { data } = useDecodedCalldata({
+    chainId,
+    target: validTarget,
+    calldata: calldata ?? "0x",
+    value: toBigInt(value),
   });
+  const showSkeleton = useDelayedFlag(expanded && !data);
 
-  const handleToggleDecode = () => {
-    setIsDecoded(!isDecoded);
-  };
+  const tokenHints = useMemo(
+    () => (data ? collectTokenHints(data) : []),
+    [data],
+  );
+  const { meta } = useTokenMeta(chainId, tokenHints);
+  const call = useMemo(
+    () => (data && meta.size > 0 ? applyTokenMeta(data, meta) : data),
+    [data, meta],
+  );
 
-  const displayCalldata =
-    isDecoded && decodedCalldata ? decodedCalldata : calldata;
+  if (!expanded) {
+    return (
+      <CollapsedActionRow
+        index={index}
+        target={target}
+        label={buildCollapsedRowLabel(call ?? undefined, calldata)}
+        onExpand={onToggle}
+        explorerUrl={blockExplorerUrl}
+      />
+    );
+  }
+
+  if (!call) {
+    return showSkeleton ? (
+      <div id={`action-${index + 1}`}>
+        <DecoderCardSkeleton />
+      </div>
+    ) : (
+      <div id={`action-${index + 1}`} />
+    );
+  }
+
   return (
-    <div className="border-border-default flex w-full flex-col gap-2 border">
-      <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 p-3">
-        <div>
-          <p className="text-primary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider">
-            // Action {index + 1}
+    <div id={`action-${index + 1}`}>
+      <DecodedActionCard
+        call={call}
+        chainId={chainId}
+        explorerUrl={blockExplorerUrl}
+        headerLeft={
+          <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider">
+            {"// "}Action {index + 1}
           </p>
-        </div>
-        <DefaultLink
-          href={`${blockExplorerUrl}/address/${target}`}
-          openInNewTab
-          className="text-secondary font-mono text-xs font-medium uppercase not-italic leading-4 tracking-wider"
-        >
-          Contract
-        </DefaultLink>
-      </div>
-      <div className="flex w-full flex-col gap-3 p-3">
-        <div className="flex w-full gap-2">
-          <p className="min-w-22 font-mono text-sm font-normal not-italic leading-5">
-            target:
-          </p>
-          <DefaultLink
-            href={`${blockExplorerUrl}/address/${target}`}
-            openInNewTab
-            className="font-mono text-sm font-normal not-italic leading-5"
+        }
+        headerRight={
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={`Collapse action ${index + 1}`}
+            className="text-secondary hover:text-primary cursor-pointer font-mono text-xs font-medium uppercase leading-4 tracking-wider transition-colors duration-[120ms]"
           >
-            {target && (
-              <EnsAvatar
-                address={target as `0x${string}`}
-                showAvatar={false}
-                nameClassName="text-secondary font-mono text-sm font-normal not-italic leading-5"
-              />
-            )}
-          </DefaultLink>
-        </div>
-        <div className="flex w-full gap-2">
-          <p className="min-w-22 shrink-0 font-mono text-sm font-normal not-italic leading-5">
-            calldata:
-          </p>
-          <div className="border-border-contrast relative min-w-0 flex-1 border">
-            <div className="scrollbar-thin max-h-62 overflow-y-auto p-3 pb-9">
-              {isDecoded && !isLoading && decodedCalldata ? (
-                <div className="text-secondary whitespace-pre-wrap font-mono text-sm font-normal not-italic leading-5">
-                  <CalldataWithEns text={decodedCalldata} />
-                </div>
-              ) : (
-                <p
-                  className={`text-secondary break-all font-mono text-sm font-normal not-italic leading-5 ${isLoading ? "animate-pulse" : ""}`}
-                >
-                  {displayCalldata}
-                </p>
-              )}
-            </div>
-            {calldata && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleToggleDecode}
-                loading={isLoading}
-                className="bg-surface-default border-border-contrast absolute bottom-2 right-2 border"
-              >
-                {isDecoded ? "Encode" : "Decode"}
-              </Button>
-            )}
-          </div>
-        </div>
-        <div className="flex w-full gap-2">
-          <p className="min-w-22 font-mono text-sm font-normal not-italic leading-5">
-            value:
-          </p>
-          <p className="text-secondary font-mono text-sm font-normal not-italic leading-5">
-            {value}
-          </p>
-        </div>
-      </div>
+            [–]
+          </button>
+        }
+      />
     </div>
   );
 };

@@ -1,0 +1,42 @@
+import { buildCollapsedRowLabel } from "@/features/decoder/utils/collapsedRowLabel";
+
+describe("buildCollapsedRowLabel", () => {
+  test("a summary leads with the signature as suffix", () => {
+    expect(
+      buildCollapsedRowLabel(
+        {
+          summary: "Transfers 25,000 USDC to grants.ens.eth.",
+          signature: "transfer(address,uint256)",
+        },
+        "0xa9059cbb",
+      ),
+    ).toEqual({
+      label: "Transfers 25,000 USDC to grants.ens.eth.",
+      signature: "transfer(address,uint256)",
+    });
+  });
+
+  test("no summary falls back to the signature alone", () => {
+    expect(
+      buildCollapsedRowLabel(
+        { summary: null, signature: "mint(address,uint256)" },
+        "0x40c10f19",
+      ),
+    ).toEqual({ label: "mint(address,uint256)" });
+  });
+
+  test("no decode yet falls back to the raw selector", () => {
+    expect(
+      buildCollapsedRowLabel(undefined, `0xa9059cbb${"0".repeat(128)}`),
+    ).toEqual({ label: "selector 0xa9059cbb" });
+  });
+
+  test("empty calldata reads as an ETH transfer", () => {
+    expect(buildCollapsedRowLabel(undefined, "0x")).toEqual({
+      label: "ETH transfer",
+    });
+    expect(buildCollapsedRowLabel(undefined, null)).toEqual({
+      label: "ETH transfer",
+    });
+  });
+});
