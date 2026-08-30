@@ -65,7 +65,10 @@ export const useDecodedCalldata = ({
       target?.toLowerCase() ?? "-",
       calldata === null ? "-" : calldataKey(calldata),
       value?.toString() ?? "0",
-      uploadedVersion,
+      // Store id + version: version counters restart at zero when a page
+      // remounts and creates a fresh store, and the 24h query cache must not
+      // serve a decode made with a previous store's ABI under the same key.
+      uploadedAbis ? `${uploadedAbis.id}:${uploadedVersion}` : "-",
       startDepth ?? 0,
     ],
     queryFn: () =>

@@ -293,6 +293,50 @@ describe("multicall unpacking", () => {
     expect(node.subcalls?.map((subcall) => subcall.index)).toEqual([0, 1]);
   });
 
+  test("the node budget splits deterministically across sibling batches", async () => {
+    // Two sibling inner batches under one outer batch, with room for only one
+    // grandchild each: the split must come out [1, 1] on every run, never
+    // [2, 0] decided by whichever network lookup finished first.
+    const MULTICALL3_ABI = parseAbi([
+      "function aggregate3((address target, bool allowFailure, bytes callData)[] calls)",
+    ]);
+    const inner = encodeFunctionData({
+      abi: MULTICALL3_ABI,
+      functionName: "aggregate3",
+      args: [
+        [
+          { target: USDC, allowFailure: false, callData: USDC_TRANSFER },
+          { target: USDC, allowFailure: false, callData: USDC_TRANSFER },
+        ],
+      ],
+    });
+    const outer = encodeFunctionData({
+      abi: MULTICALL3_ABI,
+      functionName: "aggregate3",
+      args: [
+        [
+          { target: MULTICALL3, allowFailure: false, callData: inner },
+          { target: MULTICALL3, allowFailure: false, callData: inner },
+        ],
+      ],
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: outer },
+      offlineResolver,
+      { maxNodes: 4 },
+    );
+    const grandchildCounts = node.subcalls?.map(
+      (subcall) => subcall.subcalls?.length ?? 0,
+    );
+    expect(grandchildCounts).toEqual([1, 1]);
+    for (const subcall of node.subcalls ?? []) {
+      expect(subcall.warnings).toEqual([
+        expect.objectContaining({ code: "size-limit" }),
+      ]);
+    }
+  });
+
   test("the node budget caps fan-out", async () => {
     const node = await decodeCalldata(
       { chainId: 1, calldata: AGGREGATE3_BATCH, target: MULTICALL3 },
@@ -340,9 +384,10 @@ describe("multicall unpacking", () => {
 describe("isDegradedDecode", () => {
   test("an uploaded (or verified) ABI decode is not degraded", async () => {
     const uploaded = createUploadedAbiStore();
-    uploaded.set([
-      ...parseAbi(["function transfer(address to, uint256 amount)"]),
-    ]);
+    uploaded.set(
+      [...parseAbi(["function transfer(address to, uint256 amount)"])],
+      USDC,
+    );
     const resolver = createAbiResolver({
       fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
       fetchSignatures: jest.fn().mockResolvedValue([]),

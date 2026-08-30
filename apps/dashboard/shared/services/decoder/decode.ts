@@ -281,7 +281,8 @@ const decodeNode = async (
       if (budget.nodesLeft <= 0) {
         node.warnings.push({
           code: "size-limit",
-          message: `Stopped unpacking after ${opts.maxNodes} nested calls; the rest stay raw in the parameters above.`,
+          message:
+            "Nested-call budget exhausted; the remaining calls stay raw in the parameters above.",
         });
         break;
       }
@@ -312,6 +313,23 @@ const decodeNode = async (
       slots.push({ index, subcall });
     }
 
+    // Descendant capacity is carved up deterministically BEFORE the workers
+    // start: with a shared mutable budget, whichever network lookup finished
+    // first would consume the remaining slots, and identical calldata could
+    // expose different branches on different runs. Source order gets the
+    // integer-division remainder, so earlier calls always win ties.
+    const jobCount = slots.filter((slot) => "subcall" in slot).length;
+    const remaining = budget.nodesLeft;
+    budget.nodesLeft = 0;
+    const base = jobCount > 0 ? Math.floor(remaining / jobCount) : 0;
+    let extra = jobCount > 0 ? remaining % jobCount : 0;
+    const childBudgets = slots.map((slot) => {
+      if (!("subcall" in slot)) return { nodesLeft: 0 };
+      const share = base + (extra > 0 ? 1 : 0);
+      if (extra > 0) extra -= 1;
+      return { nodesLeft: share };
+    });
+
     const decoded = new Array<DecodedCall & { index: number }>(slots.length);
     let cursor = 0;
     const workers = Array.from(
@@ -334,7 +352,7 @@ const decodeNode = async (
             resolveAbi,
             opts,
             depth + 1,
-            budget,
+            childBudgets[position],
           );
           decoded[position] = { ...child, index: slot.index };
         }

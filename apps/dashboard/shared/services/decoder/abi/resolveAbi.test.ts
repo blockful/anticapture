@@ -70,6 +70,21 @@ describe("createAbiResolver", () => {
     expect(resolved?.source).toBe("uploaded");
   });
 
+  test("a global uploaded ABI never answers targeted lookups", async () => {
+    // A wrapper's extracted children always carry concrete targets; the
+    // root's pasted ABI must not preempt their own resolution.
+    const uploaded = createUploadedAbiStore();
+    uploaded.set([...TRANSFER_ABI]);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      getKnownFunction: () => null,
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+      uploaded,
+    });
+
+    await expect(resolver(ctx)).resolves.toBeNull();
+  });
+
   test("known canonical selectors resolve without any external source", async () => {
     const fetchSignatures = jest.fn();
     const resolver = createAbiResolver({
