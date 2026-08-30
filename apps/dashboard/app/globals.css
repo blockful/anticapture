@@ -53,6 +53,9 @@
   --animate-modal-out: modal-out 0.15s ease-in;
   --animate-page-slide-in: page-slide-in 0.3s ease-out;
 
+  /* Decoder motion: the one easing every calldata-card transition uses. */
+  --ease-decoder: cubic-bezier(0.2, 0, 0, 1);
+
   /* Shadow Styles */
   --shadow-focus-ring: 0px 0px 0px 2px rgba(82, 82, 91, 0.3);
 

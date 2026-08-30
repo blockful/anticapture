@@ -1,0 +1,192 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { useState } from "react";
+
+import { ChipCluster } from "@/features/decoder/components/ChipCluster";
+import { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
+import { AddressChip } from "@/features/decoder/components/AddressChip";
+import { DecodedRawToggle } from "@/features/decoder/components/DecodedRawToggle";
+import { ParamRow } from "@/features/decoder/components/ParamRow";
+import { RawView } from "@/features/decoder/components/RawView";
+import { SummaryRow } from "@/features/decoder/components/SummaryRow";
+import { ValueCell } from "@/features/decoder/components/ValueCell";
+import type { DecodedCall, ViewMode } from "@/features/decoder/types";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { humanizeEtherValue } from "@/shared/services/decoder/humanize";
+import { cn } from "@/shared/utils/cn";
+
+interface DecodedActionCardProps {
+  call: DecodedCall;
+  chainId: number;
+  explorerUrl?: string;
+  /** Embedded mode passes the "// Action N" label; nested cards label themselves. */
+  headerLeft?: ReactNode;
+  /** Extra header actions (the embedded collapse control). */
+  headerRight?: ReactNode;
+  defaultView?: ViewMode;
+  className?: string;
+}
+
+const MONO_LABEL =
+  "font-mono text-xs font-medium uppercase leading-4 tracking-wider";
+
+const RowLabel = ({ children }: { children: ReactNode }) => (
+  <p className="text-primary min-w-22 shrink-0 font-mono text-sm leading-5">
+    {children}
+  </p>
+);
+
+/**
+ * The decoded calldata card: header chip cluster, summary sentence, identity
+ * target row, human-first params, nested subcall cards, and the decoded|raw
+ * toggle with raw hex one click away in every state.
+ */
+export const DecodedActionCard = ({
+  call,
+  chainId,
+  explorerUrl,
+  headerLeft,
+  headerRight,
+  defaultView = "decoded",
+  className,
+}: DecodedActionCardProps) => {
+  const [view, setView] = useState<ViewMode>(defaultView);
+
+  const hasError = call.error !== undefined;
+  const showDecoded = view === "decoded" && !hasError;
+  const isNested = call.depth > 0;
+
+  const headerLabel =
+    headerLeft ??
+    (call.functionName ? (
+      <p className={cn("text-primary", MONO_LABEL)}>
+        {"// "}
+        {call.functionName}
+      </p>
+    ) : (
+      <p className={cn("text-primary", MONO_LABEL)}>
+        {"// "}
+        {call.selector ?? "call"}
+      </p>
+    ));
+
+  return (
+    <div
+      className={cn(
+        "flex w-full min-w-0 flex-col border",
+        isNested
+          ? "border-border-contrast"
+          : "border-border-default bg-surface-default",
+        className,
+      )}
+    >
+      <div className="bg-surface-contrast flex w-full flex-wrap items-center justify-between gap-2 p-3">
+        <div className="flex min-w-0 items-center gap-2">{headerLabel}</div>
+        <div className="flex flex-wrap items-center gap-2">
+          <ChipCluster abiSource={call.abiSource} hasError={hasError} />
+          {call.target && explorerUrl && (
+            <DefaultLink
+              href={`${explorerUrl}/address/${call.target}`}
+              openInNewTab
+              className={cn("text-secondary", MONO_LABEL)}
+            >
+              Contract
+            </DefaultLink>
+          )}
+          {headerRight}
+        </div>
+      </div>
+
+      <div className="flex w-full flex-col gap-3 p-3">
+        {hasError && (
+          <InlineAlert variant="error" text={call.error ?? "Decode failed."} />
+        )}
+        {call.warnings.map((warning) => (
+          <InlineAlert
+            key={warning.code + warning.message}
+            variant="warning"
+            text={warning.message}
+          />
+        ))}
+
+        {showDecoded && call.summary && <SummaryRow summary={call.summary} />}
+
+        {call.target && (
+          <div className="flex w-full items-center gap-2">
+            <RowLabel>target:</RowLabel>
+            <span className="min-w-0">
+              <AddressChip address={call.target} explorerUrl={explorerUrl} />
+            </span>
+          </div>
+        )}
+
+        {call.signature && showDecoded && (
+          <div className="flex w-full gap-2">
+            <RowLabel>function:</RowLabel>
+            <p className="text-secondary min-w-0 break-all font-mono text-sm leading-5">
+              {call.signature}
+            </p>
+          </div>
+        )}
+
+        {showDecoded ? (
+          call.params.length > 0 && (
+            <div className="flex w-full flex-col gap-2">
+              {call.params.map((param, i) => (
+                <ParamRow
+                  key={`${param.name}-${i}`}
+                  param={param}
+                  chainId={chainId}
+                  explorerUrl={explorerUrl}
+                  depth={call.depth}
+                />
+              ))}
+            </div>
+          )
+        ) : (
+          <RawView
+            raw={call.raw}
+            selector={call.selector}
+            showSelector={call.abiSource === "none"}
+          />
+        )}
+
+        {call.value !== undefined && call.value > 0n && (
+          <div className="flex w-full gap-2">
+            <RowLabel>value:</RowLabel>
+            <ValueCell
+              humanized={humanizeEtherValue(call.value).text}
+              raw={`${call.value.toString()} wei`}
+            />
+          </div>
+        )}
+
+        {showDecoded && call.subcalls && call.subcalls.length > 0 && (
+          <div className="border-border-contrast ml-2 flex min-w-0 flex-col gap-2 border-l pl-3">
+            {call.subcalls.map((subcall) => (
+              <DecodedActionCard
+                key={subcall.index}
+                call={subcall}
+                chainId={chainId}
+                explorerUrl={explorerUrl}
+                headerLeft={
+                  <p className={cn("text-primary", MONO_LABEL)}>
+                    {"// "}call {subcall.index + 1}
+                    {subcall.functionName ? ` · ${subcall.functionName}` : ""}
+                  </p>
+                }
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex w-full items-center justify-between gap-2 p-3 pt-0">
+        <DecodedRawToggle value={view} onValueChange={setView} />
+        <CopyRawButton textToCopy={call.raw} />
+      </div>
+    </div>
+  );
+};
