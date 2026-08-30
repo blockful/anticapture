@@ -390,6 +390,33 @@ describe("multicall unpacking", () => {
     ]);
   });
 
+  test("an unnamed-tuple ABI still unpacks (positional decoding)", async () => {
+    // An uploaded ABI without component names makes viem decode each call as
+    // a positional array; the extractor must not crash or emit undefined
+    // calldata.
+    const unnamedAbi = parseAbi([
+      "function aggregate3((address,bool,bytes)[] calls)",
+    ]);
+    const uploaded = createUploadedAbiStore();
+    uploaded.set([...unnamedAbi], MULTICALL3);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+      uploaded,
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: AGGREGATE3_BATCH, target: MULTICALL3 },
+      resolver,
+    );
+    expect(node.abiSource).toBe("uploaded");
+    expect(node.subcalls).toHaveLength(2);
+    expect(node.subcalls![0]).toMatchObject({
+      target: USDC,
+      functionName: "transfer",
+    });
+  });
+
   test("a colliding non-wrapper resolution never enters a wrapper detector", async () => {
     // Simulate a target whose own ABI resolves the aggregate((address,bytes)[])
     // selector to an unrelated function: the detector must not run, so the

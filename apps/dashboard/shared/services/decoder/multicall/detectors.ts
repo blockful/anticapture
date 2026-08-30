@@ -41,6 +41,22 @@ export type MulticallDetector = {
 type Call2 = { target: Address; callData: Hex };
 type Call3 = { target: Address; allowFailure: boolean; callData: Hex };
 
+// viem decodes named tuples to objects but unnamed ones (an uploaded ABI
+// without component names) to positional arrays; extractors accept both.
+const asCall2 = (value: unknown): Call2 =>
+  Array.isArray(value)
+    ? { target: value[0] as Address, callData: value[1] as Hex }
+    : (value as Call2);
+
+const asCall3 = (value: unknown): Call3 =>
+  Array.isArray(value)
+    ? {
+        target: value[0] as Address,
+        allowFailure: value[1] as boolean,
+        callData: value[2] as Hex,
+      }
+    : (value as Call3);
+
 const single = (
   target: unknown,
   value: unknown,
@@ -100,7 +116,7 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "multicall3-aggregate",
       verb: "Executes",
       extract: (args) =>
-        (args[0] as Call2[]).map((call) => ({
+        (args[0] as unknown[]).map(asCall2).map((call) => ({
           target: call.target,
           calldata: call.callData,
         })),
@@ -113,7 +129,7 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "multicall3-aggregate3",
       verb: "Executes",
       extract: (args) =>
-        (args[0] as Call3[]).map((call) => ({
+        (args[0] as unknown[]).map(asCall3).map((call) => ({
           target: call.target,
           calldata: call.callData,
         })),
@@ -126,7 +142,7 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "multicall3-tryAggregate",
       verb: "Executes",
       extract: (args) =>
-        (args[1] as Call2[]).map((call) => ({
+        (args[1] as unknown[]).map(asCall2).map((call) => ({
           target: call.target,
           calldata: call.callData,
         })),
