@@ -153,13 +153,19 @@ export const DecodedActionCard = ({
           />
         )}
 
-        {call.value !== undefined && call.value > 0n && (
+        {call.value !== undefined && (
           <div className="flex w-full gap-2">
             <RowLabel>value:</RowLabel>
-            <ValueCell
-              humanized={humanizeEtherValue(call.value).text}
-              raw={`${call.value.toString()} wei`}
-            />
+            {call.value > 0n ? (
+              <ValueCell
+                humanized={humanizeEtherValue(call.value).text}
+                raw={`${call.value.toString()} wei`}
+              />
+            ) : (
+              <p className="text-secondary font-mono text-sm leading-5">
+                0 ETH
+              </p>
+            )}
           </div>
         )}
 

@@ -70,9 +70,67 @@ describe("createAbiResolver", () => {
     expect(resolved?.source).toBe("uploaded");
   });
 
+  test("known canonical selectors resolve without any external source", async () => {
+    const fetchSignatures = jest.fn();
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures,
+    });
+
+    const resolved = await resolver(ctx);
+    expect(resolved?.source).toBe("verified");
+    expect(resolved?.signature).toBe("transfer(address,uint256)");
+    expect(fetchSignatures).not.toHaveBeenCalled();
+  });
+
+  test("the target's verified ABI outranks the known table on collisions", async () => {
+    // 0x23b872dd is both transferFrom(address,address,uint256) and
+    // gasprice_bit_ether(int128); a contract that verifiably implements the
+    // latter must not decode as the canonical transferFrom.
+    const GASPRICE_ABI = parseAbi(["function gasprice_bit_ether(int128 x)"]);
+    const calldata = encodeFunctionData({
+      abi: GASPRICE_ABI,
+      functionName: "gasprice_bit_ether",
+      args: [42n],
+    });
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue([...GASPRICE_ABI]),
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+    });
+
+    const resolved = await resolver({
+      ...ctx,
+      selector: calldata.slice(0, 10) as Hex,
+      calldata,
+    });
+    expect(resolved?.source).toBe("verified");
+    expect(resolved?.signature).toBe("gasprice_bit_ether(int128)");
+  });
+
+  test("a known-table match that cannot decode falls through to openchain", async () => {
+    // transferFrom's selector with a single word of arguments: the canonical
+    // 3-arg shape does not decode it, the colliding 1-arg signature does.
+    const calldata = `0x23b872dd${"2a".padStart(64, "0")}` as Hex;
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures: jest
+        .fn()
+        .mockResolvedValue(["gasprice_bit_ether(int128)"]),
+    });
+
+    const resolved = await resolver({
+      ...ctx,
+      selector: "0x23b872dd" as Hex,
+      calldata,
+    });
+    expect(resolved?.source).toBe("openchain");
+    expect(resolved?.signature).toBe("gasprice_bit_ether(int128)");
+  });
+
   test("openchain candidates are validated by decoding, not taken first", async () => {
     const resolver = createAbiResolver({
       fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      getKnownFunction: () => null,
       fetchSignatures: jest.fn().mockResolvedValue([
         // A junk entry that cannot decode this calldata must be skipped.
         "junk_entry(uint256,bytes32,bytes32,bytes32)",
@@ -98,6 +156,7 @@ describe("createAbiResolver", () => {
     });
     const resolver = createAbiResolver({
       fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      getKnownFunction: () => null,
       fetchSignatures: jest
         .fn()
         .mockResolvedValue([
@@ -129,6 +188,7 @@ describe("createAbiResolver", () => {
       .mockResolvedValue(["transfer(address,uint256)"]);
     const resolver = createAbiResolver({
       fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      getKnownFunction: () => null,
       fetchSignatures,
     });
 
@@ -139,6 +199,7 @@ describe("createAbiResolver", () => {
   test("nothing resolves -> null", async () => {
     const resolver = createAbiResolver({
       fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      getKnownFunction: () => null,
       fetchSignatures: jest.fn().mockResolvedValue([]),
     });
     await expect(resolver(ctx)).resolves.toBeNull();

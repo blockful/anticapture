@@ -54,8 +54,7 @@ export const AddressChip = ({
   const nameContent = (
     <span
       className={cn(
-        "font-mono text-sm leading-5",
-        resolvedName ? "text-primary" : "text-secondary",
+        "text-primary font-mono text-sm leading-5",
         isLoading && "animate-pulse",
       )}
     >
@@ -76,8 +75,8 @@ export const AddressChip = ({
   return (
     <span
       className={cn(
-        "bg-surface-default inline-flex max-w-full items-center gap-1.5 border border-transparent px-1 py-0.5",
-        "hover:border-border-contrast transition-colors duration-[120ms]",
+        "bg-surface-default border-border-contrast inline-flex max-w-full items-center gap-1.5 border px-1 py-0.5",
+        "hover:border-highlight transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
         className,
       )}
     >
@@ -114,7 +113,7 @@ export const AddressChip = ({
         </span>
       )}
       {!resolvedName && isContract === false && (
-        <span className="text-dimmed border-border-contrast border px-1 font-mono text-xs uppercase leading-4">
+        <span className="text-secondary font-mono text-xs uppercase leading-4">
           EOA
         </span>
       )}

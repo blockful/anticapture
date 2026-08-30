@@ -5,6 +5,7 @@ import { useQueryStates } from "nuqs";
 import { useMemo, useState } from "react";
 import { isAddress, type Abi, type Address } from "viem";
 
+import { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
 import { DecodedActionCard } from "@/features/decoder/components/DecodedActionCard";
 import { DecoderCardSkeleton } from "@/features/decoder/components/DecoderCardSkeleton";
 import { DecoderInputPanel } from "@/features/decoder/components/DecoderInputPanel";
@@ -83,9 +84,15 @@ export const DecoderTool = () => {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 lg:p-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-primary font-mono text-sm font-medium uppercase leading-5 tracking-wider">
-          {"// "}Calldata decoder
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-primary font-mono text-sm font-medium uppercase leading-5 tracking-wider">
+            {"// "}Calldata decoder
+          </h1>
+          <CopyRawButton
+            label="copy permalink"
+            getTextToCopy={() => window.location.href}
+          />
+        </div>
         <p className="text-secondary text-sm">
           Decode any calldata into typed, human-readable parameters. Nested
           Safe, Multicall3 and Timelock batches unpack recursively.

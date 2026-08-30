@@ -9,8 +9,10 @@ export const SummaryRow = ({
   className?: string;
 }) => (
   <div className={cn("flex w-full gap-2", className)}>
-    <p className="text-dimmed min-w-22 font-mono text-sm leading-5">summary:</p>
-    <p className="text-secondary font-inter min-w-0 text-sm leading-5">
+    <p className="text-primary min-w-22 font-mono text-sm leading-5">
+      summary:
+    </p>
+    <p className="text-primary font-inter min-w-0 text-sm leading-5">
       {summary}
     </p>
   </div>

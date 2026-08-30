@@ -184,6 +184,26 @@ describe("multicall unpacking", () => {
     expect(node.params[5].humanized?.text).toBe("2 days = 172,800 seconds");
   });
 
+  test("a batch with mismatched array lengths degrades missing payloads to empty calls", async () => {
+    const abi = parseAbi([
+      "function scheduleBatch(address[] targets, uint256[] values, bytes[] payloads, bytes32 predecessor, bytes32 salt, uint256 delay)",
+    ]);
+    const zero32 = `0x${"0".repeat(64)}` as Hex;
+    // Two targets, one payload: hand-crafted calldata can disagree like this.
+    const calldata = encodeFunctionData({
+      abi,
+      functionName: "scheduleBatch",
+      args: [[USDC, RECIPIENT], [0n, 1n], [USDC_TRANSFER], zero32, zero32, 60n],
+    });
+
+    const node = await decode(calldata, { target: TIMELOCK });
+    expect(node.subcalls).toHaveLength(2);
+    expect(node.subcalls![0].functionName).toBe("transfer");
+    // The missing payload becomes an empty call, not a crash or a blank tree.
+    expect(node.subcalls![1].raw).toBe("0x");
+    expect(node.subcalls![1].error).toBeUndefined();
+  });
+
   test("recursion stops at maxDepth and leaves deeper calls raw", async () => {
     // relay(relay(relay(...transfer))) six levels deep.
     let calldata: Hex = USDC_TRANSFER;

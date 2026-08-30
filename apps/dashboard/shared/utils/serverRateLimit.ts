@@ -18,6 +18,13 @@ interface RateLimitOptions {
   maxRequests: number;
 }
 
+/**
+ * Bounds the durable-store round trip so a stalled Redis endpoint falls back
+ * to the in-memory limiter instead of blocking the request until the
+ * platform kills the function.
+ */
+const DURABLE_STORE_TIMEOUT_MS = 2000;
+
 const memoryCounters = new Map<string, { count: number; resetAt: number }>();
 
 const checkMemoryRateLimit = ({
@@ -60,6 +67,7 @@ const checkDurableRateLimit = async ({
     const response = await fetch(`${url.replace(/\/+$/, "")}/pipeline`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(DURABLE_STORE_TIMEOUT_MS),
       body: JSON.stringify([
         ["INCR", counterKey],
         ["EXPIRE", counterKey, String(windowSeconds)],

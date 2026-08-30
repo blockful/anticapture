@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import type { Abi } from "viem";
 
 import { AbiInput } from "@/features/decoder/components/AbiInput";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { Select } from "@/shared/components/design-system/form/fields/select/Select";
@@ -51,7 +52,35 @@ export const DecoderInputPanel = ({
   return (
     <div className="border-border-default bg-surface-default flex w-full flex-col gap-4 border p-4">
       <div className="flex flex-col gap-1.5">
-        <FormLabel isRequired>Calldata</FormLabel>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <FormLabel isRequired>Calldata</FormLabel>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="font-mono text-xs uppercase tracking-wider"
+              onClick={async () => {
+                try {
+                  const text = await navigator.clipboard.readText();
+                  if (text) onCalldataChange(text);
+                } catch {
+                  // Clipboard read denied: the reader pastes into the field.
+                }
+              }}
+            >
+              [paste]
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="font-mono text-xs uppercase tracking-wider"
+              disabled={calldata.length === 0}
+              onClick={() => onCalldataChange("")}
+            >
+              [clear]
+            </Button>
+          </div>
+        </div>
         <Textarea
           value={calldata}
           onChange={(event) => onCalldataChange(event.target.value)}
@@ -63,8 +92,8 @@ export const DecoderInputPanel = ({
           <span className="text-error text-xs">{calldataError}</span>
         ) : (
           <span className="text-secondary text-xs">
-            Paste calldata or a transaction&apos;s input data. On Etherscan:
-            transaction page, &quot;More Details&quot;, then &quot;Input
+            Supports raw calldata (0x-prefixed hex). On Etherscan: transaction
+            page, &quot;More Details&quot;, then copy the &quot;Input
             Data&quot;.
           </span>
         )}

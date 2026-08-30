@@ -50,12 +50,19 @@ const batch = (
   targets: unknown,
   values: unknown,
   payloads: unknown,
-): ExtractedSubcall[] =>
-  (targets as Address[]).map((target, i) => ({
+): ExtractedSubcall[] => {
+  const targetList = (targets as Address[]) ?? [];
+  const valueList = (values as bigint[]) ?? [];
+  const payloadList = (payloads as Hex[]) ?? [];
+  // Zip defensively: independently encoded arrays can disagree in length in
+  // hand-crafted calldata, and a missing payload must degrade to an empty
+  // call, never to `undefined` reaching the decoder.
+  return targetList.map((target, i) => ({
     target,
-    value: (values as bigint[])[i],
-    calldata: (payloads as Hex[])[i],
+    value: valueList[i],
+    calldata: payloadList[i] ?? "0x",
   }));
+};
 
 const DETECTOR_DEFINITIONS: Array<{
   signature: string;

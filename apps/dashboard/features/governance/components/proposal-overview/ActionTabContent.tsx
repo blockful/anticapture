@@ -167,7 +167,7 @@ const ActionItem = ({
             type="button"
             onClick={onToggle}
             aria-label={`Collapse action ${index + 1}`}
-            className="text-secondary hover:text-primary cursor-pointer font-mono text-xs font-medium uppercase leading-4 tracking-wider transition-colors duration-[120ms]"
+            className="text-secondary hover:text-primary cursor-pointer font-mono text-xs font-medium uppercase leading-4 tracking-wider transition-colors duration-[120ms] ease-[var(--ease-decoder)]"
           >
             [–]
           </button>

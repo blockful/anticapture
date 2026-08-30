@@ -11,6 +11,7 @@ import {
 
 import { getBundledAbi } from "@/shared/services/decoder/abi/bundledAbis";
 import { fetchVerifiedAbi as fetchVerifiedAbiDefault } from "@/shared/services/decoder/abi/etherscan";
+import { getKnownFunction as getKnownFunctionDefault } from "@/shared/services/decoder/abi/knownAbis";
 import { fetchSignatures as fetchSignaturesDefault } from "@/shared/services/decoder/abi/openchain";
 import type { UploadedAbiStore } from "@/shared/services/decoder/abi/uploadedStore";
 import type { DecodeWarning } from "@/shared/services/decoder/types";
@@ -38,6 +39,7 @@ type ResolverDeps = {
   fetchVerifiedAbi?: (chainId: number, address: string) => Promise<Abi | null>;
   fetchSignatures?: (selector: Hex) => Promise<string[]>;
   uploaded?: UploadedAbiStore;
+  getKnownFunction?: (selector: Hex) => AbiFunction | null;
 };
 
 const findBySelector = (abi: Abi, selector: Hex): AbiFunction | null => {
@@ -65,13 +67,17 @@ const decodes = (fn: AbiFunction, calldata: Hex): boolean => {
 
 /**
  * The PRD's ABI fallback chain: verified (bundled, then Etherscan) ->
- * user-uploaded -> OpenChain signature database -> null (the caller word-
- * guesses). Resolutions are memoized per resolver instance so a batch of
- * subcalls to one contract triggers a single fetch.
+ * user-uploaded -> known canonical selectors -> OpenChain signature database
+ * -> null (the caller word-guesses). The target's own ABI outranks the known
+ * table so a 4-byte collision (transferFrom vs gasprice_bit_ether, both
+ * 0x23b872dd) decodes as whatever the contract actually implements.
+ * Resolutions are memoized per resolver instance so a batch of subcalls to
+ * one contract triggers a single fetch.
  */
 export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
   const fetchVerified = deps.fetchVerifiedAbi ?? fetchVerifiedAbiDefault;
   const fetchSignatures = deps.fetchSignatures ?? fetchSignaturesDefault;
+  const getKnownFunction = deps.getKnownFunction ?? getKnownFunctionDefault;
   // The fetches are memoized, not the final pick: choosing an OpenChain
   // candidate depends on the full calldata, which varies per call even when
   // chain, target and selector repeat across a batch.
@@ -147,11 +153,22 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
     };
   };
 
+  const resolveKnown = (ctx: AbiResolveContext): ResolvedAbi | null => {
+    const fn = getKnownFunction(ctx.selector);
+    // Validated by decoding: on a selector collision where the calldata does
+    // not fit the canonical shape, fall through to OpenChain instead of
+    // presenting a decode error for the wrong function.
+    if (!fn || !decodes(fn, ctx.calldata)) return null;
+    return { source: "verified", fn, signature: toFunctionSignature(fn) };
+  };
+
   return async (ctx) => {
     const verified = await resolveVerified(ctx);
     if (verified) return verified;
     const uploaded = resolveUploaded(ctx);
     if (uploaded) return uploaded;
+    const known = resolveKnown(ctx);
+    if (known) return known;
     return resolveOpenchain(ctx);
   };
 };

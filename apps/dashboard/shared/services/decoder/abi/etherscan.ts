@@ -32,9 +32,13 @@ type EtherscanResponse = {
  * Fetches a verified contract ABI via the server-side Etherscan proxy. Returns
  * null when:
  * - the address is malformed
+ * - the request itself fails (network or proxy outage)
  * - the proxy is not configured (missing ETHERSCAN_API_KEY on the server)
  * - the contract is not verified on Etherscan
  * - the response is malformed
+ *
+ * Never throws: a transport failure must degrade to the next ABI source
+ * (uploaded, OpenChain, word guess), not reject the whole decode.
  */
 export const fetchVerifiedAbi = async (
   chainId: number,
@@ -46,13 +50,14 @@ export const fetchVerifiedAbi = async (
     chainid: String(chainId),
     address,
   });
-  const res = await fetch(`/api/etherscan?${params.toString()}`);
-  if (!res.ok) return null;
-
-  const json = (await res.json()) as EtherscanResponse;
-  if (json.status !== "1") return null;
 
   try {
+    const res = await fetch(`/api/etherscan?${params.toString()}`);
+    if (!res.ok) return null;
+
+    const json = (await res.json()) as EtherscanResponse;
+    if (json.status !== "1") return null;
+
     const parsed: unknown = JSON.parse(json.result);
     return parseAbiStrict(parsed);
   } catch {

@@ -1,14 +1,12 @@
 import {
   decodeFunctionData,
   getAddress,
-  toFunctionSignature,
   type AbiFunction,
   type AbiParameter,
   type Address,
   type Hex,
 } from "viem";
 
-import { getKnownFunction } from "@/shared/services/decoder/abi/knownAbis";
 import type { AbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
 import { humanizeLeaf } from "@/shared/services/decoder/humanize";
 import { getDetector } from "@/shared/services/decoder/multicall/detectors";
@@ -188,24 +186,21 @@ const decodeNode = async (
     return node;
   }
 
-  // 5. Resolve the function: known selectors first, then the injected chain.
-  let fn: AbiFunction | null = getKnownFunction(node.selector);
-  if (fn) {
-    node.abiSource = "verified";
-    node.signature = toFunctionSignature(fn);
-  } else {
-    const resolved = await resolveAbi({
-      chainId: input.chainId,
-      target: input.target,
-      selector: node.selector,
-      calldata: raw as Hex,
-    });
-    if (resolved) {
-      fn = resolved.fn;
-      node.abiSource = resolved.source;
-      node.signature = resolved.signature;
-      if (resolved.warning) node.warnings.push(resolved.warning);
-    }
+  // 5. Resolve the function. The resolver owns the whole fallback chain,
+  // including the known-selector table, so a target's verified ABI always
+  // outranks the canonical signatures on 4-byte collisions.
+  let fn: AbiFunction | null = null;
+  const resolved = await resolveAbi({
+    chainId: input.chainId,
+    target: input.target,
+    selector: node.selector,
+    calldata: raw as Hex,
+  });
+  if (resolved) {
+    fn = resolved.fn;
+    node.abiSource = resolved.source;
+    node.signature = resolved.signature;
+    if (resolved.warning) node.warnings.push(resolved.warning);
   }
 
   // 6. No ABI anywhere: word-shape-guessed params, permanently flagged.

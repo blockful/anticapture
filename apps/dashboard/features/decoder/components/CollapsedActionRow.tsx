@@ -44,12 +44,12 @@ export const CollapsedActionRow = ({
     aria-label={`Expand action ${index + 1}`}
     className={cn(
       "border-border-default bg-surface-default group flex w-full cursor-pointer items-center gap-2 border p-3",
-      "hover:bg-surface-hover transition-colors duration-[120ms]",
+      "hover:bg-surface-hover transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
       "focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none",
       className,
     )}
   >
-    <span className="text-secondary group-hover:text-highlight shrink-0 font-mono text-sm leading-5 transition-colors duration-[120ms]">
+    <span className="text-secondary group-hover:text-highlight shrink-0 font-mono text-sm leading-5 transition-colors duration-[120ms] ease-[var(--ease-decoder)]">
       [+]
     </span>
     {target && isAddress(target) && (
