@@ -27,13 +27,28 @@ const addressText = (param: DecodedParam | undefined): string =>
 
 type Template = (node: DecodedCall) => string | null;
 
+// approve/transferFrom are shared between ERC-20 and ERC-721; a param the
+// resolved ABI names as a token ID flips the sentence to NFT phrasing.
+const tokenIdParam = (node: DecodedCall): DecodedParam | undefined =>
+  node.params.find((param) => /tokenid|^id$/i.test(param.name));
+
 const TEMPLATES: Record<string, Template> = {
   "transfer(address,uint256)": (node) =>
     `Transfers ${amountText(paramByName(node, "amount", "value", "arg1"))} to ${addressText(paramByName(node, "to", "recipient", "dst", "arg0"))}.`,
-  "approve(address,uint256)": (node) =>
-    `Approves ${addressText(paramByName(node, "spender", "arg0"))} to spend ${amountText(paramByName(node, "amount", "value", "arg1"))}.`,
-  "transferFrom(address,address,uint256)": (node) =>
-    `Transfers ${amountText(paramByName(node, "amount", "value", "arg2"))} from ${addressText(paramByName(node, "from", "src", "arg0"))} to ${addressText(paramByName(node, "to", "dst", "arg1"))}.`,
+  "approve(address,uint256)": (node) => {
+    const tokenId = tokenIdParam(node);
+    if (tokenId) {
+      return `Approves ${addressText(paramByName(node, "spender", "to", "arg0"))} to manage token #${tokenId.value}.`;
+    }
+    return `Approves ${addressText(paramByName(node, "spender", "arg0"))} to spend ${amountText(paramByName(node, "amount", "value", "arg1"))}.`;
+  },
+  "transferFrom(address,address,uint256)": (node) => {
+    const tokenId = tokenIdParam(node);
+    if (tokenId) {
+      return `Transfers token #${tokenId.value} from ${addressText(paramByName(node, "from", "arg0"))} to ${addressText(paramByName(node, "to", "arg1"))}.`;
+    }
+    return `Transfers ${amountText(paramByName(node, "amount", "value", "arg2"))} from ${addressText(paramByName(node, "from", "src", "arg0"))} to ${addressText(paramByName(node, "to", "dst", "arg1"))}.`;
+  },
   "delegate(address)": (node) =>
     `Delegates the caller's voting power to ${addressText(paramByName(node, "delegatee", "arg0"))}.`,
   "safeTransferFrom(address,address,uint256)": (node) =>

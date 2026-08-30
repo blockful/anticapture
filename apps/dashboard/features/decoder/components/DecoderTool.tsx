@@ -2,7 +2,7 @@
 
 import { FileSearch } from "lucide-react";
 import { useQueryStates } from "nuqs";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isAddress, type Abi, type Address } from "viem";
 
 import { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
@@ -67,17 +67,29 @@ export const DecoderTool = () => {
     () => createUploadedAbiStore((version) => setStoreVersion(version)),
     [],
   );
+  const [uploadedAbi, setUploadedAbi] = useState<Abi | null>(null);
 
   const normalized = normalizeCalldataInput(calldataInput);
   const hasInput = normalized.length > 0;
   const inputValid = !hasInput || isValidCalldataInput(normalized);
   const trimmedAddress = address.trim();
   const addressValid = trimmedAddress === "" || isAddress(trimmedAddress);
+  const target =
+    addressValid && trimmedAddress ? (trimmedAddress as Address) : undefined;
+
+  // The uploaded ABI scopes to the selected target when one exists, so it
+  // never preempts resolution for unrelated contracts (a wrapper's child
+  // targets, or whatever address the user types next). The global entry is
+  // reserved for genuinely targetless decoding, and the store is rebuilt
+  // whenever the ABI or the target changes.
+  useEffect(() => {
+    uploadedAbis.clearAll();
+    if (uploadedAbi) uploadedAbis.set(uploadedAbi, target);
+  }, [uploadedAbi, target, uploadedAbis]);
 
   const { data, isLoading } = useDecodedCalldata({
     chainId,
-    target:
-      addressValid && trimmedAddress ? (trimmedAddress as Address) : undefined,
+    target,
     calldata: hasInput && inputValid ? normalized : null,
     uploadedAbis,
   });
@@ -95,10 +107,7 @@ export const DecoderTool = () => {
 
   const explorerUrl = explorerForChain(chainId);
 
-  const handleAbiChange = (abi: Abi | null) => {
-    if (abi) uploadedAbis.set(abi);
-    else uploadedAbis.clear();
-  };
+  const handleAbiChange = setUploadedAbi;
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 lg:p-6">

@@ -59,6 +59,35 @@ describe("decodeCalldata basics", () => {
     expect(node.params[1].tokenHint).toBeUndefined();
   });
 
+  test("an ERC-721 shaped approve is a token ID, never a fungible amount", async () => {
+    // approve(address,uint256) is shared between ERC-20 and ERC-721; when the
+    // target's own ABI names the param tokenId, the fungible hint (and its
+    // decimals lookup) must not apply and the sentence must say token #N.
+    const nftAbi = parseAbi(["function approve(address to, uint256 tokenId)"]);
+    const calldata = encodeFunctionData({
+      abi: nftAbi,
+      functionName: "approve",
+      args: [RECIPIENT, 42n],
+    });
+    const uploaded = createUploadedAbiStore();
+    uploaded.set([...nftAbi], SAFE);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+      uploaded,
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata, target: SAFE },
+      resolver,
+    );
+    expect(node.params[1].name).toBe("tokenId");
+    expect(node.params[1].tokenHint).toBeUndefined();
+    expect(node.summary).toBe(
+      `Approves ${RECIPIENT.slice(0, 6)}…${RECIPIENT.slice(-4)} to manage token #42.`,
+    );
+  });
+
   test("nested tuples and arrays become children with a rail-ready tree", async () => {
     const abi = parseAbi([
       "function createStream(address recipient, (uint256 cliff, uint256 total)[] schedules)",
@@ -236,6 +265,32 @@ describe("multicall unpacking", () => {
     ]);
     expect(rawChild.params).toEqual([]);
     expect(rawChild.raw).toBe(USDC_TRANSFER);
+  });
+
+  test("independent batch children decode concurrently, in order", async () => {
+    let active = 0;
+    let maxActive = 0;
+    const trackingResolver: Parameters<typeof decodeCalldata>[1] = async (
+      ctx,
+    ) => {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      active -= 1;
+      return offlineResolver(ctx);
+    };
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: AGGREGATE3_BATCH, target: MULTICALL3 },
+      trackingResolver,
+    );
+    // Two children resolved in parallel, original order preserved.
+    expect(maxActive).toBeGreaterThan(1);
+    expect(node.subcalls?.map((subcall) => subcall.functionName)).toEqual([
+      "transfer",
+      "approve",
+    ]);
+    expect(node.subcalls?.map((subcall) => subcall.index)).toEqual([0, 1]);
   });
 
   test("the node budget caps fan-out", async () => {

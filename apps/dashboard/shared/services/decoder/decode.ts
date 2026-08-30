@@ -9,7 +9,10 @@ import {
 
 import type { AbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
 import { humanizeLeaf } from "@/shared/services/decoder/humanize";
-import { getDetector } from "@/shared/services/decoder/multicall/detectors";
+import {
+  getDetector,
+  type ExtractedSubcall,
+} from "@/shared/services/decoder/multicall/detectors";
 import { summarize } from "@/shared/services/decoder/summarize";
 import type {
   DecodedCall,
@@ -42,12 +45,24 @@ export type DecodeOptions = {
 
 const DEFAULTS = { maxDepth: 5, maxBytes: 131_072, maxNodes: 200 };
 
+/** Independent batch children decode in parallel, gently: each may cost an
+ *  Etherscan/OpenChain round trip and both services rate-limit. */
+const SUBCALL_CONCURRENCY = 4;
+
 /** Params of the known ERC20 functions that are amounts of the call target. */
 const TOKEN_AMOUNT_PARAM: Record<string, number> = {
   "transfer(address,uint256)": 1,
   "approve(address,uint256)": 1,
   "transferFrom(address,address,uint256)": 2,
 };
+
+/**
+ * `approve(address,uint256)` and `transferFrom(address,address,uint256)` are
+ * shared between ERC-20 and ERC-721, where the uint is a token ID, not an
+ * amount. When the resolved ABI names the param, that evidence decides; ID
+ * names block the fungible-amount hint (and its decimals lookup).
+ */
+const NON_FUNGIBLE_PARAM_NAME = /tokenid|^id$/i;
 
 const isHexString = (value: string): boolean =>
   /^0x[0-9a-fA-F]*$/.test(value) && value.length % 2 === 0;
@@ -235,8 +250,13 @@ const decodeNode = async (
 
   if (input.target && node.signature !== undefined) {
     const amountIndex = TOKEN_AMOUNT_PARAM[node.signature];
-    if (amountIndex !== undefined && node.params[amountIndex]) {
-      node.params[amountIndex].tokenHint = { token: input.target };
+    const amountParam = node.params[amountIndex];
+    if (
+      amountIndex !== undefined &&
+      amountParam &&
+      !NON_FUNGIBLE_PARAM_NAME.test(amountParam.name)
+    ) {
+      amountParam.tokenHint = { token: input.target };
     }
   }
 
@@ -248,7 +268,15 @@ const decodeNode = async (
   if (detector && node.signature === detector.signature) {
     if (detector.warningsFor) node.warnings.push(...detector.warningsFor(args));
     const extracted = detector.extract(args);
-    node.subcalls = [];
+
+    // Budget and depth gating stay synchronous and deterministic; the actual
+    // child decodes then run with bounded concurrency, since each unverified
+    // child target can cost its own Etherscan/OpenChain round trip and a big
+    // batch decoded serially would keep the card blank for many seconds.
+    type Slot =
+      | { index: number; node: DecodedCall }
+      | { index: number; subcall: ExtractedSubcall };
+    const slots: Slot[] = [];
     for (const [index, subcall] of extracted.entries()) {
       if (budget.nodesLeft <= 0) {
         node.warnings.push({
@@ -259,40 +287,61 @@ const decodeNode = async (
       }
       budget.nodesLeft -= 1;
       if (depth + 1 > opts.maxDepth) {
-        node.subcalls.push({
+        slots.push({
           index,
-          chainId: input.chainId,
-          target: subcall.target,
-          value: subcall.value,
-          selector: bestEffortSelector(subcall.calldata),
-          abiSource: "none",
-          params: [],
-          raw: subcall.calldata,
-          depth: depth + 1,
-          warnings: [
-            {
-              code: "depth-limit",
-              message: `Nesting deeper than ${opts.maxDepth} levels is left raw.`,
-            },
-          ],
-          summary: null,
+          node: {
+            chainId: input.chainId,
+            target: subcall.target,
+            value: subcall.value,
+            selector: bestEffortSelector(subcall.calldata),
+            abiSource: "none",
+            params: [],
+            raw: subcall.calldata,
+            depth: depth + 1,
+            warnings: [
+              {
+                code: "depth-limit",
+                message: `Nesting deeper than ${opts.maxDepth} levels is left raw.`,
+              },
+            ],
+            summary: null,
+          },
         });
         continue;
       }
-      const child = await decodeNode(
-        {
-          chainId: input.chainId,
-          target: subcall.target,
-          calldata: subcall.calldata,
-          value: subcall.value,
-        },
-        resolveAbi,
-        opts,
-        depth + 1,
-        budget,
-      );
-      node.subcalls.push({ ...child, index });
+      slots.push({ index, subcall });
     }
+
+    const decoded = new Array<DecodedCall & { index: number }>(slots.length);
+    let cursor = 0;
+    const workers = Array.from(
+      { length: Math.min(SUBCALL_CONCURRENCY, slots.length) },
+      async () => {
+        while (cursor < slots.length) {
+          const position = cursor++;
+          const slot = slots[position];
+          if ("node" in slot) {
+            decoded[position] = { ...slot.node, index: slot.index };
+            continue;
+          }
+          const child = await decodeNode(
+            {
+              chainId: input.chainId,
+              target: slot.subcall.target,
+              calldata: slot.subcall.calldata,
+              value: slot.subcall.value,
+            },
+            resolveAbi,
+            opts,
+            depth + 1,
+            budget,
+          );
+          decoded[position] = { ...child, index: slot.index };
+        }
+      },
+    );
+    await Promise.all(workers);
+    node.subcalls = decoded;
   }
 
   node.summary = summarize(node);

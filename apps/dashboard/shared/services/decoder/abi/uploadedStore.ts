@@ -8,6 +8,8 @@ export type UploadedAbiStore = {
   /** Omit `target` to set the global ABI (standalone raw-paste mode). */
   set(abi: Abi, target?: string): void;
   clear(target?: string): void;
+  /** Drops every entry (no version bump when already empty). */
+  clearAll(): void;
   /**
    * Bumps on every mutation. Part of the decode query key, so an upload
    * automatically re-decodes everything that consulted the store.
@@ -40,6 +42,11 @@ export const createUploadedAbiStore = (
     },
     clear(target) {
       entries.delete(target ? target.toLowerCase() : GLOBAL_KEY);
+      bump();
+    },
+    clearAll() {
+      if (entries.size === 0) return;
+      entries.clear();
       bump();
     },
     get version() {
