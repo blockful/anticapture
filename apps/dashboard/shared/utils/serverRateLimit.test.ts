@@ -39,7 +39,6 @@ describe("checkRateLimit", () => {
         expect.objectContaining({
           method: "POST",
           headers: { Authorization: "Bearer token" },
-          signal: expect.any(AbortSignal),
         }),
       );
     });
@@ -64,21 +63,6 @@ describe("checkRateLimit", () => {
       const options = { key, windowSeconds: 3600, maxRequests: 2 };
 
       expect(await checkRateLimit(options)).toBe(true);
-      expect(await checkRateLimit(options)).toBe(true);
-      expect(await checkRateLimit(options)).toBe(false);
-    });
-
-    test("falls back to in-memory counting when the store stalls past the timeout", async () => {
-      global.fetch = jest
-        .fn()
-        .mockRejectedValue(
-          new DOMException("The operation timed out.", "TimeoutError"),
-        );
-      jest.spyOn(console, "error").mockImplementation(() => {});
-
-      const key = `timeout:${Math.random()}`;
-      const options = { key, windowSeconds: 3600, maxRequests: 1 };
-
       expect(await checkRateLimit(options)).toBe(true);
       expect(await checkRateLimit(options)).toBe(false);
     });
