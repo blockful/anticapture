@@ -35,7 +35,10 @@ describe("humanizeDuration", () => {
 describe("humanizeTimestamp", () => {
   test("epoch seconds inside the window render as a UTC date", () => {
     const result = humanizeTimestamp(1_767_225_600n); // 2026-01-01T00:00:00Z
-    expect(result?.iso).toBe("2026-01-01T00:00:00.000Z");
+    expect(result).toMatchObject({
+      kind: "timestamp",
+      iso: "2026-01-01T00:00:00.000Z",
+    });
     expect(result?.text).toContain("2026");
     expect(result?.text).toContain("UTC");
   });

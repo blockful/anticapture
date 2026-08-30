@@ -31,7 +31,7 @@ const guessWord = (word: string, index: number): DecodedParam => {
         name,
         type: "uint256",
         value: value.toString(),
-        humanized: humanizeNumber(value),
+        humanized: humanizeNumber(value) ?? undefined,
       };
     }
     return {
@@ -50,7 +50,7 @@ const guessWord = (word: string, index: number): DecodedParam => {
       name,
       type: "uint256",
       value: value.toString(),
-      humanized: humanizeNumber(value),
+      humanized: humanizeNumber(value) ?? undefined,
     };
   }
   return { name, type: "bytes32", value: `0x${word}` };
