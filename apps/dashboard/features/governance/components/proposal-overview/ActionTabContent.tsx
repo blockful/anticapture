@@ -145,7 +145,11 @@ const ActionItem = ({
       <CollapsedActionRow
         index={index}
         target={target}
-        label={buildCollapsedRowLabel(call ?? undefined, calldata)}
+        label={buildCollapsedRowLabel(
+          call ?? undefined,
+          calldata,
+          toBigInt(value),
+        )}
         onExpand={onToggle}
         explorerUrl={blockExplorerUrl}
       />
