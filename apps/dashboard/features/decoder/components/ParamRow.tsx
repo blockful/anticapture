@@ -63,7 +63,12 @@ export const ParamRow = ({
   uploadedAbis,
 }: ParamRowProps) => {
   const isContainer = param.children !== undefined;
-  const { display, annotation, copyAnnotation } = splitDisplay(param);
+  const isAddressValue = Boolean(param.isAddress && isAddress(param.value));
+  // Address rows render the identity chip, which carries its own [COPY]; the
+  // generic annotation column applies to plain values only.
+  const { display, annotation, copyAnnotation } = isAddressValue
+    ? { display: undefined, annotation: undefined, copyAnnotation: false }
+    : splitDisplay(param);
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
@@ -72,7 +77,7 @@ export const ParamRow = ({
           {param.name}
         </span>
         <TypeChip type={param.type} className="w-20 justify-center" />
-        {param.isAddress && isAddress(param.value) ? (
+        {isAddressValue ? (
           <span className="min-w-0">
             <AddressChip
               address={param.value as Address}

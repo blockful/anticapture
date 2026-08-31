@@ -86,7 +86,7 @@ export const CollapsedActionRow = ({
           />
         </span>
       )}
-      <span className="text-primary font-inter min-w-0 truncate text-sm leading-5">
+      <span className="text-primary font-inter max-w-[55%] shrink-0 truncate text-sm leading-5">
         {label.label}
       </span>
       {label.signature && (
