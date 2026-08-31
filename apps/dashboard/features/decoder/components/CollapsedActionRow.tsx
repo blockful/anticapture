@@ -65,7 +65,10 @@ export const CollapsedActionRow = ({
       {label.label}
     </span>
     {label.signature && (
-      <span className="text-dimmed hidden shrink-0 font-mono text-xs leading-4 sm:inline">
+      // min-w-0 + truncate (never shrink-0): a long signature must ellipsize
+      // inside the row, not overflow the card. The higher shrink weight makes
+      // the signature give way before the sentence does.
+      <span className="text-dimmed hidden min-w-0 shrink-[4] truncate font-mono text-xs leading-4 sm:block">
         · {label.signature}
       </span>
     )}
