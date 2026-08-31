@@ -390,6 +390,32 @@ describe("multicall unpacking", () => {
     ]);
   });
 
+  test("renamed tuple components still unpack (positional normalization)", async () => {
+    // Component names don't affect the canonical signature, so a compatible
+    // ABI naming the fields destination/ok/payload still hits the detector;
+    // the extractor must read by position, not by canonical field names.
+    const renamedAbi = parseAbi([
+      "function aggregate3((address destination, bool ok, bytes payload)[] calls)",
+    ]);
+    const uploaded = createUploadedAbiStore();
+    uploaded.set([...renamedAbi], MULTICALL3);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+      uploaded,
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: AGGREGATE3_BATCH, target: MULTICALL3 },
+      resolver,
+    );
+    expect(node.subcalls).toHaveLength(2);
+    expect(node.subcalls![0]).toMatchObject({
+      target: USDC,
+      functionName: "transfer",
+    });
+  });
+
   test("an unnamed-tuple ABI still unpacks (positional decoding)", async () => {
     // An uploaded ABI without component names makes viem decode each call as
     // a positional array; the extractor must not crash or emit undefined

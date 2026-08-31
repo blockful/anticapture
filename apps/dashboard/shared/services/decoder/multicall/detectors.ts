@@ -41,21 +41,38 @@ export type MulticallDetector = {
 type Call2 = { target: Address; callData: Hex };
 type Call3 = { target: Address; allowFailure: boolean; callData: Hex };
 
-// viem decodes named tuples to objects but unnamed ones (an uploaded ABI
-// without component names) to positional arrays; extractors accept both.
-const asCall2 = (value: unknown): Call2 =>
-  Array.isArray(value)
-    ? { target: value[0] as Address, callData: value[1] as Hex }
-    : (value as Call2);
+// viem decodes named tuples to objects and unnamed ones to positional
+// arrays, and Solidity component names never affect the canonical signature:
+// a compatible ABI may call the fields `destination`/`payload`. Extractors
+// therefore normalize every shape by position (object insertion order follows
+// component order), only trusting names when they are the canonical ones.
+const asCall2 = (value: unknown): Call2 => {
+  if (Array.isArray(value)) {
+    return { target: value[0] as Address, callData: value[1] as Hex };
+  }
+  const record = value as Record<string, unknown>;
+  if ("target" in record && "callData" in record) return record as Call2;
+  const positional = Object.values(record);
+  return { target: positional[0] as Address, callData: positional[1] as Hex };
+};
 
-const asCall3 = (value: unknown): Call3 =>
-  Array.isArray(value)
-    ? {
-        target: value[0] as Address,
-        allowFailure: value[1] as boolean,
-        callData: value[2] as Hex,
-      }
-    : (value as Call3);
+const asCall3 = (value: unknown): Call3 => {
+  if (Array.isArray(value)) {
+    return {
+      target: value[0] as Address,
+      allowFailure: value[1] as boolean,
+      callData: value[2] as Hex,
+    };
+  }
+  const record = value as Record<string, unknown>;
+  if ("target" in record && "callData" in record) return record as Call3;
+  const positional = Object.values(record);
+  return {
+    target: positional[0] as Address,
+    allowFailure: positional[1] as boolean,
+    callData: positional[2] as Hex,
+  };
+};
 
 const single = (
   target: unknown,

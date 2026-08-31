@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type UseActionExpansionArgs = {
   /** sessionStorage key; expansion is remembered per proposal per session. */
@@ -15,6 +15,11 @@ type UseActionExpansionArgs = {
  * read in an effect (never in the initializer) so server and client render
  * the same first frame, and all storage access is try/caught for browsers
  * that deny it.
+ *
+ * The persist effect only writes for the key the state was hydrated FROM:
+ * on a client-side navigation between proposals the hook stays mounted, and
+ * without that guard the old proposal's set would leak into the new key
+ * before rehydration runs.
  */
 export const useActionExpansion = ({
   storageKey,
@@ -23,15 +28,16 @@ export const useActionExpansion = ({
   const [expanded, setExpanded] = useState<ReadonlySet<number>>(
     () => new Set(defaultExpanded),
   );
-  const [hydrated, setHydrated] = useState(false);
+  const hydratedKeyRef = useRef<string | null>(null);
 
+  // a fresh array literal per render; keying the effect on it would loop.
   useEffect(() => {
+    // Reset first: an unseen key must start from the defaults, never from the
+    // previous proposal's state.
+    let next = new Set(defaultExpanded);
     try {
       const stored = sessionStorage.getItem(storageKey);
-      if (stored) {
-        const indexes = JSON.parse(stored) as number[];
-        setExpanded(new Set(indexes));
-      }
+      if (stored) next = new Set(JSON.parse(stored) as number[]);
     } catch {
       // Storage denied (private mode, embedded webview): defaults stand.
     }
@@ -39,8 +45,7 @@ export const useActionExpansion = ({
     // Deep link: /proposal/N?tab=actions#action-2 expands and reveals row 2.
     const match = /^#action-(\d+)$/.exec(window.location.hash);
     if (match) {
-      const index = Number(match[1]) - 1;
-      setExpanded((current) => new Set([...current, index]));
+      next = new Set([...next, Number(match[1]) - 1]);
       setTimeout(() => {
         document
           .getElementById(`action-${match[1]}`)
@@ -48,17 +53,18 @@ export const useActionExpansion = ({
       }, 0);
     }
 
-    setHydrated(true);
+    setExpanded(next);
+    hydratedKeyRef.current = storageKey;
   }, [storageKey]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (hydratedKeyRef.current !== storageKey) return;
     try {
       sessionStorage.setItem(storageKey, JSON.stringify([...expanded]));
     } catch {
       // Nothing to do: the state simply is not remembered.
     }
-  }, [expanded, hydrated, storageKey]);
+  }, [expanded, storageKey]);
 
   return {
     isExpanded: (index: number) => expanded.has(index),
