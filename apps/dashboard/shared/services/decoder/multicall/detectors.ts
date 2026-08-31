@@ -13,6 +13,8 @@ export type ExtractedSubcall = {
   target?: Address;
   value?: bigint;
   calldata: Hex;
+  /** Semantics caveats that must ride on the CHILD node (e.g. delegatecall). */
+  warnings?: DecodeWarning[];
 };
 
 export type MulticallDetector = {
@@ -114,7 +116,28 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "safe-exec",
       verb: "Executes",
-      extract: (args) => single(args[0], args[1], args[2]),
+      extract: (args) => {
+        // operation 1 is a delegatecall: the code at `to` runs with the
+        // Safe's own storage and balance, and NO ETH moves to the target —
+        // extracting the value would let the child summarize a transfer that
+        // never happens.
+        if (args[3] === 1) {
+          return [
+            {
+              target: args[0] as Address,
+              calldata: args[2] as Hex,
+              warnings: [
+                {
+                  code: "delegatecall",
+                  message:
+                    "Runs as a delegatecall: this code executes with the Safe's own storage and balance; effects apply to the Safe, not to this contract.",
+                },
+              ],
+            },
+          ];
+        }
+        return single(args[0], args[1], args[2]);
+      },
       warningsFor: (args) =>
         args[3] === 1
           ? [

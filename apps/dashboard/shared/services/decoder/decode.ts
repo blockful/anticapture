@@ -300,6 +300,7 @@ const decodeNode = async (
             raw: subcall.calldata,
             depth: depth + 1,
             warnings: [
+              ...(subcall.warnings ?? []),
               {
                 code: "depth-limit",
                 message: `Nesting deeper than ${opts.maxDepth} levels is left raw.`,
@@ -355,7 +356,11 @@ const decodeNode = async (
             depth + 1,
             childBudgets[position],
           );
-          decoded[position] = { ...child, index: slot.index };
+          decoded[position] = {
+            ...child,
+            warnings: [...(slot.subcall.warnings ?? []), ...child.warnings],
+            index: slot.index,
+          };
         }
       },
     );
@@ -386,7 +391,11 @@ const decodeNode = async (
         depth + 1,
         retryBudget,
       );
-      decoded[position] = { ...child, index: slot.index };
+      decoded[position] = {
+        ...child,
+        warnings: [...(slot.subcall.warnings ?? []), ...child.warnings],
+        index: slot.index,
+      };
       // Whatever the retry did not use returns for the next truncated sibling.
       pool = retryBudget.nodesLeft;
     }

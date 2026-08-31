@@ -194,9 +194,17 @@ describe("multicall unpacking", () => {
     expect(inner.subcalls![1]).toMatchObject({ functionName: "approve" });
   });
 
-  test("a Safe delegatecall is flagged", async () => {
+  test("a Safe delegatecall is flagged and carries no ETH into the child", async () => {
     const node = await decode(safeExecTransaction(USDC, USDC_TRANSFER, 1));
     expect(node.warnings).toEqual([
+      expect.objectContaining({ code: "delegatecall" }),
+    ]);
+    // Delegatecall transfers nothing and runs with the Safe's storage: the
+    // child must not carry the value and must repeat the caveat where its
+    // effects are shown.
+    const child = node.subcalls![0];
+    expect(child.value).toBeUndefined();
+    expect(child.warnings).toEqual([
       expect.objectContaining({ code: "delegatecall" }),
     ]);
   });
