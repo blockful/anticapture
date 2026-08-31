@@ -337,6 +337,44 @@ describe("multicall unpacking", () => {
     }
   });
 
+  test("an empty wrapper hands its whole budget back to siblings", async () => {
+    // Outer batch = [empty inner batch, 3-transfer inner batch] with room for
+    // exactly the whole tree: the empty wrapper allocates no shares and must
+    // not discard the branch's remaining budget.
+    const MULTICALL3_ABI = parseAbi([
+      "function aggregate3((address target, bool allowFailure, bytes callData)[] calls)",
+    ]);
+    const emptyInner = encodeFunctionData({
+      abi: MULTICALL3_ABI,
+      functionName: "aggregate3",
+      args: [[]],
+    });
+    const call = { target: USDC, allowFailure: false, callData: USDC_TRANSFER };
+    const fullInner = encodeFunctionData({
+      abi: MULTICALL3_ABI,
+      functionName: "aggregate3",
+      args: [[call, call, call]],
+    });
+    const outer = encodeFunctionData({
+      abi: MULTICALL3_ABI,
+      functionName: "aggregate3",
+      args: [
+        [
+          { target: MULTICALL3, allowFailure: false, callData: emptyInner },
+          { target: MULTICALL3, allowFailure: false, callData: fullInner },
+        ],
+      ],
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: outer },
+      offlineResolver,
+      { maxNodes: 5 },
+    );
+    expect(node.subcalls?.map((s) => s.subcalls?.length ?? 0)).toEqual([0, 3]);
+    expect(node.subcalls?.[1].warnings).toEqual([]);
+  });
+
   test("unused sibling shares are reclaimed so maxNodes is a total cap", async () => {
     // One flat transfer plus one two-call inner batch under maxNodes 4: the
     // whole tree is exactly four subcall nodes, so nothing may be hidden and

@@ -51,7 +51,9 @@ export const DecoderTool = () => {
   const calldataInput = oversizedCalldata ?? calldata;
 
   const handleCalldataChange = (value: string) => {
-    if (value.length > PERMALINK_CALLDATA_LIMIT) {
+    // Bound what actually lands in the URL: whitespace in explorer pastes
+    // URL-encodes to three characters each, so the raw length undercounts.
+    if (encodeURIComponent(value).length > PERMALINK_CALLDATA_LIMIT) {
       setOversizedCalldata(value);
       if (calldata) void setParams({ calldata: "" });
     } else {

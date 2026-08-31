@@ -393,8 +393,11 @@ const decodeNode = async (
 
     // Hand unused capacity back to OUR parent: without this, every wrapper
     // child looks exhausted to its parent's reclaim pass and the budget leaks
-    // one level at a time.
-    budget.nodesLeft = pool;
+    // one level at a time. The unallocated remainder matters too — a wrapper
+    // with zero decodable children (an empty batch) never carved shares at
+    // all, and discarding `remaining` there would starve its siblings.
+    const allocated = shares.reduce((sum, share) => sum + share, 0);
+    budget.nodesLeft = pool + (remaining - allocated);
 
     node.subcalls = decoded;
     node.subcallCount = extracted.length;
