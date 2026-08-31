@@ -20,6 +20,7 @@ import { useDecodedCalldata } from "@/shared/hooks/useDecodedCalldata";
 import { useDelayedFlag } from "@/shared/hooks/useDelayedFlag";
 import { useTokenMeta } from "@/shared/hooks/useTokenMeta";
 import { applyTokenMeta, collectTokenHints } from "@/shared/services/decoder";
+import { humanizeEtherValue } from "@/shared/services/decoder/humanize";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 const toBigInt = (value: string | null): bigint | undefined => {
@@ -29,6 +30,13 @@ const toBigInt = (value: string | null): bigint | undefined => {
   } catch {
     return undefined;
   }
+};
+
+/** ETH reading for the pending fallback; the raw string when unparseable. */
+const formatPendingValue = (value: string): string => {
+  const wei = toBigInt(value);
+  if (wei === undefined) return value;
+  return wei > 0n ? humanizeEtherValue(wei).text : "0 ETH";
 };
 
 export const ActionsTabContent = ({
@@ -167,6 +175,16 @@ const ActionItem = ({
                 explorerUrl={blockExplorerUrl}
               />
             </span>
+          </div>
+        )}
+        {value != null && (
+          <div className="flex w-full gap-2">
+            <p className="text-primary min-w-22 shrink-0 font-mono text-sm leading-5">
+              value:
+            </p>
+            <p className="text-secondary min-w-0 break-all font-mono text-sm leading-5">
+              {formatPendingValue(value)}
+            </p>
           </div>
         )}
         {calldata && (
