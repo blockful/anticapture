@@ -52,7 +52,10 @@ export const fetchVerifiedAbi = async (
   });
 
   try {
-    const res = await fetch(`/api/etherscan?${params.toString()}`);
+    // A hung upstream must not pin decode consumers on a loading state.
+    const res = await fetch(`/api/etherscan?${params.toString()}`, {
+      signal: AbortSignal.timeout(10_000),
+    });
     if (!res.ok) return null;
 
     const json = (await res.json()) as EtherscanResponse;

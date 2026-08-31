@@ -8,11 +8,11 @@ import type {
 const shortAddress = (address: string): string =>
   `${address.slice(0, 6)}…${address.slice(-4)}`;
 
-const paramByName = (
-  node: DecodedCall,
-  ...names: string[]
-): DecodedParam | undefined =>
-  node.params.find((param) => names.includes(param.name));
+// Positions come from the canonical signature the template is keyed by, so
+// they hold for every ABI variant. Name-based lookup broke on real contracts:
+// USDT's verified ABI declares transfer(address _to, uint256 _value).
+const paramAt = (node: DecodedCall, index: number): DecodedParam | undefined =>
+  node.params[index];
 
 /** The amount as the reader will see it: enriched token text when available. */
 const amountText = (param: DecodedParam | undefined): string => {
@@ -29,34 +29,37 @@ type Template = (node: DecodedCall) => string | null;
 
 // approve/transferFrom are shared between ERC-20 and ERC-721; a param the
 // resolved ABI names as a token ID flips the sentence to NFT phrasing.
+// Leading underscores are stripped so `_tokenId` counts too.
 const tokenIdParam = (node: DecodedCall): DecodedParam | undefined =>
-  node.params.find((param) => /tokenid|^id$/i.test(param.name));
+  node.params.find((param) =>
+    /tokenid|^id$/i.test(param.name.replace(/^_+/, "")),
+  );
 
 const TEMPLATES: Record<string, Template> = {
   "transfer(address,uint256)": (node) =>
-    `Transfers ${amountText(paramByName(node, "amount", "value", "arg1"))} to ${addressText(paramByName(node, "to", "recipient", "dst", "arg0"))}.`,
+    `Transfers ${amountText(paramAt(node, 1))} to ${addressText(paramAt(node, 0))}.`,
   "approve(address,uint256)": (node) => {
     const tokenId = tokenIdParam(node);
     if (tokenId) {
-      return `Approves ${addressText(paramByName(node, "spender", "to", "arg0"))} to manage token #${tokenId.value}.`;
+      return `Approves ${addressText(paramAt(node, 0))} to manage token #${tokenId.value}.`;
     }
-    return `Approves ${addressText(paramByName(node, "spender", "arg0"))} to spend ${amountText(paramByName(node, "amount", "value", "arg1"))}.`;
+    return `Approves ${addressText(paramAt(node, 0))} to spend ${amountText(paramAt(node, 1))}.`;
   },
   "transferFrom(address,address,uint256)": (node) => {
     const tokenId = tokenIdParam(node);
     if (tokenId) {
-      return `Transfers token #${tokenId.value} from ${addressText(paramByName(node, "from", "arg0"))} to ${addressText(paramByName(node, "to", "arg1"))}.`;
+      return `Transfers token #${tokenId.value} from ${addressText(paramAt(node, 0))} to ${addressText(paramAt(node, 1))}.`;
     }
-    return `Transfers ${amountText(paramByName(node, "amount", "value", "arg2"))} from ${addressText(paramByName(node, "from", "src", "arg0"))} to ${addressText(paramByName(node, "to", "dst", "arg1"))}.`;
+    return `Transfers ${amountText(paramAt(node, 2))} from ${addressText(paramAt(node, 0))} to ${addressText(paramAt(node, 1))}.`;
   },
   "delegate(address)": (node) =>
-    `Delegates the caller's voting power to ${addressText(paramByName(node, "delegatee", "arg0"))}.`,
+    `Delegates the caller's voting power to ${addressText(paramAt(node, 0))}.`,
   "safeTransferFrom(address,address,uint256)": (node) =>
-    `Transfers token #${paramByName(node, "tokenId", "arg2")?.value ?? "?"} from ${addressText(paramByName(node, "from", "arg0"))} to ${addressText(paramByName(node, "to", "arg1"))}.`,
+    `Transfers token #${paramAt(node, 2)?.value ?? "?"} from ${addressText(paramAt(node, 0))} to ${addressText(paramAt(node, 1))}.`,
   "safeTransferFrom(address,address,uint256,uint256,bytes)": (node) =>
-    `Transfers ${paramByName(node, "amount", "arg3")?.value ?? "?"} of token #${paramByName(node, "id", "arg2")?.value ?? "?"} from ${addressText(paramByName(node, "from", "arg0"))} to ${addressText(paramByName(node, "to", "arg1"))}.`,
+    `Transfers ${paramAt(node, 3)?.value ?? "?"} of token #${paramAt(node, 2)?.value ?? "?"} from ${addressText(paramAt(node, 0))} to ${addressText(paramAt(node, 1))}.`,
   "updateDelay(uint256)": (node) => {
-    const delay = paramByName(node, "newDelay", "arg0");
+    const delay = paramAt(node, 0);
     const text = delay?.humanized?.text ?? `${delay?.value ?? "?"} seconds`;
     return `Updates the timelock delay to ${text}.`;
   },
@@ -77,10 +80,11 @@ export const summarize = (node: DecodedCall): string | null => {
     return null;
   }
 
-  // Multicall wrappers summarize by what they unpack.
+  // Multicall wrappers summarize by what they carry, which can exceed what
+  // the node budget managed to decode.
   const detector = getDetector(node.selector);
   if (detector && node.subcalls !== undefined) {
-    const count = node.subcalls.length;
+    const count = node.subcallCount ?? node.subcalls.length;
     const noun = count === 1 ? "call" : "calls";
     return `${detector.verb} ${count} ${noun}.`;
   }

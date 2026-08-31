@@ -60,6 +60,11 @@ export type DecodedCall = {
   params: DecodedParam[];
   /** Set when a multicall detector unpacked nested calls. */
   subcalls?: Array<DecodedCall & { index: number }>;
+  /**
+   * How many calls the wrapper really carries. May exceed subcalls.length
+   * when the node budget truncated the tree; summaries must use this.
+   */
+  subcallCount?: number;
   /** The input, verbatim. Never lost, whatever else fails. */
   raw: Hex;
   /** 0 = root. Recursion stops at the decode option maxDepth. */

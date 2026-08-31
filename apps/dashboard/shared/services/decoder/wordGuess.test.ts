@@ -44,6 +44,16 @@ describe("guessWords", () => {
     expect(param.value).not.toBe(`0x${address}`);
   });
 
+  test("an 18-decimal token amount reads as a number, not an address", () => {
+    // 100e18 has 12+ leading zero bytes but is a value, not an address: only
+    // top-heavy 20-byte words (>= 2^152) read as addresses.
+    const amount = (100n * 10n ** 18n).toString(16);
+    const [param] = guessWords(calldata(word(amount)));
+    expect(param).toMatchObject({ type: "uint256" });
+    expect(param.value).toBe((100n * 10n ** 18n).toString());
+    expect(param.isAddress).toBeUndefined();
+  });
+
   test("a small value reads as uint256 with grouping", () => {
     const [param] = guessWords(calldata(word("f4240"))); // 1,000,000
     expect(param).toMatchObject({ name: "arg0", type: "uint256" });

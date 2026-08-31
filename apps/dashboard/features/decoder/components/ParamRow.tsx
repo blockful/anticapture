@@ -7,6 +7,7 @@ import { NestedBytesDecode } from "@/features/decoder/components/NestedBytesDeco
 import { TypeChip } from "@/features/decoder/components/TypeChip";
 import { ValueCell } from "@/features/decoder/components/ValueCell";
 import type { DecodedParam } from "@/features/decoder/types";
+import type { UploadedAbiStore } from "@/shared/services/decoder";
 import { cn } from "@/shared/utils/cn";
 
 interface ParamRowProps {
@@ -15,6 +16,8 @@ interface ParamRowProps {
   explorerUrl?: string;
   /** Card depth, forwarded so lazy nested decodes respect the global limit. */
   depth: number;
+  /** Forwarded so lazy nested decodes see the user's uploaded ABI. */
+  uploadedAbis?: UploadedAbiStore;
 }
 
 /**
@@ -28,6 +31,7 @@ export const ParamRow = ({
   chainId,
   explorerUrl,
   depth,
+  uploadedAbis,
 }: ParamRowProps) => {
   const isContainer = param.children !== undefined;
 
@@ -67,6 +71,7 @@ export const ParamRow = ({
               chainId={chainId}
               explorerUrl={explorerUrl}
               depth={depth}
+              uploadedAbis={uploadedAbis}
             />
           ))}
         </div>
@@ -79,6 +84,7 @@ export const ParamRow = ({
             chainId={chainId}
             explorerUrl={explorerUrl}
             depth={depth}
+            uploadedAbis={uploadedAbis}
           />
         </div>
       )}

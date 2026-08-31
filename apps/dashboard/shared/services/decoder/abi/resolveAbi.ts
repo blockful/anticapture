@@ -74,38 +74,70 @@ const decodes = (fn: AbiFunction, calldata: Hex): boolean => {
  * Resolutions are memoized per resolver instance so a batch of subcalls to
  * one contract triggers a single fetch.
  */
+/**
+ * Fetch memoization is shared per fetcher function (module-lived for the
+ * default Etherscan/OpenChain fetchers), not per resolver instance: a
+ * proposal page mounts one hook per action, and N actions against the same
+ * contract must cost one upstream request, not N. Negative results (null ABI,
+ * empty signature list) stay cached briefly — long enough to absorb focus
+ * refetch bursts, short enough that a transient outage can heal.
+ */
+const NEGATIVE_RESULT_TTL_MS = 60_000;
+
+type CacheEntry<T> = { promise: Promise<T>; negativeAt?: number };
+
+const sharedCaches = new WeakMap<object, Map<string, CacheEntry<unknown>>>();
+
+const cachedFetch = <T>(
+  fetcher: object,
+  key: string,
+  run: () => Promise<T>,
+  isNegative: (result: T) => boolean,
+): Promise<T> => {
+  let cache = sharedCaches.get(fetcher);
+  if (!cache) {
+    cache = new Map();
+    sharedCaches.set(fetcher, cache);
+  }
+  let entry = cache.get(key) as CacheEntry<T> | undefined;
+  if (
+    entry?.negativeAt !== undefined &&
+    Date.now() - entry.negativeAt > NEGATIVE_RESULT_TTL_MS
+  ) {
+    entry = undefined;
+  }
+  if (!entry) {
+    const created: CacheEntry<T> = {
+      promise: run().then((result) => {
+        if (isNegative(result)) created.negativeAt = Date.now();
+        return result;
+      }),
+    };
+    cache.set(key, created as CacheEntry<unknown>);
+    entry = created;
+  }
+  return entry.promise;
+};
+
 export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
   const fetchVerified = deps.fetchVerifiedAbi ?? fetchVerifiedAbiDefault;
   const fetchSignatures = deps.fetchSignatures ?? fetchSignaturesDefault;
   const getKnownFunction = deps.getKnownFunction ?? getKnownFunctionDefault;
-  // The fetches are memoized, not the final pick: choosing an OpenChain
-  // candidate depends on the full calldata, which varies per call even when
-  // chain, target and selector repeat across a batch.
-  const verifiedAbis = new Map<string, Promise<Abi | null>>();
-  const openchainSignatures = new Map<string, Promise<string[]>>();
 
   const resolveVerified = async (
     ctx: AbiResolveContext,
   ): Promise<ResolvedAbi | null> => {
     if (!ctx.target) return null;
-    const bundled = getBundledAbi(ctx.chainId, ctx.target);
-    let abi = bundled;
-    if (!abi) {
-      const key = `${ctx.chainId}:${ctx.target.toLowerCase()}`;
-      let pending = verifiedAbis.get(key);
-      if (!pending) {
-        // Null covers both "not verified" and transport failure, and the two
-        // are indistinguishable here; evict so a later refetch (the hook
-        // expires degraded decodes) can try again instead of replaying the
-        // memoized failure for the resolver's lifetime.
-        pending = fetchVerified(ctx.chainId, ctx.target).then((result) => {
-          if (result === null) verifiedAbis.delete(key);
-          return result;
-        });
-        verifiedAbis.set(key, pending);
-      }
-      abi = await pending;
-    }
+    const target = ctx.target;
+    const bundled = getBundledAbi(ctx.chainId, target);
+    const abi =
+      bundled ??
+      (await cachedFetch(
+        fetchVerified,
+        `${ctx.chainId}:${target.toLowerCase()}`,
+        () => fetchVerified(ctx.chainId, target),
+        (result) => result === null,
+      ));
     if (!abi) return null;
     const fn = findBySelector(abi, ctx.selector);
     if (!fn) return null;
@@ -123,18 +155,12 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
   const resolveOpenchain = async (
     ctx: AbiResolveContext,
   ): Promise<ResolvedAbi | null> => {
-    const key = ctx.selector.toLowerCase();
-    let pending = openchainSignatures.get(key);
-    if (!pending) {
-      // An empty list may be a transient OpenChain failure; evict it so the
-      // next resolution retries instead of replaying the failure forever.
-      pending = fetchSignatures(ctx.selector).then((result) => {
-        if (result.length === 0) openchainSignatures.delete(key);
-        return result;
-      });
-      openchainSignatures.set(key, pending);
-    }
-    const signatures = await pending;
+    const signatures = await cachedFetch(
+      fetchSignatures,
+      ctx.selector.toLowerCase(),
+      () => fetchSignatures(ctx.selector),
+      (result) => result.length === 0,
+    );
     const decodable: Array<{ fn: AbiFunction; signature: string }> = [];
     for (const textSignature of signatures) {
       let fn: AbiFunction;

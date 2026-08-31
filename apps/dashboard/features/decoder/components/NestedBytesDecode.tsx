@@ -8,6 +8,7 @@ import { DecoderCardSkeleton } from "@/features/decoder/components/DecoderCardSk
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { useDecodedCalldata } from "@/shared/hooks/useDecodedCalldata";
 import { useDelayedFlag } from "@/shared/hooks/useDelayedFlag";
+import type { UploadedAbiStore } from "@/shared/services/decoder";
 
 /** Nested cards stop offering "[+ decode]" past this depth. */
 const MAX_NESTED_DECODE_DEPTH = 4;
@@ -19,6 +20,8 @@ interface NestedBytesDecodeProps {
   chainId: number;
   explorerUrl?: string;
   depth: number;
+  /** The user's uploaded ABI must reach lazy nested decodes too. */
+  uploadedAbis?: UploadedAbiStore;
 }
 
 /**
@@ -32,12 +35,14 @@ export const NestedBytesDecode = ({
   chainId,
   explorerUrl,
   depth,
+  uploadedAbis,
 }: NestedBytesDecodeProps) => {
   const [requested, setRequested] = useState(false);
   const { data, isLoading } = useDecodedCalldata({
     chainId,
     target,
     calldata,
+    uploadedAbis,
     enabled: requested,
     startDepth: depth + 1,
   });
@@ -67,6 +72,7 @@ export const NestedBytesDecode = ({
       call={data}
       chainId={chainId}
       explorerUrl={explorerUrl}
+      uploadedAbis={uploadedAbis}
     />
   );
 };

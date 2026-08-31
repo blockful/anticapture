@@ -161,6 +161,7 @@ export const DecoderTool = () => {
           call={call}
           chainId={chainId}
           explorerUrl={explorerUrl}
+          uploadedAbis={uploadedAbis}
         />
       ) : showSkeleton ? (
         <DecoderCardSkeleton />

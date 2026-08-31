@@ -254,7 +254,7 @@ const decodeNode = async (
     if (
       amountIndex !== undefined &&
       amountParam &&
-      !NON_FUNGIBLE_PARAM_NAME.test(amountParam.name)
+      !NON_FUNGIBLE_PARAM_NAME.test(amountParam.name.replace(/^_+/, ""))
     ) {
       amountParam.tokenHint = { token: input.target };
     }
@@ -391,7 +391,13 @@ const decodeNode = async (
       pool = retryBudget.nodesLeft;
     }
 
+    // Hand unused capacity back to OUR parent: without this, every wrapper
+    // child looks exhausted to its parent's reclaim pass and the budget leaks
+    // one level at a time.
+    budget.nodesLeft = pool;
+
     node.subcalls = decoded;
+    node.subcallCount = extracted.length;
   }
 
   node.summary = summarize(node);

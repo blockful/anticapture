@@ -36,7 +36,7 @@ export const CollapsedActionRow = ({
     tabIndex={0}
     onClick={onExpand}
     onKeyDown={(event) => {
-      if (event.key === "Enter") {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         onExpand();
       }

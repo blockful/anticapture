@@ -5,10 +5,12 @@ import { useMemo } from "react";
 import { isAddress, type Address } from "viem";
 
 import {
+  AddressChip,
   CollapsedActionRow,
   DecodedActionCard,
   DecoderCardSkeleton,
 } from "@/features/decoder";
+import { CodeBlock } from "@/shared/components/design-system/code-block/CodeBlock";
 import { useActionExpansion } from "@/features/decoder/hooks/useActionExpansion";
 import { buildCollapsedRowLabel } from "@/features/decoder/utils/collapsedRowLabel";
 import { ProposalActionsInfoCard } from "@/features/governance/components/proposal-overview/ProposalActionsInfoCard";
@@ -143,12 +145,35 @@ const ActionItem = ({
   }
 
   if (!call) {
-    return showSkeleton ? (
-      <div id={`action-${index + 1}`}>
-        <DecoderCardSkeleton />
+    // The reader must never wait on remote ABI lookups to see what the action
+    // IS: target, value and raw calldata render immediately; the decode is
+    // progressive enhancement on top.
+    return (
+      <div
+        id={`action-${index + 1}`}
+        className="border-border-default bg-surface-default flex w-full flex-col gap-3 border p-3"
+      >
+        <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider">
+          {"// "}Action {index + 1}
+        </p>
+        {validTarget && (
+          <div className="flex w-full items-center gap-2">
+            <p className="text-primary min-w-22 shrink-0 font-mono text-sm leading-5">
+              target:
+            </p>
+            <span className="min-w-0">
+              <AddressChip
+                address={validTarget}
+                explorerUrl={blockExplorerUrl}
+              />
+            </span>
+          </div>
+        )}
+        {calldata && (
+          <CodeBlock code={calldata} codeClassName="max-h-40 overflow-y-auto" />
+        )}
+        {showSkeleton && <DecoderCardSkeleton rows={2} />}
       </div>
-    ) : (
-      <div id={`action-${index + 1}`} />
     );
   }
 

@@ -15,6 +15,7 @@ import type { DecodedCall, ViewMode } from "@/features/decoder/types";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { humanizeEtherValue } from "@/shared/services/decoder/humanize";
+import type { UploadedAbiStore } from "@/shared/services/decoder";
 import { cn } from "@/shared/utils/cn";
 
 interface DecodedActionCardProps {
@@ -27,6 +28,8 @@ interface DecodedActionCardProps {
   headerRight?: ReactNode;
   defaultView?: ViewMode;
   className?: string;
+  /** Forwarded to lazy nested decodes so an uploaded ABI applies there too. */
+  uploadedAbis?: UploadedAbiStore;
 }
 
 const MONO_LABEL =
@@ -51,6 +54,7 @@ export const DecodedActionCard = ({
   headerRight,
   defaultView = "decoded",
   className,
+  uploadedAbis,
 }: DecodedActionCardProps) => {
   const [view, setView] = useState<ViewMode>(defaultView);
 
@@ -141,6 +145,7 @@ export const DecodedActionCard = ({
                   chainId={chainId}
                   explorerUrl={explorerUrl}
                   depth={call.depth}
+                  uploadedAbis={uploadedAbis}
                 />
               ))}
             </div>
@@ -177,6 +182,7 @@ export const DecodedActionCard = ({
                 call={subcall}
                 chainId={chainId}
                 explorerUrl={explorerUrl}
+                uploadedAbis={uploadedAbis}
                 headerLeft={
                   <p className={cn("text-primary", MONO_LABEL)}>
                     {"// "}call {subcall.index + 1}

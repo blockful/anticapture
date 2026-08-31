@@ -98,9 +98,7 @@ describe("createAbiResolver", () => {
     expect(fetchSignatures).not.toHaveBeenCalled();
   });
 
-  test("a failed verified lookup is retried on the next resolution", async () => {
-    // First call fails (null), second succeeds: the resolver must not replay
-    // the memoized failure forever.
+  test("a failed verified lookup is retried after the negative-result TTL", async () => {
     const fetchVerifiedAbi = jest
       .fn()
       .mockResolvedValueOnce(null)
@@ -110,11 +108,25 @@ describe("createAbiResolver", () => {
       fetchSignatures: jest.fn().mockResolvedValue([]),
     });
 
-    const first = await resolver(ctx);
-    expect(first?.source).toBe("known"); // degraded round: canonical fallback
-    const second = await resolver(ctx);
-    expect(second?.source).toBe("verified");
-    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
+    let now = 1_000_000;
+    const spy = jest.spyOn(Date, "now").mockImplementation(() => now);
+    try {
+      const first = await resolver(ctx);
+      expect(first?.source).toBe("known"); // degraded round: canonical fallback
+
+      // Within the TTL the memoized failure is reused: focus-refetch bursts
+      // must not turn into a request storm.
+      await resolver(ctx);
+      expect(fetchVerifiedAbi).toHaveBeenCalledTimes(1);
+
+      // Past the TTL the failure expires and the real ABI wins.
+      now += 61_000;
+      const healed = await resolver(ctx);
+      expect(healed?.source).toBe("verified");
+      expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   test("the target's verified ABI outranks the known table on collisions", async () => {

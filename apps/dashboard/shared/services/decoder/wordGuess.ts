@@ -20,40 +20,37 @@ export const looksLikeCalldata = (hex: string): boolean => {
 
 const guessWord = (word: string, index: number): DecodedParam => {
   const name = `arg${index}`;
-  // 12 leading zero bytes with a non-zero tail is the ABI encoding of an
-  // address; a plain small number never has entropy in the low 20 bytes.
-  const leading = word.slice(0, 24);
-  const tail = word.slice(24);
-  if (/^0+$/.test(leading) && !/^0+$/.test(tail)) {
-    const value = BigInt(`0x${word}`);
-    if (value < 2n ** 64n) {
-      return {
-        name,
-        type: "uint256",
-        value: value.toString(),
-        humanized: humanizeNumber(value) ?? undefined,
-      };
-    }
-    return {
-      name,
-      type: "address",
-      value: getAddress(`0x${tail}`),
-      isAddress: true,
-    };
-  }
   if (/^0+$/.test(word)) {
     return { name, type: "uint256", value: "0" };
   }
+
   const value = BigInt(`0x${word}`);
-  if (value < 2n ** 64n) {
+  const leading = word.slice(0, 24);
+
+  // Entropy above the 20-byte region: not an address-shaped word.
+  if (!/^0+$/.test(leading)) {
+    return { name, type: "bytes32", value: `0x${word}` };
+  }
+
+  // Within 20 bytes, an address vs a big number: real addresses are uniform
+  // over 160 bits, so their top bytes are almost never zero, while token
+  // amounts (even 4.6e27 at 18 decimals) stay below 2^93. Values under 2^152
+  // read as numbers; only top-heavy 20-byte words read as addresses.
+  if (value >= 2n ** 152n) {
     return {
       name,
-      type: "uint256",
-      value: value.toString(),
-      humanized: humanizeNumber(value) ?? undefined,
+      type: "address",
+      value: getAddress(`0x${word.slice(24)}`),
+      isAddress: true,
     };
   }
-  return { name, type: "bytes32", value: `0x${word}` };
+
+  return {
+    name,
+    type: "uint256",
+    value: value.toString(),
+    humanized: humanizeNumber(value) ?? undefined,
+  };
 };
 
 /**

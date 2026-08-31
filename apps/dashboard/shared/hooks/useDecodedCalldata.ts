@@ -20,12 +20,14 @@ const DEGRADED_STALE_TIME_MS = 30 * 1000;
 
 /**
  * Calldata never changes for a given hash, so the query key carries a digest
- * instead of multi-KB hex. Malformed pastes (not hex) key on a bounded slice.
+ * instead of multi-KB hex. Malformed pastes hash their full UTF-8 bytes: a
+ * prefix-based key would let two long pastes sharing a prefix serve each
+ * other's cached error card.
  */
 const calldataKey = (calldata: string): string =>
   isHex(calldata) && calldata.length % 2 === 0
     ? keccak256(calldata as Hex)
-    : `raw:${calldata.length}:${calldata.slice(0, 256)}`;
+    : `raw:${keccak256(new TextEncoder().encode(calldata))}`;
 
 type UseDecodedCalldataArgs = {
   chainId: number;

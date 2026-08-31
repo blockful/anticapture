@@ -22,17 +22,29 @@ export const AbiInput = ({ onAbiChange }: AbiInputProps) => {
   const [abiText, setAbiText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Skip the callback when the parsed ABI is content-identical: every new
+  // object identity re-keys the decode query and refires its network work.
+  const lastAppliedRef = useRef<string | null>(null);
 
-  const applyText = (text: string) => {
-    setAbiText(text);
+  const applyAbi = (parsed: Abi | null) => {
+    const serialized = parsed === null ? null : JSON.stringify(parsed);
+    if (serialized === lastAppliedRef.current) return;
+    lastAppliedRef.current = serialized;
+    onAbiChange(parsed);
+  };
+
+  // Parsing multi-hundred-KB artifacts per keystroke blocks the main thread
+  // and re-decodes on every valid intermediate state; validate on blur (and
+  // on file upload) instead.
+  const validateText = (text: string) => {
     if (!text.trim()) {
       setError(null);
-      onAbiChange(null);
+      applyAbi(null);
       return;
     }
     const parsed = parseAbiJson(text);
     setError(parsed ? null : "Not a valid ABI JSON.");
-    onAbiChange(parsed);
+    applyAbi(parsed);
   };
 
   const handleFileUpload = async (file: File) => {
@@ -45,7 +57,7 @@ export const AbiInput = ({ onAbiChange }: AbiInputProps) => {
       }
       setAbiText(JSON.stringify(parsed, null, 2));
       setError(null);
-      onAbiChange(parsed);
+      applyAbi(parsed);
     } catch {
       setError("Could not read the file.");
     }
@@ -78,7 +90,8 @@ export const AbiInput = ({ onAbiChange }: AbiInputProps) => {
       </div>
       <Textarea
         value={abiText}
-        onChange={(event) => applyText(event.target.value)}
+        onChange={(event) => setAbiText(event.target.value)}
+        onBlur={(event) => validateText(event.target.value)}
         placeholder='Paste ABI JSON — e.g. [{"type":"function",...}] or a compiler artifact'
         className="min-h-24 font-mono text-xs"
         error={Boolean(error)}
