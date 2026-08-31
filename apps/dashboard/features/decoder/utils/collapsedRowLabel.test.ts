@@ -31,12 +31,14 @@ describe("buildCollapsedRowLabel", () => {
     ).toEqual({ label: "selector 0xa9059cbb" });
   });
 
-  test("empty calldata reads as an ETH transfer", () => {
+  test("empty calldata without a transfer summary reads as an empty call", () => {
+    // A real ETH transfer carries a decode summary ("Transfers 1.5 ETH…");
+    // the fallback only fires when nothing moves.
     expect(buildCollapsedRowLabel(undefined, "0x")).toEqual({
-      label: "ETH transfer",
+      label: "Empty call",
     });
-    expect(buildCollapsedRowLabel(undefined, null)).toEqual({
-      label: "ETH transfer",
-    });
+    expect(
+      buildCollapsedRowLabel({ summary: null, signature: undefined }, null),
+    ).toEqual({ label: "Empty call" });
   });
 });

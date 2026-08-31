@@ -28,5 +28,8 @@ export const buildCollapsedRowLabel = (
   if (calldata && /^0x[0-9a-fA-F]{8}/.test(calldata)) {
     return { label: `selector ${calldata.slice(0, 10)}` };
   }
-  return { label: "ETH transfer" };
+  // Empty calldata with attached value summarizes as an ETH transfer above;
+  // reaching here means no summary exists, so nothing moves: a plain empty
+  // call, not a transfer.
+  return { label: "Empty call" };
 };
