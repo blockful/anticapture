@@ -55,8 +55,9 @@ export const ActionsTabContent = ({
       (calldatas[index] ?? null) != null,
   );
 
+  // Proposal ids are DAO-local, so the key carries the DAO too.
   const { isExpanded, toggle } = useActionExpansion({
-    storageKey: `decoder:actions:${proposal.id || "draft"}`,
+    storageKey: `decoder:actions:${daoIdKey ?? "dao"}:${proposal.id || "draft"}`,
   });
 
   return (
