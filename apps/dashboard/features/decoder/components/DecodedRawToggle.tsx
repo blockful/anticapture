@@ -14,8 +14,8 @@ export const DecodedRawToggle = ({
   <SegmentedControl
     size="sm"
     items={[
-      { label: "decoded", value: "decoded" },
-      { label: "raw", value: "raw" },
+      { label: "DECODED", value: "decoded" },
+      { label: "RAW", value: "raw" },
     ]}
     value={value}
     onValueChange={(next) => onValueChange(next as ViewMode)}

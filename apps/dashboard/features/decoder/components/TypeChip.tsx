@@ -13,7 +13,7 @@ export const TypeChip = ({
 }) => (
   <span
     className={cn(
-      "border-border-contrast text-dimmed w-fit whitespace-nowrap border px-1 font-mono text-xs leading-4",
+      "border-border-contrast text-dimmed inline-flex w-fit items-center whitespace-nowrap border px-1.5 py-0.5 font-mono text-xs leading-4",
       className,
     )}
   >

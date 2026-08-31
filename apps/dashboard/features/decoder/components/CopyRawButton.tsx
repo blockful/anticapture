@@ -40,8 +40,10 @@ export const CopyRawButton = ({
       type="button"
       onClick={copy}
       className={cn(
-        "cursor-pointer font-mono text-xs uppercase leading-4 tracking-wider transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
-        copied ? "text-success" : "text-secondary hover:text-primary",
+        // Lowercase per frame 08 ("[copy raw calldata]"); callers that need
+        // the uppercase variant ("[COPY]" on chips) pass `uppercase`.
+        "cursor-pointer font-mono text-xs leading-4 tracking-wider transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
+        copied ? "text-success" : "text-dimmed hover:text-primary",
         "focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none",
         className,
       )}

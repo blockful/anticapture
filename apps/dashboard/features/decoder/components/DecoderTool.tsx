@@ -112,7 +112,7 @@ export const DecoderTool = () => {
   const handleAbiChange = setUploadedAbi;
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 lg:p-6">
+    <div className="flex w-full flex-col gap-4 p-4 lg:p-6">
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-primary font-mono text-sm font-medium uppercase leading-5 tracking-wider">

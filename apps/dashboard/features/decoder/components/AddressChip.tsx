@@ -2,7 +2,7 @@
 
 import type { Address } from "viem";
 
-import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import {
@@ -18,6 +18,8 @@ interface AddressChipProps {
   /** Enables the "view on explorer" click-through on the name. */
   explorerUrl?: string;
   size?: "xs" | "sm";
+  /** Avatar + name only (collapsed rows), per frame 08's `[◉ USDC]` chip. */
+  compact?: boolean;
   className?: string;
 }
 
@@ -30,6 +32,7 @@ export const AddressChip = ({
   address,
   explorerUrl,
   size = "xs",
+  compact = false,
   className,
 }: AddressChipProps) => {
   // Same query key as EnsAvatar, so chips and avatars share one cache entry.
@@ -107,23 +110,23 @@ export const AddressChip = ({
       ) : (
         nameContent
       )}
-      {resolvedName && (
+      {!compact && resolvedName && (
         <span className="text-dimmed font-mono text-xs leading-4">
           {shortAddress}
         </span>
       )}
-      {!resolvedName && isContract === false && (
+      {!compact && !resolvedName && isContract === false && (
         <span className="text-secondary font-mono text-xs uppercase leading-4">
           EOA
         </span>
       )}
-      <CopyAndPasteButton
-        textToCopy={address}
-        iconSize="md"
-        className="p-0.5"
-        feedbackDurationMs={1200}
-        customTooltipText={{ default: "Copy address", copied: "copied ✓" }}
-      />
+      {!compact && (
+        <CopyRawButton
+          textToCopy={address}
+          label="copy"
+          className="uppercase"
+        />
+      )}
     </span>
   );
 };

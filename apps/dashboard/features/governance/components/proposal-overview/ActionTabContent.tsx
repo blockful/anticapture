@@ -166,7 +166,7 @@ const ActionItem = ({
         className="border-border-default bg-surface-default flex w-full flex-col gap-3 border p-3"
       >
         <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider">
-          {"// "}Action {index + 1}
+          {"//"}Action {String(index + 1).padStart(2, "0")}
         </p>
         {validTarget && (
           <div className="flex w-full items-center gap-2">
@@ -207,7 +207,7 @@ const ActionItem = ({
         explorerUrl={blockExplorerUrl}
         headerLeft={
           <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider">
-            {"// "}Action {index + 1}
+            {"//"}Action {String(index + 1).padStart(2, "0")}
           </p>
         }
         headerRight={

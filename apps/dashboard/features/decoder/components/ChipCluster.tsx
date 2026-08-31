@@ -1,5 +1,5 @@
-import { BadgeStatus } from "@/shared/components/design-system/badges";
 import type { AbiSource } from "@/features/decoder/types";
+import { cn } from "@/shared/utils/cn";
 
 const ABI_SOURCE_LABEL: Record<Exclude<AbiSource, "none">, string> = {
   verified: "ABI · VERIFIED",
@@ -8,44 +8,29 @@ const ABI_SOURCE_LABEL: Record<Exclude<AbiSource, "none">, string> = {
   openchain: "ABI · OPENCHAIN",
 };
 
-export const DecodeStatusChip = ({
-  abiSource,
-  hasError,
+/** Square bordered mono chip, per Figma frame 08 (0px radius everywhere). */
+const HeaderChip = ({
+  children,
+  className,
 }: {
-  abiSource: AbiSource;
-  hasError: boolean;
-}) => {
-  if (hasError) {
-    return (
-      <BadgeStatus variant="error" className="font-mono uppercase">
-        decode error
-      </BadgeStatus>
-    );
-  }
-  if (abiSource === "none") {
-    return (
-      <BadgeStatus variant="warning" className="font-mono uppercase">
-        ABI unknown
-      </BadgeStatus>
-    );
-  }
-  return (
-    <BadgeStatus variant="success" className="font-mono lowercase">
-      decoded ✓
-    </BadgeStatus>
-  );
-};
+  children: string;
+  className?: string;
+}) => (
+  <span
+    className={cn(
+      "border-border-contrast text-secondary flex h-5 items-center border px-1.5 font-mono text-xs font-medium uppercase leading-4 tracking-wider",
+      className,
+    )}
+  >
+    {children}
+  </span>
+);
 
-export const AbiSourceChip = ({ abiSource }: { abiSource: AbiSource }) => {
-  if (abiSource === "none") return null;
-  return (
-    <BadgeStatus variant="outline" className="font-mono">
-      {ABI_SOURCE_LABEL[abiSource]}
-    </BadgeStatus>
-  );
-};
-
-/** Header chip pair: decode status + where the ABI came from. */
+/**
+ * Header chips: the ABI source in the happy path (frame 08 shows only
+ * `ABI · VERIFIED` next to CONTRACT), plus a status chip only when it carries
+ * information the source chip cannot (unknown ABI, decode error).
+ */
 export const ChipCluster = ({
   abiSource,
   hasError,
@@ -54,7 +39,18 @@ export const ChipCluster = ({
   hasError: boolean;
 }) => (
   <div className="flex items-center gap-1.5">
-    <DecodeStatusChip abiSource={abiSource} hasError={hasError} />
-    {!hasError && <AbiSourceChip abiSource={abiSource} />}
+    {hasError && (
+      <HeaderChip className="border-border-error text-error">
+        decode error
+      </HeaderChip>
+    )}
+    {!hasError && abiSource === "none" && (
+      <HeaderChip className="border-border-warning text-warning">
+        ABI unknown
+      </HeaderChip>
+    )}
+    {abiSource !== "none" && (
+      <HeaderChip>{ABI_SOURCE_LABEL[abiSource]}</HeaderChip>
+    )}
   </div>
 );
