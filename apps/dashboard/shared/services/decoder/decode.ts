@@ -45,6 +45,12 @@ export type DecodeOptions = {
 
 const DEFAULTS = { maxDepth: 5, maxBytes: 131_072, maxNodes: 200 };
 
+/** Array elements retained per level. The 128 KiB calldata cap still admits
+ *  ~4,000 ABI words, and every rendered element costs a row (an address one
+ *  costs an enrichment query too), so a single huge array must not reach the
+ *  UI whole. */
+const MAX_ARRAY_ITEMS = 100;
+
 /** Independent batch children decode in parallel, gently: each may cost an
  *  Etherscan/OpenChain round trip and both services rate-limit. */
 const SUBCALL_CONCURRENCY = 4;
@@ -96,18 +102,27 @@ const buildParam = (
 
   if (shape.kind === "array") {
     const items = Array.isArray(value) ? value : [];
+    const retained = items.slice(0, MAX_ARRAY_ITEMS);
+    const children = retained.map((item, i) =>
+      buildParam(
+        { ...shape.element, name: `[${i}]` } as AbiParameter,
+        item,
+        functionName,
+        i,
+      ),
+    );
+    if (items.length > retained.length) {
+      children.push({
+        name: "…",
+        type: shape.element.type,
+        value: `${(items.length - retained.length).toLocaleString("en-US")} more items not shown`,
+      });
+    }
     return {
       name,
       type: param.type,
-      value: `${items.length} ${items.length === 1 ? "item" : "items"}`,
-      children: items.map((item, i) =>
-        buildParam(
-          { ...shape.element, name: `[${i}]` } as AbiParameter,
-          item,
-          functionName,
-          i,
-        ),
-      ),
+      value: `${items.length.toLocaleString("en-US")} ${items.length === 1 ? "item" : "items"}`,
+      children,
     };
   }
 

@@ -116,6 +116,37 @@ describe("decodeCalldata basics", () => {
     ]);
   });
 
+  test("a huge array keeps the first elements plus a not-shown marker", async () => {
+    // A valid ABI with a large dynamic array must not materialize thousands
+    // of rows (each address row also costs an enrichment query downstream).
+    const abi = parseAbi(["function airdrop(address[] recipients)"]);
+    const calldata = encodeFunctionData({
+      abi,
+      functionName: "airdrop",
+      args: [Array.from({ length: 250 }, () => RECIPIENT)],
+    });
+    const uploaded = createUploadedAbiStore();
+    uploaded.set([...abi]);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+      uploaded,
+    });
+
+    const node = await decodeCalldata({ chainId: 1, calldata }, resolver);
+    const recipients = node.params[0];
+    expect(recipients.value).toBe("250 items");
+    expect(recipients.children).toHaveLength(101);
+    expect(recipients.children?.[99]).toMatchObject({
+      name: "[99]",
+      value: RECIPIENT,
+    });
+    expect(recipients.children?.[100]).toMatchObject({
+      name: "…",
+      value: "150 more items not shown",
+    });
+  });
+
   test("unknown selector degrades to guessed words with a permanent warning", async () => {
     const node = await decode(`0xdeadbeef${"1".padStart(64, "0")}`);
     expect(node.abiSource).toBe("none");
