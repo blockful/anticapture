@@ -24,9 +24,12 @@ export const buildCollapsedRowLabel = (
   calldata: string | null,
   value?: bigint,
 ): CollapsedLabel => {
-  const hasSelector = Boolean(calldata && /^0x[0-9a-fA-F]{8}/.test(calldata));
+  // Any non-empty payload qualifies, even one shorter than a 4-byte selector:
+  // only the pure ETH transfer (no payload) skips the suffix, because its
+  // decode summary already states the amount.
+  const hasPayload = Boolean(calldata && calldata !== "0x");
   const withValue = (label: string): string =>
-    hasSelector && value !== undefined && value > 0n
+    hasPayload && value !== undefined && value > 0n
       ? `${label} · sends ${humanizeEtherValue(value).text}`
       : label;
 
@@ -36,8 +39,12 @@ export const buildCollapsedRowLabel = (
   if (decoded?.signature) {
     return { label: withValue(decoded.signature) };
   }
-  if (hasSelector && calldata) {
+  if (calldata && /^0x[0-9a-fA-F]{8}/.test(calldata)) {
     return { label: withValue(`selector ${calldata.slice(0, 10)}`) };
+  }
+  if (hasPayload && calldata) {
+    // Sub-4-byte payload: no selector to name, but the call is not empty.
+    return { label: withValue(`calldata ${calldata}`) };
   }
   // Empty calldata with attached value summarizes as an ETH transfer above;
   // reaching here means no summary exists, so nothing moves: a plain empty

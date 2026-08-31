@@ -3,8 +3,8 @@
 import { useState } from "react";
 import type { Address } from "viem";
 
-import { DecodedActionCard } from "@/features/decoder/components/DecodedActionCard";
-import { DecoderCardSkeleton } from "@/features/decoder/components/DecoderCardSkeleton";
+import { DecodedActionCard } from "@/shared/components/decoder/DecodedActionCard";
+import { DecoderCardSkeleton } from "@/shared/components/decoder/DecoderCardSkeleton";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { useDecodedCalldata } from "@/shared/hooks/useDecodedCalldata";
 import { useDelayedFlag } from "@/shared/hooks/useDelayedFlag";

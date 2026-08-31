@@ -3,8 +3,8 @@
 import type { Address } from "viem";
 import { isAddress } from "viem";
 
-import { AddressChip } from "@/features/decoder/components/AddressChip";
-import type { CollapsedLabel } from "@/features/decoder/utils/collapsedRowLabel";
+import { AddressChip } from "@/shared/components/decoder/AddressChip";
+import type { CollapsedLabel } from "@/shared/utils/collapsedRowLabel";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { cn } from "@/shared/utils/cn";
 

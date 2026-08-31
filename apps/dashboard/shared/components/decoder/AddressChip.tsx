@@ -2,7 +2,7 @@
 
 import type { Address } from "viem";
 
-import { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
+import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import {

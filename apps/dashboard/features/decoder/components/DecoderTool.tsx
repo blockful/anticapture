@@ -5,9 +5,9 @@ import { useQueryStates } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import { isAddress, type Abi, type Address } from "viem";
 
-import { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
-import { DecodedActionCard } from "@/features/decoder/components/DecodedActionCard";
-import { DecoderCardSkeleton } from "@/features/decoder/components/DecoderCardSkeleton";
+import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
+import { DecodedActionCard } from "@/shared/components/decoder/DecodedActionCard";
+import { DecoderCardSkeleton } from "@/shared/components/decoder/DecoderCardSkeleton";
 import { DecoderInputPanel } from "@/features/decoder/components/DecoderInputPanel";
 import {
   isValidCalldataInput,
@@ -45,19 +45,21 @@ export const DecoderTool = () => {
   // Calldata past the permalink limit lives here instead of the URL: request
   // lines have practical size caps, and a permalink that cannot open is worse
   // than no permalink. The UI says so next to the copy affordance.
-  const [oversizedCalldata, setOversizedCalldata] = useState<string | null>(
-    null,
-  );
+  const [oversizedDraft, setOversizedDraft] = useState<string | null>(null);
+  // Storing an oversized draft always clears the URL param, so the draft is
+  // only authoritative while that param is still empty: calldata arriving via
+  // the URL afterwards (Back/Forward, a pasted permalink) supersedes it.
+  const oversizedCalldata = calldata === "" ? oversizedDraft : null;
   const calldataInput = oversizedCalldata ?? calldata;
 
   const handleCalldataChange = (value: string) => {
     // Bound what actually lands in the URL: whitespace in explorer pastes
     // URL-encodes to three characters each, so the raw length undercounts.
     if (encodeURIComponent(value).length > PERMALINK_CALLDATA_LIMIT) {
-      setOversizedCalldata(value);
+      setOversizedDraft(value);
       if (calldata) void setParams({ calldata: "" });
     } else {
-      setOversizedCalldata(null);
+      setOversizedDraft(null);
       void setParams({ calldata: value });
     }
   };

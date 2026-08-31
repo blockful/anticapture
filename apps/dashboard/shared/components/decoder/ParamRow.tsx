@@ -2,13 +2,13 @@
 
 import { isAddress, type Address } from "viem";
 
-import { AddressChip } from "@/features/decoder/components/AddressChip";
-import { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
-import { NestedBytesDecode } from "@/features/decoder/components/NestedBytesDecode";
-import { TypeChip } from "@/features/decoder/components/TypeChip";
-import { ValueCell } from "@/features/decoder/components/ValueCell";
-import type { DecodedParam } from "@/features/decoder/types";
-import { shortHex } from "@/features/decoder/utils/shortHex";
+import { AddressChip } from "@/shared/components/decoder/AddressChip";
+import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
+import { NestedBytesDecode } from "@/shared/components/decoder/NestedBytesDecode";
+import { TypeChip } from "@/shared/components/decoder/TypeChip";
+import { ValueCell } from "@/shared/components/decoder/ValueCell";
+import type { DecodedParam } from "@/shared/components/decoder/types";
+import { shortHex } from "@/shared/utils/shortHex";
 import type { UploadedAbiStore } from "@/shared/services/decoder";
 import { cn } from "@/shared/utils/cn";
 

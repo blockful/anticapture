@@ -3,15 +3,15 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import { ChipCluster } from "@/features/decoder/components/ChipCluster";
-import { CopyRawButton } from "@/features/decoder/components/CopyRawButton";
-import { AddressChip } from "@/features/decoder/components/AddressChip";
-import { DecodedRawToggle } from "@/features/decoder/components/DecodedRawToggle";
-import { ParamRow } from "@/features/decoder/components/ParamRow";
-import { RawView } from "@/features/decoder/components/RawView";
-import { SummaryRow } from "@/features/decoder/components/SummaryRow";
-import { ValueCell } from "@/features/decoder/components/ValueCell";
-import type { DecodedCall, ViewMode } from "@/features/decoder/types";
+import { ChipCluster } from "@/shared/components/decoder/ChipCluster";
+import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
+import { AddressChip } from "@/shared/components/decoder/AddressChip";
+import { DecodedRawToggle } from "@/shared/components/decoder/DecodedRawToggle";
+import { ParamRow } from "@/shared/components/decoder/ParamRow";
+import { RawView } from "@/shared/components/decoder/RawView";
+import { SummaryRow } from "@/shared/components/decoder/SummaryRow";
+import { ValueCell } from "@/shared/components/decoder/ValueCell";
+import type { DecodedCall, ViewMode } from "@/shared/components/decoder/types";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { humanizeEtherValue } from "@/shared/services/decoder/humanize";

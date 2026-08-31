@@ -4,16 +4,16 @@ import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { isAddress, type Address } from "viem";
 
+import { ProposalActionsInfoCard } from "@/features/governance/components/proposal-overview/ProposalActionsInfoCard";
 import {
   AddressChip,
   CollapsedActionRow,
   DecodedActionCard,
   DecoderCardSkeleton,
-} from "@/features/decoder";
+} from "@/shared/components/decoder";
 import { CodeBlock } from "@/shared/components/design-system/code-block/CodeBlock";
-import { useActionExpansion } from "@/features/decoder/hooks/useActionExpansion";
-import { buildCollapsedRowLabel } from "@/features/decoder/utils/collapsedRowLabel";
-import { ProposalActionsInfoCard } from "@/features/governance/components/proposal-overview/ProposalActionsInfoCard";
+import { useActionExpansion } from "@/shared/hooks/useActionExpansion";
+import { buildCollapsedRowLabel } from "@/shared/utils/collapsedRowLabel";
 import type { ProposalDetails } from "@/features/governance/types";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useDecodedCalldata } from "@/shared/hooks/useDecodedCalldata";

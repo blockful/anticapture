@@ -8,9 +8,15 @@ import { SUGGESTED_TRANSFER_TOKENS } from "@/shared/constants/suggestedTokens";
 import type { TokenMeta } from "@/shared/services/decoder/enrich";
 
 // Curated symbols keyed by lowercase address; decimals always come on-chain
-// so the list can never disagree with the token contract.
+// so the list can never disagree with the token contract. The curated list is
+// mainnet-only, and the same address on another chain is a different contract,
+// so the fallback never crosses chains.
 let curatedSymbols: Map<string, string> | null = null;
-const getCuratedSymbol = (token: string): string | undefined => {
+const getCuratedSymbol = (
+  chainId: number,
+  token: string,
+): string | undefined => {
+  if (chainId !== 1) return undefined;
   if (!curatedSymbols) {
     curatedSymbols = new Map();
     for (const tokens of Object.values(SUGGESTED_TRANSFER_TOKENS)) {
@@ -64,7 +70,7 @@ export const useTokenMeta = (
         (symbolResult?.status === "success"
           ? (symbolResult.result as string)
           : undefined) ??
-        getCuratedSymbol(token) ??
+        getCuratedSymbol(chainId, token) ??
         "tokens";
       map.set(token.toLowerCase(), {
         decimals: Number(decimalsResult.result),
@@ -72,7 +78,7 @@ export const useTokenMeta = (
       });
     });
     return map;
-  }, [data, tokens]);
+  }, [chainId, data, tokens]);
 
   return { meta, isLoading };
 };

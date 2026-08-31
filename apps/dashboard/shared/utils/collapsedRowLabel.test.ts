@@ -1,4 +1,4 @@
-import { buildCollapsedRowLabel } from "@/features/decoder/utils/collapsedRowLabel";
+import { buildCollapsedRowLabel } from "@/shared/utils/collapsedRowLabel";
 
 describe("buildCollapsedRowLabel", () => {
   test("a summary leads with the signature as suffix", () => {
@@ -47,6 +47,12 @@ describe("buildCollapsedRowLabel", () => {
         1_500_000_000_000_000_000n,
       ),
     ).toEqual({ label: "Transfers 1.5 ETH to 0xabc…def." });
+  });
+
+  test("attached ETH shows even when the payload is shorter than a selector", () => {
+    expect(
+      buildCollapsedRowLabel(undefined, "0x12", 1_500_000_000_000_000_000n),
+    ).toEqual({ label: "calldata 0x12 · sends 1.5 ETH" });
   });
 
   test("empty calldata without a transfer summary reads as an empty call", () => {

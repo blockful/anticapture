@@ -1,4 +1,4 @@
-import type { AbiSource } from "@/features/decoder/types";
+import type { AbiSource } from "@/shared/components/decoder/types";
 import { cn } from "@/shared/utils/cn";
 
 const ABI_SOURCE_LABEL: Record<Exclude<AbiSource, "none">, string> = {

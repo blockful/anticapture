@@ -1,7 +1,7 @@
 "use client";
 
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
-import type { ViewMode } from "@/features/decoder/types";
+import type { ViewMode } from "@/shared/components/decoder/types";
 
 /** The "decoded | raw" segmented control pinned bottom-left on every card. */
 export const DecodedRawToggle = ({

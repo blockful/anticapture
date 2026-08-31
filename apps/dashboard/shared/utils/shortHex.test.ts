@@ -1,4 +1,4 @@
-import { shortHex } from "@/features/decoder/utils/shortHex";
+import { shortHex } from "@/shared/utils/shortHex";
 
 describe("shortHex", () => {
   test("middle-truncates long hex", () => {
