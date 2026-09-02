@@ -1,5 +1,6 @@
 import { DAOClient } from "@/clients";
 import { ProposalStatus } from "@/lib/constants";
+import { logger } from "@/logger";
 import { DBProposal, ProposalSearchRequest, ProposalsRequest } from "@/mappers";
 
 export interface ProposalsRepository {
@@ -104,18 +105,40 @@ export class ProposalsService {
     );
   }
 
+  /**
+   * Resolves the chain head used to compute on-chain statuses. Returns null
+   * when the RPC is unavailable so callers degrade to the indexed status
+   * instead of failing the whole request.
+   */
+  private async getChainHead(): Promise<{
+    currentBlock: number;
+    currentTimestamp: number;
+  } | null> {
+    try {
+      const currentBlock = await this.daoClient.getCurrentBlockNumber();
+      const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+      return { currentBlock, currentTimestamp: currentTimestamp! };
+    } catch (error) {
+      logger.warn(
+        { error },
+        "RPC unavailable while resolving chain head; serving indexed proposal statuses",
+      );
+      return null;
+    }
+  }
+
   private async hydrateProposalsStatus(
     proposals: DBProposal[],
   ): Promise<DBProposal[]> {
-    const currentBlock = await this.daoClient.getCurrentBlockNumber();
-    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+    const head = await this.getChainHead();
+    if (!head) return proposals;
 
     await Promise.all(
       proposals.map(async (proposal) => {
         proposal.status = await this.daoClient.getProposalStatus(
           proposal,
-          currentBlock,
-          currentTimestamp!,
+          head.currentBlock,
+          head.currentTimestamp,
         );
       }),
     );
@@ -184,13 +207,13 @@ export class ProposalsService {
       return undefined;
     }
 
-    const currentBlock = await this.daoClient.getCurrentBlockNumber();
-    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+    const head = await this.getChainHead();
+    if (!head) return proposal;
 
     const status = await this.daoClient.getProposalStatus(
       proposal,
-      currentBlock,
-      currentTimestamp!,
+      head.currentBlock,
+      head.currentTimestamp,
     );
 
     return { ...proposal, status };
