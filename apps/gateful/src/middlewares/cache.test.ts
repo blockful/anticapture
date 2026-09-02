@@ -1,6 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
-import { type CacheStore, cacheMiddleware } from "./cache";
+import { type CacheStore, cacheMiddleware, STALE_GRACE_SECONDS } from "./cache";
 
 // ---------------------------------------------------------------------------
 // Fake Redis
@@ -155,5 +155,118 @@ describe("cacheMiddleware", () => {
     await app.request("/test");
 
     expect(redis.store.size).toBe(0);
+  });
+
+  // -------------------------------------------------------------------------
+  // Stale-on-error
+  // -------------------------------------------------------------------------
+
+  describe("stale entries", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(0);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    /** Primes the cache and moves past the TTL so the entry is stale. */
+    async function primeStale(handler = defaultHandler) {
+      const app = buildApp(redis, handler);
+      await app.request("/test");
+      vi.setSystemTime(60_001);
+    }
+
+    it("keeps entries in Redis for the grace period beyond max-age", async () => {
+      const app = buildApp(redis);
+
+      await app.request("/test");
+
+      const [entry] = redis.store.values();
+      expect(entry?.ttl).toBe(60 + STALE_GRACE_SECONDS);
+    });
+
+    it("revalidates a stale entry against the upstream when it is healthy", async () => {
+      await primeStale();
+      const handler = vi.fn((c: import("hono").Context) => {
+        c.header("Cache-Control", "public, max-age=60");
+        return c.json({ ok: "fresh" }, 200);
+      });
+      const app = buildApp(redis, handler);
+
+      const res = await app.request("/test");
+
+      expect(handler).toHaveBeenCalledOnce();
+      expect(await readResponse(res)).toMatchObject({
+        status: 200,
+        cacheStatus: null,
+        body: '{"ok":"fresh"}',
+      });
+    });
+
+    it("serves the stale entry when the upstream returns 5xx", async () => {
+      await primeStale();
+      const app = buildApp(redis, (c) =>
+        c.json({ error: "upstream down" }, 503),
+      );
+
+      const res = await app.request("/test");
+
+      expect(await readResponse(res)).toEqual({
+        status: 200,
+        cacheStatus: "Redis; stale",
+        cacheControl: "public, max-age=60",
+        body: '{"ok":true}',
+      });
+    });
+
+    it("serves the stale entry when the handler throws (e.g. circuit open)", async () => {
+      await primeStale();
+      const app = buildApp(redis, () => {
+        throw new Error("circuit open");
+      });
+
+      const res = await app.request("/test");
+
+      expect(await readResponse(res)).toMatchObject({
+        status: 200,
+        cacheStatus: "Redis; stale",
+        body: '{"ok":true}',
+      });
+    });
+
+    it("does not mask upstream errors when there is no stale entry", async () => {
+      const app = buildApp(redis, (c) =>
+        c.json({ error: "upstream down" }, 503),
+      );
+
+      const res = await app.request("/test");
+
+      expect(res.status).toBe(503);
+    });
+
+    it("treats entries written without expiresAt as fresh", async () => {
+      await redis.set(
+        new URL("/test", "http://localhost").toString(),
+        JSON.stringify({
+          body: '{"legacy":true}',
+          status: 200,
+          contentType: "application/json",
+          cacheControl: "public, max-age=60",
+        }),
+        { EX: 60 },
+      );
+      const handler = vi.fn(defaultHandler);
+      const app = buildApp(redis, handler);
+
+      const res = await app.request("/test");
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(await readResponse(res)).toMatchObject({
+        cacheStatus: "Redis; hit",
+        body: '{"legacy":true}',
+      });
+    });
   });
 });
