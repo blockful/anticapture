@@ -158,7 +158,7 @@ async function probeTarget(
   target: ProbeTarget,
   registry: CircuitBreakerRegistry,
 ): Promise<[string, UpstreamStatus]> {
-  const breaker = registry.get(target.circuitKey);
+  const breaker = registry.summary(target.circuitKey);
 
   // Read-only probe: reflect the proxy circuit's state but never run through
   // breaker.execute(). /health is public and polled by CI/orchestrators —

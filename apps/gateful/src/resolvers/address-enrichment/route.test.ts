@@ -83,15 +83,15 @@ describe("address-enrichment route", () => {
         new Response(JSON.stringify({ error: "internal" }), { status: 500 }),
       );
 
-    // Default failureThreshold is 5 — drive the breaker OPEN.
-    for (let i = 0; i < 5; i++) {
+    // Default minimumRequests is 10 — drive the breaker OPEN with all failures.
+    for (let i = 0; i < 10; i++) {
       await app.request("/address-enrichment/0x123");
     }
-    expect(fetchSpy).toHaveBeenCalledTimes(5);
+    expect(fetchSpy).toHaveBeenCalledTimes(10);
 
     // Circuit is now OPEN: the next request is rejected without hitting upstream.
     await app.request("/address-enrichment/0x123");
-    expect(fetchSpy).toHaveBeenCalledTimes(5);
+    expect(fetchSpy).toHaveBeenCalledTimes(10);
     expect(registry.get("address-enrichment").state).toBe("OPEN");
   });
 });

@@ -34,7 +34,7 @@ async function readHealthResponse(res: Response) {
 function appWithHealth(
   opts: Parameters<typeof health>[2],
   registry = new CircuitBreakerRegistry({
-    failureThreshold: 2,
+    minimumRequests: 2,
     cooldownMs: 60_000,
   }),
 ) {
@@ -255,7 +255,7 @@ describe("gateway health route", () => {
       daoRelayers: new Map(),
     });
 
-    // failureThreshold is 2 — poll more than that.
+    // minimumRequests is 2 — poll more than that.
     for (let i = 0; i < 5; i++) {
       const res = await app.request("/health");
       const body = await readHealthResponse(res);

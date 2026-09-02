@@ -34,9 +34,14 @@ export const envSchema = z
     // (local dev); set it on the public deployment. The Prometheus service reads
     // the same variable name, so it can be wired as one shared Railway variable.
     GATEFUL_METRICS_TOKEN: z.string().optional(),
-    CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
-    CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
-    CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
+    // The circuit opens when at least MIN_REQUESTS were seen in WINDOW_MS and
+    // FAILURE_RATE (0-1) of them failed, so a partially failing reload burst
+    // does not take a DAO route offline while a real outage still trips fast.
+    CIRCUIT_BREAKER_WINDOW_MS: z.coerce.number().default(30_000),
+    CIRCUIT_BREAKER_MIN_REQUESTS: z.coerce.number().default(10),
+    CIRCUIT_BREAKER_FAILURE_RATE: z.coerce.number().min(0).max(1).default(0.5),
+    CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(30_000),
+    CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(300_000),
     REDIS_URL: z.string().optional(),
     RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
   })
@@ -91,7 +96,9 @@ export const config = {
   daoApis: loadDaoMap("DAO_API_"),
   daoRelayers: loadDaoMap("DAO_RELAYER_"),
   circuitBreaker: {
-    failureThreshold: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+    windowMs: env.CIRCUIT_BREAKER_WINDOW_MS,
+    minimumRequests: env.CIRCUIT_BREAKER_MIN_REQUESTS,
+    failureRateThreshold: env.CIRCUIT_BREAKER_FAILURE_RATE,
     cooldownMs: env.CIRCUIT_BREAKER_COOLDOWN_MS,
     maxCooldownMs: env.CIRCUIT_BREAKER_MAX_COOLDOWN_MS,
   },

@@ -17,33 +17,47 @@ const STATE_VALUE: Record<State, number> = {
   OPEN: 2,
 };
 
+export type CircuitBreakerOptions = {
+  /** Sliding window over which the failure rate is measured. */
+  windowMs?: number;
+  /** Requests the window must hold before the failure rate is trusted. */
+  minimumRequests?: number;
+  /** Failure ratio (0-1) within the window that opens the circuit. */
+  failureRateThreshold?: number;
+  cooldownMs?: number;
+  maxCooldownMs?: number;
+};
+
 /** Wraps async calls with failure tracking and automatic recovery.
- *  After consecutive failures hit the threshold, the circuit OPENS and rejects calls instantly.
+ *
+ *  The circuit OPENS when the failure rate over a sliding window crosses the
+ *  threshold, and only once the window holds enough requests for the rate to
+ *  mean something. A burst of parallel calls that partially fails (a dashboard
+ *  reload against a slow upstream) therefore does not trip it, while a
+ *  sustained outage still does within seconds.
+ *
  *  After a cooldown (with exponential backoff), it transitions to HALF_OPEN and lets one probe
  *  through — if it succeeds the circuit CLOSES, otherwise it re-opens with a longer cooldown. */
 export class CircuitBreaker {
   private _state: State = "CLOSED";
-  private failureCount = 0;
+  private outcomes: Array<{ at: number; failed: boolean }> = [];
   private lastFailureTime = 0;
   private backoffMultiplier = 1;
   private probeInFlight = false;
   private readonly _name: string;
-  private readonly failureThreshold: number;
+  private readonly windowMs: number;
+  private readonly minimumRequests: number;
+  private readonly failureRateThreshold: number;
   private readonly cooldownMs: number;
   private readonly maxCooldownMs: number;
 
-  constructor(
-    name: string,
-    opts?: {
-      failureThreshold?: number;
-      cooldownMs?: number;
-      maxCooldownMs?: number;
-    },
-  ) {
+  constructor(name: string, opts?: CircuitBreakerOptions) {
     this._name = name;
-    this.failureThreshold = opts?.failureThreshold ?? 5;
-    this.cooldownMs = opts?.cooldownMs ?? 300_000;
-    this.maxCooldownMs = opts?.maxCooldownMs ?? 2_400_000;
+    this.windowMs = opts?.windowMs ?? 30_000;
+    this.minimumRequests = opts?.minimumRequests ?? 10;
+    this.failureRateThreshold = opts?.failureRateThreshold ?? 0.5;
+    this.cooldownMs = opts?.cooldownMs ?? 30_000;
+    this.maxCooldownMs = opts?.maxCooldownMs ?? 300_000;
     this.recordState();
   }
 
@@ -72,7 +86,7 @@ export class CircuitBreaker {
   /** Transition to CLOSED — reset all failure tracking. */
   private closeTheCircuit(): void {
     this._state = "CLOSED";
-    this.failureCount = 0;
+    this.outcomes = [];
     this.backoffMultiplier = 1;
     this.probeInFlight = false;
     this.recordState();
@@ -81,6 +95,7 @@ export class CircuitBreaker {
   /** Transition to OPEN — record failure time. */
   private openTheCircuit(): void {
     this._state = "OPEN";
+    this.outcomes = [];
     this.lastFailureTime = Date.now();
     this.recordState();
   }
@@ -140,21 +155,35 @@ export class CircuitBreaker {
     }
   }
 
-  /** Normal execution — track consecutive failures and open if threshold is reached. */
+  /** Normal execution — track outcomes and open once the windowed failure rate is exceeded. */
   private async handleClosed<T>(fn: () => Promise<T>): Promise<T> {
     try {
       const result = await fn();
-      this.failureCount = 0;
+      this.recordOutcome(false);
       return result;
     } catch (err) {
-      this.failureCount++;
-      if (this.failureCount >= this.failureThreshold) {
+      const { total, failures } = this.recordOutcome(true);
+      if (
+        total >= this.minimumRequests &&
+        failures / total >= this.failureRateThreshold
+      ) {
         this.openTheCircuit();
         console.warn(
-          `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${this.failureCount} consecutive failures)`,
+          `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${failures}/${total} failures in the last ${this.windowMs}ms)`,
         );
       }
       throw err;
     }
+  }
+
+  private recordOutcome(failed: boolean): { total: number; failures: number } {
+    const now = Date.now();
+    const cutoff = now - this.windowMs;
+    this.outcomes = this.outcomes.filter((o) => o.at > cutoff);
+    this.outcomes.push({ at: now, failed });
+
+    let failures = 0;
+    for (const o of this.outcomes) if (o.failed) failures++;
+    return { total: this.outcomes.length, failures };
   }
 }

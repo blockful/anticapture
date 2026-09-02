@@ -1,7 +1,7 @@
 import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { proxy as honoProxy } from "hono/proxy";
-import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
+import { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
 import { stripAuthorization } from "./strip-authorization.js";
 
 const PROXY_TIMEOUT_MS = 30000;
@@ -45,7 +45,10 @@ export function proxy(
       return c.json({ error: `DAO "${resolved.dao}" not configured` }, 404);
     }
 
-    return registry.get(resolved.dao).execute(async () => {
+    const breaker = registry.get(
+      CircuitBreakerRegistry.proxyKey(resolved.dao, resolved.path),
+    );
+    return breaker.execute(async () => {
       const url = new URL(resolved.path || "/", daoAPI);
       url.search = new URL(c.req.url).search;
       const res = await honoProxy(url.toString(), {
