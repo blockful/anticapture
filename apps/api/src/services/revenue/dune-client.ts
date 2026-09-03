@@ -1,5 +1,3 @@
-import { HTTPException } from "hono/http-exception";
-
 import { logger } from "@/logger";
 
 import { RevenueCache } from "./cache";
@@ -146,8 +144,7 @@ export class RevenueDuneClient {
   ) {}
 
   public async fetchActions(): Promise<RevenueActionItem[]> {
-    const data =
-      await this.fetchJson<DuneRowsResponse<RawActionRow>>("actions");
+    const data = await this.fetchJson<RawActionRow>("actions");
     return data.result.rows.map((row) => ({
       date: parseDuneMonth(row.month),
       category: row.category,
@@ -156,8 +153,7 @@ export class RevenueDuneClient {
   }
 
   public async fetchActiveNames(): Promise<RevenueActiveNamesItem[]> {
-    const data =
-      await this.fetchJson<DuneRowsResponse<RawActiveNamesRow>>("activeNames");
+    const data = await this.fetchJson<RawActiveNamesRow>("activeNames");
     return data.result.rows.map((row) => ({
       date: parseDuneMonth(row.month),
       netChange: row.net_change,
@@ -166,8 +162,7 @@ export class RevenueDuneClient {
   }
 
   public async fetchNewWallets(): Promise<RevenueNewWalletsItem[]> {
-    const data =
-      await this.fetchJson<DuneRowsResponse<RawNewWalletsRow>>("newWallets");
+    const data = await this.fetchJson<RawNewWalletsRow>("newWallets");
     return data.result.rows.map((row) => ({
       date: parseDuneMonth(row.month),
       newWallets: row.new_wallets,
@@ -176,10 +171,7 @@ export class RevenueDuneClient {
   }
 
   public async fetchRenewalFunnel(): Promise<RevenueRenewalFunnelItem[]> {
-    const data =
-      await this.fetchJson<DuneRowsResponse<RawRenewalFunnelRow>>(
-        "renewalFunnel",
-      );
+    const data = await this.fetchJson<RawRenewalFunnelRow>("renewalFunnel");
     return data.result.rows.map((row) => ({
       date: parseDuneMonth(row.expiry_month),
       termsExpiring: row.terms_expiring,
@@ -190,10 +182,7 @@ export class RevenueDuneClient {
   }
 
   public async fetchRenewalTenure(): Promise<RevenueRenewalTenureItem[]> {
-    const data =
-      await this.fetchJson<DuneRowsResponse<RawRenewalTenureRow>>(
-        "renewalTenure",
-      );
+    const data = await this.fetchJson<RawRenewalTenureRow>("renewalTenure");
     return data.result.rows.map((row) => ({
       date: parseDuneMonth(row.expiry_month),
       tenureBucket: row.tenure_bucket,
@@ -204,9 +193,7 @@ export class RevenueDuneClient {
 
   public async fetchRevenueByCategory(): Promise<RevenueByCategoryItem[]> {
     const data =
-      await this.fetchJson<DuneRowsResponse<RawRevenueByCategoryRow>>(
-        "revenueByCategory",
-      );
+      await this.fetchJson<RawRevenueByCategoryRow>("revenueByCategory");
     return data.result.rows.map((row) => ({
       date: parseDuneMonth(row.month),
       category: row.category,
@@ -216,10 +203,7 @@ export class RevenueDuneClient {
   }
 
   public async fetchRevenueTotals(): Promise<RevenueTotalsItem[]> {
-    const data =
-      await this.fetchJson<DuneRowsResponse<RawRevenueTotalsRow>>(
-        "revenueTotals",
-      );
+    const data = await this.fetchJson<RawRevenueTotalsRow>("revenueTotals");
     return data.result.rows.map((row) => ({
       date: parseDuneMonth(row.month),
       registrationUsd: row.registration_usd,
@@ -232,8 +216,16 @@ export class RevenueDuneClient {
     }));
   }
 
-  protected async fetchJson<T>(key: RevenueQueryKey): Promise<T> {
-    const cached = this.cache.get<T>(key);
+  /**
+   * Fetches a Dune result set, caching it for 24h. When Dune fails the last
+   * known result is served stale, or an empty result set when there is none.
+   * Revenue is third-party data: an outage there must never surface as a 5xx,
+   * because the gateway counts 5xx against the whole DAO's circuit breaker.
+   */
+  protected async fetchJson<Row>(
+    key: RevenueQueryKey,
+  ): Promise<DuneRowsResponse<Row>> {
+    const cached = this.cache.get<DuneRowsResponse<Row>>(key);
     if (cached !== null) {
       logger.debug({ key }, "revenue cache hit");
       return cached;
@@ -253,7 +245,7 @@ export class RevenueDuneClient {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const data = (await response.json()) as T;
+      const data = (await response.json()) as DuneRowsResponse<Row>;
       this.cache.set(key, data);
       const rowCount = (data as DuneRowsResponse<unknown>).result?.rows?.length;
       logger.info(
@@ -268,13 +260,15 @@ export class RevenueDuneClient {
       return data;
     } catch (error) {
       logger.error(
-        { err: error, key, durationMs: Date.now() - start },
+        { err: error, key, url, durationMs: Date.now() - start },
         "failed to fetch revenue data from Dune",
       );
-      throw new HTTPException(503, {
-        message: "Failed to fetch revenue data",
-        cause: error,
-      });
+      const stale = this.cache.getStale<DuneRowsResponse<Row>>(key);
+      if (stale !== null) {
+        logger.warn({ key }, "serving stale revenue data after Dune failure");
+        return stale;
+      }
+      return { result: { rows: [] } };
     }
   }
 }

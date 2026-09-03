@@ -15,11 +15,16 @@ export class RevenueCache {
 
     const isExpired = Date.now() - entry.timestamp > this.CACHE_TTL_MS;
     if (isExpired) {
-      this.cache.delete(key);
       return null;
     }
 
     return entry.data;
+  }
+
+  /** Last known value regardless of TTL, for serving stale data when the upstream fails. */
+  getStale<T>(key: string): T | null {
+    const entry = this.cache.get(key) as CacheEntry<T> | undefined;
+    return entry ? entry.data : null;
   }
 
   set<T>(key: string, data: T): void {
