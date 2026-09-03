@@ -49,7 +49,12 @@ export const ButtonHeaderSidebar = ({
         return pathname === `/${daoId}` || pathname === `/${daoId}/`;
       }
     }
-    // Other pages are active when the last segment matches
+    if (isGlobal) {
+      // Global pages live at /{page}, which may be nested (tools/decoder):
+      // match the full pathname, like the desktop sidebar does.
+      return pathname === `/${page}` || pathname === `/${page}/`;
+    }
+    // DAO pages are active when the last segment matches
     return currentPage === page;
   })();
 

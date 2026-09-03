@@ -13,6 +13,8 @@ interface CopyButtonProps {
   disabled?: boolean;
   customTooltipText?: { default: string; copied: string };
   iconSize?: "sm" | "md" | "lg";
+  /** How long the copied state shows before reverting. */
+  feedbackDurationMs?: number;
 }
 
 export const CopyAndPasteButton = ({
@@ -21,6 +23,7 @@ export const CopyAndPasteButton = ({
   disabled = false,
   customTooltipText,
   iconSize = "lg",
+  feedbackDurationMs = 2000,
 }: CopyButtonProps) => {
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
@@ -32,7 +35,7 @@ export const CopyAndPasteButton = ({
     try {
       await navigator.clipboard.writeText(textToCopy);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      setTimeout(() => setIsCopied(false), feedbackDurationMs);
     } catch (error) {
       console.error("Failed to copy text:", error);
     }

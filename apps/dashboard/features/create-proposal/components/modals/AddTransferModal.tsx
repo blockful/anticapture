@@ -19,7 +19,7 @@ import { useEthPrice } from "@/shared/hooks/useEthPrice";
 import { useTokenPrice } from "@/shared/hooks/useTokenPrice";
 import { cn } from "@/shared/utils/cn";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import { SUGGESTED_TRANSFER_TOKENS } from "@/features/create-proposal/constants";
+import { SUGGESTED_TRANSFER_TOKENS } from "@/shared/constants/suggestedTokens";
 import type {
   ERC20TransferAction,
   EthTransferAction,

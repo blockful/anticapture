@@ -9,7 +9,7 @@ import {
   titleSchema,
   type ProposalFormValues,
 } from "@/features/create-proposal/schema";
-import { parseAbiStrict } from "@/features/create-proposal/utils/fetchAbi";
+import { parseAbiStrict } from "@/shared/services/decoder/abi/etherscan";
 import {
   convertImportedArg,
   convertUntypedArg,
