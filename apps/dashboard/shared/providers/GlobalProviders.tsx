@@ -13,8 +13,13 @@ import { setClientConfig } from "@anticapture/client";
 import { LoginProvider } from "@/shared/services/auth/LoginProvider";
 import { wagmiConfig } from "@/shared/services/wallet/wallet";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { shouldRetryQuery } from "@/shared/utils/query-retry";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: shouldRetryQuery },
+  },
+});
 
 export const GlobalProviders = ({
   children,
