@@ -56,7 +56,9 @@ export function tokenHistoricalData(
           { err: error },
           "historical token data unavailable; returning empty series",
         );
-        return context.json([], 200);
+        // no-store keeps the gateway from caching the empty fallback for the
+        // route's regular max-age once the provider recovers.
+        return context.json([], 200, { "Cache-Control": "no-store" });
       }
     },
   );

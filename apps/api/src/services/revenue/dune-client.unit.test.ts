@@ -12,7 +12,6 @@ import {
 } from "vitest";
 
 import {
-  DuneRowsResponse,
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
   RevenueDuneUrls,
@@ -31,10 +30,8 @@ function buildUrls(
 }
 
 class TestableRevenueDuneClient extends RevenueDuneClient {
-  public fetchKey<
-    T extends DuneRowsResponse<unknown> = DuneRowsResponse<unknown>,
-  >(key: RevenueQueryKey) {
-    return this.fetchJson<T>(key);
+  public fetchKey<Row = unknown>(key: RevenueQueryKey) {
+    return this.fetchJson<Row>(key);
   }
 }
 
@@ -73,7 +70,7 @@ describe("RevenueDuneClient", () => {
     const body = { result: { rows: [{ a: 1 }] } };
     server.use(http.get(urls.actions, () => HttpResponse.json(body)));
 
-    const result = await client.fetchKey<typeof body>("actions");
+    const result = await client.fetchKey<{ a: number }>("actions");
 
     expect(result).toEqual(body);
   });

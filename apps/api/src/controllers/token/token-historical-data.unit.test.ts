@@ -16,6 +16,16 @@ function buildApp(client: TokenHistoricalDataClient) {
   return app;
 }
 
+describe("GET /token/historical-data cache headers", () => {
+  it("keeps the route max-age on successful responses", async () => {
+    const app = buildApp({ getHistoricalTokenData: async () => [] });
+
+    const res = await app.request("/token/historical-data?limit=7");
+
+    expect(res.headers.get("Cache-Control")).toBe("public, max-age=3600");
+  });
+});
+
 describe("GET /token/historical-data", () => {
   it("returns the client data", async () => {
     const app = buildApp({
@@ -42,6 +52,7 @@ describe("GET /token/historical-data", () => {
     const res = await app.request("/token/historical-data?limit=7");
 
     expect(res.status).toBe(200);
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
     expect(await res.json()).toEqual([]);
   });
 
