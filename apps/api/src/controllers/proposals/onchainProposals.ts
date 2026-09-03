@@ -117,6 +117,7 @@ export function proposals(
           query,
           skip,
           limit,
+          lean,
         }),
         service.getSearchProposalsCount(query),
       ]);
@@ -173,7 +174,7 @@ export function proposals(
       const { id } = context.req.valid("param");
       const { lean } = context.req.valid("query");
 
-      const proposal = await service.getProposalById(id);
+      const proposal = await service.getProposalById(id, lean);
 
       if (!proposal) {
         return context.json(
