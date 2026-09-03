@@ -1,5 +1,11 @@
 # @anticapture/client
 
+## 2.1.1
+
+### Patch Changes
+
+- [#2152](https://github.com/blockful/anticapture/pull/2152) [`2822cdd`](https://github.com/blockful/anticapture/commit/2822cdde3f30604b78c53dc525d9fb925eb68997) Thanks [@pikonha](https://github.com/pikonha)! - Make `lean` an honored default on the MCP proposal tools instead of a hardcoded override. The tools used to force `lean: true` while still advertising the param with `default: false`, so a caller asking for the full payload was silently ignored. They now re-declare `lean` with a `true` default (keeping MCP responses small) and pass the caller's value through, so `lean: false` returns the full proposal — calldatas, values, targets and description/body.
+
 ## 2.1.0
 
 ### Minor Changes
