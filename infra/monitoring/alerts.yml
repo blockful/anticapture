@@ -29,6 +29,22 @@ groups:
             Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
             for more than 5 minutes. DAO API traffic for this DAO is unavailable.
 
+      # DAO API job discovered no replica at all. With DNS service discovery a
+      # hostname without AAAA records yields no targets and no `up` series, so
+      # ApiDown (up == 0) would stay silent during a full outage of that API.
+      - alert: ApiNoReplicas
+        expr: prometheus_sd_discovered_targets{name="scrape", config=~"anticapture-.*-api"} == 0
+        for: 5m
+        keep_firing_for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "[CRITICAL] {{ $labels.config }} has no replicas to scrape"
+          description: >
+            DNS service discovery for {{ $labels.config }} returned no address for more than
+            5 minutes: the DAO API has no running replica (crashed, scaled to zero, or its
+            <DAO>_API_ENDPOINT hostname is wrong). DAO API traffic for this DAO is unavailable.
+
       # Indexer scrape endpoints are not responding — longer window for slow startup
       - alert: IndexerDown
         expr: up{job=~"anticapture-.*-indexer(?:-ponder)?"} == 0
@@ -216,20 +232,22 @@ groups:
             on the matching DAO API (DaoApiRouteFailing), RPC errors on eRPC, or database
             connection timeouts in the API logs.
 
-      # A single DAO API route failing most of the time for an hour. Low-volume
-      # but deterministic failures (a third-party query that 404s, a broken token
-      # id) do not move the global error rate, yet every 5xx counts toward the
-      # gateway circuit breaker for that DAO.
+      # A single DAO API route failing most of the time over the last hour. Low
+      # volume but deterministic failures (a third-party query that 404s, a
+      # broken token id) do not move the global error rate, yet every 5xx counts
+      # toward the gateway circuit breaker for that DAO. The 1h window already
+      # smooths the ratio; `for` is short so a burst of failures still alerts.
       - alert: DaoApiRouteFailing
         expr: >
           (
             sum by (job, http_route) (rate(http_server_requests_total{job=~"anticapture-.*-api", http_response_status_code=~"5.."}[1h]))
             /
             sum by (job, http_route) (rate(http_server_requests_total{job=~"anticapture-.*-api"}[1h]))
-          ) > 0.5
+            * 100 > 50
+          )
           and
           sum by (job, http_route) (increase(http_server_requests_total{job=~"anticapture-.*-api"}[1h])) >= 10
-        for: 1h
+        for: 10m
         keep_firing_for: 30m
         labels:
           severity: warning
@@ -237,7 +255,7 @@ groups:
           summary: "[WARNING] {{ $labels.job }} {{ $labels.http_route }} is failing"
           description: >
             More than half of the requests to {{ $labels.http_route }} on {{ $labels.job }}
-            returned 5xx over the last hour ({{ printf "%.0f" $value }}% failure ratio).
+            returned 5xx over the last hour ({{ printf "%.0f" $value }}% of requests).
             Each of those failures counts toward the gateway circuit breaker for the DAO.
             Check the API logs for this route; a third-party dependency (Dune, CoinGecko, RPC)
             or a misconfigured query id is the usual cause.
