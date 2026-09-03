@@ -86,15 +86,24 @@ function createStubRepo(): ProposalsRepository & {
       return stub.proposals;
     },
     getProposalsCount: async () => stub.count,
-    searchProposals: async (query: string) => {
+    searchProposals: async (
+      query: string,
+      _skip: number,
+      _limit: number,
+      lean?: boolean,
+    ) => {
       stub.lastSearchQueryArg = query;
+      stub.lastLeanArg = lean;
       return stub.proposals;
     },
     getSearchProposalsCount: async (query: string) => {
       stub.lastSearchQueryArg = query;
       return stub.searchCount;
     },
-    getProposalById: async () => stub.byId,
+    getProposalById: async (_proposalId: string, lean?: boolean) => {
+      stub.lastLeanArg = lean;
+      return stub.byId;
+    },
   };
   return stub;
 }
@@ -322,6 +331,14 @@ describe("ProposalsService", () => {
       );
     });
 
+    it("should forward lean to the repository", async () => {
+      repo.byId = createMockProposal();
+
+      await service.getProposalById("1", true);
+
+      expect(repo.lastLeanArg).toBe(true);
+    });
+
     it("should return undefined when not found", async () => {
       const result = await service.getProposalById("999");
 
@@ -342,6 +359,7 @@ describe("ProposalsService", () => {
       });
 
       expect(repo.lastSearchQueryArg).toBe("refresh");
+      expect(repo.lastLeanArg).toBe(false);
       expect(result).toEqual([
         createMockProposal({
           title: "Treasury Refresh",
