@@ -5,7 +5,9 @@
  *
  * This is a curated tool set: proposal-related tools call the regular
  * endpoints with `lean=true` to drop heavy execution-payload fields and keep
- * payloads small for LLM clients. The generated kubb server (generated/mcp/
+ * payloads small for LLM clients. Since that override is unconditional, `lean`
+ * is omitted from those tools' input schemas rather than advertised as a knob
+ * the caller can set; the REST endpoints remain the way to get full payloads. The generated kubb server (generated/mcp/
  * server.ts) exposes every endpoint one-to-one and is no longer used; it
  * remains as a reference for the available handlers and schemas.
  */
@@ -135,7 +137,6 @@ import {
   historicalVotingPowerQueryResponseSchema,
   lastUpdateQueryParamsSchema,
   lastUpdateQueryResponseSchema,
-  offchainProposalByIdQueryParamsSchema,
   offchainProposalByIdQueryResponseSchema,
   offchainProposalNonVotersQueryParamsSchema,
   offchainProposalNonVotersQueryResponseSchema,
@@ -143,7 +144,6 @@ import {
   offchainProposalsQueryResponseSchema,
   offchainSearchProposalsQueryParamsSchema,
   offchainSearchProposalsQueryResponseSchema,
-  proposalQueryParamsSchema,
   proposalQueryResponseSchema,
   proposalNonVotersQueryParamsSchema,
   proposalNonVotersQueryResponseSchema,
@@ -573,7 +573,7 @@ export function createMcpServer(): McpServer {
       outputSchema: { data: proposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
-        params: proposalsQueryParamsSchema,
+        params: proposalsQueryParamsSchema.omit({ lean: true }),
       },
     },
     async ({ dao, params }) =>
@@ -589,7 +589,7 @@ export function createMcpServer(): McpServer {
       outputSchema: { data: searchProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
-        params: searchProposalsQueryParamsSchema,
+        params: searchProposalsQueryParamsSchema.omit({ lean: true }),
       },
     },
     async ({ dao, params }) =>
@@ -606,11 +606,9 @@ export function createMcpServer(): McpServer {
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
         id: z.string(),
-        params: proposalQueryParamsSchema.optional(),
       },
     },
-    async ({ dao, id, params }) =>
-      proposalHandler({ dao, id, params: { ...params, lean: true } }),
+    async ({ dao, id }) => proposalHandler({ dao, id, params: { lean: true } }),
   );
 
   server.registerTool(
@@ -934,7 +932,7 @@ export function createMcpServer(): McpServer {
       outputSchema: { data: offchainProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
-        params: offchainProposalsQueryParamsSchema,
+        params: offchainProposalsQueryParamsSchema.omit({ lean: true }),
       },
     },
     async ({ dao, params }) =>
@@ -950,7 +948,7 @@ export function createMcpServer(): McpServer {
       outputSchema: { data: offchainSearchProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
-        params: offchainSearchProposalsQueryParamsSchema,
+        params: offchainSearchProposalsQueryParamsSchema.omit({ lean: true }),
       },
     },
     async ({ dao, params }) =>
@@ -970,15 +968,10 @@ export function createMcpServer(): McpServer {
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
         id: z.string(),
-        params: offchainProposalByIdQueryParamsSchema.optional(),
       },
     },
-    async ({ dao, id, params }) =>
-      offchainProposalByIdHandler({
-        dao,
-        id,
-        params: { ...params, lean: true },
-      }),
+    async ({ dao, id }) =>
+      offchainProposalByIdHandler({ dao, id, params: { lean: true } }),
   );
 
   server.registerTool(
