@@ -216,7 +216,7 @@ describe("cacheMiddleware", () => {
       expect(await readResponse(res)).toEqual({
         status: 200,
         cacheStatus: "Redis; stale",
-        cacheControl: "public, max-age=60",
+        cacheControl: "no-cache",
         body: '{"ok":true}',
       });
     });

@@ -165,7 +165,9 @@ async function probeTarget(
   // routing probes through the breaker would let probe failures trip the
   // real-traffic circuit (or steal its single HALF_OPEN slot) and take routes
   // offline before any user request actually fails.
-  if (breaker.state === "OPEN") {
+  // An OPEN circuit past its cooldown will probe on the next real request, so
+  // only a circuit still inside its cooldown is reported as down here.
+  if (breaker.state === "OPEN" && breaker.nextRetryIn > 0) {
     return [
       target.name,
       {

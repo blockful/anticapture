@@ -247,6 +247,34 @@ describe("gateway health route", () => {
     expect(body.upstreams.ens.nextRetryIn).toBeGreaterThan(0);
   });
 
+  it("probes the upstream again once an open circuit has cooled down", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(0);
+    const failing = vi.fn().mockRejectedValue(new Error("offline"));
+    const { app, registry } = appWithHealth({
+      daoApis: new Map([["ens", "http://api.example"]]),
+      daoRelayers: new Map(),
+    });
+    // A per-route breaker opens and then sees no more traffic.
+    await expect(
+      registry.get("ens:revenue").execute(failing),
+    ).rejects.toThrow();
+    await expect(
+      registry.get("ens:revenue").execute(failing),
+    ).rejects.toThrow();
+    vi.setSystemTime(60_000);
+
+    const fetch = okFetch();
+    vi.stubGlobal("fetch", fetch);
+    const res = await app.request("/health");
+    const body = await readHealthResponse(res);
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(res.status).toBe(200);
+    expect(body.upstreams.ens.status).toBe("ok");
+    vi.useRealTimers();
+  });
+
   it("does not trip the proxy circuit when probes fail repeatedly", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
 

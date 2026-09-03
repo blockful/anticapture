@@ -143,7 +143,9 @@ function toResponse(entry: CachedEntry, result: "hit" | "stale"): Response {
     status: entry.status,
     headers: {
       "Content-Type": entry.contentType,
-      "Cache-Control": entry.cacheControl,
+      // A stale body is already past its max-age: tell browsers and CDNs to
+      // revalidate instead of pinning it for another full TTL.
+      "Cache-Control": result === "stale" ? "no-cache" : entry.cacheControl,
       "Cache-Status": `Redis; ${result}`,
     },
   });
