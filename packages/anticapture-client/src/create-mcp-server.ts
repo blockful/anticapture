@@ -3,11 +3,11 @@
  * entrypoints. McpServer only supports one active transport at a time, so the
  * HTTP server needs a fresh instance per session.
  *
- * This is a curated tool set: proposal-related tools call the regular
- * endpoints with `lean=true` to drop heavy execution-payload fields and keep
- * payloads small for LLM clients. Since that override is unconditional, `lean`
- * is omitted from those tools' input schemas rather than advertised as a knob
- * the caller can set; the REST endpoints remain the way to get full payloads. The generated kubb server (generated/mcp/
+ * This is a curated tool set: proposal-related tools default `lean` to true to
+ * drop heavy execution-payload fields and keep payloads small for LLM clients.
+ * The REST endpoints default it to false, so these tools re-declare the param
+ * with the flipped default; callers that need the full payload (calldatas,
+ * values, targets, description/body) can still pass `lean: false`. The generated kubb server (generated/mcp/
  * server.ts) exposes every endpoint one-to-one and is no longer used; it
  * remains as a reference for the available handlers and schemas.
  */
@@ -207,6 +207,23 @@ const DAO_NO_AAVE = [
   "uni",
 ] as const;
 const DAO_OFFCHAIN = ["comp", "ens", "gtc", "uni"] as const;
+
+/**
+ * `lean`, but defaulting to true — the opposite of the REST default. Keeps MCP
+ * responses small without making the full payload unreachable.
+ */
+const leanParam = (omitted: string) =>
+  z
+    .union([z.boolean(), z.enum(["0", "1", "true", "false"])])
+    .default(true)
+    .describe(
+      `When true, omit ${omitted} to reduce response size. Defaults to true for MCP tools; pass false for the full payload. Accepts true/false/1/0.`,
+    );
+
+const onchainLeanParam = leanParam(
+  "execution-payload fields (calldatas, values, targets) and the proposal description",
+);
+const offchainLeanParam = leanParam("the proposal `body`");
 
 export function createMcpServer(): McpServer {
   const server = new McpServer({
@@ -567,48 +584,52 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     "proposals",
     {
-      title: "Get proposals (lean)",
+      title: "Get proposals",
       description:
-        "Returns a list of proposals without execution-payload fields (calldatas/values/targets) to keep payloads small for LLM clients. Call the REST endpoint /{dao}/proposals with lean=false if you need the full payload.",
+        "Returns a list of proposals. Execution-payload fields (calldatas/values/targets) and descriptions are omitted by default to keep payloads small; pass lean: false for the full payload.",
       outputSchema: { data: proposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
-        params: proposalsQueryParamsSchema.omit({ lean: true }),
+        params: proposalsQueryParamsSchema.extend({
+          lean: onchainLeanParam,
+        }),
       },
     },
-    async ({ dao, params }) =>
-      proposalsHandler({ dao, params: { ...params, lean: true } }),
+    async ({ dao, params }) => proposalsHandler({ dao, params }),
   );
 
   server.registerTool(
     "searchProposals",
     {
-      title: "Search proposals (lean)",
+      title: "Search proposals",
       description:
-        "Returns proposals whose title or identifier partially matches the query, without execution-payload fields (calldatas/values/targets).",
+        "Returns proposals whose title or identifier partially matches the query. Execution-payload fields (calldatas/values/targets) and descriptions are omitted by default; pass lean: false for the full payload.",
       outputSchema: { data: searchProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
-        params: searchProposalsQueryParamsSchema.omit({ lean: true }),
+        params: searchProposalsQueryParamsSchema.extend({
+          lean: onchainLeanParam,
+        }),
       },
     },
-    async ({ dao, params }) =>
-      searchProposalsHandler({ dao, params: { ...params, lean: true } }),
+    async ({ dao, params }) => searchProposalsHandler({ dao, params }),
   );
 
   server.registerTool(
     "proposal",
     {
-      title: "Get a proposal by ID (lean)",
+      title: "Get a proposal by ID",
       description:
-        "Returns a single proposal by its ID without execution-payload fields (calldatas/values/targets). Call the REST endpoint /{dao}/proposals/{id} with lean=false if you need the full payload.",
+        "Returns a single proposal by its ID. Execution-payload fields (calldatas/values/targets) and the description are omitted by default; pass lean: false for the full payload.",
       outputSchema: { data: proposalQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_NO_AAVE),
         id: z.string(),
+        params: z.object({ lean: onchainLeanParam }).optional(),
       },
     },
-    async ({ dao, id }) => proposalHandler({ dao, id, params: { lean: true } }),
+    async ({ dao, id, params }) =>
+      proposalHandler({ dao, id, params: { lean: true, ...params } }),
   );
 
   server.registerTool(
@@ -926,52 +947,56 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     "offchainProposals",
     {
-      title: "Get offchain proposals (lean)",
+      title: "Get offchain proposals",
       description:
-        "Returns a list of offchain (Snapshot) proposals without the markdown body to keep payloads small for LLM clients. Call the REST endpoint /{dao}/offchain/proposals with lean=false if you need the body.",
+        "Returns a list of offchain (Snapshot) proposals. The markdown body is omitted by default to keep payloads small; pass lean: false to include it.",
       outputSchema: { data: offchainProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
-        params: offchainProposalsQueryParamsSchema.omit({ lean: true }),
+        params: offchainProposalsQueryParamsSchema.extend({
+          lean: offchainLeanParam,
+        }),
       },
     },
-    async ({ dao, params }) =>
-      offchainProposalsHandler({ dao, params: { ...params, lean: true } }),
+    async ({ dao, params }) => offchainProposalsHandler({ dao, params }),
   );
 
   server.registerTool(
     "offchainSearchProposals",
     {
-      title: "Search offchain proposals (lean)",
+      title: "Search offchain proposals",
       description:
-        "Returns offchain proposals whose title or identifier partially matches the query, without the markdown body.",
+        "Returns offchain proposals whose title or identifier partially matches the query. The markdown body is omitted by default; pass lean: false to include it.",
       outputSchema: { data: offchainSearchProposalsQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
-        params: offchainSearchProposalsQueryParamsSchema.omit({ lean: true }),
+        params: offchainSearchProposalsQueryParamsSchema.extend({
+          lean: offchainLeanParam,
+        }),
       },
     },
-    async ({ dao, params }) =>
-      offchainSearchProposalsHandler({
-        dao,
-        params: { ...params, lean: true },
-      }),
+    async ({ dao, params }) => offchainSearchProposalsHandler({ dao, params }),
   );
 
   server.registerTool(
     "offchainProposalById",
     {
-      title: "Get an offchain proposal by ID (lean)",
+      title: "Get an offchain proposal by ID",
       description:
-        "Returns a single offchain (Snapshot) proposal by its ID without the markdown body. Call the REST endpoint /{dao}/offchain/proposals/{id} with lean=false if you need the body.",
+        "Returns a single offchain (Snapshot) proposal by its ID. The markdown body is omitted by default; pass lean: false to include it.",
       outputSchema: { data: offchainProposalByIdQueryResponseSchema },
       inputSchema: {
         dao: z.enum(DAO_OFFCHAIN),
         id: z.string(),
+        params: z.object({ lean: offchainLeanParam }).optional(),
       },
     },
-    async ({ dao, id }) =>
-      offchainProposalByIdHandler({ dao, id, params: { lean: true } }),
+    async ({ dao, id, params }) =>
+      offchainProposalByIdHandler({
+        dao,
+        id,
+        params: { lean: true, ...params },
+      }),
   );
 
   server.registerTool(

@@ -2,4 +2,4 @@
 "@anticapture/client": patch
 ---
 
-Stop advertising `lean` on the MCP proposal tools. Those tools always call the REST endpoints with `lean=true`, so the parameter was accepted from callers and then silently overridden. It's now omitted from the input schemas (and dropped entirely from the by-id tools, where it was the only param).
+Make `lean` an honored default on the MCP proposal tools instead of a hardcoded override. The tools used to force `lean: true` while still advertising the param with `default: false`, so a caller asking for the full payload was silently ignored. They now re-declare `lean` with a `true` default (keeping MCP responses small) and pass the caller's value through, so `lean: false` returns the full proposal — calldatas, values, targets and description/body.
