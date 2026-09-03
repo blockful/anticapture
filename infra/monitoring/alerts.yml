@@ -200,6 +200,48 @@ groups:
             resource contention, or downstream bottlenecks. Check slow query logs and DB
             connection pool.
 
+      # Gateful is rejecting every request for a DAO route: users see 503s until
+      # the circuit closes. Fires per breaker name (`<dao>` or `<dao>:<route>`).
+      - alert: GatefulCircuitOpen
+        expr: max by (name) (circuit_breaker_state{job="anticapture-gateful"}) == 2
+        for: 2m
+        keep_firing_for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "[CRITICAL] Gateful circuit breaker {{ $labels.name }} is OPEN"
+          description: >
+            The gateway has been rejecting all requests behind circuit {{ $labels.name }}
+            for more than 2 minutes. Find the upstream failures that opened it: 5xx by route
+            on the matching DAO API (DaoApiRouteFailing), RPC errors on eRPC, or database
+            connection timeouts in the API logs.
+
+      # A single DAO API route failing most of the time for an hour. Low-volume
+      # but deterministic failures (a third-party query that 404s, a broken token
+      # id) do not move the global error rate, yet every 5xx counts toward the
+      # gateway circuit breaker for that DAO.
+      - alert: DaoApiRouteFailing
+        expr: >
+          (
+            sum by (job, http_route) (rate(http_server_requests_total{job=~"anticapture-.*-api", http_response_status_code=~"5.."}[1h]))
+            /
+            sum by (job, http_route) (rate(http_server_requests_total{job=~"anticapture-.*-api"}[1h]))
+          ) > 0.5
+          and
+          sum by (job, http_route) (increase(http_server_requests_total{job=~"anticapture-.*-api"}[1h])) >= 10
+        for: 1h
+        keep_firing_for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] {{ $labels.job }} {{ $labels.http_route }} is failing"
+          description: >
+            More than half of the requests to {{ $labels.http_route }} on {{ $labels.job }}
+            returned 5xx over the last hour ({{ printf "%.0f" $value }}% failure ratio).
+            Each of those failures counts toward the gateway circuit breaker for the DAO.
+            Check the API logs for this route; a third-party dependency (Dune, CoinGecko, RPC)
+            or a misconfigured query id is the usual cause.
+
       # 5xx error rate above 1% for 2 minutes
       - alert: HighErrorRate
         expr: >

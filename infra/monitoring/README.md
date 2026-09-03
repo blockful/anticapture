@@ -11,6 +11,17 @@ space-separated `DAOS` env var (defaults to the current DAO list). To add a DAO,
 append its name to `DAOS` and set `<DAO>_INDEXER_ENDPOINT` and
 `<DAO>_API_ENDPOINT` on the Prometheus service.
 
+The `-api` job uses DNS service discovery (`dns_sd_configs`, AAAA) on the
+`<DAO>_API_ENDPOINT` hostname instead of a static target: DAO APIs run with
+several Railway replicas behind one private hostname, and a static target is
+answered by a different replica at every scrape. Each replica then looks like a
+counter reset, and `rate()` / `increase()` over `http_server_requests_total` or
+`http_server_request_duration_seconds_count` inflate real traffic by orders of
+magnitude (in September 2026 the ENS API metric showed ~32,000 req/min against
+~8 req/min in its logs). With one target per replica the counters are
+monotonic again and can be summed by `job`. `<DAO>_API_ENDPOINT` must stay in
+`<host>:<port>` form.
+
 ## eRPC metrics
 
 eRPC exposes Prometheus metrics on `:4001` at `/metrics`. Prometheus scrapes
