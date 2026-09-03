@@ -96,55 +96,125 @@ export class AAVEVotingPowerRepository {
     fromDate?: number,
     toDate?: number,
   ): Promise<{ items: DBAccountPowerWithVariation[]; totalCount: number }> {
-    const balanceSubquery = this.db
-      .select({
-        accountId: accountBalance.accountId,
-        totalBalance: sql<string>`SUM(${accountBalance.balance})`.as(
-          "total_balance",
-        ),
-      })
-      .from(accountBalance)
-      .groupBy(accountBalance.accountId)
-      .as("balance");
+    const allAccountIds = this.allAccountIdsUnion();
+    const balanceSubquery = this.balanceSumSubquery();
+    const variationSubquery = this.variationSumSubquery(fromDate, toDate);
 
-    const allAccountIds = this.db
-      .selectDistinct({ accountId: accountPower.accountId })
-      .from(accountPower)
-      .union(
-        this.db
-          .selectDistinct({ accountId: accountBalance.accountId })
-          .from(accountBalance),
-      )
-      .as("all_accounts");
-
-    const variationSubquery = this.db
-      .select({
-        accountId: votingPowerHistory.accountId,
-        absoluteChange: sql<bigint>`SUM(${votingPowerHistory.delta})`.as(
-          "absolute_change",
-        ),
-      })
-      .from(votingPowerHistory)
-      .where(
-        and(
-          fromDate
-            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
-            : undefined,
-          toDate
-            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
-            : undefined,
-        ),
-      )
-      .groupBy(votingPowerHistory.accountId)
-      .as("variation");
-
-    const combinedPowerSql = sql<bigint>`(COALESCE(${accountPower.votingPower}, 0) + COALESCE(${balanceSubquery.totalBalance}, 0))`;
     // Delegated voting power on its own, i.e. the combined total minus the
     // account's own balance. The amount filter targets this, matching both the
     // `votingPower` ordering below and what consumers render as delegation
     // received: filtering the combined total would let a large self balance
     // alone satisfy a minimum, or push a delegated account past a maximum.
     const delegatedPowerSql = sql<bigint>`COALESCE(${accountPower.votingPower}, 0)`;
+    const filter = this.filterToSql(
+      addresses,
+      amountFilter,
+      delegatedPowerSql,
+      sql`${allAccountIds.accountId}`,
+    );
+
+    // Aave has hundreds of thousands of accounts, so summing balances and
+    // voting-power deltas for every account on every request times out the
+    // gateway. Pick the page of accounts first, joining a full-table
+    // aggregation only when the requested ordering depends on it, and compute
+    // the remaining per-account values afterwards for just that page.
+    const needsBalanceAggregation =
+      orderBy === "total" || orderBy === "balance";
+    const needsVariationAggregation =
+      orderBy === "variation" || orderBy === "signedVariation";
+
+    const orderKeySql =
+      orderBy === "variation"
+        ? sql`ABS(COALESCE(${variationSubquery.absoluteChange}, 0))`
+        : orderBy === "signedVariation"
+          ? sql`COALESCE(${variationSubquery.absoluteChange}, 0)`
+          : orderBy === "total"
+            ? sql`(COALESCE(${accountPower.votingPower}, 0) + COALESCE(${balanceSubquery.totalBalance}, 0))`
+            : orderBy === "votingPower"
+              ? delegatedPowerSql
+              : orderBy === "balance"
+                ? sql`COALESCE(${balanceSubquery.totalBalance}, 0)`
+                : sql`COALESCE(${accountPower.delegationsCount}, 0)`;
+
+    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
+
+    let pageQuery = this.db
+      .select({ accountId: allAccountIds.accountId })
+      .from(allAccountIds)
+      .leftJoin(
+        accountPower,
+        eq(allAccountIds.accountId, accountPower.accountId),
+      )
+      .$dynamic();
+    if (needsBalanceAggregation) {
+      pageQuery = pageQuery.leftJoin(
+        balanceSubquery,
+        eq(allAccountIds.accountId, balanceSubquery.accountId),
+      );
+    }
+    if (needsVariationAggregation) {
+      pageQuery = pageQuery.leftJoin(
+        variationSubquery,
+        eq(allAccountIds.accountId, variationSubquery.accountId),
+      );
+    }
+
+    const [page, [totalCount]] = await Promise.all([
+      pageQuery
+        .where(filter)
+        .orderBy(orderDirectionFn(orderKeySql), asc(allAccountIds.accountId))
+        .offset(skip)
+        .limit(limit),
+      this.db
+        .select({
+          count: sql<number>`COUNT(*)`.as("count"),
+        })
+        .from(allAccountIds)
+        .leftJoin(
+          accountPower,
+          eq(allAccountIds.accountId, accountPower.accountId),
+        )
+        .where(filter),
+    ]);
+
+    const pageAccountIds = page.map((row) => row.accountId);
+    const rows = pageAccountIds.length
+      ? await this.getVotingPowerRowsByAccountIds(
+          pageAccountIds,
+          fromDate,
+          toDate,
+        )
+      : [];
+    const rowsByAccountId = new Map(rows.map((row) => [row.accountId, row]));
+
+    return {
+      items: pageAccountIds.flatMap((accountId) => {
+        const row = rowsByAccountId.get(accountId);
+        return row ? [row] : [];
+      }),
+      totalCount: Number(totalCount?.count ?? 0),
+    };
+  }
+
+  /**
+   * Full voting-power rows (combined power, balance, variation) for a known
+   * set of accounts. All aggregations are scoped to those accounts, so this
+   * stays cheap regardless of table size.
+   */
+  private async getVotingPowerRowsByAccountIds(
+    accountIds: Address[],
+    fromDate?: number,
+    toDate?: number,
+  ): Promise<DBAccountPowerWithVariation[]> {
+    const pageAccounts = this.allAccountIdsUnion(accountIds);
+    const balanceSubquery = this.balanceSumSubquery(accountIds);
+    const variationSubquery = this.variationSumSubquery(
+      fromDate,
+      toDate,
+      accountIds,
+    );
+
+    const combinedPowerSql = sql<bigint>`(COALESCE(${accountPower.votingPower}, 0) + COALESCE(${balanceSubquery.totalBalance}, 0))`;
     const absoluteChangeSql = sql<bigint>`COALESCE(${variationSubquery.absoluteChange}, 0)`;
     const percentageChangeSql = sql<string>`
     CASE
@@ -155,26 +225,9 @@ export class AAVEVotingPowerRepository {
     END
   `;
 
-    const orderDirectionFn = orderDirection === "desc" ? desc : asc;
-    const orderSql = orderDirectionFn(
-      orderBy === "variation"
-        ? sql`ABS(COALESCE(${variationSubquery.absoluteChange}, 0))`
-        : orderBy === "signedVariation"
-          ? orderDirectionFn(
-              sql`COALESCE(${variationSubquery.absoluteChange}, 0)`,
-            )
-          : orderBy === "total"
-            ? combinedPowerSql
-            : orderBy === "votingPower"
-              ? delegatedPowerSql
-              : orderBy === "balance"
-                ? sql`COALESCE(${balanceSubquery.totalBalance}, 0)`
-                : sql`COALESCE(${accountPower.delegationsCount}, 0)`,
-    );
-
-    const items = await this.db
+    const rows = await this.db
       .select({
-        accountId: allAccountIds.accountId,
+        accountId: pageAccounts.accountId,
         daoId: accountPower.daoId,
         votingPower: combinedPowerSql,
         votesCount: accountPower.votesCount,
@@ -185,65 +238,95 @@ export class AAVEVotingPowerRepository {
         percentageChange: percentageChangeSql,
         balance: balanceSubquery.totalBalance,
       })
-      .from(allAccountIds)
+      .from(pageAccounts)
       .leftJoin(
         accountPower,
-        eq(allAccountIds.accountId, accountPower.accountId),
+        eq(pageAccounts.accountId, accountPower.accountId),
       )
       .leftJoin(
         balanceSubquery,
-        eq(allAccountIds.accountId, balanceSubquery.accountId),
+        eq(pageAccounts.accountId, balanceSubquery.accountId),
       )
       .leftJoin(
         variationSubquery,
-        eq(allAccountIds.accountId, variationSubquery.accountId),
-      )
-      .where(
-        this.filterToSql(
-          addresses,
-          amountFilter,
-          delegatedPowerSql,
-          sql`${allAccountIds.accountId}`,
-        ),
-      )
-      .orderBy(orderSql)
-      .offset(skip)
-      .limit(limit);
-
-    const [totalCount] = await this.db
-      .select({
-        count: sql<number>`COUNT(*)`.as("count"),
-      })
-      .from(allAccountIds)
-      .leftJoin(
-        accountPower,
-        eq(allAccountIds.accountId, accountPower.accountId),
-      )
-      .leftJoin(
-        balanceSubquery,
-        eq(allAccountIds.accountId, balanceSubquery.accountId),
-      )
-      .where(
-        this.filterToSql(
-          addresses,
-          amountFilter,
-          delegatedPowerSql,
-          sql`${allAccountIds.accountId}`,
-        ),
+        eq(pageAccounts.accountId, variationSubquery.accountId),
       );
 
-    return {
-      items: items.map((row) => ({
-        ...row,
-        daoId: row.daoId ?? "",
-        votesCount: row.votesCount ?? 0,
-        proposalsCount: row.proposalsCount ?? 0,
-        delegationsCount: row.delegationsCount ?? 0,
-        lastVoteTimestamp: row.lastVoteTimestamp ?? 0n,
-        balance: row.balance ? BigInt(row.balance) : undefined,
-      })),
-      totalCount: Number(totalCount?.count ?? 0),
-    };
+    return rows.map((row) => ({
+      ...row,
+      daoId: row.daoId ?? "",
+      votesCount: row.votesCount ?? 0,
+      proposalsCount: row.proposalsCount ?? 0,
+      delegationsCount: row.delegationsCount ?? 0,
+      lastVoteTimestamp: row.lastVoteTimestamp ?? 0n,
+      balance: row.balance ? BigInt(row.balance) : undefined,
+    }));
+  }
+
+  private allAccountIdsUnion(accountIds?: Address[]) {
+    return this.db
+      .selectDistinct({ accountId: accountPower.accountId })
+      .from(accountPower)
+      .where(
+        accountIds ? inArray(accountPower.accountId, accountIds) : undefined,
+      )
+      .union(
+        this.db
+          .selectDistinct({ accountId: accountBalance.accountId })
+          .from(accountBalance)
+          .where(
+            accountIds
+              ? inArray(accountBalance.accountId, accountIds)
+              : undefined,
+          ),
+      )
+      .as("all_accounts");
+  }
+
+  private balanceSumSubquery(accountIds?: Address[]) {
+    return this.db
+      .select({
+        accountId: accountBalance.accountId,
+        totalBalance: sql<string>`SUM(${accountBalance.balance})`.as(
+          "total_balance",
+        ),
+      })
+      .from(accountBalance)
+      .where(
+        accountIds ? inArray(accountBalance.accountId, accountIds) : undefined,
+      )
+      .groupBy(accountBalance.accountId)
+      .as("balance");
+  }
+
+  private variationSumSubquery(
+    fromDate?: number,
+    toDate?: number,
+    accountIds?: Address[],
+  ) {
+    return this.db
+      .select({
+        accountId: votingPowerHistory.accountId,
+        absoluteChange: sql<bigint>`SUM(${votingPowerHistory.delta})`.as(
+          "absolute_change",
+        ),
+      })
+      .from(votingPowerHistory)
+      .where(
+        and(
+          accountIds
+            ? inArray(votingPowerHistory.accountId, accountIds)
+            : undefined,
+          fromDate
+            ? gte(votingPowerHistory.timestamp, BigInt(fromDate))
+            : undefined,
+          toDate
+            ? lte(votingPowerHistory.timestamp, BigInt(toDate))
+            : undefined,
+        ),
+      )
+      .groupBy(votingPowerHistory.accountId)
+      .as("variation");
   }
 
   async getVotingPowersByAccountId(

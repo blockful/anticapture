@@ -1,5 +1,13 @@
 # @anticapture/api
 
+## 1.8.1
+
+### Patch Changes
+
+- [#2147](https://github.com/blockful/anticapture/pull/2147) [`8d2bc23`](https://github.com/blockful/anticapture/commit/8d2bc2387945338fe7011a2b45ae578579690fa2) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix the Aave stakeholders page timing out by scoping the voting-power and balance listing aggregations to the requested page.
+
+- [#2152](https://github.com/blockful/anticapture/pull/2152) [`347b620`](https://github.com/blockful/anticapture/commit/347b620b4b92ae3561f226074e8fd58351be045a) Thanks [@pikonha](https://github.com/pikonha)! - Push the `lean` query param down to SQL for `GET /proposals/search` and `GET /proposals/{id}`, so description/calldatas/values/targets are no longer selected just to be dropped by the mapper. Response shape is unchanged.
+
 ## 1.8.0
 
 ### Minor Changes

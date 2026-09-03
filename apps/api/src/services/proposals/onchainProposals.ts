@@ -18,9 +18,13 @@ export interface ProposalsRepository {
     query: string,
     skip: number,
     limit: number,
+    lean?: boolean,
   ): Promise<DBProposal[]>;
   getSearchProposalsCount(query: string): Promise<number>;
-  getProposalById(proposalId: string): Promise<DBProposal | undefined>;
+  getProposalById(
+    proposalId: string,
+    lean?: boolean,
+  ): Promise<DBProposal | undefined>;
 }
 
 export class ProposalsService {
@@ -167,18 +171,25 @@ export class ProposalsService {
     query,
     skip = 0,
     limit = 10,
-  }: Omit<ProposalSearchRequest, "lean">): Promise<DBProposal[]> {
+    lean = false,
+  }: Omit<ProposalSearchRequest, "lean"> & {
+    lean?: boolean;
+  }): Promise<DBProposal[]> {
     const proposals = await this.proposalsRepo.searchProposals(
       query,
       skip,
       limit,
+      lean,
     );
 
     return this.hydrateProposalsStatus(proposals);
   }
 
-  async getProposalById(proposalId: string): Promise<DBProposal | undefined> {
-    const proposal = await this.proposalsRepo.getProposalById(proposalId);
+  async getProposalById(
+    proposalId: string,
+    lean: boolean = false,
+  ): Promise<DBProposal | undefined> {
+    const proposal = await this.proposalsRepo.getProposalById(proposalId, lean);
 
     if (!proposal) {
       return undefined;

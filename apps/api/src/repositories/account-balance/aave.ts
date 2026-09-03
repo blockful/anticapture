@@ -113,49 +113,121 @@ export class AAVEAccountBalanceRepository {
       amountfilter,
     );
 
-    const variations = this.queryFragments.variationCTE(
-      variationFromTimestamp,
-      variationToTimestamp,
-      filter,
-    );
-
-    const [totalCount] = await this.db
-      .select({
-        count: sql<number>`COUNT(DISTINCT ${variations.accountId})`.as("count"),
-      })
-      .from(variations);
-
-    const aggregated = this.db
-      .select({
-        accountId: variations.accountId,
-        delegate: sql<string>`MAX(${variations.delegate})`.as("delegate"),
-        currentBalance: sql<bigint>`SUM(${variations.currentBalance})`.as(
-          "current_balance",
-        ),
-        absoluteChange:
-          sql<string>`MAX(${variations.fromChange}::numeric) + MAX(${variations.toChange}::numeric)`.as(
-            "absolute_change",
-          ),
-      })
-      .from(variations)
-      .groupBy(variations.accountId)
-      .as("aggregated");
-
     const orderDirectionFn = orderDirection === "desc" ? desc : asc;
 
-    const orderByCriteria =
-      orderBy === "balance"
-        ? aggregated.currentBalance
-        : orderBy === "signedVariation"
-          ? sql`${aggregated.absoluteChange}::numeric`
-          : sql`ABS(${aggregated.absoluteChange}::numeric)`;
+    // Counting distinct accounts does not need the transfer aggregation the
+    // old variation CTE dragged in: the per-account transfer sums never add
+    // or remove accounts.
+    const countQuery = this.db
+      .select({
+        count: sql<number>`COUNT(DISTINCT ${accountBalance.accountId})`.as(
+          "count",
+        ),
+      })
+      .from(accountBalance)
+      .where(filter);
 
-    const result = await this.db
-      .select()
-      .from(aggregated)
-      .orderBy(orderDirectionFn(orderByCriteria))
-      .offset(skip)
-      .limit(limit);
+    // Aave holds hundreds of thousands of balances, so aggregating every
+    // transfer in the window for every account on every request times out
+    // the gateway. Group balances per account first; join the windowed
+    // transfer sums only when the ordering needs them, and otherwise compute
+    // them afterwards for just the returned page.
+    const aggregatedBalances = this.db
+      .select({
+        accountId: accountBalance.accountId,
+        delegate: sql<string>`MAX(${accountBalance.delegate})`.as("delegate"),
+        currentBalance: sql<bigint>`SUM(${accountBalance.balance})`.as(
+          "current_balance",
+        ),
+      })
+      .from(accountBalance)
+      .where(filter)
+      .groupBy(accountBalance.accountId)
+      .as("aggregated");
+
+    if (orderBy === "balance") {
+      const [page, [totalCount]] = await Promise.all([
+        this.db
+          .select()
+          .from(aggregatedBalances)
+          .orderBy(
+            orderDirectionFn(aggregatedBalances.currentBalance),
+            asc(aggregatedBalances.accountId),
+          )
+          .offset(skip)
+          .limit(limit),
+        countQuery,
+      ]);
+
+      const changes = await this.getTransferChangesByAccountIds(
+        page.map((row) => row.accountId),
+        variationFromTimestamp,
+        variationToTimestamp,
+      );
+
+      return {
+        items: page.map(({ accountId, delegate, currentBalance }) => {
+          const absoluteChange = changes.get(accountId) ?? 0n;
+          return {
+            accountId: accountId,
+            tokenId: getAddress(accountId),
+            delegate: getAddress(delegate as Address),
+            previousBalance: BigInt(currentBalance) - absoluteChange,
+            currentBalance: currentBalance,
+            absoluteChange: absoluteChange,
+            percentageChange: calculatePercentage(
+              currentBalance,
+              absoluteChange,
+            ),
+          };
+        }),
+        totalCount: Number(totalCount?.count ?? 0),
+      };
+    }
+
+    // Variation orderings need the windowed transfer sums up front, but the
+    // per-account sums are joined once per account instead of once per
+    // balance row like the old variation CTE did.
+    const transfersFrom = this.transfersFromSubquery(
+      variationFromTimestamp,
+      variationToTimestamp,
+    );
+    const transfersTo = this.transfersToSubquery(
+      variationFromTimestamp,
+      variationToTimestamp,
+    );
+
+    const absoluteChangeSql = sql<string>`COALESCE(${transfersFrom.fromAmount}, 0) + COALESCE(${transfersTo.toAmount}, 0)`;
+    const orderByCriteria =
+      orderBy === "signedVariation"
+        ? sql`${absoluteChangeSql}::numeric`
+        : sql`ABS(${absoluteChangeSql}::numeric)`;
+
+    const [result, [totalCount]] = await Promise.all([
+      this.db
+        .select({
+          accountId: aggregatedBalances.accountId,
+          delegate: aggregatedBalances.delegate,
+          currentBalance: aggregatedBalances.currentBalance,
+          absoluteChange: absoluteChangeSql.as("absolute_change"),
+        })
+        .from(aggregatedBalances)
+        .leftJoin(
+          transfersFrom,
+          eq(aggregatedBalances.accountId, transfersFrom.accountId),
+        )
+        .leftJoin(
+          transfersTo,
+          eq(aggregatedBalances.accountId, transfersTo.accountId),
+        )
+        .orderBy(
+          orderDirectionFn(orderByCriteria),
+          asc(aggregatedBalances.accountId),
+        )
+        .offset(skip)
+        .limit(limit),
+      countQuery,
+    ]);
 
     return {
       items: result.map(
@@ -171,6 +243,118 @@ export class AAVEAccountBalanceRepository {
       ),
       totalCount: Number(totalCount?.count ?? 0),
     };
+  }
+
+  /**
+   * Net transfer change (incoming minus outgoing) per account inside the
+   * window, computed only for the given accounts via the indexed
+   * from/to account columns.
+   */
+  private async getTransferChangesByAccountIds(
+    accountIds: Address[],
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+  ): Promise<Map<Address, bigint>> {
+    const changes = new Map<Address, bigint>();
+    if (!accountIds.length) return changes;
+
+    const timestampCriteria = (column: typeof transfer.timestamp) =>
+      and(
+        fromTimestamp ? gte(column, BigInt(fromTimestamp)) : undefined,
+        toTimestamp ? lte(column, BigInt(toTimestamp)) : undefined,
+      );
+
+    const [outgoing, incoming] = await Promise.all([
+      this.db
+        .select({
+          accountId: transfer.fromAccountId,
+          amount: sql<string>`SUM(${transfer.amount})`.as("from_amount"),
+        })
+        .from(transfer)
+        .where(
+          and(
+            inArray(transfer.fromAccountId, accountIds),
+            timestampCriteria(transfer.timestamp),
+          ),
+        )
+        .groupBy(transfer.fromAccountId),
+      this.db
+        .select({
+          accountId: transfer.toAccountId,
+          amount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
+        })
+        .from(transfer)
+        .where(
+          and(
+            inArray(transfer.toAccountId, accountIds),
+            timestampCriteria(transfer.timestamp),
+          ),
+        )
+        .groupBy(transfer.toAccountId),
+    ]);
+
+    for (const row of outgoing) {
+      changes.set(
+        row.accountId,
+        (changes.get(row.accountId) ?? 0n) - BigInt(row.amount),
+      );
+    }
+    for (const row of incoming) {
+      changes.set(
+        row.accountId,
+        (changes.get(row.accountId) ?? 0n) + BigInt(row.amount),
+      );
+    }
+
+    return changes;
+  }
+
+  private transfersFromSubquery(
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+  ) {
+    return this.db
+      .select({
+        accountId: transfer.fromAccountId,
+        fromAmount: sql<string>`-SUM(${transfer.amount})`.as("from_amount"),
+      })
+      .from(transfer)
+      .where(
+        and(
+          fromTimestamp
+            ? gte(transfer.timestamp, BigInt(fromTimestamp))
+            : undefined,
+          toTimestamp
+            ? lte(transfer.timestamp, BigInt(toTimestamp))
+            : undefined,
+        ),
+      )
+      .groupBy(transfer.fromAccountId)
+      .as("transfers_from");
+  }
+
+  private transfersToSubquery(
+    fromTimestamp: number | undefined,
+    toTimestamp: number | undefined,
+  ) {
+    return this.db
+      .select({
+        accountId: transfer.toAccountId,
+        toAmount: sql<string>`SUM(${transfer.amount})`.as("to_amount"),
+      })
+      .from(transfer)
+      .where(
+        and(
+          fromTimestamp
+            ? gte(transfer.timestamp, BigInt(fromTimestamp))
+            : undefined,
+          toTimestamp
+            ? lte(transfer.timestamp, BigInt(toTimestamp))
+            : undefined,
+        ),
+      )
+      .groupBy(transfer.toAccountId)
+      .as("transfers_to");
   }
 
   async getAccountBalanceWithVariation(
