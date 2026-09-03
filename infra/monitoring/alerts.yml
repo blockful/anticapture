@@ -16,9 +16,11 @@ groups:
             for more than 5 minutes. The service may be crashed, OOM-killed, or misconfigured.
             Check container/process status and recent logs immediately.
 
-      # DAO API is not responding
+      # Every discovered replica of a DAO API is unreachable. Aggregated per job:
+      # with DNS discovery each replica has its own `up` series, and one replica
+      # restarting (rolling deploy) must not read as the API being down.
       - alert: ApiDown
-        expr: up{job=~"anticapture-.*-api"} == 0
+        expr: max by (job) (up{job=~"anticapture-.*-api"}) == 0
         for: 5m
         keep_firing_for: 15m
         labels:
@@ -26,8 +28,22 @@ groups:
         annotations:
           summary: "[CRITICAL] {{ $labels.job }} is unreachable"
           description: >
-            Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
-            for more than 5 minutes. DAO API traffic for this DAO is unavailable.
+            Prometheus has been unable to scrape any replica of {{ $labels.job }} for more
+            than 5 minutes. DAO API traffic for this DAO is unavailable.
+
+      # One replica of a DAO API is unreachable while others may still serve.
+      - alert: ApiReplicaDown
+        expr: up{job=~"anticapture-.*-api"} == 0
+        for: 10m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] a replica of {{ $labels.job }} is unreachable"
+          description: >
+            Prometheus has been unable to scrape the {{ $labels.job }} replica at
+            {{ $labels.instance }} for more than 10 minutes. Other replicas may still be
+            serving; check whether the container is crash-looping or stuck after a deploy.
 
       # DAO API job discovered no replica at all. With DNS service discovery a
       # hostname without AAAA records yields no targets and no `up` series, so
