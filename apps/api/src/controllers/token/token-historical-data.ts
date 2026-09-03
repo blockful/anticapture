@@ -1,5 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
+import { HTTPException } from "hono/http-exception";
 
+import { logger } from "@/logger";
 import {
   TokenHistoricalPriceRequest,
   TokenHistoricalPriceResponse,
@@ -42,8 +44,20 @@ export function tokenHistoricalData(
     }),
     async (context) => {
       const { skip, limit } = context.req.valid("query");
-      const data = await client.getHistoricalTokenData(limit, skip);
-      return context.json(data, 200);
+      try {
+        const data = await client.getHistoricalTokenData(limit, skip);
+        return context.json(data, 200);
+      } catch (error) {
+        // Client errors (e.g. token not listed) keep their status; anything
+        // else degrades to an empty series. Price history is third-party data
+        // and a 5xx here would trip the gateway circuit breaker for the DAO.
+        if (error instanceof HTTPException && error.status < 500) throw error;
+        logger.warn(
+          { err: error },
+          "historical token data unavailable; returning empty series",
+        );
+        return context.json([], 200);
+      }
     },
   );
 }

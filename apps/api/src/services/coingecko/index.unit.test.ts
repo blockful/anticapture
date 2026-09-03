@@ -1,6 +1,14 @@
 import { http, HttpResponse, JsonBodyType } from "msw";
 import { setupServer } from "msw/node";
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
 import { DaoIdEnum } from "@/lib/enums";
 import { CoingeckoService } from "./index";
 
@@ -18,7 +26,12 @@ function handleMarketChart(tokenId: string, body: JsonBodyType) {
 }
 
 describe("CoingeckoService", () => {
-  const service = new CoingeckoService(API_URL, "test-api-key", DaoIdEnum.UNI);
+  // Fresh instance per test: the service keeps the last successful response
+  // to serve stale on failure, which would leak between tests otherwise.
+  let service: CoingeckoService;
+  beforeEach(() => {
+    service = new CoingeckoService(API_URL, "test-api-key", DaoIdEnum.UNI);
+  });
 
   describe("getHistoricalTokenData", () => {
     it("returns mapped price data from API response", async () => {
@@ -61,6 +74,38 @@ describe("CoingeckoService", () => {
       await expect(service.getHistoricalTokenData(7)).rejects.toMatchObject({
         status: 503,
       });
+    });
+
+    it("throws HTTPException(503) when CoinGecko returns a non-2xx status", async () => {
+      server.use(
+        http.get(
+          `${API_URL}/coins/uniswap/market_chart`,
+          () => new HttpResponse(null, { status: 404 }),
+        ),
+      );
+
+      await expect(service.getHistoricalTokenData(7)).rejects.toMatchObject({
+        status: 503,
+      });
+    });
+
+    it("serves the last successful response when CoinGecko fails afterwards", async () => {
+      let hits = 0;
+      server.use(
+        http.get(`${API_URL}/coins/uniswap/market_chart`, () => {
+          hits += 1;
+          return hits === 1
+            ? HttpResponse.json({ prices: [[1700000000000, 5.42]] })
+            : new HttpResponse(null, { status: 500 });
+        }),
+      );
+
+      const first = await service.getHistoricalTokenData(7);
+      const second = await service.getHistoricalTokenData(7);
+
+      expect(hits).toBe(2);
+      expect(second).toEqual(first);
+      expect(second).toEqual([{ price: "5.4200", timestamp: 1700000000 }]);
     });
 
     it("returns empty array when API returns no prices", async () => {

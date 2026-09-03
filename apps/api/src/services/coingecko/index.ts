@@ -27,6 +27,13 @@ const createCoingeckoTokenPriceDataSchema = (
 
 export class CoingeckoService implements PriceProvider {
   private readonly client: AxiosInstance;
+  // Last successful market chart per `days` window. CoinGecko is third-party
+  // data, so when it fails we serve the previous answer instead of a 5xx that
+  // the gateway would count against the whole DAO circuit breaker.
+  private readonly lastGoodByDays = new Map<
+    number,
+    TokenHistoricalPriceResponse
+  >();
 
   constructor(
     coingeckoApiUrl: string,
@@ -68,26 +75,43 @@ export class CoingeckoService implements PriceProvider {
       { tokenId, days },
       "fetching historical token prices from CoinGecko",
     );
-    const response = await this.client.get<CoingeckoHistoricalMarketData>(
-      `/coins/${tokenId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
-    );
+    try {
+      const response = await this.client.get<CoingeckoHistoricalMarketData>(
+        `/coins/${tokenId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
+      );
 
-    const { success, data } = CoingeckoHistoricalMarketDataSchema.safeParse(
-      response.data,
-    );
+      const { success, data } = CoingeckoHistoricalMarketDataSchema.safeParse(
+        response.data,
+      );
+      if (!success) {
+        throw new Error("Unexpected CoinGecko market chart response");
+      }
 
-    if (!success) {
+      // CoinGecko returns timestamps in milliseconds, convert to seconds
+      const prices = data.prices.map(([timestampMs, price]) => ({
+        price: price.toFixed(4),
+        timestamp: Math.floor(timestampMs / 1000),
+      }));
+      this.lastGoodByDays.set(days, prices);
+      return prices;
+    } catch (error) {
+      logger.error(
+        { err: error, tokenId, days },
+        "failed to fetch historical token prices from CoinGecko",
+      );
+      const stale = this.lastGoodByDays.get(days);
+      if (stale) {
+        logger.warn(
+          { tokenId, days },
+          "serving stale token prices after CoinGecko failure",
+        );
+        return stale;
+      }
       throw new HTTPException(503, {
         message: "Failed to fetch historical token data",
-        cause: data,
+        cause: error,
       });
     }
-
-    // CoinGecko returns timestamps in milliseconds, convert to seconds
-    return data.prices.map(([timestampMs, price]) => ({
-      price: price.toFixed(4),
-      timestamp: Math.floor(timestampMs / 1000),
-    }));
   }
 
   async getTokenPrice(

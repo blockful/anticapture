@@ -1,5 +1,3 @@
-import { HTTPException } from "hono/http-exception";
-
 import { logger } from "@/logger";
 
 import { RevenueCache } from "./cache";
@@ -232,7 +230,15 @@ export class RevenueDuneClient {
     }));
   }
 
-  protected async fetchJson<T>(key: RevenueQueryKey): Promise<T> {
+  /**
+   * Fetches a Dune result set, caching it for 24h. When Dune fails the last
+   * known result is served stale, or an empty result set when there is none.
+   * Revenue is third-party data: an outage there must never surface as a 5xx,
+   * because the gateway counts 5xx against the whole DAO's circuit breaker.
+   */
+  protected async fetchJson<T extends DuneRowsResponse<unknown>>(
+    key: RevenueQueryKey,
+  ): Promise<T> {
     const cached = this.cache.get<T>(key);
     if (cached !== null) {
       logger.debug({ key }, "revenue cache hit");
@@ -268,13 +274,15 @@ export class RevenueDuneClient {
       return data;
     } catch (error) {
       logger.error(
-        { err: error, key, durationMs: Date.now() - start },
+        { err: error, key, url, durationMs: Date.now() - start },
         "failed to fetch revenue data from Dune",
       );
-      throw new HTTPException(503, {
-        message: "Failed to fetch revenue data",
-        cause: error,
-      });
+      const stale = this.cache.getStale<T>(key);
+      if (stale !== null) {
+        logger.warn({ key }, "serving stale revenue data after Dune failure");
+        return stale;
+      }
+      return { result: { rows: [] } } as unknown as T;
     }
   }
 }
