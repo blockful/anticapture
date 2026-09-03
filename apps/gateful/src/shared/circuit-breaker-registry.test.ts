@@ -1,8 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  CircuitBreakerRegistry,
-  MAX_BREAKERS,
-} from "./circuit-breaker-registry.js";
+import { CircuitBreakerRegistry } from "./circuit-breaker-registry.js";
 
 const FAIL = async () => {
   throw new Error("downstream error");
@@ -28,19 +25,17 @@ describe("CircuitBreakerRegistry", () => {
     expect(CircuitBreakerRegistry.proxyKey("ens", "")).toBe("ens");
   });
 
+  it("keeps unknown path segments on the DAO breaker", () => {
+    expect(CircuitBreakerRegistry.proxyKey("ens", "/does-not-exist")).toBe(
+      "ens",
+    );
+    expect(CircuitBreakerRegistry.proxyKey("ens", "/0xdeadbeef/x")).toBe("ens");
+  });
+
   it("returns the same breaker for the same key", () => {
     const registry = new CircuitBreakerRegistry();
     expect(registry.get("ens:votes")).toBe(registry.get("ens:votes"));
     expect(registry.get("ens:votes")).not.toBe(registry.get("ens:proposals"));
-  });
-
-  it("falls back to the DAO breaker once the registry is full", () => {
-    const registry = new CircuitBreakerRegistry();
-    for (let i = 0; i < MAX_BREAKERS; i++) registry.get(`ens:route-${i}`);
-
-    expect(registry.forProxy("ens", "/route-1").name).toBe("ens:route-1");
-    expect(registry.forProxy("ens", "/unknown").name).toBe("ens");
-    expect(registry.getAll().size).toBe(MAX_BREAKERS + 1);
   });
 
   it("does not report an OPEN breaker past its cooldown as the worst state", async () => {

@@ -90,6 +90,20 @@ describe("CircuitBreaker", () => {
       expect(cb.state).toBe("CLOSED");
     });
 
+    it("opens when a success completes a window that is over the threshold", async () => {
+      const cb = createCircuitBreaker({
+        minimumRequests: 10,
+        failureRateThreshold: 0.5,
+      });
+      // Six failures settle first, below the minimum sample; the successes
+      // that complete the window must still trigger the evaluation.
+      await fail(cb, 6);
+      await succeed(cb, 3);
+      expect(cb.state).toBe("CLOSED");
+      expect(await cb.execute(SUCCESS)).toBe("ok");
+      expect(cb.state).toBe("OPEN");
+    });
+
     it("forgets outcomes that fall outside the window", async () => {
       const cb = createCircuitBreaker({ windowMs: 10_000, minimumRequests: 4 });
       await fail(cb, 3);

@@ -127,6 +127,30 @@ export class ProposalsService {
     }
   }
 
+  /**
+   * On-chain status for one proposal, or its indexed status when the RPC reads
+   * behind it fail (some DAO clients read quorum or timelock without their own
+   * fallback). One proposal must not fail the whole listing.
+   */
+  private async resolveStatus(
+    proposal: DBProposal,
+    head: { currentBlock: number; currentTimestamp: number },
+  ): Promise<string> {
+    try {
+      return await this.daoClient.getProposalStatus(
+        proposal,
+        head.currentBlock,
+        head.currentTimestamp,
+      );
+    } catch (error) {
+      logger.warn(
+        { error, proposalId: proposal.id },
+        "RPC read failed while computing proposal status; serving indexed status",
+      );
+      return proposal.status;
+    }
+  }
+
   private async hydrateProposalsStatus(
     proposals: DBProposal[],
   ): Promise<DBProposal[]> {
@@ -135,11 +159,7 @@ export class ProposalsService {
 
     await Promise.all(
       proposals.map(async (proposal) => {
-        proposal.status = await this.daoClient.getProposalStatus(
-          proposal,
-          head.currentBlock,
-          head.currentTimestamp,
-        );
+        proposal.status = await this.resolveStatus(proposal, head);
       }),
     );
 
@@ -210,12 +230,6 @@ export class ProposalsService {
     const head = await this.getChainHead();
     if (!head) return proposal;
 
-    const status = await this.daoClient.getProposalStatus(
-      proposal,
-      head.currentBlock,
-      head.currentTimestamp,
-    );
-
-    return { ...proposal, status };
+    return { ...proposal, status: await this.resolveStatus(proposal, head) };
   }
 }

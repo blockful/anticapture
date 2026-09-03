@@ -197,11 +197,19 @@ export class ProposalsActivityService {
           endTimestamp: BigInt(item.proposal.proposal_end_timestamp),
         };
         if (head) {
-          proposal.status = await this.daoClient.getProposalStatus(
-            proposal,
-            head.currentBlock,
-            head.currentTimestamp,
-          );
+          proposal.status = await this.daoClient
+            .getProposalStatus(
+              proposal,
+              head.currentBlock,
+              head.currentTimestamp,
+            )
+            .catch((error: Error) => {
+              logger.warn(
+                { error, proposalId: proposal.id },
+                "RPC read failed while computing proposal status; serving indexed status",
+              );
+              return proposal.status;
+            });
         }
         return {
           proposal,

@@ -5,10 +5,33 @@ import {
 
 const STATE_SEVERITY = { CLOSED: 0, HALF_OPEN: 1, OPEN: 2 } as const;
 
-/** Route keys derive from client-controlled paths; past this many breakers the
- *  proxy falls back to the DAO-level breaker so unknown paths cannot grow the
- *  registry (and the circuit_breaker_state series) without bound. */
-export const MAX_BREAKERS = 128;
+/** First path segments served by the DAO APIs. Route keys derive from
+ *  client-controlled paths, so only these known groups get their own breaker;
+ *  anything else shares the DAO-level breaker. This bounds the registry (and
+ *  the circuit_breaker_state series) to DAOs x groups without ever collapsing
+ *  a real route into another one. */
+export const ROUTE_GROUPS: ReadonlySet<string> = new Set([
+  "accounts",
+  "active-supply",
+  "addresses",
+  "average-turnout",
+  "balances",
+  "dao",
+  "delegation-percentage",
+  "event-relevance",
+  "feed",
+  "health",
+  "last-update",
+  "offchain",
+  "proposals",
+  "proposals-activity",
+  "revenue",
+  "token",
+  "token-metrics",
+  "treasury",
+  "votes",
+  "voting-powers",
+]);
 
 /** An OPEN circuit whose cooldown has elapsed will probe on its next call, so
  *  for reporting it ranks as HALF_OPEN rather than as an outage. */
@@ -34,20 +57,16 @@ export class CircuitBreakerRegistry {
     return breaker;
   }
 
-  /** Builds the proxy key for a DAO request from its upstream path. */
+  /** Builds the proxy key for a DAO request from its upstream path: per route
+   *  group when the first segment is a known API route, the DAO otherwise. */
   static proxyKey(dao: string, path: string): string {
     const [, segment] = path.split("/");
-    return segment ? `${dao}:${segment}` : dao;
+    return segment && ROUTE_GROUPS.has(segment) ? `${dao}:${segment}` : dao;
   }
 
-  /** Breaker guarding a proxied DAO request: per route while the registry has
-   *  room, the DAO-level breaker once MAX_BREAKERS is reached. */
+  /** Breaker guarding a proxied DAO request. */
   forProxy(dao: string, path: string): CircuitBreaker {
-    const key = CircuitBreakerRegistry.proxyKey(dao, path);
-    if (this.breakers.has(key) || this.breakers.size < MAX_BREAKERS) {
-      return this.get(key);
-    }
-    return this.get(dao);
+    return this.get(CircuitBreakerRegistry.proxyKey(dao, path));
   }
 
   /** The worst-state breaker among `<key>` and `<key>:*` (for health reporting).

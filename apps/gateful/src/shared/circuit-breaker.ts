@@ -155,24 +155,36 @@ export class CircuitBreaker {
     }
   }
 
-  /** Normal execution — track outcomes and open once the windowed failure rate is exceeded. */
+  /** Normal execution — track outcomes and open once the windowed failure rate is exceeded.
+   *  The window is evaluated after every completion: with concurrent calls a
+   *  success may be the one that fills the window, and settlement order must
+   *  not decide whether the circuit opens. */
   private async handleClosed<T>(fn: () => Promise<T>): Promise<T> {
     try {
       const result = await fn();
-      this.recordOutcome(false);
+      this.openIfOverThreshold(this.recordOutcome(false));
       return result;
     } catch (err) {
-      const { total, failures } = this.recordOutcome(true);
-      if (
-        total >= this.minimumRequests &&
-        failures / total >= this.failureRateThreshold
-      ) {
-        this.openTheCircuit();
-        console.warn(
-          `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${failures}/${total} failures in the last ${this.windowMs}ms)`,
-        );
-      }
+      this.openIfOverThreshold(this.recordOutcome(true));
       throw err;
+    }
+  }
+
+  private openIfOverThreshold({
+    total,
+    failures,
+  }: {
+    total: number;
+    failures: number;
+  }): void {
+    if (
+      total >= this.minimumRequests &&
+      failures / total >= this.failureRateThreshold
+    ) {
+      this.openTheCircuit();
+      console.warn(
+        `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${failures}/${total} failures in the last ${this.windowMs}ms)`,
+      );
     }
   }
 
