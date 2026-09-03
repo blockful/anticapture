@@ -15,7 +15,13 @@ type CachedEntry = {
   status: number;
   contentType: string;
   cacheControl: string;
+  /** Epoch ms after which the entry is stale; absent on entries written before
+   *  stale serving existed, which are treated as fresh until Redis expires them. */
+  expiresAt?: number;
 };
+
+/** How long a stale entry stays available for stale-on-error after its TTL. */
+export const STALE_GRACE_SECONDS = 300;
 
 /**
  * Cache-aside middleware using Redis.
@@ -25,6 +31,10 @@ type CachedEntry = {
  * - On cache miss: passes through, then stores the response when:
  *     - The status is 2xx.
  *     - The upstream set a `Cache-Control: max-age=<n>` header with n > 0.
+ * - Entries are kept for STALE_GRACE_SECONDS past their TTL. A stale entry is
+ *   revalidated against the upstream, but if that fails (5xx, timeout, open
+ *   circuit) the stale body is served with `Cache-Status: Redis; stale` so an
+ *   upstream blip degrades to slightly old data instead of an error.
  * - All Redis errors are swallowed (fail open) to preserve availability.
  */
 export function cacheMiddleware(
@@ -56,25 +66,39 @@ export function cacheMiddleware(
       logger.warn({ err, key }, "redis read failed");
       return null;
     });
+    let stale: CachedEntry | undefined;
     if (raw) {
       const entry = safeParse<CachedEntry>(raw);
       if (!entry) {
         cacheRequestTotal.add(1, { result: "corrupt", route });
         return next();
       }
-      cacheRequestTotal.add(1, { result: "hit", route });
-      return new Response(entry.body, {
-        status: entry.status,
-        headers: {
-          "Content-Type": entry.contentType,
-          "Cache-Control": entry.cacheControl,
-          "Cache-Status": "Redis; hit",
-        },
-      });
+      if (entry.expiresAt === undefined || entry.expiresAt > Date.now()) {
+        cacheRequestTotal.add(1, { result: "hit", route });
+        return toResponse(entry, "hit");
+      }
+      stale = entry;
     }
 
     cacheRequestTotal.add(1, { result: "miss", route });
-    await next();
+    try {
+      await next();
+    } catch (err) {
+      if (!stale) throw err;
+      logger.warn({ err, key }, "upstream failed, serving stale cache entry");
+      cacheRequestTotal.add(1, { result: "stale", route });
+      return toResponse(stale, "stale");
+    }
+
+    if (stale && c.res.status >= 500) {
+      logger.warn(
+        { status: c.res.status, key },
+        "upstream failed, serving stale cache entry",
+      );
+      cacheRequestTotal.add(1, { result: "stale", route });
+      c.res = toResponse(stale, "stale");
+      return;
+    }
 
     // --- Response phase: store the response if eligible ---
     if (c.res.status < 200 || c.res.status >= 300) return;
@@ -101,12 +125,28 @@ export function cacheMiddleware(
           status: c.res.status,
           contentType,
           cacheControl: cacheControl!,
+          expiresAt: Date.now() + ttl * 1000,
         };
-        return redis.set(key, JSON.stringify(entry), { EX: ttl });
+        return redis.set(key, JSON.stringify(entry), {
+          EX: ttl + STALE_GRACE_SECONDS,
+        });
       })
       .catch((err: unknown) => {
         logger.warn({ err, key, ttl }, "redis write failed");
         return null;
       });
   };
+}
+
+function toResponse(entry: CachedEntry, result: "hit" | "stale"): Response {
+  return new Response(entry.body, {
+    status: entry.status,
+    headers: {
+      "Content-Type": entry.contentType,
+      // A stale body is already past its max-age: tell browsers and CDNs to
+      // revalidate instead of pinning it for another full TTL.
+      "Cache-Control": result === "stale" ? "no-cache" : entry.cacheControl,
+      "Cache-Status": `Redis; ${result}`,
+    },
+  });
 }

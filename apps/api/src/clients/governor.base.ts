@@ -54,6 +54,9 @@ export abstract class GovernorBase<
   >();
   private readonly quorumRefreshes = new Map<string, Promise<void>>();
   private readonly latestBlockCacheTtlMs = 7_000;
+  // Backoff after a failed refresh so a degraded RPC is not re-probed on every
+  // request while the stale block is being served.
+  private readonly latestBlockRetryMs = 3_000;
   private readonly quorumCacheTtlMs: number;
 
   protected abstract address: Address;
@@ -342,21 +345,52 @@ export abstract class GovernorBase<
     return block?.timestamp ? fromHex(block.timestamp, "number") : null;
   }
 
+  /**
+   * Stale-while-revalidate: only the very first call waits for the RPC. Once
+   * warm, callers always get the cached block immediately and an expired entry
+   * just kicks off a background refresh, so request latency never depends on
+   * RPC health and an RPC outage degrades to a slightly stale block instead of
+   * a hanging request.
+   */
   private async getLatestBlock(): Promise<{
     number: number;
     timestamp: number | null;
   }> {
     const cached = this.latestBlockCache;
-    const now = Date.now();
 
-    if (cached && cached.expiresAt > now) {
-      return { number: cached.number, timestamp: cached.timestamp };
+    if (!cached) {
+      return this.refreshLatestBlock();
     }
 
-    if (!this.latestBlockFetch) {
-      this.latestBlockFetch = this.fetchLatestBlock().finally(() => {
-        this.latestBlockFetch = null;
+    if (cached.expiresAt <= Date.now()) {
+      this.refreshLatestBlock().catch(() => {
+        // Failure is logged and backed off inside refreshLatestBlock.
       });
+    }
+
+    return { number: cached.number, timestamp: cached.timestamp };
+  }
+
+  private refreshLatestBlock(): Promise<{
+    number: number;
+    timestamp: number | null;
+  }> {
+    if (!this.latestBlockFetch) {
+      this.latestBlockFetch = this.fetchLatestBlock()
+        .catch((error: Error) => {
+          const stale = this.latestBlockCache;
+          if (stale) {
+            stale.expiresAt = Date.now() + this.latestBlockRetryMs;
+            logger.warn(
+              { error, blockNumber: stale.number },
+              "Failed to refresh latest block; serving stale block",
+            );
+          }
+          throw error;
+        })
+        .finally(() => {
+          this.latestBlockFetch = null;
+        });
     }
 
     return this.latestBlockFetch;

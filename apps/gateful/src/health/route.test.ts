@@ -34,7 +34,7 @@ async function readHealthResponse(res: Response) {
 function appWithHealth(
   opts: Parameters<typeof health>[2],
   registry = new CircuitBreakerRegistry({
-    failureThreshold: 2,
+    minimumRequests: 2,
     cooldownMs: 60_000,
   }),
 ) {
@@ -247,6 +247,34 @@ describe("gateway health route", () => {
     expect(body.upstreams.ens.nextRetryIn).toBeGreaterThan(0);
   });
 
+  it("probes the upstream again once an open circuit has cooled down", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(0);
+    const failing = vi.fn().mockRejectedValue(new Error("offline"));
+    const { app, registry } = appWithHealth({
+      daoApis: new Map([["ens", "http://api.example"]]),
+      daoRelayers: new Map(),
+    });
+    // A per-route breaker opens and then sees no more traffic.
+    await expect(
+      registry.get("ens:revenue").execute(failing),
+    ).rejects.toThrow();
+    await expect(
+      registry.get("ens:revenue").execute(failing),
+    ).rejects.toThrow();
+    vi.setSystemTime(60_000);
+
+    const fetch = okFetch();
+    vi.stubGlobal("fetch", fetch);
+    const res = await app.request("/health");
+    const body = await readHealthResponse(res);
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(res.status).toBe(200);
+    expect(body.upstreams.ens.status).toBe("ok");
+    vi.useRealTimers();
+  });
+
   it("does not trip the proxy circuit when probes fail repeatedly", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
 
@@ -255,7 +283,7 @@ describe("gateway health route", () => {
       daoRelayers: new Map(),
     });
 
-    // failureThreshold is 2 — poll more than that.
+    // minimumRequests is 2 — poll more than that.
     for (let i = 0; i < 5; i++) {
       const res = await app.request("/health");
       const body = await readHealthResponse(res);

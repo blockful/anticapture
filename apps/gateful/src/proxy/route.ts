@@ -45,7 +45,8 @@ export function proxy(
       return c.json({ error: `DAO "${resolved.dao}" not configured` }, 404);
     }
 
-    return registry.get(resolved.dao).execute(async () => {
+    const breaker = registry.forProxy(resolved.dao, resolved.path);
+    return breaker.execute(async () => {
       const url = new URL(resolved.path || "/", daoAPI);
       url.search = new URL(c.req.url).search;
       const res = await honoProxy(url.toString(), {

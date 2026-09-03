@@ -95,7 +95,10 @@ export function daoHealth(
       return c.json({ error: `DAO "${dao}" not configured` }, 404);
     }
 
+    // The probe runs through the DAO-level breaker; the reported circuit is the
+    // worst of the DAO's per-route proxy breakers so real-traffic state shows.
     const breaker = registry.get(dao);
+    const circuit = () => buildCircuit(registry.summary(dao));
 
     try {
       const upstream = await breaker.execute(async () => {
@@ -111,13 +114,13 @@ export function daoHealth(
         return (await res.json()) as UpstreamHealth;
       });
 
-      return c.json({ ...upstream, circuit: buildCircuit(breaker) }, 200);
+      return c.json({ ...upstream, circuit: circuit() }, 200);
     } catch (err) {
       if (err instanceof CircuitOpenError) {
-        return c.json(unreachablePayload(buildCircuit(breaker)), 503);
+        return c.json(unreachablePayload(circuit()), 503);
       }
       logger.warn({ err, dao }, "per-dao health probe failed");
-      return c.json(unreachablePayload(buildCircuit(breaker)), 503);
+      return c.json(unreachablePayload(circuit()), 503);
     }
   });
 }

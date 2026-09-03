@@ -330,6 +330,56 @@ describe("ProposalsService", () => {
     });
   });
 
+  describe("RPC unavailable", () => {
+    beforeEach(() => {
+      daoClient.getCurrentBlockNumber = async () => {
+        throw new Error("rpc down");
+      };
+    });
+
+    it("should serve indexed statuses from getProposals", async () => {
+      repo.proposals = [createMockProposal({ status: ProposalStatus.PENDING })];
+      daoClient.proposalStatus = ProposalStatus.ACTIVE;
+
+      const result = await service.getProposals(DEFAULT_REQ);
+
+      expect(result).toEqual([
+        createMockProposal({ status: ProposalStatus.PENDING }),
+      ]);
+    });
+
+    it("should serve the indexed status from getProposalById", async () => {
+      repo.byId = createMockProposal({ status: ProposalStatus.PENDING });
+      daoClient.proposalStatus = ProposalStatus.ACTIVE;
+
+      const result = await service.getProposalById("1");
+
+      expect(result).toEqual(
+        createMockProposal({ status: ProposalStatus.PENDING }),
+      );
+    });
+  });
+
+  describe("status computation failure", () => {
+    it("should keep the indexed status of the proposal whose RPC reads failed", async () => {
+      repo.proposals = [
+        createMockProposal({ id: "1", status: ProposalStatus.PENDING }),
+        createMockProposal({ id: "2", status: ProposalStatus.PENDING }),
+      ];
+      daoClient.getProposalStatus = async (proposal) => {
+        if (proposal.id === "2") throw new Error("quorum read failed");
+        return ProposalStatus.ACTIVE;
+      };
+
+      const result = await service.getProposals(DEFAULT_REQ);
+
+      expect(result.map((p) => p.status)).toEqual([
+        ProposalStatus.ACTIVE,
+        ProposalStatus.PENDING,
+      ]);
+    });
+  });
+
   describe("searchProposals", () => {
     it("should return matching proposals with on-chain status", async () => {
       repo.proposals = [createMockProposal({ title: "Treasury Refresh" })];
