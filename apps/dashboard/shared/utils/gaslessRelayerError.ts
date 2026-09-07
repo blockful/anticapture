@@ -31,6 +31,35 @@ const readRelayerError = (
 
 export type RelayerEnactmentAction = "queue" | "execute";
 
+export const getRelayerErrorCode = (error: unknown): string | undefined =>
+  readRelayerError(error).code;
+
+/**
+ * Codes the relayer returns before it signs anything for queue()/execute().
+ * Any of these means no transaction was broadcast, so retrying is safe. A
+ * failure without one of these codes (network error, gateway timeout, plain
+ * 5xx) says nothing about whether the relayer already sent the transaction:
+ * Gateful aborts the proxy after 30s while the relayer is still waiting for
+ * the receipt, so the caller must treat that case as unknown, not as failed.
+ */
+const ENACTMENT_REJECTION_CODES = new Set([
+  "INVALID_PROPOSAL_STATE",
+  "TIMELOCK_NOT_READY",
+  "SIMULATION_FAILED",
+  "PROPOSAL_NOT_FOUND",
+  "PROPOSAL_DATA_MISMATCH",
+  "RELAYER_LOW_BALANCE",
+]);
+
+export const isRelayerEnactmentRejection = (error: unknown): boolean => {
+  const code = getRelayerErrorCode(error);
+  return code !== undefined && ENACTMENT_REJECTION_CODES.has(code);
+};
+
+/** The relayer broadcast the transaction and saw it revert: a final answer. */
+export const isRelayerTransactionReverted = (error: unknown): boolean =>
+  getRelayerErrorCode(error) === "TRANSACTION_REVERTED";
+
 /**
  * Relayer failures for the permissionless queue()/execute() calls, keyed by
  * the `code` the relayer returns. These are proposal-state problems rather
@@ -62,10 +91,9 @@ export const mapRelayerEnactmentError = (
   error: unknown,
   action: RelayerEnactmentAction,
 ): string => {
-  const { code, status } = readRelayerError(error);
+  const code = getRelayerErrorCode(error);
   const message = code ? ENACTMENT_MESSAGES[code] : undefined;
   if (message) return message(action);
-  if (status === 503) return ENACTMENT_MESSAGES.RELAYER_LOW_BALANCE(action);
   return `The relayer could not ${action} this proposal. You can retry or use your own wallet.`;
 };
 

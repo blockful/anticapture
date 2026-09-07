@@ -1,4 +1,7 @@
 import {
+  getRelayerErrorCode,
+  isRelayerEnactmentRejection,
+  isRelayerTransactionReverted,
   mapRelayerEnactmentError,
   mapRelayerError,
 } from "@/shared/utils/gaslessRelayerError";
@@ -13,6 +16,56 @@ const relayerError = (status: number, code?: string) =>
       data: code ? { code, error: code } : { error: "boom" },
     },
   });
+
+describe("getRelayerErrorCode", () => {
+  it("reads the structured relayer code", () => {
+    expect(getRelayerErrorCode(relayerError(409, "SIMULATION_FAILED"))).toBe(
+      "SIMULATION_FAILED",
+    );
+  });
+
+  it("returns undefined for unstructured failures", () => {
+    expect(getRelayerErrorCode(relayerError(503))).toBeUndefined();
+    expect(getRelayerErrorCode(new Error("network"))).toBeUndefined();
+    expect(getRelayerErrorCode(undefined)).toBeUndefined();
+  });
+});
+
+describe("isRelayerEnactmentRejection", () => {
+  it.each([
+    "INVALID_PROPOSAL_STATE",
+    "TIMELOCK_NOT_READY",
+    "SIMULATION_FAILED",
+    "PROPOSAL_NOT_FOUND",
+    "PROPOSAL_DATA_MISMATCH",
+    "RELAYER_LOW_BALANCE",
+  ])("treats %s as a pre-broadcast rejection", (code) => {
+    expect(isRelayerEnactmentRejection(relayerError(409, code))).toBe(true);
+  });
+
+  it("does not treat a reverted broadcast or an unstructured failure as a rejection", () => {
+    expect(
+      isRelayerEnactmentRejection(relayerError(409, "TRANSACTION_REVERTED")),
+    ).toBe(false);
+    expect(isRelayerEnactmentRejection(relayerError(503))).toBe(false);
+    expect(isRelayerEnactmentRejection(relayerError(504))).toBe(false);
+    expect(isRelayerEnactmentRejection(new Error("Failed to fetch"))).toBe(
+      false,
+    );
+  });
+});
+
+describe("isRelayerTransactionReverted", () => {
+  it("matches only TRANSACTION_REVERTED", () => {
+    expect(
+      isRelayerTransactionReverted(relayerError(409, "TRANSACTION_REVERTED")),
+    ).toBe(true);
+    expect(
+      isRelayerTransactionReverted(relayerError(409, "SIMULATION_FAILED")),
+    ).toBe(false);
+    expect(isRelayerTransactionReverted(new Error("x"))).toBe(false);
+  });
+});
 
 describe("mapRelayerEnactmentError", () => {
   it("names the required state for INVALID_PROPOSAL_STATE", () => {
@@ -75,9 +128,9 @@ describe("mapRelayerEnactmentError", () => {
     ).toMatch(/reverted on-chain/i);
   });
 
-  it("treats a bare 503 as the relayer being unavailable", () => {
+  it("does not read a bare 503 as the relayer being out of funds", () => {
     expect(mapRelayerEnactmentError(relayerError(503), "execute")).toMatch(
-      /out of funds/i,
+      /could not execute/i,
     );
   });
 

@@ -633,6 +633,21 @@ const MobileBottomBar = ({
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
   const { isAvailable: isGaslessAvailable } = useGaslessEnactment(daoId);
 
+  const isShu = daoId === DaoIdEnum.SHU;
+  const isTorn = daoId === DaoIdEnum.TORN;
+  const isQueueable = proposalStatus === "succeeded" && !isShu;
+  const isExecutable =
+    proposalStatus === "pending_execution" ||
+    // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
+    // timelocked and executing reverts until PENDING_EXECUTION
+    (proposalStatus === "queued" && !isShu && !isTorn);
+  // Relayed queue/execute carry no signer, so a funded relayer makes them
+  // available to a disconnected visitor too (see ProposalExecutionButtons).
+  const canRelayQueue =
+    isGaslessAvailable && canRelayGovernanceAction("queue", proposalStatus);
+  const canRelayExecute =
+    isGaslessAvailable && canRelayGovernanceAction("execute", proposalStatus);
+
   let content: React.ReactNode = null;
 
   if (isOffchain) {
@@ -662,38 +677,22 @@ const MobileBottomBar = ({
         );
       }
     }
+  } else if (isQueueable && (address || canRelayQueue)) {
+    content = (
+      <Button className="flex w-full" onClick={onQueueClick}>
+        Queue Proposal
+        {canRelayQueue && <GaslessBadge />}
+      </Button>
+    );
+  } else if (isExecutable && (address || canRelayExecute)) {
+    content = (
+      <Button className="flex w-full" onClick={onExecuteClick}>
+        Execute Proposal
+        {canRelayExecute && <GaslessBadge />}
+      </Button>
+    );
   } else if (address) {
-    if (
-      proposalStatus === "succeeded" &&
-      daoId.toUpperCase() !== DaoIdEnum.SHU
-    ) {
-      content = (
-        <Button className="flex w-full" onClick={onQueueClick}>
-          Queue Proposal
-          {isGaslessAvailable &&
-            canRelayGovernanceAction("queue", proposalStatus) && (
-              <GaslessBadge />
-            )}
-        </Button>
-      );
-    } else if (
-      proposalStatus === "pending_execution" ||
-      // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
-      // timelocked and executing reverts until PENDING_EXECUTION
-      (proposalStatus === "queued" &&
-        daoId.toUpperCase() !== DaoIdEnum.SHU &&
-        daoId.toUpperCase() !== DaoIdEnum.TORN)
-    ) {
-      content = (
-        <Button className="flex w-full" onClick={onExecuteClick}>
-          Execute Proposal
-          {isGaslessAvailable &&
-            canRelayGovernanceAction("execute", proposalStatus) && (
-              <GaslessBadge />
-            )}
-        </Button>
-      );
-    } else if (supportValue === undefined) {
+    if (supportValue === undefined) {
       if (isOngoing) {
         content = (
           <Button className="flex w-full" onClick={onVoteClick}>

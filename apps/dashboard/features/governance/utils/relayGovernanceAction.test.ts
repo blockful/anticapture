@@ -1,4 +1,4 @@
-import type { Hash, PublicClient } from "viem";
+import type { Hash } from "viem";
 
 import { relayExecute, relayQueue } from "@anticapture/client";
 
@@ -6,6 +6,7 @@ import {
   canRelayGovernanceAction,
   getRelayBlockedReason,
   relayGovernanceAction,
+  type ReceiptWaiter,
 } from "@/features/governance/utils/relayGovernanceAction";
 import { DaoIdEnum } from "@/shared/types/daos";
 
@@ -22,6 +23,26 @@ const mockedRelayExecute = relayExecute as jest.MockedFunction<
 const transactionHash: Hash = `0x${"ab".repeat(32)}`;
 const proposalId =
   "69304512515872868228453463730257567312488838925636819022683533220991373699419";
+
+const relayerError = (status: number, code?: string) =>
+  Object.assign(new Error("Request failed"), {
+    status,
+    response: {
+      status,
+      statusText: "",
+      headers: new Headers(),
+      data: code ? { code, error: code } : { error: "boom" },
+    },
+  });
+
+/**
+ * A typed test double for the one public-client capability the flow uses.
+ * `jest.fn()` is assignable to the method type, so no cast is needed and a
+ * change to `ReceiptWaiter` surfaces here as a type error.
+ */
+const receiptWaiter = (
+  waitForTransactionReceipt: ReceiptWaiter["waitForTransactionReceipt"],
+): ReceiptWaiter => ({ waitForTransactionReceipt });
 
 describe("canRelayGovernanceAction", () => {
   it("allows queue only for succeeded proposals", () => {
@@ -65,9 +86,6 @@ describe("relayGovernanceAction", () => {
     jest.restoreAllMocks();
   });
 
-  const clientWith = (waitForTransactionReceipt: jest.Mock): PublicClient =>
-    ({ waitForTransactionReceipt }) as unknown as PublicClient;
-
   it("queues through the relayer with the lowercase dao key", async () => {
     mockedRelayQueue.mockResolvedValue({ transactionHash });
     const onTxSubmitted = jest.fn();
@@ -79,7 +97,7 @@ describe("relayGovernanceAction", () => {
       action: "queue",
       daoId: DaoIdEnum.ENS,
       proposalId,
-      publicClient: clientWith(waitForTransactionReceipt),
+      publicClient: receiptWaiter(waitForTransactionReceipt),
       onTxSubmitted,
     });
 
@@ -120,7 +138,7 @@ describe("relayGovernanceAction", () => {
       action: "execute",
       daoId: DaoIdEnum.ENS,
       proposalId,
-      publicClient: clientWith(waitForTransactionReceipt),
+      publicClient: receiptWaiter(waitForTransactionReceipt),
       onTxSubmitted: jest.fn(),
     });
 
@@ -138,7 +156,7 @@ describe("relayGovernanceAction", () => {
       action: "queue",
       daoId: DaoIdEnum.ENS,
       proposalId,
-      publicClient: clientWith(waitForTransactionReceipt),
+      publicClient: receiptWaiter(waitForTransactionReceipt),
       onTxSubmitted,
     });
 
@@ -146,15 +164,9 @@ describe("relayGovernanceAction", () => {
     expect(outcome).toEqual({ hash: transactionHash, status: "unconfirmed" });
   });
 
-  it("propagates relayer errors without reporting a submission", async () => {
-    const relayerError = Object.assign(new Error("Conflict"), {
-      status: 409,
-      response: {
-        status: 409,
-        data: { code: "SIMULATION_FAILED", error: "reverted" },
-      },
-    });
-    mockedRelayExecute.mockRejectedValue(relayerError);
+  it("rethrows pre-broadcast relayer rejections", async () => {
+    const rejection = relayerError(409, "SIMULATION_FAILED");
+    mockedRelayExecute.mockRejectedValue(rejection);
     const onTxSubmitted = jest.fn();
 
     await expect(
@@ -165,7 +177,45 @@ describe("relayGovernanceAction", () => {
         publicClient: null,
         onTxSubmitted,
       }),
-    ).rejects.toBe(relayerError);
+    ).rejects.toBe(rejection);
     expect(onTxSubmitted).not.toHaveBeenCalled();
   });
+
+  it("rethrows a reverted broadcast reported by the relayer", async () => {
+    const reverted = relayerError(409, "TRANSACTION_REVERTED");
+    mockedRelayQueue.mockRejectedValue(reverted);
+
+    await expect(
+      relayGovernanceAction({
+        action: "queue",
+        daoId: DaoIdEnum.ENS,
+        proposalId,
+        publicClient: null,
+        onTxSubmitted: jest.fn(),
+      }),
+    ).rejects.toBe(reverted);
+  });
+
+  it.each([
+    ["a gateway timeout", relayerError(504)],
+    ["a plain 5xx without a relayer code", relayerError(503)],
+    ["a network failure", new TypeError("Failed to fetch")],
+  ])(
+    "reports unknown for %s instead of failing",
+    async (_label, transportError) => {
+      mockedRelayExecute.mockRejectedValue(transportError);
+      const onTxSubmitted = jest.fn();
+
+      const outcome = await relayGovernanceAction({
+        action: "execute",
+        daoId: DaoIdEnum.ENS,
+        proposalId,
+        publicClient: receiptWaiter(jest.fn()),
+        onTxSubmitted,
+      });
+
+      expect(outcome).toEqual({ status: "unknown", hash: null });
+      expect(onTxSubmitted).not.toHaveBeenCalled();
+    },
+  );
 });

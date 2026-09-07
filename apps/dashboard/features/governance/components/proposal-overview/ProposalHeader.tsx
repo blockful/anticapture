@@ -189,38 +189,44 @@ const ProposalExecutionButtons = ({
   const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
   const { isAvailable: isGaslessAvailable } = useGaslessEnactment(daoIdEnum);
 
-  if (!address) return null;
-
   const isShu = daoIdEnum === DaoIdEnum.SHU;
   const isTorn = daoIdEnum === DaoIdEnum.TORN;
 
+  // Relayed queue/execute carry no signer, so a funded relayer makes them
+  // available to a disconnected visitor too. The wallet path still needs an
+  // address, which the modal asks for when chosen.
+  const canRelayQueue =
+    isGaslessAvailable && canRelayGovernanceAction("queue", proposalStatus);
+  const canRelayExecute =
+    isGaslessAvailable && canRelayGovernanceAction("execute", proposalStatus);
+
+  const showQueue =
+    proposalStatus === "succeeded" && !isShu && (!!address || canRelayQueue);
+  const showExecute =
+    (proposalStatus === "pending_execution" ||
+      // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
+      // timelocked and executing reverts until PENDING_EXECUTION
+      (proposalStatus === "queued" && !isShu && !isTorn)) &&
+    (!!address || canRelayExecute);
+
   return (
     <>
-      {proposalStatus === "succeeded" && !isShu && (
+      {showQueue && (
         <Button
           className="hidden lg:flex"
           onClick={() => setIsQueueModalOpen(true)}
         >
           Queue Proposal
-          {isGaslessAvailable &&
-            canRelayGovernanceAction("queue", proposalStatus) && (
-              <GaslessBadge />
-            )}
+          {canRelayQueue && <GaslessBadge />}
         </Button>
       )}
-      {(proposalStatus === "pending_execution" ||
-        // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
-        // timelocked and executing reverts until PENDING_EXECUTION
-        (proposalStatus === "queued" && !isShu && !isTorn)) && (
+      {showExecute && (
         <Button
           className="hidden lg:flex"
           onClick={() => setIsExecuteModalOpen(true)}
         >
           Execute Proposal
-          {isGaslessAvailable &&
-            canRelayGovernanceAction("execute", proposalStatus) && (
-              <GaslessBadge />
-            )}
+          {canRelayExecute && <GaslessBadge />}
         </Button>
       )}
     </>

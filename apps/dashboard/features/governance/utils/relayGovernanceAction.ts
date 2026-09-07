@@ -8,6 +8,10 @@ import type {
 
 import type { GovernanceAction } from "@/features/governance/utils/submitGovernanceAction";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import {
+  isRelayerEnactmentRejection,
+  isRelayerTransactionReverted,
+} from "@/shared/utils/gaslessRelayerError";
 
 /**
  * Governor state each relayed action requires, expressed in the dashboard's
@@ -44,23 +48,31 @@ export const getRelayBlockedReason = (
     : "Only queued proposals with an elapsed timelock can be executed.";
 };
 
+/** The only public-client capability this flow needs. */
+export type ReceiptWaiter = Pick<PublicClient, "waitForTransactionReceipt">;
+
 /**
  * What the dashboard knows about the relayed transaction once the call
- * returns. "unconfirmed" means the hash exists but the local receipt check
- * could not run or timed out, so the caller must not treat the action as
- * either done or failed.
+ * settles.
+ *
+ * - "success" / "reverted": the receipt was read locally.
+ * - "unconfirmed": the relayer returned a hash but the local receipt check
+ *   could not run or timed out.
+ * - "unknown": the request failed without a relayer rejection code (network
+ *   error, gateway timeout, plain 5xx). The relayer may already have
+ *   broadcast the transaction, so this must not be shown as a failure or
+ *   followed by an automatic retry.
  */
-export type RelayOutcome = {
-  hash: Hash;
-  status: "success" | "reverted" | "unconfirmed";
-};
+export type RelayOutcome =
+  | { status: "success" | "reverted" | "unconfirmed"; hash: Hash }
+  | { status: "unknown"; hash: null };
 
 type RelayGovernanceActionParams = {
   action: GovernanceAction;
   daoId: DaoIdEnum;
   proposalId: string;
   /** Used to confirm the transaction; the relayer pays and signs it. */
-  publicClient?: PublicClient | null;
+  publicClient?: ReceiptWaiter | null;
   onTxSubmitted: (hash: Hash) => void;
 };
 
@@ -68,9 +80,11 @@ type RelayGovernanceActionParams = {
  * Queue or execute a proposal through the relayer, which pays the gas. The
  * relayer verifies the proposal on-chain, simulates, and normally waits for
  * the receipt before answering, so the local receipt wait is usually instant
- * and only matters when the relayer's own wait timed out. A rejection from
- * this function always means nothing was broadcast; anything after the hash
- * is returned is reported through the outcome instead.
+ * and only matters when the relayer's own wait timed out.
+ *
+ * Rejects only when the relayer answered with a definitive error: a
+ * pre-broadcast rejection (nothing was sent, retrying is safe) or
+ * TRANSACTION_REVERTED. Anything ambiguous is reported as an outcome.
  */
 export const relayGovernanceAction = async ({
   action,
@@ -80,16 +94,29 @@ export const relayGovernanceAction = async ({
   onTxSubmitted,
 }: RelayGovernanceActionParams): Promise<RelayOutcome> => {
   const daoKey = daoId.toLowerCase();
-  const response =
-    action === "queue"
-      ? await relayQueue(daoKey as RelayQueuePathParamsDaoEnumKey, {
-          proposalId,
-        })
-      : await relayExecute(daoKey as RelayExecutePathParamsDaoEnumKey, {
-          proposalId,
-        });
 
-  const hash = response.transactionHash as Hash;
+  let hash: Hash;
+  try {
+    const response =
+      action === "queue"
+        ? await relayQueue(daoKey as RelayQueuePathParamsDaoEnumKey, {
+            proposalId,
+          })
+        : await relayExecute(daoKey as RelayExecutePathParamsDaoEnumKey, {
+            proposalId,
+          });
+    hash = response.transactionHash as Hash;
+  } catch (error) {
+    if (
+      isRelayerEnactmentRejection(error) ||
+      isRelayerTransactionReverted(error)
+    ) {
+      throw error;
+    }
+    console.error(error);
+    return { status: "unknown", hash: null };
+  }
+
   onTxSubmitted(hash);
 
   if (!publicClient) return { hash, status: "unconfirmed" };

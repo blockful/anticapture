@@ -35,9 +35,12 @@ import { mapRelayerEnactmentError } from "@/shared/utils/gaslessRelayerError";
  * "idle" lasts only while the relayer balance query settles. "choose" is
  * reached when the relayer can sponsor the action: the user picks between the
  * free path and their own wallet. Without a relayer the modal opens straight
- * into the wallet flow, as it always did. "unconfirmed" means the transaction
- * was broadcast but the receipt could not be checked, so it is neither a
- * success nor a failure yet.
+ * into the wallet flow, as it always did.
+ *
+ * "unconfirmed" means a hash exists but the receipt could not be checked;
+ * "unknown" means the relayer call failed without a definitive answer and may
+ * or may not have broadcast. Neither is a success or a failure, and neither
+ * offers a retry, since a second submission could race the first.
  */
 type ActionStep =
   | "idle"
@@ -47,6 +50,7 @@ type ActionStep =
   | "pending-tx"
   | "success"
   | "unconfirmed"
+  | "unknown"
   | "error";
 
 type ActionMode = "wallet" | "gasless";
@@ -87,6 +91,16 @@ const ACTION_COPY: Record<
 
 const REVERTED_MESSAGE =
   "The transaction was mined but reverted on-chain. The proposal state did not change.";
+const CONNECT_WALLET_MESSAGE =
+  "Connect a wallet to pay for this transaction yourself.";
+
+/**
+ * The indexer picks up the queue/execute event a few blocks after the
+ * receipt, so the proposal is refetched on this cadence until its status
+ * moves off the one it had at submission, or until the budget runs out.
+ */
+const STATUS_POLL_MS = 5_000;
+const STATUS_POLL_MAX_ATTEMPTS = 24;
 
 const shortenHash = (hash: string) => `${hash.slice(0, 10)}…${hash.slice(-8)}`;
 
@@ -102,9 +116,16 @@ export const GovernanceActionModal = ({
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<Hash | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
-  // One submission at a time: a second click while a wallet prompt or relayer
-  // call is pending must not broadcast twice.
-  const inFlightRef = useRef(false);
+  // Status the proposal had when a submission went out. Non-null while the
+  // indexer is still expected to move it; polling stops once it does.
+  const [statusAtSubmit, setStatusAtSubmit] = useState<string | null>(null);
+
+  // Each run is tagged so a submission abandoned by closing the modal cannot
+  // drive the state of a later, reopened one. The busy flag stops a second
+  // click from broadcasting twice while a wallet prompt or relayer call is
+  // pending.
+  const attemptRef = useRef(0);
+  const busyRef = useRef(false);
 
   const { address } = useAccount();
   const chain = daoConfigByDaoId[daoId].daoOverview.chain;
@@ -131,20 +152,48 @@ export const GovernanceActionModal = ({
     });
   }, [queryClient, daoId, proposal.id]);
 
-  const handleSuccess = useCallback(() => {
-    setStep("success");
-    showCustomToast(`Proposal ${copy.pastTense} successfully!`, "success");
-    refreshProposal();
-  }, [copy.pastTense, refreshProposal]);
+  // Keep refetching until the indexed status advances past the one the
+  // action started from. Runs independently of the modal being open, so a
+  // user who closes right after the receipt still gets the page updated.
+  useEffect(() => {
+    if (statusAtSubmit === null) return;
+    if (proposal.status !== statusAtSubmit) {
+      setStatusAtSubmit(null);
+      return;
+    }
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (attempts > STATUS_POLL_MAX_ATTEMPTS) {
+        clearInterval(interval);
+        setStatusAtSubmit(null);
+        return;
+      }
+      refreshProposal();
+    }, STATUS_POLL_MS);
+    return () => clearInterval(interval);
+  }, [statusAtSubmit, proposal.status, refreshProposal]);
 
-  const handleFailure = useCallback((message: string) => {
-    setError(message);
-    setStep("error");
+  const startStatusPolling = useCallback(() => {
+    setStatusAtSubmit(proposal.status);
+    refreshProposal();
+  }, [proposal.status, refreshProposal]);
+
+  const beginAttempt = useCallback(() => {
+    attemptRef.current += 1;
+    busyRef.current = true;
+    const attempt = attemptRef.current;
+    return {
+      isCurrent: () => attemptRef.current === attempt,
+      finish: () => {
+        if (attemptRef.current === attempt) busyRef.current = false;
+      },
+    };
   }, []);
 
   const runWalletAction = useCallback(async () => {
-    if (!address || !walletClient || inFlightRef.current) return;
-    inFlightRef.current = true;
+    if (!address || !walletClient || busyRef.current) return;
+    const { isCurrent, finish } = beginAttempt();
 
     setMode("wallet");
     setError(null);
@@ -174,23 +223,38 @@ export const GovernanceActionModal = ({
         address,
         daoId,
         walletClient,
-        () => setStep("pending-tx"),
+        () => {
+          if (isCurrent()) setStep("pending-tx");
+        },
         proposal.id,
       );
-      setTxHash(receipt.transactionHash);
       if (receipt.status === "reverted") {
-        handleFailure(REVERTED_MESSAGE);
-      } else {
-        handleSuccess();
+        if (isCurrent()) {
+          setTxHash(receipt.transactionHash);
+          setError(REVERTED_MESSAGE);
+          setStep("error");
+        }
+        return;
+      }
+      // A success that lands after the modal was closed still changed the
+      // chain, so the page is refreshed either way; only the modal's own
+      // screen is left alone.
+      showCustomToast(`Proposal ${copy.pastTense} successfully!`, "success");
+      startStatusPolling();
+      if (isCurrent()) {
+        setTxHash(receipt.transactionHash);
+        setStep("success");
       }
     } catch (err) {
+      if (!isCurrent()) return;
       const message =
         err instanceof Error
           ? (err.message.split("\n")[0]?.slice(0, 120) ?? "Action failed.")
           : "Action failed.";
-      handleFailure(message);
+      setError(message);
+      setStep("error");
     } finally {
-      inFlightRef.current = false;
+      finish();
     }
   }, [
     address,
@@ -198,13 +262,14 @@ export const GovernanceActionModal = ({
     action,
     proposal,
     daoId,
-    handleSuccess,
-    handleFailure,
+    copy.pastTense,
+    startStatusPolling,
+    beginAttempt,
   ]);
 
   const runGaslessAction = useCallback(async () => {
-    if (inFlightRef.current) return;
-    inFlightRef.current = true;
+    if (busyRef.current) return;
+    const { isCurrent, finish } = beginAttempt();
 
     setMode("gasless");
     setError(null);
@@ -218,35 +283,55 @@ export const GovernanceActionModal = ({
         proposalId: proposal.id,
         publicClient,
         onTxSubmitted: (hash) => {
+          if (!isCurrent()) return;
           setTxHash(hash);
           setStep("pending-tx");
         },
       });
+
       if (outcome.status === "success") {
-        handleSuccess();
-      } else if (outcome.status === "reverted") {
-        handleFailure(REVERTED_MESSAGE);
-      } else {
-        // Broadcast but not confirmed here: never offer a retry, since a
-        // second submission would burn relayer gas on a revert.
-        setStep("unconfirmed");
-        refreshProposal();
+        showCustomToast(`Proposal ${copy.pastTense} successfully!`, "success");
+        startStatusPolling();
+        if (isCurrent()) setStep("success");
+        return;
+      }
+      if (outcome.status === "reverted") {
+        if (isCurrent()) {
+          setError(REVERTED_MESSAGE);
+          setStep("error");
+        }
+        return;
+      }
+      // "unconfirmed" and "unknown": the chain may have changed, so poll the
+      // proposal, but never offer a retry that could race the first send.
+      startStatusPolling();
+      if (isCurrent()) {
+        setTxHash(outcome.hash);
+        setStep(outcome.status);
       }
     } catch (err) {
       console.error(err);
-      handleFailure(mapRelayerEnactmentError(err, action));
+      if (!isCurrent()) return;
+      setError(mapRelayerEnactmentError(err, action));
+      setStep("error");
     } finally {
-      inFlightRef.current = false;
+      finish();
     }
   }, [
     action,
     daoId,
     proposal.id,
     publicClient,
-    handleSuccess,
-    handleFailure,
-    refreshProposal,
+    copy.pastTense,
+    startStatusPolling,
+    beginAttempt,
   ]);
+
+  const failWithoutWallet = useCallback((message: string) => {
+    setMode("wallet");
+    setError(message);
+    setStep("error");
+  }, []);
 
   // Opening decides the entry point once: with a funded relayer the user gets
   // to choose, otherwise the wallet flow starts on its own as before. While
@@ -264,8 +349,14 @@ export const GovernanceActionModal = ({
       setStep("choose");
       return;
     }
+    if (!address) {
+      failWithoutWallet(CONNECT_WALLET_MESSAGE);
+      return;
+    }
     if (!walletClient) {
-      handleFailure(`Please switch your wallet to the ${chain.name} network.`);
+      failWithoutWallet(
+        `Please switch your wallet to the ${chain.name} network.`,
+      );
       return;
     }
     void runWalletAction();
@@ -274,23 +365,31 @@ export const GovernanceActionModal = ({
     hasStarted,
     isGaslessLoading,
     isGaslessAvailable,
+    address,
     walletClient,
     chain.name,
     runWalletAction,
-    handleFailure,
+    failWithoutWallet,
   ]);
 
   const handleUseWallet = () => {
+    if (!address) {
+      failWithoutWallet(CONNECT_WALLET_MESSAGE);
+      return;
+    }
     if (!walletClient) {
-      setMode("wallet");
-      handleFailure(`Please switch your wallet to the ${chain.name} network.`);
+      failWithoutWallet(
+        `Please switch your wallet to the ${chain.name} network.`,
+      );
       return;
     }
     void runWalletAction();
   };
 
   const handleClose = () => {
-    if (step === "success" || step === "unconfirmed") refreshProposal();
+    // Invalidate whatever is in flight so it cannot repaint a reopened modal.
+    attemptRef.current += 1;
+    busyRef.current = false;
     setStep("idle");
     setMode("wallet");
     setError(null);
@@ -300,6 +399,8 @@ export const GovernanceActionModal = ({
   };
 
   const isGaslessRun = mode === "gasless";
+  const isSettled =
+    step === "success" || step === "unconfirmed" || step === "unknown";
 
   const txHashRow = txHash && (
     <div className="flex items-start gap-2">
@@ -427,6 +528,13 @@ export const GovernanceActionModal = ({
             />
           )}
 
+          {step === "unknown" && (
+            <InlineAlert
+              variant="warning"
+              text="The relayer did not answer in time. The transaction may still have been submitted, so wait a minute and check the proposal status before trying again."
+            />
+          )}
+
           {step === "error" && (
             <div className="flex items-center justify-end gap-2">
               <Button variant="outline" onClick={handleClose}>
@@ -451,7 +559,7 @@ export const GovernanceActionModal = ({
             </div>
           )}
 
-          {(step === "success" || step === "unconfirmed") && (
+          {isSettled && (
             <div className="flex items-center justify-end">
               <Button onClick={handleClose}>Done</Button>
             </div>
