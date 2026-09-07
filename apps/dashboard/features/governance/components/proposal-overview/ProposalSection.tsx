@@ -18,6 +18,7 @@ import { OffchainVotingModal } from "@/features/governance/components/modals/Off
 import { VotingModal } from "@/features/governance/components/modals/VotingModal";
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import {
+  GaslessBadge,
   getVoteText,
   type OffchainVoteIndicator,
   ProposalHeader,
@@ -39,6 +40,7 @@ import type {
   ProposalViewData,
 } from "@/features/governance/types";
 import { isProposalNotFoundError } from "@/features/governance/utils/proposalErrors";
+import { canRelayGovernanceAction } from "@/features/governance/utils/relayGovernanceAction";
 import {
   getOffchainProposalStatusView,
   normalizeChoices,
@@ -55,6 +57,7 @@ import { Button } from "@/shared/components";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import daoConfig from "@/shared/dao-config";
+import { useGaslessEnactment } from "@/shared/hooks/useGaslessRelayer";
 import { DaoIdEnum } from "@/shared/types/daos";
 
 /** How often to re-ask the API for a vote Snapshot has already accepted. */
@@ -628,6 +631,7 @@ const MobileBottomBar = ({
   offchainVote?: OffchainVoteIndicator;
 }) => {
   const isOngoing = proposalStatus.toLowerCase() === "ongoing";
+  const { isAvailable: isGaslessAvailable } = useGaslessEnactment(daoId);
 
   let content: React.ReactNode = null;
 
@@ -666,6 +670,10 @@ const MobileBottomBar = ({
       content = (
         <Button className="flex w-full" onClick={onQueueClick}>
           Queue Proposal
+          {isGaslessAvailable &&
+            canRelayGovernanceAction("queue", proposalStatus) && (
+              <GaslessBadge />
+            )}
         </Button>
       );
     } else if (
@@ -679,6 +687,10 @@ const MobileBottomBar = ({
       content = (
         <Button className="flex w-full" onClick={onExecuteClick}>
           Execute Proposal
+          {isGaslessAvailable &&
+            canRelayGovernanceAction("execute", proposalStatus) && (
+              <GaslessBadge />
+            )}
         </Button>
       );
     } else if (supportValue === undefined) {

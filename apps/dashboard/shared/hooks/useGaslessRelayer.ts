@@ -50,6 +50,29 @@ export const useRelayerBalance = (
   };
 };
 
+interface UseGaslessEnactmentResult {
+  /** The relayer can sponsor queue()/execute() for this DAO right now. */
+  isAvailable: boolean;
+  isLoading: boolean;
+}
+
+/**
+ * Queue and execute are permissionless and carry no signer, so the only
+ * things that gate the gasless path are the DAO having a relayer and that
+ * relayer being funded. No voting power or per-address rate limit applies.
+ */
+export const useGaslessEnactment = (
+  daoId: DaoIdEnum,
+): UseGaslessEnactmentResult => {
+  const gaslessEnabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
+  const { hasEnoughBalance, isLoading } = useRelayerBalance(daoId);
+
+  return {
+    isAvailable: gaslessEnabled && hasEnoughBalance === true,
+    isLoading: gaslessEnabled && isLoading,
+  };
+};
+
 export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
   const gaslessEnabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
   const { hasEnoughBalance, isLoading: balanceLoading } =
