@@ -1,6 +1,7 @@
 ---
 "@anticapture/api": patch
 "@anticapture/gateful": patch
+"@anticapture/client": minor
 ---
 
 Flatten `TokenPropertiesResponse` so the MCP `token` tool can validate its own
@@ -18,3 +19,9 @@ extended), so it is no longer registered as its own component and
 `TokenPropertiesResponse` is emitted as a flat object. The wire payload is
 unchanged — same twelve fields, all still required. The generated SDK loses the
 now-unused `TokenProperties` type.
+
+The SDK is bumped alongside it: `src/index.ts` re-exports every generated
+model, so dropping the component removes the public `TokenProperties` type.
+`TokenPropertiesResponse` is unaffected — twelve fields, `price` included —
+and neither consumer in the org (dashboard, notification-system) references
+the removed type.
