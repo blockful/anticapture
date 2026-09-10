@@ -9,12 +9,16 @@ import type { Address } from "viem";
 
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import { OffchainVotedChip } from "@/features/governance/components/proposal-overview/OffchainVotedChip";
+import { canRelayGovernanceAction } from "@/features/governance/utils/relayGovernanceAction";
 import { BadgeStatus, Button } from "@/shared/components";
 import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 import { ConnectWalletCustom } from "@/shared/components/wallet/ConnectWalletCustom";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
 import daoConfigByDaoId from "@/shared/dao-config";
-import { useGaslessEligibility } from "@/shared/hooks/useGaslessRelayer";
+import {
+  useGaslessEligibility,
+  useGaslessEnactment,
+} from "@/shared/hooks/useGaslessRelayer";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { getDaoGovernanceListPath } from "@/shared/utils/whitelabel";
 
@@ -182,35 +186,59 @@ const ProposalExecutionButtons = ({
   setIsQueueModalOpen: (isOpen: boolean) => void;
   setIsExecuteModalOpen: (isOpen: boolean) => void;
 }) => {
-  if (!address) return null;
+  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
+  const { isAvailable: isGaslessAvailable } = useGaslessEnactment(daoIdEnum);
 
-  const isShu = daoId.toUpperCase() === DaoIdEnum.SHU;
-  const isTorn = daoId.toUpperCase() === DaoIdEnum.TORN;
+  const isShu = daoIdEnum === DaoIdEnum.SHU;
+  const isTorn = daoIdEnum === DaoIdEnum.TORN;
+
+  // Relayed queue/execute carry no signer, so a funded relayer makes them
+  // available to a disconnected visitor too. The wallet path still needs an
+  // address, which the modal asks for when chosen.
+  const canRelayQueue =
+    isGaslessAvailable && canRelayGovernanceAction("queue", proposalStatus);
+  const canRelayExecute =
+    isGaslessAvailable && canRelayGovernanceAction("execute", proposalStatus);
+
+  const showQueue =
+    proposalStatus === "succeeded" && !isShu && (!!address || canRelayQueue);
+  const showExecute =
+    (proposalStatus === "pending_execution" ||
+      // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
+      // timelocked and executing reverts until PENDING_EXECUTION
+      (proposalStatus === "queued" && !isShu && !isTorn)) &&
+    (!!address || canRelayExecute);
 
   return (
     <>
-      {proposalStatus === "succeeded" && !isShu && (
+      {showQueue && (
         <Button
           className="hidden lg:flex"
           onClick={() => setIsQueueModalOpen(true)}
         >
           Queue Proposal
+          {canRelayQueue && <GaslessBadge />}
         </Button>
       )}
-      {(proposalStatus === "pending_execution" ||
-        // Azorius (SHU) and Tornado (TORN) proposals are QUEUED while
-        // timelocked and executing reverts until PENDING_EXECUTION
-        (proposalStatus === "queued" && !isShu && !isTorn)) && (
+      {showExecute && (
         <Button
           className="hidden lg:flex"
           onClick={() => setIsExecuteModalOpen(true)}
         >
           Execute Proposal
+          {canRelayExecute && <GaslessBadge />}
         </Button>
       )}
     </>
   );
 };
+
+/** Marks an action the relayer will pay for, matching the vote button. */
+export const GaslessBadge = () => (
+  <BadgeStatus variant="success" className="bg-success/80 text-inverted">
+    Free
+  </BadgeStatus>
+);
 
 export const ProposalHeader = ({
   daoId,
