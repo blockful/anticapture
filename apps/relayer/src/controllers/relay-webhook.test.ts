@@ -12,7 +12,10 @@ silentLogger.level = "silent";
 
 const TX_HASH = `0x${"ab".repeat(32)}` as const;
 
-function createApp(enact: (proposalId: string) => Promise<EnactOutcome>) {
+function createApp(
+  enact: (proposalId: string) => Promise<EnactOutcome>,
+  extraOptions: { daoId?: string } = {},
+) {
   const app = new Hono();
   const calls: string[] = [];
   const outcomes: WebhookOutcome[] = [];
@@ -24,13 +27,17 @@ function createApp(enact: (proposalId: string) => Promise<EnactOutcome>) {
         return enact(id);
       },
     },
-    { onOutcome: (o) => outcomes.push(o), logger: silentLogger },
+    {
+      onOutcome: (o) => outcomes.push(o),
+      logger: silentLogger,
+      ...extraOptions,
+    },
   );
   return { app, calls, outcomes };
 }
 
 const post = (app: Hono, body: unknown) =>
-  app.request("/relay/webhook", {
+  app.request("/internal/webhook", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
@@ -46,7 +53,7 @@ const webhookBody = (metadata: Record<string, unknown>) => ({
   metadata,
 });
 
-describe("POST /relay/webhook", () => {
+describe("POST /internal/webhook", () => {
   it("accepts a proposal id and enacts it asynchronously", async () => {
     const { app, calls, outcomes } = createApp(async () => ({
       action: "execute",
@@ -107,12 +114,12 @@ describe("POST /relay/webhook", () => {
   });
 
   it("ignores a non-JSON body", async () => {
-    const { app, calls } = createApp(async () => ({
+    const { app, calls, outcomes } = createApp(async () => ({
       action: "skipped",
       state: "Executed",
     }));
 
-    const res = await app.request("/relay/webhook", {
+    const res = await app.request("/internal/webhook", {
       method: "POST",
       body: "nope",
     });
@@ -120,6 +127,7 @@ describe("POST /relay/webhook", () => {
     expect(res.status).toBe(202);
     await settle();
     expect(calls).toEqual([]);
+    expect(outcomes).toEqual(["ignored"]);
   });
 
   it("reports skipped when the proposal is not actionable", async () => {
@@ -150,5 +158,93 @@ describe("POST /relay/webhook", () => {
     expect(res.status).toBe(202);
     await settle();
     expect(outcomes).toEqual(["failed"]);
+  });
+
+  it("reports failed on TRANSACTION_REVERTED (gas was spent on a mined revert)", async () => {
+    const { app, outcomes } = createApp(async () => {
+      throw Errors.TRANSACTION_REVERTED(TX_HASH);
+    });
+    const res = await post(app, webhookBody({ proposalId: "42" }));
+    expect(res.status).toBe(202);
+    await settle();
+    expect(outcomes).toEqual(["failed"]);
+  });
+
+  it.each([
+    ["PROPOSAL_NOT_FOUND (404)", () => Errors.PROPOSAL_NOT_FOUND("42")],
+    ["RELAYER_LOW_BALANCE (503)", () => Errors.RELAYER_LOW_BALANCE()],
+  ])("reports failed on %s", async (_name, makeError) => {
+    const { app, outcomes } = createApp(async () => {
+      throw makeError();
+    });
+    const res = await post(app, webhookBody({ proposalId: "42" }));
+    expect(res.status).toBe(202);
+    await settle();
+    expect(outcomes).toEqual(["failed"]);
+  });
+
+  it("returns 202 before enact settles", async () => {
+    let resolveEnact: (value: EnactOutcome) => void;
+    const enacted = new Promise<EnactOutcome>((resolve) => {
+      resolveEnact = resolve;
+    });
+    const { app, outcomes } = createApp(() => enacted);
+
+    const res = await post(app, webhookBody({ proposalId: "42" }));
+
+    expect(res.status).toBe(202);
+    expect(outcomes).toEqual([]);
+
+    resolveEnact!({ action: "execute", txHash: TX_HASH });
+    await settle();
+    expect(outcomes).toEqual(["executed"]);
+  });
+
+  it("ignores events for another DAO", async () => {
+    const { app, calls, outcomes } = createApp(
+      async () => ({ action: "execute", txHash: TX_HASH }),
+      { daoId: "ENS" },
+    );
+
+    const res = await post(
+      app,
+      webhookBody({ proposalId: "42", daoId: "UNI" }),
+    );
+
+    expect(res.status).toBe(202);
+    await settle();
+    expect(calls).toEqual([]);
+    expect(outcomes).toEqual(["ignored"]);
+  });
+
+  it("accepts a matching DAO regardless of case", async () => {
+    const { app, calls, outcomes } = createApp(
+      async () => ({ action: "execute", txHash: TX_HASH }),
+      { daoId: "ENS" },
+    );
+
+    await post(app, webhookBody({ proposalId: "42", daoId: "ens" }));
+
+    await settle();
+    expect(calls).toEqual(["42"]);
+    expect(outcomes).toEqual(["executed"]);
+  });
+
+  it("does not break when onOutcome throws", async () => {
+    const app = new Hono();
+    relayWebhook(
+      app,
+      { enact: async () => ({ action: "execute", txHash: TX_HASH }) },
+      {
+        onOutcome: () => {
+          throw new Error("boom");
+        },
+        logger: silentLogger,
+      },
+    );
+
+    const res = await post(app, webhookBody({ proposalId: "42" }));
+    expect(res.status).toBe(202);
+    await settle();
   });
 });
