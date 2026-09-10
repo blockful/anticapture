@@ -50,15 +50,14 @@ describe("humanizeTimestamp", () => {
 });
 
 describe("humanizeNumber", () => {
-  test("compacts huge values by a common token scale", () => {
+  test("compacts huge values at the 18-decimal scale", () => {
     expect(humanizeNumber(34_450n * 10n ** 18n)?.text).toBe("34,450 × 10¹⁸");
-    expect(humanizeNumber(123_456_789_012n * 10n ** 6n)?.text).toBe(
-      "123,456,789,012 × 10⁶",
+    // 59,998.98 COMP: a trailing-zero scale guess misread this as × 10⁸.
+    expect(humanizeNumber(59_998_980_000_000_000_000_000n)?.text).toBe(
+      "59,998.98 × 10¹⁸",
     );
-  });
-
-  test("falls back to scientific notation for huge values off every scale", () => {
-    expect(humanizeNumber(1234567890123456789n)?.text).toBe("1.234e18");
+    expect(humanizeNumber(1234567890123456789n)?.text).toBe("1.2345 × 10¹⁸");
+    expect(humanizeNumber(10n ** 17n)?.text).toBe("0.1 × 10¹⁸");
   });
 
   test("keeps grouping up to fifteen digits", () => {

@@ -1,11 +1,6 @@
-import type { Humanized } from "@/shared/services/decoder/types";
+import { formatUnits } from "viem";
 
-const SUPERSCRIPT_DIGITS = "⁰¹²³⁴⁵⁶⁷⁸⁹";
-const superscript = (n: number): string =>
-  String(n)
-    .split("")
-    .map((digit) => SUPERSCRIPT_DIGITS[Number(digit)])
-    .join("");
+import type { Humanized } from "@/shared/services/decoder/types";
 
 const group = (digits: string): string =>
   digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -17,14 +12,19 @@ const group = (digits: string): string =>
  */
 const COMPACT_DIGITS = 15;
 
-/** Decimal scales tried, most common first, when compacting a huge value. */
-const COMMON_SCALES = [18, 8, 6] as const;
+/**
+ * Huge values are read at the 18-decimal scale every governance token uses.
+ * Guessing the scale from trailing zeros was tried and misleads: 59,998.98
+ * COMP has only 16 trailing zeros and came out as "599,989,800,000,000 × 10⁸".
+ * A fixed scale keeps neighbouring amounts comparable at a glance.
+ */
+const COMPACT_SCALE = 18;
+const COMPACT_FRACTION_DIGITS = 4;
 
 /**
- * Thousands grouping for every uint/int leaf with no better reading. Huge
- * values compact to `34,450 × 10¹⁸` when they divide by a common token scale
- * (the reader sees the likely human amount and the exponent at once), or to
- * scientific notation otherwise. The exact raw value stays in the annotation.
+ * Thousands grouping for every uint/int leaf with no better reading. Values
+ * past fifteen digits compact to `59,998.98 × 10¹⁸`: the likely human amount
+ * and the exponent at once, with the exact raw value in the annotation.
  */
 export const humanizeNumber = (value: bigint): Humanized | null => {
   // Grouping "42" as "42" adds nothing; only large numbers earn an annotation.
@@ -37,16 +37,8 @@ export const humanizeNumber = (value: bigint): Humanized | null => {
     return { kind: "number", text: `${sign}${group(digits)}` };
   }
 
-  for (const scale of COMMON_SCALES) {
-    const unit = 10n ** BigInt(scale);
-    if (abs % unit === 0n) {
-      return {
-        kind: "number",
-        text: `${sign}${group((abs / unit).toString())} × 10${superscript(scale)}`,
-      };
-    }
-  }
-
-  const mantissa = `${digits[0]}.${digits.slice(1, 4)}`;
-  return { kind: "number", text: `${sign}${mantissa}e${digits.length - 1}` };
+  const [whole, fraction = ""] = formatUnits(abs, COMPACT_SCALE).split(".");
+  const trimmed = fraction.slice(0, COMPACT_FRACTION_DIGITS).replace(/0+$/, "");
+  const scaled = trimmed ? `${group(whole)}.${trimmed}` : group(whole);
+  return { kind: "number", text: `${sign}${scaled} × 10¹⁸` };
 };
