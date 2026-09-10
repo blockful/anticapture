@@ -1,0 +1,88 @@
+import type { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { createLogger, type Logger } from "@anticapture/observability";
+
+import { RelayError } from "@/errors";
+import { RelayWebhookBodySchema } from "@/schemas/relay-webhook";
+import type { ProposalEnactmentService } from "@/services/proposals/proposal-enactment";
+
+export type WebhookOutcome =
+  | "queued"
+  | "executed"
+  | "skipped"
+  | "ignored"
+  | "failed";
+
+export interface RelayWebhookOptions {
+  /** Called once per webhook with the final outcome; index.ts feeds a Prometheus counter. */
+  onOutcome?: (outcome: WebhookOutcome) => void;
+  logger?: Logger;
+}
+
+/**
+ * Receiver for notification-system webhooks (ProposalFinished / ProposalExecutable).
+ *
+ * Plain route on purpose: it is reached over Railway's private network only, so
+ * it carries no auth, and it is kept out of the OpenAPI spec so the generated
+ * SDK does not grow a method nobody outside the relayer should call.
+ *
+ * Always answers 202 right away: the sender times out at 30s and a mainnet
+ * receipt wait can take longer. The outcome goes to logs and metrics instead.
+ */
+export function relayWebhook(
+  app: Hono,
+  enactment: Pick<ProposalEnactmentService, "enact">,
+  options: RelayWebhookOptions = {},
+) {
+  const logger = options.logger ?? createLogger("relayer-webhook");
+  const report = (outcome: WebhookOutcome, fields: Record<string, unknown>) => {
+    options.onOutcome?.(outcome);
+    const level = outcome === "failed" ? "error" : "info";
+    logger[level]({ outcome, ...fields }, `webhook ${outcome}`);
+  };
+
+  app.post("/relay/webhook", async (c) => {
+    const parsed = RelayWebhookBodySchema.safeParse(
+      await c.req.json().catch(() => null),
+    );
+    const proposalId = parsed.success
+      ? parsed.data.metadata?.proposalId
+      : undefined;
+
+    if (proposalId === undefined) {
+      report("ignored", { reason: "no proposalId in metadata" });
+      return c.json({ accepted: true }, 202);
+    }
+
+    // Fire-and-forget: the response must not wait for the broadcast.
+    void enactment
+      .enact(proposalId.toString())
+      .then((result) => {
+        if (result.action === "skipped") {
+          report("skipped", {
+            proposalId: proposalId.toString(),
+            state: result.state,
+          });
+        } else {
+          report(result.action === "queue" ? "queued" : "executed", {
+            proposalId: proposalId.toString(),
+            txHash: result.txHash,
+          });
+        }
+      })
+      .catch((err: unknown) => {
+        // 409s are "nothing to do right now" (not ready, already done, would
+        // revert): expected in normal operation, not failures.
+        if (err instanceof RelayError && err.status === 409) {
+          report("skipped", {
+            proposalId: proposalId.toString(),
+            code: err.code,
+            reason: err.message,
+          });
+        } else {
+          report("failed", { proposalId: proposalId.toString(), err });
+        }
+      });
+
+    return c.json({ accepted: true }, 202);
+  });
+}
