@@ -10,7 +10,10 @@ import { DecimalUint256Schema } from "./evm-primitives";
 export const RelayWebhookBodySchema = z
   .object({
     metadata: z
-      .object({ proposalId: DecimalUint256Schema.optional() })
+      .object({
+        proposalId: DecimalUint256Schema.optional(),
+        daoId: z.string().optional(),
+      })
       .passthrough()
       .optional(),
   })

@@ -189,6 +189,7 @@ async function main() {
   relayProposal(app, proposalEnactment);
   relayWebhook(app, proposalEnactment, {
     onOutcome: (outcome) => webhookOutcomes.add(1, { outcome }),
+    daoId: env.DAO_NAME,
   });
   health(app);
   config(app, {

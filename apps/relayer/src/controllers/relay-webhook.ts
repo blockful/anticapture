@@ -26,6 +26,8 @@ export interface RelayWebhookOptions {
   /** Called once per webhook with the final outcome; index.ts feeds a Prometheus counter. */
   onOutcome?: (outcome: WebhookOutcome) => void;
   logger?: Logger;
+  /** DAO this relayer serves. Events whose metadata.daoId doesn't match (case-insensitive) are ignored. */
+  daoId?: string;
 }
 
 /**
@@ -64,6 +66,19 @@ export function relayWebhook(
       report("ignored", {
         reason: "body did not match the webhook envelope",
         issues: parsed.error.issues.map((issue) => issue.path.join(".")),
+      });
+      return c.json({ accepted: true }, 202);
+    }
+
+    const eventDaoId = parsed.data.metadata?.daoId;
+    if (
+      options.daoId !== undefined &&
+      typeof eventDaoId === "string" &&
+      eventDaoId.toLowerCase() !== options.daoId.toLowerCase()
+    ) {
+      report("ignored", {
+        reason: "event for another DAO",
+        daoId: eventDaoId,
       });
       return c.json({ accepted: true }, 202);
     }
