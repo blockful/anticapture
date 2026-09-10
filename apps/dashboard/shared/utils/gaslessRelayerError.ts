@@ -23,9 +23,14 @@ const readRelayerError = (
   const relayerError = error as
     | ResponseErrorConfig<ErrorResponse | RelayerErrorResponse>
     | undefined;
-  const data = relayerError?.response?.data;
+  const data: unknown = relayerError?.response?.data;
+  // A proxy, CDN or crashed upstream can answer with an HTML or plain-text
+  // page, which the client stores as a string; `"code" in string` throws.
+  // Such a body carries no relayer code, so the failure stays ambiguous.
   const code =
-    data && "code" in data ? (data as RelayerErrorResponse).code : undefined;
+    typeof data === "object" && data !== null && "code" in data
+      ? (data as RelayerErrorResponse).code
+      : undefined;
   return { code, status: relayerError?.status };
 };
 

@@ -35,6 +35,13 @@ const relayerError = (status: number, code?: string) =>
     },
   });
 
+/** A 5xx whose body is an HTML/plain-text page (proxy, CDN, crashed upstream). */
+const textBodyError = (status: number, body: string) =>
+  Object.assign(new Error("Request failed"), {
+    status,
+    response: { status, statusText: "", headers: new Headers(), data: body },
+  });
+
 /**
  * A typed test double for the one public-client capability the flow uses.
  * `jest.fn()` is assignable to the method type, so no cast is needed and a
@@ -200,6 +207,10 @@ describe("relayGovernanceAction", () => {
     ["a gateway timeout", relayerError(504)],
     ["a plain 5xx without a relayer code", relayerError(503)],
     ["a network failure", new TypeError("Failed to fetch")],
+    [
+      "a 5xx with an HTML error page instead of JSON",
+      textBodyError(502, "<html><body>Bad gateway</body></html>"),
+    ],
   ])(
     "reports unknown for %s instead of failing",
     async (_label, transportError) => {
