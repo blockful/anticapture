@@ -8,6 +8,37 @@ import { stripAuthorization } from "./strip-authorization.js";
 const PROXY_TIMEOUT_MS = 30000;
 
 /**
+ * The relayer's global error handler wraps unhandled exceptions as
+ * `500 { code: "INTERNAL" }`. That is a crash wearing the error contract,
+ * not a deliberate answer, and must keep counting against the breaker.
+ */
+const RELAYER_CRASH_CODE = "INTERNAL";
+
+/**
+ * A 5xx the relayer answered deliberately, with its own error contract
+ * (`{ code, message }`, e.g. `503 RELAYER_LOW_BALANCE`). The relayer is up
+ * and talking, so the response goes to the client verbatim and the circuit
+ * breaker does not count it as a failure. A 5xx without a `code`, or with
+ * the crash code, is the platform or a failure talking, not the relayer, and
+ * stays an upstream error.
+ */
+async function isStructuredRelayerError(res: Response): Promise<boolean> {
+  if (!res.headers.get("content-type")?.includes("application/json")) {
+    return false;
+  }
+  try {
+    const body = (await res.clone().json()) as { code?: unknown };
+    return (
+      typeof body?.code === "string" &&
+      body.code.length > 0 &&
+      body.code !== RELAYER_CRASH_CODE
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Forwards /:dao/relay/*, /:dao/config and /:dao/rate-limit/* to the
  * per-DAO relayer configured via DAO_RELAYER_<NAME>. Must be registered
  * before the catch-all DAO API proxy so relay traffic isn't swallowed by it.
@@ -43,7 +74,7 @@ export function relayerProxy(
         headers: stripAuthorization(c.req.raw.headers),
         signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
       });
-      if (res.status >= 500) {
+      if (res.status >= 500 && !(await isStructuredRelayerError(res))) {
         throw new Error(`Upstream relayer:${dao} returned ${res.status}`);
       }
       return res;
