@@ -2,9 +2,28 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "infra/mcp-server/Dockerfile"
+    "dockerfilePath": "infra/mcp-server/Dockerfile",
+    "watchPatterns": [
+      "infra/mcp-server/**",
+      "apps/api/**",
+      "apps/gateful/**",
+      "packages/anticapture-client/**"
+    ]
   },
   "deploy": {
     "healthcheckPath": "/health"
+  },
+  "environments": {
+    "pr": {
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "infra/noop/Dockerfile"
+      },
+      "deploy": {
+        "startCommand": "echo 'NOOP'",
+        "healthcheckPath": null,
+        "preDeployCommand": null
+      }
+    }
   }
 }
