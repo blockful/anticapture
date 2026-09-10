@@ -94,6 +94,8 @@ describe("CircuitBreaker", () => {
       const cb = createCircuitBreaker({
         minimumRequests: 10,
         failureRateThreshold: 0.5,
+        // Keep the streak rule out of the way: this exercises the rate rule.
+        consecutiveFailureThreshold: 10,
       });
       // Six failures settle first, below the minimum sample; the successes
       // that complete the window must still trigger the evaluation.
@@ -110,6 +112,42 @@ describe("CircuitBreaker", () => {
       advanceTime(10_001);
       // Only this failure is inside the window: 1 request, below minimum.
       await fail(cb, 1);
+      expect(cb.state).toBe("CLOSED");
+    });
+
+    it("opens after consecutive failures when the window holds too few requests", async () => {
+      // A relayer or fan-out target sees a handful of calls per minute: the
+      // rate rule never has enough samples, so straight failures must trip it.
+      const cb = createCircuitBreaker({
+        minimumRequests: 10,
+        consecutiveFailureThreshold: 3,
+      });
+      await fail(cb, 2);
+      expect(cb.state).toBe("CLOSED");
+      await fail(cb, 1);
+      expect(cb.state).toBe("OPEN");
+    });
+
+    it("resets the consecutive failure count on a success", async () => {
+      const cb = createCircuitBreaker({
+        minimumRequests: 10,
+        consecutiveFailureThreshold: 3,
+      });
+      await fail(cb, 2);
+      await succeed(cb, 1);
+      await fail(cb, 2);
+      expect(cb.state).toBe("CLOSED");
+    });
+
+    it("uses the failure rate, not the streak, once the window is busy", async () => {
+      const cb = createCircuitBreaker({
+        minimumRequests: 4,
+        failureRateThreshold: 0.5,
+        consecutiveFailureThreshold: 3,
+      });
+      // 20 successes then 3 straight failures: 13% failure rate on a busy key.
+      await succeed(cb, 20);
+      await fail(cb, 3);
       expect(cb.state).toBe("CLOSED");
     });
 

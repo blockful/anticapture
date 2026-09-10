@@ -40,6 +40,9 @@ export const envSchema = z
     CIRCUIT_BREAKER_WINDOW_MS: z.coerce.number().default(30_000),
     CIRCUIT_BREAKER_MIN_REQUESTS: z.coerce.number().default(10),
     CIRCUIT_BREAKER_FAILURE_RATE: z.coerce.number().min(0).max(1).default(0.5),
+    // Below MIN_REQUESTS a rate means nothing, so quiet upstreams (relayer,
+    // fan-out) open after this many consecutive failures instead.
+    CIRCUIT_BREAKER_CONSECUTIVE_FAILURES: z.coerce.number().default(5),
     CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(30_000),
     CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(300_000),
     REDIS_URL: z.string().optional(),
@@ -99,6 +102,7 @@ export const config = {
     windowMs: env.CIRCUIT_BREAKER_WINDOW_MS,
     minimumRequests: env.CIRCUIT_BREAKER_MIN_REQUESTS,
     failureRateThreshold: env.CIRCUIT_BREAKER_FAILURE_RATE,
+    consecutiveFailureThreshold: env.CIRCUIT_BREAKER_CONSECUTIVE_FAILURES,
     cooldownMs: env.CIRCUIT_BREAKER_COOLDOWN_MS,
     maxCooldownMs: env.CIRCUIT_BREAKER_MAX_COOLDOWN_MS,
   },

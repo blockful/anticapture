@@ -83,14 +83,15 @@ describe("relayer proxy route", () => {
         new Response(JSON.stringify({ error: "internal" }), { status: 500 }),
       );
 
-    // Default minimumRequests is 10 — drive the breaker OPEN with all failures.
-    for (let i = 0; i < 10; i++) {
+    // A relayer sees far fewer than minimumRequests (10) per window, so the
+    // consecutive-failure rule (default 5) is what opens it.
+    for (let i = 0; i < 5; i++) {
       await app.request("/uni/relay/vote");
     }
-    expect(fetchSpy).toHaveBeenCalledTimes(10);
+    expect(fetchSpy).toHaveBeenCalledTimes(5);
 
     await app.request("/uni/relay/vote");
-    expect(fetchSpy).toHaveBeenCalledTimes(10);
+    expect(fetchSpy).toHaveBeenCalledTimes(5);
     expect(registry.get("relayer:uni").state).toBe("OPEN");
   });
 });

@@ -59,6 +59,7 @@ describe("GovernorBase", () => {
   describe("latest block stale-while-revalidate", () => {
     const LATEST_BLOCK_TTL_MS = 7_000;
     const RETRY_BACKOFF_MS = 3_000;
+    const MAX_STALE_MS = 60_000;
 
     beforeEach(() => {
       vi.useFakeTimers({ toFake: ["Date"] });
@@ -127,6 +128,46 @@ describe("GovernorBase", () => {
         expect(await governor.getCurrentBlockNumber()).toBe(123);
         expect(rpcCalls()).toBe(3);
       });
+    });
+
+    it("should wait for the RPC again once the cached block is older than the stale bound", async () => {
+      const { governor, rpcCalls } = createGovernor([
+        { number: "0x7b" },
+        { number: "0x7c" },
+      ]);
+
+      expect(await governor.getCurrentBlockNumber()).toBe(123);
+      vi.setSystemTime(MAX_STALE_MS + 1);
+
+      // Not served from cache any more: the call awaits the refresh.
+      expect(await governor.getCurrentBlockNumber()).toBe(124);
+      expect(rpcCalls()).toBe(2);
+    });
+
+    it("should surface the RPC failure instead of a block older than the stale bound", async () => {
+      const { governor, rpcCalls } = createGovernor([
+        { number: "0x7b" },
+        new Error("rpc down"),
+      ]);
+
+      expect(await governor.getCurrentBlockNumber()).toBe(123);
+      vi.setSystemTime(MAX_STALE_MS + 1);
+
+      // Past the bound the stale block would misreport proposal statuses, so
+      // callers see the failure and fall back to indexed state. (viem retries
+      // the failing request internally, so count calls relative to here.)
+      await expect(governor.getCurrentBlockNumber()).rejects.toThrow(
+        "rpc down",
+      );
+      const callsAfterFailure = rpcCalls();
+      expect(callsAfterFailure).toBeGreaterThan(1);
+
+      // Inside the retry backoff the RPC is not hammered; the call still fails.
+      vi.setSystemTime(MAX_STALE_MS + 2);
+      await expect(governor.getCurrentBlockNumber()).rejects.toThrow(
+        "last RPC refresh failed",
+      );
+      expect(rpcCalls()).toBe(callsAfterFailure);
     });
 
     it("should reject when there is no cached block and the RPC fails", async () => {

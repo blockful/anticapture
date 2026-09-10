@@ -5,33 +5,16 @@ import {
 
 const STATE_SEVERITY = { CLOSED: 0, HALF_OPEN: 1, OPEN: 2 } as const;
 
-/** First path segments served by the DAO APIs. Route keys derive from
- *  client-controlled paths, so only these known groups get their own breaker;
- *  anything else shares the DAO-level breaker. This bounds the registry (and
- *  the circuit_breaker_state series) to DAOs x groups without ever collapsing
- *  a real route into another one. */
-export const ROUTE_GROUPS: ReadonlySet<string> = new Set([
-  "accounts",
-  "active-supply",
-  "addresses",
-  "average-turnout",
-  "balances",
-  "dao",
-  "delegation-percentage",
-  "event-relevance",
-  "feed",
-  "health",
-  "last-update",
-  "offchain",
-  "proposals",
-  "proposals-activity",
-  "revenue",
-  "token",
-  "token-metrics",
-  "treasury",
-  "votes",
-  "voting-powers",
-]);
+/** What a DAO API route name looks like (`proposals`, `voting-powers`).
+ *  Ids, hashes and addresses (`123`, `0xabc…`) never match, so a path such
+ *  as `/0xdead…/x` cannot mint a breaker of its own. */
+const ROUTE_SEGMENT = /^[a-z][a-z0-9-]{0,63}$/;
+
+/** Distinct route breakers a DAO may have. Paths are client-controlled, so
+ *  without a cap a scan of made-up segments could grow the registry (and the
+ *  `circuit_breaker_state` metric series) without bound. Past the cap, new
+ *  segments share the DAO-level breaker. */
+export const MAX_ROUTES_PER_DAO = 64;
 
 /** An OPEN circuit whose cooldown has elapsed will probe on its next call, so
  *  for reporting it ranks as HALF_OPEN rather than as an outage. */
@@ -42,12 +25,11 @@ const severity = (breaker: CircuitBreaker): number =>
 
 export class CircuitBreakerRegistry {
   private readonly breakers = new Map<string, CircuitBreaker>();
+  private readonly routesPerDao = new Map<string, number>();
 
   constructor(private readonly opts?: CircuitBreakerOptions) {}
 
-  /** Returns the CircuitBreaker for a key, creating it lazily if needed.
-   *  Proxy traffic is keyed per DAO and route group (`<dao>:<route>`) so one
-   *  failing route cannot take a DAO's other routes offline. */
+  /** Returns the CircuitBreaker for a key, creating it lazily if needed. */
   get(key: string): CircuitBreaker {
     let breaker = this.breakers.get(key);
     if (!breaker) {
@@ -57,16 +39,28 @@ export class CircuitBreakerRegistry {
     return breaker;
   }
 
-  /** Builds the proxy key for a DAO request from its upstream path: per route
-   *  group when the first segment is a known API route, the DAO otherwise. */
+  /** Builds the key for a DAO API request from its upstream path: the DAO
+   *  plus the first path segment when that segment reads as a route name
+   *  (`ens:proposals`), the bare DAO otherwise. Nothing here knows the API's
+   *  route list: a route added upstream gets its own breaker the first time
+   *  it is called. */
   static proxyKey(dao: string, path: string): string {
     const [, segment] = path.split("/");
-    return segment && ROUTE_GROUPS.has(segment) ? `${dao}:${segment}` : dao;
+    return segment && ROUTE_SEGMENT.test(segment) ? `${dao}:${segment}` : dao;
   }
 
-  /** Breaker guarding a proxied DAO request. */
+  /** Breaker guarding a request to a DAO API (proxy, fan-out, health probe),
+   *  keyed per DAO and route so one failing route cannot take the DAO's other
+   *  routes offline, and so every caller of the same route shares one view of
+   *  its health. Bounded by `MAX_ROUTES_PER_DAO`. */
   forProxy(dao: string, path: string): CircuitBreaker {
-    return this.get(CircuitBreakerRegistry.proxyKey(dao, path));
+    const key = CircuitBreakerRegistry.proxyKey(dao, path);
+    if (key === dao || this.breakers.has(key)) return this.get(key);
+
+    const routes = this.routesPerDao.get(dao) ?? 0;
+    if (routes >= MAX_ROUTES_PER_DAO) return this.get(dao);
+    this.routesPerDao.set(dao, routes + 1);
+    return this.get(key);
   }
 
   /** The worst-state breaker among `<key>` and `<key>:*` (for health reporting).

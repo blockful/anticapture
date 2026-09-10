@@ -24,38 +24,61 @@ export type CircuitBreakerOptions = {
   minimumRequests?: number;
   /** Failure ratio (0-1) within the window that opens the circuit. */
   failureRateThreshold?: number;
+  /** Consecutive failures that open the circuit while the window holds fewer
+   *  than `minimumRequests`, so low-traffic upstreams (a relayer, fan-out) can
+   *  still trip on a sustained outage. */
+  consecutiveFailureThreshold?: number;
   cooldownMs?: number;
   maxCooldownMs?: number;
 };
 
+/** The sliding window is split into this many fixed time buckets. */
+const BUCKET_COUNT = 10;
+
+/** Request outcomes that completed inside one time bucket. */
+type Bucket = { total: number; failures: number };
+
 /** Wraps async calls with failure tracking and automatic recovery.
  *
- *  The circuit OPENS when the failure rate over a sliding window crosses the
- *  threshold, and only once the window holds enough requests for the rate to
- *  mean something. A burst of parallel calls that partially fails (a dashboard
- *  reload against a slow upstream) therefore does not trip it, while a
- *  sustained outage still does within seconds.
+ *  Two rules open the circuit, depending on how much traffic the window holds:
+ *
+ *  - Busy keys (at least `minimumRequests` in the window) open when the
+ *    failure RATE crosses the threshold. A burst of parallel calls that
+ *    partially fails (a dashboard reload against a slow upstream) therefore
+ *    does not trip it, while a sustained outage still does within seconds.
+ *  - Quiet keys (fewer requests than the minimum) open after
+ *    `consecutiveFailureThreshold` failures in a row, since a rate over a
+ *    handful of samples means nothing but N straight failures still do.
+ *
+ *  Outcomes are counted in `BUCKET_COUNT` time buckets covering the window,
+ *  so memory is bounded by the bucket count rather than by request volume.
  *
  *  After a cooldown (with exponential backoff), it transitions to HALF_OPEN and lets one probe
  *  through — if it succeeds the circuit CLOSES, otherwise it re-opens with a longer cooldown. */
 export class CircuitBreaker {
   private _state: State = "CLOSED";
-  private outcomes: Array<{ at: number; failed: boolean }> = [];
+  /** Outcome counts keyed by bucket index (`floor(timestampMs / bucketMs)`). */
+  private buckets = new Map<number, Bucket>();
+  private consecutiveFailures = 0;
   private lastFailureTime = 0;
   private backoffMultiplier = 1;
   private probeInFlight = false;
   private readonly _name: string;
   private readonly windowMs: number;
+  private readonly bucketMs: number;
   private readonly minimumRequests: number;
   private readonly failureRateThreshold: number;
+  private readonly consecutiveFailureThreshold: number;
   private readonly cooldownMs: number;
   private readonly maxCooldownMs: number;
 
   constructor(name: string, opts?: CircuitBreakerOptions) {
     this._name = name;
     this.windowMs = opts?.windowMs ?? 30_000;
+    this.bucketMs = Math.max(1, Math.floor(this.windowMs / BUCKET_COUNT));
     this.minimumRequests = opts?.minimumRequests ?? 10;
     this.failureRateThreshold = opts?.failureRateThreshold ?? 0.5;
+    this.consecutiveFailureThreshold = opts?.consecutiveFailureThreshold ?? 5;
     this.cooldownMs = opts?.cooldownMs ?? 30_000;
     this.maxCooldownMs = opts?.maxCooldownMs ?? 300_000;
     this.recordState();
@@ -83,10 +106,15 @@ export class CircuitBreaker {
     );
   }
 
+  private resetOutcomes(): void {
+    this.buckets = new Map();
+    this.consecutiveFailures = 0;
+  }
+
   /** Transition to CLOSED — reset all failure tracking. */
   private closeTheCircuit(): void {
     this._state = "CLOSED";
-    this.outcomes = [];
+    this.resetOutcomes();
     this.backoffMultiplier = 1;
     this.probeInFlight = false;
     this.recordState();
@@ -95,7 +123,7 @@ export class CircuitBreaker {
   /** Transition to OPEN — record failure time. */
   private openTheCircuit(): void {
     this._state = "OPEN";
-    this.outcomes = [];
+    this.resetOutcomes();
     this.lastFailureTime = Date.now();
     this.recordState();
   }
@@ -155,7 +183,7 @@ export class CircuitBreaker {
     }
   }
 
-  /** Normal execution — track outcomes and open once the windowed failure rate is exceeded.
+  /** Normal execution — track outcomes and open once a trip rule fires.
    *  The window is evaluated after every completion: with concurrent calls a
    *  success may be the one that fills the window, and settlement order must
    *  not decide whether the circuit opens. */
@@ -177,25 +205,44 @@ export class CircuitBreaker {
     total: number;
     failures: number;
   }): void {
-    if (
-      total >= this.minimumRequests &&
-      failures / total >= this.failureRateThreshold
-    ) {
+    if (total >= this.minimumRequests) {
+      if (failures / total >= this.failureRateThreshold) {
+        this.openTheCircuit();
+        console.warn(
+          `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${failures}/${total} failures in the last ${this.windowMs}ms)`,
+        );
+      }
+      return;
+    }
+    if (this.consecutiveFailures >= this.consecutiveFailureThreshold) {
       this.openTheCircuit();
       console.warn(
-        `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${failures}/${total} failures in the last ${this.windowMs}ms)`,
+        `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${this.consecutiveFailureThreshold} consecutive failures on a low-traffic upstream)`,
       );
     }
   }
 
+  /** Counts the outcome in the current bucket, drops buckets that fell out
+   *  of the window, and returns the window totals. */
   private recordOutcome(failed: boolean): { total: number; failures: number } {
-    const now = Date.now();
-    const cutoff = now - this.windowMs;
-    this.outcomes = this.outcomes.filter((o) => o.at > cutoff);
-    this.outcomes.push({ at: now, failed });
+    const bucketIndex = Math.floor(Date.now() / this.bucketMs);
+    const oldestLiveIndex = bucketIndex - BUCKET_COUNT + 1;
+    for (const index of this.buckets.keys()) {
+      if (index < oldestLiveIndex) this.buckets.delete(index);
+    }
 
+    const bucket = this.buckets.get(bucketIndex) ?? { total: 0, failures: 0 };
+    bucket.total += 1;
+    if (failed) bucket.failures += 1;
+    this.buckets.set(bucketIndex, bucket);
+    this.consecutiveFailures = failed ? this.consecutiveFailures + 1 : 0;
+
+    let total = 0;
     let failures = 0;
-    for (const o of this.outcomes) if (o.failed) failures++;
-    return { total: this.outcomes.length, failures };
+    for (const { total: t, failures: f } of this.buckets.values()) {
+      total += t;
+      failures += f;
+    }
+    return { total, failures };
   }
 }

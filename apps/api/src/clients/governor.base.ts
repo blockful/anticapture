@@ -41,7 +41,12 @@ export abstract class GovernorBase<
     executionPeriod?: bigint;
   } = {};
   private latestBlockCache:
-    | { number: number; timestamp: number | null; expiresAt: number }
+    | {
+        number: number;
+        timestamp: number | null;
+        fetchedAt: number;
+        expiresAt: number;
+      }
     | undefined;
   private latestBlockFetch: Promise<{
     number: number;
@@ -57,6 +62,12 @@ export abstract class GovernorBase<
   // Backoff after a failed refresh so a degraded RPC is not re-probed on every
   // request while the stale block is being served.
   private readonly latestBlockRetryMs = 3_000;
+  // Upper bound on how old a served block may be. Past it the cache is no
+  // longer trusted to compute proposal statuses (a proposal whose endBlock
+  // passed would still read ACTIVE): callers wait for a real RPC read and a
+  // failure surfaces, so services fall back to indexed statuses and /health
+  // reports the chain head as unavailable.
+  private readonly latestBlockMaxStaleMs = 60_000;
   private readonly quorumCacheTtlMs: number;
 
   protected abstract address: Address;
@@ -346,11 +357,12 @@ export abstract class GovernorBase<
   }
 
   /**
-   * Stale-while-revalidate: only the very first call waits for the RPC. Once
-   * warm, callers always get the cached block immediately and an expired entry
-   * just kicks off a background refresh, so request latency never depends on
-   * RPC health and an RPC outage degrades to a slightly stale block instead of
-   * a hanging request.
+   * Stale-while-revalidate with a staleness bound: only the very first call
+   * waits for the RPC. Once warm, callers get the cached block immediately and
+   * an expired entry kicks off a background refresh, so request latency does
+   * not depend on RPC health and a short RPC blip degrades to a slightly stale
+   * block. Past  the block is no longer served: the
+   * call waits for the RPC again and fails if it fails.
    */
   private async getLatestBlock(): Promise<{
     number: number;
@@ -362,7 +374,20 @@ export abstract class GovernorBase<
       return this.refreshLatestBlock();
     }
 
-    if (cached.expiresAt <= Date.now()) {
+    const now = Date.now();
+    const age = now - cached.fetchedAt;
+    if (age > this.latestBlockMaxStaleMs) {
+      // Too old to serve. Inside the retry backoff of a failed refresh the RPC
+      // is not probed again; the request fails fast instead.
+      if (cached.expiresAt > now) {
+        throw new Error(
+          `Latest block is ${age}ms old and the last RPC refresh failed`,
+        );
+      }
+      return this.refreshLatestBlock();
+    }
+
+    if (cached.expiresAt <= now) {
       this.refreshLatestBlock().catch(() => {
         // Failure is logged and backed off inside refreshLatestBlock.
       });
@@ -416,9 +441,11 @@ export abstract class GovernorBase<
       timestamp: block?.timestamp ? fromHex(block.timestamp, "number") : null,
     };
 
+    const now = Date.now();
     this.latestBlockCache = {
       ...latestBlock,
-      expiresAt: Date.now() + this.latestBlockCacheTtlMs,
+      fetchedAt: now,
+      expiresAt: now + this.latestBlockCacheTtlMs,
     };
 
     return latestBlock;
