@@ -204,7 +204,9 @@ describe("multicall unpacking", () => {
   test("Safe execTransaction wrapping Multicall3.aggregate3 unpacks two levels", async () => {
     const node = await decode(SAFE_WRAPPING_AGGREGATE3, { target: SAFE });
     expect(node.functionName).toBe("execTransaction");
-    expect(node.summary).toBe("Executes 1 call.");
+    expect(node.summary).toBe(
+      "Executes 1 call: aggregate3 (2 calls) on 0xcA11…CA11.",
+    );
     expect(node.subcalls).toHaveLength(1);
 
     const inner = node.subcalls![0];
@@ -213,7 +215,7 @@ describe("multicall unpacking", () => {
       depth: 1,
       target: MULTICALL3,
       functionName: "aggregate3",
-      summary: "Executes 2 calls.",
+      summary: "Executes 2 calls: transfer, approve.",
     });
     expect(inner.subcalls).toHaveLength(2);
     expect(inner.subcalls![0]).toMatchObject({
@@ -242,7 +244,7 @@ describe("multicall unpacking", () => {
 
   test("scheduleBatch fans out and an empty-calldata entry becomes an ETH node", async () => {
     const node = await decode(SCHEDULE_BATCH, { target: TIMELOCK });
-    expect(node.summary).toBe("Schedules 2 calls.");
+    expect(node.summary).toBe("Schedules 2 calls: transfer, ETH transfer.");
     expect(node.subcalls).toHaveLength(2);
     expect(node.subcalls![0]).toMatchObject({
       target: USDC,

@@ -10,6 +10,7 @@ import {
   CollapsedActionRow,
   DecodedActionCard,
   DecoderCardSkeleton,
+  ExpandToggle,
 } from "@/shared/components/decoder";
 import { CodeBlock } from "@/shared/components/design-system/code-block/CodeBlock";
 import { useActionExpansion } from "@/shared/hooks/useActionExpansion";
@@ -39,6 +40,9 @@ const formatPendingValue = (value: string): string => {
   return wei > 0n ? humanizeEtherValue(wei).text : "0 ETH";
 };
 
+const ACTION_LABEL =
+  "text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider";
+
 export const ActionsTabContent = ({
   proposal,
 }: {
@@ -66,9 +70,11 @@ export const ActionsTabContent = ({
   );
 
   // Proposal ids are DAO-local, so the key carries the DAO too.
-  const { isExpanded, toggle } = useActionExpansion({
-    storageKey: `decoder:actions:${daoIdKey ?? "dao"}:${proposal.id || "draft"}`,
-  });
+  const { isExpanded, toggle, allExpanded, expandAll, collapseAll } =
+    useActionExpansion({
+      storageKey: `decoder:actions:${daoIdKey ?? "dao"}:${proposal.id || "draft"}`,
+    });
+  const everythingOpen = allExpanded(targets.length);
 
   return (
     <div className="text-primary flex flex-col gap-3 py-4 lg:p-4">
@@ -78,19 +84,37 @@ export const ActionsTabContent = ({
           blockExplorerUrl={blockExplorerUrl}
         />
       ) : (
-        targets.map((_, index) => (
-          <ActionItem
-            key={index}
-            index={index}
-            target={targets[index] ?? null}
-            value={values[index] ?? null}
-            calldata={calldatas[index] ?? null}
-            chainId={chainId}
-            blockExplorerUrl={blockExplorerUrl}
-            expanded={isExpanded(index)}
-            onToggle={() => toggle(index)}
-          />
-        ))
+        <>
+          {targets.length > 1 && (
+            <div className="flex items-center justify-between gap-2 px-1">
+              <p className="text-dimmed font-mono text-xs uppercase leading-4 tracking-wider">
+                {targets.length} actions
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  everythingOpen ? collapseAll() : expandAll(targets.length)
+                }
+                className="text-secondary hover:text-primary cursor-pointer font-mono text-xs uppercase leading-4 tracking-wider transition-colors duration-[120ms] ease-[var(--ease-decoder)] focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none"
+              >
+                {everythingOpen ? "[– collapse all]" : "[+ expand all]"}
+              </button>
+            </div>
+          )}
+          {targets.map((_, index) => (
+            <ActionItem
+              key={index}
+              index={index}
+              target={targets[index] ?? null}
+              value={values[index] ?? null}
+              calldata={calldatas[index] ?? null}
+              chainId={chainId}
+              blockExplorerUrl={blockExplorerUrl}
+              expanded={isExpanded(index)}
+              onToggle={() => toggle(index)}
+            />
+          ))}
+        </>
       )}
     </div>
   );
@@ -140,6 +164,19 @@ const ActionItem = ({
     [data, meta],
   );
 
+  const actionLabel = (
+    <p className={ACTION_LABEL}>
+      {"//"}Action {String(index + 1).padStart(2, "0")}
+    </p>
+  );
+  const collapseControl = (
+    <ExpandToggle
+      expanded
+      onToggle={onToggle}
+      label={`Collapse action ${index + 1}`}
+    />
+  );
+
   if (!expanded) {
     return (
       <CollapsedActionRow
@@ -165,15 +202,16 @@ const ActionItem = ({
         id={`action-${index + 1}`}
         className="border-border-default bg-surface-default flex w-full flex-col gap-3 border p-3"
       >
-        <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider">
-          {"//"}Action {String(index + 1).padStart(2, "0")}
-        </p>
+        <div className="flex items-center gap-2">
+          {actionLabel}
+          <span className="ml-auto">{collapseControl}</span>
+        </div>
         {validTarget && (
           <div className="flex w-full items-center gap-2">
             <p className="text-primary min-w-22 shrink-0 font-mono text-sm leading-5">
               target:
             </p>
-            <span className="min-w-0">
+            <span className="flex min-w-0">
               <AddressChip
                 address={validTarget}
                 explorerUrl={blockExplorerUrl}
@@ -205,21 +243,8 @@ const ActionItem = ({
         call={call}
         chainId={chainId}
         explorerUrl={blockExplorerUrl}
-        headerLeft={
-          <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider">
-            {"//"}Action {String(index + 1).padStart(2, "0")}
-          </p>
-        }
-        headerRight={
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-label={`Collapse action ${index + 1}`}
-            className="text-secondary hover:text-primary cursor-pointer font-mono text-xs font-medium uppercase leading-4 tracking-wider transition-colors duration-[120ms] ease-[var(--ease-decoder)]"
-          >
-            [–]
-          </button>
-        }
+        headerLeft={actionLabel}
+        headerRight={collapseControl}
       />
     </div>
   );

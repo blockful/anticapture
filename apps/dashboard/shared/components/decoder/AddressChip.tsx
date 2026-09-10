@@ -10,7 +10,7 @@ import {
   ADDRESS_ENRICHMENT_STALE_TIME,
 } from "@/shared/constants/api";
 import { cn } from "@/shared/utils/cn";
-import { formatAddress } from "@/shared/utils/formatAddress";
+import { shortHex } from "@/shared/utils/shortHex";
 import { useGetAddress } from "@anticapture/client/hooks";
 
 interface AddressChipProps {
@@ -25,8 +25,14 @@ interface AddressChipProps {
 
 /**
  * Identity chip for decoded addresses: identicon + resolved name + truncated
- * checksum + copy, with an EOA tag for unresolved wallets. Replaces the old
- * regex-spliced address rendering in the flat decode block.
+ * checksum + copy, with an EOA tag for unresolved wallets.
+ *
+ * The chip is a flex item that negotiates width with its row: the name is
+ * the only part allowed to shrink (and it ellipsizes), everything else is
+ * fixed, and nothing ever wraps to a second line. Callers place it in a flex
+ * container with `min-w-0` so that negotiation can happen. The checksum next
+ * to a resolved name only appears when the enclosing `@container` (card body
+ * or params box) is at least 36rem wide; narrower columns keep name + copy.
  */
 export const AddressChip = ({
   address,
@@ -46,18 +52,19 @@ export const AddressChip = ({
   const arkham = data?.arkham ?? null;
   const isContract = data?.isContract ?? null;
 
-  const resolvedName =
-    ens?.name ??
-    (arkham?.entity && arkham?.label
-      ? `${arkham.entity} · ${arkham.label}`
-      : (arkham?.entity ?? arkham?.label ?? null));
+  // Shortest useful name: an ENS name, else the Arkham label ("USD Coin
+  // Token (USDC)"), else the entity ("Circle"). Never "entity · label": the
+  // chip has one line and the tooltip carries the rest.
+  const resolvedName = ens?.name ?? arkham?.label ?? arkham?.entity ?? null;
 
-  const shortAddress = formatAddress(address);
+  // Same 6+4 middle truncation as the summary sentence, so the two never
+  // show the same address with different glyphs.
+  const shortAddress = shortHex(address, 6, 4);
 
   const nameContent = (
     <span
       className={cn(
-        "text-primary font-mono text-sm leading-5",
+        "text-primary block min-w-0 truncate font-mono text-sm leading-5",
         isLoading && "animate-pulse",
       )}
     >
@@ -77,8 +84,9 @@ export const AddressChip = ({
 
   return (
     <span
+      title={resolvedName ? `${resolvedName} · ${address}` : address}
       className={cn(
-        "bg-surface-default border-border-contrast inline-flex max-w-full items-center gap-1.5 border px-1 py-0.5",
+        "bg-surface-default border-border-contrast flex min-w-0 max-w-full items-center gap-1.5 whitespace-nowrap border px-1 py-0.5",
         "hover:border-highlight transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
         className,
       )}
@@ -86,24 +94,26 @@ export const AddressChip = ({
       {/* The tooltip trigger renders as a <button>, so it may only wrap the
           avatar: the copy control and the explorer link are interactive
           themselves and nesting them in a button is invalid HTML. */}
-      <span className="hidden md:contents">
-        <AddressDetailsTooltip
-          address={address}
-          arkhamData={arkham}
-          ens={ens}
-          isContract={isContract}
-          isLoading={isLoading}
-        >
-          {avatar}
-        </AddressDetailsTooltip>
+      <span className="flex shrink-0 items-center">
+        <span className="hidden md:contents">
+          <AddressDetailsTooltip
+            address={address}
+            arkhamData={arkham}
+            ens={ens}
+            isContract={isContract}
+            isLoading={isLoading}
+          >
+            {avatar}
+          </AddressDetailsTooltip>
+        </span>
+        <span className="contents md:hidden">{avatar}</span>
       </span>
-      <span className="contents md:hidden">{avatar}</span>
       {explorerUrl ? (
         <a
           href={`${explorerUrl}/address/${address}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:underline"
+          className="min-w-0 hover:underline"
         >
           {nameContent}
         </a>
@@ -111,21 +121,17 @@ export const AddressChip = ({
         nameContent
       )}
       {!compact && resolvedName && (
-        <span className="text-dimmed font-mono text-xs leading-4">
+        <span className="text-dimmed @xl:inline hidden shrink-0 font-mono text-xs leading-4">
           {shortAddress}
         </span>
       )}
       {!compact && !resolvedName && isContract === false && (
-        <span className="text-secondary font-mono text-xs uppercase leading-4">
+        <span className="text-secondary shrink-0 font-mono text-xs uppercase leading-4">
           EOA
         </span>
       )}
       {!compact && (
-        <CopyRawButton
-          textToCopy={address}
-          label="copy"
-          className="uppercase"
-        />
+        <CopyRawButton textToCopy={address} label="copy" className="shrink-0" />
       )}
     </span>
   );

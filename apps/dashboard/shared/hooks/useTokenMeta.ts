@@ -6,6 +6,7 @@ import { useReadContracts } from "wagmi";
 
 import { SUGGESTED_TRANSFER_TOKENS } from "@/shared/constants/suggestedTokens";
 import type { TokenMeta } from "@/shared/services/decoder/enrich";
+import { getKnownTokenMeta } from "@/shared/services/decoder/knownTokens";
 
 // Curated symbols keyed by lowercase address; decimals always come on-chain
 // so the list can never disagree with the token contract. The curated list is
@@ -29,9 +30,12 @@ const getCuratedSymbol = (
 };
 
 /**
- * decimals + symbol for the tokens a decoded tree hinted at, read through the
- * app's RPC proxy. Tokens whose decimals cannot be read are simply absent from
- * the map, and the decode renders raw units for them.
+ * decimals + symbol for the tokens a decoded tree hinted at. Known tokens
+ * (governance tokens of supported DAOs, major stables) resolve instantly from
+ * a static list so the reader never waits on the RPC proxy for "25,000 USDC";
+ * everything else is read on-chain through the app's RPC proxy, and on-chain
+ * results overlay the static ones when they arrive. Tokens with neither stay
+ * absent from the map and render as raw units.
  */
 export const useTokenMeta = (
   chainId: number,
@@ -61,6 +65,10 @@ export const useTokenMeta = (
 
   const meta = useMemo(() => {
     const map = new Map<string, TokenMeta>();
+    tokens.forEach((token) => {
+      const known = getKnownTokenMeta(chainId, token);
+      if (known) map.set(token.toLowerCase(), known);
+    });
     if (!data) return map;
     tokens.forEach((token, i) => {
       const decimalsResult = data[2 * i];
@@ -71,6 +79,7 @@ export const useTokenMeta = (
           ? (symbolResult.result as string)
           : undefined) ??
         getCuratedSymbol(chainId, token) ??
+        map.get(token.toLowerCase())?.symbol ??
         "tokens";
       map.set(token.toLowerCase(), {
         decimals: Number(decimalsResult.result),

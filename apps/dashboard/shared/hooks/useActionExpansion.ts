@@ -68,6 +68,11 @@ export const useActionExpansion = ({
 
   return {
     isExpanded: (index: number) => expanded.has(index),
+    /** True when every one of `count` actions is open. */
+    allExpanded: (count: number) => {
+      for (let i = 0; i < count; i += 1) if (!expanded.has(i)) return false;
+      return count > 0;
+    },
     toggle: (index: number) =>
       setExpanded((current) => {
         const next = new Set(current);
@@ -75,5 +80,8 @@ export const useActionExpansion = ({
         else next.add(index);
         return next;
       }),
+    expandAll: (count: number) =>
+      setExpanded(new Set(Array.from({ length: count }, (_, i) => i))),
+    collapseAll: () => setExpanded(new Set()),
   };
 };

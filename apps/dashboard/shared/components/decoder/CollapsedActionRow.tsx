@@ -4,6 +4,7 @@ import type { Address } from "viem";
 import { isAddress } from "viem";
 
 import { AddressChip } from "@/shared/components/decoder/AddressChip";
+import { ExpandToggle } from "@/shared/components/decoder/ExpandToggle";
 import type { CollapsedLabel } from "@/shared/utils/collapsedRowLabel";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { cn } from "@/shared/utils/cn";
@@ -20,9 +21,10 @@ interface CollapsedActionRowProps {
 
 /**
  * Collapsed action, per Figma frame 08: a card with the same `//ACTION NN`
- * header bar (plus CONTRACT link) and a one-line body —
- * `[+] [target chip] sentence` with the signature right-aligned and dimmed.
- * The body is the click target; the chip's own controls stop propagation.
+ * header bar and a one-line body — `[target chip] sentence` with the
+ * signature right-aligned and dimmed. The expand control sits at the header's
+ * right edge, exactly where the collapse control sits on an expanded card, so
+ * the eye never has to hunt for it; the body is a second, larger click target.
  */
 export const CollapsedActionRow = ({
   index,
@@ -39,19 +41,26 @@ export const CollapsedActionRow = ({
       className,
     )}
   >
-    <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 px-3 py-2">
-      <p className="text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider">
+    <div className="bg-surface-contrast flex w-full items-center gap-2 px-3 py-2">
+      <p className="text-primary shrink-0 font-mono text-xs font-medium uppercase leading-4 tracking-wider">
         {"//"}action {String(index + 1).padStart(2, "0")}
       </p>
-      {target && explorerUrl && (
-        <DefaultLink
-          href={`${explorerUrl}/address/${target}`}
-          openInNewTab
-          className="text-secondary font-mono text-xs font-medium uppercase leading-4 tracking-wider"
-        >
-          Contract
-        </DefaultLink>
-      )}
+      <div className="ml-auto flex shrink-0 items-center gap-2">
+        {target && explorerUrl && (
+          <DefaultLink
+            href={`${explorerUrl}/address/${target}`}
+            openInNewTab
+            className="text-secondary hidden font-mono text-xs font-medium uppercase leading-4 tracking-wider md:inline-flex"
+          >
+            Contract
+          </DefaultLink>
+        )}
+        <ExpandToggle
+          expanded={false}
+          onToggle={onExpand}
+          label={`Expand action ${index + 1}`}
+        />
+      </div>
     </div>
     <div
       role="button"
@@ -65,17 +74,14 @@ export const CollapsedActionRow = ({
       }}
       aria-label={`Expand action ${index + 1}`}
       className={cn(
-        "group flex w-full cursor-pointer items-center gap-2 p-3",
+        "group flex w-full min-w-0 cursor-pointer items-center gap-2 p-3",
         "hover:bg-surface-hover transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
         "focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none",
       )}
     >
-      <span className="text-secondary group-hover:text-highlight shrink-0 font-mono text-sm leading-5 transition-colors duration-[120ms] ease-[var(--ease-decoder)]">
-        [+]
-      </span>
       {target && isAddress(target) && (
         <span
-          className="shrink-0"
+          className="flex min-w-0 max-w-[45%] shrink-0"
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         >
@@ -86,14 +92,16 @@ export const CollapsedActionRow = ({
           />
         </span>
       )}
-      <span className="text-primary font-inter max-w-[55%] shrink-0 truncate text-sm leading-5">
+      {/* The sentence is the content: it takes what the chip leaves and may
+          run to a second line on phones instead of being cut mid-word. */}
+      <span className="text-primary font-inter line-clamp-2 min-w-0 flex-1 text-sm leading-5 md:line-clamp-1">
         {label.label}
       </span>
       {label.signature && (
         // min-w-0 + truncate (never shrink-0): a long signature must ellipsize
         // inside the row, not overflow the card. The higher shrink weight makes
         // the signature give way before the sentence does.
-        <span className="text-dimmed ml-auto hidden min-w-0 shrink-[4] truncate text-right font-mono text-xs leading-5 sm:block">
+        <span className="text-dimmed hidden min-w-0 shrink-[4] truncate text-right font-mono text-xs leading-5 md:block">
           {label.signature}
         </span>
       )}

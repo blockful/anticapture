@@ -5,6 +5,7 @@ export { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
 export { DecodedActionCard } from "@/shared/components/decoder/DecodedActionCard";
 export { DecodedRawToggle } from "@/shared/components/decoder/DecodedRawToggle";
 export { DecoderCardSkeleton } from "@/shared/components/decoder/DecoderCardSkeleton";
+export { ExpandToggle } from "@/shared/components/decoder/ExpandToggle";
 export { NestedBytesDecode } from "@/shared/components/decoder/NestedBytesDecode";
 export { ParamRow } from "@/shared/components/decoder/ParamRow";
 export { RawView } from "@/shared/components/decoder/RawView";

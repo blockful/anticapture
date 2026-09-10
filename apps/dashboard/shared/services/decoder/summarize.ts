@@ -65,6 +65,48 @@ const TEMPLATES: Record<string, Template> = {
   },
 };
 
+/** How many distinct inner function names a batch summary spells out. */
+const MAX_LISTED_SUBCALLS = 3;
+
+/** Short noun for a subcall in a batch listing: its function, or what moves. */
+const subcallNoun = (call: DecodedCall): string => {
+  if (call.functionName) {
+    if (!call.subcalls?.length) return call.functionName;
+    const inner = call.subcallCount ?? call.subcalls.length;
+    return `${call.functionName} (${inner} ${inner === 1 ? "call" : "calls"})`;
+  }
+  if (call.value && call.value > 0n) return "ETH transfer";
+  return call.selector ? `selector ${call.selector}` : "empty call";
+};
+
+/**
+ * What a wrapper carries, so "Executes 1 call." becomes "Executes 1 call:
+ * transfers 25,000 USDC to 0x1234…abcd." A single decoded child lends its
+ * whole sentence; several children are listed by function name. Children the
+ * node budget dropped stay uncounted here (the count itself already says so).
+ */
+const describeSubcalls = (
+  subcalls: NonNullable<DecodedCall["subcalls"]>,
+  count: number,
+): string | null => {
+  if (subcalls.length === 0) return null;
+  if (count === 1) {
+    const [child] = subcalls;
+    // A nested wrapper's own sentence would chain "Executes 1 call: executes
+    // 2 calls: …"; naming it with its arity reads better.
+    if (child.summary && !child.subcalls?.length) {
+      const sentence = child.summary.replace(/\.$/, "");
+      return sentence.charAt(0).toLowerCase() + sentence.slice(1);
+    }
+    const target = child.target ? ` on ${shortAddress(child.target)}` : "";
+    return `${subcallNoun(child)}${target}`;
+  }
+  const names = [...new Set(subcalls.map(subcallNoun))];
+  const listed = names.slice(0, MAX_LISTED_SUBCALLS);
+  const rest = names.length - listed.length;
+  return rest > 0 ? `${listed.join(", ")}, +${rest} more` : listed.join(", ");
+};
+
 /**
  * Deterministic one-sentence effect summary for known functions. Unknown
  * signatures return null and the UI falls back to showing the signature.
@@ -86,7 +128,10 @@ export const summarize = (node: DecodedCall): string | null => {
   if (detector && node.subcalls !== undefined) {
     const count = node.subcallCount ?? node.subcalls.length;
     const noun = count === 1 ? "call" : "calls";
-    return `${detector.verb} ${count} ${noun}.`;
+    const detail = describeSubcalls(node.subcalls, count);
+    return detail
+      ? `${detector.verb} ${count} ${noun}: ${detail}.`
+      : `${detector.verb} ${count} ${noun}.`;
   }
 
   if (!node.signature) return null;

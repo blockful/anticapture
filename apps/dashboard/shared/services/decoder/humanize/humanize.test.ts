@@ -50,6 +50,23 @@ describe("humanizeTimestamp", () => {
 });
 
 describe("humanizeNumber", () => {
+  test("compacts huge values by a common token scale", () => {
+    expect(humanizeNumber(34_450n * 10n ** 18n)?.text).toBe("34,450 × 10¹⁸");
+    expect(humanizeNumber(123_456_789_012n * 10n ** 6n)?.text).toBe(
+      "123,456,789,012 × 10⁶",
+    );
+  });
+
+  test("falls back to scientific notation for huge values off every scale", () => {
+    expect(humanizeNumber(1234567890123456789n)?.text).toBe("1.234e18");
+  });
+
+  test("keeps grouping up to fifteen digits", () => {
+    expect(humanizeNumber(123_456_789_012_345n)?.text).toBe(
+      "123,456,789,012,345",
+    );
+  });
+
   test("groups thousands", () => {
     expect(humanizeNumber(315_360_000n)?.text).toBe("315,360,000");
   });
