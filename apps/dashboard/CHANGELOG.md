@@ -1,5 +1,12 @@
 # @anticapture/dashboard
 
+## 2.15.2
+
+### Patch Changes
+
+- Updated dependencies [[`51023a6`](https://github.com/blockful/anticapture/commit/51023a61ff8b5dc1e0ace69c3b406a8027dac59a), [`36fc7ad`](https://github.com/blockful/anticapture/commit/36fc7ad45abbdcc0afca88964cdb47e6fb186639)]:
+  - @anticapture/client@2.2.0
+
 ## 2.15.1
 
 ### Patch Changes
