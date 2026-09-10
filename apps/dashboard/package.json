@@ -1,6 +1,6 @@
 {
   "name": "@anticapture/dashboard",
-  "version": "2.15.1",
+  "version": "2.15.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
