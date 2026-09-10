@@ -31,9 +31,10 @@ export interface RelayWebhookOptions {
 /**
  * Receiver for notification-system webhooks (ProposalFinished / ProposalExecutable).
  *
- * Plain route on purpose: it is reached over Railway's private network only, so
- * it carries no auth, and it is kept out of the OpenAPI spec so the generated
- * SDK does not grow a method nobody outside the relayer should call.
+ * Served under /internal/ so gateful's /:dao/relay/* proxy cannot reach it;
+ * only Railway private networking can. It carries no auth, and it is kept
+ * out of the OpenAPI spec so the generated SDK does not grow a method nobody
+ * outside the relayer should call.
  *
  * Always answers 202 right away: the sender times out at 30s and a mainnet
  * receipt wait can take longer. The outcome goes to logs and metrics instead.
@@ -54,7 +55,7 @@ export function relayWebhook(
     }
   };
 
-  app.post("/relay/webhook", async (c) => {
+  app.post("/internal/webhook", async (c) => {
     const parsed = RelayWebhookBodySchema.safeParse(
       await c.req.json().catch(() => null),
     );
