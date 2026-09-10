@@ -104,6 +104,28 @@ describe("relayer proxy route", () => {
     expect(registry.get("relayer:uni").state).toBe("CLOSED");
   });
 
+  it("counts the relayer's own crash response (500 INTERNAL) as an upstream failure", async () => {
+    // The relayer's global error handler wraps unhandled exceptions with the
+    // error contract; a nonempty code alone must not exempt it.
+    const fetchSpy = vi.spyOn(global, "fetch").mockImplementation(
+      async () =>
+        new Response(
+          JSON.stringify({
+            error: "Internal server error",
+            code: "INTERNAL",
+          }),
+          { status: 500, headers: { "content-type": "application/json" } },
+        ),
+    );
+
+    for (let i = 0; i < 5; i++) {
+      const res = await app.request("/uni/relay/queue", { method: "POST" });
+      expect(res.status).toBe(500);
+    }
+    expect(fetchSpy).toHaveBeenCalledTimes(5);
+    expect(registry.get("relayer:uni").state).toBe("OPEN");
+  });
+
   it("still treats a 5xx without a relayer error code as an upstream failure", async () => {
     vi.spyOn(global, "fetch").mockResolvedValue(
       new Response("Bad Gateway", {
