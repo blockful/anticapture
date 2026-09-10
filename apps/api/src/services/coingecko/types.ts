@@ -25,7 +25,7 @@ export const CoingeckoTokenIdEnum: Record<DaoIdEnum, string> = {
   OBOL: "obol-2",
   ZK: "zksync",
   SHU: "shutter",
-  FLUID: "fluid",
+  FLUID: "instadapp",
   TORN: "tornado-cash",
 } as const;
 
