@@ -59,10 +59,16 @@ export function relayWebhook(
     const parsed = RelayWebhookBodySchema.safeParse(
       await c.req.json().catch(() => null),
     );
-    const proposalId = parsed.success
-      ? parsed.data.metadata?.proposalId
-      : undefined;
 
+    if (!parsed.success) {
+      report("ignored", {
+        reason: "body did not match the webhook envelope",
+        issues: parsed.error.issues.map((issue) => issue.path.join(".")),
+      });
+      return c.json({ accepted: true }, 202);
+    }
+
+    const proposalId = parsed.data.metadata?.proposalId;
     if (proposalId === undefined) {
       report("ignored", { reason: "no proposalId in metadata" });
       return c.json({ accepted: true }, 202);
