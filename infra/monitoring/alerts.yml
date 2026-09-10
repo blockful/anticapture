@@ -16,9 +16,11 @@ groups:
             for more than 5 minutes. The service may be crashed, OOM-killed, or misconfigured.
             Check container/process status and recent logs immediately.
 
-      # DAO API is not responding
+      # Every discovered replica of a DAO API is unreachable. Aggregated per job:
+      # with DNS discovery each replica has its own `up` series, and one replica
+      # restarting (rolling deploy) must not read as the API being down.
       - alert: ApiDown
-        expr: up{job=~"anticapture-.*-api"} == 0
+        expr: max by (job) (up{job=~"anticapture-.*-api"}) == 0
         for: 5m
         keep_firing_for: 15m
         labels:
@@ -26,8 +28,38 @@ groups:
         annotations:
           summary: "[CRITICAL] {{ $labels.job }} is unreachable"
           description: >
-            Prometheus has been unable to scrape {{ $labels.job }} at {{ $labels.instance }}
-            for more than 5 minutes. DAO API traffic for this DAO is unavailable.
+            Prometheus has been unable to scrape any replica of {{ $labels.job }} for more
+            than 5 minutes. DAO API traffic for this DAO is unavailable.
+
+      # One replica of a DAO API is unreachable while others may still serve.
+      - alert: ApiReplicaDown
+        expr: up{job=~"anticapture-.*-api"} == 0
+        for: 10m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] a replica of {{ $labels.job }} is unreachable"
+          description: >
+            Prometheus has been unable to scrape the {{ $labels.job }} replica at
+            {{ $labels.instance }} for more than 10 minutes. Other replicas may still be
+            serving; check whether the container is crash-looping or stuck after a deploy.
+
+      # DAO API job discovered no replica at all. With DNS service discovery a
+      # hostname without AAAA records yields no targets and no `up` series, so
+      # ApiDown (up == 0) would stay silent during a full outage of that API.
+      - alert: ApiNoReplicas
+        expr: prometheus_sd_discovered_targets{name="scrape", config=~"anticapture-.*-api"} == 0
+        for: 5m
+        keep_firing_for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "[CRITICAL] {{ $labels.config }} has no replicas to scrape"
+          description: >
+            DNS service discovery for {{ $labels.config }} returned no address for more than
+            5 minutes: the DAO API has no running replica (crashed, scaled to zero, or its
+            <DAO>_API_ENDPOINT hostname is wrong). DAO API traffic for this DAO is unavailable.
 
       # Indexer scrape endpoints are not responding — longer window for slow startup
       - alert: IndexerDown
@@ -199,6 +231,50 @@ groups:
             more than 5 minutes (threshold: 2s). This may indicate slow database queries,
             resource contention, or downstream bottlenecks. Check slow query logs and DB
             connection pool.
+
+      # Gateful is rejecting every request for a DAO route: users see 503s until
+      # the circuit closes. Fires per breaker name (`<dao>` or `<dao>:<route>`).
+      - alert: GatefulCircuitOpen
+        expr: max by (name) (circuit_breaker_state{job="anticapture-gateful"}) == 2
+        for: 2m
+        keep_firing_for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "[CRITICAL] Gateful circuit breaker {{ $labels.name }} is OPEN"
+          description: >
+            The gateway has been rejecting all requests behind circuit {{ $labels.name }}
+            for more than 2 minutes. Find the upstream failures that opened it: 5xx by route
+            on the matching DAO API (DaoApiRouteFailing), RPC errors on eRPC, or database
+            connection timeouts in the API logs.
+
+      # A single DAO API route failing most of the time over the last hour. Low
+      # volume but deterministic failures (a third-party query that 404s, a
+      # broken token id) do not move the global error rate, yet every 5xx counts
+      # toward the gateway circuit breaker for that DAO. The 1h window already
+      # smooths the ratio; `for` is short so a burst of failures still alerts.
+      - alert: DaoApiRouteFailing
+        expr: >
+          (
+            sum by (job, http_route) (rate(http_server_requests_total{job=~"anticapture-.*-api", http_response_status_code=~"5.."}[1h]))
+            /
+            sum by (job, http_route) (rate(http_server_requests_total{job=~"anticapture-.*-api"}[1h]))
+            * 100 > 50
+          )
+          and
+          sum by (job, http_route) (increase(http_server_requests_total{job=~"anticapture-.*-api"}[1h])) >= 10
+        for: 10m
+        keep_firing_for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] {{ $labels.job }} {{ $labels.http_route }} is failing"
+          description: >
+            More than half of the requests to {{ $labels.http_route }} on {{ $labels.job }}
+            returned 5xx over the last hour ({{ printf "%.0f" $value }}% of requests).
+            Each of those failures counts toward the gateway circuit breaker for the DAO.
+            Check the API logs for this route; a third-party dependency (Dune, CoinGecko, RPC)
+            or a misconfigured query id is the usual cause.
 
       # 5xx error rate above 1% for 2 minutes
       - alert: HighErrorRate
