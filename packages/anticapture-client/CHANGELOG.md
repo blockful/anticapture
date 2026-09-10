@@ -1,5 +1,50 @@
 # @anticapture/client
 
+## 2.2.0
+
+### Minor Changes
+
+- [#2156](https://github.com/blockful/anticapture/pull/2156) [`51023a6`](https://github.com/blockful/anticapture/commit/51023a61ff8b5dc1e0ace69c3b406a8027dac59a) Thanks [@pikonha](https://github.com/pikonha)! - Flatten `TokenPropertiesResponse` so the MCP `token` tool can validate its own
+  responses.
+
+  `TokenPropertiesResponseSchema` extended the registered `TokenProperties`
+  component, which zod-openapi emits as `allOf: [$ref TokenProperties, { price }]`.
+  The MCP server projects output schemas with `io: "output"`, where Zod marks every
+  object `additionalProperties: false` — so the `{ price }` member rejected the
+  eleven properties carried by the sibling `$ref` and every `token` call failed
+  with `Invalid structured content returned by tool token`.
+
+  `TokenProperties` was referenced nowhere else in the spec (it existed only to be
+  extended), so it is no longer registered as its own component and
+  `TokenPropertiesResponse` is emitted as a flat object. The wire payload is
+  unchanged — same twelve fields, all still required. The generated SDK loses the
+  now-unused `TokenProperties` type.
+
+  The SDK is bumped alongside it: `src/index.ts` re-exports every generated
+  model, so dropping the component removes the public `TokenProperties` type.
+  `TokenPropertiesResponse` is unaffected — twelve fields, `price` included —
+  and neither consumer in the org (dashboard, notification-system) references
+  the removed type.
+
+### Patch Changes
+
+- [#2156](https://github.com/blockful/anticapture/pull/2156) [`36fc7ad`](https://github.com/blockful/anticapture/commit/36fc7ad45abbdcc0afca88964cdb47e6fb186639) Thanks [@pikonha](https://github.com/pikonha)! - Fix the MCP server advertising an unsatisfiable output schema for every tool
+  whose response is a discriminated union (`proposal`, `proposals`,
+  `searchProposals`).
+
+  Kubb's default `discriminator: "strict"` re-asserts each `oneOf` branch's
+  discriminator as an intersection — `OnchainFullProposal AND { variant: "full" }`
+  — even though every branch already declares its own `variant` literal.
+  `registerTool` projects output schemas with `io: "output"`, where Zod marks
+  objects `additionalProperties: false`, so the `allOf` member that declares only
+  `variant` rejects the other 20+ real properties. Neither variant could validate,
+  and every call failed client-side with `RuntimeError: Invalid structured content
+returned by tool proposal` — the data was always correct, only the advertised
+  schema was impossible.
+
+  Switching to `discriminator: "inherit"` emits a plain union of the mapped
+  branches, which projects to a satisfiable `anyOf`.
+
 ## 2.1.1
 
 ### Patch Changes
