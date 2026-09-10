@@ -12,6 +12,16 @@ export type WebhookOutcome =
   | "ignored"
   | "failed";
 
+// Only these RelayError codes mean "nothing to do right now" (not ready,
+// would revert): expected in normal operation, not failures. Everything
+// else — including TRANSACTION_REVERTED (gas was spent on a mined revert),
+// other RelayErrors (404/503), and plain errors — is a failure.
+const SKIPPED_CODES = new Set([
+  "INVALID_PROPOSAL_STATE",
+  "TIMELOCK_NOT_READY",
+  "SIMULATION_FAILED",
+]);
+
 export interface RelayWebhookOptions {
   /** Called once per webhook with the final outcome; index.ts feeds a Prometheus counter. */
   onOutcome?: (outcome: WebhookOutcome) => void;
@@ -35,9 +45,13 @@ export function relayWebhook(
 ) {
   const logger = options.logger ?? createLogger("relayer-webhook");
   const report = (outcome: WebhookOutcome, fields: Record<string, unknown>) => {
-    options.onOutcome?.(outcome);
-    const level = outcome === "failed" ? "error" : "info";
-    logger[level]({ outcome, ...fields }, `webhook ${outcome}`);
+    try {
+      options.onOutcome?.(outcome);
+      const level = outcome === "failed" ? "error" : "info";
+      logger[level]({ outcome, ...fields }, `webhook ${outcome}`);
+    } catch {
+      // reporting must never break the webhook
+    }
   };
 
   app.post("/relay/webhook", async (c) => {
@@ -70,13 +84,17 @@ export function relayWebhook(
         }
       })
       .catch((err: unknown) => {
-        // 409s are "nothing to do right now" (not ready, already done, would
-        // revert): expected in normal operation, not failures.
-        if (err instanceof RelayError && err.status === 409) {
+        if (err instanceof RelayError && SKIPPED_CODES.has(err.code)) {
           report("skipped", {
             proposalId: proposalId.toString(),
             code: err.code,
             reason: err.message,
+          });
+        } else if (err instanceof RelayError) {
+          report("failed", {
+            proposalId: proposalId.toString(),
+            code: err.code,
+            err,
           });
         } else {
           report("failed", { proposalId: proposalId.toString(), err });
