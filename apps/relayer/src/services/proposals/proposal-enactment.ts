@@ -244,7 +244,7 @@ export class ProposalEnactmentService {
     } catch (err) {
       // The transaction is already broadcast, so a failed receipt poll only
       // leaves its status unknown. Rejecting here would release the in-flight
-      // lock through enact()'s error path and reopen the duplicate-broadcast
+      // lock through dispatch()'s error path and reopen the duplicate-broadcast
       // window, so report it as unsettled and let the settlement hold decide.
       this.logger.warn(
         { proposalId, action: functionName, txHash, err },
