@@ -28,6 +28,10 @@ export interface ProposalEnactmentConfig {
 
 type EnactmentAction = "queue" | "execute";
 
+export type EnactOutcome =
+  | { action: EnactmentAction; txHash: Hash }
+  | { action: "skipped"; state: string };
+
 // After an unsettled broadcast (receipt timeout or failed poll) the in-flight
 // lock is held through this many extra receipt waits before giving up, so a
 // transaction dropped from the mempool cannot lock its proposal out of
@@ -61,14 +65,36 @@ export class ProposalEnactmentService {
   ) {}
 
   async queue(proposalId: string): Promise<{ txHash: Hash }> {
-    return this.enact("queue", proposalId);
+    return this.dispatch("queue", proposalId);
   }
 
   async execute(proposalId: string): Promise<{ txHash: Hash }> {
-    return this.enact("execute", proposalId);
+    return this.dispatch("execute", proposalId);
   }
 
-  private enact(
+  /**
+   * Picks the lifecycle step from on-chain state and runs it: Succeeded →
+   * queue, Queued → execute, anything else is a no-op. Callers that only
+   * know a proposal id (the notification-system webhook) use this instead
+   * of choosing queue/execute themselves, so the payload is never trusted.
+   * queue()/execute() re-run their own guards, so a state change between
+   * the two reads still ends in a 409 rather than a wasted broadcast.
+   */
+  async enact(proposalId: string): Promise<EnactOutcome> {
+    const state = await this.governor.state(BigInt(proposalId));
+    if (state === null) {
+      throw Errors.PROPOSAL_NOT_FOUND(proposalId);
+    }
+    if (state === ProposalState.Succeeded) {
+      return { action: "queue", ...(await this.queue(proposalId)) };
+    }
+    if (state === ProposalState.Queued) {
+      return { action: "execute", ...(await this.execute(proposalId)) };
+    }
+    return { action: "skipped", state: ProposalState[state] };
+  }
+
+  private dispatch(
     action: EnactmentAction,
     proposalId: string,
   ): Promise<{ txHash: Hash }> {
