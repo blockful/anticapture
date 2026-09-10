@@ -19,6 +19,7 @@ import { rateLimit } from "@/controllers/rate-limit";
 import { relayDelegate } from "@/controllers/relay-delegate";
 import { relayProposal } from "@/controllers/relay-proposal";
 import { relayVote } from "@/controllers/relay-vote";
+import { relayWebhook } from "@/controllers/relay-webhook";
 import { env } from "@/env";
 import { RelayError } from "@/errors";
 import { createClient } from "redis";
@@ -34,9 +35,16 @@ import { AnticaptureProposalSource } from "@/services/proposals/proposal-source"
 import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
 import { createLocalSigner } from "@/signer/local-signer";
-import { exporter } from "@/instrumentation";
+import { exporter, meterProvider } from "@/instrumentation";
 
 const logger = createLogger("anticapture-relayer");
+
+const webhookOutcomes = meterProvider
+  .getMeter("anticapture-relayer")
+  .createCounter("relayer_webhook_outcomes_total", {
+    description:
+      "Outcomes of notification-system webhooks received by the relayer",
+  });
 
 async function main() {
   const chain = mainnet;
@@ -160,26 +168,28 @@ async function main() {
     return c.json({ error: "Internal server error", code: "INTERNAL" }, 500);
   });
 
+  const proposalEnactment = wrapWithTracing(
+    new ProposalEnactmentService(
+      wrapWithTracing(new ViemGovernorGateway(publicClient, governorAddress)),
+      signer,
+      wrapWithTracing(
+        new AnticaptureProposalSource(
+          env.ANTICAPTURE_API_URL,
+          env.DAO_NAME,
+          env.ANTICAPTURE_API_KEY,
+        ),
+      ),
+      { minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI) },
+    ),
+  );
+
   // --- Routes ---
   relayVote(app, relayService);
   relayDelegate(app, relayService);
-  relayProposal(
-    app,
-    wrapWithTracing(
-      new ProposalEnactmentService(
-        wrapWithTracing(new ViemGovernorGateway(publicClient, governorAddress)),
-        signer,
-        wrapWithTracing(
-          new AnticaptureProposalSource(
-            env.ANTICAPTURE_API_URL,
-            env.DAO_NAME,
-            env.ANTICAPTURE_API_KEY,
-          ),
-        ),
-        { minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI) },
-      ),
-    ),
-  );
+  relayProposal(app, proposalEnactment);
+  relayWebhook(app, proposalEnactment, {
+    onOutcome: (outcome) => webhookOutcomes.add(1, { outcome }),
+  });
   health(app);
   config(app, {
     minVotingPower: env.MIN_VOTING_POWER,
@@ -217,7 +227,7 @@ async function main() {
     "Relayer starting",
   );
 
-  serve({ fetch: app.fetch, port: env.PORT });
+  serve({ fetch: app.fetch, port: env.PORT, hostname: "::" });
 }
 
 main().catch((err) => {
