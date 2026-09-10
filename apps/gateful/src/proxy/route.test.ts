@@ -83,4 +83,29 @@ describe("proxy route", () => {
 
     expect(res.status).toBe(500);
   });
+
+  it("should isolate circuit breakers per DAO and route", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const registry = new CircuitBreakerRegistry({ minimumRequests: 2 });
+    app = new OpenAPIHono();
+    proxy(app, daoApis, registry);
+
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify({ error: "internal" }), { status: 500 }),
+      );
+
+    await app.request("/uni/proposals");
+    await app.request("/uni/proposals?limit=5");
+
+    expect(registry.get("uni:proposals").state).toBe("OPEN");
+    expect(registry.get("uni:votes").state).toBe("CLOSED");
+    expect(registry.get("ens:proposals").state).toBe("CLOSED");
+
+    // Other routes of the same DAO still reach upstream.
+    fetchSpy.mockResolvedValue(new Response("{}", { status: 200 }));
+    const res = await app.request("/uni/votes");
+    expect(res.status).toBe(200);
+  });
 });

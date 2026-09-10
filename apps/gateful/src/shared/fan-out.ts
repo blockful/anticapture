@@ -17,7 +17,9 @@ export async function fanOutGet<T = unknown>(
 
   const results = await Promise.allSettled(
     entries.map(async ([dao, baseUrl]) => {
-      return registry.get(dao).execute(async () => {
+      // Same per-route breaker as the proxy, so an open circuit for this
+      // route (from any caller) short-circuits the fan-out too.
+      return registry.forProxy(dao, path).execute(async () => {
         const url = new URL(path, baseUrl);
         if (queryString) url.search = queryString;
 
