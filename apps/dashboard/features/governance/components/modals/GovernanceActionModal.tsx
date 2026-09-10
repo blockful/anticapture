@@ -303,7 +303,9 @@ export const GovernanceActionModal = ({
         return;
       }
       // "unconfirmed" and "unknown": the chain may have changed, so poll the
-      // proposal, but never offer a retry that could race the first send.
+      // proposal. No free retry is offered (it could race the first send);
+      // the wallet stays available because the user must never be locked out
+      // of the action, and the copy spells out the gas risk of a duplicate.
       startStatusPolling();
       if (isCurrent()) {
         setTxHash(outcome.hash);
@@ -399,8 +401,7 @@ export const GovernanceActionModal = ({
   };
 
   const isGaslessRun = mode === "gasless";
-  const isSettled =
-    step === "success" || step === "unconfirmed" || step === "unknown";
+  const isSettled = step === "success" || step === "unconfirmed";
 
   const txHashRow = txHash && (
     <div className="flex items-start gap-2">
@@ -529,10 +530,18 @@ export const GovernanceActionModal = ({
           )}
 
           {step === "unknown" && (
-            <InlineAlert
-              variant="warning"
-              text="The relayer did not answer in time. The transaction may still have been submitted, so wait a minute and check the proposal status before trying again."
-            />
+            <>
+              <InlineAlert
+                variant="warning"
+                text={`The relayer did not answer in time, so it is unclear whether the ${action} was submitted. This page keeps checking the proposal status for the next two minutes. You can still ${action} with your own wallet: if the relayer did submit it, your transaction will fail on-chain and you would pay its gas.`}
+              />
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="outline" onClick={handleClose}>
+                  Close
+                </Button>
+                <Button onClick={handleUseWallet}>Use my wallet anyway</Button>
+              </div>
+            </>
           )}
 
           {step === "error" && (
