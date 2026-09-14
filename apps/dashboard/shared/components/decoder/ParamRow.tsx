@@ -9,6 +9,7 @@ import { NestedBytesDecode } from "@/shared/components/decoder/NestedBytesDecode
 import { TypeChip } from "@/shared/components/decoder/TypeChip";
 import { ValueCell } from "@/shared/components/decoder/ValueCell";
 import type { DecodedParam } from "@/shared/components/decoder/types";
+import { arrayParamView } from "@/shared/utils/arrayParamView";
 import { shortHex } from "@/shared/utils/shortHex";
 import type { UploadedAbiStore } from "@/shared/services/decoder";
 import { cn } from "@/shared/utils/cn";
@@ -100,9 +101,11 @@ export const ParamRow = ({
   const isContainer = children !== undefined;
   const isArray = isContainer && isArrayType(param.type);
   const [showAll, setShowAll] = useState(false);
-  const visibleChildren =
-    isArray && !showAll ? (children ?? []).slice(0, ARRAY_PREVIEW) : children;
-  const hiddenCount = (children?.length ?? 0) - (visibleChildren?.length ?? 0);
+
+  const view = arrayParamView(
+    param,
+    isArray && !showAll ? ARRAY_PREVIEW : null,
+  );
 
   const isAddressValue = Boolean(param.isAddress && isAddress(param.value));
   // Address rows render the identity chip, which carries its own [copy]; the
@@ -131,7 +134,7 @@ export const ParamRow = ({
               // header stays two items wide and the name keeps its room.
               type={
                 isArray
-                  ? param.type.replace(/\[\]$/, `[${children.length}]`)
+                  ? param.type.replace(/\[\]$/, `[${view.length}]`)
                   : param.type
               }
               className="@md:w-20 @md:justify-center shrink-0"
@@ -183,9 +186,9 @@ export const ParamRow = ({
         )}
       </div>
 
-      {visibleChildren && children && children.length > 0 && (
+      {isContainer && children.length > 0 && (
         <div className="border-border-contrast ml-1 flex min-w-0 flex-col gap-1.5 border-l pl-3">
-          {visibleChildren.map((child, i) => (
+          {view.visible.map((child, i) => (
             <ParamRow
               key={`${child.name}-${i}`}
               param={child}
@@ -197,12 +200,19 @@ export const ParamRow = ({
               suppressNestedDecode={suppressNestedDecode}
             />
           ))}
-          {hiddenCount > 0 && (
+          {view.folded > 0 && (
             <DisclosureButton onClick={() => setShowAll(true)}>
-              {`[+ show ${hiddenCount} more]`}
+              {`[+ show ${view.hidden.toLocaleString("en-US")} more]`}
             </DisclosureButton>
           )}
-          {isArray && showAll && children.length > ARRAY_PREVIEW && (
+          {/* The note explains the tail the budget dropped, so it belongs
+              under the last element the reader can actually reach. */}
+          {view.note && view.folded === 0 && (
+            <p className="text-dimmed w-fit font-mono text-xs leading-4 tracking-wider">
+              {view.note.value}
+            </p>
+          )}
+          {isArray && showAll && view.retained > ARRAY_PREVIEW && (
             <DisclosureButton onClick={() => setShowAll(false)}>
               [– show less]
             </DisclosureButton>

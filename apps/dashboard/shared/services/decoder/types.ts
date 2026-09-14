@@ -30,6 +30,14 @@ export type DecodedParam = {
   humanized?: Humanized;
   /** Tuple components / array elements. */
   children?: DecodedParam[];
+  /**
+   * Arrays: how many elements the calldata really holds. `children` can hold
+   * fewer, because one shared node budget bounds the whole parameter tree, so
+   * every label and disclosure must read the length from here.
+   */
+  originalLength?: number;
+  /** The synthetic "N more items not shown" row of a truncated array. */
+  isTruncationNote?: boolean;
   /** The UI resolves identity (ENS, labels) for flagged params. */
   isAddress?: boolean;
   /** Bytes leaf shaped like calldata: gets a lazy "decode" affordance. */
@@ -43,7 +51,8 @@ export type DecodeWarning =
   | { code: "depth-limit"; message: string }
   | { code: "size-limit"; message: string }
   | { code: "openchain-ambiguous"; message: string; candidates: string[] }
-  | { code: "delegatecall"; message: string };
+  | { code: "delegatecall"; message: string }
+  | { code: "allow-failure"; message: string };
 
 export type DecodedCall = {
   chainId: number;
@@ -58,6 +67,12 @@ export type DecodedCall = {
   abiSource: AbiSource;
   /** Empty on failure; `raw` below still preserves the input verbatim. */
   params: DecodedParam[];
+  /**
+   * The batch that carries this call tolerates a revert here and keeps going
+   * (Multicall3 `allowFailure`, `tryAggregate` without `requireSuccess`), so
+   * nothing it describes is guaranteed to happen.
+   */
+  mayFail?: boolean;
   /** Set when a multicall detector unpacked nested calls. */
   subcalls?: Array<DecodedCall & { index: number }>;
   /**

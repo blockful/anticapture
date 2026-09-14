@@ -68,15 +68,25 @@ const TEMPLATES: Record<string, Template> = {
 /** How many distinct inner function names a batch summary spells out. */
 const MAX_LISTED_SUBCALLS = 3;
 
+/**
+ * A batch may mark a call as tolerated-failure, and then nothing the sentence
+ * describes is guaranteed: the summary has to say so, or a reader takes an
+ * optional transfer for a certain one.
+ */
+const MAY_FAIL_SUFFIX = " (may fail)";
+
 /** Short noun for a subcall in a batch listing: its function, or what moves. */
 const subcallNoun = (call: DecodedCall): string => {
+  const suffix = call.mayFail ? MAY_FAIL_SUFFIX : "";
   if (call.functionName) {
-    if (!call.subcalls?.length) return call.functionName;
+    if (!call.subcalls?.length) return `${call.functionName}${suffix}`;
     const inner = call.subcallCount ?? call.subcalls.length;
-    return `${call.functionName} (${inner} ${inner === 1 ? "call" : "calls"})`;
+    return `${call.functionName} (${inner} ${inner === 1 ? "call" : "calls"})${suffix}`;
   }
-  if (call.value && call.value > 0n) return "ETH transfer";
-  return call.selector ? `selector ${call.selector}` : "empty call";
+  if (call.value && call.value > 0n) return `ETH transfer${suffix}`;
+  return call.selector
+    ? `selector ${call.selector}${suffix}`
+    : `empty call${suffix}`;
 };
 
 /**
@@ -96,7 +106,8 @@ const describeSubcalls = (
     // 2 calls: …"; naming it with its arity reads better.
     if (child.summary && !child.subcalls?.length) {
       const sentence = child.summary.replace(/\.$/, "");
-      return sentence.charAt(0).toLowerCase() + sentence.slice(1);
+      const lowered = sentence.charAt(0).toLowerCase() + sentence.slice(1);
+      return child.mayFail ? `${lowered}${MAY_FAIL_SUFFIX}` : lowered;
     }
     const target = child.target ? ` on ${shortAddress(child.target)}` : "";
     return `${subcallNoun(child)}${target}`;

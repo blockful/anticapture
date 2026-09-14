@@ -156,10 +156,23 @@ const SubcallList = ({
       {subcalls.map((subcall) => {
         const number = String(subcall.index + 1).padStart(2, "0");
         const title = (
-          <p className={cn("text-primary min-w-0 truncate", MONO_LABEL)}>
-            {"//"}call {number}
-            {subcall.functionName ? ` · ${subcall.functionName}` : ""}
-          </p>
+          <>
+            <p className={cn("text-primary min-w-0 truncate", MONO_LABEL)}>
+              {"//"}call {number}
+              {subcall.functionName ? ` · ${subcall.functionName}` : ""}
+            </p>
+            {/* The batch tolerates a revert here, so the collapsed line must
+                not read as something that certainly happens. The expanded
+                card states it in full through the call's own warning. */}
+            {subcall.mayFail && (
+              <span
+                title="The batch allows this call to fail without reverting the other calls."
+                className={cn("text-dimmed shrink-0", MONO_LABEL)}
+              >
+                may fail
+              </span>
+            )}
+          </>
         );
         const isOpen = open.has(subcall.index);
         if (!isOpen) {

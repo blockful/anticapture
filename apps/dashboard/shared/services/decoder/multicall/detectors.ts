@@ -13,6 +13,8 @@ export type ExtractedSubcall = {
   target?: Address;
   value?: bigint;
   calldata: Hex;
+  /** The batch tolerates a revert here and keeps executing the rest. */
+  mayFail?: boolean;
   /** Semantics caveats that must ride on the CHILD node (e.g. delegatecall). */
   warnings?: DecodeWarning[];
 };
@@ -75,6 +77,18 @@ const asCall3 = (value: unknown): Call3 => {
     callData: positional[2] as Hex,
   };
 };
+
+/** Multicall3 lets a batch mark a call as tolerated-failure. A child rendered
+ *  like a required one would promise an effect the batch never guarantees. */
+const MAY_FAIL_WARNING: DecodeWarning = {
+  code: "allow-failure",
+  message:
+    "The batch allows this call to fail: a revert here does not revert the other calls.",
+};
+
+/** The extra fields a tolerated-failure child carries, or nothing. */
+const failurePolicy = (mayFail: boolean): Partial<ExtractedSubcall> =>
+  mayFail ? { mayFail: true, warnings: [MAY_FAIL_WARNING] } : {};
 
 const single = (
   target: unknown,
@@ -172,6 +186,7 @@ const DETECTOR_DEFINITIONS: Array<{
         (args[0] as unknown[]).map(asCall3).map((call) => ({
           target: call.target,
           calldata: call.callData,
+          ...failurePolicy(call.allowFailure === true),
         })),
     },
   },
@@ -181,11 +196,16 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "multicall3-tryAggregate",
       verb: "Executes",
-      extract: (args) =>
-        (args[1] as unknown[]).map(asCall2).map((call) => ({
+      extract: (args) => {
+        // `requireSuccess` is a property of the batch, so it applies to every
+        // call in it; without it the whole list is tolerated-failure.
+        const policy = failurePolicy(args[0] !== true);
+        return (args[1] as unknown[]).map(asCall2).map((call) => ({
           target: call.target,
           calldata: call.callData,
-        })),
+          ...policy,
+        }));
+      },
     },
   },
   {

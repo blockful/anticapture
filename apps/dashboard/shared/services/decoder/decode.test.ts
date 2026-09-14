@@ -10,6 +10,7 @@ import {
   SCHEDULE_BATCH,
   TIMELOCK,
   USDC,
+  USDC_APPROVE,
   USDC_TRANSFER,
 } from "@/shared/services/decoder/__fixtures__/calldata";
 import { createAbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
@@ -18,6 +19,7 @@ import {
   decodeCalldata,
   isDegradedDecode,
 } from "@/shared/services/decoder/decode";
+import type { DecodedParam } from "@/shared/services/decoder/types";
 
 // Every external source empty: only known selectors and uploads resolve.
 const offlineResolver = createAbiResolver({
@@ -144,7 +146,60 @@ describe("decodeCalldata basics", () => {
     expect(recipients.children?.[100]).toMatchObject({
       name: "…",
       value: "150 more items not shown",
+      isTruncationNote: true,
     });
+    // The render tree is a sample of the array, so the encoded length rides
+    // on the param: the chip must read address[250], never address[101].
+    expect(recipients.originalLength).toBe(250);
+  });
+
+  test("nested arrays share one budget instead of one per level", async () => {
+    // 40 inner arrays of 99 addresses clears the 128 KiB decode limit and
+    // every per-array slice, so a per-level cap would still render 3,960
+    // address rows, each with its own enrichment query.
+    const abi = parseAbi(["function airdrop(address[][] batches)"]);
+    const batches = Array.from({ length: 40 }, () =>
+      Array.from({ length: 99 }, () => RECIPIENT),
+    );
+    const calldata = encodeFunctionData({
+      abi,
+      functionName: "airdrop",
+      args: [batches],
+    });
+    const uploaded = createUploadedAbiStore();
+    uploaded.set([...abi]);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+      uploaded,
+    });
+
+    const node = await decodeCalldata({ chainId: 1, calldata }, resolver);
+    const countAddresses = (params: DecodedParam[]): number =>
+      params.reduce(
+        (sum, param) =>
+          sum +
+          (param.children ? countAddresses(param.children) : 0) +
+          (param.isAddress ? 1 : 0),
+        0,
+      );
+    expect(countAddresses(node.params)).toBeLessThanOrEqual(100);
+
+    const outer = node.params[0];
+    expect(outer.originalLength).toBe(40);
+    // The outer elements are themselves rows, so they spend the budget too:
+    // 40 of the 100 nodes go to the inner arrays and 60 to addresses.
+    expect(countAddresses(node.params)).toBe(60);
+    expect(outer.children?.[0].children).toHaveLength(61);
+    expect(outer.children?.[0].originalLength).toBe(99);
+    // Once the budget is gone, later arrays keep only their not-shown note.
+    expect(outer.children?.[39].children).toEqual([
+      expect.objectContaining({
+        isTruncationNote: true,
+        value: "99 more items not shown",
+      }),
+    ]);
+    expect(outer.children?.[39].originalLength).toBe(99);
   });
 
   test("unknown selector degrades to guessed words with a permanent warning", async () => {
@@ -215,7 +270,9 @@ describe("multicall unpacking", () => {
       depth: 1,
       target: MULTICALL3,
       functionName: "aggregate3",
-      summary: "Executes 2 calls: transfer, approve.",
+      // The fixture's approve is an allowFailure entry, and a summary that
+      // hid that would promise an approval the batch does not guarantee.
+      summary: "Executes 2 calls: transfer, approve (may fail).",
     });
     expect(inner.subcalls).toHaveLength(2);
     expect(inner.subcalls![0]).toMatchObject({
@@ -225,6 +282,63 @@ describe("multicall unpacking", () => {
     });
     expect(inner.subcalls![0].params[1].tokenHint).toEqual({ token: USDC });
     expect(inner.subcalls![1]).toMatchObject({ functionName: "approve" });
+  });
+
+  test("aggregate3 keeps each entry's allowFailure flag on its child", async () => {
+    const node = await decode(AGGREGATE3_BATCH, { target: MULTICALL3 });
+    const [required, tolerated] = node.subcalls!;
+    expect(required.functionName).toBe("transfer");
+    expect(required.mayFail).toBeUndefined();
+    expect(required.warnings).toEqual([]);
+    expect(tolerated.functionName).toBe("approve");
+    expect(tolerated.mayFail).toBe(true);
+    expect(tolerated.warnings).toEqual([
+      expect.objectContaining({ code: "allow-failure" }),
+    ]);
+    expect(node.summary).toBe(
+      "Executes 2 calls: transfer, approve (may fail).",
+    );
+  });
+
+  test("tryAggregate without requireSuccess tolerates every child failing", async () => {
+    const abi = parseAbi([
+      "function tryAggregate(bool requireSuccess, (address target, bytes callData)[] calls)",
+    ]);
+    const calls = [
+      { target: USDC, callData: USDC_TRANSFER },
+      { target: USDC, callData: USDC_APPROVE },
+    ];
+
+    const lenient = await decode(
+      encodeFunctionData({
+        abi,
+        functionName: "tryAggregate",
+        args: [false, calls],
+      }),
+      { target: MULTICALL3 },
+    );
+    expect(lenient.subcalls!.map((call) => call.mayFail)).toEqual([true, true]);
+    expect(lenient.subcalls![0].warnings).toEqual([
+      expect.objectContaining({ code: "allow-failure" }),
+    ]);
+    expect(lenient.summary).toBe(
+      "Executes 2 calls: transfer (may fail), approve (may fail).",
+    );
+
+    // requireSuccess reverts the batch on any failure, so nothing is optional.
+    const strict = await decode(
+      encodeFunctionData({
+        abi,
+        functionName: "tryAggregate",
+        args: [true, calls],
+      }),
+      { target: MULTICALL3 },
+    );
+    expect(strict.subcalls!.map((call) => call.mayFail)).toEqual([
+      undefined,
+      undefined,
+    ]);
+    expect(strict.summary).toBe("Executes 2 calls: transfer, approve.");
   });
 
   test("a Safe delegatecall is flagged and carries no ETH into the child", async () => {

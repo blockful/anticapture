@@ -58,23 +58,34 @@ const CURATED: Record<number, Record<string, TokenMeta>> = {
 
 let governanceTokens: Map<string, TokenMeta> | null = null;
 
-/** Every supported DAO's ERC-20 governance token, keyed `chainId:address`. */
+/**
+ * Every supported DAO's ERC-20 governance token, keyed `chainId:address`.
+ *
+ * The symbol must be the ticker, never `config.name`: that field holds the
+ * organisation ("Uniswap", "Compound"), and a summary built from it reads
+ * "Transfers 25,000 Uniswap". The DAO id IS the ticker (UNI, COMP, ENS…), and
+ * a DAO with several tokens labels each one (AAVE, stkAAVE), so that label
+ * wins where it exists.
+ */
 const getGovernanceTokens = (): Map<string, TokenMeta> => {
   if (governanceTokens) return governanceTokens;
   governanceTokens = new Map();
-  for (const config of Object.values(daoConfigByDaoId)) {
+  for (const [daoId, config] of Object.entries(daoConfigByDaoId)) {
     const overview = config?.daoOverview;
     if (!overview || overview.token !== "ERC20") continue;
     const chainId = overview.chain?.id;
     const token = overview.contracts?.token;
     if (chainId === undefined || !token || typeof config.decimals !== "number")
       continue;
-    const addresses = Array.isArray(token)
-      ? token.map((entry) => entry.address)
-      : [token];
-    for (const address of addresses) {
-      governanceTokens.set(`${chainId}:${address.toLowerCase()}`, {
-        symbol: config.name,
+    const entries = Array.isArray(token)
+      ? token.map((entry) => ({
+          address: entry.address,
+          symbol: entry.label || daoId,
+        }))
+      : [{ address: token, symbol: daoId }];
+    for (const entry of entries) {
+      governanceTokens.set(`${chainId}:${entry.address.toLowerCase()}`, {
+        symbol: entry.symbol,
         decimals: config.decimals,
       });
     }

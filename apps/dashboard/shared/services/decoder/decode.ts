@@ -45,11 +45,13 @@ export type DecodeOptions = {
 
 const DEFAULTS = { maxDepth: 5, maxBytes: 131_072, maxNodes: 200 };
 
-/** Array elements retained per level. The 128 KiB calldata cap still admits
- *  ~4,000 ABI words, and every rendered element costs a row (an address one
- *  costs an enrichment query too), so a single huge array must not reach the
- *  UI whole. */
-const MAX_ARRAY_ITEMS = 100;
+/** Array elements one decoded call may retain across EVERY nesting level.
+ *  The 128 KiB calldata cap still admits ~4,000 ABI words, and every rendered
+ *  element costs a row (an address one costs an enrichment query too), so a
+ *  single huge array must not reach the UI whole. The budget is shared rather
+ *  than per level: `address[][]` holding 40 inner arrays of 99 addresses each
+ *  clears every per-array slice and would still render 3,960 rows. */
+const MAX_ARRAY_NODES = 100;
 
 /** Independent batch children decode in parallel, gently: each may cost an
  *  Etherscan/OpenChain round trip and both services rate-limit. */
@@ -91,31 +93,42 @@ const leafValue = (type: string, value: unknown): string => {
   return typeof value === "string" ? value : String(value);
 };
 
+/** Array elements still allowed in the parameter tree of one decoded call. */
+type ParamBudget = { itemsLeft: number };
+
 const buildParam = (
   param: AbiParameter,
   value: unknown,
   functionName: string | undefined,
   index: number,
+  budget: ParamBudget,
 ): DecodedParam => {
   const shape = shapeOf(param);
   const name = param.name || `arg${index}`;
 
   if (shape.kind === "array") {
     const items = Array.isArray(value) ? value : [];
-    const retained = items.slice(0, MAX_ARRAY_ITEMS);
+    // Claim this level's slice before recursing: the elements retained here
+    // and everything their own arrays retain come out of one allowance, so a
+    // deep shape cannot multiply its way past the cap.
+    const retained = items.slice(0, Math.max(budget.itemsLeft, 0));
+    budget.itemsLeft -= retained.length;
     const children = retained.map((item, i) =>
       buildParam(
         { ...shape.element, name: `[${i}]` } as AbiParameter,
         item,
         functionName,
         i,
+        budget,
       ),
     );
-    if (items.length > retained.length) {
+    const dropped = items.length - retained.length;
+    if (dropped > 0) {
       children.push({
         name: "…",
         type: shape.element.type,
-        value: `${(items.length - retained.length).toLocaleString("en-US")} more items not shown`,
+        value: `${dropped.toLocaleString("en-US")} more items not shown`,
+        isTruncationNote: true,
       });
     }
     return {
@@ -123,6 +136,7 @@ const buildParam = (
       type: param.type,
       value: `${items.length.toLocaleString("en-US")} ${items.length === 1 ? "item" : "items"}`,
       children,
+      originalLength: items.length,
     };
   }
 
@@ -140,6 +154,7 @@ const buildParam = (
           positional ? positional[i] : record[component.name ?? ""],
           functionName,
           i,
+          budget,
         ),
       ),
     };
@@ -259,8 +274,11 @@ const decodeNode = async (
     return node;
   }
 
+  // One budget for the whole parameter tree of this call, nested arrays
+  // included; subcalls are separate nodes and are bounded by `maxNodes`.
+  const paramBudget: ParamBudget = { itemsLeft: MAX_ARRAY_NODES };
   node.params = abiFn.inputs.map((param, i) =>
-    buildParam(param, args[i], abiFn.name, i),
+    buildParam(param, args[i], abiFn.name, i, paramBudget),
   );
 
   if (input.target && node.signature !== undefined) {
@@ -312,6 +330,7 @@ const decodeNode = async (
             selector: bestEffortSelector(subcall.calldata),
             abiSource: "none",
             params: [],
+            mayFail: subcall.mayFail,
             raw: subcall.calldata,
             depth: depth + 1,
             warnings: [
@@ -373,6 +392,7 @@ const decodeNode = async (
           );
           decoded[position] = {
             ...child,
+            mayFail: slot.subcall.mayFail,
             warnings: [...(slot.subcall.warnings ?? []), ...child.warnings],
             index: slot.index,
           };
@@ -408,6 +428,7 @@ const decodeNode = async (
       );
       decoded[position] = {
         ...child,
+        mayFail: slot.subcall.mayFail,
         warnings: [...(slot.subcall.warnings ?? []), ...child.warnings],
         index: slot.index,
       };
