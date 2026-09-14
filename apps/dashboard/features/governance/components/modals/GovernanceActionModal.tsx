@@ -10,6 +10,10 @@ import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import type { ProposalViewData } from "@/features/governance/types";
 import {
+  getStatusPollStep,
+  STATUS_POLL_MS,
+} from "@/features/governance/utils/proposalStatusPolling";
+import {
   canRelayGovernanceAction,
   getRelayBlockedReason,
   relayGovernanceAction,
@@ -94,14 +98,6 @@ const REVERTED_MESSAGE =
 const CONNECT_WALLET_MESSAGE =
   "Connect a wallet to pay for this transaction yourself.";
 
-/**
- * The indexer picks up the queue/execute event a few blocks after the
- * receipt, so the proposal is refetched on this cadence until its status
- * moves off the one it had at submission, or until the budget runs out.
- */
-const STATUS_POLL_MS = 5_000;
-const STATUS_POLL_MAX_ATTEMPTS = 24;
-
 const shortenHash = (hash: string) => `${hash.slice(0, 10)}…${hash.slice(-8)}`;
 
 export const GovernanceActionModal = ({
@@ -116,9 +112,12 @@ export const GovernanceActionModal = ({
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<Hash | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
-  // Status the proposal had when a submission went out. Non-null while the
-  // indexer is still expected to move it; polling stops once it does.
-  const [statusAtSubmit, setStatusAtSubmit] = useState<string | null>(null);
+  // The action a submission is still waiting to see indexed. Non-null while
+  // the proposal is being refetched; cleared once the action's successor
+  // status arrives or the attempt budget runs out.
+  const [awaitedAction, setAwaitedAction] = useState<GovernanceAction | null>(
+    null,
+  );
 
   // Each run is tagged so a submission abandoned by closing the modal cannot
   // drive the state of a later, reopened one. The busy flag stops a second
@@ -126,6 +125,9 @@ export const GovernanceActionModal = ({
   // pending.
   const attemptRef = useRef(0);
   const busyRef = useRef(false);
+  // Refetches issued for the current polling run. Held in a ref so a status
+  // that changes mid-run restarts the timer without refilling the budget.
+  const pollAttemptsRef = useRef(0);
 
   const { address } = useAccount();
   const chain = daoConfigByDaoId[daoId].daoOverview.chain;
@@ -152,32 +154,42 @@ export const GovernanceActionModal = ({
     });
   }, [queryClient, daoId, proposal.id]);
 
-  // Keep refetching until the indexed status advances past the one the
-  // action started from. Runs independently of the modal being open, so a
-  // user who closes right after the receipt still gets the page updated.
+  // Keep refetching until the submitted action's own successor status is
+  // indexed. Any other status, including a transient one the API serves when
+  // its RPC reads fail, keeps the poll alive. Runs independently of the modal
+  // being open, so a user who closes right after the receipt still gets the
+  // page updated.
   useEffect(() => {
-    if (statusAtSubmit === null) return;
-    if (proposal.status !== statusAtSubmit) {
-      setStatusAtSubmit(null);
+    if (awaitedAction === null) return;
+
+    const pollStep = () =>
+      getStatusPollStep({
+        action: awaitedAction,
+        proposalStatus: proposal.status,
+        attempts: pollAttemptsRef.current,
+      });
+
+    if (pollStep() !== "keep-polling") {
+      setAwaitedAction(null);
       return;
     }
-    let attempts = 0;
+
     const interval = setInterval(() => {
-      attempts += 1;
-      if (attempts > STATUS_POLL_MAX_ATTEMPTS) {
-        clearInterval(interval);
-        setStatusAtSubmit(null);
+      pollAttemptsRef.current += 1;
+      if (pollStep() !== "keep-polling") {
+        setAwaitedAction(null);
         return;
       }
       refreshProposal();
     }, STATUS_POLL_MS);
     return () => clearInterval(interval);
-  }, [statusAtSubmit, proposal.status, refreshProposal]);
+  }, [awaitedAction, proposal.status, refreshProposal]);
 
   const startStatusPolling = useCallback(() => {
-    setStatusAtSubmit(proposal.status);
+    pollAttemptsRef.current = 0;
+    setAwaitedAction(action);
     refreshProposal();
-  }, [proposal.status, refreshProposal]);
+  }, [action, refreshProposal]);
 
   const beginAttempt = useCallback(() => {
     attemptRef.current += 1;
