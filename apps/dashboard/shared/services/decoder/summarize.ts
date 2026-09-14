@@ -137,22 +137,43 @@ const describeSubcalls = (
 };
 
 /**
+ * What a delegatecall leaf actually does. The target's code runs against the
+ * caller's own state, so no effect template may speak for it: "Transfers
+ * 25,000 USDC" would name a ledger the call never writes to.
+ */
+const delegatecallSentence = (node: DecodedCall): string => {
+  const where = node.target ? shortAddress(node.target) : "an unknown address";
+  const what =
+    node.functionName ??
+    (node.selector ? `selector ${node.selector}` : "no calldata");
+  return `Delegatecalls ${where} (${what}).`;
+};
+
+/**
  * Deterministic one-sentence effect summary for known functions. Unknown
  * signatures return null and the UI falls back to showing the signature.
  */
 export const summarize = (node: DecodedCall): string | null => {
-  // A delegatecall runs the target's code against the caller's own state, so
-  // no template may speak for it: "Transfers 25,000 USDC" would name a token
-  // ledger the call never writes to. Say what actually happens instead.
-  if (node.operation === "delegatecall") {
-    const where = node.target
-      ? shortAddress(node.target)
-      : "an unknown address";
-    const what =
-      node.functionName ??
-      (node.selector ? `selector ${node.selector}` : "no calldata");
-    return `Delegatecalls ${where} (${what}).`;
+  const isDelegatecall = node.operation === "delegatecall";
+
+  // Multicall wrappers summarize by what they carry, which can exceed what
+  // the node budget managed to decode. This comes FIRST, before any
+  // delegatecall handling: what a batch holds is structural and stays true
+  // however the parent invoked it, and the canonical Safe batch is a
+  // delegatecall into MultiSend, so letting the operation swallow the
+  // sentence would hide the entire transaction behind one address.
+  const detector = node.selector === null ? null : getDetector(node.selector);
+  if (detector && node.subcalls !== undefined) {
+    const count = node.subcallCount ?? node.subcalls.length;
+    const noun = count === 1 ? "call" : "calls";
+    const mode = isDelegatecall ? " (delegatecall)" : "";
+    const detail = describeSubcalls(node.subcalls, count);
+    return detail
+      ? `${detector.verb} ${count} ${noun}${mode}: ${detail}.`
+      : `${detector.verb} ${count} ${noun}${mode}.`;
   }
+
+  if (isDelegatecall) return delegatecallSentence(node);
 
   // Plain ETH transfer: no calldata, only value.
   if (node.selector === null) {
@@ -162,18 +183,6 @@ export const summarize = (node: DecodedCall): string | null => {
       return `Transfers ${ether}${to}.`;
     }
     return null;
-  }
-
-  // Multicall wrappers summarize by what they carry, which can exceed what
-  // the node budget managed to decode.
-  const detector = getDetector(node.selector);
-  if (detector && node.subcalls !== undefined) {
-    const count = node.subcallCount ?? node.subcalls.length;
-    const noun = count === 1 ? "call" : "calls";
-    const detail = describeSubcalls(node.subcalls, count);
-    return detail
-      ? `${detector.verb} ${count} ${noun}: ${detail}.`
-      : `${detector.verb} ${count} ${noun}.`;
   }
 
   if (!node.signature) return null;

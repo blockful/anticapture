@@ -30,9 +30,14 @@ import { createUploadedAbiStore } from "@/shared/services/decoder/abi/uploadedSt
 import {
   decodeCalldata,
   isDegradedDecode,
+  MAX_PARAM_NODES,
+  MAX_TREE_PARAM_NODES,
 } from "@/shared/services/decoder/decode";
 import { collectTokenHints } from "@/shared/services/decoder/enrich";
-import type { DecodedParam } from "@/shared/services/decoder/types";
+import type {
+  DecodedCall,
+  DecodedParam,
+} from "@/shared/services/decoder/types";
 
 // Every external source empty: only known selectors and uploads resolve.
 const offlineResolver = createAbiResolver({
@@ -44,6 +49,20 @@ const decode = (
   calldata: string,
   extra?: { target?: Address; value?: bigint },
 ) => decodeCalldata({ chainId: 1, calldata, ...extra }, offlineResolver);
+
+/** Every parameter row the tree would render, truncation notes excluded. */
+const countParamNodes = (node: DecodedCall): number => {
+  const inParams = (params: DecodedParam[]): number =>
+    params.reduce(
+      (sum, param) =>
+        sum + (param.isTruncationNote ? 0 : 1 + inParams(param.children ?? [])),
+      0,
+    );
+  return (
+    inParams(node.params) +
+    (node.subcalls ?? []).reduce((sum, call) => sum + countParamNodes(call), 0)
+  );
+};
 
 /** Every address row the tree would render, at any depth. */
 const countAddresses = (params: DecodedParam[]): number =>
@@ -172,15 +191,16 @@ describe("decodeCalldata basics", () => {
     const node = await decodeCalldata({ chainId: 1, calldata }, resolver);
     const recipients = node.params[0];
     expect(recipients.value).toBe("250 items");
-    // The param row itself is one of the 100 nodes, so 99 elements follow it.
-    expect(recipients.children).toHaveLength(100);
-    expect(recipients.children?.[98]).toMatchObject({
-      name: "[98]",
+    // The param row itself is one of the nodes, so the elements are one fewer.
+    const kept = MAX_PARAM_NODES - 1;
+    expect(recipients.children).toHaveLength(kept + 1);
+    expect(recipients.children?.[kept - 1]).toMatchObject({
+      name: `[${kept - 1}]`,
       value: RECIPIENT,
     });
-    expect(recipients.children?.[99]).toMatchObject({
+    expect(recipients.children?.[kept]).toMatchObject({
       name: "…",
-      value: "151 more items not shown",
+      value: `${250 - kept} more items not shown`,
       isTruncationNote: true,
     });
     // The render tree is a sample of the array, so the encoded length rides
@@ -210,14 +230,15 @@ describe("decodeCalldata basics", () => {
     });
 
     const node = await decodeCalldata({ chainId: 1, calldata }, resolver);
-    expect(countAddresses(node.params)).toBeLessThanOrEqual(100);
+    expect(countParamNodes(node)).toBe(MAX_PARAM_NODES);
 
     const outer = node.params[0];
     expect(outer.originalLength).toBe(40);
-    // Every row spends the budget: 1 node for the param, 40 for the inner
-    // arrays and the remaining 59 for addresses.
-    expect(countAddresses(node.params)).toBe(59);
-    expect(outer.children?.[0].children).toHaveLength(60);
+    // Every row spends the budget: one node for the param, 40 for the inner
+    // arrays and whatever remains for addresses.
+    const addresses = MAX_PARAM_NODES - 1 - 40;
+    expect(countAddresses(node.params)).toBe(addresses);
+    expect(outer.children?.[0].children).toHaveLength(addresses + 1);
     expect(outer.children?.[0].originalLength).toBe(99);
     // Once the budget is gone, later arrays keep only their not-shown note.
     expect(outer.children?.[39].children).toEqual([
@@ -244,14 +265,17 @@ describe("decodeCalldata basics", () => {
       { chainId: 1, calldata },
       resolverFor(abi),
     );
-    expect(countAddresses(node.params)).toBe(100);
-    expect(node.params).toHaveLength(101);
-    // What the ABI declares, so the card never reads "100 params".
+    expect(countAddresses(node.params)).toBe(MAX_PARAM_NODES);
+    expect(node.params).toHaveLength(MAX_PARAM_NODES + 1);
+    // What the ABI declares, so the card never reads back the retained rows.
     expect(node.inputCount).toBe(300);
-    expect(node.params[99]).toMatchObject({ name: "to99", value: RECIPIENT });
-    expect(node.params[100]).toMatchObject({
+    expect(node.params[MAX_PARAM_NODES - 1]).toMatchObject({
+      name: `to${MAX_PARAM_NODES - 1}`,
+      value: RECIPIENT,
+    });
+    expect(node.params[MAX_PARAM_NODES]).toMatchObject({
       isTruncationNote: true,
-      value: "200 more parameters not shown",
+      value: `${300 - MAX_PARAM_NODES} more parameters not shown`,
     });
   });
 
@@ -282,6 +306,7 @@ describe("decodeCalldata basics", () => {
     // Per-container caps saw nothing wrong here: no array holds more than 99
     // and no tuple more than 40.
     expect(countAddresses(node.params)).toBe(0);
+    expect(countParamNodes(node)).toBe(MAX_PARAM_NODES);
 
     const batches = node.params[0];
     expect(batches.originalLength).toBe(99);
@@ -297,6 +322,53 @@ describe("decodeCalldata basics", () => {
         }),
       ]);
     }
+  });
+
+  test("one budget bounds the parameters of a whole decoded tree", async () => {
+    // Per call the cap held, yet the tree rendered a hundred rows per call:
+    // a batch that fits the size guard used to reach thousands of address
+    // rows, each with its own enrichment query.
+    const abi: Abi = parseAbi(["function airdrop(address[] recipients)"]);
+    const airdrop = encodeFunctionData({
+      abi,
+      functionName: "airdrop",
+      args: [Array.from({ length: MAX_PARAM_NODES }, () => RECIPIENT)],
+    });
+    const calls = Array.from({ length: 12 }, () => ({
+      target: SAFE,
+      allowFailure: false,
+      callData: airdrop,
+    }));
+    const calldata = encodeFunctionData({
+      abi: parseAbi([
+        "function aggregate3((address target, bool allowFailure, bytes callData)[] calls)",
+      ]),
+      functionName: "aggregate3",
+      args: [calls],
+    });
+    const uploaded = createUploadedAbiStore();
+    uploaded.set([...abi], SAFE);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+      uploaded,
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata, target: MULTICALL3 },
+      resolver,
+    );
+    expect(node.subcalls).toHaveLength(12);
+    expect(countParamNodes(node)).toBe(MAX_TREE_PARAM_NODES);
+    // Every call is still decoded and summarized; only its rows run out.
+    const last = node.subcalls!.at(-1)!;
+    expect(last.functionName).toBe("airdrop");
+    expect(last.params).toEqual([
+      expect.objectContaining({
+        isTruncationNote: true,
+        value: "1 more parameter not shown",
+      }),
+    ]);
   });
 
   test("unknown selector degrades to guessed words with a permanent warning", async () => {
@@ -509,6 +581,38 @@ describe("multicall unpacking", () => {
     ]);
     expect(node.summary).toBe(
       "Executes 2 calls: transfer, approve (delegatecall).",
+    );
+  });
+
+  test("a Safe delegatecall into MultiSend still says what the batch holds", async () => {
+    // The canonical Safe batch is execTransaction(to=MultiSend, operation=1),
+    // so the MultiSend node is ALWAYS a delegatecall. Letting the operation
+    // swallow its sentence would hide the whole transaction behind one
+    // address; the qualifier rides on the structural summary instead.
+    const node = await decode(
+      safeExecTransaction(
+        MULTI_SEND,
+        multiSend([
+          { operation: 0, to: USDC, value: 0n, data: USDC_TRANSFER },
+          { operation: 0, to: USDC, value: 0n, data: USDC_APPROVE },
+        ]),
+        1,
+      ),
+    );
+
+    const batch = node.subcalls![0];
+    expect(batch.operation).toBe("delegatecall");
+    expect(batch.functionName).toBe("multiSend");
+    expect(batch.summary).toBe(
+      "Executes 2 calls (delegatecall): transfer, approve.",
+    );
+    // Its children run FROM the Safe, so they are ordinary calls with real
+    // effects and keep their hints.
+    expect(batch.subcalls).toHaveLength(2);
+    expect(batch.subcalls![0].operation).toBeUndefined();
+    expect(batch.subcalls![0].params[1].tokenHint).toEqual({ token: USDC });
+    expect(node.summary).toBe(
+      `Executes 1 call: multiSend (2 calls) (delegatecall) on ${MULTI_SEND.slice(0, 6)}…${MULTI_SEND.slice(-4)}.`,
     );
   });
 

@@ -49,7 +49,8 @@ export type MulticallDetector = {
   /** Verb for the parent summary: "Executes N calls" / "Schedules N calls". */
   verb: "Executes" | "Schedules";
   extract: (args: readonly unknown[]) => ExtractedSubcall[];
-  warningsFor?: (args: readonly unknown[]) => DecodeWarning[];
+  /** Caveats about the WRAPPER node itself, read off the calls it yielded. */
+  warningsFor?: (subcalls: ExtractedSubcall[]) => DecodeWarning[];
 };
 
 type Call2 = { target: Address; callData: Hex };
@@ -99,6 +100,50 @@ const asList = (value: unknown): readonly unknown[] =>
   Array.isArray(value) ? value : [];
 
 /**
+ * A delegatecall runs the target's code in the Safe's own context. Nothing
+ * happens at the target, so a child rendered like an ordinary call would
+ * attribute the Safe's own state changes to a contract it never touched.
+ */
+const DELEGATECALL_WARNING: DecodeWarning = {
+  code: "delegatecall",
+  message:
+    "Runs as a delegatecall: the target's code executes in the Safe's own context, so its effects apply to the Safe and not to the target contract.",
+};
+
+/** The extra fields a delegatecall child carries, or nothing. */
+const delegatecallPolicy = (
+  isDelegatecall: boolean,
+): Partial<ExtractedSubcall> =>
+  isDelegatecall
+    ? { operation: "delegatecall", warnings: [DELEGATECALL_WARNING] }
+    : {};
+
+/**
+ * The matching caveat on the WRAPPER, so the batch says up front that some of
+ * what it carries runs in the Safe's own context. Read off the extracted
+ * calls: re-unpacking a 100 KiB MultiSend blob to answer the same question
+ * twice is work the card pays for on every decode.
+ */
+const carriesDelegatecall =
+  (message: string) =>
+  (subcalls: ExtractedSubcall[]): DecodeWarning[] =>
+    subcalls.some((call) => call.operation === "delegatecall")
+      ? [{ code: "delegatecall", message }]
+      : [];
+
+/** Multicall3 lets a batch mark a call as tolerated-failure. A child rendered
+ *  like a required one would promise an effect the batch never guarantees. */
+const MAY_FAIL_WARNING: DecodeWarning = {
+  code: "allow-failure",
+  message:
+    "The batch allows this call to fail: a revert here does not revert the other calls.",
+};
+
+/** The extra fields a tolerated-failure child carries, or nothing. */
+const failurePolicy = (mayFail: boolean): Partial<ExtractedSubcall> =>
+  mayFail ? { mayFail: true, warnings: [MAY_FAIL_WARNING] } : {};
+
+/**
  * Safe MultiSend packs its batch by hand instead of ABI-encoding it: the
  * records are `operation(1) || to(20) || value(32) || dataLength(32) || data`
  * concatenated with no padding. Operation 1 is a delegatecall, which the Safe
@@ -139,37 +184,6 @@ const unpackMultiSend = (transactions: unknown): ExtractedSubcall[] => {
   }
   return calls;
 };
-
-/**
- * A delegatecall runs the target's code in the Safe's own context. Nothing
- * happens at the target, so a child rendered like an ordinary call would
- * attribute the Safe's own state changes to a contract it never touched.
- */
-const DELEGATECALL_WARNING: DecodeWarning = {
-  code: "delegatecall",
-  message:
-    "Runs as a delegatecall: the target's code executes in the Safe's own context, so its effects apply to the Safe and not to the target contract.",
-};
-
-/** The extra fields a delegatecall child carries, or nothing. */
-const delegatecallPolicy = (
-  isDelegatecall: boolean,
-): Partial<ExtractedSubcall> =>
-  isDelegatecall
-    ? { operation: "delegatecall", warnings: [DELEGATECALL_WARNING] }
-    : {};
-
-/** Multicall3 lets a batch mark a call as tolerated-failure. A child rendered
- *  like a required one would promise an effect the batch never guarantees. */
-const MAY_FAIL_WARNING: DecodeWarning = {
-  code: "allow-failure",
-  message:
-    "The batch allows this call to fail: a revert here does not revert the other calls.",
-};
-
-/** The extra fields a tolerated-failure child carries, or nothing. */
-const failurePolicy = (mayFail: boolean): Partial<ExtractedSubcall> =>
-  mayFail ? { mayFail: true, warnings: [MAY_FAIL_WARNING] } : {};
 
 const single = (
   target: unknown,
@@ -225,16 +239,9 @@ const DETECTOR_DEFINITIONS: Array<{
         }
         return single(args[0], args[1], args[2]);
       },
-      warningsFor: (args) =>
-        args[3] === 1
-          ? [
-              {
-                code: "delegatecall",
-                message:
-                  "This Safe transaction is a delegatecall: the inner code runs with the Safe's own storage and balance.",
-              },
-            ]
-          : [],
+      warningsFor: carriesDelegatecall(
+        "This Safe transaction is a delegatecall: the inner code runs with the Safe's own storage and balance.",
+      ),
     },
   },
   {
@@ -243,18 +250,9 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "safe-multisend",
       verb: "Executes",
       extract: (args) => unpackMultiSend(args[0]),
-      warningsFor: (args) =>
-        unpackMultiSend(args[0]).some(
-          (call) => call.operation === "delegatecall",
-        )
-          ? [
-              {
-                code: "delegatecall",
-                message:
-                  "This batch contains delegatecalls: that inner code runs in the Safe's own context, so its effects apply to the Safe.",
-              },
-            ]
-          : [],
+      warningsFor: carriesDelegatecall(
+        "This batch contains delegatecalls: that inner code runs in the Safe's own context, so its effects apply to the Safe.",
+      ),
     },
   },
   {

@@ -49,14 +49,23 @@ export type DecodeOptions = {
 
 const DEFAULTS = { maxDepth: 5, maxBytes: 131_072, maxNodes: 200 };
 
-/** Child nodes one decoded call may retain across EVERY nesting level, array
- *  elements and tuple components alike. The 128 KiB calldata cap still admits
- *  ~4,000 ABI words, and every retained child costs a row (an address one
- *  costs an enrichment query too), so no shape may reach the UI whole. The
- *  budget is shared rather than per container: `address[][]` holding 40 inner
- *  arrays of 99 addresses, or a `(address,…)[99]` of 40-field tuples, clears
- *  every per-container slice and would still render ~4,000 rows. */
-const MAX_PARAM_NODES = 100;
+/** Parameter nodes ONE decoded call may retain across every nesting level:
+ *  top-level inputs, array elements and tuple components alike. The 128 KiB
+ *  calldata cap still admits ~4,000 ABI words, and every retained node costs
+ *  a row (an address one costs an enrichment query too), so no shape may
+ *  reach the UI whole. The budget is shared rather than per container:
+ *  `address[][]` holding 40 inner arrays of 99 addresses, or a
+ *  `(address,…)[99]` of 40-field tuples, clears every per-container slice and
+ *  would still render ~4,000 rows. */
+export const MAX_PARAM_NODES = 100;
+
+/** Parameter nodes a WHOLE decoded tree may retain. `maxNodes` bounds how
+ *  many calls a tree holds, but without this each of those 200 calls could
+ *  still contribute its own hundred: an 89 KiB batch inside the size guard
+ *  rendered thousands of address rows, each with an enrichment query. Sized
+ *  so real batches never notice it, since a call carries a handful of
+ *  parameters and 200 of them stay well inside the total. */
+export const MAX_TREE_PARAM_NODES = 800;
 
 /** Independent batch children decode in parallel, gently: each may cost an
  *  Etherscan/OpenChain round trip and both services rate-limit. */
@@ -215,6 +224,7 @@ const decodeNode = async (
   opts: Required<Omit<DecodeOptions, "startDepth">>,
   depth: number,
   budget: Budget,
+  treeParams: ParamBudget,
 ): Promise<DecodedCall> => {
   const node: DecodedCall = {
     chainId: input.chainId,
@@ -311,16 +321,19 @@ const decodeNode = async (
     return node;
   }
 
-  // One budget for the whole parameter tree of this call: top-level inputs,
-  // nested arrays and tuple components all draw on it, since an ABI may
-  // declare thousands of scalar inputs and each one is a row like any other.
-  // Subcalls are separate nodes, bounded by `maxNodes`.
-  const paramBudget: ParamBudget = { nodesLeft: MAX_PARAM_NODES };
+  // This call draws its allowance from the tree's, so one call cannot render
+  // a hundred rows while the tree quietly renders thousands. Top-level
+  // inputs, nested arrays and tuple components all spend from it, since an
+  // ABI may declare thousands of scalar inputs and each is a row like any
+  // other. Subcalls are separate nodes, bounded by `maxNodes`.
+  const share = Math.min(MAX_PARAM_NODES, Math.max(treeParams.nodesLeft, 0));
+  const paramBudget: ParamBudget = { nodesLeft: share };
   const inputs = abiFn.inputs;
   const retainedInputs = inputs.slice(0, claim(inputs.length, paramBudget));
   node.params = retainedInputs.map((param, i) =>
     buildParam(param, args[i], abiFn.name, i, paramBudget),
   );
+  treeParams.nodesLeft -= share - paramBudget.nodesLeft;
   const droppedInputs = inputs.length - retainedInputs.length;
   if (droppedInputs > 0) {
     node.params.push(
@@ -356,8 +369,10 @@ const decodeNode = async (
   // would crash the wrapper's extractor.
   const detector = getDetector(node.selector);
   if (detector && node.signature === detector.signature) {
-    if (detector.warningsFor) node.warnings.push(...detector.warningsFor(args));
     const extracted = detector.extract(args);
+    if (detector.warningsFor) {
+      node.warnings.push(...detector.warningsFor(extracted));
+    }
 
     // Budget and depth gating stay synchronous and deterministic; the actual
     // child decodes then run with bounded concurrency, since each unverified
@@ -448,6 +463,7 @@ const decodeNode = async (
             opts,
             depth + 1,
             childBudgets[position],
+            treeParams,
           );
           decoded[position] = {
             ...child,
@@ -485,6 +501,10 @@ const decodeNode = async (
         opts,
         depth + 1,
         retryBudget,
+        // A retry replaces the first attempt's subtree, and what that attempt
+        // spent here is not reclaimed: the parameter bound only ever tightens,
+        // which is the safe direction for a guard.
+        treeParams,
       );
       decoded[position] = {
         ...child,
@@ -551,5 +571,6 @@ export const decodeCalldata = (
     { ...DEFAULTS, ...limits },
     startDepth ?? 0,
     { nodesLeft: limits.maxNodes ?? DEFAULTS.maxNodes },
+    { nodesLeft: MAX_TREE_PARAM_NODES },
   );
 };
