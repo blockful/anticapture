@@ -80,11 +80,17 @@ export function cacheMiddleware(
       stale = entry;
     }
 
-    cacheRequestTotal.add(1, { result: "miss", route });
+    // One lookup, one counted result. A revalidation that ends up serving the
+    // stale body is a stale serve, not a miss as well: counting both would
+    // inflate the denominator of the cache hit rate exactly when an upstream
+    // is failing, so the label is only decided once the call has settled.
     try {
       await next();
     } catch (err) {
-      if (!stale) throw err;
+      if (!stale) {
+        cacheRequestTotal.add(1, { result: "miss", route });
+        throw err;
+      }
       logger.warn({ err, key }, "upstream failed, serving stale cache entry");
       cacheRequestTotal.add(1, { result: "stale", route });
       return toResponse(stale, "stale");
@@ -99,6 +105,8 @@ export function cacheMiddleware(
       c.res = toResponse(stale, "stale");
       return;
     }
+
+    cacheRequestTotal.add(1, { result: "miss", route });
 
     // --- Response phase: store the response if eligible ---
     if (c.res.status < 200 || c.res.status >= 300) return;

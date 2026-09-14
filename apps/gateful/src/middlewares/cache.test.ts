@@ -1,5 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
+import { cacheRequestTotal } from "../metrics";
 import { type CacheStore, cacheMiddleware, STALE_GRACE_SECONDS } from "./cache";
 
 // ---------------------------------------------------------------------------
@@ -45,6 +46,17 @@ function buildApp(
   app.get("/test", handler);
   return app;
 }
+
+/** The `result` label of every cache counter increment, in order. */
+const countedResults = (add: ReturnType<typeof vi.spyOn>): unknown[] =>
+  add.mock.calls.map((call) => {
+    const attributes = call[1];
+    return attributes &&
+      typeof attributes === "object" &&
+      "result" in attributes
+      ? attributes.result
+      : undefined;
+  });
 
 async function readResponse(res: Response) {
   return {
@@ -244,6 +256,45 @@ describe("cacheMiddleware", () => {
       const res = await app.request("/test");
 
       expect(res.status).toBe(503);
+    });
+
+    it("counts a stale serve once, and never as a miss", async () => {
+      // The hit rate panel divides by the number of lookups, so a lookup that
+      // ends on the stale body must not also be counted as a miss.
+      await primeStale();
+      const add = vi.spyOn(cacheRequestTotal, "add");
+      const app = buildApp(redis, (c) =>
+        c.json({ error: "upstream down" }, 503),
+      );
+
+      await app.request("/test");
+
+      expect(countedResults(add)).toEqual(["stale"]);
+      add.mockRestore();
+    });
+
+    it("counts a failing revalidation with no upstream response once", async () => {
+      await primeStale();
+      const add = vi.spyOn(cacheRequestTotal, "add");
+      const app = buildApp(redis, () => {
+        throw new Error("circuit open");
+      });
+
+      await app.request("/test");
+
+      expect(countedResults(add)).toEqual(["stale"]);
+      add.mockRestore();
+    });
+
+    it("counts a successful revalidation once, as a miss", async () => {
+      await primeStale();
+      const add = vi.spyOn(cacheRequestTotal, "add");
+      const app = buildApp(redis);
+
+      await app.request("/test");
+
+      expect(countedResults(add)).toEqual(["miss"]);
+      add.mockRestore();
     });
 
     it("treats entries written without expiresAt as fresh", async () => {
