@@ -3,8 +3,8 @@ import { parseEther } from "viem";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { UpstreamUnavailableError } from "@/lib/upstream-error";
-import { TreasuryRepository } from "@/repositories/treasury";
 import {
+  ITreasuryRepository,
   TreasuryService,
   TreasuryProvider,
   LiquidTreasuryDataPoint,
@@ -66,13 +66,10 @@ class FakePriceProvider implements PriceProvider {
 }
 
 /**
- * FakeTreasuryRepository implements the same interface as TreasuryRepository
- * This enables structural typing without explicit casting
+ * Implements the interface TreasuryService actually depends on, so it is
+ * passed straight in with no cast.
  */
-class FakeTreasuryRepository implements Pick<
-  TreasuryRepository,
-  "getTokenQuantities" | "getLastTokenQuantityBeforeDate"
-> {
+class FakeTreasuryRepository implements ITreasuryRepository {
   private tokenQuantities: Map<number, bigint> = new Map();
   private lastKnownQuantity: bigint | null = null;
 
@@ -140,11 +137,7 @@ describe("Treasury Controller", () => {
 
   describe("GET /treasury/liquid", () => {
     beforeEach(() => {
-      service = new TreasuryService(
-        metricsRepo as unknown as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
+      service = new TreasuryService(metricsRepo, fakeProvider, undefined);
       app = createTestApp(service);
     });
 
@@ -160,11 +153,7 @@ describe("Treasury Controller", () => {
         ],
       };
       const degradedApp = createTestApp(
-        new TreasuryService(
-          metricsRepo as unknown as TreasuryRepository,
-          failing,
-          undefined,
-        ),
+        new TreasuryService(metricsRepo, failing, undefined),
       );
 
       const res = await degradedApp.request("/treasury/liquid?days=365d");
@@ -256,11 +245,7 @@ describe("Treasury Controller", () => {
   describe("GET /treasury/dao-token", () => {
     beforeEach(() => {
       priceRepo = new FakePriceProvider();
-      service = new TreasuryService(
-        metricsRepo as unknown as TreasuryRepository,
-        fakeProvider,
-        priceRepo,
-      );
+      service = new TreasuryService(metricsRepo, fakeProvider, priceRepo);
       app = createTestApp(service);
     });
 
@@ -297,11 +282,7 @@ describe("Treasury Controller", () => {
     });
 
     it("should return empty when price provider is not configured", async () => {
-      const service = new TreasuryService(
-        metricsRepo as unknown as TreasuryRepository,
-        undefined,
-        undefined,
-      );
+      const service = new TreasuryService(metricsRepo, undefined, undefined);
       const app = createTestApp(service);
 
       const res = await app.request("/treasury/dao-token?days=7d");
@@ -316,11 +297,7 @@ describe("Treasury Controller", () => {
   describe("GET /treasury/total", () => {
     beforeEach(() => {
       priceRepo = new FakePriceProvider();
-      service = new TreasuryService(
-        metricsRepo as unknown as TreasuryRepository,
-        fakeProvider,
-        priceRepo,
-      );
+      service = new TreasuryService(metricsRepo, fakeProvider, priceRepo);
       app = createTestApp(service);
     });
 
