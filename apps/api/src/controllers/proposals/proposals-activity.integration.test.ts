@@ -39,6 +39,12 @@ class FakeDAOClient implements DAOClient {
   async getBlockTime(): Promise<number | null> {
     return 1700000000;
   }
+  async getChainHead(): Promise<{ number: number; timestamp: number | null }> {
+    return {
+      number: await this.getCurrentBlockNumber(),
+      timestamp: 1700000000,
+    };
+  }
   alreadySupportCalldataReview(): boolean {
     return false;
   }

@@ -163,6 +163,37 @@ describe("GovernorBase", () => {
       expect(rpcCalls()).toBe(2);
     });
 
+    it("should pair block and timestamp even when a refresh lands between reads", async () => {
+      const { governor, rpcCalls } = createGovernor([
+        { number: "0x7b" },
+        { number: "0x7c" },
+      ]);
+
+      expect(await governor.getChainHead()).toEqual({
+        number: 123,
+        timestamp: 100,
+      });
+      expect(rpcCalls()).toBe(1);
+
+      // Expired entry: this read is served from cache and starts a background
+      // refresh that replaces the single cache entry.
+      vi.setSystemTime(LATEST_BLOCK_TTL_MS);
+      const head = await governor.getChainHead();
+      await flushMicrotasks();
+
+      // The head came out of one cache read, so the refresh landing behind it
+      // cannot send the timestamp lookup for block 123 to the RPC.
+      expect(head).toEqual({ number: 123, timestamp: 100 });
+      expect(rpcCalls()).toBe(2);
+
+      // The next head is the refreshed pair, still without another RPC read.
+      expect(await governor.getChainHead()).toEqual({
+        number: 124,
+        timestamp: 100,
+      });
+      expect(rpcCalls()).toBe(2);
+    });
+
     it("should keep serving the stale block and back off when the refresh fails", async () => {
       const { governor, rpcCalls } = createGovernor([
         { number: "0x7b" },

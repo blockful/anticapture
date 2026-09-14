@@ -276,6 +276,46 @@ describe("CircuitBreakerRegistry", () => {
     expect(record).toHaveBeenLastCalledWith(2, { name: "ens:proposals" });
   });
 
+  it("closes the series of an evicted route that had reported OPEN", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(0);
+    const record = vi.spyOn(circuitBreakerState, "record");
+    const registry = new CircuitBreakerRegistry({
+      windowMs: 30_000,
+      cooldownMs: 1_000,
+      minimumRequests: 1,
+    });
+
+    await expect(
+      registry.forProxy("ens", "/proposals").execute(FAIL),
+    ).rejects.toThrow();
+    expect(record).toHaveBeenLastCalledWith(2, { name: "ens:proposals" });
+
+    // Quiet past the cooldown, so the route is reclaimed under slot pressure.
+    vi.setSystemTime(60_000);
+    for (let i = 0; i < MAX_ROUTES_PER_DAO; i++) {
+      registry.forProxy("ens", `/probe-${i}`);
+    }
+    expect(registry.getAll().has("ens:proposals")).toBe(false);
+
+    // Without this the gauge would report that route as open for good: the
+    // replacement breaker is lazy and says nothing while it is healthy.
+    expect(record).toHaveBeenLastCalledWith(0, { name: "ens:proposals" });
+    vi.useRealTimers();
+  });
+
+  it("records nothing when evicting a route that never reported", () => {
+    const record = vi.spyOn(circuitBreakerState, "record");
+    const registry = new CircuitBreakerRegistry();
+
+    for (let i = 0; i < MAX_ROUTES_PER_DAO + 1; i++) {
+      registry.forProxy("ens", `/probe-${i}`);
+    }
+
+    expect(registry.getAll().has("ens:probe-0")).toBe(false);
+    expect(record).not.toHaveBeenCalled();
+  });
+
   it("folds route names past the metric budget into one bucket", async () => {
     const record = vi.spyOn(circuitBreakerState, "record");
     const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });

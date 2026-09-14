@@ -32,6 +32,9 @@ class SimpleDAOClient implements DAOClient {
   getBlockTime(_: number) {
     return Promise.resolve(null);
   }
+  getChainHead() {
+    return Promise.resolve({ number: 1, timestamp: null });
+  }
   calculateQuorum(_: {
     forVotes: bigint;
     againstVotes: bigint;

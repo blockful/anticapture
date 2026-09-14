@@ -165,12 +165,12 @@ export class ProposalsActivityService {
     // Degrade to indexed statuses when the RPC is unavailable instead of
     // failing the whole activity request.
     const head = await this.daoClient
-      .getCurrentBlockNumber()
-      .then(async (currentBlock) => ({
-        currentBlock,
-        // A head without a timestamp still dates the block-based statuses, so
-        // it is kept: only the queued timestamp comparisons are skipped.
-        currentTimestamp: await this.daoClient.getBlockTime(currentBlock),
+      .getChainHead()
+      // One read: a head without a timestamp still dates the block-based
+      // statuses, so it is kept and only the queued comparisons are skipped.
+      .then((chainHead) => ({
+        currentBlock: chainHead.number,
+        currentTimestamp: chainHead.timestamp,
       }))
       .catch((error: Error) => {
         logger.warn(

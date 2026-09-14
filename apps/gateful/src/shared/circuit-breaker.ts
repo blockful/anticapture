@@ -198,6 +198,16 @@ export class CircuitBreaker {
     this.transitionTo("OPEN");
   }
 
+  /** Publishes a final CLOSED before this breaker is dropped, so the series it
+   *  created does not sit at OPEN for the life of the process: the gauge is
+   *  synchronous, the replacement breaker is lazy and says nothing while it is
+   *  healthy, and nobody would ever clear the old value. A breaker that never
+   *  published has no series to close, so this does nothing for it. */
+  publishClosedOnEvict(): void {
+    if (!this.metricArmed || this._state === "CLOSED") return;
+    circuitBreakerState.record(STATE_VALUE.CLOSED, { name: this.metricName });
+  }
+
   /** Publishes the state gauge. A lazy breaker stays silent while it has never
    *  left CLOSED: the OTel SDK keeps every attribute set for the life of the
    *  process, so a healthy key that was never interesting must not create a

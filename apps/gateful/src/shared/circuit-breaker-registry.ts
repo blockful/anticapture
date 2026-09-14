@@ -184,6 +184,10 @@ export class CircuitBreakerRegistry {
     for (const key of routes) {
       const breaker = this.breakers.get(key);
       if (breaker && !breaker.isIdle() && !breaker.isStale()) continue;
+      // A stale route may be dropped while its last published state was OPEN.
+      // Close its series on the way out, or the gauge would report that route
+      // as open forever.
+      breaker?.publishClosedOnEvict();
       routes.delete(key);
       this.breakers.delete(key);
       return true;

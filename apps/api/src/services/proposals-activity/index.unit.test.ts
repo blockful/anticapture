@@ -78,6 +78,7 @@ function createStubDaoClient(): DAOClient {
     getProposalThreshold: async () => 0n,
     getCurrentBlockNumber: async () => 1000000,
     getBlockTime: async (_blockNumber) => 1700000000,
+    getChainHead: async () => ({ number: 100, timestamp: 1700000000 }),
     alreadySupportCalldataReview: () => false,
     supportOffchainData: () => false,
     calculateQuorum: () => 0n,

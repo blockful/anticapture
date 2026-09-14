@@ -105,13 +105,15 @@ function createStubDaoClient() {
     blockTime: number | null;
     proposalStatus: string;
     proposalStatusQueue: string[] | undefined;
-    getCurrentBlockNumberCallCount: number;
+    chainHeadCallCount: number;
+    blockTimeCallCount: number;
   } & DAOClient = {
     currentBlock: 300,
     blockTime: 1700001000,
     proposalStatus: ProposalStatus.ACTIVE,
     proposalStatusQueue: undefined,
-    getCurrentBlockNumberCallCount: 0,
+    chainHeadCallCount: 0,
+    blockTimeCallCount: 0,
     getDaoId: () => "UNI",
     getVotingDelay: async () => 0n,
     getVotingPeriod: async () => 0n,
@@ -121,11 +123,15 @@ function createStubDaoClient() {
     alreadySupportCalldataReview: () => false,
     supportOffchainData: () => false,
     calculateQuorum: () => 0n,
-    getCurrentBlockNumber: async () => {
-      stub.getCurrentBlockNumberCallCount++;
-      return stub.currentBlock;
+    getCurrentBlockNumber: async () => stub.currentBlock,
+    getBlockTime: async (_blockNumber) => {
+      stub.blockTimeCallCount++;
+      return stub.blockTime;
     },
-    getBlockTime: async (_blockNumber) => stub.blockTime,
+    getChainHead: async () => {
+      stub.chainHeadCallCount++;
+      return { number: stub.currentBlock, timestamp: stub.blockTime };
+    },
     getProposalStatus: async (_proposal, _currentBlock, _currentTimestamp) =>
       stub.proposalStatusQueue?.shift() ?? stub.proposalStatus,
   };
@@ -308,6 +314,22 @@ describe("ProposalsService", () => {
 
       expect(repo.lastLeanArg).toBe(true);
     });
+
+    it("should read the chain head once and never look a block up by number", async () => {
+      // Pairing the block with a timestamp fetched separately is what put an
+      // RPC read back on the warm path when a refresh landed between the two.
+      repo.proposals = [
+        createMockProposal({ id: "1" }),
+        createMockProposal({ id: "2" }),
+      ];
+
+      await service.getProposals({ ...DEFAULT_REQ });
+
+      expect({
+        chainHeadCallCount: daoClient.chainHeadCallCount,
+        blockTimeCallCount: daoClient.blockTimeCallCount,
+      }).toEqual({ chainHeadCallCount: 1, blockTimeCallCount: 0 });
+    });
   });
 
   describe("getProposalById", () => {
@@ -326,13 +348,13 @@ describe("ProposalsService", () => {
       const result = await service.getProposalById("999");
 
       expect(result).toBeUndefined();
-      expect(daoClient.getCurrentBlockNumberCallCount).toBe(0);
+      expect(daoClient.chainHeadCallCount).toBe(0);
     });
   });
 
   describe("RPC unavailable", () => {
     beforeEach(() => {
-      daoClient.getCurrentBlockNumber = async () => {
+      daoClient.getChainHead = async () => {
         throw new Error("rpc down");
       };
     });

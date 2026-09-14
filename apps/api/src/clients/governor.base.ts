@@ -382,6 +382,17 @@ export abstract class GovernorBase<
     return block.number;
   }
 
+  /**
+   * Block number and timestamp from one cache read. Callers that need both must
+   * use this rather than getCurrentBlockNumber followed by getBlockTime: a
+   * background refresh landing between those two calls replaces the single
+   * cache entry, and the timestamp lookup for the older block would then miss
+   * the cache and put a synchronous RPC read back on the warm path.
+   */
+  async getChainHead(): Promise<{ number: number; timestamp: number | null }> {
+    return this.getLatestBlock();
+  }
+
   async getBlockTime(blockNumber: number): Promise<number | null> {
     const cached = this.latestBlockCache;
 
