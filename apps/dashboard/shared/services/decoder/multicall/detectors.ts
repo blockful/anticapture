@@ -1,4 +1,5 @@
 import {
+  getAddress,
   parseAbiItem,
   toFunctionSelector,
   toFunctionSignature,
@@ -21,6 +22,8 @@ export type ExtractedSubcall = {
   calldata: Hex;
   /** The batch tolerates a revert here and keeps executing the rest. */
   mayFail?: boolean;
+  /** Set when the wrapper delegatecalls rather than calls this target. */
+  operation?: "call" | "delegatecall";
   /** Semantics caveats that must ride on the CHILD node (e.g. delegatecall). */
   warnings?: DecodeWarning[];
 };
@@ -28,6 +31,7 @@ export type ExtractedSubcall = {
 export type MulticallDetector = {
   id:
     | "safe-exec"
+    | "safe-multisend"
     | "multicall3-aggregate"
     | "multicall3-aggregate3"
     | "multicall3-tryAggregate"
@@ -94,6 +98,67 @@ const callsIn = <T>(
 const asList = (value: unknown): readonly unknown[] =>
   Array.isArray(value) ? value : [];
 
+/**
+ * Safe MultiSend packs its batch by hand instead of ABI-encoding it: the
+ * records are `operation(1) || to(20) || value(32) || dataLength(32) || data`
+ * concatenated with no padding. Operation 1 is a delegatecall, which the Safe
+ * runs against its own storage, so the byte decides how each child reads.
+ */
+const MULTISEND_HEADER_CHARS = (1 + 20 + 32 + 32) * 2;
+const DELEGATECALL_OPERATION = "01";
+
+const unpackMultiSend = (transactions: unknown): ExtractedSubcall[] => {
+  if (!isHexValue(transactions)) return [];
+  const body = transactions.slice(2);
+  const calls: ExtractedSubcall[] = [];
+  let cursor = 0;
+  while (cursor + MULTISEND_HEADER_CHARS <= body.length) {
+    const operation = body.slice(cursor, cursor + 2);
+    const to = `0x${body.slice(cursor + 2, cursor + 42)}`;
+    const wei = BigInt(`0x${body.slice(cursor + 42, cursor + 106)}`);
+    const size =
+      BigInt(`0x${body.slice(cursor + 106, cursor + MULTISEND_HEADER_CHARS)}`) *
+      2n;
+    cursor += MULTISEND_HEADER_CHARS;
+    // The lengths are hand-written and may be anything at all; a record that
+    // runs past the end of the blob is where the batch stops being readable.
+    if (size > BigInt(body.length - cursor)) break;
+    const data = `0x${body.slice(cursor, cursor + Number(size))}`;
+    cursor += Number(size);
+    const isDelegatecall = operation === DELEGATECALL_OPERATION;
+    calls.push({
+      // Packed bytes carry no checksum; every other extractor hands the
+      // decoder a checksummed address and the UI compares them as strings.
+      target: isAddressValue(to) ? getAddress(to) : undefined,
+      // MultiSend forwards no ETH on a delegatecall, so claiming a value
+      // there would let the child summarize a transfer that never happens.
+      value: isDelegatecall ? undefined : wei,
+      calldata: isHexValue(data) ? data : "0x",
+      ...delegatecallPolicy(isDelegatecall),
+    });
+  }
+  return calls;
+};
+
+/**
+ * A delegatecall runs the target's code in the Safe's own context. Nothing
+ * happens at the target, so a child rendered like an ordinary call would
+ * attribute the Safe's own state changes to a contract it never touched.
+ */
+const DELEGATECALL_WARNING: DecodeWarning = {
+  code: "delegatecall",
+  message:
+    "Runs as a delegatecall: the target's code executes in the Safe's own context, so its effects apply to the Safe and not to the target contract.",
+};
+
+/** The extra fields a delegatecall child carries, or nothing. */
+const delegatecallPolicy = (
+  isDelegatecall: boolean,
+): Partial<ExtractedSubcall> =>
+  isDelegatecall
+    ? { operation: "delegatecall", warnings: [DELEGATECALL_WARNING] }
+    : {};
+
 /** Multicall3 lets a batch mark a call as tolerated-failure. A child rendered
  *  like a required one would promise an effect the batch never guarantees. */
 const MAY_FAIL_WARNING: DecodeWarning = {
@@ -156,18 +221,7 @@ const DETECTOR_DEFINITIONS: Array<{
         // never happens.
         if (args[3] === 1) {
           const [call] = single(args[0], undefined, args[2]);
-          return [
-            {
-              ...call,
-              warnings: [
-                {
-                  code: "delegatecall",
-                  message:
-                    "Runs as a delegatecall: this code executes with the Safe's own storage and balance; effects apply to the Safe, not to this contract.",
-                },
-              ],
-            },
-          ];
+          return [{ ...call, ...delegatecallPolicy(true) }];
         }
         return single(args[0], args[1], args[2]);
       },
@@ -178,6 +232,26 @@ const DETECTOR_DEFINITIONS: Array<{
                 code: "delegatecall",
                 message:
                   "This Safe transaction is a delegatecall: the inner code runs with the Safe's own storage and balance.",
+              },
+            ]
+          : [],
+    },
+  },
+  {
+    signature: "function multiSend(bytes transactions)",
+    detector: {
+      id: "safe-multisend",
+      verb: "Executes",
+      extract: (args) => unpackMultiSend(args[0]),
+      warningsFor: (args) =>
+        unpackMultiSend(args[0]).some(
+          (call) => call.operation === "delegatecall",
+        )
+          ? [
+              {
+                code: "delegatecall",
+                message:
+                  "This batch contains delegatecalls: that inner code runs in the Safe's own context, so its effects apply to the Safe.",
               },
             ]
           : [],

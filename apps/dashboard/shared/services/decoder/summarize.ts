@@ -75,9 +75,21 @@ const MAX_LISTED_SUBCALLS = 3;
  */
 const MAY_FAIL_SUFFIX = " (may fail)";
 
+/**
+ * What a batch listing must say about a child beyond its name: a delegatecall
+ * does not act on the contract it names, and a tolerated-failure call may not
+ * act at all.
+ */
+const qualifiers = (call: DecodedCall): string => {
+  const notes: string[] = [];
+  if (call.operation === "delegatecall") notes.push("delegatecall");
+  if (call.mayFail) notes.push("may fail");
+  return notes.length > 0 ? ` (${notes.join(", ")})` : "";
+};
+
 /** Short noun for a subcall in a batch listing: its function, or what moves. */
 const subcallNoun = (call: DecodedCall): string => {
-  const suffix = call.mayFail ? MAY_FAIL_SUFFIX : "";
+  const suffix = qualifiers(call);
   if (call.functionName) {
     if (!call.subcalls?.length) return `${call.functionName}${suffix}`;
     const inner = call.subcallCount ?? call.subcalls.length;
@@ -103,7 +115,9 @@ const describeSubcalls = (
   if (count === 1) {
     const [child] = subcalls;
     // A nested wrapper's own sentence would chain "Executes 1 call: executes
-    // 2 calls: …"; naming it with its arity reads better.
+    // 2 calls: …"; naming it with its arity reads better. A delegatecall child
+    // needs no special case: its own sentence already says "delegatecalls X",
+    // which is exactly what must be repeated here instead of an effect.
     if (child.summary && !child.subcalls?.length) {
       const sentence = child.summary.replace(/\.$/, "");
       const lowered = sentence.charAt(0).toLowerCase() + sentence.slice(1);
@@ -114,6 +128,10 @@ const describeSubcalls = (
   }
   const names = [...new Set(subcalls.map(subcallNoun))];
   const listed = names.slice(0, MAX_LISTED_SUBCALLS);
+  // When the node budget dropped children, the names are a sample of the
+  // batch and cannot claim an exact remainder. The leading count is the one
+  // that speaks for the whole batch.
+  if (subcalls.length < count) return `${listed.join(", ")}, …`;
   const rest = names.length - listed.length;
   return rest > 0 ? `${listed.join(", ")}, +${rest} more` : listed.join(", ");
 };
@@ -123,6 +141,19 @@ const describeSubcalls = (
  * signatures return null and the UI falls back to showing the signature.
  */
 export const summarize = (node: DecodedCall): string | null => {
+  // A delegatecall runs the target's code against the caller's own state, so
+  // no template may speak for it: "Transfers 25,000 USDC" would name a token
+  // ledger the call never writes to. Say what actually happens instead.
+  if (node.operation === "delegatecall") {
+    const where = node.target
+      ? shortAddress(node.target)
+      : "an unknown address";
+    const what =
+      node.functionName ??
+      (node.selector ? `selector ${node.selector}` : "no calldata");
+    return `Delegatecalls ${where} (${what}).`;
+  }
+
   // Plain ETH transfer: no calldata, only value.
   if (node.selector === null) {
     if (node.value && node.value > 0n) {

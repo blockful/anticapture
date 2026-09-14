@@ -73,6 +73,18 @@ export type DecodedCall = {
    * nothing it describes is guaranteed to happen.
    */
   mayFail?: boolean;
+  /**
+   * How the parent invokes this call. A delegatecall runs the target's code
+   * against the CALLER's storage and balance, so the target contract's own
+   * state is untouched: its effects must never be summarized or hinted as if
+   * they happened there. Absent means an ordinary call.
+   */
+  operation?: "call" | "delegatecall";
+  /**
+   * Inputs the resolved ABI declares. `params` can hold fewer, because one
+   * shared budget bounds the render tree, so counts must come from here.
+   */
+  inputCount?: number;
   /** Set when a multicall detector unpacked nested calls. */
   subcalls?: Array<DecodedCall & { index: number }>;
   /**

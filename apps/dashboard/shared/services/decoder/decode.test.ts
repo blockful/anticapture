@@ -8,9 +8,12 @@ import {
 
 import {
   AGGREGATE3_BATCH,
+  MULTI_SEND,
+  multiSend,
   MULTICALL3,
   RECIPIENT,
   SAFE,
+  packMultiSend,
   SAFE_WRAPPING_AGGREGATE3,
   safeExecTransaction,
   SCHEDULE_BATCH,
@@ -28,6 +31,7 @@ import {
   decodeCalldata,
   isDegradedDecode,
 } from "@/shared/services/decoder/decode";
+import { collectTokenHints } from "@/shared/services/decoder/enrich";
 import type { DecodedParam } from "@/shared/services/decoder/types";
 
 // Every external source empty: only known selectors and uploads resolve.
@@ -242,6 +246,8 @@ describe("decodeCalldata basics", () => {
     );
     expect(countAddresses(node.params)).toBe(100);
     expect(node.params).toHaveLength(101);
+    // What the ABI declares, so the card never reads "100 params".
+    expect(node.inputCount).toBe(300);
     expect(node.params[99]).toMatchObject({ name: "to99", value: RECIPIENT });
     expect(node.params[100]).toMatchObject({
       isTruncationNote: true,
@@ -445,6 +451,107 @@ describe("multicall unpacking", () => {
     expect(child.warnings).toEqual([
       expect.objectContaining({ code: "delegatecall" }),
     ]);
+  });
+
+  test("a delegatecall child claims no effect on the code it runs", async () => {
+    const node = await decode(safeExecTransaction(USDC, USDC_TRANSFER, 1));
+    const child = node.subcalls![0];
+    expect(child.operation).toBe("delegatecall");
+    // USDC's ledger is never written here, so the amount is not USDC and the
+    // sentence must name the operation rather than a transfer.
+    expect(child.params[1].tokenHint).toBeUndefined();
+    expect(child.summary).toBe(
+      `Delegatecalls ${USDC.slice(0, 6)}…${USDC.slice(-4)} (transfer).`,
+    );
+    expect(collectTokenHints(node)).toEqual([]);
+    // The parent repeats the operation, never the effect.
+    expect(node.summary).toBe(
+      `Executes 1 call: delegatecalls ${USDC.slice(0, 6)}…${USDC.slice(-4)} (transfer).`,
+    );
+  });
+
+  test("an ordinary Safe call keeps its token hint and its effect", async () => {
+    const node = await decode(safeExecTransaction(USDC, USDC_TRANSFER, 0));
+    const child = node.subcalls![0];
+    expect(child.operation).toBeUndefined();
+    expect(child.params[1].tokenHint).toEqual({ token: USDC });
+    expect(child.summary).toContain("Transfers");
+    expect(node.warnings).toEqual([]);
+  });
+
+  test("multiSend reads the packed operation byte of every record", async () => {
+    const node = await decode(
+      multiSend([
+        { operation: 0, to: USDC, value: 0n, data: USDC_TRANSFER },
+        { operation: 1, to: SAFE, value: 0n, data: USDC_APPROVE },
+      ]),
+      { target: MULTI_SEND },
+    );
+    expect(node.functionName).toBe("multiSend");
+    expect(node.subcalls).toHaveLength(2);
+
+    const [called, delegated] = node.subcalls!;
+    expect(called).toMatchObject({ target: USDC, functionName: "transfer" });
+    expect(called.operation).toBeUndefined();
+    expect(called.params[1].tokenHint).toEqual({ token: USDC });
+
+    expect(delegated.operation).toBe("delegatecall");
+    expect(delegated.params[1].tokenHint).toBeUndefined();
+    expect(delegated.summary).toBe(
+      `Delegatecalls ${SAFE.slice(0, 6)}…${SAFE.slice(-4)} (approve).`,
+    );
+    expect(delegated.warnings).toEqual([
+      expect.objectContaining({ code: "delegatecall" }),
+    ]);
+    // The wrapper says the batch holds one, and names neither as an effect.
+    expect(node.warnings).toEqual([
+      expect.objectContaining({ code: "delegatecall" }),
+    ]);
+    expect(node.summary).toBe(
+      "Executes 2 calls: transfer, approve (delegatecall).",
+    );
+  });
+
+  test("multiSend forwards ETH on a call and never on a delegatecall", async () => {
+    const node = await decode(
+      multiSend([
+        {
+          operation: 0,
+          to: RECIPIENT,
+          value: 1_500_000_000_000_000_000n,
+          data: "0x",
+        },
+        { operation: 1, to: SAFE, value: 2n, data: "0x" },
+      ]),
+      { target: MULTI_SEND },
+    );
+    const [paid, delegated] = node.subcalls!;
+    expect(paid.value).toBe(1_500_000_000_000_000_000n);
+    expect(paid.summary).toContain("Transfers 1.5 ETH");
+    // MultiSend delegatecalls with no value, so claiming one would invent it.
+    expect(delegated.value).toBeUndefined();
+    expect(delegated.summary).toBe(
+      `Delegatecalls ${SAFE.slice(0, 6)}…${SAFE.slice(-4)} (no calldata).`,
+    );
+  });
+
+  test("a multiSend record running past the blob stops the batch cleanly", async () => {
+    const packed = packMultiSend([
+      { operation: 0, to: USDC, value: 0n, data: USDC_TRANSFER },
+      { operation: 0, to: SAFE, value: 0n, data: USDC_APPROVE },
+    ]);
+    const abi = parseAbi(["function multiSend(bytes transactions)"]);
+    const truncated = encodeFunctionData({
+      abi,
+      functionName: "multiSend",
+      args: [packed.slice(0, -40) as Hex],
+    });
+
+    const node = await decode(truncated, { target: MULTI_SEND });
+    // The first record is whole; the second declares more data than remains.
+    expect(node.subcalls).toHaveLength(1);
+    expect(node.subcalls![0]).toMatchObject({ functionName: "transfer" });
+    expect(node.error).toBeUndefined();
   });
 
   test("scheduleBatch fans out and an empty-calldata entry becomes an ETH node", async () => {
@@ -672,6 +779,9 @@ describe("multicall unpacking", () => {
     expect(node.warnings).toEqual([
       expect.objectContaining({ code: "size-limit" }),
     ]);
+    // The count still speaks for the whole batch, and the names it managed to
+    // decode are marked as the sample they are.
+    expect(node.summary).toBe("Executes 2 calls: transfer, ….");
   });
 
   test("renamed tuple components still unpack (positional normalization)", async () => {

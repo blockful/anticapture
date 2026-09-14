@@ -98,27 +98,35 @@ const FunctionSignature = ({
   nested: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
+  // The ABI decides how many parameters this function has; the render budget
+  // decides how many rows exist. A 300-input function must not read as 100.
+  const inputCount = call.inputCount ?? params.length;
+  const dropped = inputCount - params.length;
   const namedArgs = params
     .map((param) => `${param.type} ${param.name}`)
     .join(", ");
+  const argList =
+    dropped > 0
+      ? `${namedArgs}, +${dropped.toLocaleString("en-US")} more`
+      : namedArgs;
   const inline =
-    expanded || (!nested && params.length <= SIGNATURE_INLINE_MAX_PARAMS);
+    expanded || (!nested && inputCount <= SIGNATURE_INLINE_MAX_PARAMS);
 
   return (
     <p className="text-secondary min-w-0 break-words font-mono text-sm leading-5">
       <span className="text-link">{call.functionName}</span>{" "}
       {inline ? (
-        `(${namedArgs})`
+        `(${argList})`
       ) : (
         <>
           {"(…)"}
           <span className="text-dimmed text-xs">
             {" "}
-            · {params.length} params{" "}
+            · {inputCount.toLocaleString("en-US")} params{" "}
           </span>
         </>
       )}
-      {params.length > SIGNATURE_INLINE_MAX_PARAMS || nested ? (
+      {inputCount > SIGNATURE_INLINE_MAX_PARAMS || nested ? (
         <button
           type="button"
           onClick={() => setExpanded((current) => !current)}
@@ -168,9 +176,17 @@ const SubcallList = ({
               {"//"}call {number}
               {subcall.functionName ? ` · ${subcall.functionName}` : ""}
             </p>
-            {/* The batch tolerates a revert here, so the collapsed line must
-                not read as something that certainly happens. The expanded
-                card states it in full through the call's own warning. */}
+            {/* What the batch does not promise about this child has to survive
+                collapsing: the expanded card states each in full through the
+                call's own warning, but the row above it must say it too. */}
+            {subcall.operation === "delegatecall" && (
+              <span
+                title="Runs the target's code in the Safe's own context: its effects apply to the Safe, not to the target."
+                className={cn("text-dimmed shrink-0", MONO_LABEL)}
+              >
+                delegatecall
+              </span>
+            )}
             {subcall.mayFail && (
               <span
                 title="The batch allows this call to fail without reverting the other calls."

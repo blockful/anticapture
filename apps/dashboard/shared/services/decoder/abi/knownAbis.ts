@@ -22,6 +22,7 @@ const KNOWN_SIGNATURES = [
   "function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)",
   // Safe
   "function execTransaction(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures)",
+  "function multiSend(bytes transactions)",
   // Multicall3
   "function aggregate((address target, bytes callData)[] calls)",
   "function aggregate3((address target, bool allowFailure, bytes callData)[] calls)",

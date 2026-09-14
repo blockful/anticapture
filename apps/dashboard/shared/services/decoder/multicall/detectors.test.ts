@@ -7,6 +7,7 @@ const AGGREGATE3 = "aggregate3((address,bool,bytes)[])";
 const TRY_AGGREGATE = "tryAggregate(bool,(address,bytes)[])";
 const EXEC_TRANSACTION =
   "execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)";
+const MULTI_SEND = "multiSend(bytes)";
 const SCHEDULE_BATCH =
   "scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)";
 
@@ -90,6 +91,63 @@ describe("multicall extractors skip shapes that are not calls", () => {
     ]);
     // No requireSuccess flag at all still means the batch tolerates failure.
     expect(extract(TRY_AGGREGATE, [undefined, "nonsense"])).toEqual([]);
+  });
+});
+
+describe("multiSend unpacks its hand-packed records", () => {
+  const record = (operation: string, to: string, wei: string, data: string) =>
+    operation +
+    to.slice(2).toLowerCase() +
+    wei.padStart(64, "0") +
+    (((data.length - 2) / 2) >>> 0).toString(16).padStart(64, "0") +
+    data.slice(2);
+
+  test("the operation byte decides how each record executes", () => {
+    const packed = `0x${record("00", TARGET, "0", "0xabcd")}${record(
+      "01",
+      OTHER,
+      "0",
+      "0x",
+    )}`;
+    expect(extract(MULTI_SEND, [packed])).toEqual([
+      { target: TARGET, value: 0n, calldata: "0xabcd" },
+      {
+        target: OTHER,
+        value: undefined,
+        calldata: "0x",
+        operation: "delegatecall",
+        warnings: [expect.objectContaining({ code: "delegatecall" })],
+      },
+    ]);
+  });
+
+  test("an operation byte that is not 01 stays an ordinary call", () => {
+    const [call] = extract(MULTI_SEND, [
+      `0x${record("02", TARGET, "0", "0x")}`,
+    ]);
+    expect(call.operation).toBeUndefined();
+    expect(call.warnings).toBeUndefined();
+  });
+
+  test("a record declaring more data than remains ends the batch", () => {
+    const whole = record("00", TARGET, "0", "0xabcd");
+    const clipped = record("00", OTHER, "0", "0xabcdef").slice(0, -2);
+    expect(extract(MULTI_SEND, [`0x${whole}${clipped}`])).toEqual([
+      { target: TARGET, value: 0n, calldata: "0xabcd" },
+    ]);
+  });
+
+  test("a trailing stub too short to hold a header is ignored", () => {
+    const whole = record("00", TARGET, "0", "0x");
+    expect(extract(MULTI_SEND, [`0x${whole}0011`])).toHaveLength(1);
+  });
+
+  test.each([
+    ["nothing at all", undefined],
+    ["a non-hex argument", "transactions"],
+    ["an empty blob", "0x"],
+  ])("%s yields no subcalls", (_label, packed) => {
+    expect(extract(MULTI_SEND, [packed])).toEqual([]);
   });
 });
 

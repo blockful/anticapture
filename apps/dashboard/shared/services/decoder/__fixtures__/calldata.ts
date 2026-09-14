@@ -29,6 +29,8 @@ const SAFE_ABI = parseAbi([
   "function execTransaction(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures)",
 ]);
 
+const MULTISEND_ABI = parseAbi(["function multiSend(bytes transactions)"]);
+
 const TIMELOCK_ABI = parseAbi([
   "function scheduleBatch(address[] targets, uint256[] values, bytes[] payloads, bytes32 predecessor, bytes32 salt, uint256 delay)",
 ]);
@@ -57,6 +59,42 @@ export const AGGREGATE3_BATCH: Hex = encodeFunctionData({
     ],
   ],
 });
+
+export const MULTI_SEND =
+  "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D" as Address;
+
+export type MultiSendEntry = {
+  /** 0 = call, 1 = delegatecall, exactly as the packed byte encodes it. */
+  operation: 0 | 1;
+  to: Address;
+  value: bigint;
+  data: Hex;
+};
+
+/**
+ * Safe MultiSend packs its batch by hand rather than ABI-encoding it:
+ * `operation(1) || to(20) || value(32) || dataLength(32) || data`, repeated
+ * with no padding between records.
+ */
+export const packMultiSend = (entries: MultiSendEntry[]): Hex =>
+  `0x${entries
+    .map(({ operation, to, value, data }) =>
+      [
+        operation.toString(16).padStart(2, "0"),
+        to.slice(2).toLowerCase(),
+        value.toString(16).padStart(64, "0"),
+        (((data.length - 2) / 2) >>> 0).toString(16).padStart(64, "0"),
+        data.slice(2),
+      ].join(""),
+    )
+    .join("")}`;
+
+export const multiSend = (entries: MultiSendEntry[]): Hex =>
+  encodeFunctionData({
+    abi: MULTISEND_ABI,
+    functionName: "multiSend",
+    args: [packMultiSend(entries)],
+  });
 
 export const safeExecTransaction = (
   to: Address,

@@ -31,6 +31,9 @@ export type DecodeInput = {
   /** Unvalidated on purpose: the standalone tool pastes arbitrary text. */
   calldata: string;
   value?: bigint;
+  /** A delegatecall runs this code against the CALLER's state, not the
+   *  target's, which changes what may be claimed about its effects. */
+  operation?: "call" | "delegatecall";
 };
 
 export type DecodeOptions = {
@@ -217,6 +220,7 @@ const decodeNode = async (
     chainId: input.chainId,
     target: input.target,
     value: input.value,
+    operation: input.operation,
     selector: null,
     abiSource: "none",
     params: [],
@@ -292,6 +296,7 @@ const decodeNode = async (
 
   const abiFn = fn;
   node.functionName = abiFn.name;
+  node.inputCount = abiFn.inputs.length;
 
   // 7. Decode. A failure against a resolved ABI is an error state, never blank.
   let args: readonly unknown[];
@@ -327,7 +332,13 @@ const decodeNode = async (
     );
   }
 
-  if (input.target && node.signature !== undefined) {
+  // A delegatecall touches nothing at the target, so the target is not the
+  // token here and the amount must not be read in its decimals or its symbol.
+  if (
+    input.target &&
+    node.signature !== undefined &&
+    node.operation !== "delegatecall"
+  ) {
     const amountIndex = TOKEN_AMOUNT_PARAM[node.signature];
     const amountParam = node.params[amountIndex];
     if (
@@ -377,6 +388,7 @@ const decodeNode = async (
             abiSource: "none",
             params: [],
             mayFail: subcall.mayFail,
+            operation: subcall.operation,
             raw: subcall.calldata,
             depth: depth + 1,
             warnings: [
@@ -430,6 +442,7 @@ const decodeNode = async (
               target: slot.subcall.target,
               calldata: slot.subcall.calldata,
               value: slot.subcall.value,
+              operation: slot.subcall.operation,
             },
             resolveAbi,
             opts,
@@ -466,6 +479,7 @@ const decodeNode = async (
           target: slot.subcall.target,
           calldata: slot.subcall.calldata,
           value: slot.subcall.value,
+          operation: slot.subcall.operation,
         },
         resolveAbi,
         opts,
