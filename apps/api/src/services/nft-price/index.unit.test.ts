@@ -63,7 +63,7 @@ describe("NFTPriceService", () => {
         ),
       );
 
-      const result = await service.getTokenPrice("token", "dao");
+      const { data: result } = await service.getTokenPrice("token", "dao");
 
       // 1 ETH * $2500 = $2500.00
       expect(result).toBe("2500.00");
@@ -90,7 +90,7 @@ describe("NFTPriceService", () => {
         ),
       );
 
-      const result = await service.getHistoricalTokenData(2, 0);
+      const { data: result } = await service.getHistoricalTokenData(2, 0);
 
       // 0.5 ETH * $2400 = $1200.00, 0.5 ETH * $2500 = $1250.00 (ascending by date)
       expect(result).toEqual([
@@ -112,7 +112,7 @@ describe("NFTPriceService", () => {
         ),
       );
 
-      const result = await service.getHistoricalPricesMap(1);
+      const { data: result } = await service.getHistoricalPricesMap(1);
 
       // 1 ETH * $2500 = 2500 (Map normalized timestamp → USD price)
       expect(result).toEqual(new Map([[1705276800, 2500]]));
@@ -219,7 +219,7 @@ describe("NFTPriceService", () => {
         ),
       );
 
-      const result = await service.getHistoricalTokenData(0, 0);
+      const { data: result } = await service.getHistoricalTokenData(0, 0);
 
       expect(result).toEqual([]);
     });

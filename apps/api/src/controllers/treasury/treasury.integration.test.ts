@@ -2,6 +2,7 @@ import { OpenAPIHono as Hono } from "@hono/zod-openapi";
 import { parseEther } from "viem";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { TreasuryRepository } from "@/repositories/treasury";
 import {
   TreasuryService,
@@ -34,13 +35,20 @@ class FakeTreasuryProvider implements TreasuryProvider {
 
 class FakePriceProvider implements PriceProvider {
   private prices: Map<number, number> = new Map();
+  private failure: unknown;
 
   setPrices(prices: Map<number, number>) {
     this.prices = prices;
   }
 
-  async getHistoricalPricesMap(_days: number): Promise<Map<number, number>> {
-    return this.prices;
+  /** Makes the next lookup reject, to exercise the degraded path. */
+  failWith(error: unknown) {
+    this.failure = error;
+  }
+
+  async getHistoricalPricesMap(_days: number) {
+    if (this.failure) throw this.failure;
+    return { data: this.prices, degraded: false };
   }
 }
 
@@ -232,6 +240,22 @@ describe("Treasury Controller", () => {
         items: [{ date: FIXED_TIMESTAMP, value: 5000 }], // 100 * $50
         totalCount: 1,
       });
+    });
+
+    // A 5xx here would count against the DAO circuit breaker in the gateway,
+    // which is the outage this route is meant to ride out.
+    it("returns 200 with no-store when CoinGecko is unavailable", async () => {
+      metricsRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther("100")]]),
+      );
+      priceRepo.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+
+      const res = await app.request("/treasury/dao-token?days=7d");
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("should return empty when price provider is not configured", async () => {

@@ -6,10 +6,17 @@ import {
   truncateTimestampToMidnight,
   calculateCutoffTimestamp,
 } from "@/lib/date-helpers";
+import {
+  recordDegradedUpstream,
+  type MaybeDegraded,
+} from "@/lib/degraded-upstream";
+import { StaleValueCache } from "@/lib/stale-cache";
 import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import {
+  isDegradableUpstreamStatus,
   PROVIDER_TIMEOUT_MS,
   UpstreamUnavailableError,
+  upstreamRejectedRequest,
 } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
@@ -19,6 +26,9 @@ import { PriceProvider } from "@/services/treasury/types";
 const EthPricesSchema = z.object({
   prices: z.array(z.tuple([z.number(), z.number()])),
 });
+
+/** Serving prices older than this is worse than serving none. */
+const STALE_PRICE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export interface NFTPriceRepository {
   getHistoricalNFTPrice(
@@ -30,6 +40,9 @@ export interface NFTPriceRepository {
 
 export class NFTPriceService implements PriceProvider {
   private readonly client: AxiosInstance;
+  /** Last good auction price series, so a CoinGecko outage is not an empty chart. */
+  private readonly lastGoodPrices =
+    new StaleValueCache<TokenHistoricalPriceResponse>(STALE_PRICE_MAX_AGE_MS);
 
   constructor(
     private readonly repo: NFTPriceRepository,
@@ -48,9 +61,34 @@ export class NFTPriceService implements PriceProvider {
   async getHistoricalTokenData(
     limit: number,
     offset: number,
-  ): Promise<TokenHistoricalPriceResponse> {
+  ): Promise<MaybeDegraded<TokenHistoricalPriceResponse>> {
+    // Outside the try below on purpose: this reads PostgreSQL, and a database
+    // error must stay a real error rather than degrade to stale prices.
     const auctionPrices = await this.repo.getHistoricalNFTPrice(limit, offset);
 
+    try {
+      const prices = await this.buildHistoricalPrices(auctionPrices, limit);
+      if (prices.length) this.lastGoodPrices.set(prices);
+      return { data: prices, degraded: false };
+    } catch (error) {
+      if (!(error instanceof UpstreamUnavailableError)) throw error;
+      const stale = this.lastGoodPrices.get()?.slice(-limit);
+      if (!stale?.length) throw error;
+      recordDegradedUpstream({
+        upstream: error.upstream,
+        resource: "token_historical_prices",
+        mode: "stale",
+        error,
+        context: { limit },
+      });
+      return { data: stale, degraded: true };
+    }
+  }
+
+  private async buildHistoricalPrices(
+    auctionPrices: TokenHistoricalPriceResponse,
+    limit: number,
+  ): Promise<TokenHistoricalPriceResponse> {
     const today = new Date();
     const fromData = new Date(today);
     fromData.setDate(today.getDate() - limit);
@@ -62,10 +100,8 @@ export class NFTPriceService implements PriceProvider {
       { from: fromQuery, to: toQuery },
       "fetching historical ETH prices from CoinGecko",
     );
-    // The auction prices above come from PostgreSQL. Only the CoinGecko call is
-    // tagged as an upstream failure, so a database error stays a real error
-    // instead of degrading to an empty series. The mapping below reads one ETH
-    // price per auction price, so a shorter series is a provider problem.
+    // The mapping below reads one ETH price per auction price, so a shorter
+    // series is a provider problem rather than something to index past.
     const ethHistoricalPrices = await this.fetchEthPrices(
       `/coins/ethereum/market_chart/range?vs_currency=usd&from=${fromQuery}&to=${toQuery}`,
       auctionPrices.length,
@@ -101,7 +137,7 @@ export class NFTPriceService implements PriceProvider {
     }));
   }
 
-  async getTokenPrice(_: string, __: string): Promise<string> {
+  async getTokenPrice(_: string, __: string): Promise<MaybeDegraded<string>> {
     const price = await this.repo.getTokenPrice();
     const nftEthValue = Number(formatEther(BigInt(price)));
 
@@ -112,7 +148,10 @@ export class NFTPriceService implements PriceProvider {
     );
 
     const ethPriceResponse = ethCurrentPrice.reverse().slice(0, 1);
-    return (nftEthValue * ethPriceResponse[0]![1]).toFixed(2);
+    return {
+      data: (nftEthValue * ethPriceResponse[0]![1]).toFixed(2),
+      degraded: false,
+    };
   }
 
   /**
@@ -129,6 +168,13 @@ export class NFTPriceService implements PriceProvider {
     try {
       body = (await this.client.get<unknown>(path)).data;
     } catch (error) {
+      const status = axios.isAxiosError(error)
+        ? error.response?.status
+        : undefined;
+      if (status !== undefined && !isDegradableUpstreamStatus(status)) {
+        throw upstreamRejectedRequest("coingecko", status, path);
+      }
+      logger.error({ err: error, path, status }, "CoinGecko request failed");
       throw new UpstreamUnavailableError(
         "coingecko",
         "Failed to fetch ETH prices",
@@ -155,8 +201,13 @@ export class NFTPriceService implements PriceProvider {
     return parsed.data.prices;
   }
 
-  async getHistoricalPricesMap(days: number): Promise<Map<number, number>> {
-    const priceData = await this.getHistoricalTokenData(days, 0);
+  async getHistoricalPricesMap(
+    days: number,
+  ): Promise<MaybeDegraded<Map<number, number>>> {
+    const { data: priceData, degraded } = await this.getHistoricalTokenData(
+      days,
+      0,
+    );
 
     const priceMap = new Map<number, number>();
     priceData.forEach((item) => {
@@ -164,6 +215,6 @@ export class NFTPriceService implements PriceProvider {
       priceMap.set(normalizedTimestamp, Number(item.price));
     });
 
-    return priceMap;
+    return { data: priceMap, degraded };
   }
 }

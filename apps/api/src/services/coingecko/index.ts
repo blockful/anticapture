@@ -3,11 +3,17 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
-import { recordDegradedUpstream } from "@/lib/degraded-upstream";
-import { DaoIdEnum } from "@/lib/enums";
 import {
+  recordDegradedUpstream,
+  type MaybeDegraded,
+} from "@/lib/degraded-upstream";
+import { DaoIdEnum } from "@/lib/enums";
+import { StaleValueCache } from "@/lib/stale-cache";
+import {
+  isDegradableUpstreamStatus,
   PROVIDER_TIMEOUT_MS,
   UpstreamUnavailableError,
+  upstreamRejectedRequest,
 } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
@@ -30,15 +36,21 @@ const createCoingeckoTokenPriceDataSchema = (
     }),
   });
 
+/** Serving prices older than this is worse than serving none. */
+const STALE_PRICE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
 export class CoingeckoService implements PriceProvider {
   private readonly client: AxiosInstance;
-  // Last successful market chart per `days` window. CoinGecko is third-party
-  // data, so when it fails we serve the previous answer instead of a 5xx that
-  // the gateway would count against the whole DAO circuit breaker.
-  private readonly lastGoodByDays = new Map<
-    number,
-    TokenHistoricalPriceResponse
-  >();
+  /**
+   * Longest market chart fetched so far, ascending by timestamp. CoinGecko is
+   * third-party data, so when it fails we serve the tail of this instead of a
+   * 5xx the gateway would count against the whole DAO circuit breaker.
+   */
+  private readonly lastGoodPrices =
+    new StaleValueCache<TokenHistoricalPriceResponse>(STALE_PRICE_MAX_AGE_MS);
+  private readonly lastGoodTokenPrice = new StaleValueCache<string>(
+    STALE_PRICE_MAX_AGE_MS,
+  );
 
   constructor(
     coingeckoApiUrl: string,
@@ -54,8 +66,11 @@ export class CoingeckoService implements PriceProvider {
     });
   }
 
-  async getHistoricalPricesMap(days: number): Promise<Map<number, number>> {
-    const priceData = await this.getHistoricalTokenData(days);
+  async getHistoricalPricesMap(
+    days: number,
+  ): Promise<MaybeDegraded<Map<number, number>>> {
+    const { data: priceData, degraded } =
+      await this.getHistoricalTokenData(days);
 
     const priceMap = new Map<number, number>();
     priceData.forEach((item) => {
@@ -63,12 +78,12 @@ export class CoingeckoService implements PriceProvider {
       priceMap.set(normalizedTimestamp, Number(item.price));
     });
 
-    return priceMap;
+    return { data: priceMap, degraded };
   }
 
   async getHistoricalTokenData(
     days: number = 365,
-  ): Promise<TokenHistoricalPriceResponse> {
+  ): Promise<MaybeDegraded<TokenHistoricalPriceResponse>> {
     const tokenId = CoingeckoTokenIdEnum[this.daoId];
 
     if (!tokenId) {
@@ -89,12 +104,10 @@ export class CoingeckoService implements PriceProvider {
       // Only a CoinGecko outage degrades. Everything after this point is our
       // own code and must surface as a real error.
       if (!(error instanceof UpstreamUnavailableError)) throw error;
-      logger.error(
-        { err: error, tokenId, days },
-        "failed to fetch historical token prices from CoinGecko",
-      );
-      const stale = this.lastGoodByDays.get(days);
-      if (!stale) throw error;
+      // Serve the tail of the longest series we hold: a request for 7 days is
+      // the last 7 points of a 365 day chart.
+      const stale = this.lastGoodPrices.get()?.slice(-days);
+      if (!stale?.length) throw error;
       recordDegradedUpstream({
         upstream: error.upstream,
         resource: "token_historical_prices",
@@ -102,7 +115,7 @@ export class CoingeckoService implements PriceProvider {
         error,
         context: { tokenId, days },
       });
-      return stale;
+      return { data: stale, degraded: true };
     }
 
     // CoinGecko returns timestamps in milliseconds, convert to seconds
@@ -110,34 +123,58 @@ export class CoingeckoService implements PriceProvider {
       price: price.toFixed(4),
       timestamp: Math.floor(timestampMs / 1000),
     }));
-    this.lastGoodByDays.set(days, prices);
-    return prices;
+    // An empty chart is a valid answer but useless as a fallback, and a shorter
+    // window must not overwrite a longer one we could still slice from.
+    const previous = this.lastGoodPrices.get();
+    if (prices.length && prices.length >= (previous?.length ?? 0)) {
+      this.lastGoodPrices.set(prices);
+    }
+    return { data: prices, degraded: false };
   }
 
   /**
-   * Calls the market chart endpoint and validates the body. Every failure in
-   * here is CoinGecko's, so they all become `UpstreamUnavailableError`.
+   * Calls the market chart endpoint and validates the body. Transport
+   * failures, timeouts, retryable statuses and an unexpected body are
+   * CoinGecko being unhealthy. A rejection such as an unknown token id is our
+   * misconfiguration and surfaces as a 502 instead of degrading silently.
    */
   private async fetchMarketChart(
     tokenId: string,
     days: number,
   ): Promise<CoingeckoHistoricalMarketData> {
-    try {
-      const response = await this.client.get<CoingeckoHistoricalMarketData>(
-        `/coins/${tokenId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
-      );
+    const path = `/coins/${tokenId}/market_chart?vs_currency=usd&days=${days}&interval=daily`;
+    const body = await this.request(path);
 
-      const { success, data } = CoingeckoHistoricalMarketDataSchema.safeParse(
-        response.data,
-      );
-      if (!success) {
-        throw new Error("Unexpected CoinGecko market chart response");
-      }
-      return data;
-    } catch (error) {
+    const { success, data } =
+      CoingeckoHistoricalMarketDataSchema.safeParse(body);
+    if (!success) {
       throw new UpstreamUnavailableError(
         "coingecko",
         "Failed to fetch historical token data",
+      );
+    }
+    return data;
+  }
+
+  /**
+   * One CoinGecko GET, with every transport outcome classified. Callers get
+   * either a body, an `UpstreamUnavailableError` they may degrade, or a 502
+   * they must not.
+   */
+  private async request(path: string): Promise<unknown> {
+    try {
+      return (await this.client.get<unknown>(path)).data;
+    } catch (error) {
+      const status = axios.isAxiosError(error)
+        ? error.response?.status
+        : undefined;
+      if (status !== undefined && !isDegradableUpstreamStatus(status)) {
+        throw upstreamRejectedRequest("coingecko", status, path);
+      }
+      logger.error({ err: error, path, status }, "CoinGecko request failed");
+      throw new UpstreamUnavailableError(
+        "coingecko",
+        "Failed to fetch data from CoinGecko",
         { cause: error },
       );
     }
@@ -146,7 +183,7 @@ export class CoingeckoService implements PriceProvider {
   async getTokenPrice(
     tokenContractAddress: string,
     targetCurrency: string,
-  ): Promise<string> {
+  ): Promise<MaybeDegraded<string>> {
     const tokenId = CoingeckoTokenIdEnum[this.daoId];
     const assetPlatform = CoingeckoIdToAssetPlatformId[tokenId];
     const formattedAddress = tokenContractAddress.toLowerCase();
@@ -156,17 +193,23 @@ export class CoingeckoService implements PriceProvider {
     );
     let body: unknown;
     try {
-      body = (
-        await this.client.get<unknown>(
-          `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
-        )
-      ).data;
-    } catch (error) {
-      throw new UpstreamUnavailableError(
-        "coingecko",
-        "Failed to fetch token property data",
-        { cause: error },
+      body = await this.request(
+        `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
       );
+    } catch (error) {
+      if (!(error instanceof UpstreamUnavailableError)) throw error;
+      // No invented price: without a last known one the caller gets the error.
+      // A made up number would be indistinguishable from a real quote.
+      const stale = this.lastGoodTokenPrice.get();
+      if (stale === undefined) throw error;
+      recordDegradedUpstream({
+        upstream: error.upstream,
+        resource: "token_properties",
+        mode: "stale",
+        error,
+        context: { assetPlatform: assetPlatform ?? "unknown", targetCurrency },
+      });
+      return { data: stale, degraded: true };
     }
 
     const { success, data: price } = createCoingeckoTokenPriceDataSchema(
@@ -181,6 +224,8 @@ export class CoingeckoService implements PriceProvider {
       );
     }
 
-    return price[formattedAddress]![targetCurrency]!.toString();
+    const value = price[formattedAddress]![targetCurrency]!.toString();
+    this.lastGoodTokenPrice.set(value);
+    return { data: value, degraded: false };
   }
 }

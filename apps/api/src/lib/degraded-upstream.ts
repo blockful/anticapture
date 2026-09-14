@@ -15,6 +15,19 @@ import type { Upstream } from "./upstream-error";
 /** `stale` served the last known payload, `empty` had nothing to serve. */
 export type DegradedMode = "stale" | "empty";
 
+/**
+ * A payload plus whether it is a degraded copy. Controllers need this to put
+ * `no-store` on stale responses: caching day-old prices downstream for the
+ * route's regular TTL would outlive the outage that produced them.
+ */
+export interface MaybeDegraded<T> {
+  data: T;
+  degraded: boolean;
+}
+
+/** Cache headers for a degraded response, so the fallback is never stored. */
+export const DEGRADED_CACHE_HEADERS = { "Cache-Control": "no-store" } as const;
+
 export interface DegradedUpstreamEvent {
   /** Provider whose failure triggered the fallback. */
   upstream: Upstream;

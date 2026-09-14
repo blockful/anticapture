@@ -1,6 +1,10 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 
-import { recordDegradedUpstream } from "@/lib/degraded-upstream";
+import {
+  DEGRADED_CACHE_HEADERS,
+  recordDegradedUpstream,
+  type MaybeDegraded,
+} from "@/lib/degraded-upstream";
 import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import {
   TokenHistoricalPriceRequest,
@@ -12,7 +16,7 @@ export interface TokenHistoricalDataClient {
   getHistoricalTokenData(
     limit: number,
     offset: number,
-  ): Promise<TokenHistoricalPriceResponse>;
+  ): Promise<MaybeDegraded<TokenHistoricalPriceResponse>>;
 }
 
 export function tokenHistoricalData(
@@ -45,8 +49,17 @@ export function tokenHistoricalData(
     async (context) => {
       const { skip, limit } = context.req.valid("query");
       try {
-        const data = await client.getHistoricalTokenData(limit, skip);
-        return context.json(data, 200);
+        const { data, degraded } = await client.getHistoricalTokenData(
+          limit,
+          skip,
+        );
+        // Stale prices take the same no-store as the empty fallback: caching
+        // them for the route's hour would outlive the outage that caused them.
+        return context.json(
+          data,
+          200,
+          degraded ? DEGRADED_CACHE_HEADERS : undefined,
+        );
       } catch (error) {
         // Only a price provider outage degrades to an empty series, because a
         // 5xx here would trip the gateway circuit breaker for the whole DAO.
@@ -62,7 +75,7 @@ export function tokenHistoricalData(
         });
         // no-store keeps the gateway from caching the empty fallback for the
         // route's regular max-age once the provider recovers.
-        return context.json([], 200, { "Cache-Control": "no-store" });
+        return context.json([], 200, DEGRADED_CACHE_HEADERS);
       }
     },
   );

@@ -20,7 +20,9 @@ function buildApp(client: TokenHistoricalDataClient) {
 
 describe("GET /token/historical-data cache headers", () => {
   it("keeps the route max-age on successful responses", async () => {
-    const app = buildApp({ getHistoricalTokenData: async () => [] });
+    const app = buildApp({
+      getHistoricalTokenData: async () => ({ data: [], degraded: false }),
+    });
 
     const res = await app.request("/token/historical-data?limit=7");
 
@@ -31,9 +33,10 @@ describe("GET /token/historical-data cache headers", () => {
 describe("GET /token/historical-data", () => {
   it("returns the client data", async () => {
     const app = buildApp({
-      getHistoricalTokenData: async () => [
-        { price: "1.0000", timestamp: 1700000000 },
-      ],
+      getHistoricalTokenData: async () => ({
+        data: [{ price: "1.0000", timestamp: 1700000000 }],
+        degraded: false,
+      }),
     });
 
     const res = await app.request("/token/historical-data?limit=7");
@@ -42,6 +45,20 @@ describe("GET /token/historical-data", () => {
     expect(await res.json()).toEqual([
       { price: "1.0000", timestamp: 1700000000 },
     ]);
+  });
+
+  it("keeps stale prices out of downstream caches", async () => {
+    const app = buildApp({
+      getHistoricalTokenData: async () => ({
+        data: [{ price: "1.0000", timestamp: 1700000000 }],
+        degraded: true,
+      }),
+    });
+
+    const res = await app.request("/token/historical-data?limit=7");
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
   });
 
   it("degrades to an empty series when the price provider fails", async () => {
@@ -65,7 +82,6 @@ describe("GET /token/historical-data", () => {
         mode: "empty",
       },
     ]);
-    degraded.restore();
   });
 
   // The NOUNS and LIL_NOUNS wiring reads auction prices from PostgreSQL before
@@ -82,7 +98,6 @@ describe("GET /token/historical-data", () => {
 
     expect(res.status).toBe(500);
     expect(degraded.recorded()).toEqual([]);
-    degraded.restore();
   });
 
   it("keeps a 503 that is not an upstream failure as a 503", async () => {
@@ -97,7 +112,6 @@ describe("GET /token/historical-data", () => {
 
     expect(res.status).toBe(503);
     expect(degraded.recorded()).toEqual([]);
-    degraded.restore();
   });
 
   it("keeps client errors such as an unlisted token and does not count them", async () => {
@@ -112,6 +126,5 @@ describe("GET /token/historical-data", () => {
 
     expect(res.status).toBe(404);
     expect(degraded.recorded()).toEqual([]);
-    degraded.restore();
   });
 });

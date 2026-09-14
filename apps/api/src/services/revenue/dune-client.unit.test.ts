@@ -11,6 +11,8 @@ import {
   vi,
 } from "vitest";
 
+import { z } from "zod";
+
 import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
 
 import { RevenueCache } from "./cache";
@@ -32,9 +34,16 @@ function buildUrls(
   );
 }
 
+/**
+ * Permissive row schema for the transport and caching tests, which are not
+ * about column validation. The column schemas are exercised through the public
+ * `fetchActions` below.
+ */
+const AnyRowSchema = z.record(z.string(), z.unknown());
+
 class TestableRevenueDuneClient extends RevenueDuneClient {
-  public fetchKey<Row = unknown>(key: RevenueQueryKey) {
-    return this.fetchJson<Row>(key);
+  public fetchKey(key: RevenueQueryKey, rowSchema: z.ZodType = AnyRowSchema) {
+    return this.fetchJson(key, rowSchema);
   }
 }
 
@@ -43,7 +52,6 @@ beforeAll(() => server.listen());
 afterEach(() => {
   server.resetHandlers();
   vi.useRealTimers();
-  vi.restoreAllMocks();
 });
 afterAll(() => server.close());
 
@@ -74,16 +82,20 @@ describe("RevenueDuneClient", () => {
     const body = { result: { rows: [{ a: 1 }] } };
     server.use(http.get(urls.actions, () => HttpResponse.json(body)));
 
-    const result = await client.fetchKey<{ a: number }>("actions");
+    const result = await client.fetchKey("actions");
 
     expect(result).toEqual(body);
   });
 
-  it("returns an empty result set on a non-2xx response", async () => {
+  it("returns an empty result set when Dune is unhealthy", async () => {
     server.use(
       http.get(
         urls.actions,
-        () => new HttpResponse(null, { status: 404, statusText: "Not Found" }),
+        () =>
+          new HttpResponse(null, {
+            status: 503,
+            statusText: "Service Unavailable",
+          }),
       ),
     );
 
@@ -91,6 +103,23 @@ describe("RevenueDuneClient", () => {
 
     expect(result).toEqual({ result: { rows: [] } });
   });
+
+  // A 404 means the query id is gone and a 401 that the key expired. Both are
+  // our misconfiguration, so they must not hide behind an empty 200.
+  it.each([401, 403, 404])(
+    "throws HTTPException(502) when Dune rejects with %i",
+    async (status) => {
+      server.use(
+        http.get(urls.actions, () => new HttpResponse(null, { status })),
+      );
+      const degraded = captureDegradedUpstream();
+
+      await expect(client.fetchKey("actions")).rejects.toMatchObject({
+        status: 502,
+      });
+      expect(degraded.recorded()).toEqual([]);
+    },
+  );
 
   // Only Dune's own failures may become an empty 200. Ours have to stay a real
   // error so the HTTP error metrics still count them.
@@ -108,7 +137,6 @@ describe("RevenueDuneClient", () => {
 
     await expect(client.fetchKey("actions")).rejects.toBe(ourBug);
     expect(degraded.recorded()).toEqual([]);
-    degraded.restore();
   });
 
   // A malformed 2xx body used to sail past the classification and get cached
@@ -127,7 +155,6 @@ describe("RevenueDuneClient", () => {
     expect(degraded.recorded()).toEqual([
       { upstream: "dune", resource: "revenue_actions", mode: "empty" },
     ]);
-    degraded.restore();
   });
 
   it("does not cache a malformed body, so a later good response wins", async () => {
@@ -148,6 +175,91 @@ describe("RevenueDuneClient", () => {
     expect(second).toEqual({ result: { rows: [{ id: 1 }] } });
   });
 
+  // A renamed or nulled column used to be cached for 24h and then blow up in
+  // the mapper on every later request, outside the classified path.
+  it("degrades on a row whose columns do not match the query schema", async () => {
+    server.use(
+      http.get(urls.actions, () =>
+        HttpResponse.json({
+          result: { rows: [{ renamed_month: "x", category: "Renewal" }] },
+        }),
+      ),
+    );
+    const degraded = captureDegradedUpstream();
+
+    const result = await client.fetchActions();
+
+    expect(result).toEqual([]);
+    expect(degraded.recorded()).toEqual([
+      { upstream: "dune", resource: "revenue_actions", mode: "empty" },
+    ]);
+  });
+
+  it("maps null aggregates to zero instead of rejecting the row", async () => {
+    server.use(
+      http.get(urls.actions, () =>
+        HttpResponse.json({
+          result: {
+            rows: [
+              {
+                month: "2026-01-01 00:00:00 UTC",
+                category: "Renewal",
+                actions: null,
+              },
+            ],
+          },
+        }),
+      ),
+    );
+
+    const result = await client.fetchActions();
+
+    expect(result).toEqual([
+      { date: 1767225600, category: "Renewal", actions: 0 },
+    ]);
+  });
+
+  it("shares one upstream call between concurrent requests for a key", async () => {
+    let hits = 0;
+    server.use(
+      http.get(urls.actions, async () => {
+        hits += 1;
+        return HttpResponse.json({ result: { rows: [{ id: hits }] } });
+      }),
+    );
+
+    const [first, second] = await Promise.all([
+      client.fetchKey("actions"),
+      client.fetchKey("actions"),
+    ]);
+
+    expect(hits).toBe(1);
+    expect(second).toEqual(first);
+  });
+
+  it("leases stale data briefly so an outage is not re-probed per request", async () => {
+    let hits = 0;
+    server.use(
+      http.get(urls.actions, () => {
+        hits += 1;
+        return hits === 1
+          ? HttpResponse.json({ result: { rows: [{ id: 1 }] } })
+          : new HttpResponse(null, { status: 503 });
+      }),
+    );
+
+    await client.fetchKey("actions");
+    // Expire the 24h entry so the next call goes upstream and fails.
+    vi.useFakeTimers();
+    vi.setSystemTime(Date.now() + 24 * 60 * 60 * 1000 + 1);
+    await client.fetchKey("actions");
+    const third = await client.fetchKey("actions");
+
+    // Two upstream calls, not three: the third was served from the 60s lease.
+    expect(hits).toBe(2);
+    expect(third).toEqual({ result: { rows: [{ id: 1 }] } });
+  });
+
   it("returns an empty result set on network error", async () => {
     server.use(http.get(urls.actions, () => HttpResponse.error()));
     const degraded = captureDegradedUpstream();
@@ -160,7 +272,6 @@ describe("RevenueDuneClient", () => {
     expect(degraded.recorded()).toEqual([
       { upstream: "dune", resource: "revenue_actions", mode: "empty" },
     ]);
-    degraded.restore();
   });
 
   it("serves the last successful result when Dune fails after the TTL", async () => {
@@ -186,7 +297,6 @@ describe("RevenueDuneClient", () => {
     expect(degraded.recorded()).toEqual([
       { upstream: "dune", resource: "revenue_actions", mode: "stale" },
     ]);
-    degraded.restore();
   });
 
   it("returns cached value on the second call within TTL without re-hitting MSW", async () => {

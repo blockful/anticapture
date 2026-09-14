@@ -6,6 +6,11 @@ import {
   truncateTimestampToMidnight,
 } from "@/lib/date-helpers";
 import { forwardFill, createDailyTimeline } from "@/lib/time-series";
+import {
+  recordDegradedUpstream,
+  type MaybeDegraded,
+} from "@/lib/degraded-upstream";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { TreasuryResponse } from "@/mappers/treasury";
 
 import { TreasuryProvider } from "./providers";
@@ -78,21 +83,22 @@ export class TreasuryService {
     days: number,
     order: "asc" | "desc",
     decimals: number,
-  ): Promise<TreasuryResponse> {
+  ): Promise<MaybeDegraded<TreasuryResponse>> {
     if (!this.priceProvider) {
-      return { items: [], totalCount: 0 };
+      return { data: { items: [], totalCount: 0 }, degraded: false };
     }
 
     const cutoffTimestamp = calculateCutoffTimestamp(days);
 
     // Fetch token quantities from DB and prices from CoinGecko
-    const [tokenQuantities, historicalPrices] = await Promise.all([
+    const [tokenQuantities, prices] = await Promise.all([
       this.repository.getTokenQuantities(cutoffTimestamp),
-      this.priceProvider.getHistoricalPricesMap(days),
+      this.fetchPricesOrDegrade(days),
     ]);
+    const { data: historicalPrices, degraded } = prices;
 
     if (tokenQuantities.size === 0 && historicalPrices.size === 0) {
-      return { items: [], totalCount: 0 };
+      return { data: { items: [], totalCount: 0 }, degraded };
     }
 
     // Normalize all timestamps to midnight UTC
@@ -127,7 +133,33 @@ export class TreasuryService {
       })
       .sort((a, b) => (order === "desc" ? b.date - a.date : a.date - b.date));
 
-    return { items, totalCount: items.length };
+    return { data: { items, totalCount: items.length }, degraded };
+  }
+
+  /**
+   * Prices for the token treasury. A CoinGecko outage degrades to no prices,
+   * which yields zero-valued points, rather than a 5xx: the gateway counts
+   * 5xx against the whole DAO's circuit breaker.
+   */
+  private async fetchPricesOrDegrade(
+    days: number,
+  ): Promise<MaybeDegraded<Map<number, number>>> {
+    if (!this.priceProvider) {
+      return { data: new Map(), degraded: false };
+    }
+    try {
+      return await this.priceProvider.getHistoricalPricesMap(days);
+    } catch (error) {
+      if (!(error instanceof UpstreamUnavailableError)) throw error;
+      recordDegradedUpstream({
+        upstream: error.upstream,
+        resource: "treasury",
+        mode: "empty",
+        error,
+        context: { days },
+      });
+      return { data: new Map(), degraded: true };
+    }
   }
 
   /**
@@ -137,14 +169,15 @@ export class TreasuryService {
     days: number,
     order: "asc" | "desc",
     decimals: number,
-  ): Promise<TreasuryResponse> {
-    const [liquidResult, tokenResult] = await Promise.all([
+  ): Promise<MaybeDegraded<TreasuryResponse>> {
+    const [liquidResult, token] = await Promise.all([
       this.getLiquidTreasury(days, order),
       this.getTokenTreasury(days, order, decimals),
     ]);
+    const { data: tokenResult, degraded } = token;
 
     if (liquidResult.items.length === 0 && tokenResult.items.length === 0) {
-      return { items: [], totalCount: 0 };
+      return { data: { items: [], totalCount: 0 }, degraded };
     }
 
     // Use the timeline with more data points (liquid or token could be empty)
@@ -158,6 +191,6 @@ export class TreasuryService {
         (tokenResult.items[i]?.value ?? 0),
     }));
 
-    return { items, totalCount: items.length };
+    return { data: { items, totalCount: items.length }, degraded };
   }
 }

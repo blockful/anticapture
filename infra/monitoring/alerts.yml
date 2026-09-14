@@ -170,12 +170,14 @@ groups:
 
       # A DAO API served stale or empty third-party data instead of failing.
       # These responses are 200s on purpose, so HighErrorRate never sees them.
+      # No `for`: the 15m increase window already requires the condition to have
+      # happened, so waiting would only delay the page. keep_firing_for holds the
+      # alert open across the scrape gaps of a low-traffic route.
       - alert: DegradedUpstreamData
         expr: >
           sum by (job, upstream, resource, mode) (
             increase(degraded_upstream_responses_total{job=~"anticapture-.*-api"}[15m])
           ) > 0
-        for: 5m
         keep_firing_for: 15m
         labels:
           severity: warning

@@ -9,6 +9,9 @@ export default defineConfig({
     // regularly blow through the 10s default.
     hookTimeout: 30_000,
     setupFiles: ["./vitest.setup.ts"],
+    // Spies are restored between tests, so a failing assertion cannot leak one
+    // into the next test.
+    restoreMocks: true,
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
