@@ -12,7 +12,11 @@ import { ParamRow } from "@/shared/components/decoder/ParamRow";
 import { RawView } from "@/shared/components/decoder/RawView";
 import { SummaryRow } from "@/shared/components/decoder/SummaryRow";
 import { ValueCell } from "@/shared/components/decoder/ValueCell";
-import type { DecodedCall, ViewMode } from "@/shared/components/decoder/types";
+import type {
+  DecodedCall,
+  DecodedParam,
+  ViewMode,
+} from "@/shared/components/decoder/types";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { humanizeEtherValue } from "@/shared/services/decoder/humanize";
@@ -85,17 +89,20 @@ const Row = ({
  */
 const FunctionSignature = ({
   call,
+  params,
   nested,
 }: {
   call: DecodedCall;
+  /** The call's params with the truncation note, if any, already removed. */
+  params: DecodedParam[];
   nested: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const namedArgs = call.params
+  const namedArgs = params
     .map((param) => `${param.type} ${param.name}`)
     .join(", ");
   const inline =
-    expanded || (!nested && call.params.length <= SIGNATURE_INLINE_MAX_PARAMS);
+    expanded || (!nested && params.length <= SIGNATURE_INLINE_MAX_PARAMS);
 
   return (
     <p className="text-secondary min-w-0 break-words font-mono text-sm leading-5">
@@ -107,11 +114,11 @@ const FunctionSignature = ({
           {"(…)"}
           <span className="text-dimmed text-xs">
             {" "}
-            · {call.params.length} params{" "}
+            · {params.length} params{" "}
           </span>
         </>
       )}
-      {call.params.length > SIGNATURE_INLINE_MAX_PARAMS || nested ? (
+      {params.length > SIGNATURE_INLINE_MAX_PARAMS || nested ? (
         <button
           type="button"
           onClick={() => setExpanded((current) => !current)}
@@ -246,6 +253,12 @@ export const DecodedActionCard = ({
 }: DecodedActionCardProps) => {
   const [view, setView] = useState<ViewMode>(defaultView);
 
+  // The decoder appends a "N more parameters not shown" note when one call
+  // declares more inputs than the render budget holds. It is a note about the
+  // omitted tail, not a parameter, so it is listed apart from the rows.
+  const params = call.params.filter((param) => !param.isTruncationNote);
+  const paramsNote = call.params.find((param) => param.isTruncationNote);
+
   const hasError = call.error !== undefined;
   const showDecoded = view === "decoded" && !hasError;
   const isNested = call.depth > 0;
@@ -343,12 +356,12 @@ export const DecodedActionCard = ({
 
         {call.functionName && showDecoded && (
           <Row label="function" nested={isNested} align="start">
-            <FunctionSignature call={call} nested={isNested} />
+            <FunctionSignature call={call} params={params} nested={isNested} />
           </Row>
         )}
 
         {showDecoded ? (
-          call.params.length > 0 && (
+          params.length > 0 && (
             <Row label="params" nested={isNested} align="start">
               <div
                 className={cn(
@@ -356,7 +369,7 @@ export const DecodedActionCard = ({
                   !isNested && "border-border-contrast border p-3",
                 )}
               >
-                {call.params.map((param, i) => (
+                {params.map((param, i) => (
                   <ParamRow
                     key={`${param.name}-${i}`}
                     param={param}
@@ -367,6 +380,11 @@ export const DecodedActionCard = ({
                     suppressNestedDecode={hasSubcalls}
                   />
                 ))}
+                {paramsNote && (
+                  <p className="text-dimmed w-fit font-mono text-xs leading-4 tracking-wider">
+                    {paramsNote.value}
+                  </p>
+                )}
               </div>
             </Row>
           )

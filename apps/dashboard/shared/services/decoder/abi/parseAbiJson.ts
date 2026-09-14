@@ -1,6 +1,7 @@
 import type { Abi } from "viem";
 
 import { parseAbiStrict } from "@/shared/services/decoder/abi/etherscan";
+import { isRecord } from "@/shared/services/decoder/guards";
 
 /**
  * Parses ABI JSON text as either a bare ABI array or a compiler artifact
@@ -10,17 +11,12 @@ import { parseAbiStrict } from "@/shared/services/decoder/abi/etherscan";
 export const parseAbiJson = (text: string): Abi | null => {
   try {
     const parsed: unknown = JSON.parse(text);
-    if (Array.isArray(parsed)) {
-      return parseAbiStrict(parsed);
-    }
-    if (
-      parsed &&
-      typeof parsed === "object" &&
-      Array.isArray((parsed as { abi?: unknown }).abi)
-    ) {
-      return parseAbiStrict((parsed as { abi: unknown[] }).abi);
-    }
-    return null;
+    // A bare ABI array, or an artifact carrying one under `abi`. parseAbiStrict
+    // tests the shape itself, so neither branch has to assert anything.
+    return (
+      parseAbiStrict(parsed) ??
+      (isRecord(parsed) ? parseAbiStrict(parsed.abi) : null)
+    );
   } catch {
     return null;
   }

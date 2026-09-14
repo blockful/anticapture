@@ -86,20 +86,31 @@ const NEGATIVE_RESULT_TTL_MS = 60_000;
 
 type CacheEntry<T> = { promise: Promise<T>; negativeAt?: number };
 
-const sharedCaches = new WeakMap<object, Map<string, CacheEntry<unknown>>>();
+/**
+ * One cache per fetcher identity, so every resolver instance built around the
+ * same fetcher shares it. They are declared per result type rather than as one
+ * erased map: a single map would have to hand each caller its entries back as
+ * something it merely asserts they are.
+ */
+const abiCaches = new WeakMap<object, Map<string, CacheEntry<Abi | null>>>();
+const signatureCaches = new WeakMap<
+  object,
+  Map<string, CacheEntry<string[]>>
+>();
 
 const cachedFetch = <T>(
+  caches: WeakMap<object, Map<string, CacheEntry<T>>>,
   fetcher: object,
   key: string,
   run: () => Promise<T>,
   isNegative: (result: T) => boolean,
 ): Promise<T> => {
-  let cache = sharedCaches.get(fetcher);
+  let cache = caches.get(fetcher);
   if (!cache) {
     cache = new Map();
-    sharedCaches.set(fetcher, cache);
+    caches.set(fetcher, cache);
   }
-  let entry = cache.get(key) as CacheEntry<T> | undefined;
+  let entry = cache.get(key);
   if (
     entry?.negativeAt !== undefined &&
     Date.now() - entry.negativeAt > NEGATIVE_RESULT_TTL_MS
@@ -113,7 +124,7 @@ const cachedFetch = <T>(
         return result;
       }),
     };
-    cache.set(key, created as CacheEntry<unknown>);
+    cache.set(key, created);
     entry = created;
   }
   return entry.promise;
@@ -133,6 +144,7 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
     const abi =
       bundled ??
       (await cachedFetch(
+        abiCaches,
         fetchVerified,
         `${ctx.chainId}:${target.toLowerCase()}`,
         () => fetchVerified(ctx.chainId, target),
@@ -156,6 +168,7 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
     ctx: AbiResolveContext,
   ): Promise<ResolvedAbi | null> => {
     const signatures = await cachedFetch(
+      signatureCaches,
       fetchSignatures,
       ctx.selector.toLowerCase(),
       () => fetchSignatures(ctx.selector),

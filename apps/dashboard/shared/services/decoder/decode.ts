@@ -113,7 +113,7 @@ const claim = (count: number, budget: ParamBudget): number => {
 const truncationNote = (
   dropped: number,
   type: string,
-  noun: "item" | "field",
+  noun: "item" | "field" | "parameter",
 ): DecodedParam => ({
   name: "…",
   type,
@@ -280,7 +280,7 @@ const decodeNode = async (
 
   // 6. No ABI anywhere: word-shape-guessed params, permanently flagged.
   if (!fn) {
-    node.params = guessWords(raw as Hex);
+    node.params = guessWords(node.raw);
     node.warnings.push({
       code: "guessed-types",
       message:
@@ -296,20 +296,36 @@ const decodeNode = async (
   // 7. Decode. A failure against a resolved ABI is an error state, never blank.
   let args: readonly unknown[];
   try {
-    const decoded = decodeFunctionData({ abi: [abiFn], data: raw as Hex });
-    args = (decoded.args ?? []) as readonly unknown[];
+    const decoded = decodeFunctionData({ abi: [abiFn], data: node.raw });
+    // A function with no inputs decodes to no args at all; anything else that
+    // is not a list is not an argument list, and reads as zero arguments.
+    args = Array.isArray(decoded.args) ? decoded.args : [];
   } catch {
     node.error = `Couldn't decode this calldata against ${node.signature ?? "the resolved ABI"}.`;
     node.summary = summarize(node);
     return node;
   }
 
-  // One budget for the whole parameter tree of this call, nested arrays and
-  // tuples included; subcalls are separate nodes, bounded by `maxNodes`.
+  // One budget for the whole parameter tree of this call: top-level inputs,
+  // nested arrays and tuple components all draw on it, since an ABI may
+  // declare thousands of scalar inputs and each one is a row like any other.
+  // Subcalls are separate nodes, bounded by `maxNodes`.
   const paramBudget: ParamBudget = { nodesLeft: MAX_PARAM_NODES };
-  node.params = abiFn.inputs.map((param, i) =>
+  const inputs = abiFn.inputs;
+  const retainedInputs = inputs.slice(0, claim(inputs.length, paramBudget));
+  node.params = retainedInputs.map((param, i) =>
     buildParam(param, args[i], abiFn.name, i, paramBudget),
   );
+  const droppedInputs = inputs.length - retainedInputs.length;
+  if (droppedInputs > 0) {
+    node.params.push(
+      truncationNote(
+        droppedInputs,
+        inputs[retainedInputs.length].type,
+        "parameter",
+      ),
+    );
+  }
 
   if (input.target && node.signature !== undefined) {
     const amountIndex = TOKEN_AMOUNT_PARAM[node.signature];

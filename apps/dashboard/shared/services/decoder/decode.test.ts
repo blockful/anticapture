@@ -168,14 +168,15 @@ describe("decodeCalldata basics", () => {
     const node = await decodeCalldata({ chainId: 1, calldata }, resolver);
     const recipients = node.params[0];
     expect(recipients.value).toBe("250 items");
-    expect(recipients.children).toHaveLength(101);
-    expect(recipients.children?.[99]).toMatchObject({
-      name: "[99]",
+    // The param row itself is one of the 100 nodes, so 99 elements follow it.
+    expect(recipients.children).toHaveLength(100);
+    expect(recipients.children?.[98]).toMatchObject({
+      name: "[98]",
       value: RECIPIENT,
     });
-    expect(recipients.children?.[100]).toMatchObject({
+    expect(recipients.children?.[99]).toMatchObject({
       name: "…",
-      value: "150 more items not shown",
+      value: "151 more items not shown",
       isTruncationNote: true,
     });
     // The render tree is a sample of the array, so the encoded length rides
@@ -209,10 +210,10 @@ describe("decodeCalldata basics", () => {
 
     const outer = node.params[0];
     expect(outer.originalLength).toBe(40);
-    // The outer elements are themselves rows, so they spend the budget too:
-    // 40 of the 100 nodes go to the inner arrays and 60 to addresses.
-    expect(countAddresses(node.params)).toBe(60);
-    expect(outer.children?.[0].children).toHaveLength(61);
+    // Every row spends the budget: 1 node for the param, 40 for the inner
+    // arrays and the remaining 59 for addresses.
+    expect(countAddresses(node.params)).toBe(59);
+    expect(outer.children?.[0].children).toHaveLength(60);
     expect(outer.children?.[0].originalLength).toBe(99);
     // Once the budget is gone, later arrays keep only their not-shown note.
     expect(outer.children?.[39].children).toEqual([
@@ -222,6 +223,30 @@ describe("decodeCalldata basics", () => {
       }),
     ]);
     expect(outer.children?.[39].originalLength).toBe(99);
+  });
+
+  test("top-level inputs draw on the budget and end with the marker", async () => {
+    // An ABI may declare thousands of scalar inputs, and ~4,000 address words
+    // still fit the 128 KiB decode limit: the inputs are rows like any other.
+    const names = Array.from({ length: 300 }, (_, i) => `address to${i}`);
+    const abi: Abi = parseAbi([`function pay(${names.join(", ")})`]);
+    const calldata = encodeFunctionData({
+      abi,
+      functionName: "pay",
+      args: Array.from({ length: 300 }, () => RECIPIENT),
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata },
+      resolverFor(abi),
+    );
+    expect(countAddresses(node.params)).toBe(100);
+    expect(node.params).toHaveLength(101);
+    expect(node.params[99]).toMatchObject({ name: "to99", value: RECIPIENT });
+    expect(node.params[100]).toMatchObject({
+      isTruncationNote: true,
+      value: "200 more parameters not shown",
+    });
   });
 
   test("tuple components draw on the same budget as array elements", async () => {
@@ -248,27 +273,24 @@ describe("decodeCalldata basics", () => {
       { chainId: 1, calldata },
       resolverFor(abi),
     );
-    expect(countAddresses(node.params)).toBeLessThanOrEqual(100);
+    // Per-container caps saw nothing wrong here: no array holds more than 99
+    // and no tuple more than 40.
+    expect(countAddresses(node.params)).toBe(0);
 
     const batches = node.params[0];
     expect(batches.originalLength).toBe(99);
+    // The param row plus the 99 tuple rows are the whole budget, so every
+    // tuple keeps its note and nothing below it is rendered.
     expect(batches.children).toHaveLength(99);
-    // 99 tuple rows spend all but one node, and that one buys a single field.
-    const [first, second] = batches.children ?? [];
-    expect(first.originalLength).toBe(40);
-    expect(first.children).toEqual([
-      expect.objectContaining({ name: "recipient0", value: RECIPIENT }),
-      expect.objectContaining({
-        isTruncationNote: true,
-        value: "39 more fields not shown",
-      }),
-    ]);
-    expect(second.children).toEqual([
-      expect.objectContaining({
-        isTruncationNote: true,
-        value: "40 more fields not shown",
-      }),
-    ]);
+    for (const tuple of batches.children ?? []) {
+      expect(tuple.originalLength).toBe(40);
+      expect(tuple.children).toEqual([
+        expect.objectContaining({
+          isTruncationNote: true,
+          value: "40 more fields not shown",
+        }),
+      ]);
+    }
   });
 
   test("unknown selector degrades to guessed words with a permanent warning", async () => {
