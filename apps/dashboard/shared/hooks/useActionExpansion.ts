@@ -29,15 +29,24 @@ export const useActionExpansion = ({
     () => new Set(defaultExpanded),
   );
   const hydratedKeyRef = useRef<string | null>(null);
+  // Callers pass a fresh array literal every render, so the effect below
+  // cannot depend on its identity without re-running forever. The ref gives
+  // it the current value without the identity.
+  const defaultsRef = useRef(defaultExpanded);
+  defaultsRef.current = defaultExpanded;
 
-  // a fresh array literal per render; keying the effect on it would loop.
   useEffect(() => {
     // Reset first: an unseen key must start from the defaults, never from the
     // previous proposal's state.
-    let next = new Set(defaultExpanded);
+    let next = new Set(defaultsRef.current);
     try {
       const stored = sessionStorage.getItem(storageKey);
-      if (stored) next = new Set(JSON.parse(stored) as number[]);
+      const parsed: unknown = stored === null ? null : JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        next = new Set(
+          parsed.filter((index): index is number => typeof index === "number"),
+        );
+      }
     } catch {
       // Storage denied (private mode, embedded webview): defaults stand.
     }

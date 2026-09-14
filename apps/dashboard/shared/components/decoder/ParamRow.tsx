@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { isAddress, type Address } from "viem";
+import { isAddress } from "viem";
 
 import { AddressChip } from "@/shared/components/decoder/AddressChip";
 import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
@@ -32,8 +32,12 @@ interface ParamRowProps {
 }
 
 const LONG_RAW_THRESHOLD = 26;
-/** Array elements shown before the reader asks for the rest. */
-const ARRAY_PREVIEW = 3;
+/**
+ * Children shown before the reader asks for the rest. Tuples are capped like
+ * arrays: a 99-component tuple is as many rows, and as many identity lookups,
+ * as a 99-element array.
+ */
+const CHILD_PREVIEW = 3;
 
 const isArrayType = (type: string): boolean => type.endsWith("]");
 
@@ -102,16 +106,14 @@ export const ParamRow = ({
   const isArray = isContainer && isArrayType(param.type);
   const [showAll, setShowAll] = useState(false);
 
-  const view = containerParamView(
-    param,
-    isArray && !showAll ? ARRAY_PREVIEW : null,
-  );
+  const view = containerParamView(param, showAll ? null : CHILD_PREVIEW);
 
-  const isAddressValue = Boolean(param.isAddress && isAddress(param.value));
+  const value = param.value;
+  const addressValue = param.isAddress && isAddress(value) ? value : undefined;
   // Address rows render the identity chip, which carries its own [copy]; the
   // generic annotation column applies to plain values only.
   const { display, annotation, copyAnnotation } =
-    isAddressValue || isContainer
+    addressValue !== undefined || isContainer
       ? { display: undefined, annotation: undefined, copyAnnotation: false }
       : splitDisplay(param);
 
@@ -149,12 +151,9 @@ export const ParamRow = ({
 
         {!isContainer && (
           <div className="@md:flex-row @md:items-center @md:gap-3 flex min-w-0 flex-1 flex-col gap-0.5">
-            {isAddressValue ? (
+            {addressValue !== undefined ? (
               <span className="flex min-w-0">
-                <AddressChip
-                  address={param.value as Address}
-                  explorerUrl={explorerUrl}
-                />
+                <AddressChip address={addressValue} explorerUrl={explorerUrl} />
               </span>
             ) : (
               // The reading wins over the raw annotation: it keeps its width
@@ -212,7 +211,7 @@ export const ParamRow = ({
               {view.note.value}
             </p>
           )}
-          {isArray && showAll && view.retained > ARRAY_PREVIEW && (
+          {showAll && view.retained > CHILD_PREVIEW && (
             <DisclosureButton onClick={() => setShowAll(false)}>
               [– show less]
             </DisclosureButton>

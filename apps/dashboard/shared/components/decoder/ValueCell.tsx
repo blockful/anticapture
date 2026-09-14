@@ -14,6 +14,15 @@ interface ValueCellProps {
 
 const isHexLike = (value: string): boolean => /^0x[0-9a-fA-F]*$/.test(value);
 
+/** A word-guessed leaf can hold the whole tail of a 128 KiB payload, and a
+ *  native tooltip is no place for it. */
+const TITLE_MAX_CHARS = 256;
+
+const asTitle = (value: string): string =>
+  value.length > TITLE_MAX_CHARS
+    ? `${value.slice(0, TITLE_MAX_CHARS)}…`
+    : value;
+
 /**
  * Humanized-first value. Numbers and symbols never break mid-token: they stay
  * on one line with tabular digits and ellipsize when the column is too
@@ -33,7 +42,7 @@ export const ValueCell = ({ display, raw, className }: ValueCellProps) => {
   if (!display || display === raw) {
     return (
       <span
-        title={raw}
+        title={asTitle(raw)}
         className={cn(
           "text-primary block min-w-0 font-mono text-sm leading-5",
           textClass,
@@ -48,7 +57,7 @@ export const ValueCell = ({ display, raw, className }: ValueCellProps) => {
   return (
     <button
       type="button"
-      title={showRaw ? display : `raw: ${raw}`}
+      title={showRaw ? asTitle(display) : `raw: ${asTitle(raw)}`}
       onClick={() => setShowRaw((current) => !current)}
       className={cn(
         "text-primary block min-w-0 max-w-full cursor-pointer text-left font-mono text-sm leading-5",

@@ -2,7 +2,7 @@
 
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { isHex, keccak256, type Address, type Hex } from "viem";
+import { isHex, keccak256, type Address } from "viem";
 
 import { createAbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
 import type { UploadedAbiStore } from "@/shared/services/decoder/abi/uploadedStore";
@@ -26,7 +26,7 @@ const DEGRADED_STALE_TIME_MS = 30 * 1000;
  */
 const calldataKey = (calldata: string): string =>
   isHex(calldata) && calldata.length % 2 === 0
-    ? keccak256(calldata as Hex)
+    ? keccak256(calldata)
     : `raw:${keccak256(new TextEncoder().encode(calldata))}`;
 
 type UseDecodedCalldataArgs = {
@@ -39,6 +39,13 @@ type UseDecodedCalldataArgs = {
   enabled?: boolean;
   /** Lazy nested decodes continue from their parent's depth. */
   startDepth?: number;
+  /**
+   * How deep to unpack. 0 stops at the wrapper, which still yields its arity
+   * and its summary without a single ABI lookup for the children: a list of
+   * collapsed actions decodes every one of them, and recursing there costs a
+   * proxy request per nested call before the reader has asked for any.
+   */
+  maxDepth?: number;
 };
 
 export const useDecodedCalldata = ({
@@ -49,15 +56,17 @@ export const useDecodedCalldata = ({
   uploadedAbis,
   enabled = true,
   startDepth,
+  maxDepth,
 }: UseDecodedCalldataArgs): UseQueryResult<DecodedCall> => {
   const uploadedVersion = uploadedAbis?.version ?? 0;
-  // The resolver memoizes fetches per instance; rebuild only when an upload
-  // changes what a lookup could return.
 
-  const resolver = useMemo(
-    () => createAbiResolver({ uploaded: uploadedAbis }),
-    [uploadedAbis, uploadedVersion],
-  );
+  const resolver = useMemo(() => {
+    // The store object is stable and only its counter moves, so the version
+    // is the dependency that matters: the resolver memoizes fetches per
+    // instance, and an upload has to drop what the previous one remembered.
+    void uploadedVersion;
+    return createAbiResolver({ uploaded: uploadedAbis });
+  }, [uploadedAbis, uploadedVersion]);
 
   return useQuery<DecodedCall>({
     queryKey: [
@@ -72,12 +81,13 @@ export const useDecodedCalldata = ({
       // serve a decode made with a previous store's ABI under the same key.
       uploadedAbis ? `${uploadedAbis.id}:${uploadedVersion}` : "-",
       startDepth ?? 0,
+      maxDepth ?? "-",
     ],
     queryFn: () =>
       decodeCalldata(
         { chainId, target, calldata: calldata ?? "0x", value },
         resolver,
-        { startDepth },
+        { startDepth, maxDepth },
       ),
     enabled: enabled && calldata !== null,
     // Calldata is immutable, so a full decode is authoritative forever; only

@@ -111,9 +111,15 @@ const describeSubcalls = (
   subcalls: NonNullable<DecodedCall["subcalls"]>,
   count: number,
 ): string | null => {
-  if (subcalls.length === 0) return null;
+  // A child the depth limit left raw has no name to lend, and listing it by
+  // selector would fill the sentence with hex that says nothing. The arity
+  // alone is the honest summary then.
+  const opened = subcalls.filter(
+    (call) => !call.warnings.some((warning) => warning.code === "depth-limit"),
+  );
+  if (opened.length === 0) return null;
   if (count === 1) {
-    const [child] = subcalls;
+    const [child] = opened;
     // A nested wrapper's own sentence would chain "Executes 1 call: executes
     // 2 calls: …"; naming it with its arity reads better. A delegatecall child
     // needs no special case: its own sentence already says "delegatecalls X",
@@ -126,12 +132,12 @@ const describeSubcalls = (
     const target = child.target ? ` on ${shortAddress(child.target)}` : "";
     return `${subcallNoun(child)}${target}`;
   }
-  const names = [...new Set(subcalls.map(subcallNoun))];
+  const names = [...new Set(opened.map(subcallNoun))];
   const listed = names.slice(0, MAX_LISTED_SUBCALLS);
-  // When the node budget dropped children, the names are a sample of the
+  // When children were dropped or left raw, the names are a sample of the
   // batch and cannot claim an exact remainder. The leading count is the one
   // that speaks for the whole batch.
-  if (subcalls.length < count) return `${listed.join(", ")}, …`;
+  if (opened.length < count) return `${listed.join(", ")}, …`;
   const rest = names.length - listed.length;
   return rest > 0 ? `${listed.join(", ")}, +${rest} more` : listed.join(", ");
 };

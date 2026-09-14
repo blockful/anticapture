@@ -29,6 +29,35 @@ const getCuratedSymbol = (
   return curatedSymbols.get(token.toLowerCase());
 };
 
+/** Longest ticker a summary will repeat. Real ones are three to six. */
+const TICKER_MAX_CHARS = 12;
+
+const isPrintable = (char: string): boolean => {
+  const code = char.codePointAt(0) ?? 0;
+  return (
+    code > 0x1f &&
+    code !== 0x7f &&
+    !(code >= 0x80 && code <= 0x9f) &&
+    !(code >= 0x200b && code <= 0x200f) &&
+    !(code >= 0x2028 && code <= 0x202e)
+  );
+};
+
+/**
+ * A symbol read from an arbitrary contract goes straight into a sentence the
+ * reader trusts, so it is treated as the untrusted text it is: a string or
+ * nothing, control and bidirectional characters removed, and short enough
+ * that it cannot crowd out the sentence around it.
+ */
+const sanitizeSymbol = (value: unknown): string | undefined => {
+  if (typeof value !== "string") return undefined;
+  const cleaned = [...value].filter(isPrintable).join("").trim();
+  if (cleaned.length === 0) return undefined;
+  return cleaned.length > TICKER_MAX_CHARS
+    ? `${cleaned.slice(0, TICKER_MAX_CHARS)}…`
+    : cleaned;
+};
+
 /**
  * decimals + symbol for the tokens a decoded tree hinted at. Known tokens
  * (governance tokens of supported DAOs, major stables) resolve instantly from
@@ -76,7 +105,7 @@ export const useTokenMeta = (
       if (decimalsResult?.status !== "success") return;
       const symbol =
         (symbolResult?.status === "success"
-          ? (symbolResult.result as string)
+          ? sanitizeSymbol(symbolResult.result)
           : undefined) ??
         getCuratedSymbol(chainId, token) ??
         map.get(token.toLowerCase())?.symbol ??

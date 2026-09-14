@@ -477,7 +477,7 @@ export const AddCustomActionModal = ({
                       placeholder={
                         showEmptyAbiState
                           ? ""
-                          : 'Paste ABI JSON here — e.g. [{"type":"function",...}]'
+                          : 'Paste ABI JSON here, e.g. [{"type":"function",...}]'
                       }
                       className="min-h-32 font-mono text-xs"
                       disabled={!isManualAbiEntry}
@@ -491,7 +491,7 @@ export const AddCustomActionModal = ({
                   )}
                   {abi && !isFetchingAbi && !fetchError && (
                     <span className="text-success text-xs">
-                      ABI loaded — {functions.length} write function
+                      ABI loaded, {functions.length} write function
                       {functions.length === 1 ? "" : "s"}
                     </span>
                   )}

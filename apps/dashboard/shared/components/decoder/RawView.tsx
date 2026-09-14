@@ -16,6 +16,8 @@ export const RawView = ({
         selector: <span className="text-secondary">{selector}</span>
       </p>
     )}
-    <CodeBlock code={raw} codeClassName="break-all" />
+    {/* Calldata runs to 128 KiB: the block scrolls instead of pushing the
+        rest of the card off the screen. */}
+    <CodeBlock code={raw} codeClassName="break-all max-h-40 overflow-y-auto" />
   </div>
 );

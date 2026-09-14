@@ -47,7 +47,10 @@ export type DecodeOptions = {
   startDepth?: number;
 };
 
-const DEFAULTS = { maxDepth: 5, maxBytes: 131_072, maxNodes: 200 };
+/** Calldata past this many bytes keeps only its selector and its raw hex. */
+export const MAX_DECODE_BYTES = 131_072;
+
+const DEFAULTS = { maxDepth: 5, maxBytes: MAX_DECODE_BYTES, maxNodes: 200 };
 
 /** Parameter nodes ONE decoded call may retain across every nesting level:
  *  top-level inputs, array elements and tuple components alike. The 128 KiB
@@ -239,7 +242,9 @@ const decodeNode = async (
     warnings: [],
     summary: null,
   };
-  const raw = node.raw as string;
+  // Widened on purpose: `raw` holds whatever was pasted, and the checks
+  // below are what earn it the Hex type back.
+  const raw: string = node.raw;
 
   // 1. Malformed input: an error node that preserves the input verbatim.
   if (!isHexString(raw)) {
@@ -283,7 +288,7 @@ const decodeNode = async (
     chainId: input.chainId,
     target: input.target,
     selector: node.selector,
-    calldata: raw as Hex,
+    calldata: node.raw,
   });
   if (resolved) {
     fn = resolved.fn;
@@ -565,12 +570,23 @@ export const decodeCalldata = (
   opts?: DecodeOptions,
 ): Promise<DecodedCall> => {
   const { startDepth, ...limits } = opts ?? {};
+  // Merged field by field, never by spreading: a caller that passes an option
+  // it has not decided yet ("maxDepth: expanded ? undefined : 0") would
+  // otherwise spread that `undefined` over the default and switch the guard
+  // off entirely. Nullish coalescing also keeps a deliberate 0.
+  const merged = {
+    maxDepth: limits.maxDepth ?? DEFAULTS.maxDepth,
+    maxBytes: limits.maxBytes ?? DEFAULTS.maxBytes,
+    maxNodes: limits.maxNodes ?? DEFAULTS.maxNodes,
+  };
   return decodeNode(
     input,
     resolveAbi,
-    { ...DEFAULTS, ...limits },
+    merged,
     startDepth ?? 0,
-    { nodesLeft: limits.maxNodes ?? DEFAULTS.maxNodes },
+    {
+      nodesLeft: merged.maxNodes,
+    },
     { nodesLeft: MAX_TREE_PARAM_NODES },
   );
 };

@@ -3,7 +3,7 @@
 import { FileSearch } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
-import { isAddress, type Abi, type Address } from "viem";
+import { isAddress, type Abi } from "viem";
 
 import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
 import { DecodedActionCard } from "@/shared/components/decoder/DecodedActionCard";
@@ -11,10 +11,12 @@ import { DecoderCardSkeleton } from "@/shared/components/decoder/DecoderCardSkel
 import { DecoderInputPanel } from "@/features/decoder/components/DecoderInputPanel";
 import { permalinkAddress } from "@/features/decoder/utils/addressInput";
 import {
+  clampCalldataInput,
+  exceedsPermalinkLimit,
   isValidCalldataInput,
   normalizeCalldataInput,
-  PERMALINK_CALLDATA_LIMIT,
 } from "@/features/decoder/utils/calldataInput";
+import { toSupportedChainId } from "@/features/decoder/utils/chains";
 import { decoderParsers } from "@/features/decoder/utils/decoderSearchParams";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -40,8 +42,11 @@ const explorerForChain = (chainId: number): string | undefined => {
  * permalinks (calldata, address, chain; a custom ABI stays local by design).
  */
 export const DecoderTool = () => {
-  const [{ calldata, address, chainId }, setParams] =
+  const [{ calldata, address, chainId: chainIdParam }, setParams] =
     useQueryStates(decoderParsers);
+  // The URL is user input and this id reaches the ABI proxy as a query
+  // parameter: a chain the platform does not index reads as mainnet.
+  const chainId = toSupportedChainId(chainIdParam);
 
   // Calldata past the permalink limit lives here instead of the URL: request
   // lines have practical size caps, and a permalink that cannot open is worse
@@ -69,10 +74,12 @@ export const DecoderTool = () => {
     if (permalink !== address) void setParams({ address: permalink });
   };
 
-  const handleCalldataChange = (value: string) => {
-    // Bound what actually lands in the URL: whitespace in explorer pastes
-    // URL-encodes to three characters each, so the raw length undercounts.
-    if (encodeURIComponent(value).length > PERMALINK_CALLDATA_LIMIT) {
+  const handleCalldataChange = (raw: string) => {
+    // Nothing past the decode limit is ever looked at, so nothing past it is
+    // kept: a multi-megabyte paste would otherwise re-render, re-hash and
+    // re-encode on every keystroke that followed it.
+    const value = clampCalldataInput(raw);
+    if (exceedsPermalinkLimit(value)) {
       setOversizedDraft(value);
       if (calldata) void setParams({ calldata: "" });
     } else {
@@ -94,9 +101,10 @@ export const DecoderTool = () => {
   const hasInput = normalized.length > 0;
   const inputValid = !hasInput || isValidCalldataInput(normalized);
   const trimmedAddress = addressInput.trim();
-  const addressValid = trimmedAddress === "" || isAddress(trimmedAddress);
-  const target =
-    addressValid && trimmedAddress ? (trimmedAddress as Address) : undefined;
+  // viem's isAddress is itself a type predicate, so the target narrows here
+  // rather than being asserted into an Address further down.
+  const target = isAddress(trimmedAddress) ? trimmedAddress : undefined;
+  const addressValid = trimmedAddress === "" || target !== undefined;
 
   // The uploaded ABI scopes to the selected target when one exists, so it
   // never preempts resolution for unrelated contracts (a wrapper's child
@@ -166,7 +174,9 @@ export const DecoderTool = () => {
         addressError={addressValid ? null : "Not a valid address."}
         onCalldataChange={handleCalldataChange}
         onAddressChange={handleAddressChange}
-        onChainIdChange={(value) => void setParams({ chainId: value })}
+        onChainIdChange={(value) =>
+          void setParams({ chainId: toSupportedChainId(value) })
+        }
         onAbiChange={handleAbiChange}
       />
 

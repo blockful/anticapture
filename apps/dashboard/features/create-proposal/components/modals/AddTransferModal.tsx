@@ -407,8 +407,8 @@ export const AddTransferModal = ({
           </div>
           {exceedsBalance && (
             <span className="text-warning text-xs">
-              Amount exceeds the treasury&apos;s available balance — the
-              proposal would revert on execution.
+              Amount exceeds the treasury&apos;s available balance. The proposal
+              would revert on execution.
             </span>
           )}
           <span className="text-secondary text-xs">

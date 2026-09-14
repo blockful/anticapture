@@ -963,6 +963,46 @@ describe("multicall unpacking", () => {
     expect(node.summary).toBeNull();
   });
 
+  test("maxDepth 0 yields the arity without touching a single child", async () => {
+    // A collapsed action shows one sentence, and a wrapper can produce it
+    // from its own arity: recursing costs an ABI lookup per nested call for a
+    // row nobody has opened yet.
+    const fetchVerifiedAbi = jest.fn().mockResolvedValue(null);
+    const fetchSignatures = jest.fn().mockResolvedValue([]);
+    const node = await decodeCalldata(
+      { chainId: 1, calldata: AGGREGATE3_BATCH, target: MULTICALL3 },
+      createAbiResolver({ fetchVerifiedAbi, fetchSignatures }),
+      { maxDepth: 0 },
+    );
+
+    expect(node.functionName).toBe("aggregate3");
+    expect(node.subcallCount).toBe(2);
+    // Named by selector the sentence would say nothing, so it says the count.
+    expect(node.summary).toBe("Executes 2 calls.");
+    expect(node.subcalls!.every((call) => call.params.length === 0)).toBe(true);
+    // One lookup for the wrapper itself, none for anything inside it.
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(1);
+    expect(fetchSignatures).not.toHaveBeenCalled();
+  });
+
+  test("an option left undecided keeps its default, and 0 is honoured", async () => {
+    // Callers write "maxDepth: expanded ? undefined : 0"; spreading that over
+    // the defaults would switch the depth guard off instead of leaving it on.
+    const undecided = await decodeCalldata(
+      { chainId: 1, calldata: SAFE_WRAPPING_AGGREGATE3 },
+      offlineResolver,
+      { maxDepth: undefined, maxBytes: undefined, maxNodes: undefined },
+    );
+    expect(undecided.subcalls![0].subcalls).toHaveLength(2);
+
+    const stopped = await decodeCalldata(
+      { chainId: 1, calldata: SAFE_WRAPPING_AGGREGATE3 },
+      offlineResolver,
+      { maxDepth: 0 },
+    );
+    expect(stopped.subcalls![0].subcalls).toBeUndefined();
+  });
+
   test("a lazy nested decode continues from its parent depth", async () => {
     const node = await decodeCalldata(
       { chainId: 1, calldata: USDC_TRANSFER, target: USDC },

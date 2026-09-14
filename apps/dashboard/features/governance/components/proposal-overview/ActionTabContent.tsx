@@ -146,11 +146,16 @@ const ActionItem = ({
 
   // The decode itself is cheap and cached forever per calldata hash; only the
   // heavy card UI is gated behind expansion.
+  // Collapsed, the row shows one sentence, and a wrapper yields that from
+  // its own arity. Recursing would fetch an ABI per nested call, so a page of
+  // twenty batched actions issues hundreds of proxy requests for rows nobody
+  // has opened. Full depth arrives with the expansion.
   const { data } = useDecodedCalldata({
     chainId,
     target: validTarget,
     calldata: calldata ?? "0x",
     value: toBigInt(value),
+    maxDepth: expanded ? undefined : 0,
   });
   const showSkeleton = useDelayedFlag(expanded && !data);
 

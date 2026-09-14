@@ -1,6 +1,5 @@
 "use client";
 
-import type { Address } from "viem";
 import { isAddress } from "viem";
 
 import { AddressChip } from "@/shared/components/decoder/AddressChip";
@@ -79,17 +78,13 @@ export const CollapsedActionRow = ({
         "focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none",
       )}
     >
-      {target && isAddress(target) && (
+      {target !== null && isAddress(target) && (
         <span
           className="flex min-w-0 max-w-[45%] shrink-0"
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         >
-          <AddressChip
-            address={target as Address}
-            explorerUrl={explorerUrl}
-            compact
-          />
+          <AddressChip address={target} explorerUrl={explorerUrl} compact />
         </span>
       )}
       {/* The sentence is the content: it takes what the chip leaves and may

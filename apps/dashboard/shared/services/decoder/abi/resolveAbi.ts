@@ -84,6 +84,9 @@ const decodes = (fn: AbiFunction, calldata: Hex): boolean => {
  */
 const NEGATIVE_RESULT_TTL_MS = 60_000;
 
+/** Ambiguous-signature candidates carried on the warning. */
+const MAX_LISTED_CANDIDATES = 5;
+
 type CacheEntry<T> = { promise: Promise<T>; negativeAt?: number };
 
 /**
@@ -98,6 +101,36 @@ const signatureCaches = new WeakMap<
   Map<string, CacheEntry<string[]>>
 >();
 
+/** Entries one cache keeps. A verified ABI runs to hundreds of KB and these
+ *  caches live as long as the tab, so they evict least-recently-used rather
+ *  than growing with every address a reader ever looked at. */
+const MAX_CACHE_ENTRIES = 256;
+
+/** Reading also promotes: a Map iterates in insertion order, so re-inserting
+ *  the entry is what makes the eviction below least-recently-used. */
+const readEntry = <T>(
+  cache: Map<string, CacheEntry<T>>,
+  key: string,
+): CacheEntry<T> | undefined => {
+  const entry = cache.get(key);
+  if (entry) {
+    cache.delete(key);
+    cache.set(key, entry);
+  }
+  return entry;
+};
+
+const writeEntry = <T>(
+  cache: Map<string, CacheEntry<T>>,
+  key: string,
+  entry: CacheEntry<T>,
+): void => {
+  cache.set(key, entry);
+  if (cache.size <= MAX_CACHE_ENTRIES) return;
+  const oldest = cache.keys().next();
+  if (!oldest.done) cache.delete(oldest.value);
+};
+
 const cachedFetch = <T>(
   caches: WeakMap<object, Map<string, CacheEntry<T>>>,
   fetcher: object,
@@ -110,7 +143,7 @@ const cachedFetch = <T>(
     cache = new Map();
     caches.set(fetcher, cache);
   }
-  let entry = cache.get(key);
+  let entry = readEntry(cache, key);
   if (
     entry?.negativeAt !== undefined &&
     Date.now() - entry.negativeAt > NEGATIVE_RESULT_TTL_MS
@@ -124,7 +157,7 @@ const cachedFetch = <T>(
         return result;
       }),
     };
-    cache.set(key, created);
+    writeEntry(cache, key, created);
     entry = created;
   }
   return entry.promise;
@@ -198,7 +231,11 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
               code: "openchain-ambiguous",
               message:
                 "Several known signatures decode this calldata; showing the best-ranked one.",
-              candidates: decodable.map((candidate) => candidate.signature),
+              // Bounded: this rides in a 24h query cache and OpenChain can
+              // return a long tail for a popular selector.
+              candidates: decodable
+                .slice(0, MAX_LISTED_CANDIDATES)
+                .map((candidate) => candidate.signature),
             }
           : undefined,
     };

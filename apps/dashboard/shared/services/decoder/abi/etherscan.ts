@@ -22,9 +22,14 @@ const isValidAddress = (address: string): boolean => {
 
 type EtherscanResponse = {
   status: string;
-  message: string;
   result: string;
 };
+
+/** The proxy answers with whatever upstream said, so the shape is tested. */
+const isEtherscanResponse = (value: unknown): value is EtherscanResponse =>
+  isRecord(value) &&
+  typeof value.status === "string" &&
+  typeof value.result === "string";
 
 /**
  * Fetches a verified contract ABI via the server-side Etherscan proxy. Returns
@@ -56,8 +61,8 @@ export const fetchVerifiedAbi = async (
     });
     if (!res.ok) return null;
 
-    const json = (await res.json()) as EtherscanResponse;
-    if (json.status !== "1") return null;
+    const json: unknown = await res.json();
+    if (!isEtherscanResponse(json) || json.status !== "1") return null;
 
     const parsed: unknown = JSON.parse(json.result);
     return parseAbiStrict(parsed);

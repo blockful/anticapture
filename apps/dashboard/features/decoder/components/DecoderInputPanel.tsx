@@ -4,12 +4,12 @@ import { useMemo } from "react";
 import type { Abi } from "viem";
 
 import { AbiInput } from "@/features/decoder/components/AbiInput";
+import { supportedDecoderChains } from "@/features/decoder/utils/chains";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FormLabel } from "@/shared/components/design-system/form/fields/form-label/FormLabel";
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
-import daoConfigByDaoId from "@/shared/dao-config";
 
 interface DecoderInputPanelProps {
   calldata: string;
@@ -25,16 +25,14 @@ interface DecoderInputPanelProps {
 
 /** The chains the platform indexes, deduplicated from the DAO configs. */
 const useChainOptions = () =>
-  useMemo(() => {
-    const byId = new Map<number, string>();
-    for (const config of Object.values(daoConfigByDaoId)) {
-      const chain = config?.daoOverview?.chain;
-      if (chain && !byId.has(chain.id)) byId.set(chain.id, chain.name);
-    }
-    return [...byId.entries()]
-      .sort(([a], [b]) => a - b)
-      .map(([id, name]) => ({ label: name, value: String(id) }));
-  }, []);
+  useMemo(
+    () =>
+      supportedDecoderChains().map(({ id, name }) => ({
+        label: name,
+        value: String(id),
+      })),
+    [],
+  );
 
 export const DecoderInputPanel = ({
   calldata,

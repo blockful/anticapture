@@ -1,17 +1,31 @@
 import type { Hex } from "viem";
 
+import { isPresent, isRecord } from "@/shared/services/decoder/guards";
+
 const LOOKUP_URL = "https://api.openchain.xyz/signature-database/v1/lookup";
 
-type OpenchainResponse = {
-  result?: {
-    function?: Record<string, Array<{ name: string }> | null>;
-  };
+/**
+ * The names a third-party lookup returned for this selector. Nothing about
+ * the response is guaranteed, so every level of it is tested on the way down
+ * and an unexpected shape reads as "no signatures known".
+ */
+const signatureNames = (payload: unknown, selector: string): string[] => {
+  if (!isRecord(payload) || !isRecord(payload.result)) return [];
+  const bySelector = payload.result.function;
+  if (!isRecord(bySelector)) return [];
+  const entries = bySelector[selector];
+  if (!Array.isArray(entries)) return [];
+  return entries
+    .map((entry) =>
+      isRecord(entry) && typeof entry.name === "string" ? entry.name : null,
+    )
+    .filter(isPresent);
 };
 
 /**
  * All candidate text signatures OpenChain knows for a selector, best-ranked
- * first (`filter=true` drops known junk entries). Empty on any failure — the
- * decode then degrades to word-guessing, never an exception.
+ * first (`filter=true` drops known junk entries). Empty on any failure, and
+ * the decode then degrades to word-guessing, never an exception.
  */
 export const fetchSignatures = async (selector: Hex): Promise<string[]> => {
   const params = new URLSearchParams({ function: selector, filter: "true" });
@@ -21,9 +35,7 @@ export const fetchSignatures = async (selector: Hex): Promise<string[]> => {
       signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) return [];
-    const json = (await res.json()) as OpenchainResponse;
-    const entries = json.result?.function?.[selector] ?? [];
-    return (entries ?? []).map((entry) => entry.name);
+    return signatureNames(await res.json(), selector);
   } catch {
     return [];
   }

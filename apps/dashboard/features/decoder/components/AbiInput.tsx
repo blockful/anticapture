@@ -92,7 +92,7 @@ export const AbiInput = ({ onAbiChange }: AbiInputProps) => {
         value={abiText}
         onChange={(event) => setAbiText(event.target.value)}
         onBlur={(event) => validateText(event.target.value)}
-        placeholder='Paste ABI JSON — e.g. [{"type":"function",...}] or a compiler artifact'
+        placeholder='Paste ABI JSON, e.g. [{"type":"function",...}] or a compiler artifact'
         className="min-h-24 font-mono text-xs"
         error={Boolean(error)}
       />
