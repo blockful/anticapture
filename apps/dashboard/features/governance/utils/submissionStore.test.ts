@@ -15,6 +15,7 @@ import type { Hash } from "viem";
 import {
   canStartSubmission,
   getModalEntryPoint,
+  needsProposalWatch,
 } from "@/features/governance/utils/submissionState";
 import {
   readSubmission,
@@ -134,6 +135,32 @@ describe("unmounting and remounting the modal mid-flight", () => {
     writeSubmission(key, { kind: "ambiguous", mode: "wallet", hash });
 
     expect(entryFor(key)).toBe("ambiguous-outcome");
+    expect(canStartSubmission(readSubmission(key))).toBe(false);
+  });
+
+  it("restarts the proposal watch for an inherited ambiguous outcome", () => {
+    const key = submissionKey("ENS", "inherit-ambiguous", "execute");
+
+    // The user left while this was being watched, so the watch went with the
+    // mount that owned it. The screen tells the user the page keeps checking,
+    // which is only true if the mount that inherits it starts watching again.
+    writeSubmission(key, { kind: "ambiguous", mode: "gasless", hash: null });
+
+    expect(entryFor(key)).toBe("ambiguous-outcome");
+    expect(needsProposalWatch(readSubmission(key))).toBe(true);
+  });
+
+  it("restarts it for a request that turned ambiguous after the unmount", () => {
+    const key = submissionKey("ENS", "ambiguous-after-unmount", "execute");
+
+    writeSubmission(key, { kind: "in-flight", mode: "gasless" });
+    // Nothing is watching yet: the run does that itself once it knows there
+    // is something to watch for.
+    expect(needsProposalWatch(readSubmission(key))).toBe(false);
+
+    writeSubmission(key, { kind: "ambiguous", mode: "gasless", hash });
+
+    expect(needsProposalWatch(readSubmission(key))).toBe(true);
     expect(canStartSubmission(readSubmission(key))).toBe(false);
   });
 

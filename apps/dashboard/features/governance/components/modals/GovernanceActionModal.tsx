@@ -28,6 +28,7 @@ import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import {
   canStartSubmission,
   getModalEntryPoint,
+  needsProposalWatch,
   NOTHING_SENT,
   type ActionMode,
   type SettledSubmission,
@@ -265,12 +266,12 @@ export const GovernanceActionModal = ({
   // no further submission can start from this modal.
   const showAmbiguousOutcome = useCallback(
     (mode: ActionMode, hash: Hash | null) => {
-      // The screen is painted by the effect that follows the store, so this
-      // records the outcome once and every mount renders it the same way.
+      // Both the screen and the proposal watch come from the effect that
+      // follows the store, so every mount treats this outcome identically and
+      // there is one place that can forget to do either.
       moveSubmission({ kind: "ambiguous", mode, hash });
-      startStatusPolling();
     },
-    [moveSubmission, startStatusPolling],
+    [moveSubmission],
   );
 
   const runWalletAction = useCallback(async () => {
@@ -436,35 +437,35 @@ export const GovernanceActionModal = ({
     showAmbiguousOutcome,
   ]);
 
-  // Follows the store for anything this mount did not start. An ambiguous
-  // outcome always repaints, including the one recorded by the run that owns
-  // the screen, so the two can never drift apart; the rest only matters to a
-  // mount that inherited a request and cannot be told how it ended by the
-  // component that made it.
+  // Follows the store, which is the only thing a mount can rely on when the
+  // run it is looking at belongs to a component that is already gone.
   useEffect(() => {
-    if (submission.kind === "ambiguous") {
-      setMode(submission.mode);
-      setTxHash(submission.hash);
+    // Shows a transaction that may exist without claiming an outcome, and
+    // picks the proposal watch back up, since whoever was watching has
+    // finished or been unmounted. The budget starts fresh rather than
+    // carrying across mounts, which is the right reading of a user who has
+    // just come back to look.
+    const inheritAndWatch = (mode: ActionMode, hash: Hash | null) => {
+      setMode(mode);
+      setTxHash(hash);
       setStep("ambiguous");
+      startStatusPolling();
+    };
+
+    // An ambiguous outcome is repainted on every mount, the one that recorded
+    // it included, so the screen and the store cannot drift apart. A settled
+    // run is left alone on the mount that made it, which is already showing
+    // the success or the error it saw and is watching the proposal itself.
+    const isOwnSettledRun = ownsRunRef.current && submission.kind === "done";
+
+    if (!isOwnSettledRun && needsProposalWatch(submission)) {
+      inheritAndWatch(submission.mode, submission.hash);
       return;
     }
     if (ownsRunRef.current) return;
     if (submission.kind === "in-flight") {
       setMode(submission.mode);
       setStep(submission.mode === "gasless" ? "relaying" : "waiting-signature");
-      return;
-    }
-    if (submission.kind === "done" && submission.sent) {
-      // A transaction went out and the mount that watched it is gone, taking
-      // its polling with it. `done` does not record whether it was mined or
-      // reverted, so this mount claims neither: it shows the transaction, no
-      // action button, and picks the watch back up so the page still catches
-      // up on its own. The budget starts fresh, which is the right reading of
-      // a user who has just come back to look.
-      setMode(submission.mode);
-      setTxHash(submission.hash);
-      setStep("ambiguous");
-      startStatusPolling();
       return;
     }
     // Nothing was ever sent, so the modal goes back through its entry point

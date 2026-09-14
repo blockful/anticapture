@@ -37,6 +37,21 @@ export interface SettledSubmission {
 
 export const NOTHING_SENT: SettledSubmission = { sent: false, hash: null };
 
+/**
+ * A state where a transaction may exist and nothing on this mount is watching
+ * for it: the run that would have is finished or belongs to a mount that is
+ * gone. Whoever lands on one of these has to show the transaction and pick
+ * the proposal watch back up, and must offer no way to submit again.
+ */
+export type WatchedSubmission =
+  | { kind: "ambiguous"; mode: ActionMode; hash: Hash | null }
+  | { kind: "done"; mode: ActionMode; sent: true; hash: Hash | null };
+
+export const needsProposalWatch = (
+  state: SubmissionState,
+): state is WatchedSubmission =>
+  state.kind === "ambiguous" || (state.kind === "done" && state.sent);
+
 export const IDLE_SUBMISSION: SubmissionState = { kind: "idle" };
 
 /**

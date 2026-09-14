@@ -3,6 +3,7 @@ import type { Hash } from "viem";
 import {
   canStartSubmission,
   getModalEntryPoint,
+  needsProposalWatch,
   IDLE_SUBMISSION,
   type SubmissionState,
 } from "@/features/governance/utils/submissionState";
@@ -169,5 +170,28 @@ describe("dismissing and reopening the modal", () => {
     expect(doneSent.kind === "done" && doneSent.sent).toBe(true);
     expect(doneSent.kind === "done" && doneSent.hash).toBe(hash);
     expect(doneNothingSent.kind === "done" && doneNothingSent.sent).toBe(false);
+  });
+});
+
+describe("needsProposalWatch", () => {
+  it("watches an ambiguous outcome, with or without a hash", () => {
+    // The screen promises that the page keeps checking, so it has to.
+    expect(needsProposalWatch(ambiguousWithHash)).toBe(true);
+    expect(needsProposalWatch(ambiguousWithoutHash)).toBe(true);
+  });
+
+  it("watches a settled submission that sent a transaction", () => {
+    expect(needsProposalWatch(doneSent)).toBe(true);
+  });
+
+  it("does not watch a submission that never sent anything", () => {
+    expect(needsProposalWatch(doneNothingSent)).toBe(false);
+    expect(needsProposalWatch(IDLE_SUBMISSION)).toBe(false);
+  });
+
+  it("does not watch a request that has yet to resolve", () => {
+    // The run itself starts the watch when it learns there is something to
+    // watch for.
+    expect(needsProposalWatch(inFlight)).toBe(false);
   });
 });
