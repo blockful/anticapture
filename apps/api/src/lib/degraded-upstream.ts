@@ -10,14 +10,14 @@
 import { logger } from "@/logger";
 import { degradedUpstreamResponsesTotal } from "@/metrics";
 
-/** Third-party provider whose failure triggered the fallback. */
-export type DegradedUpstream = "coingecko" | "dune";
+import type { Upstream } from "./upstream-error";
 
 /** `stale` served the last known payload, `empty` had nothing to serve. */
 export type DegradedMode = "stale" | "empty";
 
 export interface DegradedUpstreamEvent {
-  upstream: DegradedUpstream;
+  /** Provider whose failure triggered the fallback. */
+  upstream: Upstream;
   /** Dataset served in degraded form, e.g. `token_historical_prices`. */
   resource: string;
   mode: DegradedMode;

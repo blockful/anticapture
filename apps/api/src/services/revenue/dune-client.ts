@@ -1,4 +1,5 @@
 import { recordDegradedUpstream } from "@/lib/degraded-upstream";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 
 import { RevenueCache } from "./cache";
@@ -235,52 +236,80 @@ export class RevenueDuneClient {
     const url = this.urls[key];
     const start = Date.now();
     logger.info({ key, url }, "fetching revenue data from Dune");
+
+    let data: DuneRowsResponse<Row>;
+    let status: number;
     try {
-      const response = await fetch(url, {
-        headers: {
-          "X-Dune-API-Key": this.apiKey,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = (await response.json()) as DuneRowsResponse<Row>;
-      this.cache.set(key, data);
-      const rowCount = (data as DuneRowsResponse<unknown>).result?.rows?.length;
-      logger.info(
-        {
-          key,
-          status: response.status,
-          rowCount,
-          durationMs: Date.now() - start,
-        },
-        "revenue fetch succeeded",
-      );
-      return data;
+      ({ data, status } = await this.requestRows<Row>(url));
     } catch (error) {
+      // Only a Dune outage degrades. Anything else is our own failure and must
+      // surface as a 5xx so the HTTP error metrics still count it.
+      if (!(error instanceof UpstreamUnavailableError)) throw error;
       logger.error(
         { err: error, key, url, durationMs: Date.now() - start },
         "failed to fetch revenue data from Dune",
       );
       const stale = this.cache.getStale<DuneRowsResponse<Row>>(key);
-      if (stale !== null) {
-        recordDegradedUpstream({
-          upstream: "dune",
-          resource: `revenue_${key}`,
-          mode: "stale",
-          error,
-        });
-        return stale;
-      }
       recordDegradedUpstream({
-        upstream: "dune",
+        upstream: error.upstream,
         resource: `revenue_${key}`,
-        mode: "empty",
+        mode: stale !== null ? "stale" : "empty",
         error,
       });
-      return { result: { rows: [] } };
+      return stale !== null ? stale : { result: { rows: [] } };
+    }
+
+    this.cache.set(key, data);
+    logger.info(
+      {
+        key,
+        status,
+        rowCount: data.result?.rows?.length,
+        durationMs: Date.now() - start,
+      },
+      "revenue fetch succeeded",
+    );
+    return data;
+  }
+
+  /**
+   * Calls one Dune result endpoint. Every failure in here is Dune's, so they
+   * all become `UpstreamUnavailableError`.
+   */
+  private async requestRows<Row>(
+    url: string,
+  ): Promise<{ data: DuneRowsResponse<Row>; status: number }> {
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        headers: {
+          "X-Dune-API-Key": this.apiKey,
+        },
+      });
+    } catch (error) {
+      throw new UpstreamUnavailableError("dune", "Dune request failed", {
+        cause: error,
+      });
+    }
+
+    if (!response.ok) {
+      throw new UpstreamUnavailableError(
+        "dune",
+        `HTTP ${response.status}: ${response.statusText}`,
+      );
+    }
+
+    try {
+      return {
+        data: (await response.json()) as DuneRowsResponse<Row>,
+        status: response.status,
+      };
+    } catch (error) {
+      throw new UpstreamUnavailableError(
+        "dune",
+        "Dune returned a malformed body",
+        { cause: error },
+      );
     }
   }
 }

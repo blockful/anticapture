@@ -5,6 +5,7 @@ import { z } from "zod";
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 import { recordDegradedUpstream } from "@/lib/degraded-upstream";
 import { DaoIdEnum } from "@/lib/enums";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { PriceProvider } from "@/services/treasury/types";
@@ -76,6 +77,47 @@ export class CoingeckoService implements PriceProvider {
       { tokenId, days },
       "fetching historical token prices from CoinGecko",
     );
+
+    let data: CoingeckoHistoricalMarketData;
+    try {
+      data = await this.fetchMarketChart(tokenId, days);
+    } catch (error) {
+      // Only a CoinGecko outage degrades. Everything after this point is our
+      // own code and must surface as a real error.
+      if (!(error instanceof UpstreamUnavailableError)) throw error;
+      logger.error(
+        { err: error, tokenId, days },
+        "failed to fetch historical token prices from CoinGecko",
+      );
+      const stale = this.lastGoodByDays.get(days);
+      if (!stale) throw error;
+      recordDegradedUpstream({
+        upstream: error.upstream,
+        resource: "token_historical_prices",
+        mode: "stale",
+        error,
+        context: { tokenId, days },
+      });
+      return stale;
+    }
+
+    // CoinGecko returns timestamps in milliseconds, convert to seconds
+    const prices = data.prices.map(([timestampMs, price]) => ({
+      price: price.toFixed(4),
+      timestamp: Math.floor(timestampMs / 1000),
+    }));
+    this.lastGoodByDays.set(days, prices);
+    return prices;
+  }
+
+  /**
+   * Calls the market chart endpoint and validates the body. Every failure in
+   * here is CoinGecko's, so they all become `UpstreamUnavailableError`.
+   */
+  private async fetchMarketChart(
+    tokenId: string,
+    days: number,
+  ): Promise<CoingeckoHistoricalMarketData> {
     try {
       const response = await this.client.get<CoingeckoHistoricalMarketData>(
         `/coins/${tokenId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
@@ -87,34 +129,13 @@ export class CoingeckoService implements PriceProvider {
       if (!success) {
         throw new Error("Unexpected CoinGecko market chart response");
       }
-
-      // CoinGecko returns timestamps in milliseconds, convert to seconds
-      const prices = data.prices.map(([timestampMs, price]) => ({
-        price: price.toFixed(4),
-        timestamp: Math.floor(timestampMs / 1000),
-      }));
-      this.lastGoodByDays.set(days, prices);
-      return prices;
+      return data;
     } catch (error) {
-      logger.error(
-        { err: error, tokenId, days },
-        "failed to fetch historical token prices from CoinGecko",
+      throw new UpstreamUnavailableError(
+        "coingecko",
+        "Failed to fetch historical token data",
+        { cause: error },
       );
-      const stale = this.lastGoodByDays.get(days);
-      if (stale) {
-        recordDegradedUpstream({
-          upstream: "coingecko",
-          resource: "token_historical_prices",
-          mode: "stale",
-          error,
-          context: { tokenId, days },
-        });
-        return stale;
-      }
-      throw new HTTPException(503, {
-        message: "Failed to fetch historical token data",
-        cause: error,
-      });
     }
   }
 

@@ -11,6 +11,7 @@ import {
 } from "vitest";
 import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
 import { DaoIdEnum } from "@/lib/enums";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { CoingeckoService } from "./index";
 
 const API_URL = "https://api.coingecko.com";
@@ -87,6 +88,22 @@ describe("CoingeckoService", () => {
 
       await expect(service.getHistoricalTokenData(7)).rejects.toMatchObject({
         status: 503,
+      });
+    });
+
+    it("tags provider failures as an upstream failure so callers can degrade", async () => {
+      server.use(
+        http.get(
+          `${API_URL}/coins/uniswap/market_chart`,
+          () => new HttpResponse(null, { status: 500 }),
+        ),
+      );
+
+      await expect(service.getHistoricalTokenData(7)).rejects.toBeInstanceOf(
+        UpstreamUnavailableError,
+      );
+      await expect(service.getHistoricalTokenData(7)).rejects.toMatchObject({
+        upstream: "coingecko",
       });
     });
 

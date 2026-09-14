@@ -1,7 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
-import { HTTPException } from "hono/http-exception";
 
 import { recordDegradedUpstream } from "@/lib/degraded-upstream";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import {
   TokenHistoricalPriceRequest,
   TokenHistoricalPriceResponse,
@@ -48,12 +48,14 @@ export function tokenHistoricalData(
         const data = await client.getHistoricalTokenData(limit, skip);
         return context.json(data, 200);
       } catch (error) {
-        // Client errors (e.g. token not listed) keep their status; anything
-        // else degrades to an empty series. Price history is third-party data
-        // and a 5xx here would trip the gateway circuit breaker for the DAO.
-        if (error instanceof HTTPException && error.status < 500) throw error;
+        // Only a price provider outage degrades to an empty series, because a
+        // 5xx here would trip the gateway circuit breaker for the whole DAO.
+        // Everything else keeps its status: the NOUNS and LIL_NOUNS path reads
+        // auction prices from PostgreSQL first, and a database error or a
+        // mapping bug there must stay a real error rather than a silent 200.
+        if (!(error instanceof UpstreamUnavailableError)) throw error;
         recordDegradedUpstream({
-          upstream: "coingecko",
+          upstream: error.upstream,
           resource: "token_historical_prices",
           mode: "empty",
           error,

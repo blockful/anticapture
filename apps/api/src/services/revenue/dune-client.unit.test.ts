@@ -13,6 +13,7 @@ import {
 
 import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
 
+import { RevenueCache } from "./cache";
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
@@ -42,6 +43,7 @@ beforeAll(() => server.listen());
 afterEach(() => {
   server.resetHandlers();
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 afterAll(() => server.close());
 
@@ -88,6 +90,25 @@ describe("RevenueDuneClient", () => {
     const result = await client.fetchKey("actions");
 
     expect(result).toEqual({ result: { rows: [] } });
+  });
+
+  // Only Dune's own failures may become an empty 200. Ours have to stay a real
+  // error so the HTTP error metrics still count them.
+  it("propagates a failure that is not Dune's instead of degrading", async () => {
+    const ourBug = new Error("cache write failed");
+    vi.spyOn(RevenueCache.prototype, "set").mockImplementation(() => {
+      throw ourBug;
+    });
+    server.use(
+      http.get(urls.actions, () =>
+        HttpResponse.json({ result: { rows: [{ a: 1 }] } }),
+      ),
+    );
+    const degraded = captureDegradedUpstream();
+
+    await expect(client.fetchKey("actions")).rejects.toBe(ourBug);
+    expect(degraded.recorded()).toEqual([]);
+    degraded.restore();
   });
 
   it("returns an empty result set on network error", async () => {

@@ -3,6 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { describe, expect, it } from "vitest";
 
 import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { errorHandler } from "@/middlewares";
 
 import {
@@ -46,7 +47,7 @@ describe("GET /token/historical-data", () => {
   it("degrades to an empty series when the price provider fails", async () => {
     const app = buildApp({
       getHistoricalTokenData: async () => {
-        throw new HTTPException(503, { message: "CoinGecko down" });
+        throw new UpstreamUnavailableError("coingecko", "CoinGecko down");
       },
     });
     const degraded = captureDegradedUpstream();
@@ -64,6 +65,38 @@ describe("GET /token/historical-data", () => {
         mode: "empty",
       },
     ]);
+    degraded.restore();
+  });
+
+  // The NOUNS and LIL_NOUNS wiring reads auction prices from PostgreSQL before
+  // it calls CoinGecko, so a database error reaches this handler too.
+  it("returns 500 and counts nothing when the failure is not the provider", async () => {
+    const app = buildApp({
+      getHistoricalTokenData: async () => {
+        throw new Error("connection terminated unexpectedly");
+      },
+    });
+    const degraded = captureDegradedUpstream();
+
+    const res = await app.request("/token/historical-data?limit=7");
+
+    expect(res.status).toBe(500);
+    expect(degraded.recorded()).toEqual([]);
+    degraded.restore();
+  });
+
+  it("keeps a 503 that is not an upstream failure as a 503", async () => {
+    const app = buildApp({
+      getHistoricalTokenData: async () => {
+        throw new HTTPException(503, { message: "Service unavailable" });
+      },
+    });
+    const degraded = captureDegradedUpstream();
+
+    const res = await app.request("/token/historical-data?limit=7");
+
+    expect(res.status).toBe(503);
+    expect(degraded.recorded()).toEqual([]);
     degraded.restore();
   });
 

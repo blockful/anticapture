@@ -10,6 +10,7 @@ import {
   afterEach,
   vi,
 } from "vitest";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { NFTPriceService } from "./index";
 
@@ -115,6 +116,52 @@ describe("NFTPriceService", () => {
 
       // 1 ETH * $2500 = 2500 (Map normalized timestamp → USD price)
       expect(result).toEqual(new Map([[1705276800, 2500]]));
+    });
+  });
+
+  describe("failure classification", () => {
+    it("tags a CoinGecko failure as an upstream failure", async () => {
+      repo.nftPrices = [
+        { price: "1000000000000000000", timestamp: 1705276800 },
+      ];
+      server.use(
+        http.get(
+          ETH_MARKET_CHART_RANGE_URL,
+          () => new HttpResponse(null, { status: 502 }),
+        ),
+      );
+
+      await expect(service.getHistoricalTokenData(1, 0)).rejects.toMatchObject({
+        upstream: "coingecko",
+      });
+    });
+
+    // The route degrades only on UpstreamUnavailableError, so a database error
+    // has to come back untouched rather than as an empty 200.
+    it("propagates a repository failure untouched", async () => {
+      const dbError = new Error("connection terminated unexpectedly");
+      repo.getHistoricalNFTPrice = async () => {
+        throw dbError;
+      };
+      server.use(
+        http.get(ETH_MARKET_CHART_RANGE_URL, () =>
+          HttpResponse.json({ prices: [[1705276800000, 2500.0]] }),
+        ),
+      );
+
+      await expect(service.getHistoricalTokenData(1, 0)).rejects.toBe(dbError);
+      await expect(
+        service.getHistoricalTokenData(1, 0),
+      ).rejects.not.toBeInstanceOf(UpstreamUnavailableError);
+    });
+
+    it("propagates a repository failure from getTokenPrice untouched", async () => {
+      const dbError = new Error("relation token_price does not exist");
+      repo.getTokenPrice = async () => {
+        throw dbError;
+      };
+
+      await expect(service.getTokenPrice("", "")).rejects.toBe(dbError);
     });
   });
 

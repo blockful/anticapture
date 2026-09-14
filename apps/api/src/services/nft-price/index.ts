@@ -6,6 +6,7 @@ import {
   calculateCutoffTimestamp,
 } from "@/lib/date-helpers";
 import { forwardFill, createDailyTimeline } from "@/lib/time-series";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { PriceProvider } from "@/services/treasury/types";
@@ -51,15 +52,14 @@ export class NFTPriceService implements PriceProvider {
       { from: fromQuery, to: toQuery },
       "fetching historical ETH prices from CoinGecko",
     );
-    const ethHistoricalPrices = await this.client.get<{
-      prices: [number, number][];
-    }>(
+    // The auction prices above come from PostgreSQL. Only the CoinGecko call is
+    // tagged as an upstream failure, so a database error stays a real error
+    // instead of degrading to an empty series.
+    const ethHistoricalPrices = await this.fetchEthPrices(
       `/coins/ethereum/market_chart/range?vs_currency=usd&from=${fromQuery}&to=${toQuery}`,
     );
 
-    const ethPriceResponse = ethHistoricalPrices.data.prices
-      .reverse()
-      .slice(0, limit);
+    const ethPriceResponse = ethHistoricalPrices.reverse().slice(0, limit);
 
     const rawPrices = auctionPrices.map(({ price, timestamp }, index) => ({
       price: (
@@ -94,12 +94,31 @@ export class NFTPriceService implements PriceProvider {
     const nftEthValue = Number(formatEther(BigInt(price)));
 
     logger.info("fetching current ETH price from CoinGecko");
-    const ethCurrentPrice = await this.client.get<{
-      prices: [number, number][];
-    }>(`/coins/ethereum/market_chart?vs_currency=usd&days=1`);
+    const ethCurrentPrice = await this.fetchEthPrices(
+      `/coins/ethereum/market_chart?vs_currency=usd&days=1`,
+    );
 
-    const ethPriceResponse = ethCurrentPrice.data.prices.reverse().slice(0, 1);
+    const ethPriceResponse = ethCurrentPrice.reverse().slice(0, 1);
     return (nftEthValue * ethPriceResponse[0]![1]).toFixed(2);
+  }
+
+  /**
+   * Fetches ETH prices from CoinGecko, tagging any failure as an upstream one
+   * so callers can tell a provider outage from our own errors.
+   */
+  private async fetchEthPrices(path: string): Promise<[number, number][]> {
+    try {
+      const response = await this.client.get<{
+        prices: [number, number][];
+      }>(path);
+      return response.data.prices;
+    } catch (error) {
+      throw new UpstreamUnavailableError(
+        "coingecko",
+        "Failed to fetch ETH prices",
+        { cause: error },
+      );
+    }
   }
 
   async getHistoricalPricesMap(days: number): Promise<Map<number, number>> {
