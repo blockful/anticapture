@@ -20,6 +20,11 @@ import {
 } from "@/features/governance/utils/relayGovernanceAction";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import {
+  createSubmissionGuard,
+  getModalEntryPoint,
+  type ActionMode,
+} from "@/features/governance/utils/submissionGuard";
+import {
   executeProposal,
   queueProposal,
   type GovernanceAction,
@@ -56,8 +61,6 @@ type ActionStep =
   | "unconfirmed"
   | "unknown"
   | "error";
-
-type ActionMode = "wallet" | "gasless";
 
 interface GovernanceActionModalProps {
   isOpen: boolean;
@@ -119,12 +122,11 @@ export const GovernanceActionModal = ({
     null,
   );
 
-  // Each run is tagged so a submission abandoned by closing the modal cannot
-  // drive the state of a later, reopened one. The busy flag stops a second
-  // click from broadcasting twice while a wallet prompt or relayer call is
-  // pending.
-  const attemptRef = useRef(0);
-  const busyRef = useRef(false);
+  // A submission is single-flight, and the guard is released by the request
+  // settling rather than by the modal closing. A dismissed relayer call may
+  // still broadcast, so a wallet transaction started from a reopened modal
+  // must not be able to race it.
+  const [guard] = useState(createSubmissionGuard);
   // Refetches issued for the current polling run. Held in a ref so a status
   // that changes mid-run restarts the timer without refilling the budget.
   const pollAttemptsRef = useRef(0);
@@ -191,21 +193,9 @@ export const GovernanceActionModal = ({
     refreshProposal();
   }, [action, refreshProposal]);
 
-  const beginAttempt = useCallback(() => {
-    attemptRef.current += 1;
-    busyRef.current = true;
-    const attempt = attemptRef.current;
-    return {
-      isCurrent: () => attemptRef.current === attempt,
-      finish: () => {
-        if (attemptRef.current === attempt) busyRef.current = false;
-      },
-    };
-  }, []);
-
   const runWalletAction = useCallback(async () => {
-    if (!address || !walletClient || busyRef.current) return;
-    const { isCurrent, finish } = beginAttempt();
+    if (!address || !walletClient) return;
+    if (!guard.begin("wallet")) return;
 
     setMode("wallet");
     setError(null);
@@ -235,30 +225,23 @@ export const GovernanceActionModal = ({
         address,
         daoId,
         walletClient,
-        () => {
-          if (isCurrent()) setStep("pending-tx");
-        },
+        () => setStep("pending-tx"),
         proposal.id,
       );
       if (receipt.status === "reverted") {
-        if (isCurrent()) {
-          setTxHash(receipt.transactionHash);
-          setError(REVERTED_MESSAGE);
-          setStep("error");
-        }
+        setTxHash(receipt.transactionHash);
+        setError(REVERTED_MESSAGE);
+        setStep("error");
         return;
       }
-      // A success that lands after the modal was closed still changed the
-      // chain, so the page is refreshed either way; only the modal's own
-      // screen is left alone.
+      // A result that lands after the modal was closed still repaints it: the
+      // screen is the one the user comes back to if they reopen before the
+      // submission settles, and the page is refreshed either way.
       showCustomToast(`Proposal ${copy.pastTense} successfully!`, "success");
       startStatusPolling();
-      if (isCurrent()) {
-        setTxHash(receipt.transactionHash);
-        setStep("success");
-      }
+      setTxHash(receipt.transactionHash);
+      setStep("success");
     } catch (err) {
-      if (!isCurrent()) return;
       const message =
         err instanceof Error
           ? (err.message.split("\n")[0]?.slice(0, 120) ?? "Action failed.")
@@ -266,7 +249,7 @@ export const GovernanceActionModal = ({
       setError(message);
       setStep("error");
     } finally {
-      finish();
+      guard.end();
     }
   }, [
     address,
@@ -276,12 +259,11 @@ export const GovernanceActionModal = ({
     daoId,
     copy.pastTense,
     startStatusPolling,
-    beginAttempt,
+    guard,
   ]);
 
   const runGaslessAction = useCallback(async () => {
-    if (busyRef.current) return;
-    const { isCurrent, finish } = beginAttempt();
+    if (!guard.begin("gasless")) return;
 
     setMode("gasless");
     setError(null);
@@ -295,7 +277,6 @@ export const GovernanceActionModal = ({
         proposalId: proposal.id,
         publicClient,
         onTxSubmitted: (hash) => {
-          if (!isCurrent()) return;
           setTxHash(hash);
           setStep("pending-tx");
         },
@@ -304,14 +285,12 @@ export const GovernanceActionModal = ({
       if (outcome.status === "success") {
         showCustomToast(`Proposal ${copy.pastTense} successfully!`, "success");
         startStatusPolling();
-        if (isCurrent()) setStep("success");
+        setStep("success");
         return;
       }
       if (outcome.status === "reverted") {
-        if (isCurrent()) {
-          setError(REVERTED_MESSAGE);
-          setStep("error");
-        }
+        setError(REVERTED_MESSAGE);
+        setStep("error");
         return;
       }
       // "unconfirmed" and "unknown": the chain may have changed, so poll the
@@ -319,17 +298,14 @@ export const GovernanceActionModal = ({
       // the wallet stays available because the user must never be locked out
       // of the action, and the copy spells out the gas risk of a duplicate.
       startStatusPolling();
-      if (isCurrent()) {
-        setTxHash(outcome.hash);
-        setStep(outcome.status);
-      }
+      setTxHash(outcome.hash);
+      setStep(outcome.status);
     } catch (err) {
       console.error(err);
-      if (!isCurrent()) return;
       setError(mapRelayerEnactmentError(err, action));
       setStep("error");
     } finally {
-      finish();
+      guard.end();
     }
   }, [
     action,
@@ -338,7 +314,7 @@ export const GovernanceActionModal = ({
     publicClient,
     copy.pastTense,
     startStatusPolling,
-    beginAttempt,
+    guard,
   ]);
 
   const failWithoutWallet = useCallback((message: string) => {
@@ -359,21 +335,34 @@ export const GovernanceActionModal = ({
     if (hasStarted || isGaslessLoading) return;
     setHasStarted(true);
 
-    if (isGaslessAvailable) {
-      setStep("choose");
-      return;
+    switch (
+      getModalEntryPoint({
+        inFlightSubmission: guard.inFlight(),
+        isGaslessAvailable,
+        hasAddress: Boolean(address),
+        hasWalletClient: Boolean(walletClient),
+      })
+    ) {
+      // Reopened on top of a submission that is still in flight. Its screen
+      // was left standing when the modal closed and its result will land
+      // there, so nothing is offered that could race it.
+      case "mirror-submission":
+        return;
+      case "choose":
+        setStep("choose");
+        return;
+      case "connect-wallet":
+        failWithoutWallet(CONNECT_WALLET_MESSAGE);
+        return;
+      case "switch-network":
+        failWithoutWallet(
+          `Please switch your wallet to the ${chain.name} network.`,
+        );
+        return;
+      case "wallet":
+        void runWalletAction();
+        return;
     }
-    if (!address) {
-      failWithoutWallet(CONNECT_WALLET_MESSAGE);
-      return;
-    }
-    if (!walletClient) {
-      failWithoutWallet(
-        `Please switch your wallet to the ${chain.name} network.`,
-      );
-      return;
-    }
-    void runWalletAction();
   }, [
     isOpen,
     hasStarted,
@@ -384,6 +373,7 @@ export const GovernanceActionModal = ({
     chain.name,
     runWalletAction,
     failWithoutWallet,
+    guard,
   ]);
 
   const handleUseWallet = () => {
@@ -401,13 +391,16 @@ export const GovernanceActionModal = ({
   };
 
   const handleClose = () => {
-    // Invalidate whatever is in flight so it cannot repaint a reopened modal.
-    attemptRef.current += 1;
-    busyRef.current = false;
-    setStep("idle");
-    setMode("wallet");
-    setError(null);
-    setTxHash(null);
+    // A submission that is still in flight keeps both its guard and its
+    // screen: it may yet broadcast, so reopening has to show it in progress
+    // rather than offer a second submission that could race it. The modal
+    // only resets once nothing is pending.
+    if (guard.inFlight() === null) {
+      setStep("idle");
+      setMode("wallet");
+      setError(null);
+      setTxHash(null);
+    }
     setHasStarted(false);
     onClose();
   };
