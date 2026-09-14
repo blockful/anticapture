@@ -8,6 +8,10 @@ const FAIL = async () => {
   throw new Error("downstream error");
 };
 
+/** Route breakers currently held by a DAO (the DAO-level key is not one). */
+const routeKeys = (registry: CircuitBreakerRegistry, dao: string): string[] =>
+  [...registry.getAll().keys()].filter((key) => key.startsWith(`${dao}:`));
+
 beforeEach(() => {
   vi.spyOn(console, "warn").mockImplementation(() => {});
 });
@@ -44,20 +48,85 @@ describe("CircuitBreakerRegistry", () => {
     expect(CircuitBreakerRegistry.proxyKey("ens", "/Proposals")).toBe("ens");
   });
 
-  it("caps the number of route breakers per DAO", () => {
+  it("caps how many route breakers a DAO holds at once", () => {
+    const registry = new CircuitBreakerRegistry();
+    for (let i = 0; i < MAX_ROUTES_PER_DAO * 4; i++) {
+      registry.forProxy("ens", `/route-${i}`);
+    }
+    expect(routeKeys(registry, "ens")).toHaveLength(MAX_ROUTES_PER_DAO);
+    // The cap is per DAO.
+    expect(registry.forProxy("uni", "/proposals").name).toBe("uni:proposals");
+  });
+
+  it("evicts the least recently used idle route to make room", () => {
     const registry = new CircuitBreakerRegistry();
     for (let i = 0; i < MAX_ROUTES_PER_DAO; i++) {
       expect(registry.forProxy("ens", `/route-${i}`).name).toBe(
         `ens:route-${i}`,
       );
     }
-    // Past the cap a new segment shares the DAO breaker; known routes keep
-    // theirs, and the cap is per DAO.
-    expect(registry.forProxy("ens", "/one-too-many").name).toBe("ens");
-    expect(registry.forProxy("ens", "/route-0").name).toBe("ens:route-0");
-    expect(registry.forProxy("uni", "/one-too-many").name).toBe(
-      "uni:one-too-many",
+    // Using route-0 again makes route-1 the least recently used key.
+    const routeZero = registry.forProxy("ens", "/route-0");
+
+    expect(registry.forProxy("ens", "/one-too-many").name).toBe(
+      "ens:one-too-many",
     );
+    expect(registry.getAll().has("ens:route-1")).toBe(false);
+    expect(registry.getAll().has("ens:route-0")).toBe(true);
+    // The recently used route keeps the breaker it already had.
+    expect(registry.forProxy("ens", "/route-0")).toBe(routeZero);
+  });
+
+  it("lets a real route get its own breaker after a flood of fake ones", () => {
+    const registry = new CircuitBreakerRegistry();
+    for (let i = 0; i < MAX_ROUTES_PER_DAO * 10; i++) {
+      registry.forProxy("ens", `/probe-${i}/x`);
+    }
+
+    expect(registry.forProxy("ens", "/proposals").name).toBe("ens:proposals");
+    expect(routeKeys(registry, "ens")).toHaveLength(MAX_ROUTES_PER_DAO);
+  });
+
+  it("keeps a tripped route out of the eviction pool", async () => {
+    const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
+    const proposals = registry.forProxy("ens", "/proposals");
+    await expect(proposals.execute(FAIL)).rejects.toThrow();
+    expect(proposals.state).toBe("OPEN");
+
+    for (let i = 0; i < MAX_ROUTES_PER_DAO * 3; i++) {
+      registry.forProxy("ens", `/probe-${i}`);
+    }
+
+    expect(registry.forProxy("ens", "/proposals")).toBe(proposals);
+    expect(proposals.state).toBe("OPEN");
+  });
+
+  it("does not let a route seen after the cap block the other routes", async () => {
+    const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
+    for (let i = 0; i < MAX_ROUTES_PER_DAO; i++) {
+      registry.forProxy("ens", `/probe-${i}`);
+    }
+
+    const late = registry.forProxy("ens", "/late-route");
+    expect(late.name).toBe("ens:late-route");
+    await expect(late.execute(FAIL)).rejects.toThrow();
+
+    // The failure stayed on the late route: the DAO breaker and every other
+    // route are still closed.
+    expect(registry.get("ens").state).toBe("CLOSED");
+    expect(registry.forProxy("ens", "/votes").state).toBe("CLOSED");
+    expect(registry.forProxy("ens", "/votes").name).toBe("ens:votes");
+  });
+
+  it("shares the DAO breaker only when every slot is a tripped route", async () => {
+    const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
+    for (let i = 0; i < MAX_ROUTES_PER_DAO; i++) {
+      const breaker = registry.forProxy("ens", `/route-${i}`);
+      await expect(breaker.execute(FAIL)).rejects.toThrow();
+      expect(breaker.state).toBe("OPEN");
+    }
+
+    expect(registry.forProxy("ens", "/one-too-many").name).toBe("ens");
   });
 
   it("returns the same breaker for the same key", () => {

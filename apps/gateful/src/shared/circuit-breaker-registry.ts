@@ -10,10 +10,11 @@ const STATE_SEVERITY = { CLOSED: 0, HALF_OPEN: 1, OPEN: 2 } as const;
  *  as `/0xdead…/x` cannot mint a breaker of its own. */
 const ROUTE_SEGMENT = /^[a-z][a-z0-9-]{0,63}$/;
 
-/** Distinct route breakers a DAO may have. Paths are client-controlled, so
+/** Route breakers a DAO may hold at once. Paths are client-controlled, so
  *  without a cap a scan of made-up segments could grow the registry (and the
- *  `circuit_breaker_state` metric series) without bound. Past the cap, new
- *  segments share the DAO-level breaker. */
+ *  `circuit_breaker_state` metric series) without bound. The cap is on live
+ *  breakers, not on the names ever seen: reaching it evicts an idle route
+ *  rather than freezing the set, so made-up paths cannot squat the slots. */
 export const MAX_ROUTES_PER_DAO = 64;
 
 /** An OPEN circuit whose cooldown has elapsed will probe on its next call, so
@@ -25,7 +26,10 @@ const severity = (breaker: CircuitBreaker): number =>
 
 export class CircuitBreakerRegistry {
   private readonly breakers = new Map<string, CircuitBreaker>();
-  private readonly routesPerDao = new Map<string, number>();
+  /** Route keys currently holding a slot, per DAO, ordered least recently used
+   *  first. A Set iterates in insertion order, so re-inserting a key on every
+   *  use keeps the busiest routes at the end and the stale ones at the front. */
+  private readonly routeKeysPerDao = new Map<string, Set<string>>();
 
   constructor(private readonly opts?: CircuitBreakerOptions) {}
 
@@ -52,15 +56,54 @@ export class CircuitBreakerRegistry {
   /** Breaker guarding a request to a DAO API (proxy, fan-out, health probe),
    *  keyed per DAO and route so one failing route cannot take the DAO's other
    *  routes offline, and so every caller of the same route shares one view of
-   *  its health. Bounded by `MAX_ROUTES_PER_DAO`. */
+   *  its health. At most `MAX_ROUTES_PER_DAO` routes hold a breaker at a time;
+   *  a route arriving at a full DAO takes the slot of the least recently used
+   *  idle route, and only shares the DAO breaker when no slot can be freed. */
   forProxy(dao: string, path: string): CircuitBreaker {
     const key = CircuitBreakerRegistry.proxyKey(dao, path);
-    if (key === dao || this.breakers.has(key)) return this.get(key);
+    if (key === dao) return this.get(dao);
 
-    const routes = this.routesPerDao.get(dao) ?? 0;
-    if (routes >= MAX_ROUTES_PER_DAO) return this.get(dao);
-    this.routesPerDao.set(dao, routes + 1);
+    const routes = this.routesFor(dao);
+    if (routes.has(key)) {
+      // Re-insert so the key counts as most recently used.
+      routes.delete(key);
+      routes.add(key);
+      return this.get(key);
+    }
+
+    if (routes.size >= MAX_ROUTES_PER_DAO && !this.evictIdleRoute(routes)) {
+      return this.get(dao);
+    }
+    routes.add(key);
     return this.get(key);
+  }
+
+  private routesFor(dao: string): Set<string> {
+    let routes = this.routeKeysPerDao.get(dao);
+    if (!routes) {
+      routes = new Set<string>();
+      this.routeKeysPerDao.set(dao, routes);
+    }
+    return routes;
+  }
+
+  /** Frees one slot by dropping the least recently used CLOSED route breaker.
+   *
+   *  Only CLOSED breakers are evicted. An OPEN or HALF_OPEN circuit is actively
+   *  shielding a failing route, and dropping it would let a burst of made-up
+   *  paths reopen the very route it was protecting; a tripped route therefore
+   *  keeps its slot until it recovers. Evicting a CLOSED breaker only discards
+   *  a sliding window of successes, which the route rebuilds on its next calls.
+   *  When every slot is held by a tripped circuit there is nothing safe to
+   *  evict and the caller falls back to the DAO breaker. */
+  private evictIdleRoute(routes: Set<string>): boolean {
+    for (const key of routes) {
+      if (this.breakers.get(key)?.state !== "CLOSED") continue;
+      routes.delete(key);
+      this.breakers.delete(key);
+      return true;
+    }
+    return false;
   }
 
   /** The worst-state breaker among `<key>` and `<key>:*` (for health reporting).
