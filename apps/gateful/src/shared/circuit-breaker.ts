@@ -80,6 +80,9 @@ export class CircuitBreaker {
   private readonly maxCooldownMs: number;
   /** False until this breaker is allowed to publish its state gauge. */
   private metricArmed: boolean;
+  /** Bumped on every state transition. Calls carry the generation they started
+   *  in so a straggler cannot report into a circuit that has moved on. */
+  private generation = 0;
 
   constructor(name: string, opts?: CircuitBreakerOptions) {
     this._name = name;
@@ -109,6 +112,20 @@ export class CircuitBreaker {
     return Math.max(0, this.currentCooldown() - elapsed);
   }
 
+  /** True when the breaker holds no failure history worth keeping: it is
+   *  CLOSED, nothing failed inside the live window and no consecutive-failure
+   *  streak is running. Dropping an idle breaker loses nothing; dropping one
+   *  that carries failures would hand a failing upstream a clean slate. */
+  isIdle(): boolean {
+    if (this._state !== "CLOSED" || this.consecutiveFailures > 0) return false;
+    const oldestLiveIndex =
+      Math.floor(Date.now() / this.bucketMs) - BUCKET_COUNT + 1;
+    for (const [index, bucket] of this.buckets) {
+      if (index >= oldestLiveIndex && bucket.failures > 0) return false;
+    }
+    return true;
+  }
+
   private currentCooldown(): number {
     return Math.min(
       this.cooldownMs * this.backoffMultiplier,
@@ -121,21 +138,27 @@ export class CircuitBreaker {
     this.consecutiveFailures = 0;
   }
 
+  /** Moves to a new state and starts a new generation, so outcomes from calls
+   *  that began under the old one are ignored when they settle. */
+  private transitionTo(next: State): void {
+    this._state = next;
+    this.generation += 1;
+    this.recordState();
+  }
+
   /** Transition to CLOSED — reset all failure tracking. */
   private closeTheCircuit(): void {
-    this._state = "CLOSED";
     this.resetOutcomes();
     this.backoffMultiplier = 1;
     this.probeInFlight = false;
-    this.recordState();
+    this.transitionTo("CLOSED");
   }
 
   /** Transition to OPEN — record failure time. */
   private openTheCircuit(): void {
-    this._state = "OPEN";
     this.resetOutcomes();
     this.lastFailureTime = Date.now();
-    this.recordState();
+    this.transitionTo("OPEN");
   }
 
   /** Publishes the state gauge. A lazy breaker stays silent while it has never
@@ -171,8 +194,7 @@ export class CircuitBreaker {
     if (elapsed < this.currentCooldown()) {
       throw new CircuitOpenError(this._name);
     }
-    this._state = "HALF_OPEN";
-    this.recordState();
+    this.transitionTo("HALF_OPEN");
     console.warn(
       `[circuit-breaker] ${this._name}: OPEN -> HALF_OPEN (cooldown expired, probing)`,
     );
@@ -207,14 +229,26 @@ export class CircuitBreaker {
    *  success may be the one that fills the window, and settlement order must
    *  not decide whether the circuit opens. */
   private async handleClosed<T>(fn: () => Promise<T>): Promise<T> {
+    const generation = this.generation;
     try {
       const result = await fn();
-      this.openIfOverThreshold(this.recordOutcome(false));
+      this.settle(generation, false);
       return result;
     } catch (err) {
-      this.openIfOverThreshold(this.recordOutcome(true));
+      this.settle(generation, true);
       throw err;
     }
+  }
+
+  /** Records an outcome only while the circuit is still in the generation the
+   *  call started in. The rest of a batch that already tripped the circuit
+   *  keeps failing for as long as its requests take to time out; counting
+   *  those stragglers would push `lastFailureTime` forward and stretch the
+   *  cooldown, or reopen a circuit that a half-open probe has since closed.
+   *  Their verdict is already reflected in the transition they missed. */
+  private settle(generation: number, failed: boolean): void {
+    if (generation !== this.generation) return;
+    this.openIfOverThreshold(this.recordOutcome(failed));
   }
 
   private openIfOverThreshold({

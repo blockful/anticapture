@@ -119,6 +119,32 @@ describe("CircuitBreakerRegistry", () => {
     expect(registry.forProxy("ens", "/votes").name).toBe("ens:votes");
   });
 
+  it("keeps a route that is counting failures out of the eviction pool", async () => {
+    const registry = new CircuitBreakerRegistry({
+      minimumRequests: 100,
+      consecutiveFailureThreshold: 5,
+    });
+    const proposals = registry.forProxy("ens", "/proposals");
+    for (let i = 0; i < 3; i++) {
+      await expect(proposals.execute(FAIL)).rejects.toThrow();
+    }
+    expect(proposals.state).toBe("CLOSED");
+
+    // Made-up paths interleaved with the failing route must not wipe its
+    // history: they fill the remaining slots and evict only each other.
+    for (let i = 0; i < MAX_ROUTES_PER_DAO * 3; i++) {
+      registry.forProxy("ens", `/probe-${i}`);
+    }
+    expect(routeKeys(registry, "ens")).toHaveLength(MAX_ROUTES_PER_DAO);
+    expect(registry.forProxy("ens", "/proposals")).toBe(proposals);
+
+    // The streak survived, so the fifth failure still trips the route.
+    for (let i = 0; i < 2; i++) {
+      await expect(proposals.execute(FAIL)).rejects.toThrow();
+    }
+    expect(proposals.state).toBe("OPEN");
+  });
+
   it("keeps routes that never trip out of the state gauge", async () => {
     const record = vi.spyOn(circuitBreakerState, "record");
     const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });

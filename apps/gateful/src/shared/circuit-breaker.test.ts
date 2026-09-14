@@ -234,4 +234,97 @@ describe("CircuitBreaker", () => {
       expect(cb.state).toBe("CLOSED");
     });
   });
+
+  describe("stragglers from an earlier generation", () => {
+    /** Starts `count` calls that hang until their rejecter is invoked. */
+    function pendingCalls(cb: CircuitBreaker, count: number) {
+      const rejecters: Array<() => void> = [];
+      const settled = Array.from({ length: count }, () =>
+        cb
+          .execute(
+            () =>
+              new Promise<string>((_, reject) => {
+                rejecters.push(() => reject(new Error("downstream error")));
+              }),
+          )
+          .catch(() => "failed"),
+      );
+      return { rejecters, settled };
+    }
+
+    const trippingBreaker = () =>
+      createCircuitBreaker({
+        minimumRequests: 100,
+        consecutiveFailureThreshold: 5,
+      });
+
+    it("does not let the rest of the batch stretch the cooldown", async () => {
+      const cb = trippingBreaker();
+      const { rejecters, settled } = pendingCalls(cb, 10);
+
+      for (const reject of rejecters.slice(0, 5)) reject();
+      await Promise.all(settled.slice(0, 5));
+      expect(cb.state).toBe("OPEN");
+      expect(cb.nextRetryIn).toBe(1000);
+
+      // The slower half of the same batch fails while the circuit is already
+      // open: the cooldown must still end where the opening batch put it.
+      advanceTime(500);
+      for (const reject of rejecters.slice(5)) reject();
+      await Promise.all(settled.slice(5));
+
+      expect(cb.state).toBe("OPEN");
+      expect(cb.nextRetryIn).toBe(500);
+    });
+
+    it("does not let the rest of the batch reopen a recovered circuit", async () => {
+      const cb = trippingBreaker();
+      const { rejecters, settled } = pendingCalls(cb, 10);
+
+      for (const reject of rejecters.slice(0, 5)) reject();
+      await Promise.all(settled.slice(0, 5));
+      expect(cb.state).toBe("OPEN");
+
+      advanceTime(1000);
+      await cb.execute(SUCCESS);
+      expect(cb.state).toBe("CLOSED");
+
+      for (const reject of rejecters.slice(5)) reject();
+      await Promise.all(settled.slice(5));
+
+      expect(cb.state).toBe("CLOSED");
+    });
+  });
+
+  describe("isIdle", () => {
+    it("is idle while nothing has failed", async () => {
+      const cb = createCircuitBreaker();
+      expect(cb.isIdle()).toBe(true);
+      await succeed(cb, 3);
+      expect(cb.isIdle()).toBe(true);
+    });
+
+    it("is not idle while a failure is still counted", async () => {
+      const cb = createCircuitBreaker();
+      await succeed(cb, 3);
+      await fail(cb, 1);
+      expect(cb.state).toBe("CLOSED");
+      expect(cb.isIdle()).toBe(false);
+
+      // A success ends the streak, but the failure still sits in the window.
+      await succeed(cb, 1);
+      expect(cb.isIdle()).toBe(false);
+
+      // Idle again once that failure has aged out of the window.
+      advanceTime(10_000);
+      expect(cb.isIdle()).toBe(true);
+    });
+
+    it("is not idle while the circuit is open", async () => {
+      const cb = createCircuitBreaker({ minimumRequests: 1 });
+      await fail(cb, 1);
+      expect(cb.state).toBe("OPEN");
+      expect(cb.isIdle()).toBe(false);
+    });
+  });
 });

@@ -105,18 +105,19 @@ export class CircuitBreakerRegistry {
     return routes;
   }
 
-  /** Frees one slot by dropping the least recently used CLOSED route breaker.
+  /** Frees one slot by dropping the least recently used idle route breaker.
    *
-   *  Only CLOSED breakers are evicted. An OPEN or HALF_OPEN circuit is actively
-   *  shielding a failing route, and dropping it would let a burst of made-up
-   *  paths reopen the very route it was protecting; a tripped route therefore
-   *  keeps its slot until it recovers. Evicting a CLOSED breaker only discards
-   *  a sliding window of successes, which the route rebuilds on its next calls.
-   *  When every slot is held by a tripped circuit there is nothing safe to
-   *  evict and the caller falls back to the DAO breaker. */
+   *  Only breakers with no failure history are evicted (see `isIdle`). A
+   *  tripped circuit is actively shielding a failing route, and one that is
+   *  still closed may already be counting failures towards a trip: evicting
+   *  either would let a client alternating made-up paths with a failing real
+   *  route wipe that route's history before it can open. Evicting an idle
+   *  breaker only discards a window of successes, which the route rebuilds on
+   *  its next calls. When no slot is idle the caller falls back to the DAO
+   *  breaker, as it did before any route had a slot. */
   private evictIdleRoute(routes: Set<string>): boolean {
     for (const key of routes) {
-      if (this.breakers.get(key)?.state !== "CLOSED") continue;
+      if (!this.breakers.get(key)?.isIdle()) continue;
       routes.delete(key);
       this.breakers.delete(key);
       return true;
