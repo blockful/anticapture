@@ -128,6 +128,24 @@ describe("CircuitBreaker", () => {
       expect(cb.state).toBe("OPEN");
     });
 
+    it("forgets a streak that has gone quiet for a whole window", async () => {
+      // Two failures an hour apart are not the sustained outage the streak rule
+      // is meant to catch, so a quiet window starts the count over.
+      const cb = createCircuitBreaker({
+        windowMs: 10_000,
+        minimumRequests: 10,
+        consecutiveFailureThreshold: 3,
+      });
+      await fail(cb, 2);
+      advanceTime(10_001);
+      await fail(cb, 2);
+      expect(cb.state).toBe("CLOSED");
+
+      // Three failures inside one window still trip it.
+      await fail(cb, 1);
+      expect(cb.state).toBe("OPEN");
+    });
+
     it("resets the consecutive failure count on a success", async () => {
       const cb = createCircuitBreaker({
         minimumRequests: 10,
@@ -342,6 +360,60 @@ describe("CircuitBreaker", () => {
       await fail(cb, 1);
       expect(cb.state).toBe("OPEN");
       expect(cb.isIdle()).toBe(false);
+    });
+  });
+
+  describe("isStale", () => {
+    it("goes stale once a failing key has been quiet for a window", async () => {
+      const cb = createCircuitBreaker({
+        windowMs: 10_000,
+        minimumRequests: 10,
+      });
+      await fail(cb, 1);
+      expect(cb.state).toBe("CLOSED");
+      expect(cb.isIdle()).toBe(false);
+      expect(cb.isStale()).toBe(false);
+
+      // The failure stops mattering once no call has arrived for a window.
+      advanceTime(10_000);
+      expect(cb.isStale()).toBe(true);
+    });
+
+    it("keeps an open circuit until its cooldown has elapsed", async () => {
+      const cb = createCircuitBreaker({
+        windowMs: 10_000,
+        minimumRequests: 1,
+        cooldownMs: 20_000,
+        maxCooldownMs: 20_000,
+      });
+      await fail(cb, 1);
+      expect(cb.state).toBe("OPEN");
+
+      // Quiet for a window but still inside the cooldown: it is shielding the
+      // route and must keep its place.
+      advanceTime(10_000);
+      expect(cb.isStale()).toBe(false);
+
+      // Past the cooldown it would probe on the next call anyway.
+      advanceTime(10_001);
+      expect(cb.isStale()).toBe(true);
+    });
+
+    it("is never stale while a call is running", async () => {
+      const cb = createCircuitBreaker({ windowMs: 10_000 });
+      let release!: () => void;
+      const call = cb.execute(
+        () =>
+          new Promise<string>((resolve) => {
+            release = () => resolve("ok");
+          }),
+      );
+      advanceTime(60_000);
+      expect(cb.isStale()).toBe(false);
+
+      release();
+      await call;
+      expect(cb.isStale()).toBe(false);
     });
   });
 });

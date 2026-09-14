@@ -37,6 +37,10 @@ export type CircuitBreakerOptions = {
    *  transition from then on. Long-lived keys (DAOs, relayers, services) leave
    *  it off so dashboards list them while they are healthy. */
   lazyStateMetric?: boolean;
+  /** Decides the `name` attribute this breaker reports under. Called once,
+   *  when the breaker first publishes, so the registry can fold names past its
+   *  budget into a shared bucket and keep the metric's attribute set bounded. */
+  resolveMetricName?: (key: string) => string;
 };
 
 /** The sliding window is split into this many fixed time buckets. */
@@ -86,6 +90,11 @@ export class CircuitBreaker {
   /** Calls that have started and not yet settled. Every call site passes an
    *  abort timeout, so this cannot stay above zero indefinitely. */
   private inFlight = 0;
+  /** When a call last started or settled here. */
+  private lastUsedAt: number;
+  /** The `name` attribute reported to the state gauge, fixed when it arms. */
+  private metricName: string;
+  private readonly resolveMetricName?: (key: string) => string;
 
   constructor(name: string, opts?: CircuitBreakerOptions) {
     this._name = name;
@@ -97,6 +106,9 @@ export class CircuitBreaker {
     this.cooldownMs = opts?.cooldownMs ?? 30_000;
     this.maxCooldownMs = opts?.maxCooldownMs ?? 300_000;
     this.metricArmed = !opts?.lazyStateMetric;
+    this.metricName = name;
+    this.resolveMetricName = opts?.resolveMetricName;
+    this.lastUsedAt = Date.now();
     this.recordState();
   }
 
@@ -130,6 +142,19 @@ export class CircuitBreaker {
       if (index >= oldestLiveIndex && bucket.failures > 0) return false;
     }
     return true;
+  }
+
+  /** True when the breaker has seen no call for a whole window and has nothing
+   *  to protect right now: nothing in flight, and any cooldown already elapsed.
+   *  An OPEN circuit past its cooldown probes on its next call anyway, so
+   *  dropping it costs nothing, while one still inside its cooldown keeps its
+   *  place. This is what lets routes reclaim slots after an outage: without it,
+   *  one failed call to each of 64 made-up segments would hold a DAO's slots
+   *  for good, since a failure streak and an OPEN state both persist until the
+   *  next call arrives. */
+  isStale(): boolean {
+    if (this.inFlight > 0 || this.nextRetryIn > 0) return false;
+    return Date.now() - this.lastUsedAt >= this.windowMs;
   }
 
   private currentCooldown(): number {
@@ -176,18 +201,23 @@ export class CircuitBreaker {
     if (!this.metricArmed) {
       if (this._state === "CLOSED") return;
       this.metricArmed = true;
+      if (this.resolveMetricName) {
+        this.metricName = this.resolveMetricName(this._name);
+      }
     }
     circuitBreakerState.record(STATE_VALUE[this._state], {
-      name: this._name,
+      name: this.metricName,
     });
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
+    this.lastUsedAt = Date.now();
     this.inFlight += 1;
     try {
       return await this.dispatch(fn);
     } finally {
       this.inFlight -= 1;
+      this.lastUsedAt = Date.now();
     }
   }
 
@@ -298,6 +328,12 @@ export class CircuitBreaker {
     for (const index of this.buckets.keys()) {
       if (index < oldestLiveIndex) this.buckets.delete(index);
     }
+
+    // A streak only means anything while the window still holds the calls that
+    // built it. Once the window has emptied, the key has been quiet: five
+    // failures spread over an hour are not the sustained outage this rule is
+    // meant to catch, so the count starts over.
+    if (this.buckets.size === 0) this.consecutiveFailures = 0;
 
     const bucket = this.buckets.get(bucketIndex) ?? { total: 0, failures: 0 };
     bucket.total += 1;

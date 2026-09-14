@@ -2,9 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { circuitBreakerState } from "../metrics.js";
 import {
   CircuitBreakerRegistry,
+  MAX_METRIC_ROUTES_PER_DAO,
   MAX_ROUTES_PER_DAO,
 } from "./circuit-breaker-registry.js";
 
+const SUCCESS = async () => "ok";
 const FAIL = async () => {
   throw new Error("downstream error");
 };
@@ -29,8 +31,6 @@ describe("CircuitBreakerRegistry", () => {
     expect(CircuitBreakerRegistry.proxyKey("ens", "/proposals/123/votes")).toBe(
       "ens:proposals",
     );
-    expect(CircuitBreakerRegistry.proxyKey("ens", "/")).toBe("ens");
-    expect(CircuitBreakerRegistry.proxyKey("ens", "")).toBe("ens");
   });
 
   it("gives any route-shaped segment its own key without a route list", () => {
@@ -43,10 +43,26 @@ describe("CircuitBreakerRegistry", () => {
     );
   });
 
-  it("keeps ids, hashes and addresses on the DAO breaker", () => {
-    expect(CircuitBreakerRegistry.proxyKey("ens", "/0xdeadbeef/x")).toBe("ens");
-    expect(CircuitBreakerRegistry.proxyKey("ens", "/123")).toBe("ens");
-    expect(CircuitBreakerRegistry.proxyKey("ens", "/Proposals")).toBe("ens");
+  it("reads a route name through its case and its encoding", () => {
+    // One route, one breaker, however the client spells the segment.
+    expect(CircuitBreakerRegistry.proxyKey("ens", "/Proposals")).toBe(
+      "ens:proposals",
+    );
+    expect(CircuitBreakerRegistry.proxyKey("ens", "/%50roposals")).toBe(
+      "ens:proposals",
+    );
+  });
+
+  it("puts every non-route shape on one key per DAO", () => {
+    // Ids, hashes and malformed encoding are chosen by the client, so they
+    // share a key instead of eroding the breaker that guards every route.
+    expect(CircuitBreakerRegistry.proxyKey("ens", "/0xdeadbeef/x")).toBe(
+      "ens:other",
+    );
+    expect(CircuitBreakerRegistry.proxyKey("ens", "/123")).toBe("ens:other");
+    expect(CircuitBreakerRegistry.proxyKey("ens", "/%zz")).toBe("ens:other");
+    expect(CircuitBreakerRegistry.proxyKey("ens", "/")).toBe("ens:other");
+    expect(CircuitBreakerRegistry.proxyKey("ens", "")).toBe("ens:other");
   });
 
   it("caps how many route breakers a DAO holds at once", () => {
@@ -88,6 +104,42 @@ describe("CircuitBreakerRegistry", () => {
     expect(routeKeys(registry, "ens")).toHaveLength(MAX_ROUTES_PER_DAO);
   });
 
+  it("reclaims the slots of routes that went quiet after an outage", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(0);
+    const registry = new CircuitBreakerRegistry({
+      windowMs: 30_000,
+      cooldownMs: 1_000,
+      minimumRequests: 10,
+      consecutiveFailureThreshold: 5,
+    });
+
+    // During an upstream outage, one failing call to each of 64 made-up
+    // segments takes every slot the DAO has.
+    for (let i = 0; i < MAX_ROUTES_PER_DAO; i++) {
+      await expect(
+        registry.forProxy("ens", `/probe-${i}`).execute(FAIL),
+      ).rejects.toThrow();
+    }
+    expect(routeKeys(registry, "ens")).toHaveLength(MAX_ROUTES_PER_DAO);
+
+    // The upstream recovers and those paths are never requested again.
+    vi.setSystemTime(60_000);
+    const proposals = registry.forProxy("ens", "/proposals");
+    const votes = registry.forProxy("ens", "/votes");
+    expect(proposals.name).toBe("ens:proposals");
+    expect(votes.name).toBe("ens:votes");
+
+    // Neither fell back to the shared DAO breaker, so one route failing does
+    // not reject the other.
+    for (let i = 0; i < 5; i++) {
+      await expect(proposals.execute(FAIL)).rejects.toThrow();
+    }
+    expect(proposals.state).toBe("OPEN");
+    await expect(votes.execute(SUCCESS)).resolves.toBe("ok");
+    vi.useRealTimers();
+  });
+
   it("keeps a tripped route out of the eviction pool", async () => {
     const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
     const proposals = registry.forProxy("ens", "/proposals");
@@ -112,11 +164,12 @@ describe("CircuitBreakerRegistry", () => {
     expect(late.name).toBe("ens:late-route");
     await expect(late.execute(FAIL)).rejects.toThrow();
 
-    // The failure stayed on the late route: the DAO breaker and every other
-    // route are still closed.
-    expect(registry.get("ens").state).toBe("CLOSED");
-    expect(registry.forProxy("ens", "/votes").state).toBe("CLOSED");
-    expect(registry.forProxy("ens", "/votes").name).toBe("ens:votes");
+    // The failure stayed on the late route: the DAO breaker was never even
+    // created, and another route still reaches upstream.
+    expect(registry.getAll().has("ens")).toBe(false);
+    await expect(
+      registry.forProxy("ens", "/votes").execute(SUCCESS),
+    ).resolves.toBe("ok");
   });
 
   it("keeps a route that is counting failures out of the eviction pool", async () => {
@@ -223,6 +276,29 @@ describe("CircuitBreakerRegistry", () => {
     expect(record).toHaveBeenLastCalledWith(2, { name: "ens:proposals" });
   });
 
+  it("folds route names past the metric budget into one bucket", async () => {
+    const record = vi.spyOn(circuitBreakerState, "record");
+    const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
+
+    for (let i = 0; i < MAX_METRIC_ROUTES_PER_DAO; i++) {
+      const breaker = registry.forProxy("ens", `/route-${i}`);
+      await expect(breaker.execute(FAIL)).rejects.toThrow();
+    }
+    const last = MAX_METRIC_ROUTES_PER_DAO - 1;
+    expect(record).toHaveBeenLastCalledWith(2, { name: `ens:route-${last}` });
+
+    // Past the budget the state is still reported, under a shared name that
+    // cannot grow the metric's attribute set.
+    const late = registry.forProxy("ens", "/late-route");
+    await expect(late.execute(FAIL)).rejects.toThrow();
+    expect(record).toHaveBeenLastCalledWith(2, { name: "ens:other-routes" });
+
+    // The budget is per DAO.
+    const uni = registry.forProxy("uni", "/late-route");
+    await expect(uni.execute(FAIL)).rejects.toThrow();
+    expect(record).toHaveBeenLastCalledWith(2, { name: "uni:late-route" });
+  });
+
   it("shares the DAO breaker only when every slot is a tripped route", async () => {
     const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
     for (let i = 0; i < MAX_ROUTES_PER_DAO; i++) {
@@ -240,6 +316,19 @@ describe("CircuitBreakerRegistry", () => {
     expect(registry.get("ens:votes")).not.toBe(registry.get("ens:proposals"));
   });
 
+  it("gives fan-out its own key so its tighter deadline stays contained", async () => {
+    const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
+    const fanOut = registry.forFanOut("ens", "/dao");
+    await expect(fanOut.execute(FAIL)).rejects.toThrow();
+    expect(fanOut.state).toBe("OPEN");
+
+    // The proxy route of the same path is untouched, and so is the summary.
+    await expect(
+      registry.forProxy("ens", "/dao").execute(SUCCESS),
+    ).resolves.toBe("ok");
+    expect(registry.summary("ens").state).toBe("CLOSED");
+  });
+
   it("does not report an OPEN breaker past its cooldown as the worst state", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(0);
@@ -247,33 +336,55 @@ describe("CircuitBreakerRegistry", () => {
       minimumRequests: 1,
       cooldownMs: 1_000,
     });
-    await expect(registry.get("ens:revenue").execute(FAIL)).rejects.toThrow();
+    await expect(
+      registry.forProxy("ens", "/revenue").execute(FAIL),
+    ).rejects.toThrow();
     expect(registry.summary("ens").name).toBe("ens:revenue");
 
     // Cooldown elapsed: still OPEN until probed, but no longer an outage.
     vi.setSystemTime(1_000);
-    expect(registry.get("ens:revenue").state).toBe("OPEN");
+    expect(registry.forProxy("ens", "/revenue").state).toBe("OPEN");
     expect(registry.summary("ens").nextRetryIn).toBe(0);
 
     // A circuit still inside its cooldown outranks the expired one.
-    await expect(registry.get("ens:votes").execute(FAIL)).rejects.toThrow();
+    await expect(
+      registry.forProxy("ens", "/votes").execute(FAIL),
+    ).rejects.toThrow();
     expect(registry.summary("ens").name).toBe("ens:votes");
     vi.useRealTimers();
   });
 
-  it("summarises a DAO by its worst scoped breaker", async () => {
+  it("summarises a DAO by its worst route breaker", async () => {
     const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
-    registry.get("ens");
-    registry.get("ens:votes");
-    // Not scoped to ens: must not leak into its summary.
-    await expect(registry.get("relayer:ens").execute(FAIL)).rejects.toThrow();
-
+    registry.forProxy("ens", "/votes");
     expect(registry.summary("ens").state).toBe("CLOSED");
 
-    await expect(registry.get("ens:proposals").execute(FAIL)).rejects.toThrow();
+    await expect(
+      registry.forProxy("ens", "/proposals").execute(FAIL),
+    ).rejects.toThrow();
 
     const worst = registry.summary("ens");
     expect(worst.name).toBe("ens:proposals");
     expect(worst.state).toBe("OPEN");
+  });
+
+  it("never reads another namespace as one of a DAO's routes", async () => {
+    const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
+    // Nothing stops a DAO from being called "relayer", so a summary must not
+    // go by name prefix.
+    await expect(registry.get("relayer:ens").execute(FAIL)).rejects.toThrow();
+    await expect(
+      registry.get("health:relayer").execute(FAIL),
+    ).rejects.toThrow();
+    await expect(
+      registry.forFanOut("relayer", "/dao").execute(FAIL),
+    ).rejects.toThrow();
+
+    expect(registry.summary("relayer").state).toBe("CLOSED");
+
+    await expect(
+      registry.forProxy("relayer", "/proposals").execute(FAIL),
+    ).rejects.toThrow();
+    expect(registry.summary("relayer").name).toBe("relayer:proposals");
   });
 });

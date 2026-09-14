@@ -99,13 +99,32 @@ describe("proxy route", () => {
     await app.request("/uni/proposals");
     await app.request("/uni/proposals?limit=5");
 
-    expect(registry.get("uni:proposals").state).toBe("OPEN");
-    expect(registry.get("uni:votes").state).toBe("CLOSED");
-    expect(registry.get("ens:proposals").state).toBe("CLOSED");
+    expect(registry.getAll().get("uni:proposals")?.state).toBe("OPEN");
+    // No other breaker was even created, so nothing else can be open.
+    expect([...registry.getAll().keys()]).toEqual(["uni:proposals"]);
 
-    // Other routes of the same DAO still reach upstream.
+    // Other routes of the same DAO, and the same route of another DAO, still
+    // reach upstream.
     fetchSpy.mockResolvedValue(new Response("{}", { status: 200 }));
-    const res = await app.request("/uni/votes");
+    expect((await app.request("/uni/votes")).status).toBe(200);
+    expect((await app.request("/ens/proposals")).status).toBe(200);
+    // The open route is still refused without reaching upstream at all.
+    const callsBefore = fetchSpy.mock.calls.length;
+    await app.request("/uni/proposals");
+    expect(fetchSpy.mock.calls).toHaveLength(callsBefore);
+  });
+
+  it("should strip the DAO segment however the client encodes it", async () => {
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValue(new Response("{}", { status: 200 }));
+
+    // %75 is "u": the DAO param decodes, so the path must be stripped by
+    // position rather than by matching the decoded name against the raw path.
+    const res = await app.request("/%75ni/proposals");
+
     expect(res.status).toBe(200);
+    const forwarded = fetchSpy.mock.calls[0]?.[0] as Request;
+    expect(new URL(forwarded.url).pathname).toBe("/proposals");
   });
 });

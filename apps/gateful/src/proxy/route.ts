@@ -35,9 +35,15 @@ export function proxy(
       );
     }
 
+    // Drop the DAO segment by position rather than by text: the param Hono
+    // gives us is decoded, so a percent-encoded DAO in the URL would not match
+    // the raw path and the DAO segment would be proxied on to the upstream and
+    // read as the route name. The remaining segments are passed through
+    // untouched, encoding included.
+    const [, , ...rest] = c.req.path.split("/");
     const resolved = {
       dao: paramDao.toLowerCase(),
-      path: c.req.path.replace(`/${paramDao}`, ""),
+      path: rest.length > 0 ? `/${rest.join("/")}` : "",
     };
 
     const daoAPI = daoApis.get(resolved.dao);
