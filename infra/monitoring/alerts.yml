@@ -200,19 +200,23 @@ groups:
             deadlocks in the last 5 minutes. Inspect blocked statements and cache database
             contention.
 
-      # CPU usage above 80% for 5 minutes
+      # CPU usage above 80% for 5 minutes. Aggregated per (job, instance): a DAO
+      # API job can have several replicas behind DNS discovery, each with its
+      # own process_cpu_time_seconds_total series, so summing by job alone lets
+      # two replicas at 45% each falsely report 90% for the job.
       - alert: HighCPUUsage
-        expr: sum by (job) (rate(process_cpu_time_seconds_total[1m])) * 100 > 80
+        expr: sum by (job, instance) (rate(process_cpu_time_seconds_total[1m])) * 100 > 80
         for: 5m
         keep_firing_for: 15m
         labels:
           severity: warning
         annotations:
-          summary: "[WARNING] High CPU usage on {{ $labels.job }}"
+          summary: "[WARNING] High CPU usage on a replica of {{ $labels.job }}"
           description: >
-            {{ $labels.job }} has been using {{ printf "%.1f" $value }}% CPU for more than
-            5 minutes. This may indicate a processing backlog, tight indexing loop, or a
-            runaway query. Review process metrics and recent workload.
+            The {{ $labels.job }} replica at {{ $labels.instance }} has been using
+            {{ printf "%.1f" $value }}% CPU for more than 5 minutes. This may indicate a
+            processing backlog, tight indexing loop, or a runaway query. Review process
+            metrics and recent workload for this replica.
 
       # p99 HTTP latency above 2s for 5 minutes
       - alert: HighLatency
