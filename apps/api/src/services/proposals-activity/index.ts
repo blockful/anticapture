@@ -166,13 +166,12 @@ export class ProposalsActivityService {
     // failing the whole activity request.
     const head = await this.daoClient
       .getCurrentBlockNumber()
-      .then(async (currentBlock) => {
-        const currentTimestamp =
-          await this.daoClient.getBlockTime(currentBlock);
-        // A head without a timestamp dates nothing, so treat it as no head.
-        if (currentTimestamp === null) return null;
-        return { currentBlock, currentTimestamp };
-      })
+      .then(async (currentBlock) => ({
+        currentBlock,
+        // A head without a timestamp still dates the block-based statuses, so
+        // it is kept: only the queued timestamp comparisons are skipped.
+        currentTimestamp: await this.daoClient.getBlockTime(currentBlock),
+      }))
       .catch((error: Error) => {
         logger.warn(
           { error },

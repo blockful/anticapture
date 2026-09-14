@@ -151,7 +151,13 @@ export class CircuitBreaker {
    *  place. This is what lets routes reclaim slots after an outage: without it,
    *  one failed call to each of 64 made-up segments would hold a DAO's slots
    *  for good, since a failure streak and an OPEN state both persist until the
-   *  next call arrives. */
+   *  next call arrives.
+   *
+   *  The registry may drop a stale breaker, and a stale OPEN one comes back as
+   *  a fresh CLOSED breaker: its escalated cooldown and its single-probe gate
+   *  are lost, so the route takes the full trip rule again before it reopens.
+   *  That needs both a quiet window on that route and enough slot pressure to
+   *  evict it, and it costs at most one extra round of failures. */
   isStale(): boolean {
     if (this.inFlight > 0 || this.nextRetryIn > 0) return false;
     return Date.now() - this.lastUsedAt >= this.windowMs;
@@ -328,12 +334,6 @@ export class CircuitBreaker {
     for (const index of this.buckets.keys()) {
       if (index < oldestLiveIndex) this.buckets.delete(index);
     }
-
-    // A streak only means anything while the window still holds the calls that
-    // built it. Once the window has emptied, the key has been quiet: five
-    // failures spread over an hour are not the sustained outage this rule is
-    // meant to catch, so the count starts over.
-    if (this.buckets.size === 0) this.consecutiveFailures = 0;
 
     const bucket = this.buckets.get(bucketIndex) ?? { total: 0, failures: 0 };
     bucket.total += 1;

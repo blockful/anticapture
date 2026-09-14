@@ -112,14 +112,13 @@ export class ProposalsService {
    */
   private async getChainHead(): Promise<{
     currentBlock: number;
-    currentTimestamp: number;
+    currentTimestamp: number | null;
   } | null> {
     try {
       const currentBlock = await this.daoClient.getCurrentBlockNumber();
+      // A head without a timestamp still dates the block-based statuses, so it
+      // is kept: only the queued timestamp comparisons are skipped.
       const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
-      // A head without a timestamp cannot date anything, so it is no better
-      // than no head at all: fall through to the indexed statuses.
-      if (currentTimestamp === null) return null;
       return { currentBlock, currentTimestamp };
     } catch (error) {
       logger.warn(
@@ -137,7 +136,7 @@ export class ProposalsService {
    */
   private async resolveStatus(
     proposal: DBProposal,
-    head: { currentBlock: number; currentTimestamp: number },
+    head: { currentBlock: number; currentTimestamp: number | null },
   ): Promise<string> {
     try {
       return await this.daoClient.getProposalStatus(

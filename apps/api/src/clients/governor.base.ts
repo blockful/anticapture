@@ -253,7 +253,10 @@ export abstract class GovernorBase<
       endTimestamp: bigint;
     },
     currentBlock: number,
-    currentTimestamp: number,
+    // Null when the RPC gave a block number but no timestamp. The block-based
+    // statuses below are still computed; only the timestamp-based ones for
+    // queued proposals are skipped.
+    currentTimestamp: number | null,
   ): Promise<string> {
     // The timelock delay and grace period only matter for queued proposals, and
     // both can cost an eth_call. Reading them here instead of up front keeps a

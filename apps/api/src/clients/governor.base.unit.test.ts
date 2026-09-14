@@ -326,5 +326,22 @@ describe("GovernorBase", () => {
         gracePeriodReads: 1,
       });
     });
+
+    it("should still compute block-based statuses without a head timestamp", async () => {
+      const governor = createOfflineGovernor();
+
+      // The RPC gave a block number but no timestamp: only the queued
+      // comparisons are lost, the block ladder still runs.
+      const status = await governor.getProposalStatus(
+        buildProposal(ProposalStatus.ACTIVE),
+        150,
+        null,
+      );
+
+      expect({
+        status,
+        timelockDelayFetches: governor.timelockDelayFetches,
+      }).toEqual({ status: ProposalStatus.ACTIVE, timelockDelayFetches: 0 });
+    });
   });
 });

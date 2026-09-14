@@ -46,7 +46,13 @@ export const envSchema = z
     // disables the rule it belongs to silently, so it is rejected at boot.
     CIRCUIT_BREAKER_WINDOW_MS: positiveNumber.default(30_000),
     CIRCUIT_BREAKER_MIN_REQUESTS: positiveNumber.default(10),
-    CIRCUIT_BREAKER_FAILURE_RATE: z.coerce.number().min(0).max(1).default(0.5),
+    // A rate of zero would open the circuit on the first evaluation even with
+    // no failures at all, so the bound is exclusive.
+    CIRCUIT_BREAKER_FAILURE_RATE: z.coerce
+      .number()
+      .gt(0, "must be greater than zero")
+      .max(1)
+      .default(0.5),
     // Below MIN_REQUESTS a rate means nothing, so quiet upstreams (relayer,
     // fan-out) open after this many consecutive failures instead.
     CIRCUIT_BREAKER_CONSECUTIVE_FAILURES: positiveNumber.default(5),

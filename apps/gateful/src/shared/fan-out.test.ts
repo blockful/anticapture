@@ -28,13 +28,14 @@ describe("fanOutGet", () => {
     const isolated = new CircuitBreakerRegistry({
       consecutiveFailureThreshold: 1,
     });
-    // The proxy tripped ens's /dao route; fan-out reads the same breaker.
+    // An earlier fan-out tripped ens's /dao circuit. Fan-out keys are its own,
+    // so this is the breaker a later fan-out reads.
     await expect(
-      isolated.forProxy("ens", "/dao").execute(async () => {
+      isolated.forFanOut("ens", "/dao").execute(async () => {
         throw new Error("upstream down");
       }),
     ).rejects.toThrow("upstream down");
-    expect(isolated.get("ens:dao").state).toBe("OPEN");
+    expect(isolated.getAll().get("fanout:ens:dao")?.state).toBe("OPEN");
 
     const daoApis = new Map([
       ["ens", "http://ens-api"],
@@ -42,7 +43,10 @@ describe("fanOutGet", () => {
     ]);
     const result = await fanOutGet(daoApis, isolated, "/dao");
 
+    // ens was skipped without a request: msw is set to error on any call to it.
     expect(result.data).toEqual(new Map([["uni", { id: "uni" }]]));
+    // The proxy route of the same path never saw the fan-out failure.
+    expect(isolated.getAll().has("ens:dao")).toBe(false);
   });
 
   it("returns data from all upstreams and cacheControl from the first fulfilled", async () => {

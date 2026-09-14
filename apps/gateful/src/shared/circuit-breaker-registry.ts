@@ -26,9 +26,11 @@ export const MAX_ROUTES_PER_DAO = 64;
  *  the slots host far more names over a process lifetime than they hold at
  *  once, and the OTel SDK keeps every attribute set for as long as it runs, so
  *  names are budgeted separately from slots. Past this many, route breakers
- *  report under `<dao>:other-routes`, which says "a route past the budget is
- *  unhealthy" rather than which one. The named series go to the routes seen
- *  first, which are the ones real traffic uses. */
+ *  report under `<dao>:other-routes`. The gauge is synchronous, so that series
+ *  carries the last transition among the routes sharing it, not a combined
+ *  view of their health: read it as "a route past the budget changed state".
+ *  The named series go to the routes seen first, which are the ones real
+ *  traffic uses. */
 export const MAX_METRIC_ROUTES_PER_DAO = 32;
 
 /** Shared metric name for route breakers past the per-DAO name budget. */
@@ -193,7 +195,9 @@ export class CircuitBreakerRegistry {
    *  currently holds (for health reporting). Only keys this registry handed out
    *  for that DAO count, so a key from another namespace (a relayer, a health
    *  probe, a fan-out) can never be read as one of its routes, whatever the DAO
-   *  is called. */
+   *  is called. That is also why an open fan-out or probe circuit does not show
+   *  up in `/health` or `/{dao}/health`: those endpoints report what real proxy
+   *  traffic sees, and a fan-out deadline or a probe failure is not that. */
   summary(key: string): CircuitBreaker {
     let worst = this.get(key);
     for (const routeKey of this.routeKeysPerDao.get(key) ?? []) {

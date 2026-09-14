@@ -54,7 +54,7 @@ class SimpleDAOClient implements DAOClient {
       endTimestamp: bigint;
     },
     __: number,
-    ___: number,
+    ___: number | null,
   ) {
     return Promise.resolve("ACTIVE");
   }

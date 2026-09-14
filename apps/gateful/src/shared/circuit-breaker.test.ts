@@ -128,20 +128,21 @@ describe("CircuitBreaker", () => {
       expect(cb.state).toBe("OPEN");
     });
 
-    it("forgets a streak that has gone quiet for a whole window", async () => {
-      // Two failures an hour apart are not the sustained outage the streak rule
-      // is meant to catch, so a quiet window starts the count over.
+    it("keeps a streak across calls spaced wider than the window", async () => {
+      // A relayer or a health probe may be called less than once per window.
+      // The streak must survive those gaps, since it is the only rule that can
+      // trip a key too quiet for the failure rate to mean anything.
       const cb = createCircuitBreaker({
         windowMs: 10_000,
         minimumRequests: 10,
-        consecutiveFailureThreshold: 3,
+        consecutiveFailureThreshold: 5,
       });
-      await fail(cb, 2);
-      advanceTime(10_001);
-      await fail(cb, 2);
-      expect(cb.state).toBe("CLOSED");
+      for (let i = 0; i < 4; i++) {
+        await fail(cb, 1);
+        advanceTime(10_001);
+        expect(cb.state).toBe("CLOSED");
+      }
 
-      // Three failures inside one window still trip it.
       await fail(cb, 1);
       expect(cb.state).toBe("OPEN");
     });

@@ -40,6 +40,6 @@ export interface DAOClient {
       endTimestamp: bigint;
     },
     currentBlock: number,
-    currentTimestamp: number,
+    currentTimestamp: number | null,
   ) => Promise<string>;
 }
