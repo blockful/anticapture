@@ -568,3 +568,73 @@ describe("ProposalEnactmentService in-flight dedup", () => {
     await expectRelayError(executed, "INVALID_PROPOSAL_STATE", 409);
   });
 });
+
+describe("ProposalEnactmentService.enact", () => {
+  it("queues when the proposal is Succeeded", async () => {
+    const { service, simulated } = createService({
+      governor: { state: async () => ProposalState.Succeeded },
+    });
+
+    const outcome = await service.enact(PROPOSAL_ID.toString());
+
+    expect(outcome).toEqual({ action: "queue", txHash: TX_HASH });
+    expect(simulated).toEqual([{ functionName: "queue" }]);
+  });
+
+  it("executes when the proposal is Queued and the eta has passed", async () => {
+    const { service, simulated } = createService({
+      governor: {
+        state: async () => ProposalState.Queued,
+        proposalEta: async () => NOW - 1n,
+      },
+    });
+
+    const outcome = await service.enact(PROPOSAL_ID.toString());
+
+    expect(outcome).toEqual({ action: "execute", txHash: TX_HASH });
+    expect(simulated).toEqual([{ functionName: "execute" }]);
+  });
+
+  it("propagates TIMELOCK_NOT_READY when Queued but the eta is in the future", async () => {
+    const { service, sent } = createService({
+      governor: {
+        state: async () => ProposalState.Queued,
+        proposalEta: async () => NOW + 100n,
+      },
+    });
+
+    await expectRelayError(
+      service.enact(PROPOSAL_ID.toString()),
+      "TIMELOCK_NOT_READY",
+      409,
+    );
+    expect(sent).toEqual([]);
+  });
+
+  it.each([
+    ProposalState.Pending,
+    ProposalState.Active,
+    ProposalState.Canceled,
+    ProposalState.Defeated,
+    ProposalState.Expired,
+    ProposalState.Executed,
+  ])("skips without broadcasting when state is %s", async (state) => {
+    const { service, sent, simulated } = createService({
+      governor: { state: async () => state },
+    });
+
+    const outcome = await service.enact(PROPOSAL_ID.toString());
+
+    expect(outcome).toEqual({ action: "skipped", state: ProposalState[state] });
+    expect(sent).toEqual([]);
+    expect(simulated).toEqual([]);
+  });
+
+  it("throws PROPOSAL_NOT_FOUND for an unknown proposal", async () => {
+    const { service } = createService({
+      governor: { state: async () => null },
+    });
+
+    await expectRelayError(service.enact("999"), "PROPOSAL_NOT_FOUND", 404);
+  });
+});
