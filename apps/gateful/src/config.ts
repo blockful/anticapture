@@ -3,6 +3,11 @@ import { z } from "zod";
 
 dotenv.config();
 
+/** A duration or a count that only makes sense above zero. */
+const positiveNumber = z.coerce
+  .number()
+  .positive("must be greater than zero milliseconds or requests");
+
 export const envSchema = z
   .object({
     PORT: z.coerce.number().default(4001),
@@ -37,14 +42,16 @@ export const envSchema = z
     // The circuit opens when at least MIN_REQUESTS were seen in WINDOW_MS and
     // FAILURE_RATE (0-1) of them failed, so a partially failing reload burst
     // does not take a DAO route offline while a real outage still trips fast.
-    CIRCUIT_BREAKER_WINDOW_MS: z.coerce.number().default(30_000),
-    CIRCUIT_BREAKER_MIN_REQUESTS: z.coerce.number().default(10),
+    // Durations and counts must be above zero: a zero window or cooldown
+    // disables the rule it belongs to silently, so it is rejected at boot.
+    CIRCUIT_BREAKER_WINDOW_MS: positiveNumber.default(30_000),
+    CIRCUIT_BREAKER_MIN_REQUESTS: positiveNumber.default(10),
     CIRCUIT_BREAKER_FAILURE_RATE: z.coerce.number().min(0).max(1).default(0.5),
     // Below MIN_REQUESTS a rate means nothing, so quiet upstreams (relayer,
     // fan-out) open after this many consecutive failures instead.
-    CIRCUIT_BREAKER_CONSECUTIVE_FAILURES: z.coerce.number().default(5),
-    CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(30_000),
-    CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(300_000),
+    CIRCUIT_BREAKER_CONSECUTIVE_FAILURES: positiveNumber.default(5),
+    CIRCUIT_BREAKER_COOLDOWN_MS: positiveNumber.default(30_000),
+    CIRCUIT_BREAKER_MAX_COOLDOWN_MS: positiveNumber.default(300_000),
     REDIS_URL: z.string().optional(),
     RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
   })

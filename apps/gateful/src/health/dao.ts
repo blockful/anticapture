@@ -95,10 +95,12 @@ export function daoHealth(
       return c.json({ error: `DAO "${dao}" not configured` }, 404);
     }
 
-    // The probe runs through the health route's own breaker; the reported
-    // circuit is the worst of the DAO's per-route breakers so real-traffic
-    // state shows.
-    const breaker = registry.forProxy(dao, "/health/full");
+    // The probe runs through its own breaker, keyed outside the DAO's route
+    // namespace: /health is polled by CI and orchestrators, and a key under
+    // `<dao>:` would feed probe failures into the DAO summary and from there
+    // into gateway readiness. The reported circuit is the worst of the DAO's
+    // per-route breakers, so real-traffic state is what shows.
+    const breaker = registry.get(`health:${dao}`);
     const circuit = () => buildCircuit(registry.summary(dao));
 
     try {
