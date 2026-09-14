@@ -117,7 +117,10 @@ export class ProposalsService {
     try {
       const currentBlock = await this.daoClient.getCurrentBlockNumber();
       const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
-      return { currentBlock, currentTimestamp: currentTimestamp! };
+      // A head without a timestamp cannot date anything, so it is no better
+      // than no head at all: fall through to the indexed statuses.
+      if (currentTimestamp === null) return null;
+      return { currentBlock, currentTimestamp };
     } catch (error) {
       logger.warn(
         { error },

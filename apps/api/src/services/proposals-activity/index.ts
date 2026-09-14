@@ -166,10 +166,13 @@ export class ProposalsActivityService {
     // failing the whole activity request.
     const head = await this.daoClient
       .getCurrentBlockNumber()
-      .then(async (currentBlock) => ({
-        currentBlock,
-        currentTimestamp: (await this.daoClient.getBlockTime(currentBlock))!,
-      }))
+      .then(async (currentBlock) => {
+        const currentTimestamp =
+          await this.daoClient.getBlockTime(currentBlock);
+        // A head without a timestamp dates nothing, so treat it as no head.
+        if (currentTimestamp === null) return null;
+        return { currentBlock, currentTimestamp };
+      })
       .catch((error: Error) => {
         logger.warn(
           { error },

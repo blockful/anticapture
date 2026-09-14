@@ -58,6 +58,7 @@ export abstract class GovernorBase<
     { value: bigint; expiresAt: number }
   >();
   private readonly quorumRefreshes = new Map<string, Promise<void>>();
+  private readonly quorumFetches = new Map<string, Promise<bigint>>();
   private readonly latestBlockCacheTtlMs = 7_000;
   // Backoff after a failed refresh so a degraded RPC is not re-probed on every
   // request while the stale block is being served.
@@ -68,6 +69,10 @@ export abstract class GovernorBase<
   // failure surfaces, so services fall back to indexed statuses and /health
   // reports the chain head as unavailable.
   private readonly latestBlockMaxStaleMs = 60_000;
+  // Earliest time a failed latest-block read may be retried. Kept outside the
+  // cache entry so a failure at boot, when nothing is cached yet, is backed off
+  // as well instead of re-probing a down RPC on every request.
+  private latestBlockNextAttemptAt = 0;
   private readonly quorumCacheTtlMs: number;
 
   protected abstract address: Address;
@@ -97,13 +102,30 @@ export abstract class GovernorBase<
       return cached.value;
     }
 
-    const quorum = await fetcher();
-    this.quorumCache.set(cacheKey, {
-      value: quorum,
-      expiresAt: now + this.quorumCacheTtlMs,
-    });
+    // Cold cache: share one in-flight read across concurrent callers, the same
+    // way getTimelockDelay does. getProposalStatus runs per proposal, so a cold
+    // listing would otherwise fire one identical eth_call per finished proposal
+    // and trip upstream RPC rate limits.
+    const inFlight = this.quorumFetches.get(cacheKey);
+    if (inFlight) {
+      return inFlight;
+    }
 
-    return quorum;
+    const fetch = fetcher()
+      .then((quorum) => {
+        this.quorumCache.set(cacheKey, {
+          value: quorum,
+          expiresAt: Date.now() + this.quorumCacheTtlMs,
+        });
+        return quorum;
+      })
+      .finally(() => {
+        this.quorumFetches.delete(cacheKey);
+      });
+
+    this.quorumFetches.set(cacheKey, fetch);
+
+    return fetch;
   }
 
   private refreshCachedQuorum(
@@ -132,39 +154,54 @@ export abstract class GovernorBase<
   }
 
   async getProposalThreshold(): Promise<bigint> {
-    if (!this.cache.proposalThreshold) {
-      this.cache.proposalThreshold = (await this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "proposalThreshold",
-        args: [],
-      })) as bigint;
+    const cached = this.cache.proposalThreshold;
+    if (cached !== undefined) {
+      return cached;
     }
-    return this.cache.proposalThreshold!;
+
+    const proposalThreshold = (await this.readContract({
+      abi: this.abi,
+      address: this.address,
+      functionName: "proposalThreshold",
+      args: [],
+    })) as bigint;
+    this.cache.proposalThreshold = proposalThreshold;
+
+    return proposalThreshold;
   }
 
   async getVotingDelay(): Promise<bigint> {
-    if (!this.cache.votingDelay) {
-      this.cache.votingDelay = (await this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "votingDelay",
-        args: [],
-      })) as bigint;
+    const cached = this.cache.votingDelay;
+    if (cached !== undefined) {
+      return cached;
     }
-    return this.cache.votingDelay!;
+
+    const votingDelay = (await this.readContract({
+      abi: this.abi,
+      address: this.address,
+      functionName: "votingDelay",
+      args: [],
+    })) as bigint;
+    this.cache.votingDelay = votingDelay;
+
+    return votingDelay;
   }
 
   async getVotingPeriod(): Promise<bigint> {
-    if (!this.cache.votingPeriod) {
-      this.cache.votingPeriod = (await this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "votingPeriod",
-        args: [],
-      })) as bigint;
+    const cached = this.cache.votingPeriod;
+    if (cached !== undefined) {
+      return cached;
     }
-    return this.cache.votingPeriod!;
+
+    const votingPeriod = (await this.readContract({
+      abi: this.abi,
+      address: this.address,
+      functionName: "votingPeriod",
+      args: [],
+    })) as bigint;
+    this.cache.votingPeriod = votingPeriod;
+
+    return votingPeriod;
   }
 
   abstract calculateQuorum(votes: {
@@ -218,37 +255,39 @@ export abstract class GovernorBase<
     currentBlock: number,
     currentTimestamp: number,
   ): Promise<string> {
-    let timelockDelay: bigint;
-    let gracePeriod: bigint | null;
-    try {
-      timelockDelay = await this.getTimelockDelay();
-      gracePeriod = await this.getGracePeriod();
-    } catch (error) {
-      // Degrade gracefully on RPC failures (e.g. rate limits): serve the
-      // indexed status instead of failing the whole request.
-      logger.warn(
-        { error, proposalId: proposal.id },
-        "RPC read failed while computing proposal status; falling back to indexed status",
-      );
-      return proposal.status;
-    }
+    // The timelock delay and grace period only matter for queued proposals, and
+    // both can cost an eth_call. Reading them here instead of up front keeps a
+    // proposal listing with nothing queued free of those RPC reads, so a
+    // degraded RPC cannot downgrade every proposal to its indexed status.
+    if (proposal.status === ProposalStatus.QUEUED && currentTimestamp) {
+      let timelockDelay: bigint;
+      let gracePeriod: bigint | null;
+      try {
+        [timelockDelay, gracePeriod] = await Promise.all([
+          this.getTimelockDelay(),
+          this.getGracePeriod(),
+        ]);
+      } catch (error) {
+        // Degrade gracefully on RPC failures (e.g. rate limits): serve the
+        // indexed status instead of failing the whole request.
+        logger.warn(
+          { error, proposalId: proposal.id },
+          "RPC read failed while computing proposal status; falling back to indexed status",
+        );
+        return proposal.status;
+      }
 
-    if (
-      proposal.status === ProposalStatus.QUEUED &&
-      gracePeriod !== null &&
-      currentTimestamp &&
-      BigInt(currentTimestamp) >=
-        proposal.endTimestamp + timelockDelay + gracePeriod
-    ) {
-      return ProposalStatus.EXPIRED;
-    }
+      if (
+        gracePeriod !== null &&
+        BigInt(currentTimestamp) >=
+          proposal.endTimestamp + timelockDelay + gracePeriod
+      ) {
+        return ProposalStatus.EXPIRED;
+      }
 
-    if (
-      proposal.status === ProposalStatus.QUEUED &&
-      currentTimestamp &&
-      BigInt(currentTimestamp) >= proposal.endTimestamp + timelockDelay
-    ) {
-      return ProposalStatus.PENDING_EXECUTION;
+      if (BigInt(currentTimestamp) >= proposal.endTimestamp + timelockDelay) {
+        return ProposalStatus.PENDING_EXECUTION;
+      }
     }
 
     // Skip proposals already finalized via event
@@ -361,25 +400,38 @@ export abstract class GovernorBase<
    * waits for the RPC. Once warm, callers get the cached block immediately and
    * an expired entry kicks off a background refresh, so request latency does
    * not depend on RPC health and a short RPC blip degrades to a slightly stale
-   * block. Past  the block is no longer served: the
-   * call waits for the RPC again and fails if it fails.
+   * block. Past latestBlockMaxStaleMs the cached block is no longer served: the
+   * call waits for a fresh RPC read and fails when that read fails, so callers
+   * fall back to indexed statuses instead of computing them from a block that
+   * is too old to be trusted.
    */
   private async getLatestBlock(): Promise<{
     number: number;
     timestamp: number | null;
   }> {
     const cached = this.latestBlockCache;
+    const now = Date.now();
+    // An in-flight read is joined rather than backed off: it costs no extra RPC
+    // call and is the only way a concurrent caller gets a block at all.
+    const backedOff =
+      !this.latestBlockFetch && now < this.latestBlockNextAttemptAt;
 
     if (!cached) {
+      // Nothing cached and the last read failed recently: fail fast instead of
+      // probing a down RPC on every request.
+      if (backedOff) {
+        throw new Error(
+          "Latest block is unavailable and the last RPC refresh failed",
+        );
+      }
       return this.refreshLatestBlock();
     }
 
-    const now = Date.now();
     const age = now - cached.fetchedAt;
     if (age > this.latestBlockMaxStaleMs) {
       // Too old to serve. Inside the retry backoff of a failed refresh the RPC
       // is not probed again; the request fails fast instead.
-      if (cached.expiresAt > now) {
+      if (backedOff) {
         throw new Error(
           `Latest block is ${age}ms old and the last RPC refresh failed`,
         );
@@ -387,7 +439,7 @@ export abstract class GovernorBase<
       return this.refreshLatestBlock();
     }
 
-    if (cached.expiresAt <= now) {
+    if (cached.expiresAt <= now && !backedOff) {
       this.refreshLatestBlock().catch(() => {
         // Failure is logged and backed off inside refreshLatestBlock.
       });
@@ -403,14 +455,16 @@ export abstract class GovernorBase<
     if (!this.latestBlockFetch) {
       this.latestBlockFetch = this.fetchLatestBlock()
         .catch((error: Error) => {
+          // Recorded whether or not a block is cached, so an RPC that is down
+          // at boot is backed off too.
+          this.latestBlockNextAttemptAt = Date.now() + this.latestBlockRetryMs;
           const stale = this.latestBlockCache;
-          if (stale) {
-            stale.expiresAt = Date.now() + this.latestBlockRetryMs;
-            logger.warn(
-              { error, blockNumber: stale.number },
-              "Failed to refresh latest block; serving stale block",
-            );
-          }
+          logger.warn(
+            { error, blockNumber: stale?.number },
+            stale
+              ? "Failed to refresh latest block; serving stale block"
+              : "Failed to fetch latest block and none is cached",
+          );
           throw error;
         })
         .finally(() => {
@@ -447,6 +501,7 @@ export abstract class GovernorBase<
       fetchedAt: now,
       expiresAt: now + this.latestBlockCacheTtlMs,
     };
+    this.latestBlockNextAttemptAt = 0;
 
     return latestBlock;
   }
