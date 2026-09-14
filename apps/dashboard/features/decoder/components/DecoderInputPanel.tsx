@@ -16,6 +16,8 @@ interface DecoderInputPanelProps {
   address: string;
   chainId: number;
   calldataError: string | null;
+  /** Said out loud, not silently: the field no longer holds what was pasted. */
+  calldataNotice?: string | null;
   addressError: string | null;
   onCalldataChange: (value: string) => void;
   onAddressChange: (value: string) => void;
@@ -39,6 +41,7 @@ export const DecoderInputPanel = ({
   address,
   chainId,
   calldataError,
+  calldataNotice,
   addressError,
   onCalldataChange,
   onAddressChange,
@@ -88,6 +91,8 @@ export const DecoderInputPanel = ({
         />
         {calldataError ? (
           <span className="text-error text-xs">{calldataError}</span>
+        ) : calldataNotice ? (
+          <span className="text-warning text-xs">{calldataNotice}</span>
         ) : (
           <span className="text-secondary text-xs">
             Supports raw calldata (0x-prefixed hex). On Etherscan: transaction

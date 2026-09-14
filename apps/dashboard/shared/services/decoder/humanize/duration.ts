@@ -9,7 +9,7 @@ export const DURATION_NAME_HINT = /delay|duration|period|deadline$|eta$/i;
 
 /**
  * Governor clock parameters (votingDelay, votingPeriod, …) are commonly block
- * counts, not seconds — the dashboard itself converts them with blockTime.
+ * counts, not seconds, and the dashboard converts them with blockTime.
  * Rendering "5,760 blocks" as "96 minutes = 5,760 seconds" would be a lie, so
  * anything voting-scoped is excluded from the seconds humanizer.
  */

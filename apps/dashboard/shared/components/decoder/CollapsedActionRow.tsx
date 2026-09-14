@@ -20,7 +20,7 @@ interface CollapsedActionRowProps {
 
 /**
  * Collapsed action, per Figma frame 08: a card with the same `//ACTION NN`
- * header bar and a one-line body — `[target chip] sentence` with the
+ * header bar and a one-line body of `[target chip] sentence` with the
  * signature right-aligned and dimmed. The expand control sits at the header's
  * right edge, exactly where the collapse control sits on an expanded card, so
  * the eye never has to hunt for it; the body is a second, larger click target.

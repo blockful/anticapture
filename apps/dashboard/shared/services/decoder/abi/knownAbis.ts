@@ -8,7 +8,7 @@ import {
 /**
  * Functions decoded even when the target is unverified: the multicall wrappers
  * the engine unpacks plus the ubiquitous token/governance calls. Parameter
- * names matter — humanizers and summary templates read them.
+ * names matter, since humanizers and summary templates read them.
  */
 const KNOWN_SIGNATURES = [
   // ERC20

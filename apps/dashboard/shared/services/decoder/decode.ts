@@ -52,22 +52,25 @@ export const MAX_DECODE_BYTES = 131_072;
 
 const DEFAULTS = { maxDepth: 5, maxBytes: MAX_DECODE_BYTES, maxNodes: 200 };
 
-/** Parameter nodes ONE decoded call may retain across every nesting level:
- *  top-level inputs, array elements and tuple components alike. The 128 KiB
- *  calldata cap still admits ~4,000 ABI words, and every retained node costs
- *  a row (an address one costs an enrichment query too), so no shape may
- *  reach the UI whole. The budget is shared rather than per container:
- *  `address[][]` holding 40 inner arrays of 99 addresses, or a
- *  `(address,…)[99]` of 40-field tuples, clears every per-container slice and
- *  would still render ~4,000 rows. */
+/** Retained value nodes, truncation notes excluded, that ONE decoded call
+ *  may hold across every nesting level: top-level inputs, array elements and
+ *  tuple components alike. Each truncated container adds one note row on top
+ *  of this, so the rendered rows can exceed it by the number of containers
+ *  that were cut short. The 128 KiB calldata cap still admits ~4,000 ABI
+ *  words, and every retained node costs a row (an address one costs an
+ *  enrichment query too), so no shape may reach the UI whole. The budget is
+ *  shared rather than per container: `address[][]` holding 40 inner arrays of
+ *  99 addresses, or a `(address,…)[99]` of 40-field tuples, clears every
+ *  per-container slice and would still render ~4,000 rows. */
 export const MAX_PARAM_NODES = 100;
 
-/** Parameter nodes a WHOLE decoded tree may retain. `maxNodes` bounds how
- *  many calls a tree holds, but without this each of those 200 calls could
- *  still contribute its own hundred: an 89 KiB batch inside the size guard
- *  rendered thousands of address rows, each with an enrichment query. Sized
- *  so real batches never notice it, since a call carries a handful of
- *  parameters and 200 of them stay well inside the total. */
+/** Retained value nodes, again excluding truncation notes, for a WHOLE
+ *  decoded tree. `maxNodes` bounds how many calls a tree holds, but without
+ *  this each of those 200 calls could still contribute its own hundred: an
+ *  89 KiB batch inside the size guard rendered thousands of address rows,
+ *  each with an enrichment query. Sized so real batches never notice it,
+ *  since a call carries a handful of parameters and 200 of them stay well
+ *  inside the total. */
 export const MAX_TREE_PARAM_NODES = 800;
 
 /** Independent batch children decode in parallel, gently: each may cost an
@@ -376,7 +379,7 @@ const decodeNode = async (
   if (detector && node.signature === detector.signature) {
     const extracted = detector.extract(args);
     if (detector.warningsFor) {
-      node.warnings.push(...detector.warningsFor(extracted));
+      node.warnings.push(...detector.warningsFor(extracted, args));
     }
 
     // Budget and depth gating stay synchronous and deterministic; the actual
@@ -523,7 +526,7 @@ const decodeNode = async (
 
     // Hand unused capacity back to OUR parent: without this, every wrapper
     // child looks exhausted to its parent's reclaim pass and the budget leaks
-    // one level at a time. The unallocated remainder matters too — a wrapper
+    // one level at a time. The unallocated remainder matters too: a wrapper
     // with zero decodable children (an empty batch) never carved shares at
     // all, and discarding `remaining` there would starve its siblings.
     const allocated = shares.reduce((sum, share) => sum + share, 0);

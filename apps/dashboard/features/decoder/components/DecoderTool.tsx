@@ -52,6 +52,7 @@ export const DecoderTool = () => {
   // lines have practical size caps, and a permalink that cannot open is worse
   // than no permalink. The UI says so next to the copy affordance.
   const [oversizedDraft, setOversizedDraft] = useState<string | null>(null);
+  const [truncated, setTruncated] = useState(false);
   // Storing an oversized draft always clears the URL param, so the draft is
   // only authoritative while that param is still empty: calldata arriving via
   // the URL afterwards (Back/Forward, a pasted permalink) supersedes it.
@@ -77,8 +78,10 @@ export const DecoderTool = () => {
   const handleCalldataChange = (raw: string) => {
     // Nothing past the decode limit is ever looked at, so nothing past it is
     // kept: a multi-megabyte paste would otherwise re-render, re-hash and
-    // re-encode on every keystroke that followed it.
+    // re-encode on every keystroke that followed it. The reader is told,
+    // because the field then holds less than what they pasted into it.
     const value = clampCalldataInput(raw);
+    setTruncated(value !== raw);
     if (exceedsPermalinkLimit(value)) {
       setOversizedDraft(value);
       if (calldata) void setParams({ calldata: "" });
@@ -152,7 +155,7 @@ export const DecoderTool = () => {
             />
           ) : (
             <span className="text-dimmed font-mono text-xs uppercase leading-4 tracking-wider">
-              permalink unavailable: calldata exceeds the URL limit
+              link omitted: input too long for a URL
             </span>
           )}
         </div>
@@ -170,6 +173,13 @@ export const DecoderTool = () => {
           inputValid
             ? null
             : "Must be 0x-prefixed hex with an even number of characters."
+        }
+        calldataNotice={
+          truncated
+            ? "Input truncated to the 128 KiB decode limit."
+            : oversizedCalldata !== null
+              ? "Link omitted: input too long for a URL."
+              : null
         }
         addressError={addressValid ? null : "Not a valid address."}
         onCalldataChange={handleCalldataChange}

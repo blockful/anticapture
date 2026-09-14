@@ -79,7 +79,7 @@ const decodes = (fn: AbiFunction, calldata: Hex): boolean => {
  * default Etherscan/OpenChain fetchers), not per resolver instance: a
  * proposal page mounts one hook per action, and N actions against the same
  * contract must cost one upstream request, not N. Negative results (null ABI,
- * empty signature list) stay cached briefly — long enough to absorb focus
+ * empty signature list) stay cached briefly: long enough to absorb focus
  * refetch bursts, short enough that a transient outage can heal.
  */
 const NEGATIVE_RESULT_TTL_MS = 60_000;

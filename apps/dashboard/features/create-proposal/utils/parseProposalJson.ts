@@ -55,7 +55,7 @@ export type ParseProposalJsonResult =
   | { ok: false; issues: ImportIssue[] };
 
 /* Three steps, and only the first two are this file's own: transport (which keys,
- * which JSON kind), translation (arg shapes into what the form stores), then rules —
+ * which JSON kind), translation (arg shapes into what the form stores), then rules:
  * which are `schema.ts`'s, run rather than restated. The import used to restate a
  * subset, so a paste could be accepted here and then sit on the form with Publish
  * disabled and nothing on screen explaining why. */

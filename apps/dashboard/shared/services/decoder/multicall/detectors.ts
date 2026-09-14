@@ -49,8 +49,15 @@ export type MulticallDetector = {
   /** Verb for the parent summary: "Executes N calls" / "Schedules N calls". */
   verb: "Executes" | "Schedules";
   extract: (args: readonly unknown[]) => ExtractedSubcall[];
-  /** Caveats about the WRAPPER node itself, read off the calls it yielded. */
-  warningsFor?: (subcalls: ExtractedSubcall[]) => DecodeWarning[];
+  /**
+   * Caveats about the WRAPPER node itself, read off the calls it yielded. The
+   * arguments come along for what the calls alone cannot say, such as how much
+   * of a hand-packed blob the extractor could not read.
+   */
+  warningsFor?: (
+    subcalls: ExtractedSubcall[],
+    args: readonly unknown[],
+  ) => DecodeWarning[];
 };
 
 type Call2 = { target: Address; callData: Hex };
@@ -119,6 +126,51 @@ const delegatecallPolicy = (
     : {};
 
 /**
+ * What a MultiSend blob holds beyond the records that parsed. The unpacker
+ * stops at the first record it cannot read, and silence there would leave the
+ * card saying "Executes 0 calls" about a blob full of bytes. Derived from the
+ * calls themselves rather than by walking the blob again: each record is its
+ * header plus its data, so where the last one ended is arithmetic.
+ */
+const multiSendRemainder = (
+  subcalls: ExtractedSubcall[],
+  transactions: unknown,
+): DecodeWarning[] => {
+  if (!isHexValue(transactions)) return [];
+  const body = transactions.slice(2);
+  const consumed = subcalls.reduce(
+    (sum, call) => sum + MULTISEND_HEADER_CHARS + call.calldata.length - 2,
+    0,
+  );
+  const leftover = body.length - consumed;
+  if (leftover <= 0) return [];
+  const operation = body.slice(consumed, consumed + 2);
+  const bytes = (leftover / 2).toLocaleString("en-US");
+  if (leftover < MULTISEND_HEADER_CHARS) {
+    return [
+      {
+        code: "size-limit",
+        message: `This MultiSend batch ends with ${bytes} bytes too few to form another call; they are not decoded.`,
+      },
+    ];
+  }
+  if (operation !== CALL_OPERATION && operation !== DELEGATECALL_OPERATION) {
+    return [
+      {
+        code: "size-limit",
+        message: `This MultiSend batch stops at an invalid operation byte (0x${operation}): MultiSend accepts only call (0x00) and delegatecall (0x01), and the remaining ${bytes} bytes are not decoded.`,
+      },
+    ];
+  }
+  return [
+    {
+      code: "size-limit",
+      message: `This MultiSend batch declares a call longer than the ${bytes} bytes that remain; the rest of the batch is not decoded.`,
+    },
+  ];
+};
+
+/**
  * The matching caveat on the WRAPPER, so the batch says up front that some of
  * what it carries runs in the Safe's own context. Read off the extracted
  * calls: re-unpacking a 100 KiB MultiSend blob to answer the same question
@@ -150,6 +202,7 @@ const failurePolicy = (mayFail: boolean): Partial<ExtractedSubcall> =>
  * runs against its own storage, so the byte decides how each child reads.
  */
 const MULTISEND_HEADER_CHARS = (1 + 20 + 32 + 32) * 2;
+const CALL_OPERATION = "00";
 const DELEGATECALL_OPERATION = "01";
 
 const unpackMultiSend = (transactions: unknown): ExtractedSubcall[] => {
@@ -159,6 +212,12 @@ const unpackMultiSend = (transactions: unknown): ExtractedSubcall[] => {
   let cursor = 0;
   while (cursor + MULTISEND_HEADER_CHARS <= body.length) {
     const operation = body.slice(cursor, cursor + 2);
+    // MultiSend itself reverts on anything but call or delegatecall, so a
+    // third value means this blob is not the batch it claims to be. Reading
+    // past it would present records as calls that could never execute.
+    if (operation !== CALL_OPERATION && operation !== DELEGATECALL_OPERATION) {
+      break;
+    }
     const to = `0x${body.slice(cursor + 2, cursor + 42)}`;
     const wei = BigInt(`0x${body.slice(cursor + 42, cursor + 106)}`);
     const size =
@@ -230,7 +289,7 @@ const DETECTOR_DEFINITIONS: Array<{
       verb: "Executes",
       extract: (args) => {
         // operation 1 is a delegatecall: the code at `to` runs with the
-        // Safe's own storage and balance, and NO ETH moves to the target —
+        // Safe's own storage and balance, and NO ETH moves to the target, so
         // extracting the value would let the child summarize a transfer that
         // never happens.
         if (args[3] === 1) {
@@ -250,9 +309,12 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "safe-multisend",
       verb: "Executes",
       extract: (args) => unpackMultiSend(args[0]),
-      warningsFor: carriesDelegatecall(
-        "This batch contains delegatecalls: that inner code runs in the Safe's own context, so its effects apply to the Safe.",
-      ),
+      warningsFor: (subcalls, args) => [
+        ...carriesDelegatecall(
+          "This batch contains delegatecalls: that inner code runs in the Safe's own context, so its effects apply to the Safe.",
+        )(subcalls),
+        ...multiSendRemainder(subcalls, args[0]),
+      ],
     },
   },
   {

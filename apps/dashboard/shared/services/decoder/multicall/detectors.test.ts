@@ -14,11 +14,19 @@ const SCHEDULE_BATCH =
 const TARGET = "0x26D5EB37002152186ec86B9835ecAf32846bC0DD";
 const OTHER = "0x93a8f8072337F2D1Ff2D019761cE0ABa39723d7B";
 
-/** Runs a detector the way decode.ts does, on already decoded arguments. */
-const extract = (signature: string, args: readonly unknown[]) => {
+const detectorFor = (signature: string) => {
   const detector = getDetector(toFunctionSelector(signature));
   if (!detector) throw new Error(`no detector for ${signature}`);
-  return detector.extract(args);
+  return detector;
+};
+
+/** Runs a detector the way decode.ts does, on already decoded arguments. */
+const extract = (signature: string, args: readonly unknown[]) =>
+  detectorFor(signature).extract(args);
+
+const warningsFor = (signature: string, args: readonly unknown[]) => {
+  const detector = detectorFor(signature);
+  return detector.warningsFor?.(detector.extract(args), args) ?? [];
 };
 
 // viem decodes a named tuple to an object and an unnamed one to a positional
@@ -121,25 +129,58 @@ describe("multiSend unpacks its hand-packed records", () => {
     ]);
   });
 
-  test("an operation byte that is not 01 stays an ordinary call", () => {
-    const [call] = extract(MULTI_SEND, [
-      `0x${record("02", TARGET, "0", "0x")}`,
+  test("an operation byte MultiSend would reject stops the batch", () => {
+    // MultiSend itself reverts on anything but 0 or 1, so a record carrying a
+    // 7 is not a call: presenting it as one would summarize an effect that
+    // could never happen.
+    const packed = `0x${record("00", TARGET, "0", "0xabcd")}${record(
+      "07",
+      OTHER,
+      "0",
+      "0x",
+    )}`;
+    expect(extract(MULTI_SEND, [packed])).toEqual([
+      { target: TARGET, value: 0n, calldata: "0xabcd" },
     ]);
-    expect(call.operation).toBeUndefined();
-    expect(call.warnings).toBeUndefined();
+    expect(warningsFor(MULTI_SEND, [packed])).toEqual([
+      expect.objectContaining({
+        code: "size-limit",
+        message: expect.stringContaining("invalid operation byte (0x07)"),
+      }),
+    ]);
   });
 
   test("a record declaring more data than remains ends the batch", () => {
     const whole = record("00", TARGET, "0", "0xabcd");
     const clipped = record("00", OTHER, "0", "0xabcdef").slice(0, -2);
-    expect(extract(MULTI_SEND, [`0x${whole}${clipped}`])).toEqual([
+    const packed = `0x${whole}${clipped}`;
+    expect(extract(MULTI_SEND, [packed])).toEqual([
       { target: TARGET, value: 0n, calldata: "0xabcd" },
+    ]);
+    expect(warningsFor(MULTI_SEND, [packed])).toEqual([
+      expect.objectContaining({
+        code: "size-limit",
+        message: expect.stringContaining("declares a call longer than"),
+      }),
     ]);
   });
 
-  test("a trailing stub too short to hold a header is ignored", () => {
-    const whole = record("00", TARGET, "0", "0x");
-    expect(extract(MULTI_SEND, [`0x${whole}0011`])).toHaveLength(1);
+  test("a trailing stub too short to hold a header is called out", () => {
+    const packed = `0x${record("00", TARGET, "0", "0x")}0011`;
+    expect(extract(MULTI_SEND, [packed])).toHaveLength(1);
+    expect(warningsFor(MULTI_SEND, [packed])).toEqual([
+      expect.objectContaining({
+        code: "size-limit",
+        message: expect.stringContaining(
+          "ends with 2 bytes too few to form another call",
+        ),
+      }),
+    ]);
+  });
+
+  test("a batch that parses whole carries no remainder warning", () => {
+    const packed = `0x${record("00", TARGET, "0", "0xabcd")}`;
+    expect(warningsFor(MULTI_SEND, [packed])).toEqual([]);
   });
 
   test.each([

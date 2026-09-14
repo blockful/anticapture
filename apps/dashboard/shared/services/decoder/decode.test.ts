@@ -656,6 +656,13 @@ describe("multicall unpacking", () => {
     expect(node.subcalls).toHaveLength(1);
     expect(node.subcalls![0]).toMatchObject({ functionName: "transfer" });
     expect(node.error).toBeUndefined();
+    // And the card says so, rather than presenting a partial batch as whole.
+    expect(node.warnings).toEqual([
+      expect.objectContaining({
+        code: "size-limit",
+        message: expect.stringContaining("declares a call longer than"),
+      }),
+    ]);
   });
 
   test("scheduleBatch fans out and an empty-calldata entry becomes an ETH node", async () => {
@@ -963,25 +970,46 @@ describe("multicall unpacking", () => {
     expect(node.summary).toBeNull();
   });
 
-  test("maxDepth 0 yields the arity without touching a single child", async () => {
-    // A collapsed action shows one sentence, and a wrapper can produce it
-    // from its own arity: recursing costs an ABI lookup per nested call for a
-    // row nobody has opened yet.
+  test("maxDepth 1 names the direct children and stops there", async () => {
+    // A collapsed action is one sentence, and that sentence needs the names
+    // of the direct children. One level buys them at one lookup per child;
+    // deeper costs a lookup per call nested inside a row nobody has opened.
     const fetchVerifiedAbi = jest.fn().mockResolvedValue(null);
     const fetchSignatures = jest.fn().mockResolvedValue([]);
     const node = await decodeCalldata(
-      { chainId: 1, calldata: AGGREGATE3_BATCH, target: MULTICALL3 },
+      {
+        chainId: 1,
+        target: SAFE,
+        calldata: safeExecTransaction(
+          MULTI_SEND,
+          multiSend([
+            { operation: 0, to: USDC, value: 0n, data: USDC_TRANSFER },
+            { operation: 0, to: USDC, value: 0n, data: USDC_APPROVE },
+          ]),
+          1,
+        ),
+      },
       createAbiResolver({ fetchVerifiedAbi, fetchSignatures }),
-      { maxDepth: 0 },
+      { maxDepth: 1 },
     );
 
-    expect(node.functionName).toBe("aggregate3");
-    expect(node.subcallCount).toBe(2);
-    // Named by selector the sentence would say nothing, so it says the count.
-    expect(node.summary).toBe("Executes 2 calls.");
-    expect(node.subcalls!.every((call) => call.params.length === 0)).toBe(true);
-    // One lookup for the wrapper itself, none for anything inside it.
-    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(1);
+    // The child is named, and keeps the qualifier that says how it runs.
+    const batch = node.subcalls![0];
+    expect(batch.functionName).toBe("multiSend");
+    expect(node.summary).toBe(
+      `Executes 1 call: multiSend (2 calls) (delegatecall) on ${MULTI_SEND.slice(0, 6)}…${MULTI_SEND.slice(-4)}.`,
+    );
+    // Its own children stay raw, so nothing below the first level was fetched.
+    expect(batch.subcalls).toHaveLength(2);
+    expect(
+      batch.subcalls!.every(
+        (call) =>
+          call.functionName === undefined &&
+          call.warnings.some((warning) => warning.code === "depth-limit"),
+      ),
+    ).toBe(true);
+    // The wrapper itself and its one direct child, and nothing deeper.
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
     expect(fetchSignatures).not.toHaveBeenCalled();
   });
 

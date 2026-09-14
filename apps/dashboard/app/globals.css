@@ -94,7 +94,7 @@
   --color-surface-destructive-hover: var(--base-destructive-hover);
   --color-surface-disabled: var(--base-muted);
 
-  /* Banner Surface Colors — intentionally dark in both themes */
+  /* Banner Surface Colors, intentionally dark in both themes */
   --color-surface-banner-default: #2c1810;
   --color-surface-banner-highlight: #18181b;
 
@@ -666,7 +666,7 @@
     --base-chart-6: #06b6d4;
     --base-chart-7: #fbbf24;
 
-    /* ECharts theme tokens — dark mode */
+    /* ECharts theme tokens, dark mode */
     --color-chart-grid: #3f3f46;
     --color-chart-axis-label: #a1a1aa;
     --color-chart-legend-text: #d4d4d8;

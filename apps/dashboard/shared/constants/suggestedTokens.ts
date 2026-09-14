@@ -20,7 +20,7 @@ const trustWalletToken = (
   };
 };
 
-// Curated per-DAO token list. Deliberately carries no decimals — decimals are
+// Curated per-DAO token list. Deliberately carries no decimals, which are
 // always read on-chain so the list can never disagree with the token contract.
 export const SUGGESTED_TRANSFER_TOKENS: Partial<
   Record<DaoIdEnum, SuggestedTransferToken[]>

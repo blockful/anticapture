@@ -6,7 +6,7 @@ import { isRecord } from "@/shared/services/decoder/guards";
 /**
  * Parses ABI JSON text as either a bare ABI array or a compiler artifact
  * carrying an `abi` key (Hardhat/Foundry output). Returns null on anything
- * else — callers treat null as "not an ABI", never as an exception.
+ * else, and callers treat null as "not an ABI", never as an exception.
  */
 export const parseAbiJson = (text: string): Abi | null => {
   try {
