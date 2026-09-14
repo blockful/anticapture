@@ -136,6 +136,52 @@ describe("NFTPriceService", () => {
       });
     });
 
+    it.each([
+      ["a missing prices key", {}],
+      ["prices that are not an array", { prices: "nope" }],
+      ["tuples with the wrong types", { prices: [["nope", 1]] }],
+    ])("tags %s as an upstream failure", async (_label, body) => {
+      repo.nftPrices = [
+        { price: "1000000000000000000", timestamp: 1705276800 },
+      ];
+      server.use(
+        http.get(ETH_MARKET_CHART_RANGE_URL, () => HttpResponse.json(body)),
+      );
+
+      await expect(service.getHistoricalTokenData(1, 0)).rejects.toMatchObject({
+        upstream: "coingecko",
+      });
+    });
+
+    // Previously a short series made the mapping read undefined and blew up
+    // outside the classified path, so it surfaced as a 500.
+    it("tags a series shorter than the mapping needs as an upstream failure", async () => {
+      repo.nftPrices = [
+        { price: "1000000000000000000", timestamp: 1705190400 },
+        { price: "1000000000000000000", timestamp: 1705276800 },
+      ];
+      server.use(
+        http.get(ETH_MARKET_CHART_RANGE_URL, () =>
+          HttpResponse.json({ prices: [[1705276800000, 2500.0]] }),
+        ),
+      );
+
+      await expect(service.getHistoricalTokenData(2, 0)).rejects.toBeInstanceOf(
+        UpstreamUnavailableError,
+      );
+    });
+
+    it("tags an empty current price series as an upstream failure", async () => {
+      repo.tokenPrice = "1000000000000000000";
+      server.use(
+        http.get(ETH_MARKET_CHART_URL, () => HttpResponse.json({ prices: [] })),
+      );
+
+      await expect(service.getTokenPrice("", "")).rejects.toMatchObject({
+        upstream: "coingecko",
+      });
+    });
+
     // The route degrades only on UpstreamUnavailableError, so a database error
     // has to come back untouched rather than as an empty 200.
     it("propagates a repository failure untouched", async () => {

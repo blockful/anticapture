@@ -5,7 +5,10 @@ import { z } from "zod";
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 import { recordDegradedUpstream } from "@/lib/degraded-upstream";
 import { DaoIdEnum } from "@/lib/enums";
-import { UpstreamUnavailableError } from "@/lib/upstream-error";
+import {
+  PROVIDER_TIMEOUT_MS,
+  UpstreamUnavailableError,
+} from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { PriceProvider } from "@/services/treasury/types";
@@ -44,6 +47,7 @@ export class CoingeckoService implements PriceProvider {
   ) {
     this.client = axios.create({
       baseURL: coingeckoApiUrl,
+      timeout: PROVIDER_TIMEOUT_MS,
       headers: {
         "x-cg-demo-api-key": coingeckoApiKey,
       },
@@ -150,22 +154,31 @@ export class CoingeckoService implements PriceProvider {
       { assetPlatform, tokenContractAddress: formattedAddress, targetCurrency },
       "fetching token price from CoinGecko",
     );
-    const response = await this.client.get(
-      `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
-    );
-
-    const data = response.data;
+    let body: unknown;
+    try {
+      body = (
+        await this.client.get<unknown>(
+          `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
+        )
+      ).data;
+    } catch (error) {
+      throw new UpstreamUnavailableError(
+        "coingecko",
+        "Failed to fetch token property data",
+        { cause: error },
+      );
+    }
 
     const { success, data: price } = createCoingeckoTokenPriceDataSchema(
       formattedAddress,
       targetCurrency,
-    ).safeParse(data);
+    ).safeParse(body);
 
     if (!success) {
-      throw new HTTPException(503, {
-        message: "Failed to fetch token property data",
-        cause: data,
-      });
+      throw new UpstreamUnavailableError(
+        "coingecko",
+        "Failed to fetch token property data",
+      );
     }
 
     return price[formattedAddress]![targetCurrency]!.toString();

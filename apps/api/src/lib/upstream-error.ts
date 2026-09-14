@@ -4,6 +4,13 @@ import { HTTPException } from "hono/http-exception";
 export type Upstream = "coingecko" | "dune";
 
 /**
+ * Deadline for every third-party call. Without one a hanging provider is
+ * neither degraded nor errored: the request just holds a connection until the
+ * client gives up, and the gateway sees a timeout rather than our fallback.
+ */
+export const PROVIDER_TIMEOUT_MS = 15_000;
+
+/**
  * A third-party provider call failed: network error, timeout, non-2xx, rate
  * limit, or a body that does not match its documented shape.
  *

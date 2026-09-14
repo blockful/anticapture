@@ -61,7 +61,7 @@ describe("RevenueDuneClient", () => {
     server.use(
       http.get(urls.actions, ({ request }) => {
         capturedHeaders = request.headers;
-        return HttpResponse.json({ rows: [] });
+        return HttpResponse.json({ result: { rows: [] } });
       }),
     );
 
@@ -111,6 +111,43 @@ describe("RevenueDuneClient", () => {
     degraded.restore();
   });
 
+  // A malformed 2xx body used to sail past the classification and get cached
+  // for 24h, so every later call failed from the cache.
+  it.each([
+    ["a missing result envelope", { rows: [{ a: 1 }] }],
+    ["rows that are not an array", { result: { rows: "nope" } }],
+    ["a missing rows key", { result: {} }],
+  ])("degrades on %s instead of caching it", async (_label, body) => {
+    server.use(http.get(urls.actions, () => HttpResponse.json(body)));
+    const degraded = captureDegradedUpstream();
+
+    const result = await client.fetchKey("actions");
+
+    expect(result).toEqual({ result: { rows: [] } });
+    expect(degraded.recorded()).toEqual([
+      { upstream: "dune", resource: "revenue_actions", mode: "empty" },
+    ]);
+    degraded.restore();
+  });
+
+  it("does not cache a malformed body, so a later good response wins", async () => {
+    let hits = 0;
+    server.use(
+      http.get(urls.actions, () => {
+        hits += 1;
+        return hits === 1
+          ? HttpResponse.json({ result: "not an envelope" })
+          : HttpResponse.json({ result: { rows: [{ id: 1 }] } });
+      }),
+    );
+
+    const first = await client.fetchKey("actions");
+    const second = await client.fetchKey("actions");
+
+    expect(first).toEqual({ result: { rows: [] } });
+    expect(second).toEqual({ result: { rows: [{ id: 1 }] } });
+  });
+
   it("returns an empty result set on network error", async () => {
     server.use(http.get(urls.actions, () => HttpResponse.error()));
     const degraded = captureDegradedUpstream();
@@ -157,15 +194,15 @@ describe("RevenueDuneClient", () => {
     server.use(
       http.get(urls.actions, () => {
         hits += 1;
-        return HttpResponse.json({ rows: [{ id: hits }] });
+        return HttpResponse.json({ result: { rows: [{ id: hits }] } });
       }),
     );
 
     const first = await client.fetchKey("actions");
     const second = await client.fetchKey("actions");
 
-    expect(first).toEqual({ rows: [{ id: 1 }] });
-    expect(second).toEqual({ rows: [{ id: 1 }] });
+    expect(first).toEqual({ result: { rows: [{ id: 1 }] } });
+    expect(second).toEqual({ result: { rows: [{ id: 1 }] } });
     expect(hits).toBe(1);
   });
 
@@ -177,7 +214,7 @@ describe("RevenueDuneClient", () => {
     server.use(
       http.get(urls.actions, () => {
         hits += 1;
-        return HttpResponse.json({ rows: [{ id: hits }] });
+        return HttpResponse.json({ result: { rows: [{ id: hits }] } });
       }),
     );
 
@@ -194,11 +231,13 @@ describe("RevenueDuneClient", () => {
     server.use(
       http.get(urls.actions, () => {
         actionsHits += 1;
-        return HttpResponse.json({ rows: [{ kind: "actions" }] });
+        return HttpResponse.json({ result: { rows: [{ kind: "actions" }] } });
       }),
       http.get(urls.activeNames, () => {
         activeNamesHits += 1;
-        return HttpResponse.json({ rows: [{ kind: "activeNames" }] });
+        return HttpResponse.json({
+          result: { rows: [{ kind: "activeNames" }] },
+        });
       }),
     );
 

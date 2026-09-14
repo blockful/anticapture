@@ -1,9 +1,25 @@
+import { z } from "zod";
+
 import { recordDegradedUpstream } from "@/lib/degraded-upstream";
-import { UpstreamUnavailableError } from "@/lib/upstream-error";
+import {
+  PROVIDER_TIMEOUT_MS,
+  UpstreamUnavailableError,
+} from "@/lib/upstream-error";
 import { logger } from "@/logger";
 
 import { RevenueCache } from "./cache";
 import { parseDuneMonth } from "./utils";
+
+/**
+ * Shape every Dune result endpoint shares. Only the envelope is checked: the
+ * columns differ per query and nullable columns are normal, so a strict
+ * per-column schema here would reject payloads the mappers handle fine.
+ */
+const DuneEnvelopeSchema = z.object({
+  result: z.object({
+    rows: z.array(z.record(z.string(), z.unknown())),
+  }),
+});
 
 export const REVENUE_QUERY_KEYS = [
   "actions",
@@ -285,6 +301,7 @@ export class RevenueDuneClient {
         headers: {
           "X-Dune-API-Key": this.apiKey,
         },
+        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
       });
     } catch (error) {
       throw new UpstreamUnavailableError("dune", "Dune request failed", {
@@ -299,11 +316,9 @@ export class RevenueDuneClient {
       );
     }
 
+    let body: unknown;
     try {
-      return {
-        data: (await response.json()) as DuneRowsResponse<Row>,
-        status: response.status,
-      };
+      body = await response.json();
     } catch (error) {
       throw new UpstreamUnavailableError(
         "dune",
@@ -311,5 +326,21 @@ export class RevenueDuneClient {
         { cause: error },
       );
     }
+
+    const envelope = DuneEnvelopeSchema.safeParse(body);
+    if (!envelope.success) {
+      throw new UpstreamUnavailableError(
+        "dune",
+        "Dune returned an unexpected result shape",
+        { cause: envelope.error },
+      );
+    }
+
+    return {
+      // The envelope is validated above. Columns differ per query and are the
+      // contract of each public method's mapper, so they stay statically typed.
+      data: { result: { rows: envelope.data.result.rows as Row[] } },
+      status: response.status,
+    };
   }
 }

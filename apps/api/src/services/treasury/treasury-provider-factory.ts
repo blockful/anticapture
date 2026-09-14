@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { PROVIDER_TIMEOUT_MS } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { TreasuryRepository } from "@/repositories/treasury";
 
@@ -32,6 +33,7 @@ function resolveTreasuryProvider(
       return new DuneProvider(
         axios.create({
           baseURL: config.apiUrl,
+          timeout: PROVIDER_TIMEOUT_MS,
         }),
         config.apiKey,
       );
@@ -39,12 +41,14 @@ function resolveTreasuryProvider(
       return new DefiLlamaProvider(
         axios.create({
           baseURL: config.apiUrl,
+          timeout: PROVIDER_TIMEOUT_MS,
         }),
       );
     case "COMPOUND":
       return new CompoundProvider(
         axios.create({
           baseURL: config.apiUrl,
+          timeout: PROVIDER_TIMEOUT_MS,
         }),
       );
   }
