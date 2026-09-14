@@ -68,7 +68,14 @@ export class NFTPriceService implements PriceProvider {
 
     try {
       const prices = await this.buildHistoricalPrices(auctionPrices, limit);
-      if (prices.length) this.lastGoodPrices.set(prices);
+      // Same policy as the CoinGecko service: longest fresh series wins, an
+      // absent or expired entry is always replaced, empty is never stored.
+      if (prices.length) {
+        this.lastGoodPrices.setIf(
+          prices,
+          (current) => prices.length >= current.length,
+        );
+      }
       return { data: prices, degraded: false };
     } catch (error) {
       if (!(error instanceof UpstreamUnavailableError)) throw error;

@@ -10,7 +10,7 @@ import {
 import { logger } from "@/logger";
 
 import { RevenueCache, REVENUE_STALE_TTL_MS } from "./cache";
-import { parseDuneMonth } from "./utils";
+import { DUNE_MONTH_REGEX, parseDuneMonth } from "./utils";
 
 /**
  * Envelope every Dune result endpoint shares, wrapped around the row schema of
@@ -26,10 +26,55 @@ const duneEnvelopeSchema = <Row>(rowSchema: z.ZodType<Row>) =>
   });
 
 /**
- * Dune returns null for an aggregate with no underlying rows, so the count and
- * amount columns are nullable and the mappers default them to zero.
+ * Month columns are parsed by `parseDuneMonth`, so validate the exact format it
+ * accepts. A format change would otherwise pass validation, be cached for 24h,
+ * and throw in the mapper on every later request.
  */
-const nullableNumber = z.number().nullable();
+const duneMonth = z.string().regex(DUNE_MONTH_REGEX);
+
+/**
+ * Dune serialises decimals and bigints as text and returns null for an
+ * aggregate with no underlying rows, so numeric columns accept either form and
+ * the mappers default null to zero.
+ */
+const duneNumeric = z
+  .union([z.string(), z.number()])
+  .nullable()
+  .transform((value, ctx) => {
+    if (value === null) return null;
+    const parsed = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(parsed)) {
+      ctx.addIssue({ code: "custom", message: `Not a number: ${value}` });
+      return z.NEVER;
+    }
+    return parsed;
+  });
+
+/**
+ * Label columns are validated as plain strings so that one category a query
+ * author added does not reject the whole series. The unknown rows are dropped
+ * in the mapper instead, because the response schemas for these routes are
+ * strict enums and widening them is an API contract change.
+ */
+const ACTION_CATEGORIES = ["Registration", "Renewal", "Premium"] as const;
+const REVENUE_CATEGORIES = ["Registration", "Renewal"] as const;
+const TENURE_BUCKETS = [
+  "0 renewals (one-shot)",
+  "1 renewal",
+  "2 renewals",
+  "3+ renewals",
+] as const;
+
+/** Narrows a Dune label to the union the response schema allows, or drops it. */
+const knownLabel = <Known extends string>(
+  value: string,
+  known: readonly Known[],
+  column: string,
+): Known | undefined => {
+  if ((known as readonly string[]).includes(value)) return value as Known;
+  logger.warn({ column, value }, "dropping revenue row with unknown label");
+  return undefined;
+};
 
 export const REVENUE_QUERY_KEYS = [
   "actions",
@@ -51,7 +96,7 @@ export type DuneRowsResponse<T> = {
   };
 };
 
-export type RevenueActionCategory = "Registration" | "Renewal" | "Premium";
+export type RevenueActionCategory = (typeof ACTION_CATEGORIES)[number];
 
 export type RevenueActionItem = {
   date: number;
@@ -60,9 +105,9 @@ export type RevenueActionItem = {
 };
 
 const RawActionRowSchema = z.object({
-  month: z.string(),
-  category: z.enum(["Registration", "Renewal", "Premium"]),
-  actions: nullableNumber,
+  month: duneMonth,
+  category: z.string(),
+  actions: duneNumeric,
 });
 
 export type RevenueActiveNamesItem = {
@@ -72,9 +117,9 @@ export type RevenueActiveNamesItem = {
 };
 
 const RawActiveNamesRowSchema = z.object({
-  month: z.string(),
-  net_change: nullableNumber,
-  cumulative_active: nullableNumber,
+  month: duneMonth,
+  net_change: duneNumeric,
+  cumulative_active: duneNumeric,
 });
 
 export type RevenueNewWalletsItem = {
@@ -84,9 +129,9 @@ export type RevenueNewWalletsItem = {
 };
 
 const RawNewWalletsRowSchema = z.object({
-  month: z.string(),
-  new_wallets: nullableNumber,
-  cumulative_wallets: nullableNumber,
+  month: duneMonth,
+  new_wallets: duneNumeric,
+  cumulative_wallets: duneNumeric,
 });
 
 export type RevenueRenewalFunnelItem = {
@@ -98,15 +143,14 @@ export type RevenueRenewalFunnelItem = {
 };
 
 const RawRenewalFunnelRowSchema = z.object({
-  expiry_month: z.string(),
-  terms_expiring: nullableNumber,
-  renewed_count: nullableNumber,
-  churned_count: nullableNumber,
-  // Dune serialises this ratio as text.
-  renewal_rate_pct: z.string().nullable(),
+  expiry_month: duneMonth,
+  terms_expiring: duneNumeric,
+  renewed_count: duneNumeric,
+  churned_count: duneNumeric,
+  renewal_rate_pct: duneNumeric,
 });
 
-export type RevenueByCategoryCategory = "Registration" | "Renewal";
+export type RevenueByCategoryCategory = (typeof REVENUE_CATEGORIES)[number];
 
 export type RevenueByCategoryItem = {
   date: number;
@@ -116,17 +160,13 @@ export type RevenueByCategoryItem = {
 };
 
 const RawRevenueByCategoryRowSchema = z.object({
-  month: z.string(),
-  category: z.enum(["Registration", "Renewal"]),
-  revenue_usd: nullableNumber,
-  revenue_eth: nullableNumber,
+  month: duneMonth,
+  category: z.string(),
+  revenue_usd: duneNumeric,
+  revenue_eth: duneNumeric,
 });
 
-export type RevenueRenewalTenureBucket =
-  | "0 renewals (one-shot)"
-  | "1 renewal"
-  | "2 renewals"
-  | "3+ renewals";
+export type RevenueRenewalTenureBucket = (typeof TENURE_BUCKETS)[number];
 
 export type RevenueRenewalTenureItem = {
   date: number;
@@ -136,15 +176,10 @@ export type RevenueRenewalTenureItem = {
 };
 
 const RawRenewalTenureRowSchema = z.object({
-  expiry_month: z.string(),
-  tenure_bucket: z.enum([
-    "0 renewals (one-shot)",
-    "1 renewal",
-    "2 renewals",
-    "3+ renewals",
-  ]),
-  names: nullableNumber,
-  total_renewals_in_bucket: nullableNumber,
+  expiry_month: duneMonth,
+  tenure_bucket: z.string(),
+  names: duneNumeric,
+  total_renewals_in_bucket: duneNumeric,
 });
 
 export type RevenueTotalsItem = {
@@ -159,14 +194,14 @@ export type RevenueTotalsItem = {
 };
 
 const RawRevenueTotalsRowSchema = z.object({
-  month: z.string(),
-  registration_usd: nullableNumber,
-  premium_usd: nullableNumber,
-  renewal_usd: nullableNumber,
-  total_usd: nullableNumber,
-  registration_eth: nullableNumber,
-  premium_eth: nullableNumber,
-  renewal_eth: nullableNumber,
+  month: duneMonth,
+  registration_usd: duneNumeric,
+  premium_usd: duneNumeric,
+  renewal_usd: duneNumeric,
+  total_usd: duneNumeric,
+  registration_eth: duneNumeric,
+  premium_eth: duneNumeric,
+  renewal_eth: duneNumeric,
 });
 
 export class RevenueDuneClient {
@@ -183,11 +218,17 @@ export class RevenueDuneClient {
 
   public async fetchActions(): Promise<RevenueActionItem[]> {
     const data = await this.fetchJson("actions", RawActionRowSchema);
-    return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.month),
-      category: row.category,
-      actions: row.actions ?? 0,
-    }));
+    return data.result.rows.flatMap((row) => {
+      const category = knownLabel(row.category, ACTION_CATEGORIES, "category");
+      if (!category) return [];
+      return [
+        {
+          date: parseDuneMonth(row.month),
+          category,
+          actions: row.actions ?? 0,
+        },
+      ];
+    });
   }
 
   public async fetchActiveNames(): Promise<RevenueActiveNamesItem[]> {
@@ -218,7 +259,7 @@ export class RevenueDuneClient {
       termsExpiring: row.terms_expiring ?? 0,
       renewedCount: row.renewed_count ?? 0,
       churnedCount: row.churned_count ?? 0,
-      renewalRatePct: parseFloat(row.renewal_rate_pct ?? "0"),
+      renewalRatePct: row.renewal_rate_pct ?? 0,
     }));
   }
 
@@ -227,12 +268,22 @@ export class RevenueDuneClient {
       "renewalTenure",
       RawRenewalTenureRowSchema,
     );
-    return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.expiry_month),
-      tenureBucket: row.tenure_bucket,
-      names: row.names ?? 0,
-      totalRenewalsInBucket: row.total_renewals_in_bucket ?? 0,
-    }));
+    return data.result.rows.flatMap((row) => {
+      const tenureBucket = knownLabel(
+        row.tenure_bucket,
+        TENURE_BUCKETS,
+        "tenure_bucket",
+      );
+      if (!tenureBucket) return [];
+      return [
+        {
+          date: parseDuneMonth(row.expiry_month),
+          tenureBucket,
+          names: row.names ?? 0,
+          totalRenewalsInBucket: row.total_renewals_in_bucket ?? 0,
+        },
+      ];
+    });
   }
 
   public async fetchRevenueByCategory(): Promise<RevenueByCategoryItem[]> {
@@ -240,12 +291,18 @@ export class RevenueDuneClient {
       "revenueByCategory",
       RawRevenueByCategoryRowSchema,
     );
-    return data.result.rows.map((row) => ({
-      date: parseDuneMonth(row.month),
-      category: row.category,
-      revenueUsd: row.revenue_usd ?? 0,
-      revenueEth: row.revenue_eth ?? 0,
-    }));
+    return data.result.rows.flatMap((row) => {
+      const category = knownLabel(row.category, REVENUE_CATEGORIES, "category");
+      if (!category) return [];
+      return [
+        {
+          date: parseDuneMonth(row.month),
+          category,
+          revenueUsd: row.revenue_usd ?? 0,
+          revenueEth: row.revenue_eth ?? 0,
+        },
+      ];
+    });
   }
 
   public async fetchRevenueTotals(): Promise<RevenueTotalsItem[]> {
@@ -288,7 +345,18 @@ export class RevenueDuneClient {
     const existing = this.inFlight.get(key);
     if (existing) {
       logger.debug({ key }, "joining in-flight revenue fetch");
-      return (await existing) as DuneRowsResponse<Row>;
+      // Re-validated rather than cast: the promise is shared between callers,
+      // so the map cannot carry each caller's row type. Every caller for a key
+      // passes the same schema, so this parse is a formality that stays honest.
+      const shared = duneEnvelopeSchema(rowSchema).safeParse(await existing);
+      if (!shared.success) {
+        throw new UpstreamUnavailableError(
+          "dune",
+          "Dune returned an unexpected result shape",
+          { cause: shared.error },
+        );
+      }
+      return shared.data;
     }
 
     const pending = this.fetchAndCache(key, rowSchema);

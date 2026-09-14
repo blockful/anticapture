@@ -95,7 +95,7 @@ describe("TreasuryService", () => {
     it("should return empty when provider is undefined", async () => {
       const service = new TreasuryService(metricRepo, undefined, undefined);
 
-      const result = await service.getLiquidTreasury(7, "asc");
+      const { data: result } = await service.getLiquidTreasury(7, "asc");
 
       expect(result).toEqual(EMPTY_RESULT);
     });
@@ -108,7 +108,7 @@ describe("TreasuryService", () => {
         undefined,
       );
 
-      const result = await service.getLiquidTreasury(7, "asc");
+      const { data: result } = await service.getLiquidTreasury(7, "asc");
 
       expect(result).toEqual(EMPTY_RESULT);
     });
@@ -127,7 +127,7 @@ describe("TreasuryService", () => {
         undefined,
       );
 
-      const result = await service.getLiquidTreasury(7, "asc");
+      const { data: result } = await service.getLiquidTreasury(7, "asc");
 
       expect(result).toEqual({
         items: expected,
@@ -149,12 +149,46 @@ describe("TreasuryService", () => {
         undefined,
       );
 
-      const result = await service.getLiquidTreasury(7, "desc");
+      const { data: result } = await service.getLiquidTreasury(7, "desc");
 
       expect(result).toEqual({
         items: expected.sort((a, b) => b.date - a.date),
         totalCount: expected.length,
       });
+    });
+  });
+
+  describe("getLiquidTreasury degradation", () => {
+    it("degrades to empty when the treasury provider is unavailable", async () => {
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw new UpstreamUnavailableError("defillama", "DefiLlama down");
+        },
+      };
+      const degraded = captureDegradedUpstream();
+
+      const service = new TreasuryService(metricRepo, failing, priceProvider);
+      const { data: result, degraded: isDegraded } =
+        await service.getLiquidTreasury(7, "asc");
+
+      expect(isDegraded).toBe(true);
+      expect(result).toEqual({ items: [], totalCount: 0 });
+      expect(degraded.recorded()).toEqual([
+        { upstream: "defillama", resource: "treasury", mode: "empty" },
+      ]);
+    });
+
+    it("propagates a failure that is not the provider's", async () => {
+      const ourBug = new Error("transform blew up");
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw ourBug;
+        },
+      };
+
+      const service = new TreasuryService(metricRepo, failing, priceProvider);
+
+      await expect(service.getLiquidTreasury(7, "asc")).rejects.toBe(ourBug);
     });
   });
 
@@ -185,6 +219,24 @@ describe("TreasuryService", () => {
       expect(degraded.recorded()).toEqual([
         { upstream: "coingecko", resource: "treasury", mode: "empty" },
       ]);
+    });
+
+    // Valuing every point at zero would read as the treasury crashing to $0.
+    it("serves no points rather than zero-valued ones when prices are missing", async () => {
+      metricRepo.setTokenQuantities(new Map([[1700000000, 10n ** 18n]]));
+      priceProvider.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+      const { data: result, degraded } = await service.getTokenTreasury(
+        7,
+        "asc",
+        18,
+      );
+
+      expect(degraded).toBe(true);
+      expect(result).toEqual({ items: [], totalCount: 0 });
     });
 
     it("does not degrade when the failure is our own", async () => {

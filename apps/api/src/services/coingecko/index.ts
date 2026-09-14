@@ -48,9 +48,15 @@ export class CoingeckoService implements PriceProvider {
    */
   private readonly lastGoodPrices =
     new StaleValueCache<TokenHistoricalPriceResponse>(STALE_PRICE_MAX_AGE_MS);
-  private readonly lastGoodTokenPrice = new StaleValueCache<string>(
-    STALE_PRICE_MAX_AGE_MS,
-  );
+  /**
+   * Last good spot price, tagged with the currency it was quoted in. A USD
+   * price served as an ETH quote would be wrong by three orders of magnitude,
+   * so a stale value is only ever used for the currency it was fetched for.
+   */
+  private readonly lastGoodTokenPrice = new StaleValueCache<{
+    currency: string;
+    value: string;
+  }>(STALE_PRICE_MAX_AGE_MS);
 
   constructor(
     coingeckoApiUrl: string,
@@ -123,11 +129,14 @@ export class CoingeckoService implements PriceProvider {
       price: price.toFixed(4),
       timestamp: Math.floor(timestampMs / 1000),
     }));
-    // An empty chart is a valid answer but useless as a fallback, and a shorter
-    // window must not overwrite a longer one we could still slice from.
-    const previous = this.lastGoodPrices.get();
-    if (prices.length && prices.length >= (previous?.length ?? 0)) {
-      this.lastGoodPrices.set(prices);
+    // An empty chart is a valid answer but useless as a fallback. Among fresh
+    // entries the longest wins, since a longer series can be sliced to any
+    // shorter window; an absent or expired one is always replaced.
+    if (prices.length) {
+      this.lastGoodPrices.setIf(
+        prices,
+        (current) => prices.length >= current.length,
+      );
     }
     return { data: prices, degraded: false };
   }
@@ -201,7 +210,7 @@ export class CoingeckoService implements PriceProvider {
       // No invented price: without a last known one the caller gets the error.
       // A made up number would be indistinguishable from a real quote.
       const stale = this.lastGoodTokenPrice.get();
-      if (stale === undefined) throw error;
+      if (stale?.currency !== targetCurrency) throw error;
       recordDegradedUpstream({
         upstream: error.upstream,
         resource: "token_properties",
@@ -209,7 +218,7 @@ export class CoingeckoService implements PriceProvider {
         error,
         context: { assetPlatform: assetPlatform ?? "unknown", targetCurrency },
       });
-      return { data: stale, degraded: true };
+      return { data: stale.value, degraded: true };
     }
 
     const { success, data: price } = createCoingeckoTokenPriceDataSchema(
@@ -225,7 +234,7 @@ export class CoingeckoService implements PriceProvider {
     }
 
     const value = price[formattedAddress]![targetCurrency]!.toString();
-    this.lastGoodTokenPrice.set(value);
+    this.lastGoodTokenPrice.set({ currency: targetCurrency, value });
     return { data: value, degraded: false };
   }
 }

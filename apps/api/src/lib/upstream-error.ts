@@ -1,9 +1,10 @@
+import { isAxiosError } from "axios";
 import { HTTPException } from "hono/http-exception";
 
 import { logger } from "@/logger";
 
 /** Third-party provider a request depends on. */
-export type Upstream = "coingecko" | "dune";
+export type Upstream = "coingecko" | "compound" | "defillama" | "dune";
 
 /**
  * Deadline for every third-party call. Without one a hanging provider is
@@ -62,6 +63,9 @@ const redactUrl = (url: string): string => {
  * deleted query id, a wrong token id. Serving stale or empty data here would
  * hide a misconfiguration only we can fix, so it surfaces as a 502 and is
  * counted by the HTTP error metrics and the HighErrorRate alert.
+ *
+ * 502 is >= 500, so the gateway counts it against the circuit breaker. That is
+ * intended: a misconfiguration must be loud, and the breaker is per route.
  */
 export const upstreamRejectedRequest = (
   upstream: Upstream,
@@ -75,4 +79,22 @@ export const upstreamRejectedRequest = (
   return new HTTPException(502, {
     message: `Upstream ${upstream} rejected the request`,
   });
+};
+
+/**
+ * Turns an axios rejection into the right error: `UpstreamUnavailableError`
+ * when the provider is unhealthy, a 502 when it rejected our request.
+ */
+export const classifyAxiosFailure = (
+  upstream: Upstream,
+  error: unknown,
+  path: string,
+  message: string,
+): HTTPException => {
+  const status = isAxiosError(error) ? error.response?.status : undefined;
+  if (status !== undefined && !isDegradableUpstreamStatus(status)) {
+    return upstreamRejectedRequest(upstream, status, path);
+  }
+  logger.error({ err: error, path, status }, `${upstream} request failed`);
+  return new UpstreamUnavailableError(upstream, message, { cause: error });
 };

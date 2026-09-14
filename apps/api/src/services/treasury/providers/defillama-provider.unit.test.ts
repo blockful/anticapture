@@ -146,11 +146,23 @@ describe("DefiLlamaProvider", () => {
     expect(callCount).toBe(1);
   });
 
-  it("should return empty array on error", async () => {
+  // This used to swallow every failure and return an empty array, so a
+  // DefiLlama outage was invisible. The caller degrades and counts it now.
+  it("throws a classified upstream error on a transport failure", async () => {
     server.use(http.get(BASE_URL, () => HttpResponse.error()));
 
-    const result = await provider.fetchTreasury(0);
+    await expect(provider.fetchTreasury(0)).rejects.toMatchObject({
+      upstream: "defillama",
+    });
+  });
 
-    expect(result).toEqual([]);
+  it("throws HTTPException(502) when DefiLlama rejects the request", async () => {
+    server.use(
+      http.get(BASE_URL, () => new HttpResponse(null, { status: 404 })),
+    );
+
+    await expect(provider.fetchTreasury(0)).rejects.toMatchObject({
+      status: 502,
+    });
   });
 });

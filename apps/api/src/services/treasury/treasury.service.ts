@@ -40,16 +40,32 @@ export class TreasuryService {
   async getLiquidTreasury(
     days: number,
     order: "asc" | "desc",
-  ): Promise<TreasuryResponse> {
+  ): Promise<MaybeDegraded<TreasuryResponse>> {
     if (!this.provider) {
-      return { items: [], totalCount: 0 };
+      return { data: { items: [], totalCount: 0 }, degraded: false };
     }
 
     const cutoffTimestamp = calculateCutoffTimestamp(days);
-    const data = await this.provider.fetchTreasury(cutoffTimestamp);
+
+    let data;
+    try {
+      data = await this.provider.fetchTreasury(cutoffTimestamp);
+    } catch (error) {
+      // Liquid treasury comes from Dune, DefiLlama or Compound. An outage
+      // there must not 5xx: the gateway counts that against the whole DAO.
+      if (!(error instanceof UpstreamUnavailableError)) throw error;
+      recordDegradedUpstream({
+        upstream: error.upstream,
+        resource: "treasury",
+        mode: "empty",
+        error,
+        context: { days },
+      });
+      return { data: { items: [], totalCount: 0 }, degraded: true };
+    }
 
     if (data.length === 0) {
-      return { items: [], totalCount: 0 };
+      return { data: { items: [], totalCount: 0 }, degraded: false };
     }
 
     // Convert to map with normalized timestamps (midnight UTC)
@@ -73,7 +89,7 @@ export class TreasuryService {
       }))
       .sort((a, b) => (order === "desc" ? b.date - a.date : a.date - b.date));
 
-    return { items, totalCount: items.length };
+    return { data: { items, totalCount: items.length }, degraded: false };
   }
 
   /**
@@ -93,11 +109,17 @@ export class TreasuryService {
     // Fetch token quantities from DB and prices from CoinGecko
     const [tokenQuantities, prices] = await Promise.all([
       this.repository.getTokenQuantities(cutoffTimestamp),
-      this.fetchPricesOrDegrade(days),
+      this.fetchPricesOrDegrade(this.priceProvider, days),
     ]);
     const { data: historicalPrices, degraded } = prices;
 
-    if (tokenQuantities.size === 0 && historicalPrices.size === 0) {
+    // With no prices every point would value at zero, which reads as the
+    // treasury crashing to $0 rather than as missing data. Serve nothing.
+    if (historicalPrices.size === 0) {
+      return { data: { items: [], totalCount: 0 }, degraded };
+    }
+
+    if (tokenQuantities.size === 0) {
       return { data: { items: [], totalCount: 0 }, degraded };
     }
 
@@ -142,13 +164,11 @@ export class TreasuryService {
    * 5xx against the whole DAO's circuit breaker.
    */
   private async fetchPricesOrDegrade(
+    priceProvider: PriceProvider,
     days: number,
   ): Promise<MaybeDegraded<Map<number, number>>> {
-    if (!this.priceProvider) {
-      return { data: new Map(), degraded: false };
-    }
     try {
-      return await this.priceProvider.getHistoricalPricesMap(days);
+      return await priceProvider.getHistoricalPricesMap(days);
     } catch (error) {
       if (!(error instanceof UpstreamUnavailableError)) throw error;
       recordDegradedUpstream({
@@ -170,11 +190,13 @@ export class TreasuryService {
     order: "asc" | "desc",
     decimals: number,
   ): Promise<MaybeDegraded<TreasuryResponse>> {
-    const [liquidResult, token] = await Promise.all([
+    const [liquid, token] = await Promise.all([
       this.getLiquidTreasury(days, order),
       this.getTokenTreasury(days, order, decimals),
     ]);
-    const { data: tokenResult, degraded } = token;
+    const { data: liquidResult } = liquid;
+    const { data: tokenResult } = token;
+    const degraded = liquid.degraded || token.degraded;
 
     if (liquidResult.items.length === 0 && tokenResult.items.length === 0) {
       return { data: { items: [], totalCount: 0 }, degraded };

@@ -22,4 +22,14 @@ export class StaleValueCache<T> {
     if (Date.now() - this.entry.fetchedAt > this.maxAgeMs) return undefined;
     return this.entry.value;
   }
+
+  /**
+   * Replaces the entry when `isBetter` says so, and always when the slot is
+   * empty or expired. Without the second rule a "keep the longest" policy
+   * would let a stored value go cold while shorter fetches keep succeeding.
+   */
+  setIf(value: T, isBetter: (current: T) => boolean): void {
+    const current = this.get();
+    if (current === undefined || isBetter(current)) this.set(value);
+  }
 }

@@ -219,6 +219,115 @@ describe("RevenueDuneClient", () => {
     ]);
   });
 
+  it("accepts numeric columns Dune serialised as text", async () => {
+    server.use(
+      http.get(urls.actions, () =>
+        HttpResponse.json({
+          result: {
+            rows: [
+              {
+                month: "2026-01-01 00:00:00 UTC",
+                category: "Renewal",
+                actions: "1234",
+              },
+            ],
+          },
+        }),
+      ),
+    );
+
+    const result = await client.fetchActions();
+
+    expect(result).toEqual([
+      { date: 1767225600, category: "Renewal", actions: 1234 },
+    ]);
+  });
+
+  it("degrades on a numeric column that is not a number", async () => {
+    server.use(
+      http.get(urls.actions, () =>
+        HttpResponse.json({
+          result: {
+            rows: [
+              {
+                month: "2026-01-01 00:00:00 UTC",
+                category: "Renewal",
+                actions: "not a number",
+              },
+            ],
+          },
+        }),
+      ),
+    );
+
+    expect(await client.fetchActions()).toEqual([]);
+  });
+
+  // Previously a format change passed validation, was cached for 24h, and then
+  // threw in parseDuneMonth on every later request.
+  it("degrades on a month that parseDuneMonth cannot read", async () => {
+    server.use(
+      http.get(urls.actions, () =>
+        HttpResponse.json({
+          result: {
+            rows: [{ month: "2026-01-01", category: "Renewal", actions: 1 }],
+          },
+        }),
+      ),
+    );
+
+    expect(await client.fetchActions()).toEqual([]);
+  });
+
+  it("drops a row with an unknown label instead of the whole series", async () => {
+    server.use(
+      http.get(urls.actions, () =>
+        HttpResponse.json({
+          result: {
+            rows: [
+              {
+                month: "2026-01-01 00:00:00 UTC",
+                category: "Renewal",
+                actions: 1,
+              },
+              {
+                month: "2026-02-01 00:00:00 UTC",
+                category: "BrandNewCategory",
+                actions: 2,
+              },
+            ],
+          },
+        }),
+      ),
+    );
+
+    const result = await client.fetchActions();
+
+    expect(result).toEqual([
+      { date: 1767225600, category: "Renewal", actions: 1 },
+    ]);
+  });
+
+  it("stops serving stale revenue once it is older than the cap", async () => {
+    let hits = 0;
+    server.use(
+      http.get(urls.actions, () => {
+        hits += 1;
+        return hits === 1
+          ? HttpResponse.json({ result: { rows: [{ id: 1 }] } })
+          : new HttpResponse(null, { status: 503 });
+      }),
+    );
+
+    await client.fetchKey("actions");
+    vi.useFakeTimers();
+    // Past the fresh TTL plus the extra stale day.
+    vi.setSystemTime(Date.now() + 48 * 60 * 60 * 1000 + 1);
+    const result = await client.fetchKey("actions");
+
+    expect(result).toEqual({ result: { rows: [] } });
+  });
+
   it("shares one upstream call between concurrent requests for a key", async () => {
     let hits = 0;
     server.use(

@@ -179,6 +179,37 @@ describe("CoingeckoService", () => {
       ]);
     });
 
+    it("replaces an expired series even when the new one is shorter", async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      let hits = 0;
+      server.use(
+        http.get(`${API_URL}/coins/uniswap/market_chart`, () => {
+          hits += 1;
+          if (hits === 1)
+            return HttpResponse.json({
+              prices: [
+                [1700000000000, 1.0],
+                [1700086400000, 2.0],
+              ],
+            });
+          if (hits === 2)
+            return HttpResponse.json({ prices: [[1700172800000, 9.0]] });
+          return new HttpResponse(null, { status: 503 });
+        }),
+      );
+
+      await service.getHistoricalTokenData(2);
+      // Past the 24h max age, so the stored two-point series is cold.
+      vi.setSystemTime(Date.now() + 24 * 60 * 60 * 1000 + 1);
+      await service.getHistoricalTokenData(1);
+      const { data, degraded } = await service.getHistoricalTokenData(1);
+
+      expect(degraded).toBe(true);
+      expect(data).toEqual([{ price: "9.0000", timestamp: 1700172800 }]);
+      vi.useRealTimers();
+    });
+
     it("does not keep an empty chart as the last good series", async () => {
       let hits = 0;
       server.use(
@@ -245,6 +276,30 @@ describe("CoingeckoService", () => {
       expect(degraded.recorded()).toEqual([
         { upstream: "coingecko", resource: "token_properties", mode: "stale" },
       ]);
+    });
+
+    // A USD quote served as ETH would be wrong by three orders of magnitude.
+    it("does not serve a stale price quoted in another currency", async () => {
+      let hits = 0;
+      server.use(
+        http.get(PRICE_PATH, () => {
+          hits += 1;
+          return hits === 1
+            ? HttpResponse.json({ "0xabc": { usd: 12.5 } })
+            : new HttpResponse(null, { status: 503 });
+        }),
+      );
+
+      await service.getTokenPrice("0xABC", "usd");
+
+      await expect(
+        service.getTokenPrice("0xABC", "eth"),
+      ).rejects.toBeInstanceOf(UpstreamUnavailableError);
+      // The matching currency still degrades.
+      await expect(service.getTokenPrice("0xABC", "usd")).resolves.toEqual({
+        data: "12.5",
+        degraded: true,
+      });
     });
 
     // Inventing a price would be indistinguishable from a real quote.
