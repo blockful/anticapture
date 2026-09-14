@@ -13,7 +13,7 @@
 import type { Hash } from "viem";
 
 import {
-  canStartSubmission,
+  canSubmitAgain,
   getModalEntryPoint,
   needsProposalWatch,
 } from "@/features/governance/utils/submissionState";
@@ -69,16 +69,16 @@ describe("closing and reopening the modal mid-flight", () => {
 
     // Closing the modal writes nothing, so reopening sees the same state.
     expect(entryFor(key)).toBe("mirror-submission");
-    expect(canStartSubmission(readSubmission(key))).toBe(false);
+    expect(canSubmitAgain(readSubmission(key))).toBe(false);
 
     writeSubmission(key, {
       kind: "done",
       mode: "wallet",
-      sent: false,
+      outcome: "failed",
       hash: null,
     });
     expect(entryFor(key)).toBe("choose");
-    expect(canStartSubmission(readSubmission(key))).toBe(true);
+    expect(canSubmitAgain(readSubmission(key))).toBe(true);
   });
 });
 
@@ -93,24 +93,43 @@ describe("unmounting and remounting the modal mid-flight", () => {
     // the Execute button cannot send a second governor call.
     expect(readSubmission(key)).toEqual({ kind: "in-flight", mode: "gasless" });
     expect(entryFor(key)).toBe("mirror-submission");
-    expect(canStartSubmission(readSubmission(key))).toBe(false);
+    expect(canSubmitAgain(readSubmission(key))).toBe(false);
   });
 
-  it("tells the new mount that a transaction went out", () => {
+  it("keeps the action closed after an inherited transaction landed", () => {
     const key = submissionKey("ENS", "remount-sent", "execute");
 
     writeSubmission(key, { kind: "in-flight", mode: "gasless" });
-    writeSubmission(key, { kind: "done", mode: "gasless", sent: true, hash });
-
-    // The new mount cannot tell mined from reverted, but it knows enough to
-    // keep watching the proposal instead of offering the action again.
-    expect(readSubmission(key)).toEqual({
+    writeSubmission(key, {
       kind: "done",
       mode: "gasless",
-      sent: true,
+      outcome: "landed",
       hash,
     });
+
+    // The queue or execute already happened; the indexer has simply not
+    // caught up, so opening must not put the stale action back on screen.
+    expect(entryFor(key)).toBe("mirror-submission");
+    expect(canSubmitAgain(readSubmission(key))).toBe(false);
+    expect(needsProposalWatch(readSubmission(key))).toBe(true);
+  });
+
+  it("reopens the choices after an inherited attempt that changed nothing", () => {
+    const key = submissionKey("ENS", "remount-failed", "execute");
+
+    writeSubmission(key, { kind: "in-flight", mode: "wallet" });
+    writeSubmission(key, {
+      kind: "done",
+      mode: "wallet",
+      outcome: "failed",
+      hash,
+    });
+
+    // A mined revert left the proposal where it was, so a retry is exactly
+    // what the error screen should offer.
     expect(entryFor(key)).toBe("choose");
+    expect(canSubmitAgain(readSubmission(key))).toBe(true);
+    expect(needsProposalWatch(readSubmission(key))).toBe(false);
   });
 
   it("tells the new mount how the inherited request ended", () => {
@@ -125,7 +144,7 @@ describe("unmounting and remounting the modal mid-flight", () => {
     writeSubmission(key, { kind: "ambiguous", mode: "gasless", hash: null });
 
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(entryFor(key)).toBe("ambiguous-outcome");
+    expect(entryFor(key)).toBe("mirror-submission");
     unsubscribe();
   });
 
@@ -134,8 +153,8 @@ describe("unmounting and remounting the modal mid-flight", () => {
 
     writeSubmission(key, { kind: "ambiguous", mode: "wallet", hash });
 
-    expect(entryFor(key)).toBe("ambiguous-outcome");
-    expect(canStartSubmission(readSubmission(key))).toBe(false);
+    expect(entryFor(key)).toBe("mirror-submission");
+    expect(canSubmitAgain(readSubmission(key))).toBe(false);
   });
 
   it("restarts the proposal watch for an inherited ambiguous outcome", () => {
@@ -146,7 +165,7 @@ describe("unmounting and remounting the modal mid-flight", () => {
     // which is only true if the mount that inherits it starts watching again.
     writeSubmission(key, { kind: "ambiguous", mode: "gasless", hash: null });
 
-    expect(entryFor(key)).toBe("ambiguous-outcome");
+    expect(entryFor(key)).toBe("mirror-submission");
     expect(needsProposalWatch(readSubmission(key))).toBe(true);
   });
 
@@ -161,7 +180,7 @@ describe("unmounting and remounting the modal mid-flight", () => {
     writeSubmission(key, { kind: "ambiguous", mode: "gasless", hash });
 
     expect(needsProposalWatch(readSubmission(key))).toBe(true);
-    expect(canStartSubmission(readSubmission(key))).toBe(false);
+    expect(canSubmitAgain(readSubmission(key))).toBe(false);
   });
 
   it("leaves the other action on the same proposal alone", () => {
@@ -170,7 +189,7 @@ describe("unmounting and remounting the modal mid-flight", () => {
 
     writeSubmission(queueKey, { kind: "ambiguous", mode: "wallet", hash });
 
-    expect(canStartSubmission(readSubmission(executeKey))).toBe(true);
+    expect(canSubmitAgain(readSubmission(executeKey))).toBe(true);
     expect(entryFor(executeKey)).toBe("choose");
   });
 });
@@ -192,7 +211,7 @@ describe("subscribeToSubmission", () => {
     writeSubmission(key, {
       kind: "done",
       mode: "wallet",
-      sent: false,
+      outcome: "failed",
       hash: null,
     });
     expect(listener).toHaveBeenCalledTimes(1);
@@ -219,7 +238,7 @@ describe("store growth", () => {
       writeSubmission(submissionKey("ENS", `cap-${i}`, "queue"), {
         kind: "done",
         mode: "wallet",
-        sent: false,
+        outcome: "failed",
         hash: null,
       });
     }

@@ -71,7 +71,7 @@ const ENACTMENT_REJECTION_CODES = new Set([
 ]);
 
 /** The relayer broadcast the transaction and saw it revert: a final answer. */
-export const isRelayerTransactionReverted = (error: unknown): boolean =>
+const isRelayerTransactionReverted = (error: unknown): boolean =>
   getRelayerErrorCode(error) === "TRANSACTION_REVERTED";
 
 const TX_HASH_PATTERN = /0x[0-9a-fA-F]{64}/;

@@ -1,7 +1,7 @@
 import type { Hash } from "viem";
 
 import {
-  canStartSubmission,
+  canSubmitAgain,
   getModalEntryPoint,
   needsProposalWatch,
   IDLE_SUBMISSION,
@@ -21,36 +21,53 @@ const ambiguousWithoutHash: SubmissionState = {
   mode: "gasless",
   hash: null,
 };
+/** A pre-broadcast refusal: nothing was ever sent. */
 const doneNothingSent: SubmissionState = {
   kind: "done",
   mode: "wallet",
-  sent: false,
+  outcome: "failed",
   hash: null,
 };
-const doneSent: SubmissionState = {
+/** Mined and reverted: a transaction existed but changed nothing. */
+const doneReverted: SubmissionState = {
+  kind: "done",
+  mode: "wallet",
+  outcome: "failed",
+  hash,
+};
+const doneLanded: SubmissionState = {
   kind: "done",
   mode: "gasless",
-  sent: true,
+  outcome: "landed",
   hash,
 };
 
-describe("canStartSubmission", () => {
+describe("canSubmitAgain", () => {
   it("allows a first submission", () => {
-    expect(canStartSubmission(IDLE_SUBMISSION)).toBe(true);
+    expect(canSubmitAgain(IDLE_SUBMISSION)).toBe(true);
   });
 
-  it("allows another after one resolved definitively", () => {
-    expect(canStartSubmission(doneNothingSent)).toBe(true);
-    expect(canStartSubmission(doneSent)).toBe(true);
+  it("allows another after an attempt that changed nothing", () => {
+    expect(canSubmitAgain(doneNothingSent)).toBe(true);
+  });
+
+  it("allows another after a mined revert, which the error screen offers", () => {
+    expect(canSubmitAgain(doneReverted)).toBe(true);
+  });
+
+  it("refuses one after a transaction landed and has yet to be indexed", () => {
+    // Offering the action here is offering the stale action: the proposal has
+    // already moved, the indexer just has not caught up.
+    expect(canSubmitAgain(doneLanded)).toBe(false);
   });
 
   it("refuses one while a submission is in flight", () => {
-    expect(canStartSubmission(inFlight)).toBe(false);
+    expect(canSubmitAgain(inFlight)).toBe(false);
   });
 
   it("refuses one after an ambiguous outcome, with or without a hash", () => {
-    expect(canStartSubmission(ambiguousWithHash)).toBe(false);
-    expect(canStartSubmission(ambiguousWithoutHash)).toBe(false);
+    expect(canSubmitAgain(ambiguousWithHash)).toBe(false);
+    expect(canSubmitAgain(ambiguousWithoutHash)).toBe(false);
   });
 });
 
@@ -70,13 +87,13 @@ describe("getModalEntryPoint", () => {
   it("shows the ambiguous outcome again rather than the choices", () => {
     expect(
       getModalEntryPoint({ ...connected, submission: ambiguousWithHash }),
-    ).toBe("ambiguous-outcome");
+    ).toBe("mirror-submission");
   });
 
   it("shows it again when the relayer never answered and there is no hash", () => {
     expect(
       getModalEntryPoint({ ...connected, submission: ambiguousWithoutHash }),
-    ).toBe("ambiguous-outcome");
+    ).toBe("mirror-submission");
   });
 
   it("shows it again even without a relayer, where the wallet flow would start itself", () => {
@@ -87,7 +104,7 @@ describe("getModalEntryPoint", () => {
         hasAddress: true,
         hasWalletClient: true,
       }),
-    ).toBe("ambiguous-outcome");
+    ).toBe("mirror-submission");
   });
 
   it("offers the choices when a funded relayer is available and nothing is pending", () => {
@@ -96,7 +113,29 @@ describe("getModalEntryPoint", () => {
     ).toBe("choose");
   });
 
-  it("offers the choices again after a definitive outcome", () => {
+  it("keeps the screen of a transaction that landed and is not indexed yet", () => {
+    // Falling through to the choices here would put the stale action back on
+    // screen while the queue or execute it already did is being indexed.
+    expect(getModalEntryPoint({ ...connected, submission: doneLanded })).toBe(
+      "mirror-submission",
+    );
+  });
+
+  it("keeps it even without a relayer, where the wallet flow would start itself", () => {
+    expect(
+      getModalEntryPoint({
+        submission: doneLanded,
+        isGaslessAvailable: false,
+        hasAddress: true,
+        hasWalletClient: true,
+      }),
+    ).toBe("mirror-submission");
+  });
+
+  it("offers the choices again after an attempt that changed nothing", () => {
+    expect(getModalEntryPoint({ ...connected, submission: doneReverted })).toBe(
+      "choose",
+    );
     expect(
       getModalEntryPoint({ ...connected, submission: doneNothingSent }),
     ).toBe("choose");
@@ -149,27 +188,32 @@ describe("dismissing and reopening the modal", () => {
     // Closing the modal does not change the state, so reopening lands on the
     // in-progress screen and no second submission may start.
     expect(entryFor(inFlight)).toBe("mirror-submission");
-    expect(canStartSubmission(inFlight)).toBe(false);
+    expect(canSubmitAgain(inFlight)).toBe(false);
   });
 
   it("keeps an ambiguous relayer outcome on screen after a reopen", () => {
     // The request resolved as unknown while the modal was closed. Reopening
     // must not fall through to the choices.
-    expect(entryFor(ambiguousWithoutHash)).toBe("ambiguous-outcome");
-    expect(canStartSubmission(ambiguousWithoutHash)).toBe(false);
+    expect(entryFor(ambiguousWithoutHash)).toBe("mirror-submission");
+    expect(canSubmitAgain(ambiguousWithoutHash)).toBe(false);
   });
 
-  it("frees the modal once a submission resolved definitively", () => {
+  it("frees the modal once an attempt has changed nothing", () => {
     expect(entryFor(doneNothingSent)).toBe("choose");
-    expect(canStartSubmission(doneNothingSent)).toBe(true);
+    expect(canSubmitAgain(doneNothingSent)).toBe(true);
   });
 
-  it("records whether a transaction went out, for a mount that never saw it", () => {
-    // A mount that inherits this cannot tell mined from reverted, but it can
-    // tell that something is on-chain and that it must keep watching.
-    expect(doneSent.kind === "done" && doneSent.sent).toBe(true);
-    expect(doneSent.kind === "done" && doneSent.hash).toBe(hash);
-    expect(doneNothingSent.kind === "done" && doneNothingSent.sent).toBe(false);
+  it("keeps it closed to a second submission once one landed", () => {
+    expect(entryFor(doneLanded)).toBe("mirror-submission");
+    expect(canSubmitAgain(doneLanded)).toBe(false);
+  });
+
+  it("records what the attempt did, for a mount that never saw it", () => {
+    expect(doneLanded.kind === "done" && doneLanded.outcome).toBe("landed");
+    expect(doneLanded.kind === "done" && doneLanded.hash).toBe(hash);
+    expect(doneNothingSent.kind === "done" && doneNothingSent.outcome).toBe(
+      "failed",
+    );
   });
 });
 
@@ -180,13 +224,31 @@ describe("needsProposalWatch", () => {
     expect(needsProposalWatch(ambiguousWithoutHash)).toBe(true);
   });
 
-  it("watches a settled submission that sent a transaction", () => {
-    expect(needsProposalWatch(doneSent)).toBe(true);
+  it("watches a transaction that landed and is not indexed yet", () => {
+    expect(needsProposalWatch(doneLanded)).toBe(true);
   });
 
-  it("does not watch a submission that never sent anything", () => {
+  it("does not watch an attempt that changed nothing", () => {
+    // A mined revert leaves the proposal exactly where it was, so there is
+    // nothing for a watch to see.
     expect(needsProposalWatch(doneNothingSent)).toBe(false);
+    expect(needsProposalWatch(doneReverted)).toBe(false);
     expect(needsProposalWatch(IDLE_SUBMISSION)).toBe(false);
+  });
+
+  it("is the exact complement of canSubmitAgain once a run has settled", () => {
+    // The entry point, the close handler and both buttons ask one question,
+    // so the two answers can never disagree about the same state.
+    for (const state of [
+      IDLE_SUBMISSION,
+      ambiguousWithHash,
+      ambiguousWithoutHash,
+      doneNothingSent,
+      doneReverted,
+      doneLanded,
+    ]) {
+      expect(needsProposalWatch(state)).toBe(!canSubmitAgain(state));
+    }
   });
 
   it("does not watch a request that has yet to resolve", () => {

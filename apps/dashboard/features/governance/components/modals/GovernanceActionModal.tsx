@@ -26,10 +26,10 @@ import {
 } from "@/features/governance/utils/relayGovernanceAction";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import {
-  canStartSubmission,
+  canSubmitAgain,
   getModalEntryPoint,
   needsProposalWatch,
-  NOTHING_SENT,
+  SUBMISSION_FAILED,
   type ActionMode,
   type SettledSubmission,
   type SubmissionState,
@@ -57,7 +57,6 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import {
   getRelayerRevertedHash,
-  isRelayerTransactionReverted,
   mapRelayerEnactmentError,
 } from "@/shared/utils/gaslessRelayerError";
 
@@ -170,7 +169,7 @@ export const GovernanceActionModal = ({
   // reopened modal would race whatever is already out there.
   const startSubmission = useCallback(
     (mode: ActionMode): boolean => {
-      if (!canStartSubmission(readSubmission(stateKey))) return false;
+      if (!canSubmitAgain(readSubmission(stateKey))) return false;
       ownsRunRef.current = true;
       moveSubmission({ kind: "in-flight", mode });
       return true;
@@ -283,7 +282,7 @@ export const GovernanceActionModal = ({
     setTxHash(null);
     setStep("waiting-signature");
 
-    let settled: SettledSubmission = NOTHING_SENT;
+    let settled: SettledSubmission = SUBMISSION_FAILED;
 
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
@@ -328,7 +327,10 @@ export const GovernanceActionModal = ({
         showAmbiguousOutcome("wallet", outcome.hash);
         return;
       }
-      settled = { sent: true, hash: outcome.hash };
+      settled = {
+        outcome: outcome.status === "reverted" ? "failed" : "landed",
+        hash: outcome.hash,
+      };
       if (outcome.status === "reverted") {
         setTxHash(outcome.hash);
         setError(REVERTED_MESSAGE);
@@ -375,7 +377,7 @@ export const GovernanceActionModal = ({
     setTxHash(null);
     setStep("relaying");
 
-    let settled: SettledSubmission = NOTHING_SENT;
+    let settled: SettledSubmission = SUBMISSION_FAILED;
 
     try {
       const outcome = await relayGovernanceAction({
@@ -390,7 +392,10 @@ export const GovernanceActionModal = ({
       });
 
       if (outcome.status === "success" || outcome.status === "reverted") {
-        settled = { sent: true, hash: outcome.hash };
+        settled = {
+          outcome: outcome.status === "reverted" ? "failed" : "landed",
+          hash: outcome.hash,
+        };
       }
       if (outcome.status === "success") {
         showCustomToast(`Proposal ${copy.pastTense} successfully!`, "success");
@@ -414,11 +419,10 @@ export const GovernanceActionModal = ({
       // revert names its transaction in the message, which is the only place
       // the hash appears, so the explorer link matches the wallet path.
       console.error(err);
+      // A reported revert was mined and changed nothing, and a refusal never
+      // reached the chain, so both leave the action retryable.
       const revertedHash = getRelayerRevertedHash(err);
-      settled = {
-        sent: isRelayerTransactionReverted(err),
-        hash: revertedHash,
-      };
+      settled = { outcome: "failed", hash: revertedHash };
       setTxHash(revertedHash);
       setError(mapRelayerEnactmentError(err, action));
       setStep("error");
@@ -499,17 +503,11 @@ export const GovernanceActionModal = ({
         hasWalletClient: Boolean(walletClient),
       })
     ) {
-      // Reopened on top of a submission that is still in flight. Its screen
-      // was left standing when the modal closed and its result will land
-      // there, so nothing is offered that could race it.
+      // Reopened on top of a submission that is out, ambiguous, or landed
+      // and not yet indexed. Its screen is already standing, painted by the
+      // run that made it or by the effect that follows the store, so nothing
+      // is offered here that could race or duplicate it.
       case "mirror-submission":
-        return;
-      // Reopened after an ambiguous outcome. The screen is rebuilt from the
-      // recorded outcome rather than trusted to have survived, and it offers
-      // no way to submit again.
-      case "ambiguous-outcome":
-        // The screen is rebuilt by the effect that follows the store, which
-        // also covers an outcome recorded by a mount that is already gone.
         return;
       case "choose":
         setStep("choose");
@@ -543,7 +541,7 @@ export const GovernanceActionModal = ({
     // No screen offering this button renders while a submission is pending or
     // ambiguous, but the check keeps that invariant local to the action
     // rather than spread across the render branches.
-    if (!canStartSubmission(readSubmission(stateKey))) return;
+    if (!canSubmitAgain(readSubmission(stateKey))) return;
     if (!address) {
       failWithoutWallet(CONNECT_WALLET_MESSAGE);
       return;
@@ -562,7 +560,7 @@ export const GovernanceActionModal = ({
     // yet land, so reopening has to show what is known rather than offer a
     // submission that could duplicate it. The modal resets only in the states
     // where starting another one is allowed anyway.
-    if (canStartSubmission(readSubmission(stateKey))) {
+    if (canSubmitAgain(readSubmission(stateKey))) {
       setStep("idle");
       setMode("wallet");
       setError(null);
