@@ -255,4 +255,47 @@ describe("store growth", () => {
       kind: "idle",
     });
   });
+
+  it("forgets failed attempts before a landed transaction", () => {
+    const landed = submissionKey("ENS", "cap-landed", "execute");
+    writeSubmission(landed, {
+      kind: "done",
+      mode: "gasless",
+      outcome: "landed",
+      hash,
+    });
+
+    for (let i = 0; i < 120; i += 1) {
+      writeSubmission(submissionKey("ENS", `cap-failed-${i}`, "queue"), {
+        kind: "done",
+        mode: "wallet",
+        outcome: "failed",
+        hash: null,
+      });
+    }
+
+    // A landed transaction keeps the action closed until it is indexed, so
+    // every failed attempt goes before it does, however old it is.
+    expect(readSubmission(landed)).toEqual({
+      kind: "done",
+      mode: "gasless",
+      outcome: "landed",
+      hash,
+    });
+    expect(canSubmitAgain(readSubmission(landed))).toBe(false);
+  });
+
+  it("still bounds the map when only landed transactions are left", () => {
+    const first = submissionKey("ENS", "cap-landed-only-0", "queue");
+    for (let i = 0; i < 120; i += 1) {
+      writeSubmission(submissionKey("ENS", `cap-landed-only-${i}`, "queue"), {
+        kind: "done",
+        mode: "wallet",
+        outcome: "landed",
+        hash,
+      });
+    }
+
+    expect(readSubmission(first)).toEqual({ kind: "idle" });
+  });
 });

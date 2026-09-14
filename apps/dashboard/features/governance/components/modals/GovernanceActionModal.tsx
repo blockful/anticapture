@@ -33,6 +33,7 @@ import {
   type ActionMode,
   type SettledSubmission,
   type SubmissionState,
+  type WatchedSubmission,
 } from "@/features/governance/utils/submissionState";
 import {
   readSubmission,
@@ -444,15 +445,16 @@ export const GovernanceActionModal = ({
   // Follows the store, which is the only thing a mount can rely on when the
   // run it is looking at belongs to a component that is already gone.
   useEffect(() => {
-    // Shows a transaction that may exist without claiming an outcome, and
-    // picks the proposal watch back up, since whoever was watching has
-    // finished or been unmounted. The budget starts fresh rather than
-    // carrying across mounts, which is the right reading of a user who has
-    // just come back to look.
-    const inheritAndWatch = (mode: ActionMode, hash: Hash | null) => {
-      setMode(mode);
-      setTxHash(hash);
-      setStep("ambiguous");
+    // Shows the inherited transaction and picks the proposal watch back up,
+    // since whoever was watching has finished or been unmounted. A landed
+    // transaction is confirmed and gets the success screen; only an
+    // ambiguous outcome gets the screen that claims nothing. The budget
+    // starts fresh rather than carrying across mounts, which is the right
+    // reading of a user who has just come back to look.
+    const inheritAndWatch = (inherited: WatchedSubmission) => {
+      setMode(inherited.mode);
+      setTxHash(inherited.hash);
+      setStep(inherited.kind === "ambiguous" ? "ambiguous" : "success");
       startStatusPolling();
     };
 
@@ -463,7 +465,7 @@ export const GovernanceActionModal = ({
     const isOwnSettledRun = ownsRunRef.current && submission.kind === "done";
 
     if (!isOwnSettledRun && needsProposalWatch(submission)) {
-      inheritAndWatch(submission.mode, submission.hash);
+      inheritAndWatch(submission);
       return;
     }
     if (ownsRunRef.current) return;

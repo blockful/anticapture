@@ -12,6 +12,12 @@ const RATE_LIMITED = "RATE_LIMITED";
 
 const GENERIC_MESSAGE =
   "Something went wrong with your operation. Try again later";
+/**
+ * Gateful's answer when the DAO's circuit is open, from `app.onError` in
+ * `apps/gateful/src/index.ts`. The request is refused before it is proxied,
+ * so no relayer ever saw it.
+ */
+const GATEFUL_CIRCUIT_OPEN_MESSAGE = "DAO service temporarily unavailable";
 const RATE_LIMITED_MESSAGE =
   "You've reached the maximum operations for this month";
 
@@ -100,7 +106,7 @@ export const getRelayerRevertedHash = (error: unknown): Hash | null => {
 export type RelayerFailureClass = "pre-broadcast" | "reverted" | "ambiguous";
 
 export const classifyRelayerFailure = (error: unknown): RelayerFailureClass => {
-  const { code, status } = readRelayerError(error);
+  const { code, message, status } = readRelayerError(error);
 
   if (code === "TRANSACTION_REVERTED") return "reverted";
   if (code !== undefined && ENACTMENT_REJECTION_CODES.has(code)) {
@@ -110,6 +116,13 @@ export const classifyRelayerFailure = (error: unknown): RelayerFailureClass => {
   // when the DAO or its relayer is unknown, and its request validation does
   // the same. Any 4xx is a refusal to act on the request, so nothing was sent.
   if (status !== undefined && status >= 400 && status < 500) {
+    return "pre-broadcast";
+  }
+  // Gateful's open circuit breaker refuses the request before proxying it,
+  // so this 503 says nothing was sent either. Without this, a user who
+  // clicks while the breaker is open is locked out of the wallet path until
+  // the page is reloaded.
+  if (status === 503 && message === GATEFUL_CIRCUIT_OPEN_MESSAGE) {
     return "pre-broadcast";
   }
   // Everything left is a 5xx with no code this file knows, a timeout, or a

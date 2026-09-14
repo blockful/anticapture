@@ -195,6 +195,21 @@ describe("classifyRelayerFailure", () => {
     expect(classifyRelayerFailure(unstructuredError(504))).toBe("ambiguous");
   });
 
+  it("calls Gateful's open circuit pre-broadcast, since nothing was proxied", () => {
+    const circuitOpen = Object.assign(new Error("Request failed"), {
+      status: 503,
+      response: {
+        status: 503,
+        statusText: "",
+        headers: new Headers(),
+        data: { error: "DAO service temporarily unavailable" },
+      },
+    });
+    expect(classifyRelayerFailure(circuitOpen)).toBe("pre-broadcast");
+    // Any other bare 503 still says nothing about whether a transaction exists.
+    expect(classifyRelayerFailure(relayerError(503))).toBe("ambiguous");
+  });
+
   it("calls a transport failure with no status ambiguous", () => {
     expect(classifyRelayerFailure(new Error("Failed to fetch"))).toBe(
       "ambiguous",

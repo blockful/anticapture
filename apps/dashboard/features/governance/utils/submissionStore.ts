@@ -22,17 +22,27 @@ const listeners = new Map<string, Set<() => void>>();
  * map for the life of the tab. Entries are dropped in the order they were
  * first written, and only where the state is settled: an unresolved or
  * ambiguous entry is the thing that stops a duplicate submission, so it is
- * never evicted no matter how old it is.
+ * never evicted no matter how old it is. Of the settled entries, a failed
+ * attempt goes first: reading it back is the same as never having submitted.
+ * A landed transaction still keeps the action closed until it is indexed, so
+ * it is evicted only once no failed entry is left to evict.
  */
 const MAX_TRACKED_SUBMISSIONS = 50;
+
+const isSettledAs = (
+  state: SubmissionState,
+  outcome: "failed" | "landed",
+): boolean => state.kind === "done" && state.outcome === outcome;
 
 const evictOldestSettled = () => {
   if (submissions.size <= MAX_TRACKED_SUBMISSIONS) return;
 
-  for (const [key, state] of submissions) {
-    if (state.kind === "done") {
-      submissions.delete(key);
-      return;
+  for (const outcome of ["failed", "landed"] as const) {
+    for (const [key, state] of submissions) {
+      if (isSettledAs(state, outcome)) {
+        submissions.delete(key);
+        return;
+      }
     }
   }
 };
