@@ -8,6 +8,8 @@ const TRY_AGGREGATE = "tryAggregate(bool,(address,bytes)[])";
 const EXEC_TRANSACTION =
   "execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)";
 const MULTI_SEND = "multiSend(bytes)";
+const EXECUTE_BATCH =
+  "executeBatch(address[],uint256[],bytes[],bytes32,bytes32)";
 const SCHEDULE_BATCH =
   "scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)";
 
@@ -209,15 +211,35 @@ describe("single and batch extractors degrade instead of throwing", () => {
     ]);
   });
 
-  test("a batch zips defensively across mismatched and malformed arrays", () => {
-    expect(
-      extract(SCHEDULE_BATCH, [[TARGET, "nope", OTHER], [1n], ["0xabcd", 7]]),
-    ).toEqual([
+  test("a batch reads malformed entries defensively when the lengths agree", () => {
+    const args = [
+      [TARGET, "nope", OTHER],
+      [1n, 2n, "three"],
+      ["0xabcd", 7, "0x"],
+    ];
+    expect(extract(SCHEDULE_BATCH, args)).toEqual([
       { target: TARGET, value: 1n, calldata: "0xabcd" },
-      { target: undefined, value: undefined, calldata: "0x" },
+      { target: undefined, value: 2n, calldata: "0x" },
       { target: OTHER, value: undefined, calldata: "0x" },
     ]);
+    expect(warningsFor(SCHEDULE_BATCH, args)).toEqual([]);
   });
+
+  test.each([SCHEDULE_BATCH, EXECUTE_BATCH])(
+    "%s with arrays of different lengths yields nothing executable",
+    (signature) => {
+      // The contract checks the lengths and reverts, so inventing an empty
+      // call for the missing payload would summarize a batch that cannot run.
+      const args = [[TARGET, OTHER], [1n], ["0xabcd"]];
+      expect(extract(signature, args)).toEqual([]);
+      expect(warningsFor(signature, args)).toEqual([
+        expect.objectContaining({
+          code: "would-revert",
+          message: expect.stringContaining("would revert"),
+        }),
+      ]);
+    },
+  );
 
   test("a batch with no arrays at all yields no subcalls", () => {
     expect(extract(SCHEDULE_BATCH, [undefined, null, 5])).toEqual([]);

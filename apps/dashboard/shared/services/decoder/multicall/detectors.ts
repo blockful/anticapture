@@ -256,16 +256,41 @@ const single = (
   },
 ];
 
+/**
+ * A batch whose parallel arrays disagree in length cannot execute: every
+ * contract that takes this shape checks the lengths and reverts. Zipping them
+ * anyway invents an empty call for each missing payload, and the card then
+ * summarizes a batch that would never run as though it were executable.
+ */
+const parallelLengthsAgree = (
+  targets: unknown,
+  values: unknown,
+  payloads: unknown,
+): boolean => {
+  const count = asList(targets).length;
+  return asList(values).length === count && asList(payloads).length === count;
+};
+
+const WOULD_REVERT_WARNING: DecodeWarning = {
+  code: "would-revert",
+  message:
+    "This batch's arrays have different lengths, so the call would revert; its calls are not decoded.",
+};
+
+const mismatchedBatch = (args: readonly unknown[]): DecodeWarning[] =>
+  parallelLengthsAgree(args[0], args[1], args[2]) ? [] : [WOULD_REVERT_WARNING];
+
 const batch = (
   targets: unknown,
   values: unknown,
   payloads: unknown,
 ): ExtractedSubcall[] => {
+  if (!parallelLengthsAgree(targets, values, payloads)) return [];
   const valueList = asList(values);
   const payloadList = asList(payloads);
-  // Zip defensively: independently encoded arrays can disagree in length in
-  // hand-crafted calldata, and a missing payload must degrade to an empty
-  // call, never to `undefined` reaching the decoder.
+  // Read defensively even so: the lengths agreeing does not make every entry
+  // the type it should be, and a malformed one must degrade to an empty call
+  // rather than let `undefined` reach the decoder.
   return asList(targets).map((target, i) => {
     const value = valueList[i];
     const payload = payloadList[i];
@@ -377,6 +402,7 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "timelock-scheduleBatch",
       verb: "Schedules",
       extract: (args) => batch(args[0], args[1], args[2]),
+      warningsFor: (_subcalls, args) => mismatchedBatch(args),
     },
   },
   {
@@ -395,6 +421,7 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "timelock-executeBatch",
       verb: "Executes",
       extract: (args) => batch(args[0], args[1], args[2]),
+      warningsFor: (_subcalls, args) => mismatchedBatch(args),
     },
   },
   {

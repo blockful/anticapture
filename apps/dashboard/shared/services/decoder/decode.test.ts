@@ -1,5 +1,6 @@
 import {
   encodeFunctionData,
+  getAddress,
   parseAbi,
   type Abi,
   type Address,
@@ -360,15 +361,77 @@ describe("decodeCalldata basics", () => {
     );
     expect(node.subcalls).toHaveLength(12);
     expect(countParamNodes(node)).toBe(MAX_TREE_PARAM_NODES);
-    // Every call is still decoded and summarized; only its rows run out.
-    const last = node.subcalls!.at(-1)!;
-    expect(last.functionName).toBe("airdrop");
-    expect(last.params).toEqual([
-      expect.objectContaining({
+
+    // The batch is split by source order rather than first come, so every
+    // call keeps some of its rows and each one is visibly cut short.
+    const perChild = node.subcalls!.map(countParamNodes);
+    expect(perChild.every((count) => count > 0)).toBe(true);
+    expect([...perChild].sort((a, b) => b - a)).toEqual(perChild);
+    for (const child of node.subcalls!) {
+      expect(child.functionName).toBe("airdrop");
+      expect(child.params[0].originalLength).toBe(MAX_PARAM_NODES);
+      expect(child.params[0].children?.at(-1)).toMatchObject({
         isTruncationNote: true,
-        value: "1 more parameter not shown",
-      }),
+      });
+    }
+  });
+
+  test("the parameter split does not depend on which lookup lands first", async () => {
+    // Children decode in parallel and claim their rows when their own ABI
+    // lookup resolves. Sharing one budget across that would hand the tree to
+    // whichever network call returned first, and the same calldata would
+    // render differently between two decodes of it.
+    const abi: Abi = parseAbi(["function airdrop(address[] recipients)"]);
+    const airdrop = encodeFunctionData({
+      abi,
+      functionName: "airdrop",
+      args: [Array.from({ length: MAX_PARAM_NODES }, () => RECIPIENT)],
+    });
+    const targets = Array.from({ length: 12 }, (_, i) =>
+      getAddress(`0x${(i + 1).toString(16).padStart(40, "0")}`),
+    );
+    const calldata = encodeFunctionData({
+      abi: parseAbi([
+        "function aggregate3((address target, bool allowFailure, bytes callData)[] calls)",
+      ]),
+      functionName: "aggregate3",
+      args: [
+        targets.map((target) => ({
+          target,
+          allowFailure: false,
+          callData: airdrop,
+        })),
+      ],
+    });
+
+    // Same batch, lookups resolving in opposite orders.
+    const decodeWith = (reversed: boolean) => {
+      const uploaded = createUploadedAbiStore();
+      for (const target of targets) uploaded.set([...abi], target);
+      const resolver = createAbiResolver({
+        fetchVerifiedAbi: jest.fn(async (_chainId: number, address: string) => {
+          const position = targets.indexOf(getAddress(address));
+          const delay = reversed ? targets.length - position : position;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return null;
+        }),
+        fetchSignatures: jest.fn().mockResolvedValue([]),
+        uploaded,
+      });
+      return decodeCalldata(
+        { chainId: 1, calldata, target: MULTICALL3 },
+        resolver,
+      );
+    };
+
+    const [forward, reverse] = await Promise.all([
+      decodeWith(false),
+      decodeWith(true),
     ]);
+    const shape = (node: DecodedCall) => node.subcalls!.map(countParamNodes);
+    expect(shape(forward)).toEqual(shape(reverse));
+    // And it is the source-order split, not an arrival-order one.
+    expect([...shape(forward)].sort((a, b) => b - a)).toEqual(shape(forward));
   });
 
   test("unknown selector degrades to guessed words with a permanent warning", async () => {
@@ -680,24 +743,67 @@ describe("multicall unpacking", () => {
     expect(node.params[5].humanized?.text).toBe("2 days = 172,800 seconds");
   });
 
-  test("a batch with mismatched array lengths degrades missing payloads to empty calls", async () => {
+  test.each([
+    ["scheduleBatch", "Schedules"],
+    ["executeBatch", "Executes"],
+  ])(
+    "%s with arrays of different lengths decodes to nothing executable",
+    async (name, verb) => {
+      // Every contract taking this shape checks the lengths and reverts, so
+      // zipping them would invent an empty call and let the card summarize a
+      // batch that can never run.
+      // Typed as Abi so the arguments stay a plain list: viem cannot infer a
+      // signature chosen at runtime, and the inferred tuple would be nonsense.
+      const abi: Abi = parseAbi([
+        "function scheduleBatch(address[] targets, uint256[] values, bytes[] payloads, bytes32 predecessor, bytes32 salt, uint256 delay)",
+        "function executeBatch(address[] targets, uint256[] values, bytes[] payloads, bytes32 predecessor, bytes32 salt)",
+      ]);
+      const zero32 = `0x${"0".repeat(64)}` as Hex;
+      // Two targets, one payload: hand-crafted calldata can disagree so.
+      const head = [[USDC, RECIPIENT], [0n, 1n], [USDC_TRANSFER], zero32];
+      const calldata = encodeFunctionData({
+        abi,
+        functionName: name,
+        args:
+          name === "scheduleBatch" ? [...head, zero32, 60n] : [...head, zero32],
+      });
+
+      const node = await decode(calldata, { target: TIMELOCK });
+      expect(node.functionName).toBe(name);
+      expect(node.subcalls).toEqual([]);
+      expect(node.summary).toBe(`${verb} 0 calls.`);
+      expect(node.warnings).toEqual([
+        expect.objectContaining({
+          code: "would-revert",
+          message: expect.stringContaining("would revert"),
+        }),
+      ]);
+    },
+  );
+
+  test("a batch whose arrays agree still fans out", async () => {
     const abi = parseAbi([
       "function scheduleBatch(address[] targets, uint256[] values, bytes[] payloads, bytes32 predecessor, bytes32 salt, uint256 delay)",
     ]);
     const zero32 = `0x${"0".repeat(64)}` as Hex;
-    // Two targets, one payload: hand-crafted calldata can disagree like this.
     const calldata = encodeFunctionData({
       abi,
       functionName: "scheduleBatch",
-      args: [[USDC, RECIPIENT], [0n, 1n], [USDC_TRANSFER], zero32, zero32, 60n],
+      args: [
+        [USDC, RECIPIENT],
+        [0n, 1n],
+        [USDC_TRANSFER, "0x"],
+        zero32,
+        zero32,
+        60n,
+      ],
     });
 
     const node = await decode(calldata, { target: TIMELOCK });
     expect(node.subcalls).toHaveLength(2);
     expect(node.subcalls![0].functionName).toBe("transfer");
-    // The missing payload becomes an empty call, not a crash or a blank tree.
     expect(node.subcalls![1].raw).toBe("0x");
-    expect(node.subcalls![1].error).toBeUndefined();
+    expect(node.warnings).toEqual([]);
   });
 
   test("recursion stops at maxDepth and leaves deeper calls raw", async () => {

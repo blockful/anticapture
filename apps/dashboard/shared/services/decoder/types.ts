@@ -52,7 +52,8 @@ export type DecodeWarning =
   | { code: "size-limit"; message: string }
   | { code: "openchain-ambiguous"; message: string; candidates: string[] }
   | { code: "delegatecall"; message: string }
-  | { code: "allow-failure"; message: string };
+  | { code: "allow-failure"; message: string }
+  | { code: "would-revert"; message: string };
 
 export type DecodedCall = {
   chainId: number;

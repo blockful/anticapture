@@ -447,6 +447,24 @@ const decodeNode = async (
     });
     const childBudgets = shares.map((share) => ({ nodesLeft: share }));
 
+    // Parameter capacity is carved up here for the same reason, and it is the
+    // sharper case: a child claims its parameters only once its own ABI
+    // lookup has resolved, so a shared budget hands the tree to whichever
+    // network call happened to return first. The same calldata would then
+    // render different rows on different runs. Same rule as above, so ties go
+    // to source order and the split is a pure function of the batch.
+    const paramRemaining = treeParams.nodesLeft;
+    treeParams.nodesLeft = 0;
+    const paramBase = jobCount > 0 ? Math.floor(paramRemaining / jobCount) : 0;
+    let paramExtra = jobCount > 0 ? paramRemaining % jobCount : 0;
+    const paramShares = slots.map((slot) => {
+      if (!("subcall" in slot)) return 0;
+      const share = paramBase + (paramExtra > 0 ? 1 : 0);
+      if (paramExtra > 0) paramExtra -= 1;
+      return share;
+    });
+    const childParams = paramShares.map((share) => ({ nodesLeft: share }));
+
     const decoded = new Array<DecodedCall & { index: number }>(slots.length);
     let cursor = 0;
     const workers = Array.from(
@@ -471,7 +489,7 @@ const decodeNode = async (
             opts,
             depth + 1,
             childBudgets[position],
-            treeParams,
+            childParams[position],
           );
           decoded[position] = {
             ...child,
@@ -510,9 +528,10 @@ const decodeNode = async (
         depth + 1,
         retryBudget,
         // A retry replaces the first attempt's subtree, and what that attempt
-        // spent here is not reclaimed: the parameter bound only ever tightens,
-        // which is the safe direction for a guard.
-        treeParams,
+        // spent stays spent: the parameter bound only ever tightens, which is
+        // the safe direction for a guard, and it stays this child's own share
+        // rather than eating into a sibling's.
+        childParams[position],
       );
       decoded[position] = {
         ...child,
@@ -531,6 +550,14 @@ const decodeNode = async (
     // all, and discarding `remaining` there would starve its siblings.
     const allocated = shares.reduce((sum, share) => sum + share, 0);
     budget.nodesLeft = pool + (remaining - allocated);
+
+    // Parameter leftovers go back the same way. This runs after every child
+    // has finished, so what returns is a function of the batch and not of the
+    // order the lookups resolved in.
+    const paramAllocated = paramShares.reduce((sum, share) => sum + share, 0);
+    treeParams.nodesLeft =
+      childParams.reduce((sum, child) => sum + child.nodesLeft, 0) +
+      (paramRemaining - paramAllocated);
 
     node.subcalls = decoded;
     node.subcallCount = extracted.length;
