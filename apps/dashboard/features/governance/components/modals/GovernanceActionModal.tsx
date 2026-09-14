@@ -28,7 +28,9 @@ import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import {
   canStartSubmission,
   getModalEntryPoint,
+  NOTHING_SENT,
   type ActionMode,
+  type SettledSubmission,
   type SubmissionState,
 } from "@/features/governance/utils/submissionState";
 import {
@@ -54,6 +56,7 @@ import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import {
   getRelayerRevertedHash,
+  isRelayerTransactionReverted,
   mapRelayerEnactmentError,
 } from "@/shared/utils/gaslessRelayerError";
 
@@ -175,11 +178,16 @@ export const GovernanceActionModal = ({
   );
 
   // Frees the action unless the submission ended somewhere no retry is safe.
-  const finishSubmission = useCallback(() => {
-    if (readSubmission(stateKey).kind === "in-flight") {
-      moveSubmission({ kind: "done" });
-    }
-  }, [moveSubmission, stateKey]);
+  // What it sent is recorded with it, because a mount that inherits this
+  // state never saw the run and has to know whether a transaction exists.
+  const finishSubmission = useCallback(
+    (settled: SettledSubmission) => {
+      const current = readSubmission(stateKey);
+      if (current.kind !== "in-flight") return;
+      moveSubmission({ kind: "done", mode: current.mode, ...settled });
+    },
+    [moveSubmission, stateKey],
+  );
 
   // Refetches issued for the current polling run, the immediate one at the
   // start included. Held in a ref so a status that changes mid-run restarts
@@ -274,6 +282,8 @@ export const GovernanceActionModal = ({
     setTxHash(null);
     setStep("waiting-signature");
 
+    let settled: SettledSubmission = NOTHING_SENT;
+
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
       const targets = proposal.targets ?? [];
@@ -317,6 +327,7 @@ export const GovernanceActionModal = ({
         showAmbiguousOutcome("wallet", outcome.hash);
         return;
       }
+      settled = { sent: true, hash: outcome.hash };
       if (outcome.status === "reverted") {
         setTxHash(outcome.hash);
         setError(REVERTED_MESSAGE);
@@ -340,7 +351,7 @@ export const GovernanceActionModal = ({
       setError(message);
       setStep("error");
     } finally {
-      finishSubmission();
+      finishSubmission(settled);
     }
   }, [
     address,
@@ -363,6 +374,8 @@ export const GovernanceActionModal = ({
     setTxHash(null);
     setStep("relaying");
 
+    let settled: SettledSubmission = NOTHING_SENT;
+
     try {
       const outcome = await relayGovernanceAction({
         action,
@@ -375,6 +388,9 @@ export const GovernanceActionModal = ({
         },
       });
 
+      if (outcome.status === "success" || outcome.status === "reverted") {
+        settled = { sent: true, hash: outcome.hash };
+      }
       if (outcome.status === "success") {
         showCustomToast(`Proposal ${copy.pastTense} successfully!`, "success");
         startStatusPolling();
@@ -397,11 +413,16 @@ export const GovernanceActionModal = ({
       // revert names its transaction in the message, which is the only place
       // the hash appears, so the explorer link matches the wallet path.
       console.error(err);
-      setTxHash(getRelayerRevertedHash(err));
+      const revertedHash = getRelayerRevertedHash(err);
+      settled = {
+        sent: isRelayerTransactionReverted(err),
+        hash: revertedHash,
+      };
+      setTxHash(revertedHash);
       setError(mapRelayerEnactmentError(err, action));
       setStep("error");
     } finally {
-      finishSubmission();
+      finishSubmission(settled);
     }
   }, [
     action,
@@ -433,10 +454,23 @@ export const GovernanceActionModal = ({
       setStep(submission.mode === "gasless" ? "relaying" : "waiting-signature");
       return;
     }
-    // Nothing is pending any more and the outcome belongs to a mount that is
-    // gone, so the modal goes back through its entry point.
+    if (submission.kind === "done" && submission.sent) {
+      // A transaction went out and the mount that watched it is gone, taking
+      // its polling with it. `done` does not record whether it was mined or
+      // reverted, so this mount claims neither: it shows the transaction, no
+      // action button, and picks the watch back up so the page still catches
+      // up on its own. The budget starts fresh, which is the right reading of
+      // a user who has just come back to look.
+      setMode(submission.mode);
+      setTxHash(submission.hash);
+      setStep("ambiguous");
+      startStatusPolling();
+      return;
+    }
+    // Nothing was ever sent, so the modal goes back through its entry point
+    // and the action is offered again.
     setHasStarted(false);
-  }, [submission]);
+  }, [submission, startStatusPolling]);
 
   const failWithoutWallet = useCallback((message: string) => {
     setMode("wallet");

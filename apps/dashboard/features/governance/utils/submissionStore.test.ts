@@ -70,7 +70,12 @@ describe("closing and reopening the modal mid-flight", () => {
     expect(entryFor(key)).toBe("mirror-submission");
     expect(canStartSubmission(readSubmission(key))).toBe(false);
 
-    writeSubmission(key, { kind: "done" });
+    writeSubmission(key, {
+      kind: "done",
+      mode: "wallet",
+      sent: false,
+      hash: null,
+    });
     expect(entryFor(key)).toBe("choose");
     expect(canStartSubmission(readSubmission(key))).toBe(true);
   });
@@ -88,6 +93,23 @@ describe("unmounting and remounting the modal mid-flight", () => {
     expect(readSubmission(key)).toEqual({ kind: "in-flight", mode: "gasless" });
     expect(entryFor(key)).toBe("mirror-submission");
     expect(canStartSubmission(readSubmission(key))).toBe(false);
+  });
+
+  it("tells the new mount that a transaction went out", () => {
+    const key = submissionKey("ENS", "remount-sent", "execute");
+
+    writeSubmission(key, { kind: "in-flight", mode: "gasless" });
+    writeSubmission(key, { kind: "done", mode: "gasless", sent: true, hash });
+
+    // The new mount cannot tell mined from reverted, but it knows enough to
+    // keep watching the proposal instead of offering the action again.
+    expect(readSubmission(key)).toEqual({
+      kind: "done",
+      mode: "gasless",
+      sent: true,
+      hash,
+    });
+    expect(entryFor(key)).toBe("choose");
   });
 
   it("tells the new mount how the inherited request ended", () => {
@@ -140,7 +162,12 @@ describe("subscribeToSubmission", () => {
     expect(listener).toHaveBeenCalledTimes(1);
 
     unsubscribe();
-    writeSubmission(key, { kind: "done" });
+    writeSubmission(key, {
+      kind: "done",
+      mode: "wallet",
+      sent: false,
+      hash: null,
+    });
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
@@ -152,5 +179,34 @@ describe("subscribeToSubmission", () => {
 
     writeSubmission(key, { kind: "in-flight", mode: "wallet" });
     expect(readSubmission(key)).toBe(readSubmission(key));
+  });
+});
+
+describe("store growth", () => {
+  it("drops the oldest settled entries but never an unresolved one", () => {
+    const pending = submissionKey("ENS", "cap-pending", "execute");
+    writeSubmission(pending, { kind: "in-flight", mode: "gasless" });
+
+    // Push the settled entries well past the cap.
+    for (let i = 0; i < 120; i += 1) {
+      writeSubmission(submissionKey("ENS", `cap-${i}`, "queue"), {
+        kind: "done",
+        mode: "wallet",
+        sent: false,
+        hash: null,
+      });
+    }
+
+    // The unresolved entry is what stops a duplicate submission, so it stays
+    // however old it gets.
+    expect(readSubmission(pending)).toEqual({
+      kind: "in-flight",
+      mode: "gasless",
+    });
+    // The earliest settled entries were forgotten, and reading them is the
+    // same as never having submitted.
+    expect(readSubmission(submissionKey("ENS", "cap-0", "queue"))).toEqual({
+      kind: "idle",
+    });
   });
 });

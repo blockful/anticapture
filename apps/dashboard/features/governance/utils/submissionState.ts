@@ -16,13 +16,26 @@ export type ActionMode = "wallet" | "gasless";
  *   no safe retry, so this is terminal. `hash` is null when even the send is
  *   in doubt, which is why the screen cannot always offer an explorer link.
  * - "done": a submission resolved definitively, mined, reverted, or never
- *   sent at all. Another submission is allowed.
+ *   sent at all. Another submission is allowed. `sent` says whether a
+ *   transaction went out, which is what a mount that inherits this state
+ *   needs: it did not see the outcome, so it has to keep watching the
+ *   proposal rather than offer the action as though nothing had happened.
+ *   Every state but "idle" carries the mode, so any mount can describe the
+ *   submission the same way the one that made it would have.
  */
 export type SubmissionState =
   | { kind: "idle" }
   | { kind: "in-flight"; mode: ActionMode }
   | { kind: "ambiguous"; mode: ActionMode; hash: Hash | null }
-  | { kind: "done" };
+  | { kind: "done"; mode: ActionMode; sent: boolean; hash: Hash | null };
+
+/** What a run reports about itself once it settles definitively. */
+export interface SettledSubmission {
+  sent: boolean;
+  hash: Hash | null;
+}
+
+export const NOTHING_SENT: SettledSubmission = { sent: false, hash: null };
 
 export const IDLE_SUBMISSION: SubmissionState = { kind: "idle" };
 

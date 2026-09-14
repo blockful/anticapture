@@ -71,7 +71,7 @@ const ENACTMENT_REJECTION_CODES = new Set([
 ]);
 
 /** The relayer broadcast the transaction and saw it revert: a final answer. */
-const isRelayerTransactionReverted = (error: unknown): boolean =>
+export const isRelayerTransactionReverted = (error: unknown): boolean =>
   getRelayerErrorCode(error) === "TRANSACTION_REVERTED";
 
 const TX_HASH_PATTERN = /0x[0-9a-fA-F]{64}/;
@@ -112,6 +112,11 @@ export const classifyRelayerFailure = (error: unknown): RelayerFailureClass => {
   if (status !== undefined && status >= 400 && status < 500) {
     return "pre-broadcast";
   }
+  // Everything left is a 5xx with no code this file knows, a timeout, or a
+  // transport failure, and none of them says whether a transaction exists.
+  // The default is deliberately the cautious one: a relayer code added over
+  // there and not here lands in this branch and costs the user a retry, which
+  // is the cheaper mistake than offering one that duplicates a governor call.
   return "ambiguous";
 };
 

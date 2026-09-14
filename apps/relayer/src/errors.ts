@@ -20,6 +20,15 @@ export class RelayError extends Error {
 
 // All errors are factory functions to avoid shared mutable instances
 // (stack traces, request context leaking across requests)
+//
+// Every code below except TRANSACTION_REVERTED is raised before anything is
+// signed, which is what lets the dashboard offer a retry. It mirrors this
+// list in ENACTMENT_REJECTION_CODES in
+// apps/dashboard/shared/utils/gaslessRelayerError.ts, and classifies by code
+// rather than by status precisely so the 503s here are still read as "did not
+// send". A new code added here is treated as ambiguous over there until it is
+// added to that set, so a pre-broadcast code shipped with a 5xx status will
+// strand users on "transaction may have been sent" until both sides agree.
 export const Errors = {
   INSUFFICIENT_VOTING_POWER: (min: string) =>
     new RelayError(

@@ -20,7 +20,18 @@ const ambiguousWithoutHash: SubmissionState = {
   mode: "gasless",
   hash: null,
 };
-const done: SubmissionState = { kind: "done" };
+const doneNothingSent: SubmissionState = {
+  kind: "done",
+  mode: "wallet",
+  sent: false,
+  hash: null,
+};
+const doneSent: SubmissionState = {
+  kind: "done",
+  mode: "gasless",
+  sent: true,
+  hash,
+};
 
 describe("canStartSubmission", () => {
   it("allows a first submission", () => {
@@ -28,7 +39,8 @@ describe("canStartSubmission", () => {
   });
 
   it("allows another after one resolved definitively", () => {
-    expect(canStartSubmission(done)).toBe(true);
+    expect(canStartSubmission(doneNothingSent)).toBe(true);
+    expect(canStartSubmission(doneSent)).toBe(true);
   });
 
   it("refuses one while a submission is in flight", () => {
@@ -84,9 +96,9 @@ describe("getModalEntryPoint", () => {
   });
 
   it("offers the choices again after a definitive outcome", () => {
-    expect(getModalEntryPoint({ ...connected, submission: done })).toBe(
-      "choose",
-    );
+    expect(
+      getModalEntryPoint({ ...connected, submission: doneNothingSent }),
+    ).toBe("choose");
   });
 
   it("starts the wallet flow without a relayer", () => {
@@ -147,7 +159,15 @@ describe("dismissing and reopening the modal", () => {
   });
 
   it("frees the modal once a submission resolved definitively", () => {
-    expect(entryFor(done)).toBe("choose");
-    expect(canStartSubmission(done)).toBe(true);
+    expect(entryFor(doneNothingSent)).toBe("choose");
+    expect(canStartSubmission(doneNothingSent)).toBe(true);
+  });
+
+  it("records whether a transaction went out, for a mount that never saw it", () => {
+    // A mount that inherits this cannot tell mined from reverted, but it can
+    // tell that something is on-chain and that it must keep watching.
+    expect(doneSent.kind === "done" && doneSent.sent).toBe(true);
+    expect(doneSent.kind === "done" && doneSent.hash).toBe(hash);
+    expect(doneNothingSent.kind === "done" && doneNothingSent.sent).toBe(false);
   });
 });

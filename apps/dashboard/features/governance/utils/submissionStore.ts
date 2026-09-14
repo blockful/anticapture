@@ -17,6 +17,26 @@ import {
 const submissions = new Map<string, SubmissionState>();
 const listeners = new Map<string, Set<() => void>>();
 
+/**
+ * A session that browses proposal after proposal would otherwise grow this
+ * map for the life of the tab. Entries are dropped in the order they were
+ * first written, and only where the state is settled: an unresolved or
+ * ambiguous entry is the thing that stops a duplicate submission, so it is
+ * never evicted no matter how old it is.
+ */
+const MAX_TRACKED_SUBMISSIONS = 50;
+
+const evictOldestSettled = () => {
+  if (submissions.size <= MAX_TRACKED_SUBMISSIONS) return;
+
+  for (const [key, state] of submissions) {
+    if (state.kind === "done") {
+      submissions.delete(key);
+      return;
+    }
+  }
+};
+
 export const submissionKey = (
   daoId: string,
   proposalId: string,
@@ -28,6 +48,7 @@ export const readSubmission = (key: string): SubmissionState =>
 
 export const writeSubmission = (key: string, state: SubmissionState): void => {
   submissions.set(key, state);
+  evictOldestSettled();
   listeners.get(key)?.forEach((listener) => listener());
 };
 
