@@ -67,6 +67,10 @@ export class DuneProvider implements TreasuryProvider {
     return filterWithFallback(data, cutoffTimestamp);
   }
 
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.cache.getStale();
+  }
+
   private transformData(data: DuneResponse): LiquidTreasuryDataPoint[] {
     return data.result.rows
       .map((row) => {

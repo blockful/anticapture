@@ -21,10 +21,23 @@ class FakeTreasuryProvider implements TreasuryProvider {
     }));
   }
 
+  /** Last good series this fake would serve after a failed fetch. */
+  private stale: LiquidTreasuryDataPoint[] | null = null;
+
+  setStale(data: { date: number; value: number }[] | null) {
+    this.stale =
+      data &&
+      data.map((item) => ({ date: item.date, liquidTreasury: item.value }));
+  }
+
   async fetchTreasury(
     _cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
     return this.data;
+  }
+
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.stale;
   }
 }
 
@@ -164,6 +177,7 @@ describe("TreasuryService", () => {
         fetchTreasury: async () => {
           throw new UpstreamUnavailableError("defillama", "DefiLlama down");
         },
+        getStaleTreasury: () => null,
       };
       const degraded = captureDegradedUpstream();
 
@@ -183,12 +197,38 @@ describe("TreasuryService", () => {
       ]);
     });
 
+    it("serves the last good series when the provider holds one", async () => {
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw new UpstreamUnavailableError("defillama", "DefiLlama down");
+        },
+        getStaleTreasury: () => [{ date: 1700000000, liquidTreasury: 42 }],
+      };
+      const degraded = captureDegradedUpstream();
+
+      const service = new TreasuryService(metricRepo, failing, priceProvider);
+      const { data: result, degraded: isDegraded } =
+        await service.getLiquidTreasury(365, "asc");
+
+      expect(isDegraded).toBe(true);
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(degraded.recorded()).toEqual([
+        {
+          upstream: "defillama",
+          resource: "treasury",
+          mode: "stale",
+          reason: "unavailable",
+        },
+      ]);
+    });
+
     it("propagates a failure that is not the provider's", async () => {
       const ourBug = new Error("transform blew up");
       const failing: TreasuryProvider = {
         fetchTreasury: async () => {
           throw ourBug;
         },
+        getStaleTreasury: () => null,
       };
 
       const service = new TreasuryService(metricRepo, failing, priceProvider);

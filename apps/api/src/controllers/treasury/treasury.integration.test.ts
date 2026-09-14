@@ -26,10 +26,23 @@ class FakeTreasuryProvider implements TreasuryProvider {
     }));
   }
 
+  /** Last good series this fake would serve after a failed fetch. */
+  private stale: LiquidTreasuryDataPoint[] | null = null;
+
+  setStale(data: { date: number; value: number }[] | null) {
+    this.stale =
+      data &&
+      data.map((item) => ({ date: item.date, liquidTreasury: item.value }));
+  }
+
   async fetchTreasury(
     _cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
     return this.data;
+  }
+
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.stale;
   }
 }
 
@@ -133,6 +146,31 @@ describe("Treasury Controller", () => {
         undefined,
       );
       app = createTestApp(service);
+    });
+
+    // A stale treasury series must not sit in a downstream cache once the
+    // provider recovers.
+    it("returns 200 with no-store when the provider fails but holds stale data", async () => {
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw new UpstreamUnavailableError("dune", "Dune down");
+        },
+        getStaleTreasury: () => [
+          { date: FIXED_TIMESTAMP, liquidTreasury: 1000000 },
+        ],
+      };
+      const degradedApp = createTestApp(
+        new TreasuryService(
+          metricsRepo as unknown as TreasuryRepository,
+          failing,
+          undefined,
+        ),
+      );
+
+      const res = await degradedApp.request("/treasury/liquid?days=365d");
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("should return 200 with valid response structure", async () => {

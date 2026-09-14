@@ -10,11 +10,12 @@ import {
   recordDegradedUpstream,
   type MaybeDegraded,
 } from "@/lib/degraded-upstream";
+import { filterWithFallback } from "@/lib/query-helpers";
 import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { TreasuryResponse } from "@/mappers/treasury";
 
 import { TreasuryProvider } from "./providers";
-import { PriceProvider } from "./types";
+import { LiquidTreasuryDataPoint, PriceProvider } from "./types";
 
 export interface ITreasuryRepository {
   getTokenQuantities(cutoffTimestamp: number): Promise<Map<number, bigint>>;
@@ -47,26 +48,34 @@ export class TreasuryService {
 
     const cutoffTimestamp = calculateCutoffTimestamp(days);
 
-    let data;
+    let data: LiquidTreasuryDataPoint[];
+    let degraded = false;
     try {
       data = await this.provider.fetchTreasury(cutoffTimestamp);
     } catch (error) {
       // Liquid treasury comes from Dune, DefiLlama or Compound. An outage
       // there must not 5xx: the gateway counts that against the whole DAO.
+      // Same policy as the price routes: serve the last good series while it
+      // is young enough, and only then fall to empty.
       if (!(error instanceof UpstreamUnavailableError)) throw error;
+      const stale = this.provider.getStaleTreasury();
       recordDegradedUpstream({
         upstream: error.upstream,
         resource: "treasury",
-        mode: "empty",
+        mode: stale ? "stale" : "empty",
         reason: error.reason,
         error,
         context: { days },
       });
-      return { data: { items: [], totalCount: 0 }, degraded: true };
+      if (!stale) {
+        return { data: { items: [], totalCount: 0 }, degraded: true };
+      }
+      data = filterWithFallback(stale, cutoffTimestamp);
+      degraded = true;
     }
 
     if (data.length === 0) {
-      return { data: { items: [], totalCount: 0 }, degraded: false };
+      return { data: { items: [], totalCount: 0 }, degraded };
     }
 
     // Convert to map with normalized timestamps (midnight UTC)
@@ -90,7 +99,7 @@ export class TreasuryService {
       }))
       .sort((a, b) => (order === "desc" ? b.date - a.date : a.date - b.date));
 
-    return { data: { items, totalCount: items.length }, degraded: false };
+    return { data: { items, totalCount: items.length }, degraded };
   }
 
   /**

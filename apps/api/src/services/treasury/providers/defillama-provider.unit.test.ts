@@ -146,6 +146,43 @@ describe("DefiLlamaProvider", () => {
     expect(callCount).toBe(1);
   });
 
+  it("offers the last good series as stale within the max age", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+    server.use(
+      http.get(BASE_URL, () =>
+        HttpResponse.json({
+          chainTvls: {
+            ethereum: {
+              tvl: [{ date: 1700000000, totalLiquidityUSD: 100 }],
+            },
+          },
+        }),
+      ),
+    );
+
+    await provider.fetchTreasury(0);
+    // Past the 24h fresh TTL but inside the extra stale day.
+    vi.setSystemTime(Date.now() + 36 * 60 * 60 * 1000);
+
+    expect(provider.getStaleTreasury()).toEqual([
+      { date: 1699920000, liquidTreasury: 100 },
+    ]);
+
+    // Past the cap, nothing is offered.
+    vi.setSystemTime(Date.now() + 24 * 60 * 60 * 1000);
+    expect(provider.getStaleTreasury()).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it("caches nothing when the fetch fails", async () => {
+    server.use(http.get(BASE_URL, () => HttpResponse.error()));
+
+    await expect(provider.fetchTreasury(0)).rejects.toThrow();
+
+    expect(provider.getStaleTreasury()).toBeNull();
+  });
+
   // This used to swallow every failure and return an empty array, so a
   // DefiLlama outage was invisible. The caller degrades and counts it now.
   it("throws a classified upstream error on a transport failure", async () => {

@@ -61,6 +61,10 @@ export class DefiLlamaProvider implements TreasuryProvider {
     return filterWithFallback(data, cutoffTimestamp);
   }
 
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.cache.getStale();
+  }
+
   /**
    * Transforms DeFi Llama's raw response into our standardized format.
    */

@@ -66,6 +66,10 @@ export class CompoundProvider implements TreasuryProvider {
     return this.filterData(data, cutoffTimestamp);
   }
 
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.cache.getStale();
+  }
+
   private transformData(data: CompoundResponse): LiquidTreasuryDataPoint[] {
     const map = new Map();
     data.data.forEach((row) => {
