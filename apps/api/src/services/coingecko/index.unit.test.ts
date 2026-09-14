@@ -9,6 +9,7 @@ import {
   expect,
   it,
 } from "vitest";
+import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
 import { DaoIdEnum } from "@/lib/enums";
 import { CoingeckoService } from "./index";
 
@@ -99,6 +100,7 @@ describe("CoingeckoService", () => {
             : new HttpResponse(null, { status: 500 });
         }),
       );
+      const degraded = captureDegradedUpstream();
 
       const first = await service.getHistoricalTokenData(7);
       const second = await service.getHistoricalTokenData(7);
@@ -106,6 +108,15 @@ describe("CoingeckoService", () => {
       expect(hits).toBe(2);
       expect(second).toEqual(first);
       expect(second).toEqual([{ price: "5.4200", timestamp: 1700000000 }]);
+      // Serving stale prices is a 200, so operators only learn about it here.
+      expect(degraded.recorded()).toEqual([
+        {
+          upstream: "coingecko",
+          resource: "token_historical_prices",
+          mode: "stale",
+        },
+      ]);
+      degraded.restore();
     });
 
     it("returns empty array when API returns no prices", async () => {

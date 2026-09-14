@@ -1,3 +1,4 @@
+import { recordDegradedUpstream } from "@/lib/degraded-upstream";
 import { logger } from "@/logger";
 
 import { RevenueCache } from "./cache";
@@ -265,9 +266,20 @@ export class RevenueDuneClient {
       );
       const stale = this.cache.getStale<DuneRowsResponse<Row>>(key);
       if (stale !== null) {
-        logger.warn({ key }, "serving stale revenue data after Dune failure");
+        recordDegradedUpstream({
+          upstream: "dune",
+          resource: `revenue_${key}`,
+          mode: "stale",
+          error,
+        });
         return stale;
       }
+      recordDegradedUpstream({
+        upstream: "dune",
+        resource: `revenue_${key}`,
+        mode: "empty",
+        error,
+      });
       return { result: { rows: [] } };
     }
   }

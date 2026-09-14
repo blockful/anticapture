@@ -3,6 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
+import { recordDegradedUpstream } from "@/lib/degraded-upstream";
 import { DaoIdEnum } from "@/lib/enums";
 import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
@@ -101,10 +102,13 @@ export class CoingeckoService implements PriceProvider {
       );
       const stale = this.lastGoodByDays.get(days);
       if (stale) {
-        logger.warn(
-          { tokenId, days },
-          "serving stale token prices after CoinGecko failure",
-        );
+        recordDegradedUpstream({
+          upstream: "coingecko",
+          resource: "token_historical_prices",
+          mode: "stale",
+          error,
+          context: { tokenId, days },
+        });
         return stale;
       }
       throw new HTTPException(503, {

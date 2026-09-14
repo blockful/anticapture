@@ -168,6 +168,26 @@ groups:
             deadlocks in the last 5 minutes. Inspect blocked statements and cache database
             contention.
 
+      # A DAO API served stale or empty third-party data instead of failing.
+      # These responses are 200s on purpose, so HighErrorRate never sees them.
+      - alert: DegradedUpstreamData
+        expr: >
+          sum by (job, upstream, resource, mode) (
+            increase(degraded_upstream_responses_total{job=~"anticapture-.*-api"}[15m])
+          ) > 0
+        for: 5m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] {{ $labels.job }} is serving {{ $labels.mode }} {{ $labels.resource }}"
+          description: >
+            {{ $labels.job }} answered {{ printf "%.0f" $value }} requests in the last 15 minutes
+            with {{ $labels.mode }} data for {{ $labels.resource }} because {{ $labels.upstream }}
+            is failing. Clients see a 200 with stale or empty values, not an error. Check the
+            provider status page, the API warn logs for "after {{ $labels.upstream }} failure",
+            and the provider API key and rate limits.
+
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage
         expr: sum by (job) (rate(process_cpu_time_seconds_total[1m])) * 100 > 80

@@ -1,7 +1,7 @@
 import { OpenAPIHono as Hono, createRoute } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 
-import { logger } from "@/logger";
+import { recordDegradedUpstream } from "@/lib/degraded-upstream";
 import {
   TokenHistoricalPriceRequest,
   TokenHistoricalPriceResponse,
@@ -52,10 +52,12 @@ export function tokenHistoricalData(
         // else degrades to an empty series. Price history is third-party data
         // and a 5xx here would trip the gateway circuit breaker for the DAO.
         if (error instanceof HTTPException && error.status < 500) throw error;
-        logger.warn(
-          { err: error },
-          "historical token data unavailable; returning empty series",
-        );
+        recordDegradedUpstream({
+          upstream: "coingecko",
+          resource: "token_historical_prices",
+          mode: "empty",
+          error,
+        });
         // no-store keeps the gateway from caching the empty fallback for the
         // route's regular max-age once the provider recovers.
         return context.json([], 200, { "Cache-Control": "no-store" });

@@ -11,6 +11,8 @@ import {
   vi,
 } from "vitest";
 
+import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
+
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
@@ -90,13 +92,21 @@ describe("RevenueDuneClient", () => {
 
   it("returns an empty result set on network error", async () => {
     server.use(http.get(urls.actions, () => HttpResponse.error()));
+    const degraded = captureDegradedUpstream();
 
     const result = await client.fetchKey("actions");
 
     expect(result).toEqual({ result: { rows: [] } });
+    // The empty result set is a 200 downstream, so this counter is the only
+    // signal operators get that Dune is failing.
+    expect(degraded.recorded()).toEqual([
+      { upstream: "dune", resource: "revenue_actions", mode: "empty" },
+    ]);
+    degraded.restore();
   });
 
   it("serves the last successful result when Dune fails after the TTL", async () => {
+    const degraded = captureDegradedUpstream();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
     let hits = 0;
@@ -115,6 +125,10 @@ describe("RevenueDuneClient", () => {
 
     expect(hits).toBe(2);
     expect(result).toEqual({ result: { rows: [{ id: 1 }] } });
+    expect(degraded.recorded()).toEqual([
+      { upstream: "dune", resource: "revenue_actions", mode: "stale" },
+    ]);
+    degraded.restore();
   });
 
   it("returns cached value on the second call within TTL without re-hitting MSW", async () => {

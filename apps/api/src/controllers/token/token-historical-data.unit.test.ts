@@ -2,6 +2,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { describe, expect, it } from "vitest";
 
+import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
 import { errorHandler } from "@/middlewares";
 
 import {
@@ -48,23 +49,36 @@ describe("GET /token/historical-data", () => {
         throw new HTTPException(503, { message: "CoinGecko down" });
       },
     });
+    const degraded = captureDegradedUpstream();
 
     const res = await app.request("/token/historical-data?limit=7");
 
     expect(res.status).toBe(200);
     expect(res.headers.get("Cache-Control")).toBe("no-store");
     expect(await res.json()).toEqual([]);
+    // The empty series is a 200, so this counter is the only alerting signal.
+    expect(degraded.recorded()).toEqual([
+      {
+        upstream: "coingecko",
+        resource: "token_historical_prices",
+        mode: "empty",
+      },
+    ]);
+    degraded.restore();
   });
 
-  it("keeps client errors such as an unlisted token", async () => {
+  it("keeps client errors such as an unlisted token and does not count them", async () => {
     const app = buildApp({
       getHistoricalTokenData: async () => {
         throw new HTTPException(404, { message: "Token not found" });
       },
     });
+    const degraded = captureDegradedUpstream();
 
     const res = await app.request("/token/historical-data?limit=7");
 
     expect(res.status).toBe(404);
+    expect(degraded.recorded()).toEqual([]);
+    degraded.restore();
   });
 });
