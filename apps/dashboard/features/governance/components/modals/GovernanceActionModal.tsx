@@ -20,10 +20,12 @@ import {
 } from "@/features/governance/utils/relayGovernanceAction";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import {
-  createSubmissionGuard,
+  canStartSubmission,
   getModalEntryPoint,
+  IDLE_SUBMISSION,
   type ActionMode,
-} from "@/features/governance/utils/submissionGuard";
+  type SubmissionState,
+} from "@/features/governance/utils/submissionState";
 import { runWalletSubmission } from "@/features/governance/utils/walletSubmission";
 import {
   executeProposal,
@@ -47,10 +49,11 @@ import { mapRelayerEnactmentError } from "@/shared/utils/gaslessRelayerError";
  * free path and their own wallet. Without a relayer the modal opens straight
  * into the wallet flow, as it always did.
  *
- * "unconfirmed" means a hash exists but the receipt could not be checked;
- * "unknown" means the relayer call failed without a definitive answer and may
- * or may not have broadcast. Neither is a success or a failure, and neither
- * offers a retry, since a second submission could race the first.
+ * "ambiguous" is every outcome that is neither a success nor a failure: a
+ * receipt that could not be read, a relayer that never answered, a send whose
+ * response was lost. It offers no retry, since a second submission could
+ * duplicate a governor call that is already on its way, and it shows an
+ * explorer link only when a hash exists.
  */
 type ActionStep =
   | "idle"
@@ -59,8 +62,7 @@ type ActionStep =
   | "relaying"
   | "pending-tx"
   | "success"
-  | "unconfirmed"
-  | "unknown"
+  | "ambiguous"
   | "error";
 
 interface GovernanceActionModalProps {
@@ -123,11 +125,37 @@ export const GovernanceActionModal = ({
     null,
   );
 
-  // A submission is single-flight, and the guard is released by the request
-  // settling rather than by the modal closing. A dismissed relayer call may
-  // still broadcast, so a wallet transaction started from a reopened modal
-  // must not be able to race it.
-  const [guard] = useState(createSubmissionGuard);
+  // What this modal knows about its action, for the life of the page. The ref
+  // is the authority, because the check that stops a second submission has to
+  // be synchronous; the state is its mirror and exists only to repaint. Both
+  // are written together, so they never disagree once a render has landed.
+  const submissionRef = useRef<SubmissionState>(IDLE_SUBMISSION);
+  const [submission, setSubmission] =
+    useState<SubmissionState>(IDLE_SUBMISSION);
+
+  const moveSubmission = useCallback((next: SubmissionState) => {
+    submissionRef.current = next;
+    setSubmission(next);
+  }, []);
+
+  // Claims the modal for one submission. Dismissing the modal never releases
+  // it: the request carries on, and a wallet transaction started from a
+  // reopened modal would race whatever is already out there.
+  const startSubmission = useCallback(
+    (mode: ActionMode): boolean => {
+      if (!canStartSubmission(submissionRef.current)) return false;
+      moveSubmission({ kind: "in-flight", mode });
+      return true;
+    },
+    [moveSubmission],
+  );
+
+  // Frees the modal unless the submission ended somewhere no retry is safe.
+  const finishSubmission = useCallback(() => {
+    if (submissionRef.current.kind === "in-flight")
+      moveSubmission({ kind: "done" });
+  }, [moveSubmission]);
+
   // Refetches issued for the current polling run. Held in a ref so a status
   // that changes mid-run restarts the timer without refilling the budget.
   const pollAttemptsRef = useRef(0);
@@ -194,18 +222,28 @@ export const GovernanceActionModal = ({
     refreshProposal();
   }, [action, refreshProposal]);
 
+  // Terminal for this action: the page keeps polling so it updates if the
+  // transaction does land, the screen shows whatever is known about it, and
+  // no further submission can start from this modal.
+  const showAmbiguousOutcome = useCallback(
+    (mode: ActionMode, hash: Hash | null) => {
+      moveSubmission({ kind: "ambiguous", mode, hash });
+      startStatusPolling();
+      setMode(mode);
+      setTxHash(hash);
+      setStep("ambiguous");
+    },
+    [moveSubmission, startStatusPolling],
+  );
+
   const runWalletAction = useCallback(async () => {
     if (!address || !walletClient) return;
-    if (!guard.begin("wallet")) return;
+    if (!startSubmission("wallet")) return;
 
     setMode("wallet");
     setError(null);
     setTxHash(null);
     setStep("waiting-signature");
-
-    // See the release in `finally`: an unconfirmed transaction keeps the
-    // guard for the life of the modal.
-    let isUnconfirmed = false;
 
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
@@ -222,7 +260,7 @@ export const GovernanceActionModal = ({
         }
         return acc;
       }, []);
-      const outcome = await runWalletSubmission((onBroadcast) =>
+      const outcome = await runWalletSubmission((progress) =>
         handler(
           validIndices.map((i) => targets[i] as Address),
           validIndices.map((i) => values[i] as string),
@@ -231,29 +269,29 @@ export const GovernanceActionModal = ({
           address,
           daoId,
           walletClient,
-          (hash) => {
-            onBroadcast(hash);
-            setTxHash(hash);
-            setStep("pending-tx");
+          {
+            onSendAttempt: progress.onSendAttempt,
+            onBroadcast: (hash) => {
+              progress.onBroadcast(hash);
+              setTxHash(hash);
+              setStep("pending-tx");
+            },
           },
           proposal.id,
         ),
       );
 
+      if (outcome.status === "ambiguous") {
+        // The transaction may be on its way, with or without a hash to show
+        // for it. The proposal is polled exactly as it is on success, and the
+        // state stays terminal so nothing here can duplicate the call.
+        showAmbiguousOutcome("wallet", outcome.hash);
+        return;
+      }
       if (outcome.status === "reverted") {
         setTxHash(outcome.hash);
         setError(REVERTED_MESSAGE);
         setStep("error");
-        return;
-      }
-      if (outcome.status === "unconfirmed") {
-        // The wallet broadcast the transaction and only the receipt read
-        // failed, so the call may still land. The proposal is polled exactly
-        // as it is on success, and no retry is offered.
-        isUnconfirmed = true;
-        startStatusPolling();
-        setTxHash(outcome.hash);
-        setStep("unconfirmed");
         return;
       }
       // A result that lands after the modal was closed still repaints it: the
@@ -273,10 +311,7 @@ export const GovernanceActionModal = ({
       setError(message);
       setStep("error");
     } finally {
-      // The guard is released on every settled outcome but "unconfirmed":
-      // there a transaction is still pending on-chain, so a second
-      // submission from this modal could broadcast the same call twice.
-      if (!isUnconfirmed) guard.end();
+      finishSubmission();
     }
   }, [
     address,
@@ -286,20 +321,18 @@ export const GovernanceActionModal = ({
     daoId,
     copy.pastTense,
     startStatusPolling,
-    guard,
+    startSubmission,
+    finishSubmission,
+    showAmbiguousOutcome,
   ]);
 
   const runGaslessAction = useCallback(async () => {
-    if (!guard.begin("gasless")) return;
+    if (!startSubmission("gasless")) return;
 
     setMode("gasless");
     setError(null);
     setTxHash(null);
     setStep("relaying");
-
-    // See the release in `finally`: a relayed transaction whose receipt was
-    // never read keeps the guard, exactly as the wallet path does.
-    let isUnconfirmed = false;
 
     try {
       const outcome = await relayGovernanceAction({
@@ -324,22 +357,19 @@ export const GovernanceActionModal = ({
         setStep("error");
         return;
       }
-      // "unconfirmed" and "unknown": the chain may have changed, so poll the
-      // proposal. No free retry is offered, since it could race the first
-      // send. "unconfirmed" carries a hash, so the transaction is out there
-      // and the guard is held. "unknown" has none and releases it: nothing
-      // may have been sent, the user must never be locked out of the action,
-      // and the copy spells out the gas risk of a duplicate.
-      isUnconfirmed = outcome.status === "unconfirmed";
-      startStatusPolling();
-      setTxHash(outcome.hash);
-      setStep(outcome.status);
+      // "unconfirmed" carries a hash and "unknown" does not, but neither says
+      // whether the governor call landed, so both are the same ambiguous
+      // terminal state: poll the proposal and offer no retry that could
+      // duplicate a relayed transaction already on its way.
+      showAmbiguousOutcome("gasless", outcome.hash);
     } catch (err) {
+      // The relayer answered with a definitive rejection or a revert, so
+      // nothing is pending and the error path with its retry is correct.
       console.error(err);
       setError(mapRelayerEnactmentError(err, action));
       setStep("error");
     } finally {
-      if (!isUnconfirmed) guard.end();
+      finishSubmission();
     }
   }, [
     action,
@@ -348,7 +378,9 @@ export const GovernanceActionModal = ({
     publicClient,
     copy.pastTense,
     startStatusPolling,
-    guard,
+    startSubmission,
+    finishSubmission,
+    showAmbiguousOutcome,
   ]);
 
   const failWithoutWallet = useCallback((message: string) => {
@@ -371,7 +403,7 @@ export const GovernanceActionModal = ({
 
     switch (
       getModalEntryPoint({
-        inFlightSubmission: guard.inFlight(),
+        submission: submissionRef.current,
         isGaslessAvailable,
         hasAddress: Boolean(address),
         hasWalletClient: Boolean(walletClient),
@@ -382,6 +414,18 @@ export const GovernanceActionModal = ({
       // there, so nothing is offered that could race it.
       case "mirror-submission":
         return;
+      // Reopened after an ambiguous outcome. The screen is rebuilt from the
+      // recorded outcome rather than trusted to have survived, and it offers
+      // no way to submit again.
+      case "ambiguous-outcome": {
+        const outcome = submissionRef.current;
+        if (outcome.kind === "ambiguous") {
+          setMode(outcome.mode);
+          setTxHash(outcome.hash);
+          setStep("ambiguous");
+        }
+        return;
+      }
       case "choose":
         setStep("choose");
         return;
@@ -407,10 +451,14 @@ export const GovernanceActionModal = ({
     chain.name,
     runWalletAction,
     failWithoutWallet,
-    guard,
+    submission,
   ]);
 
   const handleUseWallet = () => {
+    // No screen offering this button renders while a submission is pending or
+    // ambiguous, but the check keeps that invariant local to the action
+    // rather than spread across the render branches.
+    if (!canStartSubmission(submissionRef.current)) return;
     if (!address) {
       failWithoutWallet(CONNECT_WALLET_MESSAGE);
       return;
@@ -425,11 +473,11 @@ export const GovernanceActionModal = ({
   };
 
   const handleClose = () => {
-    // A submission that is still in flight keeps both its guard and its
-    // screen: it may yet broadcast, so reopening has to show it in progress
-    // rather than offer a second submission that could race it. The modal
-    // only resets once nothing is pending.
-    if (guard.inFlight() === null) {
+    // A submission that is unresolved or ambiguous keeps its screen: it may
+    // yet land, so reopening has to show what is known rather than offer a
+    // submission that could duplicate it. The modal resets only in the states
+    // where starting another one is allowed anyway.
+    if (canStartSubmission(submissionRef.current)) {
       setStep("idle");
       setMode("wallet");
       setError(null);
@@ -440,7 +488,7 @@ export const GovernanceActionModal = ({
   };
 
   const isGaslessRun = mode === "gasless";
-  const isSettled = step === "success" || step === "unconfirmed";
+  const isFinished = step === "success" || step === "ambiguous";
 
   const txHashRow = txHash && (
     <div className="flex items-start gap-2">
@@ -534,8 +582,8 @@ export const GovernanceActionModal = ({
             <StepRow
               done={
                 step === "success" ||
-                step === "unconfirmed" ||
-                step === "pending-tx"
+                step === "pending-tx" ||
+                (step === "ambiguous" && txHash !== null)
               }
               active={step === "waiting-signature" || step === "relaying"}
               icon={
@@ -561,26 +609,15 @@ export const GovernanceActionModal = ({
 
           {txHashRow}
 
-          {step === "unconfirmed" && (
+          {step === "ambiguous" && (
             <InlineAlert
               variant="warning"
-              text="The transaction was sent but is not confirmed yet. Follow it on the explorer. This page updates on its own once the action is indexed."
+              text={
+                txHash
+                  ? "The transaction was sent but is not confirmed yet. Follow it on the explorer. This page updates on its own once the action is indexed."
+                  : `Transaction may have been sent. It is unclear whether the ${action} reached the network, so there is no safe retry here. This page keeps checking the proposal status.`
+              }
             />
-          )}
-
-          {step === "unknown" && (
-            <>
-              <InlineAlert
-                variant="warning"
-                text={`The relayer did not answer in time, so it is unclear whether the ${action} was submitted. This page keeps checking the proposal status for the next two minutes. You can still ${action} with your own wallet: if the relayer did submit it, your transaction will fail on-chain and you would pay its gas.`}
-              />
-              <div className="flex items-center justify-end gap-2">
-                <Button variant="outline" onClick={handleClose}>
-                  Close
-                </Button>
-                <Button onClick={handleUseWallet}>Use my wallet anyway</Button>
-              </div>
-            </>
           )}
 
           {step === "error" && (
@@ -607,9 +644,11 @@ export const GovernanceActionModal = ({
             </div>
           )}
 
-          {isSettled && (
+          {isFinished && (
             <div className="flex items-center justify-end">
-              <Button onClick={handleClose}>Done</Button>
+              <Button onClick={handleClose}>
+                {step === "success" ? "Done" : "Close"}
+              </Button>
             </div>
           )}
         </div>

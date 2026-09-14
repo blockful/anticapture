@@ -1,5 +1,6 @@
 import { keccak256, publicActions, toHex } from "viem";
 import type { Address, Chain, Hash, WalletClient } from "viem";
+import type { SubmissionProgress } from "@/features/governance/utils/walletSubmission";
 import { DaoIdEnum } from "@/shared/types/daos";
 import daoConfigByDaoId from "@/shared/dao-config";
 import ensGovernorAbi from "@/abis/ens-governor.json";
@@ -71,7 +72,7 @@ const submitAction = async (
   daoId: DaoIdEnum,
   walletClient: WalletClient,
   args: ActionArgs,
-  onTxSubmitted: (hash: Hash) => void,
+  progress: SubmissionProgress,
 ) => {
   const client = walletClient.extend(publicActions);
   const daoOverview = daoConfigByDaoId[daoId].daoOverview;
@@ -86,7 +87,10 @@ const submitAction = async (
     args.descriptionHash,
   ] as const;
 
-  let hash: `0x${string}`;
+  // Each branch only simulates and prepares the send. Simulation failures
+  // are provably pre-broadcast, so the send itself is hoisted to the single
+  // place below, announced first, and nothing else is attempted after it.
+  let send: () => Promise<Hash>;
 
   switch (daoId) {
     case DaoIdEnum.UNISWAP:
@@ -101,7 +105,7 @@ const submitAction = async (
         account: args.account,
         chain,
       });
-      hash = await client.writeContract(request);
+      send = () => client.writeContract(request);
       break;
     }
     case DaoIdEnum.TORN: {
@@ -118,7 +122,7 @@ const submitAction = async (
         account: args.account,
         chain,
       });
-      hash = await client.writeContract(request);
+      send = () => client.writeContract(request);
       break;
     }
     case DaoIdEnum.SHU: {
@@ -142,7 +146,7 @@ const submitAction = async (
         account: args.account,
         chain,
       });
-      hash = await client.writeContract(request);
+      send = () => client.writeContract(request);
       break;
     }
     default: {
@@ -155,7 +159,7 @@ const submitAction = async (
           account: args.account,
           chain,
         });
-        hash = await client.writeContract(request);
+        send = () => client.writeContract(request);
       } else {
         const { request } = await client.simulateContract({
           abi: ensGovernorAbi,
@@ -166,15 +170,21 @@ const submitAction = async (
           value: 0n,
           chain,
         });
-        hash = await client.writeContract(request);
+        send = () => client.writeContract(request);
       }
       break;
     }
   }
 
+  // From here the transaction may exist even if nothing comes back: a lost
+  // `eth_sendTransaction` response is indistinguishable from a send that
+  // never happened, which is why the attempt is announced before it is made.
+  progress.onSendAttempt();
+  const hash = await send();
+
   // The hash reaches the caller before the receipt wait, which can fail on
   // its own once the transaction is already out there.
-  onTxSubmitted(hash);
+  progress.onBroadcast(hash);
   const receipt = await client.waitForTransactionReceipt({ hash });
   return receipt;
 };
@@ -205,7 +215,7 @@ export const queueProposal = (
   account: Address,
   daoId: DaoIdEnum,
   walletClient: WalletClient,
-  onTxSubmitted: (hash: Hash) => void,
+  progress: SubmissionProgress,
   proposalId: string,
 ) =>
   submitAction(
@@ -220,7 +230,7 @@ export const queueProposal = (
       account,
       proposalId,
     ),
-    onTxSubmitted,
+    progress,
   );
 
 export const executeProposal = (
@@ -231,7 +241,7 @@ export const executeProposal = (
   account: Address,
   daoId: DaoIdEnum,
   walletClient: WalletClient,
-  onTxSubmitted: (hash: Hash) => void,
+  progress: SubmissionProgress,
   proposalId: string,
 ) =>
   submitAction(
@@ -246,5 +256,5 @@ export const executeProposal = (
       account,
       proposalId,
     ),
-    onTxSubmitted,
+    progress,
   );
