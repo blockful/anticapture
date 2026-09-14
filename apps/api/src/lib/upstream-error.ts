@@ -7,6 +7,16 @@ import { logger } from "@/logger";
 export type Upstream = "coingecko" | "compound" | "defillama" | "dune";
 
 /**
+ * Why the provider could not answer.
+ *
+ * `unavailable` is the transient case that should clear on its own.
+ * `not_found` is a resource the provider says is gone: it will not recover by
+ * itself, so operators need to see it apart from an outage even though both
+ * degrade rather than 5xx.
+ */
+export type UpstreamFailureReason = "unavailable" | "not_found";
+
+/**
  * Deadline for every third-party call. Without one a hanging provider is
  * neither degraded nor errored: the request just holds a connection until the
  * client gives up, and the gateway sees a timeout rather than our fallback.
@@ -27,15 +37,17 @@ export const PROVIDER_TIMEOUT_MS = 15_000;
  */
 export class UpstreamUnavailableError extends HTTPException {
   readonly upstream: Upstream;
+  readonly reason: UpstreamFailureReason;
 
   constructor(
     upstream: Upstream,
     message: string,
-    options?: { cause?: unknown },
+    options?: { cause?: unknown; reason?: UpstreamFailureReason },
   ) {
     super(503, { message, cause: options?.cause });
     this.name = "UpstreamUnavailableError";
     this.upstream = upstream;
+    this.reason = options?.reason ?? "unavailable";
   }
 }
 

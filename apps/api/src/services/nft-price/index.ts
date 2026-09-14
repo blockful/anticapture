@@ -43,6 +43,14 @@ export class NFTPriceService implements PriceProvider {
   /** Last good auction price series, so a CoinGecko outage is not an empty chart. */
   private readonly lastGoodPrices =
     new StaleValueCache<TokenHistoricalPriceResponse>(STALE_PRICE_MAX_AGE_MS);
+  /**
+   * Last good spot price, tagged with the currency it was quoted in so a value
+   * is never reused for a different one.
+   */
+  private readonly lastGoodTokenPrice = new StaleValueCache<{
+    currency: string;
+    value: string;
+  }>(STALE_PRICE_MAX_AGE_MS);
 
   constructor(
     private readonly repo: NFTPriceRepository,
@@ -85,6 +93,7 @@ export class NFTPriceService implements PriceProvider {
         upstream: error.upstream,
         resource: "token_historical_prices",
         mode: "stale",
+        reason: error.reason,
         error,
         context: { limit },
       });
@@ -144,21 +153,43 @@ export class NFTPriceService implements PriceProvider {
     }));
   }
 
-  async getTokenPrice(_: string, __: string): Promise<MaybeDegraded<string>> {
+  async getTokenPrice(
+    _: string,
+    targetCurrency: string,
+  ): Promise<MaybeDegraded<string>> {
+    // Outside the try below on purpose: this reads PostgreSQL, and a database
+    // error must stay a real error rather than degrade to a stale price.
     const price = await this.repo.getTokenPrice();
     const nftEthValue = Number(formatEther(BigInt(price)));
 
-    logger.info("fetching current ETH price from CoinGecko");
-    const ethCurrentPrice = await this.fetchEthPrices(
-      `/coins/ethereum/market_chart?vs_currency=usd&days=1`,
-      1,
-    );
+    let value: string;
+    try {
+      logger.info("fetching current ETH price from CoinGecko");
+      const ethCurrentPrice = await this.fetchEthPrices(
+        `/coins/ethereum/market_chart?vs_currency=usd&days=1`,
+        1,
+      );
+      const ethPriceResponse = ethCurrentPrice.reverse().slice(0, 1);
+      value = (nftEthValue * ethPriceResponse[0]![1]).toFixed(2);
+    } catch (error) {
+      // Same fallback as the fungible path, so NOUNS and LIL_NOUNS do not 503
+      // on /token while every other DAO degrades.
+      if (!(error instanceof UpstreamUnavailableError)) throw error;
+      const stale = this.lastGoodTokenPrice.get();
+      if (stale?.currency !== targetCurrency) throw error;
+      recordDegradedUpstream({
+        upstream: error.upstream,
+        resource: "token_properties",
+        mode: "stale",
+        reason: error.reason,
+        error,
+        context: { targetCurrency },
+      });
+      return { data: stale.value, degraded: true };
+    }
 
-    const ethPriceResponse = ethCurrentPrice.reverse().slice(0, 1);
-    return {
-      data: (nftEthValue * ethPriceResponse[0]![1]).toFixed(2),
-      degraded: false,
-    };
+    this.lastGoodTokenPrice.set({ currency: targetCurrency, value });
+    return { data: value, degraded: false };
   }
 
   /**

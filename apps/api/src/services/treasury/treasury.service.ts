@@ -58,6 +58,7 @@ export class TreasuryService {
         upstream: error.upstream,
         resource: "treasury",
         mode: "empty",
+        reason: error.reason,
         error,
         context: { days },
       });
@@ -175,6 +176,7 @@ export class TreasuryService {
         upstream: error.upstream,
         resource: "treasury",
         mode: "empty",
+        reason: error.reason,
         error,
         context: { days },
       });

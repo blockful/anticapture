@@ -13,6 +13,7 @@ export interface DegradedUpstreamLabels {
   upstream: string;
   resource: string;
   mode: string;
+  reason: string;
 }
 
 export interface DegradedUpstreamCapture {
@@ -35,6 +36,7 @@ export const captureDegradedUpstream = (): DegradedUpstreamCapture => {
         upstream: String(attributes?.upstream),
         resource: String(attributes?.resource),
         mode: String(attributes?.mode),
+        reason: String(attributes?.reason),
       })),
     restore: () => spy.mockRestore(),
   };

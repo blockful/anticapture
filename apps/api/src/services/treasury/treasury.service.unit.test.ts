@@ -174,7 +174,12 @@ describe("TreasuryService", () => {
       expect(isDegraded).toBe(true);
       expect(result).toEqual({ items: [], totalCount: 0 });
       expect(degraded.recorded()).toEqual([
-        { upstream: "defillama", resource: "treasury", mode: "empty" },
+        {
+          upstream: "defillama",
+          resource: "treasury",
+          mode: "empty",
+          reason: "unavailable",
+        },
       ]);
     });
 
@@ -217,7 +222,12 @@ describe("TreasuryService", () => {
       expect(isDegraded).toBe(true);
       expect(result.items.every((item) => item.value === 0)).toBe(true);
       expect(degraded.recorded()).toEqual([
-        { upstream: "coingecko", resource: "treasury", mode: "empty" },
+        {
+          upstream: "coingecko",
+          resource: "treasury",
+          mode: "empty",
+          reason: "unavailable",
+        },
       ]);
     });
 

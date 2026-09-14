@@ -26,11 +26,17 @@ describe("recordDegradedUpstream", () => {
     });
 
     expect(capture.recorded()).toEqual([
-      { upstream: "dune", resource: "revenue_actions", mode: "stale" },
+      {
+        upstream: "dune",
+        resource: "revenue_actions",
+        mode: "stale",
+        reason: "unavailable",
+      },
       {
         upstream: "coingecko",
         resource: "token_historical_prices",
         mode: "empty",
+        reason: "unavailable",
       },
     ]);
   });

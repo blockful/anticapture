@@ -10,6 +10,7 @@ import {
   afterEach,
   vi,
 } from "vitest";
+import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
 import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import { TokenHistoricalPriceResponse } from "@/mappers";
 import { NFTPriceService } from "./index";
@@ -180,6 +181,62 @@ describe("NFTPriceService", () => {
       await expect(service.getTokenPrice("", "")).rejects.toMatchObject({
         upstream: "coingecko",
       });
+    });
+
+    // NOUNS and LIL_NOUNS used to 503 on /token while every other DAO degraded.
+    it("serves the last known spot price when CoinGecko fails", async () => {
+      repo.tokenPrice = "1000000000000000000";
+      let hits = 0;
+      server.use(
+        http.get(ETH_MARKET_CHART_URL, () => {
+          hits += 1;
+          return hits === 1
+            ? HttpResponse.json({ prices: [[1705276800000, 2500.0]] })
+            : new HttpResponse(null, { status: 503 });
+        }),
+      );
+      const degraded = captureDegradedUpstream();
+
+      await service.getTokenPrice("token", "usd");
+      const second = await service.getTokenPrice("token", "usd");
+
+      expect(second).toEqual({ data: "2500.00", degraded: true });
+      expect(degraded.recorded()).toEqual([
+        {
+          upstream: "coingecko",
+          resource: "token_properties",
+          mode: "stale",
+          reason: "unavailable",
+        },
+      ]);
+    });
+
+    it("does not reuse a spot price across currencies", async () => {
+      repo.tokenPrice = "1000000000000000000";
+      let hits = 0;
+      server.use(
+        http.get(ETH_MARKET_CHART_URL, () => {
+          hits += 1;
+          return hits === 1
+            ? HttpResponse.json({ prices: [[1705276800000, 2500.0]] })
+            : new HttpResponse(null, { status: 503 });
+        }),
+      );
+
+      await service.getTokenPrice("token", "usd");
+
+      await expect(
+        service.getTokenPrice("token", "eth"),
+      ).rejects.toBeInstanceOf(UpstreamUnavailableError);
+    });
+
+    it("propagates a database failure rather than serving a stale price", async () => {
+      const dbError = new Error("relation token_price does not exist");
+      repo.getTokenPrice = async () => {
+        throw dbError;
+      };
+
+      await expect(service.getTokenPrice("token", "usd")).rejects.toBe(dbError);
     });
 
     // The route degrades only on UpstreamUnavailableError, so a database error

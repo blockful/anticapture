@@ -175,7 +175,7 @@ groups:
       # alert open across the scrape gaps of a low-traffic route.
       - alert: DegradedUpstreamData
         expr: >
-          sum by (job, upstream, resource, mode) (
+          sum by (job, upstream, resource, mode, reason) (
             increase(degraded_upstream_responses_total{job=~"anticapture-.*-api"}[15m])
           ) > 0
         keep_firing_for: 15m
@@ -186,9 +186,11 @@ groups:
           description: >
             {{ $labels.job }} answered {{ printf "%.0f" $value }} requests in the last 15 minutes
             with {{ $labels.mode }} data for {{ $labels.resource }} because {{ $labels.upstream }}
-            is failing. Clients see a 200 with stale or empty values, not an error. Check the
-            provider status page, the API warn logs for "after {{ $labels.upstream }} failure",
-            and the provider API key and rate limits.
+            reported {{ $labels.reason }}. Clients see a 200 with stale or empty values, not an
+            error. A reason of not_found will not clear on its own: the provider says that query
+            or resource is gone, so check the query id. Otherwise check the provider status page,
+            the API warn logs for "after {{ $labels.upstream }} failure", and the key and rate
+            limits.
 
       # CPU usage above 80% for 5 minutes
       - alert: HighCPUUsage

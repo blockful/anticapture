@@ -147,6 +147,7 @@ describe("CoingeckoService", () => {
           upstream: "coingecko",
           resource: "token_historical_prices",
           mode: "stale",
+          reason: "unavailable",
         },
       ]);
     });
@@ -274,7 +275,40 @@ describe("CoingeckoService", () => {
       expect(first).toEqual({ data: "12.5", degraded: false });
       expect(second).toEqual({ data: "12.5", degraded: true });
       expect(degraded.recorded()).toEqual([
-        { upstream: "coingecko", resource: "token_properties", mode: "stale" },
+        {
+          upstream: "coingecko",
+          resource: "token_properties",
+          mode: "stale",
+          reason: "unavailable",
+        },
+      ]);
+    });
+
+    // A 200 carrying a bad body used to escape the fallback as a 503, so
+    // /token failed even with a last good price in hand.
+    it("serves the last known price when the body is malformed", async () => {
+      let hits = 0;
+      server.use(
+        http.get(PRICE_PATH, () => {
+          hits += 1;
+          return hits === 1
+            ? HttpResponse.json({ "0xabc": { usd: 12.5 } })
+            : HttpResponse.json({ "0xabc": { usd: "not a number" } });
+        }),
+      );
+      const degraded = captureDegradedUpstream();
+
+      await service.getTokenPrice("0xABC", "usd");
+      const second = await service.getTokenPrice("0xABC", "usd");
+
+      expect(second).toEqual({ data: "12.5", degraded: true });
+      expect(degraded.recorded()).toEqual([
+        {
+          upstream: "coingecko",
+          resource: "token_properties",
+          mode: "stale",
+          reason: "unavailable",
+        },
       ]);
     });
 

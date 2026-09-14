@@ -393,6 +393,7 @@ export class RevenueDuneClient {
         upstream: error.upstream,
         resource: `revenue_${key}`,
         mode: stale !== null ? "stale" : "empty",
+        reason: error.reason,
         error,
       });
       if (stale === null) return { result: { rows: [] } };
@@ -441,6 +442,19 @@ export class RevenueDuneClient {
     }
 
     if (!response.ok) {
+      // A 404 on a results endpoint means that query id no longer resolves.
+      // The renewal-tenure query does this persistently, and turning it into a
+      // 502 would leave the route 5xx-ing, which is exactly what the empty
+      // fallback exists to avoid. It degrades, but under its own reason so
+      // operators can tell a dead query from a passing outage. A 401 or 403
+      // stays loud: a bad key is fixed by us, not by waiting.
+      if (response.status === 404) {
+        throw new UpstreamUnavailableError(
+          "dune",
+          `HTTP 404: ${response.statusText}`,
+          { reason: "not_found" },
+        );
+      }
       if (!isDegradableUpstreamStatus(response.status)) {
         throw upstreamRejectedRequest("dune", response.status, url);
       }

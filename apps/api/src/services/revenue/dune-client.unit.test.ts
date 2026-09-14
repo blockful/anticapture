@@ -104,9 +104,8 @@ describe("RevenueDuneClient", () => {
     expect(result).toEqual({ result: { rows: [] } });
   });
 
-  // A 404 means the query id is gone and a 401 that the key expired. Both are
-  // our misconfiguration, so they must not hide behind an empty 200.
-  it.each([401, 403, 404])(
+  // A 401 or 403 means the key is wrong, which waiting will not fix.
+  it.each([401, 403])(
     "throws HTTPException(502) when Dune rejects with %i",
     async (status) => {
       server.use(
@@ -120,6 +119,28 @@ describe("RevenueDuneClient", () => {
       expect(degraded.recorded()).toEqual([]);
     },
   );
+
+  // The renewal-tenure query 404s persistently. A 502 there would leave the
+  // route 5xx-ing, so it degrades, but under a reason that says it will not
+  // clear on its own.
+  it("degrades a 404 on a results endpoint under the not_found reason", async () => {
+    server.use(
+      http.get(urls.actions, () => new HttpResponse(null, { status: 404 })),
+    );
+    const degraded = captureDegradedUpstream();
+
+    const result = await client.fetchKey("actions");
+
+    expect(result).toEqual({ result: { rows: [] } });
+    expect(degraded.recorded()).toEqual([
+      {
+        upstream: "dune",
+        resource: "revenue_actions",
+        mode: "empty",
+        reason: "not_found",
+      },
+    ]);
+  });
 
   // Only Dune's own failures may become an empty 200. Ours have to stay a real
   // error so the HTTP error metrics still count them.
@@ -153,7 +174,12 @@ describe("RevenueDuneClient", () => {
 
     expect(result).toEqual({ result: { rows: [] } });
     expect(degraded.recorded()).toEqual([
-      { upstream: "dune", resource: "revenue_actions", mode: "empty" },
+      {
+        upstream: "dune",
+        resource: "revenue_actions",
+        mode: "empty",
+        reason: "unavailable",
+      },
     ]);
   });
 
@@ -191,7 +217,12 @@ describe("RevenueDuneClient", () => {
 
     expect(result).toEqual([]);
     expect(degraded.recorded()).toEqual([
-      { upstream: "dune", resource: "revenue_actions", mode: "empty" },
+      {
+        upstream: "dune",
+        resource: "revenue_actions",
+        mode: "empty",
+        reason: "unavailable",
+      },
     ]);
   });
 
@@ -379,7 +410,12 @@ describe("RevenueDuneClient", () => {
     // The empty result set is a 200 downstream, so this counter is the only
     // signal operators get that Dune is failing.
     expect(degraded.recorded()).toEqual([
-      { upstream: "dune", resource: "revenue_actions", mode: "empty" },
+      {
+        upstream: "dune",
+        resource: "revenue_actions",
+        mode: "empty",
+        reason: "unavailable",
+      },
     ]);
   });
 
@@ -404,7 +440,12 @@ describe("RevenueDuneClient", () => {
     expect(hits).toBe(2);
     expect(result).toEqual({ result: { rows: [{ id: 1 }] } });
     expect(degraded.recorded()).toEqual([
-      { upstream: "dune", resource: "revenue_actions", mode: "stale" },
+      {
+        upstream: "dune",
+        resource: "revenue_actions",
+        mode: "stale",
+        reason: "unavailable",
+      },
     ]);
   });
 

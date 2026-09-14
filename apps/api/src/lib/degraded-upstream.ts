@@ -10,7 +10,7 @@
 import { logger } from "@/logger";
 import { degradedUpstreamResponsesTotal } from "@/metrics";
 
-import type { Upstream } from "./upstream-error";
+import type { Upstream, UpstreamFailureReason } from "./upstream-error";
 
 /** `stale` served the last known payload, `empty` had nothing to serve. */
 export type DegradedMode = "stale" | "empty";
@@ -34,6 +34,11 @@ export interface DegradedUpstreamEvent {
   /** Dataset served in degraded form, e.g. `token_historical_prices`. */
   resource: string;
   mode: DegradedMode;
+  /**
+   * Why the provider could not answer. `not_found` will not clear on its own,
+   * so it is a label rather than only a log field.
+   */
+  reason?: UpstreamFailureReason;
   /** Upstream failure that caused the fallback, when the caller still has it. */
   error?: unknown;
   /** Extra context for the log only, kept out of the metric labels. */
@@ -44,12 +49,13 @@ export const recordDegradedUpstream = ({
   upstream,
   resource,
   mode,
+  reason = "unavailable",
   error,
   context,
 }: DegradedUpstreamEvent): void => {
-  degradedUpstreamResponsesTotal.add(1, { upstream, resource, mode });
+  degradedUpstreamResponsesTotal.add(1, { upstream, resource, mode, reason });
   logger.warn(
-    { err: error, upstream, resource, mode, ...context },
+    { err: error, upstream, resource, mode, reason, ...context },
     mode === "stale"
       ? `serving stale ${resource} after ${upstream} failure`
       : `serving empty ${resource} after ${upstream} failure`,

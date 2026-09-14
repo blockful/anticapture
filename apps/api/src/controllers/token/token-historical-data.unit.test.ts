@@ -80,6 +80,7 @@ describe("GET /token/historical-data", () => {
         upstream: "coingecko",
         resource: "token_historical_prices",
         mode: "empty",
+        reason: "unavailable",
       },
     ]);
   });

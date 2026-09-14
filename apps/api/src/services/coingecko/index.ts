@@ -118,6 +118,7 @@ export class CoingeckoService implements PriceProvider {
         upstream: error.upstream,
         resource: "token_historical_prices",
         mode: "stale",
+        reason: error.reason,
         error,
         context: { tokenId, days },
       });
@@ -200,26 +201,48 @@ export class CoingeckoService implements PriceProvider {
       { assetPlatform, tokenContractAddress: formattedAddress, targetCurrency },
       "fetching token price from CoinGecko",
     );
-    let body: unknown;
+    let value: string;
     try {
-      body = await this.request(
-        `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
+      value = await this.fetchSpotPrice(
+        assetPlatform,
+        formattedAddress,
+        targetCurrency,
       );
     } catch (error) {
       if (!(error instanceof UpstreamUnavailableError)) throw error;
-      // No invented price: without a last known one the caller gets the error.
-      // A made up number would be indistinguishable from a real quote.
+      // No invented price: without a last known one in the same currency the
+      // caller gets the error. A made up number would be indistinguishable
+      // from a real quote.
       const stale = this.lastGoodTokenPrice.get();
       if (stale?.currency !== targetCurrency) throw error;
       recordDegradedUpstream({
         upstream: error.upstream,
         resource: "token_properties",
         mode: "stale",
+        reason: error.reason,
         error,
         context: { assetPlatform: assetPlatform ?? "unknown", targetCurrency },
       });
       return { data: stale.value, degraded: true };
     }
+
+    this.lastGoodTokenPrice.set({ currency: targetCurrency, value });
+    return { data: value, degraded: false };
+  }
+
+  /**
+   * Fetches and validates one spot price. Validation lives in here, not in the
+   * caller, so a 200 carrying a missing or mistyped price takes the same stale
+   * path as a transport failure instead of escaping as a 503.
+   */
+  private async fetchSpotPrice(
+    assetPlatform: string | undefined,
+    formattedAddress: string,
+    targetCurrency: string,
+  ): Promise<string> {
+    const body = await this.request(
+      `/simple/token_price/${assetPlatform}?contract_addresses=${formattedAddress}&vs_currencies=${targetCurrency}`,
+    );
 
     const { success, data: price } = createCoingeckoTokenPriceDataSchema(
       formattedAddress,
@@ -233,8 +256,6 @@ export class CoingeckoService implements PriceProvider {
       );
     }
 
-    const value = price[formattedAddress]![targetCurrency]!.toString();
-    this.lastGoodTokenPrice.set({ currency: targetCurrency, value });
-    return { data: value, degraded: false };
+    return price[formattedAddress]![targetCurrency]!.toString();
   }
 }
