@@ -1,19 +1,31 @@
 import {
+  classifyRelayerFailure,
   getRelayerErrorCode,
-  isRelayerEnactmentRejection,
-  isRelayerTransactionReverted,
+  getRelayerRevertedHash,
   mapRelayerEnactmentError,
   mapRelayerError,
 } from "@/shared/utils/gaslessRelayerError";
 
-const relayerError = (status: number, code?: string) =>
+const relayerError = (status: number, code?: string, message?: string) =>
   Object.assign(new Error("Request failed"), {
     status,
     response: {
       status,
       statusText: "",
       headers: new Headers(),
-      data: code ? { code, error: code } : { error: "boom" },
+      data: code ? { code, error: message ?? code } : { error: "boom" },
+    },
+  });
+
+/** A body that is not JSON at all, as a proxy or CDN page would be. */
+const unstructuredError = (status: number) =>
+  Object.assign(new Error("Request failed"), {
+    status,
+    response: {
+      status,
+      statusText: "",
+      headers: new Headers(),
+      data: "<html>Gateway Timeout</html>",
     },
   });
 
@@ -28,42 +40,6 @@ describe("getRelayerErrorCode", () => {
     expect(getRelayerErrorCode(relayerError(503))).toBeUndefined();
     expect(getRelayerErrorCode(new Error("network"))).toBeUndefined();
     expect(getRelayerErrorCode(undefined)).toBeUndefined();
-  });
-});
-
-describe("isRelayerEnactmentRejection", () => {
-  it.each([
-    "INVALID_PROPOSAL_STATE",
-    "TIMELOCK_NOT_READY",
-    "SIMULATION_FAILED",
-    "PROPOSAL_NOT_FOUND",
-    "PROPOSAL_DATA_MISMATCH",
-    "RELAYER_LOW_BALANCE",
-  ])("treats %s as a pre-broadcast rejection", (code) => {
-    expect(isRelayerEnactmentRejection(relayerError(409, code))).toBe(true);
-  });
-
-  it("does not treat a reverted broadcast or an unstructured failure as a rejection", () => {
-    expect(
-      isRelayerEnactmentRejection(relayerError(409, "TRANSACTION_REVERTED")),
-    ).toBe(false);
-    expect(isRelayerEnactmentRejection(relayerError(503))).toBe(false);
-    expect(isRelayerEnactmentRejection(relayerError(504))).toBe(false);
-    expect(isRelayerEnactmentRejection(new Error("Failed to fetch"))).toBe(
-      false,
-    );
-  });
-});
-
-describe("isRelayerTransactionReverted", () => {
-  it("matches only TRANSACTION_REVERTED", () => {
-    expect(
-      isRelayerTransactionReverted(relayerError(409, "TRANSACTION_REVERTED")),
-    ).toBe(true);
-    expect(
-      isRelayerTransactionReverted(relayerError(409, "SIMULATION_FAILED")),
-    ).toBe(false);
-    expect(isRelayerTransactionReverted(new Error("x"))).toBe(false);
   });
 });
 
@@ -173,5 +149,87 @@ describe("mapRelayerError", () => {
     expect(mapRelayerError(new Error("network"), context)).toMatch(
       /something went wrong/i,
     );
+  });
+});
+
+describe("classifyRelayerFailure", () => {
+  it.each([
+    ["INSUFFICIENT_VOTING_POWER", 400],
+    ["INVALID_SIGNATURE", 400],
+    ["INVALID_CONTRACT", 400],
+    ["RATE_LIMITED", 429],
+    ["PROPOSAL_NOT_FOUND", 404],
+    ["PROPOSAL_DATA_MISMATCH", 422],
+    ["INVALID_PROPOSAL_STATE", 409],
+    ["TIMELOCK_NOT_READY", 409],
+    ["SIMULATION_FAILED", 409],
+  ])("calls %s pre-broadcast", (code, status) => {
+    expect(classifyRelayerFailure(relayerError(status, code))).toBe(
+      "pre-broadcast",
+    );
+  });
+
+  it.each(["RELAYER_LOW_BALANCE", "RATE_LIMITER_UNAVAILABLE"])(
+    "calls the structured 503 %s pre-broadcast rather than ambiguous",
+    (code) => {
+      expect(classifyRelayerFailure(relayerError(503, code))).toBe(
+        "pre-broadcast",
+      );
+    },
+  );
+
+  it("calls a reported revert reverted", () => {
+    expect(
+      classifyRelayerFailure(relayerError(409, "TRANSACTION_REVERTED")),
+    ).toBe("reverted");
+  });
+
+  it("calls a gateway 4xx without a relayer code pre-broadcast", () => {
+    // Gateful answers like this for an unknown DAO or an unconfigured relayer.
+    expect(classifyRelayerFailure(relayerError(400))).toBe("pre-broadcast");
+    expect(classifyRelayerFailure(relayerError(404))).toBe("pre-broadcast");
+  });
+
+  it("calls a 5xx without a structured code ambiguous", () => {
+    expect(classifyRelayerFailure(relayerError(500))).toBe("ambiguous");
+    expect(classifyRelayerFailure(unstructuredError(504))).toBe("ambiguous");
+  });
+
+  it("calls a transport failure with no status ambiguous", () => {
+    expect(classifyRelayerFailure(new Error("Failed to fetch"))).toBe(
+      "ambiguous",
+    );
+    expect(classifyRelayerFailure(undefined)).toBe("ambiguous");
+  });
+});
+
+describe("getRelayerRevertedHash", () => {
+  const hash = `0x${"ab".repeat(32)}`;
+
+  it("reads the hash out of the revert message", () => {
+    expect(
+      getRelayerRevertedHash(
+        relayerError(
+          409,
+          "TRANSACTION_REVERTED",
+          `Transaction ${hash} was mined but reverted on-chain`,
+        ),
+      ),
+    ).toBe(hash);
+  });
+
+  it("returns null for any other failure", () => {
+    expect(
+      getRelayerRevertedHash(relayerError(409, "SIMULATION_FAILED")),
+    ).toBeNull();
+    expect(getRelayerRevertedHash(new Error("network"))).toBeNull();
+  });
+
+  it("returns null when the revert message carries no hash", () => {
+    expect(
+      getRelayerRevertedHash(
+        relayerError(409, "TRANSACTION_REVERTED", "reverted on-chain"),
+      ),
+    ).toBeNull();
   });
 });

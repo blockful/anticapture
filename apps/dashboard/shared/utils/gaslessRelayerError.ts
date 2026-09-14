@@ -1,4 +1,5 @@
 import { formatUnits } from "viem";
+import type { Hash } from "viem";
 
 import type {
   ErrorResponse,
@@ -19,7 +20,11 @@ const formatThreshold = (raw: bigint, decimals: number, symbol: string) =>
 
 const readRelayerError = (
   error: unknown,
-): { code: string | undefined; status: number | undefined } => {
+): {
+  code: string | undefined;
+  message: string | undefined;
+  status: number | undefined;
+} => {
   const relayerError = error as
     | ResponseErrorConfig<ErrorResponse | RelayerErrorResponse>
     | undefined;
@@ -27,11 +32,14 @@ const readRelayerError = (
   // A proxy, CDN or crashed upstream can answer with an HTML or plain-text
   // page, which the client stores as a string; `"code" in string` throws.
   // Such a body carries no relayer code, so the failure stays ambiguous.
+  const isStructured = typeof data === "object" && data !== null;
   const code =
-    typeof data === "object" && data !== null && "code" in data
+    isStructured && "code" in data
       ? (data as RelayerErrorResponse).code
       : undefined;
-  return { code, status: relayerError?.status };
+  const message =
+    isStructured && "error" in data ? (data as ErrorResponse).error : undefined;
+  return { code, message, status: relayerError?.status };
 };
 
 export type RelayerEnactmentAction = "queue" | "execute";
@@ -40,30 +48,72 @@ export const getRelayerErrorCode = (error: unknown): string | undefined =>
   readRelayerError(error).code;
 
 /**
- * Codes the relayer returns before it signs anything for queue()/execute().
- * Any of these means no transaction was broadcast, so retrying is safe. A
- * failure without one of these codes (network error, gateway timeout, plain
- * 5xx) says nothing about whether the relayer already sent the transaction:
- * Gateful aborts the proxy after 30s while the relayer is still waiting for
- * the receipt, so the caller must treat that case as unknown, not as failed.
+ * Every code the relayer can answer with before it signs anything, mirroring
+ * `Errors` in `apps/relayer/src/errors.ts`. All of them mean no transaction
+ * was broadcast, so retrying is safe. The two 503s are in here for that
+ * reason: a low balance or an unreachable rate limiter are structured "did
+ * not send" answers, not the ambiguous 5xx they look like from the status
+ * alone. `TRANSACTION_REVERTED` is deliberately absent, being the one code
+ * that reports a transaction the relayer did broadcast.
  */
 const ENACTMENT_REJECTION_CODES = new Set([
+  "INSUFFICIENT_VOTING_POWER",
+  "INVALID_SIGNATURE",
+  "RATE_LIMITED",
+  "RELAYER_LOW_BALANCE",
+  "INVALID_CONTRACT",
+  "RATE_LIMITER_UNAVAILABLE",
+  "PROPOSAL_NOT_FOUND",
+  "PROPOSAL_DATA_MISMATCH",
   "INVALID_PROPOSAL_STATE",
   "TIMELOCK_NOT_READY",
   "SIMULATION_FAILED",
-  "PROPOSAL_NOT_FOUND",
-  "PROPOSAL_DATA_MISMATCH",
-  "RELAYER_LOW_BALANCE",
 ]);
 
-export const isRelayerEnactmentRejection = (error: unknown): boolean => {
-  const code = getRelayerErrorCode(error);
-  return code !== undefined && ENACTMENT_REJECTION_CODES.has(code);
+/** The relayer broadcast the transaction and saw it revert: a final answer. */
+const isRelayerTransactionReverted = (error: unknown): boolean =>
+  getRelayerErrorCode(error) === "TRANSACTION_REVERTED";
+
+const TX_HASH_PATTERN = /0x[0-9a-fA-F]{64}/;
+
+/**
+ * The relayer reports a reverted transaction in the message rather than in a
+ * field of its own, so the hash is read back out of it. That gives the modal
+ * the same explorer link the wallet path shows for a revert.
+ */
+export const getRelayerRevertedHash = (error: unknown): Hash | null => {
+  if (!isRelayerTransactionReverted(error)) return null;
+  const match = readRelayerError(error).message?.match(TX_HASH_PATTERN);
+  return match ? (match[0] as Hash) : null;
 };
 
-/** The relayer broadcast the transaction and saw it revert: a final answer. */
-export const isRelayerTransactionReverted = (error: unknown): boolean =>
-  getRelayerErrorCode(error) === "TRANSACTION_REVERTED";
+/**
+ * How much a relayer failure says about whether a transaction exists.
+ *
+ * - "pre-broadcast": the relayer or the gateway refused the request. Nothing
+ *   was signed, so the caller may offer a retry.
+ * - "reverted": the relayer broadcast it and saw it fail. Also final.
+ * - "ambiguous": a 5xx with no structured code, a timeout, or a transport
+ *   failure. Gateful aborts the proxy after 30s while the relayer may still
+ *   be waiting for its receipt, so the transaction may well be on its way.
+ */
+export type RelayerFailureClass = "pre-broadcast" | "reverted" | "ambiguous";
+
+export const classifyRelayerFailure = (error: unknown): RelayerFailureClass => {
+  const { code, status } = readRelayerError(error);
+
+  if (code === "TRANSACTION_REVERTED") return "reverted";
+  if (code !== undefined && ENACTMENT_REJECTION_CODES.has(code)) {
+    return "pre-broadcast";
+  }
+  // Gateful answers 400 or 404 with an `error` string and no relayer code
+  // when the DAO or its relayer is unknown, and its request validation does
+  // the same. Any 4xx is a refusal to act on the request, so nothing was sent.
+  if (status !== undefined && status >= 400 && status < 500) {
+    return "pre-broadcast";
+  }
+  return "ambiguous";
+};
 
 /**
  * Relayer failures for the permissionless queue()/execute() calls, keyed by

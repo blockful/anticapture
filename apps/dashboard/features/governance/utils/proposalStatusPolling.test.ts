@@ -8,6 +8,7 @@
 import {
   getStatusPollStep,
   hasIndexedGovernanceAction,
+  hasSupersededGovernanceAction,
   STATUS_POLL_MAX_ATTEMPTS,
 } from "@/features/governance/utils/proposalStatusPolling";
 
@@ -81,27 +82,61 @@ describe("getStatusPollStep", () => {
     ).toBe("keep-polling");
   });
 
-  it("keeps polling on the last attempt of the budget", () => {
+  it("keeps polling on the last refetch of the budget", () => {
+    expect(
+      getStatusPollStep({
+        action: "execute",
+        proposalStatus: "queued",
+        attempts: STATUS_POLL_MAX_ATTEMPTS - 1,
+      }),
+    ).toBe("keep-polling");
+  });
+
+  it("times out once the budget is spent", () => {
+    // The count includes the refetch issued as soon as the receipt landed, so
+    // the run is exactly STATUS_POLL_MAX_ATTEMPTS refetches.
     expect(
       getStatusPollStep({
         action: "execute",
         proposalStatus: "queued",
         attempts: STATUS_POLL_MAX_ATTEMPTS,
       }),
-    ).toBe("keep-polling");
-  });
-
-  it("times out once the budget is spent", () => {
-    expect(
-      getStatusPollStep({
-        action: "execute",
-        proposalStatus: "queued",
-        attempts: STATUS_POLL_MAX_ATTEMPTS + 1,
-      }),
     ).toBe("timed-out");
   });
 
-  it("settles rather than times out when the successor arrives on the last attempt", () => {
+  it("stops early when the proposal moved out of the action's reach", () => {
+    expect(
+      getStatusPollStep({
+        action: "execute",
+        proposalStatus: "canceled",
+        attempts: 2,
+      }),
+    ).toBe("superseded");
+  });
+
+  it("stops an execute once the grace period expired", () => {
+    expect(
+      getStatusPollStep({
+        action: "execute",
+        proposalStatus: "expired",
+        attempts: 2,
+      }),
+    ).toBe("superseded");
+  });
+
+  it("prefers the successor over a terminal status for a queue", () => {
+    // `expired` proves the queue itself was indexed, so it settles rather
+    // than superseding.
+    expect(
+      getStatusPollStep({
+        action: "queue",
+        proposalStatus: "expired",
+        attempts: 2,
+      }),
+    ).toBe("settled");
+  });
+
+  it("settles rather than times out when the successor arrives on the last refetch", () => {
     expect(
       getStatusPollStep({
         action: "queue",
@@ -109,5 +144,34 @@ describe("getStatusPollStep", () => {
         attempts: STATUS_POLL_MAX_ATTEMPTS + 10,
       }),
     ).toBe("settled");
+  });
+});
+
+describe("hasSupersededGovernanceAction", () => {
+  it.each(["canceled", "defeated", "no_quorum"])(
+    "treats %s as out of reach for a queue",
+    (status) => {
+      expect(hasSupersededGovernanceAction("queue", status)).toBe(true);
+    },
+  );
+
+  it.each(["canceled", "defeated", "no_quorum", "expired"])(
+    "treats %s as out of reach for an execute",
+    (status) => {
+      expect(hasSupersededGovernanceAction("execute", status)).toBe(true);
+    },
+  );
+
+  it("does not treat expired as out of reach for a queue", () => {
+    expect(hasSupersededGovernanceAction("queue", "expired")).toBe(false);
+  });
+
+  it("does not treat a status the action is still waiting on as out of reach", () => {
+    expect(hasSupersededGovernanceAction("execute", "queued")).toBe(false);
+    expect(hasSupersededGovernanceAction("queue", "succeeded")).toBe(false);
+  });
+
+  it("compares case insensitively", () => {
+    expect(hasSupersededGovernanceAction("execute", "CANCELED")).toBe(true);
   });
 });

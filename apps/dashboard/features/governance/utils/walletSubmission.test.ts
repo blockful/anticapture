@@ -64,8 +64,25 @@ describe("isPreSendFailure", () => {
     ).toBe(true);
   });
 
+  it.each([
+    "TransactionRejectedRpcError",
+    "ExecutionRevertedError",
+    "NonceTooLowError",
+    "NonceTooHighError",
+    "TransactionTypeNotSupportedError",
+    "SwitchChainError",
+  ])("recognises %s, where the node or wallet refused the send", (name) => {
+    expect(isPreSendFailure(viemError(name))).toBe(true);
+  });
+
   it("does not match a transport failure, which says nothing about the send", () => {
     expect(isPreSendFailure(viemError("HttpRequestError"))).toBe(false);
+  });
+
+  it("does not match a timeout waiting for the receipt", () => {
+    expect(
+      isPreSendFailure(viemError("WaitForTransactionReceiptTimeoutError")),
+    ).toBe(false);
   });
 });
 

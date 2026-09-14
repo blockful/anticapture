@@ -8,10 +8,7 @@ import type {
 
 import type { GovernanceAction } from "@/features/governance/utils/submitGovernanceAction";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import {
-  isRelayerEnactmentRejection,
-  isRelayerTransactionReverted,
-} from "@/shared/utils/gaslessRelayerError";
+import { classifyRelayerFailure } from "@/shared/utils/gaslessRelayerError";
 
 /**
  * Governor state each relayed action requires, expressed in the dashboard's
@@ -82,9 +79,9 @@ type RelayGovernanceActionParams = {
  * the receipt before answering, so the local receipt wait is usually instant
  * and only matters when the relayer's own wait timed out.
  *
- * Rejects only when the relayer answered with a definitive error: a
- * pre-broadcast rejection (nothing was sent, retrying is safe) or
- * TRANSACTION_REVERTED. Anything ambiguous is reported as an outcome.
+ * Rejects only when the relayer answered definitively: a refusal before
+ * signing (nothing was sent, retrying is safe) or a reported revert. Anything
+ * that leaves the transaction in doubt is reported as an outcome instead.
  */
 export const relayGovernanceAction = async ({
   action,
@@ -107,12 +104,10 @@ export const relayGovernanceAction = async ({
           });
     hash = response.transactionHash as Hash;
   } catch (error) {
-    if (
-      isRelayerEnactmentRejection(error) ||
-      isRelayerTransactionReverted(error)
-    ) {
-      throw error;
-    }
+    // Only an answer that says nothing about whether a transaction exists
+    // becomes "unknown". A refusal or a reported revert is final, so it is
+    // rethrown and the caller keeps its error path with a retry.
+    if (classifyRelayerFailure(error) !== "ambiguous") throw error;
     console.error(error);
     return { status: "unknown", hash: null };
   }

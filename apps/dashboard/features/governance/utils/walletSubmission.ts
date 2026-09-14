@@ -54,11 +54,19 @@ const PRE_SEND_ERROR_NAMES = [
   "ChainMismatchError",
   "ChainNotFoundError",
   "ChainNotConfiguredError",
+  "SwitchChainError",
   "AccountNotFoundError",
   "InvalidAddressError",
   "InsufficientFundsError",
   "EstimateGasExecutionError",
   "IntrinsicGasTooLowError",
+  "TransactionTypeNotSupportedError",
+  // The node refused the transaction outright rather than accepting it into
+  // the pool, so it was never broadcast.
+  "TransactionRejectedRpcError",
+  "ExecutionRevertedError",
+  "NonceTooLowError",
+  "NonceTooHighError",
 ];
 
 const readProperty = (value: unknown, key: string): unknown => {

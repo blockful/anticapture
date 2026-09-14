@@ -4,7 +4,13 @@ import { proposalQueryKey, proposalsQueryKey } from "@anticapture/client/hooks";
 import type { ProposalPathParamsDaoEnumKey } from "@anticapture/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, ExternalLink, Hourglass, PenLine, Zap } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { Address, Hash } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
@@ -22,10 +28,15 @@ import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import {
   canStartSubmission,
   getModalEntryPoint,
-  IDLE_SUBMISSION,
   type ActionMode,
   type SubmissionState,
 } from "@/features/governance/utils/submissionState";
+import {
+  readSubmission,
+  submissionKey,
+  subscribeToSubmission,
+  writeSubmission,
+} from "@/features/governance/utils/submissionStore";
 import { runWalletSubmission } from "@/features/governance/utils/walletSubmission";
 import {
   executeProposal,
@@ -41,7 +52,10 @@ import daoConfigByDaoId from "@/shared/dao-config";
 import { useGaslessEnactment } from "@/shared/hooks/useGaslessRelayer";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
-import { mapRelayerEnactmentError } from "@/shared/utils/gaslessRelayerError";
+import {
+  getRelayerRevertedHash,
+  mapRelayerEnactmentError,
+} from "@/shared/utils/gaslessRelayerError";
 
 /**
  * "idle" lasts only while the relayer balance query settles. "choose" is
@@ -125,39 +139,51 @@ export const GovernanceActionModal = ({
     null,
   );
 
-  // What this modal knows about its action, for the life of the page. The ref
-  // is the authority, because the check that stops a second submission has to
-  // be synchronous; the state is its mirror and exists only to repaint. Both
-  // are written together, so they never disagree once a render has landed.
-  const submissionRef = useRef<SubmissionState>(IDLE_SUBMISSION);
-  const [submission, setSubmission] =
-    useState<SubmissionState>(IDLE_SUBMISSION);
+  // What is known about this proposal action, held outside the component so
+  // it survives the route unmounting while a request is still unresolved. The
+  // store is read synchronously wherever a decision depends on it, because
+  // the check that stops a second submission cannot wait for a render.
+  const stateKey = submissionKey(daoId, proposal.id, action);
+  const subscribe = useCallback(
+    (onChange: () => void) => subscribeToSubmission(stateKey, onChange),
+    [stateKey],
+  );
+  const readState = useCallback(() => readSubmission(stateKey), [stateKey]);
+  const submission = useSyncExternalStore(subscribe, readState, readState);
 
-  const moveSubmission = useCallback((next: SubmissionState) => {
-    submissionRef.current = next;
-    setSubmission(next);
-  }, []);
+  const moveSubmission = useCallback(
+    (next: SubmissionState) => writeSubmission(stateKey, next),
+    [stateKey],
+  );
 
-  // Claims the modal for one submission. Dismissing the modal never releases
+  // True once a submission was started from this mount. A mount that inherits
+  // someone else's request renders from the store instead, since the run that
+  // owns the screen belongs to a component that may be gone.
+  const ownsRunRef = useRef(false);
+
+  // Claims the action for one submission. Dismissing the modal never releases
   // it: the request carries on, and a wallet transaction started from a
   // reopened modal would race whatever is already out there.
   const startSubmission = useCallback(
     (mode: ActionMode): boolean => {
-      if (!canStartSubmission(submissionRef.current)) return false;
+      if (!canStartSubmission(readSubmission(stateKey))) return false;
+      ownsRunRef.current = true;
       moveSubmission({ kind: "in-flight", mode });
       return true;
     },
-    [moveSubmission],
+    [moveSubmission, stateKey],
   );
 
-  // Frees the modal unless the submission ended somewhere no retry is safe.
+  // Frees the action unless the submission ended somewhere no retry is safe.
   const finishSubmission = useCallback(() => {
-    if (submissionRef.current.kind === "in-flight")
+    if (readSubmission(stateKey).kind === "in-flight") {
       moveSubmission({ kind: "done" });
-  }, [moveSubmission]);
+    }
+  }, [moveSubmission, stateKey]);
 
-  // Refetches issued for the current polling run. Held in a ref so a status
-  // that changes mid-run restarts the timer without refilling the budget.
+  // Refetches issued for the current polling run, the immediate one at the
+  // start included. Held in a ref so a status that changes mid-run restarts
+  // the timer without refilling the budget.
   const pollAttemptsRef = useRef(0);
 
   const { address } = useAccount();
@@ -206,18 +232,22 @@ export const GovernanceActionModal = ({
     }
 
     const interval = setInterval(() => {
-      pollAttemptsRef.current += 1;
+      // Checked against the refetches already issued, then counted, so the
+      // budget covers the immediate one below as well as these.
       if (pollStep() !== "keep-polling") {
         setAwaitedAction(null);
         return;
       }
+      pollAttemptsRef.current += 1;
       refreshProposal();
     }, STATUS_POLL_MS);
     return () => clearInterval(interval);
   }, [awaitedAction, proposal.status, refreshProposal]);
 
   const startStatusPolling = useCallback(() => {
-    pollAttemptsRef.current = 0;
+    // This first refetch counts towards the budget, so the run is exactly
+    // STATUS_POLL_MAX_ATTEMPTS refetches spanning the two minutes promised.
+    pollAttemptsRef.current = 1;
     setAwaitedAction(action);
     refreshProposal();
   }, [action, refreshProposal]);
@@ -227,11 +257,10 @@ export const GovernanceActionModal = ({
   // no further submission can start from this modal.
   const showAmbiguousOutcome = useCallback(
     (mode: ActionMode, hash: Hash | null) => {
+      // The screen is painted by the effect that follows the store, so this
+      // records the outcome once and every mount renders it the same way.
       moveSubmission({ kind: "ambiguous", mode, hash });
       startStatusPolling();
-      setMode(mode);
-      setTxHash(hash);
-      setStep("ambiguous");
     },
     [moveSubmission, startStatusPolling],
   );
@@ -364,8 +393,11 @@ export const GovernanceActionModal = ({
       showAmbiguousOutcome("gasless", outcome.hash);
     } catch (err) {
       // The relayer answered with a definitive rejection or a revert, so
-      // nothing is pending and the error path with its retry is correct.
+      // nothing is pending and the error path with its retry is correct. A
+      // revert names its transaction in the message, which is the only place
+      // the hash appears, so the explorer link matches the wallet path.
       console.error(err);
+      setTxHash(getRelayerRevertedHash(err));
       setError(mapRelayerEnactmentError(err, action));
       setStep("error");
     } finally {
@@ -382,6 +414,29 @@ export const GovernanceActionModal = ({
     finishSubmission,
     showAmbiguousOutcome,
   ]);
+
+  // Follows the store for anything this mount did not start. An ambiguous
+  // outcome always repaints, including the one recorded by the run that owns
+  // the screen, so the two can never drift apart; the rest only matters to a
+  // mount that inherited a request and cannot be told how it ended by the
+  // component that made it.
+  useEffect(() => {
+    if (submission.kind === "ambiguous") {
+      setMode(submission.mode);
+      setTxHash(submission.hash);
+      setStep("ambiguous");
+      return;
+    }
+    if (ownsRunRef.current) return;
+    if (submission.kind === "in-flight") {
+      setMode(submission.mode);
+      setStep(submission.mode === "gasless" ? "relaying" : "waiting-signature");
+      return;
+    }
+    // Nothing is pending any more and the outcome belongs to a mount that is
+    // gone, so the modal goes back through its entry point.
+    setHasStarted(false);
+  }, [submission]);
 
   const failWithoutWallet = useCallback((message: string) => {
     setMode("wallet");
@@ -403,7 +458,7 @@ export const GovernanceActionModal = ({
 
     switch (
       getModalEntryPoint({
-        submission: submissionRef.current,
+        submission,
         isGaslessAvailable,
         hasAddress: Boolean(address),
         hasWalletClient: Boolean(walletClient),
@@ -417,15 +472,10 @@ export const GovernanceActionModal = ({
       // Reopened after an ambiguous outcome. The screen is rebuilt from the
       // recorded outcome rather than trusted to have survived, and it offers
       // no way to submit again.
-      case "ambiguous-outcome": {
-        const outcome = submissionRef.current;
-        if (outcome.kind === "ambiguous") {
-          setMode(outcome.mode);
-          setTxHash(outcome.hash);
-          setStep("ambiguous");
-        }
+      case "ambiguous-outcome":
+        // The screen is rebuilt by the effect that follows the store, which
+        // also covers an outcome recorded by a mount that is already gone.
         return;
-      }
       case "choose":
         setStep("choose");
         return;
@@ -458,7 +508,7 @@ export const GovernanceActionModal = ({
     // No screen offering this button renders while a submission is pending or
     // ambiguous, but the check keeps that invariant local to the action
     // rather than spread across the render branches.
-    if (!canStartSubmission(submissionRef.current)) return;
+    if (!canStartSubmission(readSubmission(stateKey))) return;
     if (!address) {
       failWithoutWallet(CONNECT_WALLET_MESSAGE);
       return;
@@ -477,7 +527,7 @@ export const GovernanceActionModal = ({
     // yet land, so reopening has to show what is known rather than offer a
     // submission that could duplicate it. The modal resets only in the states
     // where starting another one is allowed anyway.
-    if (canStartSubmission(submissionRef.current)) {
+    if (canStartSubmission(readSubmission(stateKey))) {
       setStep("idle");
       setMode("wallet");
       setError(null);

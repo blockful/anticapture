@@ -4,8 +4,9 @@ import type { GovernanceAction } from "@/features/governance/utils/submitGoverna
 /**
  * The indexer picks up the queue/execute event a few blocks after the
  * receipt, so the proposal is refetched on this cadence until the relayed
- * action shows up, or until the budget runs out. 24 attempts at 5s is the
- * two minutes the modal copy promises.
+ * action shows up, or until the budget runs out. The first refetch goes out
+ * as soon as the receipt lands and counts towards the budget, so 24 of them
+ * at 5s apart is the two minutes the modal copy promises.
  */
 export const STATUS_POLL_MS = 5_000;
 export const STATUS_POLL_MAX_ATTEMPTS = 24;
@@ -36,24 +37,60 @@ const SUCCESSOR_STATUSES: Record<GovernanceAction, readonly string[]> = {
   execute: [ProposalStatus.EXECUTED],
 };
 
+/**
+ * Statuses that put the action out of reach for good. The submitted
+ * transaction can no longer be indexed as a success from here, so spending
+ * the rest of the budget waiting for it only delays the screen catching up
+ * with what the proposal actually says.
+ *
+ * `expired` belongs to execute alone: a queued proposal that outlived its
+ * grace period can never be executed, while for queue it is proof the queue
+ * itself was indexed.
+ */
+const TERMINAL_STATUSES: Record<GovernanceAction, readonly string[]> = {
+  queue: [
+    ProposalStatus.CANCELED,
+    ProposalStatus.DEFEATED,
+    ProposalStatus.NO_QUORUM,
+  ],
+  execute: [
+    ProposalStatus.CANCELED,
+    ProposalStatus.DEFEATED,
+    ProposalStatus.NO_QUORUM,
+    ProposalStatus.EXPIRED,
+  ],
+};
+
 /** Whether the indexed status already reflects the submitted action. */
 export const hasIndexedGovernanceAction = (
   action: GovernanceAction,
   proposalStatus: string,
 ): boolean => SUCCESSOR_STATUSES[action].includes(proposalStatus.toLowerCase());
 
+/** Whether the proposal moved somewhere the submitted action can never land. */
+export const hasSupersededGovernanceAction = (
+  action: GovernanceAction,
+  proposalStatus: string,
+): boolean => TERMINAL_STATUSES[action].includes(proposalStatus.toLowerCase());
+
 /**
  * "settled": the successor status is indexed, stop and keep it on screen.
+ * "superseded": the proposal moved somewhere the action cannot land, so stop
+ * and let the screen show the status it actually has.
  * "timed-out": the budget is spent, stop without having seen it.
  * "keep-polling": anything else, including a status that is neither the one
  * at submit nor a successor.
  */
-export type StatusPollStep = "settled" | "timed-out" | "keep-polling";
+export type StatusPollStep =
+  | "settled"
+  | "superseded"
+  | "timed-out"
+  | "keep-polling";
 
 interface StatusPollInput {
   action: GovernanceAction;
   proposalStatus: string;
-  /** Refetches issued so far for this run. */
+  /** Refetches issued so far for this run, the first one included. */
   attempts: number;
 }
 
@@ -63,6 +100,9 @@ export const getStatusPollStep = ({
   attempts,
 }: StatusPollInput): StatusPollStep => {
   if (hasIndexedGovernanceAction(action, proposalStatus)) return "settled";
-  if (attempts > STATUS_POLL_MAX_ATTEMPTS) return "timed-out";
+  if (hasSupersededGovernanceAction(action, proposalStatus)) {
+    return "superseded";
+  }
+  if (attempts >= STATUS_POLL_MAX_ATTEMPTS) return "timed-out";
   return "keep-polling";
 };
