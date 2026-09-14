@@ -24,6 +24,7 @@ import {
   getModalEntryPoint,
   type ActionMode,
 } from "@/features/governance/utils/submissionGuard";
+import { runWalletSubmission } from "@/features/governance/utils/walletSubmission";
 import {
   executeProposal,
   queueProposal,
@@ -202,6 +203,10 @@ export const GovernanceActionModal = ({
     setTxHash(null);
     setStep("waiting-signature");
 
+    // See the release in `finally`: an unconfirmed transaction keeps the
+    // guard for the life of the modal.
+    let isUnconfirmed = false;
+
     try {
       const handler = action === "queue" ? queueProposal : executeProposal;
       const targets = proposal.targets ?? [];
@@ -217,21 +222,38 @@ export const GovernanceActionModal = ({
         }
         return acc;
       }, []);
-      const receipt = await handler(
-        validIndices.map((i) => targets[i] as Address),
-        validIndices.map((i) => values[i] as string),
-        validIndices.map((i) => calldatas[i] as Address),
-        proposal.description ?? "",
-        address,
-        daoId,
-        walletClient,
-        () => setStep("pending-tx"),
-        proposal.id,
+      const outcome = await runWalletSubmission((onBroadcast) =>
+        handler(
+          validIndices.map((i) => targets[i] as Address),
+          validIndices.map((i) => values[i] as string),
+          validIndices.map((i) => calldatas[i] as Address),
+          proposal.description ?? "",
+          address,
+          daoId,
+          walletClient,
+          (hash) => {
+            onBroadcast(hash);
+            setTxHash(hash);
+            setStep("pending-tx");
+          },
+          proposal.id,
+        ),
       );
-      if (receipt.status === "reverted") {
-        setTxHash(receipt.transactionHash);
+
+      if (outcome.status === "reverted") {
+        setTxHash(outcome.hash);
         setError(REVERTED_MESSAGE);
         setStep("error");
+        return;
+      }
+      if (outcome.status === "unconfirmed") {
+        // The wallet broadcast the transaction and only the receipt read
+        // failed, so the call may still land. The proposal is polled exactly
+        // as it is on success, and no retry is offered.
+        isUnconfirmed = true;
+        startStatusPolling();
+        setTxHash(outcome.hash);
+        setStep("unconfirmed");
         return;
       }
       // A result that lands after the modal was closed still repaints it: the
@@ -239,9 +261,11 @@ export const GovernanceActionModal = ({
       // submission settles, and the page is refreshed either way.
       showCustomToast(`Proposal ${copy.pastTense} successfully!`, "success");
       startStatusPolling();
-      setTxHash(receipt.transactionHash);
+      setTxHash(outcome.hash);
       setStep("success");
     } catch (err) {
+      // Only pre-broadcast failures reach here: a rejected signature or a
+      // simulation revert sent nothing, so retrying is safe.
       const message =
         err instanceof Error
           ? (err.message.split("\n")[0]?.slice(0, 120) ?? "Action failed.")
@@ -249,7 +273,10 @@ export const GovernanceActionModal = ({
       setError(message);
       setStep("error");
     } finally {
-      guard.end();
+      // The guard is released on every settled outcome but "unconfirmed":
+      // there a transaction is still pending on-chain, so a second
+      // submission from this modal could broadcast the same call twice.
+      if (!isUnconfirmed) guard.end();
     }
   }, [
     address,
@@ -269,6 +296,10 @@ export const GovernanceActionModal = ({
     setError(null);
     setTxHash(null);
     setStep("relaying");
+
+    // See the release in `finally`: a relayed transaction whose receipt was
+    // never read keeps the guard, exactly as the wallet path does.
+    let isUnconfirmed = false;
 
     try {
       const outcome = await relayGovernanceAction({
@@ -294,9 +325,12 @@ export const GovernanceActionModal = ({
         return;
       }
       // "unconfirmed" and "unknown": the chain may have changed, so poll the
-      // proposal. No free retry is offered (it could race the first send);
-      // the wallet stays available because the user must never be locked out
-      // of the action, and the copy spells out the gas risk of a duplicate.
+      // proposal. No free retry is offered, since it could race the first
+      // send. "unconfirmed" carries a hash, so the transaction is out there
+      // and the guard is held. "unknown" has none and releases it: nothing
+      // may have been sent, the user must never be locked out of the action,
+      // and the copy spells out the gas risk of a duplicate.
+      isUnconfirmed = outcome.status === "unconfirmed";
       startStatusPolling();
       setTxHash(outcome.hash);
       setStep(outcome.status);
@@ -305,7 +339,7 @@ export const GovernanceActionModal = ({
       setError(mapRelayerEnactmentError(err, action));
       setStep("error");
     } finally {
-      guard.end();
+      if (!isUnconfirmed) guard.end();
     }
   }, [
     action,
@@ -530,7 +564,7 @@ export const GovernanceActionModal = ({
           {step === "unconfirmed" && (
             <InlineAlert
               variant="warning"
-              text="The transaction was submitted but could not be confirmed here yet. Check it on the explorer before trying again."
+              text="The transaction was sent but is not confirmed yet. Follow it on the explorer. This page updates on its own once the action is indexed."
             />
           )}
 
