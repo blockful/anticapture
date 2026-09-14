@@ -9,6 +9,7 @@ import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
 import { DecodedActionCard } from "@/shared/components/decoder/DecodedActionCard";
 import { DecoderCardSkeleton } from "@/shared/components/decoder/DecoderCardSkeleton";
 import { DecoderInputPanel } from "@/features/decoder/components/DecoderInputPanel";
+import { permalinkAddress } from "@/features/decoder/utils/addressInput";
 import {
   isValidCalldataInput,
   normalizeCalldataInput,
@@ -52,6 +53,22 @@ export const DecoderTool = () => {
   const oversizedCalldata = calldata === "" ? oversizedDraft : null;
   const calldataInput = oversizedCalldata ?? calldata;
 
+  // Only a complete address is a target someone else can open the link on, so
+  // the URL carries nothing else and a half-typed one lives here. The draft is
+  // authoritative only while the URL still agrees with it: an address arriving
+  // via the URL (Back/Forward, a pasted permalink) supersedes it.
+  const [addressDraft, setAddressDraft] = useState<string | null>(null);
+  const addressInput =
+    addressDraft !== null && permalinkAddress(addressDraft) === address
+      ? addressDraft
+      : address;
+
+  const handleAddressChange = (value: string) => {
+    setAddressDraft(value);
+    const permalink = permalinkAddress(value);
+    if (permalink !== address) void setParams({ address: permalink });
+  };
+
   const handleCalldataChange = (value: string) => {
     // Bound what actually lands in the URL: whitespace in explorer pastes
     // URL-encodes to three characters each, so the raw length undercounts.
@@ -76,7 +93,7 @@ export const DecoderTool = () => {
   const normalized = normalizeCalldataInput(calldataInput);
   const hasInput = normalized.length > 0;
   const inputValid = !hasInput || isValidCalldataInput(normalized);
-  const trimmedAddress = address.trim();
+  const trimmedAddress = addressInput.trim();
   const addressValid = trimmedAddress === "" || isAddress(trimmedAddress);
   const target =
     addressValid && trimmedAddress ? (trimmedAddress as Address) : undefined;
@@ -139,7 +156,7 @@ export const DecoderTool = () => {
 
       <DecoderInputPanel
         calldata={calldataInput}
-        address={address}
+        address={addressInput}
         chainId={chainId}
         calldataError={
           inputValid
@@ -148,7 +165,7 @@ export const DecoderTool = () => {
         }
         addressError={addressValid ? null : "Not a valid address."}
         onCalldataChange={handleCalldataChange}
-        onAddressChange={(value) => void setParams({ address: value })}
+        onAddressChange={handleAddressChange}
         onChainIdChange={(value) => void setParams({ chainId: value })}
         onAbiChange={handleAbiChange}
       />

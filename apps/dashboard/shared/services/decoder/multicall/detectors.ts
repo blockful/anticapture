@@ -7,6 +7,12 @@ import {
   type Hex,
 } from "viem";
 
+import {
+  isAddressValue,
+  isHexValue,
+  isPresent,
+  isRecord,
+} from "@/shared/services/decoder/guards";
 import type { DecodeWarning } from "@/shared/services/decoder/types";
 
 export type ExtractedSubcall = {
@@ -45,38 +51,48 @@ export type MulticallDetector = {
 type Call2 = { target: Address; callData: Hex };
 type Call3 = { target: Address; allowFailure: boolean; callData: Hex };
 
-// viem decodes named tuples to objects and unnamed ones to positional
-// arrays, and Solidity component names never affect the canonical signature:
-// a compatible ABI may call the fields `destination`/`payload`. Extractors
-// therefore normalize every shape by position (object insertion order follows
-// component order), only trusting names when they are the canonical ones.
-const asCall2 = (value: unknown): Call2 => {
-  if (Array.isArray(value)) {
-    return { target: value[0] as Address, callData: value[1] as Hex };
-  }
-  const record = value as Record<string, unknown>;
-  if ("target" in record && "callData" in record) return record as Call2;
-  const positional = Object.values(record);
-  return { target: positional[0] as Address, callData: positional[1] as Hex };
+/**
+ * The fields of a decoded tuple in component order. viem decodes named tuples
+ * to objects (insertion order follows the components) and unnamed ones to
+ * positional arrays, and Solidity component names never affect the canonical
+ * signature: a compatible ABI may call the fields `destination`/`payload`.
+ */
+const fieldsOf = (value: unknown): readonly unknown[] => {
+  if (Array.isArray(value)) return value;
+  if (isRecord(value)) return Object.values(value);
+  return [];
 };
 
-const asCall3 = (value: unknown): Call3 => {
-  if (Array.isArray(value)) {
-    return {
-      target: value[0] as Address,
-      allowFailure: value[1] as boolean,
-      callData: value[2] as Hex,
-    };
-  }
-  const record = value as Record<string, unknown>;
-  if ("target" in record && "callData" in record) return record as Call3;
-  const positional = Object.values(record);
-  return {
-    target: positional[0] as Address,
-    allowFailure: positional[1] as boolean,
-    callData: positional[2] as Hex,
-  };
+/** The field under its canonical name, or else the one in that position. */
+const fieldAt = (value: unknown, key: string, index: number): unknown =>
+  isRecord(value) && key in value ? value[key] : fieldsOf(value)[index];
+
+// A wrapper resolved from an unverified ABI can hand an extractor any shape at
+// all, so every entry is tested rather than asserted. What is not a call is
+// dropped here instead of reaching the decoder as `undefined`.
+const toCall2 = (value: unknown): Call2 | null => {
+  const target = fieldAt(value, "target", 0);
+  const callData = fieldAt(value, "callData", 1);
+  if (!isAddressValue(target) || !isHexValue(callData)) return null;
+  return { target, callData };
 };
+
+const toCall3 = (value: unknown): Call3 | null => {
+  const target = fieldAt(value, "target", 0);
+  const allowFailure = fieldAt(value, "allowFailure", 1);
+  const callData = fieldAt(value, "callData", 2);
+  if (!isAddressValue(target) || !isHexValue(callData)) return null;
+  return { target, allowFailure: allowFailure === true, callData };
+};
+
+/** Every well-shaped call in a batch argument; the rest are skipped. */
+const callsIn = <T>(
+  value: unknown,
+  toCall: (entry: unknown) => T | null,
+): T[] => (Array.isArray(value) ? value.map(toCall).filter(isPresent) : []);
+
+const asList = (value: unknown): readonly unknown[] =>
+  Array.isArray(value) ? value : [];
 
 /** Multicall3 lets a batch mark a call as tolerated-failure. A child rendered
  *  like a required one would promise an effect the batch never guarantees. */
@@ -96,9 +112,9 @@ const single = (
   calldata: unknown,
 ): ExtractedSubcall[] => [
   {
-    target: target as Address,
-    value: value as bigint,
-    calldata: calldata as Hex,
+    target: isAddressValue(target) ? target : undefined,
+    value: typeof value === "bigint" ? value : undefined,
+    calldata: isHexValue(calldata) ? calldata : "0x",
   },
 ];
 
@@ -107,17 +123,20 @@ const batch = (
   values: unknown,
   payloads: unknown,
 ): ExtractedSubcall[] => {
-  const targetList = (targets as Address[]) ?? [];
-  const valueList = (values as bigint[]) ?? [];
-  const payloadList = (payloads as Hex[]) ?? [];
+  const valueList = asList(values);
+  const payloadList = asList(payloads);
   // Zip defensively: independently encoded arrays can disagree in length in
   // hand-crafted calldata, and a missing payload must degrade to an empty
   // call, never to `undefined` reaching the decoder.
-  return targetList.map((target, i) => ({
-    target,
-    value: valueList[i],
-    calldata: payloadList[i] ?? "0x",
-  }));
+  return asList(targets).map((target, i) => {
+    const value = valueList[i];
+    const payload = payloadList[i];
+    return {
+      target: isAddressValue(target) ? target : undefined,
+      value: typeof value === "bigint" ? value : undefined,
+      calldata: isHexValue(payload) ? payload : "0x",
+    };
+  });
 };
 
 const DETECTOR_DEFINITIONS: Array<{
@@ -136,10 +155,10 @@ const DETECTOR_DEFINITIONS: Array<{
         // extracting the value would let the child summarize a transfer that
         // never happens.
         if (args[3] === 1) {
+          const [call] = single(args[0], undefined, args[2]);
           return [
             {
-              target: args[0] as Address,
-              calldata: args[2] as Hex,
+              ...call,
               warnings: [
                 {
                   code: "delegatecall",
@@ -170,7 +189,7 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "multicall3-aggregate",
       verb: "Executes",
       extract: (args) =>
-        (args[0] as unknown[]).map(asCall2).map((call) => ({
+        callsIn(args[0], toCall2).map((call) => ({
           target: call.target,
           calldata: call.callData,
         })),
@@ -183,10 +202,10 @@ const DETECTOR_DEFINITIONS: Array<{
       id: "multicall3-aggregate3",
       verb: "Executes",
       extract: (args) =>
-        (args[0] as unknown[]).map(asCall3).map((call) => ({
+        callsIn(args[0], toCall3).map((call) => ({
           target: call.target,
           calldata: call.callData,
-          ...failurePolicy(call.allowFailure === true),
+          ...failurePolicy(call.allowFailure),
         })),
     },
   },
@@ -200,7 +219,7 @@ const DETECTOR_DEFINITIONS: Array<{
         // `requireSuccess` is a property of the batch, so it applies to every
         // call in it; without it the whole list is tolerated-failure.
         const policy = failurePolicy(args[0] !== true);
-        return (args[1] as unknown[]).map(asCall2).map((call) => ({
+        return callsIn(args[1], toCall2).map((call) => ({
           target: call.target,
           calldata: call.callData,
           ...policy,

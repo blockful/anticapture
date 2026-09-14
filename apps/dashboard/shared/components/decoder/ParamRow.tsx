@@ -9,7 +9,7 @@ import { NestedBytesDecode } from "@/shared/components/decoder/NestedBytesDecode
 import { TypeChip } from "@/shared/components/decoder/TypeChip";
 import { ValueCell } from "@/shared/components/decoder/ValueCell";
 import type { DecodedParam } from "@/shared/components/decoder/types";
-import { arrayParamView } from "@/shared/utils/arrayParamView";
+import { containerParamView } from "@/shared/utils/containerParamView";
 import { shortHex } from "@/shared/utils/shortHex";
 import type { UploadedAbiStore } from "@/shared/services/decoder";
 import { cn } from "@/shared/utils/cn";
@@ -102,7 +102,7 @@ export const ParamRow = ({
   const isArray = isContainer && isArrayType(param.type);
   const [showAll, setShowAll] = useState(false);
 
-  const view = arrayParamView(
+  const view = containerParamView(
     param,
     isArray && !showAll ? ARRAY_PREVIEW : null,
   );
@@ -142,7 +142,7 @@ export const ParamRow = ({
           )}
           {isContainer && !isArray && (
             <span className="text-dimmed shrink-0 font-mono text-xs leading-4">
-              {children.length} fields
+              {view.length} fields
             </span>
           )}
         </div>

@@ -8,6 +8,7 @@ import {
 } from "viem";
 
 import type { AbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
+import { isRecord } from "@/shared/services/decoder/guards";
 import { humanizeLeaf } from "@/shared/services/decoder/humanize";
 import {
   getDetector,
@@ -45,13 +46,14 @@ export type DecodeOptions = {
 
 const DEFAULTS = { maxDepth: 5, maxBytes: 131_072, maxNodes: 200 };
 
-/** Array elements one decoded call may retain across EVERY nesting level.
- *  The 128 KiB calldata cap still admits ~4,000 ABI words, and every rendered
- *  element costs a row (an address one costs an enrichment query too), so a
- *  single huge array must not reach the UI whole. The budget is shared rather
- *  than per level: `address[][]` holding 40 inner arrays of 99 addresses each
- *  clears every per-array slice and would still render 3,960 rows. */
-const MAX_ARRAY_NODES = 100;
+/** Child nodes one decoded call may retain across EVERY nesting level, array
+ *  elements and tuple components alike. The 128 KiB calldata cap still admits
+ *  ~4,000 ABI words, and every retained child costs a row (an address one
+ *  costs an enrichment query too), so no shape may reach the UI whole. The
+ *  budget is shared rather than per container: `address[][]` holding 40 inner
+ *  arrays of 99 addresses, or a `(address,…)[99]` of 40-field tuples, clears
+ *  every per-container slice and would still render ~4,000 rows. */
+const MAX_PARAM_NODES = 100;
 
 /** Independent batch children decode in parallel, gently: each may cost an
  *  Etherscan/OpenChain round trip and both services rate-limit. */
@@ -93,8 +95,31 @@ const leafValue = (type: string, value: unknown): string => {
   return typeof value === "string" ? value : String(value);
 };
 
-/** Array elements still allowed in the parameter tree of one decoded call. */
-type ParamBudget = { itemsLeft: number };
+/** Child nodes still allowed in the parameter tree of one decoded call. */
+type ParamBudget = { nodesLeft: number };
+
+/**
+ * Takes this container's share of the shared budget up front, so breadth wins
+ * over depth: the reader sees all 40 batches of an `address[][]` with the
+ * deepest level thinned out, rather than one batch in full and 39 elided.
+ */
+const claim = (count: number, budget: ParamBudget): number => {
+  const taken = Math.min(count, Math.max(budget.nodesLeft, 0));
+  budget.nodesLeft -= taken;
+  return taken;
+};
+
+/** The synthetic row standing in for the children the budget could not hold. */
+const truncationNote = (
+  dropped: number,
+  type: string,
+  noun: "item" | "field",
+): DecodedParam => ({
+  name: "…",
+  type,
+  value: `${dropped.toLocaleString("en-US")} more ${dropped === 1 ? noun : `${noun}s`} not shown`,
+  isTruncationNote: true,
+});
 
 const buildParam = (
   param: AbiParameter,
@@ -108,11 +133,7 @@ const buildParam = (
 
   if (shape.kind === "array") {
     const items = Array.isArray(value) ? value : [];
-    // Claim this level's slice before recursing: the elements retained here
-    // and everything their own arrays retain come out of one allowance, so a
-    // deep shape cannot multiply its way past the cap.
-    const retained = items.slice(0, Math.max(budget.itemsLeft, 0));
-    budget.itemsLeft -= retained.length;
+    const retained = items.slice(0, claim(items.length, budget));
     const children = retained.map((item, i) =>
       buildParam(
         { ...shape.element, name: `[${i}]` } as AbiParameter,
@@ -124,12 +145,7 @@ const buildParam = (
     );
     const dropped = items.length - retained.length;
     if (dropped > 0) {
-      children.push({
-        name: "…",
-        type: shape.element.type,
-        value: `${dropped.toLocaleString("en-US")} more items not shown`,
-        isTruncationNote: true,
-      });
+      children.push(truncationNote(dropped, shape.element.type, "item"));
     }
     return {
       name,
@@ -141,22 +157,36 @@ const buildParam = (
   }
 
   if (shape.kind === "tuple") {
+    // Tuple components are rows too. A static tuple is bounded by its ABI, but
+    // an array of them is not: 99 tuples of 40 addresses each is ~4,000 rows
+    // that no per-container cap would ever see, so they draw on the same
+    // budget and truncate with the same marker semantics as array elements.
+    const fields = shape.components;
+    const retained = fields.slice(0, claim(fields.length, budget));
     // viem decodes named tuples to objects and unnamed ones to arrays.
-    const record = (value ?? {}) as Record<string, unknown>;
+    const record = isRecord(value) ? value : {};
     const positional = Array.isArray(value) ? value : null;
+    const children = retained.map((component, i) =>
+      buildParam(
+        component,
+        positional ? positional[i] : record[component.name ?? ""],
+        functionName,
+        i,
+        budget,
+      ),
+    );
+    const dropped = fields.length - retained.length;
+    if (dropped > 0) {
+      children.push(
+        truncationNote(dropped, fields[retained.length].type, "field"),
+      );
+    }
     return {
       name,
       type: param.type,
-      value: `${shape.components.length} fields`,
-      children: shape.components.map((component, i) =>
-        buildParam(
-          component,
-          positional ? positional[i] : record[component.name ?? ""],
-          functionName,
-          i,
-          budget,
-        ),
-      ),
+      value: `${fields.length} fields`,
+      children,
+      originalLength: fields.length,
     };
   }
 
@@ -274,9 +304,9 @@ const decodeNode = async (
     return node;
   }
 
-  // One budget for the whole parameter tree of this call, nested arrays
-  // included; subcalls are separate nodes and are bounded by `maxNodes`.
-  const paramBudget: ParamBudget = { itemsLeft: MAX_ARRAY_NODES };
+  // One budget for the whole parameter tree of this call, nested arrays and
+  // tuples included; subcalls are separate nodes, bounded by `maxNodes`.
+  const paramBudget: ParamBudget = { nodesLeft: MAX_PARAM_NODES };
   node.params = abiFn.inputs.map((param, i) =>
     buildParam(param, args[i], abiFn.name, i, paramBudget),
   );

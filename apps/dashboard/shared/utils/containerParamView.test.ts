@@ -1,5 +1,5 @@
 import type { DecodedParam } from "@/shared/services/decoder/types";
-import { arrayParamView } from "@/shared/utils/arrayParamView";
+import { containerParamView } from "@/shared/utils/containerParamView";
 
 const element = (i: number): DecodedParam => ({
   name: `[${i}]`,
@@ -25,9 +25,9 @@ const truncated: DecodedParam = {
   ],
 };
 
-describe("arrayParamView", () => {
+describe("containerParamView", () => {
   test("labels a truncated array by its encoded length, not the render tree", () => {
-    const view = arrayParamView(truncated, 3);
+    const view = containerParamView(truncated, 3);
     // 101 children would spell address[101] and offer "98 more".
     expect(view.length).toBe(250);
     expect(view.visible).toHaveLength(3);
@@ -38,7 +38,7 @@ describe("arrayParamView", () => {
   });
 
   test("expanding shows every retained element and keeps the note out of them", () => {
-    const view = arrayParamView(truncated, null);
+    const view = containerParamView(truncated, null);
     expect(view.visible).toHaveLength(100);
     expect(view.visible.some((child) => child.isTruncationNote)).toBe(false);
     expect(view.folded).toBe(0);
@@ -47,7 +47,7 @@ describe("arrayParamView", () => {
   });
 
   test("an array the budget emptied has nothing to reveal", () => {
-    const view = arrayParamView(
+    const view = containerParamView(
       {
         name: "batch",
         type: "address[]",
@@ -70,7 +70,7 @@ describe("arrayParamView", () => {
   });
 
   test("an untruncated container reports itself unchanged", () => {
-    const view = arrayParamView(
+    const view = containerParamView(
       {
         name: "targets",
         type: "address[]",
@@ -87,8 +87,36 @@ describe("arrayParamView", () => {
     expect(view.note).toBeUndefined();
   });
 
+  test("a truncated tuple reports the fields the calldata really held", () => {
+    // Tuple components spend the same budget as array elements, so a tuple
+    // can be cut short too and its "N fields" hint must not count the note.
+    const view = containerParamView(
+      {
+        name: "batch",
+        type: "tuple",
+        value: "40 fields",
+        originalLength: 40,
+        children: [
+          element(0),
+          {
+            name: "…",
+            type: "address",
+            value: "39 more fields not shown",
+            isTruncationNote: true,
+          },
+        ],
+      },
+      null,
+    );
+    expect(view.length).toBe(40);
+    expect(view.visible).toHaveLength(1);
+    expect(view.retained).toBe(1);
+    expect(view.folded).toBe(0);
+    expect(view.note?.value).toBe("39 more fields not shown");
+  });
+
   test("a param without children is an empty view", () => {
-    const view = arrayParamView(
+    const view = containerParamView(
       { name: "to", type: "address", value: "0x00" },
       3,
     );

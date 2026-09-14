@@ -1,22 +1,20 @@
 import type { Abi } from "viem";
-import { z } from "zod";
 
-// Minimal structural validation for an ABI: an array of objects each with a
-// string `type` field. Extra keys are allowed (ABI items carry many shapes:
-// function, event, error, constructor, fallback, receive) — we preserve them
-// via .passthrough(). viem's decoders validate the rest at use-time.
-const AbiItemSchema = z.object({ type: z.string() }).passthrough();
-const AbiSchema = z.array(AbiItemSchema);
+import { isRecord } from "@/shared/services/decoder/guards";
 
-export const parseAbiStrict = (value: unknown): Abi | null => {
-  const result = AbiSchema.safeParse(value);
-  if (!result.success) return null;
-  // Zod's inferred output type is a loose record because we use
-  // .passthrough() — the structural guarantee (array of objects with a
-  // string `type`) is exactly the contract viem needs to pick the right
-  // decoder per item at call time. Cast at the boundary only.
-  return result.data as unknown as Abi;
-};
+/**
+ * Minimal structural validation for an ABI: an array of objects each with a
+ * string `type` field. Extra keys are kept as they are, since ABI items carry
+ * many shapes (function, event, error, constructor, fallback, receive) and
+ * viem's decoders validate the rest at use time. A predicate rather than a
+ * schema, so the value reaches viem as the object it already is.
+ */
+const isAbi = (value: unknown): value is Abi =>
+  Array.isArray(value) &&
+  value.every((item) => isRecord(item) && typeof item.type === "string");
+
+export const parseAbiStrict = (value: unknown): Abi | null =>
+  isAbi(value) ? value : null;
 
 const isValidAddress = (address: string): boolean => {
   return /^0x[a-fA-F0-9]{40}$/.test(address);

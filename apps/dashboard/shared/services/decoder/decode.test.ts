@@ -1,4 +1,10 @@
-import { encodeFunctionData, parseAbi, type Address, type Hex } from "viem";
+import {
+  encodeFunctionData,
+  parseAbi,
+  type Abi,
+  type Address,
+  type Hex,
+} from "viem";
 
 import {
   AGGREGATE3_BATCH,
@@ -13,7 +19,10 @@ import {
   USDC_APPROVE,
   USDC_TRANSFER,
 } from "@/shared/services/decoder/__fixtures__/calldata";
-import { createAbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
+import {
+  createAbiResolver,
+  type AbiResolver,
+} from "@/shared/services/decoder/abi/resolveAbi";
 import { createUploadedAbiStore } from "@/shared/services/decoder/abi/uploadedStore";
 import {
   decodeCalldata,
@@ -31,6 +40,27 @@ const decode = (
   calldata: string,
   extra?: { target?: Address; value?: bigint },
 ) => decodeCalldata({ chainId: 1, calldata, ...extra }, offlineResolver);
+
+/** Every address row the tree would render, at any depth. */
+const countAddresses = (params: DecodedParam[]): number =>
+  params.reduce(
+    (sum, param) =>
+      sum +
+      (param.children ? countAddresses(param.children) : 0) +
+      (param.isAddress ? 1 : 0),
+    0,
+  );
+
+/** An abi resolver that knows only the uploaded ABI, for synthetic shapes. */
+const resolverFor = (abi: Abi): AbiResolver => {
+  const uploaded = createUploadedAbiStore();
+  uploaded.set([...abi]);
+  return createAbiResolver({
+    fetchVerifiedAbi: jest.fn().mockResolvedValue(null),
+    fetchSignatures: jest.fn().mockResolvedValue([]),
+    uploaded,
+  });
+};
 
 describe("decodeCalldata basics", () => {
   test("an ERC20 transfer decodes via the known-selector table", async () => {
@@ -175,14 +205,6 @@ describe("decodeCalldata basics", () => {
     });
 
     const node = await decodeCalldata({ chainId: 1, calldata }, resolver);
-    const countAddresses = (params: DecodedParam[]): number =>
-      params.reduce(
-        (sum, param) =>
-          sum +
-          (param.children ? countAddresses(param.children) : 0) +
-          (param.isAddress ? 1 : 0),
-        0,
-      );
     expect(countAddresses(node.params)).toBeLessThanOrEqual(100);
 
     const outer = node.params[0];
@@ -200,6 +222,53 @@ describe("decodeCalldata basics", () => {
       }),
     ]);
     expect(outer.children?.[39].originalLength).toBe(99);
+  });
+
+  test("tuple components draw on the same budget as array elements", async () => {
+    // 99 static tuples of 40 addresses is ~4,000 address rows that no array
+    // cap would ever see: the tuples are ABI-bounded individually, the array
+    // of them is not.
+    const fields = Array.from(
+      { length: 40 },
+      (_, i) => `address recipient${i}`,
+    ).join(", ");
+    // Typed as Abi on purpose: viem cannot infer a signature it cannot see
+    // as a literal, and the inferred arg tuple would be nonsense.
+    const abi: Abi = parseAbi([`function pay((${fields})[] batches)`]);
+    const entry = Object.fromEntries(
+      Array.from({ length: 40 }, (_, i) => [`recipient${i}`, RECIPIENT]),
+    );
+    const calldata = encodeFunctionData({
+      abi,
+      functionName: "pay",
+      args: [Array.from({ length: 99 }, () => entry)],
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata },
+      resolverFor(abi),
+    );
+    expect(countAddresses(node.params)).toBeLessThanOrEqual(100);
+
+    const batches = node.params[0];
+    expect(batches.originalLength).toBe(99);
+    expect(batches.children).toHaveLength(99);
+    // 99 tuple rows spend all but one node, and that one buys a single field.
+    const [first, second] = batches.children ?? [];
+    expect(first.originalLength).toBe(40);
+    expect(first.children).toEqual([
+      expect.objectContaining({ name: "recipient0", value: RECIPIENT }),
+      expect.objectContaining({
+        isTruncationNote: true,
+        value: "39 more fields not shown",
+      }),
+    ]);
+    expect(second.children).toEqual([
+      expect.objectContaining({
+        isTruncationNote: true,
+        value: "40 more fields not shown",
+      }),
+    ]);
   });
 
   test("unknown selector degrades to guessed words with a permanent warning", async () => {
