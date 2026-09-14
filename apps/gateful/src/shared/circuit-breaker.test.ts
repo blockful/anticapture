@@ -193,6 +193,32 @@ describe("CircuitBreaker", () => {
       });
     });
 
+    it("publishes nothing for a lazy breaker that never leaves CLOSED", async () => {
+      const cb = createCircuitBreaker({ lazyStateMetric: true });
+      await succeed(cb, 5);
+      expect(cb.state).toBe("CLOSED");
+      expect(circuitBreakerState.record).not.toHaveBeenCalled();
+    });
+
+    it("publishes every transition once a lazy breaker has tripped", async () => {
+      const cb = createCircuitBreaker({
+        lazyStateMetric: true,
+        minimumRequests: 1,
+      });
+      await fail(cb, 1);
+      expect(circuitBreakerState.record).toHaveBeenLastCalledWith(2, {
+        name: "test",
+      });
+
+      // Recovery is published too, so the series never sticks at OPEN.
+      advanceTime(1000);
+      await cb.execute(SUCCESS);
+      expect(cb.state).toBe("CLOSED");
+      expect(circuitBreakerState.record).toHaveBeenLastCalledWith(0, {
+        name: "test",
+      });
+    });
+
     it("lets a single probe through while others are rejected", async () => {
       const cb = await halfOpenBreaker();
       let release!: () => void;

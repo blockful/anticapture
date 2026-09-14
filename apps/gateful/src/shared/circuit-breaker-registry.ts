@@ -11,10 +11,13 @@ const STATE_SEVERITY = { CLOSED: 0, HALF_OPEN: 1, OPEN: 2 } as const;
 const ROUTE_SEGMENT = /^[a-z][a-z0-9-]{0,63}$/;
 
 /** Route breakers a DAO may hold at once. Paths are client-controlled, so
- *  without a cap a scan of made-up segments could grow the registry (and the
- *  `circuit_breaker_state` metric series) without bound. The cap is on live
- *  breakers, not on the names ever seen: reaching it evicts an idle route
- *  rather than freezing the set, so made-up paths cannot squat the slots. */
+ *  without a cap a scan of made-up segments could grow the registry without
+ *  bound. The cap is on live breakers, not on the names ever seen: reaching it
+ *  evicts an idle route rather than freezing the set, so made-up paths cannot
+ *  squat the slots. Two invariants hold together: a DAO never holds more than
+ *  this many route breakers at once, and a route only publishes a
+ *  `circuit_breaker_state` series once it has tripped (see `lazyStateMetric`),
+ *  which a scan of made-up paths cannot cause since a 404 is not a failure. */
 export const MAX_ROUTES_PER_DAO = 64;
 
 /** An OPEN circuit whose cooldown has elapsed will probe on its next call, so
@@ -33,14 +36,29 @@ export class CircuitBreakerRegistry {
 
   constructor(private readonly opts?: CircuitBreakerOptions) {}
 
-  /** Returns the CircuitBreaker for a key, creating it lazily if needed. */
+  /** Returns the CircuitBreaker for a key, creating it lazily if needed.
+   *  Keys passed here are configuration-derived (a DAO, a relayer, a service),
+   *  so they report their state from the moment they exist. */
   get(key: string): CircuitBreaker {
+    return this.getOrCreate(key, this.opts);
+  }
+
+  private getOrCreate(
+    key: string,
+    opts: CircuitBreakerOptions | undefined,
+  ): CircuitBreaker {
     let breaker = this.breakers.get(key);
     if (!breaker) {
-      breaker = new CircuitBreaker(key, this.opts);
+      breaker = new CircuitBreaker(key, opts);
       this.breakers.set(key, breaker);
     }
     return breaker;
+  }
+
+  /** Breaker for a route key, whose name carries a client-controlled path
+   *  segment: it only publishes its state gauge once it has tripped. */
+  private getRoute(key: string): CircuitBreaker {
+    return this.getOrCreate(key, { ...this.opts, lazyStateMetric: true });
   }
 
   /** Builds the key for a DAO API request from its upstream path: the DAO
@@ -68,14 +86,14 @@ export class CircuitBreakerRegistry {
       // Re-insert so the key counts as most recently used.
       routes.delete(key);
       routes.add(key);
-      return this.get(key);
+      return this.getRoute(key);
     }
 
     if (routes.size >= MAX_ROUTES_PER_DAO && !this.evictIdleRoute(routes)) {
       return this.get(dao);
     }
     routes.add(key);
-    return this.get(key);
+    return this.getRoute(key);
   }
 
   private routesFor(dao: string): Set<string> {

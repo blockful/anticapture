@@ -30,6 +30,13 @@ export type CircuitBreakerOptions = {
   consecutiveFailureThreshold?: number;
   cooldownMs?: number;
   maxCooldownMs?: number;
+  /** Publish `circuit_breaker_state` only once this breaker leaves CLOSED for
+   *  the first time, instead of from construction. Set for keys whose name
+   *  comes from a client-controlled path, so probing made-up routes cannot
+   *  mint metric series; a route that actually trips still reports every
+   *  transition from then on. Long-lived keys (DAOs, relayers, services) leave
+   *  it off so dashboards list them while they are healthy. */
+  lazyStateMetric?: boolean;
 };
 
 /** The sliding window is split into this many fixed time buckets. */
@@ -71,6 +78,8 @@ export class CircuitBreaker {
   private readonly consecutiveFailureThreshold: number;
   private readonly cooldownMs: number;
   private readonly maxCooldownMs: number;
+  /** False until this breaker is allowed to publish its state gauge. */
+  private metricArmed: boolean;
 
   constructor(name: string, opts?: CircuitBreakerOptions) {
     this._name = name;
@@ -81,6 +90,7 @@ export class CircuitBreaker {
     this.consecutiveFailureThreshold = opts?.consecutiveFailureThreshold ?? 5;
     this.cooldownMs = opts?.cooldownMs ?? 30_000;
     this.maxCooldownMs = opts?.maxCooldownMs ?? 300_000;
+    this.metricArmed = !opts?.lazyStateMetric;
     this.recordState();
   }
 
@@ -128,7 +138,16 @@ export class CircuitBreaker {
     this.recordState();
   }
 
+  /** Publishes the state gauge. A lazy breaker stays silent while it has never
+   *  left CLOSED: the OTel SDK keeps every attribute set for the life of the
+   *  process, so a healthy key that was never interesting must not create a
+   *  series. The first non-CLOSED state arms it for good, so the recovery back
+   *  to CLOSED is published too and the series does not stick at OPEN. */
   private recordState(): void {
+    if (!this.metricArmed) {
+      if (this._state === "CLOSED") return;
+      this.metricArmed = true;
+    }
     circuitBreakerState.record(STATE_VALUE[this._state], {
       name: this._name,
     });

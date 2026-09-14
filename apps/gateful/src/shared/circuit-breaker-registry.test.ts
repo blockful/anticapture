@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { circuitBreakerState } from "../metrics.js";
 import {
   CircuitBreakerRegistry,
   MAX_ROUTES_PER_DAO,
@@ -116,6 +117,27 @@ describe("CircuitBreakerRegistry", () => {
     expect(registry.get("ens").state).toBe("CLOSED");
     expect(registry.forProxy("ens", "/votes").state).toBe("CLOSED");
     expect(registry.forProxy("ens", "/votes").name).toBe("ens:votes");
+  });
+
+  it("keeps routes that never trip out of the state gauge", async () => {
+    const record = vi.spyOn(circuitBreakerState, "record");
+    const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });
+
+    for (let i = 0; i < MAX_ROUTES_PER_DAO * 2; i++) {
+      registry.forProxy("ens", `/probe-${i}`);
+    }
+    // Made-up paths cost a slot at most, never a metric series: the OTel SDK
+    // keeps every attribute set for the life of the process.
+    expect(record).not.toHaveBeenCalled();
+
+    // A DAO key comes from configuration, so it reports from the start.
+    expect(registry.get("ens").state).toBe("CLOSED");
+    expect(record).toHaveBeenCalledWith(0, { name: "ens" });
+
+    // A route that actually trips does publish its state.
+    const proposals = registry.forProxy("ens", "/proposals");
+    await expect(proposals.execute(FAIL)).rejects.toThrow();
+    expect(record).toHaveBeenLastCalledWith(2, { name: "ens:proposals" });
   });
 
   it("shares the DAO breaker only when every slot is a tripped route", async () => {
