@@ -145,6 +145,63 @@ describe("CircuitBreakerRegistry", () => {
     expect(proposals.state).toBe("OPEN");
   });
 
+  it("keeps a route with a request in flight out of the eviction pool", async () => {
+    const registry = new CircuitBreakerRegistry({
+      minimumRequests: 100,
+      consecutiveFailureThreshold: 5,
+    });
+    const proposals = registry.forProxy("ens", "/proposals");
+    let timeOut!: () => void;
+    const slowCall = proposals
+      .execute(
+        () =>
+          new Promise<string>((_, reject) => {
+            timeOut = () => reject(new Error("upstream timeout"));
+          }),
+      )
+      .catch(() => "failed");
+
+    // The slow route is the least recently used key, so a flood would take its
+    // slot if an unsettled call counted as idle.
+    for (let i = 0; i < MAX_ROUTES_PER_DAO * 3; i++) {
+      registry.forProxy("ens", `/probe-${i}`);
+    }
+    expect(registry.forProxy("ens", "/proposals")).toBe(proposals);
+
+    timeOut();
+    await slowCall;
+
+    // The timeout landed on the breaker callers still get, so it counts
+    // towards the trip instead of being lost on a detached instance.
+    for (let i = 0; i < 4; i++) {
+      await expect(proposals.execute(FAIL)).rejects.toThrow();
+    }
+    expect(registry.forProxy("ens", "/proposals").state).toBe("OPEN");
+  });
+
+  it("evicts a route again once its request has settled", async () => {
+    const registry = new CircuitBreakerRegistry();
+    const proposals = registry.forProxy("ens", "/proposals");
+    let release!: () => void;
+    const slowCall = proposals.execute(
+      () =>
+        new Promise<string>((resolve) => {
+          release = () => resolve("ok");
+        }),
+    );
+    for (let i = 0; i < MAX_ROUTES_PER_DAO - 1; i++) {
+      registry.forProxy("ens", `/probe-${i}`);
+    }
+
+    release();
+    await slowCall;
+    expect(proposals.isIdle()).toBe(true);
+
+    // Nothing is pending and nothing failed, so the slot can be reused.
+    expect(registry.forProxy("ens", "/one-more").name).toBe("ens:one-more");
+    expect(registry.getAll().has("ens:proposals")).toBe(false);
+  });
+
   it("keeps routes that never trip out of the state gauge", async () => {
     const record = vi.spyOn(circuitBreakerState, "record");
     const registry = new CircuitBreakerRegistry({ minimumRequests: 1 });

@@ -83,6 +83,9 @@ export class CircuitBreaker {
   /** Bumped on every state transition. Calls carry the generation they started
    *  in so a straggler cannot report into a circuit that has moved on. */
   private generation = 0;
+  /** Calls that have started and not yet settled. Every call site passes an
+   *  abort timeout, so this cannot stay above zero indefinitely. */
+  private inFlight = 0;
 
   constructor(name: string, opts?: CircuitBreakerOptions) {
     this._name = name;
@@ -112,11 +115,14 @@ export class CircuitBreaker {
     return Math.max(0, this.currentCooldown() - elapsed);
   }
 
-  /** True when the breaker holds no failure history worth keeping: it is
-   *  CLOSED, nothing failed inside the live window and no consecutive-failure
-   *  streak is running. Dropping an idle breaker loses nothing; dropping one
-   *  that carries failures would hand a failing upstream a clean slate. */
+  /** True when the breaker holds no failure history worth keeping: nothing is
+   *  in flight, it is CLOSED, nothing failed inside the live window and no
+   *  consecutive-failure streak is running. Dropping an idle breaker loses
+   *  nothing; dropping one that carries failures, or one whose slow request is
+   *  still running, would hand a failing upstream a clean slate, since that
+   *  request would settle onto a breaker nobody reads any more. */
   isIdle(): boolean {
+    if (this.inFlight > 0) return false;
     if (this._state !== "CLOSED" || this.consecutiveFailures > 0) return false;
     const oldestLiveIndex =
       Math.floor(Date.now() / this.bucketMs) - BUCKET_COUNT + 1;
@@ -177,6 +183,15 @@ export class CircuitBreaker {
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
+    this.inFlight += 1;
+    try {
+      return await this.dispatch(fn);
+    } finally {
+      this.inFlight -= 1;
+    }
+  }
+
+  private dispatch<T>(fn: () => Promise<T>): Promise<T> {
     switch (this._state) {
       case "OPEN":
         this.tryTransitionToHalfOpen();

@@ -320,6 +320,23 @@ describe("CircuitBreaker", () => {
       expect(cb.isIdle()).toBe(true);
     });
 
+    it("is not idle while a call is still running", async () => {
+      const cb = createCircuitBreaker();
+      let release!: () => void;
+      const call = cb.execute(
+        () =>
+          new Promise<string>((resolve) => {
+            release = () => resolve("ok");
+          }),
+      );
+      expect(cb.state).toBe("CLOSED");
+      expect(cb.isIdle()).toBe(false);
+
+      release();
+      await call;
+      expect(cb.isIdle()).toBe(true);
+    });
+
     it("is not idle while the circuit is open", async () => {
       const cb = createCircuitBreaker({ minimumRequests: 1 });
       await fail(cb, 1);
