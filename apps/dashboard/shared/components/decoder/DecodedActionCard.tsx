@@ -105,10 +105,14 @@ const FunctionSignature = ({
   const namedArgs = params
     .map((param) => `${param.type} ${param.name}`)
     .join(", ");
-  const argList =
-    dropped > 0
-      ? `${namedArgs}, +${dropped.toLocaleString("en-US")} more`
-      : namedArgs;
+  // Joined rather than appended, so a call whose every input was dropped
+  // reads `(+3 more)` and not `(, +3 more)`.
+  const argList = [
+    namedArgs,
+    dropped > 0 ? `+${dropped.toLocaleString("en-US")} more` : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
   const inline =
     expanded || (!nested && inputCount <= SIGNATURE_INLINE_MAX_PARAMS);
 
@@ -377,7 +381,9 @@ export const DecodedActionCard = ({
         )}
 
         {showDecoded ? (
-          params.length > 0 && (
+          // The note has to show precisely when the budget dropped every
+          // input, or the card would claim the call takes no arguments.
+          (params.length > 0 || paramsNote) && (
             <Row label="params" nested={isNested} align="start">
               <div
                 className={cn(

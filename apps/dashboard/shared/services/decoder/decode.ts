@@ -515,6 +515,7 @@ const decodeNode = async (
       if (!("subcall" in slot)) continue;
       if (childBudgets[position].nodesLeft > 0) continue;
       const retryBudget = { nodesLeft: pool + shares[position] };
+      const retryParams = { nodesLeft: paramShares[position] };
       const child = await decodeNode(
         {
           chainId: input.chainId,
@@ -527,12 +528,15 @@ const decodeNode = async (
         opts,
         depth + 1,
         retryBudget,
-        // A retry replaces the first attempt's subtree, and what that attempt
-        // spent stays spent: the parameter bound only ever tightens, which is
-        // the safe direction for a guard, and it stays this child's own share
-        // rather than eating into a sibling's.
-        childParams[position],
+        // The retry replaces the first attempt's subtree, so that attempt's
+        // parameter spend is forgotten along with it and the child starts
+        // from its whole share again, as it does for nodes. Charging the
+        // discarded pass would hand the retry a drained budget and render a
+        // child with more calls and fewer arguments than the one it replaced.
+        // It stays this child's own share, never a sibling's.
+        retryParams,
       );
+      childParams[position] = retryParams;
       decoded[position] = {
         ...child,
         mayFail: slot.subcall.mayFail,

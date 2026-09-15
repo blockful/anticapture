@@ -376,6 +376,58 @@ describe("decodeCalldata basics", () => {
     }
   });
 
+  test("a retried child starts from its whole parameter share again", async () => {
+    // The node budget re-decodes a child that ran out of call slots. That
+    // replacement throws the first attempt's tree away, so it has to start
+    // from the child's whole parameter share: handing it what the discarded
+    // pass left would render more calls with fewer arguments than before.
+    const aggregate3: Abi = parseAbi([
+      "function aggregate3((address target, bool allowFailure, bytes callData)[] calls)",
+    ]);
+    const entry = (target: Address, callData: Hex) => ({
+      target,
+      allowFailure: false,
+      callData,
+    });
+    const inner = encodeFunctionData({
+      abi: aggregate3,
+      functionName: "aggregate3",
+      args: [Array.from({ length: 40 }, () => entry(USDC, USDC_TRANSFER))],
+    });
+    const calldata = encodeFunctionData({
+      abi: aggregate3,
+      functionName: "aggregate3",
+      args: [
+        [
+          entry(MULTICALL3, inner),
+          entry(USDC, USDC_TRANSFER),
+          entry(USDC, USDC_TRANSFER),
+          entry(USDC, USDC_TRANSFER),
+        ],
+      ],
+    });
+
+    const node = await decodeCalldata(
+      { chainId: 1, calldata, target: MULTICALL3 },
+      offlineResolver,
+      // Tight enough that the inner batch exhausts its slots on pass one.
+      { maxNodes: 20 },
+    );
+
+    const batch = node.subcalls![0];
+    expect(batch.functionName).toBe("aggregate3");
+    expect(batch.subcallCount).toBe(40);
+    // The reclaim pass gave it the slots its flat siblings never used.
+    expect(batch.subcalls!.length).toBeGreaterThan(4);
+    // And its own argument list came back whole rather than cut to whatever
+    // the discarded attempt had left over.
+    expect(batch.params[0].originalLength).toBe(40);
+    expect(batch.params[0].children).toHaveLength(40);
+    expect(
+      batch.params[0].children?.some((child) => child.isTruncationNote),
+    ).toBe(false);
+  });
+
   test("the parameter split does not depend on which lookup lands first", async () => {
     // Children decode in parallel and claim their rows when their own ABI
     // lookup resolves. Sharing one budget across that would hand the tree to
