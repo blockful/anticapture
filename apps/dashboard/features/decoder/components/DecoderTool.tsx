@@ -85,6 +85,15 @@ export const DecoderTool = () => {
   const [mode, setMode] = useState<AbiSourceMode>(() =>
     address ? "contract" : "automatic",
   );
+  // Leaving for Automatic is the only way the address leaves the URL from
+  // here, so an address that appears while Automatic is selected came from
+  // outside: Back/Forward between two decoder URLs, a link followed with the
+  // page mounted. The tab follows it, or the permalink would decode without
+  // the ABI it names.
+  useEffect(() => {
+    if (address && mode === "automatic") setMode("contract");
+  }, [address, mode]);
+
   const handleModeChange = (next: AbiSourceMode) => {
     if (next === mode) return;
     setMode(next);

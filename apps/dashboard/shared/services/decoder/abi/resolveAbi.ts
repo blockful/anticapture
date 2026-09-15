@@ -87,6 +87,35 @@ const NEGATIVE_RESULT_TTL_MS = 60_000;
 /** Ambiguous-signature candidates carried on the warning. */
 const MAX_LISTED_CANDIDATES = 5;
 
+/**
+ * A lookup that ran to (or nearly to) the fetcher's own 10 s abort answered
+ * nothing in the only way an unresponsive service can. Both fetchers turn
+ * that into a null result, indistinguishable from "not verified", so the
+ * elapsed time is the signal: one such answer latches the source closed for
+ * a while and every later lookup falls straight through to the next tier.
+ * Without it a batch of 200 children on distinct contracts, four workers at
+ * a time, waits out fifty timeout waves before the reader sees anything.
+ * The latch is per fetcher identity, like the caches, and degraded results
+ * stay refresh-eligible, so the real ABI arrives once the service is back.
+ */
+export const SLOW_RESPONSE_MS = 9_500;
+export const SOURCE_OUTAGE_TTL_MS = 60_000;
+const outagesUntil = new WeakMap<object, number>();
+
+const withOutageLatch = async <T>(
+  fetcher: object,
+  run: () => Promise<T>,
+  unavailable: T,
+): Promise<T> => {
+  if (Date.now() < (outagesUntil.get(fetcher) ?? 0)) return unavailable;
+  const started = Date.now();
+  const result = await run();
+  if (Date.now() - started >= SLOW_RESPONSE_MS) {
+    outagesUntil.set(fetcher, Date.now() + SOURCE_OUTAGE_TTL_MS);
+  }
+  return result;
+};
+
 type CacheEntry<T> = { promise: Promise<T>; negativeAt?: number };
 
 /**
@@ -176,12 +205,17 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
     const bundled = getBundledAbi(ctx.chainId, target);
     const abi =
       bundled ??
-      (await cachedFetch(
-        abiCaches,
+      (await withOutageLatch(
         fetchVerified,
-        `${ctx.chainId}:${target.toLowerCase()}`,
-        () => fetchVerified(ctx.chainId, target),
-        (result) => result === null,
+        () =>
+          cachedFetch(
+            abiCaches,
+            fetchVerified,
+            `${ctx.chainId}:${target.toLowerCase()}`,
+            () => fetchVerified(ctx.chainId, target),
+            (result) => result === null,
+          ),
+        null,
       ));
     if (!abi) return null;
     const fn = findBySelector(abi, ctx.selector);
@@ -200,12 +234,17 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
   const resolveOpenchain = async (
     ctx: AbiResolveContext,
   ): Promise<ResolvedAbi | null> => {
-    const signatures = await cachedFetch(
-      signatureCaches,
+    const signatures = await withOutageLatch(
       fetchSignatures,
-      ctx.selector.toLowerCase(),
-      () => fetchSignatures(ctx.selector),
-      (result) => result.length === 0,
+      () =>
+        cachedFetch(
+          signatureCaches,
+          fetchSignatures,
+          ctx.selector.toLowerCase(),
+          () => fetchSignatures(ctx.selector),
+          (result) => result.length === 0,
+        ),
+      [],
     );
     const decodable: Array<{ fn: AbiFunction; signature: string }> = [];
     for (const textSignature of signatures) {

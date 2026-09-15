@@ -56,7 +56,10 @@ export const AddressChip = ({
   });
   const ens = data?.ens ?? null;
   const arkham = data?.arkham ?? null;
-  const isContract = data?.isContract ?? null;
+  // The enrichment service reads code on mainnet only, so "no code there"
+  // says nothing about an Optimism or Scroll address: the EOA tag (and the
+  // tooltip's contract line) is mainnet knowledge and stays on mainnet.
+  const isContract = chainId === 1 ? (data?.isContract ?? null) : null;
 
   // What the platform knows offline comes first ("USDC", "ENS Governor"),
   // then the shortest useful remote name: an ENS name, else the Arkham label

@@ -1,6 +1,10 @@
 import { encodeFunctionData, parseAbi, type Address, type Hex } from "viem";
 
-import { createAbiResolver } from "@/shared/services/decoder/abi/resolveAbi";
+import {
+  createAbiResolver,
+  SLOW_RESPONSE_MS,
+  SOURCE_OUTAGE_TTL_MS,
+} from "@/shared/services/decoder/abi/resolveAbi";
 import { createUploadedAbiStore } from "@/shared/services/decoder/abi/uploadedStore";
 
 const TARGET = "0x00000000000000000000000000000000000000aa" as Address;
@@ -249,5 +253,58 @@ describe("createAbiResolver", () => {
       fetchSignatures: jest.fn().mockResolvedValue([]),
     });
     await expect(resolver(ctx)).resolves.toBeNull();
+  });
+});
+
+describe("an unresponsive ABI source is skipped for a while", () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const otherTarget = (n: number) =>
+    `0x00000000000000000000000000000000000000${n.toString(16).padStart(2, "0")}` as Address;
+
+  test("one lookup that ran to the timeout latches the verified source closed", async () => {
+    jest.useFakeTimers();
+    // The proxy hangs until the fetcher's own abort turns it into null.
+    const fetchVerifiedAbi = jest.fn(
+      () =>
+        new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), SLOW_RESPONSE_MS + 500),
+        ),
+    );
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi,
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+    });
+
+    const first = resolver({ ...ctx, target: otherTarget(0xc1) });
+    await jest.advanceTimersByTimeAsync(SLOW_RESPONSE_MS + 500);
+    expect((await first)?.source).toBe("known");
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(1);
+
+    // The next contract is not even asked for: the known table answers at
+    // once instead of after another full timeout.
+    const second = await resolver({ ...ctx, target: otherTarget(0xc2) });
+    expect(second?.source).toBe("known");
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(1);
+
+    // Once the latch expires the source is tried again.
+    await jest.advanceTimersByTimeAsync(SOURCE_OUTAGE_TTL_MS);
+    const third = resolver({ ...ctx, target: otherTarget(0xc3) });
+    await jest.advanceTimersByTimeAsync(SLOW_RESPONSE_MS + 500);
+    await third;
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
+  });
+
+  test("a prompt null answer does not latch anything", async () => {
+    const fetchVerifiedAbi = jest.fn().mockResolvedValue(null);
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi,
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+    });
+    await resolver({ ...ctx, target: otherTarget(0xd1) });
+    await resolver({ ...ctx, target: otherTarget(0xd2) });
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
   });
 });
