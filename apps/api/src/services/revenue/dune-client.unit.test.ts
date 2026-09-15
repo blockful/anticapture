@@ -120,6 +120,22 @@ describe("RevenueDuneClient", () => {
     },
   );
 
+  // Nothing stale to serve: the empty answer is leased so an outage is not
+  // re-probed at the full provider deadline by every request.
+  it("leases the empty fallback instead of re-probing Dune on every request", async () => {
+    let calls = 0;
+    server.use(
+      http.get(urls.actions, () => {
+        calls += 1;
+        return new HttpResponse(null, { status: 500 });
+      }),
+    );
+
+    expect(await client.fetchKey("actions")).toEqual({ result: { rows: [] } });
+    expect(await client.fetchKey("actions")).toEqual({ result: { rows: [] } });
+    expect(calls).toBe(1);
+  });
+
   // The renewal-tenure query 404s persistently. A 502 there would leave the
   // route 5xx-ing, so it degrades, but under a reason that says it will not
   // clear on its own.

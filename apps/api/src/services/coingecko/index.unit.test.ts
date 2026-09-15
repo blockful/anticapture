@@ -19,6 +19,9 @@ const server = setupServer();
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
+// A failing assertion inside a fake-timer test must not leak the clock
+// into every test that follows.
+afterEach(() => vi.useRealTimers());
 afterAll(() => server.close());
 
 function handleMarketChart(tokenId: string, body: JsonBodyType) {

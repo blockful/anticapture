@@ -173,11 +173,25 @@ groups:
       # No `for`: the 15m increase window already requires the condition to have
       # happened, so waiting would only delay the page. keep_firing_for holds the
       # alert open across the scrape gaps of a low-traffic route.
+      # A counter series is born at 1 with its first degraded response and
+      # `increase()` sees no change on a series it has one sample of, so the
+      # first fallback of a new label set would never page. The second half
+      # catches series that did not exist 15m ago.
       - alert: DegradedUpstreamData
         expr: >
-          sum by (job, upstream, resource, mode, reason) (
-            increase(degraded_upstream_responses_total{job=~"anticapture-.*-api"}[15m])
-          ) > 0
+          (
+            sum by (job, upstream, resource, mode, reason) (
+              increase(degraded_upstream_responses_total{job=~"anticapture-.*-api"}[15m])
+            ) > 0
+          )
+          or
+          (
+            sum by (job, upstream, resource, mode, reason) (
+              degraded_upstream_responses_total{job=~"anticapture-.*-api"}
+              unless
+              degraded_upstream_responses_total{job=~"anticapture-.*-api"} offset 15m
+            ) > 0
+          )
         keep_firing_for: 15m
         labels:
           severity: warning

@@ -163,9 +163,15 @@ export class NFTPriceService implements PriceProvider {
 
     let value: string;
     try {
-      logger.info("fetching current ETH price from CoinGecko");
+      logger.info(
+        { targetCurrency },
+        "fetching current ETH price from CoinGecko",
+      );
+      // Quoted in the currency the caller asked for, which is also what the
+      // stale entry is tagged with; a USD number stored under `eth` would be
+      // served later as a matching-currency hit.
       const ethCurrentPrice = await this.fetchEthPrices(
-        `/coins/ethereum/market_chart?vs_currency=usd&days=1`,
+        `/coins/ethereum/market_chart?vs_currency=${encodeURIComponent(targetCurrency)}&days=1`,
         1,
       );
       const ethPriceResponse = ethCurrentPrice.reverse().slice(0, 1);

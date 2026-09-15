@@ -119,27 +119,27 @@ export class TreasuryService {
 
     const cutoffTimestamp = calculateCutoffTimestamp(days);
 
-    // Fetch token quantities from DB and prices from CoinGecko
-    const [tokenQuantities, prices] = await Promise.all([
+    // Token quantities and the pre-window balance from PostgreSQL, prices
+    // from CoinGecko.
+    const [tokenQuantities, lastKnownQuantity, prices] = await Promise.all([
       this.repository.getTokenQuantities(cutoffTimestamp),
+      this.repository.getLastTokenQuantityBeforeDate(cutoffTimestamp),
       this.fetchPricesOrDegrade(this.priceProvider, days),
     ]);
     const { data: historicalPrices, degraded } = prices;
 
+    // No transfer inside the window is not "no treasury": the balance from
+    // before the window is what gets forward-filled across it. Only a DAO
+    // that never held the token has nothing to show, and that is decided
+    // before the prices are looked at: an empty series because there is
+    // nothing to price is complete, not degraded, whatever CoinGecko said.
+    if (tokenQuantities.size === 0 && lastKnownQuantity === null) {
+      return { data: { items: [], totalCount: 0 }, degraded: false };
+    }
+
     // With no prices every point would value at zero, which reads as the
     // treasury crashing to $0 rather than as missing data. Serve nothing.
     if (historicalPrices.size === 0) {
-      return { data: { items: [], totalCount: 0 }, degraded };
-    }
-
-    // Get last known quantity before cutoff to use as initial value for forward-fill
-    const lastKnownQuantity =
-      await this.repository.getLastTokenQuantityBeforeDate(cutoffTimestamp);
-
-    // No transfer inside the window is not "no treasury": the balance from
-    // before the window is what gets forward-filled across it. Only a DAO
-    // that never held the token has nothing to show.
-    if (tokenQuantities.size === 0 && lastKnownQuantity === null) {
       return { data: { items: [], totalCount: 0 }, degraded };
     }
 
@@ -175,8 +175,8 @@ export class TreasuryService {
   }
 
   /**
-   * Prices for the token treasury. A CoinGecko outage degrades to no prices,
-   * which yields zero-valued points, rather than a 5xx: the gateway counts
+   * Prices for the token treasury. A CoinGecko outage degrades to an empty
+   * series, never to zero-valued points, rather than a 5xx: the gateway counts
    * 5xx against the whole DAO's circuit breaker.
    */
   private async fetchPricesOrDegrade(
@@ -215,20 +215,34 @@ export class TreasuryService {
     const { data: tokenResult } = token;
     const degraded = liquid.degraded || token.degraded;
 
-    if (liquidResult.items.length === 0 && tokenResult.items.length === 0) {
+    // A half that degraded to nothing makes the sum a lie: a token-only total
+    // reads as the liquid treasury having vanished, not as missing data. Serve
+    // nothing, as the token path already does one level down. A half that is
+    // empty for a complete reason (no provider configured, no token held) is
+    // not degraded and still sums.
+    const liquidMissing = liquid.degraded && liquidResult.items.length === 0;
+    const tokenMissing = token.degraded && tokenResult.items.length === 0;
+    if (
+      liquidMissing ||
+      tokenMissing ||
+      (liquidResult.items.length === 0 && tokenResult.items.length === 0)
+    ) {
       return { data: { items: [], totalCount: 0 }, degraded };
     }
 
-    // Use the timeline with more data points (liquid or token could be empty)
-    const baseItems =
-      liquidResult.items.length > 0 ? liquidResult.items : tokenResult.items;
-
-    const items = baseItems.map((item, i) => ({
-      date: item.date,
-      value:
-        (liquidResult.items[i]?.value ?? 0) +
-        (tokenResult.items[i]?.value ?? 0),
-    }));
+    // Joined by date, never by position: each series is built on its own
+    // timeline, and a stale liquid series can start on a different day than
+    // the token one.
+    const byDate = new Map<number, number>();
+    for (const { date, value } of [
+      ...liquidResult.items,
+      ...tokenResult.items,
+    ]) {
+      byDate.set(date, (byDate.get(date) ?? 0) + value);
+    }
+    const items = [...byDate.entries()]
+      .map(([date, value]) => ({ date, value }))
+      .sort((a, b) => (order === "desc" ? b.date - a.date : a.date - b.date));
 
     return { data: { items, totalCount: items.length }, degraded };
   }

@@ -510,4 +510,95 @@ describe("TreasuryService", () => {
       });
     });
   });
+
+  describe("getTotalTreasury", () => {
+    // A token-only total reads as the liquid treasury having vanished, not as
+    // missing data, so a half that degraded to nothing empties the sum.
+    it("serves nothing when the liquid half degraded with nothing to serve", async () => {
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw new UpstreamUnavailableError("defillama", "DefiLlama down");
+        },
+        getStaleTreasury: () => null,
+      };
+      metricRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther("100")]]),
+      );
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP, 10]]));
+
+      const service = new TreasuryService(metricRepo, failing, priceProvider);
+
+      expect(await service.getTotalTreasury(7, "asc", 18)).toEqual({
+        data: EMPTY_RESULT,
+        degraded: true,
+      });
+    });
+
+    // A DAO that holds none of its own token has nothing to price; a CoinGecko
+    // outage must not blank the liquid half it does have.
+    it("keeps the liquid half when the DAO holds no token and prices are down", async () => {
+      liquidProvider.setData([{ date: FIXED_TIMESTAMP, value: 5 }]);
+      metricRepo.setTokenQuantities(new Map());
+      metricRepo.setLastKnownQuantity(null);
+      priceProvider.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+
+      const service = new TreasuryService(
+        metricRepo,
+        liquidProvider,
+        priceProvider,
+      );
+
+      expect(await service.getTotalTreasury(7, "asc", 18)).toEqual({
+        data: { items: [{ date: FIXED_TIMESTAMP, value: 5 }], totalCount: 1 },
+        degraded: false,
+      });
+    });
+
+    it("still sums when the DAO simply has no liquid provider", async () => {
+      metricRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther("100")]]),
+      );
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP, 10]]));
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+
+      expect(await service.getTotalTreasury(7, "asc", 18)).toEqual({
+        data: {
+          items: [{ date: FIXED_TIMESTAMP, value: 1000 }],
+          totalCount: 1,
+        },
+        degraded: false,
+      });
+    });
+
+    // The two series are built on their own timelines and may start on
+    // different days; pairing them by position would add the wrong days.
+    it("joins the liquid and token halves by date", async () => {
+      liquidProvider.setData([
+        { date: FIXED_TIMESTAMP - ONE_DAY, value: 5 },
+        { date: FIXED_TIMESTAMP, value: 7 },
+      ]);
+      metricRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther("100")]]),
+      );
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP, 10]]));
+
+      const service = new TreasuryService(
+        metricRepo,
+        liquidProvider,
+        priceProvider,
+      );
+      const { data } = await service.getTotalTreasury(7, "asc", 18);
+
+      expect(data).toEqual({
+        items: [
+          { date: FIXED_TIMESTAMP - ONE_DAY, value: 5 },
+          { date: FIXED_TIMESTAMP, value: 1007 },
+        ],
+        totalCount: 2,
+      });
+    });
+  });
 });

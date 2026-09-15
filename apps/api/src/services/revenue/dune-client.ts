@@ -6,11 +6,13 @@ import {
   PROVIDER_TIMEOUT_MS,
   UpstreamUnavailableError,
   upstreamRejectedRequest,
+  describeUpstreamError,
+  redactUrl,
 } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 
 import { RevenueCache, REVENUE_STALE_TTL_MS } from "./cache";
-import { DUNE_MONTH_REGEX, parseDuneMonth } from "./utils";
+import { DUNE_MONTH_REGEX, isValidDuneMonth, parseDuneMonth } from "./utils";
 
 /**
  * Envelope every Dune result endpoint shares, wrapped around the row schema of
@@ -30,7 +32,10 @@ const duneEnvelopeSchema = <Row>(rowSchema: z.ZodType<Row>) =>
  * accepts. A format change would otherwise pass validation, be cached for 24h,
  * and throw in the mapper on every later request.
  */
-const duneMonth = z.string().regex(DUNE_MONTH_REGEX);
+const duneMonth = z
+  .string()
+  .regex(DUNE_MONTH_REGEX)
+  .refine(isValidDuneMonth, { message: "not a calendar date" });
 
 /**
  * Dune serialises decimals and bigints as text and returns null for an
@@ -206,6 +211,8 @@ const RawRevenueTotalsRowSchema = z.object({
 
 export class RevenueDuneClient {
   private readonly cache = new RevenueCache();
+  /** Keys whose last fetch failed with nothing stale to serve, and until when. */
+  private readonly emptyUntil = new Map<string, number>();
   private readonly inFlight = new Map<
     RevenueQueryKey,
     Promise<DuneRowsResponse<unknown>>
@@ -373,8 +380,21 @@ export class RevenueDuneClient {
     rowSchema: z.ZodType<Row>,
   ): Promise<DuneRowsResponse<Row>> {
     const url = this.urls[key];
+    // An outage with nothing stale to serve must not be re-probed by every
+    // request: seven revenue queries at the 15 s provider deadline would hang
+    // one page for close to two minutes. The empty answer is leased for the
+    // same short window a stale one is. Leased answers are not counted again
+    // on degraded_upstream_responses_total: inside the window the counter
+    // counts probes, not responses, which is enough for the alert to fire.
+    const emptyUntil = this.emptyUntil.get(key);
+    if (emptyUntil !== undefined && Date.now() < emptyUntil) {
+      return { result: { rows: [] } };
+    }
     const start = Date.now();
-    logger.info({ key, url }, "fetching revenue data from Dune");
+    logger.info(
+      { key, url: redactUrl(url) },
+      "fetching revenue data from Dune",
+    );
 
     let data: DuneRowsResponse<Row>;
     let status: number;
@@ -385,7 +405,11 @@ export class RevenueDuneClient {
       // rejected request, and must surface so the HTTP error metrics count it.
       if (!(error instanceof UpstreamUnavailableError)) throw error;
       logger.error(
-        { err: error, key, durationMs: Date.now() - start },
+        {
+          err: describeUpstreamError(error),
+          key,
+          durationMs: Date.now() - start,
+        },
         "failed to fetch revenue data from Dune",
       );
       const stale = this.cache.getStale<DuneRowsResponse<Row>>(key);
@@ -396,7 +420,18 @@ export class RevenueDuneClient {
         reason: error.reason,
         error,
       });
-      if (stale === null) return { result: { rows: [] } };
+      if (stale === null) {
+        // Lease only what a retry would pay for again: a transport failure
+        // or a provider status. A body that could not be read came back at
+        // once, and the next response may already be a good one.
+        const unreadableBody =
+          error.cause instanceof z.ZodError ||
+          error.cause instanceof SyntaxError;
+        if (!unreadableBody) {
+          this.emptyUntil.set(key, Date.now() + REVENUE_STALE_TTL_MS);
+        }
+        return { result: { rows: [] } };
+      }
       // Lease the stale value briefly so the outage is not re-probed by every
       // single request, while still refreshing soon after Dune recovers.
       this.cache.set(key, stale, REVENUE_STALE_TTL_MS);

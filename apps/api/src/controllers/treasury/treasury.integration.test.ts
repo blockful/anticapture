@@ -1,6 +1,17 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 import { parseEther } from "viem";
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import { UpstreamUnavailableError } from "@/lib/upstream-error";
 import {
@@ -10,6 +21,7 @@ import {
   LiquidTreasuryDataPoint,
   PriceProvider,
 } from "@/services/treasury";
+import { createTreasuryService } from "@/services/treasury/treasury-provider-factory";
 
 import { treasury } from "./index";
 
@@ -110,6 +122,12 @@ function createTestApp(
   return app;
 }
 
+const DEFILLAMA_URL = "https://defillama.test/protocol/anticapture";
+const server = setupServer();
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 describe("Treasury Controller", () => {
   const FIXED_DATE = new Date("2026-01-15T00:00:00Z");
   const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000);
@@ -142,24 +160,53 @@ describe("Treasury Controller", () => {
     });
 
     // A stale treasury series must not sit in a downstream cache once the
-    // provider recovers.
+    // provider recovers. Driven through the real provider factory and the
+    // real DefiLlama provider, with DefiLlama itself answered by MSW: the
+    // stale series is what the provider kept from its own earlier success.
     it("returns 200 with no-store when the provider fails but holds stale data", async () => {
-      const failing: TreasuryProvider = {
-        fetchTreasury: async () => {
-          throw new UpstreamUnavailableError("dune", "Dune down");
+      const service = createTreasuryService(
+        metricsRepo,
+        new FakePriceProvider(),
+        {
+          id: "DEFILLAMA",
+          apiUrl: DEFILLAMA_URL,
         },
-        getStaleTreasury: () => [
-          { date: FIXED_TIMESTAMP, liquidTreasury: 1000000 },
-        ],
-      };
-      const degradedApp = createTestApp(
-        new TreasuryService(metricsRepo, failing, undefined),
+      );
+      const degradedApp = createTestApp(service);
+      server.use(
+        http.get(DEFILLAMA_URL, () =>
+          HttpResponse.json({
+            chainTvls: {
+              Ethereum: {
+                tvl: [{ date: FIXED_TIMESTAMP, totalLiquidityUSD: 1000000 }],
+              },
+            },
+          }),
+        ),
+      );
+      const warm = await degradedApp.request("/treasury/liquid?days=365d");
+      expect(warm.status).toBe(200);
+      expect(warm.headers.get("Cache-Control")).not.toBe("no-store");
+
+      // The provider's own cache is what fetchTreasury reads first, so it is
+      // aged past its freshness before DefiLlama goes down.
+      vi.advanceTimersByTime(ONE_DAY * 1000 + 1);
+      server.use(
+        http.get(DEFILLAMA_URL, () => new HttpResponse(null, { status: 500 })),
       );
 
       const res = await degradedApp.request("/treasury/liquid?days=365d");
 
       expect(res.status).toBe(200);
       expect(res.headers.get("Cache-Control")).toBe("no-store");
+      // The series is carried forward to today, which is one day later now.
+      expect(await res.json()).toEqual({
+        items: [
+          { date: FIXED_TIMESTAMP, value: 1000000 },
+          { date: FIXED_TIMESTAMP + ONE_DAY, value: 1000000 },
+        ],
+        totalCount: 2,
+      });
     });
 
     it("should return 200 with valid response structure", async () => {

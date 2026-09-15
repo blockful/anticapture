@@ -7,10 +7,13 @@
  * is what the `DegradedUpstreamData` Prometheus alert fires on.
  */
 
+import {
+  describeUpstreamError,
+  type Upstream,
+  type UpstreamFailureReason,
+} from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { degradedUpstreamResponsesTotal } from "@/metrics";
-
-import type { Upstream, UpstreamFailureReason } from "./upstream-error";
 
 /** `stale` served the last known payload, `empty` had nothing to serve. */
 export type DegradedMode = "stale" | "empty";
@@ -55,7 +58,16 @@ export const recordDegradedUpstream = ({
 }: DegradedUpstreamEvent): void => {
   degradedUpstreamResponsesTotal.add(1, { upstream, resource, mode, reason });
   logger.warn(
-    { err: error, upstream, resource, mode, reason, ...context },
+    {
+      // Described, not serialised: the cause is the provider's AxiosError,
+      // request headers and API key included.
+      ...(error !== undefined ? { err: describeUpstreamError(error) } : {}),
+      upstream,
+      resource,
+      mode,
+      reason,
+      ...context,
+    },
     mode === "stale"
       ? `serving stale ${resource} after ${upstream} failure`
       : `serving empty ${resource} after ${upstream} failure`,

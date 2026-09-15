@@ -79,6 +79,54 @@ export const redactUrl = (url: string): string => {
 };
 
 /**
+ * What an upstream failure may say about itself in a log line. Never the
+ * error object: an AxiosError carries its request config, headers and API
+ * keys included, and pino serialises every enumerable property, `cause`
+ * included, straight into stdout and the OpenTelemetry pipeline.
+ */
+export type UpstreamErrorDescription = {
+  name: string;
+  message: string;
+  code?: string;
+  status?: number;
+  url?: string;
+  cause?: UpstreamErrorDescription;
+};
+
+/** Nested causes described past this depth are cut, so a cyclic cause chain
+ *  cannot overflow the stack inside the logger on the error path. */
+const MAX_CAUSE_DEPTH = 3;
+
+export const describeUpstreamError = (
+  error: unknown,
+  depth = 0,
+): UpstreamErrorDescription => {
+  if (isAxiosError(error)) {
+    return {
+      name: error.name,
+      message: error.message,
+      ...(error.code !== undefined ? { code: error.code } : {}),
+      ...(error.response?.status !== undefined
+        ? { status: error.response.status }
+        : {}),
+      ...(error.config?.url !== undefined
+        ? { url: redactUrl(error.config.url) }
+        : {}),
+    };
+  }
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      ...(error.cause !== undefined && depth < MAX_CAUSE_DEPTH
+        ? { cause: describeUpstreamError(error.cause, depth + 1) }
+        : {}),
+    };
+  }
+  return { name: "Error", message: String(error) };
+};
+
+/**
  * Builds the error for a provider that rejected our request: a bad API key, a
  * deleted query id, a wrong token id. Serving stale or empty data here would
  * hide a misconfiguration only we can fix, so it surfaces as a 502 and is
@@ -134,6 +182,14 @@ export const classifyAxiosFailure = (
   if (status !== undefined && !isDegradableUpstreamStatus(status)) {
     return upstreamRejectedRequest(upstream, status, path);
   }
-  logger.error({ err: error, path, status }, `${upstream} request failed`);
+  logger.error(
+    {
+      upstream,
+      status,
+      url: redactUrl(path),
+      err: describeUpstreamError(error),
+    },
+    `${upstream} request failed`,
+  );
   return new UpstreamUnavailableError(upstream, message, { cause: error });
 };

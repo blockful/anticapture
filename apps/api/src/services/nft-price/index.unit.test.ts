@@ -138,6 +138,23 @@ describe("NFTPriceService", () => {
       });
     });
 
+    it("quotes the ETH price in the currency the caller asked for", async () => {
+      repo.tokenPrice = "1000000000000000000";
+      let requested: string | null = null;
+      server.use(
+        http.get(ETH_MARKET_CHART_URL, ({ request }) => {
+          requested = new URL(request.url).searchParams.get("vs_currency");
+          return HttpResponse.json({ prices: [[1705276800000, 1]] });
+        }),
+      );
+
+      expect(await service.getTokenPrice("token", "eth")).toEqual({
+        data: "1.00",
+        degraded: false,
+      });
+      expect(requested).toBe("eth");
+    });
+
     // The hand-rolled copy of the classification here missed the 404 branch,
     // so NOUNS and LIL_NOUNS still 502 on a delisted ETH price while every
     // other DAO degraded.
