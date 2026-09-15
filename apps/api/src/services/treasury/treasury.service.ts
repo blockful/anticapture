@@ -58,16 +58,19 @@ export class TreasuryService {
       // Same policy as the price routes: serve the last good series while it
       // is young enough, and only then fall to empty.
       if (!(error instanceof UpstreamUnavailableError)) throw error;
+      // A cached empty series is no fallback at all, so it is reported and
+      // served as "empty" rather than as a stale value.
       const stale = this.provider.getStaleTreasury();
+      const hasStale = stale !== null && stale.length > 0;
       recordDegradedUpstream({
         upstream: error.upstream,
         resource: "treasury",
-        mode: stale ? "stale" : "empty",
+        mode: hasStale ? "stale" : "empty",
         reason: error.reason,
         error,
         context: { days },
       });
-      if (!stale) {
+      if (!hasStale) {
         return { data: { items: [], totalCount: 0 }, degraded: true };
       }
       data = filterWithFallback(stale, cutoffTimestamp);
@@ -129,7 +132,14 @@ export class TreasuryService {
       return { data: { items: [], totalCount: 0 }, degraded };
     }
 
-    if (tokenQuantities.size === 0) {
+    // Get last known quantity before cutoff to use as initial value for forward-fill
+    const lastKnownQuantity =
+      await this.repository.getLastTokenQuantityBeforeDate(cutoffTimestamp);
+
+    // No transfer inside the window is not "no treasury": the balance from
+    // before the window is what gets forward-filled across it. Only a DAO
+    // that never held the token has nothing to show.
+    if (tokenQuantities.size === 0 && lastKnownQuantity === null) {
       return { data: { items: [], totalCount: 0 }, degraded };
     }
 
@@ -141,10 +151,6 @@ export class TreasuryService {
     const timeline = createDailyTimeline(
       Math.min(...[...normalizedQuantities.keys(), ...normalizedPrices.keys()]),
     );
-
-    // Get last known quantity before cutoff to use as initial value for forward-fill
-    const lastKnownQuantity =
-      await this.repository.getLastTokenQuantityBeforeDate(cutoffTimestamp);
 
     // Forward-fill both quantities and prices
     const filledQuantities = forwardFill(

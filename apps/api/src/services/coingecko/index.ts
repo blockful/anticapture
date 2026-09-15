@@ -10,10 +10,9 @@ import {
 import { DaoIdEnum } from "@/lib/enums";
 import { StaleValueCache } from "@/lib/stale-cache";
 import {
-  isDegradableUpstreamStatus,
+  classifyAxiosFailure,
   PROVIDER_TIMEOUT_MS,
   UpstreamUnavailableError,
-  upstreamRejectedRequest,
 } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
@@ -175,17 +174,13 @@ export class CoingeckoService implements PriceProvider {
     try {
       return (await this.client.get<unknown>(path)).data;
     } catch (error) {
-      const status = axios.isAxiosError(error)
-        ? error.response?.status
-        : undefined;
-      if (status !== undefined && !isDegradableUpstreamStatus(status)) {
-        throw upstreamRejectedRequest("coingecko", status, path);
-      }
-      logger.error({ err: error, path, status }, "CoinGecko request failed");
-      throw new UpstreamUnavailableError(
+      // Same classification as every other provider: a 404 degrades under
+      // `not_found`, a 401 or 403 is a 502, the rest is an outage.
+      throw classifyAxiosFailure(
         "coingecko",
+        error,
+        path,
         "Failed to fetch data from CoinGecko",
-        { cause: error },
       );
     }
   }

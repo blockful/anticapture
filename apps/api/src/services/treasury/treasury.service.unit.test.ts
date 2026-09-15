@@ -64,9 +64,14 @@ const EMPTY_RESULT = { items: [], totalCount: 0 };
 
 class FakeTreasuryRepository implements ITreasuryRepository {
   private tokenQuantities: Map<number, bigint> = new Map();
+  private lastKnownQuantity: bigint | null = null;
 
   setTokenQuantities(quantities: Map<number, bigint>) {
     this.tokenQuantities = quantities;
+  }
+
+  setLastKnownQuantity(quantity: bigint | null) {
+    this.lastKnownQuantity = quantity;
   }
 
   async getTokenQuantities(
@@ -78,7 +83,7 @@ class FakeTreasuryRepository implements ITreasuryRepository {
   async getLastTokenQuantityBeforeDate(
     _cutoffTimestamp: number,
   ): Promise<bigint | null> {
-    return null;
+    return this.lastKnownQuantity;
   }
 }
 
@@ -248,7 +253,7 @@ describe("TreasuryService", () => {
 
     // Without this the gateway counts the 5xx against the DAO circuit breaker,
     // which is exactly what this route is supposed to survive.
-    it("degrades to unpriced points when CoinGecko is unavailable", async () => {
+    it("counts the degraded fallback when CoinGecko is unavailable", async () => {
       metricRepo.setTokenQuantities(new Map([[1700000000, 10n ** 18n]]));
       priceProvider.failWith(
         new UpstreamUnavailableError("coingecko", "CoinGecko down"),
@@ -260,7 +265,7 @@ describe("TreasuryService", () => {
         await service.getTokenTreasury(7, "asc", 18);
 
       expect(isDegraded).toBe(true);
-      expect(result.items.every((item) => item.value === 0)).toBe(true);
+      expect(result).toEqual({ items: [], totalCount: 0 });
       expect(degraded.recorded()).toEqual([
         {
           upstream: "coingecko",
@@ -299,6 +304,21 @@ describe("TreasuryService", () => {
 
       await expect(service.getTokenTreasury(7, "asc", 18)).rejects.toBe(ourBug);
       expect(degraded.recorded()).toEqual([]);
+    });
+
+    // The token quantities query only returns transfers inside the window. A
+    // treasury that did not move in the last week still has its balance,
+    // carried in from before the window and forward-filled across it.
+    it("carries the balance from before the window when nothing moved inside it", async () => {
+      metricRepo.setTokenQuantities(new Map());
+      metricRepo.setLastKnownQuantity(10n ** 18n);
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP - ONE_DAY, 2]]));
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+      const { data: result } = await service.getTokenTreasury(7, "asc", 18);
+
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(result.items.every((item) => item.value === 2)).toBe(true);
     });
 
     it("should return empty when repository and priceProvider return empty", async () => {

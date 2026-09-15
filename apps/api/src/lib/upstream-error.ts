@@ -77,7 +77,10 @@ const redactUrl = (url: string): string => {
  * counted by the HTTP error metrics and the HighErrorRate alert.
  *
  * 502 is >= 500, so the gateway counts it against the circuit breaker. That is
- * intended: a misconfiguration must be loud, and the breaker is per route.
+ * intended for a bad key: a misconfiguration must be loud. It is also why a
+ * 404 is not routed here (see `classifyAxiosFailure`): the breaker is keyed
+ * by DAO until per-route breakers land, and a renamed slug on one chart must
+ * not take every route of the DAO down with it.
  */
 export const upstreamRejectedRequest = (
   upstream: Upstream,
@@ -104,6 +107,19 @@ export const classifyAxiosFailure = (
   message: string,
 ): HTTPException => {
   const status = isAxiosError(error) ? error.response?.status : undefined;
+  // A 404 is a resource the provider says is gone: a renamed DefiLlama slug,
+  // a deleted Dune query, a token CoinGecko no longer lists. Before this
+  // classification existed the route served an empty 200, and a 502 here
+  // would trip the DAO's gateway breaker over one chart. It degrades under
+  // `not_found`, which the log, the metric and the alert keep apart from an
+  // outage, since it will not clear on its own. A 401 or 403 stays loud.
+  if (status === 404) {
+    logger.error({ path, status }, `${upstream} says the resource is gone`);
+    return new UpstreamUnavailableError(upstream, message, {
+      cause: error,
+      reason: "not_found",
+    });
+  }
   if (status !== undefined && !isDegradableUpstreamStatus(status)) {
     return upstreamRejectedRequest(upstream, status, path);
   }

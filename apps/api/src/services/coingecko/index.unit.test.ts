@@ -78,13 +78,29 @@ describe("CoingeckoService", () => {
       });
     });
 
-    // A 404 means the token id is wrong, which is our misconfiguration. It has
-    // to stay loud rather than degrade to an empty chart forever.
-    it("throws HTTPException(502) when CoinGecko rejects the request", async () => {
+    // A 404 means the token id is gone. It degrades under its own reason so
+    // the chart does not 5xx, and the not_found reason keeps it loud in the
+    // log, the metric and the alert.
+    it("degrades a 404 under the not_found reason", async () => {
       server.use(
         http.get(
           `${API_URL}/coins/uniswap/market_chart`,
           () => new HttpResponse(null, { status: 404 }),
+        ),
+      );
+
+      await expect(service.getHistoricalTokenData(7)).rejects.toMatchObject({
+        upstream: "coingecko",
+        reason: "not_found",
+      });
+    });
+
+    // A bad key is fixed by us rather than by waiting, so it stays a 502.
+    it("throws HTTPException(502) when CoinGecko rejects the key", async () => {
+      server.use(
+        http.get(
+          `${API_URL}/coins/uniswap/market_chart`,
+          () => new HttpResponse(null, { status: 401 }),
         ),
       );
 

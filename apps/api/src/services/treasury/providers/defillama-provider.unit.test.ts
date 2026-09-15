@@ -193,9 +193,22 @@ describe("DefiLlamaProvider", () => {
     });
   });
 
-  it("throws HTTPException(502) when DefiLlama rejects the request", async () => {
+  // A renamed protocol slug 404s persistently. A 502 would trip the DAO's
+  // gateway breaker over one chart, so it degrades under not_found instead.
+  it("degrades a 404 under the not_found reason", async () => {
     server.use(
       http.get(BASE_URL, () => new HttpResponse(null, { status: 404 })),
+    );
+
+    await expect(provider.fetchTreasury(0)).rejects.toMatchObject({
+      upstream: "defillama",
+      reason: "not_found",
+    });
+  });
+
+  it("throws HTTPException(502) when DefiLlama rejects the request", async () => {
+    server.use(
+      http.get(BASE_URL, () => new HttpResponse(null, { status: 403 })),
     );
 
     await expect(provider.fetchTreasury(0)).rejects.toMatchObject({
