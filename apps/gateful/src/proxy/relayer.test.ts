@@ -83,6 +83,8 @@ describe("relayer proxy route", () => {
         new Response(JSON.stringify({ error: "internal" }), { status: 500 }),
       );
 
+    // A relayer sees far fewer than minimumRequests (10) per window, so the
+    // consecutive-failure rule (default 5) is what opens it.
     for (let i = 0; i < 5; i++) {
       await app.request("/uni/relay/vote");
     }
