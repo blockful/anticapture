@@ -1,5 +1,18 @@
 # @anticapture/dashboard
 
+## 2.16.0
+
+### Minor Changes
+
+- [#2146](https://github.com/blockful/anticapture/pull/2146) [`c7aed8c`](https://github.com/blockful/anticapture/commit/c7aed8c31434a3e92d978c8572b315590b8a232d) Thanks [@brunod-e](https://github.com/brunod-e)! - Add a recursive calldata decoder to proposal actions and a standalone /tools/decoder page.
+
+- [#2155](https://github.com/blockful/anticapture/pull/2155) [`55af56b`](https://github.com/blockful/anticapture/commit/55af56b0fcd0bfabdbcaad62542915a16c0695b8) Thanks [@brunod-e](https://github.com/brunod-e)! - Queue and execute proposals through the relayer for free when it is funded, with the wallet flow as fallback.
+
+### Patch Changes
+
+- [#2150](https://github.com/blockful/anticapture/pull/2150) [`3935d42`](https://github.com/blockful/anticapture/commit/3935d42ce5b2aa24788f449e1600834ecee9bbbd) Thanks [@brunod-e](https://github.com/brunod-e)! - Stop retrying failed HTTP requests in React Query (retry network errors once): each retry against a failing
+  route counted toward the gateway circuit breaker, so one page view could take a DAO offline.
+
 ## 2.15.2
 
 ### Patch Changes
