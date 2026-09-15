@@ -301,8 +301,17 @@ const decodeNode = async (
   }
 
   // 6. No ABI anywhere: word-shape-guessed params, permanently flagged.
+  // Guessed rows spend from the tree budget like decoded ones would: a batch
+  // of unknown calls rendering 64 words each would otherwise clear the cap
+  // that bounds everything else, address chips and enrichment queries
+  // included. The remainder stays whole in the trailing bytes leaf.
   if (!fn) {
-    node.params = guessWords(node.raw);
+    const allowed = Math.min(
+      MAX_PARAM_NODES,
+      Math.max(treeParams.nodesLeft, 0),
+    );
+    node.params = guessWords(node.raw, allowed);
+    treeParams.nodesLeft -= node.params.length;
     node.warnings.push({
       code: "guessed-types",
       message:

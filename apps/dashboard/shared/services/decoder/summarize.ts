@@ -35,6 +35,25 @@ const roleText = (param: DecodedParam | undefined): string => {
   return `role ${shortAddress(param.value)}`;
 };
 
+/**
+ * approve/transferFrom carry the same signature on ERC-20 and ERC-721. A
+ * verified or uploaded ABI settles it by naming the parameter; the canonical
+ * table and the signature databases cannot, and until the target has
+ * answered decimals() the uint is an amount or a token id. The sentence must
+ * not pick one for the reader.
+ */
+const isAmbiguousUnits = (
+  node: DecodedCall,
+  param: DecodedParam | undefined,
+): boolean =>
+  param !== undefined &&
+  param.humanized?.kind !== "tokenAmount" &&
+  node.abiSource !== "verified" &&
+  node.abiSource !== "uploaded";
+
+const unitsText = (param: DecodedParam | undefined): string =>
+  `${param?.humanized?.text ?? param?.value ?? "?"} units, an ERC-20 amount or a token id`;
+
 type Template = (node: DecodedCall) => string | null;
 
 // approve/transferFrom are shared between ERC-20 and ERC-721; a param the
@@ -53,12 +72,18 @@ const TEMPLATES: Record<string, Template> = {
     if (tokenId) {
       return `Approves ${addressText(paramAt(node, 0))} to manage token #${tokenId.value}.`;
     }
+    if (isAmbiguousUnits(node, paramAt(node, 1))) {
+      return `Approves ${addressText(paramAt(node, 0))} over ${unitsText(paramAt(node, 1))}.`;
+    }
     return `Approves ${addressText(paramAt(node, 0))} to spend ${amountText(paramAt(node, 1))}.`;
   },
   "transferFrom(address,address,uint256)": (node) => {
     const tokenId = tokenIdParam(node);
     if (tokenId) {
       return `Transfers token #${tokenId.value} from ${addressText(paramAt(node, 0))} to ${addressText(paramAt(node, 1))}.`;
+    }
+    if (isAmbiguousUnits(node, paramAt(node, 2))) {
+      return `Transfers ${unitsText(paramAt(node, 2))}, from ${addressText(paramAt(node, 0))} to ${addressText(paramAt(node, 1))}.`;
     }
     return `Transfers ${amountText(paramAt(node, 2))} from ${addressText(paramAt(node, 0))} to ${addressText(paramAt(node, 1))}.`;
   },

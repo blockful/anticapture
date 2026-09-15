@@ -94,3 +94,26 @@ describe("guessWords", () => {
     expect(guessWords(SELECTOR as Hex)).toEqual([]);
   });
 });
+
+describe("guessWords under a row budget", () => {
+  const address = "26d5eb37002152186ec86b9835ecaf32846bc0dd";
+  const words = Array.from({ length: 6 }, () => address.padStart(64, "0"));
+  const raw = `0xdeadbeef${words.join("")}` as Hex;
+
+  test("spends the budget on words and one folded remainder, never more rows", () => {
+    const params = guessWords(raw, 2);
+    expect(params).toHaveLength(2);
+    expect(params[0].type).toBe("address");
+    expect(params[1]).toMatchObject({ name: "arg1", type: "bytes" });
+    // The folded words are all still there, byte for byte.
+    expect(params[1].value).toBe(`0x${words.slice(1).join("")}`);
+    // A budget that fits every word needs no remainder row.
+    expect(guessWords(raw, 6)).toHaveLength(6);
+  });
+
+  test("a zero budget keeps the whole body in one bytes leaf", () => {
+    expect(guessWords(raw, 0)).toEqual([
+      { name: "arg0", type: "bytes", value: `0x${words.join("")}` },
+    ]);
+  });
+});

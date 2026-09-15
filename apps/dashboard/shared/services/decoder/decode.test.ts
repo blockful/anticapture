@@ -1420,3 +1420,31 @@ describe("batch summaries by kind", () => {
     );
   });
 });
+
+describe("guessed parameters spend the tree budget", () => {
+  test("a batch of unknown calls cannot render more rows than the tree allows", async () => {
+    // 20 calls nobody has an ABI for, each carrying 64 address-shaped words:
+    // 1,280 guessed rows, each an identity chip with an enrichment query.
+    const word = RECIPIENT.slice(2).toLowerCase().padStart(64, "0");
+    const unknown = `0xdeadbeef${word.repeat(64)}` as Hex;
+    const node = await decode(
+      multiSend(
+        Array.from({ length: 20 }, () => ({
+          operation: 0,
+          to: RECIPIENT,
+          value: 0n,
+          data: unknown,
+        })),
+      ),
+      { target: MULTI_SEND },
+    );
+    expect(node.subcalls).toHaveLength(20);
+    expect(countParamNodes(node)).toBeLessThanOrEqual(MAX_TREE_PARAM_NODES);
+    // Nothing is dropped: what the budget would not render as words stays
+    // whole in each call's trailing bytes leaf.
+    for (const child of node.subcalls!) {
+      const last = child.params[child.params.length - 1];
+      expect(child.raw.endsWith(last.value.slice(2))).toBe(true);
+    }
+  });
+});

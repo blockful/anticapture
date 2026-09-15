@@ -1,4 +1,4 @@
-import { toFunctionSelector } from "viem";
+import { keccak256, stringToBytes, toFunctionSelector } from "viem";
 
 import {
   getDetector,
@@ -281,15 +281,52 @@ describe("governor propose zips the proposal arrays into actions", () => {
     expect(complete.calldata).toBe("0xabcd");
   });
 
-  test("a Bravo signature the governor could not hash leaves the arguments raw", () => {
+  test("a Bravo signature is hashed verbatim, as the governor does", () => {
+    // A space the author left in the string is part of what gets hashed on
+    // chain; canonicalising it would decode the function they meant, which
+    // is not the one that will run.
+    const padded = "transfer(address, uint256)";
     const [call] = extract(PROPOSE_BRAVO, [
       [TARGET],
       [0n],
-      ["not a signature("],
+      [padded],
       ["0xabcd"],
       "",
     ]);
-    expect(call.calldata).toBe("0xabcd");
+    expect(call.calldata).toBe(
+      `${keccak256(stringToBytes(padded)).slice(0, 10)}abcd`,
+    );
+    expect(
+      call.calldata.startsWith(toFunctionSelector("transfer(address,uint256)")),
+    ).toBe(false);
+    // Strings that are not signatures at all still hash to something.
+    expect(
+      extract(PROPOSE_BRAVO, [
+        [TARGET],
+        [0n],
+        ["not a signature("],
+        ["0x"],
+        "",
+      ])[0].calldata,
+    ).toHaveLength(10);
+  });
+
+  test("execTransaction with an operation outside the enum yields nothing executable", () => {
+    const args = [TARGET, 1n, "0xabcd", 2, 0n, 0n, 0n, OTHER, OTHER, "0x"];
+    expect(extract(EXEC_TRANSACTION, args)).toEqual([]);
+    expect(warningsFor(EXEC_TRANSACTION, args)).toEqual([
+      expect.objectContaining({
+        code: "would-revert",
+        message: expect.stringContaining("Operation 2"),
+      }),
+    ]);
+    // 0 and 1 stay untouched.
+    expect(
+      extract(EXEC_TRANSACTION, [...args.slice(0, 3), 0, ...args.slice(4)]),
+    ).toHaveLength(1);
+    expect(
+      warningsFor(EXEC_TRANSACTION, [...args.slice(0, 3), 1, ...args.slice(4)]),
+    ).toEqual([expect.objectContaining({ code: "delegatecall" })]);
   });
 
   test.each([PROPOSE, PROPOSE_BRAVO])(

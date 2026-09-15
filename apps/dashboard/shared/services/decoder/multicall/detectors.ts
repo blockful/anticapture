@@ -1,6 +1,8 @@
 import {
   getAddress,
+  keccak256,
   parseAbiItem,
+  stringToBytes,
   toFunctionSelector,
   toFunctionSignature,
   type AbiFunction,
@@ -135,6 +137,24 @@ const DELEGATECALL_WARNING: DecodeWarning = {
   message:
     "Runs as a delegatecall: the target's code executes in the Safe's own context, so its effects apply to the Safe and not to the target contract.",
 };
+
+/**
+ * Safe's `operation` is an enum of exactly call (0) and delegatecall (1).
+ * Solidity reverts on any other value before the transaction runs, so a
+ * hand-crafted 2 cannot execute and must not be rendered as if it did.
+ */
+const isSafeOperation = (value: unknown): value is 0 | 1 =>
+  value === 0 || value === 1;
+
+const unsupportedSafeOperation = (args: readonly unknown[]): DecodeWarning[] =>
+  isSafeOperation(args[3])
+    ? []
+    : [
+        {
+          code: "would-revert",
+          message: `Operation ${String(args[3])} is not a Safe operation: only call (0) and delegatecall (1) exist, so this transaction would revert and its call is not decoded.`,
+        },
+      ];
 
 /** The extra fields a delegatecall child carries, or nothing. */
 const delegatecallPolicy = (
@@ -321,24 +341,19 @@ const batch = (
 
 /**
  * Governor Bravo splits each action into a `signatures[i]` string and a
- * `calldatas[i]` blob of ABI-encoded arguments WITHOUT the selector; the
- * governor prepends `bytes4(keccak256(signature))` at execution. An empty
- * signature means the calldata is already complete. Reassembled here so the
- * child decodes like any other call.
+ * `calldatas[i]` blob of ABI-encoded arguments WITHOUT the selector; at
+ * execution the governor prepends `bytes4(keccak256(bytes(signature)))`,
+ * hashing the string verbatim, whitespace, typos and all. The same hash is
+ * taken here, never a parsed and canonicalised one: a padded signature
+ * selects nothing on chain, and the decode must land on nothing too rather
+ * than on the function the author meant. An empty signature means the
+ * calldata is already complete.
  */
 const bravoCalldata = (signature: unknown, payload: unknown): Hex => {
   const args = isHexValue(payload) ? payload : "0x";
   if (typeof signature !== "string" || signature === "") return args;
-  // Hashed as stored, whitespace included: the governor does not trim, so a
-  // padded signature selects a function that will not run, and the decode
-  // must not pretend otherwise.
-  try {
-    return `${toFunctionSelector(signature)}${args.slice(2)}`;
-  } catch {
-    // Not a signature the governor could hash either: the action would
-    // revert, and the raw arguments are the most honest thing to show.
-    return args;
-  }
+  const selector = keccak256(stringToBytes(signature)).slice(0, 10);
+  return `${selector}${args.slice(2)}` as Hex;
 };
 
 const bravoBatch = (
@@ -376,6 +391,7 @@ const DETECTOR_DEFINITIONS: Array<{
       unpackedParams: [],
       payloadParam: 2,
       extract: (args) => {
+        if (!isSafeOperation(args[3])) return [];
         // operation 1 is a delegatecall: the code at `to` runs with the
         // Safe's own storage and balance, and NO ETH moves to the target, so
         // extracting the value would let the child summarize a transfer that
@@ -386,9 +402,12 @@ const DETECTOR_DEFINITIONS: Array<{
         }
         return single(args[0], args[1], args[2]);
       },
-      warningsFor: carriesDelegatecall(
-        "This Safe transaction is a delegatecall: the inner code runs with the Safe's own storage and balance.",
-      ),
+      warningsFor: (subcalls, args) => [
+        ...carriesDelegatecall(
+          "This Safe transaction is a delegatecall: the inner code runs with the Safe's own storage and balance.",
+        )(subcalls),
+        ...unsupportedSafeOperation(args),
+      ],
     },
   },
   {

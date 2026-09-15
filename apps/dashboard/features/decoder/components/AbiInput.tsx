@@ -52,14 +52,21 @@ export const AbiInput = ({ onAbiChange }: AbiInputProps) => {
       const text = await file.text();
       const parsed = parseAbiJson(text);
       if (!parsed) {
+        // The file the reader picked replaces whatever was there, valid or
+        // not: keeping the previous ABI live behind an error message would
+        // decode with something the field no longer claims to hold.
+        setAbiText("");
         setError("Not a valid ABI JSON file.");
+        applyAbi(null);
         return;
       }
       setAbiText(JSON.stringify(parsed, null, 2));
       setError(null);
       applyAbi(parsed);
     } catch {
+      setAbiText("");
       setError("Could not read the file.");
+      applyAbi(null);
     }
   };
 

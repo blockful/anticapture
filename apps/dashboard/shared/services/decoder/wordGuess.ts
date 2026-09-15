@@ -56,15 +56,29 @@ const guessWord = (word: string, index: number): DecodedParam => {
 /**
  * Best-effort parameter tree for calldata with no known ABI: the post-selector
  * data split into 32-byte words with word-shape-guessed types. Callers pair
- * this with a permanent "guessed types" warning.
+ * this with a permanent "guessed types" warning. `maxRows` is the caller's
+ * remaining row budget, the folded remainder's row included; whatever is not
+ * rendered as words stays whole in the trailing bytes leaf, so nothing is
+ * lost, only folded.
  */
-export const guessWords = (calldata: Hex): DecodedParam[] => {
+export const guessWords = (
+  calldata: Hex,
+  maxRows: number = Number.POSITIVE_INFINITY,
+): DecodedParam[] => {
   const body = calldata.slice(10); // strip 0x + 4-byte selector
   if (body.length === 0) return [];
 
   const params: DecodedParam[] = [];
   const wholeWords = Math.floor(body.length / WORD_HEX_CHARS);
-  const renderedWords = Math.min(wholeWords, MAX_WORDS);
+  const budget = Math.max(maxRows, 0);
+  let renderedWords = Math.min(wholeWords, MAX_WORDS, budget);
+  // The folded remainder is a row too, so when there will be one it comes
+  // out of the same budget. A budget of zero still yields that one leaf,
+  // since a call cannot render as nothing at all.
+  const hasRemainder = renderedWords * WORD_HEX_CHARS < body.length;
+  if (hasRemainder && renderedWords > 0 && renderedWords + 1 > budget) {
+    renderedWords -= 1;
+  }
 
   for (let i = 0; i < renderedWords; i++) {
     const word = body.slice(i * WORD_HEX_CHARS, (i + 1) * WORD_HEX_CHARS);
