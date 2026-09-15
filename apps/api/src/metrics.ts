@@ -31,3 +31,16 @@ export const rpcRequestTotal: Counter = meter.createCounter(
     description: "Total number of RPC requests sent to the RPC node",
   },
 );
+
+/**
+ * Third-party fallbacks are served as 200s, so the HTTP error metrics never see
+ * them. The `DegradedUpstreamData` rule in `infra/monitoring/alerts.yml` alerts
+ * on this counter; rename either side and the alert goes silent.
+ */
+export const degradedUpstreamResponsesTotal: Counter = meter.createCounter(
+  "degraded_upstream_responses_total",
+  {
+    description:
+      "Responses served with stale or empty data because a third-party upstream failed",
+  },
+);

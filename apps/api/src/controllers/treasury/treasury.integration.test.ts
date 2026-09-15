@@ -1,14 +1,27 @@
 import { OpenAPIHono as Hono } from "@hono/zod-openapi";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 import { parseEther } from "viem";
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-
-import { TreasuryRepository } from "@/repositories/treasury";
 import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
+import {
+  ITreasuryRepository,
   TreasuryService,
   TreasuryProvider,
   LiquidTreasuryDataPoint,
   PriceProvider,
 } from "@/services/treasury";
+import { createTreasuryService } from "@/services/treasury/treasury-provider-factory";
 
 import { treasury } from "./index";
 
@@ -25,33 +38,50 @@ class FakeTreasuryProvider implements TreasuryProvider {
     }));
   }
 
+  /** Last good series this fake would serve after a failed fetch. */
+  private stale: LiquidTreasuryDataPoint[] | null = null;
+
+  setStale(data: { date: number; value: number }[] | null) {
+    this.stale =
+      data &&
+      data.map((item) => ({ date: item.date, liquidTreasury: item.value }));
+  }
+
   async fetchTreasury(
     _cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
     return this.data;
   }
+
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.stale;
+  }
 }
 
 class FakePriceProvider implements PriceProvider {
   private prices: Map<number, number> = new Map();
+  private failure: unknown;
 
   setPrices(prices: Map<number, number>) {
     this.prices = prices;
   }
 
-  async getHistoricalPricesMap(_days: number): Promise<Map<number, number>> {
-    return this.prices;
+  /** Makes the next lookup reject, to exercise the degraded path. */
+  failWith(error: unknown) {
+    this.failure = error;
+  }
+
+  async getHistoricalPricesMap(_days: number) {
+    if (this.failure) throw this.failure;
+    return { data: this.prices, degraded: false };
   }
 }
 
 /**
- * FakeTreasuryRepository implements the same interface as TreasuryRepository
- * This enables structural typing without explicit casting
+ * Implements the interface TreasuryService actually depends on, so it is
+ * passed straight in with no cast.
  */
-class FakeTreasuryRepository implements Pick<
-  TreasuryRepository,
-  "getTokenQuantities" | "getLastTokenQuantityBeforeDate"
-> {
+class FakeTreasuryRepository implements ITreasuryRepository {
   private tokenQuantities: Map<number, bigint> = new Map();
   private lastKnownQuantity: bigint | null = null;
 
@@ -92,6 +122,12 @@ function createTestApp(
   return app;
 }
 
+const DEFILLAMA_URL = "https://defillama.test/protocol/anticapture";
+const server = setupServer();
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 describe("Treasury Controller", () => {
   const FIXED_DATE = new Date("2026-01-15T00:00:00Z");
   const FIXED_TIMESTAMP = Math.floor(FIXED_DATE.getTime() / 1000);
@@ -119,12 +155,58 @@ describe("Treasury Controller", () => {
 
   describe("GET /treasury/liquid", () => {
     beforeEach(() => {
-      service = new TreasuryService(
-        metricsRepo as unknown as TreasuryRepository,
-        fakeProvider,
-        undefined,
-      );
+      service = new TreasuryService(metricsRepo, fakeProvider, undefined);
       app = createTestApp(service);
+    });
+
+    // A stale treasury series must not sit in a downstream cache once the
+    // provider recovers. Driven through the real provider factory and the
+    // real DefiLlama provider, with DefiLlama itself answered by MSW: the
+    // stale series is what the provider kept from its own earlier success.
+    it("returns 200 with no-store when the provider fails but holds stale data", async () => {
+      const service = createTreasuryService(
+        metricsRepo,
+        new FakePriceProvider(),
+        {
+          id: "DEFILLAMA",
+          apiUrl: DEFILLAMA_URL,
+        },
+      );
+      const degradedApp = createTestApp(service);
+      server.use(
+        http.get(DEFILLAMA_URL, () =>
+          HttpResponse.json({
+            chainTvls: {
+              Ethereum: {
+                tvl: [{ date: FIXED_TIMESTAMP, totalLiquidityUSD: 1000000 }],
+              },
+            },
+          }),
+        ),
+      );
+      const warm = await degradedApp.request("/treasury/liquid?days=365d");
+      expect(warm.status).toBe(200);
+      expect(warm.headers.get("Cache-Control")).not.toBe("no-store");
+
+      // The provider's own cache is what fetchTreasury reads first, so it is
+      // aged past its freshness before DefiLlama goes down.
+      vi.advanceTimersByTime(ONE_DAY * 1000 + 1);
+      server.use(
+        http.get(DEFILLAMA_URL, () => new HttpResponse(null, { status: 500 })),
+      );
+
+      const res = await degradedApp.request("/treasury/liquid?days=365d");
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
+      // The series is carried forward to today, which is one day later now.
+      expect(await res.json()).toEqual({
+        items: [
+          { date: FIXED_TIMESTAMP, value: 1000000 },
+          { date: FIXED_TIMESTAMP + ONE_DAY, value: 1000000 },
+        ],
+        totalCount: 2,
+      });
     });
 
     it("should return 200 with valid response structure", async () => {
@@ -210,11 +292,7 @@ describe("Treasury Controller", () => {
   describe("GET /treasury/dao-token", () => {
     beforeEach(() => {
       priceRepo = new FakePriceProvider();
-      service = new TreasuryService(
-        metricsRepo as unknown as TreasuryRepository,
-        fakeProvider,
-        priceRepo,
-      );
+      service = new TreasuryService(metricsRepo, fakeProvider, priceRepo);
       app = createTestApp(service);
     });
 
@@ -234,12 +312,24 @@ describe("Treasury Controller", () => {
       });
     });
 
-    it("should return empty when price provider is not configured", async () => {
-      const service = new TreasuryService(
-        metricsRepo as unknown as TreasuryRepository,
-        undefined,
-        undefined,
+    // A 5xx here would count against the DAO circuit breaker in the gateway,
+    // which is the outage this route is meant to ride out.
+    it("returns 200 with no-store when CoinGecko is unavailable", async () => {
+      metricsRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther("100")]]),
       );
+      priceRepo.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+
+      const res = await app.request("/treasury/dao-token?days=7d");
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
+    });
+
+    it("should return empty when price provider is not configured", async () => {
+      const service = new TreasuryService(metricsRepo, undefined, undefined);
       const app = createTestApp(service);
 
       const res = await app.request("/treasury/dao-token?days=7d");
@@ -254,11 +344,7 @@ describe("Treasury Controller", () => {
   describe("GET /treasury/total", () => {
     beforeEach(() => {
       priceRepo = new FakePriceProvider();
-      service = new TreasuryService(
-        metricsRepo as unknown as TreasuryRepository,
-        fakeProvider,
-        priceRepo,
-      );
+      service = new TreasuryService(metricsRepo, fakeProvider, priceRepo);
       app = createTestApp(service);
     });
 

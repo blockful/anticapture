@@ -200,6 +200,44 @@ groups:
             deadlocks in the last 5 minutes. Inspect blocked statements and cache database
             contention.
 
+      # A DAO API served stale or empty third-party data instead of failing.
+      # These responses are 200s on purpose, so HighErrorRate never sees them.
+      # No `for`: the 15m increase window already requires the condition to have
+      # happened, so waiting would only delay the page. keep_firing_for holds the
+      # alert open across the scrape gaps of a low-traffic route.
+      # A counter series is born at 1 with its first degraded response and
+      # `increase()` sees no change on a series it has one sample of, so the
+      # first fallback of a new label set would never page. The second half
+      # catches series that did not exist 15m ago.
+      - alert: DegradedUpstreamData
+        expr: >
+          (
+            sum by (job, upstream, resource, mode, reason) (
+              increase(degraded_upstream_responses_total{job=~"anticapture-.*-api"}[15m])
+            ) > 0
+          )
+          or
+          (
+            sum by (job, upstream, resource, mode, reason) (
+              degraded_upstream_responses_total{job=~"anticapture-.*-api"}
+              unless
+              degraded_upstream_responses_total{job=~"anticapture-.*-api"} offset 15m
+            ) > 0
+          )
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] {{ $labels.job }} is serving {{ $labels.mode }} {{ $labels.resource }}"
+          description: >
+            {{ $labels.job }} answered {{ printf "%.0f" $value }} requests in the last 15 minutes
+            with {{ $labels.mode }} data for {{ $labels.resource }} because {{ $labels.upstream }}
+            reported {{ $labels.reason }}. Clients see a 200 with stale or empty values, not an
+            error. A reason of not_found will not clear on its own: the provider says that query
+            or resource is gone, so check the query id. Otherwise check the provider status page,
+            the API warn logs for "after {{ $labels.upstream }} failure", and the key and rate
+            limits.
+
       # CPU usage above 80% for 5 minutes. Aggregated per (job, instance): a DAO
       # API job can have several replicas behind DNS discovery, each with its
       # own process_cpu_time_seconds_total series, so summing by job alone lets

@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axios";
-import { HTTPException } from "hono/http-exception";
 
+import { classifyAxiosFailure } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 
 import { LiquidTreasuryDataPoint } from "../types";
@@ -42,25 +42,32 @@ export class CompoundProvider implements TreasuryProvider {
 
     if (cached !== null) return this.filterData(cached, cutoffTimestamp);
 
+    const path = `/treasury?order=DESC&limit=${LIMIT}`;
+    let response;
     try {
       logger.info(
         { cutoffTimestamp, limit: LIMIT },
         "fetching treasury data from Compound API",
       );
-      const response = await this.client.get<CompoundResponse>(
-        `/treasury?order=DESC&limit=${LIMIT}`,
-      );
-      const data = this.transformData(response.data);
-      this.cache.set(data);
-
-      return this.filterData(data, cutoffTimestamp);
+      response = await this.client.get<CompoundResponse>(path);
     } catch (error) {
-      logger.error({ err: error }, "compound API fetch failed");
-      throw new HTTPException(503, {
-        message: "Failed to fetch total assets data",
-        cause: error,
-      });
+      throw classifyAxiosFailure(
+        "compound",
+        error,
+        path,
+        "Failed to fetch total assets data",
+      );
     }
+
+    // Outside the try on purpose: a transform failure is our bug, not theirs.
+    const data = this.transformData(response.data);
+    this.cache.set(data);
+
+    return this.filterData(data, cutoffTimestamp);
+  }
+
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.cache.getStale();
   }
 
   private transformData(data: CompoundResponse): LiquidTreasuryDataPoint[] {

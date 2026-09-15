@@ -1,12 +1,13 @@
 import axios from "axios";
 
+import { PROVIDER_TIMEOUT_MS } from "@/lib/upstream-error";
 import { logger } from "@/logger";
-import { TreasuryRepository } from "@/repositories/treasury";
 
 import { CompoundProvider, TreasuryProvider } from "./providers";
 import { DefiLlamaProvider } from "./providers/defillama-provider";
 import { DuneProvider } from "./providers/dune-provider";
-import { TreasuryService } from "./treasury.service";
+import { type ITreasuryRepository, TreasuryService } from "./treasury.service";
+
 import { PriceProvider } from "./types";
 
 export type TreasuryProviderConfig =
@@ -32,6 +33,7 @@ function resolveTreasuryProvider(
       return new DuneProvider(
         axios.create({
           baseURL: config.apiUrl,
+          timeout: PROVIDER_TIMEOUT_MS,
         }),
         config.apiKey,
       );
@@ -39,12 +41,14 @@ function resolveTreasuryProvider(
       return new DefiLlamaProvider(
         axios.create({
           baseURL: config.apiUrl,
+          timeout: PROVIDER_TIMEOUT_MS,
         }),
       );
     case "COMPOUND":
       return new CompoundProvider(
         axios.create({
           baseURL: config.apiUrl,
+          timeout: PROVIDER_TIMEOUT_MS,
         }),
       );
   }
@@ -90,7 +94,7 @@ export function parseTreasuryProviderConfig(
  * @returns TreasuryService instance
  */
 export function createTreasuryService(
-  repository: TreasuryRepository,
+  repository: ITreasuryRepository,
   tokenPriceProvider: PriceProvider,
   config?: TreasuryProviderConfig,
 ): TreasuryService {

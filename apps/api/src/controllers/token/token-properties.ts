@@ -1,6 +1,10 @@
 import { OpenAPIHono as Hono, createRoute, z } from "@hono/zod-openapi";
 
 import { CONTRACT_ADDRESSES } from "@/lib/constants";
+import {
+  DEGRADED_CACHE_HEADERS,
+  type MaybeDegraded,
+} from "@/lib/degraded-upstream";
 import { DaoIdEnum } from "@/lib/enums";
 import {
   ErrorResponseSchema,
@@ -14,7 +18,7 @@ export interface TokenPriceClient {
   getTokenPrice(
     tokenContractAddress: string,
     targetCurrency: string,
-  ): Promise<string>;
+  ): Promise<MaybeDegraded<string>>;
 }
 
 const TokenPropertiesQuerySchema = z
@@ -69,7 +73,7 @@ export function token(
 
       const tokenContractAddress = CONTRACT_ADDRESSES[daoId].token.address;
       const tokenProps = await service.getTokenProperties(daoId);
-      const priceData = await client.getTokenPrice(
+      const { data: priceData, degraded } = await client.getTokenPrice(
         tokenContractAddress,
         currency,
       );
@@ -81,7 +85,12 @@ export function token(
         );
       }
 
-      return context.json(TokenMapper.toApi(tokenProps, priceData), 200);
+      // A stale price must not sit in a downstream cache for the route's hour.
+      return context.json(
+        TokenMapper.toApi(tokenProps, priceData),
+        200,
+        degraded ? DEGRADED_CACHE_HEADERS : undefined,
+      );
     },
   );
 }

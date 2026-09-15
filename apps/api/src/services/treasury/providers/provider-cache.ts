@@ -1,47 +1,47 @@
 import { LiquidTreasuryDataPoint } from "../types";
 
-type CacheSchema = {
-  timestamp: number;
+const CACHE_TTL_MS = 60 * 60 * 1000 * 24; // 24 hours
+
+/**
+ * Past this, serving the last known treasury is worse than serving none.
+ *
+ * It must stay larger than the fresh TTL: a value is only ever served stale
+ * once it has expired, so a cap equal to the TTL would make stale unreachable.
+ * One extra day is the window an outage may be ridden out for. Same rule as
+ * `REVENUE_STALE_MAX_AGE_MS` in the revenue cache.
+ */
+const STALE_MAX_AGE_MS = CACHE_TTL_MS + 60 * 60 * 1000 * 24;
+
+type CacheEntry = {
+  fetchedAt: number;
   data: LiquidTreasuryDataPoint[];
 };
 
 export class TreasuryProviderCache {
-  private readonly CACHE_TTL_MS = 60 * 60 * 1000 * 24; // 24 hours
-  private readonly cache = new Map<
-    keyof CacheSchema,
-    CacheSchema[keyof CacheSchema]
-  >();
+  private entry: CacheEntry | undefined;
 
   get(): LiquidTreasuryDataPoint[] | null {
-    const timestamp = this.getCache("timestamp");
+    if (!this.entry) return null;
+    if (Date.now() - this.entry.fetchedAt > CACHE_TTL_MS) return null;
+    return this.entry.data;
+  }
 
-    if (!timestamp) {
-      return null;
-    }
-
-    const isExpired = Date.now() - timestamp > this.CACHE_TTL_MS;
-    if (isExpired) {
-      this.clear();
-      return null;
-    }
-
-    return this.getCache("data");
+  /**
+   * Last known value for serving stale data when the provider fails, as long
+   * as it was fetched within the max age. Never written on a failure, so a
+   * degraded response can never become the next response's source of truth.
+   */
+  getStale(): LiquidTreasuryDataPoint[] | null {
+    if (!this.entry) return null;
+    if (Date.now() - this.entry.fetchedAt > STALE_MAX_AGE_MS) return null;
+    return this.entry.data;
   }
 
   set(data: LiquidTreasuryDataPoint[]): void {
-    this.setCache("timestamp", Date.now());
-    this.setCache("data", data);
+    this.entry = { fetchedAt: Date.now(), data };
   }
 
   clear(): void {
-    this.cache.clear();
-  }
-
-  private setCache<K extends keyof CacheSchema>(key: K, value: CacheSchema[K]) {
-    this.cache.set(key, value);
-  }
-
-  private getCache<K extends keyof CacheSchema>(key: K): CacheSchema[K] | null {
-    return this.cache.get(key) as CacheSchema[K] | null;
+    this.entry = undefined;
   }
 }

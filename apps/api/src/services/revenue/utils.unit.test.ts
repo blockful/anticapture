@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { filterByRange, parseDuneMonth } from "./utils";
+import { filterByRange, parseDuneMonth, isValidDuneMonth } from "./utils";
 
 describe("parseDuneMonth", () => {
   it("parses 'YYYY-MM-DD HH:mm:ss.SSS UTC' to seconds at start-of-month UTC", () => {
@@ -50,5 +50,24 @@ describe("filterByRange", () => {
 
   it("filters by both bounds inclusively", () => {
     expect(filterByRange(items, 200, 200)).toEqual([{ date: 200, v: "b" }]);
+  });
+});
+
+describe("isValidDuneMonth", () => {
+  it("accepts a real calendar timestamp", () => {
+    expect(isValidDuneMonth("2026-02-28 00:00:00 UTC")).toBe(true);
+    expect(isValidDuneMonth("2024-02-29 00:00:00.000 UTC")).toBe(true);
+  });
+
+  it("rejects dates the digit widths allow but the calendar does not", () => {
+    // Date.UTC would roll each of these into another month or year.
+    expect(isValidDuneMonth("2026-13-01 00:00:00 UTC")).toBe(false);
+    expect(isValidDuneMonth("2026-02-31 00:00:00 UTC")).toBe(false);
+    expect(isValidDuneMonth("2025-02-29 00:00:00 UTC")).toBe(false);
+    expect(isValidDuneMonth("2026-01-01 24:00:00 UTC")).toBe(false);
+  });
+
+  it("rejects what the regex already rejects", () => {
+    expect(isValidDuneMonth("2026-01-01")).toBe(false);
   });
 });
