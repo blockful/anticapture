@@ -1,5 +1,15 @@
 # @anticapture/gateful
 
+## 1.8.2
+
+### Patch Changes
+
+- [#2148](https://github.com/blockful/anticapture/pull/2148) [`82179d9`](https://github.com/blockful/anticapture/commit/82179d9e76a941ea1e3efad6b98ff2090670a9c4) Thanks [@brunod-e](https://github.com/brunod-e)! - Circuit breakers open per DAO route on a windowed failure rate, tunable via the `CIRCUIT_BREAKER_*` variables in apps/gateful/src/config.ts, with route keys derived from the path and separate keys for fan-out and health probes, whose circuits are no longer reported in the DAO health summary.
+  The Redis cache serves stale entries when the upstream fails, and each lookup is counted once.
+
+- [#2162](https://github.com/blockful/anticapture/pull/2162) [`888097f`](https://github.com/blockful/anticapture/commit/888097fc7e908d905da516f47a713c9e5dbfc54d) Thanks [@brunod-e](https://github.com/brunod-e)! - Forward the relayer's own error responses (e.g. `503 RELAYER_LOW_BALANCE`, `{ code, message }`) to clients instead of
+  replacing them with a generic 500, and stop counting them as circuit-breaker failures: the relayer answered, it is not down.
+
 ## 1.8.1
 
 ### Patch Changes

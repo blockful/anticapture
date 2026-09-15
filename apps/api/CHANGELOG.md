@@ -1,5 +1,15 @@
 # @anticapture/api
 
+## 1.8.3
+
+### Patch Changes
+
+- [#2148](https://github.com/blockful/anticapture/pull/2148) [`82179d9`](https://github.com/blockful/anticapture/commit/82179d9e76a941ea1e3efad6b98ff2090670a9c4) Thanks [@brunod-e](https://github.com/brunod-e)! - Serve proposals without waiting on RPC: the latest block is refreshed stale-while-revalidate, bounded to 60s of staleness.
+  Requests fall back to the indexed proposal status when the RPC is down instead of failing.
+
+- [#2149](https://github.com/blockful/anticapture/pull/2149) [`f144c5c`](https://github.com/blockful/anticapture/commit/f144c5c5e76ee611779b401fb22bc387e8668198) Thanks [@brunod-e](https://github.com/brunod-e)! - Revenue, token price and treasury serve the last known or empty data instead of 5xx when Dune or CoinGecko is
+  unhealthy, token properties keep the last known price, all counted on degraded_upstream_responses_total; fix the FLUID CoinGecko id.
+
 ## 1.8.2
 
 ### Patch Changes
