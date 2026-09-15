@@ -370,6 +370,18 @@ export const DecodedActionCard = ({
     />
   );
 
+  const contractLink = call.target && explorerUrl && (
+    <DefaultLink
+      href={`${explorerUrl}/address/${call.target}`}
+      openInNewTab
+      size="sm"
+      className="shrink-0"
+    >
+      Contract
+      <ExternalLink className="size-3" aria-hidden="true" />
+    </DefaultLink>
+  );
+
   const body = (
     <div
       className={cn(
@@ -377,6 +389,19 @@ export const DecodedActionCard = ({
         embedded ? "gap-3" : "gap-4 p-3",
       )}
     >
+      {/* An embedded card has no header bar, but how the call was decoded,
+          where its contract lives and its raw bytes must not vanish with it. */}
+      {embedded && (
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+          <ChipCluster abiSource={call.abiSource} hasError={hasError} />
+          {contractLink}
+          <CopyButton
+            textToCopy={call.raw}
+            label="Copy raw"
+            className="-my-1 ml-auto"
+          />
+        </div>
+      )}
       {hasError && (
         <InlineAlert variant="error" text={call.error ?? "Decode failed."} />
       )}
@@ -539,22 +564,10 @@ export const DecodedActionCard = ({
           <ChipCluster abiSource={call.abiSource} hasError={hasError} />
         </div>
         <div className="flex min-w-0 items-center gap-2 md:ml-auto">
-          {call.target && explorerUrl && (
-            <DefaultLink
-              href={`${explorerUrl}/address/${call.target}`}
-              openInNewTab
-              size="sm"
-              className="shrink-0"
-            >
-              Contract
-              <ExternalLink className="size-3" aria-hidden="true" />
-            </DefaultLink>
-          )}
+          {contractLink}
           {headerRight && (
             <>
-              {call.target && explorerUrl && (
-                <DividerDefault isVertical className="h-4" />
-              )}
+              {contractLink && <DividerDefault isVertical className="h-4" />}
               {headerRight}
             </>
           )}

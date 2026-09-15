@@ -29,7 +29,11 @@ export const IdentityAvatar = ({
   identity,
   className,
 }: IdentityAvatarProps) => {
-  const [logoFailed, setLogoFailed] = useState(false);
+  // Keyed by URL rather than a flag: React reuses the instance by position,
+  // so a flag set for one token's logo would stick to the next address
+  // rendered in the same slot.
+  const [failedLogo, setFailedLogo] = useState<string | null>(null);
+  const logoFailed = failedLogo !== null && failedLogo === identity?.logoUri;
   const box = cn(
     "flex size-5 shrink-0 overflow-hidden rounded-full",
     className,
@@ -58,7 +62,7 @@ export const IdentityAvatar = ({
             width={20}
             height={20}
             className="size-full object-cover"
-            onError={() => setLogoFailed(true)}
+            onError={() => setFailedLogo(identity.logoUri ?? null)}
             unoptimized
           />
         </span>

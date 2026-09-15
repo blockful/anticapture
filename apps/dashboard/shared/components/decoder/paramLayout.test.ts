@@ -85,17 +85,39 @@ describe("layoutParams", () => {
       param("calldatas", "bytes[]"),
       param("description", "string"),
     ];
+    const action = { ...call({ depth: 1 }), index: 0 };
     const layout = layoutParams(
       call({
         selector: toFunctionSelector(signature),
         signature,
-        subcalls: [],
+        subcalls: [action],
+        subcallCount: 1,
       }),
       params,
     );
     expect(layout.primary.map((p) => p.name)).toEqual(["description"]);
     expect(layout.operation).toBeUndefined();
     expect(layout.secondary).toBeUndefined();
+  });
+
+  test("a proposal whose arrays could not be unpacked keeps them in view", () => {
+    const signature = "propose(address[],uint256[],bytes[],string)";
+    const params = [
+      param("targets", "address[]"),
+      param("values", "uint256[]"),
+      param("calldatas", "bytes[]"),
+      param("description", "string"),
+    ];
+    const layout = layoutParams(
+      call({
+        selector: toFunctionSelector(signature),
+        signature,
+        subcalls: [],
+        subcallCount: 0,
+      }),
+      params,
+    );
+    expect(layout.primary).toEqual(params);
   });
 
   test("any other call lists every parameter", () => {

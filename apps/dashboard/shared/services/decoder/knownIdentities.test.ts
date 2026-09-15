@@ -25,6 +25,16 @@ describe("resolveKnownIdentity", () => {
     expect(identity?.logoUri).toBeUndefined();
   });
 
+  test("an NFT collection is named by the DAO, not its enum key", () => {
+    // Nouns' token is the ERC-721 collection; "NOUNS Token" would be a key.
+    const NOUNS_TOKEN = "0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03";
+    expect(resolveKnownIdentity(1, NOUNS_TOKEN)).toMatchObject({
+      label: "Nouns Token",
+      isToken: false,
+      daoId: "NOUNS",
+    });
+  });
+
   test("governance contracts are named by role", () => {
     expect(resolveKnownIdentity(1, ENS_GOVERNOR)).toMatchObject({
       label: "ENS Governor",

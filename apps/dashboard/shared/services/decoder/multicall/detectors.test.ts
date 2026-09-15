@@ -316,23 +316,29 @@ describe("governor propose zips the proposal arrays into actions", () => {
 });
 
 describe("unpackedParamIndices", () => {
+  const ONE_CALL = [{}];
+
   test("names the parallel arrays a batch's subcalls already spell out", () => {
     const selector = toFunctionSelector(PROPOSE);
     expect([
-      ...unpackedParamIndices({ selector, signature: PROPOSE, subcalls: [] }),
+      ...unpackedParamIndices({
+        selector,
+        signature: PROPOSE,
+        subcalls: ONE_CALL,
+      }),
     ]).toEqual([0, 1, 2]);
     expect([
       ...unpackedParamIndices({
         selector: toFunctionSelector(EXECUTE_BATCH),
         signature: EXECUTE_BATCH,
-        subcalls: [],
+        subcalls: ONE_CALL,
       }),
     ]).toEqual([0, 1, 2]);
     expect([
       ...unpackedParamIndices({
         selector: toFunctionSelector(TRY_AGGREGATE),
         signature: TRY_AGGREGATE,
-        subcalls: [],
+        subcalls: ONE_CALL,
       }),
     ]).toEqual([1]);
   });
@@ -342,23 +348,40 @@ describe("unpackedParamIndices", () => {
       unpackedParamIndices({
         selector: toFunctionSelector(EXEC_TRANSACTION),
         signature: EXEC_TRANSACTION,
-        subcalls: [],
+        subcalls: ONE_CALL,
       }).size,
     ).toBe(0);
   });
 
-  test("hides nothing when the decoder did not unpack the call", () => {
+  test("keeps the arrays when nothing, or not everything, was unpacked", () => {
     const selector = toFunctionSelector(PROPOSE);
-    // No subcalls: the depth limit or the budget left the batch closed.
+    // Not decoded at all: the depth limit left the batch closed.
     expect(unpackedParamIndices({ selector, signature: PROPOSE }).size).toBe(0);
+    // Mismatched arrays unpack to an empty list, and the would-revert
+    // warning points the reader at arrays that must therefore stay visible.
+    expect(
+      unpackedParamIndices({ selector, signature: PROPOSE, subcalls: [] }).size,
+    ).toBe(0);
+    // The node budget listed one of three calls: the other two "stay raw in
+    // the parameters above", so the parameters must be above.
+    expect(
+      unpackedParamIndices({
+        selector,
+        signature: PROPOSE,
+        subcalls: ONE_CALL,
+        subcallCount: 3,
+      }).size,
+    ).toBe(0);
     // A colliding selector that resolved to another function.
     expect(
       unpackedParamIndices({
         selector,
         signature: "somethingElse(uint256)",
-        subcalls: [],
+        subcalls: ONE_CALL,
       }).size,
     ).toBe(0);
-    expect(unpackedParamIndices({ selector: null, subcalls: [] }).size).toBe(0);
+    expect(
+      unpackedParamIndices({ selector: null, subcalls: ONE_CALL }).size,
+    ).toBe(0);
   });
 });

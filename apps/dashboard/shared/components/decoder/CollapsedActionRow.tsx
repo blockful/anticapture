@@ -69,6 +69,7 @@ export const CollapsedActionRow = ({
         }
       }}
       aria-label={`Expand action ${index + 1}`}
+      aria-expanded={false}
       className={cn(
         "group flex w-full min-w-0 cursor-pointer items-center gap-2 p-3",
         "hover:bg-surface-hover transition-colors duration-[120ms] ease-[var(--ease-decoder)]",

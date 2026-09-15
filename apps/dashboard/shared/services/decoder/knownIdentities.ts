@@ -40,16 +40,27 @@ const getDaoContracts = (): Map<string, KnownIdentity> => {
     const chainId = overview?.chain?.id;
     if (!overview || chainId === undefined) continue;
     const { token, governor, timelock } = overview.contracts;
+    const isErc20 = overview.token === "ERC20";
+    // An ERC-20 is named by its ticker (the DAO id, or the entry's own label
+    // where a DAO has several); an NFT collection by the DAO's display name,
+    // since "LIL_NOUNS Token" is a key, not a name.
     const tokens = Array.isArray(token)
       ? token.map((entry) => ({
           address: entry.address,
-          label: `${entry.label || daoId} Token`,
+          label: isErc20
+            ? `${entry.label || daoId} Token`
+            : `${config.name} Token`,
         }))
-      : [{ address: token, label: `${daoId} Token` }];
+      : [
+          {
+            address: token,
+            label: isErc20 ? `${daoId} Token` : `${config.name} Token`,
+          },
+        ];
     for (const entry of tokens) {
       daoContracts.set(key(chainId, entry.address), {
         label: entry.label,
-        isToken: overview.token === "ERC20",
+        isToken: isErc20,
         daoId,
       });
     }

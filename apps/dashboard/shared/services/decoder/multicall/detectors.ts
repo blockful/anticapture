@@ -328,9 +328,12 @@ const batch = (
  */
 const bravoCalldata = (signature: unknown, payload: unknown): Hex => {
   const args = isHexValue(payload) ? payload : "0x";
-  if (typeof signature !== "string" || signature.trim() === "") return args;
+  if (typeof signature !== "string" || signature === "") return args;
+  // Hashed as stored, whitespace included: the governor does not trim, so a
+  // padded signature selects a function that will not run, and the decode
+  // must not pretend otherwise.
   try {
-    return `${toFunctionSelector(signature.trim())}${args.slice(2)}`;
+    return `${toFunctionSelector(signature)}${args.slice(2)}`;
   } catch {
     // Not a signature the governor could hash either: the action would
     // revert, and the raw arguments are the most honest thing to show.
@@ -550,13 +553,35 @@ export const getDetector = (selector: Hex): MulticallDetector | null => {
   return detectorsBySelector.get(selector.toLowerCase() as Hex) ?? null;
 };
 
+type UnpackedCall = {
+  selector: Hex | null;
+  signature?: string;
+  subcalls?: unknown[];
+  subcallCount?: number;
+};
+
+/** The detector that produced at least one of this call's subcalls. */
+const unpackingDetector = (call: UnpackedCall): MulticallDetector | null => {
+  if (call.selector === null || !call.subcalls?.length) return null;
+  const detector = getDetector(call.selector);
+  return detector && detector.signature === call.signature ? detector : null;
+};
+
 /**
- * Positions of the parameters a wrapper's subcall list already spells out,
- * for a call the decoder actually unpacked. Empty for everything else, so a
- * colliding selector that resolved to some other function keeps every row.
+ * Positions of the parameters a wrapper's subcall list already spells out.
+ * Only when EVERY extracted call is listed: a batch whose arrays disagree
+ * unpacks nothing, and one the node budget cut short lists fewer calls than
+ * it carries. In both cases the arrays are the only place the reader can
+ * still see what the warning is about, so they stay.
  */
-export const unpackedParamIndices = (call: UnpackedCall): ReadonlySet<number> =>
-  new Set(unpackingDetector(call)?.unpackedParams ?? []);
+export const unpackedParamIndices = (
+  call: UnpackedCall,
+): ReadonlySet<number> => {
+  const detector = unpackingDetector(call);
+  const listed = call.subcalls?.length ?? 0;
+  if (!detector || listed < (call.subcallCount ?? listed)) return new Set();
+  return new Set(detector.unpackedParams);
+};
 
 /**
  * Position of the `bytes` parameter the subcalls were unpacked from, for a
@@ -565,15 +590,3 @@ export const unpackedParamIndices = (call: UnpackedCall): ReadonlySet<number> =>
  */
 export const unpackedPayloadIndex = (call: UnpackedCall): number | undefined =>
   unpackingDetector(call)?.payloadParam;
-
-type UnpackedCall = {
-  selector: Hex | null;
-  signature?: string;
-  subcalls?: unknown[];
-};
-
-const unpackingDetector = (call: UnpackedCall): MulticallDetector | null => {
-  if (call.selector === null || call.subcalls === undefined) return null;
-  const detector = getDetector(call.selector);
-  return detector && detector.signature === call.signature ? detector : null;
-};

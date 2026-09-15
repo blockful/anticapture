@@ -202,8 +202,18 @@ export const DecoderInputPanel = ({
           {calldataHelper}
         </div>
 
+        <div className={cn(mode !== "custom" && "hidden")}>
+          <AbiInput onAbiChange={onAbiChange} />
+        </div>
+
+        {/* The address serves both tabs: the contract tab fetches its
+            verified ABI, the custom tab scopes the pasted ABI to it so the
+            ABI is tried on that contract's calls and no other. */}
         <div
-          className={cn("flex flex-col gap-2", mode !== "contract" && "hidden")}
+          className={cn(
+            "flex flex-col gap-2",
+            mode === "automatic" && "hidden",
+          )}
         >
           <FormLabel isOptional>Contract address</FormLabel>
           <Input
@@ -215,16 +225,17 @@ export const DecoderInputPanel = ({
           />
           {addressError ? (
             <HelperText tone="error">{addressError}</HelperText>
+          ) : mode === "custom" ? (
+            <HelperText>
+              Scopes the ABI above to this contract. Leave it empty to try the
+              ABI on the pasted calldata itself.
+            </HelperText>
           ) : (
             <HelperText>
               We look up the verified ABI for this contract. Your calldata stays
               as it is.
             </HelperText>
           )}
-        </div>
-
-        <div className={cn(mode !== "custom" && "hidden")}>
-          <AbiInput onAbiChange={onAbiChange} />
         </div>
 
         <div className="md:hidden">{chainPicker}</div>

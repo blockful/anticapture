@@ -37,7 +37,9 @@ export const layoutParams = (
 ): ParamLayout => {
   const payloadIndex = unpackedPayloadIndex(call);
   const payload = payloadIndex === undefined ? undefined : params[payloadIndex];
-  if (call.signature === SAFE_EXEC_SIGNATURE && params.length >= 4) {
+  // Sliced, not indexed: the render budget can leave fewer than ten rows,
+  // and a Safe transaction cut short is still a Safe transaction.
+  if (call.signature === SAFE_EXEC_SIGNATURE) {
     const execution = params.slice(4);
     return {
       payload,

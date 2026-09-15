@@ -76,19 +76,22 @@ export const DecoderTool = () => {
       ? addressDraft
       : address;
 
-  // One ABI source at a time. A permalink that carries an address opens on
-  // its tab; leaving that tab drops the address from the URL (the draft is
-  // kept for when the reader comes back) so the link says what the decode
-  // used and nothing else.
+  // Automatic means the decoder is on its own: the address is dropped from
+  // the URL on the way there (kept as the draft, whether it was typed or
+  // arrived in a permalink, for when the reader comes back) so the link says
+  // what the decode used and nothing else. The other two tabs both take an
+  // address: the contract tab to fetch its verified ABI, the custom tab to
+  // scope the pasted ABI to it.
   const [mode, setMode] = useState<AbiSourceMode>(() =>
     address ? "contract" : "automatic",
   );
   const handleModeChange = (next: AbiSourceMode) => {
     if (next === mode) return;
     setMode(next);
-    if (mode === "contract") {
+    if (next === "automatic") {
+      if (addressDraft === null) setAddressDraft(address);
       void setParams({ address: "" });
-    } else if (next === "contract" && addressDraft !== null) {
+    } else if (mode === "automatic" && addressDraft) {
       void setParams({ address: permalinkAddress(addressDraft) });
     }
   };
@@ -132,7 +135,7 @@ export const DecoderTool = () => {
   // rather than being asserted into an Address further down.
   const typedTarget = isAddress(trimmedAddress) ? trimmedAddress : undefined;
   const addressValid = trimmedAddress === "" || typedTarget !== undefined;
-  const target = mode === "contract" ? typedTarget : undefined;
+  const target = mode === "automatic" ? undefined : typedTarget;
   const activeAbi = mode === "custom" ? uploadedAbi : null;
 
   // The uploaded ABI scopes to the selected target when one exists, so it
