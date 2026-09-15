@@ -80,6 +80,16 @@ describe("humanizeNumber", () => {
 });
 
 describe("humanizeTokenAmount", () => {
+  test("the maximum uint256 reads as an unlimited approval", () => {
+    expect(humanizeTokenAmount(2n ** 256n - 1n, 6, "USDC").text).toBe(
+      "unlimited USDC",
+    );
+    // One less is a number like any other, not an idiom.
+    expect(humanizeTokenAmount(2n ** 256n - 2n, 6, "USDC").text).not.toContain(
+      "unlimited",
+    );
+  });
+
   test("25,000 USDC from 6-decimal raw units", () => {
     expect(humanizeTokenAmount(25_000_000_000n, 6, "USDC").text).toBe(
       "25,000 USDC",

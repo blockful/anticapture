@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { Clipboard, Eraser } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import type { Abi } from "viem";
 
 import { AbiInput } from "@/features/decoder/components/AbiInput";
@@ -10,11 +11,26 @@ import { FormLabel } from "@/shared/components/design-system/form/fields/form-la
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
 import { Select } from "@/shared/components/design-system/form/fields/select/Select";
 import { Textarea } from "@/shared/components/design-system/form/fields/textarea/Textarea";
+import { TabGroup } from "@/shared/components/design-system/tabs/tab-group/TabGroup";
+import { cn } from "@/shared/utils/cn";
+
+/** Where the decoder looks for an ABI beyond the public signature databases. */
+export type AbiSourceMode = "automatic" | "contract" | "custom";
+
+const ABI_SOURCE_TABS: Array<{ label: string; value: AbiSourceMode }> = [
+  { label: "Automatic", value: "automatic" },
+  { label: "Contract address", value: "contract" },
+  { label: "Custom ABI", value: "custom" },
+];
+
+const isAbiSourceMode = (value: string): value is AbiSourceMode =>
+  ABI_SOURCE_TABS.some((tab) => tab.value === value);
 
 interface DecoderInputPanelProps {
   calldata: string;
   address: string;
   chainId: number;
+  mode: AbiSourceMode;
   calldataError: string | null;
   /** Said out loud, not silently: the field no longer holds what was pasted. */
   calldataNotice?: string | null;
@@ -23,6 +39,7 @@ interface DecoderInputPanelProps {
   onAddressChange: (value: string) => void;
   onChainIdChange: (value: number) => void;
   onAbiChange: (abi: Abi | null) => void;
+  onModeChange: (mode: AbiSourceMode) => void;
 }
 
 /** The chains the platform indexes, deduplicated from the DAO configs. */
@@ -36,10 +53,36 @@ const useChainOptions = () =>
     [],
   );
 
+const HelperText = ({
+  children,
+  tone = "default",
+}: {
+  children: string;
+  tone?: "default" | "error" | "warning";
+}) => (
+  <span
+    className={cn(
+      "text-xs leading-4",
+      tone === "error" && "text-error",
+      tone === "warning" && "text-warning",
+      tone === "default" && "text-secondary",
+    )}
+  >
+    {children}
+  </span>
+);
+
+/**
+ * The input card: calldata pinned at the top, the ABI source behind three
+ * tabs (Automatic / Contract address / Custom ABI) and the chain picker in
+ * the header. The extra inputs stay mounted while hidden so a pasted ABI
+ * survives a look at the other tabs.
+ */
 export const DecoderInputPanel = ({
   calldata,
   address,
   chainId,
+  mode,
   calldataError,
   calldataNotice,
   addressError,
@@ -47,86 +90,145 @@ export const DecoderInputPanel = ({
   onAddressChange,
   onChainIdChange,
   onAbiChange,
+  onModeChange,
 }: DecoderInputPanelProps) => {
   const chainOptions = useChainOptions();
 
+  // `readText` is missing in Firefox and throws outside secure contexts, so
+  // the button only exists where it can work, and a denied read says so
+  // instead of silently doing nothing. Checked in an effect: the server has
+  // no navigator, and the first client frame must match it.
+  const [canPaste, setCanPaste] = useState(false);
+  const [pasteError, setPasteError] = useState<string | null>(null);
+  useEffect(() => {
+    setCanPaste(typeof navigator.clipboard?.readText === "function");
+  }, []);
+
+  const handleCalldataChange = (value: string) => {
+    setPasteError(null);
+    onCalldataChange(value);
+  };
+
+  const paste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        handleCalldataChange(text);
+      } else {
+        setPasteError("Nothing to paste: the clipboard is empty.");
+      }
+    } catch {
+      setPasteError(
+        "Clipboard access was denied. Paste into the field with Ctrl+V or Cmd+V.",
+      );
+    }
+  };
+
+  const chainPicker = (
+    <div className="flex items-center justify-between gap-2 md:justify-start">
+      <FormLabel>Chain</FormLabel>
+      <Select
+        items={chainOptions}
+        value={String(chainId)}
+        placeholder="Chain"
+        aria-label="Chain"
+        onValueChange={(value) => onChainIdChange(Number(value))}
+        className="h-7 w-36 py-1"
+      />
+    </div>
+  );
+
+  const calldataHelper = calldataError ? (
+    <HelperText tone="error">{calldataError}</HelperText>
+  ) : pasteError ? (
+    <HelperText tone="error">{pasteError}</HelperText>
+  ) : calldataNotice ? (
+    <HelperText tone="warning">{calldataNotice}</HelperText>
+  ) : (
+    <HelperText>
+      Raw, 0x-prefixed hex. Any EVM transaction, any length.
+    </HelperText>
+  );
+
   return (
-    <div className="border-border-default bg-surface-default flex w-full flex-col gap-4 border p-4">
-      <div className="flex flex-col gap-1.5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <FormLabel isRequired>Calldata</FormLabel>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="font-mono text-xs uppercase tracking-wider"
-              onClick={async () => {
-                try {
-                  const text = await navigator.clipboard.readText();
-                  if (text) onCalldataChange(text);
-                } catch {
-                  // Clipboard read denied: the reader pastes into the field.
-                }
-              }}
-            >
-              [paste]
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="font-mono text-xs uppercase tracking-wider"
-              disabled={calldata.length === 0}
-              onClick={() => onCalldataChange("")}
-            >
-              [clear]
-            </Button>
-          </div>
+    <div className="bg-surface-default flex w-full flex-col">
+      <div className="bg-surface-contrast flex w-full items-center justify-between gap-2 px-3">
+        {/* Three tabs do not fit a phone at this size; the strip scrolls
+            sideways instead of pushing the page wider. */}
+        <div className="min-w-0 overflow-x-auto [scrollbar-width:none]">
+          <TabGroup
+            size="md"
+            tabs={ABI_SOURCE_TABS}
+            activeTab={mode}
+            onTabChange={(value) => {
+              if (isAbiSourceMode(value)) onModeChange(value);
+            }}
+            className="border-b-0"
+          />
         </div>
-        <Textarea
-          value={calldata}
-          onChange={(event) => onCalldataChange(event.target.value)}
-          placeholder="0x…"
-          className="min-h-28 font-mono text-xs"
-          error={Boolean(calldataError)}
-        />
-        {calldataError ? (
-          <span className="text-error text-xs">{calldataError}</span>
-        ) : calldataNotice ? (
-          <span className="text-warning text-xs">{calldataNotice}</span>
-        ) : (
-          <span className="text-secondary text-xs">
-            Supports raw calldata (0x-prefixed hex). On Etherscan: transaction
-            page, &quot;More Details&quot;, then copy the &quot;Input
-            Data&quot;.
-          </span>
-        )}
+        <div className="hidden shrink-0 py-2 md:block">{chainPicker}</div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex flex-1 flex-col gap-1.5">
-          <FormLabel>Contract address (optional)</FormLabel>
+      <div className="flex w-full flex-col gap-3 p-4">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <FormLabel isRequired>Calldata</FormLabel>
+            <div className="flex items-center gap-1">
+              {canPaste && (
+                <Button variant="ghost" size="sm" onClick={paste}>
+                  <Clipboard className="size-3.5" aria-hidden="true" />
+                  Paste
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={calldata.length === 0}
+                onClick={() => handleCalldataChange("")}
+              >
+                <Eraser className="size-3.5" aria-hidden="true" />
+                Clear
+              </Button>
+            </div>
+          </div>
+          <Textarea
+            value={calldata}
+            onChange={(event) => handleCalldataChange(event.target.value)}
+            placeholder="0x…"
+            aria-label="Calldata"
+            className="min-h-20 break-all"
+            error={Boolean(calldataError)}
+          />
+          {calldataHelper}
+        </div>
+
+        <div
+          className={cn("flex flex-col gap-2", mode !== "contract" && "hidden")}
+        >
+          <FormLabel isOptional>Contract address</FormLabel>
           <Input
             value={address}
             onChange={(event) => onAddressChange(event.target.value)}
-            placeholder="0x… enables verified-ABI lookup"
+            placeholder="0x… the contract this transaction calls"
+            aria-label="Contract address"
             error={Boolean(addressError)}
           />
-          {addressError && (
-            <span className="text-error text-xs">{addressError}</span>
+          {addressError ? (
+            <HelperText tone="error">{addressError}</HelperText>
+          ) : (
+            <HelperText>
+              We look up the verified ABI for this contract. Your calldata stays
+              as it is.
+            </HelperText>
           )}
         </div>
-        <div className="flex flex-col gap-1.5 sm:w-48">
-          <FormLabel>Chain</FormLabel>
-          <Select
-            items={chainOptions}
-            value={String(chainId)}
-            placeholder="Chain"
-            onValueChange={(value) => onChainIdChange(Number(value))}
-          />
-        </div>
-      </div>
 
-      <AbiInput onAbiChange={onAbiChange} />
+        <div className={cn(mode !== "custom" && "hidden")}>
+          <AbiInput onAbiChange={onAbiChange} />
+        </div>
+
+        <div className="md:hidden">{chainPicker}</div>
+      </div>
     </div>
   );
 };

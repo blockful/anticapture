@@ -24,12 +24,13 @@ const asTitle = (value: string): string =>
     : value;
 
 /**
- * Humanized-first value. Numbers and symbols never break mid-token: they stay
- * on one line with tabular digits and ellipsize when the column is too
- * narrow (the full text is in the title and one click away). Only hex blobs
- * wrap character-wise, since they have no word boundaries to respect.
- * Clicking swaps human and raw inline for as long as the card stays mounted;
- * the dimmed annotation in ParamRow carries the raw value at rest.
+ * Humanized-first value in the content style (Inter 14/20). Numbers and
+ * symbols never break mid-token: they stay on one line with tabular digits
+ * and ellipsize when the column is too narrow (the full text is in the title
+ * and one click away). Only hex blobs wrap character-wise, since they have no
+ * word boundaries to respect. Clicking swaps human and raw inline for as long
+ * as the card stays mounted; the annotation in ParamRow carries the raw value
+ * at rest.
  */
 export const ValueCell = ({ display, raw, className }: ValueCellProps) => {
   const [showRaw, setShowRaw] = useState(false);
@@ -44,7 +45,7 @@ export const ValueCell = ({ display, raw, className }: ValueCellProps) => {
       <span
         title={asTitle(raw)}
         className={cn(
-          "text-primary block min-w-0 font-mono text-sm leading-5",
+          "text-primary block min-w-0 text-sm leading-5",
           textClass,
           className,
         )}
@@ -60,7 +61,7 @@ export const ValueCell = ({ display, raw, className }: ValueCellProps) => {
       title={showRaw ? asTitle(display) : `raw: ${asTitle(raw)}`}
       onClick={() => setShowRaw((current) => !current)}
       className={cn(
-        "text-primary block min-w-0 max-w-full cursor-pointer text-left font-mono text-sm leading-5",
+        "text-primary block min-w-0 max-w-full cursor-pointer text-left text-sm leading-5",
         "decoration-border-contrast hover:underline hover:decoration-dotted hover:underline-offset-4",
         textClass,
         className,

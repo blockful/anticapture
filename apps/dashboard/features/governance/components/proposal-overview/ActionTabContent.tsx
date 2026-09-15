@@ -5,24 +5,27 @@ import { useMemo } from "react";
 import { isAddress, type Address } from "viem";
 
 import { ProposalActionsInfoCard } from "@/features/governance/components/proposal-overview/ProposalActionsInfoCard";
+import type { ProposalDetails } from "@/features/governance/types";
 import {
   AddressChip,
   CollapsedActionRow,
   DecodedActionCard,
   DecoderCardSkeleton,
   ExpandToggle,
+  MONO_LABEL,
 } from "@/shared/components/decoder";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { CodeBlock } from "@/shared/components/design-system/code-block/CodeBlock";
-import { useActionExpansion } from "@/shared/hooks/useActionExpansion";
-import { buildCollapsedRowLabel } from "@/shared/utils/collapsedRowLabel";
-import type { ProposalDetails } from "@/features/governance/types";
 import daoConfigByDaoId from "@/shared/dao-config";
+import { useActionExpansion } from "@/shared/hooks/useActionExpansion";
 import { useDecodedCalldata } from "@/shared/hooks/useDecodedCalldata";
 import { useDelayedFlag } from "@/shared/hooks/useDelayedFlag";
 import { useTokenMeta } from "@/shared/hooks/useTokenMeta";
 import { applyTokenMeta, collectTokenHints } from "@/shared/services/decoder";
 import { humanizeEtherValue } from "@/shared/services/decoder/humanize";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils/cn";
+import { buildCollapsedRowLabel } from "@/shared/utils/collapsedRowLabel";
 
 const toBigInt = (value: string | null): bigint | undefined => {
   if (value == null) return undefined;
@@ -40,8 +43,11 @@ const formatPendingValue = (value: string): string => {
   return wei > 0n ? humanizeEtherValue(wei).text : "0 ETH";
 };
 
-const ACTION_LABEL =
-  "text-primary font-mono text-xs font-medium uppercase leading-4 tracking-wider";
+const ACTION_LABEL = cn("text-primary shrink-0", MONO_LABEL);
+const PENDING_ROW_LABEL = cn(
+  "text-primary shrink-0 md:w-22 md:leading-5",
+  MONO_LABEL,
+);
 
 export const ActionsTabContent = ({
   proposal,
@@ -87,18 +93,18 @@ export const ActionsTabContent = ({
         <>
           {targets.length > 1 && (
             <div className="flex items-center justify-between gap-2 px-1">
-              <p className="text-dimmed font-mono text-xs uppercase leading-4 tracking-wider">
+              <p className={cn("text-secondary", MONO_LABEL)}>
                 {targets.length} actions
               </p>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() =>
                   everythingOpen ? collapseAll() : expandAll(targets.length)
                 }
-                className="text-secondary hover:text-primary cursor-pointer font-mono text-xs uppercase leading-4 tracking-wider transition-colors duration-[120ms] ease-[var(--ease-decoder)] focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none"
               >
-                {everythingOpen ? "[– collapse all]" : "[+ expand all]"}
-              </button>
+                {everythingOpen ? "Collapse all" : "Expand all"}
+              </Button>
             </div>
           )}
           {targets.map((_, index) => (
@@ -189,6 +195,7 @@ const ActionItem = ({
       <CollapsedActionRow
         index={index}
         target={target}
+        chainId={chainId}
         label={buildCollapsedRowLabel(
           call ?? undefined,
           calldata,
@@ -207,39 +214,41 @@ const ActionItem = ({
     return (
       <div
         id={`action-${index + 1}`}
-        className="border-border-default bg-surface-default flex w-full flex-col gap-3 border p-3"
+        className="border-border-default bg-surface-default flex w-full flex-col border"
       >
-        <div className="flex items-center gap-2">
+        <div className="bg-surface-contrast border-border-default flex items-center gap-2 border-b px-3 py-2">
           {actionLabel}
           <span className="ml-auto">{collapseControl}</span>
         </div>
-        {validTarget && (
-          <div className="flex w-full items-center gap-2">
-            <p className="text-primary min-w-22 shrink-0 font-mono text-sm leading-5">
-              target:
-            </p>
-            <span className="flex min-w-0">
-              <AddressChip
-                address={validTarget}
-                explorerUrl={blockExplorerUrl}
-              />
-            </span>
-          </div>
-        )}
-        {value != null && (
-          <div className="flex w-full gap-2">
-            <p className="text-primary min-w-22 shrink-0 font-mono text-sm leading-5">
-              value:
-            </p>
-            <p className="text-secondary min-w-0 break-all font-mono text-sm leading-5">
-              {formatPendingValue(value)}
-            </p>
-          </div>
-        )}
-        {calldata && (
-          <CodeBlock code={calldata} codeClassName="max-h-40 overflow-y-auto" />
-        )}
-        {showSkeleton && <DecoderCardSkeleton rows={2} />}
+        <div className="flex w-full flex-col gap-4 p-3">
+          {validTarget && (
+            <div className="flex w-full flex-col gap-1 md:flex-row md:items-center md:gap-2">
+              <p className={PENDING_ROW_LABEL}>target</p>
+              <span className="flex min-w-0">
+                <AddressChip
+                  address={validTarget}
+                  chainId={chainId}
+                  explorerUrl={blockExplorerUrl}
+                />
+              </span>
+            </div>
+          )}
+          {value != null && (
+            <div className="flex w-full flex-col gap-1 md:flex-row md:items-center md:gap-2">
+              <p className={PENDING_ROW_LABEL}>value</p>
+              <p className="text-primary min-w-0 break-all text-sm leading-5">
+                {formatPendingValue(value)}
+              </p>
+            </div>
+          )}
+          {calldata && (
+            <CodeBlock
+              code={calldata}
+              codeClassName="max-h-40 overflow-y-auto"
+            />
+          )}
+          {showSkeleton && <DecoderCardSkeleton rows={2} />}
+        </div>
       </div>
     );
   }

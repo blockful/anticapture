@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 
-import { DecoderTool } from "@/features/decoder/components/DecoderTool";
+import {
+  DECODER_DESCRIPTION,
+  DecoderTool,
+} from "@/features/decoder/components/DecoderTool";
 import { Footer } from "@/shared/components/design-system/footer/Footer";
 import { HeaderSidebar } from "@/widgets";
 import { HeaderMobile } from "@/widgets/HeaderMobile";
@@ -9,8 +12,7 @@ import { HeaderMobile } from "@/widgets/HeaderMobile";
 // root (main sidebar "Decoder" entry), outside any /{daoId} context.
 export const metadata: Metadata = {
   title: "Calldata Decoder | Anticapture",
-  description:
-    "Decode any calldata into typed, human-readable parameters, with recursive Safe, Multicall3 and Timelock unpacking.",
+  description: DECODER_DESCRIPTION,
   alternates: { canonical: "/tools/decoder" },
 };
 

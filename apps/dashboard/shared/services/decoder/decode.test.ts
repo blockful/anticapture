@@ -1281,3 +1281,69 @@ describe("summaries", () => {
     );
   });
 });
+
+describe("governor propose", () => {
+  const GOVERNOR = getAddress("0x323a76393544d5ecca80cd6ef2a560c6a395b7e3");
+
+  test("OpenZeppelin propose unpacks into one action per target", async () => {
+    const abi = parseAbi([
+      "function propose(address[] targets, uint256[] values, bytes[] calldatas, string description)",
+    ]);
+    const calldata = encodeFunctionData({
+      abi,
+      functionName: "propose",
+      args: [
+        [USDC, RECIPIENT],
+        [0n, 1_500_000_000_000_000_000n],
+        [USDC_TRANSFER, "0x"],
+        "# [EP 6.1] Q3 treasury batch",
+      ],
+    });
+
+    const node = await decode(calldata, { target: GOVERNOR });
+    expect(node.functionName).toBe("propose");
+    expect(node.summary).toBe(
+      "Submits a proposal with 2 actions: transfer, ETH transfer.",
+    );
+    expect(node.subcalls).toHaveLength(2);
+    expect(node.subcalls![0]).toMatchObject({
+      target: USDC,
+      functionName: "transfer",
+    });
+    expect(node.subcalls![1].summary).toContain("Transfers 1.5 ETH");
+    // The description survives as a plain parameter next to the actions.
+    expect(node.params[3]).toMatchObject({
+      name: "description",
+      value: "# [EP 6.1] Q3 treasury batch",
+    });
+  });
+
+  test("Bravo propose reassembles signature and arguments into a decodable action", async () => {
+    const abi = parseAbi([
+      "function propose(address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, string description)",
+    ]);
+    const calldata = encodeFunctionData({
+      abi,
+      functionName: "propose",
+      args: [
+        [USDC],
+        [0n],
+        ["transfer(address,uint256)"],
+        // The arguments alone: Bravo prepends the selector at execution.
+        [`0x${USDC_TRANSFER.slice(10)}`],
+        "Pay the grant",
+      ],
+    });
+
+    const node = await decode(calldata, { target: GOVERNOR });
+    // Token metadata is overlaid by the UI later; the engine reports raw units.
+    expect(node.summary).toBe(
+      `Submits a proposal with 1 action: transfers 25,000,000,000 (raw units) to ${RECIPIENT.slice(0, 6)}…${RECIPIENT.slice(-4)}.`,
+    );
+    expect(node.subcalls![0]).toMatchObject({
+      target: USDC,
+      functionName: "transfer",
+      raw: USDC_TRANSFER,
+    });
+  });
+});

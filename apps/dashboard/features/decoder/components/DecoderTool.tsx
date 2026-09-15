@@ -1,14 +1,14 @@
 "use client";
 
-import { FileSearch } from "lucide-react";
+import { Braces, FileSearch } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import { isAddress, type Abi } from "viem";
 
-import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
-import { DecodedActionCard } from "@/shared/components/decoder/DecodedActionCard";
-import { DecoderCardSkeleton } from "@/shared/components/decoder/DecoderCardSkeleton";
-import { DecoderInputPanel } from "@/features/decoder/components/DecoderInputPanel";
+import {
+  DecoderInputPanel,
+  type AbiSourceMode,
+} from "@/features/decoder/components/DecoderInputPanel";
 import { permalinkAddress } from "@/features/decoder/utils/addressInput";
 import {
   clampCalldataInput,
@@ -18,7 +18,11 @@ import {
 } from "@/features/decoder/utils/calldataInput";
 import { toSupportedChainId } from "@/features/decoder/utils/chains";
 import { decoderParsers } from "@/features/decoder/utils/decoderSearchParams";
+import { CopyButton } from "@/shared/components/decoder/CopyButton";
+import { DecodedActionCard } from "@/shared/components/decoder/DecodedActionCard";
+import { DecoderCardSkeleton } from "@/shared/components/decoder/DecoderCardSkeleton";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
+import { SectionTitle } from "@/shared/components/design-system/section/section-title/SectionTitle";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useDecodedCalldata } from "@/shared/hooks/useDecodedCalldata";
 import { useDelayedFlag } from "@/shared/hooks/useDelayedFlag";
@@ -28,6 +32,9 @@ import {
   collectTokenHints,
   createUploadedAbiStore,
 } from "@/shared/services/decoder";
+
+export const DECODER_DESCRIPTION =
+  "See what a transaction really does, including calls hidden inside Safe and Multicall3 batches.";
 
 const explorerForChain = (chainId: number): string | undefined => {
   for (const config of Object.values(daoConfigByDaoId)) {
@@ -69,6 +76,23 @@ export const DecoderTool = () => {
       ? addressDraft
       : address;
 
+  // One ABI source at a time. A permalink that carries an address opens on
+  // its tab; leaving that tab drops the address from the URL (the draft is
+  // kept for when the reader comes back) so the link says what the decode
+  // used and nothing else.
+  const [mode, setMode] = useState<AbiSourceMode>(() =>
+    address ? "contract" : "automatic",
+  );
+  const handleModeChange = (next: AbiSourceMode) => {
+    if (next === mode) return;
+    setMode(next);
+    if (mode === "contract") {
+      void setParams({ address: "" });
+    } else if (next === "contract" && addressDraft !== null) {
+      void setParams({ address: permalinkAddress(addressDraft) });
+    }
+  };
+
   const handleAddressChange = (value: string) => {
     setAddressDraft(value);
     const permalink = permalinkAddress(value);
@@ -106,8 +130,10 @@ export const DecoderTool = () => {
   const trimmedAddress = addressInput.trim();
   // viem's isAddress is itself a type predicate, so the target narrows here
   // rather than being asserted into an Address further down.
-  const target = isAddress(trimmedAddress) ? trimmedAddress : undefined;
-  const addressValid = trimmedAddress === "" || target !== undefined;
+  const typedTarget = isAddress(trimmedAddress) ? trimmedAddress : undefined;
+  const addressValid = trimmedAddress === "" || typedTarget !== undefined;
+  const target = mode === "contract" ? typedTarget : undefined;
+  const activeAbi = mode === "custom" ? uploadedAbi : null;
 
   // The uploaded ABI scopes to the selected target when one exists, so it
   // never preempts resolution for unrelated contracts (a wrapper's child
@@ -116,8 +142,8 @@ export const DecoderTool = () => {
   // whenever the ABI or the target changes.
   useEffect(() => {
     uploadedAbis.clearAll();
-    if (uploadedAbi) uploadedAbis.set(uploadedAbi, target);
-  }, [uploadedAbi, target, uploadedAbis]);
+    if (activeAbi) uploadedAbis.set(activeAbi, target);
+  }, [activeAbi, target, uploadedAbis]);
 
   const { data, isLoading } = useDecodedCalldata({
     chainId,
@@ -139,74 +165,76 @@ export const DecoderTool = () => {
 
   const explorerUrl = explorerForChain(chainId);
 
-  const handleAbiChange = setUploadedAbi;
+  // The permalink only means something once something decoded, so it lives
+  // in the result card's header rather than on the page.
+  const permalinkAction =
+    oversizedCalldata === null ? (
+      <CopyButton
+        label="Copy link"
+        getTextToCopy={() => window.location.href}
+      />
+    ) : (
+      <span className="text-secondary text-xs leading-4">
+        Link unavailable: input too long for a URL
+      </span>
+    );
 
   return (
-    <div className="flex w-full flex-col gap-4 p-4 lg:p-6">
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-primary font-mono text-sm font-medium uppercase leading-5 tracking-wider">
-            {"// "}Calldata decoder
-          </h1>
-          {oversizedCalldata === null ? (
-            <CopyRawButton
-              label="copy permalink"
-              getTextToCopy={() => window.location.href}
-            />
-          ) : (
-            <span className="text-dimmed font-mono text-xs uppercase leading-4 tracking-wider">
-              link omitted: input too long for a URL
-            </span>
-          )}
-        </div>
-        <p className="text-secondary text-sm">
-          Decode any calldata into typed, human-readable parameters. Nested
-          Safe, Multicall3 and Timelock batches unpack recursively.
-        </p>
-      </div>
-
-      <DecoderInputPanel
-        calldata={calldataInput}
-        address={addressInput}
-        chainId={chainId}
-        calldataError={
-          inputValid
-            ? null
-            : "Must be 0x-prefixed hex with an even number of characters."
-        }
-        calldataNotice={
-          truncated
-            ? "Input truncated to the 128 KiB decode limit."
-            : oversizedCalldata !== null
-              ? "Link omitted: input too long for a URL."
-              : null
-        }
-        addressError={addressValid ? null : "Not a valid address."}
-        onCalldataChange={handleCalldataChange}
-        onAddressChange={handleAddressChange}
-        onChainIdChange={(value) =>
-          void setParams({ chainId: toSupportedChainId(value) })
-        }
-        onAbiChange={handleAbiChange}
+    <div className="flex w-full flex-col gap-6 p-4 lg:p-5">
+      <SectionTitle
+        icon={<Braces className="text-secondary size-5" aria-hidden="true" />}
+        title="Calldata Decoder"
+        description={DECODER_DESCRIPTION}
       />
 
-      {!hasInput ? (
-        <BlankSlate
-          variant="default"
-          icon={FileSearch}
-          title="Nothing to decode yet"
-          description="Paste calldata above. You can grab it from any transaction: on Etherscan, open the transaction, expand More Details and copy the Input Data."
-        />
-      ) : !inputValid ? null : call ? (
-        <DecodedActionCard
-          call={call}
+      <div className="flex w-full flex-col gap-2">
+        <DecoderInputPanel
+          calldata={calldataInput}
+          address={addressInput}
           chainId={chainId}
-          explorerUrl={explorerUrl}
-          uploadedAbis={uploadedAbis}
+          mode={mode}
+          calldataError={
+            inputValid
+              ? null
+              : "Must be 0x-prefixed hex with an even number of characters."
+          }
+          calldataNotice={
+            truncated
+              ? "Input truncated to the 128 KiB decode limit."
+              : oversizedCalldata !== null
+                ? "Link omitted: input too long for a URL."
+                : null
+          }
+          addressError={addressValid ? null : "Not a valid address."}
+          onCalldataChange={handleCalldataChange}
+          onAddressChange={handleAddressChange}
+          onChainIdChange={(value) =>
+            void setParams({ chainId: toSupportedChainId(value) })
+          }
+          onAbiChange={setUploadedAbi}
+          onModeChange={handleModeChange}
         />
-      ) : showSkeleton ? (
-        <DecoderCardSkeleton />
-      ) : null}
+
+        {!hasInput ? (
+          <BlankSlate
+            variant="title"
+            icon={FileSearch}
+            title="Nothing to decode yet"
+            description="Paste the input data of any transaction. On Etherscan it sits under More Details, labelled Input Data."
+          />
+        ) : !inputValid ? null : call ? (
+          <DecodedActionCard
+            call={call}
+            chainId={chainId}
+            explorerUrl={explorerUrl}
+            uploadedAbis={uploadedAbis}
+            headerRight={permalinkAction}
+            showRawToggle={false}
+          />
+        ) : showSkeleton ? (
+          <DecoderCardSkeleton />
+        ) : null}
+      </div>
     </div>
   );
 };

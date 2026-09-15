@@ -1,4 +1,4 @@
-import { formatUnits } from "viem";
+import { formatUnits, maxUint256 } from "viem";
 
 import type { Humanized } from "@/shared/services/decoder/types";
 
@@ -16,14 +16,21 @@ const trimAndGroup = (formatted: string, isNonZero: boolean): string => {
   return groupedWhole;
 };
 
-/** "25000000000" with 6 decimals and "USDC" -> "25,000 USDC". */
+/**
+ * "25000000000" with 6 decimals and "USDC" -> "25,000 USDC". The maximum
+ * uint256 is the conventional unlimited approval and reads as such: spelled
+ * out, it is a 78-digit number that says nothing about what was granted.
+ */
 export const humanizeTokenAmount = (
   value: bigint,
   decimals: number,
   symbol: string,
 ): Humanized => ({
   kind: "tokenAmount",
-  text: `${trimAndGroup(formatUnits(value, decimals), value !== 0n)} ${symbol}`,
+  text:
+    value === maxUint256
+      ? `unlimited ${symbol}`
+      : `${trimAndGroup(formatUnits(value, decimals), value !== 0n)} ${symbol}`,
   symbol,
   decimals,
 });

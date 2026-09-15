@@ -3,16 +3,18 @@
 import { useState } from "react";
 import { isAddress } from "viem";
 
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
 import { AddressChip } from "@/shared/components/decoder/AddressChip";
-import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
 import { NestedBytesDecode } from "@/shared/components/decoder/NestedBytesDecode";
-import { TypeChip } from "@/shared/components/decoder/TypeChip";
+import { MONO_LABEL } from "@/shared/components/decoder/styles";
 import { ValueCell } from "@/shared/components/decoder/ValueCell";
 import type { DecodedParam } from "@/shared/components/decoder/types";
-import { containerParamView } from "@/shared/utils/containerParamView";
-import { shortHex } from "@/shared/utils/shortHex";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
+import { BulletDivider } from "@/shared/components/design-system/section/bullet-divider/BulletDivider";
 import type { UploadedAbiStore } from "@/shared/services/decoder";
 import { cn } from "@/shared/utils/cn";
+import { containerParamView } from "@/shared/utils/containerParamView";
+import { shortHex } from "@/shared/utils/shortHex";
 
 interface ParamRowProps {
   param: DecodedParam;
@@ -25,10 +27,11 @@ interface ParamRowProps {
   /** Array elements: the type is on the array header, not on every row. */
   hideType?: boolean;
   /**
-   * The parent card already unpacked this call's payload into subcall cards,
-   * so calldata-shaped bytes must not offer a second, duplicate decode.
+   * The parent card already unpacked this row's bytes into subcall rows
+   * ("4 calls, unpacked below"): the note replaces the annotation and no
+   * second, duplicate decode is offered.
    */
-  suppressNestedDecode?: boolean;
+  unpackedNote?: string;
 }
 
 const LONG_RAW_THRESHOLD = 26;
@@ -42,8 +45,8 @@ const CHILD_PREVIEW = 3;
 const isArrayType = (type: string): boolean => type.endsWith("]");
 
 /**
- * The primary reading and the dimmed annotation, per Figma frame 08:
- * `10 years` | `= 315,360,000 seconds`, `6460d40e…35f9` | `[copy]`.
+ * The primary reading and the secondary annotation: `10 years` · `=
+ * 315,360,000 seconds`, `0x6460d40e…35f9` · copy.
  */
 const splitDisplay = (
   param: DecodedParam,
@@ -76,7 +79,7 @@ const DisclosureButton = ({
   <button
     type="button"
     onClick={onClick}
-    className="text-secondary hover:text-primary w-fit cursor-pointer font-mono text-xs leading-4 tracking-wider transition-colors duration-[120ms] ease-[var(--ease-decoder)]"
+    className="text-secondary hover:text-primary w-fit cursor-pointer text-sm leading-5 transition-colors duration-[120ms] ease-[var(--ease-decoder)]"
   >
     {children}
   </button>
@@ -85,12 +88,12 @@ const DisclosureButton = ({
 /**
  * One decoded argument. Two layouts, chosen by the width of the params box
  * (a container query, so a card nested three levels deep behaves like a
- * phone): wide = `name · type · value · annotation` on one line, per frame 08;
- * narrow = name and type on one line, value below at full width, annotation
- * below the value. Addresses render identity chips; tuples list their fields
+ * phone): wide = `NAME · type · value · annotation` on one line; narrow =
+ * name and type on one line, value below at full width, annotation below
+ * the value. Addresses render identity chips; tuples list their fields
  * behind a 1px rail; arrays show a header with their length and the first
  * few elements, the rest on request; calldata-shaped bytes get a lazy
- * "[+ decode]" unless the parent already unpacked them.
+ * "Decode" unless the parent already unpacked them.
  */
 export const ParamRow = ({
   param,
@@ -99,7 +102,7 @@ export const ParamRow = ({
   depth,
   uploadedAbis,
   hideType = false,
-  suppressNestedDecode = false,
+  unpackedNote,
 }: ParamRowProps) => {
   const children = param.children;
   const isContainer = children !== undefined;
@@ -110,76 +113,97 @@ export const ParamRow = ({
 
   const value = param.value;
   const addressValue = param.isAddress && isAddress(value) ? value : undefined;
-  // Address rows render the identity chip, which carries its own [copy]; the
+  // Address rows render the identity chip, which carries its own copy; the
   // generic annotation column applies to plain values only.
-  const { display, annotation, copyAnnotation } =
-    addressValue !== undefined || isContainer
+  // A string is prose (a proposal description, a name): it wraps in full
+  // rather than being middle-truncated like a hex blob.
+  const isText = param.type === "string";
+  const split =
+    addressValue !== undefined || isContainer || isText
       ? { display: undefined, annotation: undefined, copyAnnotation: false }
       : splitDisplay(param);
+  const unpacked = unpackedNote !== undefined;
+  const annotation = unpacked ? unpackedNote : split.annotation;
+  const copyAnnotation = !unpacked && split.copyAnnotation;
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <div className="@md:flex-row @md:items-center @md:gap-3 flex min-w-0 flex-col gap-1">
+      <div className="@md:flex-row @md:items-center @md:gap-2 flex min-w-0 flex-col gap-1">
         <div className="@md:shrink-0 flex min-w-0 items-center gap-2">
           <span
             title={param.name}
             className={cn(
-              "text-primary @md:shrink-0 min-w-0 truncate font-mono text-sm font-medium leading-5",
+              "text-primary @md:shrink-0 @md:leading-5 min-w-0 truncate",
+              MONO_LABEL,
               hideType ? "@md:w-10" : "@md:w-24",
             )}
           >
             {param.name}
           </span>
           {!hideType && (
-            <TypeChip
-              // Arrays carry their length in the chip (`address[13]`) so the
-              // header stays two items wide and the name keeps its room.
-              type={
-                isArray
-                  ? param.type.replace(/\[\]$/, `[${view.length}]`)
-                  : param.type
-              }
-              className="@md:w-20 @md:justify-center shrink-0"
-            />
+            <BadgeStatus
+              variant="outline"
+              className="@md:min-w-20 @md:justify-center shrink-0"
+            >
+              {/* Arrays carry their length in the badge (`address[13]`) so
+                  the header stays two items wide and the name keeps its room. */}
+              {isArray
+                ? param.type.replace(/\[\]$/, `[${view.length}]`)
+                : param.type}
+            </BadgeStatus>
           )}
           {isContainer && !isArray && (
-            <span className="text-dimmed shrink-0 font-mono text-xs leading-4">
+            <span className="text-secondary shrink-0 text-sm leading-5">
               {view.length} fields
             </span>
           )}
         </div>
 
         {!isContainer && (
-          <div className="@md:flex-row @md:items-center @md:gap-3 flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="@md:flex-row @md:items-center @md:gap-2 flex min-w-0 flex-1 flex-col gap-0.5">
             {addressValue !== undefined ? (
               <span className="flex min-w-0">
-                <AddressChip address={addressValue} explorerUrl={explorerUrl} />
+                <AddressChip
+                  address={addressValue}
+                  chainId={chainId}
+                  explorerUrl={explorerUrl}
+                  variant="plain"
+                />
               </span>
+            ) : isText ? (
+              <p className="text-primary min-w-0 whitespace-pre-wrap break-words text-sm leading-5">
+                {param.value}
+              </p>
             ) : (
               // The reading wins over the raw annotation: it keeps its width
               // (up to most of the row) and the annotation absorbs the squeeze.
               <ValueCell
-                display={display}
+                display={split.display}
                 raw={param.value}
                 className="@md:max-w-[70%] @md:shrink-0"
               />
             )}
             {annotation && (
-              <span
-                title={annotation}
-                className="text-dimmed @md:ml-auto @md:shrink-[4] @md:text-right min-w-0 truncate font-mono text-xs leading-4"
-              >
-                {annotation}
-              </span>
+              <>
+                <BulletDivider className="@md:block hidden shrink-0" />
+                <span
+                  title={annotation}
+                  className="text-secondary @md:shrink-[4] min-w-0 truncate text-sm leading-5"
+                >
+                  {annotation}
+                </span>
+              </>
             )}
             {copyAnnotation && (
-              <span className="@md:ml-auto shrink-0">
-                <CopyRawButton
-                  textToCopy={param.value}
-                  label="copy"
-                  className="normal-case tracking-normal"
-                />
-              </span>
+              <CopyAndPasteButton
+                textToCopy={param.value}
+                iconSize="sm"
+                className="-my-1 shrink-0"
+                customTooltipText={{
+                  default: "Copy value",
+                  copied: "Value copied!",
+                }}
+              />
             )}
           </div>
         )}
@@ -196,45 +220,39 @@ export const ParamRow = ({
               depth={depth}
               uploadedAbis={uploadedAbis}
               hideType={isArray}
-              suppressNestedDecode={suppressNestedDecode}
             />
           ))}
           {view.folded > 0 && (
             <DisclosureButton onClick={() => setShowAll(true)}>
-              {`[+ show ${view.hidden.toLocaleString("en-US")} more]`}
+              {`Show ${view.hidden.toLocaleString("en-US")} more`}
             </DisclosureButton>
           )}
           {/* The note explains the tail the budget dropped, so it belongs
               under the last element the reader can actually reach. */}
           {view.note && view.folded === 0 && (
-            <p className="text-dimmed w-fit font-mono text-xs leading-4 tracking-wider">
+            <p className="text-secondary w-fit text-sm leading-5">
               {view.note.value}
             </p>
           )}
           {showAll && view.retained > CHILD_PREVIEW && (
             <DisclosureButton onClick={() => setShowAll(false)}>
-              [– show less]
+              Show less
             </DisclosureButton>
           )}
         </div>
       )}
 
-      {param.isCalldataLike &&
-        (suppressNestedDecode ? (
-          <p className="text-dimmed ml-1 pl-3 font-mono text-xs leading-4">
-            decoded as a nested call below ↓
-          </p>
-        ) : (
-          <div className="border-border-contrast ml-1 min-w-0 border-l pl-3">
-            <NestedBytesDecode
-              calldata={param.value}
-              chainId={chainId}
-              explorerUrl={explorerUrl}
-              depth={depth}
-              uploadedAbis={uploadedAbis}
-            />
-          </div>
-        ))}
+      {param.isCalldataLike && !unpacked && (
+        <div className="border-border-contrast ml-1 min-w-0 border-l pl-3">
+          <NestedBytesDecode
+            calldata={param.value}
+            chainId={chainId}
+            explorerUrl={explorerUrl}
+            depth={depth}
+            uploadedAbis={uploadedAbis}
+          />
+        </div>
+      )}
     </div>
   );
 };

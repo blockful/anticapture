@@ -26,6 +26,15 @@ export {
   collectTokenHints,
   type TokenMeta,
 } from "@/shared/services/decoder/enrich";
+export {
+  resolveKnownIdentity,
+  type KnownIdentity,
+} from "@/shared/services/decoder/knownIdentities";
+export {
+  getDetector,
+  unpackedParamIndices,
+  unpackedPayloadIndex,
+} from "@/shared/services/decoder/multicall/detectors";
 export { summarize } from "@/shared/services/decoder/summarize";
 export { looksLikeCalldata } from "@/shared/services/decoder/wordGuess";
 export type {

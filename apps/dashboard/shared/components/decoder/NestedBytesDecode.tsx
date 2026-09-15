@@ -1,5 +1,6 @@
 "use client";
 
+import { Braces } from "lucide-react";
 import { useState } from "react";
 import type { Address } from "viem";
 
@@ -10,7 +11,7 @@ import { useDecodedCalldata } from "@/shared/hooks/useDecodedCalldata";
 import { useDelayedFlag } from "@/shared/hooks/useDelayedFlag";
 import type { UploadedAbiStore } from "@/shared/services/decoder";
 
-/** Nested cards stop offering "[+ decode]" past this depth. */
+/** Nested cards stop offering "Decode" past this depth. */
 const MAX_NESTED_DECODE_DEPTH = 4;
 
 interface NestedBytesDecodeProps {
@@ -56,9 +57,10 @@ export const NestedBytesDecode = ({
         variant="ghost"
         size="sm"
         onClick={() => setRequested(true)}
-        className="text-secondary hover:text-primary w-fit font-mono text-xs uppercase tracking-wider"
+        className="text-secondary hover:text-primary w-fit"
       >
-        [+ decode]
+        <Braces className="size-3.5" aria-hidden="true" />
+        Decode
       </Button>
     );
   }
@@ -73,6 +75,7 @@ export const NestedBytesDecode = ({
       chainId={chainId}
       explorerUrl={explorerUrl}
       uploadedAbis={uploadedAbis}
+      embedded
     />
   );
 };

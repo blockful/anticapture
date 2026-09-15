@@ -1,101 +1,116 @@
 "use client";
 
+import { ChevronRight, ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import { ChipCluster } from "@/shared/components/decoder/ChipCluster";
-import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
 import { AddressChip } from "@/shared/components/decoder/AddressChip";
+import { ChipCluster } from "@/shared/components/decoder/ChipCluster";
+import { CopyButton } from "@/shared/components/decoder/CopyButton";
 import { DecodedRawToggle } from "@/shared/components/decoder/DecodedRawToggle";
 import { ExpandToggle } from "@/shared/components/decoder/ExpandToggle";
+import { layoutParams } from "@/shared/components/decoder/paramLayout";
 import { ParamRow } from "@/shared/components/decoder/ParamRow";
 import { RawView } from "@/shared/components/decoder/RawView";
-import { SummaryRow } from "@/shared/components/decoder/SummaryRow";
-import { ValueCell } from "@/shared/components/decoder/ValueCell";
+import { MONO_LABEL } from "@/shared/components/decoder/styles";
 import type {
   DecodedCall,
   DecodedParam,
   ViewMode,
 } from "@/shared/components/decoder/types";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { BadgeStatus } from "@/shared/components/design-system/badges";
+import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
+import { BulletDivider } from "@/shared/components/design-system/section/bullet-divider/BulletDivider";
+import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
+import { getDetector, type UploadedAbiStore } from "@/shared/services/decoder";
 import { humanizeEtherValue } from "@/shared/services/decoder/humanize";
-import type { UploadedAbiStore } from "@/shared/services/decoder";
 import { cn } from "@/shared/utils/cn";
+import { buildCollapsedRowLabel } from "@/shared/utils/collapsedRowLabel";
 
 interface DecodedActionCardProps {
   call: DecodedCall;
   chainId: number;
   explorerUrl?: string;
-  /** Embedded mode passes the "// Action N" label; nested cards label themselves. */
+  /** The proposal tab passes "// Action N"; the tool reads "// Decoded call". */
   headerLeft?: ReactNode;
-  /** Extra header actions (the embedded collapse control). */
+  /** Extra header actions (copy link, the embedded collapse control). */
   headerRight?: ReactNode;
   defaultView?: ViewMode;
   className?: string;
   /** Forwarded to lazy nested decodes so an uploaded ABI applies there too. */
   uploadedAbis?: UploadedAbiStore;
+  /**
+   * The proposal tab keeps the Decoded | Raw footer, since it has no input
+   * field; the standalone tool shows the raw hex in the field above the card
+   * and drops it.
+   */
+  showRawToggle?: boolean;
+  /**
+   * Rows only: a subcall row or a lazy bytes decode already drew the line
+   * that names this call, so the card brings no border, header or footer.
+   */
+  embedded?: boolean;
 }
-
-const MONO_LABEL =
-  "font-mono text-xs font-medium uppercase leading-4 tracking-wider";
 
 /** Signatures with more params than this collapse to `name(…) · N params`. */
 const SIGNATURE_INLINE_MAX_PARAMS = 4;
 
-const RowLabel = ({ children }: { children: ReactNode }) => (
-  <p className="text-primary min-w-22 shrink-0 font-mono text-sm leading-5">
-    {children}
-  </p>
-);
+const DELEGATECALL_EXPLANATION =
+  "Runs the target's code in the Safe's own storage and balance: its effects apply to the Safe, not to the target contract.";
 
 /**
- * A labelled row. Root cards keep frame 08's left label column; nested cards
- * stack the label above the content as a dimmed eyebrow, because every
- * left column a level adds is width the deepest value no longer has.
+ * A labelled row: uppercase mono label, content in the base style. Root
+ * cards keep the 88px label column from md up and stack the label above the
+ * content below it; embedded cards always stack, because every left column
+ * a level adds is width the deepest value no longer has.
  */
 const Row = ({
   label,
-  nested,
+  stacked,
   align = "center",
   children,
 }: {
   label: string;
-  nested: boolean;
+  stacked: boolean;
   align?: "center" | "start";
   children: ReactNode;
-}) =>
-  nested ? (
-    <div className="flex min-w-0 flex-col gap-1">
-      <p className={cn("text-dimmed", MONO_LABEL)}>{label}</p>
-      {children}
-    </div>
-  ) : (
-    <div
+}) => (
+  <div
+    className={cn(
+      "flex w-full min-w-0 flex-col gap-1",
+      !stacked && "md:flex-row md:gap-2",
+      !stacked && (align === "center" ? "md:items-center" : "md:items-start"),
+    )}
+  >
+    <p
       className={cn(
-        "flex w-full min-w-0 gap-2",
-        align === "center" ? "items-center" : "items-start",
+        "shrink-0",
+        MONO_LABEL,
+        stacked ? "text-secondary" : "text-primary md:w-22 md:leading-5",
       )}
     >
-      <RowLabel>{label}:</RowLabel>
-      {children}
-    </div>
-  );
+      {label}
+    </p>
+    {children}
+  </div>
+);
 
 /**
  * `register (uint256 id, address owner, uint256 duration)` when short enough
- * to read on one line; otherwise `execTransaction(…) · 10 params [show]`, since
- * every argument is already listed in the params table right below.
+ * to read on one line; otherwise `execTransaction (…) · 10 params`, since
+ * every argument is already listed in the params box right below.
  */
 const FunctionSignature = ({
   call,
   params,
-  nested,
+  embedded,
 }: {
   call: DecodedCall;
   /** The call's params with the truncation note, if any, already removed. */
   params: DecodedParam[];
-  nested: boolean;
+  embedded: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
   // The ABI decides how many parameters this function has; the render budget
@@ -114,39 +129,80 @@ const FunctionSignature = ({
     .filter(Boolean)
     .join(", ");
   const inline =
-    expanded || (!nested && inputCount <= SIGNATURE_INLINE_MAX_PARAMS);
+    expanded || (!embedded && inputCount <= SIGNATURE_INLINE_MAX_PARAMS);
+  const collapsible = inputCount > SIGNATURE_INLINE_MAX_PARAMS || embedded;
 
   return (
-    <p className="text-secondary min-w-0 break-words font-mono text-sm leading-5">
-      <span className="text-link">{call.functionName}</span>{" "}
+    <p className="text-secondary min-w-0 break-words text-sm leading-5">
+      <span className="text-link font-medium">{call.functionName}</span>{" "}
       {inline ? (
         `(${argList})`
       ) : (
         <>
           {"(…)"}
-          <span className="text-dimmed text-xs">
+          <span className="text-secondary">
             {" "}
             · {inputCount.toLocaleString("en-US")} params{" "}
           </span>
         </>
       )}
-      {inputCount > SIGNATURE_INLINE_MAX_PARAMS || nested ? (
+      {collapsible && (
         <button
           type="button"
           onClick={() => setExpanded((current) => !current)}
-          className="text-dimmed hover:text-primary cursor-pointer font-mono text-xs leading-4"
+          className="text-secondary hover:text-primary cursor-pointer text-xs leading-4 underline decoration-dotted underline-offset-4"
         >
-          {inline ? "[hide]" : "[show]"}
+          {inline ? "hide" : "show all"}
         </button>
-      ) : null}
+      )}
     </p>
   );
 };
 
+const ElevatedPermissionBadge = () => (
+  <Tooltip tooltipContent={DELEGATECALL_EXPLANATION} asChild>
+    <span className="flex shrink-0">
+      <BadgeStatus variant="warning">Elevated permission</BadgeStatus>
+    </span>
+  </Tooltip>
+);
+
 /**
- * Subcalls a wrapper unpacked. A lone subcall opens by default; several stay
- * collapsed to one summary line each, so a Timelock batch of eight Safe
- * transactions reads as a list before it reads as eight full cards.
+ * How the call is invoked: the Safe `operation` byte (`1 · delegatecall`)
+ * or, for a child of a batch, the mode its parent used. A delegatecall gets
+ * the elevated-permission badge, because the callee then acts as the Safe.
+ */
+const OperationValue = ({
+  code,
+  operation,
+}: {
+  code: string;
+  operation: "call" | "delegatecall" | "unknown";
+}) => (
+  <div className="flex min-w-0 flex-wrap items-center gap-2">
+    <span className="text-primary text-sm leading-5">
+      {code} · {operation === "unknown" ? "unknown operation" : operation}
+    </span>
+    {operation === "delegatecall" && <ElevatedPermissionBadge />}
+  </div>
+);
+
+const operationName = (code: string): "call" | "delegatecall" | "unknown" =>
+  code === "0" ? "call" : code === "1" ? "delegatecall" : "unknown";
+
+/** `7 actions` / `4 calls`: the wrapper's own word for what it carries. */
+const subcallCountLabel = (call: DecodedCall, count: number): string => {
+  const detector = call.selector === null ? null : getDetector(call.selector);
+  const nouns = detector?.noun ?? { one: "call", many: "calls" };
+  return `${count.toLocaleString("en-US")} ${count === 1 ? nouns.one : nouns.many}`;
+};
+
+/**
+ * Subcalls a wrapper unpacked, one line each: chevron, target chip, the
+ * call's sentence, its signature. A lone subcall opens by default; several
+ * stay collapsed, so a Timelock batch of eight Safe transactions reads as a
+ * list before it reads as eight full cards. Opening a row renders the
+ * call's rows one rail deeper, under the line that names it.
  */
 const SubcallList = ({
   subcalls,
@@ -171,81 +227,87 @@ const SubcallList = ({
     });
 
   return (
-    <div className="border-border-contrast ml-1 flex min-w-0 flex-col gap-2 border-l pl-3">
+    <div className="divide-border-default flex min-w-0 flex-col divide-y">
       {subcalls.map((subcall) => {
-        const number = String(subcall.index + 1).padStart(2, "0");
-        const title = (
-          <>
-            <p className={cn("text-primary min-w-0 truncate", MONO_LABEL)}>
-              {"//"}call {number}
-              {subcall.functionName ? ` · ${subcall.functionName}` : ""}
-            </p>
-            {/* What the batch does not promise about this child has to survive
-                collapsing: the expanded card states each in full through the
-                call's own warning, but the row above it must say it too. */}
-            {subcall.operation === "delegatecall" && (
-              <span
-                title="Runs the target's code in the Safe's own context: its effects apply to the Safe, not to the target."
-                className={cn("text-dimmed shrink-0", MONO_LABEL)}
-              >
-                delegatecall
-              </span>
-            )}
-            {subcall.mayFail && (
-              <span
-                title="The batch allows this call to fail without reverting the other calls."
-                className={cn("text-dimmed shrink-0", MONO_LABEL)}
-              >
-                may fail
-              </span>
-            )}
-          </>
-        );
         const isOpen = open.has(subcall.index);
-        if (!isOpen) {
-          return (
-            <div
-              key={subcall.index}
-              className="border-border-contrast flex min-w-0 flex-col border"
-            >
-              <div className="bg-surface-contrast flex w-full items-center gap-2 px-3 py-2">
-                {title}
-                <ExpandToggle
-                  expanded={false}
-                  onToggle={() => toggle(subcall.index)}
-                  label={`Expand call ${subcall.index + 1}`}
-                  className="ml-auto"
-                />
-              </div>
+        const number = subcall.index + 1;
+        const label = buildCollapsedRowLabel(
+          subcall,
+          subcall.raw,
+          subcall.value,
+        );
+        // A plain ETH transfer has no selector to match, so "no signature
+        // match" would be a false alarm on it.
+        const undecoded =
+          subcall.error !== undefined ||
+          (subcall.abiSource === "none" && subcall.selector !== null);
+        return (
+          <div key={subcall.index} className="flex min-w-0 flex-col py-1.5">
+            {/* On a phone the sentence drops under the chip instead of being
+                squeezed into whatever the badges leave. */}
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 md:flex-nowrap">
+              <ExpandToggle
+                expanded={isOpen}
+                onToggle={() => toggle(subcall.index)}
+                label={`${isOpen ? "Collapse" : "Expand"} call ${number}`}
+              />
+              {subcall.target && (
+                <span className="flex min-w-0 max-w-[45%] shrink-0">
+                  <AddressChip
+                    address={subcall.target}
+                    chainId={chainId}
+                    explorerUrl={explorerUrl}
+                    compact
+                  />
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => toggle(subcall.index)}
-                className="hover:bg-surface-hover text-primary font-inter line-clamp-2 min-w-0 cursor-pointer px-3 py-2 text-left text-sm leading-5 transition-colors duration-[120ms] ease-[var(--ease-decoder)]"
+                className="text-primary line-clamp-2 min-w-0 flex-1 cursor-pointer text-left text-sm leading-5 md:line-clamp-1"
               >
-                {subcall.summary ??
-                  subcall.signature ??
-                  subcall.selector ??
-                  "call"}
+                {label.label}
               </button>
+              {/* What the batch does not promise about this child has to
+                  survive collapsing: the open rows state each in full, but
+                  the line above them must say it too. */}
+              {subcall.operation === "delegatecall" && (
+                <ElevatedPermissionBadge />
+              )}
+              {subcall.mayFail && (
+                <Tooltip
+                  tooltipContent="The batch allows this call to fail without reverting the other calls."
+                  asChild
+                >
+                  <span className="flex shrink-0">
+                    <BadgeStatus variant="dimmed">May fail</BadgeStatus>
+                  </span>
+                </Tooltip>
+              )}
+              {undecoded && (
+                <ChipCluster
+                  abiSource={subcall.abiSource}
+                  hasError={subcall.error !== undefined}
+                />
+              )}
+              {label.signature && (
+                <span className="text-secondary hidden min-w-0 shrink-[4] truncate text-right text-sm leading-5 md:block">
+                  {label.signature}
+                </span>
+              )}
             </div>
-          );
-        }
-        return (
-          <DecodedActionCard
-            key={subcall.index}
-            call={subcall}
-            chainId={chainId}
-            explorerUrl={explorerUrl}
-            uploadedAbis={uploadedAbis}
-            headerLeft={title}
-            headerRight={
-              <ExpandToggle
-                expanded
-                onToggle={() => toggle(subcall.index)}
-                label={`Collapse call ${subcall.index + 1}`}
-              />
-            }
-          />
+            {isOpen && (
+              <div className="border-border-contrast ml-2.5 mt-2 min-w-0 border-l pl-3">
+                <DecodedActionCard
+                  call={subcall}
+                  chainId={chainId}
+                  explorerUrl={explorerUrl}
+                  uploadedAbis={uploadedAbis}
+                  embedded
+                />
+              </div>
+            )}
+          </div>
         );
       })}
     </div>
@@ -253,13 +315,10 @@ const SubcallList = ({
 };
 
 /**
- * The decoded calldata card: header chip cluster, summary sentence, identity
- * target row, human-first params, nested subcall cards, and the decoded|raw
- * toggle with raw hex one click away in every state.
- *
- * Nested cards (depth > 0) use a reduced anatomy: eyebrow labels instead of
- * a label column, no bordered params box, no own decoded|raw toggle (the
- * raw hex is still one click away via the header copy control).
+ * The decoded calldata card: header with the ABI-source badge, summary
+ * sentence, identity target row, human-first params, the Safe operation with
+ * its permission badge, nested subcall rows, and (on the proposal tab) the
+ * Decoded | Raw footer with raw hex one click away.
  */
 export const DecodedActionCard = ({
   call,
@@ -270,183 +329,244 @@ export const DecodedActionCard = ({
   defaultView = "decoded",
   className,
   uploadedAbis,
+  showRawToggle = true,
+  embedded = false,
 }: DecodedActionCardProps) => {
   const [view, setView] = useState<ViewMode>(defaultView);
+  const [executionOpen, setExecutionOpen] = useState(false);
 
   // The decoder appends a "N more parameters not shown" note when one call
   // declares more inputs than the render budget holds. It is a note about the
   // omitted tail, not a parameter, so it is listed apart from the rows.
   const params = call.params.filter((param) => !param.isTruncationNote);
   const paramsNote = call.params.find((param) => param.isTruncationNote);
+  const layout = layoutParams(call, params);
 
   const hasError = call.error !== undefined;
-  const showDecoded = view === "decoded" && !hasError;
-  const isNested = call.depth > 0;
-  const hasSubcalls = Boolean(call.subcalls && call.subcalls.length > 0);
+  const rawToggle = !embedded && showRawToggle;
+  const showDecoded = (!rawToggle || view === "decoded") && !hasError;
+  const subcalls = call.subcalls ?? [];
+  const subcallCount = call.subcallCount ?? subcalls.length;
+  const hasSubcalls = subcalls.length > 0;
+  const unpackedNote = hasSubcalls
+    ? `${subcallCountLabel(call, subcallCount)}, unpacked below`
+    : undefined;
+
+  const operationCode =
+    layout.operation?.value ??
+    (call.operation === "delegatecall" ? "1" : undefined);
+
+  const hasParams = layout.primary.length > 0 || layout.secondary || paramsNote;
+
+  const renderParam = (param: DecodedParam, index: number) => (
+    <ParamRow
+      key={`${param.name}-${index}`}
+      param={param}
+      chainId={chainId}
+      explorerUrl={explorerUrl}
+      depth={call.depth}
+      uploadedAbis={uploadedAbis}
+      unpackedNote={param === layout.payload ? unpackedNote : undefined}
+    />
+  );
+
+  const body = (
+    <div
+      className={cn(
+        "@container flex w-full min-w-0 flex-col",
+        embedded ? "gap-3" : "gap-4 p-3",
+      )}
+    >
+      {hasError && (
+        <InlineAlert variant="error" text={call.error ?? "Decode failed."} />
+      )}
+      {call.warnings.map((warning) => (
+        <InlineAlert
+          key={warning.code + warning.message}
+          variant="warning"
+          text={warning.message}
+        />
+      ))}
+
+      {showDecoded && call.summary && (
+        <Row label="summary" stacked={embedded} align="start">
+          <p className="text-primary min-w-0 text-sm leading-5">
+            {call.summary}
+          </p>
+        </Row>
+      )}
+
+      {call.target && !embedded && (
+        <Row label="target" stacked={embedded}>
+          <span className="flex min-w-0">
+            <AddressChip
+              address={call.target}
+              chainId={chainId}
+              explorerUrl={explorerUrl}
+            />
+          </span>
+        </Row>
+      )}
+
+      {call.functionName && showDecoded && (
+        <Row label="function" stacked={embedded} align="start">
+          <FunctionSignature call={call} params={params} embedded={embedded} />
+        </Row>
+      )}
+
+      {showDecoded ? (
+        // The note has to show precisely when the budget dropped every
+        // input, or the card would claim the call takes no arguments.
+        hasParams && (
+          <Row label="params" stacked={embedded} align="start">
+            <div
+              className={cn(
+                "@container flex min-w-0 flex-1 flex-col gap-2",
+                !embedded && "border-border-contrast border p-3",
+              )}
+            >
+              {layout.primary.map(renderParam)}
+              {layout.secondary && (
+                <div className="flex min-w-0 flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setExecutionOpen((current) => !current)}
+                    aria-expanded={executionOpen}
+                    className="text-secondary hover:text-primary flex w-fit cursor-pointer items-center gap-2 text-left text-sm leading-5 transition-colors duration-[120ms] ease-[var(--ease-decoder)]"
+                  >
+                    <ChevronRight
+                      aria-hidden="true"
+                      className={cn(
+                        "size-3.5 shrink-0 transition-transform duration-[120ms] ease-[var(--ease-decoder)]",
+                        executionOpen && "rotate-90",
+                      )}
+                    />
+                    {layout.secondary.label}
+                  </button>
+                  {executionOpen && layout.secondary.params.map(renderParam)}
+                </div>
+              )}
+              {paramsNote && (
+                <p className="text-secondary w-fit text-sm leading-5">
+                  {paramsNote.value}
+                </p>
+              )}
+            </div>
+          </Row>
+        )
+      ) : (
+        <RawView
+          raw={call.raw}
+          selector={call.selector}
+          showSelector={call.abiSource === "none"}
+        />
+      )}
+
+      {showDecoded && operationCode !== undefined && (
+        <Row label="operation" stacked={embedded}>
+          <OperationValue
+            code={operationCode}
+            operation={operationName(operationCode)}
+          />
+        </Row>
+      )}
+
+      {call.value !== undefined && (!embedded || call.value > 0n) && (
+        <Row label="value" stacked={embedded}>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="text-primary text-sm leading-5">
+              {call.value > 0n ? humanizeEtherValue(call.value).text : "0 ETH"}
+            </span>
+            {call.value > 0n && (
+              <>
+                <BulletDivider className="shrink-0" />
+                <span className="text-secondary min-w-0 truncate text-sm leading-5">
+                  {call.value.toString()} wei
+                </span>
+              </>
+            )}
+          </div>
+        </Row>
+      )}
+
+      {showDecoded &&
+        hasSubcalls &&
+        (embedded ? (
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className={cn("text-secondary", MONO_LABEL)}>
+              {subcallCountLabel(call, subcallCount)}
+            </p>
+            <SubcallList
+              subcalls={subcalls}
+              chainId={chainId}
+              explorerUrl={explorerUrl}
+              uploadedAbis={uploadedAbis}
+            />
+          </div>
+        ) : (
+          <Row label="nested" stacked={false} align="start">
+            <div className="border-border-default flex min-w-0 flex-1 flex-col border px-3 py-1">
+              <SubcallList
+                subcalls={subcalls}
+                chainId={chainId}
+                explorerUrl={explorerUrl}
+                uploadedAbis={uploadedAbis}
+              />
+            </div>
+          </Row>
+        ))}
+    </div>
+  );
+
+  if (embedded) return <div className={className}>{body}</div>;
 
   const headerLabel = headerLeft ?? (
-    <p className={cn("text-primary min-w-0 truncate", MONO_LABEL)}>
-      {"//"}
-      {call.functionName ?? call.selector ?? "call"}
+    <p className={cn("text-primary shrink-0", MONO_LABEL)}>
+      {"//"}decoded call
     </p>
   );
 
   return (
     <div
       className={cn(
-        "flex w-full min-w-0 flex-col border",
-        isNested
-          ? "border-border-contrast"
-          : "border-border-default bg-surface-default",
+        "border-border-default bg-surface-default flex w-full min-w-0 flex-col border",
         className,
       )}
     >
-      <div
-        className={cn(
-          "bg-surface-contrast flex w-full items-center gap-2",
-          isNested ? "px-3 py-2" : "p-3",
-        )}
-      >
-        {/* Root labels ("//ACTION 01") are short and never give way; nested
-            titles carry the function name and ellipsize before the chips do. */}
-        <div
-          className={cn(
-            "flex min-w-0 items-center gap-2",
-            isNested ? "shrink" : "shrink-0",
-          )}
-        >
+      <div className="bg-surface-contrast border-border-default flex w-full flex-wrap items-center gap-x-3 gap-y-2 border-b px-3 py-2">
+        <div className="flex min-w-0 items-center gap-2">
           {headerLabel}
-        </div>
-        <div className="ml-auto flex min-w-0 items-center gap-2">
           <ChipCluster abiSource={call.abiSource} hasError={hasError} />
+        </div>
+        <div className="flex min-w-0 items-center gap-2 md:ml-auto">
           {call.target && explorerUrl && (
             <DefaultLink
               href={`${explorerUrl}/address/${call.target}`}
               openInNewTab
-              className={cn(
-                "text-secondary hidden shrink-0 md:inline-flex",
-                MONO_LABEL,
-              )}
+              size="sm"
+              className="shrink-0"
             >
               Contract
+              <ExternalLink className="size-3" aria-hidden="true" />
             </DefaultLink>
           )}
-          {isNested && (
-            <CopyRawButton
-              textToCopy={call.raw}
-              label="copy raw"
-              className="hidden shrink-0 sm:inline"
-            />
+          {headerRight && (
+            <>
+              {call.target && explorerUrl && (
+                <DividerDefault isVertical className="h-4" />
+              )}
+              {headerRight}
+            </>
           )}
-          {headerRight}
         </div>
       </div>
 
-      <div className="@container flex w-full min-w-0 flex-col gap-3 p-3">
-        {hasError && (
-          <InlineAlert variant="error" text={call.error ?? "Decode failed."} />
-        )}
-        {call.warnings.map((warning) => (
-          <InlineAlert
-            key={warning.code + warning.message}
-            variant="warning"
-            text={warning.message}
-          />
-        ))}
+      {body}
 
-        {showDecoded &&
-          call.summary &&
-          (isNested ? (
-            <Row label="summary" nested>
-              <p className="text-primary font-inter min-w-0 text-sm leading-5">
-                {call.summary}
-              </p>
-            </Row>
-          ) : (
-            <SummaryRow summary={call.summary} />
-          ))}
-
-        {call.target && (
-          <Row label="target" nested={isNested}>
-            <span className="flex min-w-0">
-              <AddressChip address={call.target} explorerUrl={explorerUrl} />
-            </span>
-          </Row>
-        )}
-
-        {call.functionName && showDecoded && (
-          <Row label="function" nested={isNested} align="start">
-            <FunctionSignature call={call} params={params} nested={isNested} />
-          </Row>
-        )}
-
-        {showDecoded ? (
-          // The note has to show precisely when the budget dropped every
-          // input, or the card would claim the call takes no arguments.
-          (params.length > 0 || paramsNote) && (
-            <Row label="params" nested={isNested} align="start">
-              <div
-                className={cn(
-                  "@container flex min-w-0 flex-1 flex-col gap-2",
-                  !isNested && "border-border-contrast border p-3",
-                )}
-              >
-                {params.map((param, i) => (
-                  <ParamRow
-                    key={`${param.name}-${i}`}
-                    param={param}
-                    chainId={chainId}
-                    explorerUrl={explorerUrl}
-                    depth={call.depth}
-                    uploadedAbis={uploadedAbis}
-                    suppressNestedDecode={hasSubcalls}
-                  />
-                ))}
-                {paramsNote && (
-                  <p className="text-dimmed w-fit font-mono text-xs leading-4 tracking-wider">
-                    {paramsNote.value}
-                  </p>
-                )}
-              </div>
-            </Row>
-          )
-        ) : (
-          <RawView
-            raw={call.raw}
-            selector={call.selector}
-            showSelector={call.abiSource === "none"}
-          />
-        )}
-
-        {call.value !== undefined && (!isNested || call.value > 0n) && (
-          <Row label="value" nested={isNested}>
-            {call.value > 0n ? (
-              <ValueCell
-                display={humanizeEtherValue(call.value).text}
-                raw={`${call.value.toString()} wei`}
-              />
-            ) : (
-              <p className="text-secondary font-mono text-sm leading-5">
-                0 ETH
-              </p>
-            )}
-          </Row>
-        )}
-
-        {showDecoded && call.subcalls && call.subcalls.length > 0 && (
-          <SubcallList
-            subcalls={call.subcalls}
-            chainId={chainId}
-            explorerUrl={explorerUrl}
-            uploadedAbis={uploadedAbis}
-          />
-        )}
-      </div>
-
-      {!isNested && (
+      {rawToggle && (
         <div className="flex w-full items-center justify-between gap-2 p-3 pt-0">
           <DecodedRawToggle value={view} onValueChange={setView} />
-          <CopyRawButton textToCopy={call.raw} />
+          <CopyButton textToCopy={call.raw} label="Copy raw" />
         </div>
       )}
     </div>

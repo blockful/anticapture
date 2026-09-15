@@ -33,8 +33,10 @@ const KNOWN_SIGNATURES = [
   "function execute(address target, uint256 value, bytes payload, bytes32 predecessor, bytes32 salt)",
   "function executeBatch(address[] targets, uint256[] values, bytes[] payloads, bytes32 predecessor, bytes32 salt)",
   "function updateDelay(uint256 newDelay)",
-  // Governor
+  // Governor (OpenZeppelin, then Bravo with its separate signatures array)
   "function relay(address target, uint256 value, bytes data)",
+  "function propose(address[] targets, uint256[] values, bytes[] calldatas, string description)",
+  "function propose(address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, string description)",
 ];
 
 const buildKnownFunctions = (): Map<Hex, AbiFunction> => {

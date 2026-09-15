@@ -1,17 +1,19 @@
 "use client";
 
+import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { cn } from "@/shared/utils/cn";
 
 /**
- * Labeled copy affordance for a card's raw calldata. Per the interaction spec
- * the label itself swaps to "copied ✓" for 1.2s; no toast.
+ * Labelled copy action (ghost, small): "Copy raw", "Copy link". The label
+ * itself swaps to "Copied" for 1.2s; no toast.
  */
-export const CopyRawButton = ({
+export const CopyButton = ({
   textToCopy,
   getTextToCopy,
-  label = "copy raw calldata",
+  label = "Copy raw",
   className,
 }: {
   textToCopy?: string;
@@ -35,20 +37,18 @@ export const CopyRawButton = ({
     }
   };
 
+  const Icon = copied ? Check : Copy;
+
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={copy}
-      className={cn(
-        // Lowercase per frame 08 ("[copy raw calldata]"); callers that need
-        // the uppercase variant ("[COPY]" on chips) pass `uppercase`.
-        "cursor-pointer font-mono text-xs leading-4 tracking-wider transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
-        copied ? "text-success" : "text-dimmed hover:text-primary",
-        "focus-visible:shadow-[var(--shadow-focus-ring)] focus-visible:outline-none",
-        className,
-      )}
+      aria-label={label}
+      className={cn("shrink-0", copied && "text-success", className)}
     >
-      {copied ? "copied ✓" : `[${label}]`}
-    </button>
+      <Icon className="size-3.5" aria-hidden="true" />
+      {copied ? "Copied" : label}
+    </Button>
   );
 };

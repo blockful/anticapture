@@ -2,30 +2,35 @@
 
 import type { Address } from "viem";
 
-import { CopyRawButton } from "@/shared/components/decoder/CopyRawButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
+import { IdentityAvatar } from "@/shared/components/decoder/IdentityAvatar";
 import { AddressDetailsTooltip } from "@/shared/components/tooltips/AddressDetailsTooltip";
 import {
   ADDRESS_ENRICHMENT_GC_TIME,
   ADDRESS_ENRICHMENT_STALE_TIME,
 } from "@/shared/constants/api";
+import { resolveKnownIdentity } from "@/shared/services/decoder/knownIdentities";
 import { cn } from "@/shared/utils/cn";
 import { shortHex } from "@/shared/utils/shortHex";
 import { useGetAddress } from "@anticapture/client/hooks";
 
 interface AddressChipProps {
   address: Address;
+  /** Picks the token and DAO contract identities the platform knows offline. */
+  chainId: number;
   /** Enables the "view on explorer" click-through on the name. */
   explorerUrl?: string;
-  size?: "xs" | "sm";
-  /** Avatar + name only (collapsed rows), per frame 08's `[◉ USDC]` chip. */
+  /** Avatar + name only (collapsed rows). */
   compact?: boolean;
+  /** `plain` drops the border, for chips that sit inside a params box. */
+  variant?: "bordered" | "plain";
   className?: string;
 }
 
 /**
- * Identity chip for decoded addresses: identicon + resolved name + truncated
- * checksum + copy, with an EOA tag for unresolved wallets.
+ * Identity chip for decoded addresses: token or protocol glyph, resolved
+ * name, truncated checksum and a copy control, with an EOA tag for
+ * unresolved wallets.
  *
  * The chip is a flex item that negotiates width with its row: the name is
  * the only part allowed to shrink (and it ellipsizes), everything else is
@@ -36,9 +41,10 @@ interface AddressChipProps {
  */
 export const AddressChip = ({
   address,
+  chainId,
   explorerUrl,
-  size = "xs",
   compact = false,
+  variant = "bordered",
   className,
 }: AddressChipProps) => {
   // Same query key as EnsAvatar, so chips and avatars share one cache entry.
@@ -52,10 +58,13 @@ export const AddressChip = ({
   const arkham = data?.arkham ?? null;
   const isContract = data?.isContract ?? null;
 
-  // Shortest useful name: an ENS name, else the Arkham label ("USD Coin
-  // Token (USDC)"), else the entity ("Circle"). Never "entity · label": the
-  // chip has one line and the tooltip carries the rest.
-  const resolvedName = ens?.name ?? arkham?.label ?? arkham?.entity ?? null;
+  // What the platform knows offline comes first ("USDC", "ENS Governor"),
+  // then the shortest useful remote name: an ENS name, else the Arkham label
+  // ("USD Coin Token (USDC)"), else the entity ("Circle"). Never "entity ·
+  // label": the chip has one line and the tooltip carries the rest.
+  const identity = resolveKnownIdentity(chainId, address);
+  const resolvedName =
+    identity?.label ?? ens?.name ?? arkham?.label ?? arkham?.entity ?? null;
 
   // Same 6+4 middle truncation as the summary sentence, so the two never
   // show the same address with different glyphs.
@@ -64,30 +73,23 @@ export const AddressChip = ({
   const nameContent = (
     <span
       className={cn(
-        "text-primary block min-w-0 truncate font-mono text-sm leading-5",
-        isLoading && "animate-pulse",
+        "text-primary block min-w-0 truncate text-sm leading-5",
+        isLoading && !identity && "animate-pulse",
       )}
     >
       {resolvedName ?? shortAddress}
     </span>
   );
 
-  const avatar = (
-    <EnsAvatar
-      address={address}
-      size={size}
-      variant="square"
-      showName={false}
-      withDetailsTooltip={false}
-    />
-  );
+  const avatar = <IdentityAvatar address={address} identity={identity} />;
 
   return (
     <span
       title={resolvedName ? `${resolvedName} · ${address}` : address}
       className={cn(
-        "bg-surface-default border-border-contrast flex min-w-0 max-w-full items-center gap-1.5 whitespace-nowrap border px-1 py-0.5",
-        "hover:border-highlight transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
+        "bg-surface-default flex min-w-0 max-w-full items-center gap-1.5 whitespace-nowrap py-[3px]",
+        variant === "bordered" &&
+          "border-border-contrast hover:border-highlight border pl-1.5 pr-2 transition-colors duration-[120ms] ease-[var(--ease-decoder)]",
         className,
       )}
     >
@@ -121,7 +123,7 @@ export const AddressChip = ({
         nameContent
       )}
       {!compact && resolvedName && (
-        <span className="text-dimmed @xl:inline hidden shrink-0 font-mono text-xs leading-4">
+        <span className="text-secondary @xl:inline hidden shrink-0 text-sm leading-5">
           {shortAddress}
         </span>
       )}
@@ -131,7 +133,15 @@ export const AddressChip = ({
         </span>
       )}
       {!compact && (
-        <CopyRawButton textToCopy={address} label="copy" className="shrink-0" />
+        <CopyAndPasteButton
+          textToCopy={address}
+          iconSize="sm"
+          className="-my-1 shrink-0"
+          customTooltipText={{
+            default: "Copy address",
+            copied: "Address copied!",
+          }}
+        />
       )}
     </span>
   );

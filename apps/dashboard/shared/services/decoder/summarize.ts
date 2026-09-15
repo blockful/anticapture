@@ -171,7 +171,8 @@ export const summarize = (node: DecodedCall): string | null => {
   const detector = node.selector === null ? null : getDetector(node.selector);
   if (detector && node.subcalls !== undefined) {
     const count = node.subcallCount ?? node.subcalls.length;
-    const noun = count === 1 ? "call" : "calls";
+    const nouns = detector.noun ?? { one: "call", many: "calls" };
+    const noun = count === 1 ? nouns.one : nouns.many;
     const mode = isDelegatecall ? " (delegatecall)" : "";
     const detail = describeSubcalls(node.subcalls, count);
     return detail

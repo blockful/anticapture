@@ -39,7 +39,9 @@ export type MulticallDetector = {
     | "timelock-scheduleBatch"
     | "timelock-execute"
     | "timelock-executeBatch"
-    | "governor-relay";
+    | "governor-relay"
+    | "governor-propose"
+    | "governor-propose-bravo";
   /**
    * Canonical signature of the wrapper. Callers must only run a detector when
    * the RESOLVED signature matches: a target's own ABI can resolve a colliding
@@ -47,7 +49,24 @@ export type MulticallDetector = {
    */
   signature: string;
   /** Verb for the parent summary: "Executes N calls" / "Schedules N calls". */
-  verb: "Executes" | "Schedules";
+  verb: "Executes" | "Schedules" | "Submits a proposal with";
+  /** What the wrapper carries, when it is not a plain "call": `7 actions`. */
+  noun?: { one: string; many: string };
+  /**
+   * Positions of the parameters the extracted calls already spell out (the
+   * `targets`/`values`/`calldatas` arrays of a batch, the `calls` tuple list
+   * of a Multicall3). The card lists the calls instead of repeating three
+   * parallel arrays. Scalars that carry one call (`data` of a Safe
+   * transaction) are not listed here: they stay visible with a note.
+   */
+  unpackedParams: readonly number[];
+  /**
+   * Position of the single `bytes` parameter that carries the batch (`data`
+   * of a Safe transaction, `transactions` of a MultiSend). It stays visible,
+   * annotated with what was unpacked from it. Absent for batches whose calls
+   * come from arrays.
+   */
+  payloadParam?: number;
   extract: (args: readonly unknown[]) => ExtractedSubcall[];
   /**
    * Caveats about the WRAPPER node itself, read off the calls it yielded. The
@@ -262,13 +281,9 @@ const single = (
  * anyway invents an empty call for each missing payload, and the card then
  * summarizes a batch that would never run as though it were executable.
  */
-const parallelLengthsAgree = (
-  targets: unknown,
-  values: unknown,
-  payloads: unknown,
-): boolean => {
-  const count = asList(targets).length;
-  return asList(values).length === count && asList(payloads).length === count;
+const parallelLengthsAgree = (...lists: unknown[]): boolean => {
+  const [first, ...rest] = lists.map((list) => asList(list).length);
+  return rest.every((length) => length === first);
 };
 
 const WOULD_REVERT_WARNING: DecodeWarning = {
@@ -277,8 +292,10 @@ const WOULD_REVERT_WARNING: DecodeWarning = {
     "This batch's arrays have different lengths, so the call would revert; its calls are not decoded.",
 };
 
-const mismatchedBatch = (args: readonly unknown[]): DecodeWarning[] =>
-  parallelLengthsAgree(args[0], args[1], args[2]) ? [] : [WOULD_REVERT_WARNING];
+const mismatchedBatch =
+  (count: number) =>
+  (_subcalls: ExtractedSubcall[], args: readonly unknown[]): DecodeWarning[] =>
+    parallelLengthsAgree(...args.slice(0, count)) ? [] : [WOULD_REVERT_WARNING];
 
 const batch = (
   targets: unknown,
@@ -302,6 +319,47 @@ const batch = (
   });
 };
 
+/**
+ * Governor Bravo splits each action into a `signatures[i]` string and a
+ * `calldatas[i]` blob of ABI-encoded arguments WITHOUT the selector; the
+ * governor prepends `bytes4(keccak256(signature))` at execution. An empty
+ * signature means the calldata is already complete. Reassembled here so the
+ * child decodes like any other call.
+ */
+const bravoCalldata = (signature: unknown, payload: unknown): Hex => {
+  const args = isHexValue(payload) ? payload : "0x";
+  if (typeof signature !== "string" || signature.trim() === "") return args;
+  try {
+    return `${toFunctionSelector(signature.trim())}${args.slice(2)}`;
+  } catch {
+    // Not a signature the governor could hash either: the action would
+    // revert, and the raw arguments are the most honest thing to show.
+    return args;
+  }
+};
+
+const bravoBatch = (
+  targets: unknown,
+  values: unknown,
+  signatures: unknown,
+  payloads: unknown,
+): ExtractedSubcall[] => {
+  if (!parallelLengthsAgree(targets, values, signatures, payloads)) return [];
+  const valueList = asList(values);
+  const signatureList = asList(signatures);
+  const payloadList = asList(payloads);
+  return asList(targets).map((target, i) => {
+    const value = valueList[i];
+    return {
+      target: isAddressValue(target) ? target : undefined,
+      value: typeof value === "bigint" ? value : undefined,
+      calldata: bravoCalldata(signatureList[i], payloadList[i]),
+    };
+  });
+};
+
+const ACTIONS = { one: "action", many: "actions" };
+
 const DETECTOR_DEFINITIONS: Array<{
   signature: string;
   detector: Omit<MulticallDetector, "signature">;
@@ -312,6 +370,8 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "safe-exec",
       verb: "Executes",
+      unpackedParams: [],
+      payloadParam: 2,
       extract: (args) => {
         // operation 1 is a delegatecall: the code at `to` runs with the
         // Safe's own storage and balance, and NO ETH moves to the target, so
@@ -333,6 +393,8 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "safe-multisend",
       verb: "Executes",
+      unpackedParams: [],
+      payloadParam: 0,
       extract: (args) => unpackMultiSend(args[0]),
       warningsFor: (subcalls, args) => [
         ...carriesDelegatecall(
@@ -347,6 +409,7 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "multicall3-aggregate",
       verb: "Executes",
+      unpackedParams: [0],
       extract: (args) =>
         callsIn(args[0], toCall2).map((call) => ({
           target: call.target,
@@ -360,6 +423,7 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "multicall3-aggregate3",
       verb: "Executes",
+      unpackedParams: [0],
       extract: (args) =>
         callsIn(args[0], toCall3).map((call) => ({
           target: call.target,
@@ -374,6 +438,7 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "multicall3-tryAggregate",
       verb: "Executes",
+      unpackedParams: [1],
       extract: (args) => {
         // `requireSuccess` is a property of the batch, so it applies to every
         // call in it; without it the whole list is tolerated-failure.
@@ -392,6 +457,8 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "timelock-schedule",
       verb: "Schedules",
+      unpackedParams: [],
+      payloadParam: 2,
       extract: (args) => single(args[0], args[1], args[2]),
     },
   },
@@ -401,8 +468,9 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "timelock-scheduleBatch",
       verb: "Schedules",
+      unpackedParams: [0, 1, 2],
       extract: (args) => batch(args[0], args[1], args[2]),
-      warningsFor: (_subcalls, args) => mismatchedBatch(args),
+      warningsFor: mismatchedBatch(3),
     },
   },
   {
@@ -411,6 +479,8 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "timelock-execute",
       verb: "Executes",
+      unpackedParams: [],
+      payloadParam: 2,
       extract: (args) => single(args[0], args[1], args[2]),
     },
   },
@@ -420,8 +490,9 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "timelock-executeBatch",
       verb: "Executes",
+      unpackedParams: [0, 1, 2],
       extract: (args) => batch(args[0], args[1], args[2]),
-      warningsFor: (_subcalls, args) => mismatchedBatch(args),
+      warningsFor: mismatchedBatch(3),
     },
   },
   {
@@ -429,7 +500,36 @@ const DETECTOR_DEFINITIONS: Array<{
     detector: {
       id: "governor-relay",
       verb: "Executes",
+      unpackedParams: [],
+      payloadParam: 2,
       extract: (args) => single(args[0], args[1], args[2]),
+    },
+  },
+  // A proposal is a batch that has not been scheduled yet: the same three
+  // parallel arrays, zipped into one row per action so the card reads "7
+  // actions" instead of three lists and seven separate expanders.
+  {
+    signature:
+      "function propose(address[] targets, uint256[] values, bytes[] calldatas, string description)",
+    detector: {
+      id: "governor-propose",
+      verb: "Submits a proposal with",
+      noun: ACTIONS,
+      unpackedParams: [0, 1, 2],
+      extract: (args) => batch(args[0], args[1], args[2]),
+      warningsFor: mismatchedBatch(3),
+    },
+  },
+  {
+    signature:
+      "function propose(address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, string description)",
+    detector: {
+      id: "governor-propose-bravo",
+      verb: "Submits a proposal with",
+      noun: ACTIONS,
+      unpackedParams: [0, 1, 2, 3],
+      extract: (args) => bravoBatch(args[0], args[1], args[2], args[3]),
+      warningsFor: mismatchedBatch(4),
     },
   },
 ];
@@ -448,4 +548,32 @@ export const getDetector = (selector: Hex): MulticallDetector | null => {
     }
   }
   return detectorsBySelector.get(selector.toLowerCase() as Hex) ?? null;
+};
+
+/**
+ * Positions of the parameters a wrapper's subcall list already spells out,
+ * for a call the decoder actually unpacked. Empty for everything else, so a
+ * colliding selector that resolved to some other function keeps every row.
+ */
+export const unpackedParamIndices = (call: UnpackedCall): ReadonlySet<number> =>
+  new Set(unpackingDetector(call)?.unpackedParams ?? []);
+
+/**
+ * Position of the `bytes` parameter the subcalls were unpacked from, for a
+ * call the decoder actually unpacked; undefined when the calls came from
+ * arrays or nothing was unpacked.
+ */
+export const unpackedPayloadIndex = (call: UnpackedCall): number | undefined =>
+  unpackingDetector(call)?.payloadParam;
+
+type UnpackedCall = {
+  selector: Hex | null;
+  signature?: string;
+  subcalls?: unknown[];
+};
+
+const unpackingDetector = (call: UnpackedCall): MulticallDetector | null => {
+  if (call.selector === null || call.subcalls === undefined) return null;
+  const detector = getDetector(call.selector);
+  return detector && detector.signature === call.signature ? detector : null;
 };

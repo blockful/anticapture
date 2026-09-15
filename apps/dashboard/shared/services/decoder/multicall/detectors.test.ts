@@ -1,6 +1,9 @@
 import { toFunctionSelector } from "viem";
 
-import { getDetector } from "@/shared/services/decoder/multicall/detectors";
+import {
+  getDetector,
+  unpackedParamIndices,
+} from "@/shared/services/decoder/multicall/detectors";
 
 const AGGREGATE = "aggregate((address,bytes)[])";
 const AGGREGATE3 = "aggregate3((address,bool,bytes)[])";
@@ -243,5 +246,119 @@ describe("single and batch extractors degrade instead of throwing", () => {
 
   test("a batch with no arrays at all yields no subcalls", () => {
     expect(extract(SCHEDULE_BATCH, [undefined, null, 5])).toEqual([]);
+  });
+});
+
+const PROPOSE = "propose(address[],uint256[],bytes[],string)";
+const PROPOSE_BRAVO = "propose(address[],uint256[],string[],bytes[],string)";
+
+describe("governor propose zips the proposal arrays into actions", () => {
+  test("OpenZeppelin propose yields one call per action", () => {
+    const args = [[TARGET, OTHER], [0n, 5n], ["0xabcd", "0x"], "description"];
+    expect(extract(PROPOSE, args)).toEqual([
+      { target: TARGET, value: 0n, calldata: "0xabcd" },
+      { target: OTHER, value: 5n, calldata: "0x" },
+    ]);
+    expect(warningsFor(PROPOSE, args)).toEqual([]);
+  });
+
+  test("Bravo propose prepends the selector of each signature", () => {
+    // Bravo stores `transfer(address,uint256)` apart from its ABI-encoded
+    // arguments and hashes the signature at execution; the child can only
+    // decode once the two halves are back together.
+    const encodedArgs = `0x${"1".padStart(64, "0")}${"2".padStart(64, "0")}`;
+    const [transfer, complete] = extract(PROPOSE_BRAVO, [
+      [TARGET, OTHER],
+      [0n, 0n],
+      ["transfer(address,uint256)", ""],
+      [encodedArgs, "0xabcd"],
+      "description",
+    ]);
+    expect(transfer.calldata).toBe(
+      `${toFunctionSelector("transfer(address,uint256)")}${encodedArgs.slice(2)}`,
+    );
+    // An empty signature means the calldata already carries its selector.
+    expect(complete.calldata).toBe("0xabcd");
+  });
+
+  test("a Bravo signature the governor could not hash leaves the arguments raw", () => {
+    const [call] = extract(PROPOSE_BRAVO, [
+      [TARGET],
+      [0n],
+      ["not a signature("],
+      ["0xabcd"],
+      "",
+    ]);
+    expect(call.calldata).toBe("0xabcd");
+  });
+
+  test.each([PROPOSE, PROPOSE_BRAVO])(
+    "%s with arrays of different lengths yields nothing executable",
+    (signature) => {
+      const args =
+        signature === PROPOSE
+          ? [[TARGET, OTHER], [0n], ["0xabcd"], ""]
+          : [[TARGET, OTHER], [0n, 0n], [""], ["0xabcd", "0x"], ""];
+      expect(extract(signature, args)).toEqual([]);
+      expect(warningsFor(signature, args)).toEqual([
+        expect.objectContaining({ code: "would-revert" }),
+      ]);
+    },
+  );
+
+  test("a proposal counts actions, not calls", () => {
+    expect(detectorFor(PROPOSE).noun).toEqual({
+      one: "action",
+      many: "actions",
+    });
+    expect(detectorFor(PROPOSE).verb).toBe("Submits a proposal with");
+  });
+});
+
+describe("unpackedParamIndices", () => {
+  test("names the parallel arrays a batch's subcalls already spell out", () => {
+    const selector = toFunctionSelector(PROPOSE);
+    expect([
+      ...unpackedParamIndices({ selector, signature: PROPOSE, subcalls: [] }),
+    ]).toEqual([0, 1, 2]);
+    expect([
+      ...unpackedParamIndices({
+        selector: toFunctionSelector(EXECUTE_BATCH),
+        signature: EXECUTE_BATCH,
+        subcalls: [],
+      }),
+    ]).toEqual([0, 1, 2]);
+    expect([
+      ...unpackedParamIndices({
+        selector: toFunctionSelector(TRY_AGGREGATE),
+        signature: TRY_AGGREGATE,
+        subcalls: [],
+      }),
+    ]).toEqual([1]);
+  });
+
+  test("keeps every row of a Safe transaction: `data` carries one call and stays visible", () => {
+    expect(
+      unpackedParamIndices({
+        selector: toFunctionSelector(EXEC_TRANSACTION),
+        signature: EXEC_TRANSACTION,
+        subcalls: [],
+      }).size,
+    ).toBe(0);
+  });
+
+  test("hides nothing when the decoder did not unpack the call", () => {
+    const selector = toFunctionSelector(PROPOSE);
+    // No subcalls: the depth limit or the budget left the batch closed.
+    expect(unpackedParamIndices({ selector, signature: PROPOSE }).size).toBe(0);
+    // A colliding selector that resolved to another function.
+    expect(
+      unpackedParamIndices({
+        selector,
+        signature: "somethingElse(uint256)",
+        subcalls: [],
+      }).size,
+    ).toBe(0);
+    expect(unpackedParamIndices({ selector: null, subcalls: [] }).size).toBe(0);
   });
 });

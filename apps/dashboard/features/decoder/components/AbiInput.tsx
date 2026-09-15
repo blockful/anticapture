@@ -64,16 +64,15 @@ export const AbiInput = ({ onAbiChange }: AbiInputProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <FormLabel>ABI (optional)</FormLabel>
+        <FormLabel isOptional>ABI</FormLabel>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
-          className="gap-1"
         >
-          <Upload className="size-3.5" />
+          <Upload className="size-3.5" aria-hidden="true" />
           Upload JSON
         </Button>
         <input
@@ -92,16 +91,17 @@ export const AbiInput = ({ onAbiChange }: AbiInputProps) => {
         value={abiText}
         onChange={(event) => setAbiText(event.target.value)}
         onBlur={(event) => validateText(event.target.value)}
-        placeholder='Paste ABI JSON, e.g. [{"type":"function",...}] or a compiler artifact'
-        className="min-h-24 font-mono text-xs"
+        placeholder='[{"type":"function","name":"execTransaction", …}] or a full compiler artifact'
+        aria-label="ABI"
+        className="min-h-24 break-all"
         error={Boolean(error)}
       />
       {error ? (
-        <span className="text-error text-xs">{error}</span>
+        <span className="text-error text-xs leading-4">{error}</span>
       ) : (
-        <span className="text-secondary text-xs">
-          Used before public signature lookups. A custom ABI isn&apos;t included
-          in the shareable link.
+        <span className="text-secondary text-xs leading-4">
+          Tried before the public signature databases. A pasted ABI is not
+          included in the shared link.
         </span>
       )}
     </div>

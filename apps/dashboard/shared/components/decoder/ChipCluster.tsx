@@ -1,59 +1,71 @@
 import type { AbiSource } from "@/shared/components/decoder/types";
+import {
+  BadgeStatus,
+  type BadgeStatusProps,
+} from "@/shared/components/design-system/badges";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { cn } from "@/shared/utils/cn";
 
 const ABI_SOURCE: Record<
   Exclude<AbiSource, "none">,
-  { label: string; explanation: string; tentative?: boolean }
+  {
+    label: string;
+    explanation: string;
+    variant: BadgeStatusProps["variant"];
+    tentative?: boolean;
+  }
 > = {
   verified: {
-    label: "ABI · VERIFIED",
+    label: "ABI Verified",
+    variant: "success",
     explanation:
       "Decoded with the target's verified source code from the block explorer.",
   },
   uploaded: {
-    label: "ABI · UPLOADED",
+    label: "ABI Uploaded",
+    variant: "secondary",
     explanation: "Decoded with the ABI you pasted or uploaded on this page.",
   },
   known: {
-    label: "ABI · KNOWN",
+    label: "ABI Known",
+    variant: "dimmed",
     explanation:
-      "Decoded with a standard interface (ERC-20, Safe, Multicall3, Timelock). The shape is trusted; the target itself was not verified.",
+      "Decoded with a standard interface (ERC-20, Safe, Multicall3, Timelock, Governor). The shape is trusted; the target itself was not verified.",
   },
   openchain: {
-    label: "ABI · OPENCHAIN",
+    label: "ABI OpenChain",
+    variant: "dimmed",
     explanation:
       "Function name looked up by selector in OpenChain's public signature database. Parameter names are unknown and the target was not verified, so treat the reading as a best guess.",
     tentative: true,
   },
 };
 
-/** Square bordered mono chip, per Figma frame 08 (0px radius everywhere). */
-const HeaderChip = ({
+/** A status badge that explains itself on hover. */
+const StatusBadge = ({
   children,
   explanation,
+  variant,
   className,
 }: {
   children: string;
   explanation: string;
+  variant: BadgeStatusProps["variant"];
   className?: string;
 }) => (
   <Tooltip tooltipContent={explanation} asChild>
-    <span
-      className={cn(
-        "border-border-contrast text-secondary flex h-5 shrink-0 items-center whitespace-nowrap border px-1.5 font-mono text-xs font-medium uppercase leading-4 tracking-wider",
-        className,
-      )}
-    >
-      {children}
+    <span className="flex shrink-0">
+      <BadgeStatus variant={variant} className={className}>
+        {children}
+      </BadgeStatus>
     </span>
   </Tooltip>
 );
 
 /**
- * Header chips: the ABI source in the happy path (frame 08 shows only
- * `ABI · VERIFIED` next to CONTRACT), plus a status chip only when it carries
- * information the source chip cannot (unknown ABI, decode error). Every chip
+ * Header badges: the ABI source in the happy path (`ABI Verified` next to the
+ * card title), plus a status badge only when it carries information the
+ * source badge cannot (no signature matched, decode error). Every badge
  * explains itself on hover, and tentative sources (signature-database
  * lookups) get a dashed border so trust is legible before reading.
  */
@@ -66,28 +78,32 @@ export const ChipCluster = ({
 }) => (
   <div className="flex shrink-0 items-center gap-1.5">
     {hasError && (
-      <HeaderChip
-        className="border-border-error text-error"
+      <StatusBadge
+        variant="error"
         explanation="The calldata did not fit the resolved function; the raw hex is still shown below."
       >
-        decode error
-      </HeaderChip>
+        Decode error
+      </StatusBadge>
     )}
     {!hasError && abiSource === "none" && (
-      <HeaderChip
-        className="border-border-warning text-warning"
+      <StatusBadge
+        variant="warning"
         explanation="No ABI matched this selector. Parameter types were guessed from the raw words; verify against the raw calldata."
       >
-        ABI unknown
-      </HeaderChip>
+        No signature match
+      </StatusBadge>
     )}
     {abiSource !== "none" && (
-      <HeaderChip
+      <StatusBadge
+        variant={ABI_SOURCE[abiSource].variant}
         explanation={ABI_SOURCE[abiSource].explanation}
-        className={cn(ABI_SOURCE[abiSource].tentative && "border-dashed")}
+        className={cn(
+          ABI_SOURCE[abiSource].tentative &&
+            "border-border-contrast border border-dashed",
+        )}
       >
         {ABI_SOURCE[abiSource].label}
-      </HeaderChip>
+      </StatusBadge>
     )}
   </div>
 );
