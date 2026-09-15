@@ -119,23 +119,24 @@ export class TreasuryService {
 
     const cutoffTimestamp = calculateCutoffTimestamp(days);
 
-    // Token quantities and the pre-window balance from PostgreSQL, prices
-    // from CoinGecko.
-    const [tokenQuantities, lastKnownQuantity, prices] = await Promise.all([
+    // Token quantities and the pre-window balance from PostgreSQL first.
+    const [tokenQuantities, lastKnownQuantity] = await Promise.all([
       this.repository.getTokenQuantities(cutoffTimestamp),
       this.repository.getLastTokenQuantityBeforeDate(cutoffTimestamp),
-      this.fetchPricesOrDegrade(this.priceProvider, days),
     ]);
-    const { data: historicalPrices, degraded } = prices;
 
     // No transfer inside the window is not "no treasury": the balance from
     // before the window is what gets forward-filled across it. Only a DAO
     // that never held the token has nothing to show, and that is decided
-    // before the prices are looked at: an empty series because there is
-    // nothing to price is complete, not degraded, whatever CoinGecko said.
+    // before CoinGecko is asked at all: with nothing to price there is no
+    // reason to wait on the provider or to record its outage as degrading
+    // a treasury that is complete without it.
     if (tokenQuantities.size === 0 && lastKnownQuantity === null) {
       return { data: { items: [], totalCount: 0 }, degraded: false };
     }
+
+    const { data: historicalPrices, degraded } =
+      await this.fetchPricesOrDegrade(this.priceProvider, days);
 
     // With no prices every point would value at zero, which reads as the
     // treasury crashing to $0 rather than as missing data. Serve nothing.

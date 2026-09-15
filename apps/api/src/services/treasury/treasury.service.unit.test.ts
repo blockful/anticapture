@@ -54,7 +54,11 @@ class FakePriceProvider implements PriceProvider {
     this.failure = error;
   }
 
+  /** How many times the treasury asked for prices. */
+  calls = 0;
+
   async getHistoricalPricesMap(_days: number) {
+    this.calls += 1;
     if (this.failure) throw this.failure;
     return { data: this.prices, degraded: false };
   }
@@ -327,9 +331,31 @@ describe("TreasuryService", () => {
 
       const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
-      const { data: result } = await service.getTokenTreasury(7, "asc", 18);
+      expect(await service.getTokenTreasury(7, "asc", 18)).toEqual({
+        data: EMPTY_RESULT,
+        degraded: false,
+      });
+    });
 
-      expect(result).toEqual(EMPTY_RESULT);
+    // A DAO that never held its own token has nothing to price. Asking
+    // CoinGecko anyway would hold the request for the provider timeout during
+    // an outage and record a degraded treasury the response does not have.
+    it("skips the price lookup when the DAO holds no token", async () => {
+      metricRepo.setTokenQuantities(new Map());
+      metricRepo.setLastKnownQuantity(null);
+      priceProvider.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+      const degraded = captureDegradedUpstream();
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+
+      expect(await service.getTokenTreasury(7, "asc", 18)).toEqual({
+        data: EMPTY_RESULT,
+        degraded: false,
+      });
+      expect(priceProvider.calls).toBe(0);
+      expect(degraded.recorded()).toEqual([]);
     });
 
     it("should calculate value correctly with decimals", async () => {
