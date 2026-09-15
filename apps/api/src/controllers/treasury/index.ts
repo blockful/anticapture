@@ -5,6 +5,7 @@ import {
   TreasuryQuerySchema,
 } from "@/mappers/treasury";
 import {} from "@/mappers";
+import { DEGRADED_CACHE_HEADERS } from "@/lib/degraded-upstream";
 import { setCacheControl } from "@/middlewares";
 import { TreasuryService } from "@/services/treasury";
 
@@ -39,11 +40,15 @@ export function treasury(
     }),
     async (context) => {
       const { days, orderDirection = "asc" } = context.req.valid("query");
-      const result = await treasuryService.getLiquidTreasury(
+      const { data, degraded } = await treasuryService.getLiquidTreasury(
         days / (24 * 60 * 60),
         orderDirection,
       );
-      return context.json(result, 200);
+      return context.json(
+        data,
+        200,
+        degraded ? DEGRADED_CACHE_HEADERS : undefined,
+      );
     },
   );
 
@@ -73,12 +78,16 @@ export function treasury(
     }),
     async (context) => {
       const { days, orderDirection = "asc" } = context.req.valid("query");
-      const result = await treasuryService.getTokenTreasury(
+      const { data, degraded } = await treasuryService.getTokenTreasury(
         days / (24 * 60 * 60),
         orderDirection,
         decimals,
       );
-      return context.json(result, 200);
+      return context.json(
+        data,
+        200,
+        degraded ? DEGRADED_CACHE_HEADERS : undefined,
+      );
     },
   );
 
@@ -108,12 +117,16 @@ export function treasury(
     }),
     async (context) => {
       const { days, orderDirection = "asc" } = context.req.valid("query");
-      const result = await treasuryService.getTotalTreasury(
+      const { data, degraded } = await treasuryService.getTotalTreasury(
         days / (24 * 60 * 60),
         orderDirection,
         decimals,
       );
-      return context.json(result, 200);
+      return context.json(
+        data,
+        200,
+        degraded ? DEGRADED_CACHE_HEADERS : undefined,
+      );
     },
   );
 }

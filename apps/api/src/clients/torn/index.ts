@@ -140,7 +140,7 @@ export class TORNClient<
       endTimestamp: bigint;
     },
     _currentBlock: number,
-    currentTimestamp: number,
+    currentTimestamp: number | null,
   ): Promise<string> {
     // Already finalized via event
     if (proposal.status === ProposalStatus.EXECUTED) {
@@ -149,6 +149,12 @@ export class TORNClient<
 
     if (proposal.status === ProposalStatus.CANCELED) {
       return ProposalStatus.CANCELED;
+    }
+
+    // Every status below this point is dated from the chain head, so without
+    // a timestamp the indexed status is the best answer available.
+    if (currentTimestamp === null) {
+      return proposal.status;
     }
 
     const now = BigInt(currentTimestamp);

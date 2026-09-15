@@ -20,6 +20,7 @@ const fakeDaoClient: DAOClient = {
   getProposalThreshold: async () => 0n,
   getCurrentBlockNumber: async () => 12345,
   getBlockTime: async () => 0,
+  getChainHead: async () => ({ number: 12345, timestamp: 0 }),
   alreadySupportCalldataReview: () => false,
   supportOffchainData: () => false,
   calculateQuorum: () => 0n,

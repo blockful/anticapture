@@ -13,6 +13,7 @@ function createStubDAOClient(overrides?: Partial<DAOClient>): DAOClient {
     getTimelockDelay: () => Promise.resolve(172800n),
     getCurrentBlockNumber: () => Promise.resolve(0),
     getBlockTime: () => Promise.resolve(null),
+    getChainHead: () => Promise.resolve({ number: 0, timestamp: null }),
     calculateQuorum: () => 0n,
     alreadySupportCalldataReview: () => false,
     getProposalStatus: () => Promise.resolve("ACTIVE"),

@@ -85,7 +85,10 @@ export const TabsSection = ({
     }
   };
 
-  const stickyTopClassName = `${isWhitelabel ? "top-0" : "top-29.5"} lg:top-[85px]`;
+  // Mobile: the proposal header scrolls away (it only sticks from lg up), so
+  // the tabs pin right under the fixed 55px page header (h-13.75), not under
+  // where the proposal header would have been.
+  const stickyTopClassName = `${isWhitelabel ? "top-0" : "top-13.75"} lg:top-[85px]`;
 
   const tabs = isDraft
     ? [

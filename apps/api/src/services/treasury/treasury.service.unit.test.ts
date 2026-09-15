@@ -1,6 +1,9 @@
 import { parseEther } from "viem";
 import { afterEach, beforeEach, vi, describe, it, expect } from "vitest";
 
+import { captureDegradedUpstream } from "@/lib/degraded-upstream.test-support";
+import { UpstreamUnavailableError } from "@/lib/upstream-error";
+
 import { TreasuryProvider } from "./providers";
 import { ITreasuryRepository, TreasuryService } from "./treasury.service";
 import { PriceProvider, LiquidTreasuryDataPoint } from "./types";
@@ -18,22 +21,46 @@ class FakeTreasuryProvider implements TreasuryProvider {
     }));
   }
 
+  /** Last good series this fake would serve after a failed fetch. */
+  private stale: LiquidTreasuryDataPoint[] | null = null;
+
+  setStale(data: { date: number; value: number }[] | null) {
+    this.stale =
+      data &&
+      data.map((item) => ({ date: item.date, liquidTreasury: item.value }));
+  }
+
   async fetchTreasury(
     _cutoffTimestamp: number,
   ): Promise<LiquidTreasuryDataPoint[]> {
     return this.data;
   }
+
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.stale;
+  }
 }
 
 class FakePriceProvider implements PriceProvider {
   private prices: Map<number, number> = new Map();
+  private failure: unknown;
 
   setPrices(prices: Map<number, number>) {
     this.prices = prices;
   }
 
-  async getHistoricalPricesMap(_days: number): Promise<Map<number, number>> {
-    return this.prices;
+  /** Makes the next lookup reject, to exercise the degraded path. */
+  failWith(error: unknown) {
+    this.failure = error;
+  }
+
+  /** How many times the treasury asked for prices. */
+  calls = 0;
+
+  async getHistoricalPricesMap(_days: number) {
+    this.calls += 1;
+    if (this.failure) throw this.failure;
+    return { data: this.prices, degraded: false };
   }
 }
 
@@ -41,9 +68,14 @@ const EMPTY_RESULT = { items: [], totalCount: 0 };
 
 class FakeTreasuryRepository implements ITreasuryRepository {
   private tokenQuantities: Map<number, bigint> = new Map();
+  private lastKnownQuantity: bigint | null = null;
 
   setTokenQuantities(quantities: Map<number, bigint>) {
     this.tokenQuantities = quantities;
+  }
+
+  setLastKnownQuantity(quantity: bigint | null) {
+    this.lastKnownQuantity = quantity;
   }
 
   async getTokenQuantities(
@@ -55,7 +87,7 @@ class FakeTreasuryRepository implements ITreasuryRepository {
   async getLastTokenQuantityBeforeDate(
     _cutoffTimestamp: number,
   ): Promise<bigint | null> {
-    return null;
+    return this.lastKnownQuantity;
   }
 }
 
@@ -85,7 +117,7 @@ describe("TreasuryService", () => {
     it("should return empty when provider is undefined", async () => {
       const service = new TreasuryService(metricRepo, undefined, undefined);
 
-      const result = await service.getLiquidTreasury(7, "asc");
+      const { data: result } = await service.getLiquidTreasury(7, "asc");
 
       expect(result).toEqual(EMPTY_RESULT);
     });
@@ -98,7 +130,7 @@ describe("TreasuryService", () => {
         undefined,
       );
 
-      const result = await service.getLiquidTreasury(7, "asc");
+      const { data: result } = await service.getLiquidTreasury(7, "asc");
 
       expect(result).toEqual(EMPTY_RESULT);
     });
@@ -117,7 +149,7 @@ describe("TreasuryService", () => {
         undefined,
       );
 
-      const result = await service.getLiquidTreasury(7, "asc");
+      const { data: result } = await service.getLiquidTreasury(7, "asc");
 
       expect(result).toEqual({
         items: expected,
@@ -139,7 +171,7 @@ describe("TreasuryService", () => {
         undefined,
       );
 
-      const result = await service.getLiquidTreasury(7, "desc");
+      const { data: result } = await service.getLiquidTreasury(7, "desc");
 
       expect(result).toEqual({
         items: expected.sort((a, b) => b.date - a.date),
@@ -148,13 +180,149 @@ describe("TreasuryService", () => {
     });
   });
 
+  describe("getLiquidTreasury degradation", () => {
+    it("degrades to empty when the treasury provider is unavailable", async () => {
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw new UpstreamUnavailableError("defillama", "DefiLlama down");
+        },
+        getStaleTreasury: () => null,
+      };
+      const degraded = captureDegradedUpstream();
+
+      const service = new TreasuryService(metricRepo, failing, priceProvider);
+      const { data: result, degraded: isDegraded } =
+        await service.getLiquidTreasury(7, "asc");
+
+      expect(isDegraded).toBe(true);
+      expect(result).toEqual({ items: [], totalCount: 0 });
+      expect(degraded.recorded()).toEqual([
+        {
+          upstream: "defillama",
+          resource: "treasury",
+          mode: "empty",
+          reason: "unavailable",
+        },
+      ]);
+    });
+
+    it("serves the last good series when the provider holds one", async () => {
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw new UpstreamUnavailableError("defillama", "DefiLlama down");
+        },
+        getStaleTreasury: () => [{ date: 1700000000, liquidTreasury: 42 }],
+      };
+      const degraded = captureDegradedUpstream();
+
+      const service = new TreasuryService(metricRepo, failing, priceProvider);
+      const { data: result, degraded: isDegraded } =
+        await service.getLiquidTreasury(365, "asc");
+
+      expect(isDegraded).toBe(true);
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(degraded.recorded()).toEqual([
+        {
+          upstream: "defillama",
+          resource: "treasury",
+          mode: "stale",
+          reason: "unavailable",
+        },
+      ]);
+    });
+
+    it("propagates a failure that is not the provider's", async () => {
+      const ourBug = new Error("transform blew up");
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw ourBug;
+        },
+        getStaleTreasury: () => null,
+      };
+
+      const service = new TreasuryService(metricRepo, failing, priceProvider);
+
+      await expect(service.getLiquidTreasury(7, "asc")).rejects.toBe(ourBug);
+    });
+  });
+
   describe("getTokenTreasury", () => {
     it("should return empty when priceProvider is undefined", async () => {
       const service = new TreasuryService(metricRepo, undefined, undefined);
 
-      const result = await service.getTokenTreasury(7, "asc", 18);
+      const { data: result } = await service.getTokenTreasury(7, "asc", 18);
 
       expect(result).toEqual(EMPTY_RESULT);
+    });
+
+    // Without this the gateway counts the 5xx against the DAO circuit breaker,
+    // which is exactly what this route is supposed to survive.
+    it("counts the degraded fallback when CoinGecko is unavailable", async () => {
+      metricRepo.setTokenQuantities(new Map([[1700000000, 10n ** 18n]]));
+      priceProvider.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+      const degraded = captureDegradedUpstream();
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+      const { data: result, degraded: isDegraded } =
+        await service.getTokenTreasury(7, "asc", 18);
+
+      expect(isDegraded).toBe(true);
+      expect(result).toEqual({ items: [], totalCount: 0 });
+      expect(degraded.recorded()).toEqual([
+        {
+          upstream: "coingecko",
+          resource: "treasury",
+          mode: "empty",
+          reason: "unavailable",
+        },
+      ]);
+    });
+
+    // Valuing every point at zero would read as the treasury crashing to $0.
+    it("serves no points rather than zero-valued ones when prices are missing", async () => {
+      metricRepo.setTokenQuantities(new Map([[1700000000, 10n ** 18n]]));
+      priceProvider.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+      const { data: result, degraded } = await service.getTokenTreasury(
+        7,
+        "asc",
+        18,
+      );
+
+      expect(degraded).toBe(true);
+      expect(result).toEqual({ items: [], totalCount: 0 });
+    });
+
+    it("does not degrade when the failure is our own", async () => {
+      metricRepo.setTokenQuantities(new Map([[1700000000, 10n ** 18n]]));
+      const ourBug = new Error("connection terminated unexpectedly");
+      priceProvider.failWith(ourBug);
+      const degraded = captureDegradedUpstream();
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+
+      await expect(service.getTokenTreasury(7, "asc", 18)).rejects.toBe(ourBug);
+      expect(degraded.recorded()).toEqual([]);
+    });
+
+    // The token quantities query only returns transfers inside the window. A
+    // treasury that did not move in the last week still has its balance,
+    // carried in from before the window and forward-filled across it.
+    it("carries the balance from before the window when nothing moved inside it", async () => {
+      metricRepo.setTokenQuantities(new Map());
+      metricRepo.setLastKnownQuantity(10n ** 18n);
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP - ONE_DAY, 2]]));
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+      const { data: result } = await service.getTokenTreasury(7, "asc", 18);
+
+      expect(result.items.length).toBeGreaterThan(0);
+      expect(result.items.every((item) => item.value === 2)).toBe(true);
     });
 
     it("should return empty when repository and priceProvider return empty", async () => {
@@ -163,9 +331,31 @@ describe("TreasuryService", () => {
 
       const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
-      const result = await service.getTokenTreasury(7, "asc", 18);
+      expect(await service.getTokenTreasury(7, "asc", 18)).toEqual({
+        data: EMPTY_RESULT,
+        degraded: false,
+      });
+    });
 
-      expect(result).toEqual(EMPTY_RESULT);
+    // A DAO that never held its own token has nothing to price. Asking
+    // CoinGecko anyway would hold the request for the provider timeout during
+    // an outage and record a degraded treasury the response does not have.
+    it("skips the price lookup when the DAO holds no token", async () => {
+      metricRepo.setTokenQuantities(new Map());
+      metricRepo.setLastKnownQuantity(null);
+      priceProvider.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+      const degraded = captureDegradedUpstream();
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+
+      expect(await service.getTokenTreasury(7, "asc", 18)).toEqual({
+        data: EMPTY_RESULT,
+        degraded: false,
+      });
+      expect(priceProvider.calls).toBe(0);
+      expect(degraded.recorded()).toEqual([]);
     });
 
     it("should calculate value correctly with decimals", async () => {
@@ -179,7 +369,7 @@ describe("TreasuryService", () => {
 
       const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
-      const result = await service.getTokenTreasury(7, "asc", 18);
+      const { data: result } = await service.getTokenTreasury(7, "asc", 18);
 
       expect(result).toEqual({
         items: [{ date: FIXED_TIMESTAMP, value: quantity * price }],
@@ -206,7 +396,7 @@ describe("TreasuryService", () => {
 
       const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
-      const result = await service.getTokenTreasury(7, "asc", 18);
+      const { data: result } = await service.getTokenTreasury(7, "asc", 18);
 
       expect(result).toEqual({
         items: [
@@ -237,7 +427,7 @@ describe("TreasuryService", () => {
 
       const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
-      const result = await service.getTokenTreasury(7, "desc", 18);
+      const { data: result } = await service.getTokenTreasury(7, "desc", 18);
 
       expect(result).toEqual({
         items: [
@@ -259,7 +449,7 @@ describe("TreasuryService", () => {
 
       const service = new TreasuryService(metricRepo, undefined, priceProvider);
 
-      const result = await service.getTokenTreasury(7, "asc", 18);
+      const { data: result } = await service.getTokenTreasury(7, "asc", 18);
 
       expect(result).toEqual({
         items: [
@@ -287,7 +477,7 @@ describe("TreasuryService", () => {
     });
 
     it("should return empty when both liquid and token are empty", async () => {
-      const result = await service.getTotalTreasury(7, "asc", 18);
+      const { data: result } = await service.getTotalTreasury(7, "asc", 18);
 
       expect(result).toEqual(EMPTY_RESULT);
     });
@@ -304,7 +494,7 @@ describe("TreasuryService", () => {
       );
       priceProvider.setPrices(new Map([[dayTimestamp, 30]]));
 
-      const result = await service.getTotalTreasury(7, "asc", 18);
+      const { data: result } = await service.getTotalTreasury(7, "asc", 18);
 
       expect(result).toEqual({
         items: [{ date: FIXED_TIMESTAMP, value: 8000 }],
@@ -315,7 +505,7 @@ describe("TreasuryService", () => {
     it("should work when only liquid has data", async () => {
       liquidProvider.setData([{ date: FIXED_TIMESTAMP, value: 5000 }]);
 
-      const result = await service.getTotalTreasury(7, "asc", 18);
+      const { data: result } = await service.getTotalTreasury(7, "asc", 18);
 
       expect(result).toEqual({
         items: [{ date: FIXED_TIMESTAMP, value: 5000 }],
@@ -338,11 +528,102 @@ describe("TreasuryService", () => {
         priceProvider,
       );
 
-      const result = await service.getTotalTreasury(7, "asc", 18);
+      const { data: result } = await service.getTotalTreasury(7, "asc", 18);
 
       expect(result).toEqual({
         items: [{ date: FIXED_TIMESTAMP, value: 2500 }],
         totalCount: 1,
+      });
+    });
+  });
+
+  describe("getTotalTreasury", () => {
+    // A token-only total reads as the liquid treasury having vanished, not as
+    // missing data, so a half that degraded to nothing empties the sum.
+    it("serves nothing when the liquid half degraded with nothing to serve", async () => {
+      const failing: TreasuryProvider = {
+        fetchTreasury: async () => {
+          throw new UpstreamUnavailableError("defillama", "DefiLlama down");
+        },
+        getStaleTreasury: () => null,
+      };
+      metricRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther("100")]]),
+      );
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP, 10]]));
+
+      const service = new TreasuryService(metricRepo, failing, priceProvider);
+
+      expect(await service.getTotalTreasury(7, "asc", 18)).toEqual({
+        data: EMPTY_RESULT,
+        degraded: true,
+      });
+    });
+
+    // A DAO that holds none of its own token has nothing to price; a CoinGecko
+    // outage must not blank the liquid half it does have.
+    it("keeps the liquid half when the DAO holds no token and prices are down", async () => {
+      liquidProvider.setData([{ date: FIXED_TIMESTAMP, value: 5 }]);
+      metricRepo.setTokenQuantities(new Map());
+      metricRepo.setLastKnownQuantity(null);
+      priceProvider.failWith(
+        new UpstreamUnavailableError("coingecko", "CoinGecko down"),
+      );
+
+      const service = new TreasuryService(
+        metricRepo,
+        liquidProvider,
+        priceProvider,
+      );
+
+      expect(await service.getTotalTreasury(7, "asc", 18)).toEqual({
+        data: { items: [{ date: FIXED_TIMESTAMP, value: 5 }], totalCount: 1 },
+        degraded: false,
+      });
+    });
+
+    it("still sums when the DAO simply has no liquid provider", async () => {
+      metricRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther("100")]]),
+      );
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP, 10]]));
+
+      const service = new TreasuryService(metricRepo, undefined, priceProvider);
+
+      expect(await service.getTotalTreasury(7, "asc", 18)).toEqual({
+        data: {
+          items: [{ date: FIXED_TIMESTAMP, value: 1000 }],
+          totalCount: 1,
+        },
+        degraded: false,
+      });
+    });
+
+    // The two series are built on their own timelines and may start on
+    // different days; pairing them by position would add the wrong days.
+    it("joins the liquid and token halves by date", async () => {
+      liquidProvider.setData([
+        { date: FIXED_TIMESTAMP - ONE_DAY, value: 5 },
+        { date: FIXED_TIMESTAMP, value: 7 },
+      ]);
+      metricRepo.setTokenQuantities(
+        new Map([[FIXED_TIMESTAMP, parseEther("100")]]),
+      );
+      priceProvider.setPrices(new Map([[FIXED_TIMESTAMP, 10]]));
+
+      const service = new TreasuryService(
+        metricRepo,
+        liquidProvider,
+        priceProvider,
+      );
+      const { data } = await service.getTotalTreasury(7, "asc", 18);
+
+      expect(data).toEqual({
+        items: [
+          { date: FIXED_TIMESTAMP - ONE_DAY, value: 5 },
+          { date: FIXED_TIMESTAMP, value: 1007 },
+        ],
+        totalCount: 2,
       });
     });
   });

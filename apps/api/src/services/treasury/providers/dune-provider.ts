@@ -1,7 +1,7 @@
 import { AxiosInstance } from "axios";
-import { HTTPException } from "hono/http-exception";
 
 import { filterWithFallback } from "@/lib/query-helpers";
+import { classifyAxiosFailure } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 
 import { LiquidTreasuryDataPoint } from "../types";
@@ -43,24 +43,32 @@ export class DuneProvider implements TreasuryProvider {
 
     if (cached !== null) return filterWithFallback(cached, cutoffTimestamp);
 
+    let response;
     try {
       logger.info({ cutoffTimestamp }, "fetching treasury data from Dune");
-      const response = await this.client.get<DuneResponse>("/", {
+      response = await this.client.get<DuneResponse>("/", {
         headers: {
           "X-Dune-API-Key": this.apiKey,
         },
       });
-      const data = this.transformData(response.data);
-      this.cache.set(data);
-
-      return filterWithFallback(data, cutoffTimestamp);
     } catch (error) {
-      logger.error({ err: error }, "dune API fetch failed");
-      throw new HTTPException(503, {
-        message: "Failed to fetch total assets data",
-        cause: error,
-      });
+      throw classifyAxiosFailure(
+        "dune",
+        error,
+        "/",
+        "Failed to fetch total assets data",
+      );
     }
+
+    // Outside the try on purpose: a transform failure is our bug, not Dune's.
+    const data = this.transformData(response.data);
+    this.cache.set(data);
+
+    return filterWithFallback(data, cutoffTimestamp);
+  }
+
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.cache.getStale();
   }
 
   private transformData(data: DuneResponse): LiquidTreasuryDataPoint[] {

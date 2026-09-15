@@ -17,7 +17,10 @@ export async function fanOutGet<T = unknown>(
 
   const results = await Promise.allSettled(
     entries.map(async ([dao, baseUrl]) => {
-      return registry.get(dao).execute(async () => {
+      // Fan-out has its own breaker per DAO route. It aborts far sooner than
+      // the proxy does, so sharing a key would let this deadline open the
+      // circuit for proxy calls that still had most of their budget left.
+      return registry.forFanOut(dao, path).execute(async () => {
         const url = new URL(path, baseUrl);
         if (queryString) url.search = queryString;
 

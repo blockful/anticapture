@@ -2,6 +2,7 @@ import { AxiosInstance } from "axios";
 
 import { truncateTimestampToMidnight } from "@/lib/date-helpers";
 import { filterWithFallback } from "@/lib/query-helpers";
+import { classifyAxiosFailure } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 
 import { LiquidTreasuryDataPoint } from "../types";
@@ -38,20 +39,30 @@ export class DefiLlamaProvider implements TreasuryProvider {
 
     if (cached !== null) return filterWithFallback(cached, cutoffTimestamp);
 
+    let response;
     try {
       logger.info({ cutoffTimestamp }, "fetching treasury data from DefiLlama");
-      const response = await this.client.get<RawDefiLlamaResponse>("");
-      const data = this.transformData(response.data);
-      this.cache.set(data);
-
-      return filterWithFallback(data, cutoffTimestamp);
+      response = await this.client.get<RawDefiLlamaResponse>("");
     } catch (error) {
-      logger.error(
-        { err: error },
-        "failed to fetch treasury data from DefiLlama",
+      // Previously this swallowed every failure and returned an empty array,
+      // so an outage was invisible. The caller degrades and counts it instead.
+      throw classifyAxiosFailure(
+        "defillama",
+        error,
+        "/",
+        "Failed to fetch liquid treasury data",
       );
-      return [];
     }
+
+    // Outside the try on purpose: a transform failure is our bug, not theirs.
+    const data = this.transformData(response.data);
+    this.cache.set(data);
+
+    return filterWithFallback(data, cutoffTimestamp);
+  }
+
+  getStaleTreasury(): LiquidTreasuryDataPoint[] | null {
+    return this.cache.getStale();
   }
 
   /**

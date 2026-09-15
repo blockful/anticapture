@@ -2,6 +2,7 @@ import { Address } from "viem";
 
 import { DAOClient } from "@/clients";
 import { DaoIdEnum } from "@/lib/enums";
+import { logger } from "@/logger";
 import { DBProposal } from "@/mappers";
 import {
   DbProposal,
@@ -161,8 +162,23 @@ export class ProposalsActivityService {
       return this.createEmptyActivity(address, false);
     }
 
-    const currentBlock = await this.daoClient.getCurrentBlockNumber();
-    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+    // Degrade to indexed statuses when the RPC is unavailable instead of
+    // failing the whole activity request.
+    const head = await this.daoClient
+      .getChainHead()
+      // One read: a head without a timestamp still dates the block-based
+      // statuses, so it is kept and only the queued comparisons are skipped.
+      .then((chainHead) => ({
+        currentBlock: chainHead.number,
+        currentTimestamp: chainHead.timestamp,
+      }))
+      .catch((error: Error) => {
+        logger.warn(
+          { error },
+          "RPC unavailable while resolving chain head; serving indexed proposal statuses",
+        );
+        return null;
+      });
 
     // Transform to the expected format
     const proposals = await Promise.all(
@@ -182,11 +198,21 @@ export class ProposalsActivityService {
           abstainVotes: item.proposal.abstain_votes,
           endTimestamp: BigInt(item.proposal.proposal_end_timestamp),
         };
-        proposal.status = await this.daoClient.getProposalStatus(
-          proposal,
-          currentBlock,
-          currentTimestamp!,
-        );
+        if (head) {
+          proposal.status = await this.daoClient
+            .getProposalStatus(
+              proposal,
+              head.currentBlock,
+              head.currentTimestamp,
+            )
+            .catch((error: Error) => {
+              logger.warn(
+                { error, proposalId: proposal.id },
+                "RPC read failed while computing proposal status; serving indexed status",
+              );
+              return proposal.status;
+            });
+        }
         return {
           proposal,
           userVote: item.userVote && {

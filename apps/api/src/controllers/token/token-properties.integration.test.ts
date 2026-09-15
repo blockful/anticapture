@@ -13,14 +13,21 @@ import { TokenService } from "@/services/token/token";
 import { TokenPriceClient, token } from "./token-properties";
 
 class FakeTokenPriceClient implements TokenPriceClient {
+  private degraded = false;
+
+  /** Marks the next price as a stale copy served after a provider outage. */
+  setDegraded(degraded: boolean) {
+    this.degraded = degraded;
+  }
+
   private price = "0";
 
   setPrice(price: string) {
     this.price = price;
   }
 
-  async getTokenPrice(): Promise<string> {
-    return this.price;
+  async getTokenPrice() {
+    return { data: this.price, degraded: this.degraded };
   }
 }
 
@@ -91,6 +98,27 @@ describe("Token Properties Controller (integration)", () => {
         treasury: "100000000000000000",
         price: "25.50",
       });
+    });
+
+    it("keeps a fresh price cacheable for the route max-age", async () => {
+      await db.insert(tokenTable).values(createToken());
+      fakeClient.setPrice("25.50");
+
+      const res = await app.request("/token");
+
+      expect(res.headers.get("Cache-Control")).toBe("public, max-age=3600");
+    });
+
+    // A stale price sitting in a downstream cache would outlive the outage.
+    it("keeps a stale price out of downstream caches", async () => {
+      await db.insert(tokenTable).values(createToken());
+      fakeClient.setPrice("25.50");
+      fakeClient.setDegraded(true);
+
+      const res = await app.request("/token");
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("should accept currency=eth query parameter", async () => {

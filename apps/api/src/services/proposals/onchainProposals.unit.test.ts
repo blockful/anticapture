@@ -114,13 +114,15 @@ function createStubDaoClient() {
     blockTime: number | null;
     proposalStatus: string;
     proposalStatusQueue: string[] | undefined;
-    getCurrentBlockNumberCallCount: number;
+    chainHeadCallCount: number;
+    blockTimeCallCount: number;
   } & DAOClient = {
     currentBlock: 300,
     blockTime: 1700001000,
     proposalStatus: ProposalStatus.ACTIVE,
     proposalStatusQueue: undefined,
-    getCurrentBlockNumberCallCount: 0,
+    chainHeadCallCount: 0,
+    blockTimeCallCount: 0,
     getDaoId: () => "UNI",
     getVotingDelay: async () => 0n,
     getVotingPeriod: async () => 0n,
@@ -130,11 +132,15 @@ function createStubDaoClient() {
     alreadySupportCalldataReview: () => false,
     supportOffchainData: () => false,
     calculateQuorum: () => 0n,
-    getCurrentBlockNumber: async () => {
-      stub.getCurrentBlockNumberCallCount++;
-      return stub.currentBlock;
+    getCurrentBlockNumber: async () => stub.currentBlock,
+    getBlockTime: async (_blockNumber) => {
+      stub.blockTimeCallCount++;
+      return stub.blockTime;
     },
-    getBlockTime: async (_blockNumber) => stub.blockTime,
+    getChainHead: async () => {
+      stub.chainHeadCallCount++;
+      return { number: stub.currentBlock, timestamp: stub.blockTime };
+    },
     getProposalStatus: async (_proposal, _currentBlock, _currentTimestamp) =>
       stub.proposalStatusQueue?.shift() ?? stub.proposalStatus,
   };
@@ -317,6 +323,22 @@ describe("ProposalsService", () => {
 
       expect(repo.lastLeanArg).toBe(true);
     });
+
+    it("should read the chain head once and never look a block up by number", async () => {
+      // Pairing the block with a timestamp fetched separately is what put an
+      // RPC read back on the warm path when a refresh landed between the two.
+      repo.proposals = [
+        createMockProposal({ id: "1" }),
+        createMockProposal({ id: "2" }),
+      ];
+
+      await service.getProposals({ ...DEFAULT_REQ });
+
+      expect({
+        chainHeadCallCount: daoClient.chainHeadCallCount,
+        blockTimeCallCount: daoClient.blockTimeCallCount,
+      }).toEqual({ chainHeadCallCount: 1, blockTimeCallCount: 0 });
+    });
   });
 
   describe("getProposalById", () => {
@@ -343,7 +365,57 @@ describe("ProposalsService", () => {
       const result = await service.getProposalById("999");
 
       expect(result).toBeUndefined();
-      expect(daoClient.getCurrentBlockNumberCallCount).toBe(0);
+      expect(daoClient.chainHeadCallCount).toBe(0);
+    });
+  });
+
+  describe("RPC unavailable", () => {
+    beforeEach(() => {
+      daoClient.getChainHead = async () => {
+        throw new Error("rpc down");
+      };
+    });
+
+    it("should serve indexed statuses from getProposals", async () => {
+      repo.proposals = [createMockProposal({ status: ProposalStatus.PENDING })];
+      daoClient.proposalStatus = ProposalStatus.ACTIVE;
+
+      const result = await service.getProposals(DEFAULT_REQ);
+
+      expect(result).toEqual([
+        createMockProposal({ status: ProposalStatus.PENDING }),
+      ]);
+    });
+
+    it("should serve the indexed status from getProposalById", async () => {
+      repo.byId = createMockProposal({ status: ProposalStatus.PENDING });
+      daoClient.proposalStatus = ProposalStatus.ACTIVE;
+
+      const result = await service.getProposalById("1");
+
+      expect(result).toEqual(
+        createMockProposal({ status: ProposalStatus.PENDING }),
+      );
+    });
+  });
+
+  describe("status computation failure", () => {
+    it("should keep the indexed status of the proposal whose RPC reads failed", async () => {
+      repo.proposals = [
+        createMockProposal({ id: "1", status: ProposalStatus.PENDING }),
+        createMockProposal({ id: "2", status: ProposalStatus.PENDING }),
+      ];
+      daoClient.getProposalStatus = async (proposal) => {
+        if (proposal.id === "2") throw new Error("quorum read failed");
+        return ProposalStatus.ACTIVE;
+      };
+
+      const result = await service.getProposals(DEFAULT_REQ);
+
+      expect(result.map((p) => p.status)).toEqual([
+        ProposalStatus.ACTIVE,
+        ProposalStatus.PENDING,
+      ]);
     });
   });
 

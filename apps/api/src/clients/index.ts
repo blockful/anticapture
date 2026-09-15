@@ -28,6 +28,9 @@ export interface DAOClient {
     againstVotes: bigint;
     abstainVotes: bigint;
   }) => bigint;
+  /** Latest block number and its timestamp, read together so callers never
+   *  pair a block with a timestamp fetched separately. */
+  getChainHead: () => Promise<{ number: number; timestamp: number | null }>;
   getProposalStatus: (
     proposal: {
       id: string;
@@ -40,6 +43,6 @@ export interface DAOClient {
       endTimestamp: bigint;
     },
     currentBlock: number,
-    currentTimestamp: number,
+    currentTimestamp: number | null,
   ) => Promise<string>;
 }
