@@ -88,15 +88,24 @@ const NEGATIVE_RESULT_TTL_MS = 60_000;
 const MAX_LISTED_CANDIDATES = 5;
 
 /**
- * A lookup that ran to (or nearly to) the fetcher's own 10 s abort answered
- * nothing in the only way an unresponsive service can. Both fetchers turn
- * that into a null result, indistinguishable from "not verified", so the
- * elapsed time is the signal: one such answer latches the source closed for
- * a while and every later lookup falls straight through to the next tier.
- * Without it a batch of 200 children on distinct contracts, four workers at
- * a time, waits out fifty timeout waves before the reader sees anything.
- * The latch is per fetcher identity, like the caches, and degraded results
- * stay refresh-eligible, so the real ABI arrives once the service is back.
+ * A lookup that ran to (or nearly to) the fetcher's own 10 s abort AND came
+ * back empty answered the only way an unresponsive service can. Both
+ * fetchers turn a timeout into an empty result, indistinguishable from "not
+ * verified", so the pair of signals is what marks an outage: one such answer
+ * latches the source closed for a while and later lookups fall straight
+ * through to the next tier. Without it a batch of 200 children on distinct
+ * contracts, four workers at a time, waits out fifty timeout waves before
+ * the reader sees anything.
+ *
+ * A slow answer that carries a result is a working service on a bad day and
+ * latches nothing; a prompt result lifts any latch, since the service is
+ * evidently back. Only answers that went to the network move the latch: a
+ * result served from memory says nothing about the service today. Memoized,
+ * settled results are served before the latch is even consulted, so the
+ * latch skips the network and never the cache, and it never waits on a
+ * request that was already in flight when it closed. The latch is per
+ * fetcher identity, like the caches, and degraded results stay
+ * refresh-eligible.
  */
 export const SLOW_RESPONSE_MS = 9_500;
 export const SOURCE_OUTAGE_TTL_MS = 60_000;
@@ -105,18 +114,30 @@ const outagesUntil = new WeakMap<object, number>();
 const withOutageLatch = async <T>(
   fetcher: object,
   run: () => Promise<T>,
+  cached: () => Promise<T> | undefined,
+  isEmpty: (result: T) => boolean,
   unavailable: T,
 ): Promise<T> => {
+  const memoized = cached();
+  if (memoized) return memoized;
   if (Date.now() < (outagesUntil.get(fetcher) ?? 0)) return unavailable;
   const started = Date.now();
   const result = await run();
-  if (Date.now() - started >= SLOW_RESPONSE_MS) {
+  const elapsed = Date.now() - started;
+  if (elapsed >= SLOW_RESPONSE_MS && isEmpty(result)) {
     outagesUntil.set(fetcher, Date.now() + SOURCE_OUTAGE_TTL_MS);
+  } else if (elapsed < SLOW_RESPONSE_MS && !isEmpty(result)) {
+    outagesUntil.delete(fetcher);
   }
   return result;
 };
 
-type CacheEntry<T> = { promise: Promise<T>; negativeAt?: number };
+type CacheEntry<T> = {
+  promise: Promise<T>;
+  negativeAt?: number;
+  /** Set once the promise resolved; an in-flight entry is still the network. */
+  settled?: boolean;
+};
 
 /**
  * One cache per fetcher identity, so every resolver instance built around the
@@ -160,6 +181,29 @@ const writeEntry = <T>(
   if (!oldest.done) cache.delete(oldest.value);
 };
 
+/**
+ * A memoized, settled result that has not aged out; nothing is fetched and
+ * nothing in flight is waited for. Reading promotes the entry like any other
+ * hit, so the eviction order stays least-recently-used.
+ */
+const peekCached = <T>(
+  caches: WeakMap<object, Map<string, CacheEntry<T>>>,
+  fetcher: object,
+  key: string,
+): Promise<T> | undefined => {
+  const cache = caches.get(fetcher);
+  if (!cache) return undefined;
+  const entry = readEntry(cache, key);
+  if (!entry?.settled) return undefined;
+  if (
+    entry.negativeAt !== undefined &&
+    Date.now() - entry.negativeAt > NEGATIVE_RESULT_TTL_MS
+  ) {
+    return undefined;
+  }
+  return entry.promise;
+};
+
 const cachedFetch = <T>(
   caches: WeakMap<object, Map<string, CacheEntry<T>>>,
   fetcher: object,
@@ -183,6 +227,7 @@ const cachedFetch = <T>(
     const created: CacheEntry<T> = {
       promise: run().then((result) => {
         if (isNegative(result)) created.negativeAt = Date.now();
+        created.settled = true;
         return result;
       }),
     };
@@ -203,6 +248,7 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
     if (!ctx.target) return null;
     const target = ctx.target;
     const bundled = getBundledAbi(ctx.chainId, target);
+    const abiKey = `${ctx.chainId}:${target.toLowerCase()}`;
     const abi =
       bundled ??
       (await withOutageLatch(
@@ -211,10 +257,12 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
           cachedFetch(
             abiCaches,
             fetchVerified,
-            `${ctx.chainId}:${target.toLowerCase()}`,
+            abiKey,
             () => fetchVerified(ctx.chainId, target),
             (result) => result === null,
           ),
+        () => peekCached(abiCaches, fetchVerified, abiKey),
+        (result) => result === null,
         null,
       ));
     if (!abi) return null;
@@ -234,16 +282,19 @@ export const createAbiResolver = (deps: ResolverDeps = {}): AbiResolver => {
   const resolveOpenchain = async (
     ctx: AbiResolveContext,
   ): Promise<ResolvedAbi | null> => {
+    const selectorKey = ctx.selector.toLowerCase();
     const signatures = await withOutageLatch(
       fetchSignatures,
       () =>
         cachedFetch(
           signatureCaches,
           fetchSignatures,
-          ctx.selector.toLowerCase(),
+          selectorKey,
           () => fetchSignatures(ctx.selector),
           (result) => result.length === 0,
         ),
+      () => peekCached(signatureCaches, fetchSignatures, selectorKey),
+      (result) => result.length === 0,
       [],
     );
     const decodable: Array<{ fn: AbiFunction; signature: string }> = [];

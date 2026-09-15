@@ -1448,3 +1448,63 @@ describe("guessed parameters spend the tree budget", () => {
     }
   });
 });
+
+describe("a borrowed child sentence keeps the child's attached ETH", () => {
+  test("a Safe transaction that calls transfer and sends 1 ETH says both", async () => {
+    const safe = parseAbi([
+      "function execTransaction(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures)",
+    ]);
+    const zero = "0x0000000000000000000000000000000000000000";
+    const calldata = encodeFunctionData({
+      abi: safe,
+      functionName: "execTransaction",
+      args: [
+        USDC,
+        1_000_000_000_000_000_000n,
+        USDC_TRANSFER,
+        0,
+        0n,
+        0n,
+        0n,
+        zero,
+        zero,
+        "0x",
+      ],
+    });
+    const node = await decode(calldata, { target: SAFE });
+    expect(node.summary).toBe(
+      `Executes 1 call: transfers 25,000,000,000 (raw units) to ${RECIPIENT.slice(0, 6)}…${RECIPIENT.slice(-4)} and sends 1 ETH.`,
+    );
+  });
+});
+
+describe("a borrowed child sentence does not say the ETH twice", () => {
+  test("an unnamed child carrying ETH reads as one ETH transfer", async () => {
+    const safe = parseAbi([
+      "function execTransaction(address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures)",
+    ]);
+    const zero = "0x0000000000000000000000000000000000000000";
+    const calldata = encodeFunctionData({
+      abi: safe,
+      functionName: "execTransaction",
+      // A selector no ABI source knows, plus one word, plus 1 ETH.
+      args: [
+        RECIPIENT,
+        1_000_000_000_000_000_000n,
+        `0xdeadbeef${"0".repeat(64)}`,
+        0,
+        0n,
+        0n,
+        0n,
+        zero,
+        zero,
+        "0x",
+      ],
+    });
+    const node = await decode(calldata, { target: SAFE });
+    expect(node.summary).not.toMatch(/ETH.*ETH/);
+    expect(node.summary).toBe(
+      `Executes 1 call: ETH transfer on ${RECIPIENT.slice(0, 6)}…${RECIPIENT.slice(-4)}.`,
+    );
+  });
+});

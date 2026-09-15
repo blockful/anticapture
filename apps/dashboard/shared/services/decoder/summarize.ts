@@ -211,13 +211,21 @@ const describeSubcalls = (
     // 2 calls: …"; naming it with its arity reads better. A delegatecall child
     // needs no special case: its own sentence already says "delegatecalls X",
     // which is exactly what must be repeated here instead of an effect.
+    // ETH riding on a call with calldata is material and no function
+    // template mentions it (a plain ETH transfer's own sentence already
+    // does), so the borrowed sentence says it here.
+    const sends =
+      child.selector !== null && child.value && child.value > 0n
+        ? ` and sends ${humanizeEtherValue(child.value).text}`
+        : "";
     if (child.summary && !child.subcalls?.length) {
       const sentence = child.summary.replace(/\.$/, "");
       const lowered = sentence.charAt(0).toLowerCase() + sentence.slice(1);
-      return child.mayFail ? `${lowered}${MAY_FAIL_SUFFIX}` : lowered;
+      return `${lowered}${sends}${child.mayFail ? MAY_FAIL_SUFFIX : ""}`;
     }
     const target = child.target ? ` on ${shortAddress(child.target)}` : "";
-    return `${subcallNoun(child)}${target}`;
+    // Without a function name the noun itself may already be "ETH transfer".
+    return `${subcallNoun(child)}${target}${child.functionName ? sends : ""}`;
   }
   // Grouped by kind and by what the batch promises about it: a tolerated
   // failure or a delegatecall changes what a call means, so it is its own

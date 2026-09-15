@@ -1,4 +1,10 @@
-import { encodeFunctionData, parseAbi, type Address, type Hex } from "viem";
+import {
+  encodeFunctionData,
+  parseAbi,
+  type Abi,
+  type Address,
+  type Hex,
+} from "viem";
 
 import {
   createAbiResolver,
@@ -294,6 +300,89 @@ describe("an unresponsive ABI source is skipped for a while", () => {
     const third = resolver({ ...ctx, target: otherTarget(0xc3) });
     await jest.advanceTimersByTimeAsync(SLOW_RESPONSE_MS + 500);
     await third;
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
+  });
+
+  test("a slow answer that carries an ABI is a working service and latches nothing", async () => {
+    jest.useFakeTimers();
+    const fetchVerifiedAbi = jest.fn(
+      () =>
+        new Promise<Abi | null>((resolve) =>
+          setTimeout(() => resolve([...TRANSFER_ABI]), SLOW_RESPONSE_MS + 100),
+        ),
+    );
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: fetchVerifiedAbi,
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+    });
+
+    const first = resolver({ ...ctx, target: otherTarget(0xe1) });
+    await jest.advanceTimersByTimeAsync(SLOW_RESPONSE_MS + 100);
+    expect((await first)?.source).toBe("verified");
+
+    const second = resolver({ ...ctx, target: otherTarget(0xe2) });
+    await jest.advanceTimersByTimeAsync(SLOW_RESPONSE_MS + 100);
+    expect((await second)?.source).toBe("verified");
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
+  });
+
+  test("a latched source still serves what it already memoized", async () => {
+    jest.useFakeTimers();
+    const fetchVerifiedAbi = jest.fn((_chainId: number, address: string) =>
+      address === otherTarget(0xf1)
+        ? Promise.resolve<Abi | null>([...TRANSFER_ABI])
+        : new Promise<null>((resolve) =>
+            setTimeout(() => resolve(null), SLOW_RESPONSE_MS + 500),
+          ),
+    );
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi: fetchVerifiedAbi,
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+    });
+
+    // Memoize a real ABI, then let another target trip the latch.
+    expect(
+      (await resolver({ ...ctx, target: otherTarget(0xf1) }))?.source,
+    ).toBe("verified");
+    const hanging = resolver({ ...ctx, target: otherTarget(0xf2) });
+    await jest.advanceTimersByTimeAsync(SLOW_RESPONSE_MS + 500);
+    await hanging;
+
+    // Latched: the memoized ABI is still the answer, without a network call.
+    expect(
+      (await resolver({ ...ctx, target: otherTarget(0xf1) }))?.source,
+    ).toBe("verified");
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
+  });
+
+  test("an answer served from memory neither lifts nor sets the latch", async () => {
+    jest.useFakeTimers();
+    const fetchVerifiedAbi = jest.fn((_chainId: number, address: string) =>
+      address === otherTarget(0xa1)
+        ? Promise.resolve<Abi | null>([...TRANSFER_ABI])
+        : new Promise<null>((resolve) =>
+            setTimeout(() => resolve(null), SLOW_RESPONSE_MS + 500),
+          ),
+    );
+    const resolver = createAbiResolver({
+      fetchVerifiedAbi,
+      fetchSignatures: jest.fn().mockResolvedValue([]),
+    });
+
+    await resolver({ ...ctx, target: otherTarget(0xa1) });
+    const hanging = resolver({ ...ctx, target: otherTarget(0xa2) });
+    await jest.advanceTimersByTimeAsync(SLOW_RESPONSE_MS + 500);
+    await hanging;
+    expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
+
+    // A cache hit while latched is answered from memory and proves nothing
+    // about the service, so the next unknown contract is still not fetched.
+    expect(
+      (await resolver({ ...ctx, target: otherTarget(0xa1) }))?.source,
+    ).toBe("verified");
+    expect(
+      (await resolver({ ...ctx, target: otherTarget(0xa3) }))?.source,
+    ).toBe("known");
     expect(fetchVerifiedAbi).toHaveBeenCalledTimes(2);
   });
 
