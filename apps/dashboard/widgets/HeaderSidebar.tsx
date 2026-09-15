@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart4, Bell, Code } from "lucide-react";
+import { BarChart4, Bell, Braces, Code } from "lucide-react";
 import Link from "next/link";
 import { useMemo, type ElementType } from "react";
 
@@ -37,6 +37,12 @@ export const HeaderSidebar = () => {
         page: "api-keys",
         label: "API",
         icon: Code,
+        isGlobal: true,
+      },
+      {
+        page: "tools/decoder",
+        label: "Decoder",
+        icon: Braces,
         isGlobal: true,
       },
     ],

@@ -3,6 +3,11 @@ import { z } from "zod";
 
 dotenv.config();
 
+/** A duration or a count that only makes sense above zero. */
+const positiveNumber = z.coerce
+  .number()
+  .positive("must be greater than zero milliseconds or requests");
+
 export const envSchema = z
   .object({
     PORT: z.coerce.number().default(4001),
@@ -34,9 +39,25 @@ export const envSchema = z
     // (local dev); set it on the public deployment. The Prometheus service reads
     // the same variable name, so it can be wired as one shared Railway variable.
     GATEFUL_METRICS_TOKEN: z.string().optional(),
-    CIRCUIT_BREAKER_FAILURE_THRESHOLD: z.coerce.number().default(5),
-    CIRCUIT_BREAKER_COOLDOWN_MS: z.coerce.number().default(300_000),
-    CIRCUIT_BREAKER_MAX_COOLDOWN_MS: z.coerce.number().default(2_400_000),
+    // The circuit opens when at least MIN_REQUESTS were seen in WINDOW_MS and
+    // FAILURE_RATE (0-1) of them failed, so a partially failing reload burst
+    // does not take a DAO route offline while a real outage still trips fast.
+    // Durations and counts must be above zero: a zero window or cooldown
+    // disables the rule it belongs to silently, so it is rejected at boot.
+    CIRCUIT_BREAKER_WINDOW_MS: positiveNumber.default(30_000),
+    CIRCUIT_BREAKER_MIN_REQUESTS: positiveNumber.default(10),
+    // A rate of zero would open the circuit on the first evaluation even with
+    // no failures at all, so the bound is exclusive.
+    CIRCUIT_BREAKER_FAILURE_RATE: z.coerce
+      .number()
+      .gt(0, "must be greater than zero")
+      .max(1)
+      .default(0.5),
+    // Below MIN_REQUESTS a rate means nothing, so quiet upstreams (relayer,
+    // fan-out) open after this many consecutive failures instead.
+    CIRCUIT_BREAKER_CONSECUTIVE_FAILURES: positiveNumber.default(5),
+    CIRCUIT_BREAKER_COOLDOWN_MS: positiveNumber.default(30_000),
+    CIRCUIT_BREAKER_MAX_COOLDOWN_MS: positiveNumber.default(300_000),
     REDIS_URL: z.string().optional(),
     RAILWAY_GIT_COMMIT_SHA: z.string().optional(),
   })
@@ -91,7 +112,10 @@ export const config = {
   daoApis: loadDaoMap("DAO_API_"),
   daoRelayers: loadDaoMap("DAO_RELAYER_"),
   circuitBreaker: {
-    failureThreshold: env.CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+    windowMs: env.CIRCUIT_BREAKER_WINDOW_MS,
+    minimumRequests: env.CIRCUIT_BREAKER_MIN_REQUESTS,
+    failureRateThreshold: env.CIRCUIT_BREAKER_FAILURE_RATE,
+    consecutiveFailureThreshold: env.CIRCUIT_BREAKER_CONSECUTIVE_FAILURES,
     cooldownMs: env.CIRCUIT_BREAKER_COOLDOWN_MS,
     maxCooldownMs: env.CIRCUIT_BREAKER_MAX_COOLDOWN_MS,
   },

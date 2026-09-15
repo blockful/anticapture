@@ -39,33 +39,37 @@ export type TokenHistoricalPriceResponse = z.infer<
   typeof TokenHistoricalPriceResponse
 >;
 
-export const TokenPropertiesSchema = z
-  .object({
-    id: z.string(),
-    name: z.string().nullable(),
-    decimals: z.number().int().openapi({
-      description: "Token decimals.",
-      example: 18,
-      type: "integer",
-    }),
-    totalSupply: z.string().openapi({ format: "bigint" }),
-    delegatedSupply: z.string().openapi({ format: "bigint" }),
-    cexSupply: z.string().openapi({ format: "bigint" }),
-    dexSupply: z.string().openapi({ format: "bigint" }),
-    lendingSupply: z.string().openapi({ format: "bigint" }),
-    circulatingSupply: z.string().openapi({ format: "bigint" }),
-    nonCirculatingSupply: z.string().openapi({ format: "bigint" }),
-    treasury: z.string().openapi({ format: "bigint" }),
-  })
-  .openapi("TokenProperties", {
-    description:
-      "Core token supply and treasury attributes for the active DAO token.",
-  });
+export const TokenPropertiesSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  decimals: z.number().int().openapi({
+    description: "Token decimals.",
+    example: 18,
+    type: "integer",
+  }),
+  totalSupply: z.string().openapi({ format: "bigint" }),
+  delegatedSupply: z.string().openapi({ format: "bigint" }),
+  cexSupply: z.string().openapi({ format: "bigint" }),
+  dexSupply: z.string().openapi({ format: "bigint" }),
+  lendingSupply: z.string().openapi({ format: "bigint" }),
+  circulatingSupply: z.string().openapi({ format: "bigint" }),
+  nonCirculatingSupply: z.string().openapi({ format: "bigint" }),
+  treasury: z.string().openapi({ format: "bigint" }),
+});
 
+// Deliberately NOT registered as its own OpenAPI component. Registering it made
+// `TokenPropertiesResponse` emit `allOf: [$ref TokenProperties, { price }]`, and
+// the MCP server projects output schemas with `io: "output"`, where Zod marks
+// every object `additionalProperties: false`. The `{ price }` member then
+// rejects the eleven properties carried by the sibling `$ref`, so no response
+// could satisfy the schema and the `token` tool failed every call with
+// "Invalid structured content". Nothing else referenced the component — it
+// existed only to be extended — so inlining it costs no expressiveness.
 export const TokenPropertiesResponseSchema = TokenPropertiesSchema.extend({
   price: z.string(),
 }).openapi("TokenPropertiesResponse", {
-  description: "Token properties enriched with the current token price.",
+  description:
+    "Core token supply and treasury attributes for the active DAO token, enriched with the current token price.",
 });
 
 export const TokenDistributionComparisonQuerySchema = z

@@ -213,19 +213,26 @@ export class DrizzleRepository {
       .offset(skip);
   }
 
-  async getProposalById(proposalId: string): Promise<DBProposal | undefined> {
-    return await this.db.query.proposalsOnchain.findFirst({
-      where: eq(proposalsOnchain.id, proposalId),
-    });
+  async getProposalById(
+    proposalId: string,
+    lean: boolean = false,
+  ): Promise<DBProposal | undefined> {
+    const [proposal] = await this.db
+      .select(this.proposalSelectFields(lean))
+      .from(proposalsOnchain)
+      .where(eq(proposalsOnchain.id, proposalId))
+      .limit(1);
+    return proposal;
   }
 
   async searchProposals(
     query: string,
     skip: number,
     limit: number,
+    lean: boolean = false,
   ): Promise<DBProposal[]> {
     return await this.db
-      .select()
+      .select(this.proposalSelectFields(lean))
       .from(proposalsOnchain)
       .where(this.buildProposalSearchWhere(query))
       .orderBy(desc(proposalsOnchain.timestamp))

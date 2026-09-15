@@ -101,7 +101,7 @@ export class SHUClient<
       endTimestamp: bigint;
     },
     currentBlock: number,
-    currentTimestamp: number,
+    currentTimestamp: number | null,
   ): Promise<string> {
     const status = await super.getProposalStatus(
       proposal,

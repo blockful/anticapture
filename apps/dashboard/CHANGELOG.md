@@ -1,5 +1,21 @@
 # @anticapture/dashboard
 
+## 2.15.2
+
+### Patch Changes
+
+- Updated dependencies [[`51023a6`](https://github.com/blockful/anticapture/commit/51023a61ff8b5dc1e0ace69c3b406a8027dac59a), [`36fc7ad`](https://github.com/blockful/anticapture/commit/36fc7ad45abbdcc0afca88964cdb47e6fb186639)]:
+  - @anticapture/client@2.2.0
+
+## 2.15.1
+
+### Patch Changes
+
+- [#2147](https://github.com/blockful/anticapture/pull/2147) [`61ceeb8`](https://github.com/blockful/anticapture/commit/61ceeb8193e4cf29ef7e8c61f8ae715ea5858d66) Thanks [@brunod-e](https://github.com/brunod-e)! - Show the address column again on the Aave delegates table at desktop widths.
+
+- Updated dependencies [[`2822cdd`](https://github.com/blockful/anticapture/commit/2822cdde3f30604b78c53dc525d9fb925eb68997)]:
+  - @anticapture/client@2.1.1
+
 ## 2.15.0
 
 ### Minor Changes

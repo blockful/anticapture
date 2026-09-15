@@ -60,6 +60,17 @@ export default defineConfig(({ watch }) => ({
   plugins: [
     pluginOas({
       collisionDetection: false,
+      // `strict` (the default) re-asserts each `oneOf` branch's discriminator as
+      // an intersection: `OnchainFullProposal AND { variant: "full" }`. That is
+      // redundant — every branch already declares its own `variant` literal —
+      // and it is fatal for the MCP server. `registerTool` projects the output
+      // schema with `io: "output"`, where Zod marks every object
+      // `additionalProperties: false`; an `allOf` member that declares only
+      // `variant` then rejects the other 20+ real properties, so no response of
+      // either variant can validate and the tool fails with "Invalid structured
+      // content" on every call. `inherit` emits a plain union of the mapped
+      // branches, which projects to a satisfiable `anyOf`.
+      discriminator: "inherit",
     }),
     pluginTs(pluginTsOptions),
     pluginClient({

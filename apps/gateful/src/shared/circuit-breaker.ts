@@ -17,33 +17,98 @@ const STATE_VALUE: Record<State, number> = {
   OPEN: 2,
 };
 
+export type CircuitBreakerOptions = {
+  /** Sliding window over which the failure rate is measured. */
+  windowMs?: number;
+  /** Requests the window must hold before the failure rate is trusted. */
+  minimumRequests?: number;
+  /** Failure ratio (0-1) within the window that opens the circuit. */
+  failureRateThreshold?: number;
+  /** Consecutive failures that open the circuit while the window holds fewer
+   *  than `minimumRequests`, so low-traffic upstreams (a relayer, fan-out) can
+   *  still trip on a sustained outage. */
+  consecutiveFailureThreshold?: number;
+  cooldownMs?: number;
+  maxCooldownMs?: number;
+  /** Publish `circuit_breaker_state` only once this breaker leaves CLOSED for
+   *  the first time, instead of from construction. Set for keys whose name
+   *  comes from a client-controlled path, so probing made-up routes cannot
+   *  mint metric series; a route that actually trips still reports every
+   *  transition from then on. Long-lived keys (DAOs, relayers, services) leave
+   *  it off so dashboards list them while they are healthy. */
+  lazyStateMetric?: boolean;
+  /** Decides the `name` attribute this breaker reports under. Called once,
+   *  when the breaker first publishes, so the registry can fold names past its
+   *  budget into a shared bucket and keep the metric's attribute set bounded. */
+  resolveMetricName?: (key: string) => string;
+};
+
+/** The sliding window is split into this many fixed time buckets. */
+const BUCKET_COUNT = 10;
+
+/** Request outcomes that completed inside one time bucket. */
+type Bucket = { total: number; failures: number };
+
 /** Wraps async calls with failure tracking and automatic recovery.
- *  After consecutive failures hit the threshold, the circuit OPENS and rejects calls instantly.
+ *
+ *  Two rules open the circuit, depending on how much traffic the window holds:
+ *
+ *  - Busy keys (at least `minimumRequests` in the window) open when the
+ *    failure RATE crosses the threshold. A burst of parallel calls that
+ *    partially fails (a dashboard reload against a slow upstream) therefore
+ *    does not trip it, while a sustained outage still does within seconds.
+ *  - Quiet keys (fewer requests than the minimum) open after
+ *    `consecutiveFailureThreshold` failures in a row, since a rate over a
+ *    handful of samples means nothing but N straight failures still do.
+ *
+ *  Outcomes are counted in `BUCKET_COUNT` time buckets covering the window,
+ *  so memory is bounded by the bucket count rather than by request volume.
+ *
  *  After a cooldown (with exponential backoff), it transitions to HALF_OPEN and lets one probe
  *  through — if it succeeds the circuit CLOSES, otherwise it re-opens with a longer cooldown. */
 export class CircuitBreaker {
   private _state: State = "CLOSED";
-  private failureCount = 0;
+  /** Outcome counts keyed by bucket index (`floor(timestampMs / bucketMs)`). */
+  private buckets = new Map<number, Bucket>();
+  private consecutiveFailures = 0;
   private lastFailureTime = 0;
   private backoffMultiplier = 1;
   private probeInFlight = false;
   private readonly _name: string;
-  private readonly failureThreshold: number;
+  private readonly windowMs: number;
+  private readonly bucketMs: number;
+  private readonly minimumRequests: number;
+  private readonly failureRateThreshold: number;
+  private readonly consecutiveFailureThreshold: number;
   private readonly cooldownMs: number;
   private readonly maxCooldownMs: number;
+  /** False until this breaker is allowed to publish its state gauge. */
+  private metricArmed: boolean;
+  /** Bumped on every state transition. Calls carry the generation they started
+   *  in so a straggler cannot report into a circuit that has moved on. */
+  private generation = 0;
+  /** Calls that have started and not yet settled. Every call site passes an
+   *  abort timeout, so this cannot stay above zero indefinitely. */
+  private inFlight = 0;
+  /** When a call last started or settled here. */
+  private lastUsedAt: number;
+  /** The `name` attribute reported to the state gauge, fixed when it arms. */
+  private metricName: string;
+  private readonly resolveMetricName?: (key: string) => string;
 
-  constructor(
-    name: string,
-    opts?: {
-      failureThreshold?: number;
-      cooldownMs?: number;
-      maxCooldownMs?: number;
-    },
-  ) {
+  constructor(name: string, opts?: CircuitBreakerOptions) {
     this._name = name;
-    this.failureThreshold = opts?.failureThreshold ?? 5;
-    this.cooldownMs = opts?.cooldownMs ?? 300_000;
-    this.maxCooldownMs = opts?.maxCooldownMs ?? 2_400_000;
+    this.windowMs = opts?.windowMs ?? 30_000;
+    this.bucketMs = Math.max(1, Math.floor(this.windowMs / BUCKET_COUNT));
+    this.minimumRequests = opts?.minimumRequests ?? 10;
+    this.failureRateThreshold = opts?.failureRateThreshold ?? 0.5;
+    this.consecutiveFailureThreshold = opts?.consecutiveFailureThreshold ?? 5;
+    this.cooldownMs = opts?.cooldownMs ?? 30_000;
+    this.maxCooldownMs = opts?.maxCooldownMs ?? 300_000;
+    this.metricArmed = !opts?.lazyStateMetric;
+    this.metricName = name;
+    this.resolveMetricName = opts?.resolveMetricName;
+    this.lastUsedAt = Date.now();
     this.recordState();
   }
 
@@ -62,6 +127,42 @@ export class CircuitBreaker {
     return Math.max(0, this.currentCooldown() - elapsed);
   }
 
+  /** True when the breaker holds no failure history worth keeping: nothing is
+   *  in flight, it is CLOSED, nothing failed inside the live window and no
+   *  consecutive-failure streak is running. Dropping an idle breaker loses
+   *  nothing; dropping one that carries failures, or one whose slow request is
+   *  still running, would hand a failing upstream a clean slate, since that
+   *  request would settle onto a breaker nobody reads any more. */
+  isIdle(): boolean {
+    if (this.inFlight > 0) return false;
+    if (this._state !== "CLOSED" || this.consecutiveFailures > 0) return false;
+    const oldestLiveIndex =
+      Math.floor(Date.now() / this.bucketMs) - BUCKET_COUNT + 1;
+    for (const [index, bucket] of this.buckets) {
+      if (index >= oldestLiveIndex && bucket.failures > 0) return false;
+    }
+    return true;
+  }
+
+  /** True when the breaker has seen no call for a whole window and has nothing
+   *  to protect right now: nothing in flight, and any cooldown already elapsed.
+   *  An OPEN circuit past its cooldown probes on its next call anyway, so
+   *  dropping it costs nothing, while one still inside its cooldown keeps its
+   *  place. This is what lets routes reclaim slots after an outage: without it,
+   *  one failed call to each of 64 made-up segments would hold a DAO's slots
+   *  for good, since a failure streak and an OPEN state both persist until the
+   *  next call arrives.
+   *
+   *  The registry may drop a stale breaker, and a stale OPEN one comes back as
+   *  a fresh CLOSED breaker: its escalated cooldown and its single-probe gate
+   *  are lost, so the route takes the full trip rule again before it reopens.
+   *  That needs both a quiet window on that route and enough slot pressure to
+   *  evict it, and it costs at most one extra round of failures. */
+  isStale(): boolean {
+    if (this.inFlight > 0 || this.nextRetryIn > 0) return false;
+    return Date.now() - this.lastUsedAt >= this.windowMs;
+  }
+
   private currentCooldown(): number {
     return Math.min(
       this.cooldownMs * this.backoffMultiplier,
@@ -69,29 +170,74 @@ export class CircuitBreaker {
     );
   }
 
+  private resetOutcomes(): void {
+    this.buckets = new Map();
+    this.consecutiveFailures = 0;
+  }
+
+  /** Moves to a new state and starts a new generation, so outcomes from calls
+   *  that began under the old one are ignored when they settle. */
+  private transitionTo(next: State): void {
+    this._state = next;
+    this.generation += 1;
+    this.recordState();
+  }
+
   /** Transition to CLOSED — reset all failure tracking. */
   private closeTheCircuit(): void {
-    this._state = "CLOSED";
-    this.failureCount = 0;
+    this.resetOutcomes();
     this.backoffMultiplier = 1;
     this.probeInFlight = false;
-    this.recordState();
+    this.transitionTo("CLOSED");
   }
 
   /** Transition to OPEN — record failure time. */
   private openTheCircuit(): void {
-    this._state = "OPEN";
+    this.resetOutcomes();
     this.lastFailureTime = Date.now();
-    this.recordState();
+    this.transitionTo("OPEN");
   }
 
+  /** Publishes a final CLOSED before this breaker is dropped, so the series it
+   *  created does not sit at OPEN for the life of the process: the gauge is
+   *  synchronous, the replacement breaker is lazy and says nothing while it is
+   *  healthy, and nobody would ever clear the old value. A breaker that never
+   *  published has no series to close, so this does nothing for it. */
+  publishClosedOnEvict(): void {
+    if (!this.metricArmed || this._state === "CLOSED") return;
+    circuitBreakerState.record(STATE_VALUE.CLOSED, { name: this.metricName });
+  }
+
+  /** Publishes the state gauge. A lazy breaker stays silent while it has never
+   *  left CLOSED: the OTel SDK keeps every attribute set for the life of the
+   *  process, so a healthy key that was never interesting must not create a
+   *  series. The first non-CLOSED state arms it for good, so the recovery back
+   *  to CLOSED is published too and the series does not stick at OPEN. */
   private recordState(): void {
+    if (!this.metricArmed) {
+      if (this._state === "CLOSED") return;
+      this.metricArmed = true;
+      if (this.resolveMetricName) {
+        this.metricName = this.resolveMetricName(this._name);
+      }
+    }
     circuitBreakerState.record(STATE_VALUE[this._state], {
-      name: this._name,
+      name: this.metricName,
     });
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
+    this.lastUsedAt = Date.now();
+    this.inFlight += 1;
+    try {
+      return await this.dispatch(fn);
+    } finally {
+      this.inFlight -= 1;
+      this.lastUsedAt = Date.now();
+    }
+  }
+
+  private dispatch<T>(fn: () => Promise<T>): Promise<T> {
     switch (this._state) {
       case "OPEN":
         this.tryTransitionToHalfOpen();
@@ -109,8 +255,7 @@ export class CircuitBreaker {
     if (elapsed < this.currentCooldown()) {
       throw new CircuitOpenError(this._name);
     }
-    this._state = "HALF_OPEN";
-    this.recordState();
+    this.transitionTo("HALF_OPEN");
     console.warn(
       `[circuit-breaker] ${this._name}: OPEN -> HALF_OPEN (cooldown expired, probing)`,
     );
@@ -140,21 +285,78 @@ export class CircuitBreaker {
     }
   }
 
-  /** Normal execution — track consecutive failures and open if threshold is reached. */
+  /** Normal execution — track outcomes and open once a trip rule fires.
+   *  The window is evaluated after every completion: with concurrent calls a
+   *  success may be the one that fills the window, and settlement order must
+   *  not decide whether the circuit opens. */
   private async handleClosed<T>(fn: () => Promise<T>): Promise<T> {
+    const generation = this.generation;
     try {
       const result = await fn();
-      this.failureCount = 0;
+      this.settle(generation, false);
       return result;
     } catch (err) {
-      this.failureCount++;
-      if (this.failureCount >= this.failureThreshold) {
-        this.openTheCircuit();
-        console.warn(
-          `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${this.failureCount} consecutive failures)`,
-        );
-      }
+      this.settle(generation, true);
       throw err;
     }
+  }
+
+  /** Records an outcome only while the circuit is still in the generation the
+   *  call started in. The rest of a batch that already tripped the circuit
+   *  keeps failing for as long as its requests take to time out; counting
+   *  those stragglers would push `lastFailureTime` forward and stretch the
+   *  cooldown, or reopen a circuit that a half-open probe has since closed.
+   *  Their verdict is already reflected in the transition they missed. */
+  private settle(generation: number, failed: boolean): void {
+    if (generation !== this.generation) return;
+    this.openIfOverThreshold(this.recordOutcome(failed));
+  }
+
+  private openIfOverThreshold({
+    total,
+    failures,
+  }: {
+    total: number;
+    failures: number;
+  }): void {
+    if (total >= this.minimumRequests) {
+      if (failures / total >= this.failureRateThreshold) {
+        this.openTheCircuit();
+        console.warn(
+          `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${failures}/${total} failures in the last ${this.windowMs}ms)`,
+        );
+      }
+      return;
+    }
+    if (this.consecutiveFailures >= this.consecutiveFailureThreshold) {
+      this.openTheCircuit();
+      console.warn(
+        `[circuit-breaker] ${this._name}: CLOSED -> OPEN (${this.consecutiveFailureThreshold} consecutive failures on a low-traffic upstream)`,
+      );
+    }
+  }
+
+  /** Counts the outcome in the current bucket, drops buckets that fell out
+   *  of the window, and returns the window totals. */
+  private recordOutcome(failed: boolean): { total: number; failures: number } {
+    const bucketIndex = Math.floor(Date.now() / this.bucketMs);
+    const oldestLiveIndex = bucketIndex - BUCKET_COUNT + 1;
+    for (const index of this.buckets.keys()) {
+      if (index < oldestLiveIndex) this.buckets.delete(index);
+    }
+
+    const bucket = this.buckets.get(bucketIndex) ?? { total: 0, failures: 0 };
+    bucket.total += 1;
+    if (failed) bucket.failures += 1;
+    this.buckets.set(bucketIndex, bucket);
+    this.consecutiveFailures = failed ? this.consecutiveFailures + 1 : 0;
+
+    let total = 0;
+    let failures = 0;
+    for (const { total: t, failures: f } of this.buckets.values()) {
+      total += t;
+      failures += f;
+    }
+    return { total, failures };
   }
 }

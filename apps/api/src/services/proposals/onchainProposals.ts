@@ -1,5 +1,6 @@
 import { DAOClient } from "@/clients";
 import { ProposalStatus } from "@/lib/constants";
+import { logger } from "@/logger";
 import { DBProposal, ProposalSearchRequest, ProposalsRequest } from "@/mappers";
 
 export interface ProposalsRepository {
@@ -18,9 +19,13 @@ export interface ProposalsRepository {
     query: string,
     skip: number,
     limit: number,
+    lean?: boolean,
   ): Promise<DBProposal[]>;
   getSearchProposalsCount(query: string): Promise<number>;
-  getProposalById(proposalId: string): Promise<DBProposal | undefined>;
+  getProposalById(
+    proposalId: string,
+    lean?: boolean,
+  ): Promise<DBProposal | undefined>;
 }
 
 export class ProposalsService {
@@ -104,19 +109,62 @@ export class ProposalsService {
     );
   }
 
+  /**
+   * Resolves the chain head used to compute on-chain statuses. Returns null
+   * when the RPC is unavailable so callers degrade to the indexed status
+   * instead of failing the whole request.
+   */
+  private async getChainHead(): Promise<{
+    currentBlock: number;
+    currentTimestamp: number | null;
+  } | null> {
+    try {
+      // One read: a head without a timestamp still dates the block-based
+      // statuses, so it is kept and only the queued comparisons are skipped.
+      const head = await this.daoClient.getChainHead();
+      return { currentBlock: head.number, currentTimestamp: head.timestamp };
+    } catch (error) {
+      logger.warn(
+        { error },
+        "RPC unavailable while resolving chain head; serving indexed proposal statuses",
+      );
+      return null;
+    }
+  }
+
+  /**
+   * On-chain status for one proposal, or its indexed status when the RPC reads
+   * behind it fail (some DAO clients read quorum or timelock without their own
+   * fallback). One proposal must not fail the whole listing.
+   */
+  private async resolveStatus(
+    proposal: DBProposal,
+    head: { currentBlock: number; currentTimestamp: number | null },
+  ): Promise<string> {
+    try {
+      return await this.daoClient.getProposalStatus(
+        proposal,
+        head.currentBlock,
+        head.currentTimestamp,
+      );
+    } catch (error) {
+      logger.warn(
+        { error, proposalId: proposal.id },
+        "RPC read failed while computing proposal status; serving indexed status",
+      );
+      return proposal.status;
+    }
+  }
+
   private async hydrateProposalsStatus(
     proposals: DBProposal[],
   ): Promise<DBProposal[]> {
-    const currentBlock = await this.daoClient.getCurrentBlockNumber();
-    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+    const head = await this.getChainHead();
+    if (!head) return proposals;
 
     await Promise.all(
       proposals.map(async (proposal) => {
-        proposal.status = await this.daoClient.getProposalStatus(
-          proposal,
-          currentBlock,
-          currentTimestamp!,
-        );
+        proposal.status = await this.resolveStatus(proposal, head);
       }),
     );
 
@@ -167,32 +215,33 @@ export class ProposalsService {
     query,
     skip = 0,
     limit = 10,
-  }: Omit<ProposalSearchRequest, "lean">): Promise<DBProposal[]> {
+    lean = false,
+  }: Omit<ProposalSearchRequest, "lean"> & {
+    lean?: boolean;
+  }): Promise<DBProposal[]> {
     const proposals = await this.proposalsRepo.searchProposals(
       query,
       skip,
       limit,
+      lean,
     );
 
     return this.hydrateProposalsStatus(proposals);
   }
 
-  async getProposalById(proposalId: string): Promise<DBProposal | undefined> {
-    const proposal = await this.proposalsRepo.getProposalById(proposalId);
+  async getProposalById(
+    proposalId: string,
+    lean: boolean = false,
+  ): Promise<DBProposal | undefined> {
+    const proposal = await this.proposalsRepo.getProposalById(proposalId, lean);
 
     if (!proposal) {
       return undefined;
     }
 
-    const currentBlock = await this.daoClient.getCurrentBlockNumber();
-    const currentTimestamp = await this.daoClient.getBlockTime(currentBlock);
+    const head = await this.getChainHead();
+    if (!head) return proposal;
 
-    const status = await this.daoClient.getProposalStatus(
-      proposal,
-      currentBlock,
-      currentTimestamp!,
-    );
-
-    return { ...proposal, status };
+    return { ...proposal, status: await this.resolveStatus(proposal, head) };
   }
 }

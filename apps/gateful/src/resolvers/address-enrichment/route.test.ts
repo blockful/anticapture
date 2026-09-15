@@ -83,7 +83,8 @@ describe("address-enrichment route", () => {
         new Response(JSON.stringify({ error: "internal" }), { status: 500 }),
       );
 
-    // Default failureThreshold is 5 — drive the breaker OPEN.
+    // Below minimumRequests (10) in the window the consecutive-failure rule
+    // (default 5) opens the circuit, so a quiet upstream still trips.
     for (let i = 0; i < 5; i++) {
       await app.request("/address-enrichment/0x123");
     }
