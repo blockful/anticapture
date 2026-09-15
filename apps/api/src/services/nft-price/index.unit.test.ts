@@ -1,4 +1,5 @@
 import { http, HttpResponse } from "msw";
+import { HTTPException } from "hono/http-exception";
 import { setupServer } from "msw/node";
 import {
   describe,
@@ -135,6 +136,83 @@ describe("NFTPriceService", () => {
       await expect(service.getHistoricalTokenData(1, 0)).rejects.toMatchObject({
         upstream: "coingecko",
       });
+    });
+
+    // The hand-rolled copy of the classification here missed the 404 branch,
+    // so NOUNS and LIL_NOUNS still 502 on a delisted ETH price while every
+    // other DAO degraded.
+    // The service only classifies; the controller is what degrades. What is
+    // asserted is the whole classification the controller will read.
+    const classification = async (run: () => Promise<unknown>) => {
+      const error: unknown = await run().then(
+        () => undefined,
+        (rejection: unknown) => rejection,
+      );
+      if (!(error instanceof UpstreamUnavailableError)) return error;
+      return {
+        name: error.name,
+        upstream: error.upstream,
+        reason: error.reason,
+        status: error.status,
+      };
+    };
+
+    it("classifies a 404 on the ETH price call as not_found", async () => {
+      repo.tokenPrice = "1000000000000000000";
+      server.use(
+        http.get(
+          ETH_MARKET_CHART_URL,
+          () => new HttpResponse(null, { status: 404 }),
+        ),
+      );
+
+      expect(
+        await classification(() => service.getTokenPrice("token", "usd")),
+      ).toEqual({
+        name: "UpstreamUnavailableError",
+        upstream: "coingecko",
+        reason: "not_found",
+        status: 503,
+      });
+    });
+
+    it("classifies a 404 on the historical ETH price call the same way", async () => {
+      repo.nftPrices = [
+        { price: "1000000000000000000", timestamp: 1705276800 },
+      ];
+      server.use(
+        http.get(
+          ETH_MARKET_CHART_RANGE_URL,
+          () => new HttpResponse(null, { status: 404 }),
+        ),
+      );
+
+      expect(
+        await classification(() => service.getHistoricalTokenData(1, 0)),
+      ).toEqual({
+        name: "UpstreamUnavailableError",
+        upstream: "coingecko",
+        reason: "not_found",
+        status: 503,
+      });
+    });
+
+    // A bad key is fixed by us rather than by waiting, so it stays loud.
+    it("keeps a rejected key as a 502 that is not an upstream failure", async () => {
+      repo.tokenPrice = "1000000000000000000";
+      server.use(
+        http.get(
+          ETH_MARKET_CHART_URL,
+          () => new HttpResponse(null, { status: 401 }),
+        ),
+      );
+
+      const error = await classification(() =>
+        service.getTokenPrice("token", "usd"),
+      );
+      expect(error).toBeInstanceOf(HTTPException);
+      expect(error).not.toBeInstanceOf(UpstreamUnavailableError);
+      expect((error as HTTPException).status).toBe(502);
     });
 
     it.each([

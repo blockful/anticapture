@@ -49,16 +49,16 @@ describe("CoingeckoService", () => {
         }),
       );
 
-      const { data: result } = await service.getHistoricalTokenData(7);
+      const result = await service.getHistoricalTokenData(7);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
-        price: "5.4200",
-        timestamp: Math.floor(msTimestamp1 / 1000),
-      });
-      expect(result[1]).toEqual({
-        price: "5.7800",
-        timestamp: Math.floor(msTimestamp2 / 1000),
+      // The whole result, `degraded` included: a fresh answer that came back
+      // flagged would make every controller emit no-store for good data.
+      expect(result).toEqual({
+        data: [
+          { price: "5.4200", timestamp: Math.floor(msTimestamp1 / 1000) },
+          { price: "5.7800", timestamp: Math.floor(msTimestamp2 / 1000) },
+        ],
+        degraded: false,
       });
     });
 

@@ -13,10 +13,9 @@ import {
 import { StaleValueCache } from "@/lib/stale-cache";
 import { forwardFill, createDailyTimeline } from "@/lib/time-series";
 import {
-  isDegradableUpstreamStatus,
+  classifyAxiosFailure,
   PROVIDER_TIMEOUT_MS,
   UpstreamUnavailableError,
-  upstreamRejectedRequest,
 } from "@/lib/upstream-error";
 import { logger } from "@/logger";
 import { TokenHistoricalPriceResponse } from "@/mappers";
@@ -206,17 +205,14 @@ export class NFTPriceService implements PriceProvider {
     try {
       body = (await this.client.get<unknown>(path)).data;
     } catch (error) {
-      const status = axios.isAxiosError(error)
-        ? error.response?.status
-        : undefined;
-      if (status !== undefined && !isDegradableUpstreamStatus(status)) {
-        throw upstreamRejectedRequest("coingecko", status, path);
-      }
-      logger.error({ err: error, path, status }, "CoinGecko request failed");
-      throw new UpstreamUnavailableError(
+      // Same classification as every other provider, rather than a copy that
+      // misses later branches: a 404 degrades under `not_found`, a 401 or 403
+      // is a 502, the rest is an outage.
+      throw classifyAxiosFailure(
         "coingecko",
+        error,
+        path,
         "Failed to fetch ETH prices",
-        { cause: error },
       );
     }
 

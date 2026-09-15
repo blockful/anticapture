@@ -60,11 +60,19 @@ export class UpstreamUnavailableError extends HTTPException {
 export const isDegradableUpstreamStatus = (status: number): boolean =>
   status === 408 || status === 429 || status >= 500;
 
-/** Drops the query string so keys and ids in parameters never reach the logs. */
-const redactUrl = (url: string): string => {
+/**
+ * Drops the query string so keys and ids in parameters never reach the logs.
+ * Callers pass axios paths, which are relative to the client's base URL, so a
+ * relative input is resolved against a placeholder origin and only the path
+ * is kept; an absolute URL keeps its origin.
+ */
+const RELATIVE_BASE = "https://relative.invalid";
+export const redactUrl = (url: string): string => {
   try {
-    const parsed = new URL(url);
-    return `${parsed.origin}${parsed.pathname}`;
+    const parsed = new URL(url, RELATIVE_BASE);
+    return parsed.origin === RELATIVE_BASE
+      ? parsed.pathname
+      : `${parsed.origin}${parsed.pathname}`;
   } catch {
     return "(unparseable url)";
   }
@@ -114,7 +122,10 @@ export const classifyAxiosFailure = (
   // `not_found`, which the log, the metric and the alert keep apart from an
   // outage, since it will not clear on its own. A 401 or 403 stays loud.
   if (status === 404) {
-    logger.error({ path, status }, `${upstream} says the resource is gone`);
+    logger.error(
+      { upstream, status, url: redactUrl(path) },
+      `${upstream} says the resource is gone`,
+    );
     return new UpstreamUnavailableError(upstream, message, {
       cause: error,
       reason: "not_found",

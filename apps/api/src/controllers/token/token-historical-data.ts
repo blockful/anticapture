@@ -71,6 +71,10 @@ export function tokenHistoricalData(
           upstream: error.upstream,
           resource: "token_historical_prices",
           mode: "empty",
+          // Without the reason a persistent `not_found`, such as a token the
+          // provider stopped listing, is counted as a transient outage and the
+          // alert tells operators to wait for something that will not clear.
+          reason: error.reason,
           error,
         });
         // no-store keeps the gateway from caching the empty fallback for the
