@@ -52,6 +52,17 @@ const splitDisplay = (
   param: DecodedParam,
 ): { display?: string; annotation?: string; copyAnnotation?: boolean } => {
   const human = param.humanized?.text;
+  // "1e21 units of USDC" is 1,000,000,000,000,000 USDC, and reads as 1,000
+  // to anyone assuming 18 decimals: the annotation says which were used.
+  if (param.humanized?.kind === "tokenAmount") {
+    const raw = /^\d+$/.test(param.value)
+      ? BigInt(param.value).toLocaleString("en-US")
+      : param.value;
+    return {
+      display: human,
+      annotation: `${raw} raw units · ${param.humanized.decimals} decimals`,
+    };
+  }
   if (human) {
     const eq = human.indexOf(" = ");
     if (eq > 0) {

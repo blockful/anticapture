@@ -1,7 +1,10 @@
 import {
   encodeFunctionData,
   getAddress,
+  keccak256,
+  maxUint256,
   parseAbi,
+  stringToBytes,
   type Abi,
   type Address,
   type Hex,
@@ -556,7 +559,7 @@ describe("multicall unpacking", () => {
       functionName: "aggregate3",
       // The fixture's approve is an allowFailure entry, and a summary that
       // hid that would promise an approval the batch does not guarantee.
-      summary: "Executes 2 calls: transfer, approve (may fail).",
+      summary: "Executes 2 calls: 1 transfer, 1 approval (may fail).",
     });
     expect(inner.subcalls).toHaveLength(2);
     expect(inner.subcalls![0]).toMatchObject({
@@ -580,7 +583,7 @@ describe("multicall unpacking", () => {
       expect.objectContaining({ code: "allow-failure" }),
     ]);
     expect(node.summary).toBe(
-      "Executes 2 calls: transfer, approve (may fail).",
+      "Executes 2 calls: 1 transfer, 1 approval (may fail).",
     );
   });
 
@@ -606,7 +609,7 @@ describe("multicall unpacking", () => {
       expect.objectContaining({ code: "allow-failure" }),
     ]);
     expect(lenient.summary).toBe(
-      "Executes 2 calls: transfer (may fail), approve (may fail).",
+      "Executes 2 calls: 1 transfer (may fail), 1 approval (may fail).",
     );
 
     // requireSuccess reverts the batch on any failure, so nothing is optional.
@@ -622,7 +625,7 @@ describe("multicall unpacking", () => {
       undefined,
       undefined,
     ]);
-    expect(strict.summary).toBe("Executes 2 calls: transfer, approve.");
+    expect(strict.summary).toBe("Executes 2 calls: 1 transfer, 1 approval.");
   });
 
   test("a Safe delegatecall is flagged and carries no ETH into the child", async () => {
@@ -695,7 +698,7 @@ describe("multicall unpacking", () => {
       expect.objectContaining({ code: "delegatecall" }),
     ]);
     expect(node.summary).toBe(
-      "Executes 2 calls: transfer, approve (delegatecall).",
+      "Executes 2 calls: 1 transfer, 1 approval (delegatecall).",
     );
   });
 
@@ -719,7 +722,7 @@ describe("multicall unpacking", () => {
     expect(batch.operation).toBe("delegatecall");
     expect(batch.functionName).toBe("multiSend");
     expect(batch.summary).toBe(
-      "Executes 2 calls (delegatecall): transfer, approve.",
+      "Executes 2 calls (delegatecall): 1 transfer, 1 approval.",
     );
     // Its children run FROM the Safe, so they are ordinary calls with real
     // effects and keep their hints.
@@ -782,7 +785,7 @@ describe("multicall unpacking", () => {
 
   test("scheduleBatch fans out and an empty-calldata entry becomes an ETH node", async () => {
     const node = await decode(SCHEDULE_BATCH, { target: TIMELOCK });
-    expect(node.summary).toBe("Schedules 2 calls: transfer, ETH transfer.");
+    expect(node.summary).toBe("Schedules 2 calls: 1 transfer, 1 ETH transfer.");
     expect(node.subcalls).toHaveLength(2);
     expect(node.subcalls![0]).toMatchObject({
       target: USDC,
@@ -1050,7 +1053,7 @@ describe("multicall unpacking", () => {
     ]);
     // The count still speaks for the whole batch, and the names it managed to
     // decode are marked as the sample they are.
-    expect(node.summary).toBe("Executes 2 calls: transfer, ….");
+    expect(node.summary).toBe("Executes 2 calls: 1 transfer, ….");
   });
 
   test("renamed tuple components still unpack (positional normalization)", async () => {
@@ -1303,7 +1306,7 @@ describe("governor propose", () => {
     const node = await decode(calldata, { target: GOVERNOR });
     expect(node.functionName).toBe("propose");
     expect(node.summary).toBe(
-      "Submits a proposal with 2 actions: transfer, ETH transfer.",
+      "Submits a proposal with 2 actions: 1 transfer, 1 ETH transfer.",
     );
     expect(node.subcalls).toHaveLength(2);
     expect(node.subcalls![0]).toMatchObject({
@@ -1345,5 +1348,75 @@ describe("governor propose", () => {
       functionName: "transfer",
       raw: USDC_TRANSFER,
     });
+  });
+});
+
+describe("batch summaries by kind", () => {
+  const short = (address: string) =>
+    `${address.slice(0, 6)}…${address.slice(-4)}`;
+
+  test("repeated kinds are counted and roles are named", async () => {
+    const unlimited = encodeFunctionData({
+      abi: parseAbi(["function approve(address spender, uint256 amount)"]),
+      functionName: "approve",
+      args: [RECIPIENT, maxUint256],
+    });
+    const grant = encodeFunctionData({
+      abi: parseAbi(["function grantRole(bytes32 role, address account)"]),
+      functionName: "grantRole",
+      args: [keccak256(stringToBytes("PROPOSER_ROLE")), RECIPIENT],
+    });
+    const node = await decode(
+      multiSend([
+        { operation: 0, to: USDC, value: 0n, data: unlimited },
+        { operation: 0, to: USDC, value: 0n, data: unlimited },
+        { operation: 0, to: USDC, value: 0n, data: unlimited },
+        { operation: 0, to: TIMELOCK, value: 0n, data: grant },
+      ]),
+      { target: MULTI_SEND },
+    );
+    expect(node.summary).toBe(
+      "Executes 4 calls: 3 unlimited approvals, 1 role grant.",
+    );
+    const grantNode = node.subcalls![3];
+    expect(grantNode.summary).toBe(
+      `Grants the PROPOSER_ROLE role to ${short(RECIPIENT)}.`,
+    );
+    expect(grantNode.params[0].humanized).toEqual({
+      kind: "role",
+      text: "PROPOSER_ROLE",
+    });
+  });
+
+  test("more kinds than fit are folded into a call count", async () => {
+    const erc20 = parseAbi([
+      "function approve(address spender, uint256 amount)",
+      "function transfer(address to, uint256 amount)",
+      "function delegate(address delegatee)",
+    ]);
+    const call = (functionName: "approve" | "transfer" | "delegate") =>
+      encodeFunctionData({
+        abi: erc20,
+        functionName,
+        args: functionName === "delegate" ? [RECIPIENT] : [RECIPIENT, 1n],
+      });
+    const revoke = encodeFunctionData({
+      abi: parseAbi(["function revokeRole(bytes32 role, address account)"]),
+      functionName: "revokeRole",
+      args: [keccak256(stringToBytes("MINTER_ROLE")), RECIPIENT],
+    });
+    const node = await decode(
+      multiSend([
+        { operation: 0, to: USDC, value: 0n, data: call("approve") },
+        { operation: 0, to: USDC, value: 0n, data: call("transfer") },
+        { operation: 0, to: USDC, value: 0n, data: call("delegate") },
+        { operation: 0, to: TIMELOCK, value: 0n, data: revoke },
+        { operation: 0, to: TIMELOCK, value: 0n, data: revoke },
+      ]),
+      { target: MULTI_SEND },
+    );
+    expect(node.summary).toBe(
+      "Executes 5 calls: 1 approval, 1 transfer, 1 delegation, +2 more.",
+    );
   });
 });

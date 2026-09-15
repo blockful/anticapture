@@ -1,3 +1,5 @@
+import { keccak256, stringToBytes, zeroHash } from "viem";
+
 import { humanizeDuration } from "@/shared/services/decoder/humanize/duration";
 import { humanizeLeaf } from "@/shared/services/decoder/humanize";
 import { humanizeNumber } from "@/shared/services/decoder/humanize/number";
@@ -169,5 +171,32 @@ describe("humanizeLeaf", () => {
       315_360_000n,
     );
     expect(result?.kind).toBe("number");
+  });
+});
+
+describe("humanizeLeaf on role hashes", () => {
+  const minter = keccak256(stringToBytes("MINTER_ROLE"));
+
+  test("a bytes32 role reads as its name", () => {
+    expect(
+      humanizeLeaf(
+        { type: "bytes32", name: "role", functionName: "grantRole" },
+        minter,
+      ),
+    ).toEqual({ kind: "role", text: "MINTER_ROLE" });
+    expect(humanizeLeaf({ type: "bytes32", name: "role" }, zeroHash)).toEqual({
+      kind: "role",
+      text: "DEFAULT_ADMIN_ROLE",
+    });
+  });
+
+  test("a bytes32 that is not a role, or not a known one, stays raw", () => {
+    expect(humanizeLeaf({ type: "bytes32", name: "salt" }, minter)).toBeNull();
+    expect(
+      humanizeLeaf(
+        { type: "bytes32", name: "role" },
+        keccak256(stringToBytes("MY_CUSTOM_ROLE")),
+      ),
+    ).toBeNull();
   });
 });

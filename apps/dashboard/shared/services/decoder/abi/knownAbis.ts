@@ -17,6 +17,10 @@ const KNOWN_SIGNATURES = [
   "function transferFrom(address from, address to, uint256 amount)",
   // Votes delegation
   "function delegate(address delegatee)",
+  // AccessControl
+  "function grantRole(bytes32 role, address account)",
+  "function revokeRole(bytes32 role, address account)",
+  "function renounceRole(bytes32 role, address account)",
   // ERC721 / ERC1155
   "function safeTransferFrom(address from, address to, uint256 tokenId)",
   "function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)",

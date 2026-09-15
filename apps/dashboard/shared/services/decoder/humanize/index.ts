@@ -9,6 +9,7 @@ import {
   humanizeTimestamp,
   TIMESTAMP_NAME_HINT,
 } from "@/shared/services/decoder/humanize/timestamp";
+import { lookupRoleName } from "@/shared/services/decoder/roles";
 import type { Humanized } from "@/shared/services/decoder/types";
 
 export { humanizeDuration } from "@/shared/services/decoder/humanize/duration";
@@ -27,15 +28,37 @@ export type LeafContext = {
   functionName?: string;
 };
 
+/** A bytes32 named like a role, or any bytes32 handed to a role function. */
+const ROLE_NAME_HINT = /role/i;
+const ROLE_FUNCTION_HINT = new Set([
+  "grantRole",
+  "revokeRole",
+  "renounceRole",
+  "hasRole",
+  "getRoleAdmin",
+  "setRoleAdmin",
+]);
+
 /**
- * Best sync reading for a decoded leaf. Precedence: timestamp > duration >
- * plain grouped number. Token amounts arrive later via async enrichment, and
- * addresses only get flagged (identity is resolved in the UI).
+ * Best sync reading for a decoded leaf. Precedence: role name > timestamp >
+ * duration > plain grouped number. Token amounts arrive later via async
+ * enrichment, and addresses only get flagged (identity is resolved in the UI).
  */
 export const humanizeLeaf = (
   ctx: LeafContext,
   value: unknown,
 ): Humanized | null => {
+  if (
+    ctx.type === "bytes32" &&
+    typeof value === "string" &&
+    (ROLE_NAME_HINT.test(ctx.name) ||
+      (ctx.functionName !== undefined &&
+        ROLE_FUNCTION_HINT.has(ctx.functionName)))
+  ) {
+    const role = lookupRoleName(value);
+    return role ? { kind: "role", text: role } : null;
+  }
+
   if (typeof value !== "bigint") return null;
   if (!/^u?int/.test(ctx.type)) return null;
 

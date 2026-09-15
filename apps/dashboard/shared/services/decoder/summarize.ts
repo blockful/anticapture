@@ -1,5 +1,7 @@
-import { getDetector } from "@/shared/services/decoder/multicall/detectors";
+import { maxUint256 } from "viem";
+
 import { humanizeEtherValue } from "@/shared/services/decoder/humanize/tokenAmount";
+import { getDetector } from "@/shared/services/decoder/multicall/detectors";
 import type {
   DecodedCall,
   DecodedParam,
@@ -24,6 +26,14 @@ const amountText = (param: DecodedParam | undefined): string => {
 
 const addressText = (param: DecodedParam | undefined): string =>
   param ? shortAddress(param.value) : "an unknown address";
+
+/** "the PROPOSER_ROLE role", or the hash when no known name matches it. */
+const roleText = (param: DecodedParam | undefined): string => {
+  if (!param) return "an unknown role";
+  if (param.humanized?.kind === "role")
+    return `the ${param.humanized.text} role`;
+  return `role ${shortAddress(param.value)}`;
+};
 
 type Template = (node: DecodedCall) => string | null;
 
@@ -63,10 +73,16 @@ const TEMPLATES: Record<string, Template> = {
     const text = delay?.humanized?.text ?? `${delay?.value ?? "?"} seconds`;
     return `Updates the timelock delay to ${text}.`;
   },
+  "grantRole(bytes32,address)": (node) =>
+    `Grants ${roleText(paramAt(node, 0))} to ${addressText(paramAt(node, 1))}.`,
+  "revokeRole(bytes32,address)": (node) =>
+    `Revokes ${roleText(paramAt(node, 0))} from ${addressText(paramAt(node, 1))}.`,
+  "renounceRole(bytes32,address)": (node) =>
+    `Renounces ${roleText(paramAt(node, 0))} for ${addressText(paramAt(node, 1))}.`,
 };
 
-/** How many distinct inner function names a batch summary spells out. */
-const MAX_LISTED_SUBCALLS = 3;
+/** How many kinds of inner call a batch summary spells out. */
+const MAX_LISTED_KINDS = 3;
 
 /**
  * A batch may mark a call as tolerated-failure, and then nothing the sentence
@@ -101,11 +117,57 @@ const subcallNoun = (call: DecodedCall): string => {
     : `empty call${suffix}`;
 };
 
+type Noun = { one: string; many: string };
+const noun = (one: string, many = `${one}s`): Noun => ({ one, many });
+
+const isUnlimited = (param: DecodedParam | undefined): boolean => {
+  if (!param || !/^\d+$/.test(param.value)) return false;
+  return BigInt(param.value) === maxUint256;
+};
+
+/**
+ * What a subcall IS, as something that can be counted: "3 unlimited
+ * approvals, 1 role grant" says more about a batch than "approve, grantRole,
+ * +2 more". Known effects get a noun; anything else is named by its function.
+ */
+const subcallKind = (call: DecodedCall): Noun => {
+  if (call.functionName && call.subcalls?.length) {
+    return noun(`${call.functionName} batch`, `${call.functionName} batches`);
+  }
+  switch (call.signature) {
+    case "approve(address,uint256)":
+      if (tokenIdParam(call)) return noun("NFT approval");
+      return isUnlimited(paramAt(call, 1))
+        ? noun("unlimited approval")
+        : noun("approval");
+    case "transfer(address,uint256)":
+    case "transferFrom(address,address,uint256)":
+    case "safeTransferFrom(address,address,uint256)":
+    case "safeTransferFrom(address,address,uint256,uint256,bytes)":
+      return noun("transfer");
+    case "delegate(address)":
+      return noun("delegation");
+    case "grantRole(bytes32,address)":
+      return noun("role grant");
+    case "revokeRole(bytes32,address)":
+      return noun("role revocation");
+    case "renounceRole(bytes32,address)":
+      return noun("role renunciation");
+    case "updateDelay(uint256)":
+      return noun("delay update");
+  }
+  if (call.functionName) return noun(`${call.functionName} call`);
+  if (call.value && call.value > 0n) return noun("ETH transfer");
+  if (call.selector) return noun(`${call.selector} call`);
+  return noun("empty call");
+};
+
 /**
  * What a wrapper carries, so "Executes 1 call." becomes "Executes 1 call:
  * transfers 25,000 USDC to 0x1234…abcd." A single decoded child lends its
- * whole sentence; several children are listed by function name. Children the
- * node budget dropped stay uncounted here (the count itself already says so).
+ * whole sentence; several children are grouped by kind and counted. Children
+ * the node budget dropped stay uncounted here (the count itself already says
+ * so).
  */
 const describeSubcalls = (
   subcalls: NonNullable<DecodedCall["subcalls"]>,
@@ -132,13 +194,33 @@ const describeSubcalls = (
     const target = child.target ? ` on ${shortAddress(child.target)}` : "";
     return `${subcallNoun(child)}${target}`;
   }
-  const names = [...new Set(opened.map(subcallNoun))];
-  const listed = names.slice(0, MAX_LISTED_SUBCALLS);
-  // When children were dropped or left raw, the names are a sample of the
+  // Grouped by kind and by what the batch promises about it: a tolerated
+  // failure or a delegatecall changes what a call means, so it is its own
+  // group even when it shares a kind with the rest.
+  const groups = new Map<
+    string,
+    { kind: Noun; suffix: string; count: number }
+  >();
+  for (const call of opened) {
+    const kind = subcallKind(call);
+    const suffix = qualifiers(call);
+    const key = `${kind.one}${suffix}`;
+    const group = groups.get(key);
+    if (group) group.count += 1;
+    else groups.set(key, { kind, suffix, count: 1 });
+  }
+  const phrases = [...groups.values()].map(
+    ({ kind, suffix, count: n }) =>
+      `${n} ${n === 1 ? kind.one : kind.many}${suffix}`,
+  );
+  const listed = phrases.slice(0, MAX_LISTED_KINDS);
+  // When children were dropped or left raw, the kinds are a sample of the
   // batch and cannot claim an exact remainder. The leading count is the one
   // that speaks for the whole batch.
   if (opened.length < count) return `${listed.join(", ")}, …`;
-  const rest = names.length - listed.length;
+  const rest = [...groups.values()]
+    .slice(MAX_LISTED_KINDS)
+    .reduce((sum, group) => sum + group.count, 0);
   return rest > 0 ? `${listed.join(", ")}, +${rest} more` : listed.join(", ");
 };
 

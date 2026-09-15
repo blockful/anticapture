@@ -14,7 +14,9 @@ export type Humanized =
   | { kind: "timestamp"; text: string; iso: string }
   | { kind: "tokenAmount"; text: string; symbol: string; decimals: number }
   | { kind: "etherValue"; text: string }
-  | { kind: "number"; text: string };
+  | { kind: "number"; text: string }
+  /** A bytes32 AccessControl role hash resolved to its name. */
+  | { kind: "role"; text: string };
 
 export type DecodedParam = {
   /** ABI name, or "arg0".."argN" when the shape was guessed from raw words. */
