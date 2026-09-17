@@ -53,6 +53,35 @@ scrape_configs:
     static_configs:
       - targets: ["${RELAYER_ENDPOINT}"]
 
+  # Notification system (repo blockful/notification-system). Each service serves
+  # /metrics on the same Fastify server as its Railway /health check, so every
+  # endpoint is that service's private domain plus the port it listens on. The
+  # notification-* prefix keeps them out of the anticapture-<dao>-* patterns, so
+  # ServiceDown and the General Scrape Status panel pick them up unchanged.
+  - job_name: notification-subscription-server
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${NOTIF_SUBSCRIPTION_SERVER_ENDPOINT}"]
+
+  - job_name: notification-dispatcher
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${NOTIF_DISPATCHER_ENDPOINT}"]
+
+  - job_name: notification-consumers
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${NOTIF_CONSUMERS_ENDPOINT}"]
+
+  - job_name: notification-logic-system
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["${NOTIF_LOGIC_SYSTEM_ENDPOINT}"]
+
   - job_name: anticapture-erpc
     metrics_path: "/metrics"
     scrape_interval: 15s
