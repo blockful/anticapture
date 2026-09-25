@@ -60,6 +60,33 @@ environments continue using their configured authentication provider.
 The standalone `infra/erpc/Dockerfile.monitoring` image is legacy. Use this
 unified monitoring stack for the normal Anticapture Railway deployment.
 
+## Notification system metrics
+
+Prometheus also scrapes the four services of the
+[notification system](https://github.com/blockful/notification-system)
+(`notification-subscription-server`, `notification-dispatcher`,
+`notification-consumers`, `notification-logic-system`). This is what backs the
+uptime figure blockful reports to the ENS DAO for the notification system, so
+it is measured the same way as the Anticapture services. Set these variables on
+the Prometheus service:
+
+```text
+NOTIF_SUBSCRIPTION_SERVER_ENDPOINT=${{<subscription-server-service>.RAILWAY_PRIVATE_DOMAIN}}:<PORT>
+NOTIF_DISPATCHER_ENDPOINT=${{<dispatcher-service>.RAILWAY_PRIVATE_DOMAIN}}:<PORT>
+NOTIF_CONSUMERS_ENDPOINT=${{<consumer-service>.RAILWAY_PRIVATE_DOMAIN}}:<WEBHOOK_API_PORT>
+NOTIF_LOGIC_SYSTEM_ENDPOINT=${{<logic-system-service>.RAILWAY_PRIVATE_DOMAIN}}:<PORT>
+```
+
+Each service serves `/metrics` on the same Fastify server as its `/health`
+check, so the port is the one that service listens on (`PORT`, or
+`WEBHOOK_API_PORT` for the consumer, whose Slack bot occupies `PORT`). The
+endpoints are unauthenticated and only reachable through Railway private
+networking. The services emit `http_server_request_duration_seconds` with the
+same labels as Gateful, so the generic `HighLatency` and `HighErrorRate` alerts
+cover them, and `ServiceDown` covers the scrape itself. The dashboard's
+"Notification System" row shows scrape status, request rate, 5xx and p99
+latency per service; there is no per-channel delivery counter yet.
+
 ## Alert lifecycle
 
 Every Prometheus rule keeps a fired alert active for 15 minutes after its

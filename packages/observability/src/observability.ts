@@ -1,8 +1,4 @@
 import { metrics } from "@opentelemetry/api";
-import {
-  PrometheusExporter,
-  PrometheusSerializer,
-} from "@opentelemetry/exporter-prometheus";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { HostMetrics } from "@opentelemetry/host-metrics";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
@@ -16,28 +12,20 @@ import {
 } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 
-export { PrometheusExporter, PrometheusSerializer };
+import { PrometheusExporter } from "./prometheus.js";
 
-export const PROMETHEUS_MIME_TYPE = "text/plain; version=0.0.4; charset=utf-8";
-
-const prometheusSerializer = new PrometheusSerializer();
+export {
+  collectPrometheusMetrics,
+  PROMETHEUS_MIME_TYPE,
+  PrometheusExporter,
+  PrometheusSerializer,
+} from "./prometheus.js";
 
 export interface ObservabilityProvider {
   meterProvider: MeterProvider;
   tracerProvider: NodeTracerProvider;
   exporter: PrometheusExporter;
   shutdown: () => Promise<void>;
-}
-
-export async function collectPrometheusMetrics(
-  exporter: PrometheusExporter,
-): Promise<{ body: string; contentType: string }> {
-  const result = await exporter.collect();
-
-  return {
-    body: prometheusSerializer.serialize(result.resourceMetrics),
-    contentType: PROMETHEUS_MIME_TYPE,
-  };
 }
 
 export function createObservabilityProvider(
@@ -74,12 +62,17 @@ export function createObservabilityProvider(
   });
   tracerProvider.register();
 
+  metrics.setGlobalMeterProvider(meterProvider);
+
+  // The meter provider must be set (and passed) before the instrumentations
+  // are registered: each instrumentation creates its instruments from the
+  // provider available at registration time, and the API's default is a
+  // no-op meter that silently drops http.server.duration and friends.
   registerInstrumentations({
     tracerProvider,
+    meterProvider,
     instrumentations: [new HttpInstrumentation(), new PgInstrumentation()],
   });
-
-  metrics.setGlobalMeterProvider(meterProvider);
 
   new HostMetrics({ meterProvider }).start();
 
