@@ -7,6 +7,7 @@ import type {
   ProgramConfig,
   ProgramDefinition,
   ProgramsConfig,
+  ProviderEntry,
   ProvidersConfig,
   QuarterKey,
   QuarterReport,
@@ -22,7 +23,8 @@ export type ServiceProvidersData = Record<number, Record<string, YearData>>;
 export type ServiceProvidersResult = {
   config: ProvidersConfig;
   programs: Record<string, ProgramDefinition>;
-  data: ServiceProvidersData;
+  // Keyed by program: the same quarter can have different deadlines per program.
+  data: Record<string, ServiceProvidersData>;
   avatarUrls: Record<string, string>;
 };
 
@@ -36,6 +38,7 @@ export const parseProgramConfig = (
   config: ProgramConfig,
 ): ProgramDefinition => ({
   name: config.name,
+  reportDueDays: config.reportDueDays ?? 0,
   discussionUrl: config.discussionUrl,
   budgetProposal: config.budgetProposal,
   selectionProposal: config.selectionProposal,
@@ -47,13 +50,9 @@ export const parseProgramConfig = (
     .filter((q): q is ParsedQuarter => q !== null),
 });
 
-const collectYears = (
-  programs: Record<string, ProgramDefinition>,
-): number[] => [
+const collectYears = (program: ProgramDefinition): number[] => [
   ...new Set(
-    Object.values(programs).flatMap((p) =>
-      [...p.year1Quarters, ...p.year2Quarters].map((q) => q.year),
-    ),
+    [...program.year1Quarters, ...program.year2Quarters].map((q) => q.year),
   ),
 ];
 
@@ -61,6 +60,7 @@ const buildQuarterReport = (
   year: number,
   quarter: QuarterKey,
   reports: Record<string, string>,
+  reportDueDays: number,
   now: Date,
 ): QuarterReport => {
   const reportUrl = reports[`${year}/${quarter}`];
@@ -69,8 +69,36 @@ const buildQuarterReport = (
     return { status: "published", reportUrl };
   }
 
-  return { status: computeQuarterStatus(year, quarter, now) };
+  return { status: computeQuarterStatus(year, quarter, now, reportDueDays) };
 };
+
+export const buildProgramData = (
+  program: ProgramDefinition,
+  providers: ProviderEntry[],
+  now: Date,
+): ServiceProvidersData =>
+  Object.fromEntries(
+    collectYears(program).map((year) => [
+      year,
+      Object.fromEntries(
+        providers.map((provider) => [
+          provider.slug,
+          Object.fromEntries(
+            QUARTERS.map((quarter) => [
+              quarter,
+              buildQuarterReport(
+                year,
+                quarter,
+                provider.reports,
+                program.reportDueDays,
+                now,
+              ),
+            ]),
+          ) as YearData, // safe: maps over all 4 quarters
+        ]),
+      ),
+    ]),
+  );
 
 const fetchJson = async <T>(path: string): Promise<T> => {
   const response = await fetch(`${GITHUB_RAW_BASE}/${path}`);
@@ -122,23 +150,12 @@ export const fetchServiceProvidersData =
       ]),
     );
 
-    const years = collectYears(programs);
     const now = new Date();
 
     const data = Object.fromEntries(
-      years.map((year) => [
-        year,
-        Object.fromEntries(
-          config.providers.map((provider) => [
-            provider.slug,
-            Object.fromEntries(
-              QUARTERS.map((quarter) => [
-                quarter,
-                buildQuarterReport(year, quarter, provider.reports, now),
-              ]),
-            ) as YearData, // safe: maps over all 4 quarters
-          ]),
-        ),
+      Object.entries(programs).map(([key, program]) => [
+        key,
+        buildProgramData(program, config.providers, now),
       ]),
     );
 
