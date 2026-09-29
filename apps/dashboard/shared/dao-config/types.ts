@@ -99,14 +99,6 @@ export interface DaoOverviewConfig {
     isActive: boolean;
     /** Card heading (rendered uppercase). Defaults to "Security Council". */
     label?: string;
-    /**
-     * Set when the veto power has no fixed term (e.g. a Safe that owns a
-     * governance module and can cancel indefinitely). The card then shows
-     * "No expiration" instead of a countdown and hides the progress/danger
-     * bar; the `expiration` fields below are ignored and may be left as
-     * sentinels (only `startDate` is still shown as the "Start" label).
-     */
-    noExpiration?: boolean;
     vetoCouncilAddress: string;
     multisig: {
       threshold: number;
@@ -122,6 +114,13 @@ export interface DaoOverviewConfig {
     };
     expiration: {
       date: string;
+      /**
+       * Unix seconds when the veto term ends. Use `0` for a council with no
+       * fixed term (e.g. a Safe that owns a governance module and can cancel
+       * indefinitely): the card then shows "No expiration" instead of a
+       * countdown and hides the progress/danger bar, and the other expiration
+       * fields are ignored (only `startDate` is still shown as "Start").
+       */
       timestamp: number;
       startDate: string;
       alertExpiration: number;

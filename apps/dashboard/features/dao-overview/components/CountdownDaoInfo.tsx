@@ -15,8 +15,10 @@ export const CountdownDaoInfo = ({
   const targetTimestamp = securityCouncil?.expiration.timestamp;
   const countdown = useCountdown(targetTimestamp);
 
-  // A council with no fixed term shows a static label instead of a countdown.
-  const noExpiration = securityCouncil?.noExpiration ?? false;
+  // timestamp === 0 marks a council with no fixed term: show a static label
+  // instead of a countdown.
+  const noExpiration =
+    !!securityCouncil && !securityCouncil.expiration.timestamp;
 
   const formattedCountdown = useMemo(() => {
     if (!countdown || countdown.isLoading) return null;

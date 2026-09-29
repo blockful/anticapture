@@ -56,10 +56,7 @@ export const SHU: DaoConfiguration = {
       // Shutter's veto is exercised through Snapshot X: the Security Council
       // (5-of-8 Safe 0x3ea7...c0C0) owns the Snapshot X Space
       // (0x594EB60b35C4E91A06a5df988e0504f7463cB769) and vetoes a proposal by
-      // calling Space.cancel(proposalId) any time before it is executed. The
-      // veto power is an owner privilege with no fixed term, so there is no
-      // expiration; the council took ownership of the Space on 2026-09-07.
-      noExpiration: true,
+      // calling Space.cancel(proposalId) any time before it is executed.
       vetoCouncilAddress: "0x3ea731dAF66D6A7980549f90152CD9A761B9c0C0",
       multisig: {
         threshold: 5,
@@ -70,8 +67,10 @@ export const SHU: DaoConfiguration = {
           "The Security Council is a multisig with eight signers, needing five signatures to veto a proposal by cancelling it on the Snapshot X space before execution.",
       },
       expiration: {
-        // No fixed term (noExpiration); only startDate is shown, as the "Start"
-        // label. The remaining fields are unused sentinels.
+        // The veto is an owner privilege with no fixed term: timestamp 0 makes
+        // the card show "No expiration" instead of a countdown. Only startDate
+        // is rendered (as "Start") — the council took ownership of the Space on
+        // 2026-09-07; the other fields are unused.
         startDate: "September 7, 2026",
         date: "",
         timestamp: 0,
