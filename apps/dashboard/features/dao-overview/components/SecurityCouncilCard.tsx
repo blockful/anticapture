@@ -17,7 +17,7 @@ export const SecurityCouncilCard = ({
   const { securityCouncil } = daoOverview;
 
   const progress = useMemo(() => {
-    if (!securityCouncil) return 0;
+    if (!securityCouncil || securityCouncil.noExpiration) return 0;
     const start = new Date(securityCouncil.expiration.startDate).getTime();
     const end = new Date(securityCouncil.expiration.date).getTime();
     const now = Date.now();
@@ -29,7 +29,7 @@ export const SecurityCouncilCard = ({
   }, [securityCouncil]);
 
   const warning = useMemo(() => {
-    if (!securityCouncil) return 0;
+    if (!securityCouncil || securityCouncil.noExpiration) return 0;
 
     const start = new Date(securityCouncil.expiration.startDate).getTime();
     const end = new Date(securityCouncil.expiration.date).getTime();
