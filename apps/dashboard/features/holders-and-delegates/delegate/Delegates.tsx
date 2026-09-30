@@ -306,7 +306,9 @@ export const Delegates = ({
               />
             </div>
             {!isMobile && (
-              <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
+              // Only in the flow while hovered, so the invisible actions do
+              // not reserve ~130px next to the name on every row.
+              <div className="hidden items-center [tr:hover_&]:flex">
                 <CopyAndPasteButton
                   textToCopy={address as `0x${string}`}
                   customTooltipText={{
@@ -471,7 +473,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: isWhitelabel ? "w-[13%]" : "w-[16%]",
+        columnClassName: isWhitelabel ? "w-[12%]" : "w-[16%]",
       },
     },
     {
@@ -528,7 +530,7 @@ export const Delegates = ({
         </h4>
       ),
       meta: {
-        columnClassName: isWhitelabel ? "w-[10%]" : "w-[11%]",
+        columnClassName: isWhitelabel ? "w-[9%]" : "w-[11%]",
       },
     },
     {
@@ -579,7 +581,7 @@ export const Delegates = ({
         </div>
       ),
       meta: {
-        columnClassName: isWhitelabel ? "w-[13%]" : "w-[16%]",
+        columnClassName: isWhitelabel ? "w-[12%]" : "w-[16%]",
       },
     },
     {
@@ -622,7 +624,7 @@ export const Delegates = ({
         </Button>
       ),
       meta: {
-        columnClassName: isWhitelabel ? "w-[11%]" : "w-[12%]",
+        columnClassName: isWhitelabel ? "w-[10%]" : "w-[12%]",
       },
     },
     ...(isWhitelabel
@@ -652,7 +654,7 @@ export const Delegates = ({
             },
             header: () => null,
             meta: {
-              columnClassName: "w-24 px-2",
+              columnClassName: "w-40 px-2",
             },
           } satisfies ColumnDef<DelegateTableData>,
         ]
