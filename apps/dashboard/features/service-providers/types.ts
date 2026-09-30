@@ -43,6 +43,8 @@ export type ProgramConfig = {
   year2Quarters?: string[];
   budget: number;
   startDate: string;
+  /** Days after each quarter ends that its report is due, per the program's terms. */
+  reportDueDays?: number;
   discussionUrl: string;
   budgetProposal: ProgramProposal;
   selectionProposal: ProgramProposal;
@@ -78,6 +80,7 @@ export type ProgramDefinition = {
   name: string;
   year1Quarters: ParsedQuarter[];
   year2Quarters: ParsedQuarter[];
+  reportDueDays: number;
   discussionUrl: string;
   budgetProposal: ProgramProposal;
   selectionProposal: ProgramProposal;

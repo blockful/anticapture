@@ -10,25 +10,37 @@ const QUARTER_END_DATES: Record<QuarterKey, { month: number; day: number }> = {
   Q4: { month: 12, day: 31 },
 };
 
-export const getDueDate = (year: number, quarter: QuarterKey): Date => {
+// reportDueDays: days after the quarter ends that the program gives providers
+// to publish the report (e.g. SPP3 Program Terms §6.3: 30 days).
+export const getDueDate = (
+  year: number,
+  quarter: QuarterKey,
+  reportDueDays = 0,
+): Date => {
   const { month, day } = QUARTER_END_DATES[quarter];
-  return new Date(Date.UTC(year, month - 1, day, 23, 59, 59));
+  return new Date(Date.UTC(year, month - 1, day + reportDueDays, 23, 59, 59));
 };
 
-export const getDueDateLabel = (quarter: QuarterKey): string => {
-  const { month, day } = QUARTER_END_DATES[quarter];
-  const monthName = new Date(2000, month - 1).toLocaleString("en-US", {
+export const getDueDateLabel = (
+  year: number,
+  quarter: QuarterKey,
+  reportDueDays = 0,
+): string => {
+  const dueDate = getDueDate(year, quarter, reportDueDays);
+  const monthName = dueDate.toLocaleString("en-US", {
     month: "short",
+    timeZone: "UTC",
   });
-  return `Due by ${monthName} ${day}`;
+  return `Due by ${monthName} ${dueDate.getUTCDate()}`;
 };
 
 export const computeQuarterStatus = (
   year: number,
   quarter: QuarterKey,
   now: Date,
+  reportDueDays = 0,
 ): ReportStatus => {
-  const deadline = getDueDate(year, quarter);
+  const deadline = getDueDate(year, quarter, reportDueDays);
 
   if (now > deadline) return "overdue";
 
