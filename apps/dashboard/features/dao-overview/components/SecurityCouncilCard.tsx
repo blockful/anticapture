@@ -17,7 +17,8 @@ export const SecurityCouncilCard = ({
   const { securityCouncil } = daoOverview;
 
   const progress = useMemo(() => {
-    if (!securityCouncil) return 0;
+    // timestamp === 0 marks a council with no fixed term: no progress to show.
+    if (!securityCouncil || !securityCouncil.expiration.timestamp) return 0;
     const start = new Date(securityCouncil.expiration.startDate).getTime();
     const end = new Date(securityCouncil.expiration.date).getTime();
     const now = Date.now();
@@ -29,7 +30,8 @@ export const SecurityCouncilCard = ({
   }, [securityCouncil]);
 
   const warning = useMemo(() => {
-    if (!securityCouncil) return 0;
+    // No fixed term (timestamp === 0) means no danger zone to render.
+    if (!securityCouncil || !securityCouncil.expiration.timestamp) return 0;
 
     const start = new Date(securityCouncil.expiration.startDate).getTime();
     const end = new Date(securityCouncil.expiration.date).getTime();

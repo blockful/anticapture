@@ -103,7 +103,11 @@ export const ServiceProvidersTable = ({
     const isYear2 = year2ColIndex !== undefined;
     const isCurrentQuarter =
       col.year === currentYear && col.quarter === currentQuarter;
-    const dueDateLabel = getDueDateLabel(col.quarter);
+    const dueDateLabel = getDueDateLabel(
+      col.year,
+      col.quarter,
+      program.reportDueDays,
+    );
 
     return {
       id: key,

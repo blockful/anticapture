@@ -1,5 +1,17 @@
 # @anticapture/dashboard
 
+## 2.17.0
+
+### Minor Changes
+
+- [#2168](https://github.com/blockful/anticapture/pull/2168) [`ac8e8a0`](https://github.com/blockful/anticapture/commit/ac8e8a00d5ba97c4afd1e8ab1ebd22ffef43fef8) Thanks [@alextnetto](https://github.com/alextnetto)! - Add the Security Council card to the Shutter DAO overview: the 5-of-8 multisig that owns the Snapshot X space and vetoes proposals via `cancel` before execution. Support councils with no fixed term ("No expiration") in the card.
+
+### Patch Changes
+
+- [#2169](https://github.com/blockful/anticapture/pull/2169) [`68414b8`](https://github.com/blockful/anticapture/commit/68414b873120e6288afc27036b020c0f36100885) Thanks [@brunod-e](https://github.com/brunod-e)! - Fix the whitelabel delegates table clipping the Delegate button and scrolling horizontally, and stop the hidden row actions from squeezing the address name
+
+- [#2167](https://github.com/blockful/anticapture/pull/2167) [`f705ff8`](https://github.com/blockful/anticapture/commit/f705ff8d5066370b793c332b3c244cebf361f9a9) Thanks [@alextnetto](https://github.com/alextnetto)! - Service providers page: respect each program's report deadline (`reportDueDays` in `ensdao/spp`), so SPP3 reports are due 30 days after each quarter ends, per its Program Terms
+
 ## 2.16.0
 
 ### Minor Changes

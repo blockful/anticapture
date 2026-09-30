@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 const shared = {
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/fastify.ts"],
   dts: true,
   outDir: "dist",
   // Bundle all OTel packages to avoid ESM/CJS resolution issues in consumers
@@ -24,5 +24,8 @@ export default defineConfig([
     ...shared,
     format: ["cjs"],
     dts: false, // only emit .d.ts once from the ESM build
+    // Share the bundled OTel code between the two entries instead of
+    // duplicating it in fastify.cjs.
+    splitting: true,
   },
 ]);

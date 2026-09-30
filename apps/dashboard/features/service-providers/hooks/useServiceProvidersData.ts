@@ -31,7 +31,7 @@ const buildProviders = (
         githubSlug: entry.slug,
         streamDuration: programEntry.streamDuration,
         years: Object.fromEntries(
-          Object.entries(result.data)
+          Object.entries(result.data[programKey] ?? {})
             .filter(([, slugData]) => slugData[entry.slug])
             .map(([year, slugData]) => [year, slugData[entry.slug]]),
         ),

@@ -1,5 +1,12 @@
 # @anticapture/api
 
+## 1.8.4
+
+### Patch Changes
+
+- Updated dependencies [[`5c3da3b`](https://github.com/blockful/anticapture/commit/5c3da3b399569ac8046403c46c5264d0802b73c4)]:
+  - @anticapture/observability@1.1.0
+
 ## 1.8.3
 
 ### Patch Changes

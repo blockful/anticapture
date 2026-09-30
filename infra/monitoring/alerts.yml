@@ -2,7 +2,9 @@ groups:
   - name: anticapture
     interval: 30s
     rules:
-      # Non-DAO service is not responding (no scrape data for 5 minutes)
+      # Non-DAO service is not responding (no scrape data for 5 minutes). Matches
+      # every job outside the anticapture-<dao>-* pattern, including the
+      # notification-* jobs of the notification system.
       - alert: ServiceDown
         expr: up{job!~"anticapture-.*-(api|indexer(?:-ponder)?)"} == 0
         for: 5m

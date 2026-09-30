@@ -553,7 +553,7 @@
     {
       "id": 13,
       "title": "General Scrape Status",
-      "description": "Gateway/auth/relayer/RPC/monitoring scrape status.",
+      "description": "Gateway/auth/relayer/RPC/monitoring and notification-system scrape status.",
       "type": "stat",
       "gridPos": {
         "x": 0,
@@ -2475,8 +2475,8 @@
       ]
     },
     {
-      "id": 80,
-      "title": "Traces",
+      "id": 90,
+      "title": "Notification System",
       "type": "row",
       "collapsed": false,
       "gridPos": {
@@ -2488,12 +2488,230 @@
       "panels": []
     },
     {
+      "id": 91,
+      "title": "Notification Scrape Status",
+      "description": "blockful/notification-system: subscription-server, dispatcher, consumers and logic-system scrape status. Backs the notification system uptime reported to the ENS DAO.",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 138,
+        "w": 24,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "name"
+      },
+      "targets": [
+        {
+          "expr": "label_replace(up{job=~\"notification-.*\"}, \"service\", \"$1\", \"job\", \"notification-(.*)\")",
+          "refId": "A",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "id": 92,
+      "title": "Notification Request Rate",
+      "description": "HTTP requests per second per notification service (/health and /metrics excluded).",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 142,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "label_replace(sum by (job) (rate(http_server_request_duration_seconds_count{job=~\"notification-.*\"}[$__rate_interval])), \"service\", \"$1\", \"job\", \"notification-(.*)\")",
+          "refId": "A",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "id": 93,
+      "title": "Notification 5xx by Service",
+      "description": "",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 8,
+        "y": 142,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "label_replace(sum by (job, http_route) (rate(http_server_request_duration_seconds_count{job=~\"notification-.*\",http_response_status_code=~\"5..\"}[$__rate_interval])), \"service\", \"$1\", \"job\", \"notification-(.*)\") > 0",
+          "refId": "A",
+          "legendFormat": "{{service}} {{http_route}}"
+        }
+      ]
+    },
+    {
+      "id": 94,
+      "title": "Notification p99 Latency",
+      "description": "",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 16,
+        "y": 142,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "label_replace(histogram_quantile(0.99, sum by (le, job) (rate(http_server_request_duration_seconds_bucket{job=~\"notification-.*\"}[$__rate_interval]))), \"service\", \"$1\", \"job\", \"notification-(.*)\")",
+          "refId": "A",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "id": 80,
+      "title": "Traces",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 149,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
       "id": 81,
       "title": "Recent Traces",
       "type": "traces",
       "gridPos": {
         "x": 0,
-        "y": 138,
+        "y": 150,
         "w": 24,
         "h": 10
       },
