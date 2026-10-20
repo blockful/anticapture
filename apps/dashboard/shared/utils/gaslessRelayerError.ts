@@ -178,6 +178,15 @@ export const mapRelayerEnactmentError = (
   return `The relayer could not ${action} this proposal. You can retry or use your own wallet.`;
 };
 
+/**
+ * The governor refused the vote because this address already voted, which
+ * means a vote exists on-chain: a signature replay, or a stale page.
+ */
+export const isAlreadyVotedRejection = (error: unknown): boolean => {
+  const { code, message } = readRelayerError(error);
+  return code === SIMULATION_FAILED && ALREADY_VOTED_REASON.test(message ?? "");
+};
+
 export const mapRelayerError = (
   error: unknown,
   context: {
@@ -187,16 +196,13 @@ export const mapRelayerError = (
     symbol: string;
   },
 ): string => {
-  const { code, message, status } = readRelayerError(error);
+  const { code, status } = readRelayerError(error);
 
   // The relayer simulates before sending, so a revert here means nothing was
   // broadcast. A second click re-signs the same ballot byte for byte, which is
   // the common way to land here after the first vote already counted.
   if (code === SIMULATION_FAILED) {
-    if (
-      context.operation === "vote" &&
-      ALREADY_VOTED_REASON.test(message ?? "")
-    ) {
+    if (context.operation === "vote" && isAlreadyVotedRejection(error)) {
       return "You have already voted on this proposal.";
     }
     const noun = context.operation === "vote" ? "vote" : "delegation";

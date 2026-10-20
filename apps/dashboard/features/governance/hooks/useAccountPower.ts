@@ -33,6 +33,11 @@ export interface UseAccountPowerParams {
   daoId: DaoIdEnum;
   proposalId: string;
   decimals: number;
+  /**
+   * Re-asks for the account's vote at this interval until the API returns
+   * one, for a vote that was submitted but is not indexed yet.
+   */
+  votePollIntervalMs?: number | false;
 }
 
 const EMPTY_ACCOUNT_POWER_DATA: AccountPowerData = {
@@ -48,6 +53,7 @@ export const useAccountPower = ({
   daoId,
   proposalId,
   decimals,
+  votePollIntervalMs = false,
 }: UseAccountPowerParams): UseAccountPowerResult => {
   const votingPowerDaoKey =
     daoId.toLowerCase() as VotingPowerByAccountIdPathParamsDaoEnumKey;
@@ -75,6 +81,10 @@ export const useAccountPower = ({
     {
       query: {
         enabled: !!address && !!proposalId,
+        refetchInterval: (query) =>
+          votePollIntervalMs && !query.state.data?.items.length
+            ? votePollIntervalMs
+            : false,
       },
     },
   );

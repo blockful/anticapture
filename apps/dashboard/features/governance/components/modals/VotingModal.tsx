@@ -1,17 +1,35 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Check, User2Icon, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
-import { useAccount, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+
+import { getRateLimitQueryKey } from "@anticapture/client/hooks";
+import type { GetRateLimitPathParamsDaoEnumKey } from "@anticapture/client";
 
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
+import { VotePendingContent } from "@/features/governance/components/modals/VotePendingContent";
 import { VoteSuccessContent } from "@/features/governance/components/modals/VoteSuccessContent";
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
+import { useVoteSubmission } from "@/features/governance/hooks/useVoteSubmission";
 import type { ProposalDetails } from "@/features/governance/types";
+import { relayGaslessVote } from "@/features/governance/utils/relayGaslessVote";
+import { showCustomToast } from "@/features/governance/utils/showCustomToast";
+import { canSubmitAgain } from "@/features/governance/utils/submissionState";
+import { readSubmission } from "@/features/governance/utils/submissionStore";
 import { buildTornDelegatedVoteFrom } from "@/features/governance/utils/tornDelegatedVote";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
+import {
+  claimVote,
+  getVoteScreen,
+  settlementForGaslessVote,
+  settlementForWalletVote,
+  settleVote,
+  type VoteSettlement,
+} from "@/features/governance/utils/voteSubmission";
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import {
@@ -24,8 +42,27 @@ import {
   useRelayerConfig,
 } from "@/shared/hooks/useGaslessRelayer";
 import { useDelegators } from "@/shared/hooks/useDelegators";
+import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
+import {
+  isUserRejection,
+  mapRelayerError,
+} from "@/shared/utils/gaslessRelayerError";
+
+const VOTE_NUMBER = { for: 1, against: 0, abstain: 2 } as const;
+
+const SUPPORT_LABEL: Record<number, "for" | "against" | "abstain"> = {
+  1: "for",
+  0: "against",
+  2: "abstain",
+};
+
+const NOTHING_SENT: VoteSettlement = {
+  kind: "done",
+  outcome: "failed",
+  hash: null,
+};
 
 interface VotingModalProps {
   isOpen: boolean;
@@ -48,17 +85,7 @@ export const VotingModal = ({
 }: VotingModalProps) => {
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactionhash, setTransactionhash] = useState<string>("");
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
-
-  // Every way out of the modal reloads after a successful vote, so the page
-  // stops offering "Vote": a second click re-signs the same ballot byte for
-  // byte, and the governor rejects it as already cast.
-  const handleClose = useCallback(() => {
-    onClose();
-    if (isSuccess) window.location.reload();
-  }, [onClose, isSuccess]);
 
   const { isMobile } = useScreenSize();
 
@@ -122,6 +149,19 @@ export const VotingModal = ({
 
   const { address, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const daoConfig = daoConfigByDaoId[daoId];
+  const daoChain = daoConfig.daoOverview.chain;
+  // The relayed vote is read and confirmed on the DAO's own chain. The wallet
+  // never sent it, and its provider may be on another chain or refuse the call.
+  const publicClient = usePublicClient({ chainId: daoChain.id });
+  const queryClient = useQueryClient();
+
+  const {
+    key: voteKey,
+    submission,
+    support: submittedSupport,
+  } = useVoteSubmission(daoId, proposal?.id, address);
+  const screen = getVoteScreen(submission);
   const {
     delegators: tornDelegators,
     loading: isLoadingTornDelegators,
@@ -188,16 +228,16 @@ export const VotingModal = ({
   const { isEligible: isGaslessEligible, remaining: voteRemaining } =
     useGaslessEligibility(daoId, address, "vote");
 
-  // Reset state when modal opens to prevent stale data from previous sessions
+  // Opening starts a fresh ballot only when a new submission may start. A
+  // vote that is out, landed or in doubt keeps its screen: resetting it here
+  // used to put the ballot back while the relayer already had the vote.
   useEffect(() => {
-    if (isOpen) {
-      setVote("");
-      setComment("");
-      setIsLoading(false);
-      setTransactionhash("");
-      setIsSuccess(false);
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+    if (voteKey !== null && !canSubmitAgain(readSubmission(voteKey))) return;
+    setVote("");
+    setComment("");
+    setTransactionhash("");
+  }, [isOpen, voteKey]);
 
   // Prevent body scroll when desktop modal is open
   useEffect(() => {
@@ -218,7 +258,7 @@ export const VotingModal = ({
     if (isMobile) return;
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        handleClose();
+        onClose();
       }
     };
     if (isOpen) {
@@ -227,32 +267,104 @@ export const VotingModal = ({
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen, handleClose, isMobile]);
+  }, [isOpen, onClose, isMobile]);
 
   const handleSubmit = async () => {
-    if (!address || !chain || !walletClient) return;
+    if (!address || !chain || !walletClient || !voteKey) return;
+    if (vote !== "for" && vote !== "against" && vote !== "abstain") return;
     // Fail closed: an errored or still-paginating delegator query leaves a
     // partial list that would otherwise read as complete and cast without the
     // delegated voting power shown for this account.
     if (isTorn && (isTornDelegatorListIncomplete || tornDelegatorsError))
       return;
-    setIsLoading(true);
-    const hash = await voteOnProposal(
-      vote as "for" | "against" | "abstain",
-      proposal?.id as string,
-      { address, type: "json-rpc" },
-      chain,
-      daoId,
-      walletClient,
-      setTransactionhash,
-      comment,
-      minVotingPower,
-      isGaslessEligible,
-      tornDelegatedVoteAddresses,
-    );
-    setIsLoading(false);
-    if (hash) {
-      setIsSuccess(true);
+
+    const voteNumber = VOTE_NUMBER[vote];
+    // castVoteBySig carries no reason, so a vote with a comment goes through
+    // the wallet rather than dropping the comment.
+    const isGasless =
+      isGaslessEligible &&
+      daoConfig.gaslessRelayer === true &&
+      comment.trim().length === 0;
+    if (isGasless && !publicClient) return;
+
+    // Taken before the first await, so a double click or a reopened modal
+    // finds the vote claimed and sends nothing.
+    if (!claimVote(voteKey, isGasless ? "gasless" : "wallet", voteNumber)) {
+      return;
+    }
+    setTransactionhash("");
+
+    let settlement: VoteSettlement = NOTHING_SENT;
+    try {
+      if (isGasless && publicClient) {
+        const outcome = await relayGaslessVote({
+          daoId,
+          proposalId: proposal.id,
+          support: voteNumber,
+          account: { address, type: "json-rpc" },
+          signer: walletClient,
+          publicClient,
+          onTxSubmitted: setTransactionhash,
+        });
+        settlement = settlementForGaslessVote(outcome);
+
+        if (outcome.hash) {
+          void queryClient.invalidateQueries({
+            queryKey: getRateLimitQueryKey(
+              daoId.toLowerCase() as GetRateLimitPathParamsDaoEnumKey,
+              address,
+            ),
+          });
+        }
+        if (outcome.status === "already-voted") {
+          showCustomToast(
+            "You have already voted on this proposal.",
+            "success",
+          );
+        }
+        if (outcome.status === "reverted") {
+          showCustomToast(
+            "Your vote was mined but reverted on-chain.",
+            "error",
+          );
+        }
+      } else {
+        const receipt = await voteOnProposal(
+          vote,
+          proposal.id,
+          { address, type: "json-rpc" },
+          chain,
+          daoId,
+          walletClient,
+          setTransactionhash,
+          comment,
+          tornDelegatedVoteAddresses,
+        );
+        if (receipt?.status === "reverted") {
+          showCustomToast("Your vote transaction reverted on-chain.", "error");
+        }
+        settlement = settlementForWalletVote(
+          receipt?.status === "success" ? receipt.transactionHash : null,
+        );
+      }
+    } catch (error) {
+      // relayGaslessVote rejects only when nothing was sent: a declined
+      // signature, or a relayer refusal before broadcasting. Both are safe to
+      // retry, so the ballot comes back.
+      console.error(error);
+      if (!isUserRejection(error)) {
+        showCustomToast(
+          mapRelayerError(error, {
+            operation: "vote",
+            minVotingPower,
+            decimals: daoConfig.decimals,
+            symbol: daoConfig.name,
+          }),
+          "error",
+        );
+      }
+    } finally {
+      settleVote(voteKey, settlement);
     }
   };
 
@@ -261,7 +373,8 @@ export const VotingModal = ({
     !chain ||
     !vote ||
     !walletClient ||
-    isLoading ||
+    !voteKey ||
+    screen !== "ballot" ||
     (isTorn &&
       (isTornDelegatorListIncomplete || tornDelegatorsError !== null)) ||
     !rawVotingPower ||
@@ -281,7 +394,7 @@ export const VotingModal = ({
         </div>
 
         <button
-          onClick={handleClose}
+          onClick={onClose}
           className="text-secondary hover:text-primary cursor-pointer rounded-sm p-1 transition-colors"
           aria-label="Close"
         >
@@ -290,16 +403,23 @@ export const VotingModal = ({
       </div>
 
       {/* Content */}
-      {isSuccess ? (
+      {screen === "landed" ? (
         <VoteSuccessContent onClose={onClose} />
-      ) : isLoading ? (
+      ) : screen === "pending" ? (
+        <VotePendingContent
+          hash={submission.kind === "ambiguous" ? submission.hash : null}
+          explorerBaseUrl={daoChain.blockExplorers?.default?.url}
+        />
+      ) : screen === "in-flight" ? (
         <LoadingComponent
           transactionhash={transactionhash}
           proposalId={proposal?.id as string}
           proposalTitle={proposal?.title as string}
           votingPower={votingPower}
-          vote={vote as "for" | "against" | "abstain"}
-          isGaslessEligible={isGaslessEligible}
+          vote={SUPPORT_LABEL[submittedSupport ?? 2]}
+          isGaslessEligible={
+            submission.kind === "in-flight" && submission.mode === "gasless"
+          }
           voteRemaining={voteRemaining}
         />
       ) : (
@@ -385,9 +505,9 @@ export const VotingModal = ({
         </>
       )}
 
-      {!isSuccess && (
+      {screen === "ballot" && (
         <div className="border-border-default flex items-center justify-end gap-2 border-t px-4 py-3">
-          {!isLoading && showTornDelegatorsError && (
+          {showTornDelegatorsError && (
             <p className="text-error mr-auto text-xs leading-4">
               Could not load your delegators, so voting is disabled.{" "}
               <button
@@ -399,7 +519,7 @@ export const VotingModal = ({
               </button>
             </p>
           )}
-          {!isLoading && showTornDelegatorsLoading && (
+          {showTornDelegatorsLoading && (
             <p className="text-secondary mr-auto text-xs leading-4">
               Loading your delegators...
             </p>
@@ -412,7 +532,6 @@ export const VotingModal = ({
             data-ph-source="gov_fe"
             data-umami-event="vote_submit"
             disabled={submitDisabled}
-            loading={isLoading}
             onClick={handleSubmit}
           >
             Submit
@@ -424,7 +543,7 @@ export const VotingModal = ({
 
   if (isMobile) {
     return (
-      <DrawerRoot open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DrawerRoot open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DrawerContent className="data-[vaul-drawer-direction=bottom]:h-auto data-[vaul-drawer-direction=bottom]:max-h-[90svh]">
           {content}
         </DrawerContent>
@@ -441,7 +560,7 @@ export const VotingModal = ({
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={handleClose}
+        onClick={onClose}
         aria-hidden="true"
       />
 
