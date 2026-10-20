@@ -9,6 +9,14 @@ import type {
 
 const INSUFFICIENT_VOTING_POWER = "INSUFFICIENT_VOTING_POWER";
 const RATE_LIMITED = "RATE_LIMITED";
+const SIMULATION_FAILED = "SIMULATION_FAILED";
+
+/**
+ * How each governor family words a second vote from the same address:
+ * OpenZeppelin 4 ("vote already cast"), Compound Bravo ("voter already
+ * voted") and OpenZeppelin 5's custom error (GovernorAlreadyCastVote).
+ */
+const ALREADY_VOTED_REASON = /already\s*(cast|voted)|AlreadyCastVote/i;
 
 const GENERIC_MESSAGE =
   "Something went wrong with your operation. Try again later";
@@ -179,7 +187,21 @@ export const mapRelayerError = (
     symbol: string;
   },
 ): string => {
-  const { code, status } = readRelayerError(error);
+  const { code, message, status } = readRelayerError(error);
+
+  // The relayer simulates before sending, so a revert here means nothing was
+  // broadcast. A second click re-signs the same ballot byte for byte, which is
+  // the common way to land here after the first vote already counted.
+  if (code === SIMULATION_FAILED) {
+    if (
+      context.operation === "vote" &&
+      ALREADY_VOTED_REASON.test(message ?? "")
+    ) {
+      return "You have already voted on this proposal.";
+    }
+    const noun = context.operation === "vote" ? "vote" : "delegation";
+    return `This ${noun} would revert on-chain, so it was not sent. No gas was spent.`;
+  }
 
   if (code === INSUFFICIENT_VOTING_POWER) {
     if (context.minVotingPower === null) {

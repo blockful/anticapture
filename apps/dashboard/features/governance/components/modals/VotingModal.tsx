@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, User2Icon, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
@@ -51,6 +51,14 @@ export const VotingModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactionhash, setTransactionhash] = useState<string>("");
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
+
+  // Every way out of the modal reloads after a successful vote, so the page
+  // stops offering "Vote": a second click re-signs the same ballot byte for
+  // byte, and the governor rejects it as already cast.
+  const handleClose = useCallback(() => {
+    onClose();
+    if (isSuccess) window.location.reload();
+  }, [onClose, isSuccess]);
 
   const { isMobile } = useScreenSize();
 
@@ -210,7 +218,7 @@ export const VotingModal = ({
     if (isMobile) return;
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        handleClose();
       }
     };
     if (isOpen) {
@@ -219,7 +227,7 @@ export const VotingModal = ({
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen, onClose, isMobile]);
+  }, [isOpen, handleClose, isMobile]);
 
   const handleSubmit = async () => {
     if (!address || !chain || !walletClient) return;
@@ -273,10 +281,7 @@ export const VotingModal = ({
         </div>
 
         <button
-          onClick={() => {
-            onClose();
-            if (isSuccess) window.location.reload();
-          }}
+          onClick={handleClose}
           className="text-secondary hover:text-primary cursor-pointer rounded-sm p-1 transition-colors"
           aria-label="Close"
         >
@@ -419,7 +424,7 @@ export const VotingModal = ({
 
   if (isMobile) {
     return (
-      <DrawerRoot open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DrawerRoot open={isOpen} onOpenChange={(open) => !open && handleClose()}>
         <DrawerContent className="data-[vaul-drawer-direction=bottom]:h-auto data-[vaul-drawer-direction=bottom]:max-h-[90svh]">
           {content}
         </DrawerContent>
@@ -436,10 +441,7 @@ export const VotingModal = ({
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={() => {
-          onClose();
-          if (isSuccess) window.location.reload();
-        }}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
