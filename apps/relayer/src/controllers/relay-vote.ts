@@ -37,6 +37,13 @@ export function relayVote(app: Hono, relayService: RelayService) {
             "application/json": { schema: ErrorResponseSchema },
           },
         },
+        409: {
+          description:
+            "The vote would revert on-chain (already cast, proposal not active), so it was not sent",
+          content: {
+            "application/json": { schema: ErrorResponseSchema },
+          },
+        },
         429: {
           description: "Rate limited",
           content: {
