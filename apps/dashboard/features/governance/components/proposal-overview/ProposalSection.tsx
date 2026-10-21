@@ -1,9 +1,14 @@
 "use client";
 
-import type { VotesOffchainByProposalIdPathParamsDaoEnumKey } from "@anticapture/client";
+import type {
+  ProposalPathParamsDaoEnumKey,
+  VotesOffchainByProposalIdPathParamsDaoEnumKey,
+} from "@anticapture/client";
 import {
   offchainProposalByIdQueryKey,
+  proposalQueryKey,
   useVotesOffchainByProposalId,
+  votesByProposalIdQueryKey,
   votesOffchainByProposalIdQueryKey,
 } from "@anticapture/client/hooks";
 import { useQueryClient } from "@tanstack/react-query";
@@ -35,12 +40,18 @@ import { useOffchainProposalPrivacy } from "@/features/governance/hooks/useOffch
 import { useOffchainVoteIndexing } from "@/features/governance/hooks/useOffchainVoteIndexing";
 import { useCalldataReviews } from "@/features/governance/hooks/useCalldataReview";
 import { useProposal } from "@/features/governance/hooks/useProposal";
+import { useVoteSubmission } from "@/features/governance/hooks/useVoteSubmission";
 import type {
   ProposalDetails,
   ProposalViewData,
 } from "@/features/governance/types";
 import { isProposalNotFoundError } from "@/features/governance/utils/proposalErrors";
 import { canRelayGovernanceAction } from "@/features/governance/utils/relayGovernanceAction";
+import { needsProposalWatch } from "@/features/governance/utils/submissionState";
+import {
+  isSubmittedVoteIndexed,
+  submittedVoteSupport,
+} from "@/features/governance/utils/voteSubmission";
 import {
   getOffchainProposalStatusView,
   normalizeChoices,
@@ -62,6 +73,13 @@ import { DaoIdEnum } from "@/shared/types/daos";
 
 /** How often to re-ask the API for a vote Snapshot has already accepted. */
 const VOTE_INDEXING_POLL_MS = 5_000;
+
+/**
+ * How long to keep asking for an on-chain vote that was submitted but is not
+ * indexed yet. Long enough for a slow block and the indexer, short enough
+ * that a vote that never landed does not poll for the life of the tab.
+ */
+const ONCHAIN_VOTE_WATCH_MS = 120_000;
 
 /**
  * Identity of the indexed vote a submission replaces. Snapshot votes carry no
@@ -161,11 +179,37 @@ export const ProposalSection = ({
   const offchainDaoKey =
     daoEnum.toLowerCase() as VotesOffchainByProposalIdPathParamsDaoEnumKey;
 
+  // The connected wallet's on-chain vote as the voting modal left it. It
+  // outlives the modal, so the page stops offering "Vote" the moment a vote is
+  // out, instead of when the indexer catches up.
+  const {
+    key: onchainVoteKey,
+    submission: onchainVoteSubmission,
+    details: onchainVoteDetails,
+  } = useVoteSubmission(daoEnum, isOffchain ? undefined : proposalId, address);
+  const isWatchingOnchainVote = needsProposalWatch(onchainVoteSubmission);
+  const [isOnchainVoteWatchOver, setIsOnchainVoteWatchOver] = useState(false);
+  useEffect(() => {
+    setIsOnchainVoteWatchOver(false);
+    if (!isWatchingOnchainVote) return;
+    const timer = setTimeout(
+      () => setIsOnchainVoteWatchOver(true),
+      ONCHAIN_VOTE_WATCH_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [isWatchingOnchainVote, onchainVoteKey]);
+
   const { data: accountPower } = useAccountPower({
     address: address ?? "",
     daoId: daoEnum,
     proposalId: isOffchain ? "" : proposalId,
     decimals,
+    votePollIntervalMs:
+      isWatchingOnchainVote && !isOnchainVoteWatchOver
+        ? VOTE_INDEXING_POLL_MS
+        : false,
+    isVoteIndexed: (latestVote) =>
+      isSubmittedVoteIndexed(onchainVoteSubmission, latestVote),
   });
   const { votingPower, rawVotingPower, votes } = accountPower;
 
@@ -320,6 +364,37 @@ export const ProposalSection = ({
 
   const queryClient = useQueryClient();
 
+  const indexedSupport =
+    votes?.items[0]?.support != null
+      ? Number(votes.items[0].support)
+      : undefined;
+  // Indexed means the submitted transaction itself: a changed vote leaves the
+  // previous one in the API until the new one is indexed.
+  const isOnchainVoteIndexed = isSubmittedVoteIndexed(
+    onchainVoteSubmission,
+    votes?.items[0],
+  );
+
+  // Once a submitted on-chain vote is indexed, the tally and the votes table
+  // are refetched so they include it without a page reload.
+  useEffect(() => {
+    if (isOffchain || !isWatchingOnchainVote || !isOnchainVoteIndexed) return;
+    const daoKey = daoEnum.toLowerCase() as ProposalPathParamsDaoEnumKey;
+    void queryClient.invalidateQueries({
+      queryKey: proposalQueryKey(daoKey, proposalId),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: votesByProposalIdQueryKey(daoKey, proposalId),
+    });
+  }, [
+    isOffchain,
+    isWatchingOnchainVote,
+    isOnchainVoteIndexed,
+    queryClient,
+    daoEnum,
+    proposalId,
+  ]);
+
   // The tally is refetched again the moment the vote lands: the invalidation at
   // signature time races the indexer and usually loses.
   useEffect(() => {
@@ -439,10 +514,14 @@ export const ProposalSection = ({
     );
   }
 
-  const supportValue =
-    votes?.items[0]?.support != null
-      ? Number(votes.items[0].support)
-      : undefined;
+  // Until the submitted vote is indexed, the landed choice stands in for the
+  // indexed one, which is absent or still the vote it replaced.
+  const supportValue = isOnchainVoteIndexed
+    ? indexedSupport
+    : (submittedVoteSupport(
+        onchainVoteSubmission,
+        onchainVoteDetails.support,
+      ) ?? indexedSupport);
 
   return (
     <ProposalHeaderProvider
@@ -462,7 +541,7 @@ export const ProposalSection = ({
           setIsQueueModalOpen={setIsQueueModalOpen}
           setIsExecuteModalOpen={setIsExecuteModalOpen}
           votingPower={votingPower}
-          votes={votes}
+          supportValue={supportValue}
           address={address}
           proposalStatus={proposal.status}
           snapshotLink={snapshotLink}

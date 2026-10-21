@@ -1,8 +1,5 @@
 import {
   Address,
-  BaseError,
-  ContractFunctionRevertedError,
-  ExecutionRevertedError,
   Hash,
   Hex,
   WaitForTransactionReceiptTimeoutError,
@@ -12,6 +9,7 @@ import {
 import { governorAbi, ProposalState } from "@/abi/governor";
 
 import type { ChainReader } from "./chain-reader";
+import { findRevert, revertReason } from "./revert";
 
 /** queue()/execute() argument tuple, with the description already hashed. */
 export interface EnactmentCall {
@@ -76,24 +74,6 @@ export type GovernorChainReader = ChainReader &
 // covers the whole request — otherwise the gateway aborts and records a
 // circuit-breaker failure for a transaction that was already broadcast.
 const RECEIPT_TIMEOUT_MS = 15_000;
-
-function findRevert(err: unknown) {
-  if (!(err instanceof BaseError)) return null;
-  return err.walk(
-    (e) =>
-      e instanceof ContractFunctionRevertedError ||
-      e instanceof ExecutionRevertedError,
-  ) as ContractFunctionRevertedError | ExecutionRevertedError | null;
-}
-
-function revertReason(
-  revert: ContractFunctionRevertedError | ExecutionRevertedError,
-): string {
-  if (revert instanceof ContractFunctionRevertedError) {
-    return revert.reason ?? revert.data?.errorName ?? revert.shortMessage;
-  }
-  return revert.shortMessage;
-}
 
 export class ViemGovernorGateway implements GovernorGateway {
   constructor(
