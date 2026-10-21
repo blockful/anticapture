@@ -75,16 +75,7 @@ export const LoadingComponent = ({
 
       <div className="flex w-full flex-col items-start justify-start gap-3 p-4">
         {isGaslessEligible && voteRemaining !== null && (
-          <InlineAlert
-            variant="success"
-            text={
-              voteRemaining === 1
-                ? "This vote is free! Last one this month — resets next month."
-                : `This vote is free! You'll still have ${
-                    voteRemaining - 1
-                  } left to use this month.`
-            }
-          />
+          <InlineAlert variant="success" text="This vote is free!" />
         )}
         <div className="border-border-default flex w-full flex-col items-center justify-start gap-3 border p-3">
           {/* Confirm your vote in your wallet */}
