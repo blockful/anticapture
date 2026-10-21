@@ -135,11 +135,30 @@ export const settlementForGaslessVote = (
   }
 };
 
-/** The wallet path reports its confirmed hash, or null when nothing landed. */
-export const settlementForWalletVote = (hash: Hash | null): VoteSettlement =>
-  hash
-    ? { kind: "done", outcome: "landed", hash }
-    : { kind: "done", outcome: "failed", hash: null };
+type WalletVoteReceipt = {
+  status: "success" | "reverted";
+  transactionHash: Hash;
+};
+
+/**
+ * The wallet path reports a read receipt, or a broadcast hash when the
+ * receipt could not be read. Only a failure with no broadcast is retryable.
+ */
+export const settlementForWalletVote = (
+  receipt: WalletVoteReceipt | null,
+  broadcastHash: Hash | null = null,
+): VoteSettlement => {
+  if (receipt?.status === "success") {
+    return { kind: "done", outcome: "landed", hash: receipt.transactionHash };
+  }
+  if (receipt?.status === "reverted") {
+    return { kind: "done", outcome: "failed", hash: receipt.transactionHash };
+  }
+  if (broadcastHash) {
+    return { kind: "ambiguous", hash: broadcastHash };
+  }
+  return { kind: "done", outcome: "failed", hash: null };
+};
 
 /**
  * What the voting modal shows for a submission. Only a vote that may start

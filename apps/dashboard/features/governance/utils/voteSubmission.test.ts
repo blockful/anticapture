@@ -68,7 +68,7 @@ describe("claimVote", () => {
   it("allows a new attempt only after one that changed nothing", () => {
     const key = freshKey();
     claimVote(key, "gasless", 1);
-    settleVote(key, settlementForWalletVote(null));
+    settleVote(key, settlementForWalletVote(null, null));
 
     expect(claimVote(key, "gasless", 0)).toBe(true);
     expect(readVoteDetails(key).support).toBe(0);
@@ -85,7 +85,10 @@ describe("claimVote", () => {
   it("lets a landed vote be changed where the DAO allows it", () => {
     const key = freshKey();
     claimVote(key, "wallet", 1, true);
-    settleVote(key, settlementForWalletVote(hash));
+    settleVote(
+      key,
+      settlementForWalletVote({ status: "success", transactionHash: hash }),
+    );
 
     expect(claimVote(key, "wallet", 0, true)).toBe(true);
     expect(readVoteDetails(key).support).toBe(0);
@@ -131,6 +134,15 @@ describe("settleVote", () => {
     expect(
       submittedVoteSupport(readSubmission(key), readVoteDetails(key).support),
     ).toBeUndefined();
+  });
+});
+
+describe("settlementForWalletVote", () => {
+  it("keeps a broadcast vote in doubt when the receipt could not be read", () => {
+    expect(settlementForWalletVote(null, hash)).toEqual({
+      kind: "ambiguous",
+      hash,
+    });
   });
 });
 

@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, User2Icon, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { Address } from "viem";
+import type { Address, Hash } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
@@ -347,6 +347,7 @@ export const VotingModal = ({
           );
         }
       } else {
+        let broadcastHash: Hash | null = null;
         const receipt = await voteOnProposal(
           vote,
           proposal.id,
@@ -354,7 +355,10 @@ export const VotingModal = ({
           chain,
           daoId,
           walletClient,
-          setTransactionhash,
+          (hash) => {
+            setTransactionhash(hash);
+            if (hash) broadcastHash = hash as Hash;
+          },
           comment,
           tornDelegatedVoteAddresses,
         );
@@ -362,7 +366,13 @@ export const VotingModal = ({
           showCustomToast("Your vote transaction reverted on-chain.", "error");
         }
         settlement = settlementForWalletVote(
-          receipt?.status === "success" ? receipt.transactionHash : null,
+          receipt
+            ? {
+                status: receipt.status,
+                transactionHash: receipt.transactionHash,
+              }
+            : null,
+          broadcastHash,
         );
       }
     } catch (error) {
