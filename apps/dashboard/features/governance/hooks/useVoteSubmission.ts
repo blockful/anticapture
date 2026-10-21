@@ -10,16 +10,16 @@ import {
   subscribeToSubmission,
 } from "@/features/governance/utils/submissionStore";
 import {
-  readVoteSupport,
+  readVoteDetails,
   voteSubmissionKey,
+  type VoteDetails,
 } from "@/features/governance/utils/voteSubmission";
 
 interface UseVoteSubmissionResult {
   /** Null until there is both a voter and a proposal to key the vote by. */
   key: string | null;
   submission: SubmissionState;
-  /** The choice that was submitted, when one was. */
-  support: number | null;
+  details: VoteDetails;
 }
 
 /**
@@ -49,6 +49,8 @@ export const useVoteSubmission = (
   return {
     key,
     submission,
-    support: key ? readVoteSupport(key) : null,
+    details: key
+      ? readVoteDetails(key)
+      : { support: null, alreadyVoted: false },
   };
 };

@@ -48,7 +48,10 @@ import type {
 import { isProposalNotFoundError } from "@/features/governance/utils/proposalErrors";
 import { canRelayGovernanceAction } from "@/features/governance/utils/relayGovernanceAction";
 import { needsProposalWatch } from "@/features/governance/utils/submissionState";
-import { submittedVoteSupport } from "@/features/governance/utils/voteSubmission";
+import {
+  isSubmittedVoteIndexed,
+  submittedVoteSupport,
+} from "@/features/governance/utils/voteSubmission";
 import {
   getOffchainProposalStatusView,
   normalizeChoices,
@@ -182,7 +185,7 @@ export const ProposalSection = ({
   const {
     key: onchainVoteKey,
     submission: onchainVoteSubmission,
-    support: onchainVoteSupport,
+    details: onchainVoteDetails,
   } = useVoteSubmission(daoEnum, isOffchain ? undefined : proposalId, address);
   const isWatchingOnchainVote = needsProposalWatch(onchainVoteSubmission);
   const [isOnchainVoteWatchOver, setIsOnchainVoteWatchOver] = useState(false);
@@ -205,6 +208,8 @@ export const ProposalSection = ({
       isWatchingOnchainVote && !isOnchainVoteWatchOver
         ? VOTE_INDEXING_POLL_MS
         : false,
+    isVoteIndexed: (latestVote) =>
+      isSubmittedVoteIndexed(onchainVoteSubmission, latestVote),
   });
   const { votingPower, rawVotingPower, votes } = accountPower;
 
@@ -363,7 +368,12 @@ export const ProposalSection = ({
     votes?.items[0]?.support != null
       ? Number(votes.items[0].support)
       : undefined;
-  const isOnchainVoteIndexed = indexedSupport !== undefined;
+  // Indexed means the submitted transaction itself: a changed vote leaves the
+  // previous one in the API until the new one is indexed.
+  const isOnchainVoteIndexed = isSubmittedVoteIndexed(
+    onchainVoteSubmission,
+    votes?.items[0],
+  );
 
   // Once a submitted on-chain vote is indexed, the tally and the votes table
   // are refetched so they include it without a page reload.
@@ -504,9 +514,14 @@ export const ProposalSection = ({
     );
   }
 
-  const supportValue =
-    indexedSupport ??
-    submittedVoteSupport(onchainVoteSubmission, onchainVoteSupport);
+  // Until the submitted vote is indexed, the landed choice stands in for the
+  // indexed one, which is absent or still the vote it replaced.
+  const supportValue = isOnchainVoteIndexed
+    ? indexedSupport
+    : (submittedVoteSupport(
+        onchainVoteSubmission,
+        onchainVoteDetails.support,
+      ) ?? indexedSupport);
 
   return (
     <ProposalHeaderProvider

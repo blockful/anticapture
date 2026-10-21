@@ -206,7 +206,7 @@ export const mapRelayerError = (
       return "You have already voted on this proposal.";
     }
     const noun = context.operation === "vote" ? "vote" : "delegation";
-    return `This ${noun} would revert on-chain, so it was not sent. No gas was spent.`;
+    return `This ${noun} couldn't be completed, so nothing was sent.`;
   }
 
   if (code === INSUFFICIENT_VOTING_POWER) {

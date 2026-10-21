@@ -174,9 +174,7 @@ describe("mapRelayerError", () => {
         ),
         { ...context, operation: "delegate" },
       ),
-    ).toBe(
-      "This delegation would revert on-chain, so it was not sent. No gas was spent.",
-    );
+    ).toBe("This delegation couldn't be completed, so nothing was sent.");
   });
 
   it("falls back to the generic message", () => {

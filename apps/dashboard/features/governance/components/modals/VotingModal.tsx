@@ -11,6 +11,7 @@ import { getRateLimitQueryKey } from "@anticapture/client/hooks";
 import type { GetRateLimitPathParamsDaoEnumKey } from "@anticapture/client";
 
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
+import { VoteAlreadyCastContent } from "@/features/governance/components/modals/VoteAlreadyCastContent";
 import { VotePendingContent } from "@/features/governance/components/modals/VotePendingContent";
 import { VoteSuccessContent } from "@/features/governance/components/modals/VoteSuccessContent";
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
@@ -18,11 +19,11 @@ import { useVoteSubmission } from "@/features/governance/hooks/useVoteSubmission
 import type { ProposalDetails } from "@/features/governance/types";
 import { relayGaslessVote } from "@/features/governance/utils/relayGaslessVote";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
-import { canSubmitAgain } from "@/features/governance/utils/submissionState";
 import { readSubmission } from "@/features/governance/utils/submissionStore";
 import { buildTornDelegatedVoteFrom } from "@/features/governance/utils/tornDelegatedVote";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import {
+  canStartVote,
   claimVote,
   getVoteScreen,
   settlementForGaslessVote,
@@ -86,6 +87,10 @@ export const VotingModal = ({
   const [vote, setVote] = useState<string>("");
   const [comment, setComment] = useState<string>("");
   const [transactionhash, setTransactionhash] = useState<string>("");
+  // A vote that landed from this open of the modal. Where votes can be
+  // changed the store offers the ballot again, so this keeps the success
+  // screen up until the modal is closed.
+  const [hasLandedHere, setHasLandedHere] = useState(false);
 
   const { isMobile } = useScreenSize();
 
@@ -156,12 +161,18 @@ export const VotingModal = ({
   const publicClient = usePublicClient({ chainId: daoChain.id });
   const queryClient = useQueryClient();
 
+  const canChangeVote = daoConfig.daoOverview.rules?.changeVote ?? false;
   const {
     key: voteKey,
     submission,
-    support: submittedSupport,
+    details: voteDetails,
   } = useVoteSubmission(daoId, proposal?.id, address);
-  const screen = getVoteScreen(submission);
+  const screen = hasLandedHere
+    ? "landed"
+    : getVoteScreen(submission, {
+        canChangeVote,
+        alreadyVoted: voteDetails.alreadyVoted,
+      });
   const {
     delegators: tornDelegators,
     loading: isLoadingTornDelegators,
@@ -233,11 +244,17 @@ export const VotingModal = ({
   // used to put the ballot back while the relayer already had the vote.
   useEffect(() => {
     if (!isOpen) return;
-    if (voteKey !== null && !canSubmitAgain(readSubmission(voteKey))) return;
+    setHasLandedHere(false);
+    if (
+      voteKey !== null &&
+      !canStartVote(readSubmission(voteKey), canChangeVote)
+    ) {
+      return;
+    }
     setVote("");
     setComment("");
     setTransactionhash("");
-  }, [isOpen, voteKey]);
+  }, [isOpen, voteKey, canChangeVote]);
 
   // Prevent body scroll when desktop modal is open
   useEffect(() => {
@@ -289,7 +306,14 @@ export const VotingModal = ({
 
     // Taken before the first await, so a double click or a reopened modal
     // finds the vote claimed and sends nothing.
-    if (!claimVote(voteKey, isGasless ? "gasless" : "wallet", voteNumber)) {
+    if (
+      !claimVote(
+        voteKey,
+        isGasless ? "gasless" : "wallet",
+        voteNumber,
+        canChangeVote,
+      )
+    ) {
       return;
     }
     setTransactionhash("");
@@ -315,12 +339,6 @@ export const VotingModal = ({
               address,
             ),
           });
-        }
-        if (outcome.status === "already-voted") {
-          showCustomToast(
-            "You have already voted on this proposal.",
-            "success",
-          );
         }
         if (outcome.status === "reverted") {
           showCustomToast(
@@ -365,6 +383,13 @@ export const VotingModal = ({
       }
     } finally {
       settleVote(voteKey, settlement);
+      if (
+        settlement.kind === "done" &&
+        settlement.outcome === "landed" &&
+        !settlement.alreadyVoted
+      ) {
+        setHasLandedHere(true);
+      }
     }
   };
 
@@ -405,6 +430,8 @@ export const VotingModal = ({
       {/* Content */}
       {screen === "landed" ? (
         <VoteSuccessContent onClose={onClose} />
+      ) : screen === "already-voted" ? (
+        <VoteAlreadyCastContent onClose={onClose} />
       ) : screen === "pending" ? (
         <VotePendingContent
           hash={submission.kind === "ambiguous" ? submission.hash : null}
@@ -416,7 +443,7 @@ export const VotingModal = ({
           proposalId={proposal?.id as string}
           proposalTitle={proposal?.title as string}
           votingPower={votingPower}
-          vote={SUPPORT_LABEL[submittedSupport ?? 2]}
+          vote={SUPPORT_LABEL[voteDetails.support ?? 2]}
           isGaslessEligible={
             submission.kind === "in-flight" && submission.mode === "gasless"
           }
