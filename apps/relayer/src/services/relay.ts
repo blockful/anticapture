@@ -66,9 +66,14 @@ export class RelayService {
     private minVotingPower: bigint,
     private governorAddress: Address,
     private tokenAddress: Address,
+    /** The GASLESS_PAUSED kill switch: every relay is refused while set. */
+    private paused = false,
   ) {}
 
   async relayVote(params: RelayVoteParams): Promise<RelayResult> {
+    // 0. Kill switch — before anything is recovered, read or spent
+    if (this.paused) throw Errors.RELAYER_PAUSED();
+
     // 1. Recover voter from signature
     const voter = await this.signatureVerifier.recoverVoteSigner(params);
 
@@ -111,6 +116,9 @@ export class RelayService {
   }
 
   async relayDelegation(params: RelayDelegateParams): Promise<RelayResult> {
+    // 0. Kill switch — before anything is recovered, read or spent
+    if (this.paused) throw Errors.RELAYER_PAUSED();
+
     // 1. Recover delegator from signature
     const delegator =
       await this.signatureVerifier.recoverDelegationSigner(params);

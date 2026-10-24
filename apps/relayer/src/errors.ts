@@ -29,6 +29,8 @@ export class RelayError extends Error {
 // send". A new code added here is treated as ambiguous over there until it is
 // added to that set, so a pre-broadcast code shipped with a 5xx status will
 // strand users on "transaction may have been sent" until both sides agree.
+// RELAYER_PAUSED is the earliest of them: the GASLESS_PAUSED kill switch
+// refuses before a signature is even recovered or the chain is read.
 export const Errors = {
   INSUFFICIENT_VOTING_POWER: (min: string) =>
     new RelayError(
@@ -48,6 +50,8 @@ export const Errors = {
       "RELAYER_LOW_BALANCE",
       503,
     ),
+  RELAYER_PAUSED: () =>
+    new RelayError("Gasless relaying is paused", "RELAYER_PAUSED", 503),
   INVALID_CONTRACT: () =>
     new RelayError(
       "Target contract is not in the whitelist",

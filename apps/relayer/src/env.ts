@@ -37,6 +37,15 @@ const envSchema = z.object({
     .regex(/^\d+$/, "Must be a non-negative decimal")
     .default("100000000000000000"),
 
+  // Operator kill switch: refuses every gasless relay and reports PAUSED on
+  // GET /relay/status, so the dashboard sends users to their own wallet (for
+  // instance while a leaked key is rotated). Only the literal "true" pauses:
+  // z.coerce.boolean() would read "false" as true, being a non-empty string.
+  GASLESS_PAUSED: z
+    .string()
+    .optional()
+    .transform((value) => value === "true"),
+
   // Per address, per calendar month (UTC). Optional; each defaults to DEFAULT_RELAY_LIMIT (3).
   // .positive() rejects 0/negatives: a 0 limit would block all relays — omit the var to use the default instead.
   MAX_VOTES_PER_ADDRESS_PER_MONTH: z.coerce

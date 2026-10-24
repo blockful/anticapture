@@ -51,7 +51,7 @@ export function relayDelegate(app: Hono, relayService: RelayService) {
           },
         },
         503: {
-          description: "Relayer unavailable (low balance)",
+          description: "Relayer unavailable (paused or low balance)",
           content: {
             "application/json": { schema: ErrorResponseSchema },
           },
