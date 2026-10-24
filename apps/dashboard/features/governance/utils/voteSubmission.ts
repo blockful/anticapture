@@ -135,6 +135,36 @@ export const settlementForGaslessVote = (
   }
 };
 
+/**
+ * Frees a relayed vote the relayer never confirmed, once the chain shows no
+ * vote from this address, so the voter can cast it from their own wallet.
+ *
+ * Only a gasless submission with no hash qualifies: with a hash the
+ * transaction exists and the explorer link is the answer. Without one the
+ * relayer may still broadcast late, which is why the caller reads `hasVoted`
+ * first. The worst that leaves is two transactions for one ballot, and the
+ * governor counts only the first; the second reverts and costs its sender
+ * gas. That is cheaper than a voter who cannot vote, which is what keeping
+ * this state terminal used to mean.
+ */
+export const releaseUnsentVote = (key: string): boolean => {
+  const current = readSubmission(key);
+  if (
+    current.kind !== "ambiguous" ||
+    current.mode !== "gasless" ||
+    current.hash !== null
+  ) {
+    return false;
+  }
+  writeSubmission(key, {
+    kind: "done",
+    mode: "gasless",
+    outcome: "failed",
+    hash: null,
+  });
+  return true;
+};
+
 /** The wallet path reports its confirmed hash, or null when nothing landed. */
 export const settlementForWalletVote = (hash: Hash | null): VoteSettlement =>
   hash

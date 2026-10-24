@@ -1,23 +1,35 @@
-import { ExternalLink, Hourglass } from "lucide-react";
+import { ExternalLink, Hourglass, Wallet } from "lucide-react";
 import type { Hash } from "viem";
 
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 
 interface VotePendingContentProps {
   hash: Hash | null;
   explorerBaseUrl?: string;
+  /**
+   * Offered only when the relayer answered without a hash: checks the chain
+   * and, if no vote from this address is there, hands the ballot to the
+   * wallet. Absent, the screen keeps its old wait-only behaviour.
+   */
+  onVoteWithWallet?: () => void;
+  isCheckingChain?: boolean;
 }
 
 const shortenHash = (hash: string) => `${hash.slice(0, 10)}…${hash.slice(-8)}`;
 
 /**
- * A vote that may be on-chain but could not be confirmed here. It offers no
- * way to vote again: the wallet would sign the same ballot, and the relayer
- * would only be asked to replay it.
+ * A vote that may be on-chain but could not be confirmed here. With a hash it
+ * offers no way to vote again: the transaction exists and the explorer is the
+ * answer. Without one the relayer may never have sent it, so the voter gets a
+ * way to cast the vote from their own wallet rather than a screen that waits
+ * forever on a service that is not answering.
  */
 export const VotePendingContent = ({
   hash,
   explorerBaseUrl,
+  onVoteWithWallet,
+  isCheckingChain = false,
 }: VotePendingContentProps) => (
   <div className="flex flex-col items-center gap-3 px-4 py-8">
     <div className="bg-surface-contrast flex size-12 items-center justify-center rounded-full">
@@ -45,8 +57,26 @@ export const VotePendingContent = ({
       text={
         hash
           ? "It is not confirmed yet. Follow it on the explorer. This page shows your vote on its own once it is indexed, so there is no need to vote again."
-          : "The relayer did not answer clearly, so the vote may already be on its way. This page shows your vote on its own once it is indexed, so there is no need to vote again."
+          : onVoteWithWallet
+            ? "The relayer did not confirm your vote. If it is not on-chain, you can cast it from your own wallet and pay the network fee."
+            : "The relayer did not answer clearly, so the vote may already be on its way. This page shows your vote on its own once it is indexed, so there is no need to vote again."
       }
     />
+
+    {!hash && onVoteWithWallet && (
+      <Button
+        variant="outline"
+        onClick={onVoteWithWallet}
+        disabled={isCheckingChain}
+        data-ph-event="vote_wallet_fallback"
+        data-ph-source="gov_fe"
+        data-umami-event="vote_wallet_fallback"
+      >
+        <Wallet className="size-3.5" />
+        {isCheckingChain
+          ? "Checking the chain..."
+          : "Vote with my wallet instead"}
+      </Button>
+    )}
   </div>
 );

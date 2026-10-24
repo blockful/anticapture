@@ -5,14 +5,15 @@ import {
   useAccountBalanceByAccountId,
   useGetConfig,
   useGetRateLimit,
-  useGetRelayerBalance,
+  useGetRelayerStatus,
   useVotingPowerByAccountId,
 } from "@anticapture/client/hooks";
 import type {
   AccountBalanceByAccountIdPathParamsDaoEnumKey,
   GetConfigPathParamsDaoEnumKey,
   GetRateLimitPathParamsDaoEnumKey,
-  GetRelayerBalancePathParamsDaoEnumKey,
+  GetRelayerStatusPathParamsDaoEnumKey,
+  RelayerStatusReason,
   VotingPowerByAccountIdPathParamsDaoEnumKey,
 } from "@anticapture/client";
 
@@ -30,33 +31,66 @@ interface UseRelayerConfigResult {
 const toDaoKey = (daoId: DaoIdEnum) => daoId.toLowerCase();
 
 /**
- * The relayer's balance, config and an address's rate limit change at most
- * once per relayed transaction. The balance hook alone is mounted by the
- * config, rate-limit and eligibility hooks and by every enactment modal, and
- * with no stale time each new observer refetched: the relayer logged the same
- * three GETs two or three times within one second. A vote invalidates the
- * rate limit itself once it is relayed.
+ * The relayer's config and an address's rate limit change at most once per
+ * relayed transaction. The status hook alone is mounted by the config,
+ * rate-limit and eligibility hooks and by every enactment modal, and with no
+ * stale time each new observer refetched: the relayer logged the same three
+ * GETs two or three times within one second. A vote invalidates the rate
+ * limit itself once it is relayed.
  */
 const RELAYER_QUERY_STALE_MS = 60_000;
 
-interface UseRelayerBalanceResult {
-  hasEnoughBalance: boolean | null;
+/**
+ * How long a relayer status answer is trusted. Shorter than the config and
+ * rate-limit stale time: the status is what decides whether the ballot goes
+ * through the relayer at all, and a relayer that broke a minute ago should
+ * stop being offered well before the voter gives up on it.
+ */
+const RELAYER_STATUS_STALE_MS = 30_000;
+
+interface UseRelayerStatusResult {
+  /**
+   * Whether the gasless path may be offered. Null while the first answer is
+   * on its way; false for a DAO without a relayer, for every reason the
+   * relayer or the gateway reports, and for a request that failed outright.
+   */
+  isAvailable: boolean | null;
+  reasons: RelayerStatusReason[];
   isLoading: boolean;
 }
 
-export const useRelayerBalance = (
-  daoId: DaoIdEnum,
-): UseRelayerBalanceResult => {
+/**
+ * Whether the relayer can sponsor a transaction right now, from the one
+ * endpoint that checks everything it depends on: the pause switch, the RPC,
+ * the wallet balance, the rate limiter, stuck nonces and recent broadcast
+ * failures. Gateful answers on the relayer's behalf when it is down, so the
+ * gasless path is offered only on an explicit `available: true`. Anything
+ * else, including an error, leaves the voter on their own wallet, which is
+ * the path that never depends on this service.
+ */
+export const useRelayerStatus = (daoId: DaoIdEnum): UseRelayerStatusResult => {
   const enabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
 
-  const { data, isLoading } = useGetRelayerBalance(
-    toDaoKey(daoId) as GetRelayerBalancePathParamsDaoEnumKey,
-    { query: { enabled, staleTime: RELAYER_QUERY_STALE_MS } },
+  const { data, isLoading, isError } = useGetRelayerStatus(
+    toDaoKey(daoId) as GetRelayerStatusPathParamsDaoEnumKey,
+    {
+      query: {
+        enabled,
+        staleTime: RELAYER_STATUS_STALE_MS,
+        // A failed status read already means "use the wallet"; retrying it
+        // would only hold the ballot on the slower path for longer.
+        retry: false,
+      },
+    },
   );
 
+  if (!enabled) return { isAvailable: false, reasons: [], isLoading: false };
+  if (isError) return { isAvailable: false, reasons: [], isLoading: false };
+
   return {
-    hasEnoughBalance: data?.hasEnoughBalance ?? null,
-    isLoading: enabled && isLoading,
+    isAvailable: data ? data.available === true : null,
+    reasons: data?.reasons ?? [],
+    isLoading,
   };
 };
 
@@ -69,25 +103,26 @@ interface UseGaslessEnactmentResult {
 /**
  * Queue and execute are permissionless and carry no signer, so the only
  * things that gate the gasless path are the DAO having a relayer and that
- * relayer being funded. No voting power or per-address rate limit applies.
+ * relayer reporting itself available. No voting power or per-address rate
+ * limit applies.
  */
 export const useGaslessEnactment = (
   daoId: DaoIdEnum,
 ): UseGaslessEnactmentResult => {
   const gaslessEnabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
-  const { hasEnoughBalance, isLoading } = useRelayerBalance(daoId);
+  const { isAvailable, isLoading } = useRelayerStatus(daoId);
 
   return {
-    isAvailable: gaslessEnabled && hasEnoughBalance === true,
+    isAvailable: gaslessEnabled && isAvailable === true,
     isLoading: gaslessEnabled && isLoading,
   };
 };
 
 export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
   const gaslessEnabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
-  const { hasEnoughBalance, isLoading: balanceLoading } =
-    useRelayerBalance(daoId);
-  const enabled = gaslessEnabled && hasEnoughBalance === true;
+  const { isAvailable: isRelayerAvailable, isLoading: statusLoading } =
+    useRelayerStatus(daoId);
+  const enabled = gaslessEnabled && isRelayerAvailable === true;
 
   const { data, isLoading } = useGetConfig(
     toDaoKey(daoId) as GetConfigPathParamsDaoEnumKey,
@@ -108,7 +143,7 @@ export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
     minVotingPower,
     voteLimit: data?.limits?.vote ?? null,
     delegationLimit: data?.limits?.delegation ?? null,
-    isLoading: gaslessEnabled && (balanceLoading || (enabled && isLoading)),
+    isLoading: gaslessEnabled && (statusLoading || (enabled && isLoading)),
   };
 };
 
@@ -127,9 +162,9 @@ export const useRelayerRateLimit = (
 ): UseRelayerRateLimitResult => {
   const gaslessEnabled =
     daoConfigByDaoId[daoId].gaslessRelayer === true && !!address;
-  const { hasEnoughBalance, isLoading: balanceLoading } =
-    useRelayerBalance(daoId);
-  const enabled = gaslessEnabled && hasEnoughBalance === true;
+  const { isAvailable: isRelayerAvailable, isLoading: statusLoading } =
+    useRelayerStatus(daoId);
+  const enabled = gaslessEnabled && isRelayerAvailable === true;
 
   const { data, isLoading } = useGetRateLimit(
     toDaoKey(daoId) as GetRateLimitPathParamsDaoEnumKey,
@@ -143,7 +178,7 @@ export const useRelayerRateLimit = (
     voteLimit: data?.vote?.limit ?? null,
     delegationLimit: data?.delegation?.limit ?? null,
     resetsAt: data?.resetsAt ?? null,
-    isLoading: gaslessEnabled && (balanceLoading || (enabled && isLoading)),
+    isLoading: gaslessEnabled && (statusLoading || (enabled && isLoading)),
   };
 };
 
@@ -160,8 +195,8 @@ export const useGaslessEligibility = (
 ): UseGaslessEligibilityResult => {
   const gaslessEnabled = daoConfigByDaoId[daoId].gaslessRelayer === true;
 
-  const { hasEnoughBalance, isLoading: balanceLoading } =
-    useRelayerBalance(daoId);
+  const { isAvailable: isRelayerAvailable, isLoading: statusLoading } =
+    useRelayerStatus(daoId);
   const { minVotingPower, isLoading: configLoading } = useRelayerConfig(daoId);
   const {
     voteRemaining,
@@ -169,7 +204,8 @@ export const useGaslessEligibility = (
     isLoading: rateLimitLoading,
   } = useRelayerRateLimit(daoId, address);
 
-  const queryEnabled = gaslessEnabled && !!address && hasEnoughBalance === true;
+  const queryEnabled =
+    gaslessEnabled && !!address && isRelayerAvailable === true;
 
   const isVote = operation === "vote";
 
@@ -197,14 +233,14 @@ export const useGaslessEligibility = (
   const isLoading =
     gaslessEnabled &&
     !!address &&
-    (balanceLoading ||
-      (hasEnoughBalance === true &&
+    (statusLoading ||
+      (isRelayerAvailable === true &&
         (configLoading || rateLimitLoading || eligibilityLoading)));
 
   const isEligible =
     gaslessEnabled &&
     !isLoading &&
-    hasEnoughBalance === true &&
+    isRelayerAvailable === true &&
     rawEligibilityAmount !== null &&
     minVotingPower !== null &&
     BigInt(rawEligibilityAmount) >= minVotingPower &&

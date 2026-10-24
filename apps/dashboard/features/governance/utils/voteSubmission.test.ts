@@ -18,6 +18,7 @@ import {
   getVoteScreen,
   isSubmittedVoteIndexed,
   readVoteDetails,
+  releaseUnsentVote,
   settleVote,
   settlementForGaslessVote,
   settlementForWalletVote,
@@ -246,5 +247,48 @@ describe("isSubmittedVoteIndexed", () => {
     expect(
       isSubmittedVoteIndexed(alreadyVoted, { transactionHash: otherHash }),
     ).toBe(true);
+  });
+});
+
+describe("releaseUnsentVote", () => {
+  it("frees a relayed vote that came back with no hash", () => {
+    const key = freshKey();
+    claimVote(key, "gasless", 1);
+    settleVote(
+      key,
+      settlementForGaslessVote({ status: "unknown", hash: null }),
+    );
+    expect(getVoteScreen(readSubmission(key), fixedVote)).toBe("pending");
+
+    expect(releaseUnsentVote(key)).toBe(true);
+    expect(getVoteScreen(readSubmission(key), fixedVote)).toBe("ballot");
+    expect(claimVote(key, "wallet", 1)).toBe(true);
+  });
+
+  it("keeps a relayed vote with a hash: that transaction exists", () => {
+    const key = freshKey();
+    claimVote(key, "gasless", 1);
+    settleVote(key, settlementForGaslessVote({ status: "unconfirmed", hash }));
+
+    expect(releaseUnsentVote(key)).toBe(false);
+    expect(getVoteScreen(readSubmission(key), fixedVote)).toBe("pending");
+  });
+
+  it("leaves every other state alone", () => {
+    const inFlight = freshKey();
+    claimVote(inFlight, "gasless", 1);
+    expect(releaseUnsentVote(inFlight)).toBe(false);
+    expect(readSubmission(inFlight).kind).toBe("in-flight");
+
+    const landedKey = freshKey();
+    claimVote(landedKey, "gasless", 1);
+    settleVote(
+      landedKey,
+      settlementForGaslessVote({ status: "success", hash }),
+    );
+    expect(releaseUnsentVote(landedKey)).toBe(false);
+    expect(readSubmission(landedKey)).toMatchObject({ outcome: "landed" });
+
+    expect(releaseUnsentVote(freshKey())).toBe(false);
   });
 });

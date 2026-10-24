@@ -1,5 +1,6 @@
 import {
   classifyRelayerFailure,
+  describeGaslessVoteFailure,
   getRelayerErrorCode,
   getRelayerRevertedHash,
   mapRelayerEnactmentError,
@@ -278,5 +279,53 @@ describe("getRelayerRevertedHash", () => {
         relayerError(409, "TRANSACTION_REVERTED", "reverted on-chain"),
       ),
     ).toBeNull();
+  });
+});
+
+describe("describeGaslessVoteFailure", () => {
+  const context = { minVotingPower: null, decimals: 18, symbol: "ENS" };
+
+  it("names the relayer's own state rather than telling the voter to wait", () => {
+    expect(
+      describeGaslessVoteFailure(
+        relayerError(503, "RELAYER_LOW_BALANCE"),
+        context,
+      ),
+    ).toBe("The relayer is out of funds.");
+    expect(
+      describeGaslessVoteFailure(relayerError(503, "RELAYER_PAUSED"), context),
+    ).toBe("Gas-free voting is paused.");
+  });
+
+  it("keeps the voter-specific reasons", () => {
+    expect(
+      describeGaslessVoteFailure(relayerError(429, "RATE_LIMITED"), context),
+    ).toMatch(/maximum operations/i);
+    expect(
+      describeGaslessVoteFailure(
+        relayerError(400, "INSUFFICIENT_VOTING_POWER"),
+        context,
+      ),
+    ).toMatch(/voting power/i);
+  });
+
+  it("never says try again later", () => {
+    for (const error of [
+      relayerError(503),
+      relayerError(409, "SIMULATION_FAILED", "reverted"),
+      new Error("network"),
+    ]) {
+      expect(describeGaslessVoteFailure(error, context)).not.toMatch(
+        /try again/i,
+      );
+    }
+  });
+});
+
+describe("RELAYER_PAUSED", () => {
+  it("is a refusal before broadcasting, so the wallet path stays open", () => {
+    expect(classifyRelayerFailure(relayerError(503, "RELAYER_PAUSED"))).toBe(
+      "pre-broadcast",
+    );
   });
 });

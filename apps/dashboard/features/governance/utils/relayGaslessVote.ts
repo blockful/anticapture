@@ -80,9 +80,10 @@ type RelayGaslessVoteParams = {
 
 /**
  * A read that cannot run says nothing, so it lets the vote through: the
- * relayer simulates before sending and refuses a duplicate on its own.
+ * relayer simulates before sending and refuses a duplicate on its own, and
+ * on the wallet fallback the governor refuses it just the same.
  */
-const hasVotedOnChain = async (
+export const hasVotedOnChain = async (
   publicClient: VoteChainReader,
   governor: Address,
   proposalId: string,

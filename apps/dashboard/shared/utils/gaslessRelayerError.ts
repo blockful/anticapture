@@ -64,10 +64,10 @@ export const getRelayerErrorCode = (error: unknown): string | undefined =>
 /**
  * Every code the relayer can answer with before it signs anything, mirroring
  * `Errors` in `apps/relayer/src/errors.ts`. All of them mean no transaction
- * was broadcast, so retrying is safe. The two 503s are in here for that
- * reason: a low balance or an unreachable rate limiter are structured "did
- * not send" answers, not the ambiguous 5xx they look like from the status
- * alone. `TRANSACTION_REVERTED` is deliberately absent, being the one code
+ * was broadcast, so retrying is safe. The 503s are in here for that reason:
+ * a low balance, a paused relayer or an unreachable rate limiter are
+ * structured "did not send" answers, not the ambiguous 5xx they look like
+ * from the status alone. `TRANSACTION_REVERTED` is deliberately absent, being the one code
  * that reports a transaction the relayer did broadcast.
  */
 const ENACTMENT_REJECTION_CODES = new Set([
@@ -75,6 +75,7 @@ const ENACTMENT_REJECTION_CODES = new Set([
   "INVALID_SIGNATURE",
   "RATE_LIMITED",
   "RELAYER_LOW_BALANCE",
+  "RELAYER_PAUSED",
   "INVALID_CONTRACT",
   "RATE_LIMITER_UNAVAILABLE",
   "PROPOSAL_NOT_FOUND",
@@ -166,6 +167,8 @@ const ENACTMENT_MESSAGES: Record<
     "The proposal data doesn't match what is on-chain, so the relayer refused to submit it.",
   RELAYER_LOW_BALANCE: () =>
     "The relayer is out of funds right now. You can still complete this action with your own wallet.",
+  RELAYER_PAUSED: () =>
+    "Gas-free transactions are paused right now. You can still complete this action with your own wallet.",
 };
 
 export const mapRelayerEnactmentError = (
@@ -226,6 +229,30 @@ export const mapRelayerError = (
   }
 
   return GENERIC_MESSAGE;
+};
+
+/**
+ * Why a gas-free vote did not go through, in the words the ballot uses right
+ * above the wallet button. It never says "try again later": the wallet is
+ * right there, so the copy points at it instead of at the relayer.
+ */
+export const describeGaslessVoteFailure = (
+  error: unknown,
+  context: {
+    minVotingPower: bigint | null;
+    decimals: number;
+    symbol: string;
+  },
+): string => {
+  const { code, status } = readRelayerError(error);
+
+  if (code === INSUFFICIENT_VOTING_POWER || code === RATE_LIMITED) {
+    return mapRelayerError(error, { operation: "vote", ...context });
+  }
+  if (status === 429) return RATE_LIMITED_MESSAGE;
+  if (code === "RELAYER_LOW_BALANCE") return "The relayer is out of funds.";
+  if (code === "RELAYER_PAUSED") return "Gas-free voting is paused.";
+  return "The gas-free vote did not go through, and nothing was sent.";
 };
 
 export const isUserRejection = (error: unknown): boolean => {
