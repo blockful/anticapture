@@ -61,6 +61,10 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
       ms,
     );
   });
+  void promise.catch(() => {
+    // After the race settles on the timeout, a late rejection must not crash
+    // the process.
+  });
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
