@@ -232,27 +232,45 @@ export const mapRelayerError = (
 };
 
 /**
- * Why a gas-free vote did not go through, in the words the ballot uses right
- * above the wallet button. It never says "try again later": the wallet is
- * right there, so the copy points at it instead of at the relayer.
+ * Why a gas-free vote or delegation did not go through, as one complete
+ * sentence the modal puts right before "You can still ... with your wallet".
+ * It never says "try again later": the wallet is right there, so the copy
+ * points at it instead of at the relayer. The relayer's own refusals are
+ * about gas-free eligibility, not about voting at all, so they say so: "you
+ * don't have sufficient voting power" next to a wallet button would read as
+ * a contradiction.
  */
-export const describeGaslessVoteFailure = (
+export const describeGaslessFailure = (
   error: unknown,
   context: {
+    operation: "vote" | "delegate";
     minVotingPower: bigint | null;
     decimals: number;
     symbol: string;
   },
 ): string => {
   const { code, status } = readRelayerError(error);
+  const noun = context.operation === "vote" ? "vote" : "delegation";
 
-  if (code === INSUFFICIENT_VOTING_POWER || code === RATE_LIMITED) {
-    return mapRelayerError(error, { operation: "vote", ...context });
+  if (code === INSUFFICIENT_VOTING_POWER) {
+    return context.minVotingPower === null
+      ? `Your balance is below the minimum for a gas-free ${noun}.`
+      : `A gas-free ${noun} needs at least ${formatThreshold(
+          context.minVotingPower,
+          context.decimals,
+          context.symbol,
+        )}.`;
   }
-  if (status === 429) return RATE_LIMITED_MESSAGE;
+  if (code === RATE_LIMITED || status === 429) {
+    return "You've used all your gas-free operations for this month.";
+  }
   if (code === "RELAYER_LOW_BALANCE") return "The relayer is out of funds.";
-  if (code === "RELAYER_PAUSED") return "Gas-free voting is paused.";
-  return "The gas-free vote did not go through, and nothing was sent.";
+  if (code === "RELAYER_PAUSED") {
+    return `Gas-free ${context.operation === "vote" ? "voting" : "delegation"} is paused.`;
+  }
+  return classifyRelayerFailure(error) === "pre-broadcast"
+    ? `The gas-free ${noun} did not go through, and nothing was sent.`
+    : `The relayer did not confirm the gas-free ${noun}.`;
 };
 
 export const isUserRejection = (error: unknown): boolean => {

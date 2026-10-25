@@ -380,7 +380,11 @@ export const FallbackFromNoAnswer: Story = {
         name: /Vote with my wallet instead/,
       }),
     );
-    await screen.findByText(/The relayer did not confirm your vote/);
+    // The ballot's own alert, not the pending screen's, which opens with the
+    // same sentence.
+    await screen.findByText(
+      /did not confirm your vote\. You can still vote with your wallet/,
+    );
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "Vote with wallet" }),

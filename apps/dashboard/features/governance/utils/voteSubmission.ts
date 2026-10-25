@@ -49,6 +49,48 @@ export const readVoteDetails = (key: string): VoteDetails =>
   detailsByKey.get(key) ?? NO_VOTE_DETAILS;
 
 /**
+ * How this voter's ballot is to be paid for, beyond what the relayer status
+ * says. Keyed like the submission, so it follows the voter rather than the
+ * modal: a second account in the same tab starts clean, and a remount of the
+ * proposal page does not offer the relayer that just refused this voter.
+ *
+ * - `gaslessFailure`: why the last relayed attempt did not go through. Once
+ *   set, the ballot stays on the wallet for the life of the page, since the
+ *   same relayer would most likely refuse the same voter the same way.
+ * - `prefersWallet`: the voter chose to pay gas while the relayer was on offer.
+ */
+export interface WalletFallback {
+  gaslessFailure: string | null;
+  prefersWallet: boolean;
+}
+
+const NO_WALLET_FALLBACK: WalletFallback = {
+  gaslessFailure: null,
+  prefersWallet: false,
+};
+
+const fallbackByKey = new Map<string, WalletFallback>();
+const fallbackListeners = new Set<() => void>();
+
+export const readWalletFallback = (key: string | null): WalletFallback =>
+  (key ? fallbackByKey.get(key) : undefined) ?? NO_WALLET_FALLBACK;
+
+export const updateWalletFallback = (
+  key: string,
+  patch: Partial<WalletFallback>,
+): void => {
+  fallbackByKey.set(key, { ...readWalletFallback(key), ...patch });
+  for (const listener of fallbackListeners) listener();
+};
+
+export const subscribeToWalletFallback = (onChange: () => void) => {
+  fallbackListeners.add(onChange);
+  return () => {
+    fallbackListeners.delete(onChange);
+  };
+};
+
+/**
  * Whether a new ballot may be submitted. A vote that is out or in doubt never
  * allows one. A landed vote allows one only where the governor lets a voter
  * change their vote (UNI, TORN); everywhere else a second ballot could only
@@ -139,30 +181,59 @@ export const settlementForGaslessVote = (
  * Frees a relayed vote the relayer never confirmed, once the chain shows no
  * vote from this address, so the voter can cast it from their own wallet.
  *
- * Only a gasless submission with no hash qualifies: with a hash the
- * transaction exists and the explorer link is the answer. Without one the
- * relayer may still broadcast late, which is why the caller reads `hasVoted`
- * first. The worst that leaves is two transactions for one ballot, and the
- * governor counts only the first; the second reverts and costs its sender
- * gas. That is cheaper than a voter who cannot vote, which is what keeping
- * this state terminal used to mean.
+ * The caller reads `hasVoted` first and, when the relayer returned a hash,
+ * checks that the transaction is not still waiting in the mempool: a hash
+ * proves the relayer sent it, not that it will land, and a dropped or
+ * reverted one would otherwise strand the voter on a screen that waits for
+ * it forever. The relayer may still broadcast late after this; the worst
+ * that leaves is two transactions for one ballot, and the governor counts
+ * only the first. The second reverts and costs its sender gas, which is
+ * cheaper than a voter who cannot vote, and the wallet path reads the chain
+ * again before and after it sends.
  */
-export const releaseUnsentVote = (key: string): boolean => {
+export const releaseUnlandedVote = (key: string): boolean => {
   const current = readSubmission(key);
-  if (
-    current.kind !== "ambiguous" ||
-    current.mode !== "gasless" ||
-    current.hash !== null
-  ) {
+  if (current.kind !== "ambiguous" || current.mode !== "gasless") {
     return false;
   }
   writeSubmission(key, {
     kind: "done",
     mode: "gasless",
     outcome: "failed",
-    hash: null,
+    hash: current.hash,
   });
   return true;
+};
+
+/**
+ * Settles a vote whose outcome was in doubt once the chain shows a vote from
+ * this address: the relayed one landed after all. The submission becomes a
+ * landed vote, so the screen says so and the page keeps watching for it to
+ * be indexed, instead of offering the voter another way to cast it.
+ */
+export const confirmLandedVote = (key: string): boolean => {
+  const current = readSubmission(key);
+  if (current.kind !== "ambiguous") return false;
+  writeSubmission(key, {
+    kind: "done",
+    mode: current.mode,
+    outcome: "landed",
+    hash: current.hash,
+  });
+  return true;
+};
+
+/**
+ * A wallet vote that found the governor already holding a vote from this
+ * address: an earlier relayed one landed first. That vote is the one that
+ * counts, so the run settles as landed and the screen says the vote was
+ * already cast, rather than reporting a failure and offering the ballot again.
+ */
+export const ALREADY_ON_CHAIN: VoteSettlement = {
+  kind: "done",
+  outcome: "landed",
+  hash: null,
+  alreadyVoted: true,
 };
 
 /** The wallet path reports its confirmed hash, or null when nothing landed. */

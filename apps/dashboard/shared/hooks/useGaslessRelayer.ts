@@ -48,6 +48,15 @@ const RELAYER_QUERY_STALE_MS = 60_000;
  */
 const RELAYER_STATUS_STALE_MS = 30_000;
 
+/**
+ * How often an open page asks again. Every observer of the status lives as
+ * long as the page (the voting and delegation modals stay mounted while
+ * closed), so the stale time alone never triggers a refetch: without this a
+ * relayer that broke after the page loaded kept being offered until the
+ * window lost and regained focus. Paused while the tab is in the background.
+ */
+const RELAYER_STATUS_REFRESH_MS = 60_000;
+
 interface UseRelayerStatusResult {
   /**
    * Whether the gasless path may be offered. Null while the first answer is
@@ -77,6 +86,7 @@ export const useRelayerStatus = (daoId: DaoIdEnum): UseRelayerStatusResult => {
       query: {
         enabled,
         staleTime: RELAYER_STATUS_STALE_MS,
+        refetchInterval: RELAYER_STATUS_REFRESH_MS,
         // A failed status read already means "use the wallet"; retrying it
         // would only hold the ballot on the slower path for longer.
         retry: false,

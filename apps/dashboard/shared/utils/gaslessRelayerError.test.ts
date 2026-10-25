@@ -1,6 +1,6 @@
 import {
   classifyRelayerFailure,
-  describeGaslessVoteFailure,
+  describeGaslessFailure,
   getRelayerErrorCode,
   getRelayerRevertedHash,
   mapRelayerEnactmentError,
@@ -282,42 +282,72 @@ describe("getRelayerRevertedHash", () => {
   });
 });
 
-describe("describeGaslessVoteFailure", () => {
-  const context = { minVotingPower: null, decimals: 18, symbol: "ENS" };
+describe("describeGaslessFailure", () => {
+  const vote = {
+    operation: "vote" as const,
+    minVotingPower: null,
+    decimals: 18,
+    symbol: "ENS",
+  };
+  const delegate = { ...vote, operation: "delegate" as const };
 
-  it("names the relayer's own state rather than telling the voter to wait", () => {
+  it("names the relayer's own state rather than telling the user to wait", () => {
     expect(
-      describeGaslessVoteFailure(
-        relayerError(503, "RELAYER_LOW_BALANCE"),
-        context,
-      ),
+      describeGaslessFailure(relayerError(503, "RELAYER_LOW_BALANCE"), vote),
     ).toBe("The relayer is out of funds.");
     expect(
-      describeGaslessVoteFailure(relayerError(503, "RELAYER_PAUSED"), context),
+      describeGaslessFailure(relayerError(503, "RELAYER_PAUSED"), vote),
     ).toBe("Gas-free voting is paused.");
+    expect(
+      describeGaslessFailure(relayerError(503, "RELAYER_PAUSED"), delegate),
+    ).toBe("Gas-free delegation is paused.");
   });
 
-  it("keeps the voter-specific reasons", () => {
+  // These sit right before "You can still vote with your wallet", so they
+  // must be about the gas-free allowance, not about voting itself.
+  it("frames the relayer's eligibility refusals as gas-free limits", () => {
     expect(
-      describeGaslessVoteFailure(relayerError(429, "RATE_LIMITED"), context),
-    ).toMatch(/maximum operations/i);
+      describeGaslessFailure(relayerError(429, "RATE_LIMITED"), vote),
+    ).toBe("You've used all your gas-free operations for this month.");
     expect(
-      describeGaslessVoteFailure(
+      describeGaslessFailure(relayerError(400, "INSUFFICIENT_VOTING_POWER"), {
+        ...vote,
+        minVotingPower: BigInt(10) ** BigInt(18),
+      }),
+    ).toBe("A gas-free vote needs at least 1 ENS.");
+    expect(
+      describeGaslessFailure(
         relayerError(400, "INSUFFICIENT_VOTING_POWER"),
-        context,
+        delegate,
       ),
-    ).toMatch(/voting power/i);
+    ).toBe("Your balance is below the minimum for a gas-free delegation.");
   });
 
-  it("never says try again later", () => {
+  it("says nothing was sent only when the relayer refused before sending", () => {
+    expect(
+      describeGaslessFailure(
+        relayerError(409, "SIMULATION_FAILED", "reverted"),
+        vote,
+      ),
+    ).toBe("The gas-free vote did not go through, and nothing was sent.");
+    expect(describeGaslessFailure(relayerError(502), delegate)).toBe(
+      "The relayer did not confirm the gas-free delegation.",
+    );
+  });
+
+  it("always answers one complete sentence and never says try again", () => {
     for (const error of [
       relayerError(503),
       relayerError(409, "SIMULATION_FAILED", "reverted"),
+      relayerError(429, "RATE_LIMITED"),
+      relayerError(400, "INSUFFICIENT_VOTING_POWER"),
       new Error("network"),
     ]) {
-      expect(describeGaslessVoteFailure(error, context)).not.toMatch(
-        /try again/i,
-      );
+      for (const context of [vote, delegate]) {
+        const text = describeGaslessFailure(error, context);
+        expect(text).toMatch(/\.$/);
+        expect(text).not.toMatch(/try again/i);
+      }
     }
   });
 });

@@ -16,13 +16,18 @@ import { readSubmission } from "@/features/governance/utils/submissionStore";
 import {
   claimVote,
   getVoteScreen,
+  ALREADY_ON_CHAIN,
+  confirmLandedVote,
   isSubmittedVoteIndexed,
   readVoteDetails,
-  releaseUnsentVote,
+  readWalletFallback,
+  releaseUnlandedVote,
   settleVote,
   settlementForGaslessVote,
   settlementForWalletVote,
   submittedVoteSupport,
+  subscribeToWalletFallback,
+  updateWalletFallback,
   voteSubmissionKey,
 } from "@/features/governance/utils/voteSubmission";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -250,7 +255,7 @@ describe("isSubmittedVoteIndexed", () => {
   });
 });
 
-describe("releaseUnsentVote", () => {
+describe("releaseUnlandedVote", () => {
   it("frees a relayed vote that came back with no hash", () => {
     const key = freshKey();
     claimVote(key, "gasless", 1);
@@ -260,24 +265,32 @@ describe("releaseUnsentVote", () => {
     );
     expect(getVoteScreen(readSubmission(key), fixedVote)).toBe("pending");
 
-    expect(releaseUnsentVote(key)).toBe(true);
+    expect(releaseUnlandedVote(key)).toBe(true);
     expect(getVoteScreen(readSubmission(key), fixedVote)).toBe("ballot");
     expect(claimVote(key, "wallet", 1)).toBe(true);
   });
 
-  it("keeps a relayed vote with a hash: that transaction exists", () => {
+  // A hash proves the relayer sent it, not that it lands: a dropped or
+  // reverted relay must not strand the voter. The caller checks the chain.
+  it("frees a relayed vote whose hash never confirmed, keeping the hash", () => {
     const key = freshKey();
     claimVote(key, "gasless", 1);
     settleVote(key, settlementForGaslessVote({ status: "unconfirmed", hash }));
 
-    expect(releaseUnsentVote(key)).toBe(false);
-    expect(getVoteScreen(readSubmission(key), fixedVote)).toBe("pending");
+    expect(releaseUnlandedVote(key)).toBe(true);
+    expect(readSubmission(key)).toEqual({
+      kind: "done",
+      mode: "gasless",
+      outcome: "failed",
+      hash,
+    });
+    expect(getVoteScreen(readSubmission(key), fixedVote)).toBe("ballot");
   });
 
   it("leaves every other state alone", () => {
     const inFlight = freshKey();
     claimVote(inFlight, "gasless", 1);
-    expect(releaseUnsentVote(inFlight)).toBe(false);
+    expect(releaseUnlandedVote(inFlight)).toBe(false);
     expect(readSubmission(inFlight).kind).toBe("in-flight");
 
     const landedKey = freshKey();
@@ -286,9 +299,94 @@ describe("releaseUnsentVote", () => {
       landedKey,
       settlementForGaslessVote({ status: "success", hash }),
     );
-    expect(releaseUnsentVote(landedKey)).toBe(false);
+    expect(releaseUnlandedVote(landedKey)).toBe(false);
     expect(readSubmission(landedKey)).toMatchObject({ outcome: "landed" });
 
-    expect(releaseUnsentVote(freshKey())).toBe(false);
+    expect(releaseUnlandedVote(freshKey())).toBe(false);
+  });
+});
+
+describe("confirmLandedVote", () => {
+  it("turns a vote in doubt into a landed one once the chain shows it", () => {
+    const key = freshKey();
+    claimVote(key, "gasless", 1);
+    settleVote(key, settlementForGaslessVote({ status: "unconfirmed", hash }));
+
+    expect(confirmLandedVote(key)).toBe(true);
+    expect(getVoteScreen(readSubmission(key), fixedVote)).toBe("landed");
+    expect(isSubmittedVoteIndexed(readSubmission(key), undefined)).toBe(false);
+    expect(
+      isSubmittedVoteIndexed(readSubmission(key), { transactionHash: hash }),
+    ).toBe(true);
+  });
+
+  it("does nothing outside a vote in doubt", () => {
+    const key = freshKey();
+    claimVote(key, "gasless", 1);
+    expect(confirmLandedVote(key)).toBe(false);
+    expect(readSubmission(key).kind).toBe("in-flight");
+  });
+});
+
+describe("ALREADY_ON_CHAIN", () => {
+  // A wallet vote that found the relayed one already counted.
+  it("shows the vote on record and never offers the ballot again", () => {
+    const key = freshKey();
+    claimVote(key, "wallet", 0);
+    settleVote(key, ALREADY_ON_CHAIN);
+
+    expect(readVoteDetails(key)).toEqual({ support: null, alreadyVoted: true });
+    expect(
+      getVoteScreen(readSubmission(key), {
+        canChangeVote: false,
+        alreadyVoted: readVoteDetails(key).alreadyVoted,
+      }),
+    ).toBe("already-voted");
+    expect(claimVote(key, "wallet", 0)).toBe(false);
+  });
+});
+
+describe("wallet fallback", () => {
+  it("follows the voter, not the modal: another account starts clean", () => {
+    const first = voteSubmissionKey(DaoIdEnum.ENS, "fallback-1", voter);
+    const second = voteSubmissionKey(
+      DaoIdEnum.ENS,
+      "fallback-1",
+      "0x983110309620D911731Ac0932219af06091b6744",
+    );
+
+    updateWalletFallback(first, {
+      gaslessFailure: "The relayer is out of funds.",
+    });
+
+    expect(readWalletFallback(first)).toEqual({
+      gaslessFailure: "The relayer is out of funds.",
+      prefersWallet: false,
+    });
+    expect(readWalletFallback(second)).toEqual({
+      gaslessFailure: null,
+      prefersWallet: false,
+    });
+    expect(readWalletFallback(null)).toEqual({
+      gaslessFailure: null,
+      prefersWallet: false,
+    });
+  });
+
+  it("merges updates and notifies subscribers", () => {
+    const key = voteSubmissionKey(DaoIdEnum.ENS, "fallback-2", voter);
+    const onChange = jest.fn();
+    const unsubscribe = subscribeToWalletFallback(onChange);
+
+    updateWalletFallback(key, { prefersWallet: true });
+    updateWalletFallback(key, { gaslessFailure: "Gas-free voting is paused." });
+    unsubscribe();
+    updateWalletFallback(key, { prefersWallet: false });
+
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(readWalletFallback(key)).toEqual({
+      gaslessFailure: "Gas-free voting is paused.",
+      prefersWallet: false,
+    });
   });
 });

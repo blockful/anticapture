@@ -103,6 +103,26 @@ export const hasVotedOnChain = async (
 };
 
 /**
+ * Whether a relayed transaction is still waiting to be mined. Only a node
+ * that knows the transaction and has no block for it says yes: a mined one
+ * is answered by `hasVoted`, and one the node has never seen or has dropped
+ * will not land. A read that fails says nothing, so it does not hold the
+ * voter back from their wallet.
+ */
+export const isRelayedVotePending = async (
+  publicClient: Pick<PublicClient, "getTransaction">,
+  hash: Hash,
+): Promise<boolean> => {
+  try {
+    const transaction = await publicClient.getTransaction({ hash });
+    return transaction.blockNumber === null;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
+/**
  * Casts a vote through the relayer, which pays the gas, with exactly one
  * relay call per run.
  *
