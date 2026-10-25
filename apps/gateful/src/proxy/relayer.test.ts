@@ -1,9 +1,14 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
 
+import { logger } from "../logger.js";
 import { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry";
 
 import { relayerProxy } from "./relayer";
+
+vi.mock("../logger.js", () => ({
+  logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() },
+}));
 
 describe("relayer proxy route", () => {
   const daoRelayers = new Map([
@@ -365,5 +370,39 @@ describe("relayer status route", () => {
 
     expect(await res.json()).toEqual(RELAYER_STATUS);
     expect(registry.get("relayer:uni").state).toBe("OPEN");
+  });
+  // Dashboards poll this on every page: one outage must be one warning and
+  // one recovery line, not a line per request.
+  it("logs a relayer outage once when it starts and once when it ends", async () => {
+    vi.mocked(logger.warn).mockClear();
+    vi.mocked(logger.info).mockClear();
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockRejectedValue(new Error("connect ECONNREFUSED relayer-uni:3002"));
+
+    await app.request("/uni/relay/status");
+    await app.request("/uni/relay/status");
+    await app.request("/uni/relay/status");
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      { dao: "uni", cause: "Error" },
+      expect.stringContaining("unreachable"),
+    );
+
+    fetchSpy.mockResolvedValue(
+      new Response(JSON.stringify(RELAYER_STATUS), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    await app.request("/uni/relay/status");
+    await app.request("/uni/relay/status");
+
+    expect(logger.info).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledWith(
+      { dao: "uni" },
+      "relayer status reachable again",
+    );
   });
 });
