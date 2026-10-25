@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import { getAddress, isAddress, isHex } from "viem";
 import { z } from "zod";
 
+import { envFlag } from "@/schemas/flag";
+
 dotenv.config();
 
 const envSchema = z.object({
@@ -39,12 +41,10 @@ const envSchema = z.object({
 
   // Operator kill switch: refuses every gasless relay and reports PAUSED on
   // GET /relay/status, so the dashboard sends users to their own wallet (for
-  // instance while a leaked key is rotated). Only the literal "true" pauses:
-  // z.coerce.boolean() would read "false" as true, being a non-empty string.
-  GASLESS_PAUSED: z
-    .string()
-    .optional()
-    .transform((value) => value === "true"),
+  // instance while a leaked key is rotated). true/1/yes/on pause; a value
+  // envFlag does not recognise stops the relayer at boot, which also takes
+  // gasless offline, rather than leaving the switch silently off.
+  GASLESS_PAUSED: envFlag,
 
   // Per address, per calendar month (UTC). Optional; each defaults to DEFAULT_RELAY_LIMIT (3).
   // .positive() rejects 0/negatives: a 0 limit would block all relays — omit the var to use the default instead.

@@ -41,6 +41,7 @@ import {
   trackBroadcasts,
 } from "@/services/status/relay-outcome-tracker";
 import { RelayerStatusService } from "@/services/status/relayer-status";
+import { registerStatusMetrics } from "@/services/status/status-metrics";
 import { createLocalSigner } from "@/signer/local-signer";
 import { exporter, meterProvider } from "@/instrumentation";
 
@@ -224,19 +225,22 @@ async function main() {
     relayerAddress,
     thresholdWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
   });
-  status(
-    app,
-    wrapWithTracing(
-      new RelayerStatusService({
-        paused: env.GASLESS_PAUSED,
-        chainId: env.CHAIN_ID,
-        chain: wrapWithTracing(new ViemChainProbe(publicClient)),
-        relayerAddress,
-        thresholdWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
-        rateLimitStorage,
-        relayOutcomes,
-      }),
-    ),
+  const relayerStatus = wrapWithTracing(
+    new RelayerStatusService({
+      paused: env.GASLESS_PAUSED,
+      chainId: env.CHAIN_ID,
+      chain: wrapWithTracing(new ViemChainProbe(publicClient)),
+      relayerAddress,
+      thresholdWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
+      rateLimitStorage,
+      relayOutcomes,
+    }),
+  );
+  status(app, relayerStatus);
+  registerStatusMetrics(
+    meterProvider.getMeter("anticapture-relayer"),
+    relayerStatus,
+    env.DAO_NAME,
   );
 
   // --- OpenAPI docs ---
