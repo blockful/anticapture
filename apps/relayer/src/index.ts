@@ -20,6 +20,7 @@ import { relayDelegate } from "@/controllers/relay-delegate";
 import { relayProposal } from "@/controllers/relay-proposal";
 import { relayVote } from "@/controllers/relay-vote";
 import { relayWebhook } from "@/controllers/relay-webhook";
+import { status } from "@/controllers/status";
 import { env } from "@/env";
 import { RelayError } from "@/errors";
 import { createClient } from "redis";
@@ -29,11 +30,18 @@ import {
   resolveRelayLimits,
 } from "@/services/guards/rate-limiter";
 import { ChainStateService } from "@/services/chain/chain-state";
+import { ViemChainProbe } from "@/services/chain/chain-probe";
 import { ViemGovernorGateway } from "@/services/chain/governor-gateway";
 import { ProposalEnactmentService } from "@/services/proposals/proposal-enactment";
 import { AnticaptureProposalSource } from "@/services/proposals/proposal-source";
 import { RelayService } from "@/services/relay";
 import { SignatureVerifier } from "@/services/guards/signature-verifier";
+import {
+  RelayOutcomeTracker,
+  trackBroadcasts,
+} from "@/services/status/relay-outcome-tracker";
+import { RelayerStatusService } from "@/services/status/relayer-status";
+import { registerStatusMetrics } from "@/services/status/status-metrics";
 import { createLocalSigner } from "@/signer/local-signer";
 import { exporter, meterProvider } from "@/instrumentation";
 
@@ -58,7 +66,13 @@ async function main() {
     transport: http(env.RPC_URL),
   });
 
-  const signer = createLocalSigner(env.RELAYER_PRIVATE_KEY, chain, env.RPC_URL);
+  // Every broadcast with the relayer wallet goes through this signer, so
+  // GET /relay/status can tell when they keep failing.
+  const relayOutcomes = new RelayOutcomeTracker();
+  const signer = trackBroadcasts(
+    createLocalSigner(env.RELAYER_PRIVATE_KEY, chain, env.RPC_URL),
+    relayOutcomes,
+  );
   const relayerAddress = await signer.getAddress();
 
   // --- Services ---
@@ -118,6 +132,7 @@ async function main() {
       BigInt(env.MIN_VOTING_POWER),
       governorAddress,
       tokenAddress,
+      env.GASLESS_PAUSED,
     ),
   );
 
@@ -179,7 +194,10 @@ async function main() {
           env.ANTICAPTURE_API_KEY,
         ),
       ),
-      { minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI) },
+      {
+        minBalanceWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
+        paused: env.GASLESS_PAUSED,
+      },
     ),
   );
 
@@ -207,6 +225,23 @@ async function main() {
     relayerAddress,
     thresholdWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
   });
+  const relayerStatus = wrapWithTracing(
+    new RelayerStatusService({
+      paused: env.GASLESS_PAUSED,
+      chainId: env.CHAIN_ID,
+      chain: wrapWithTracing(new ViemChainProbe(publicClient)),
+      relayerAddress,
+      thresholdWei: BigInt(env.MIN_RELAYER_BALANCE_WEI),
+      rateLimitStorage,
+      relayOutcomes,
+    }),
+  );
+  status(app, relayerStatus);
+  registerStatusMetrics(
+    meterProvider.getMeter("anticapture-relayer"),
+    relayerStatus,
+    env.DAO_NAME,
+  );
 
   // --- OpenAPI docs ---
   app.doc("/docs", {
@@ -224,6 +259,7 @@ async function main() {
       token: tokenAddress,
       voteLimitPerMonth: relayLimits.vote,
       delegationLimitPerMonth: relayLimits.delegation,
+      gaslessPaused: env.GASLESS_PAUSED,
     },
     "Relayer starting",
   );

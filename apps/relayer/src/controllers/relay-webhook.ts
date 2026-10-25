@@ -13,13 +13,17 @@ export type WebhookOutcome =
   | "failed";
 
 // Only these RelayError codes mean "nothing to do right now" (not ready,
-// would revert): expected in normal operation, not failures. Everything
-// else — including TRANSACTION_REVERTED (gas was spent on a mined revert),
-// other RelayErrors (404/503), and plain errors — is a failure.
+// would revert, deliberately paused): expected in normal operation, not
+// failures. RELAYER_PAUSED is an operator's choice, refused before anything
+// is read or broadcast, so it must not raise a failure for every event that
+// arrives while the kill switch is on. Everything else — including
+// TRANSACTION_REVERTED (gas was spent on a mined revert), other RelayErrors
+// (404/503), and plain errors — is a failure.
 const SKIPPED_CODES = new Set([
   "INVALID_PROPOSAL_STATE",
   "TIMELOCK_NOT_READY",
   "SIMULATION_FAILED",
+  "RELAYER_PAUSED",
 ]);
 
 export interface RelayWebhookOptions {

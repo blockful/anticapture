@@ -18,6 +18,7 @@ import type {
   ReceiptOutcome,
 } from "@/services/chain/governor-gateway";
 import { SimulationRevertError } from "@/services/chain/governor-gateway";
+import { trackBroadcasts } from "@/services/status/relay-outcome-tracker";
 import { RelayerSigner } from "@/signer/types";
 
 import { ProposalEnactmentService } from "./proposal-enactment";
@@ -89,6 +90,7 @@ function createService(
   overrides: {
     governor?: Partial<GovernorGateway>;
     source?: ProposalSource;
+    paused?: boolean;
   } = {},
 ) {
   const { governor, simulated } = createStubGovernor(overrides.governor);
@@ -97,7 +99,7 @@ function createService(
     governor,
     signer,
     overrides.source ?? createStubSource().source,
-    { minBalanceWei: parseEther("0.1").valueOf() },
+    { minBalanceWei: parseEther("0.1").valueOf(), paused: overrides.paused },
     silentLogger,
   );
   return { service, sent, simulated };
@@ -636,5 +638,94 @@ describe("ProposalEnactmentService.enact", () => {
     });
 
     await expectRelayError(service.enact("999"), "PROPOSAL_NOT_FOUND", 404);
+  });
+});
+
+describe("ProposalEnactmentService kill switch", () => {
+  it.each(["queue", "execute", "enact"] as const)(
+    "refuses %s with 503 RELAYER_PAUSED before reading the chain or the API",
+    async (method) => {
+      const stateReads: bigint[] = [];
+      const { source, fetched } = createStubSource();
+      const { service, sent } = createService({
+        paused: true,
+        governor: {
+          state: async (proposalId) => {
+            stateReads.push(proposalId);
+            return ProposalState.Succeeded;
+          },
+        },
+        source,
+      });
+
+      await expectRelayError(
+        service[method](PROPOSAL_ID.toString()),
+        "RELAYER_PAUSED",
+        503,
+      );
+      expect(stateReads).toEqual([]);
+      expect(fetched).toEqual([]);
+      expect(sent).toEqual([]);
+    },
+  );
+});
+
+// index.ts wraps the signer with trackBroadcasts, which is how enactment
+// feeds GET /relay/status. Only an actual broadcast may count either way.
+describe("ProposalEnactmentService broadcast tracking", () => {
+  function createTrackedService(
+    sendTransaction: RelayerSigner["sendTransaction"],
+    governor: Partial<GovernorGateway> = {},
+  ) {
+    const outcomes: ("success" | "failure")[] = [];
+    const signer = trackBroadcasts(
+      { getAddress: async () => RELAYER, sendTransaction },
+      {
+        recordSuccess: () => outcomes.push("success"),
+        recordFailure: () => outcomes.push("failure"),
+      },
+    );
+    const service = new ProposalEnactmentService(
+      createStubGovernor(governor).governor,
+      signer,
+      createStubSource().source,
+      { minBalanceWei: parseEther("0.1").valueOf() },
+      silentLogger,
+    );
+    return { service, outcomes };
+  }
+
+  it("records a success for a broadcast queue()", async () => {
+    const { service, outcomes } = createTrackedService(async () => TX_HASH);
+
+    await service.queue(PROPOSAL_ID.toString());
+
+    expect(outcomes).toEqual(["success"]);
+  });
+
+  it("records a failure for a broadcast answered as RELAYER_LOW_BALANCE", async () => {
+    const { service, outcomes } = createTrackedService(async () => {
+      throw new InsufficientFundsError();
+    });
+
+    await expectRelayError(
+      service.queue(PROPOSAL_ID.toString()),
+      "RELAYER_LOW_BALANCE",
+      503,
+    );
+    expect(outcomes).toEqual(["failure"]);
+  });
+
+  it("records nothing when the balance guard refuses before broadcasting", async () => {
+    const { service, outcomes } = createTrackedService(async () => TX_HASH, {
+      ethBalance: async () => parseEther("0.01"),
+    });
+
+    await expectRelayError(
+      service.queue(PROPOSAL_ID.toString()),
+      "RELAYER_LOW_BALANCE",
+      503,
+    );
+    expect(outcomes).toEqual([]);
   });
 });

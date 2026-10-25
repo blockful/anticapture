@@ -21,12 +21,15 @@ export interface GetCountParams {
 export interface RateLimitStorage {
   incrementIfAllowed(params: IncrementIfAllowedParams): Promise<boolean>;
   getCount(params: GetCountParams): Promise<number>;
+  /** Resolves once the store answers a round trip; rejects when it cannot. */
+  ping(): Promise<void>;
 }
 
 export interface RedisClient {
   incr(key: string): Promise<number>;
   expire(key: string, seconds: number): Promise<unknown>;
   get(key: string): Promise<string | null>;
+  ping(): Promise<string>;
 }
 
 /**
@@ -118,5 +121,14 @@ export class RedisRateLimitStorage implements RateLimitStorage {
 
     const raw = await this.redis.get(monthKey);
     return raw === null ? 0 : Number(raw);
+  }
+
+  /**
+   * A PING round trip, the cheapest proof that Redis answers. While the client
+   * is reconnecting it queues commands rather than failing them, so callers
+   * must bound this with their own timeout.
+   */
+  async ping(): Promise<void> {
+    await this.redis.ping();
   }
 }
