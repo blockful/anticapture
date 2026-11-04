@@ -159,10 +159,10 @@ export const ProposalSectionSkeleton = () => {
                         className="h-1 w-full"
                       />
                       {/* Vote count + percentage */}
-                      <div className="flex w-[100px] items-center gap-2">
+                      <div className="flex w-[112px] items-center gap-2">
                         <SkeletonRow
                           parentClassName="flex animate-pulse"
-                          className="h-[20px] w-12 shrink-0"
+                          className="h-[20px] w-14 shrink-0"
                         />
                         <SkeletonRow
                           parentClassName="flex animate-pulse"
