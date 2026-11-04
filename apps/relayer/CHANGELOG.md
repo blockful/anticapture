@@ -1,5 +1,11 @@
 # @anticapture/relayer
 
+## 1.3.2
+
+### Patch Changes
+
+- [#2171](https://github.com/blockful/anticapture/pull/2171) [`bd4f072`](https://github.com/blockful/anticapture/commit/bd4f072dc66eff4764e39fed0303ac1a6f79c4da) Thanks [@alextnetto](https://github.com/alextnetto)! - Answer a gasless vote or delegation that would revert on-chain (a vote already cast, a used nonce) with 409 SIMULATION_FAILED instead of 500 INTERNAL, documented in the relay routes Gateful exposes, and make a gasless vote reach the relayer once: the dashboard checks hasVoted before asking for a signature, confirms the relayed transaction on the DAO's chain instead of through the wallet, never reports a relayed vote as failed, and keeps the vote's submission state across modal closes and remounts so the ballot is not offered again
+
 ## 1.3.1
 
 ### Patch Changes
