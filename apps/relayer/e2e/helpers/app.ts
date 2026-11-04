@@ -57,7 +57,11 @@ export async function createTestApp(
   );
 
   const rateLimiter = new RateLimiter(
-    { incrementIfAllowed: async () => true, getCount: async () => 0 },
+    {
+      incrementIfAllowed: async () => true,
+      getCount: async () => 0,
+      ping: async () => {},
+    },
     {
       daoName: "test",
       governorAddress: GOVERNOR_ADDRESS,

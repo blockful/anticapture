@@ -2,10 +2,56 @@ import type { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context } from "hono";
 import { proxy as honoProxy } from "hono/proxy";
 
+import { logger } from "../logger.js";
 import type { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry.js";
 import { stripAuthorization } from "./strip-authorization.js";
 
 const PROXY_TIMEOUT_MS = 30000;
+
+/**
+ * The relayer bounds each of its own checks at 3s and caches the answer, so
+ * anything slower than this is a relayer that is not answering.
+ */
+const STATUS_PROBE_TIMEOUT_MS = 5000;
+
+/** Reasons Gateful reports on the relayer's behalf (RelayerStatusReason). */
+type GatewayStatusReason = "RELAYER_UNREACHABLE" | "RELAYER_NOT_CONFIGURED";
+
+/**
+ * The relayer's RelayerStatusResponse as Gateful answers it when the relayer
+ * cannot: unavailable, with no per-check detail since none of them ran.
+ */
+function unavailableStatus(reason: GatewayStatusReason) {
+  return {
+    available: false,
+    reasons: [reason],
+    checkedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * The relayer's status body, when it is one worth passing on: a 2xx JSON
+ * object whose `available` is a boolean. Anything else means the relayer did
+ * not really answer, so the caller reports it as unreachable instead.
+ */
+async function readRelayerStatus(
+  res: Response,
+): Promise<Record<string, unknown> | null> {
+  if (!res.ok) return null;
+  try {
+    const body: unknown = await res.json();
+    if (
+      typeof body === "object" &&
+      body !== null &&
+      typeof (body as { available?: unknown }).available === "boolean"
+    ) {
+      return body as Record<string, unknown>;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * The relayer's global error handler wraps unhandled exceptions as
@@ -48,9 +94,85 @@ export function relayerProxy(
   daoRelayers: Map<string, string>,
   registry: CircuitBreakerRegistry,
 ) {
+  // Ahead of /relay/* so the status probe never takes the proxy path. Its
+  // OpenAPI entry comes from the relayer's own spec, merged under /{dao}.
+  app.get("/:dao{[^/]+}/relay/status", statusHandler);
   app.all("/:dao{[^/]+}/relay/*", handler);
   app.all("/:dao{[^/]+}/config", handler);
   app.all("/:dao{[^/]+}/rate-limit/*", handler);
+
+  // DAOs whose relayer this Gateful is currently answering for. A dead
+  // relayer is invisible otherwise: voters fall back to their wallets and
+  // nothing errors. Logging only the transitions keeps every open dashboard's
+  // poll from turning one outage into a log line per request.
+  const answeringFor = new Set<string>();
+
+  const noteUnreachable = (dao: string, cause: string) => {
+    if (answeringFor.has(dao)) return;
+    answeringFor.add(dao);
+    logger.warn(
+      { dao, cause },
+      "relayer status unreachable; answering available: false on its behalf",
+    );
+  };
+
+  const noteReachable = (dao: string) => {
+    if (answeringFor.delete(dao)) {
+      logger.info({ dao }, "relayer status reachable again");
+    }
+  };
+
+  /**
+   * Always answers 200 with a RelayerStatusResponse, so the dashboard gets
+   * an answer to "can gasless be offered?" even when the relayer is down,
+   * missing or behind an open circuit, and falls back to a wallet
+   * transaction on anything but `available: true`.
+   */
+  async function statusHandler(c: Context) {
+    const dao = c.req.param("dao")?.toLowerCase();
+    const relayerUrl = dao ? daoRelayers.get(dao) : undefined;
+    if (!dao || !relayerUrl) {
+      return c.json(unavailableStatus("RELAYER_NOT_CONFIGURED"), 200);
+    }
+
+    // Read-only, the way /health reads it: while the circuit is open and
+    // cooling down, real relay traffic is refused, so as far as a user is
+    // concerned the relayer is unreachable.
+    const breaker = registry.summary(`relayer:${dao}`);
+    if (breaker.state === "OPEN" && breaker.nextRetryIn > 0) {
+      noteUnreachable(dao, "circuit open");
+      return c.json(unavailableStatus("RELAYER_UNREACHABLE"), 200);
+    }
+
+    // Straight to the relayer, never through breaker.execute(): dashboards
+    // poll this, and a failing probe must not trip the circuit real relay
+    // traffic depends on or take its single HALF_OPEN slot (the same reason
+    // probeTarget in src/health/route.ts stays off the breaker).
+    let cause: string;
+    try {
+      const res = await honoProxy(
+        new URL("/relay/status", relayerUrl).toString(),
+        {
+          ...c.req,
+          // Strip the per-tenant bearer so it is never leaked to relayers.
+          headers: stripAuthorization(c.req.raw.headers),
+          signal: AbortSignal.timeout(STATUS_PROBE_TIMEOUT_MS),
+        },
+      );
+      const status = await readRelayerStatus(res);
+      if (status) {
+        noteReachable(dao);
+        return c.json(status, 200);
+      }
+      cause = `no valid status (HTTP ${res.status})`;
+    } catch (err) {
+      // Timeout or network error: the relayer did not answer. Only the error
+      // name is logged; the message can carry the relayer's internal URL.
+      cause = err instanceof Error ? err.name : "request failed";
+    }
+    noteUnreachable(dao, cause);
+    return c.json(unavailableStatus("RELAYER_UNREACHABLE"), 200);
+  }
 
   async function handler(c: Context) {
     const paramDao = c.req.param("dao");

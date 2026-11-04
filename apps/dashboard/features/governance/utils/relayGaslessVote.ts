@@ -80,9 +80,10 @@ type RelayGaslessVoteParams = {
 
 /**
  * A read that cannot run says nothing, so it lets the vote through: the
- * relayer simulates before sending and refuses a duplicate on its own.
+ * relayer simulates before sending and refuses a duplicate on its own, and
+ * on the wallet fallback the governor refuses it just the same.
  */
-const hasVotedOnChain = async (
+export const hasVotedOnChain = async (
   publicClient: VoteChainReader,
   governor: Address,
   proposalId: string,
@@ -95,6 +96,26 @@ const hasVotedOnChain = async (
       functionName: "hasVoted",
       args: [BigInt(proposalId), voter],
     });
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
+/**
+ * Whether a relayed transaction is still waiting to be mined. Only a node
+ * that knows the transaction and has no block for it says yes: a mined one
+ * is answered by `hasVoted`, and one the node has never seen or has dropped
+ * will not land. A read that fails says nothing, so it does not hold the
+ * voter back from their wallet.
+ */
+export const isRelayedVotePending = async (
+  publicClient: Pick<PublicClient, "getTransaction">,
+  hash: Hash,
+): Promise<boolean> => {
+  try {
+    const transaction = await publicClient.getTransaction({ hash });
+    return transaction.blockNumber === null;
   } catch (error) {
     console.error(error);
     return false;

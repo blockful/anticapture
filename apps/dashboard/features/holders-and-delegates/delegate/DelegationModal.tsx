@@ -1,22 +1,29 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, Hourglass, PenLine } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Check, Hourglass, PenLine, Wallet } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useReadContract, useWalletClient } from "wagmi";
 
-import { getRateLimitQueryKey } from "@anticapture/client/hooks";
-import type { GetRateLimitPathParamsDaoEnumKey } from "@anticapture/client";
+import {
+  getRateLimitQueryKey,
+  getRelayerStatusQueryKey,
+} from "@anticapture/client/hooks";
+import type {
+  GetRateLimitPathParamsDaoEnumKey,
+  GetRelayerStatusPathParamsDaoEnumKey,
+} from "@anticapture/client";
 
 import { delegateTo } from "@/features/holders-and-delegates/delegate/utils/delegateTo";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import {
+  describeGaslessFailure,
   isUserRejection,
-  mapRelayerError,
 } from "@/shared/utils/gaslessRelayerError";
 import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
+import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import { Modal } from "@/shared/components/design-system/modal/Modal";
 import { SpinIcon } from "@/shared/components/icons/SpinIcon";
@@ -61,6 +68,22 @@ export const DelegationModal = ({
   const queryClient = useQueryClient();
   const [step, setStep] = useState<DelegationStep>("waiting-signature");
   const [error, setError] = useState<string | null>(null);
+  // The account whose gas-free delegation the relayer last refused or never
+  // confirmed. That account delegates from its own wallet from then on, the
+  // same rule the ballot follows: the wallet is the guarantee, and offering
+  // the relayer that just failed would only fail again. Keyed by account so
+  // switching wallets starts clean.
+  const [gaslessFailedFor, setGaslessFailedFor] = useState<Address | null>(
+    null,
+  );
+  const gaslessFailed =
+    !!userAddress &&
+    gaslessFailedFor?.toLowerCase() === userAddress.toLowerCase();
+  // One delegation at a time. The effect below runs handleDelegate whenever
+  // its inputs change while the modal waits for a signature, and the relayer
+  // status now refreshes in the background, so without this a refresh during
+  // signing would ask the wallet for a second signature.
+  const inFlight = useRef(false);
 
   const daoConfig = daoConfigByDaoId[daoId];
   const tokenAddress = daoConfig?.daoOverview?.contracts?.token as
@@ -90,11 +113,14 @@ export const DelegationModal = ({
   const handleDelegate = useCallback(async () => {
     if (!userAddress || !walletClient || !tokenAddress) return;
     if (step === "pending-tx" || step === "success") return;
+    if (inFlight.current) return;
+    inFlight.current = true;
 
     setError(null);
     setStep("waiting-signature");
 
-    const isGasless = isGaslessEligible && daoConfig?.gaslessRelayer === true;
+    const isGasless =
+      isGaslessEligible && daoConfig?.gaslessRelayer === true && !gaslessFailed;
     try {
       await delegateTo(
         tokenAddress,
@@ -104,7 +130,7 @@ export const DelegationModal = ({
         () => setStep("pending-tx"),
         chain,
         daoId,
-        isGaslessEligible,
+        isGasless,
       );
       setStep("success");
       showCustomToast("Delegation successful!", "success");
@@ -117,14 +143,23 @@ export const DelegationModal = ({
       }
 
       if (isGasless) {
-        const message = mapRelayerError(err, {
-          operation: "delegate",
-          minVotingPower,
-          decimals,
-          symbol: daoConfig.name,
+        // Any relayer failure moves this account to its wallet. Delegating
+        // again to the same delegate is idempotent, so even a relayed
+        // delegation that lands late costs the wallet path nothing but gas.
+        setGaslessFailedFor(userAddress);
+        setError(
+          `${describeGaslessFailure(err, {
+            operation: "delegate",
+            minVotingPower,
+            decimals,
+            symbol: daoConfig.name,
+          })} You can still delegate with your wallet and pay the network fee.`,
+        );
+        void queryClient.invalidateQueries({
+          queryKey: getRelayerStatusQueryKey(
+            daoId.toLowerCase() as GetRelayerStatusPathParamsDaoEnumKey,
+          ),
         });
-        showCustomToast(message, "error");
-        setError(message);
       } else {
         const message =
           err instanceof Error ? err.message : "Delegation failed.";
@@ -132,6 +167,7 @@ export const DelegationModal = ({
       }
       setStep("error");
     } finally {
+      inFlight.current = false;
       // The relayer counts each delegation against a monthly allowance, and
       // the cached count is stale for a minute: without this, a delegation
       // right after the last free one still goes to the relayer and gets 429.
@@ -157,6 +193,7 @@ export const DelegationModal = ({
     decimals,
     minVotingPower,
     isGaslessEligible,
+    gaslessFailed,
     queryClient,
   ]);
 
@@ -196,19 +233,21 @@ export const DelegationModal = ({
             showCopyAddress={false}
           />
         </div>
-        {isGaslessEligible && delegationRemaining !== null && (
-          <InlineAlert
-            variant="success"
-            text={
-              delegationRemaining === 1
-                ? "This delegation is free! Last one this month — resets next month."
-                : `This delegation is free! You'll still have ${
-                    delegationRemaining - 1
-                  } left to use this month.`
-            }
-            className="mt-2"
-          />
-        )}
+        {isGaslessEligible &&
+          !gaslessFailed &&
+          delegationRemaining !== null && (
+            <InlineAlert
+              variant="success"
+              text={
+                delegationRemaining === 1
+                  ? "This delegation is free! Last one this month — resets next month."
+                  : `This delegation is free! You'll still have ${
+                      delegationRemaining - 1
+                    } left to use this month.`
+              }
+              className="mt-2"
+            />
+          )}
       </div>
 
       {/* Stepper */}
@@ -230,6 +269,23 @@ export const DelegationModal = ({
           label="Wait for the delegation to complete"
         />
       </div>
+
+      {step === "error" && gaslessFailed && (
+        <div className="flex justify-end pt-4">
+          <Button
+            onClick={() => {
+              setError(null);
+              setStep("waiting-signature");
+            }}
+            data-ph-event="delegate_wallet_fallback"
+            data-ph-source="gov_fe"
+            data-umami-event="delegate_wallet_fallback"
+          >
+            <Wallet className="size-3.5" />
+            Delegate with my wallet
+          </Button>
+        </div>
+      )}
     </Modal>
   );
 };

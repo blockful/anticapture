@@ -26,7 +26,7 @@ const errorResponses = {
     content: { "application/json": { schema: ErrorResponseSchema } },
   },
   503: {
-    description: "Relayer unavailable (low balance)",
+    description: "Relayer unavailable (paused or low balance)",
     content: { "application/json": { schema: ErrorResponseSchema } },
   },
 } as const;

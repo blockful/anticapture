@@ -24,6 +24,8 @@ import type { ProposalSource } from "./proposal-source";
 export interface ProposalEnactmentConfig {
   /** Below this relayer balance the service refuses to broadcast. */
   minBalanceWei: bigint;
+  /** The GASLESS_PAUSED kill switch: every enactment is refused while set. */
+  paused?: boolean;
 }
 
 type EnactmentAction = "queue" | "execute";
@@ -65,10 +67,12 @@ export class ProposalEnactmentService {
   ) {}
 
   async queue(proposalId: string): Promise<{ txHash: Hash }> {
+    this.assertNotPaused();
     return this.dispatch("queue", proposalId);
   }
 
   async execute(proposalId: string): Promise<{ txHash: Hash }> {
+    this.assertNotPaused();
     return this.dispatch("execute", proposalId);
   }
 
@@ -81,6 +85,7 @@ export class ProposalEnactmentService {
    * the two reads still ends in a 409 rather than a wasted broadcast.
    */
   async enact(proposalId: string): Promise<EnactOutcome> {
+    this.assertNotPaused();
     const state = await this.governor.state(BigInt(proposalId));
     if (state === null) {
       throw Errors.PROPOSAL_NOT_FOUND(proposalId);
@@ -92,6 +97,16 @@ export class ProposalEnactmentService {
       return { action: "execute", ...(await this.execute(proposalId)) };
     }
     return { action: "skipped", state: ProposalState[state] };
+  }
+
+  /**
+   * Runs first in every entry point, so a paused relayer neither reads the
+   * chain nor calls the Anticapture API, let alone broadcasts.
+   */
+  private assertNotPaused(): void {
+    if (this.config.paused) {
+      throw Errors.RELAYER_PAUSED();
+    }
   }
 
   private dispatch(

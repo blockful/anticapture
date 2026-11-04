@@ -1,14 +1,20 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, User2Icon, X } from "lucide-react";
+import { Check, User2Icon, Wallet, X, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
-import { getRateLimitQueryKey } from "@anticapture/client/hooks";
-import type { GetRateLimitPathParamsDaoEnumKey } from "@anticapture/client";
+import {
+  getRateLimitQueryKey,
+  getRelayerStatusQueryKey,
+} from "@anticapture/client/hooks";
+import type {
+  GetRateLimitPathParamsDaoEnumKey,
+  GetRelayerStatusPathParamsDaoEnumKey,
+} from "@anticapture/client";
 
 import { LoadingComponent } from "@/features/governance/components/modals/LoadingContent";
 import { VoteAlreadyCastContent } from "@/features/governance/components/modals/VoteAlreadyCastContent";
@@ -17,20 +23,34 @@ import { VoteSuccessContent } from "@/features/governance/components/modals/Vote
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
 import { useVoteSubmission } from "@/features/governance/hooks/useVoteSubmission";
 import type { ProposalDetails } from "@/features/governance/types";
-import { relayGaslessVote } from "@/features/governance/utils/relayGaslessVote";
+import {
+  hasVotedOnChain,
+  isRelayedVotePending,
+  relayGaslessVote,
+} from "@/features/governance/utils/relayGaslessVote";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { readSubmission } from "@/features/governance/utils/submissionStore";
 import { buildTornDelegatedVoteFrom } from "@/features/governance/utils/tornDelegatedVote";
 import { voteOnProposal } from "@/features/governance/utils/voteOnProposal";
 import {
+  canReturnToGasless,
+  getSubmitLabel,
+  getVotePayment,
+} from "@/features/governance/utils/votePayment";
+import {
+  ALREADY_ON_CHAIN,
   canStartVote,
   claimVote,
+  confirmLandedVote,
   getVoteScreen,
+  releaseUnlandedVote,
   settlementForGaslessVote,
   settlementForWalletVote,
   settleVote,
+  updateWalletFallback,
   type VoteSettlement,
 } from "@/features/governance/utils/voteSubmission";
+import { InlineAlert } from "@/shared/components/design-system/alerts/inline-alert/InlineAlert";
 import { BadgeStatus } from "@/shared/components/design-system/badges/badge-status/BadgeStatus";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import {
@@ -41,12 +61,14 @@ import { useScreenSize } from "@/shared/hooks";
 import {
   useGaslessEligibility,
   useRelayerConfig,
+  useRelayerStatus,
 } from "@/shared/hooks/useGaslessRelayer";
 import { useDelegators } from "@/shared/hooks/useDelegators";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import {
+  describeGaslessFailure,
   isUserRejection,
   mapRelayerError,
 } from "@/shared/utils/gaslessRelayerError";
@@ -91,6 +113,7 @@ export const VotingModal = ({
   // changed the store offers the ballot again, so this keeps the success
   // screen up until the modal is closed.
   const [hasLandedHere, setHasLandedHere] = useState(false);
+  const [isCheckingChain, setIsCheckingChain] = useState(false);
 
   const { isMobile } = useScreenSize();
 
@@ -166,6 +189,7 @@ export const VotingModal = ({
     key: voteKey,
     submission,
     details: voteDetails,
+    walletFallback: { gaslessFailure, prefersWallet },
   } = useVoteSubmission(daoId, proposal?.id, address);
   const screen = hasLandedHere
     ? "landed"
@@ -238,6 +262,36 @@ export const VotingModal = ({
   const { minVotingPower } = useRelayerConfig(daoId);
   const { isEligible: isGaslessEligible, remaining: voteRemaining } =
     useGaslessEligibility(daoId, address, "vote");
+  const daoHasRelayer = daoConfig.gaslessRelayer === true;
+  const { isAvailable: isRelayerAvailable } = useRelayerStatus(daoId);
+  const payment = getVotePayment({
+    daoHasRelayer,
+    isRelayerAvailable,
+    isEligible: isGaslessEligible,
+    hasComment: comment.trim().length > 0,
+    gaslessFailed: gaslessFailure !== null,
+    prefersWallet,
+  });
+
+  // A relay that failed may have been the first sign of a broken relayer, so
+  // the next status read should not wait out the stale time.
+  const refreshRelayerStatus = () => {
+    void queryClient.invalidateQueries({
+      queryKey: getRelayerStatusQueryKey(
+        daoId.toLowerCase() as GetRelayerStatusPathParamsDaoEnumKey,
+      ),
+    });
+  };
+
+  // Whether the governor already holds a vote from this voter, read on the
+  // DAO's chain. Only where a vote cannot be changed: elsewhere a second vote
+  // is a legitimate change, not a duplicate. A failed read answers no, which
+  // leaves the voter on the path they chose.
+  const isAlreadyOnChain = async (): Promise<boolean> => {
+    const governor = daoConfig.daoOverview.contracts.governor;
+    if (canChangeVote || !governor || !publicClient || !address) return false;
+    return hasVotedOnChain(publicClient, governor, proposal.id, address);
+  };
 
   // Opening starts a fresh ballot only when a new submission may start. A
   // vote that is out, landed or in doubt keeps its screen: resetting it here
@@ -296,12 +350,9 @@ export const VotingModal = ({
       return;
 
     const voteNumber = VOTE_NUMBER[vote];
-    // castVoteBySig carries no reason, so a vote with a comment goes through
-    // the wallet rather than dropping the comment.
-    const isGasless =
-      isGaslessEligible &&
-      daoConfig.gaslessRelayer === true &&
-      comment.trim().length === 0;
+    // getVotePayment sends a commented vote through the wallet, since
+    // castVoteBySig carries no reason, and every relayer problem as well.
+    const isGasless = payment.mode === "gasless";
     if (isGasless && !publicClient) return;
 
     // Taken before the first await, so a double click or a reopened modal
@@ -346,7 +397,15 @@ export const VotingModal = ({
             "error",
           );
         }
+        if (outcome.status === "unknown") refreshRelayerStatus();
       } else {
+        // A relayed attempt from this voter may land after the relayer gave
+        // up on it. Reading the chain first keeps the wallet from paying for
+        // a vote the governor already holds.
+        if (gaslessFailure !== null && (await isAlreadyOnChain())) {
+          settlement = ALREADY_ON_CHAIN;
+          return;
+        }
         const receipt = await voteOnProposal(
           vote,
           proposal.id,
@@ -359,6 +418,10 @@ export const VotingModal = ({
           tornDelegatedVoteAddresses,
         );
         if (receipt?.status === "reverted") {
+          if (await isAlreadyOnChain()) {
+            settlement = ALREADY_ON_CHAIN;
+            return;
+          }
           showCustomToast("Your vote transaction reverted on-chain.", "error");
         }
         settlement = settlementForWalletVote(
@@ -368,9 +431,25 @@ export const VotingModal = ({
     } catch (error) {
       // relayGaslessVote rejects only when nothing was sent: a declined
       // signature, or a relayer refusal before broadcasting. Both are safe to
-      // retry, so the ballot comes back.
+      // retry, so the ballot comes back. A refusal moves that ballot to the
+      // wallet and says why, rather than offering the relayer that just
+      // refused it.
       console.error(error);
-      if (!isUserRejection(error)) {
+      if (isGasless && !isUserRejection(error)) {
+        updateWalletFallback(voteKey, {
+          gaslessFailure: describeGaslessFailure(error, {
+            operation: "vote",
+            minVotingPower,
+            decimals: daoConfig.decimals,
+            symbol: daoConfig.name,
+          }),
+        });
+        refreshRelayerStatus();
+      } else if (!isUserRejection(error) && (await isAlreadyOnChain())) {
+        // The wallet refused to send, or the send failed, because a vote is
+        // already there: a relayed one that landed first counts.
+        settlement = ALREADY_ON_CHAIN;
+      } else if (!isUserRejection(error)) {
         showCustomToast(
           mapRelayerError(error, {
             operation: "vote",
@@ -392,6 +471,43 @@ export const VotingModal = ({
       }
     }
   };
+
+  // The relayer never confirmed the vote, with or without a hash. The chain
+  // decides: a vote already there is the relayed one landing late, a relayed
+  // transaction still in the mempool is left to land, and anything else
+  // (never sent, dropped, reverted) hands the same ballot to the wallet.
+  const handleVoteWithWallet = async () => {
+    if (!voteKey || !address || !publicClient) return;
+    if (submission.kind !== "ambiguous") return;
+    setIsCheckingChain(true);
+    try {
+      if (await isAlreadyOnChain()) {
+        confirmLandedVote(voteKey);
+        return;
+      }
+      if (
+        submission.hash &&
+        (await isRelayedVotePending(publicClient, submission.hash))
+      ) {
+        showCustomToast(
+          "The relayed vote is still waiting to be mined. Follow it on the explorer.",
+          "error",
+        );
+        return;
+      }
+      if (releaseUnlandedVote(voteKey)) {
+        updateWalletFallback(voteKey, {
+          gaslessFailure: "The relayer did not confirm your vote.",
+        });
+        refreshRelayerStatus();
+      }
+    } finally {
+      setIsCheckingChain(false);
+    }
+  };
+
+  const canFallBackFromPending =
+    submission.kind === "ambiguous" && submission.mode === "gasless";
 
   const submitDisabled =
     !address ||
@@ -436,6 +552,10 @@ export const VotingModal = ({
         <VotePendingContent
           hash={submission.kind === "ambiguous" ? submission.hash : null}
           explorerBaseUrl={daoChain.blockExplorers?.default?.url}
+          onVoteWithWallet={
+            canFallBackFromPending ? handleVoteWithWallet : undefined
+          }
+          isCheckingChain={isCheckingChain}
         />
       ) : screen === "in-flight" ? (
         <LoadingComponent
@@ -522,13 +642,75 @@ export const VotingModal = ({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
-            {isGaslessEligible && comment.trim().length > 0 && (
+            {payment.mode === "wallet" && payment.reason === "comment" && (
               <p className="text-warning text-xs">
                 Adding a comment requires a wallet transaction (gas fee). Votes
                 without comments are gasless.
               </p>
             )}
           </div>
+
+          {/* How the vote is paid for */}
+          {daoHasRelayer && (
+            <div className="flex flex-col gap-2 px-4 pb-4">
+              {payment.mode === "gasless" && (
+                <div className="border-border-default bg-surface-contrast flex flex-wrap items-center justify-between gap-2 border px-[10px] py-2">
+                  <p className="text-secondary inline-flex items-center gap-2 text-sm leading-5">
+                    <Zap className="text-success size-3.5" />
+                    Gas-free vote: the relayer pays the network fee.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      voteKey &&
+                      updateWalletFallback(voteKey, { prefersWallet: true })
+                    }
+                    className="text-link cursor-pointer text-sm leading-5 hover:underline"
+                    data-ph-event="vote_prefer_wallet"
+                    data-ph-source="gov_fe"
+                    data-umami-event="vote_prefer_wallet"
+                  >
+                    Pay with my wallet instead
+                  </button>
+                </div>
+              )}
+              {payment.mode === "wallet" &&
+                payment.reason === "relayer-unavailable" && (
+                  <InlineAlert
+                    variant="warning"
+                    text="Gas-free voting is unavailable right now. You can still vote with your wallet and pay the network fee."
+                  />
+                )}
+              {payment.mode === "wallet" &&
+                payment.reason === "gasless-failed" && (
+                  <InlineAlert
+                    variant="warning"
+                    text={`${gaslessFailure ?? "The gas-free vote did not go through."} You can still vote with your wallet and pay the network fee.`}
+                  />
+                )}
+              {canReturnToGasless(payment) && (
+                <div className="border-border-default bg-surface-contrast flex flex-wrap items-center justify-between gap-2 border px-[10px] py-2">
+                  <p className="text-secondary inline-flex items-center gap-2 text-sm leading-5">
+                    <Wallet className="text-secondary size-3.5" />
+                    You pay the network fee from your wallet.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      voteKey &&
+                      updateWalletFallback(voteKey, { prefersWallet: false })
+                    }
+                    data-ph-event="vote_prefer_gasless"
+                    data-ph-source="gov_fe"
+                    data-umami-event="vote_prefer_gasless"
+                    className="text-link cursor-pointer text-sm leading-5 hover:underline"
+                  >
+                    Use the gas-free vote
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
 
@@ -557,11 +739,15 @@ export const VotingModal = ({
           <Button
             data-ph-event="vote_submit"
             data-ph-source="gov_fe"
+            data-ph-payment={payment.mode}
             data-umami-event="vote_submit"
             disabled={submitDisabled}
             onClick={handleSubmit}
           >
-            Submit
+            {payment.mode === "wallet" && daoHasRelayer && (
+              <Wallet className="size-3.5" />
+            )}
+            {getSubmitLabel(payment, daoHasRelayer)}
           </Button>
         </div>
       )}

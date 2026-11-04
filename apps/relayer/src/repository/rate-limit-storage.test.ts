@@ -17,6 +17,12 @@ const MAX_PER_MONTH = 3;
  */
 class FakeRedis implements RedisClient {
   private counters = new Map<string, number>();
+  down = false;
+
+  async ping(): Promise<string> {
+    if (this.down) throw new Error("connection refused");
+    return "PONG";
+  }
 
   async incr(key: string): Promise<number> {
     const next = (this.counters.get(key) ?? 0) + 1;
@@ -204,6 +210,18 @@ describe("RedisRateLimitStorage.getCount", () => {
     });
 
     expect(count).toBe(0);
+  });
+});
+
+describe("RedisRateLimitStorage.ping", () => {
+  it("resolves when Redis answers", async () => {
+    await expect(store.ping()).resolves.toBeUndefined();
+  });
+
+  it("rejects when Redis does not answer", async () => {
+    redis.down = true;
+
+    await expect(store.ping()).rejects.toThrow("connection refused");
   });
 });
 
