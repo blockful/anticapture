@@ -185,12 +185,11 @@ export const ProposalInfoSection = ({
                 />
               </div>
 
-              <div className="flex w-[100px] items-center gap-2">
-                <div className="flex w-12 items-center">
+              <div className="flex w-[112px] items-center gap-2">
+                <div className="flex w-14 items-center">
                   <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
                     {formatNumberUserReadable(
                       Number(formatUnits(BigInt(row.rawVotes), decimals)),
-                      0,
                     )}
                   </p>
                 </div>
