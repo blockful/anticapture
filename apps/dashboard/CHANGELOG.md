@@ -1,5 +1,13 @@
 # @anticapture/dashboard
 
+## 2.17.1
+
+### Patch Changes
+
+- [#2177](https://github.com/blockful/anticapture/pull/2177) [`d28e497`](https://github.com/blockful/anticapture/commit/d28e4979b44104498395c7c5b17bbc1a466c8c65) Thanks [@alextnetto](https://github.com/alextnetto)! - Show vote totals and quorum on the proposal results card with 2 decimals while the value is below 100 in its unit (1.69M instead of 2M, 12.35K) and none from 100 up (123K), and widen the vote column so these values fit
+
+- [#2171](https://github.com/blockful/anticapture/pull/2171) [`bd4f072`](https://github.com/blockful/anticapture/commit/bd4f072dc66eff4764e39fed0303ac1a6f79c4da) Thanks [@alextnetto](https://github.com/alextnetto)! - Answer a gasless vote or delegation that would revert on-chain (a vote already cast, a used nonce) with 409 SIMULATION_FAILED instead of 500 INTERNAL, documented in the relay routes Gateful exposes, and make a gasless vote reach the relayer once: the dashboard checks hasVoted before asking for a signature, confirms the relayed transaction on the DAO's chain instead of through the wallet, never reports a relayed vote as failed, and keeps the vote's submission state across modal closes and remounts so the ballot is not offered again
+
 ## 2.17.0
 
 ### Minor Changes
