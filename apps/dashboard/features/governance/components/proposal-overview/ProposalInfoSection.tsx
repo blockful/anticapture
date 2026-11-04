@@ -17,6 +17,14 @@ import { BulletDivider } from "@/shared/components/design-system/section";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { formatNumberUserReadable } from "@/shared/utils";
 
+// Two decimals while the value is below 100 in its unit (1.69M, 12.35K),
+// none from 100 up (123K), so totals stay short but small ones keep precision.
+const formatVotes = (raw: string | number, decimals: number) => {
+  const value = Number(formatUnits(BigInt(raw), decimals));
+  const unit = value >= 1e9 ? 1e9 : value >= 1e6 ? 1e6 : value >= 1e3 ? 1e3 : 1;
+  return formatNumberUserReadable(value, value / unit >= 100 ? 0 : 2);
+};
+
 const VotingProgressBar = ({
   startTimestamp,
   endTimestamp,
@@ -188,9 +196,7 @@ export const ProposalInfoSection = ({
               <div className="flex w-[112px] items-center gap-2">
                 <div className="flex w-14 items-center">
                   <p className="text-primary font-inter text-[14px] font-normal not-italic leading-[20px]">
-                    {formatNumberUserReadable(
-                      Number(formatUnits(BigInt(row.rawVotes), decimals)),
-                    )}
+                    {formatVotes(row.rawVotes, decimals)}
                   </p>
                 </div>
                 <div className="flex w-12 items-center">
@@ -217,13 +223,8 @@ export const ProposalInfoSection = ({
           </Tooltip>
           <BulletDivider />
           <p className="font-inter text-secondary text-[14px] font-normal not-italic leading-[20px]">
-            {formatNumberUserReadable(
-              Number(formatUnits(BigInt(quorumVotes), decimals)),
-            )}{" "}
-            /{" "}
-            {formatNumberUserReadable(
-              Number(formatUnits(BigInt(proposal.quorum), decimals)),
-            )}
+            {formatVotes(quorumVotes, decimals)} /{" "}
+            {formatVotes(proposal.quorum, decimals)}
           </p>
           {quorumVotes >= Number(proposal.quorum) && (
             <div className="bg-surface-opacity-success flex items-center gap-1 rounded-full px-[6px] py-[2px]">
