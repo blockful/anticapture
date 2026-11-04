@@ -15,6 +15,7 @@ import { RelayerSigner } from "@/signer/types";
 
 import type { ChainReader } from "./chain/chain-reader";
 import type { IChainStateService } from "./chain/chain-state";
+import { findRevert, revertReason } from "./chain/revert";
 import type { ISignatureVerifier } from "./guards/signature-verifier";
 
 export interface RelayVoteParams {
@@ -38,6 +39,21 @@ export interface RelayDelegateParams {
 export interface RelayResult {
   hash: Hash;
   signer: Address;
+}
+
+/**
+ * A simulation that reverted is the contract refusing the request before
+ * anything is broadcast (vote already cast, proposal not active, used nonce,
+ * expired signature), so it answers 409 SIMULATION_FAILED. Without this it
+ * reached the global handler as 500 INTERNAL, which Gateful counts against
+ * the relayer's circuit breaker. A simulation that could not run at all
+ * (RPC down) is still rethrown as is.
+ */
+function simulationError(functionName: string, err: unknown): unknown {
+  const revert = findRevert(err);
+  return revert
+    ? Errors.SIMULATION_FAILED(functionName, revertReason(revert))
+    : err;
 }
 
 export class RelayService {
@@ -67,13 +83,17 @@ export class RelayService {
     await this.rateLimiter.assertWithinLimit(voter, "vote");
 
     // 4. Simulate the call. Covers: proposal state, hasVoted, signature validity.
-    await this.publicClient.simulateContract({
-      address: this.governorAddress,
-      abi: governorAbi,
-      functionName: "castVoteBySig",
-      args: [params.proposalId, params.support, params.v, params.r, params.s],
-      account: await this.signer.getAddress(),
-    });
+    try {
+      await this.publicClient.simulateContract({
+        address: this.governorAddress,
+        abi: governorAbi,
+        functionName: "castVoteBySig",
+        args: [params.proposalId, params.support, params.v, params.r, params.s],
+        account: await this.signer.getAddress(),
+      });
+    } catch (err) {
+      throw simulationError("castVoteBySig", err);
+    }
 
     // 5. Submit transaction
     const data = encodeFunctionData({
@@ -102,20 +122,24 @@ export class RelayService {
     await this.rateLimiter.assertWithinLimit(delegator, "delegation");
 
     // 4. Simulate the call. Covers: nonce match, signature validity, expiry.
-    await this.publicClient.simulateContract({
-      address: this.tokenAddress,
-      abi: erc20VotesAbi,
-      functionName: "delegateBySig",
-      args: [
-        params.delegatee,
-        params.nonce,
-        params.expiry,
-        params.v,
-        params.r,
-        params.s,
-      ],
-      account: await this.signer.getAddress(),
-    });
+    try {
+      await this.publicClient.simulateContract({
+        address: this.tokenAddress,
+        abi: erc20VotesAbi,
+        functionName: "delegateBySig",
+        args: [
+          params.delegatee,
+          params.nonce,
+          params.expiry,
+          params.v,
+          params.r,
+          params.s,
+        ],
+        account: await this.signer.getAddress(),
+      });
+    } catch (err) {
+      throw simulationError("delegateBySig", err);
+    }
 
     // 5. Submit transaction
     const data = encodeFunctionData({

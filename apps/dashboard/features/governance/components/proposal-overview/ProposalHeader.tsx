@@ -1,6 +1,5 @@
 "use client";
 
-import type { VotesByProposalIdQueryResponse } from "@anticapture/client";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,7 +29,8 @@ interface ProposalHeaderProps {
   setIsQueueModalOpen: (isOpen: boolean) => void;
   setIsExecuteModalOpen: (isOpen: boolean) => void;
   votingPower: string;
-  votes: VotesByProposalIdQueryResponse | null;
+  /** The connected account's vote: indexed, or submitted and landed. */
+  supportValue: number | undefined;
   address: string | undefined;
   proposalStatus: string;
   snapshotLink?: string | null;
@@ -243,7 +243,7 @@ export const GaslessBadge = () => (
 export const ProposalHeader = ({
   daoId,
   votingPower,
-  votes,
+  supportValue,
   setIsVotingModalOpen,
   setIsQueueModalOpen,
   setIsExecuteModalOpen,
@@ -265,10 +265,6 @@ export const ProposalHeader = ({
     "tab",
     parseAsStringEnum<TabId>(allowedTabs).withDefault("description"),
   );
-  const supportValue =
-    votes?.items[0]?.support != null
-      ? Number(votes.items[0].support)
-      : undefined;
   const proposalListHref = getDaoGovernanceListPath({
     daoId: daoId.toUpperCase() as DaoIdEnum,
     pathname,

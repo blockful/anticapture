@@ -37,6 +37,13 @@ export function relayDelegate(app: Hono, relayService: RelayService) {
             "application/json": { schema: ErrorResponseSchema },
           },
         },
+        409: {
+          description:
+            "The delegation would revert on-chain (used nonce, expired signature), so it was not sent",
+          content: {
+            "application/json": { schema: ErrorResponseSchema },
+          },
+        },
         429: {
           description: "Rate limited",
           content: {

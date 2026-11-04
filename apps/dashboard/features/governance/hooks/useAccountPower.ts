@@ -33,7 +33,21 @@ export interface UseAccountPowerParams {
   daoId: DaoIdEnum;
   proposalId: string;
   decimals: number;
+  /**
+   * Re-asks for the account's vote at this interval until `isVoteIndexed`
+   * accepts the latest one, for a vote that was submitted but is not indexed
+   * yet. A changed vote leaves the previous one indexed meanwhile, which is
+   * why "the API returned a vote" is not the stop condition.
+   */
+  votePollIntervalMs?: number | false;
+  isVoteIndexed?: (
+    latestVote: VotesByProposalIdQueryResponse["items"][number] | undefined,
+  ) => boolean;
 }
+
+const anyVoteIndexed: NonNullable<UseAccountPowerParams["isVoteIndexed"]> = (
+  latestVote,
+) => latestVote !== undefined;
 
 const EMPTY_ACCOUNT_POWER_DATA: AccountPowerData = {
   accountPower: null,
@@ -48,6 +62,8 @@ export const useAccountPower = ({
   daoId,
   proposalId,
   decimals,
+  votePollIntervalMs = false,
+  isVoteIndexed = anyVoteIndexed,
 }: UseAccountPowerParams): UseAccountPowerResult => {
   const votingPowerDaoKey =
     daoId.toLowerCase() as VotingPowerByAccountIdPathParamsDaoEnumKey;
@@ -75,6 +91,10 @@ export const useAccountPower = ({
     {
       query: {
         enabled: !!address && !!proposalId,
+        refetchInterval: (query) =>
+          votePollIntervalMs && !isVoteIndexed(query.state.data?.items[0])
+            ? votePollIntervalMs
+            : false,
       },
     },
   );

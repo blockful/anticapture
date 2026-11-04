@@ -141,8 +141,6 @@ describe("voteOnProposal", () => {
       walletClient,
       setTransactionhash,
       undefined,
-      undefined,
-      false,
       delegatorAddresses,
     );
 
@@ -176,8 +174,6 @@ describe("voteOnProposal", () => {
       walletClient,
       jest.fn(),
       undefined,
-      undefined,
-      false,
       [],
     );
 
