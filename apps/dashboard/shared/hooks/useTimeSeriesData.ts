@@ -57,6 +57,7 @@ export const useTimeSeriesData = (
               (item): TokenMetricItem => ({
                 date: item.date,
                 high: String(item.high),
+                close: String(item.close),
                 volume: String(item.volume),
               }),
             ),

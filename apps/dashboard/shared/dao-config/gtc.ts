@@ -31,7 +31,7 @@ export const GTC: DaoConfiguration = {
     chain: { ...mainnet, icon: MainnetIcon },
     snapshot: "https://snapshot.box/#/s:gitcoindao.eth",
     contracts: {
-      governor: "0x9D4C63565D5618310271bF3F3c01b2954C1D1639",
+      governor: "0xef41CbD211076E8b1901e214Bf751d404cf06638",
       token: "0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F",
       timelock: "0x57a8865cfB1eCEf7253c27da6B4BC3dAEE5Be518",
     },
@@ -228,14 +228,14 @@ export const GTC: DaoConfiguration = {
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        currentSetting: "The Voting Delay is set to 1 day and 19 hours",
+        currentSetting: "The Voting Delay is set to 2 days (14,400 blocks).",
         impact:
           "Given the current Voting Delay, the DAO has sufficient time to coordinate stakeholders and wallets before the snapshot (that counts votes) occurs.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_DELAY],
         nextStep: "The parameter is in its lowest-risk condition.",
         requirements: [
-          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current 44 hours delay is the time to redelegate and activate delegates before voting starts.",
+          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current 2 days delay is the time to redelegate and activate delegates before voting starts.",
           "Our standard for low risk is of at least 2 days, to give time for a coordinated response with holders that need to redelegate in case of an attacker",
         ],
       },

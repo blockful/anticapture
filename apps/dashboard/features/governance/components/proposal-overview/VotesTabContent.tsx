@@ -91,7 +91,7 @@ export const VotesTabContent = ({
     BigInt(proposal.againstVotes) +
     BigInt(proposal.abstainVotes);
 
-  const historicalDelegatedSupply = delegatedSupplyData?.items?.[0]?.high;
+  const historicalDelegatedSupply = delegatedSupplyData?.items?.[0]?.close;
 
   const delegatedSupplyBigInt = historicalDelegatedSupply
     ? BigInt(historicalDelegatedSupply)
