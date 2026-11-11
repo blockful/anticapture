@@ -78,8 +78,9 @@ export const CONTRACT_ADDRESSES = {
       address: "0xDbD27635A534A3d3169Ef0498beB56Fb9c937489",
       startBlock: 12497481,
     },
-    // Live governor. Status reads stay on `governor` (Bravo): Charlie has no
-    // proposals yet, and one quorum() target would recompute Bravo proposals.
+    // Governor Charlie (GitcoinGovernorWithGuardian), the live governor and
+    // timelock admin since August 2026. `governor` (Bravo) still owns the
+    // finished proposals.
     // https://etherscan.io/address/0xef41CbD211076E8b1901e214Bf751d404cf06638
     governorCharlie: {
       address: "0xef41CbD211076E8b1901e214Bf751d404cf06638",
