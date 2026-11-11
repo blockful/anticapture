@@ -10,6 +10,11 @@ import { Address, getAddress, Hex } from "viem";
 import { ProposalStatus } from "@/lib/constants";
 import { voteWeightByChoice, type VoteWeights } from "@/lib/vote-support";
 
+import {
+  applyProposalContentUpdate,
+  parseProposalTitle,
+  type ProposalContentPatch,
+} from "./proposal-content";
 import { ensureAccountExists } from "./shared";
 
 /**
@@ -106,45 +111,6 @@ export const voteCast = async (
   });
 };
 
-const MAX_TITLE_LENGTH = 200;
-
-/**
- * Extracts a proposal title from a markdown description.
- *
- * Strategy:
- * 1. Normalize literal `\n` sequences to real newlines (some proposers
- *    submit descriptions with escaped newlines).
- * 2. If the first non-empty line is an H1 (`# Title`), use it.
- * 3. Otherwise, use the first non-empty line that is not a section header
- *    (H2+), truncated to MAX_TITLE_LENGTH characters.
- */
-function parseProposalTitle(description: string): string {
-  // Normalize literal "\n" (two chars) into real newlines
-  const normalized = description.replace(/\\n/g, "\n");
-  const lines = normalized.split("\n");
-
-  // Pass 1: look for an H1 among leading lines (before any content)
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    if (/^# /.test(trimmed)) {
-      return trimmed.replace(/^# +/, "");
-    }
-    break; // stop at first non-empty, non-H1 line
-  }
-
-  // Pass 2: no H1 found — use first non-empty, non-header line
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || /^#{1,6}\s/.test(trimmed)) continue;
-    return trimmed.length > MAX_TITLE_LENGTH
-      ? trimmed.substring(0, MAX_TITLE_LENGTH) + "..."
-      : trimmed;
-  }
-
-  return "";
-}
-
 /**
  * ### Creates:
  * - New `Account` record (for proposer if it doesn't exist)
@@ -238,6 +204,22 @@ export const proposalCreated = async (
     timestamp,
     proposalId,
   });
+};
+
+/**
+ * Applies a proposal edit (Nouns `ProposalUpdated`,
+ * `ProposalDescriptionUpdated`, `ProposalTransactionsUpdated`) without
+ * touching the fields the event did not carry. A new description re-parses
+ * the title.
+ */
+export const updateProposalContent = async (
+  context: Context,
+  proposalId: string,
+  patch: ProposalContentPatch,
+) => {
+  await context.db
+    .update(proposalsOnchain, { id: proposalId })
+    .set((current) => applyProposalContentUpdate(current, patch));
 };
 
 /**

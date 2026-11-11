@@ -3,6 +3,7 @@ import { ponder } from "ponder:registry";
 import {
   updateProposalStatus,
   proposalCreated,
+  updateProposalContent,
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
@@ -71,6 +72,37 @@ export function LilNounsGovernorIndexer(blockTime: number) {
       event.transaction.hash,
     );
   });
+
+  ponder.on(`LilNounsGovernor:ProposalUpdated`, async ({ event, context }) => {
+    await updateProposalContent(context, event.args.id.toString(), {
+      description: event.args.description,
+      targets: [...event.args.targets],
+      values: [...event.args.values],
+      signatures: [...event.args.signatures],
+      calldatas: [...event.args.calldatas],
+    });
+  });
+
+  ponder.on(
+    `LilNounsGovernor:ProposalDescriptionUpdated`,
+    async ({ event, context }) => {
+      await updateProposalContent(context, event.args.id.toString(), {
+        description: event.args.description,
+      });
+    },
+  );
+
+  ponder.on(
+    `LilNounsGovernor:ProposalTransactionsUpdated`,
+    async ({ event, context }) => {
+      await updateProposalContent(context, event.args.id.toString(), {
+        targets: [...event.args.targets],
+        values: [...event.args.values],
+        signatures: [...event.args.signatures],
+        calldatas: [...event.args.calldatas],
+      });
+    },
+  );
 
   ponder.on(`LilNounsGovernor:ProposalVetoed`, async ({ event, context }) => {
     await updateProposalStatus(
