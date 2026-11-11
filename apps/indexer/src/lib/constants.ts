@@ -217,6 +217,11 @@ export const CONTRACT_ADDRESSES = {
       address: "0x5d2C31ce16924C2a71D317e5BbFd5ce387854039",
       startBlock: 14736719,
     },
+    auction: {
+      // https://etherscan.io/address/0x55e0F7A3bB39a28Bd7Bcc458e04b3cF00Ad3219E
+      address: "0x55e0F7A3bB39a28Bd7Bcc458e04b3cF00Ad3219E",
+      startBlock: 14736713,
+    },
   },
   [DaoIdEnum.AAVE]: {
     blockTime: 1,
@@ -831,7 +836,7 @@ export const BurningAddresses: Record<
   },
   [DaoIdEnum.LIL_NOUNS]: {
     ZeroAddress: zeroAddress,
-    Dead: "0x0000000000000000000000000000000000000000",
+    Dead: "0x000000000000000000000000000000000000dEaD",
     TokenContract: "0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B",
   },
   [DaoIdEnum.SCR]: {
