@@ -10,7 +10,7 @@ import type {
 export function normalizeDataset(
   tokenPrices: TokenHistoricalPriceItem[],
   key: string,
-  multiplier: number | Pick<TokenMetricItem, "date" | "high">[],
+  multiplier: number | Pick<TokenMetricItem, "date" | "close">[],
   decimals: number,
 ): MultilineChartDataSetPoint[] {
   if (!Array.isArray(multiplier)) {
@@ -25,7 +25,7 @@ export function normalizeDataset(
   const multipliersByTs = multiplier.reduce(
     (acc, item) => ({
       ...acc,
-      [Number(item.date)]: Number(formatUnits(BigInt(item.high), decimals)),
+      [Number(item.date)]: Number(formatUnits(BigInt(item.close), decimals)),
     }),
     {} as Record<number, number>,
   );

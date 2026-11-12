@@ -138,7 +138,7 @@ export const useChartMetrics = ({
       appliedMetricsMemo.forEach((metricKey) => {
         const metricSchema = metricsSchema[metricKey];
         let dataSourceKey = metricKey as MetricTypesEnum;
-        let valueField = "high";
+        let valueField = "close";
 
         // For TRANSFER VOLUME metrics, use corresponding SUPPLY data with volume field
         if (metricSchema?.category === "VOLUME") {
@@ -159,7 +159,7 @@ export const useChartMetrics = ({
 
         if (timeSeriesData[dataSourceKey]) {
           timeSeriesData[dataSourceKey].forEach((item: TokenMetricItem) => {
-            const value = valueField === "volume" ? item.volume : item.high;
+            const value = valueField === "volume" ? item.volume : item.close;
 
             result[normalizeTimestamp(item.date)] = {
               ...result[normalizeTimestamp(item.date)],

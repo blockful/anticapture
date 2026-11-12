@@ -42,8 +42,8 @@ export function getClient<
       return new OPClient(client, governor.address);
     }
     case DaoIdEnum.GTC: {
-      const { governor } = CONTRACT_ADDRESSES[daoId];
-      return new GTCClient(client, governor.address);
+      const { governor, governorCharlie } = CONTRACT_ADDRESSES[daoId];
+      return new GTCClient(client, governorCharlie.address, governor.address);
     }
     case DaoIdEnum.LIL_NOUNS: {
       const { governor } = CONTRACT_ADDRESSES[daoId];

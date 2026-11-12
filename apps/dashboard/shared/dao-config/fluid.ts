@@ -21,7 +21,7 @@ export const FLUID: DaoConfiguration = {
     contracts: {
       governor: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B",
       token: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb",
-      timelock: "0xC7Cb1dE2721BFC0E0DA1b9D526bCdC54eF1C0eFC",
+      timelock: "0x2386DC45AdDed673317eF068992F19421B481F4c",
     },
     rules: {
       delay: true,

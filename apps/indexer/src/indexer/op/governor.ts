@@ -24,6 +24,19 @@ export function GovernorIndexer(blockTime: number) {
     });
   });
 
+  ponder.on("OPGovernor:VoteCastWithParams", async ({ event, context }) => {
+    await voteCast(context, daoId, {
+      proposalId: event.args.proposalId.toString(),
+      voter: event.args.voter,
+      reason: event.args.reason,
+      support: event.args.support,
+      timestamp: event.block.timestamp,
+      txHash: event.transaction.hash,
+      votingPower: event.args.weight,
+      logIndex: event.log.logIndex,
+    });
+  });
+
   ponder.on(
     `OPGovernor:ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description)`,
     async ({ event, context }) => {

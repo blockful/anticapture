@@ -57,6 +57,8 @@ export const useTimeSeriesData = (
               (item): TokenMetricItem => ({
                 date: item.date,
                 high: String(item.high),
+                // Falls back to high until every API behind Gateful exposes close.
+                close: String(item.close ?? item.high),
                 volume: String(item.volume),
               }),
             ),

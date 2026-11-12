@@ -11,6 +11,7 @@ import {
   GTCTokenIndexer,
 } from "@/indexer/gtc";
 import {
+  LilNounsAuctionIndexer,
   LilNounsTokenIndexer,
   LilNounsGovernorIndexer,
 } from "@/indexer/lil-nouns";
@@ -88,6 +89,7 @@ switch (daoId) {
   case DaoIdEnum.LIL_NOUNS: {
     LilNounsTokenIndexer(token.address, token.decimals);
     LilNounsGovernorIndexer(blockTime);
+    LilNounsAuctionIndexer();
     break;
   }
   case DaoIdEnum.SCR: {

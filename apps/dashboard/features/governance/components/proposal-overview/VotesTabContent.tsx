@@ -91,7 +91,10 @@ export const VotesTabContent = ({
     BigInt(proposal.againstVotes) +
     BigInt(proposal.abstainVotes);
 
-  const historicalDelegatedSupply = delegatedSupplyData?.items?.[0]?.high;
+  const latestDelegatedSupply = delegatedSupplyData?.items?.[0];
+  // Falls back to high until every API behind Gateful exposes close.
+  const historicalDelegatedSupply =
+    latestDelegatedSupply?.close ?? latestDelegatedSupply?.high;
 
   const delegatedSupplyBigInt = historicalDelegatedSupply
     ? BigInt(historicalDelegatedSupply)
