@@ -25,6 +25,9 @@ class RecordingNouns extends Client {
   ): Promise<ReadContractReturnType<TAbi, TFunctionName, TArgs>> {
     const functionName = String(params.functionName);
     this.calls.push(functionName);
+    if (functionName === "proposalCount") {
+      return 270n as ReadContractReturnType<TAbi, TFunctionName, TArgs>;
+    }
     if (functionName !== "quorumVotes") {
       throw new Error(`unexpected ${functionName}`);
     }
@@ -48,6 +51,13 @@ describe("Nouns quorum", () => {
         abstainVotes: 57n,
       }),
     ).toBe(101n);
+  });
+
+  it("reads the latest proposal's quorum when no proposal is given", async () => {
+    const client = new RecordingNouns();
+
+    expect(await client.getQuorum(null)).toBe(136n);
+    expect(client.calls).toEqual(["proposalCount", "quorumVotes"]);
   });
 
   it("reads quorumVotes for that proposal and marks Nouns 269 defeated", async () => {

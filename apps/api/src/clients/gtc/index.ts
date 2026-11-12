@@ -56,11 +56,12 @@ export class GTCClient<
   }
 
   async getQuorum(proposalId: string | null): Promise<bigint> {
-    // Bravo ids stay on Bravo so finished proposals are not recomputed
-    // against Charlie's quorum.
-    const governor = isGtcCharlieProposal(proposalId)
-      ? this.address
-      : this.legacyAddress;
+    // null is the DAO's current quorum, which is Charlie's. Bravo ids stay
+    // on Bravo so finished proposals are not recomputed against Charlie.
+    const governor =
+      proposalId == null || isGtcCharlieProposal(proposalId)
+        ? this.address
+        : this.legacyAddress;
 
     return this.getCachedQuorum(async () => {
       const blockNumber = await this.getBlockNumber();

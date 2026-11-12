@@ -223,19 +223,19 @@ export const GTC: DaoConfiguration = {
         ],
       },
       [GovernanceImplementationEnum.VOTING_DELAY]: {
-        riskLevel: RiskLevel.MEDIUM,
+        riskLevel: RiskLevel.LOW,
         description:
           GOVERNANCE_IMPLEMENTATION_CONSTANTS[
             GovernanceImplementationEnum.VOTING_DELAY
           ].description,
-        currentSetting: "The Voting Delay is set to 2 days (14,400 blocks).",
+        currentSetting: "The Voting Delay is set to 2 days.",
         impact:
           "Given the current Voting Delay, the DAO has sufficient time to coordinate stakeholders and wallets before the snapshot (that counts votes) occurs.",
         recommendedSetting:
           RECOMMENDED_SETTINGS[GovernanceImplementationEnum.VOTING_DELAY],
         nextStep: "The parameter is in its lowest-risk condition.",
         requirements: [
-          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current 2 days delay is the time to redelegate and activate delegates before voting starts.",
+          "Voting delay is the time between proposal submission and the snapshot that fixes voting power. The current 2-day delay is the time to redelegate and activate delegates before voting starts.",
           "Our standard for low risk is of at least 2 days, to give time for a coordinated response with holders that need to redelegate in case of an attacker",
         ],
       },
@@ -318,7 +318,7 @@ export const GTC: DaoConfiguration = {
       },
       [RiskAreaEnum.RESPONSE_TIME]: {
         description:
-          "Response time is partially limited by shorter-than-ideal voting delay and voting period, reducing the window for coordinated reaction and review.",
+          "Response time is partially limited by a shorter-than-ideal voting period, reducing the window for coordinated reaction and review.",
       },
       [RiskAreaEnum.GOV_FRONTEND_RESILIENCE]: {
         description:

@@ -31,9 +31,25 @@ export class Client<
     return this.daoId;
   }
 
+  /**
+   * Nouns stores quorum per proposal. A proposal id reads that proposal's
+   * quorum; null (the DAO parameters endpoint) reads the latest proposal's.
+   */
   async getQuorum(proposalId: string | null): Promise<bigint> {
     if (proposalId == null) {
-      throw new Error("Nouns quorum is stored per proposal");
+      return this.getCachedQuorum(async () => {
+        const lastProposalId = await this.readContract({
+          abi: this.abi,
+          address: this.address,
+          functionName: "proposalCount",
+        });
+        return this.readContract({
+          abi: this.abi,
+          address: this.address,
+          functionName: "quorumVotes",
+          args: [lastProposalId],
+        });
+      }, "quorum:current");
     }
 
     return this.getCachedQuorum(async () => {

@@ -81,4 +81,14 @@ describe("GTCClient", () => {
       ["quorum", CHARLIE],
     ]);
   });
+
+  it("reads the current quorum from Charlie when no proposal is given", async () => {
+    const client = new RecordingGtc();
+
+    await client.getQuorum(null);
+
+    expect(client.calls).toEqual([
+      { functionName: "quorum", address: CHARLIE },
+    ]);
+  });
 });
