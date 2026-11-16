@@ -31,21 +31,35 @@ export class Client<
     return this.daoId;
   }
 
-  async getQuorum(): Promise<bigint> {
-    return this.getCachedQuorum(async () => {
-      const lastProposalId = await this.readContract({
-        abi: this.abi,
-        address: this.address,
-        functionName: "proposalCount",
-      });
+  /**
+   * Nouns stores quorum per proposal. A proposal id reads that proposal's
+   * quorum; null (the DAO parameters endpoint) reads the latest proposal's.
+   */
+  async getQuorum(proposalId: string | null): Promise<bigint> {
+    if (proposalId == null) {
+      return this.getCachedQuorum(async () => {
+        const lastProposalId = await this.readContract({
+          abi: this.abi,
+          address: this.address,
+          functionName: "proposalCount",
+        });
+        return this.readContract({
+          abi: this.abi,
+          address: this.address,
+          functionName: "quorumVotes",
+          args: [lastProposalId],
+        });
+      }, "quorum:current");
+    }
 
+    return this.getCachedQuorum(async () => {
       return this.readContract({
         abi: this.abi,
         address: this.address,
         functionName: "quorumVotes",
-        args: [lastProposalId],
+        args: [BigInt(proposalId)],
       });
-    });
+    }, `quorum:${proposalId}`);
   }
 
   protected async fetchTimelockDelay(): Promise<bigint> {
@@ -84,6 +98,6 @@ export class Client<
     againstVotes: bigint;
     abstainVotes: bigint;
   }): bigint {
-    return votes.forVotes + votes.abstainVotes;
+    return votes.forVotes;
   }
 }

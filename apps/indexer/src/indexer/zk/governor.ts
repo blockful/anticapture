@@ -17,7 +17,9 @@ export function GovernorIndexer(blockTime: number) {
       proposalId: event.args.proposalId.toString(),
       voter: event.args.voter,
       reason: event.args.reason,
-      support: event.args.support ? 1 : 0,
+      // `support` is a uint8: 0 against, 1 for, 2 abstain. A boolean
+      // coercion would store abstain as for.
+      support: Number(event.args.support),
       timestamp: event.block.timestamp,
       txHash: event.transaction.hash,
       votingPower: event.args.weight,

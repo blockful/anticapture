@@ -26,6 +26,12 @@ export default createConfig({
       ],
       startBlock: GTC_CONTRACTS.governorAlpha.startBlock,
     },
+    GTCGovernorCharlie: {
+      abi: GovernorAbi,
+      chain: "ethereum_mainnet",
+      address: GTC_CONTRACTS.governorCharlie.address,
+      startBlock: GTC_CONTRACTS.governorCharlie.startBlock,
+    },
     GTCToken: {
       abi: TokenAbi,
       chain: "ethereum_mainnet",

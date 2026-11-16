@@ -192,6 +192,32 @@ export const GovernorAbi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: "address",
+        name: "voter",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "proposalId",
+        type: "uint256",
+      },
+      { indexed: false, internalType: "bool", name: "support", type: "bool" },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "votes",
+        type: "uint256",
+      },
+    ],
+    name: "VoteCast",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "address",
         name: "voter",

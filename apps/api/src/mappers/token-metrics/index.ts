@@ -45,6 +45,12 @@ export const TokenMetricItemSchema = z
       example: "14250000000000000000",
       format: "bigint",
     }),
+    close: z.string().openapi({
+      description:
+        "Value at the end of the UTC day. Days without activity carry the previous close forward. This is the level to chart.",
+      example: "12000000000000000000",
+      format: "bigint",
+    }),
     volume: z.string().openapi({
       description: "Total volume observed for the period.",
       example: "1200500000000000000000",
