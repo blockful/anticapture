@@ -1,6 +1,7 @@
 import type { Address, Hash } from "viem";
 
 import type { GaslessVoteOutcome } from "@/features/governance/utils/relayGaslessVote";
+import type { WalletVoteOutcome } from "@/features/governance/utils/voteOnProposal";
 import {
   canSubmitAgain,
   needsProposalWatch,
@@ -135,11 +136,41 @@ export const settlementForGaslessVote = (
   }
 };
 
-/** The wallet path reports its confirmed hash, or null when nothing landed. */
-export const settlementForWalletVote = (hash: Hash | null): VoteSettlement =>
-  hash
-    ? { kind: "done", outcome: "landed", hash }
-    : { kind: "done", outcome: "failed", hash: null };
+/**
+ * Only a wallet vote that was never broadcast, or one mined as a revert, may
+ * be retried. A broadcast whose receipt could not be read may still land.
+ */
+export const settlementForWalletVote = (
+  outcome: WalletVoteOutcome,
+): VoteSettlement => {
+  switch (outcome.status) {
+    case "success":
+      return { kind: "done", outcome: "landed", hash: outcome.hash };
+    case "reverted":
+      return { kind: "done", outcome: "failed", hash: outcome.hash };
+    case "unconfirmed":
+      return { kind: "ambiguous", hash: outcome.hash };
+    case "not-sent":
+      return { kind: "done", outcome: "failed", hash: null };
+  }
+};
+
+/**
+ * Promotes an in-doubt vote to landed once the API has indexed its exact
+ * transaction, so the page stops calling it unconfirmed and, where the DAO
+ * allows it, the vote can be changed again. Anything else is left alone.
+ */
+export const confirmIndexedVote = (key: string, indexedHash: string): void => {
+  const current = readSubmission(key);
+  if (current.kind !== "ambiguous" || !current.hash) return;
+  if (current.hash.toLowerCase() !== indexedHash.toLowerCase()) return;
+  writeSubmission(key, {
+    kind: "done",
+    mode: current.mode,
+    outcome: "landed",
+    hash: current.hash,
+  });
+};
 
 /**
  * What the voting modal shows for a submission. Only a vote that may start

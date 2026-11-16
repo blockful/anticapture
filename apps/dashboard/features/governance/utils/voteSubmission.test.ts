@@ -11,10 +11,12 @@
 import type { Address, Hash } from "viem";
 
 import type { GaslessVoteOutcome } from "@/features/governance/utils/relayGaslessVote";
+import type { WalletVoteOutcome } from "@/features/governance/utils/voteOnProposal";
 import type { SubmissionState } from "@/features/governance/utils/submissionState";
 import { readSubmission } from "@/features/governance/utils/submissionStore";
 import {
   claimVote,
+  confirmIndexedVote,
   getVoteScreen,
   isSubmittedVoteIndexed,
   readVoteDetails,
@@ -68,7 +70,10 @@ describe("claimVote", () => {
   it("allows a new attempt only after one that changed nothing", () => {
     const key = freshKey();
     claimVote(key, "gasless", 1);
-    settleVote(key, settlementForWalletVote(null));
+    settleVote(
+      key,
+      settlementForWalletVote({ status: "not-sent", hash: null }),
+    );
 
     expect(claimVote(key, "gasless", 0)).toBe(true);
     expect(readVoteDetails(key).support).toBe(0);
@@ -85,7 +90,7 @@ describe("claimVote", () => {
   it("lets a landed vote be changed where the DAO allows it", () => {
     const key = freshKey();
     claimVote(key, "wallet", 1, true);
-    settleVote(key, settlementForWalletVote(hash));
+    settleVote(key, settlementForWalletVote({ status: "success", hash }));
 
     expect(claimVote(key, "wallet", 0, true)).toBe(true);
     expect(readVoteDetails(key).support).toBe(0);
@@ -246,5 +251,87 @@ describe("isSubmittedVoteIndexed", () => {
     expect(
       isSubmittedVoteIndexed(alreadyVoted, { transactionHash: otherHash }),
     ).toBe(true);
+  });
+});
+
+describe("settlementForWalletVote", () => {
+  const cases: Array<
+    [WalletVoteOutcome, ReturnType<typeof settlementForWalletVote>]
+  > = [
+    [
+      { status: "success", hash },
+      { kind: "done", outcome: "landed", hash },
+    ],
+    [
+      { status: "reverted", hash },
+      { kind: "done", outcome: "failed", hash },
+    ],
+    [
+      { status: "unconfirmed", hash },
+      { kind: "ambiguous", hash },
+    ],
+    [
+      { status: "not-sent", hash: null },
+      { kind: "done", outcome: "failed", hash: null },
+    ],
+  ];
+
+  it.each(cases)("maps %o to %o", (outcome, expected) => {
+    expect(settlementForWalletVote(outcome)).toEqual(expected);
+  });
+
+  it("keeps a broadcast vote whose receipt was not read closed to a retry", () => {
+    const key = freshKey();
+    claimVote(key, "wallet", 1);
+    settleVote(key, settlementForWalletVote({ status: "unconfirmed", hash }));
+
+    expect(claimVote(key, "wallet", 1)).toBe(false);
+  });
+});
+
+describe("confirmIndexedVote", () => {
+  it("promotes an in-doubt vote to landed once its transaction is indexed", () => {
+    const key = freshKey();
+    claimVote(key, "gasless", 1, true);
+    settleVote(key, { kind: "ambiguous", hash });
+
+    confirmIndexedVote(key, hash.toUpperCase());
+
+    expect(readSubmission(key)).toEqual({
+      kind: "done",
+      mode: "gasless",
+      outcome: "landed",
+      hash,
+    });
+    expect(
+      getVoteScreen(readSubmission(key), {
+        canChangeVote: true,
+        alreadyVoted: false,
+      }),
+    ).toBe("ballot");
+  });
+
+  it("leaves the vote in doubt when another transaction is indexed", () => {
+    const key = freshKey();
+    claimVote(key, "gasless", 1);
+    settleVote(key, { kind: "ambiguous", hash });
+
+    confirmIndexedVote(key, otherHash);
+
+    expect(readSubmission(key)).toEqual({
+      kind: "ambiguous",
+      mode: "gasless",
+      hash,
+    });
+  });
+
+  it("does nothing to a vote in doubt with no hash", () => {
+    const key = freshKey();
+    claimVote(key, "gasless", 1);
+    settleVote(key, { kind: "ambiguous", hash: null });
+
+    confirmIndexedVote(key, hash);
+
+    expect(readSubmission(key).kind).toBe("ambiguous");
   });
 });

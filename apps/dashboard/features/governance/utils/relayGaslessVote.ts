@@ -1,5 +1,12 @@
 import { parseSignature } from "viem";
-import type { Account, Address, Hash, PublicClient, WalletClient } from "viem";
+import type {
+  Account,
+  Address,
+  Hash,
+  Hex,
+  PublicClient,
+  SignTypedDataParameters,
+} from "viem";
 
 import { relayVote } from "@anticapture/client";
 import type { RelayVotePathParamsDaoEnumKey } from "@anticapture/client";
@@ -43,14 +50,46 @@ const BALLOT_TYPES = {
  * wallet never sent the relayed transaction, and its provider may sit on
  * another chain or refuse the call, which used to surface as a failed vote
  * after the relayer had already broadcast it.
+ *
+ * Narrowed to the three calls the flow makes, so a test double implements it
+ * with real types instead of casting a partial viem client.
  */
-export type VoteChainReader = Pick<
-  PublicClient,
-  "readContract" | "waitForTransactionReceipt"
->;
+export interface VoteChainReader {
+  hasVoted: (
+    governor: Address,
+    proposalId: bigint,
+    voter: Address,
+  ) => Promise<boolean>;
+  governorName: (governor: Address) => Promise<string>;
+  waitForReceipt: (hash: Hash) => Promise<{ status: "success" | "reverted" }>;
+}
 
-/** The only wallet capability the gasless path needs. */
-export type BallotSigner = Pick<WalletClient, "signTypedData">;
+/** Backs a VoteChainReader with a viem client on the DAO's chain. */
+export const voteChainReader = (
+  client: Pick<PublicClient, "readContract" | "waitForTransactionReceipt">,
+): VoteChainReader => ({
+  hasVoted: (governor, proposalId, voter) =>
+    client.readContract({
+      abi: GovernorBallotAbi,
+      address: governor,
+      functionName: "hasVoted",
+      args: [proposalId, voter],
+    }),
+  governorName: (governor) =>
+    client.readContract({
+      abi: GovernorBallotAbi,
+      address: governor,
+      functionName: "name",
+    }),
+  waitForReceipt: (hash) => client.waitForTransactionReceipt({ hash }),
+});
+
+/** The only wallet capability the gasless path needs: signing a Ballot. */
+export interface BallotSigner {
+  signTypedData: (
+    args: SignTypedDataParameters<typeof BALLOT_TYPES, "Ballot", Account>,
+  ) => Promise<Hex>;
+}
 
 /**
  * What the dashboard knows about a gasless vote once the call settles.
@@ -74,7 +113,7 @@ type RelayGaslessVoteParams = {
   support: number;
   account: Account;
   signer: BallotSigner;
-  publicClient: VoteChainReader;
+  reader: VoteChainReader;
   onTxSubmitted: (hash: Hash) => void;
 };
 
@@ -83,18 +122,13 @@ type RelayGaslessVoteParams = {
  * relayer simulates before sending and refuses a duplicate on its own.
  */
 const hasVotedOnChain = async (
-  publicClient: VoteChainReader,
+  reader: VoteChainReader,
   governor: Address,
   proposalId: string,
   voter: Address,
 ): Promise<boolean> => {
   try {
-    return await publicClient.readContract({
-      abi: GovernorBallotAbi,
-      address: governor,
-      functionName: "hasVoted",
-      args: [BigInt(proposalId), voter],
-    });
+    return await reader.hasVoted(governor, BigInt(proposalId), voter);
   } catch (error) {
     console.error(error);
     return false;
@@ -116,7 +150,7 @@ export const relayGaslessVote = async ({
   support,
   account,
   signer,
-  publicClient,
+  reader,
   onTxSubmitted,
 }: RelayGaslessVoteParams): Promise<GaslessVoteOutcome> => {
   const { daoOverview } = daoConfigByDaoId[daoId];
@@ -125,17 +159,11 @@ export const relayGaslessVote = async ({
 
   // A wallet signs the same ballot byte for byte, so a page that missed the
   // first vote would only replay it. Asking the chain first costs no signature.
-  if (
-    await hasVotedOnChain(publicClient, governor, proposalId, account.address)
-  ) {
+  if (await hasVotedOnChain(reader, governor, proposalId, account.address)) {
     return { status: "already-voted", hash: null };
   }
 
-  const name = await publicClient.readContract({
-    abi: GovernorBallotAbi,
-    address: governor,
-    functionName: "name",
-  });
+  const name = await reader.governorName(governor);
 
   const signature = await signer.signTypedData({
     account,
@@ -175,7 +203,7 @@ export const relayGaslessVote = async ({
   onTxSubmitted(hash);
 
   try {
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    const receipt = await reader.waitForReceipt(hash);
     return {
       hash,
       status: receipt.status === "reverted" ? "reverted" : "success",

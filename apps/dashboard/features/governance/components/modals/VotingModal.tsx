@@ -17,7 +17,10 @@ import { VoteSuccessContent } from "@/features/governance/components/modals/Vote
 import { VoteOption } from "@/features/governance/components/proposal-overview/VoteOption";
 import { useVoteSubmission } from "@/features/governance/hooks/useVoteSubmission";
 import type { ProposalDetails } from "@/features/governance/types";
-import { relayGaslessVote } from "@/features/governance/utils/relayGaslessVote";
+import {
+  relayGaslessVote,
+  voteChainReader,
+} from "@/features/governance/utils/relayGaslessVote";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import { readSubmission } from "@/features/governance/utils/submissionStore";
 import { buildTornDelegatedVoteFrom } from "@/features/governance/utils/tornDelegatedVote";
@@ -327,19 +330,11 @@ export const VotingModal = ({
           support: voteNumber,
           account: { address, type: "json-rpc" },
           signer: walletClient,
-          publicClient,
+          reader: voteChainReader(publicClient),
           onTxSubmitted: setTransactionhash,
         });
         settlement = settlementForGaslessVote(outcome);
 
-        if (outcome.hash) {
-          void queryClient.invalidateQueries({
-            queryKey: getRateLimitQueryKey(
-              daoId.toLowerCase() as GetRateLimitPathParamsDaoEnumKey,
-              address,
-            ),
-          });
-        }
         if (outcome.status === "reverted") {
           showCustomToast(
             "Your vote was mined but reverted on-chain.",
@@ -347,7 +342,7 @@ export const VotingModal = ({
           );
         }
       } else {
-        const receipt = await voteOnProposal(
+        const outcome = await voteOnProposal(
           vote,
           proposal.id,
           { address, type: "json-rpc" },
@@ -358,12 +353,10 @@ export const VotingModal = ({
           comment,
           tornDelegatedVoteAddresses,
         );
-        if (receipt?.status === "reverted") {
+        if (outcome.status === "reverted") {
           showCustomToast("Your vote transaction reverted on-chain.", "error");
         }
-        settlement = settlementForWalletVote(
-          receipt?.status === "success" ? receipt.transactionHash : null,
-        );
+        settlement = settlementForWalletVote(outcome);
       }
     } catch (error) {
       // relayGaslessVote rejects only when nothing was sent: a declined
@@ -382,6 +375,16 @@ export const VotingModal = ({
         );
       }
     } finally {
+      // The relayer counts the attempt against the monthly allowance before it
+      // simulates, so a refused or ambiguous relay spends quota too.
+      if (isGasless) {
+        void queryClient.invalidateQueries({
+          queryKey: getRateLimitQueryKey(
+            daoId.toLowerCase() as GetRateLimitPathParamsDaoEnumKey,
+            address,
+          ),
+        });
+      }
       settleVote(voteKey, settlement);
       if (
         settlement.kind === "done" &&
