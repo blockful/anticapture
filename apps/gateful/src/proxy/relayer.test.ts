@@ -1,9 +1,14 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { vi } from "vitest";
 
+import { logger } from "../logger.js";
 import { CircuitBreakerRegistry } from "../shared/circuit-breaker-registry";
 
 import { relayerProxy } from "./relayer";
+
+vi.mock("../logger.js", () => ({
+  logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() },
+}));
 
 describe("relayer proxy route", () => {
   const daoRelayers = new Map([
@@ -155,5 +160,249 @@ describe("relayer proxy route", () => {
     await app.request("/uni/relay/vote");
     expect(fetchSpy).toHaveBeenCalledTimes(5);
     expect(registry.get("relayer:uni").state).toBe("OPEN");
+  });
+});
+
+describe("relayer status route", () => {
+  const NOW = Date.parse("2026-10-24T12:00:00.000Z");
+  const daoRelayers = new Map([["uni", "http://relayer-uni"]]);
+
+  const UNREACHABLE = {
+    available: false,
+    reasons: ["RELAYER_UNREACHABLE"],
+    checkedAt: "2026-10-24T12:00:00.000Z",
+  };
+
+  const RELAYER_STATUS = {
+    available: true,
+    reasons: [],
+    checks: {
+      paused: false,
+      rpc: "ok",
+      balance: "ok",
+      rateLimiter: "ok",
+      pendingTransactions: "ok",
+      recentRelays: "ok",
+    },
+    balanceWei: "1000000000000000000",
+    thresholdWei: "100000000000000000",
+    checkedAt: "2026-10-24T11:59:55.000Z",
+  };
+
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "content-type": "application/json" },
+    });
+
+  const requestedUrls = (spy: { mock: { calls: unknown[][] } }) =>
+    spy.mock.calls.map(([arg]) =>
+      arg instanceof Request ? arg.url : String(arg),
+    );
+
+  let app: InstanceType<typeof OpenAPIHono>;
+  let registry: CircuitBreakerRegistry;
+
+  beforeEach(() => {
+    // Only Date: the breaker's cooldown reads it, and the probe's abort
+    // timeout must keep running on real timers.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(NOW);
+    app = new OpenAPIHono();
+    registry = new CircuitBreakerRegistry();
+    relayerProxy(app, daoRelayers, registry);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  /** Opens relayer:uni the way real traffic does: five failed relays in a row. */
+  async function openRelayerCircuit() {
+    for (let i = 0; i < 5; i++) {
+      await app.request("/uni/relay/vote", { method: "POST" });
+    }
+    expect(registry.get("relayer:uni").state).toBe("OPEN");
+  }
+
+  it("answers RELAYER_NOT_CONFIGURED, without fetching, for a DAO with no relayer", async () => {
+    const fetchSpy = vi.spyOn(global, "fetch");
+
+    const res = await app.request("/unknown/relay/status");
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      available: false,
+      reasons: ["RELAYER_NOT_CONFIGURED"],
+      checkedAt: "2026-10-24T12:00:00.000Z",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("passes the relayer's answer through verbatim, without the caller's bearer", async () => {
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockImplementation(async () => json(RELAYER_STATUS));
+
+    const res = await app.request("/UNI/relay/status", {
+      headers: { authorization: "Bearer tenant-token" },
+    });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(RELAYER_STATUS);
+    expect(requestedUrls(fetchSpy)).toEqual([
+      "http://relayer-uni/relay/status",
+    ]);
+    const forwarded = fetchSpy.mock.calls[0]?.[0];
+    expect(
+      forwarded instanceof Request && forwarded.headers.has("authorization"),
+    ).toBe(false);
+  });
+
+  it("passes an unavailable answer from the relayer through as well", async () => {
+    const lowBalance = {
+      ...RELAYER_STATUS,
+      available: false,
+      reasons: ["LOW_BALANCE"],
+      checks: { ...RELAYER_STATUS.checks, balance: "low" },
+      balanceWei: "1",
+    };
+    vi.spyOn(global, "fetch").mockImplementation(async () => json(lowBalance));
+
+    const res = await app.request("/uni/relay/status");
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(lowBalance);
+  });
+
+  it.each([
+    [
+      "a 500",
+      () => json({ error: "Internal server error", code: "INTERNAL" }, 500),
+    ],
+    [
+      "a structured 503",
+      () =>
+        json(
+          { error: "Gasless relaying is paused", code: "RELAYER_PAUSED" },
+          503,
+        ),
+    ],
+    [
+      "a non-JSON body",
+      () =>
+        new Response("<html>Bad Gateway</html>", {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        }),
+    ],
+    ["a body without a boolean available", () => json({ available: "yes" })],
+    ["a JSON body that is not an object", () => json(true)],
+  ])("answers RELAYER_UNREACHABLE on %s", async (_name, respond) => {
+    vi.spyOn(global, "fetch").mockImplementation(async () => respond());
+
+    const res = await app.request("/uni/relay/status");
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(UNREACHABLE);
+  });
+
+  it.each([
+    ["a network error", () => new TypeError("fetch failed")],
+    [
+      "a timeout",
+      () =>
+        new DOMException(
+          "The operation was aborted due to timeout",
+          "TimeoutError",
+        ),
+    ],
+  ])("answers RELAYER_UNREACHABLE on %s", async (_name, makeError) => {
+    vi.spyOn(global, "fetch").mockImplementation(async () => {
+      throw makeError();
+    });
+
+    const res = await app.request("/uni/relay/status");
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(UNREACHABLE);
+  });
+
+  it("answers RELAYER_UNREACHABLE, without probing, while the relayer circuit cools down", async () => {
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockImplementation(async () => json({ error: "internal" }, 500));
+    await openRelayerCircuit();
+
+    const res = await app.request("/uni/relay/status");
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(UNREACHABLE);
+    expect(fetchSpy).toHaveBeenCalledTimes(5);
+  });
+
+  // A status probe must never decide whether real relay traffic is allowed:
+  // dashboards poll it far more often than anyone relays.
+  it("never moves the relayer circuit, however often the probe fails", async () => {
+    const fetchSpy = vi.spyOn(global, "fetch").mockImplementation(async () => {
+      throw new TypeError("fetch failed");
+    });
+
+    for (let i = 0; i < 6; i++) {
+      const res = await app.request("/uni/relay/status");
+      expect(await res.json()).toEqual(UNREACHABLE);
+    }
+
+    expect(fetchSpy).toHaveBeenCalledTimes(6);
+    expect(registry.get("relayer:uni").state).toBe("CLOSED");
+  });
+
+  it("probes a circuit past its cooldown without spending its half-open slot", async () => {
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockImplementation(async () => json({ error: "internal" }, 500));
+    await openRelayerCircuit();
+    vi.setSystemTime(NOW + 30_000);
+    fetchSpy.mockImplementation(async () => json(RELAYER_STATUS));
+
+    const res = await app.request("/uni/relay/status");
+
+    expect(await res.json()).toEqual(RELAYER_STATUS);
+    expect(registry.get("relayer:uni").state).toBe("OPEN");
+  });
+  // Dashboards poll this on every page: one outage must be one warning and
+  // one recovery line, not a line per request.
+  it("logs a relayer outage once when it starts and once when it ends", async () => {
+    vi.mocked(logger.warn).mockClear();
+    vi.mocked(logger.info).mockClear();
+    const fetchSpy = vi
+      .spyOn(global, "fetch")
+      .mockRejectedValue(new Error("connect ECONNREFUSED relayer-uni:3002"));
+
+    await app.request("/uni/relay/status");
+    await app.request("/uni/relay/status");
+    await app.request("/uni/relay/status");
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      { dao: "uni", cause: "Error" },
+      expect.stringContaining("unreachable"),
+    );
+
+    fetchSpy.mockResolvedValue(
+      new Response(JSON.stringify(RELAYER_STATUS), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    await app.request("/uni/relay/status");
+    await app.request("/uni/relay/status");
+
+    expect(logger.info).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledWith(
+      { dao: "uni" },
+      "relayer status reachable again",
+    );
   });
 });

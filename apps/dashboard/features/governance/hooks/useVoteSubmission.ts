@@ -11,8 +11,11 @@ import {
 } from "@/features/governance/utils/submissionStore";
 import {
   readVoteDetails,
+  readWalletFallback,
+  subscribeToWalletFallback,
   voteSubmissionKey,
   type VoteDetails,
+  type WalletFallback,
 } from "@/features/governance/utils/voteSubmission";
 
 interface UseVoteSubmissionResult {
@@ -20,6 +23,7 @@ interface UseVoteSubmissionResult {
   key: string | null;
   submission: SubmissionState;
   details: VoteDetails;
+  walletFallback: WalletFallback;
 }
 
 /**
@@ -46,11 +50,19 @@ export const useVoteSubmission = (
   );
   const submission = useSyncExternalStore(subscribe, read, read);
 
+  const readFallback = useCallback(() => readWalletFallback(key), [key]);
+  const walletFallback = useSyncExternalStore(
+    subscribeToWalletFallback,
+    readFallback,
+    readFallback,
+  );
+
   return {
     key,
     submission,
     details: key
       ? readVoteDetails(key)
       : { support: null, alreadyVoted: false },
+    walletFallback,
   };
 };

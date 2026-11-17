@@ -183,6 +183,18 @@ describe("POST /internal/webhook", () => {
     expect(outcomes).toEqual(["failed"]);
   });
 
+  // The kill switch is an operator's choice, not an outage: events that
+  // arrive while it is on must not raise a failure each.
+  it("reports skipped while gasless relaying is paused", async () => {
+    const { app, outcomes } = createApp(async () => {
+      throw Errors.RELAYER_PAUSED();
+    });
+    const res = await post(app, webhookBody({ proposalId: "42" }));
+    expect(res.status).toBe(202);
+    await settle();
+    expect(outcomes).toEqual(["skipped"]);
+  });
+
   it("returns 202 before enact settles", async () => {
     let resolveEnact: (value: EnactOutcome) => void;
     const enacted = new Promise<EnactOutcome>((resolve) => {

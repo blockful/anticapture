@@ -4,6 +4,7 @@ import {
   ContractFunctionRevertedError,
   getAddress,
   HttpRequestError,
+  InsufficientFundsError,
   type Hash,
   type Hex,
 } from "viem";
@@ -12,6 +13,7 @@ import { governorAbi } from "@/abi/governor";
 import { erc20VotesAbi } from "@/abi/token";
 import { RelayError } from "@/errors";
 import { RelayService } from "./relay";
+import { trackBroadcasts } from "./status/relay-outcome-tracker";
 import type { RelayerSigner } from "@/signer/types";
 import type { ISignatureVerifier } from "./guards/signature-verifier";
 import type { IChainStateService } from "./chain/chain-state";
@@ -112,6 +114,7 @@ function createService(
     rateLimiter?: IRateLimiter;
     minVotingPower?: bigint;
     chainReader?: ChainReader;
+    paused?: boolean;
   } = {},
 ): RelayService {
   return new RelayService(
@@ -123,7 +126,34 @@ function createService(
     overrides.minVotingPower ?? 0n,
     GOVERNOR,
     TOKEN,
+    overrides.paused,
   );
+}
+
+/** Signature verifier that records whether any signer was recovered. */
+function createRecordingVerifier() {
+  const recovered: string[] = [];
+  const verifier = createStubSignatureVerifier({
+    recoverVoteSigner: async () => {
+      recovered.push("vote");
+      return VOTER;
+    },
+    recoverDelegationSigner: async () => {
+      recovered.push("delegation");
+      return VOTER;
+    },
+  });
+  return { verifier, recovered };
+}
+
+/** Outcome recorder in the shape trackBroadcasts feeds. */
+function createRecorder() {
+  const outcomes: ("success" | "failure")[] = [];
+  return {
+    outcomes,
+    recordSuccess: () => outcomes.push("success"),
+    recordFailure: () => outcomes.push("failure"),
+  };
 }
 
 describe("RelayService", () => {
@@ -217,6 +247,20 @@ describe("RelayService", () => {
 
       await expect(service.relayVote(voteParams)).rejects.toBe(transportError);
     });
+
+    it("answers 503 RELAYER_PAUSED, before recovering the voter, while paused", async () => {
+      const { verifier, recovered } = createRecordingVerifier();
+      const service = createService({
+        paused: true,
+        signatureVerifier: verifier,
+      });
+
+      const err = await caught(service.relayVote(voteParams));
+
+      expect(err).toBeInstanceOf(RelayError);
+      expect(err).toMatchObject({ code: "RELAYER_PAUSED", status: 503 });
+      expect(recovered).toEqual([]);
+    });
   });
 
   describe("relayDelegation", () => {
@@ -305,6 +349,76 @@ describe("RelayService", () => {
         "ERC20Votes: invalid nonce",
       );
       expect(sent).toBe(false);
+    });
+
+    it("answers 503 RELAYER_PAUSED, before recovering the delegator, while paused", async () => {
+      const { verifier, recovered } = createRecordingVerifier();
+      const service = createService({
+        paused: true,
+        signatureVerifier: verifier,
+      });
+
+      const err = await caught(service.relayDelegation(delegateParams));
+
+      expect(err).toBeInstanceOf(RelayError);
+      expect(err).toMatchObject({ code: "RELAYER_PAUSED", status: 503 });
+      expect(recovered).toEqual([]);
+    });
+  });
+
+  // index.ts wraps the signer with trackBroadcasts, which is how relays feed
+  // GET /relay/status. Only an actual broadcast may count either way.
+  describe("broadcast outcomes", () => {
+    const voteParams = {
+      proposalId: 1n,
+      support: 1,
+      v: 27,
+      r: SAMPLE_R,
+      s: SAMPLE_S,
+    };
+
+    it("records a success for a relayed vote", async () => {
+      const recorder = createRecorder();
+      const service = createService({
+        signer: trackBroadcasts(createStubSigner(), recorder),
+      });
+
+      await service.relayVote(voteParams);
+
+      expect(recorder.outcomes).toEqual(["success"]);
+    });
+
+    it("records a failure for a broadcast answered as RELAYER_LOW_BALANCE", async () => {
+      const recorder = createRecorder();
+      const service = createService({
+        signer: trackBroadcasts(
+          createStubSigner({
+            sendTransaction: async () => {
+              throw new InsufficientFundsError();
+            },
+          }),
+          recorder,
+        ),
+      });
+
+      const err = await caught(service.relayVote(voteParams));
+
+      expect(err).toMatchObject({ code: "RELAYER_LOW_BALANCE", status: 503 });
+      expect(recorder.outcomes).toEqual(["failure"]);
+    });
+
+    it("records nothing for a relay refused before broadcasting", async () => {
+      const recorder = createRecorder();
+      const service = createService({
+        signer: trackBroadcasts(createStubSigner(), recorder),
+        chainState: createStubChainState({ getVotingPower: async () => 0n }),
+        minVotingPower: 1000n,
+      });
+
+      await expect(service.relayVote(voteParams)).rejects.toThrow(
+        "minimum voting power",
+      );
+      expect(recorder.outcomes).toEqual([]);
     });
   });
 });

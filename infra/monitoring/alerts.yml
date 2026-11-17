@@ -342,3 +342,27 @@ groups:
             2 minutes (threshold: 1%). Users are experiencing server errors. Check application
             logs for stack traces, database connectivity, and any recent deployments that may
             have introduced regressions.
+
+      # The gasless relayer reports it cannot sponsor transactions (unfunded
+      # wallet, RPC or Redis down, stuck nonce, repeated broadcast failures).
+      # Voters keep voting from their own wallets, which is what makes this
+      # silent without an alert. A deliberate GASLESS_PAUSED is left out: the
+      # operator who set it already knows.
+      - alert: GaslessRelayerUnavailable
+        expr: >
+          max by (dao) (relayer_gasless_available) == 0
+          unless on (dao)
+          max by (dao) (relayer_gasless_unavailable_reason{reason="PAUSED"}) == 1
+        for: 10m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] gasless relaying is unavailable for {{ $labels.dao }}"
+          description: >
+            GET /relay/status on the {{ $labels.dao }} relayer has reported available: false
+            for more than 10 minutes, so the dashboard sends every voter to their own wallet.
+            relayer_gasless_unavailable_reason{dao="{{ $labels.dao }}"} lists why: fund the
+            relayer wallet for LOW_BALANCE, check eRPC for RPC_UNAVAILABLE or CHAIN_STALE,
+            Redis for RATE_LIMITER_UNAVAILABLE, and the relayer's pending transactions for
+            PENDING_TRANSACTIONS_STUCK or RECENT_RELAY_FAILURES.

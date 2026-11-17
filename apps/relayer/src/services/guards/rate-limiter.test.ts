@@ -32,6 +32,7 @@ function makeStore(): RateLimitStorage {
     async getCount({ address, operation }) {
       return counters.get(`${address}:${operation}`) ?? 0;
     },
+    async ping() {},
   };
 }
 
@@ -105,6 +106,7 @@ describe("RateLimiter", () => {
     const brokenStore: RateLimitStorage = {
       incrementIfAllowed: () => Promise.reject(new Error("connection refused")),
       getCount: () => Promise.reject(new Error("connection refused")),
+      ping: () => Promise.reject(new Error("connection refused")),
     };
 
     const brokenLimiter = new RateLimiter(brokenStore, {

@@ -3,6 +3,7 @@ import type { Account, Address, Hash, Hex } from "viem";
 import { relayVote } from "@anticapture/client";
 
 import {
+  isRelayedVotePending,
   relayGaslessVote,
   type BallotSigner,
   type VoteChainReader,
@@ -246,5 +247,49 @@ describe("relayGaslessVote", () => {
       hash: transactionHash,
     });
     expect(signTypedData).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("isRelayedVotePending", () => {
+  const withTransaction = (getTransaction: jest.Mock) =>
+    ({ getTransaction }) as unknown as Parameters<
+      typeof isRelayedVotePending
+    >[0];
+
+  beforeEach(() => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("holds the wallet back while the relayed transaction waits in the mempool", async () => {
+    const client = withTransaction(
+      jest.fn().mockResolvedValue({ blockNumber: null }),
+    );
+    await expect(isRelayedVotePending(client, transactionHash)).resolves.toBe(
+      true,
+    );
+  });
+
+  it("does not for a mined transaction: hasVoted answers that one", async () => {
+    const client = withTransaction(
+      jest.fn().mockResolvedValue({ blockNumber: BigInt(21_000_000) }),
+    );
+    await expect(isRelayedVotePending(client, transactionHash)).resolves.toBe(
+      false,
+    );
+  });
+
+  // A dropped transaction is unknown to the node, and a failed read says
+  // nothing; neither may keep the voter from their wallet.
+  it("does not for a transaction the node cannot find or a failed read", async () => {
+    const client = withTransaction(
+      jest.fn().mockRejectedValue(new Error("Transaction not found")),
+    );
+    await expect(isRelayedVotePending(client, transactionHash)).resolves.toBe(
+      false,
+    );
   });
 });

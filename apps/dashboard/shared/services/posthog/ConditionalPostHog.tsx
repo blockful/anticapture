@@ -41,6 +41,11 @@ const ConditionalPostHog = () => {
         properties.dao = element.dataset.phDao;
       }
 
+      // Optionally add how an action is paid for (gasless or wallet)
+      if (element.dataset.phPayment) {
+        properties.payment = element.dataset.phPayment;
+      }
+
       windowWithPostHog.posthog.capture(
         element.dataset.phEvent || "",
         properties,
