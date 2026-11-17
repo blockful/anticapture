@@ -49,6 +49,7 @@ import { isProposalNotFoundError } from "@/features/governance/utils/proposalErr
 import { canRelayGovernanceAction } from "@/features/governance/utils/relayGovernanceAction";
 import { needsProposalWatch } from "@/features/governance/utils/submissionState";
 import {
+  confirmIndexedVote,
   isSubmittedVoteIndexed,
   submittedVoteSupport,
 } from "@/features/governance/utils/voteSubmission";
@@ -370,6 +371,7 @@ export const ProposalSection = ({
       : undefined;
   // Indexed means the submitted transaction itself: a changed vote leaves the
   // previous one in the API until the new one is indexed.
+  const indexedVoteHash = votes?.items[0]?.transactionHash;
   const isOnchainVoteIndexed = isSubmittedVoteIndexed(
     onchainVoteSubmission,
     votes?.items[0],
@@ -379,6 +381,11 @@ export const ProposalSection = ({
   // are refetched so they include it without a page reload.
   useEffect(() => {
     if (isOffchain || !isWatchingOnchainVote || !isOnchainVoteIndexed) return;
+    // A vote left in doubt (receipt unread) is settled by the API seeing its
+    // transaction: the page stops calling it unconfirmed for good.
+    if (onchainVoteKey && indexedVoteHash) {
+      confirmIndexedVote(onchainVoteKey, indexedVoteHash);
+    }
     const daoKey = daoEnum.toLowerCase() as ProposalPathParamsDaoEnumKey;
     void queryClient.invalidateQueries({
       queryKey: proposalQueryKey(daoKey, proposalId),
@@ -390,6 +397,8 @@ export const ProposalSection = ({
     isOffchain,
     isWatchingOnchainVote,
     isOnchainVoteIndexed,
+    onchainVoteKey,
+    indexedVoteHash,
     queryClient,
     daoEnum,
     proposalId,

@@ -3,6 +3,7 @@ import type {
   Account,
   Address,
   Chain,
+  Hash,
   PublicActions,
   WalletActions,
   WalletClient,
@@ -199,6 +200,20 @@ function getVoteHandler(daoId: DaoIdEnum): VoteHandler {
   }
 }
 
+/**
+ * What a wallet vote did, once the call settles.
+ *
+ * - "success" / "reverted": the receipt was read.
+ * - "unconfirmed": the wallet broadcast the transaction but the receipt wait
+ *   failed. The vote may still land, so it must not be offered again.
+ * - "not-sent": nothing was broadcast (declined, or the simulation refused).
+ */
+export type WalletVoteOutcome =
+  | { status: "success" | "reverted" | "unconfirmed"; hash: Hash }
+  | { status: "not-sent"; hash: null };
+
+const NOT_SENT: WalletVoteOutcome = { status: "not-sent", hash: null };
+
 export const voteOnProposal = async (
   vote: "for" | "against" | "abstain",
   proposalId: string,
@@ -209,31 +224,39 @@ export const voteOnProposal = async (
   setTransactionhash: (hash: string) => void,
   comment?: string,
   delegatedVoteAddresses?: Address[],
-) => {
+): Promise<WalletVoteOutcome> => {
   const client = walletClient.extend(publicActions);
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
 
+  let hash: Hash;
   try {
     const trimmedComment = comment?.trim() || undefined;
     const handler = getVoteHandler(daoId);
-    const hash = await handler(client as VoteClient, {
+    hash = await handler(client as VoteClient, {
       proposalId,
       voteNumber,
       account,
       comment: trimmedComment,
       delegatedVoteAddresses,
     });
-
-    setTransactionhash(hash);
-    const transaction = await client.waitForTransactionReceipt({ hash });
-    setTransactionhash("");
-
-    return transaction;
   } catch (error) {
     console.error(error);
-    if (isUserRejection(error)) return null;
+    if (!isUserRejection(error)) showCustomToast("Failed to vote", "error");
+    return NOT_SENT;
+  }
 
-    showCustomToast("Failed to vote", "error");
-    return null;
+  setTransactionhash(hash);
+  try {
+    const receipt = await client.waitForTransactionReceipt({ hash });
+    setTransactionhash("");
+    return {
+      hash: receipt.transactionHash,
+      status: receipt.status === "reverted" ? "reverted" : "success",
+    };
+  } catch (error) {
+    // The transaction is out; the explorer link stays up and the vote is
+    // reported as in doubt rather than failed.
+    console.error(error);
+    return { hash, status: "unconfirmed" };
   }
 };

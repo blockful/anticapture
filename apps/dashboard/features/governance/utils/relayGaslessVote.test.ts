@@ -39,9 +39,8 @@ const relayerError = (status: number, code?: string, message?: string) =>
   });
 
 /**
- * The chain reader the flow is given: `hasVoted` and `name` answered by
- * function name, plus the receipt wait. Typed against the real interface so
- * a change to it surfaces here as a type error.
+ * The chain reader the flow is given, implementing the real interface so a
+ * change to it surfaces here as a type error.
  */
 const makeReader = ({
   hasVoted = false,
@@ -52,27 +51,35 @@ const makeReader = ({
   hasVotedError?: Error;
   receipt?: Promise<{ status: "success" | "reverted" }>;
 } = {}) => {
-  const readContract = jest.fn(
-    async ({ functionName }: { functionName: string }) => {
-      if (functionName === "hasVoted") {
-        if (hasVotedError) throw hasVotedError;
-        return hasVoted;
-      }
-      if (functionName === "name") return "ENS Governor";
-      throw new Error(`unexpected read ${functionName}`);
-    },
-  );
-  const waitForTransactionReceipt = jest.fn(() => receipt);
-  const reader = {
-    readContract,
-    waitForTransactionReceipt,
-  } as unknown as VoteChainReader;
-  return { reader, readContract, waitForTransactionReceipt };
+  const hasVotedFn = jest.fn<
+    ReturnType<VoteChainReader["hasVoted"]>,
+    Parameters<VoteChainReader["hasVoted"]>
+  >(async () => {
+    if (hasVotedError) throw hasVotedError;
+    return hasVoted;
+  });
+  const governorName = jest.fn<
+    ReturnType<VoteChainReader["governorName"]>,
+    Parameters<VoteChainReader["governorName"]>
+  >(async () => "ENS Governor");
+  const waitForReceipt = jest.fn<
+    ReturnType<VoteChainReader["waitForReceipt"]>,
+    Parameters<VoteChainReader["waitForReceipt"]>
+  >(() => receipt);
+  const reader: VoteChainReader = {
+    hasVoted: hasVotedFn,
+    governorName,
+    waitForReceipt,
+  };
+  return { reader, hasVoted: hasVotedFn, waitForReceipt };
 };
 
 const makeSigner = (sign: () => Promise<Hex> = async () => signature) => {
-  const signTypedData = jest.fn(sign);
-  const signer = { signTypedData } as unknown as BallotSigner;
+  const signTypedData = jest.fn<
+    ReturnType<BallotSigner["signTypedData"]>,
+    Parameters<BallotSigner["signTypedData"]>
+  >(sign);
+  const signer: BallotSigner = { signTypedData };
   return { signer, signTypedData };
 };
 
@@ -87,7 +94,7 @@ const run = (
     support: 1,
     account,
     signer,
-    publicClient: reader,
+    reader,
     onTxSubmitted,
   });
 
@@ -102,25 +109,23 @@ describe("relayGaslessVote", () => {
   });
 
   it("asks for no signature and makes no relay call when the vote is already on-chain", async () => {
-    const { reader, readContract } = makeReader({ hasVoted: true });
+    const { reader, hasVoted } = makeReader({ hasVoted: true });
     const { signer, signTypedData } = makeSigner();
 
     const outcome = await run(reader, signer);
 
     expect(outcome).toEqual({ status: "already-voted", hash: null });
-    expect(readContract).toHaveBeenCalledWith(
-      expect.objectContaining({
-        address: ensGovernor,
-        functionName: "hasVoted",
-        args: [BigInt(proposalId), voter],
-      }),
+    expect(hasVoted).toHaveBeenCalledWith(
+      ensGovernor,
+      BigInt(proposalId),
+      voter,
     );
     expect(signTypedData).not.toHaveBeenCalled();
     expect(mockedRelayVote).not.toHaveBeenCalled();
   });
 
   it("signs the ballot, relays it exactly once and confirms on the DAO chain", async () => {
-    const { reader, waitForTransactionReceipt } = makeReader();
+    const { reader, waitForReceipt } = makeReader();
     const { signer, signTypedData } = makeSigner();
     const onTxSubmitted = jest.fn();
     mockedRelayVote.mockResolvedValue({ transactionHash, voter });
@@ -150,9 +155,7 @@ describe("relayGaslessVote", () => {
       v: 28,
     });
     expect(onTxSubmitted).toHaveBeenCalledWith(transactionHash);
-    expect(waitForTransactionReceipt).toHaveBeenCalledWith({
-      hash: transactionHash,
-    });
+    expect(waitForReceipt).toHaveBeenCalledWith(transactionHash);
   });
 
   // The production incident: the relay answered 200, then the receipt wait
