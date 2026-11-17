@@ -1,5 +1,13 @@
 # @anticapture/gateful
 
+## 1.8.4
+
+### Patch Changes
+
+- [#2171](https://github.com/blockful/anticapture/pull/2171) [`bd4f072`](https://github.com/blockful/anticapture/commit/bd4f072dc66eff4764e39fed0303ac1a6f79c4da) Thanks [@alextnetto](https://github.com/alextnetto)! - Answer a gasless vote or delegation that would revert on-chain (a vote already cast, a used nonce) with 409 SIMULATION_FAILED instead of 500 INTERNAL, documented in the relay routes Gateful exposes, and make a gasless vote reach the relayer once: the dashboard checks hasVoted before asking for a signature, confirms the relayed transaction on the DAO's chain instead of through the wallet, never reports a relayed vote as failed, and keeps the vote's submission state across modal closes and remounts so the ballot is not offered again
+
+- [#2178](https://github.com/blockful/anticapture/pull/2178) [`b12bc97`](https://github.com/blockful/anticapture/commit/b12bc9745af6873bd24678d2489c7fb5a2c79112) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Token metrics items gain a `close` field: the value at the end of the UTC day, forward-filled on days without activity. `high` keeps its meaning. Regenerate @anticapture/client from this spec.
+
 ## 1.8.3
 
 ### Patch Changes
