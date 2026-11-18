@@ -35,6 +35,7 @@ import { TokenMetricItem } from "@/mappers/token-metrics";
 interface DaoMetricsRow {
   date: bigint;
   high: bigint;
+  close: bigint;
   volume: bigint;
 }
 
@@ -54,12 +55,8 @@ export interface ITokenMetricsRepository {
 
 interface MetricData {
   high: bigint;
+  close: bigint;
   volume: bigint;
-  low?: bigint;
-  open?: bigint;
-  close?: bigint;
-  average?: bigint;
-  count?: number;
 }
 
 export class TokenMetricsService {
@@ -116,6 +113,7 @@ export class TokenMetricsService {
       const date = Number(row.date);
       dateMap.set(date, {
         high: row.high,
+        close: row.close,
         volume: row.volume,
       });
     });
@@ -182,6 +180,7 @@ export class TokenMetricsService {
       if (row) {
         return {
           high: row.high,
+          close: row.close,
           volume: row.volume,
         };
       }
@@ -193,7 +192,9 @@ export class TokenMetricsService {
   }
 
   /**
-   * Apply forward-fill to create complete data series
+   * Apply forward-fill to create complete data series.
+   * `high` and `close` are carried forward independently; `close` is the
+   * level to chart, since a day's high hides a drop until the next peak.
    * Volume is NOT forward-filled - days without activity have volume = 0.
    */
   private applyForwardFill(
@@ -203,15 +204,18 @@ export class TokenMetricsService {
   ): TokenMetricItem[] {
     // Convert dateMap to Maps for forward-fill
     const highMap = new Map<number, bigint>();
+    const closeMap = new Map<number, bigint>();
     const volumeMap = new Map<number, bigint>();
 
     for (const [date, data] of dateMap) {
       highMap.set(date, data.high);
+      closeMap.set(date, data.close);
       volumeMap.set(date, data.volume);
     }
 
     // Normalize timestamps to midnight UTC before forward-fill
     const normalizedHighMap = normalizeMapTimestamps(highMap);
+    const normalizedCloseMap = normalizeMapTimestamps(closeMap);
     const normalizedVolumeMap = normalizeMapTimestamps(volumeMap);
 
     // Apply forward-fill
@@ -220,6 +224,11 @@ export class TokenMetricsService {
       normalizedHighMap,
       initialValue?.high,
     );
+    const filledClose = forwardFill(
+      timeline,
+      normalizedCloseMap,
+      initialValue?.close,
+    );
 
     // Build result array
     return timeline
@@ -227,6 +236,7 @@ export class TokenMetricsService {
       .map((date) => ({
         date: date.toString(),
         high: (filledHigh.get(date) ?? 0n).toString(),
+        close: (filledClose.get(date) ?? 0n).toString(),
         volume: (normalizedVolumeMap.get(date) ?? 0n).toString(),
       }));
   }

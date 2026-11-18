@@ -4,6 +4,7 @@ import { tokenPrice } from "ponder:schema";
 import {
   updateProposalStatus,
   proposalCreated,
+  updateProposalContent,
   voteCast,
 } from "@/eventHandlers";
 import { DaoIdEnum } from "@/lib/enums";
@@ -73,6 +74,37 @@ export function GovernorIndexer(blockTime: number) {
       event.transaction.hash,
     );
   });
+
+  ponder.on(`NounsGovernor:ProposalUpdated`, async ({ event, context }) => {
+    await updateProposalContent(context, event.args.id.toString(), {
+      description: event.args.description,
+      targets: [...event.args.targets],
+      values: [...event.args.values],
+      signatures: [...event.args.signatures],
+      calldatas: [...event.args.calldatas],
+    });
+  });
+
+  ponder.on(
+    `NounsGovernor:ProposalDescriptionUpdated`,
+    async ({ event, context }) => {
+      await updateProposalContent(context, event.args.id.toString(), {
+        description: event.args.description,
+      });
+    },
+  );
+
+  ponder.on(
+    `NounsGovernor:ProposalTransactionsUpdated`,
+    async ({ event, context }) => {
+      await updateProposalContent(context, event.args.id.toString(), {
+        targets: [...event.args.targets],
+        values: [...event.args.values],
+        signatures: [...event.args.signatures],
+        calldatas: [...event.args.calldatas],
+      });
+    },
+  );
 
   ponder.on(`NounsGovernor:ProposalVetoed`, async ({ event, context }) => {
     await updateProposalStatus(

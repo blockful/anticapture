@@ -29,12 +29,22 @@ const EthPricesSchema = z.object({
 /** Serving prices older than this is worse than serving none. */
 const STALE_PRICE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
+/** A sale older than this is not the current token price. */
+export const NFT_AUCTION_PRICE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+
+export function isAuctionPriceStale(
+  timestampSeconds: number,
+  nowSeconds: number,
+): boolean {
+  return nowSeconds - timestampSeconds > NFT_AUCTION_PRICE_MAX_AGE_SECONDS;
+}
+
 export interface NFTPriceRepository {
   getHistoricalNFTPrice(
     limit: number,
     offset: number,
   ): Promise<TokenHistoricalPriceResponse>;
-  getTokenPrice(): Promise<string>;
+  getTokenPrice(): Promise<{ price: string; timestamp: number } | null>;
 }
 
 export class NFTPriceService implements PriceProvider {
@@ -158,7 +168,24 @@ export class NFTPriceService implements PriceProvider {
   ): Promise<MaybeDegraded<string>> {
     // Outside the try below on purpose: this reads PostgreSQL, and a database
     // error must stay a real error rather than degrade to a stale price.
-    const price = await this.repo.getTokenPrice();
+    const latest = await this.repo.getTokenPrice();
+    if (latest == null) {
+      // Lil Nouns never indexed auction settlements, so this table is empty
+      // and the old non-null assertion crashed GET /token with a 500.
+      logger.warn("no indexed NFT auction price; serving a degraded zero");
+      return { data: "0", degraded: true };
+    }
+    const auctionIsStale = isAuctionPriceStale(
+      latest.timestamp,
+      Math.floor(Date.now() / 1000),
+    );
+    if (auctionIsStale) {
+      logger.warn(
+        { timestamp: latest.timestamp },
+        "indexed NFT auction price is older than 7 days",
+      );
+    }
+    const price = latest.price;
     const nftEthValue = Number(formatEther(BigInt(price)));
 
     let value: string;
@@ -194,7 +221,7 @@ export class NFTPriceService implements PriceProvider {
     }
 
     this.lastGoodTokenPrice.set({ currency: targetCurrency, value });
-    return { data: value, degraded: false };
+    return { data: value, degraded: auctionIsStale };
   }
 
   /**

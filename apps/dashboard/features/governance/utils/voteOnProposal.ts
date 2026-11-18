@@ -1,23 +1,18 @@
-import { parseSignature, publicActions } from "viem";
+import { publicActions } from "viem";
 import type {
   Account,
   Address,
   Chain,
+  Hash,
   PublicActions,
   WalletActions,
   WalletClient,
 } from "viem";
 
-import { relayVote } from "@anticapture/client";
-import type { RelayVotePathParamsDaoEnumKey } from "@anticapture/client";
-
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { DaoIdEnum } from "@/shared/types/daos";
-import {
-  isUserRejection,
-  mapRelayerError,
-} from "@/shared/utils/gaslessRelayerError";
+import { isUserRejection } from "@/shared/utils/gaslessRelayerError";
 
 const LinearVotingStrategyAbi = [
   {
@@ -58,23 +53,6 @@ const GovernorCastVoteAbi = [
     type: "function",
   },
 ] as const;
-
-const GovernorNameAbi = [
-  {
-    inputs: [],
-    name: "name",
-    outputs: [{ internalType: "string", name: "", type: "string" }],
-    stateMutability: "view",
-    type: "function",
-  },
-] as const;
-
-const BALLOT_TYPES = {
-  Ballot: [
-    { name: "proposalId", type: "uint256" },
-    { name: "support", type: "uint8" },
-  ],
-} as const;
 
 type VoteClient = WalletClient & PublicActions & WalletActions;
 
@@ -207,61 +185,11 @@ const ozGovernorVoteHandler =
     return client.writeContract(request);
   };
 
-const gaslessVoteHandler =
-  (daoId: DaoIdEnum): VoteHandler =>
-  async (client, params) => {
-    const config = daoConfigByDaoId[daoId];
-    const governor = config.daoOverview.contracts.governor;
-    if (!governor) throw new Error("DAO governance address not found");
-
-    const name = await client.readContract({
-      abi: GovernorNameAbi,
-      address: governor,
-      functionName: "name",
-    });
-
-    const signature = await client.signTypedData({
-      account: params.account,
-      domain: {
-        name,
-        version: "1",
-        chainId: config.daoOverview.chain.id,
-        verifyingContract: governor,
-      },
-      types: BALLOT_TYPES,
-      primaryType: "Ballot",
-      message: {
-        proposalId: BigInt(params.proposalId),
-        support: params.voteNumber,
-      },
-    });
-
-    const { r, s, v } = parseSignature(signature);
-    if (v === undefined) throw new Error("Signature missing v");
-
-    const response = await relayVote(
-      daoId.toLowerCase() as RelayVotePathParamsDaoEnumKey,
-      {
-        proposalId: params.proposalId,
-        support: params.voteNumber,
-        r,
-        s,
-        v: Number(v),
-      },
-    );
-    return response.transactionHash as `0x${string}`;
-  };
-
-function getVoteHandler(
-  daoId: DaoIdEnum,
-  useGasless: boolean,
-  hasComment: boolean,
-): VoteHandler {
-  // Gasless relay uses castVoteBySig which doesn't support vote reasons.
-  // Fall back to direct vote when a comment is present so it isn't silently dropped.
-  if (useGasless && daoConfigByDaoId[daoId].gaslessRelayer && !hasComment) {
-    return gaslessVoteHandler(daoId);
-  }
+/**
+ * Wallet votes only. Gasless votes go through relayGaslessVote, which waits on
+ * the DAO's chain rather than the wallet's provider.
+ */
+function getVoteHandler(daoId: DaoIdEnum): VoteHandler {
   switch (daoId) {
     case DaoIdEnum.SHU:
       return azoriusVoteHandler(daoId);
@@ -272,6 +200,20 @@ function getVoteHandler(
   }
 }
 
+/**
+ * What a wallet vote did, once the call settles.
+ *
+ * - "success" / "reverted": the receipt was read.
+ * - "unconfirmed": the wallet broadcast the transaction but the receipt wait
+ *   failed. The vote may still land, so it must not be offered again.
+ * - "not-sent": nothing was broadcast (declined, or the simulation refused).
+ */
+export type WalletVoteOutcome =
+  | { status: "success" | "reverted" | "unconfirmed"; hash: Hash }
+  | { status: "not-sent"; hash: null };
+
+const NOT_SENT: WalletVoteOutcome = { status: "not-sent", hash: null };
+
 export const voteOnProposal = async (
   vote: "for" | "against" | "abstain",
   proposalId: string,
@@ -281,45 +223,40 @@ export const voteOnProposal = async (
   walletClient: WalletClient,
   setTransactionhash: (hash: string) => void,
   comment?: string,
-  minVotingPower: bigint | null = null,
-  useGasless: boolean = false,
   delegatedVoteAddresses?: Address[],
-) => {
+): Promise<WalletVoteOutcome> => {
   const client = walletClient.extend(publicActions);
   const voteNumber = vote === "for" ? 1 : vote === "against" ? 0 : 2;
 
+  let hash: Hash;
   try {
     const trimmedComment = comment?.trim() || undefined;
-    const handler = getVoteHandler(daoId, useGasless, !!trimmedComment);
-    const hash = await handler(client as VoteClient, {
+    const handler = getVoteHandler(daoId);
+    hash = await handler(client as VoteClient, {
       proposalId,
       voteNumber,
       account,
       comment: trimmedComment,
       delegatedVoteAddresses,
     });
-
-    setTransactionhash(hash);
-    const transaction = await client.waitForTransactionReceipt({ hash });
-    setTransactionhash("");
-
-    return transaction;
   } catch (error) {
     console.error(error);
-    if (isUserRejection(error)) return null;
+    if (!isUserRejection(error)) showCustomToast("Failed to vote", "error");
+    return NOT_SENT;
+  }
 
-    const config = daoConfigByDaoId[daoId];
-    if (useGasless && config.gaslessRelayer) {
-      const message = mapRelayerError(error, {
-        operation: "vote",
-        minVotingPower,
-        decimals: config.decimals,
-        symbol: config.name,
-      });
-      showCustomToast(message, "error");
-    } else {
-      showCustomToast("Failed to vote", "error");
-    }
-    return null;
+  setTransactionhash(hash);
+  try {
+    const receipt = await client.waitForTransactionReceipt({ hash });
+    setTransactionhash("");
+    return {
+      hash: receipt.transactionHash,
+      status: receipt.status === "reverted" ? "reverted" : "success",
+    };
+  } catch (error) {
+    // The transaction is out; the explorer link stays up and the vote is
+    // reported as in doubt rather than failed.
+    console.error(error);
+    return { hash, status: "unconfirmed" };
   }
 };

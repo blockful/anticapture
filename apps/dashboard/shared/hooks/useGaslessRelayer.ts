@@ -29,6 +29,16 @@ interface UseRelayerConfigResult {
 
 const toDaoKey = (daoId: DaoIdEnum) => daoId.toLowerCase();
 
+/**
+ * The relayer's balance, config and an address's rate limit change at most
+ * once per relayed transaction. The balance hook alone is mounted by the
+ * config, rate-limit and eligibility hooks and by every enactment modal, and
+ * with no stale time each new observer refetched: the relayer logged the same
+ * three GETs two or three times within one second. A vote invalidates the
+ * rate limit itself once it is relayed.
+ */
+const RELAYER_QUERY_STALE_MS = 60_000;
+
 interface UseRelayerBalanceResult {
   hasEnoughBalance: boolean | null;
   isLoading: boolean;
@@ -41,7 +51,7 @@ export const useRelayerBalance = (
 
   const { data, isLoading } = useGetRelayerBalance(
     toDaoKey(daoId) as GetRelayerBalancePathParamsDaoEnumKey,
-    { query: { enabled } },
+    { query: { enabled, staleTime: RELAYER_QUERY_STALE_MS } },
   );
 
   return {
@@ -81,7 +91,7 @@ export const useRelayerConfig = (daoId: DaoIdEnum): UseRelayerConfigResult => {
 
   const { data, isLoading } = useGetConfig(
     toDaoKey(daoId) as GetConfigPathParamsDaoEnumKey,
-    { query: { enabled } },
+    { query: { enabled, staleTime: RELAYER_QUERY_STALE_MS } },
   );
 
   const minVotingPower = useMemo(() => {
@@ -124,7 +134,7 @@ export const useRelayerRateLimit = (
   const { data, isLoading } = useGetRateLimit(
     toDaoKey(daoId) as GetRateLimitPathParamsDaoEnumKey,
     address ?? zeroAddress,
-    { query: { enabled } },
+    { query: { enabled, staleTime: RELAYER_QUERY_STALE_MS } },
   );
 
   return {

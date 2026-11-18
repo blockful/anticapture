@@ -36,15 +36,15 @@ const HealthResponseSchema = z
       .object({
         lastEventTimestamp: z.number().int().nullable().openapi({
           description:
-            "Unix timestamp (seconds) of the most recent indexed event, or null if no events have been recorded.",
+            "Unix timestamp (seconds) of the most recent indexed activity (feed, votes, proposals, transfers, metrics), or null if nothing has been indexed.",
         }),
         lagSeconds: z.number().int().nullable().openapi({
           description:
-            "Seconds between now and lastEventTimestamp, or null if the indexer hasn't produced any events.",
+            "Seconds between now and lastEventTimestamp, or null if nothing has been indexed.",
         }),
         fresh: z.boolean().openapi({
           description:
-            "True when lagSeconds is within the freshness threshold (300s).",
+            "True when lagSeconds is within the freshness threshold (24h).",
         }),
       })
       .openapi({

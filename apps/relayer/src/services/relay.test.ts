@@ -1,6 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { getAddress, type Hash, type Hex } from "viem";
+import {
+  ContractFunctionExecutionError,
+  ContractFunctionRevertedError,
+  getAddress,
+  HttpRequestError,
+  type Hash,
+  type Hex,
+} from "viem";
 
+import { governorAbi } from "@/abi/governor";
+import { erc20VotesAbi } from "@/abi/token";
+import { RelayError } from "@/errors";
 import { RelayService } from "./relay";
 import type { RelayerSigner } from "@/signer/types";
 import type { ISignatureVerifier } from "./guards/signature-verifier";
@@ -58,15 +68,40 @@ function createStubRateLimiter(): IRateLimiter {
   };
 }
 
-function createStubChainReader(): ChainReader {
+function createStubChainReader(
+  simulate: () => Promise<unknown> = async () => ({
+    request: {},
+    result: undefined,
+  }),
+): ChainReader {
   return {
     getBalance: async () => 0n,
     readContract: (async () => undefined) as ChainReader["readContract"],
-    simulateContract: (async () => ({
-      request: {},
-      result: undefined,
-    })) as unknown as ChainReader["simulateContract"],
+    simulateContract: simulate as unknown as ChainReader["simulateContract"],
   };
+}
+
+/** What viem's simulateContract throws when the contract reverts. */
+function contractRevert(
+  abi: typeof governorAbi | typeof erc20VotesAbi,
+  functionName: string,
+  args: unknown[],
+  reason: string,
+) {
+  return new ContractFunctionExecutionError(
+    new ContractFunctionRevertedError({ abi, functionName, message: reason }),
+    { abi, functionName, args, contractAddress: GOVERNOR },
+  );
+}
+
+/** Captures what the service threw, so its fields can be asserted on. */
+async function caught(promise: Promise<unknown>): Promise<unknown> {
+  try {
+    await promise;
+  } catch (err) {
+    return err;
+  }
+  throw new Error("expected the promise to reject");
 }
 
 function createService(
@@ -140,6 +175,48 @@ describe("RelayService", () => {
         "minimum voting power",
       );
     });
+
+    // A replayed signature is the common case: the wallet signs the same
+    // Ballot deterministically, so a second click resends identical bytes.
+    it("answers 409 SIMULATION_FAILED, without sending, when the vote would revert", async () => {
+      let sent = false;
+      const service = createService({
+        signer: createStubSigner({
+          sendTransaction: async () => {
+            sent = true;
+            return TX_HASH;
+          },
+        }),
+        chainReader: createStubChainReader(async () => {
+          throw contractRevert(
+            governorAbi,
+            "castVoteBySig",
+            [1n, 1, 27, SAMPLE_R, SAMPLE_S],
+            "GovernorVotingSimple: vote already cast",
+          );
+        }),
+      });
+
+      const err = await caught(service.relayVote(voteParams));
+
+      expect(err).toBeInstanceOf(RelayError);
+      expect(err).toMatchObject({ code: "SIMULATION_FAILED", status: 409 });
+      expect((err as RelayError).message).toContain(
+        "GovernorVotingSimple: vote already cast",
+      );
+      expect(sent).toBe(false);
+    });
+
+    it("lets a simulation that could not run surface as an unhandled error", async () => {
+      const transportError = new HttpRequestError({ url: "http://rpc" });
+      const service = createService({
+        chainReader: createStubChainReader(async () => {
+          throw transportError;
+        }),
+      });
+
+      await expect(service.relayVote(voteParams)).rejects.toBe(transportError);
+    });
   });
 
   describe("relayDelegation", () => {
@@ -199,6 +276,35 @@ describe("RelayService", () => {
       await expect(service.relayDelegation(delegateParams)).rejects.toThrow(
         "minimum voting power",
       );
+    });
+
+    it("answers 409 SIMULATION_FAILED, without sending, when the delegation would revert", async () => {
+      let sent = false;
+      const service = createService({
+        signer: createStubSigner({
+          sendTransaction: async () => {
+            sent = true;
+            return TX_HASH;
+          },
+        }),
+        chainReader: createStubChainReader(async () => {
+          throw contractRevert(
+            erc20VotesAbi,
+            "delegateBySig",
+            [VOTER, 0n, 0n, 27, SAMPLE_R, SAMPLE_S],
+            "ERC20Votes: invalid nonce",
+          );
+        }),
+      });
+
+      const err = await caught(service.relayDelegation(delegateParams));
+
+      expect(err).toBeInstanceOf(RelayError);
+      expect(err).toMatchObject({ code: "SIMULATION_FAILED", status: 409 });
+      expect((err as RelayError).message).toContain(
+        "ERC20Votes: invalid nonce",
+      );
+      expect(sent).toBe(false);
     });
   });
 });

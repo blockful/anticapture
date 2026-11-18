@@ -36,9 +36,11 @@ export class NFTPriceRepository {
       .offset(offset);
   }
 
-  async getTokenPrice(): Promise<string> {
-    return (await this.db.query.tokenPrice.findFirst({
+  async getTokenPrice(): Promise<{ price: string; timestamp: number } | null> {
+    const row = await this.db.query.tokenPrice.findFirst({
       orderBy: desc(tokenPrice.timestamp),
-    }))!.price.toString();
+    });
+    if (!row) return null;
+    return { price: row.price.toString(), timestamp: Number(row.timestamp) };
   }
 }

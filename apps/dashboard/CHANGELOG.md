@@ -1,5 +1,17 @@
 # @anticapture/dashboard
 
+## 2.17.1
+
+### Patch Changes
+
+- [#2177](https://github.com/blockful/anticapture/pull/2177) [`d28e497`](https://github.com/blockful/anticapture/commit/d28e4979b44104498395c7c5b17bbc1a466c8c65) Thanks [@alextnetto](https://github.com/alextnetto)! - Show vote totals and quorum on the proposal results card with 2 decimals while the value is below 100 in its unit (1.69M instead of 2M, 12.35K) and none from 100 up (123K), and widen the vote column so these values fit
+
+- [#2178](https://github.com/blockful/anticapture/pull/2178) [`b12bc97`](https://github.com/blockful/anticapture/commit/b12bc9745af6873bd24678d2489c7fb5a2c79112) Thanks [@PedroBinotto](https://github.com/PedroBinotto)! - Correct published governance and supply figures found by the November 2026 data review: GTC abstain votes, GovernorAlpha votes and Governor Charlie are indexed, SCR and OP module ballots (VoteCastWithParams) are counted, Nouns and Lil Nouns proposal edits are applied and NFT burns lower supply, Lil Nouns auctions are indexed and GET /lil_nouns/token no longer 500s without a price, Nouns quorum is read per proposal from for-votes only, GTC governance parameters come from Governor Charlie, token metrics expose the daily close and the dashboard charts it, /health judges freshness from all indexed activity within a day, and the GTC, COMP, AAVE, ARB and Fluid address lists drop third parties, duplicates and wrong contracts. Historical indexer rows change only after the affected DAOs are replayed.
+
+- [#2171](https://github.com/blockful/anticapture/pull/2171) [`bd4f072`](https://github.com/blockful/anticapture/commit/bd4f072dc66eff4764e39fed0303ac1a6f79c4da) Thanks [@alextnetto](https://github.com/alextnetto)! - Answer a gasless vote or delegation that would revert on-chain (a vote already cast, a used nonce) with 409 SIMULATION_FAILED instead of 500 INTERNAL, documented in the relay routes Gateful exposes, and make a gasless vote reach the relayer once: the dashboard checks hasVoted before asking for a signature, confirms the relayed transaction on the DAO's chain instead of through the wallet, never reports a relayed vote as failed, and keeps the vote's submission state across modal closes and remounts so the ballot is not offered again
+
+- [#2179](https://github.com/blockful/anticapture/pull/2179) [`fa4dbc1`](https://github.com/blockful/anticapture/commit/fa4dbc1347eb7edae0b4d5f7f20c12bb55bc80cd) Thanks [@brunod-e](https://github.com/brunod-e)! - Keep a broadcast wallet vote pending when its receipt can't be read.
+
 ## 2.17.0
 
 ### Minor Changes

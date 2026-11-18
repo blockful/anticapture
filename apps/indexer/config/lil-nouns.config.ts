@@ -4,6 +4,7 @@ import { DaoIdEnum } from "@/lib/enums";
 
 import { env } from "@/env";
 import {
+  AuctionAbi,
   GovernorAbi,
   TokenAbi,
   LegacyGovernorABI,
@@ -26,6 +27,12 @@ export default createConfig({
       chain: "ethereum_mainnet",
       address: LIL_NOUNS_CONTRACTS.governor.address,
       startBlock: LIL_NOUNS_CONTRACTS.governor.startBlock,
+    },
+    LilNounsAuction: {
+      abi: AuctionAbi,
+      chain: "ethereum_mainnet",
+      address: LIL_NOUNS_CONTRACTS.auction.address,
+      startBlock: LIL_NOUNS_CONTRACTS.auction.startBlock,
     },
     LilNounsToken: {
       abi: TokenAbi,

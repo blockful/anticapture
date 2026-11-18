@@ -39,7 +39,7 @@ interface RpcCall {
  * castVote returns no data, so an ABI declaring a return value would make
  * simulateContract throw while decoding the empty result.
  */
-const makeClient = () => {
+const makeClient = ({ receiptFails = false } = {}) => {
   const requests: RpcCall[] = [];
   const request = async ({ method, params }: RpcCall) => {
     requests.push({ method, params });
@@ -53,6 +53,7 @@ const makeClient = () => {
       case "eth_blockNumber":
         return "0x1";
       case "eth_getTransactionReceipt":
+        if (receiptFails) throw new Error("wallet RPC refused the call");
         return {
           transactionHash,
           transactionIndex: "0x0",
@@ -75,7 +76,7 @@ const makeClient = () => {
   };
   const walletClient = createWalletClient({
     chain: mainnet,
-    transport: custom({ request }),
+    transport: custom({ request }, { retryCount: 0 }),
   });
   const callsTo = (method: string) =>
     requests.filter((entry) => entry.method === method);
@@ -125,6 +126,7 @@ describe("voteOnProposal", () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -132,7 +134,7 @@ describe("voteOnProposal", () => {
     const { walletClient, callsTo } = makeClient();
     const setTransactionhash = jest.fn();
 
-    const receipt = await voteOnProposal(
+    const outcome = await voteOnProposal(
       "for",
       "42",
       account,
@@ -141,8 +143,6 @@ describe("voteOnProposal", () => {
       walletClient,
       setTransactionhash,
       undefined,
-      undefined,
-      false,
       delegatorAddresses,
     );
 
@@ -158,8 +158,8 @@ describe("voteOnProposal", () => {
     expect(callsTo("eth_sendTransaction")[0]?.params?.[0]).toMatchObject({
       data: expectedData,
     });
-    expect(receipt?.transactionHash).toBe(transactionHash);
-    expect(receipt?.status).toBe("success");
+    expect(outcome.hash).toBe(transactionHash);
+    expect(outcome.status).toBe("success");
     expect(setTransactionhash).toHaveBeenNthCalledWith(1, transactionHash);
     expect(setTransactionhash).toHaveBeenNthCalledWith(2, "");
   });
@@ -167,7 +167,7 @@ describe("voteOnProposal", () => {
   it("uses Tornado Cash castVote when the voter has no delegators", async () => {
     const { walletClient, callsTo } = makeClient();
 
-    const receipt = await voteOnProposal(
+    const outcome = await voteOnProposal(
       "against",
       "42",
       account,
@@ -176,8 +176,6 @@ describe("voteOnProposal", () => {
       walletClient,
       jest.fn(),
       undefined,
-      undefined,
-      false,
       [],
     );
 
@@ -195,13 +193,13 @@ describe("voteOnProposal", () => {
     expect(callsTo("eth_sendTransaction")[0]?.params?.[0]).toMatchObject({
       data: expectedData,
     });
-    expect(receipt?.status).toBe("success");
+    expect(outcome.status).toBe("success");
   });
 
   it("casts governor votes through castVote(uint256,uint8)", async () => {
     const { walletClient, callsTo } = makeClient();
 
-    const receipt = await voteOnProposal(
+    const outcome = await voteOnProposal(
       "for",
       "98",
       account,
@@ -223,13 +221,13 @@ describe("voteOnProposal", () => {
       to: uniGovernor,
       data: expectedData,
     });
-    expect(receipt?.status).toBe("success");
+    expect(outcome.status).toBe("success");
   });
 
   it("rejects Tornado Cash abstain votes before sending a transaction", async () => {
     const { walletClient, callsTo } = makeClient();
 
-    const receipt = await voteOnProposal(
+    const outcome = await voteOnProposal(
       "abstain",
       "42",
       account,
@@ -239,8 +237,34 @@ describe("voteOnProposal", () => {
       jest.fn(),
     );
 
-    expect(receipt).toBeNull();
+    expect(outcome).toEqual({ status: "not-sent", hash: null });
     expect(callsTo("eth_call")).toHaveLength(0);
     expect(callsTo("eth_sendTransaction")).toHaveLength(0);
+  });
+
+  // The vote is out once the wallet broadcasts it, so a receipt that cannot
+  // be read must not hand the ballot back as a failure.
+  it("reports a broadcast vote whose receipt wait fails as unconfirmed", async () => {
+    const { walletClient, callsTo } = makeClient({ receiptFails: true });
+    const setTransactionhash = jest.fn();
+    // viem retries the receipt read with backoff before giving up.
+    jest.useFakeTimers();
+
+    const pending = voteOnProposal(
+      "for",
+      "98",
+      account,
+      mainnet,
+      DaoIdEnum.UNISWAP,
+      walletClient,
+      setTransactionhash,
+    );
+    await jest.runAllTimersAsync();
+    const outcome = await pending;
+
+    expect(outcome).toEqual({ status: "unconfirmed", hash: transactionHash });
+    expect(callsTo("eth_sendTransaction")).toHaveLength(1);
+    expect(setTransactionhash).toHaveBeenCalledTimes(1);
+    expect(setTransactionhash).toHaveBeenCalledWith(transactionHash);
   });
 });

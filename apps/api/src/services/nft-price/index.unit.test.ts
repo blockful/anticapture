@@ -30,10 +30,14 @@ afterAll(() => server.close());
 function createStubRepo() {
   const stub = {
     nftPrices: [] as TokenHistoricalPriceResponse,
-    tokenPrice: "0",
+    tokenPrice: "0" as string | null,
+    tokenPriceTimestamp: Math.floor(Date.now() / 1000),
 
     getHistoricalNFTPrice: async () => stub.nftPrices,
-    getTokenPrice: async () => stub.tokenPrice,
+    getTokenPrice: async () =>
+      stub.tokenPrice == null
+        ? null
+        : { price: stub.tokenPrice, timestamp: stub.tokenPriceTimestamp },
   };
   return stub;
 }
@@ -69,6 +73,35 @@ describe("NFTPriceService", () => {
       expect(await service.getTokenPrice("token", "dao")).toEqual({
         data: "2500.00",
         degraded: false,
+      });
+    });
+
+    it("marks a price older than 7 days as degraded", async () => {
+      repo.tokenPrice = "1000000000000000000";
+      repo.tokenPriceTimestamp = 1_720_000_000;
+
+      server.use(
+        http.get(ETH_MARKET_CHART_URL, () =>
+          HttpResponse.json({ prices: [[1705315200000, 2500.0]] }),
+        ),
+      );
+
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-11-09T00:00:00Z"));
+
+      expect(await service.getTokenPrice("token", "usd")).toEqual({
+        data: "2500.00",
+        degraded: true,
+      });
+      vi.useRealTimers();
+    });
+
+    it("returns a degraded zero instead of throwing when no auction price exists", async () => {
+      repo.getTokenPrice = async () => null;
+
+      expect(await service.getTokenPrice("token", "usd")).toEqual({
+        data: "0",
+        degraded: true,
       });
     });
   });

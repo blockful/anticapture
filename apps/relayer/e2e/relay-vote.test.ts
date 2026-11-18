@@ -162,8 +162,8 @@ describe("POST /relay/vote", () => {
       body: JSON.stringify(body),
     });
 
-    expect(res.status).toBe(500);
-    expect(await res.json()).toMatchObject({ code: "INTERNAL" });
+    expect(res.status).toBe(409);
+    expect(await res.json()).toMatchObject({ code: "SIMULATION_FAILED" });
   });
 
   it("should reject a second vote from the same address on the same proposal", async () => {
@@ -191,7 +191,12 @@ describe("POST /relay/vote", () => {
       body: JSON.stringify(body),
     });
 
-    expect(secondRes.status).toBe(500);
-    expect(await secondRes.json()).toMatchObject({ code: "INTERNAL" });
+    expect(secondRes.status).toBe(409);
+    const secondBody = (await secondRes.json()) as {
+      code: string;
+      error: string;
+    };
+    expect(secondBody.code).toBe("SIMULATION_FAILED");
+    expect(secondBody.error).toContain("vote already cast");
   });
 });

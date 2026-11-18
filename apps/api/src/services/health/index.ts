@@ -1,7 +1,10 @@
 import type { DAOClient } from "@/clients";
 import type { HealthRepository } from "@/repositories";
 
-const FRESHNESS_MAX_LAG_SECONDS = 300;
+// Governance DAOs can go hours without a vote, proposal or transfer, so a
+// short window flags quiet DAOs as stalled. Sync lag itself is watched by
+// the IndexerSyncStale Prometheus alert on the indexer's own metrics.
+const FRESHNESS_MAX_LAG_SECONDS = 24 * 60 * 60;
 
 export type HealthStatus = "ok" | "degraded" | "error";
 

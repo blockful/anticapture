@@ -145,6 +145,38 @@ describe("mapRelayerError", () => {
     );
   });
 
+  it("says the vote is already counted when the governor reports it", () => {
+    for (const reason of [
+      "GovernorVotingSimple: vote already cast",
+      "GovernorBravo::castVoteInternal: voter already voted",
+      "GovernorAlreadyCastVote",
+    ]) {
+      expect(
+        mapRelayerError(
+          relayerError(
+            409,
+            "SIMULATION_FAILED",
+            `Simulation of castVoteBySig() reverted: ${reason}`,
+          ),
+          context,
+        ),
+      ).toBe("You have already voted on this proposal.");
+    }
+  });
+
+  it("says any other simulated revert was not sent", () => {
+    expect(
+      mapRelayerError(
+        relayerError(
+          409,
+          "SIMULATION_FAILED",
+          "Simulation of delegateBySig() reverted: ERC20Votes: invalid nonce",
+        ),
+        { ...context, operation: "delegate" },
+      ),
+    ).toBe("This delegation couldn't be completed, so nothing was sent.");
+  });
+
   it("falls back to the generic message", () => {
     expect(mapRelayerError(new Error("network"), context)).toMatch(
       /something went wrong/i,

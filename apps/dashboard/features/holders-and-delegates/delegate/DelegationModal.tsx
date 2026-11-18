@@ -1,10 +1,14 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Check, Hourglass, PenLine } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useReadContract, useWalletClient } from "wagmi";
+
+import { getRateLimitQueryKey } from "@anticapture/client/hooks";
+import type { GetRateLimitPathParamsDaoEnumKey } from "@anticapture/client";
 
 import { delegateTo } from "@/features/holders-and-delegates/delegate/utils/delegateTo";
 import { showCustomToast } from "@/features/governance/utils/showCustomToast";
@@ -54,6 +58,7 @@ export const DelegationModal = ({
   onSuccess,
 }: DelegationModalProps) => {
   const { address: userAddress } = useAccount();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<DelegationStep>("waiting-signature");
   const [error, setError] = useState<string | null>(null);
 
@@ -89,6 +94,7 @@ export const DelegationModal = ({
     setError(null);
     setStep("waiting-signature");
 
+    const isGasless = isGaslessEligible && daoConfig?.gaslessRelayer === true;
     try {
       await delegateTo(
         tokenAddress,
@@ -110,7 +116,7 @@ export const DelegationModal = ({
         return;
       }
 
-      if (isGaslessEligible && daoConfig?.gaslessRelayer) {
+      if (isGasless) {
         const message = mapRelayerError(err, {
           operation: "delegate",
           minVotingPower,
@@ -125,6 +131,18 @@ export const DelegationModal = ({
         setError(message);
       }
       setStep("error");
+    } finally {
+      // The relayer counts each delegation against a monthly allowance, and
+      // the cached count is stale for a minute: without this, a delegation
+      // right after the last free one still goes to the relayer and gets 429.
+      if (isGasless) {
+        void queryClient.invalidateQueries({
+          queryKey: getRateLimitQueryKey(
+            daoId.toLowerCase() as GetRateLimitPathParamsDaoEnumKey,
+            userAddress,
+          ),
+        });
+      }
     }
   }, [
     userAddress,
@@ -139,6 +157,7 @@ export const DelegationModal = ({
     decimals,
     minVotingPower,
     isGaslessEligible,
+    queryClient,
   ]);
 
   useEffect(() => {

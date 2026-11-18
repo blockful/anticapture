@@ -11,7 +11,10 @@ import type { MetricTypesEnum } from "@/shared/types/enums/metric-type";
 
 export type TokenMetricItem = {
   date: string;
+  /** Highest value observed that day. */
   high: string;
+  /** Value at the end of the UTC day; the level to chart. */
+  close: string;
   volume: string;
 };
 
