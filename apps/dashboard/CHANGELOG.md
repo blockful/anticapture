@@ -1,5 +1,14 @@
 # @anticapture/dashboard
 
+## 2.17.4
+
+### Patch Changes
+
+- [#2190](https://github.com/blockful/anticapture/pull/2190) [`67c67e1`](https://github.com/blockful/anticapture/commit/67c67e1e1b3ab492ad2dc2a08b8dd631d1b272c9) Thanks [@alextnetto](https://github.com/alextnetto)! - Scroll DAO is retired: it no longer appears in the dashboard or in the MCP server's DAO list. Its indexer is off.
+
+- Updated dependencies [[`67c67e1`](https://github.com/blockful/anticapture/commit/67c67e1e1b3ab492ad2dc2a08b8dd631d1b272c9)]:
+  - @anticapture/client@2.2.2
+
 ## 2.17.3
 
 ### Patch Changes
