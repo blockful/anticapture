@@ -7,6 +7,8 @@ import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 
+import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
+import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import type { ChartGranularity } from "@/features/revenue/types";
 import { formatMillions } from "@/features/revenue/utils/format";
 import { transformToStreamSeries } from "@/features/revenue/utils/transform";
@@ -39,10 +41,15 @@ const formatXAxisLabel = (
 
 export const MonthlyRevenueChart = () => {
   const [granularity, setGranularity] = useState<ChartGranularity>("quarter");
-  const { data, isLoading } = useGetRevenueTotals("ens");
+  const totalsQuery = useGetRevenueTotals("ens");
+  const totals = useRevenueDataState(totalsQuery);
+  const { isLoading, isUnavailable } = totals;
   const series = useMemo(
-    () => (data ? transformToStreamSeries(data.items, granularity) : null),
-    [data, granularity],
+    () =>
+      isLoading || isUnavailable
+        ? null
+        : transformToStreamSeries(totals.items, granularity),
+    [isLoading, isUnavailable, totals, granularity],
   );
 
   return (
@@ -77,6 +84,8 @@ export const MonthlyRevenueChart = () => {
       </div>
       {isLoading ? (
         <div className="bg-surface-raised h-[300px] w-full animate-pulse rounded" />
+      ) : isUnavailable ? (
+        <UnavailableChart height={300} />
       ) : series ? (
         <StackedBarChart
           series={series.series}

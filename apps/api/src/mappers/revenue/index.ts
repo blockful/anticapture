@@ -18,6 +18,25 @@ export const RevenueQuerySchema = z
 
 export type RevenueQuery = z.infer<typeof RevenueQuerySchema>;
 
+export const RevenueMetaSchema = z
+  .object({
+    asOf: z
+      .string()
+      .nullable()
+      .openapi({ example: "2026-09-23T00:08:52.123Z" })
+      .describe(
+        "When the upstream computation behind these items finished, as an ISO-8601 UTC timestamp (Dune's execution_ended_at). Null when unknown or when nothing could be served.",
+      ),
+    degraded: z
+      .boolean()
+      .describe(
+        "True when the API served a stale copy or an empty fallback after the upstream failed, or the data source is not configured. Degraded responses are sent with Cache-Control: no-store. This reflects the API's own fallbacks only: a copy the gateway serves stale after an API error keeps its original meta and is marked by the `Cache-Status: Redis; stale` header instead.",
+      ),
+  })
+  .openapi("RevenueMeta", {
+    description: "Freshness of a /revenue/* response.",
+  });
+
 export const RevenueActionCategorySchema = z
   .enum(["Registration", "Renewal", "Premium"])
   .openapi("RevenueActionCategory", {
@@ -44,6 +63,7 @@ export const RevenueActionsResponseSchema = z
   .object({
     items: z.array(RevenueActionsItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueActionsResponse", {
     description:
@@ -75,6 +95,7 @@ export const RevenueActiveNamesResponseSchema = z
   .object({
     items: z.array(RevenueActiveNamesItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueActiveNamesResponse", {
     description:
@@ -106,6 +127,7 @@ export const RevenueNewWalletsResponseSchema = z
   .object({
     items: z.array(RevenueNewWalletsItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueNewWalletsResponse", {
     description:
@@ -124,7 +146,9 @@ export const RevenueRenewalFunnelItemSchema = z
       .describe("Expiry month start (Unix timestamp in seconds, UTC)."),
     termsExpiring: z
       .number()
-      .describe("Total .eth terms expiring in the given month."),
+      .describe(
+        ".eth terms expiring in the given month, counted once their expiry is more than 90 days before the data was computed (the latest month can be partial).",
+      ),
     renewedCount: z
       .number()
       .describe("Number of expiring terms that were renewed."),
@@ -143,6 +167,7 @@ export const RevenueRenewalFunnelResponseSchema = z
   .object({
     items: z.array(RevenueRenewalFunnelItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueRenewalFunnelResponse", {
     description:
@@ -165,7 +190,7 @@ export const RevenueTotalsItemSchema = z
     premiumUsd: z
       .number()
       .describe(
-        "USD revenue from temporary premium auctions in the given month.",
+        "USD revenue from temporary premium auctions in the given month, as recorded separately by the 2023 and later controllers; premiums paid through the 2020 controller are included in registrationUsd.",
       ),
     renewalUsd: z
       .number()
@@ -181,7 +206,7 @@ export const RevenueTotalsItemSchema = z
     premiumEth: z
       .number()
       .describe(
-        "ETH revenue from temporary premium auctions in the given month.",
+        "ETH revenue from temporary premium auctions in the given month, as recorded separately by the 2023 and later controllers; premiums paid through the 2020 controller are included in registrationEth.",
       ),
     renewalEth: z
       .number()
@@ -195,6 +220,7 @@ export const RevenueTotalsResponseSchema = z
   .object({
     items: z.array(RevenueTotalsItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueTotalsResponse", {
     description:
@@ -233,6 +259,7 @@ export const RevenueRenewalTenureResponseSchema = z
   .object({
     items: z.array(RevenueRenewalTenureItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueRenewalTenureResponse", {
     description:
@@ -272,6 +299,7 @@ export const RevenueByCategoryResponseSchema = z
   .object({
     items: z.array(RevenueByCategoryItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueByCategoryResponse", {
     description:

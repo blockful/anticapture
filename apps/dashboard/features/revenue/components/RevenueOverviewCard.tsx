@@ -10,22 +10,48 @@ import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
 import { cn } from "@/shared/utils/cn";
 
+import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
+import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { transformToOverview } from "@/features/revenue/utils/transform";
 
-export const RevenueOverviewCard = () => {
-  const { data: totalsData, isLoading: totalsLoading } =
-    useGetRevenueTotals("ens");
-  const { data: actionsData, isLoading: actionsLoading } =
-    useGetRevenueActions("ens");
+const STREAM_DESCRIPTIONS: Record<string, string> = {
+  Registration:
+    "Fees paid for new .eth registrations. Includes any premium a registrar contract did not record separately. Volume counts registrations without a separately recorded premium; the average divides by every registration, including those that also paid a premium.",
+  Renewals:
+    "Fees paid to extend existing .eth registrations. Volume counts renewal events.",
+  Premium:
+    "Premium counts premiums recorded separately by the registrar contracts: the temporary, decaying surcharge for registering a recently released name. Volume counts registrations that paid one.",
+};
 
-  const isLoading = totalsLoading || actionsLoading;
+export const RevenueOverviewCard = () => {
+  const totalsQuery = useGetRevenueTotals("ens");
+  const totals = useRevenueDataState(totalsQuery);
+  const actionsQuery = useGetRevenueActions("ens");
+  const actions = useRevenueDataState(actionsQuery);
+
+  const isLoading = totals.isLoading || actions.isLoading;
+  const isUnavailable = totals.isUnavailable || actions.isUnavailable;
   const overview = useMemo(
     () =>
-      totalsData && actionsData
-        ? transformToOverview(totalsData.items, actionsData.items)
-        : null,
-    [totalsData, actionsData],
+      isLoading || isUnavailable
+        ? null
+        : transformToOverview(
+            totals.items,
+            actions.items,
+            totals.cutoff,
+            totals.cutoffKnown,
+          ),
+    [isLoading, isUnavailable, totals, actions],
   );
+
+  if (isUnavailable) {
+    return (
+      <Card className="p-4">
+        <UnavailableChart height={120} />
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -63,9 +89,15 @@ export const RevenueOverviewCard = () => {
                   rounded
                 />
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-secondary text-sm font-medium">
-                    {stream.name}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-secondary text-sm font-medium">
+                      {stream.name}
+                    </span>
+                    <InfoTooltip>
+                      {STREAM_DESCRIPTIONS[stream.name]} All time:{" "}
+                      {overview.period}. Share is of total protocol revenue.
+                    </InfoTooltip>
+                  </div>
                   <span
                     className="text-sm font-medium"
                     style={{ color: stream.color }}

@@ -6,33 +6,76 @@ import { useGetRevenueActiveNames } from "@anticapture/client/hooks";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ComboChart } from "@/shared/components/design-system/charts/combo-chart/ComboChart";
 
-import { formatCompact } from "@/features/revenue/utils/format";
+import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
+import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
+import {
+  formatCompact,
+  formatMonthLabel,
+  formatUtcDate,
+} from "@/features/revenue/utils/format";
+import { UNAVAILABLE_TEXT } from "@/features/revenue/utils/meta";
 import { transformToNameGrowth } from "@/features/revenue/utils/transform";
 
 export const NameGrowthChart = () => {
-  const { data, isLoading } = useGetRevenueActiveNames("ens");
+  const activeNamesQuery = useGetRevenueActiveNames("ens");
+  const activeNames = useRevenueDataState(activeNamesQuery);
+  const { isLoading, isUnavailable, items, meta } = activeNames;
+  // A month's row counts every name active at some point in it: a name only
+  // leaves the count in the month after it expires. Name the latest row's
+  // month, and the cutoff when the API reports it (older API: unknown).
+  const latestMonth =
+    items.length > 0 ? formatMonthLabel(items[items.length - 1].date) : null;
+  const latestMonthText = latestMonth
+    ? meta.asOf
+      ? `in ${latestMonth} (data to ${formatUtcDate(meta.asOf)})`
+      : `in ${latestMonth}, the latest month of data`
+    : "in the latest month of data";
   const series = useMemo(
-    () => (data ? transformToNameGrowth(data.items) : null),
-    [data],
+    () => (isLoading || isUnavailable ? null : transformToNameGrowth(items)),
+    [isLoading, isUnavailable, items],
   );
-  const activeNamesCount = useMemo(() => {
-    if (!data || data.items.length === 0) return null;
-    return data.items[data.items.length - 1].cumulativeActive;
-  }, [data]);
+  const activeNamesCount =
+    isUnavailable || items.length === 0
+      ? null
+      : items[items.length - 1].cumulativeActive;
 
   return (
     <Card className="p-4">
-      <p className="text-secondary text-sm font-medium">Name Growth & Churn</p>
-      {!isLoading && activeNamesCount !== null && (
+      <div className="flex items-center gap-1.5">
+        <p className="text-secondary text-sm font-medium">
+          Name Growth & Churn
+        </p>
+        <InfoTooltip>
+          Active names are .eth names whose registration was active at some
+          point in the month: a name leaves the count in the month after it
+          expires, so the headline counts names active at some point{" "}
+          {latestMonthText}, including names that expired during it. Renewing or
+          re-registering within 90 days of expiry continues the same
+          registration. Bars show the net monthly change: names that became
+          active minus names that expired the month before. Names count from
+          their first registrar-controller event (May 2019 onward), so names
+          from the 2017 auction appear once renewed through a controller.
+        </InfoTooltip>
+      </div>
+      {!isLoading && (
         <p className="text-secondary mt-0.5 text-sm">
-          <span className="font-medium" style={{ color: "#0080bc" }}>
-            {formatCompact(activeNamesCount)}
-          </span>{" "}
-          active names now
+          {activeNamesCount !== null ? (
+            <>
+              <span className="font-medium" style={{ color: "#0080bc" }}>
+                {formatCompact(activeNamesCount)}
+              </span>{" "}
+              active names {latestMonthText}
+            </>
+          ) : (
+            <>{UNAVAILABLE_TEXT}: up-to-date active names are not available</>
+          )}
         </p>
       )}
       {isLoading ? (
         <div className="bg-surface-raised mt-3 h-[300px] w-full animate-pulse rounded" />
+      ) : isUnavailable ? (
+        <UnavailableChart height={300} className="mt-3" />
       ) : series ? (
         <ComboChart
           barSeries={series.barSeries}

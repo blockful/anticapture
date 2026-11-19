@@ -1,4 +1,4 @@
-import type { Counter, Histogram } from "@opentelemetry/api";
+import type { Counter, Histogram, ObservableGauge } from "@opentelemetry/api";
 
 import { meterProvider } from "@/instrumentation";
 
@@ -44,3 +44,50 @@ export const degradedUpstreamResponsesTotal: Counter = meter.createCounter(
       "Responses served with stale or empty data because a third-party upstream failed",
   },
 );
+
+/**
+ * When the rows each revenue query serves were computed upstream (Dune's
+ * `execution_ended_at`), in epoch ms, keyed by query. A stale copy served
+ * after a failure keeps its original time, so the age keeps growing through
+ * an outage instead of resetting.
+ */
+const revenueDataAsOf = new Map<string, number>();
+
+export const recordRevenueDataAsOf = (
+  query: string,
+  asOf: string | null,
+): void => {
+  const asOfMs = asOf === null ? Number.NaN : Date.parse(asOf);
+  // An unknown age is reported as no series, never as a made-up one.
+  if (Number.isNaN(asOfMs)) {
+    revenueDataAsOf.delete(query);
+    return;
+  }
+  revenueDataAsOf.set(query, asOfMs);
+};
+
+/** Age in seconds of every revenue query seen by this process. */
+export const revenueDataAges = (
+  now: number = Date.now(),
+): { query: string; ageSeconds: number }[] =>
+  [...revenueDataAsOf].map(([query, asOfMs]) => ({
+    query,
+    ageSeconds: (now - asOfMs) / 1000,
+  }));
+
+/**
+ * A frozen Dune result is a normal 200, so neither the HTTP error metrics nor
+ * `degraded_upstream_responses_total` notice it. The `RevenueDataStale` rule
+ * in `infra/monitoring/alerts.yml` alerts on this gauge; rename either side
+ * and the alert goes silent. A query appears once this process has fetched it.
+ */
+export const revenueDataAgeSeconds: ObservableGauge =
+  meter.createObservableGauge("revenue_data_age_seconds", {
+    description:
+      "Seconds since the upstream execution behind each revenue query's served rows finished",
+  });
+revenueDataAgeSeconds.addCallback((result) => {
+  for (const { query, ageSeconds } of revenueDataAges()) {
+    result.observe(ageSeconds, { query });
+  }
+});

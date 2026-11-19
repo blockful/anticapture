@@ -36,7 +36,10 @@ import {
 
 import { revenue } from "./index";
 
-type RevenueFixture = { result: { rows: unknown[] } };
+type RevenueFixture = {
+  execution_ended_at: string;
+  result: { rows: unknown[] };
+};
 
 type RevenueEndpointDef = {
   path: string;
@@ -99,6 +102,19 @@ const REVENUE_ENDPOINTS: readonly RevenueEndpointDef[] = [
 ];
 
 const API_KEY = "test-api-key";
+
+/** Every fixture's execution_ended_at, cut to milliseconds. */
+const FIXTURE_AS_OF = "2026-09-23T00:08:52.123Z";
+const HEALTHY_META = { asOf: FIXTURE_AS_OF, degraded: false };
+const EMPTY_META = { asOf: null, degraded: true };
+const UNCONFIGURED_BODY = { items: [], totalCount: 0, meta: EMPTY_META };
+const HEALTHY_CACHE_CONTROL = "public, max-age=60";
+
+type RevenueBody = {
+  items: { date: number }[];
+  totalCount: number;
+  meta: { asOf: string | null; degraded: boolean };
+};
 const FIXTURE_BASE = "https://dune.test";
 
 function buildUrls(base = FIXTURE_BASE): RevenueDuneUrls {
@@ -116,7 +132,10 @@ function createTestApp(client?: RevenueDuneClient) {
 
 const server = setupServer();
 beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  vi.useRealTimers();
+});
 afterAll(() => server.close());
 
 describe("Revenue Controller", () => {
@@ -175,7 +194,8 @@ describe("Revenue Controller", () => {
       const res = await app.request("/revenue/actions");
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("sorts descending when orderDirection=desc", async () => {
@@ -286,7 +306,8 @@ describe("Revenue Controller", () => {
       const res = await app.request("/revenue/active-names");
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("sorts descending when orderDirection=desc", async () => {
@@ -360,7 +381,8 @@ describe("Revenue Controller", () => {
       const res = await app.request("/revenue/new-wallets");
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("sorts descending when orderDirection=desc", async () => {
@@ -438,7 +460,8 @@ describe("Revenue Controller", () => {
       const res = await app.request("/revenue/renewal-funnel");
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("sorts descending when orderDirection=desc", async () => {
@@ -556,7 +579,8 @@ describe("Revenue Controller", () => {
       const res = await app.request("/revenue/totals");
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("sorts descending when orderDirection=desc", async () => {
@@ -667,7 +691,8 @@ describe("Revenue Controller", () => {
       const res = await app.request("/revenue/by-category");
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("sorts descending when orderDirection=desc", async () => {
@@ -761,7 +786,8 @@ describe("Revenue Controller", () => {
       const res = await app.request("/revenue/renewal-tenure");
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ items: [], totalCount: 0 });
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("Cache-Control")).toBe("no-store");
     });
 
     it("sorts descending when orderDirection=desc", async () => {
@@ -908,6 +934,169 @@ describe("Revenue Controller", () => {
         const res = await app.request(endpoint.path);
         expect(res.status, `expected 404 for ${endpoint.path}`).toBe(404);
         expect(await res.json()).toEqual({ error: "Not Found" });
+      }
+    });
+
+    it("returns healthy meta and the regular cache header for every endpoint", async () => {
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        server.use(
+          http.get(urls[endpoint.urlKey], () =>
+            HttpResponse.json(endpoint.fixture),
+          ),
+        );
+      }
+      const app = createTestApp(new RevenueDuneClient(API_KEY, urls));
+
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        const res = await app.request(endpoint.path);
+        const body = (await res.json()) as RevenueBody;
+        expect(body.meta, endpoint.path).toEqual(HEALTHY_META);
+        expect(res.headers.get("Cache-Control"), endpoint.path).toBe(
+          HEALTHY_CACHE_CONTROL,
+        );
+      }
+    });
+
+    it("keeps meta when the range filter leaves no items", async () => {
+      server.use(
+        http.get(urls.revenueTotals, () =>
+          HttpResponse.json(revenueTotalsFixture),
+        ),
+      );
+      const app = createTestApp(new RevenueDuneClient(API_KEY, urls));
+
+      const res = await app.request("/revenue/totals?fromDate=4102444800");
+      const body = (await res.json()) as RevenueBody;
+
+      expect(body).toEqual({ items: [], totalCount: 0, meta: HEALTHY_META });
+      expect(res.headers.get("Cache-Control")).toBe(HEALTHY_CACHE_CONTROL);
+    });
+
+    it("answers every endpoint degraded and uncacheable without a Dune client", async () => {
+      const app = createTestApp(undefined);
+
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        const res = await app.request(endpoint.path);
+        expect(res.status, endpoint.path).toBe(200);
+        expect(await res.json(), endpoint.path).toEqual(UNCONFIGURED_BODY);
+        expect(res.headers.get("Cache-Control"), endpoint.path).toBe(
+          "no-store",
+        );
+      }
+    });
+
+    // 503: an outage. 404: no completed execution for the query's latest
+    // version, or an expired result. 402: over the account's billing limits.
+    it.each([503, 404, 402])(
+      "serves the empty fallback as degraded and uncacheable on HTTP %i",
+      async (status) => {
+        for (const endpoint of REVENUE_ENDPOINTS) {
+          server.use(
+            http.get(
+              urls[endpoint.urlKey],
+              () => new HttpResponse(null, { status }),
+            ),
+          );
+        }
+        const app = createTestApp(new RevenueDuneClient(API_KEY, urls));
+
+        for (const endpoint of REVENUE_ENDPOINTS) {
+          const res = await app.request(endpoint.path);
+          expect(res.status, endpoint.path).toBe(200);
+          expect(await res.json(), endpoint.path).toEqual({
+            items: [],
+            totalCount: 0,
+            meta: EMPTY_META,
+          });
+          expect(res.headers.get("Cache-Control"), endpoint.path).toBe(
+            "no-store",
+          );
+        }
+      },
+    );
+
+    it.each([503, 402])(
+      "serves a stale copy with its original asOf on HTTP %i",
+      async (status) => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-10-01T00:00:00Z"));
+        let failing = false;
+        for (const endpoint of REVENUE_ENDPOINTS) {
+          server.use(
+            http.get(urls[endpoint.urlKey], () =>
+              failing
+                ? new HttpResponse(null, { status })
+                : HttpResponse.json(endpoint.fixture),
+            ),
+          );
+        }
+        const app = createTestApp(new RevenueDuneClient(API_KEY, urls));
+
+        const healthy = new Map<string, RevenueBody>();
+        for (const endpoint of REVENUE_ENDPOINTS) {
+          const res = await app.request(endpoint.path);
+          healthy.set(endpoint.path, (await res.json()) as RevenueBody);
+        }
+        failing = true;
+        vi.advanceTimersByTime(24 * 60 * 60 * 1000 + 1);
+
+        for (const endpoint of REVENUE_ENDPOINTS) {
+          const res = await app.request(endpoint.path);
+          const body = (await res.json()) as RevenueBody;
+          expect(res.status, endpoint.path).toBe(200);
+          expect(body.items, endpoint.path).toEqual(
+            healthy.get(endpoint.path)?.items,
+          );
+          expect(body.items.length, endpoint.path).toBeGreaterThan(0);
+          expect(body.meta, endpoint.path).toEqual({
+            asOf: FIXTURE_AS_OF,
+            degraded: true,
+          });
+          expect(res.headers.get("Cache-Control"), endpoint.path).toBe(
+            "no-store",
+          );
+        }
+      },
+    );
+
+    it("still rejects a bad Dune key with a 502", async () => {
+      server.use(
+        http.get(urls.actions, () => new HttpResponse(null, { status: 401 })),
+      );
+      const app = createTestApp(new RevenueDuneClient(API_KEY, urls));
+
+      const res = await app.request("/revenue/actions");
+
+      expect(res.status).toBe(502);
+    });
+
+    it("documents a required RevenueMeta on every response", async () => {
+      const app = createTestApp(new RevenueDuneClient(API_KEY, urls));
+      docs(app);
+
+      const res = await app.request("/docs");
+      type SchemaObject = {
+        type?: string | string[];
+        required?: string[];
+        properties?: Record<string, SchemaObject & { $ref?: string }>;
+      };
+      const doc = (await res.json()) as {
+        components: { schemas: Record<string, SchemaObject> };
+      };
+      const schemas = doc.components.schemas;
+
+      expect(schemas.RevenueMeta?.required?.sort()).toEqual([
+        "asOf",
+        "degraded",
+      ]);
+      for (const endpoint of REVENUE_ENDPOINTS) {
+        const response = schemas[endpoint.responseSchemaName];
+        expect(response?.properties?.meta?.$ref, endpoint.path).toBe(
+          "#/components/schemas/RevenueMeta",
+        );
+        expect(response?.required, endpoint.path).toEqual(
+          expect.arrayContaining(["items", "totalCount", "meta"]),
+        );
       }
     });
 

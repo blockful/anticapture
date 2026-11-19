@@ -15,7 +15,9 @@ import type {
 } from "@/features/revenue/types";
 import {
   formatCompact,
+  formatCutoffEnd,
   formatMonthLabel,
+  formatMonthRange,
   formatQuarterLabel,
   formatUsd,
   formatYearLabel,
@@ -30,6 +32,8 @@ type StreamSpec = {
   totalUsd: number;
   actionCount: number;
   actionLabel: string;
+  /** Actions whose revenue is in amountUsd, when wider than the volume count. */
+  avgActionCount?: number;
 };
 
 function buildStream({
@@ -39,10 +43,11 @@ function buildStream({
   totalUsd,
   actionCount,
   actionLabel,
+  avgActionCount = actionCount,
 }: StreamSpec): RevenueStream {
   const sharePercent = totalUsd > 0 ? (amountUsd / totalUsd) * 100 : 0;
   const avgPerAction =
-    actionCount > 0 ? formatUsd(amountUsd / actionCount) : "—";
+    avgActionCount > 0 ? formatUsd(amountUsd / avgActionCount) : "—";
   return {
     name,
     color,
@@ -56,10 +61,10 @@ function buildStream({
 
 function computeYtdDelta(
   totalsItems: RevenueTotalsItem[],
+  cutoff: Date,
 ): RevenueOverview["ytdDelta"] {
-  const now = new Date();
-  const currentYear = now.getUTCFullYear();
-  const currentMonth = now.getUTCMonth();
+  const currentYear = cutoff.getUTCFullYear();
+  const currentMonth = cutoff.getUTCMonth();
   const prevYear = currentYear - 1;
 
   const currentMonths = new Set<number>();
@@ -102,9 +107,11 @@ function computeYtdDelta(
 export function transformToOverview(
   totalsItems: RevenueTotalsItem[],
   actionsItems: RevenueActionsItem[],
+  cutoff: Date,
+  cutoffKnown = true,
 ): RevenueOverview {
   if (totalsItems.length === 0) {
-    return { totalAmount: "—", totalContext: "", streams: [] };
+    return { totalAmount: "—", totalContext: "", period: "", streams: [] };
   }
 
   const totalReg = totalsItems.reduce((s, i) => s + i.registrationUsd, 0);
@@ -115,8 +122,7 @@ export function transformToOverview(
   const ytd = totalsItems
     .filter(
       (i) =>
-        new Date(i.date * 1000).getUTCFullYear() ===
-        new Date().getUTCFullYear(),
+        new Date(i.date * 1000).getUTCFullYear() === cutoff.getUTCFullYear(),
     )
     .reduce((s, i) => s + i.totalUsd, 0);
   const firstDate = formatMonthLabel(totalsItems[0].date);
@@ -129,7 +135,8 @@ export function transformToOverview(
   return {
     totalAmount: formatUsd(total),
     totalContext: `since ${firstDate} · ${formatUsd(ytd)} YTD`,
-    ytdDelta: computeYtdDelta(totalsItems),
+    period: `${firstDate} to ${formatCutoffEnd(cutoff, cutoffKnown)}`,
+    ytdDelta: computeYtdDelta(totalsItems, cutoff),
     streams: [
       buildStream({
         name: "Registration",
@@ -138,6 +145,9 @@ export function transformToOverview(
         totalUsd: total,
         actionCount: actionCounts.Registration,
         actionLabel: "registrations",
+        // Registration revenue also holds the base fee of registrations that
+        // paid a premium, which the actions count as Premium.
+        avgActionCount: actionCounts.Registration + actionCounts.Premium,
       }),
       buildStream({
         name: "Renewals",
@@ -334,8 +344,15 @@ const TENURE_ORDER: RevenueRenewalTenureBucket[] = [
 
 const EXPIRATION_HORIZON_YEARS = 7;
 
-export function transformToRenewalTenure(items: RevenueRenewalTenureItem[]) {
-  const maxYear = new Date().getUTCFullYear() + EXPIRATION_HORIZON_YEARS;
+/**
+ * `cutoff` is the instant the data was computed at: "next 12 months" counts
+ * from the cutoff's month, not from the viewer's clock.
+ */
+export function transformToRenewalTenure(
+  items: RevenueRenewalTenureItem[],
+  cutoff: Date,
+) {
+  const maxYear = cutoff.getUTCFullYear() + EXPIRATION_HORIZON_YEARS;
   const namesByDate = new Map<
     number,
     Map<RevenueRenewalTenureBucket, number>
@@ -347,14 +364,13 @@ export function transformToRenewalTenure(items: RevenueRenewalTenureItem[]) {
   }
   const dates = Array.from(namesByDate.keys()).sort((a, b) => a - b);
 
-  // Bucket dates are start-of-month UTC timestamps. Use start-of-current-month
-  // as the lower bound so the current month is included, and start of the
-  // same month next year as the exclusive upper bound — exactly 12 buckets.
-  const now = new Date();
+  // Bucket dates are start-of-month UTC timestamps. Use the start of the
+  // cutoff's month as the lower bound so that month is included, and the
+  // same month a year later as the exclusive upper bound — exactly 12 buckets.
   const startOfCurrentMonth =
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1) / 1000;
+    Date.UTC(cutoff.getUTCFullYear(), cutoff.getUTCMonth(), 1) / 1000;
   const startOfPlus12 =
-    Date.UTC(now.getUTCFullYear() + 1, now.getUTCMonth(), 1) / 1000;
+    Date.UTC(cutoff.getUTCFullYear() + 1, cutoff.getUTCMonth(), 1) / 1000;
   const neverRenewedNext12mo = dates
     .filter((d) => d >= startOfCurrentMonth && d < startOfPlus12)
     .reduce(
@@ -370,6 +386,10 @@ export function transformToRenewalTenure(items: RevenueRenewalTenureItem[]) {
       color: TENURE_COLORS[bucket],
     })),
     neverRenewedNext12mo,
+    next12moPeriod: formatMonthRange(
+      startOfCurrentMonth,
+      Date.UTC(cutoff.getUTCFullYear() + 1, cutoff.getUTCMonth() - 1, 1) / 1000,
+    ),
   };
 }
 
