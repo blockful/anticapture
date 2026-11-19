@@ -53,6 +53,22 @@ export const degradedUpstreamResponsesTotal: Counter = meter.createCounter(
  */
 const revenueDataAsOf = new Map<string, number>();
 
+/**
+ * When this process last served each revenue query, in epoch ms. A replica
+ * that gets no revenue traffic never refreshes its copy, so its age would
+ * grow past the alert threshold while Dune is healthy. An age is reported
+ * only for queries served within this window.
+ */
+const revenueDataServedAt = new Map<string, number>();
+export const REVENUE_DATA_AGE_IDLE_MS = 60 * 60 * 1000;
+
+export const recordRevenueDataServed = (
+  query: string,
+  now: number = Date.now(),
+): void => {
+  revenueDataServedAt.set(query, now);
+};
+
 export const recordRevenueDataAsOf = (
   query: string,
   asOf: string | null,
@@ -64,22 +80,31 @@ export const recordRevenueDataAsOf = (
     return;
   }
   revenueDataAsOf.set(query, asOfMs);
+  recordRevenueDataServed(query);
 };
 
-/** Age in seconds of every revenue query seen by this process. */
+/** Age in seconds of every revenue query this process served recently. */
 export const revenueDataAges = (
   now: number = Date.now(),
 ): { query: string; ageSeconds: number }[] =>
-  [...revenueDataAsOf].map(([query, asOfMs]) => ({
-    query,
-    ageSeconds: (now - asOfMs) / 1000,
-  }));
+  [...revenueDataAsOf]
+    .filter(([query]) => {
+      const servedAt = revenueDataServedAt.get(query);
+      return (
+        servedAt !== undefined && now - servedAt <= REVENUE_DATA_AGE_IDLE_MS
+      );
+    })
+    .map(([query, asOfMs]) => ({
+      query,
+      ageSeconds: (now - asOfMs) / 1000,
+    }));
 
 /**
  * A frozen Dune result is a normal 200, so neither the HTTP error metrics nor
  * `degraded_upstream_responses_total` notice it. The `RevenueDataStale` rule
  * in `infra/monitoring/alerts.yml` alerts on this gauge; rename either side
- * and the alert goes silent. A query appears once this process has fetched it.
+ * and the alert goes silent. A query appears once this process has fetched it
+ * and disappears after an hour without being served.
  */
 export const revenueDataAgeSeconds: ObservableGauge =
   meter.createObservableGauge("revenue_data_age_seconds", {

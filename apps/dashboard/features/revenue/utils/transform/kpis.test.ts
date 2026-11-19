@@ -168,6 +168,31 @@ describe("computeKpis windows", () => {
     });
   });
 
+  it("shows no delta when the current window has no rows", () => {
+    // Rows for Feb-Apr 2026 only; cutoff Aug 10, 2026, so May-Jul is empty.
+    const cards = computeKpis(
+      {
+        newWallets: series([]),
+        funnel: series([]),
+        totals: {
+          items: [
+            month(2026, 1, 100),
+            month(2026, 2, 100),
+            month(2026, 3, 100),
+          ],
+          cutoff: new Date("2026-08-10T00:00:00Z"),
+          unavailable: false,
+        },
+      },
+      THREE_MONTHS,
+    );
+
+    const revenue = byTitle(cards, "Revenue");
+    expect(revenue.value).toBe("—");
+    expect(revenue.delta).toBeUndefined();
+    expect(revenue.trend).toBeUndefined();
+  });
+
   it("marks a KPI Unavailable when its own series is unavailable", () => {
     const cards = computeKpis(
       {

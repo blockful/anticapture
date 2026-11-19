@@ -695,6 +695,21 @@ describe("RevenueDuneClient", () => {
       expect(ageAt(asOfMs + 90_000_000)).toBe(90_000);
     });
 
+    it("reports no age once the query has not been served for an hour", async () => {
+      server.use(
+        http.get(urls.actions, () => HttpResponse.json(okBody([{ id: 1 }]))),
+      );
+
+      await client.fetchKey("actions");
+      const has = (now: number) =>
+        revenueDataAges(now).some(({ query }) => query === "actions");
+
+      expect(has(Date.now() + 59 * 60 * 1000)).toBe(true);
+      // An idle replica would otherwise age past the alert threshold while
+      // Dune is healthy.
+      expect(has(Date.now() + 61 * 60 * 1000)).toBe(false);
+    });
+
     it("drops the age series when a healthy read has no execution_ended_at", async () => {
       let hits = 0;
       server.use(

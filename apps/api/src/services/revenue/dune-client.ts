@@ -10,7 +10,7 @@ import {
   redactUrl,
 } from "@/lib/upstream-error";
 import { logger } from "@/logger";
-import { recordRevenueDataAsOf } from "@/metrics";
+import { recordRevenueDataAsOf, recordRevenueDataServed } from "@/metrics";
 
 import { RevenueCache, REVENUE_STALE_TTL_MS } from "./cache";
 import { DUNE_MONTH_REGEX, isValidDuneMonth, parseDuneMonth } from "./utils";
@@ -418,6 +418,7 @@ export class RevenueDuneClient {
     key: RevenueQueryKey,
     rowSchema: z.ZodType<Row>,
   ): Promise<RevenueRows<Row>> {
+    recordRevenueDataServed(key);
     const cached = this.cache.get<RevenueRows<Row>>(key);
     if (cached !== null) {
       logger.debug({ key }, "revenue cache hit");

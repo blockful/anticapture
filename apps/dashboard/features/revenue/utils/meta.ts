@@ -128,7 +128,9 @@ export type RevenueDataState<TItem> = {
   isLoading: boolean;
   /**
    * The card must say "Unavailable" instead of rendering numbers: the request
-   * failed, the API flagged the response as degraded, or it has no rows.
+   * failed or the response has no rows. A degraded response that still has
+   * rows is the API's last good copy (at most 30 hours old): it is rendered,
+   * and its `asOf` drives the freshness line and the "Data delayed" badge.
    */
   isUnavailable: boolean;
   items: TItem[];
@@ -152,8 +154,7 @@ export function toRevenueDataState<TData extends { items: unknown[] }>(
   return {
     isLoading,
     isUnavailable:
-      !isLoading &&
-      (query.data ? meta.degraded || items.length === 0 : query.isError),
+      !isLoading && (query.data ? items.length === 0 : query.isError),
     items,
     meta,
     cutoff: resolveDataCutoff(

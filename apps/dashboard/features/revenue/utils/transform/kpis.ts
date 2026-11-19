@@ -109,11 +109,19 @@ function buildFlowKpi<T extends { date: number }>(args: {
     windows.current.end,
   );
   const currentValue = args.aggregate(current);
-  const previousValue = isWindowCovered(items, windows.previous)
-    ? args.aggregate(
-        itemsWithin(items, windows.previous.start, windows.previous.end),
-      )
-    : null;
+  const previous = itemsWithin(
+    items,
+    windows.previous.start,
+    windows.previous.end,
+  );
+  // No delta without a value on both sides: an empty window aggregates to 0,
+  // which would read as "-100%" next to a "—" value.
+  const previousValue =
+    current.length > 0 &&
+    previous.length > 0 &&
+    isWindowCovered(items, windows.previous)
+      ? args.aggregate(previous)
+      : null;
 
   const rawDelta =
     previousValue !== null

@@ -95,10 +95,23 @@ describe("toRevenueDataState", () => {
     expect(state.cutoff).toEqual(new Date(AS_OF));
   });
 
-  it("is unavailable when the API flags the response as degraded", () => {
+  it("renders the last good copy when a degraded response still has rows", () => {
     const state = toRevenueDataState(
       {
         data: { items: [row], meta: { asOf: AS_OF, degraded: true } },
+        isLoading: false,
+        isError: false,
+      },
+      now,
+    );
+    expect(state.isUnavailable).toBe(false);
+    expect(state.items).toEqual([row]);
+  });
+
+  it("is unavailable when a degraded response has no rows", () => {
+    const state = toRevenueDataState(
+      {
+        data: { items: [], meta: { asOf: null, degraded: true } },
         isLoading: false,
         isError: false,
       },
