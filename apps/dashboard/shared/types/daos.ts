@@ -5,7 +5,8 @@ export enum DaoIdEnum {
   FLUID = "FLUID",
   LIL_NOUNS = "LIL_NOUNS",
   NOUNS = "NOUNS",
-  SCR = "SCR",
+  // Retired 2026-11-19: the indexer is off and gateful no longer routes it.
+  // SCROLL = "SCR",
   OBOL = "OBOL",
   SHU = "SHU",
   // OPTIMISM = "OP",

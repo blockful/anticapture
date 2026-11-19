@@ -190,7 +190,6 @@ const DAO_ALL = [
   "lil_nouns",
   "nouns",
   "obol",
-  "scr",
   "shu",
   "uni",
 ] as const;
@@ -202,7 +201,6 @@ const DAO_NO_AAVE = [
   "lil_nouns",
   "nouns",
   "obol",
-  "scr",
   "shu",
   "uni",
 ] as const;
