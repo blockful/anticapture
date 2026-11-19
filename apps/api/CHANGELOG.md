@@ -1,5 +1,19 @@
 # @anticapture/api
 
+## 1.9.0
+
+### Minor Changes
+
+- [#2181](https://github.com/blockful/anticapture/pull/2181) [`c41db8c`](https://github.com/blockful/anticapture/commit/c41db8c5bbfb3c1a6b67100b6b497fa04fbbbc11) Thanks [@alextnetto](https://github.com/alextnetto)! - Every /revenue/\* response now carries `meta { asOf, degraded }` (OpenAPI component `RevenueMeta`): `asOf` is when the Dune execution behind the rows finished, and `degraded` marks a stale copy, an empty fallback after a Dune failure, or a missing Dune key. Degraded revenue responses are sent with `Cache-Control: no-store` instead of being cached for 60 seconds, a Dune 402 (billing limit) on a result read degrades instead of answering 502, and a `revenue_data_age_seconds` gauge backs a new `RevenueDataStale` alert for revenue data older than 36 hours. `degraded` covers the API's own fallbacks only: when gateful serves an expired cache entry after an API 5xx (stale-on-error), the body keeps its original meta and the copy is marked by `Cache-Status: Redis; stale`.
+
+### Patch Changes
+
+- [#2182](https://github.com/blockful/anticapture/pull/2182) [`f4438a2`](https://github.com/blockful/anticapture/commit/f4438a29028ea82fc1a9a4ee6e4efa3db22cbb94) Thanks [@alextnetto](https://github.com/alextnetto)! - Revenue results from Dune are now cached for 6 hours instead of 24. With the queries refreshed daily, the data served stays at most about 30 hours old, under the 36-hour "Data delayed" threshold; the 24-hour cache let it reach 48 hours on a normal day.
+
+- [#2182](https://github.com/blockful/anticapture/pull/2182) [`b523f87`](https://github.com/blockful/anticapture/commit/b523f877a3fe6b00a91a9266929a79850c7882e2) Thanks [@alextnetto](https://github.com/alextnetto)! - Revenue tooltips now describe the new ENS revenue queries (v1 controllers plus ENSv2, hourly ETH price, registrants instead of transaction senders, grace-period top-ups excluded from the renewal rate) and spell out each metric's formula, including the arithmetic behind the run rate. The "All Time Revenue by Stream" chart gains a methodology tooltip.
+
+- [#2181](https://github.com/blockful/anticapture/pull/2181) [`a5f4061`](https://github.com/blockful/anticapture/commit/a5f4061952ccf013d916fdc1631f6feffdf81343) Thanks [@alextnetto](https://github.com/alextnetto)! - Revenue: the page keeps showing the API's last good copy when a Dune refresh fails, a KPI with no value no longer shows a change, and the data-age metric is reported only by replicas that served the query in the last hour.
+
 ## 1.8.5
 
 ### Patch Changes

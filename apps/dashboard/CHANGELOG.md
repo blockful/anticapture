@@ -1,5 +1,13 @@
 # @anticapture/dashboard
 
+## 2.17.2
+
+### Patch Changes
+
+- [#2182](https://github.com/blockful/anticapture/pull/2182) [`b523f87`](https://github.com/blockful/anticapture/commit/b523f877a3fe6b00a91a9266929a79850c7882e2) Thanks [@alextnetto](https://github.com/alextnetto)! - Revenue tooltips now describe the new ENS revenue queries (v1 controllers plus ENSv2, hourly ETH price, registrants instead of transaction senders, grace-period top-ups excluded from the renewal rate) and spell out each metric's formula, including the arithmetic behind the run rate. The "All Time Revenue by Stream" chart gains a methodology tooltip.
+
+- [#2181](https://github.com/blockful/anticapture/pull/2181) [`a5f4061`](https://github.com/blockful/anticapture/commit/a5f4061952ccf013d916fdc1631f6feffdf81343) Thanks [@alextnetto](https://github.com/alextnetto)! - Revenue: the page keeps showing the API's last good copy when a Dune refresh fails, a KPI with no value no longer shows a change, and the data-age metric is reported only by replicas that served the query in the last hour.
+
 ## 2.17.1
 
 ### Patch Changes
