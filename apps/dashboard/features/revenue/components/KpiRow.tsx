@@ -13,6 +13,9 @@ import { SegmentedControl } from "@/shared/components/design-system/segmented-co
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { cn } from "@/shared/utils/cn";
 
+import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
+import type { RevenueDataState } from "@/features/revenue/utils/meta";
 import { computeKpis } from "@/features/revenue/utils/transform";
 import type { KpiWindow } from "@/features/revenue/utils/window";
 
@@ -45,24 +48,35 @@ export const KpiRow = () => {
     [timePeriod],
   );
 
-  const { data: newWalletsData, isLoading: newWalletsLoading } =
-    useGetRevenueNewWallets("ens");
-  const { data: funnelData, isLoading: funnelLoading } =
-    useGetRevenueRenewalFunnel("ens");
-  const { data: totalsData, isLoading: totalsLoading } =
-    useGetRevenueTotals("ens");
+  const newWalletsQuery = useGetRevenueNewWallets("ens");
+  const newWallets = useRevenueDataState(newWalletsQuery);
+  const funnelQuery = useGetRevenueRenewalFunnel("ens");
+  const funnel = useRevenueDataState(funnelQuery);
+  const totalsQuery = useGetRevenueTotals("ens");
+  const totals = useRevenueDataState(totalsQuery);
 
-  const isLoading = newWalletsLoading || funnelLoading || totalsLoading;
+  const isLoading =
+    newWallets.isLoading || funnel.isLoading || totals.isLoading;
 
+  // Each KPI reads its own series; one failed request marks only its card
+  // "Unavailable" instead of holding the whole row in a loading state.
   const kpis = useMemo(() => {
-    if (!newWalletsData || !funnelData || !totalsData) return null;
+    if (isLoading) return null;
+    const toSeries = <T,>(state: RevenueDataState<T>) => ({
+      items: state.items,
+      cutoff: state.cutoff,
+      cutoffKnown: state.cutoffKnown,
+      unavailable: state.isUnavailable,
+    });
     return computeKpis(
-      newWalletsData.items,
-      funnelData.items,
-      totalsData.items,
+      {
+        newWallets: toSeries(newWallets),
+        funnel: toSeries(funnel),
+        totals: toSeries(totals),
+      },
       activeWindow,
     );
-  }, [newWalletsData, funnelData, totalsData, activeWindow]);
+  }, [isLoading, newWallets, funnel, totals, activeWindow]);
 
   return (
     <Card>
@@ -119,10 +133,18 @@ export const KpiRow = () => {
                     "border-border-default border-b lg:border-b-0 lg:border-r",
                 )}
               >
-                <p className="text-secondary text-sm font-medium">
-                  {kpi.title}
-                </p>
-                <p className="text-primary mt-1 text-[30px] font-medium leading-9">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-secondary text-sm font-medium">
+                    {kpi.title}
+                  </p>
+                  <InfoTooltip>{kpi.tooltip}</InfoTooltip>
+                </div>
+                <p
+                  className={cn(
+                    "mt-1 text-[30px] font-medium leading-9",
+                    kpi.unavailable ? "text-secondary" : "text-primary",
+                  )}
+                >
                   {kpi.value}
                 </p>
                 <p className="text-secondary mt-1 flex items-center gap-1 text-sm">

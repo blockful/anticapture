@@ -1,44 +1,44 @@
 "use client";
 
 import { useMemo } from "react";
-import { Info } from "lucide-react";
 import { useGetRevenueNewWallets } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ComboChart } from "@/shared/components/design-system/charts/combo-chart/ComboChart";
-import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 
+import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
+import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { formatCompact } from "@/features/revenue/utils/format";
 import { transformToNewWallets } from "@/features/revenue/utils/transform";
 
 export const NewUsersChart = () => {
-  const { data, isLoading } = useGetRevenueNewWallets("ens");
+  const newWalletsQuery = useGetRevenueNewWallets("ens");
+  const newWallets = useRevenueDataState(newWalletsQuery);
+  const { isLoading, isUnavailable, items } = newWallets;
   const series = useMemo(
-    () => (data ? transformToNewWallets(data.items) : null),
-    [data],
+    () => (isLoading || isUnavailable ? null : transformToNewWallets(items)),
+    [isLoading, isUnavailable, items],
   );
 
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center gap-1.5">
         <p className="text-secondary text-sm font-medium">
-          New Wallets Interacting with ENS
+          New .eth Registrants
         </p>
-        <Tooltip
-          tooltipContent={
-            <p className="text-secondary text-sm font-normal leading-5">
-              First-time wallets to interact with ENS registrar contracts in the
-              month (registration, renewal, or premium action). Cumulative line
-              counts every unique wallet that has ever interacted.
-            </p>
-          }
-          triggerClassName="inline-flex cursor-help items-center border-0 bg-transparent p-0"
-        >
-          <Info className="text-secondary size-3.5" />
-        </Tooltip>
+        <InfoTooltip>
+          New registrants: each address is counted once, in the month it first
+          becomes the owner of a newly registered .eth name (first paid
+          registration on the v1 ETH registrar controllers, from May 2019, or on
+          ENSv2). Renewals do not add wallets. The cumulative line counts every
+          registrant seen so far.
+        </InfoTooltip>
       </div>
       {isLoading ? (
         <div className="bg-surface-raised h-[300px] w-full animate-pulse rounded" />
+      ) : isUnavailable ? (
+        <UnavailableChart height={300} />
       ) : series ? (
         <ComboChart
           barSeries={series.barSeries}

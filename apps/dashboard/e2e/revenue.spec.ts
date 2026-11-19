@@ -11,7 +11,7 @@ test.describe("Revenue page (/ens/revenue)", () => {
         page.locator("h4").filter({ hasText: "Revenue" }),
       ).toBeVisible({ timeout: 15_000 });
       await expect(page.getByText("Protocol Revenue (actual)")).toBeVisible();
-      await expect(page.getByText("Annual run rate (projected)")).toBeVisible();
+      await expect(page.getByText("Annualized run rate")).toBeVisible();
       await expect(page.getByText("All Time Revenue by Stream")).toBeVisible();
       await expect(
         page.getByRole("radio", { name: "Quarter" }),

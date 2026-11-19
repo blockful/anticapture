@@ -18,6 +18,25 @@ export const RevenueQuerySchema = z
 
 export type RevenueQuery = z.infer<typeof RevenueQuerySchema>;
 
+export const RevenueMetaSchema = z
+  .object({
+    asOf: z
+      .string()
+      .nullable()
+      .openapi({ example: "2026-09-23T00:08:52.123Z" })
+      .describe(
+        "When the upstream computation behind these items finished, as an ISO-8601 UTC timestamp (Dune's execution_ended_at). Null when unknown or when nothing could be served.",
+      ),
+    degraded: z
+      .boolean()
+      .describe(
+        "True when the API served a stale copy or an empty fallback after the upstream failed, or the data source is not configured. Degraded responses are sent with Cache-Control: no-store. This reflects the API's own fallbacks only: a copy the gateway serves stale after an API error keeps its original meta and is marked by the `Cache-Status: Redis; stale` header instead.",
+      ),
+  })
+  .openapi("RevenueMeta", {
+    description: "Freshness of a /revenue/* response.",
+  });
+
 export const RevenueActionCategorySchema = z
   .enum(["Registration", "Renewal", "Premium"])
   .openapi("RevenueActionCategory", {
@@ -44,6 +63,7 @@ export const RevenueActionsResponseSchema = z
   .object({
     items: z.array(RevenueActionsItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueActionsResponse", {
     description:
@@ -75,6 +95,7 @@ export const RevenueActiveNamesResponseSchema = z
   .object({
     items: z.array(RevenueActiveNamesItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueActiveNamesResponse", {
     description:
@@ -93,10 +114,14 @@ export const RevenueNewWalletsItemSchema = z
       .describe("Month start (Unix timestamp in seconds, UTC)."),
     newWallets: z
       .number()
-      .describe("New wallets that interacted with ENS in the given month."),
+      .describe(
+        "Addresses that first became the registrant (owner) of a .eth name in the given month, at their first paid registration on the v1 ETH registrar controllers (from May 2019) or on ENSv2. Renewals do not add wallets.",
+      ),
     cumulativeWallets: z
       .number()
-      .describe("Cumulative count of ENS wallets as of the given month."),
+      .describe(
+        "Cumulative count of distinct .eth registrants as of the given month.",
+      ),
   })
   .openapi("RevenueNewWalletsItem", {
     description: "Single new-wallets datapoint.",
@@ -106,10 +131,11 @@ export const RevenueNewWalletsResponseSchema = z
   .object({
     items: z.array(RevenueNewWalletsItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueNewWalletsResponse", {
     description:
-      "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+      "Monthly new-registrant counts and the cumulative registrant total for ENS.",
   });
 
 export type RevenueNewWalletsResponse = z.infer<
@@ -124,7 +150,9 @@ export const RevenueRenewalFunnelItemSchema = z
       .describe("Expiry month start (Unix timestamp in seconds, UTC)."),
     termsExpiring: z
       .number()
-      .describe("Total .eth terms expiring in the given month."),
+      .describe(
+        ".eth terms expiring in the given month, counted once their expiry is more than 90 days before the data was computed (the latest month can be partial).",
+      ),
     renewedCount: z
       .number()
       .describe("Number of expiring terms that were renewed."),
@@ -143,6 +171,7 @@ export const RevenueRenewalFunnelResponseSchema = z
   .object({
     items: z.array(RevenueRenewalFunnelItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueRenewalFunnelResponse", {
     description:
@@ -177,15 +206,19 @@ export const RevenueTotalsItemSchema = z
       ),
     registrationEth: z
       .number()
-      .describe("ETH revenue from new .eth registrations in the month."),
+      .describe(
+        "ETH paid for new .eth registrations in the month. ENSv2 payments are in USDC or DAI and appear only in the USD fields.",
+      ),
     premiumEth: z
       .number()
       .describe(
-        "ETH revenue from temporary premium auctions in the given month.",
+        "ETH paid in temporary premium auctions in the given month. ENSv2 payments are in USDC or DAI and appear only in the USD fields.",
       ),
     renewalEth: z
       .number()
-      .describe("ETH revenue from .eth renewals in the given month."),
+      .describe(
+        "ETH paid for .eth renewals in the given month. ENSv2 payments are in USDC or DAI and appear only in the USD fields.",
+      ),
   })
   .openapi("RevenueTotalsItem", {
     description: "Single revenue-totals datapoint.",
@@ -195,10 +228,11 @@ export const RevenueTotalsResponseSchema = z
   .object({
     items: z.array(RevenueTotalsItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueTotalsResponse", {
     description:
-      "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+      "Monthly ENS revenue totals split into registration, premium, and renewal: USD covers every payment, ETH covers payments made in ETH.",
   });
 
 export type RevenueTotalsResponse = z.infer<typeof RevenueTotalsResponseSchema>;
@@ -233,6 +267,7 @@ export const RevenueRenewalTenureResponseSchema = z
   .object({
     items: z.array(RevenueRenewalTenureItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueRenewalTenureResponse", {
     description:
@@ -272,6 +307,7 @@ export const RevenueByCategoryResponseSchema = z
   .object({
     items: z.array(RevenueByCategoryItemSchema),
     totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
   })
   .openapi("RevenueByCategoryResponse", {
     description:

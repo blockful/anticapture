@@ -1,6 +1,7 @@
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 
+import { DataFreshness } from "@/features/revenue/components/DataFreshness";
 import { KpiRow } from "@/features/revenue/components/KpiRow";
 import { MonthlyRevenueChart } from "@/features/revenue/components/MonthlyRevenueChart";
 import { NameGrowthChart } from "@/features/revenue/components/NameGrowthChart";
@@ -19,6 +20,9 @@ export const RevenueSection = () => {
       headerAction={<ReportPanelButton panel="Revenue" />}
     >
       <div className="flex flex-col gap-4 pb-8">
+        {/* Data cutoff and delay warning for every card below */}
+        <DataFreshness />
+
         {/* Section 1 — Revenue Summary */}
         <RevenueSummaryCard />
 

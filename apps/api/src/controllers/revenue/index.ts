@@ -10,8 +10,35 @@ import {
   RevenueRenewalTenureResponseSchema,
   RevenueTotalsResponseSchema,
 } from "@/mappers/revenue";
+import { DEGRADED_CACHE_HEADERS } from "@/lib/degraded-upstream";
 import { setCacheControl } from "@/middlewares";
-import { RevenueDuneClient, ensOnly, filterByRange } from "@/services/revenue";
+import {
+  RevenueDuneClient,
+  type RevenueMeta,
+  ensOnly,
+  filterByRange,
+} from "@/services/revenue";
+
+/**
+ * Without a Dune key there is nothing to serve and no time to report. It is a
+ * degraded answer, not an empty month, so the dashboard can say so.
+ */
+const UNCONFIGURED_RESPONSE: {
+  items: never[];
+  totalCount: number;
+  meta: RevenueMeta;
+} = {
+  items: [],
+  totalCount: 0,
+  meta: { asOf: null, degraded: true },
+};
+
+/**
+ * A stale copy or an empty fallback must not be stored downstream for the
+ * route's regular TTL: the gateway would keep serving it after Dune recovers.
+ */
+const cacheHeadersFor = (meta: RevenueMeta) =>
+  meta.degraded ? DEGRADED_CACHE_HEADERS : undefined;
 
 export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
   app.openapi(
@@ -42,11 +69,11 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       const { fromDate, toDate, orderDirection } = context.req.valid("query");
 
       if (!revenueDuneClient) {
-        return context.json({ items: [], totalCount: 0 }, 200);
+        return context.json(UNCONFIGURED_RESPONSE, 200, DEGRADED_CACHE_HEADERS);
       }
 
-      const rows = await revenueDuneClient.fetchActions();
-      const filtered = filterByRange(rows, fromDate, toDate);
+      const { items, meta } = await revenueDuneClient.fetchActions();
+      const filtered = filterByRange(items, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => {
         const byDate = a.date - b.date;
@@ -54,7 +81,11 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
         return sign * a.category.localeCompare(b.category);
       });
 
-      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+      return context.json(
+        { items: sorted, totalCount: sorted.length, meta },
+        200,
+        cacheHeadersFor(meta),
+      );
     },
   );
 
@@ -87,15 +118,19 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       const { fromDate, toDate, orderDirection } = context.req.valid("query");
 
       if (!revenueDuneClient) {
-        return context.json({ items: [], totalCount: 0 }, 200);
+        return context.json(UNCONFIGURED_RESPONSE, 200, DEGRADED_CACHE_HEADERS);
       }
 
-      const rows = await revenueDuneClient.fetchActiveNames();
-      const filtered = filterByRange(rows, fromDate, toDate);
+      const { items, meta } = await revenueDuneClient.fetchActiveNames();
+      const filtered = filterByRange(items, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
 
-      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+      return context.json(
+        { items: sorted, totalCount: sorted.length, meta },
+        200,
+        cacheHeadersFor(meta),
+      );
     },
   );
 
@@ -128,15 +163,19 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       const { fromDate, toDate, orderDirection } = context.req.valid("query");
 
       if (!revenueDuneClient) {
-        return context.json({ items: [], totalCount: 0 }, 200);
+        return context.json(UNCONFIGURED_RESPONSE, 200, DEGRADED_CACHE_HEADERS);
       }
 
-      const rows = await revenueDuneClient.fetchNewWallets();
-      const filtered = filterByRange(rows, fromDate, toDate);
+      const { items, meta } = await revenueDuneClient.fetchNewWallets();
+      const filtered = filterByRange(items, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
 
-      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+      return context.json(
+        { items: sorted, totalCount: sorted.length, meta },
+        200,
+        cacheHeadersFor(meta),
+      );
     },
   );
 
@@ -169,15 +208,19 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       const { fromDate, toDate, orderDirection } = context.req.valid("query");
 
       if (!revenueDuneClient) {
-        return context.json({ items: [], totalCount: 0 }, 200);
+        return context.json(UNCONFIGURED_RESPONSE, 200, DEGRADED_CACHE_HEADERS);
       }
 
-      const rows = await revenueDuneClient.fetchRenewalFunnel();
-      const filtered = filterByRange(rows, fromDate, toDate);
+      const { items, meta } = await revenueDuneClient.fetchRenewalFunnel();
+      const filtered = filterByRange(items, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
 
-      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+      return context.json(
+        { items: sorted, totalCount: sorted.length, meta },
+        200,
+        cacheHeadersFor(meta),
+      );
     },
   );
 
@@ -209,15 +252,19 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       const { fromDate, toDate, orderDirection } = context.req.valid("query");
 
       if (!revenueDuneClient) {
-        return context.json({ items: [], totalCount: 0 }, 200);
+        return context.json(UNCONFIGURED_RESPONSE, 200, DEGRADED_CACHE_HEADERS);
       }
 
-      const rows = await revenueDuneClient.fetchRevenueTotals();
-      const filtered = filterByRange(rows, fromDate, toDate);
+      const { items, meta } = await revenueDuneClient.fetchRevenueTotals();
+      const filtered = filterByRange(items, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
 
-      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+      return context.json(
+        { items: sorted, totalCount: sorted.length, meta },
+        200,
+        cacheHeadersFor(meta),
+      );
     },
   );
 
@@ -249,11 +296,11 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       const { fromDate, toDate, orderDirection } = context.req.valid("query");
 
       if (!revenueDuneClient) {
-        return context.json({ items: [], totalCount: 0 }, 200);
+        return context.json(UNCONFIGURED_RESPONSE, 200, DEGRADED_CACHE_HEADERS);
       }
 
-      const rows = await revenueDuneClient.fetchRevenueByCategory();
-      const filtered = filterByRange(rows, fromDate, toDate);
+      const { items, meta } = await revenueDuneClient.fetchRevenueByCategory();
+      const filtered = filterByRange(items, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => {
         const byDate = a.date - b.date;
@@ -261,7 +308,11 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
         return sign * a.category.localeCompare(b.category);
       });
 
-      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+      return context.json(
+        { items: sorted, totalCount: sorted.length, meta },
+        200,
+        cacheHeadersFor(meta),
+      );
     },
   );
 
@@ -294,11 +345,11 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
       const { fromDate, toDate, orderDirection } = context.req.valid("query");
 
       if (!revenueDuneClient) {
-        return context.json({ items: [], totalCount: 0 }, 200);
+        return context.json(UNCONFIGURED_RESPONSE, 200, DEGRADED_CACHE_HEADERS);
       }
 
-      const rows = await revenueDuneClient.fetchRenewalTenure();
-      const filtered = filterByRange(rows, fromDate, toDate);
+      const { items, meta } = await revenueDuneClient.fetchRenewalTenure();
+      const filtered = filterByRange(items, fromDate, toDate);
       const sign = orderDirection === "desc" ? -1 : 1;
       const sorted = [...filtered].sort((a, b) => {
         const byDate = a.date - b.date;
@@ -306,7 +357,11 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
         return sign * a.tenureBucket.localeCompare(b.tenureBucket);
       });
 
-      return context.json({ items: sorted, totalCount: sorted.length }, 200);
+      return context.json(
+        { items: sorted, totalCount: sorted.length, meta },
+        200,
+        cacheHeadersFor(meta),
+      );
     },
   );
 }

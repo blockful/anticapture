@@ -235,10 +235,34 @@ groups:
             {{ $labels.job }} answered {{ printf "%.0f" $value }} requests in the last 15 minutes
             with {{ $labels.mode }} data for {{ $labels.resource }} because {{ $labels.upstream }}
             reported {{ $labels.reason }}. Clients see a 200 with stale or empty values, not an
-            error. A reason of not_found will not clear on its own: the provider says that query
-            or resource is gone, so check the query id. Otherwise check the provider status page,
+            error. A reason of not_found will not clear on its own: the provider says it does not
+            have that resource. For Dune it means the query has no completed execution for its
+            latest version, or its result expired, so the query needs a re-run on Dune. A reason
+            of payment_required (Dune HTTP 402) means the Dune account is over its billing limits
+            and will not recover until it is paid for. Otherwise check the provider status page,
             the API warn logs for "after {{ $labels.upstream }} failure", and the key and rate
             limits.
+
+      # The revenue rows a DAO API serves were computed upstream more than 36h ago.
+      # A frozen Dune result is a normal 200 and degrades nothing, so neither
+      # HighErrorRate nor DegradedUpstreamData notices it: the queries are refreshed
+      # on Dune's side and nothing in Anticapture runs them. The gauge only has a
+      # series for a query the process has fetched since it started; a query that
+      # never answered shows up in DegradedUpstreamData instead. 36h = 129600s.
+      - alert: RevenueDataStale
+        expr: >
+          max by (job, query) (revenue_data_age_seconds{job=~"anticapture-.*-api"}) > 129600
+        for: 15m
+        keep_firing_for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "[WARNING] {{ $labels.job }} is serving {{ $labels.query }} revenue data older than 36h"
+          description: >
+            The Dune execution behind {{ $labels.query }} finished
+            {{ humanizeDuration $value }} ago. The revenue page shows it with that
+            "data as of" time. Check that the Dune query still has a schedule, that the owning
+            Dune account has credits, and the API logs for "revenue fetch succeeded" (asOf).
 
       # CPU usage above 80% for 5 minutes. Aggregated per (job, instance): a DAO
       # API job can have several replicas behind DNS discovery, each with its

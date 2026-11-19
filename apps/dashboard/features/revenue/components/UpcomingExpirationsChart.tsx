@@ -6,14 +6,26 @@ import { useGetRevenueRenewalTenure } from "@anticapture/client/hooks";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
 
+import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
+import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { formatCompact } from "@/features/revenue/utils/format";
+import { UNAVAILABLE_TEXT } from "@/features/revenue/utils/meta";
 import { transformToRenewalTenure } from "@/features/revenue/utils/transform";
 
 export const UpcomingExpirationsChart = () => {
-  const { data, isLoading } = useGetRevenueRenewalTenure("ens");
+  const tenureQuery = useGetRevenueRenewalTenure("ens");
+  // Rows are keyed by future expiry months, so without asOf the cutoff falls
+  // back to the viewer's clock rather than the latest row.
+  const tenure = useRevenueDataState(tenureQuery, "clock");
+  const { isLoading, isUnavailable, items, cutoff, cutoffKnown } = tenure;
+  // An empty or degraded response must never read as "0 names expiring".
   const series = useMemo(
-    () => (data ? transformToRenewalTenure(data.items) : null),
-    [data],
+    () =>
+      isLoading || isUnavailable
+        ? null
+        : transformToRenewalTenure(items, cutoff),
+    [isLoading, isUnavailable, items, cutoff],
   );
 
   // Target ~7 visible year labels regardless of how many months of data exist
@@ -23,13 +35,35 @@ export const UpcomingExpirationsChart = () => {
 
   return (
     <Card className="p-4">
-      <p className="text-secondary text-sm font-medium">Upcoming Expirations</p>
-      {!isLoading && series && (
+      <div className="flex items-center gap-1.5">
+        <p className="text-secondary text-sm font-medium">
+          Upcoming Expirations
+        </p>
+        <InfoTooltip>
+          .eth names grouped by the month their current registration expires,
+          split by how many times they have been renewed since that registration
+          began. Names registered before ENSv2 (Oct 27, 2026) use their ENSv2
+          expiry, which is their v1 expiry plus 62 days. The headline counts
+          names not renewed since their current registration began and not yet
+          expired at the data cutoff that expire in the 12 calendar months
+          starting with{" "}
+          {cutoffKnown ? "the data cutoff's month" : "the current month"}
+          {series ? ` (${series.next12moPeriod})` : ""}.
+        </InfoTooltip>
+      </div>
+      {!isLoading && (
         <p className="text-secondary mt-0.5 text-sm">
-          <span className="font-medium" style={{ color: "#f87171" }}>
-            {formatCompact(series.neverRenewedNext12mo)}
-          </span>{" "}
-          names with no prior renewals expiring in next 12 months
+          {series ? (
+            <>
+              <span className="font-medium" style={{ color: "#f87171" }}>
+                {formatCompact(series.neverRenewedNext12mo)}
+              </span>{" "}
+              names not renewed in their current registration, expiring in next
+              12 months
+            </>
+          ) : (
+            <>{UNAVAILABLE_TEXT}: up-to-date expiration data is not available</>
+          )}
         </p>
       )}
       {isLoading ? (
@@ -44,7 +78,9 @@ export const UpcomingExpirationsChart = () => {
           height={260}
           className="mt-2"
         />
-      ) : null}
+      ) : (
+        <UnavailableChart height={260} className="mt-2" />
+      )}
     </Card>
   );
 };
